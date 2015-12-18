@@ -68,7 +68,7 @@ SCRATCH:5BB5		 ; b0=left
 SCRATCH:5BB5 ??		 user_input:	 ds 1						 ; DATA	XREF: chk_pickup_drop+6r
 SCRATCH:5BB5										 ; check_user_input+104w
 SCRATCH:5BB6 ??		 tmp_attrib:	 ds 1
-SCRATCH:5BB7 ??		 initial_rendering:ds 1
+SCRATCH:5BB7 ??		 render_status_info:ds 1
 SCRATCH:5BB8 ??		 suppress_border:ds 1
 SCRATCH:5BB9 ??		 days:		 ds 1						 ; DATA	XREF: lose_life-16E9o
 SCRATCH:5BB9										 ; print_days+3o ...
@@ -2649,11 +2649,11 @@ RAM:B03D 10 F6			     djnz    game_delay
 RAM:B03F
 RAM:B03F	     loc_B03F:							     ; CODE XREF: RAM:B030j
 RAM:B03F									     ; RAM:B033j
-RAM:B03F 3A B7 5B		     ld	     a,	(initial_rendering)
+RAM:B03F 3A B7 5B		     ld	     a,	(render_status_info)
 RAM:B042 A7			     and     a					     ; rendered	before?
 RAM:B043 28 2F			     jr	     z,	loc_B074			     ; yes, skip
 RAM:B045 AF			     xor     a					     ; reset flag
-RAM:B046 32 B7 5B		     ld	     (initial_rendering), a
+RAM:B046 32 B7 5B		     ld	     (render_status_info), a
 RAM:B049 3A AD 5B		     ld	     a,	(curr_room_attrib)		     ; attribute
 RAM:B04C CD 56 D5		     call    fill_attr
 RAM:B04F CD 4E BF		     call    display_objects
@@ -5429,7 +5429,7 @@ RAM:C1DF 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
 RAM:C1E2 CD A3 B4		     call    toggle_FE_bit4_x16
 RAM:C1E5 CD A3 BC		     call    print_lives
 RAM:C1E8 01 20 20		     ld	     bc, 2020h
-RAM:C1EB CD 32 C4		     call    sub_C432
+RAM:C1EB CD 32 C4		     call    blit_2x8
 RAM:C1EE
 RAM:C1EE	     loc_C1EE:							     ; CODE XREF: RAM:C1C9j
 RAM:C1EE C3 C6 C4		     jp	     loc_C4C6
@@ -5796,7 +5796,7 @@ RAM:C421 FE 40			     cp	     64
 RAM:C423 CA 22 BA		     jp	     z,	game_over
 RAM:C426 CD 66 BC		     call    print_days
 RAM:C429 01 78 00		     ld	     bc, 78h ; 'x'
-RAM:C42C CD 32 C4		     call    sub_C432
+RAM:C42C CD 32 C4		     call    blit_2x8
 RAM:C42F C3 C3 C3		     jp	     display_frame
 RAM:C42F	     ; End of function display_sun_moon_frame
 RAM:C42F
@@ -5804,7 +5804,7 @@ RAM:C432
 RAM:C432	     ; =============== S U B R O U T I N E =======================================
 RAM:C432
 RAM:C432
-RAM:C432	     sub_C432:							     ; CODE XREF: RAM:C1EBp
+RAM:C432	     blit_2x8:							     ; CODE XREF: RAM:C1EBp
 RAM:C432									     ; display_sun_moon_frame+88p
 RAM:C432 CD 26 D8		     call    BC_to_attr_addr_in_DE
 RAM:C435 CD 11 D8		     call    calc_screen_buffer_addr
@@ -5812,7 +5812,7 @@ RAM:C438 69			     ld	     l,	c
 RAM:C439 60			     ld	     h,	b
 RAM:C43A 01 02 08		     ld	     bc, 802h
 RAM:C43D C3 7C D6		     jp	     blit_to_screen
-RAM:C43D	     ; End of function sub_C432
+RAM:C43D	     ; End of function blit_2x8
 RAM:C43D
 RAM:C43D	     ; ---------------------------------------------------------------------------
 RAM:C440 05 06 07 08+sun_moon_yoff:  db	5, 6, 7, 8, 9, 0Ah, 0Ah, 9, 8, 7, 6, 5,	5    ; DATA XREF: display_sun_moon_frame+11o
@@ -8400,8 +8400,8 @@ RAM:D1FC 32 AF 5B		     ld	     (portcullis_moving), a
 RAM:D1FF 32 B0 5B		     ld	     (portcullis_move_cnt), a
 RAM:D202 32 BD 5B		     ld	     (ball_bounce_height), a
 RAM:D205 32 BF 5B		     ld	     (is_spike_ball_dropping), a
-RAM:D208 3E 01			     ld	     a,	1				     ; flag initial rendering of screen
-RAM:D20A 32 B7 5B		     ld	     (initial_rendering), a
+RAM:D208 3E 01			     ld	     a,	1				     ; flag rendering of status	information
+RAM:D20A 32 B7 5B		     ld	     (render_status_info), a
 RAM:D20D 3A 10 5C		     ld	     a,	(graphic_objs_tbl+8)		     ; plyr_spr_1 screen
 RAM:D210 E6 01			     and     1
 RAM:D212 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
@@ -9143,7 +9143,7 @@ RAM:D59F	     render_dynamic_objects:					     ; CODE XREF: RAM:B01Ep
 RAM:D59F AF			     xor     a
 RAM:D5A0 32 A8 5B		     ld	     (objs_wiped_cnt), a		     ; zero count of wiped objects
 RAM:D5A3 DD E5			     push    ix
-RAM:D5A5 3A B7 5B		     ld	     a,	(initial_rendering)
+RAM:D5A5 3A B7 5B		     ld	     a,	(render_status_info)
 RAM:D5A8 A7			     and     a					     ; initial rendering?
 RAM:D5A9 C2 53 D6		     jp	     nz, loc_D653			     ; yes, no need to wipe anything
 RAM:D5AC 21 8B CE		     ld	     hl, objects_to_draw
@@ -9685,7 +9685,7 @@ RAM:D826	     ; =============== S U B R O U T I N E ============================
 RAM:D826
 RAM:D826
 RAM:D826	     BC_to_attr_addr_in_DE:					     ; CODE XREF: display_objects+49p
-RAM:D826									     ; sub_C432p ...
+RAM:D826									     ; blit_2x8p ...
 RAM:D826 79			     ld	     a,	c
 RAM:D827 0F			     rrca
 RAM:D828 0F			     rrca

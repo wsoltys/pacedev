@@ -75,7 +75,7 @@ static uint8_t pickup_drop_pressed;                   // $5BB3
 static uint8_t byte_5BB4;                             // $5BB4
 static uint8_t user_input;                            // $5BB5
 static uint8_t tmp_attrib;                            // $5BB6
-static uint8_t initial_rendering;                     // $5BB7
+static uint8_t render_status_info;                    // $5BB7
 static uint8_t suppress_border;                       // $5BB8
 static uint8_t days;                                  // $5BB9
 static int8_t lives;                                  // $5BBA
@@ -130,6 +130,13 @@ typedef struct
 } OBJ_WIPED, *POBJ_WIPED;
 
 OBJ_WIPED objs_wiped_stack[MAX_OBJS];
+
+typedef struct
+{
+  uint8_t   turbo;
+  
+} DBG, *PDBG;
+DBG dbg = { 0 };
 
 // end of variables
 
@@ -212,6 +219,7 @@ static void upd_92_to_95 (POBJ32 p_obj);
 static void rand_legs_sprite (POBJ32 p_obj);
 static void print_sun_moon (void);
 static void display_sun_moon_frame (POBJ32 p_obj);
+static void blit_2x8 (uint8_t x, uint8_t y);
 static void init_sun (void);
 static void init_special_objects (void);
 static void upd_62 (POBJ32 p_obj);
@@ -303,7 +311,7 @@ void dump_graphic_objs_tbl (int start, int end)
   
   for (; i<end && i<MAX_OBJS; i++)
   {
-    DBGPRINTF ("%02d: graphic_no=%02d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
+    DBGPRINTF ("%02d: graphic_no=%03d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
               i,
               graphic_objs_tbl[i].graphic_no,
               graphic_objs_tbl[i].x,
@@ -426,9 +434,6 @@ player_dies:
 game_loop:
   build_screen_objects ();
 
-  // *** REMOVE ME
-	osd_clear_scrn ();
-
 onscreen_loop:
 
   fire_seed = seed_2;
@@ -479,16 +484,13 @@ onscreen_loop:
   // calc game delay loop
   // using rendered_objs_cnt
 
-  // *** REMOVE ME
-  //update_screen ();
-        
 game_delay:
   // last to-do  
-  osd_delay (100);
+  osd_delay (dbg.turbo ? 5 : 50);
 
-  if (initial_rendering)
+  if (render_status_info)
   {
-    initial_rendering = 0;
+    render_status_info = 0;
     fill_attr (curr_room_attrib);
     display_objects ();
     colour_panel ();
@@ -572,6 +574,12 @@ game_delay:
     graphic_objs_tbl[0].scrn = special_objs_tbl[s_no].start_scrn;
     s_no = (s_no + 1) % 32;
     goto exit_screen;
+  }
+    
+  if (osd_key(OSD_KEY_T))
+  {
+    dbg.turbo = !dbg.turbo;
+    while (osd_key(OSD_KEY_T));
   }
     
   if (osd_key(OSD_KEY_D))
@@ -1894,11 +1902,11 @@ int chk_and_init_transform (POBJ32 p_obj)
   
   if (transform_flag_graphic == 0)
     return (0);
-  if ((p_obj->flags12 & 0x0F) != 0)
+  if ((p_obj->flags12 & 0xF0) != 0)
     return (0);
   if ((p_obj->flags12 & FLAG_JUMPING) != 0)
     return (0);
-    
+
   // the original Z80 code incremented the stack twice
   // so we didn't return to the caller
   // - but here we return 1 instead
@@ -1985,25 +1993,29 @@ void display_sun_moon_frame (POBJ32 p_obj)
 
   // adjust Y coordinate
   x = p_obj->pixel_x + 16;
-  p_obj->y = sun_moon_yoff[(x>>2)&0x0f];
-  print_sprite (p_obj);
+  p_obj->pixel_y = sun_moon_yoff[(x>>2)&0x0f];
 
 display_frame:
-  p_frm->graphic_no = 0x5a;
+  // display sun/moon
+  fill_window (184, 0, 6, 31, 0); // *** FIXME x,y
+  print_sprite (p_obj);
+
   p_frm->flags7 = 0;
+  p_frm->graphic_no = 0x5a;
   p_frm->pixel_x = 184;
   p_frm->pixel_y = 0;
   print_sprite (p_frm);
   p_frm->pixel_x = 208;
   p_frm->graphic_no = 0xba;
   print_sprite (p_frm);
-  // wipe something
+  blit_to_screen (184, 0, 6, 31); // *** FIXME x,y
   return;
 
 toggle_day_night:
   p_obj->graphic_no ^= 1;
   colour_sun_moon ();
   p_obj->pixel_x = 176;
+  transform_flag_graphic = 1;
   // if just changed to moon, exit
   if (p_obj->graphic_no & 1)
     return;
@@ -2013,12 +2025,18 @@ inc_days:
   days++;
   if ((days & 0x0f) == 10)
     days += 6;
-  if (days == 64)
-    //game_over ();
-    ;
+  if (days == 0x40)
+    /*game_over ()*/;
   print_days ();
-  // something
+  DBGPRINTF ("days=%d\n", days);
+  blit_2x8 (0x78, 7);      // *** check x,y
   goto display_frame;  
+}
+
+// $C432
+void blit_2x8 (uint8_t x, uint8_t y)
+{
+  blit_to_screen (x, y, 2, 8);
 }
 
 // $C46D
@@ -3055,7 +3073,7 @@ void build_screen_objects (void)
   portcullis_move_cnt = 0;
   ball_bounce_height = 0;
   is_spike_ball_dropping = 0;
-  initial_rendering = 1;
+  render_status_info = 1;
   // spiked balls don't drop immediately in odd-numbered rooms
   disable_spike_ball_drop = graphic_objs_tbl[0].scrn & 1;
   flag_room_visited ();
@@ -3334,7 +3352,7 @@ void render_dynamic_objects (void)
   UNIMPLEMENTED;
   
   objs_wiped_cnt = 0;
-  if (initial_rendering == 0)
+  if (render_status_info == 0)
   {
     uint8_t i;
     
@@ -3403,6 +3421,8 @@ loc_D653:
 // $D67C
 void blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
 {
+  // x starts on a byte boundary
+  x &= 0xF8;
   osd_blit_to_screen (x, y, width_bytes, height_lines);
 }
 
