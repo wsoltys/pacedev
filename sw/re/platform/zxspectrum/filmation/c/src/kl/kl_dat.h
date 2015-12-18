@@ -34,7 +34,7 @@ typedef struct
   uint8_t   width;
   uint8_t   depth;
   uint8_t   height;
-  uint8_t   flags;
+  uint8_t   flags7;
   uint8_t   scrn;
   int8_t    d_x;
   int8_t    d_y;

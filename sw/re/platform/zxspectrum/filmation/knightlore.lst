@@ -41,7 +41,7 @@ SCRATCH:5BA8										 ; render_dynamic_objects+1w ...
 SCRATCH:5BA9 ??	??	 tmp_SP:	 ds 2						 ; DATA	XREF: RAM:D763w
 SCRATCH:5BA9										 ; RAM:D80Cr
 SCRATCH:5BAB ??		 room_size_X:	 ds 1						 ; DATA	XREF: chk_plyr_OOBr
-SCRATCH:5BAB										 ; sub_CA70+12r ...
+SCRATCH:5BAB										 ; handle_exit_screen+12r ...
 SCRATCH:5BAC ??		 room_size_Y:	 ds 1						 ; DATA	XREF: adj_dY_for_out_of_bounds+Br
 SCRATCH:5BAC										 ; adjust_plyr_xyz_for_room_size+6r ...
 SCRATCH:5BAD ??		 curr_room_attrib:ds 1
@@ -51,8 +51,8 @@ SCRATCH:5BAF ??		 portcullis_moving:ds 1						 ; DATA	XREF: RAM:C661o
 SCRATCH:5BAF										 ; RAM:C6E1w ...
 SCRATCH:5BB0 ??		 portcullis_move_cnt:ds	1					 ; DATA	XREF: RAM:C676r
 SCRATCH:5BB0										 ; RAM:C686w ...
-SCRATCH:5BB1 ??		 byte_5BB1:	 ds 1						 ; DATA	XREF: sub_C306r
-SCRATCH:5BB1										 ; sub_C306+15w ...
+SCRATCH:5BB1 ??		 transform_flag_graphic:ds 1					 ; DATA	XREF: chk_and_init_transformr
+SCRATCH:5BB1										 ; chk_and_init_transform+15w ...
 SCRATCH:5BB2 ??		 unk_5BB2:	 ds 1						 ; DATA	XREF: lose_life-219Ew
 SCRATCH:5BB2										 ; RAM:B010o ...
 SCRATCH:5BB3 ??		 pickup_drop_pressed:ds	1					 ; DATA	XREF: handle_pickup_dropr
@@ -86,8 +86,8 @@ SCRATCH:5BBF ??		 is_spike_ball_dropping:ds 1					 ; DATA	XREF: RAM:B7BAo
 SCRATCH:5BBF										 ; RAM:B7E0o ...
 SCRATCH:5BC0 ??		 disable_spike_ball_drop:ds 1					 ; DATA	XREF: RAM:B7AFr
 SCRATCH:5BC0										 ; handle_pickup_drop+137w ...
-SCRATCH:5BC1 ??		 byte_5BC1:	 ds 1						 ; DATA	XREF: sub_C9A1+30w
-SCRATCH:5BC1										 ; sub_C9A1+47r
+SCRATCH:5BC1 ??		 old_dZ:	 ds 1						 ; DATA	XREF: move_player+30w
+SCRATCH:5BC1										 ; move_player+47r
 SCRATCH:5BC2 ??		 tmp_bouncing_ball_dZ:ds 1					 ; DATA	XREF: RAM:B60Cw
 SCRATCH:5BC2										 ; RAM:B645r
 SCRATCH:5BC3 ??		 byte_5BC3:	 ds 1						 ; DATA	XREF: init_cauldron_bubbles+Cr
@@ -96,7 +96,7 @@ SCRATCH:5BC4 ??		 byte_5BC4:	 ds 1						 ; DATA	XREF: handle_pickup_drop+CCw
 SCRATCH:5BC4										 ; RAM:C266w ...
 SCRATCH:5BC5 ??		 byte_5BC5:	 ds 1						 ; DATA	XREF: RAM:B021r
 SCRATCH:5BC5										 ; RAM:B075w ...
-SCRATCH:5BC6 ??		 unk_5BC6:	 ds 1
+SCRATCH:5BC6 ??		 num_scrns_visited:ds 1
 SCRATCH:5BC7 ??	??	 gfxbase_8x8:	 ds 2
 SCRATCH:5BC9 ??		 unk_5BC9:	 ds 1						 ; DATA	XREF: sub_BC10+3Ew
 SCRATCH:5BC9										 ; sub_BC10+44o
@@ -136,7 +136,8 @@ SCRATCH:5BE8		 ;
 SCRATCH:5BE8		 ; bit table of	flags denoting room has	been visited
 SCRATCH:5BE8		 ; - as	of yet,	doesn't appear to be used at all
 SCRATCH:5BE8		 ;
-SCRATCH:5BE8 ??	?? ?? ??+room_visited:	 ds 32						 ; DATA	XREF: RAM:D230o
+SCRATCH:5BE8 ??	?? ?? ??+screen_visited: ds 32						 ; DATA	XREF: sub_BC10+5o
+SCRATCH:5BE8 ??	?? ?? ??+								 ; RAM:D230o
 SCRATCH:5C08		 ;
 SCRATCH:5C08		 ; table of objects to draw (40	max)
 SCRATCH:5C08		 ; - 00,01 player sprites
@@ -3132,7 +3133,7 @@ RAM:B403
 RAM:B403	     ; =============== S U B R O U T I N E =======================================
 RAM:B403
 RAM:B403
-RAM:B403	     gen_audio_graphic_no_rom:					     ; CODE XREF: sub_C306:loc_BF31p
+RAM:B403	     gen_audio_graphic_no_rom:					     ; CODE XREF: chk_and_init_transform:loc_BF31p
 RAM:B403									     ; sub_C2A5+18p
 RAM:B403 DD 7E 00		     ld	     a,	(ix+0)				     ; sprite index
 RAM:B406 2F			     cpl
@@ -3275,7 +3276,7 @@ RAM:B472
 RAM:B472	     ; =============== S U B R O U T I N E =======================================
 RAM:B472
 RAM:B472
-RAM:B472	     gen_audio_graphic_no_2:					     ; CODE XREF: sub_C306+49p
+RAM:B472	     gen_audio_graphic_no_2:					     ; CODE XREF: chk_and_init_transform+49p
 RAM:B472 DD 7E 00		     ld	     a,	(ix+0)
 RAM:B475 07			     rlca
 RAM:B476 07			     rlca
@@ -4310,7 +4311,7 @@ RAM:BA41 11 B9 5B		     ld	     de, days
 RAM:BA44 06 01			     ld	     b,	1				     ; 1 BCD digit pair
 RAM:BA46 CD AE BC		     call    print_BCD_number
 RAM:BA49 CD 10 BC		     call    sub_BC10
-RAM:BA4C 3A C6 5B		     ld	     a,	(unk_5BC6)
+RAM:BA4C 3A C6 5B		     ld	     a,	(num_scrns_visited)
 RAM:BA4F 07			     rlca
 RAM:BA50 E6 C0			     and     0C0h ; 'À'
 RAM:BA52 4F			     ld	     c,	a
@@ -4469,11 +4470,11 @@ RAM:BC10	     ; =============== S U B R O U T I N E ============================
 RAM:BC10
 RAM:BC10
 RAM:BC10	     sub_BC10:							     ; CODE XREF: lose_life-16E1p
-RAM:BC10 1E 00			     ld	     e,	0
-RAM:BC12 01 20 08		     ld	     bc, 820h
-RAM:BC15 21 E8 5B		     ld	     hl, 5BE8h
+RAM:BC10 1E 00			     ld	     e,	0				     ; zero room count
+RAM:BC12 01 20 08		     ld	     bc, 820h				     ; B=8 bits/byte
+RAM:BC15 21 E8 5B		     ld	     hl, screen_visited
 RAM:BC18
-RAM:BC18	     loc_BC18:							     ; CODE XREF: sub_BC10+13j
+RAM:BC18	     count_screens:						     ; CODE XREF: sub_BC10+13j
 RAM:BC18 C5			     push    bc
 RAM:BC19 7E			     ld	     a,	(hl)
 RAM:BC1A 23			     inc     hl
@@ -4481,18 +4482,18 @@ RAM:BC1B
 RAM:BC1B	     loc_BC1B:							     ; CODE XREF: sub_BC10:loc_BC1Fj
 RAM:BC1B 0F			     rrca
 RAM:BC1C 30 01			     jr	     nc, loc_BC1F
-RAM:BC1E 1C			     inc     e
+RAM:BC1E 1C			     inc     e					     ; room count
 RAM:BC1F
 RAM:BC1F	     loc_BC1F:							     ; CODE XREF: sub_BC10+Cj
 RAM:BC1F 10 FA			     djnz    loc_BC1B
 RAM:BC21 C1			     pop     bc
-RAM:BC22 0D			     dec     c
-RAM:BC23 20 F3			     jr	     nz, loc_BC18
+RAM:BC22 0D			     dec     c					     ; done all	screens?
+RAM:BC23 20 F3			     jr	     nz, count_screens			     ; no, loop
 RAM:BC25 7B			     ld	     a,	e
-RAM:BC26 3D			     dec     a
-RAM:BC27 32 C6 5B		     ld	     (unk_5BC6), a
+RAM:BC26 3D			     dec     a					     ; -1? don't count 1st room?
+RAM:BC27 32 C6 5B		     ld	     (num_scrns_visited), a		     ; store for ratings calculations
 RAM:BC2A 3A BB 5B		     ld	     a,	(objects_put_in_caldron)
-RAM:BC2D CB 27			     sla     a
+RAM:BC2D CB 27			     sla     a					     ; x2
 RAM:BC2F 83			     add     a,	e
 RAM:BC30 5F			     ld	     e,	a
 RAM:BC31 01 1A A4		     ld	     bc, 0A41Ah
@@ -5002,14 +5003,14 @@ RAM:BF18 DD 7E 10		     ld	     a,	(ix+16)
 RAM:BF1B DD 77 00		     ld	     (ix+0), a
 RAM:BF1E C3 D5 AF		     jp	     jump_to_upd_object
 RAM:BF21	     ; ---------------------------------------------------------------------------
-RAM:BF21	     ; START OF	FUNCTION CHUNK FOR sub_C306
+RAM:BF21	     ; START OF	FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF21
-RAM:BF21	     init_sparkles:						     ; CODE XREF: sub_C306+40j
+RAM:BF21	     init_sparkles:						     ; CODE XREF: chk_and_init_transform+40j
 RAM:BF21									     ; RAM:C83Bj ...
 RAM:BF21 DD 36 00 70		     ld	     (ix+0), 112			     ; twinkly transform
 RAM:BF25 DD CB 07 CE		     set     1,	(ix+7)
 RAM:BF29 18 06			     jr	     loc_BF31
-RAM:BF29	     ; END OF FUNCTION CHUNK FOR sub_C306
+RAM:BF29	     ; END OF FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF2B	     ; ---------------------------------------------------------------------------
 RAM:BF2B	     ; sparkles
 RAM:BF2B
@@ -5017,12 +5018,12 @@ RAM:BF2B	     upd_112_to_118_184:					     ; CODE XREF: RAM:B6AEj
 RAM:BF2B									     ; DATA XREF: RAM:B176o ...
 RAM:BF2B CD D8 C4		     call    adj_m4_m12
 RAM:BF2E DD 34 00		     inc     (ix+0)
-RAM:BF31	     ; START OF	FUNCTION CHUNK FOR sub_C306
+RAM:BF31	     ; START OF	FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF31
-RAM:BF31	     loc_BF31:							     ; CODE XREF: sub_C306-3DDj
+RAM:BF31	     loc_BF31:							     ; CODE XREF: chk_and_init_transform-3DDj
 RAM:BF31 CD 03 B4		     call    gen_audio_graphic_no_rom
 RAM:BF34 C3 92 C6		     jp	     set_wipe_and_draw_flags
-RAM:BF34	     ; END OF FUNCTION CHUNK FOR sub_C306
+RAM:BF34	     ; END OF FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF37	     ; ---------------------------------------------------------------------------
 RAM:BF37	     ; sparkles	(object	in cauldron?)
 RAM:BF37
@@ -5629,12 +5630,12 @@ RAM:C306
 RAM:C306	     ; =============== S U B R O U T I N E =======================================
 RAM:C306
 RAM:C306
-RAM:C306	     sub_C306:							     ; CODE XREF: RAM:loc_C83Ep
+RAM:C306	     chk_and_init_transform:					     ; CODE XREF: RAM:loc_C83Ep
 RAM:C306
 RAM:C306	     ; FUNCTION	CHUNK AT RAM:BF21 SIZE 0000000A	BYTES
 RAM:C306	     ; FUNCTION	CHUNK AT RAM:BF31 SIZE 00000006	BYTES
 RAM:C306
-RAM:C306 3A B1 5B		     ld	     a,	(byte_5BB1)
+RAM:C306 3A B1 5B		     ld	     a,	(transform_flag_graphic)
 RAM:C309 A7			     and     a
 RAM:C30A C8			     ret     z
 RAM:C30B DD 7E 0C		     ld	     a,	(ix+12)
@@ -5645,8 +5646,8 @@ RAM:C315 C0			     ret     nz					     ; yes, exit
 RAM:C316 33			     inc     sp
 RAM:C317 33			     inc     sp
 RAM:C318 DD 7E 00		     ld	     a,	(ix+0)				     ; graphic_no
-RAM:C31B 32 B1 5B		     ld	     (byte_5BB1), a
-RAM:C31E DD 36 10 08		     ld	     (ix+16), 8
+RAM:C31B 32 B1 5B		     ld	     (transform_flag_graphic), a
+RAM:C31E DD 36 10 08		     ld	     (ix+16), 8				     ; transform count
 RAM:C322 DD E5			     push    ix
 RAM:C324 11 20 00		     ld	     de, 20h ; ' '
 RAM:C327 DD 19			     add     ix, de
@@ -5669,8 +5670,8 @@ RAM:C344 20 03			     jr	     nz, loc_C349
 RAM:C346 C3 21 BF		     jp	     init_sparkles
 RAM:C349	     ; ---------------------------------------------------------------------------
 RAM:C349
-RAM:C349	     loc_C349:							     ; CODE XREF: sub_C306+38j
-RAM:C349									     ; sub_C306+3Ej
+RAM:C349	     loc_C349:							     ; CODE XREF: chk_and_init_transform+38j
+RAM:C349									     ; chk_and_init_transform+3Ej
 RAM:C349 3A A2 5B		     ld	     a,	(seed_2)
 RAM:C34C E6 03			     and     3					     ; 1-in-4 chance?
 RAM:C34E C0			     ret     nz					     ; no, return
@@ -5678,7 +5679,7 @@ RAM:C34F CD 72 B4		     call    gen_audio_graphic_no_2
 RAM:C352 DD 35 10		     dec     (ix+16)				     ; copy of graphic_no
 RAM:C355 28 20			     jr	     z,	loc_C377
 RAM:C357
-RAM:C357	     rand_legs_sprite:						     ; CODE XREF: sub_C306+2Fj
+RAM:C357	     rand_legs_sprite:						     ; CODE XREF: chk_and_init_transform+2Fj
 RAM:C357 ED 5F			     ld	     a,	r				     ; RANDOM
 RAM:C359 4F			     ld	     c,	a
 RAM:C35A 3A A5 5B		     ld	     a,	(seed_3)
@@ -5689,7 +5690,7 @@ RAM:C362 DD BE 00		     cp	     (ix+0)				     ; same as current?
 RAM:C365 20 02			     jr	     nz, loc_C369			     ; no, skip
 RAM:C367 EE 01			     xor     1					     ; change
 RAM:C369
-RAM:C369	     loc_C369:							     ; CODE XREF: sub_C306+5Fj
+RAM:C369	     loc_C369:							     ; CODE XREF: chk_and_init_transform+5Fj
 RAM:C369 DD 77 00		     ld	     (ix+0), a				     ; store new sprite
 RAM:C36C DD 7E 07		     ld	     a,	(ix+7)
 RAM:C36F EE 40			     xor     40h ; '@'                               ; toggle hflip
@@ -5697,22 +5698,22 @@ RAM:C371 DD 77 07		     ld	     (ix+7), a
 RAM:C374 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:C377	     ; ---------------------------------------------------------------------------
 RAM:C377
-RAM:C377	     loc_C377:							     ; CODE XREF: sub_C306+4Fj
-RAM:C377 3A B1 5B		     ld	     a,	(byte_5BB1)
+RAM:C377	     loc_C377:							     ; CODE XREF: chk_and_init_transform+4Fj
+RAM:C377 3A B1 5B		     ld	     a,	(transform_flag_graphic)
 RAM:C37A EE 20			     xor     20h ; ' '
-RAM:C37C DD 77 00		     ld	     (ix+0), a
+RAM:C37C DD 77 00		     ld	     (ix+0), a				     ; graphic_no
 RAM:C37F C6 10			     add     a,	10h
-RAM:C381 DD 77 20		     ld	     (ix+20h), a
+RAM:C381 DD 77 20		     ld	     (ix+20h), a			     ; graphic_no (top half)
 RAM:C384 AF			     xor     a
-RAM:C385 32 B1 5B		     ld	     (byte_5BB1), a
+RAM:C385 32 B1 5B		     ld	     (transform_flag_graphic), a
 RAM:C388 CD DD C4		     call    adj_m6_m12
 RAM:C38B DD CB 00 6E		     bit     5,	(ix+0)
 RAM:C38F 28 03			     jr	     z,	loc_C394
-RAM:C391 DD 35 13		     dec     (ix+19)
+RAM:C391 DD 35 13		     dec     (ix+19)				     ; dY_adj
 RAM:C394
-RAM:C394	     loc_C394:							     ; CODE XREF: sub_C306+89j
+RAM:C394	     loc_C394:							     ; CODE XREF: chk_and_init_transform+89j
 RAM:C394 C3 92 C6		     jp	     set_wipe_and_draw_flags
-RAM:C394	     ; End of function sub_C306
+RAM:C394	     ; End of function chk_and_init_transform
 RAM:C394
 RAM:C397
 RAM:C397	     ; =============== S U B R O U T I N E =======================================
@@ -5780,7 +5781,7 @@ RAM:C404 DD 77 00		     ld	     (ix+0), a
 RAM:C407 CD 0D D3		     call    colour_sun_moon
 RAM:C40A DD 36 1A B0		     ld	     (ix+26), 176			     ; pixel X
 RAM:C40E 3E 01			     ld	     a,	1
-RAM:C410 32 B1 5B		     ld	     (byte_5BB1), a
+RAM:C410 32 B1 5B		     ld	     (transform_flag_graphic), a
 RAM:C413 3A 4D C4		     ld	     a,	(sun_moon_scratchpad)
 RAM:C416 E6 01			     and     1
 RAM:C418 C0			     ret     nz
@@ -5924,7 +5925,7 @@ RAM:C4DD	     ; =============== S U B R O U T I N E ============================
 RAM:C4DD
 RAM:C4DD
 RAM:C4DD	     adj_m6_m12:						     ; CODE XREF: RAM:upd_144_to_149_152_to_157p
-RAM:C4DD									     ; sub_C306+82p ...
+RAM:C4DD									     ; chk_and_init_transform+82p ...
 RAM:C4DD 21 F4 FA		     ld	     hl, 0FAF4h				     ; -6, -12
 RAM:C4DD	     ; End of function adj_m6_m12
 RAM:C4DD
@@ -5956,8 +5957,8 @@ RAM:C4ED
 RAM:C4ED	     ; =============== S U B R O U T I N E =======================================
 RAM:C4ED
 RAM:C4ED
-RAM:C4ED	     upd_11:							     ; CODE XREF: sub_C306+2Cp
-RAM:C4ED									     ; sub_C306:upd_92_to_95p
+RAM:C4ED	     upd_11:							     ; CODE XREF: chk_and_init_transform+2Cp
+RAM:C4ED									     ; chk_and_init_transform:upd_92_to_95p
 RAM:C4ED									     ; DATA XREF: ...
 RAM:C4ED 21 F4 FE		     ld	     hl, 0FEF4h				     ; -2, -12
 RAM:C4F0 18 EE			     jr	     jp_set_pixel_adj
@@ -6393,7 +6394,7 @@ RAM:C700									     ; RAM:B60Fp ...
 RAM:C700 DD 35 0B		     dec     (ix+11)				     ; dec dZ?
 RAM:C703 CD 45 CB		     call    adj_for_out_of_bounds
 RAM:C706
-RAM:C706	     add_dXYZ:							     ; CODE XREF: sub_C9A1+3Ep
+RAM:C706	     add_dXYZ:							     ; CODE XREF: move_player+3Ep
 RAM:C706 DD 7E 01		     ld	     a,	(ix+1)				     ; X
 RAM:C709 DD 86 09		     add     a,	(ix+9)				     ; dX
 RAM:C70C DD 77 01		     ld	     (ix+1), a				     ; X+=dX
@@ -6618,7 +6619,7 @@ RAM:C83E	     ; ----------------------------------------------------------------
 RAM:C83E
 RAM:C83E	     loc_C83E:							     ; CODE XREF: RAM:C82Fj
 RAM:C83E									     ; RAM:C835j
-RAM:C83E CD 06 C3		     call    sub_C306
+RAM:C83E CD 06 C3		     call    chk_and_init_transform		     ; returns to caller if transforming
 RAM:C841 CD 22 D0		     call    check_user_input
 RAM:C844 CD 0E C0		     call    handle_pickup_drop
 RAM:C847 CD 9F C8		     call    handle_left_right
@@ -6630,7 +6631,7 @@ RAM:C855
 RAM:C855	     loc_C855:							     ; CODE XREF: RAM:C871j
 RAM:C855									     ; RAM:C878j
 RAM:C855 DD CB 27 CE		     set     1,	(ix+27h)
-RAM:C859 CD A1 C9		     call    sub_C9A1				     ; does the	moving
+RAM:C859 CD A1 C9		     call    move_player			     ; does the	moving
 RAM:C85C DD CB 27 8E		     res     1,	(ix+27h)
 RAM:C860 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:C863 D6 10			     sub     10h
@@ -6885,13 +6886,13 @@ RAM:C9A1
 RAM:C9A1	     ; =============== S U B R O U T I N E =======================================
 RAM:C9A1
 RAM:C9A1
-RAM:C9A1	     sub_C9A1:							     ; CODE XREF: RAM:C859p
+RAM:C9A1	     move_player:						     ; CODE XREF: RAM:C859p
 RAM:C9A1 3A C4 5B		     ld	     a,	(byte_5BC4)
 RAM:C9A4 A7			     and     a
 RAM:C9A5 28 04			     jr	     z,	loc_C9AB
 RAM:C9A7 DD 36 0B 02		     ld	     (ix+11), 2				     ; dZ=2
 RAM:C9AB
-RAM:C9AB	     loc_C9AB:							     ; CODE XREF: sub_C9A1+4j
+RAM:C9AB	     loc_C9AB:							     ; CODE XREF: move_player+4j
 RAM:C9AB DD CB 0C 5E		     bit     3,	(ix+12)				     ; already jumping?
 RAM:C9AF 20 0B			     jr	     nz, loc_C9BC			     ; yes, skip
 RAM:C9B1 DD 7E 0C		     ld	     a,	(ix+12)
@@ -6900,34 +6901,34 @@ RAM:C9B6 20 04			     jr	     nz, loc_C9BC
 RAM:C9B8 CB 51			     bit     2,	c				     ; forward?
 RAM:C9BA 28 05			     jr	     z,	loc_C9C1			     ; no, skip
 RAM:C9BC
-RAM:C9BC	     loc_C9BC:							     ; CODE XREF: sub_C9A1+Ej
-RAM:C9BC									     ; sub_C9A1+15j
+RAM:C9BC	     loc_C9BC:							     ; CODE XREF: move_player+Ej
+RAM:C9BC									     ; move_player+15j
 RAM:C9BC C5			     push    bc
-RAM:C9BD CD FB C9		     call    move_player
+RAM:C9BD CD FB C9		     call    calc_plyr_dXY
 RAM:C9C0 C1			     pop     bc
 RAM:C9C1
-RAM:C9C1	     loc_C9C1:							     ; CODE XREF: sub_C9A1+19j
+RAM:C9C1	     loc_C9C1:							     ; CODE XREF: move_player+19j
 RAM:C9C1 DD 7E 0B		     ld	     a,	(ix+11)				     ; dZ
 RAM:C9C4 A7			     and     a
 RAM:C9C5 FA CC C9		     jp	     m,	loc_C9CC
 RAM:C9C8 CB 59			     bit     3,	c
 RAM:C9CA 20 01			     jr	     nz, loc_C9CD
 RAM:C9CC
-RAM:C9CC	     loc_C9CC:							     ; CODE XREF: sub_C9A1+24j
+RAM:C9CC	     loc_C9CC:							     ; CODE XREF: move_player+24j
 RAM:C9CC 3D			     dec     a
 RAM:C9CD
-RAM:C9CD	     loc_C9CD:							     ; CODE XREF: sub_C9A1+29j
+RAM:C9CD	     loc_C9CD:							     ; CODE XREF: move_player+29j
 RAM:C9CD 3D			     dec     a
-RAM:C9CE DD 77 0B		     ld	     (ix+11), a
-RAM:C9D1 32 C1 5B		     ld	     (byte_5BC1), a
+RAM:C9CE DD 77 0B		     ld	     (ix+11), a				     ; dZ
+RAM:C9D1 32 C1 5B		     ld	     (old_dZ), a
 RAM:C9D4 C6 02			     add     a,	2
 RAM:C9D6 FC 51 B4		     call    m,	gen_audio_Z
 RAM:C9D9 CD 45 CB		     call    adj_for_out_of_bounds
-RAM:C9DC CD 70 CA		     call    sub_CA70
+RAM:C9DC CD 70 CA		     call    handle_exit_screen
 RAM:C9DF CD 06 C7		     call    add_dXYZ
 RAM:C9E2 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
 RAM:C9E6 28 0B			     jr	     z,	clear_dX_dY			     ; no, go
-RAM:C9E8 3A C1 5B		     ld	     a,	(byte_5BC1)
+RAM:C9E8 3A C1 5B		     ld	     a,	(old_dZ)
 RAM:C9EB A7			     and     a
 RAM:C9EC F2 F3 C9		     jp	     p,	clear_dX_dY
 RAM:C9EF DD CB 0C 9E		     res     3,	(ix+12)				     ; clear jumping flag
@@ -6938,13 +6939,13 @@ RAM:C9F3 AF			     xor     a
 RAM:C9F4 DD 77 09		     ld	     (ix+9), a				     ; dX=0
 RAM:C9F7 DD 77 0A		     ld	     (ix+10), a				     ; dY=0
 RAM:C9FA C9			     ret
-RAM:C9FA	     ; End of function sub_C9A1
+RAM:C9FA	     ; End of function move_player
 RAM:C9FA
 RAM:C9FB
 RAM:C9FB	     ; =============== S U B R O U T I N E =======================================
 RAM:C9FB
 RAM:C9FB
-RAM:C9FB	     move_player:						     ; CODE XREF: sub_C9A1+1Cp
+RAM:C9FB	     calc_plyr_dXY:						     ; CODE XREF: move_player+1Cp
 RAM:C9FB DD 7E 09		     ld	     a,	(ix+9)				     ; dX
 RAM:C9FE DD 86 0E		     add     a,	(ix+14)				     ; dX_adjust
 RAM:CA01 DD 77 09		     ld	     (ix+9), a
@@ -6957,11 +6958,11 @@ RAM:CA11 DD 77 0F		     ld	     (ix+15), a				     ; zap adjustment
 RAM:CA14 01 32 CA		     ld	     bc, off_CA32
 RAM:CA17
 RAM:CA17	     loc_CA17:							     ; CODE XREF: RAM:C7A6j
-RAM:CA17									     ; sub_CA70+16j
+RAM:CA17									     ; handle_exit_screen+16j
 RAM:CA17 CD 1E CA		     call    get_player_dir
 RAM:CA1A 6F			     ld	     l,	a
 RAM:CA1B C3 DB AF		     jp	     jump_to_tbl_entry
-RAM:CA1B	     ; End of function move_player
+RAM:CA1B	     ; End of function calc_plyr_dXY
 RAM:CA1B
 RAM:CA1E
 RAM:CA1E	     ; =============== S U B R O U T I N E =======================================
@@ -6985,7 +6986,7 @@ RAM:CA31 C9			     ret
 RAM:CA31	     ; End of function get_player_dir
 RAM:CA31
 RAM:CA31	     ; ---------------------------------------------------------------------------
-RAM:CA32 3A CA	     off_CA32:	     dw	move_plyr_W				     ; DATA XREF: move_player+19o
+RAM:CA32 3A CA	     off_CA32:	     dw	move_plyr_W				     ; DATA XREF: calc_plyr_dXY+19o
 RAM:CA32									     ; dX -= 3
 RAM:CA34 43 CA			     dw	move_plyr_E				     ; dX += 3
 RAM:CA36 4A CA			     dw	move_plyr_N				     ; dY += 3
@@ -7045,7 +7046,7 @@ RAM:CA70
 RAM:CA70	     ; =============== S U B R O U T I N E =======================================
 RAM:CA70
 RAM:CA70
-RAM:CA70	     sub_CA70:							     ; CODE XREF: sub_C9A1+3Bp
+RAM:CA70	     handle_exit_screen:					     ; CODE XREF: move_player+3Bp
 RAM:CA70 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CA73 E6 F0			     and     0F0h ; 'ð'
 RAM:CA75 C0			     ret     nz
@@ -7056,7 +7057,7 @@ RAM:CA7F 01 92 CA		     ld	     bc, screen_move_tbl
 RAM:CA82 2A AB 5B		     ld	     hl, (room_size_X)
 RAM:CA85 E5			     push    hl
 RAM:CA86 C3 17 CA		     jp	     loc_CA17
-RAM:CA86	     ; End of function sub_CA70
+RAM:CA86	     ; End of function handle_exit_screen
 RAM:CA86
 RAM:CA89	     ; adjust dX/dY/dZ when out	of bounds
 RAM:CA89	     ; A = dX/dY/dZ
@@ -7078,7 +7079,7 @@ RAM:CA91 C9			     ret
 RAM:CA91	     ; End of function adj_d_for_out_of_bounds
 RAM:CA91
 RAM:CA91	     ; ---------------------------------------------------------------------------
-RAM:CA92 9A CA	     screen_move_tbl:dw	screen_west				     ; DATA XREF: sub_CA70+Fo
+RAM:CA92 9A CA	     screen_move_tbl:dw	screen_west				     ; DATA XREF: handle_exit_screen+Fo
 RAM:CA94 F3 CA			     dw	screen_east
 RAM:CA96 0E CB			     dw	screen_north
 RAM:CA98 29 CB			     dw	screen_south
@@ -7187,7 +7188,7 @@ RAM:CB45	     ; =============== S U B R O U T I N E ============================
 RAM:CB45
 RAM:CB45
 RAM:CB45	     adj_for_out_of_bounds:					     ; CODE XREF: dec_dZ_and_update_XYZ+3p
-RAM:CB45									     ; sub_C9A1+38p
+RAM:CB45									     ; move_player+38p
 RAM:CB45 DD CB 07 4E		     bit     1,	(ix+7)
 RAM:CB49 C0			     ret     nz
 RAM:CB4A DD CB 07 CE		     set     1,	(ix+7)
@@ -8253,9 +8254,9 @@ RAM:D12D 11 08 5C		     ld	     de, graphic_objs_tbl
 RAM:D130 D5			     push    de
 RAM:D131 DD E1			     pop     ix
 RAM:D133 01 40 00		     ld	     bc, 64				     ; 1st 2 entries
-RAM:D136 ED B0			     ldir
+RAM:D136 ED B0			     ldir					     ; copy scratchpad back to object table
 RAM:D138 AF			     xor     a
-RAM:D139 32 B1 5B		     ld	     (byte_5BB1), a
+RAM:D139 32 B1 5B		     ld	     (transform_flag_graphic), a
 RAM:D13C 21 BA 5B		     ld	     hl, lives
 RAM:D13F 35			     dec     (hl)				     ; decrement life
 RAM:D140 FA 22 BA		     jp	     m,	game_over			     ; any left? no, exit
@@ -8263,16 +8264,16 @@ RAM:D143 3A 4D C4		     ld	     a,	(sun_moon_scratchpad)		     ; sprite index
 RAM:D146 0F			     rrca
 RAM:D147 0F			     rrca
 RAM:D148 0F			     rrca
-RAM:D149 E6 20			     and     20h ; ' '
+RAM:D149 E6 20			     and     20h ; ' '                               ; day/night?
 RAM:D14B 4F			     ld	     c,	a
-RAM:D14C DD 7E 10		     ld	     a,	(ix+16)
+RAM:D14C DD 7E 10		     ld	     a,	(ix+16)				     ; plyr graphic no
 RAM:D14F E6 1F			     and     1Fh
-RAM:D151 81			     add     a,	c
+RAM:D151 81			     add     a,	c				     ; legs human/wulf?
 RAM:D152 DD 77 10		     ld	     (ix+16), a
-RAM:D155 DD 7E 30		     ld	     a,	(ix+30h)
+RAM:D155 DD 7E 30		     ld	     a,	(ix+30h)			     ; top half	playr graphic no
 RAM:D158 E6 0F			     and     0Fh
 RAM:D15A 81			     add     a,	c
-RAM:D15B C6 20			     add     a,	20h ; ' '
+RAM:D15B C6 20			     add     a,	20h ; ' '                            ; top half human/wulf
 RAM:D15D DD 77 30		     ld	     (ix+30h), a
 RAM:D160 C9			     ret
 RAM:D160	     ; End of function lose_life
@@ -8426,7 +8427,7 @@ RAM:D228 07			     rlca
 RAM:D229 E6 38			     and     38h ; '8'
 RAM:D22B F6 C6			     or	     0C6h ; 'Æ'                              ; SET 0,(HL)
 RAM:D22D 32 35 D2		     ld	     (byte_D235), a			     ; self-modifying code
-RAM:D230 01 E8 5B		     ld	     bc, room_visited
+RAM:D230 01 E8 5B		     ld	     bc, screen_visited
 RAM:D233 09			     add     hl, bc				     ; offset to room flag
 RAM:D233	     ; ---------------------------------------------------------------------------
 RAM:D234 CB			     db	0CBh ; Ë				     ; SET n,(HL)

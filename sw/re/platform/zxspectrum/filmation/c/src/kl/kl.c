@@ -69,7 +69,7 @@ static uint8_t curr_room_attrib;                      // $5BAD
 static uint8_t room_size_Z;                           // $5BAE
 static uint8_t portcullis_moving;                     // $5BAF
 static uint8_t portcullis_move_cnt;                   // $5BB0
-static uint8_t byte_5BB1;                             // $5BB1
+static uint8_t transform_flag_graphic;                // $5BB1
 static uint8_t unk_5BB2;                              // $5BB2
 static uint8_t pickup_drop_pressed;                   // $5BB3
 static uint8_t byte_5BB4;                             // $5BB4
@@ -85,12 +85,12 @@ static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t rendered_objs_cnt;                     // $5BBE
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
-static uint8_t byte_5BC1;                             // $5BC1
+static uint8_t old_dZ;                                // $5BC1
 static int8_t tmp_bouncing_ball_dZ;                   // $5BC2
 static uint8_t byte_5BC3;                             // $5BC3
 static uint8_t byte_5BC4;                             // $5BC4
 static uint8_t byte_5BC5;                             // $5BC5
-static uint8_t unk_5BC6;                              // $5BC6
+static uint8_t num_scrns_visited;                     // $5BC6
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t unk_5BC9;                              // $5BC9
 static uint8_t unk_5BCA;                              // $5BCA
@@ -207,7 +207,7 @@ static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
 static void upd_96_to_102 (POBJ32 p_obj);
 static void no_update (POBJ32 p_obj);
 static void prepare_final_animation (void);
-static int sub_C306 (POBJ32 p_obj);
+static int chk_and_init_transform (POBJ32 p_obj);
 static void upd_92_to_95 (POBJ32 p_obj);
 static void rand_legs_sprite (POBJ32 p_obj);
 static void print_sun_moon (void);
@@ -218,6 +218,7 @@ static void upd_62 (POBJ32 p_obj);
 static void upd_85 (POBJ32 p_obj);
 static void upd_84 (POBJ32 p_obj);
 static void upd_128_to_130 (POBJ32 p_obj);
+static void adj_m6_m12 (POBJ32 p_obj);
 static void upd_6_7 (POBJ32 p_obj);
 static void upd_10 (POBJ32 p_obj);
 static void upd_11 (POBJ32 p_obj);
@@ -248,13 +249,17 @@ static void handle_left_right (POBJ32 p_obj, uint8_t inp);
 static void handle_jump (POBJ32 p_obj, uint8_t inp);
 static void handle_forward (POBJ32 p_obj, uint8_t inp);
 static void animate_guard_wizard_legs (POBJ32 p_obj);
-static void sub_C9A1 (POBJ32 p_obj, uint8_t c);
+static void move_player (POBJ32 p_obj, uint8_t c);
 static void clear_dX_dY (POBJ32 p_obj);
-static void move_player (POBJ32 p_obj);
+static void calc_plyr_dXY (POBJ32 p_obj);
 static uint8_t get_player_dir (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
+static void handle_exit_screen (POBJ32 p_obj);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
+static void sub_CB9A (POBJ32 p_obj);
+static void sub_CBE9 (POBJ32 p_obj);
+static void sub_CC38 (POBJ32 p_obj);
 static int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x);
 static int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y);
 static void calc_2d_info (POBJ32 p_obj);
@@ -307,7 +312,7 @@ void dump_graphic_objs_tbl (int start, int end)
               graphic_objs_tbl[i].width,
               graphic_objs_tbl[i].depth,
               graphic_objs_tbl[i].height,
-              graphic_objs_tbl[i].flags,
+              graphic_objs_tbl[i].flags7,
               graphic_objs_tbl[i].pixel_x,
               graphic_objs_tbl[i].pixel_y);
   }
@@ -595,7 +600,7 @@ void reset_objs_wipe_flag (void)
   unsigned i;
   
   for (i=0; i<MAX_OBJS; i++)
-    graphic_objs_tbl[i].flags &= ~FLAG_WIPE;
+    graphic_objs_tbl[i].flags7 &= ~FLAG_WIPE;
 }
 
 // $B096
@@ -1033,7 +1038,7 @@ void upd_144_to_149_152_to_157 (POBJ32 p_obj)
       p_obj->graphic_no |= (1<<3);
     else
       p_obj->graphic_no &= ~(1<<3);
-    p_obj->flags |= FLAG_HFLIP;
+    p_obj->flags7 |= FLAG_HFLIP;
   }
   else
   {
@@ -1041,7 +1046,7 @@ void upd_144_to_149_152_to_157 (POBJ32 p_obj)
       p_obj->graphic_no &= ~(1<<3);
     else
       p_obj->graphic_no |= (1<<3);
-    p_obj->flags &= ~FLAG_HFLIP;
+    p_obj->flags7 &= ~FLAG_HFLIP;
   }
   animate_guard_wizard_legs (p_obj);
   set_wipe_and_draw_flags (p_obj);
@@ -1058,7 +1063,7 @@ void set_guard_wizard_sprite (POBJ32 p_obj)
       p_obj->graphic_no |= (1<<0);
     else
       p_obj->graphic_no &= ~(1<<0);
-    p_obj->flags |= FLAG_HFLIP;
+    p_obj->flags7 |= FLAG_HFLIP;
   }
   else 
   {
@@ -1066,7 +1071,7 @@ void set_guard_wizard_sprite (POBJ32 p_obj)
       p_obj->graphic_no &= ~(1<<0);
     else
       p_obj->graphic_no |= (1<<0);
-    p_obj->flags &= ~FLAG_HFLIP;
+    p_obj->flags7 &= ~FLAG_HFLIP;
   }
 }
 
@@ -1195,7 +1200,7 @@ void upd_176_177 (POBJ32 p_obj)
   if ((fire_seed & (1<<0)) == 0)
     return;
   // randomise HFLIP
-  p_obj->flags ^= seed_3 & FLAG_HFLIP;
+  p_obj->flags7 ^= seed_3 & FLAG_HFLIP;
   toggle_next_prev_sprite (p_obj);
   sub_B85C (p_obj);
   set_wipe_and_draw_flags (p_obj);
@@ -1280,7 +1285,7 @@ void upd_160_to_163 (POBJ32 p_obj)
     upd_111 (p_obj);
   else
   {
-    p_obj->flags |= (1<<1);
+    p_obj->flags7 |= (1<<1);
     dec_dZ_and_update_XYZ (p_obj);
     next_graphic_no_mod_4 (p_obj);
     if (p_obj->z < 160)
@@ -1292,7 +1297,7 @@ void upd_160_to_163 (POBJ32 p_obj)
       {
         // wulf - no hint for next object
         p_obj->graphic_no |= (1<<2);
-        p_obj->flags &= ~(1<<1);
+        p_obj->flags7 &= ~(1<<1);
       }
       else
       {
@@ -1325,7 +1330,7 @@ void upd_164_to_167 (POBJ32 p_obj)
   
   adj_m4_m12 (p_obj);
   if (p_obj->scrn != CAULDRON_SCREEN && 
-      (graphic_objs_tbl[0].flags & (1<<0)) != 0)
+      (graphic_objs_tbl[0].flags7 & (1<<0)) != 0)
     d_x = d_y = 1;
   else
     d_x = d_y = 4;
@@ -1479,7 +1484,7 @@ void print_lives_gfx (void)
   UNIMPLEMENTED;
 
   p_obj->graphic_no = 0x8c;
-  p_obj->flags = 0;
+  p_obj->flags7 = 0;
   p_obj->pixel_x = 16;
   p_obj->pixel_y = 32;
   print_sprite (p_obj);
@@ -1613,7 +1618,7 @@ void multiple_print_sprite (POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n)
 void init_sparkles (POBJ32 p_obj)
 {
   p_obj->graphic_no = 112;
-  p_obj->flags |= (1<<1);   // ???
+  p_obj->flags7 |= (1<<1);   // ???
   //gen_audio_graphic_no_rom (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
@@ -1834,7 +1839,7 @@ void upd_104_to_110 (POBJ32 p_obj)
       return;
     }
     else
-      p_obj->flags |= (1<<1);
+      p_obj->flags7 |= (1<<1);
   }
   dec_dZ_and_update_XYZ (p_obj);
   gen_audio_XYZ_wipe_and_draw (p_obj);
@@ -1883,43 +1888,61 @@ void prepare_final_animation (void)
 }
 
 // $C306
-int sub_C306 (POBJ32 p_obj)
+int chk_and_init_transform (POBJ32 p_obj)
 {
   POBJ32 p_next_obj = p_obj+1;
   
-  if (byte_5BB1 == 0)
-    return (1);
+  if (transform_flag_graphic == 0)
+    return (0);
   if ((p_obj->flags12 & 0x0F) != 0)
-    return (1);
-  if ((p_obj->flags12 & (1<<3)) != 0)
-    return (1);
+    return (0);
+  if ((p_obj->flags12 & FLAG_JUMPING) != 0)
+    return (0);
     
   // the original Z80 code incremented the stack twice
   // so we didn't return to the caller
-  // - but here we return 0 instead
+  // - but here we return 1 instead
 
-  byte_5BB1 = p_obj->graphic_no;
+  transform_flag_graphic = p_obj->graphic_no;
   p_obj->u.plyr_graphic_no = 8;
   p_next_obj->graphic_no = 1;
   set_wipe_and_draw_flags (p_next_obj);
   upd_11 (p_obj);
   rand_legs_sprite (p_obj);
   
-  return (0);
+  return (1);
 }
 
 // $C337
 // human/wulf transform
 void upd_92_to_95 (POBJ32 p_obj)
 {
-  UNIMPLEMENTED;
+  UNTESTED;
   
   upd_11 (p_obj);
-  if ((p_obj->flags13 & (1<<6)) == 1 &&
+  if ((p_obj->flags13 & (1<<6)) != 0 &&
       byte_5BC3 == 0)
     init_sparkles (p_obj);
   else
   {
+    if ((seed_2 & 3) != 0)
+      return;
+    //gen_audio_graphic_no_2 (p_obj);
+    if (--p_obj->u.plyr_graphic_no == 0)
+    {
+      POBJ32 p_next_obj = p_obj+1;
+      uint8_t graphic_no = transform_flag_graphic ^ 0x20;
+      
+      p_obj->graphic_no = graphic_no;
+      p_next_obj->graphic_no = graphic_no + 16;
+      transform_flag_graphic = 0;
+      adj_m6_m12 (p_obj);
+      if ((p_obj->graphic_no & (1<<5)) != 0)
+        p_obj->pixel_y_adj--;
+      set_wipe_and_draw_flags (p_obj);
+    }
+    else
+      rand_legs_sprite (p_obj);
   }
 }
 
@@ -1931,7 +1954,7 @@ void rand_legs_sprite (POBJ32 p_obj)
   if (r == p_obj->graphic_no)
     r ^= (1<<0);
   p_obj->graphic_no = r;
-  p_obj->flags ^= FLAG_HFLIP;
+  p_obj->flags7 ^= FLAG_HFLIP;
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1967,7 +1990,7 @@ void display_sun_moon_frame (POBJ32 p_obj)
 
 display_frame:
   p_frm->graphic_no = 0x5a;
-  p_frm->flags = 0;
+  p_frm->flags7 = 0;
   p_frm->pixel_x = 184;
   p_frm->pixel_y = 0;
   print_sprite (p_frm);
@@ -2167,7 +2190,7 @@ void find_special_objs_here (void)
     p_special_obj->width = 5;
     p_special_obj->depth = 5;
     p_special_obj->height = 20;
-    p_special_obj->flags = 0x14;
+    p_special_obj->flags7 = 0x14;
     p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
     memset (&p_special_obj->d_x, 0, 7);  // *** FIXME
     p_special_obj->u.ptr_obj_tbl_entry = i;
@@ -2238,7 +2261,7 @@ void calc_ghost_sprite (POBJ32 p_obj)
       p_obj->graphic_no &= ~(1<<1);   // 80/81
     else
       p_obj->graphic_no |= (1<<1);    // 82/83
-    p_obj->flags &= ~FLAG_HFLIP;
+    p_obj->flags7 &= ~FLAG_HFLIP;
   }
   else
   {
@@ -2246,7 +2269,7 @@ void calc_ghost_sprite (POBJ32 p_obj)
       p_obj->graphic_no |= (1<<1);    // 82/83
     else
       p_obj->graphic_no &= ~(1<<1);   // 80/81
-    p_obj->flags |= FLAG_HFLIP;
+    p_obj->flags7 |= FLAG_HFLIP;
   }
 }
 
@@ -2302,9 +2325,7 @@ void upd_8 (POBJ32 p_obj)
 // $C692
 void set_wipe_and_draw_flags (POBJ32 p_obj)
 {
-  UNIMPLEMENTED;
-
-  p_obj->flags |= (FLAG_WIPE|FLAG_DRAW);
+  p_obj->flags7 |= (FLAG_WIPE|FLAG_DRAW);
   set_draw_objs_overlapped (p_obj);
 }
 
@@ -2361,7 +2382,7 @@ void add_dXYZ (POBJ32 p_obj)
 // stone/tree arch (far side)
 void upd_3_5 (POBJ32 p_obj)
 {
-  if ((p_obj->flags & FLAG_HFLIP) == 0)
+  if ((p_obj->flags7 & FLAG_HFLIP) == 0)
     set_pixel_adj (p_obj, -3, -9);
   else
     set_pixel_adj (p_obj, -2, -7);
@@ -2380,7 +2401,7 @@ void upd_2_4 (POBJ32 p_obj)
 {
   UNIMPLEMENTED;
 
-  if ((p_obj->flags & FLAG_HFLIP) == 0)
+  if ((p_obj->flags7 & FLAG_HFLIP) == 0)
   {
     // tree arch
     if (p_obj->graphic_no == 4)
@@ -2436,7 +2457,7 @@ void upd_player_bottom (POBJ32 p_obj)
   else
   {
     // the original Z80 code popped the return address
-    if (!sub_C306 (p_obj))
+    if (chk_and_init_transform (p_obj))
       return;
     inp = check_user_input ();
     handle_pickup_drop (p_obj);
@@ -2446,9 +2467,9 @@ void upd_player_bottom (POBJ32 p_obj)
     if (chk_plyr_OOB (p_obj) == 0)
       if (p_obj->d_z >= 0)
         p_obj->d_z = 0;
-    p_next_obj->flags |= FLAG_Y_OOB;
-    sub_C9A1 (p_obj, inp);               // does the moving
-    p_next_obj->flags &= ~FLAG_Y_OOB;
+    p_next_obj->flags7 |= FLAG_Y_OOB;
+    move_player (p_obj, inp);
+    p_next_obj->flags7 &= ~FLAG_Y_OOB;
     if (p_obj->flags12 >= 16)
       p_obj->flags12 -= 16;
     set_wipe_and_draw_flags (p_obj);
@@ -2498,16 +2519,13 @@ void handle_left_right (POBJ32 p_obj, uint8_t inp)
   }
   p_obj->flags13 |= 2;
   if (((inp & INP_RIGHT) != 0 &&
-      (p_obj->flags & FLAG_HFLIP) != 0) ||
+      (p_obj->flags7 & FLAG_HFLIP) != 0) ||
       ((inp & INP_RIGHT) == 0 &&
-      (p_obj->flags & FLAG_HFLIP) == 0))
+      (p_obj->flags7 & FLAG_HFLIP) == 0))
     p_obj->graphic_no ^= 8;
-  p_obj->flags ^= FLAG_HFLIP;
+  p_obj->flags7 ^= FLAG_HFLIP;
   // set sprite for top half
   p_next_obj->graphic_no = p_obj->graphic_no + 16;
-  // where does HFLIP get set for top half?
-  // *** FUDGE - remove me!!!!
-  //p_next_obj->flags ^= FLAG_HFLIP;
 }
 
 // $C948
@@ -2558,23 +2576,28 @@ void animate_guard_wizard_legs (POBJ32 p_obj)
 }
 
 // $C9A1
-void sub_C9A1 (POBJ32 p_obj, uint8_t inp)
+void move_player (POBJ32 p_obj, uint8_t inp)
 {
-  UNIMPLEMENTED;
+  UNTESTED;
   
   if (byte_5BC4 != 0)
     p_obj->d_z = 2;
   if ((p_obj->flags12 & FLAG_JUMPING) != 0 ||
       (p_obj->flags12 & 0xF0) != 0 ||
       (inp & INP_FORWARD) != 0)
-    move_player (p_obj);
+    calc_plyr_dXY (p_obj);
   if (p_obj->d_z < 0 || (inp & INP_JUMP) == 0)
     p_obj->d_z--;
   p_obj->d_z--;
-  byte_5BC1 = p_obj->d_z;
-  
-  // more stuff I couldn't be bothered with atm
-  
+  old_dZ = p_obj->d_z;
+  if (p_obj->d_z < -2)
+    /*gen_audio_Z(p_obj)*/;
+  adj_for_out_of_bounds (p_obj);
+  handle_exit_screen (p_obj);
+  add_dXYZ (p_obj);
+  if ((p_obj->flags12 & FLAG_Z_OOB) != 0)
+    if (old_dZ < 0)
+      p_obj->flags12 &= ~FLAG_JUMPING;
   clear_dX_dY (p_obj);
 }
 
@@ -2586,7 +2609,7 @@ void clear_dX_dY (POBJ32 p_obj)
 }
 
 // $C9FB
-void move_player (POBJ32 p_obj)
+void calc_plyr_dXY (POBJ32 p_obj)
 {
   //DBGPRINTF_FN;
   
@@ -2619,7 +2642,7 @@ void move_player (POBJ32 p_obj)
 // returns 0-3 (WENS)
 uint8_t get_player_dir (POBJ32 p_obj)
 {
-  uint8_t l = (p_obj->flags>>2) & 0x10;
+  uint8_t l = (p_obj->flags7>>2) & 0x10;
   uint8_t a = (p_obj->graphic_no & 8) | l;
   
   return ((a>>3) & 3);
@@ -2640,6 +2663,22 @@ int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z)
   return (d_z);
 }
 
+// $CA70
+void handle_exit_screen (POBJ32 p_obj)
+{
+  UNIMPLEMENTED;
+  
+  if ((p_obj->flags12 & 0xF0) != 0)
+    return;
+  if ((p_obj->flags7 & (1<<0)) == 0)
+    return;
+  p_obj->flags7 &= ~(1<<0);
+  
+  switch (get_player_dir (p_obj))
+  {
+  }
+}
+
 // $CA89
 int8_t adj_d_for_out_of_bounds (int8_t d)
 {
@@ -2654,14 +2693,12 @@ int8_t adj_d_for_out_of_bounds (int8_t d)
 // $CB45
 void adj_for_out_of_bounds (POBJ32 p_obj)
 {
-  UNIMPLEMENTED;
-
   int8_t d_x, d_y, d_z;
 
-  if (p_obj->flags & (1<<1))
+  if (p_obj->flags7 & (1<<1))
     return;
     
-  p_obj->flags |= (1<<1);
+  p_obj->flags7 |= (1<<1);
   p_obj->flags12 &= ~(FLAG_Z_OOB|FLAG_Y_OOB|FLAG_X_OOB);
   d_y = 0;
   d_x = 0;
@@ -2671,15 +2708,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_z = adj_dZ_for_out_of_bounds (p_obj, d_z);
     if (d_z != 0)
-      ; // do some stuff
-  }
-
-  d_y = p_obj->d_y;  
-  if (p_obj->d_y != 0)
-  {
-    d_y = adj_dY_for_out_of_bounds (p_obj, d_y);
-    if (d_y != 0)
-      ; // do some stuff
+      sub_CC38 (p_obj);
   }
 
   d_x = p_obj->d_x;
@@ -2687,13 +2716,39 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_x = adj_dX_for_out_of_bounds (p_obj, d_x);
     if (d_x != 0)
-      ; // do some stuff
+      sub_CB9A (p_obj);
+  }
+
+  d_y = p_obj->d_y;  
+  if (p_obj->d_y != 0)
+  {
+    d_y = adj_dY_for_out_of_bounds (p_obj, d_y);
+    if (d_y != 0)
+      sub_CBE9 (p_obj);
   }
 
   p_obj->d_x = d_x;
   p_obj->d_y = d_y;
   p_obj->d_z = d_z;
-  p_obj->flags &= ~(1<<1);
+  p_obj->flags7 &= ~(1<<1);
+}
+
+// $CB9A
+void sub_CB9A (POBJ32 p_obj)
+{
+  UNIMPLEMENTED;
+}
+
+// $CBE9
+void sub_CBE9 (POBJ32 p_obj)
+{
+  UNIMPLEMENTED;
+}
+
+// $CC38
+void sub_CC38 (POBJ32 p_obj)
+{
+  UNIMPLEMENTED;
 }
 
 // $CCDD
@@ -2701,7 +2756,7 @@ int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x)
 {
   if ((p_obj->flags12 & 0xF0) != 0)
     return (d_x);
-  if ((p_obj->flags & (1<<0)) != 0)
+  if ((p_obj->flags7 & (1<<0)) != 0)
     return (d_x);
   do
   {
@@ -2720,7 +2775,7 @@ int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
 {
   if ((p_obj->flags12 & 0xF0) != 0)
     return (d_y);
-  if ((p_obj->flags & (1<<0)) != 0)
+  if ((p_obj->flags7 & (1<<0)) != 0)
     return (d_y);
   do
   {
@@ -2777,7 +2832,7 @@ void set_draw_objs_overlapped (POBJ32 p_obj)
   {
     if (p_other->graphic_no == 0)
       continue;
-    if ((p_other->flags & FLAG_DRAW) != 0)
+    if ((p_other->flags7 & FLAG_DRAW) != 0)
       continue;
     a = p_other->pixel_x >> 3;
     if (a < e)
@@ -2794,7 +2849,7 @@ void set_draw_objs_overlapped (POBJ32 p_obj)
     }
     else if (p_other->pixel_y >= (l+h))
       continue;
-    p_other->flags |= FLAG_DRAW;        
+    p_other->flags7 |= FLAG_DRAW;        
   }
 }
 
@@ -2827,10 +2882,10 @@ void upd_player_top (POBJ32 p_obj)
     init_sparkles (p_obj);
   else
   {
-    // copy x,y,z,w,d,h,flags from bottom half
+    // copy x,y,z,w,d,h,flags7 from bottom half
     memcpy (&(p_obj->x), &(p_prev_obj->x), 7);
     p_obj->height = 0;
-    p_obj->flags |= (1<<1);
+    p_obj->flags7 |= (1<<1);
     if ((p_obj->flags13 & MASK_LOOK_CNT) == 0)
     {
       if (seed_3 < 2)
@@ -2879,10 +2934,10 @@ void list_objects_to_draw (void)
   for (i=0; i<MAX_OBJS; i++)
   {
     if ((graphic_objs_tbl[i].graphic_no != 0) &&
-        (graphic_objs_tbl[i].flags & FLAG_DRAW))
+        (graphic_objs_tbl[i].flags7 & FLAG_DRAW))
     {
-      //DBGPRINTF ("[%02d]=%02d(graphic_no=$%02X,flags=$%02X)\n",
-      //          n, i, graphic_objs_tbl[i].graphic_no, graphic_objs_tbl[i].flags);
+      //DBGPRINTF ("[%02d]=%02d(graphic_no=$%02X,flags7=$%02X)\n",
+      //          n, i, graphic_objs_tbl[i].graphic_no, graphic_objs_tbl[i].flags7);
       objects_to_draw[n++] = i;
     }
   }
@@ -2901,7 +2956,7 @@ void calc_display_order_and_render (void)
     POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
     #if 0
     if (p_obj->graphic_no == 23)
-      p_obj->flags &= ~(1<<4);
+      p_obj->flags7 &= ~FLAG_DRAW;
     else 
     #endif     
       calc_pixel_XY_and_render (p_obj);
@@ -2912,8 +2967,11 @@ void calc_display_order_and_render (void)
 uint8_t check_user_input (void)
 {
   if (byte_5BC3 != 0 || byte_5BC4 != 0)
+  {
+    user_input = 0;
     goto finished_input;
-
+  }
+  
   // handle various input methods here
   goto keyboard;
   
@@ -2950,7 +3008,7 @@ int lose_life (void)
 
   memcpy ((void *)&graphic_objs_tbl[0], (void *)&plyr_spr_1_scratchpad, sizeof(OBJ32));
   memcpy ((void *)&graphic_objs_tbl[1], (void *)&plyr_spr_2_scratchpad, sizeof(OBJ32));
-  byte_5BB1 = 0;
+  transform_flag_graphic = 0;
   if (--lives < 0)
     game_over ();
   else
@@ -3014,7 +3072,7 @@ void flag_room_visited (void)
 uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite)
 {
   p_obj->graphic_no = *(psprite++);
-  p_obj->flags = *(psprite++);
+  p_obj->flags7 = *(psprite++);
   p_obj->pixel_x = *(psprite++);
   p_obj->pixel_y = *(psprite++);
 
@@ -3163,7 +3221,7 @@ found_screen:
     {    
       next_bj_obj_sprite:
         
-      // copy sprite,x,y,z,w,d,h,flags
+      // copy sprite,x,y,z,w,d,h,flags7
       memcpy ((uint8_t *)p_other_objs, p_bg_obj, 8);
       // set screen (location)
       p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
@@ -3207,7 +3265,7 @@ found_screen:
         p_other_objs->width = p_fg_obj[1];
         p_other_objs->depth = p_fg_obj[2];
         p_other_objs->height = p_fg_obj[3];
-        p_other_objs->flags = p_fg_obj[4];
+        p_other_objs->flags7 = p_fg_obj[4];
         p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
         
         // X = x*16 + x1*8 + 72
@@ -3287,9 +3345,9 @@ void render_dynamic_objects (void)
       POBJ32 p_obj = &graphic_objs_tbl[i];
       int a,b,c,e,h,l;
             
-      if ((p_obj->flags & FLAG_WIPE) == 0)
+      if ((p_obj->flags7 & FLAG_WIPE) == 0)
         continue;
-      p_obj->flags &= ~FLAG_WIPE;
+      p_obj->flags7 &= ~FLAG_WIPE;
 
       c = (p_obj->pixel_x < p_obj->old_pixel_x 
             ? p_obj->pixel_x 
@@ -3365,8 +3423,8 @@ uint8_t *flip_sprite (POBJ32 p_obj)
 {
   uint8_t *psprite = sprite_tbl[p_obj->graphic_no];
   
-  uint8_t vflip = (p_obj->flags ^ (*psprite)) & FLAG_VFLIP;
-  uint8_t hflip = (p_obj->flags ^ (*psprite)) & FLAG_HFLIP;
+  uint8_t vflip = (p_obj->flags7 ^ (*psprite)) & FLAG_VFLIP;
+  uint8_t hflip = (p_obj->flags7 ^ (*psprite)) & FLAG_HFLIP;
 
   uint8_t w = psprite[0] & 0x3f;
   uint8_t h = psprite[1];
@@ -3415,7 +3473,7 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
   }
     
   // flag don't draw
-  p_obj->flags &= ~FLAG_DRAW;
+  p_obj->flags7 &= ~FLAG_DRAW;
   
   if (calc_pixel_XY (p_obj) == 0)
     return;
