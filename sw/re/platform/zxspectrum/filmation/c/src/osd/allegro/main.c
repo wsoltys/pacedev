@@ -135,8 +135,7 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
     
     for (b=0; b<8; b++)
     {
-      if (d & (1<<7))
-        putpixel (scrn_buf, x+b, 191-y+l, 15);
+      putpixel (scrn_buf, x+b, 191-y+l, (d&(1<<7)?15:0));
       d <<= 1;
     }
   }  
@@ -157,6 +156,7 @@ void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_
 void osd_update_screen (void)
 {
   blit (scrn_buf, screen, 0, 0, 0, 0, 256, 192);
+  clear_bitmap (scrn_buf);
 }
 
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)

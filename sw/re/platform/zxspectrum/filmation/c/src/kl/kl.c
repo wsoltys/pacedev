@@ -1481,7 +1481,7 @@ void game_over (void)
 // $BC66
 void print_days (void)
 {
-  print_bcd_number (122, 7, &days, 1);
+  print_bcd_number (120, 7, &days, 1);
 }
 
 // $BC7A
@@ -1997,7 +1997,7 @@ void display_sun_moon_frame (POBJ32 p_obj)
 
 display_frame:
   // display sun/moon
-  fill_window (184, 0, 6, 31, 0); // *** FIXME x,y
+  fill_window (184, 0, 6, 31, 0);
   print_sprite (p_obj);
 
   p_frm->flags7 = 0;
@@ -2008,7 +2008,7 @@ display_frame:
   p_frm->pixel_x = 208;
   p_frm->graphic_no = 0xba;
   print_sprite (p_frm);
-  blit_to_screen (184, 0, 6, 31); // *** FIXME x,y
+  blit_to_screen (184, 0, 6, 31);
   return;
 
 toggle_day_night:
@@ -2028,8 +2028,7 @@ inc_days:
   if (days == 0x40)
     /*game_over ()*/;
   print_days ();
-  DBGPRINTF ("days=%d\n", days);
-  blit_2x8 (0x78, 7);      // *** check x,y
+  blit_2x8 (120, 0);
   goto display_frame;  
 }
 
@@ -2042,9 +2041,11 @@ void blit_2x8 (uint8_t x, uint8_t y)
 // $C46D
 void init_sun (void)
 {
-  sun_moon_scratchpad.graphic_no = 0x58;
-  sun_moon_scratchpad.pixel_x = 176;
-  sun_moon_scratchpad.pixel_y = 9;
+  POBJ32 p_obj = &sun_moon_scratchpad;
+  
+  p_obj->graphic_no = 0x58;
+  p_obj->pixel_x = 176;
+  p_obj->pixel_y = 9;
 }
 
 // $C47E
@@ -3141,6 +3142,9 @@ void print_border (void)
 // $D2EF
 void colour_panel (void)
 {
+  // this effectively wipes the sun from
+  // the left of the frame
+  
   // A=$00, HL=$5AB6, BC=$0103, jp fill_window
   // A=$00, HL=$5ABD, BC=$0103, jp fill_window
   // A=$42, HL=$5A97, BC=$0604, jp fill_window

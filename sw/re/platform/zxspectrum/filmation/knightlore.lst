@@ -4537,11 +4537,11 @@ RAM:BC66
 RAM:BC66
 RAM:BC66	     print_days:						     ; CODE XREF: RAM:B065p
 RAM:BC66									     ; display_sun_moon_frame+82p
-RAM:BC66 21 E2 D9		     ld	     hl, 0D9E2h
+RAM:BC66 21 E2 D9		     ld	     hl, 0D9E2h				     ; (120,7)
 RAM:BC69 11 B9 5B		     ld	     de, days
 RAM:BC6C 06 01			     ld	     b,	1
 RAM:BC6E CD AE BC		     call    print_BCD_number
-RAM:BC71 21 EF 5A		     ld	     hl, 5AEFh
+RAM:BC71 21 EF 5A		     ld	     hl, 5AEFh				     ; attribute memory
 RAM:BC74 36 47			     ld	     (hl), 47h ; 'G'
 RAM:BC76 2C			     inc     l
 RAM:BC77 36 47			     ld	     (hl), 47h ; 'G'
@@ -5749,8 +5749,8 @@ RAM:C3BF 7E			     ld	     a,	(hl)				     ; get entry
 RAM:C3C0 DD 77 1B		     ld	     (ix+27), a				     ; pixel Y
 RAM:C3C3
 RAM:C3C3	     display_frame:						     ; CODE XREF: display_sun_moon_frame+8Bj
-RAM:C3C3 01 06 1F		     ld	     bc, 1F06h				     ; 31 lines, 6 bytes
-RAM:C3C6 21 0A D9		     ld	     hl, 0D90Ah
+RAM:C3C3 01 06 1F		     ld	     bc, 1F06h				     ; 31 lines, 6 bytes (swapped below)
+RAM:C3C6 21 0A D9		     ld	     hl, 0D90Ah				     ; (184,0)
 RAM:C3C9 C5			     push    bc
 RAM:C3CA E5			     push    hl
 RAM:C3CB 79			     ld	     a,	c
@@ -5770,7 +5770,7 @@ RAM:C3F0 DD 36 00 BA		     ld	     (ix+0), 0BAh ; 'º'                      ; sun
 RAM:C3F4 CD 18 D7		     call    print_sprite
 RAM:C3F7 E1			     pop     hl
 RAM:C3F8 C1			     pop     bc
-RAM:C3F9 11 F7 57		     ld	     de, 57F7h
+RAM:C3F9 11 F7 57		     ld	     de, 57F7h				     ; (184,0)
 RAM:C3FC C3 7C D6		     jp	     blit_to_screen
 RAM:C3FF	     ; ---------------------------------------------------------------------------
 RAM:C3FF
@@ -5795,7 +5795,7 @@ RAM:C420 77			     ld	     (hl), a
 RAM:C421 FE 40			     cp	     64
 RAM:C423 CA 22 BA		     jp	     z,	game_over
 RAM:C426 CD 66 BC		     call    print_days
-RAM:C429 01 78 00		     ld	     bc, 78h ; 'x'
+RAM:C429 01 78 00		     ld	     bc, 78h ; 'x'                           ; (120,0)
 RAM:C42C CD 32 C4		     call    blit_2x8
 RAM:C42F C3 C3 C3		     jp	     display_frame
 RAM:C42F	     ; End of function display_sun_moon_frame
@@ -8542,7 +8542,7 @@ RAM:D2EF
 RAM:D2EF	     colour_panel:						     ; CODE XREF: RAM:B052p
 RAM:D2EF AF			     xor     a
 RAM:D2F0 21 B6 5A		     ld	     hl, 5AB6h
-RAM:D2F3 01 03 01		     ld	     bc, 103h				     ; 1 byte, 3 lines
+RAM:D2F3 01 03 01		     ld	     bc, 103h				     ; 1 bytes,	3 lines
 RAM:D2F6 CD 15 C5		     call    fill_window
 RAM:D2F9 21 BD 5A		     ld	     hl, 5ABDh
 RAM:D2FC 01 03 01		     ld	     bc, 103h				     ; 1 byte, 3 lines
@@ -8566,7 +8566,7 @@ RAM:D314 28 01			     jr	     z,	loc_D317			     ; yes, skip
 RAM:D316 3C			     inc     a
 RAM:D317
 RAM:D317	     loc_D317:							     ; CODE XREF: colour_sun_moon+7j
-RAM:D317 21 B8 5A		     ld	     hl, 5AB8h
+RAM:D317 21 B8 5A		     ld	     hl, 5AB8h				     ; attribute memory
 RAM:D31A 01 02 04		     ld	     bc, 402h				     ; 4 bytes,	2 lines
 RAM:D31D C3 15 C5		     jp	     fill_window
 RAM:D31D	     ; End of function colour_sun_moon
