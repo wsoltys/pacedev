@@ -85,7 +85,7 @@ static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t rendered_objs_cnt;                     // $5BBE
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
-static uint8_t old_dZ;                                // $5BC1
+static int8_t old_dZ;                                 // $5BC1
 static int8_t tmp_bouncing_ball_dZ;                   // $5BC2
 static uint8_t byte_5BC3;                             // $5BC3
 static uint8_t byte_5BC4;                             // $5BC4
