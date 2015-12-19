@@ -224,6 +224,69 @@ void main (int argc, char *argv[])
   }
 	set_palette_range (pal, 0, 15, 1);
 
+#if 0
+	clear_bitmap (screen);
+	unsigned x, y;
+  for (y=0; y<192; y++)
+    for (x=0; x<256; x++)
+    {
+	    c = x/128*8+y/(192/8);
+      putpixel (screen, x, y, c);
+    }
+  while (!keypressed ());
+#endif
+
+	clear_bitmap (screen);
+  FILE *fp = fopen ("src/kl/kl.scr", "rb");
+  if (fp)
+  {
+    unsigned line, byte, bit;
+    
+    for (line=0; line<192; line++)
+    {
+      uint8_t l = (line&0xC0) | ((line&0x07) << 3) | ((line &0x38)>>3);
+      
+      for (byte=0; byte<32; byte++)
+      {
+        uint8_t data;
+        
+        fread (&data, 1, 1, fp);
+        for (bit=0; bit<8; bit++)
+        {
+          if (data & (1<<7))
+            putpixel (screen, byte*8+bit, l, 15);
+          data <<= 1;
+        }
+      }
+    }
+    
+    // now colour it
+    for (line=0; line<192; line+=8)
+    {
+      //uint8_t line2 = (line&0xC0) | ((line&0x07) << 3) | ((line &0x38)>>3);
+      uint8_t line2 = line;
+
+      for (byte=0; byte<32; byte++)
+      {
+        uint8_t data, l, bright;
+        
+        fread (&data, 1, 1, fp);
+        bright = (data>>3) & 0x08;
+        for (l=0; l<8; l++)
+        {
+          for (bit=0; bit<8; bit++)
+            if (getpixel (screen, byte*8+bit, line2+l) != 0)
+              putpixel (screen, byte*8+bit, line2+l, bright|(data&0x07));
+            else
+              putpixel (screen, byte*8+bit, line2+l, bright|((data>>3)&0x07));
+        }
+      }
+    }
+    
+    fclose (fp);
+    while (!keypressed ());
+  }
+
 	clear_bitmap (scrn_buf);
 	clear_bitmap (screen);
   knight_lore ();

@@ -517,6 +517,16 @@ game_delay:
   if (osd_key(OSD_KEY_ESC))
     return;
 
+  if (osd_key(OSD_KEY_F))
+  {
+    // wait until release
+    while (osd_key(OSD_KEY_F));
+    // wait until press
+    while (!osd_key(OSD_KEY_F));
+    // wait until release
+    while (osd_key(OSD_KEY_F));
+  }
+    
   if (osd_key(OSD_KEY_N))
   {
     graphic_objs_tbl[0].scrn += 16;
