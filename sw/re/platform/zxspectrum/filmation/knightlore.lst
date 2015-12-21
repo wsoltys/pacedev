@@ -6488,22 +6488,22 @@ RAM:C794 A7			     and     a					     ; null?
 RAM:C795 28 3F			     jr	     z,	loc_C7D6			     ; yes, skip
 RAM:C797 FD CB 07 5E		     bit     3,	(iy+7)
 RAM:C79B 28 39			     jr	     z,	loc_C7D6
-RAM:C79D CD FE C7		     call    sub_C7FE
+RAM:C79D CD FE C7		     call    is_near_to
 RAM:C7A0 30 34			     jr	     nc, loc_C7D6
 RAM:C7A2 C5			     push    bc
 RAM:C7A3 01 A9 C7		     ld	     bc, off_C7A9
-RAM:C7A6 C3 17 CA		     jp	     loc_CA17
+RAM:C7A6 C3 17 CA		     jp	     loc_CA17				     ; index into table	based on sprite	dir
 RAM:C7A6	     ; ---------------------------------------------------------------------------
-RAM:C7A9 B1 C7	     off_C7A9:	     dw	loc_C7B1				     ; DATA XREF: RAM:C7A3o
-RAM:C7AB B1 C7			     dw	loc_C7B1
-RAM:C7AD C4 C7			     dw	loc_C7C4
-RAM:C7AF C4 C7			     dw	loc_C7C4
+RAM:C7A9 B1 C7	     off_C7A9:	     dw	adj_ew					     ; DATA XREF: RAM:C7A3o
+RAM:C7AB B1 C7			     dw	adj_ew
+RAM:C7AD C4 C7			     dw	adj_ns
+RAM:C7AF C4 C7			     dw	adj_ns
 RAM:C7B1	     ; ---------------------------------------------------------------------------
 RAM:C7B1
-RAM:C7B1	     loc_C7B1:							     ; DATA XREF: RAM:off_C7A9o
+RAM:C7B1	     adj_ew:							     ; DATA XREF: RAM:off_C7A9o
 RAM:C7B1									     ; RAM:C7ABo
 RAM:C7B1 DD 7E 0A		     ld	     a,	(ix+10)				     ; dY
-RAM:C7B4 FD BE 02		     cp	     (iy+2)
+RAM:C7B4 FD BE 02		     cp	     (iy+2)				     ; Y
 RAM:C7B7 28 1C			     jr	     z,	loc_C7D5
 RAM:C7B9 3E 01			     ld	     a,	1
 RAM:C7BB 30 02			     jr	     nc, loc_C7BF
@@ -6514,10 +6514,10 @@ RAM:C7BF FD 77 0F		     ld	     (iy+15), a
 RAM:C7C2 18 11			     jr	     loc_C7D5
 RAM:C7C4	     ; ---------------------------------------------------------------------------
 RAM:C7C4
-RAM:C7C4	     loc_C7C4:							     ; DATA XREF: RAM:C7ADo
+RAM:C7C4	     adj_ns:							     ; DATA XREF: RAM:C7ADo
 RAM:C7C4									     ; RAM:C7AFo
-RAM:C7C4 DD 7E 09		     ld	     a,	(ix+9)
-RAM:C7C7 FD BE 01		     cp	     (iy+1)
+RAM:C7C4 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
+RAM:C7C7 FD BE 01		     cp	     (iy+1)				     ; X
 RAM:C7CA 28 09			     jr	     z,	loc_C7D5
 RAM:C7CC 3E 01			     ld	     a,	1
 RAM:C7CE 30 02			     jr	     nc, loc_C7D2
@@ -6550,7 +6550,7 @@ RAM:C7E7 A7			     and     a					     ; null?
 RAM:C7E8 28 0F			     jr	     z,	loc_C7F9			     ; yes, skip
 RAM:C7EA FD CB 07 5E		     bit     3,	(iy+7)
 RAM:C7EE 28 09			     jr	     z,	loc_C7F9			     ; , skip
-RAM:C7F0 CD FE C7		     call    sub_C7FE
+RAM:C7F0 CD FE C7		     call    is_near_to
 RAM:C7F3 30 04			     jr	     nc, loc_C7F9
 RAM:C7F5 FD CB 07 C6		     set     0,	(iy+7)
 RAM:C7F9
@@ -6565,14 +6565,14 @@ RAM:C7FE
 RAM:C7FE	     ; =============== S U B R O U T I N E =======================================
 RAM:C7FE
 RAM:C7FE
-RAM:C7FE	     sub_C7FE:							     ; CODE XREF: RAM:C79Dp
+RAM:C7FE	     is_near_to:						     ; CODE XREF: RAM:C79Dp
 RAM:C7FE									     ; sub_C7DB+15p
 RAM:C7FE DD 7E 09		     ld	     a,	(ix+9)				     ; dX
 RAM:C801 FD 96 01		     sub     (iy+1)				     ; sub X
 RAM:C804 30 02			     jr	     nc, loc_C808
 RAM:C806 ED 44			     neg
 RAM:C808
-RAM:C808	     loc_C808:							     ; CODE XREF: sub_C7FE+6j
+RAM:C808	     loc_C808:							     ; CODE XREF: is_near_to+6j
 RAM:C808 BD			     cp	     l
 RAM:C809 D0			     ret     nc
 RAM:C80A DD 7E 0A		     ld	     a,	(ix+10)				     ; dY
@@ -6580,7 +6580,7 @@ RAM:C80D FD 96 02		     sub     (iy+2)				     ; sub Y
 RAM:C810 30 02			     jr	     nc, loc_C814
 RAM:C812 ED 44			     neg
 RAM:C814
-RAM:C814	     loc_C814:							     ; CODE XREF: sub_C7FE+12j
+RAM:C814	     loc_C814:							     ; CODE XREF: is_near_to+12j
 RAM:C814 BC			     cp	     h
 RAM:C815 D0			     ret     nc
 RAM:C816 DD 7E 0B		     ld	     a,	(ix+11)				     ; dZ
@@ -6588,10 +6588,10 @@ RAM:C819 FD 96 03		     sub     (iy+3)				     ; sub Z
 RAM:C81C 30 02			     jr	     nc, loc_C820
 RAM:C81E ED 44			     neg
 RAM:C820
-RAM:C820	     loc_C820:							     ; CODE XREF: sub_C7FE+1Ej
+RAM:C820	     loc_C820:							     ; CODE XREF: is_near_to+1Ej
 RAM:C820 FE 04			     cp	     4
 RAM:C822 C9			     ret
-RAM:C822	     ; End of function sub_C7FE
+RAM:C822	     ; End of function is_near_to
 RAM:C822
 RAM:C823	     ; ---------------------------------------------------------------------------
 RAM:C823	     ; human legs
@@ -6715,7 +6715,7 @@ RAM:C8CC C9			     ret
 RAM:C8CD	     ; ---------------------------------------------------------------------------
 RAM:C8CD
 RAM:C8CD	     loc_C8CD:							     ; CODE XREF: handle_left_right+1Dj
-RAM:C8CD CD 1E CA		     call    get_player_dir
+RAM:C8CD CD 1E CA		     call    get_sprite_dir
 RAM:C8D0 FE 02			     cp	     2
 RAM:C8D2
 RAM:C8D2	     loc_C8D2:							     ; CODE XREF: handle_left_right+3Fj
@@ -6728,13 +6728,13 @@ RAM:C8D7 18 46			     jr	     loc_C91F
 RAM:C8D9	     ; ---------------------------------------------------------------------------
 RAM:C8D9
 RAM:C8D9	     loc_C8D9:							     ; CODE XREF: handle_left_right+21j
-RAM:C8D9 CD 1E CA		     call    get_player_dir
+RAM:C8D9 CD 1E CA		     call    get_sprite_dir
 RAM:C8DC FE 01			     cp	     1
 RAM:C8DE 18 F2			     jr	     loc_C8D2
 RAM:C8E0	     ; ---------------------------------------------------------------------------
 RAM:C8E0
 RAM:C8E0	     loc_C8E0:							     ; CODE XREF: handle_left_right+25j
-RAM:C8E0 CD 1E CA		     call    get_player_dir
+RAM:C8E0 CD 1E CA		     call    get_sprite_dir
 RAM:C8E3 FE 03			     cp	     3
 RAM:C8E5
 RAM:C8E5	     loc_C8E5:							     ; CODE XREF: handle_left_right+4Ej
@@ -6743,7 +6743,7 @@ RAM:C8E7 18 EC			     jr	     loc_C8D5
 RAM:C8E9	     ; ---------------------------------------------------------------------------
 RAM:C8E9
 RAM:C8E9	     loc_C8E9:							     ; CODE XREF: handle_left_right+29j
-RAM:C8E9 CD 1E CA		     call    get_player_dir
+RAM:C8E9 CD 1E CA		     call    get_sprite_dir
 RAM:C8EC A7			     and     a
 RAM:C8ED 18 F6			     jr	     loc_C8E5
 RAM:C8EF	     ; ---------------------------------------------------------------------------
@@ -6959,7 +6959,7 @@ RAM:CA14 01 32 CA		     ld	     bc, off_CA32
 RAM:CA17
 RAM:CA17	     loc_CA17:							     ; CODE XREF: RAM:C7A6j
 RAM:CA17									     ; handle_exit_screen+16j
-RAM:CA17 CD 1E CA		     call    get_player_dir
+RAM:CA17 CD 1E CA		     call    get_sprite_dir
 RAM:CA1A 6F			     ld	     l,	a
 RAM:CA1B C3 DB AF		     jp	     jump_to_tbl_entry
 RAM:CA1B	     ; End of function calc_plyr_dXY
@@ -6968,7 +6968,7 @@ RAM:CA1E
 RAM:CA1E	     ; =============== S U B R O U T I N E =======================================
 RAM:CA1E
 RAM:CA1E
-RAM:CA1E	     get_player_dir:						     ; CODE XREF: handle_left_right:loc_C8CDp
+RAM:CA1E	     get_sprite_dir:						     ; CODE XREF: handle_left_right:loc_C8CDp
 RAM:CA1E									     ; handle_left_right:loc_C8D9p ...
 RAM:CA1E DD 7E 07		     ld	     a,	(ix+7)				     ; flags
 RAM:CA21 0F			     rrca
@@ -6983,7 +6983,7 @@ RAM:CA2D 0F			     rrca
 RAM:CA2E 0F			     rrca
 RAM:CA2F E6 03			     and     3					     ; 1=hflip,	0=graphic no & 8
 RAM:CA31 C9			     ret
-RAM:CA31	     ; End of function get_player_dir
+RAM:CA31	     ; End of function get_sprite_dir
 RAM:CA31
 RAM:CA31	     ; ---------------------------------------------------------------------------
 RAM:CA32 3A CA	     off_CA32:	     dw	move_plyr_W				     ; DATA XREF: calc_plyr_dXY+19o

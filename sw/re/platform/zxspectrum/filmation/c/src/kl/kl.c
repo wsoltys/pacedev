@@ -12,6 +12,7 @@
 
 // build options - all disabled for 'production' build
 //#define BUILD_OPT_DISABLE_WIPE
+#define BUILD_OPT_DISABLE_TELEPORT
 
 #pragma pack(1)
 
@@ -249,6 +250,8 @@ static void add_dXYZ (POBJ32 p_obj);
 static void upd_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void upd_2_4 (POBJ32 p_obj);
+static void sub_C7DB (POBJ32 p_obj, uint8_t near_x, uint8_t near_y);
+static uint8_t is_near_to (POBJ32 p_obj, POBJ32 p_other, uint8_t near_x, uint8_t near_y);
 static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
 static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
 static void upd_player_bottom (POBJ32 p_obj);
@@ -260,7 +263,7 @@ static void animate_guard_wizard_legs (POBJ32 p_obj);
 static void move_player (POBJ32 p_obj, uint8_t c);
 static void clear_dX_dY (POBJ32 p_obj);
 static void calc_plyr_dXY (POBJ32 p_obj);
-static uint8_t get_player_dir (POBJ32 p_obj);
+static uint8_t get_sprite_dir (POBJ32 p_obj);
 static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static void handle_exit_screen (POBJ32 p_obj);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
@@ -526,6 +529,8 @@ game_delay:
     // wait until release
     while (osd_key(OSD_KEY_F));
   }
+
+#ifndef BUILD_OPT_DISABLE_TELEPORT
     
   if (osd_key(OSD_KEY_N))
   {
@@ -585,6 +590,8 @@ game_delay:
     s_no = (s_no + 1) % 32;
     goto exit_screen;
   }
+
+#endif //BUILD_OPT_DISABLE_TELEPORT
     
   if (osd_key(OSD_KEY_T))
   {
@@ -2428,6 +2435,9 @@ void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l)
 // stone/tree arch (near side)
 void upd_2_4 (POBJ32 p_obj)
 {
+  POBJ32 p_other;
+  unsigned i;
+  
   UNIMPLEMENTED;
 
   if ((p_obj->flags7 & FLAG_HFLIP) == 0)
@@ -2440,16 +2450,80 @@ void upd_2_4 (POBJ32 p_obj)
     p_obj->d_y = p_obj->y + 13;
     p_obj->d_x = p_obj->x;
     p_obj->d_z = p_obj->z;
-    // call sub_c7db
-    // call loc_c785
+    sub_C7DB (p_obj, 15, 6);
   }
   else
   {
     set_pixel_adj (p_obj, -2, -17);
-    p_obj->d_x = p_obj->x + 13;
+    p_obj->d_x = p_obj->x - 13;
     p_obj->d_y = p_obj->y;
-    // jp loc_c760
+    p_obj->d_z = p_obj->z;
+    sub_C7DB (p_obj, 6, 15);
   }
+
+  // player and special objects only
+  p_other = graphic_objs_tbl;  
+  for (i=0; i<4; i++, p_other++)
+  {
+    if (p_other->graphic_no == 0)
+      continue;
+    if ((p_other->flags7 & (1<<3)) == 0)
+      continue;
+    if (is_near_to (p_obj, p_other, 15, 15) == 0)
+      continue;
+    switch (get_sprite_dir (p_obj))
+    {
+      case 0 :  // W
+      case 1 :  // E
+        if (p_obj->d_y == p_other->y)
+          continue;
+        p_other->d_y_adj = (p_obj->d_y < p_other->y ? -1 : 1);
+        break;
+      case 2 :  // N
+      case 3 :  // S
+      default :
+        if (p_obj->d_x == p_other->x)
+          continue;
+        p_other->d_x_adj = (p_obj->d_x < p_other->x ? -1 : 1);
+        break;
+    }
+  }
+}
+
+// $C7DB
+void sub_C7DB (POBJ32 p_obj, uint8_t near_x, uint8_t near_y)
+{
+  unsigned i;
+  
+  // player and special objects only
+  POBJ32 p_other = graphic_objs_tbl;
+  for (i=0; i<4; i++, p_other++)
+  {
+    if (p_other->graphic_no == 0)
+      continue;
+    if ((p_other->flags7 & (1<<3)) == 0)
+      continue;
+    if (is_near_to (p_obj, p_other, near_x, near_y) == 0)
+      continue;
+    p_other->flags7 |= (1<<0);
+  }
+}
+
+// $C7FE
+// returns C(1) if 'near (enough) to'
+uint8_t is_near_to (POBJ32 p_obj, POBJ32 p_other, uint8_t near_x, uint8_t near_y)
+{
+  int8_t a = p_obj->d_x - p_other->x;
+  if (a < 0) a = -a;
+  if (a >= near_x)
+    return (0);  
+  a = p_obj->d_y - p_other->y;
+  if (a < 0) a = -a;
+  if (a >= near_y)
+    return (0);
+  a = p_obj->d_z - p_other->z;
+  if (a < 0) a = -a;
+  return (a < 4 ? 1 : 0);
 }
 
 // $C823
@@ -2649,7 +2723,7 @@ void calc_plyr_dXY (POBJ32 p_obj)
   p_obj->d_x_adj = 0;
   p_obj->d_y_adj = 0;
   
-  switch (get_player_dir (p_obj))
+  switch (get_sprite_dir (p_obj))
   {
     case 0 :  // W
       p_obj->d_x -= 3;
@@ -2669,7 +2743,7 @@ void calc_plyr_dXY (POBJ32 p_obj)
 
 // $CA1E
 // returns 0-3 (WENS)
-uint8_t get_player_dir (POBJ32 p_obj)
+uint8_t get_sprite_dir (POBJ32 p_obj)
 {
   uint8_t l = (p_obj->flags7>>2) & 0x10;
   uint8_t a = (p_obj->graphic_no & 8) | l;
@@ -2703,8 +2777,17 @@ void handle_exit_screen (POBJ32 p_obj)
     return;
   p_obj->flags7 &= ~(1<<0);
   
-  switch (get_player_dir (p_obj))
+  switch (get_sprite_dir (p_obj))
   {
+    case 0 :  // W
+      break;
+    case 1 :  // E
+      break;
+    case 2 :  // N
+      break;
+    case 3 :  // S
+    default :
+      break;
   }
 }
 
