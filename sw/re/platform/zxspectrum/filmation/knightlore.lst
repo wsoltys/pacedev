@@ -3503,17 +3503,17 @@ RAM:B566	     upd_131_to_133:						     ; DATA XREF: RAM:B19Co
 RAM:B566									     ; RAM:B19Eo ...
 RAM:B566 CD D8 C4		     call    adj_m4_m12
 RAM:B569 DD 7E 03		     ld	     a,	(ix+3)				     ; Z
-RAM:B56C FE A4			     cp	     164
-RAM:B56E 30 54			     jr	     nc, loc_B5C4
-RAM:B570 DD 36 0B 03		     ld	     (ix+11), 3
+RAM:B56C FE A4			     cp	     164				     ; <164?
+RAM:B56E 30 54			     jr	     nc, loc_B5C4			     ; no, go
+RAM:B570 DD 36 0B 03		     ld	     (ix+11), 3				     ; dZ=3
 RAM:B574 DD 7E 01		     ld	     a,	(ix+1)				     ; X
 RAM:B577 07			     rlca
 RAM:B578 E6 01			     and     1
-RAM:B57A 6F			     ld	     l,	a				     ; X bit 7
+RAM:B57A 6F			     ld	     l,	a				     ; X bit 7 -> bit 1
 RAM:B57B DD 7E 02		     ld	     a,	(ix+2)				     ; Y
 RAM:B57E E6 80			     and     80h ; '€'                               ; Y bit 7
 RAM:B580 B5			     or	     l
-RAM:B581 07			     rlca					     ; shift to	bottom bits
+RAM:B581 07			     rlca					     ; bit 1 ->	bit 2, bit 7 ->	bit 1
 RAM:B582 E6 03			     and     3
 RAM:B584 6F			     ld	     l,	a
 RAM:B585 01 8B B5		     ld	     bc, off_B58B			     ; jump table
@@ -3539,7 +3539,7 @@ RAM:B5A1 20 01			     jr	     nz, loc_B5A4			     ; >0, skip
 RAM:B5A3 3C			     inc     a					     ; =1
 RAM:B5A4
 RAM:B5A4	     loc_B5A4:							     ; CODE XREF: RAM:B5A1j
-RAM:B5A4 C6 82			     add     a,	82h ; '‚'                            ; rnd twinkly sprite
+RAM:B5A4 C6 82			     add     a,	130				     ; rnd twinkly sprite
 RAM:B5A6 DD 77 00		     ld	     (ix+0), a				     ; set graphic no.
 RAM:B5A9
 RAM:B5A9	     loc_B5A9:							     ; CODE XREF: RAM:B5F5j
@@ -3588,7 +3588,7 @@ RAM:B5E3
 RAM:B5E3	     loc_B5E3:							     ; CODE XREF: RAM:B5D1j
 RAM:B5E3 DD CB 0D FE		     set     7,	(ix+13)
 RAM:B5E7 DD CB 07 CE		     set     1,	(ix+7)
-RAM:B5EB DD 36 0B 01		     ld	     (ix+11), 1
+RAM:B5EB DD 36 0B 01		     ld	     (ix+11), 1				     ; dZ=1
 RAM:B5EF 01 04 04		     ld	     bc, 404h
 RAM:B5F2 CD 65 B9		     call    move_towards_plyr
 RAM:B5F5 18 B2			     jr	     loc_B5A9
@@ -4301,11 +4301,11 @@ RAM:BA25 A7			     and     a
 RAM:BA26 C2 AB BA		     jp	     nz, game_complete_msg
 RAM:BA29
 RAM:BA29	     loc_BA29:							     ; CODE XREF: lose_life-165Bj
-RAM:BA29 CD 67 D5		     call    clr_screen_buffer
+RAM:BA29 CD 67 D5		     call    clear_scrn_buffer
 RAM:BA2C CD 5F D5		     call    clear_scrn
-RAM:BA2F 11 4C BB		     ld	     de, 0BB4Ch				     ; game over status	screen
+RAM:BA2F 11 4C BB		     ld	     de, gameover_colours		     ; game over status	screen
 RAM:BA32 D9			     exx
-RAM:BA33 21 52 BB		     ld	     hl, 0BB52h				     ; game over status	screen
+RAM:BA33 21 52 BB		     ld	     hl, gameover_xy			     ; game over status	screen
 RAM:BA36 11 5E BB		     ld	     de, a_GAME_OVER
 RAM:BA39 06 06			     ld	     b,	6
 RAM:BA3B CD BF BE		     call    display_text_list
@@ -4387,11 +4387,11 @@ RAM:BAAB	     ; ----------------------------------------------------------------
 RAM:BAAB	     ; START OF	FUNCTION CHUNK FOR lose_life
 RAM:BAAB
 RAM:BAAB	     game_complete_msg:						     ; CODE XREF: lose_life-1704j
-RAM:BAAB CD 67 D5		     call    clr_screen_buffer
+RAM:BAAB CD 67 D5		     call    clear_scrn_buffer
 RAM:BAAE CD 5F D5		     call    clear_scrn
-RAM:BAB1 11 D2 BA		     ld	     de, byte_BAD2
+RAM:BAB1 11 D2 BA		     ld	     de, complete_colours
 RAM:BAB4 D9			     exx
-RAM:BAB5 21 D8 BA		     ld	     hl, byte_BAD8
+RAM:BAB5 21 D8 BA		     ld	     hl, complete_xy
 RAM:BAB8 11 E4 BA		     ld	     de, the_potion_casts
 RAM:BABB 06 06			     ld	     b,	6
 RAM:BABD AF			     xor     a
@@ -4404,8 +4404,8 @@ RAM:BACC CD 9B BA		     call    wait_for_key_release
 RAM:BACF C3 29 BA		     jp	     loc_BA29
 RAM:BACF	     ; END OF FUNCTION CHUNK FOR lose_life
 RAM:BACF	     ; ---------------------------------------------------------------------------
-RAM:BAD2 47 46 45 44+byte_BAD2:	     db	47h, 46h, 45h, 44h, 43h, 42h		     ; DATA XREF: lose_life-1679o
-RAM:BAD8 40 87 40 77+byte_BAD8:	     db	40h, 87h, 40h, 77h, 30h, 67h, 30h, 57h,	50h, 47h, 30h
+RAM:BAD2 47 46 45 44+complete_colours:db 47h, 46h, 45h,	44h, 43h, 42h		     ; DATA XREF: lose_life-1679o
+RAM:BAD8 40 87 40 77+complete_xy:    db	40h, 87h, 40h, 77h, 30h, 67h, 30h, 57h,	50h, 47h, 30h
 RAM:BAD8 30 67 30 57+								     ; DATA XREF: lose_life-1675o
 RAM:BAD8 50 47 30 37		     db	37h
 RAM:BAE4	     ; "THE POTION CASTS"
@@ -4428,9 +4428,10 @@ RAM:BB38	     ; "GO FORTH TO MIRE MARE"
 RAM:BB38 10 18 26 0F+		     db	10h, 18h, 26h, 0Fh, 18h, 1Bh, 1Dh, 11h,	26h, 1Dh, 18h
 RAM:BB38 18 1B 1D 11+		     db	26h, 16h, 12h, 1Bh, 0Eh, 16h, 0Ah, 1Bh,	8Eh
 RAM:BB4C	     ; Game Over status	screen
-RAM:BB4C 47 46 45 45+		     db	47h, 46h, 45h, 45h, 43h, 44h
-RAM:BB52 58 9F 50 7F+		     db	58h, 9Fh, 50h, 7Fh, 30h, 6Fh, 40h, 5Fh,	30h, 4Fh, 48h
-RAM:BB52 30 6F 40 5F+		     db	37h
+RAM:BB4C 47 46 45 45+gameover_colours:db 47h, 46h, 45h,	45h, 43h, 44h		     ; DATA XREF: lose_life-16FBo
+RAM:BB52 58 9F 50 7F+gameover_xy:    db	58h, 9Fh, 50h, 7Fh, 30h, 6Fh, 40h, 5Fh,	30h, 4Fh, 48h
+RAM:BB52 30 6F 40 5F+								     ; DATA XREF: lose_life-16F7o
+RAM:BB52 30 4F 48 37		     db	37h
 RAM:BB5E	     ; "GAME  OVER"
 RAM:BB5E 10 0A 16 0E+a_GAME_OVER:    db	10h, 0Ah, 16h, 0Eh, 26h, 26h, 18h, 1Fh,	0Eh, 9Bh
 RAM:BB5E 26 26 18 1F+								     ; DATA XREF: lose_life-16F4o
@@ -4655,7 +4656,7 @@ RAM:BD15	     loc_BD15:							     ; CODE XREF: do_menu_selection+Cj
 RAM:BD15 CB BE			     res     7,	(hl)				     ; reset flashing attribute
 RAM:BD17 23			     inc     hl					     ; next menu colour	entry
 RAM:BD18 10 FB			     djnz    loc_BD15				     ; loop until done
-RAM:BD1A CD 67 D5		     call    clr_screen_buffer
+RAM:BD1A CD 67 D5		     call    clear_scrn_buffer
 RAM:BD1D CD B3 BE		     call    display_menu
 RAM:BD20 CD 89 BD		     call    flash_menu
 RAM:BD23
@@ -8277,7 +8278,7 @@ RAM:D152 DD 77 10		     ld	     (ix+16), a
 RAM:D155 DD 7E 30		     ld	     a,	(ix+30h)			     ; top half	playr graphic no
 RAM:D158 E6 0F			     and     0Fh
 RAM:D15A 81			     add     a,	c
-RAM:D15B C6 20			     add     a,	20h ; ' '                            ; top half human/wulf
+RAM:D15B C6 20			     add     a,	32				     ; top half	human/wulf
 RAM:D15D DD 77 30		     ld	     (ix+30h), a
 RAM:D160 C9			     ret
 RAM:D160	     ; End of function lose_life
@@ -8395,7 +8396,7 @@ RAM:D1EA 28 03			     jr	     z,	loc_D1EF
 RAM:D1EC CD 91 C5		     call    update_special_objs		     ; save state in special_objs_tbl
 RAM:D1EF
 RAM:D1EF	     loc_D1EF:							     ; CODE XREF: build_screen_objects+4j
-RAM:D1EF CD 67 D5		     call    clr_screen_buffer
+RAM:D1EF CD 67 D5		     call    clear_scrn_buffer
 RAM:D1F2 CD C6 D3		     call    retrieve_screen
 RAM:D1F5 CD 25 C5		     call    find_special_objs_here		     ; find special objects in new room
 RAM:D1F8 CD 20 D3		     call    adjust_plyr_xyz_for_room_size
@@ -9084,12 +9085,12 @@ RAM:D567
 RAM:D567	     ; =============== S U B R O U T I N E =======================================
 RAM:D567
 RAM:D567
-RAM:D567	     clr_screen_buffer:						     ; CODE XREF: lose_life:loc_BA29p
+RAM:D567	     clear_scrn_buffer:						     ; CODE XREF: lose_life:loc_BA29p
 RAM:D567									     ; lose_life:game_complete_msgp ...
 RAM:D567 01 00 18		     ld	     bc, 1800h				     ; # bytes to clear
 RAM:D56A 21 F3 D8		     ld	     hl, 0D8F3h				     ; screen buffer
 RAM:D56D 18 CB			     jr	     clr_mem
-RAM:D56D	     ; End of function clr_screen_buffer
+RAM:D56D	     ; End of function clear_scrn_buffer
 RAM:D56D
 RAM:D56F	     ; copies from screen buffer to video memory
 RAM:D56F

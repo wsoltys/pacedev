@@ -471,6 +471,110 @@ void main (int argc, char *argv[])
     fprintf (fp2, "};\n\n");
   }
 
+  // cauldron_bubbles
+  p = 0xb8c8;
+  fprintf (fp2, "uint8_t cauldron_bubbles[] = \n{\n");
+  for (unsigned i=0; p<0xb8da; i++, p++)
+  {
+    if (i%8==0) fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p]);
+    if (p<0xb8da-1) fprintf (fp2, ", ");
+    if (i%8==7) fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "\n};\n\n");
+
+  // complete colours
+  p = 0xbad2;
+  fprintf (fp2, "uint8_t complete_colours[] = \n{\n");
+  for (int i=0; i<6; i++)
+  {
+    if ((i%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if ((i%8) == 7)
+      fprintf (fp2, "\n");
+    else
+      fprintf (fp2, ", ");
+  }
+  fprintf (fp2, "};\n\n");
+
+  // complete_xy
+  p = 0xbad8;
+  fprintf (fp2, "uint8_t complete_xy[] = \n{\n");
+  for (int xy=0; xy<12; xy++)
+  {
+    if ((xy%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if ((xy%8) != 7 || xy < 15)
+      fprintf (fp2, ", ");
+    if ((xy%8) == 7)
+      fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "};\n\n");
+
+  // complete_text
+  fprintf (fp2, "const char *complete_text[] = \n{\n");
+  while (p < 0xBB4C)
+  {
+    fprintf (fp2, "  \"");
+    do
+    {
+      fprintf (fp2, "%c", to_ascii[ram[p]&0x7f]);
+    } while (ram[p++] < 128);
+    fprintf (fp2, "\"");
+    if (p < 0xBB4C)
+      fprintf (fp2, ", ");
+    fprintf (fp2, "\n");  
+  }
+  fprintf (fp2, "};\n\n");
+
+  // gameover colours
+  p = 0xbb4c;
+  fprintf (fp2, "uint8_t gameover_colours[] = \n{\n");
+  for (int i=0; i<6; i++)
+  {
+    if ((i%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if ((i%8) == 7)
+      fprintf (fp2, "\n");
+    else
+      fprintf (fp2, ", ");
+  }
+  fprintf (fp2, "};\n\n");
+
+  // gameover_xy
+  p = 0xbb52;
+  fprintf (fp2, "uint8_t gameover_xy[] = \n{\n");
+  for (int xy=0; xy<12; xy++)
+  {
+    if ((xy%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if ((xy%8) != 7 || xy < 15)
+      fprintf (fp2, ", ");
+    if ((xy%8) == 7)
+      fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "};\n\n");
+
+  // gameover_text
+  fprintf (fp2, "const char *gameover_text[] = \n{\n");
+  while (p < 0xbbb7)
+  {
+    fprintf (fp2, "  \"");
+    do
+    {
+      fprintf (fp2, "%c", to_ascii[ram[p]&0x7f]);
+    } while (ram[p++] < 128);
+    fprintf (fp2, "\"");
+    if (p < 0xbbb7)
+      fprintf (fp2, ", ");
+    fprintf (fp2, "\n");  
+  }
+  fprintf (fp2, "};\n\n");
+
   // days_txt
   p = 0xbce7;
   fprintf (fp2, "uint8_t days_txt[] = \n{\n  ");
@@ -542,6 +646,18 @@ void main (int argc, char *argv[])
     fprintf (fp2, "\n");  
   }
   fprintf (fp2, "};\n\n");
+
+  // objects_required
+  p = 0xc27d;
+  fprintf (fp2, "uint8_t objects_required[] = \n{\n");
+  for (unsigned i=0; p<0xc28b; i++, p++)
+  {
+    if (i%8==0) fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p]);
+    if (p<0xc28b-1) fprintf (fp2, ", ");
+    if (i%8==7) fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "\n};\n\n");
 
   // sun_moon_yoff
   p = 0xc440;

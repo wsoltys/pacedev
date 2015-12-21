@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-//#include <sys/stat.h>
-//#include <memory.h>
+#include <setjmp.h>
 
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
 //#define UNTESTED        DBGPRINTF ("*** %s(): UNTESTED ***\n", __FUNCTION__)
@@ -46,6 +45,7 @@
 
 #define MAX_OBJS          40                          
 #define CAULDRON_SCREEN   136
+#define NO_LIVES          1
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -111,11 +111,6 @@ static POBJ32 other_objs_here =
               &graphic_objs_tbl[4];                   // $5C88
               
 static OBJ32 sprite_scratchpad;                       // $BFDB
-// fixme this should be auto-generated and stored in kl_dat.c
-static uint8_t objects_required[] =                   // $C27D
-{
-  0, 1, 2, 3, 4, 5, 6, 3, 5, 0, 6, 1, 2, 4
-};
 static OBJ32 sun_moon_scratchpad;                     // $C44D
 static uint8_t objects_to_draw[48];                   // $CE8B
 static OBJ32 plyr_spr_1_scratchpad;                   // $D161
@@ -189,6 +184,7 @@ static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
 static void upd_30_31_158_159 (POBJ32 p_obj);
 static void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy);
+static void wait_for_key_release (void);
 static void game_over (void);
 static void print_days (void);
 static void print_lives_gfx (void);
@@ -310,7 +306,7 @@ static void adjust_plyr_Z_for_arch (POBJ32 p_obj, uint8_t xy);
 static void retrieve_screen (void);
 static void fill_attr (uint8_t attr);
 static void clear_scrn (void);
-static void clr_screen_buffer (void);
+static void clear_scrn_buffer (void);
 static void update_screen (void);
 static void render_dynamic_objects (void);
 static void blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
@@ -388,6 +384,9 @@ void upd_not_implemented (POBJ32 obj)
 
 extern adjfn_t upd_sprite_jump_tbl[];
 
+static jmp_buf start_menu_env_buf;
+static jmp_buf game_loop_env_buf;
+
 void knight_lore (void)
 {
   POBJ32 p_obj;
@@ -412,9 +411,10 @@ START_AF6C:
     seed_1 = 0x00;    // to match MESS emulation
     goto MAIN_AF88;
   }
-  
+
 START_MENU_AF7F:
 
+  setjmp (start_menu_env_buf);
   {
     // fudge fudge fudge
     // clear variables $5BA8-$6107
@@ -428,7 +428,7 @@ MAIN_AF88:
   //build_lookup_tbls ();
   unk_5BB2 = 0;
   plyr_spr_1_scratchpad.flags12 = 0;
-  lives = 5;
+  lives = NO_LIVES;
   // update seed
   seed_1 += seed_2;
   clear_scrn ();
@@ -450,6 +450,8 @@ player_dies:
     goto START_MENU_AF7F;
 
 game_loop:
+
+  setjmp (game_loop_env_buf);
 
   // required for C implementation
   internal.exit_scrn = 0;
@@ -480,6 +482,10 @@ onscreen_loop:
       // debug only - 7 only
       //if (p_obj->graphic_no == 7)
         upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
+
+      // required for C implementation
+      if (internal.exit_scrn == 1)
+        goto game_loop;
     }
 
     // update seed_3
@@ -488,10 +494,6 @@ onscreen_loop:
     seed_3 += r;
   }
 
-  // required for C implementation
-  if (internal.exit_scrn == 1)
-    goto game_loop;
-    
   // update seed_2, 3
   seed_2++;
   // this was originally [HL] where HL=seed2
@@ -926,10 +928,57 @@ void shuffle_objects_required (void)
 // sparkles
 void upd_131_to_133 (POBJ32 p_obj)
 {
-  UNIMPLEMENTED;
+  uint8_t a;
+
+  UNTESTED;
   
   adj_m4_m12 (p_obj);
-  // complicated stuff
+  if (p_obj->z < 164)
+  {
+    uint8_t r;
+    
+    p_obj->d_z = 3;
+    a = ((p_obj->x >> 6) & (1<<1)) | ((p_obj->y >> 7) & (1<<0));
+    switch (a)
+    {
+      case 0 :
+        p_obj->d_x = -4;
+        p_obj->d_y = 4;
+        break;
+      case 1 :
+        p_obj->d_x = 4;
+        p_obj->d_y = 4;
+        break;
+      case 2 :
+        p_obj->d_x = -4;
+        p_obj->d_y = -4;
+        break;
+      case 3 :
+      default :
+        p_obj->d_x = 4;
+        p_obj->d_y = -4;
+        break;
+    }
+    r = seed_3 & 3;
+    if (r == 0) r++;
+    p_obj->graphic_no = 130 + r;
+  }
+  else
+  {
+    if (abs(graphic_objs_tbl[0].x - p_obj->x) < 6 &&
+        abs(graphic_objs_tbl[0].y - p_obj->y) < 6)
+    {
+      game_over ();
+      // longjmp to start_menu
+    }
+    p_obj->flags13 |= (1<<7);
+    p_obj->flags7 |= (1<<1);
+    p_obj->d_z = 1;
+    move_towards_plyr (p_obj, 4, 4);
+  }
+  byte_5BC3 = p_obj->z;
+  dec_dZ_wipe_and_draw (p_obj);
+  set_wipe_and_draw_flags (p_obj);
 }
 
 // $B5AF
@@ -1297,6 +1346,7 @@ void loc_B856 (POBJ32 p_obj)
 }
   
 // $B85C
+// - rumoured to be immunity
 void sub_B85C (POBJ32 p_obj)
 {
   p_obj->flags13 |= (1<<7)|(1<<5);
@@ -1330,13 +1380,6 @@ void upd_178_179 (POBJ32 p_obj)
   sub_B85C (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
-/// *** FIX ME - in kl_dat
-uint8_t cauldron_bubbles[] =
-{
-  0xa0, 0x80, 0x80, 0x80, 0x05, 0x05, 0x0c, 0x10,
-  0xb4, 0x00, 0x00, 0x00, 0x00, 0xa0, 0x00, 0x00, 
-  0x00, 0x00
-};
 
 // $B8A9
 void init_cauldron_bubbles (void)
@@ -1547,10 +1590,42 @@ void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy)
                     ((p_obj->flags13+1) & MASK_DIR));
 }
 
+// $BA9B
+void wait_for_key_release (void)
+{
+  // fixme
+  while (!osd_key(OSD_KEY_ESC));
+  while (osd_key(OSD_KEY_ESC));
+}
+
 // $BA22
 void game_over (void)
 {
   UNIMPLEMENTED;
+  
+  DBGPRINTF_FN;
+  
+  if (byte_5BC3 != 0)
+  {
+  game_complete_msg:
+    clear_scrn_buffer ();
+    clear_scrn ();
+    suppress_border = 0;
+    display_text_list (complete_colours, complete_xy, (char **)complete_text, 6);
+    // some audio
+    wait_for_key_release ();
+  }
+  clear_scrn_buffer ();
+  clear_scrn ();
+  display_text_list (gameover_colours, gameover_xy, (char **)gameover_text, 6);
+  print_bcd_number (10, 10, &days, 1);  // FIXME
+  // some rating calcs
+  print_border ();
+  update_screen ();
+  play_audio_until_keypress (NULL);
+  wait_for_key_release ();
+  
+  longjmp (start_menu_env_buf, 1);
 }
 
 // $BC66
@@ -1564,15 +1639,16 @@ void print_lives_gfx (void)
 {
   POBJ32 p_obj = &sprite_scratchpad;
   
-  UNIMPLEMENTED;
+  UNTESTED;
 
   p_obj->graphic_no = 0x8c;
   p_obj->flags7 = 0;
   p_obj->pixel_x = 16;
   p_obj->pixel_y = 32;
   print_sprite (p_obj);
-  // fill_de ();
-  // fill_de ();
+  // attributes
+  // fill_de (47h,5a42h,2);
+  // fill_de (47h,5a62h,4);
 }
 
 // $BCA3
@@ -1610,7 +1686,7 @@ void do_menu_selection (void)
 {
   uint8_t key;
 
-  clr_screen_buffer ();
+  clear_scrn_buffer ();
   display_menu ();
   flash_menu ();
 menu_loop:
@@ -1682,6 +1758,11 @@ void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_
   
   for (i=0; i<n; i++, xy+=2)
     print_text_single_colour (*xy, *(xy+1), text_list[i]);
+  if (suppress_border != 0)
+    return;
+  suppress_border++;
+  print_border ();
+  update_screen ();
 }
 
 // $BEE4
@@ -1875,7 +1956,6 @@ void upd_103 (POBJ32 p_obj)
 // special objects (dropped in cauldron room?)
 void upd_104_to_110 (POBJ32 p_obj)
 {
-  UNIMPLEMENTED;
   UNTESTED;
   
   adj_m4_m12 (p_obj);
@@ -2106,7 +2186,10 @@ inc_days:
   if ((days & 0x0f) == 10)
     days += 6;
   if (days == 0x40)
-    /*game_over ()*/;
+  {
+    game_over ();
+    // longjmp to start_menu
+  }
   print_days ();
   blit_2x8 (120, 0);
   goto display_frame;  
@@ -2578,16 +2661,13 @@ uint8_t is_near_to (POBJ32 p_obj, POBJ32 p_other, uint8_t near_x, uint8_t near_y
 {
   int8_t a;
   
-  a = p_obj->d_x - p_other->x;
-  if (a < 0) a = -a;
+  a = abs(p_obj->d_x - p_other->x);
   if (a >= near_x)
     return (0);  
-  a = p_obj->d_y - p_other->y;
-  if (a < 0) a = -a;
+  a = abs(p_obj->d_y - p_other->y);
   if (a >= near_y)
     return (0);
-  a = p_obj->d_z - p_other->z;
-  if (a < 0) a = -a;
+  a = abs(p_obj->d_z - p_other->z);
   return (a < 4 ? 1 : 0);
 }
 
@@ -2766,7 +2846,7 @@ uint8_t move_player (POBJ32 p_obj, uint8_t inp)
     /*gen_audio_Z(p_obj)*/;
   adj_for_out_of_bounds (p_obj);
   if (handle_exit_screen (p_obj) == 1)
-    return (1);
+    /*return (1)*/;
   add_dXYZ (p_obj);
   if ((p_obj->flags12 & FLAG_Z_OOB) != 0)
     if (old_dZ < 0)
@@ -2880,9 +2960,11 @@ uint8_t handle_exit_screen (POBJ32 p_obj)
   }
   
 exit_screen:
+  internal.exit_scrn = 1;
   p_obj->flags12 |= 0x30;
   if ((p_obj->graphic_no - 16) >= 64)
-    return (1);
+    longjmp (game_loop_env_buf, 1);
+    //return (1);
 
   // the original Z80 code popped 2 return addresses
   // from the stack and then JP game_loop:
@@ -2901,8 +2983,8 @@ exit_screen:
   plyr_spr_1_scratchpad.graphic_no = 120;
   plyr_spr_2_scratchpad.graphic_no = 120;
   
-  internal.exit_scrn = 1;
-  return (1);
+  longjmp (game_loop_env_buf, 1);
+  //return (1);
 }
 
 // $CA89
@@ -3079,8 +3161,7 @@ uint8_t sub_CC9D (POBJ32 p_obj, POBJ32 p_other, int8_t d_x)
   UNTESTED;
 
   d = p_obj->width + p_other->width;
-  a = p_obj->x + d_x - p_other->x;
-  if (a < 0) a = -a;
+  a = abs(p_obj->x + d_x - p_other->x);
     
   return (a < d ? 1 : 0);
 }
@@ -3093,8 +3174,7 @@ uint8_t sub_CCB2 (POBJ32 p_obj, POBJ32 p_other, int8_t d_y)
   UNTESTED;
   
   d = p_obj->depth + p_other->depth;
-  a = p_obj->y + d_y - p_other->y;
-  if (a < 0) a = -a;
+  a = abs(p_obj->y + d_y - p_other->y);
   
   return (a < d ? 1 : 0);
 }
@@ -3373,18 +3453,25 @@ finished_input:
 // $D12A
 int lose_life (void)
 {
-  UNIMPLEMENTED;
+  POBJ32  p_obj = graphic_objs_tbl;
+  POBJ32  p_next_obj = p_obj+1;
+  uint8_t c;
+  
+  UNTESTED;
 
   memcpy ((void *)&graphic_objs_tbl[0], (void *)&plyr_spr_1_scratchpad, sizeof(OBJ32));
   memcpy ((void *)&graphic_objs_tbl[1], (void *)&plyr_spr_2_scratchpad, sizeof(OBJ32));
   transform_flag_graphic = 0;
   if (--lives < 0)
-    game_over ();
-  else
   {
-    // some stuff with sun/moon scratchpad
+    game_over ();
+    // longjmp to start_menu
   }
 
+  c = (sun_moon_scratchpad.graphic_no << 5) & 0x20;
+  p_obj->u.plyr_graphic_no = (p_obj->u.plyr_graphic_no & 0x1F) + c;
+  p_next_obj->u.plyr_graphic_no = (p_next_obj->u.plyr_graphic_no & 0x0F) + c + 32;
+  
   // caller needs this value
   return (lives);  
 }
@@ -3414,7 +3501,7 @@ void build_screen_objects (void)
   if (unk_5BB2 != 0)
     update_special_objs ();
     
-  clr_screen_buffer ();
+  clear_scrn_buffer ();
   retrieve_screen ();
   find_special_objs_here ();
   adjust_plyr_xyz_for_room_size (graphic_objs_tbl);
@@ -3746,9 +3833,9 @@ void clear_scrn (void)
 }
 
 // $D567
-void clr_screen_buffer (void)
+void clear_scrn_buffer (void)
 {
-  osd_clr_screen_buffer ();
+  osd_clear_scrn_buffer ();
 }
 
 // $D56F

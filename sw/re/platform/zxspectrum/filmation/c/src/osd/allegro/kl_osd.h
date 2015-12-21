@@ -71,7 +71,7 @@ extern "C"
   
 void osd_delay (unsigned ms);
 void osd_clear_scrn (void);
-void osd_clr_screen_buffer (void);
+void osd_clear_scrn_buffer (void);
 int osd_readkey (void);
 int osd_key (int _key);
 int osd_keypressed (void);

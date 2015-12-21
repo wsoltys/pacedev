@@ -43,7 +43,7 @@ void osd_clear_scrn (void)
 	clear_bitmap (screen);
 }
 
-void osd_clr_screen_buffer (void)
+void osd_clear_scrn_buffer (void)
 {
   clear_bitmap (scrn_buf);
 }
