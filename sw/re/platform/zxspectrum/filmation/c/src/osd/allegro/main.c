@@ -25,7 +25,8 @@
 #include "kl_osd.h"
 #include "kl_dat.h"
 
-#define ENABLE_MASK
+#define BUILD_OPT_DISABLE_LOADER
+//#define BUILD_OPT_DISABLE_MASK
 
 static BITMAP *scrn_buf;
 
@@ -189,7 +190,7 @@ void osd_print_sprite (POBJ32 p_obj)
       uint8_t d = *(psprite++);
       for (b=0; b<8; b++)
       {
-#ifdef ENABLE_MASK
+#ifndef BUILD_OPT_DISABLE_MASK
         if (m & (1<<7))
           putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
 #endif
@@ -236,6 +237,7 @@ void main (int argc, char *argv[])
   while (!keypressed ());
 #endif
 
+#ifndef BUILD_OPT_DISABLE_LOADER
 	clear_bitmap (screen);
   FILE *fp = fopen ("src/kl/kl.scr", "rb");
   if (fp)
@@ -286,6 +288,7 @@ void main (int argc, char *argv[])
     fclose (fp);
     while (!keypressed ());
   }
+#endif //BUILD_OPT_DISABLE_LOADER
 
 	clear_bitmap (scrn_buf);
 	clear_bitmap (screen);
