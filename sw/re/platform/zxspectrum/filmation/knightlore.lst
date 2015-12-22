@@ -2828,7 +2828,7 @@ RAM:B194 11 BF			     dw	upd_127					     ; * last player appears sparkle
 RAM:B196 D3 C4			     dw	upd_128_to_130				     ; * tree wall
 RAM:B198 D3 C4			     dw	upd_128_to_130				     ;	 "
 RAM:B19A D3 C4			     dw	upd_128_to_130				     ;	 "
-RAM:B19C 66 B5			     dw	upd_131_to_133				     ;	 more sparkles
+RAM:B19C 66 B5			     dw	upd_131_to_133				     ; * sparkles in the cauldron room at end of game
 RAM:B19E 66 B5			     dw	upd_131_to_133				     ;	 "
 RAM:B1A0 66 B5			     dw	upd_131_to_133				     ;	 "
 RAM:B1A2 CB C2			     dw	no_update
@@ -3136,7 +3136,7 @@ RAM:B403	     ; =============== S U B R O U T I N E ============================
 RAM:B403
 RAM:B403
 RAM:B403	     gen_audio_graphic_no_rom:					     ; CODE XREF: chk_and_init_transform:loc_BF31p
-RAM:B403									     ; sub_C2A5+18p
+RAM:B403									     ; cycle_colours_with_sound+18p
 RAM:B403 DD 7E 00		     ld	     a,	(ix+0)				     ; sprite index
 RAM:B406 2F			     cpl
 RAM:B407 E6 1F			     and     1Fh
@@ -3497,7 +3497,8 @@ RAM:B565 C9			     ret
 RAM:B565	     ; End of function shuffle_objects_required
 RAM:B565
 RAM:B566	     ; ---------------------------------------------------------------------------
-RAM:B566	     ; sparkles
+RAM:B566	     ; sparkles	from the blocks	in the cauldron	room
+RAM:B566	     ; at the end of the game
 RAM:B566
 RAM:B566	     upd_131_to_133:						     ; DATA XREF: RAM:B19Co
 RAM:B566									     ; RAM:B19Eo ...
@@ -4808,9 +4809,9 @@ RAM:BE4D C5			     push    bc
 RAM:BE4E CD 11 D8		     call    calc_screen_buffer_addr
 RAM:BE51 69			     ld	     l,	c
 RAM:BE52 60			     ld	     h,	b				     ; HL = bitmap buffer address
-RAM:BE53 1A			     ld	     a,	(de)				     ; text character
+RAM:BE53 1A			     ld	     a,	(de)				     ; attribute
 RAM:BE54 08			     ex	     af, af'
-RAM:BE55 13			     inc     de					     ; next character
+RAM:BE55 13			     inc     de					     ; ptr first character
 RAM:BE56
 RAM:BE56	     loc_BE56:							     ; CODE XREF: print_text_single_colour+12j
 RAM:BE56 D9			     exx
@@ -5412,17 +5413,17 @@ RAM:C1AB
 RAM:C1AB	     upd_103:							     ; DATA XREF: RAM:B164o
 RAM:C1AB CD D3 C4		     call    upd_128_to_130
 RAM:C1AE DD E5			     push    ix
-RAM:C1B0 FD E1			     pop     iy
-RAM:C1B2 DD 21 08 5C		     ld	     ix, graphic_objs_tbl
-RAM:C1B6 DD 34 04		     inc     (ix+4)				     ; plyr_spr_1 width
-RAM:C1B9 DD 34 05		     inc     (ix+5)				     ; plyr_spr_1 depth
+RAM:C1B0 FD E1			     pop     iy					     ; iy=extra	life object
+RAM:C1B2 DD 21 08 5C		     ld	     ix, graphic_objs_tbl		     ; ix = player
+RAM:C1B6 DD 34 04		     inc     (ix+4)				     ; width
+RAM:C1B9 DD 34 05		     inc     (ix+5)				     ; depth
 RAM:C1BC CD 7A C1		     call    loc_C17A
-RAM:C1BF DD 35 04		     dec     (ix+4)
-RAM:C1C2 DD 35 05		     dec     (ix+5)
+RAM:C1BF DD 35 04		     dec     (ix+4)				     ; restore width
+RAM:C1C2 DD 35 05		     dec     (ix+5)				     ; restore depth
 RAM:C1C5 FD E5			     push    iy
-RAM:C1C7 DD E1			     pop     ix
+RAM:C1C7 DD E1			     pop     ix					     ; restore ix (extra life object)
 RAM:C1C9 30 23			     jr	     nc, loc_C1EE
-RAM:C1CB DD CB 00 DE		     set     3,	(ix+0)
+RAM:C1CB DD CB 00 DE		     set     3,	(ix+0)				     ; graphic_no
 RAM:C1CF CD D8 C4		     call    adj_m4_m12
 RAM:C1D2 DD 6E 10		     ld	     l,	(ix+16)
 RAM:C1D5 DD 66 11		     ld	     h,	(ix+17)
@@ -5506,7 +5507,7 @@ RAM:C251 BE			     cp	     (hl)				     ; same as required?
 RAM:C252 20 11			     jr	     nz, loc_C265			     ; no, skip
 RAM:C254 21 BB 5B		     ld	     hl, objects_put_in_cauldron
 RAM:C257 34			     inc     (hl)
-RAM:C258 CD A5 C2		     call    sub_C2A5
+RAM:C258 CD A5 C2		     call    cycle_colours_with_sound
 RAM:C25B 3A BB 5B		     ld	     a,	(objects_put_in_cauldron)
 RAM:C25E FE 0E			     cp	     14					     ; got all objects?
 RAM:C260 20 03			     jr	     nz, loc_C265			     ; no, skip
@@ -5554,14 +5555,14 @@ RAM:C2A5
 RAM:C2A5	     ; =============== S U B R O U T I N E =======================================
 RAM:C2A5
 RAM:C2A5
-RAM:C2A5	     sub_C2A5:							     ; CODE XREF: RAM:C258p
-RAM:C2A5 16 10			     ld	     d,	10h
+RAM:C2A5	     cycle_colours_with_sound:					     ; CODE XREF: RAM:C258p
+RAM:C2A5 16 10			     ld	     d,	16				     ; cycle 16	times
 RAM:C2A7
-RAM:C2A7	     loc_C2A7:							     ; CODE XREF: sub_C2A5+24j
-RAM:C2A7 21 00 58		     ld	     hl, 5800h
-RAM:C2AA 01 00 03		     ld	     bc, 300h
+RAM:C2A7	     loc_C2A7:							     ; CODE XREF: cycle_colours_with_sound+24j
+RAM:C2A7 21 00 58		     ld	     hl, 5800h				     ; attribute memory
+RAM:C2AA 01 00 03		     ld	     bc, 300h				     ; size
 RAM:C2AD
-RAM:C2AD	     loc_C2AD:							     ; CODE XREF: sub_C2A5+16j
+RAM:C2AD	     cycle_attribute_mem:					     ; CODE XREF: cycle_colours_with_sound+16j
 RAM:C2AD 7E			     ld	     a,	(hl)
 RAM:C2AE E6 F8			     and     0F8h ; 'ø'
 RAM:C2B0 5F			     ld	     e,	a
@@ -5574,11 +5575,11 @@ RAM:C2B7 23			     inc     hl
 RAM:C2B8 0B			     dec     bc
 RAM:C2B9 78			     ld	     a,	b
 RAM:C2BA B1			     or	     c
-RAM:C2BB 20 F0			     jr	     nz, loc_C2AD
+RAM:C2BB 20 F0			     jr	     nz, cycle_attribute_mem
 RAM:C2BD CD 03 B4		     call    gen_audio_graphic_no_rom
 RAM:C2C0 01 00 20		     ld	     bc, 2000h
 RAM:C2C3
-RAM:C2C3	     loc_C2C3:							     ; CODE XREF: sub_C2A5+21j
+RAM:C2C3	     loc_C2C3:							     ; CODE XREF: cycle_colours_with_sound+21j
 RAM:C2C3 0B			     dec     bc
 RAM:C2C4 78			     ld	     a,	b
 RAM:C2C5 B1			     or	     c
@@ -5589,7 +5590,7 @@ RAM:C2CB
 RAM:C2CB	     no_update:							     ; DATA XREF: RAM:upd_sprite_jmp_tblo
 RAM:C2CB									     ; RAM:B098o ...
 RAM:C2CB C9			     ret
-RAM:C2CB	     ; End of function sub_C2A5
+RAM:C2CB	     ; End of function cycle_colours_with_sound
 RAM:C2CB
 RAM:C2CC
 RAM:C2CC	     ; =============== S U B R O U T I N E =======================================
@@ -5601,7 +5602,8 @@ RAM:C2CE 32 C3 5B		     ld	     (all_objs_in_cauldron), a
 RAM:C2D1 DD E5			     push    ix
 RAM:C2D3 DD 21 68 5C		     ld	     ix, byte_5C68			     ; special_objs_here[1]
 RAM:C2D7 11 20 00		     ld	     de, 32				     ; entry size
-RAM:C2DA 06 0B			     ld	     b,	11				     ; max 11 objects
+RAM:C2DA 06 0B			     ld	     b,	11				     ; wipe 11 objects in the room
+RAM:C2DA									     ; (1 special, 7 bg, 3 fg)
 RAM:C2DC
 RAM:C2DC	     loc_C2DC:							     ; CODE XREF: prepare_final_animation+1Dj
 RAM:C2DC C5			     push    bc
@@ -5618,7 +5620,7 @@ RAM:C2EE	     loc_C2EE:							     ; CODE XREF: prepare_final_animation+35j
 RAM:C2EE DD 7E 00		     ld	     a,	(ix+0)				     ; graphic no.
 RAM:C2F1 FE 07			     cp	     7					     ; block?
 RAM:C2F3 20 04			     jr	     nz, loc_C2F9			     ; no, skip
-RAM:C2F5 DD 36 00 83		     ld	     (ix+0), 83h ; 'ƒ'                       ; set to twinkly sprite
+RAM:C2F5 DD 36 00 83		     ld	     (ix+0), 131			     ; set to twinkly sprite
 RAM:C2F9
 RAM:C2F9	     loc_C2F9:							     ; CODE XREF: prepare_final_animation+27j
 RAM:C2F9 DD 19			     add     ix, de				     ; next entry

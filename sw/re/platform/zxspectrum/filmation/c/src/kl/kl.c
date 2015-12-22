@@ -8,6 +8,7 @@
 #define UNTESTED        
 //#define UNIMPLEMENTED   DBGPRINTF ("*** %s(): UNMIPLEMENTED ***\n", __FUNCTION__)
 #define UNIMPLEMENTED   
+#define UNIMPLEMENTED_AUDIO
 
 // build options - all disabled for 'production' build
 //#define BUILD_OPT_DISABLE_WIPE
@@ -214,13 +215,14 @@ static void adj_m8_m12 (POBJ32 p_obj);
 static uint8_t chk_pickup_drop (void);
 static void handle_pickup_drop (POBJ32 p_obj);
 static uint8_t sub_C172 (POBJ32 p_obj, POBJ32 p_other);
+static uint8_t loc_C17A (POBJ32 p_obj, POBJ32 p_other);
 static uint8_t is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void upd_104_to_110 (POBJ32 p_obj);
 static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
 static uint8_t ret_next_obj_required (void);
 static void upd_96_to_102 (POBJ32 p_obj);
-static void sub_C2A5 (POBJ32 p_obj);
+static void cycle_colours_with_sound (POBJ32 p_obj);
 static void no_update (POBJ32 p_obj);
 static void prepare_final_animation (void);
 static int chk_and_init_transform (POBJ32 p_obj);
@@ -234,6 +236,7 @@ static void init_special_objects (void);
 static void upd_62 (POBJ32 p_obj);
 static void upd_85 (POBJ32 p_obj);
 static void upd_84 (POBJ32 p_obj);
+static void loc_C4C6 (POBJ32 p_obj);
 static void upd_128_to_130 (POBJ32 p_obj);
 static void adj_m6_m12 (POBJ32 p_obj);
 static void upd_6_7 (POBJ32 p_obj);
@@ -857,7 +860,7 @@ void play_audio_wait_key (uint8_t *audio_data)
 // $B2BE
 void play_audio_until_keypress (uint8_t *audio_data)
 {
-  UNIMPLEMENTED;
+  UNIMPLEMENTED_AUDIO;
 
   while (1)
   {
@@ -870,7 +873,7 @@ void play_audio_until_keypress (uint8_t *audio_data)
 // $B2CF
 void play_audio (uint8_t *audio_data)
 {
-  UNIMPLEMENTED;
+  UNIMPLEMENTED_AUDIO;
 }
 
 // $B4FD
@@ -932,7 +935,8 @@ void shuffle_objects_required (void)
 }
 
 // $B566
-// sparkles
+// sparkles from the blocks in the cauldron room
+// at the end of the game
 void upd_131_to_133 (POBJ32 p_obj)
 {
   uint8_t a;
@@ -1753,7 +1757,22 @@ menu_loop:
 // $BD89
 void flash_menu (void)
 {
-  UNIMPLEMENTED;
+  unsigned i;
+  
+  UNTESTED;
+
+  // keyboard, joystick...
+  for (i=1; i<=4; i++)
+  {
+    if (i == ((user_input_method >> 1) & 3))
+      menu_colours[i] |= (1<<7);
+    else
+      menu_colours[i] &= ~(1<<7);
+  }
+  // directional
+  menu_colours[i] &= ~(1<<7);
+  if ((user_input_method & (1<<3)) != 0)
+    menu_colours[i] |= (1<<7);
 }
 
 // $BE31
@@ -1802,7 +1821,10 @@ void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_
   unsigned i;
   
   for (i=0; i<n; i++, xy+=2)
+  {
+    tmp_attrib = colours[i];
     print_text_single_colour (*xy, *(xy+1), text_list[i]);
+  }
   if (suppress_border != 0)
     return;
   suppress_border++;
@@ -2052,11 +2074,17 @@ pickup_object:
 // $C172
 uint8_t sub_C172 (POBJ32 p_obj, POBJ32 p_other)
 {
-  uint8_t f;
-  
   // special object?
   if ((p_other->graphic_no - 0x60) >= 7)
     return (0);
+  return loc_C17A (p_obj, p_other);
+}
+
+// $C17A
+uint8_t loc_C17A (POBJ32 p_obj, POBJ32 p_other)
+{    
+  uint8_t f;
+  
   if (sub_CC9D (p_obj, p_other, 0) == 0)
     return (0);
   if (sub_CCB2 (p_obj, p_other, 0) == 0)
@@ -2077,10 +2105,31 @@ uint8_t is_obj_moving (POBJ32 p_obj)
 // extra life
 void upd_103 (POBJ32 p_obj)
 {
-  UNIMPLEMENTED;
+  POBJ32  p_other;
+  uint8_t f;
+  
+  UNTESTED;
 
   upd_128_to_130 (p_obj);
-  // more stuff
+  
+  p_other = graphic_objs_tbl;
+  p_other->width++;
+  p_other->depth++;
+  f = loc_C17A (p_other, p_obj);
+  p_other->width--;
+  p_other->depth--;
+  if (f != 0)
+  {
+    p_obj->graphic_no |= (1<<3);
+    adj_m4_m12 (p_obj);
+    p_obj->u.ptr_obj_tbl_entry = 0;
+    lives++;
+    disable_spike_ball_drop = 0;
+    // audio
+    print_lives ();
+    blit_2x8 (32, 32);
+  }
+  loc_C4C6 (p_obj);    
 }
 
 // $C1F1
@@ -2123,7 +2172,7 @@ void upd_104_to_110 (POBJ32 p_obj)
       if ((p_obj->graphic_no & 7) == ret_next_obj_required ())
       {
         objects_put_in_cauldron++;
-        sub_C2A5 (p_obj);
+        cycle_colours_with_sound (p_obj);
         if (objects_put_in_cauldron == 14)
           prepare_final_animation ();
       }
@@ -2171,9 +2220,9 @@ void upd_96_to_102 (POBJ32 p_obj)
 
 // $C2A5
 // audio/video effects?
-void sub_C2A5 (POBJ32 p_obj)
+void cycle_colours_with_sound (POBJ32 p_obj)
 {
-  UNIMPLEMENTED;
+  UNIMPLEMENTED_AUDIO;
 }
   
 // $C2CB
@@ -2185,7 +2234,26 @@ void no_update (POBJ32 p_obj)
 // $C2CC
 void prepare_final_animation (void)
 {
-  UNIMPLEMENTED;
+  POBJ32    p_obj;
+  unsigned  i;
+    
+  UNTESTED;
+  
+  all_objs_in_cauldron = 1;
+  p_obj = &special_objs_here[1];
+  // wipe 11 objects in the room
+  // - 1 special, 7 bg, 3 fg
+  for (i=0; i<11; i++, p_obj++)
+  {
+    set_wipe_and_draw_flags (p_obj);
+    p_obj->graphic_no = 1;  // invalid
+  }
+  for (; i<MAX_OBJS-(3+11); i++)
+  {
+    // turn blocks to twinkly sprites
+    if (p_obj->graphic_no == 7)
+      p_obj->graphic_no = 131;
+  }
 }
 
 // $C306
@@ -2392,6 +2460,12 @@ void upd_85 (POBJ32 p_obj)
 void upd_84 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
+  loc_C4C6 (p_obj);
+}
+
+// $C4C6
+void loc_C4C6 (POBJ32 p_obj)
+{
   dec_dZ_and_update_XYZ (p_obj);
   if (!is_obj_moving (p_obj))
     return;
