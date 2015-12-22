@@ -3614,15 +3614,21 @@ void calc_display_order_and_render (void)
   
   UNIMPLEMENTED;
   
+  rendered_objs_cnt = 0;
+  
   for (i=0; objects_to_draw[i] != 0xFF; i++)
   {
-    POBJ32 p_obj = &graphic_objs_tbl[objects_to_draw[i]];
-    #if 0
-    if (p_obj->graphic_no == 23)
-      p_obj->flags7 &= ~FLAG_DRAW;
-    else 
-    #endif     
-      calc_pixel_XY_and_render (p_obj);
+    POBJ32 p_obj;
+    
+    // already rendered?
+    if ((objects_to_draw[i] & (1<<7)) != 0)
+      continue;
+      
+    p_obj = &graphic_objs_tbl[objects_to_draw[i]];
+    
+    // some maths
+    
+    calc_pixel_XY_and_render (p_obj);
   }
 }
 
