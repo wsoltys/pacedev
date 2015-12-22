@@ -180,6 +180,7 @@ void main (int argc, char *argv[])
   fprintf (fp2, "};\n\n");
   
   // location table
+  unsigned locations = 0;
   p = 0x6251;
   fprintf (fp2, "uint8_t location_tbl[] = \n{\n");
   while (p < 0x6BD1)
@@ -188,6 +189,7 @@ void main (int argc, char *argv[])
     fprintf (fp2, "  %d, %d, %d,\n",
               ram[p], ram[p+1], ram[p+2]);
     p += 3;
+    locations++;
     for (unsigned i=0; i<n-2; i++)
     {
       if ((i%8)==0)
@@ -200,6 +202,7 @@ void main (int argc, char *argv[])
     }
   }
   fprintf (fp2, "};\n\n");
+  fprintf (stderr, "#locations = %d\n", locations);
 
   // block type table
 
@@ -584,6 +587,23 @@ void main (int argc, char *argv[])
     if (i<4) fprintf (fp2, ", ");
   }
   fprintf (fp2, "\n};\n\n");
+
+  // rating_text
+  p = 0xbbc7;
+  fprintf (fp2, "const RATING rating_tbl[] = \n{\n");
+  while (p < 0xbc10)
+  {
+    fprintf (fp2, "  { 0x%02X, \"", ram[p++]);
+    do
+    {
+      fprintf (fp2, "%c", to_ascii[ram[p]&0x7f]);
+    } while (ram[p++] < 128);
+    fprintf (fp2, "\" }");
+    if (p < 0xbc10)
+      fprintf (fp2, ", ");
+    fprintf (fp2, "\n");  
+  }
+  fprintf (fp2, "};\n\n");
 
   // days_font
   p = 0xbcec;

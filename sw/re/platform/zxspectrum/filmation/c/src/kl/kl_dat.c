@@ -3622,6 +3622,18 @@ const char *gameover_text[] =
   "OVERALL RATING"
 };
 
+const RATING rating_tbl[] = 
+{
+  { 0x42, "   POOR"     }, 
+  { 0x42, " AVERAGE"    }, 
+  { 0x42, "   FAIR"     }, 
+  { 0x42, "   GOOD"     }, 
+  { 0x42, "EXCELLENT"   }, 
+  { 0x42, "MARVELLOUS"  }, 
+  { 0x42, "   HERO"     }, 
+  { 0x42, "ADVENTURER"  }
+};
+
 uint8_t days_txt[] = 
 {
   0x00, 0x00, 0x01, 0x02, 0x83

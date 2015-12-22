@@ -100,17 +100,17 @@ static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
 static int8_t old_dZ;                                 // $5BC1
 static int8_t tmp_bouncing_ball_dZ;                   // $5BC2
-static uint8_t byte_5BC3;                             // $5BC3
+static uint8_t all_objs_in_cauldron;                  // $5BC3
 static uint8_t byte_5BC4;                             // $5BC4
 static uint8_t byte_5BC5;                             // $5BC5
 static uint8_t num_scrns_visited;                     // $5BC6
 static uint8_t *gfxbase_8x8;                          // $5BC7
-static uint8_t unk_5BC9;                              // $5BC9
-static uint8_t unk_5BCA;                              // $5BCA
+static uint8_t percent_msw;                           // $5BC9
+static uint8_t percent_lsw;                           // $5BCA
 static uint8_t *tmp_objects_to_draw;                  // $5BCB
 static uint8_t *word_5BCD;                            // $5BCD
 static uint8_t *word_5BCF;                            // $5BCF
-static uint8_t unk_5BD1;                              // $5BD1
+static uint8_t audio_played;                          // $5BD1
 static uint8_t directional;                           // $5BD2
 static uint8_t byte_5BD3;                             // $5BD3
 static uint8_t unk_5BD8;                              // $5BD8
@@ -184,7 +184,7 @@ static void upd_30_31_158_159 (POBJ32 p_obj);
 static void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy);
 static void wait_for_key_release (void);
 static void game_over (void);
-static void sub_BC10 (void);
+static void calc_and_display_percent (void);
 static void print_days (void);
 static void print_lives_gfx (void);
 static void print_lives (void);
@@ -973,7 +973,7 @@ void upd_131_to_133 (POBJ32 p_obj)
     p_obj->d_z = 1;
     move_towards_plyr (p_obj, 4, 4);
   }
-  byte_5BC3 = p_obj->z;
+  byte_5BC5 = p_obj->z;
   dec_dZ_wipe_and_draw (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
@@ -1389,8 +1389,7 @@ void init_cauldron_bubbles (void)
   // already initialised?
   if (special_objs_here[1].graphic_no != 0)
     return;
-  // *** what does this mean???
-  if (byte_5BC3 != 0)
+  if (all_objs_in_cauldron != 0)
     return;
   memcpy (&special_objs_here[1], cauldron_bubbles, 18);
   adj_m4_m12 (&special_objs_here[1]);
@@ -1598,11 +1597,11 @@ void wait_for_key_release (void)
 // $BA22
 void game_over (void)
 {
-  UNIMPLEMENTED;
+  uint8_t   rating;
   
-  DBGPRINTF_FN;
+  UNTESTED;
   
-  if (byte_5BC3 != 0)
+  if (all_objs_in_cauldron != 0)
   {
   game_complete_msg:
     clear_scrn_buffer ();
@@ -1615,9 +1614,14 @@ void game_over (void)
   clear_scrn_buffer ();
   clear_scrn ();
   display_text_list (gameover_colours, gameover_xy, (char **)gameover_text, 6);
-  print_bcd_number (10, 10, &days, 1);  // FIXME
-  sub_BC10 ();
-  // some rating calcs
+  print_bcd_number (120, 127, &days, 1);
+  calc_and_display_percent ();
+  rating = ((all_objs_in_cauldron & 1) << 2) | ((num_scrns_visited & 0x60) >> 5);
+  print_text_std_font (88, 39, rating_tbl[rating].text);
+  // convert to BCD
+  if (objects_put_in_cauldron >= 10)
+    objects_put_in_cauldron += 6;
+  print_bcd_number (184, 79, &objects_put_in_cauldron, 1);
   print_border ();
   update_screen ();
   play_audio_until_keypress (NULL);
@@ -1627,21 +1631,29 @@ void game_over (void)
 }
 
 // $BC10
-void sub_BC10 (void)
+void calc_and_display_percent (void)
 {
-  unsigned  i, b;
-  uint8_t   e;
+  unsigned  byte, bit, pc;
+  unsigned  score;
   
-  e = 0;
-  for (i=0; i<32; i++)
-  {
-    for (b=0; b<8; b++)
-      if (scrn_visited[i] & (1<<b))
-        e++;
-  }
-  num_scrns_visited = e - 1;
-  e += objects_put_in_cauldron * 2;
+  score = 0;
+  for (byte=0; byte<32; byte++)
+    for (bit=0; bit<8; bit++)
+      if (scrn_visited[byte] & (1<<bit))
+        score++;
+  num_scrns_visited = score - 1;
+  score += objects_put_in_cauldron * 2;
   
+  // 128 locations + 14*2 objects = 156 maximum score
+  pc = score * 100 / 156;
+  percent_msw = pc/100;
+  pc %= 100;
+  percent_lsw = ((pc/10)<<4)+(pc%10);
+  
+  if (percent_msw != 0)
+    print_bcd_number (152, 95, &percent_msw, 2);   // *** FIXME
+  else
+    print_bcd_number (160, 95, &percent_lsw, 1);   // *** FIXME
 }
 
 // $BC66
@@ -1682,7 +1694,12 @@ void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n)
   for (i=0; i<n; i++, bcd++)
   {
     uint8_t code = (*bcd) >> 4;
-    x = print_8x8 (x, y, code);
+    // slightly modified!!!
+    // - always called with n=1
+    // - except one place that jumps into the middle
+    //   so only 3 digits are printed
+    if (i>0 || n==1)
+      x = print_8x8 (x, y, code);
     code = (*bcd) & 0x0f;
     x = print_8x8 (x, y, code);
   }
@@ -1694,7 +1711,7 @@ void display_day (void)
   // stick attribute at front
   gfxbase_8x8 = (uint8_t *)days_font;
   // fudge to skip attribute for now
-  print_text_raw (114, 15, (days_txt+1));
+  print_text_raw (112, 15, (days_txt+1));
 }
 
 // $BD0C
@@ -2107,7 +2124,7 @@ void upd_92_to_95 (POBJ32 p_obj)
   
   upd_11 (p_obj);
   if ((p_obj->flags13 & (1<<6)) != 0 &&
-      byte_5BC3 == 0)
+      all_objs_in_cauldron == 0)
     init_sparkles (p_obj);
   else
   {
@@ -2161,7 +2178,7 @@ void display_sun_moon_frame (POBJ32 p_obj)
   POBJ32 p_frm = &sprite_scratchpad;
   uint8_t x;
 
-  if (byte_5BC3 != 0)
+  if (all_objs_in_cauldron != 0)
     return;
 
   if (p_obj->pixel_x == 225)
@@ -2716,7 +2733,7 @@ void upd_player_bottom (POBJ32 p_obj)
   UNTESTED;
 
   if ((p_obj->flags13 & (1<<6)) != 0 &&
-      byte_5BC3 == 0)
+      all_objs_in_cauldron == 0)
   {
     p_next_obj->flags13 |= (1<<6);
     init_sparkles (p_obj);
@@ -3349,7 +3366,7 @@ void upd_player_top (POBJ32 p_obj)
   // bottom half
   POBJ32 p_prev_obj = p_obj-1;
   
-  if (byte_5BC3 == 0 &&
+  if (all_objs_in_cauldron == 0 &&
       (p_obj->flags13 & (1<<6)) != 0)
     init_sparkles (p_obj);
   else
@@ -3440,7 +3457,7 @@ void calc_display_order_and_render (void)
 // $D022
 uint8_t check_user_input (void)
 {
-  if (byte_5BC3 != 0 || byte_5BC4 != 0)
+  if (all_objs_in_cauldron != 0 || byte_5BC4 != 0)
   {
     user_input = 0;
     goto finished_input;

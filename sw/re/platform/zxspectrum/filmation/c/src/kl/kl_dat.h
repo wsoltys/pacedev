@@ -64,6 +64,13 @@ typedef struct
 
 } OBJ32, *POBJ32;
 
+typedef struct
+{
+  uint8_t   attr;
+  char      text[32];
+  
+} RATING, *PRATING;
+
 extern uint8_t kl_font[][8];
 extern ROOM_SIZE_T room_size_tbl[];
 extern uint8_t location_tbl[];
@@ -82,6 +89,7 @@ extern const char *complete_text[];
 extern uint8_t gameover_colours[];
 extern uint8_t gameover_xy[];
 extern const char *gameover_text[];
+extern const RATING rating_tbl[];
 extern uint8_t days_txt[];
 extern uint8_t days_font[][8];
 extern uint8_t menu_colours[];

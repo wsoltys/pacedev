@@ -75,7 +75,7 @@ SCRATCH:5BB9										 ; print_days+3o ...
 SCRATCH:5BBA ??		 lives:		 ds 1						 ; DATA	XREF: lose_life-2196w
 SCRATCH:5BBA										 ; print_liveso ...
 SCRATCH:5BBB ??		 objects_put_in_cauldron:ds 1					 ; DATA	XREF: lose_life-16BCo
-SCRATCH:5BBB										 ; sub_BC10+1Ar ...
+SCRATCH:5BBB										 ; calc_and_display_percent+1Ar ...
 SCRATCH:5BBC ??		 fire_seed:	 ds 1						 ; DATA	XREF: lose_life-216Aw
 SCRATCH:5BBC										 ; lose_life-2160o ...
 SCRATCH:5BBD ??		 ball_bounce_height:ds 1					 ; DATA	XREF: RAM:B868r
@@ -90,7 +90,7 @@ SCRATCH:5BC1 ??		 old_dZ:	 ds 1						 ; DATA	XREF: move_player+30w
 SCRATCH:5BC1										 ; move_player+47r
 SCRATCH:5BC2 ??		 tmp_bouncing_ball_dZ:ds 1					 ; DATA	XREF: RAM:B60Cw
 SCRATCH:5BC2										 ; RAM:B645r
-SCRATCH:5BC3 ??		 byte_5BC3:	 ds 1						 ; DATA	XREF: init_cauldron_bubbles+Cr
+SCRATCH:5BC3 ??		 all_objs_in_cauldron:ds 1					 ; DATA	XREF: init_cauldron_bubbles+Cr
 SCRATCH:5BC3										 ; lose_life:game_overr ...
 SCRATCH:5BC4 ??		 byte_5BC4:	 ds 1						 ; DATA	XREF: handle_pickup_drop+CCw
 SCRATCH:5BC4										 ; RAM:C266w ...
@@ -98,15 +98,15 @@ SCRATCH:5BC5 ??		 byte_5BC5:	 ds 1						 ; DATA	XREF: RAM:B021r
 SCRATCH:5BC5										 ; RAM:B075w ...
 SCRATCH:5BC6 ??		 num_scrns_visited:ds 1
 SCRATCH:5BC7 ??	??	 gfxbase_8x8:	 ds 2
-SCRATCH:5BC9 ??		 unk_5BC9:	 ds 1						 ; DATA	XREF: sub_BC10+3Ew
-SCRATCH:5BC9										 ; sub_BC10+44o
-SCRATCH:5BCA ??		 unk_5BCA:	 ds 1
+SCRATCH:5BC9 ??		 percent_msw:	 ds 1						 ; DATA	XREF: calc_and_display_percent+3Ew
+SCRATCH:5BC9										 ; calc_and_display_percent+44o
+SCRATCH:5BCA ??		 percent_lsw:	 ds 1
 SCRATCH:5BCB ??	??	 tmp_objects_to_draw:ds	2
 SCRATCH:5BCD ??	??	 word_5BCD:	 ds 2						 ; DATA	XREF: calc_display_order_and_render+19w
 SCRATCH:5BCD										 ; calc_display_order_and_render+10Aw ...
 SCRATCH:5BCF ??	??	 word_5BCF:	 ds 2						 ; DATA	XREF: calc_display_order_and_render+2Ew
 SCRATCH:5BCF										 ; calc_display_order_and_render:d_3467121516r	...
-SCRATCH:5BD1 ??		 unk_5BD1:	 ds 1						 ; DATA	XREF: play_audio_wait_keyo
+SCRATCH:5BD1 ??		 audio_played:	 ds 1						 ; DATA	XREF: play_audio_wait_keyo
 SCRATCH:5BD2 ??		 directional:	 ds 1						 ; DATA	XREF: do_menu_selection+4Bo
 SCRATCH:5BD3 ??		 byte_5BD3:	 ds 1						 ; DATA	XREF: handle_pickup_drop+1Aw
 SCRATCH:5BD3										 ; handle_pickup_drop+30w ...
@@ -136,7 +136,7 @@ SCRATCH:5BE8		 ;
 SCRATCH:5BE8		 ; bit table of	flags denoting room has	been visited
 SCRATCH:5BE8		 ; - as	of yet,	doesn't appear to be used at all
 SCRATCH:5BE8		 ;
-SCRATCH:5BE8 ??	?? ?? ??+scrn_visited:	 ds 32						 ; DATA	XREF: sub_BC10+5o
+SCRATCH:5BE8 ??	?? ?? ??+scrn_visited:	 ds 32						 ; DATA	XREF: calc_and_display_percent+5o
 SCRATCH:5BE8 ??	?? ?? ??+								 ; RAM:D230o
 SCRATCH:5C08		 ;
 SCRATCH:5C08		 ; table of objects to draw (40	max)
@@ -2913,7 +2913,7 @@ RAM:B2B6	     ; =============== S U B R O U T I N E ============================
 RAM:B2B6
 RAM:B2B6
 RAM:B2B6	     play_audio_wait_key:					     ; CODE XREF: do_menu_selection+1Dp
-RAM:B2B6 21 D1 5B		     ld	     hl, unk_5BD1
+RAM:B2B6 21 D1 5B		     ld	     hl, audio_played
 RAM:B2B9 7E			     ld	     a,	(hl)
 RAM:B2BA A7			     and     a
 RAM:B2BB C0			     ret     nz
@@ -4047,7 +4047,7 @@ RAM:B8AF 11 68 5C		     ld	     de, byte_5C68			     ; special_objs_here[1]
 RAM:B8B2 1A			     ld	     a,	(de)				     ; graphic no.
 RAM:B8B3 A7			     and     a					     ; null?
 RAM:B8B4 C0			     ret     nz					     ; no, return
-RAM:B8B5 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:B8B5 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:B8B8 A7			     and     a
 RAM:B8B9 C0			     ret     nz
 RAM:B8BA 21 C8 B8		     ld	     hl, cauldron_bubbles		     ; source data
@@ -4296,7 +4296,7 @@ RAM:BA22	     ; START OF	FUNCTION CHUNK FOR lose_life
 RAM:BA22
 RAM:BA22	     game_over:							     ; CODE XREF: RAM:B5E0j
 RAM:BA22									     ; display_sun_moon_frame+7Fj ...
-RAM:BA22 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:BA22 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:BA25 A7			     and     a
 RAM:BA26 C2 AB BA		     jp	     nz, game_complete_msg
 RAM:BA29
@@ -4313,12 +4313,12 @@ RAM:BA3E 21 E2 E8		     ld	     hl, 0E8E2h				     ; video buffer address
 RAM:BA41 11 B9 5B		     ld	     de, days
 RAM:BA44 06 01			     ld	     b,	1				     ; 1 BCD digit pair
 RAM:BA46 CD AE BC		     call    print_BCD_number
-RAM:BA49 CD 10 BC		     call    sub_BC10
+RAM:BA49 CD 10 BC		     call    calc_and_display_percent
 RAM:BA4C 3A C6 5B		     ld	     a,	(num_scrns_visited)
 RAM:BA4F 07			     rlca
 RAM:BA50 E6 C0			     and     0C0h ; 'À'
 RAM:BA52 4F			     ld	     c,	a
-RAM:BA53 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:BA53 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:BA56 E6 01			     and     1
 RAM:BA58 B1			     or	     c
 RAM:BA59 07			     rlca
@@ -4473,22 +4473,22 @@ RAM:BC10
 RAM:BC10	     ; =============== S U B R O U T I N E =======================================
 RAM:BC10
 RAM:BC10
-RAM:BC10	     sub_BC10:							     ; CODE XREF: lose_life-16E1p
+RAM:BC10	     calc_and_display_percent:					     ; CODE XREF: lose_life-16E1p
 RAM:BC10 1E 00			     ld	     e,	0				     ; zero room count
 RAM:BC12 01 20 08		     ld	     bc, 820h				     ; B=8 bits/byte
 RAM:BC15 21 E8 5B		     ld	     hl, scrn_visited
 RAM:BC18
-RAM:BC18	     count_screens:						     ; CODE XREF: sub_BC10+13j
+RAM:BC18	     count_screens:						     ; CODE XREF: calc_and_display_percent+13j
 RAM:BC18 C5			     push    bc
 RAM:BC19 7E			     ld	     a,	(hl)
 RAM:BC1A 23			     inc     hl
 RAM:BC1B
-RAM:BC1B	     loc_BC1B:							     ; CODE XREF: sub_BC10:loc_BC1Fj
+RAM:BC1B	     loc_BC1B:							     ; CODE XREF: calc_and_display_percent:loc_BC1Fj
 RAM:BC1B 0F			     rrca
 RAM:BC1C 30 01			     jr	     nc, loc_BC1F
 RAM:BC1E 1C			     inc     e					     ; room count
 RAM:BC1F
-RAM:BC1F	     loc_BC1F:							     ; CODE XREF: sub_BC10+Cj
+RAM:BC1F	     loc_BC1F:							     ; CODE XREF: calc_and_display_percent+Cj
 RAM:BC1F 10 FA			     djnz    loc_BC1B
 RAM:BC21 C1			     pop     bc
 RAM:BC22 0D			     dec     c					     ; done all	screens?
@@ -4500,40 +4500,40 @@ RAM:BC2A 3A BB 5B		     ld	     a,	(objects_put_in_cauldron)
 RAM:BC2D CB 27			     sla     a					     ; x2
 RAM:BC2F 83			     add     a,	e
 RAM:BC30 5F			     ld	     e,	a
-RAM:BC31 01 1A A4		     ld	     bc, 0A41Ah				     ; FWIW 42,010
+RAM:BC31 01 1A A4		     ld	     bc, 0A41Ah				     ; 0.64102 * (128 +	14*2) =	99.999%
 RAM:BC34 21 00 00		     ld	     hl, 0
 RAM:BC37 AF			     xor     a
 RAM:BC38
-RAM:BC38	     loc_BC38:							     ; CODE XREF: sub_BC10+2Dj
+RAM:BC38	     loc_BC38:							     ; CODE XREF: calc_and_display_percent+2Dj
 RAM:BC38 09			     add     hl, bc
 RAM:BC39 CE 00			     adc     a,	0
 RAM:BC3B 27			     daa
 RAM:BC3C 1D			     dec     e
-RAM:BC3D 20 F9			     jr	     nz, loc_BC38
-RAM:BC3F 01 28 00		     ld	     bc, 28h ; '('
+RAM:BC3D 20 F9			     jr	     nz, loc_BC38			     ; calculate percentage complete (BCD)
+RAM:BC3F 01 28 00		     ld	     bc, 28h ; '('                           ; $A410*156 = $63FFD8+$28 = $640000
 RAM:BC42 09			     add     hl, bc
 RAM:BC43 CE 00			     adc     a,	0
-RAM:BC45 27			     daa
-RAM:BC46 32 CA 5B		     ld	     (unk_5BCA), a
+RAM:BC45 27			     daa					     ; fix rounding to 100%
+RAM:BC46 32 CA 5B		     ld	     (percent_lsw), a			     ; store least significant 2 BCD digits
 RAM:BC49 3E 00			     ld	     a,	0
 RAM:BC4B CE 00			     adc     a,	0
 RAM:BC4D 27			     daa
-RAM:BC4E 32 C9 5B		     ld	     (unk_5BC9), a
+RAM:BC4E 32 C9 5B		     ld	     (percent_msw), a			     ; store most significant BCD digit
 RAM:BC51 21 E6 E4		     ld	     hl, 0E4E6h
-RAM:BC54 11 C9 5B		     ld	     de, unk_5BC9
-RAM:BC57 06 01			     ld	     b,	1
+RAM:BC54 11 C9 5B		     ld	     de, percent_msw
+RAM:BC57 06 01			     ld	     b,	1				     ; 1 pair =	2 digits
 RAM:BC59 1A			     ld	     a,	(de)
-RAM:BC5A A7			     and     a
-RAM:BC5B 28 04			     jr	     z,	loc_BC61
-RAM:BC5D 04			     inc     b
-RAM:BC5E C3 C0 BC		     jp	     loc_BCC0
+RAM:BC5A A7			     and     a					     ; 100%?
+RAM:BC5B 28 04			     jr	     z,	loc_BC61			     ; no, skip
+RAM:BC5D 04			     inc     b					     ; 2 pair =	4 digits
+RAM:BC5E C3 C0 BC		     jp	     print_BCD_lsd
 RAM:BC61	     ; ---------------------------------------------------------------------------
 RAM:BC61
-RAM:BC61	     loc_BC61:							     ; CODE XREF: sub_BC10+4Bj
+RAM:BC61	     loc_BC61:							     ; CODE XREF: calc_and_display_percent+4Bj
 RAM:BC61 23			     inc     hl
-RAM:BC62 13			     inc     de
+RAM:BC62 13			     inc     de					     ; skip over leading zero
 RAM:BC63 C3 AE BC		     jp	     print_BCD_number
-RAM:BC63	     ; End of function sub_BC10
+RAM:BC63	     ; End of function calc_and_display_percent
 RAM:BC63
 RAM:BC66
 RAM:BC66	     ; =============== S U B R O U T I N E =======================================
@@ -4607,7 +4607,7 @@ RAM:BCBA 0F			     rrca
 RAM:BCBB E6 0F			     and     0Fh				     ; high digit
 RAM:BCBD CD 7F BE		     call    print_8x8
 RAM:BCC0
-RAM:BCC0	     loc_BCC0:							     ; CODE XREF: sub_BC10+4Ej
+RAM:BCC0	     print_BCD_lsd:						     ; CODE XREF: calc_and_display_percent+4Ej
 RAM:BCC0 1A			     ld	     a,	(de)				     ; get number
 RAM:BCC1 E6 0F			     and     0Fh				     ; low digit
 RAM:BCC3 CD 7F BE		     call    print_8x8
@@ -5597,7 +5597,7 @@ RAM:C2CC
 RAM:C2CC
 RAM:C2CC	     prepare_final_animation:					     ; CODE XREF: RAM:C262p
 RAM:C2CC 3E 01			     ld	     a,	1
-RAM:C2CE 32 C3 5B		     ld	     (byte_5BC3), a
+RAM:C2CE 32 C3 5B		     ld	     (all_objs_in_cauldron), a
 RAM:C2D1 DD E5			     push    ix
 RAM:C2D3 DD 21 68 5C		     ld	     ix, byte_5C68			     ; special_objs_here[1]
 RAM:C2D7 11 20 00		     ld	     de, 32				     ; entry size
@@ -5669,7 +5669,7 @@ RAM:C337									     ; RAM:B150o ...
 RAM:C337 CD ED C4		     call    upd_11
 RAM:C33A DD CB 0D 76		     bit     6,	(ix+13)
 RAM:C33E 28 09			     jr	     z,	loc_C349
-RAM:C340 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:C340 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:C343 A7			     and     a
 RAM:C344 20 03			     jr	     nz, loc_C349
 RAM:C346 C3 21 BF		     jp	     init_sparkles
@@ -5737,7 +5737,7 @@ RAM:C3A4	     ; =============== S U B R O U T I N E ============================
 RAM:C3A4
 RAM:C3A4
 RAM:C3A4	     display_sun_moon_frame:					     ; CODE XREF: RAM:B05Fp
-RAM:C3A4 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:C3A4 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:C3A7 A7			     and     a
 RAM:C3A8 C0			     ret     nz
 RAM:C3A9 DD 7E 1A		     ld	     a,	(ix+26)				     ; pixel X
@@ -6615,7 +6615,7 @@ RAM:C82B
 RAM:C82B	     upd_player_bottom:						     ; CODE XREF: RAM:C826j
 RAM:C82B DD CB 0D 76		     bit     6,	(ix+13)
 RAM:C82F 28 0D			     jr	     z,	loc_C83E
-RAM:C831 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:C831 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:C834 A7			     and     a
 RAM:C835 20 07			     jr	     nz, loc_C83E
 RAM:C837 DD CB 2D F6		     set     6,	(ix+2Dh)			     ; top half	flags13
@@ -7685,7 +7685,7 @@ RAM:CDE2	     ; copies most information from bottom half	object
 RAM:CDE2	     ; handles randomly	looking	around
 RAM:CDE2
 RAM:CDE2	     upd_player_top:						     ; CODE XREF: RAM:CDDDj
-RAM:CDE2 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:CDE2 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:CDE5 A7			     and     a
 RAM:CDE6 20 07			     jr	     nz, loc_CDEF
 RAM:CDE8 DD CB 0D 76		     bit     6,	(ix+13)
@@ -8051,7 +8051,7 @@ RAM:D022	     ; =============== S U B R O U T I N E ============================
 RAM:D022
 RAM:D022
 RAM:D022	     check_user_input:						     ; CODE XREF: RAM:C841p
-RAM:D022 3A C3 5B		     ld	     a,	(byte_5BC3)
+RAM:D022 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:D025 4F			     ld	     c,	a
 RAM:D026 3A C4 5B		     ld	     a,	(byte_5BC4)
 RAM:D029 B1			     or	     c
