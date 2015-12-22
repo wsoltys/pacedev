@@ -45,6 +45,7 @@
 
 #define MAX_OBJS          40                          
 #define CAULDRON_SCREEN   136
+// standard is 5
 #define NO_LIVES          1
 
 #include "osd_types.h"
@@ -52,6 +53,17 @@
 #include "kl_dat.h"
 
 typedef void (*adjfn_t)(POBJ32 p_obj);
+
+typedef struct
+{
+  uint8_t   turbo;
+  uint8_t   exit_scrn;
+  
+} INTERNAL, *PINTERNAL;
+static INTERNAL internal = { 0, 0 };
+
+static jmp_buf start_menu_env_buf;
+static jmp_buf game_loop_env_buf;
 
 // start of variables
 
@@ -103,7 +115,7 @@ static uint8_t directional;                           // $5BD2
 static uint8_t byte_5BD3;                             // $5BD3
 static uint8_t unk_5BD8;                              // $5BD8
 static uint8_t objects_carried[3][4];                 // $5BDC
-static uint8_t room_visited[32];                      // $5BE8
+static uint8_t scrn_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[MAX_OBJS];              // $5C08
 static POBJ32 special_objs_here = 
               &graphic_objs_tbl[2];                   // $5C48
@@ -126,20 +138,6 @@ typedef struct
 } OBJ_WIPED, *POBJ_WIPED;
 
 OBJ_WIPED objs_wiped_stack[MAX_OBJS];
-
-typedef struct
-{
-  uint8_t   exit_scrn;
-  
-} INTERNAL, *PINTERNAL;
-static INTERNAL internal = { 0 };
-
-typedef struct
-{
-  uint8_t   turbo;
-  
-} DBG, *PDBG;
-DBG dbg = { 0 };
 
 // end of variables
 
@@ -186,6 +184,7 @@ static void upd_30_31_158_159 (POBJ32 p_obj);
 static void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy);
 static void wait_for_key_release (void);
 static void game_over (void);
+static void sub_BC10 (void);
 static void print_days (void);
 static void print_lives_gfx (void);
 static void print_lives (void);
@@ -256,7 +255,7 @@ static void add_dXYZ (POBJ32 p_obj);
 static void upd_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void upd_2_4 (POBJ32 p_obj);
-static void chk_plr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y);
+static void chk_plyr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y);
 static uint8_t is_near_to (POBJ32 p_obj, POBJ32 p_other, uint8_t near_x, uint8_t near_y);
 static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
 static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
@@ -274,9 +273,9 @@ static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static uint8_t handle_exit_screen (POBJ32 p_obj);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
-static void sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
-static void sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
-static void sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
+static int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
+static int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
+static int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
 static uint8_t sub_CC9D (POBJ32 p_obj, POBJ32 p_other, int8_t d_x);
 static uint8_t sub_CCB2 (POBJ32 p_obj, POBJ32 p_other, int8_t d_y);
 static uint8_t sub_CCC7 (POBJ32 p_obj, POBJ32 p_other, int8_t d_z);
@@ -294,7 +293,7 @@ static uint8_t check_user_input (void);
 static int lose_life (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
-static void flag_room_visited (void);
+static void flag_scrn_visited (void);
 static uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite);
 static uint8_t *transfer_sprite_and_print (POBJ32 p_obj, uint8_t *psprite);
 static void display_panel (void);
@@ -384,9 +383,6 @@ void upd_not_implemented (POBJ32 obj)
 
 extern adjfn_t upd_sprite_jump_tbl[];
 
-static jmp_buf start_menu_env_buf;
-static jmp_buf game_loop_env_buf;
-
 void knight_lore (void)
 {
   POBJ32 p_obj;
@@ -446,8 +442,9 @@ player_dies:
   // leaves a return address on the stack
   // - but update_sprite_loop re-init's the stack ptr
   //   each operation, so doesn't matter
+  // * now uses longjmp
   if (lose_life () < 0)
-    goto START_MENU_AF7F;
+    /*goto START_MENU_AF7F*/;
 
 game_loop:
 
@@ -514,7 +511,7 @@ onscreen_loop:
 
 game_delay:
   // last to-do  
-  osd_delay (dbg.turbo ? 5 : 50);
+  osd_delay (internal.turbo ? 5 : 50);
 
   if (render_status_info)
   {
@@ -624,7 +621,7 @@ game_delay:
     
   if (osd_key(OSD_KEY_T))
   {
-    dbg.turbo = !dbg.turbo;
+    internal.turbo = !internal.turbo;
     while (osd_key(OSD_KEY_T));
   }
     
@@ -1619,6 +1616,7 @@ void game_over (void)
   clear_scrn ();
   display_text_list (gameover_colours, gameover_xy, (char **)gameover_text, 6);
   print_bcd_number (10, 10, &days, 1);  // FIXME
+  sub_BC10 ();
   // some rating calcs
   print_border ();
   update_screen ();
@@ -1626,6 +1624,24 @@ void game_over (void)
   wait_for_key_release ();
   
   longjmp (start_menu_env_buf, 1);
+}
+
+// $BC10
+void sub_BC10 (void)
+{
+  unsigned  i, b;
+  uint8_t   e;
+  
+  e = 0;
+  for (i=0; i<32; i++)
+  {
+    for (b=0; b<8; b++)
+      if (scrn_visited[i] & (1<<b))
+        e++;
+  }
+  num_scrns_visited = e - 1;
+  e += objects_put_in_cauldron * 2;
+  
 }
 
 // $BC66
@@ -2374,9 +2390,9 @@ void find_special_objs_here (void)
     p_special_obj->height = 20;
     p_special_obj->flags7 = 0x14;
     p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
-    memset (&p_special_obj->d_x, 0, 7);  // *** FIXME
+    memset (&p_special_obj->d_x, 0, 7);
     p_special_obj->u.ptr_obj_tbl_entry = i;
-    memset (&p_special_obj->pad2, 0, 12); // *** FIXME
+    memset (&p_special_obj->unused, 0, 32-20);
     
     p_special_obj++;
     n_special_objs_here++;
@@ -2593,18 +2609,20 @@ void upd_2_4 (POBJ32 p_obj)
       set_pixel_adj (p_obj, -3, 1);
     else
       set_pixel_adj (p_obj, -3, -7);
+    // set centre points for player adjustment
     p_obj->d_y = p_obj->y + 13;
     p_obj->d_x = p_obj->x;
     p_obj->d_z = p_obj->z;
-    chk_plr_spec_near_to (p_obj, 15, 6);
+    chk_plyr_spec_near_to (p_obj, 15, 6);
   }
   else
   {
     set_pixel_adj (p_obj, -2, -17);
+    // set centre points for player adjustment
     p_obj->d_x = p_obj->x - 13;
     p_obj->d_y = p_obj->y;
     p_obj->d_z = p_obj->z;
-    chk_plr_spec_near_to (p_obj, 6, 15);
+    chk_plyr_spec_near_to (p_obj, 6, 15);
   }
 
   // player and special objects only
@@ -2623,26 +2641,27 @@ void upd_2_4 (POBJ32 p_obj)
       case 1 :  // E
         if (p_obj->d_y == p_other->y)
           continue;
-        p_other->d_y_adj = (p_obj->d_y < p_other->y ? -1 : 1);
+        p_other->d_y_adj = ((uint8_t)p_obj->d_y < p_other->y ? -1 : 1);
         break;
       case 2 :  // N
       case 3 :  // S
       default :
         if (p_obj->d_x == p_other->x)
           continue;
-        p_other->d_x_adj = (p_obj->d_x < p_other->x ? -1 : 1);
+        p_other->d_x_adj = ((uint8_t)p_obj->d_x < p_other->x ? -1 : 1);
         break;
     }
   }
 }
 
 // $C7DB
-void chk_plr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y)
+void chk_plyr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y)
 {
-  unsigned i;
+  POBJ32    p_other;
+  unsigned  i;
   
   // player and special objects only
-  POBJ32 p_other = graphic_objs_tbl;
+  p_other = graphic_objs_tbl;
   for (i=0; i<4; i++, p_other++)
   {
     if (p_other->graphic_no == 0)
@@ -2659,15 +2678,15 @@ void chk_plr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y)
 // returns C(1) if 'near (enough) to'
 uint8_t is_near_to (POBJ32 p_obj, POBJ32 p_other, uint8_t near_x, uint8_t near_y)
 {
-  int8_t a;
+  uint8_t a;
   
-  a = abs(p_obj->d_x - p_other->x);
+  a = abs((uint8_t)(p_obj->d_x) - p_other->x);
   if (a >= near_x)
     return (0);  
-  a = abs(p_obj->d_y - p_other->y);
+  a = abs((uint8_t)(p_obj->d_y) - p_other->y);
   if (a >= near_y)
     return (0);
-  a = abs(p_obj->d_z - p_other->z);
+  a = abs((uint8_t)(p_obj->d_z) - p_other->z);
   return (a < 4 ? 1 : 0);
 }
 
@@ -2963,8 +2982,7 @@ exit_screen:
   internal.exit_scrn = 1;
   p_obj->flags12 |= 0x30;
   if ((p_obj->graphic_no - 16) >= 64)
-    longjmp (game_loop_env_buf, 1);
-    //return (1);
+    return (0);
 
   // the original Z80 code popped 2 return addresses
   // from the stack and then JP game_loop:
@@ -2975,13 +2993,17 @@ exit_screen:
   // - fortunately SP is reset a few instructions later
   //   but that begs the question, why bother popping at all?
 
-  memcpy (&plyr_spr_1_scratchpad, &graphic_objs_tbl[0], sizeof(POBJ32));
-  memcpy (&plyr_spr_2_scratchpad, &graphic_objs_tbl[1], sizeof(POBJ32));
+  memcpy (&plyr_spr_1_scratchpad, &graphic_objs_tbl[0], sizeof(OBJ32));
   plyr_spr_1_scratchpad.u.plyr_graphic_no = plyr_spr_1_scratchpad.graphic_no;
+  memcpy (&plyr_spr_2_scratchpad, &graphic_objs_tbl[1], sizeof(OBJ32));
   plyr_spr_2_scratchpad.u.plyr_graphic_no = plyr_spr_2_scratchpad.graphic_no;
   // sparkles
   plyr_spr_1_scratchpad.graphic_no = 120;
   plyr_spr_2_scratchpad.graphic_no = 120;
+
+  DBGPRINTF ("%s() got=%d,ps1s=%d\n", __FUNCTION__, 
+              graphic_objs_tbl[0].scrn,
+              plyr_spr_1_scratchpad.scrn);
   
   longjmp (game_loop_env_buf, 1);
   //return (1);
@@ -3016,7 +3038,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_z = adj_dZ_for_out_of_bounds (p_obj, d_z);
     if (d_z != 0)
-      sub_CC38 (p_obj, d_x, d_y, d_z);
+      d_z = sub_CC38 (p_obj, d_x, d_y, d_z);
   }
 
   d_x = p_obj->d_x;
@@ -3024,7 +3046,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_x = adj_dX_for_out_of_bounds (p_obj, d_x);
     if (d_x != 0)
-      sub_CB9A (p_obj, d_x, d_y, d_z);
+      d_x = sub_CB9A (p_obj, d_x, d_y, d_z);
   }
 
   d_y = p_obj->d_y;  
@@ -3032,7 +3054,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_y = adj_dY_for_out_of_bounds (p_obj, d_y);
     if (d_y != 0)
-      sub_CBE9 (p_obj, d_x, d_y, d_z);
+      d_y = sub_CBE9 (p_obj, d_x, d_y, d_z);
   }
 
   p_obj->d_x = d_x;
@@ -3042,7 +3064,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
 }
 
 // $CB9A
-void sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
+int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 {
   POBJ32    p_other;
   unsigned  i;
@@ -3071,13 +3093,14 @@ void sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
       if ((p_other->flags7 & (1<<2)) != 0)
         p_other->d_x = p_obj->d_x;
       if ((d_x = adj_d_for_out_of_bounds (d_x)) == 0)
-        return;
+        return (d_x);
     }
   }
+  return (d_x);
 }
 
 // $CBE9
-void sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
+int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 {
   POBJ32    p_other;
   unsigned  i;
@@ -3106,13 +3129,14 @@ void sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
       if ((p_other->flags7 & (1<<2)) != 0)
         p_other->d_y = p_obj->d_y;
       if ((d_y = adj_d_for_out_of_bounds (d_y)) == 0)
-        return;
+        return (d_y);
     }
   }
+  return (d_y);
 }
 
 // $CC38
-void sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
+int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 {
   POBJ32    p_other;
   unsigned  i;
@@ -3139,7 +3163,7 @@ void sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
       // other bit 5 -> obj bit 6
       p_obj->flags13 |= (p_other->flags13 << 1) & (1<<6);
       p_other->flags13 |= (1<<3);
-      if ((p_other->flags7 & (1<<2)) != 0)
+      if ((p_obj->flags7 & (1<<2)) != 0)
       {
         if (p_obj->d_x == 0)
           p_obj->d_x = p_other->d_x;
@@ -3147,9 +3171,10 @@ void sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
           p_obj->d_y = p_other->d_y;
       }
       if ((d_z = adj_d_for_out_of_bounds (d_z)) == 0)
-        return;
+        return (d_z);
     }
   }
+  return (d_z);
 }
 
 // $CC9D
@@ -3161,7 +3186,7 @@ uint8_t sub_CC9D (POBJ32 p_obj, POBJ32 p_other, int8_t d_x)
   UNTESTED;
 
   d = p_obj->width + p_other->width;
-  a = abs(p_obj->x + d_x - p_other->x);
+  a = abs((int8_t)(p_obj->x + d_x - p_other->x));
     
   return (a < d ? 1 : 0);
 }
@@ -3174,7 +3199,7 @@ uint8_t sub_CCB2 (POBJ32 p_obj, POBJ32 p_other, int8_t d_y)
   UNTESTED;
   
   d = p_obj->depth + p_other->depth;
-  a = abs(p_obj->y + d_y - p_other->y);
+  a = abs((int8_t)(p_obj->y + d_y - p_other->y));
   
   return (a < d ? 1 : 0);
 }
@@ -3472,6 +3497,10 @@ int lose_life (void)
   p_obj->u.plyr_graphic_no = (p_obj->u.plyr_graphic_no & 0x1F) + c;
   p_next_obj->u.plyr_graphic_no = (p_next_obj->u.plyr_graphic_no & 0x0F) + c + 32;
   
+  DBGPRINTF ("%s() got=%d,ps1s=%d\n", __FUNCTION__, 
+              graphic_objs_tbl[0].scrn,
+              plyr_spr_1_scratchpad.scrn);
+              
   // caller needs this value
   return (lives);  
 }
@@ -3512,14 +3541,14 @@ void build_screen_objects (void)
   render_status_info = 1;
   // spiked balls don't drop immediately in odd-numbered rooms
   disable_spike_ball_drop = graphic_objs_tbl[0].scrn & 1;
-  flag_room_visited ();
+  flag_scrn_visited ();
 }
 
 // $D219
-void flag_room_visited (void)
+void flag_scrn_visited (void)
 {
   uint8_t scrn = graphic_objs_tbl[0].scrn;
-  room_visited[scrn>>3] |= 1<<(scrn&7);
+  scrn_visited[scrn>>3] |= 1<<(scrn&7);
 }
 
 // $D237

@@ -74,7 +74,7 @@ SCRATCH:5BB9 ??		 days:		 ds 1						 ; DATA	XREF: lose_life-16E9o
 SCRATCH:5BB9										 ; print_days+3o ...
 SCRATCH:5BBA ??		 lives:		 ds 1						 ; DATA	XREF: lose_life-2196w
 SCRATCH:5BBA										 ; print_liveso ...
-SCRATCH:5BBB ??		 objects_put_in_caldron:ds 1					 ; DATA	XREF: lose_life-16BCo
+SCRATCH:5BBB ??		 objects_put_in_cauldron:ds 1					 ; DATA	XREF: lose_life-16BCo
 SCRATCH:5BBB										 ; sub_BC10+1Ar ...
 SCRATCH:5BBC ??		 fire_seed:	 ds 1						 ; DATA	XREF: lose_life-216Aw
 SCRATCH:5BBC										 ; lose_life-2160o ...
@@ -136,7 +136,7 @@ SCRATCH:5BE8		 ;
 SCRATCH:5BE8		 ; bit table of	flags denoting room has	been visited
 SCRATCH:5BE8		 ; - as	of yet,	doesn't appear to be used at all
 SCRATCH:5BE8		 ;
-SCRATCH:5BE8 ??	?? ?? ??+screen_visited: ds 32						 ; DATA	XREF: sub_BC10+5o
+SCRATCH:5BE8 ??	?? ?? ??+scrn_visited:	 ds 32						 ; DATA	XREF: sub_BC10+5o
 SCRATCH:5BE8 ??	?? ?? ??+								 ; RAM:D230o
 SCRATCH:5C08		 ;
 SCRATCH:5C08		 ; table of objects to draw (40	max)
@@ -4334,7 +4334,7 @@ RAM:BA66 23			     inc     hl
 RAM:BA67 56			     ld	     d,	(hl)				     ; DE=addr of rating string
 RAM:BA68 21 58 27		     ld	     hl, 2758h
 RAM:BA6B CD 45 BE		     call    print_text_std_font
-RAM:BA6E 11 BB 5B		     ld	     de, objects_put_in_caldron
+RAM:BA6E 11 BB 5B		     ld	     de, objects_put_in_cauldron
 RAM:BA71 1A			     ld	     a,	(de)
 RAM:BA72 D6 0A			     sub     10					     ; less than 10?
 RAM:BA74 38 03			     jr	     c,	loc_BA79			     ; yes, skip
@@ -4476,7 +4476,7 @@ RAM:BC10
 RAM:BC10	     sub_BC10:							     ; CODE XREF: lose_life-16E1p
 RAM:BC10 1E 00			     ld	     e,	0				     ; zero room count
 RAM:BC12 01 20 08		     ld	     bc, 820h				     ; B=8 bits/byte
-RAM:BC15 21 E8 5B		     ld	     hl, screen_visited
+RAM:BC15 21 E8 5B		     ld	     hl, scrn_visited
 RAM:BC18
 RAM:BC18	     count_screens:						     ; CODE XREF: sub_BC10+13j
 RAM:BC18 C5			     push    bc
@@ -4496,11 +4496,11 @@ RAM:BC23 20 F3			     jr	     nz, count_screens			     ; no, loop
 RAM:BC25 7B			     ld	     a,	e
 RAM:BC26 3D			     dec     a					     ; -1? don't count 1st room?
 RAM:BC27 32 C6 5B		     ld	     (num_scrns_visited), a		     ; store for ratings calculations
-RAM:BC2A 3A BB 5B		     ld	     a,	(objects_put_in_caldron)
+RAM:BC2A 3A BB 5B		     ld	     a,	(objects_put_in_cauldron)
 RAM:BC2D CB 27			     sla     a					     ; x2
 RAM:BC2F 83			     add     a,	e
 RAM:BC30 5F			     ld	     e,	a
-RAM:BC31 01 1A A4		     ld	     bc, 0A41Ah
+RAM:BC31 01 1A A4		     ld	     bc, 0A41Ah				     ; FWIW 42,010
 RAM:BC34 21 00 00		     ld	     hl, 0
 RAM:BC37 AF			     xor     a
 RAM:BC38
@@ -5504,10 +5504,10 @@ RAM:C24C DD 7E 00		     ld	     a,	(ix+0)				     ; graphic no.
 RAM:C24F E6 07			     and     7					     ; convert to secial object	index
 RAM:C251 BE			     cp	     (hl)				     ; same as required?
 RAM:C252 20 11			     jr	     nz, loc_C265			     ; no, skip
-RAM:C254 21 BB 5B		     ld	     hl, objects_put_in_caldron
+RAM:C254 21 BB 5B		     ld	     hl, objects_put_in_cauldron
 RAM:C257 34			     inc     (hl)
 RAM:C258 CD A5 C2		     call    sub_C2A5
-RAM:C25B 3A BB 5B		     ld	     a,	(objects_put_in_caldron)
+RAM:C25B 3A BB 5B		     ld	     a,	(objects_put_in_cauldron)
 RAM:C25E FE 0E			     cp	     14					     ; got all objects?
 RAM:C260 20 03			     jr	     nz, loc_C265			     ; no, skip
 RAM:C262 CD CC C2		     call    prepare_final_animation
@@ -5526,7 +5526,7 @@ RAM:C274
 RAM:C274
 RAM:C274	     ret_next_obj_required:					     ; CODE XREF: RAM:B90Dp
 RAM:C274									     ; RAM:C249p
-RAM:C274 3A BB 5B		     ld	     a,	(objects_put_in_caldron)
+RAM:C274 3A BB 5B		     ld	     a,	(objects_put_in_cauldron)
 RAM:C277 21 7D C2		     ld	     hl, objects_required
 RAM:C27A C3 F2 D4		     jp	     add_HL_A
 RAM:C27A	     ; End of function ret_next_obj_required
@@ -7289,7 +7289,7 @@ RAM:CBE1	     ; ----------------------------------------------------------------
 RAM:CBE1
 RAM:CBE1	     loc_CBE1:							     ; CODE XREF: sub_CB9A+9j
 RAM:CBE1									     ; sub_CB9A+Ej ...
-RAM:CBE1 11 20 00		     ld	     de, 20h ; ' '                           ; entry size
+RAM:CBE1 11 20 00		     ld	     de, 32				     ; entry size
 RAM:CBE4 FD 19			     add     iy, de				     ; next entry
 RAM:CBE6 10 B8			     djnz    loc_CBA0
 RAM:CBE8 C9			     ret
@@ -7367,19 +7367,19 @@ RAM:CC50 30 43			     jr	     nc, loc_CC95			     ; next entry
 RAM:CC52 DD CB 0C D6		     set     2,	(ix+12)				     ; set Z OOB
 RAM:CC56 DD 7E 0D		     ld	     a,	(ix+13)
 RAM:CC59 0F			     rrca
-RAM:CC5A E6 40			     and     40h ; '@'                               ; was bit 7
+RAM:CC5A E6 40			     and     40h ; '@'                               ; bit 7->6
 RAM:CC5C FD B6 0D		     or	     (iy+13)
 RAM:CC5F FD 77 0D		     ld	     (iy+13), a
 RAM:CC62 07			     rlca
-RAM:CC63 E6 40			     and     40h ; '@'                               ; was bit 5
+RAM:CC63 E6 40			     and     40h ; '@'                               ; bit 5->6
 RAM:CC65 DD B6 0D		     or	     (ix+13)
 RAM:CC68 DD 77 0D		     ld	     (ix+13), a
 RAM:CC6B FD CB 0D DE		     set     3,	(iy+13)
-RAM:CC6F DD CB 07 56		     bit     2,	(ix+7)
+RAM:CC6F DD CB 07 56		     bit     2,	(ix+7)				     ; X,Y routines check IY+7...???
 RAM:CC73 28 18			     jr	     z,	loc_CC8D
-RAM:CC75 DD 7E 09		     ld	     a,	(ix+9)
-RAM:CC78 A7			     and     a
-RAM:CC79 20 06			     jr	     nz, loc_CC81
+RAM:CC75 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
+RAM:CC78 A7			     and     a					     ; zero?
+RAM:CC79 20 06			     jr	     nz, loc_CC81			     ; no, skip
 RAM:CC7B FD 7E 09		     ld	     a,	(iy+9)
 RAM:CC7E DD 77 09		     ld	     (ix+9), a
 RAM:CC81
@@ -8432,7 +8432,7 @@ RAM:D228 07			     rlca
 RAM:D229 E6 38			     and     38h ; '8'
 RAM:D22B F6 C6			     or	     0C6h ; 'Æ'                              ; SET 0,(HL)
 RAM:D22D 32 35 D2		     ld	     (byte_D235), a			     ; self-modifying code
-RAM:D230 01 E8 5B		     ld	     bc, screen_visited
+RAM:D230 01 E8 5B		     ld	     bc, scrn_visited
 RAM:D233 09			     add     hl, bc				     ; offset to room flag
 RAM:D233	     ; ---------------------------------------------------------------------------
 RAM:D234 CB			     db	0CBh ; Ë				     ; SET n,(HL)
