@@ -114,6 +114,9 @@ static uint8_t audio_played;                          // $5BD1
 static uint8_t directional;                           // $5BD2
 static uint8_t byte_5BD3;                             // $5BD3
 static uint8_t unk_5BD8;                              // $5BD8
+static uint8_t unk_5BD9;                              // $5BD9
+static uint16_t unk_5BDA;                             // $5BDA
+static uint8_t unk_5BE4;                              // $5BE4
 static uint8_t objects_carried[3][4];                 // $5BDC
 static uint8_t scrn_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[MAX_OBJS];              // $5C08
@@ -211,6 +214,7 @@ static void display_objects (void);
 static void adj_m8_m12 (POBJ32 p_obj);
 static uint8_t chk_pickup_drop (void);
 static void handle_pickup_drop (POBJ32 p_obj);
+static uint8_t sub_C172 (POBJ32 p_obj, POBJ32 p_other);
 static uint8_t is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void upd_104_to_110 (POBJ32 p_obj);
@@ -842,21 +846,26 @@ adjfn_t upd_sprite_jump_tbl[] =
 // $B2B6
 void play_audio_wait_key (uint8_t *audio_data)
 {
-  UNIMPLEMENTED;
+  UNTESTED;
   
-  // check something here
-  while (1)
-  {
-    if (read_key (0))
-      return;
-    // keep playing audio
-  }
+  if (audio_played != 0)
+    return;
+  audio_played |= (1<<0);
+
+  play_audio_until_keypress (audio_data);  
 }
 
 // $B2BE
 void play_audio_until_keypress (uint8_t *audio_data)
 {
   UNIMPLEMENTED;
+
+  while (1)
+  {
+    if (read_key (0))
+      return;
+    // keep playing audio
+  }
 }
 
 // $B2CF
@@ -1617,7 +1626,7 @@ void game_over (void)
   print_bcd_number (120, 127, &days, 1);
   calc_and_display_percent ();
   rating = ((all_objs_in_cauldron & 1) << 2) | ((num_scrns_visited & 0x60) >> 5);
-  print_text_std_font (88, 39, rating_tbl[rating].text);
+  print_text_std_font (88, 39, (char *)rating_tbl[rating].text);
   // convert to BCD
   if (objects_put_in_cauldron >= 10)
     objects_put_in_cauldron += 6;
@@ -1925,8 +1934,10 @@ uint8_t chk_pickup_drop (void)
 // $C00E
 void handle_pickup_drop (POBJ32 p_obj)
 {
+  POBJ32    p_other;
   uint8_t   z;
-  uint8_t   carry;
+  uint8_t   width, depth, height;
+  unsigned  i;
   
   UNIMPLEMENTED;
   UNTESTED;
@@ -1948,25 +1959,85 @@ void handle_pickup_drop (POBJ32 p_obj)
   // out-of-bounds?
   if (chk_plyr_OOB (p_obj) == 0)
     return;
-  if ((p_obj->flags12 & (1<<3)) != 0)
+  if ((p_obj->flags12 & FLAG_JUMPING) != 0)
     return;
-  if ((p_obj->flags12 & (1<<2)) == 0)
+  if ((p_obj->flags12 & FLAG_Z_OOB) == 0)
     return;
   byte_5BD3 = 0;
   z = p_obj->z;     // save
   p_obj->z += 12;
-  carry = sub_B4FD (p_obj);
-  p_obj->z = z;     // restore
-  if (carry != 0)
+  if (sub_B4FD (p_obj) != 0)
     byte_5BD3 = 1;
+  p_obj->z = z;     // restore
   // audio
   pickup_drop_pressed = 1;
   byte_5BB4 = 1;
+  width = p_obj->width;
   p_obj->width += 4;
+  depth = p_obj->depth;
   p_obj->depth += 4;
+  height = p_obj->height;
   p_obj->height += 4;
-  // some special object stuff
+
+  p_other = special_objs_here;  
+  for (i=0; i<2; i++)
+  {
+    if (sub_C172 (p_obj, p_other) != 0)
+      goto loc_C141;
+  }
+  if (chk_pickup_drop () != 0)
+  {
+    uint8_t b = (p_obj->scrn == CAULDRON_SCREEN ? 1 : 2);
+    p_other = special_objs_here;
+    for (; b; b--)
+      if (p_other->graphic_no == 0)
+        goto loc_C0B2;
+  }
+  // restore original dimensions
+  p_obj->height = height;
+  p_obj->depth = depth;
+  p_obj->width = width;
+  return;
   
+loc_C0B2:
+  ;
+
+loc_C106:
+  ;
+  
+loc_C12B:
+  ;
+      
+loc_C141:
+  disable_spike_ball_drop = 0;
+  unk_5BD8 = p_other->graphic_no;
+  unk_5BD9 = p_other->flags7;
+  unk_5BDA = p_other->u.ptr_obj_tbl_entry;
+  p_other->u.ptr_obj_tbl_entry = 0;
+  set_wipe_and_draw_flags (p_other);
+  p_other->graphic_no = 1;  // invalid
+  if (unk_5BE4 == 0)
+    goto loc_C12B;
+  p_other->graphic_no = unk_5BE4;
+  goto loc_C106;
+}
+
+// $C172
+uint8_t sub_C172 (POBJ32 p_obj, POBJ32 p_other)
+{
+  uint8_t f;
+  
+  // special object?
+  if ((p_other->graphic_no - 0x60) >= 7)
+    return (0);
+  if (sub_CC9D (p_obj, p_other, 0) == 0)
+    return (0);
+  if (sub_CCB2 (p_obj, p_other, 0) == 0)
+    return (0);
+  p_obj->z -= 4;
+  f = sub_CCC7 (p_obj, p_other, 0);
+  p_obj->z += 4;
+  return (f);
 }
 
 // $C1A1

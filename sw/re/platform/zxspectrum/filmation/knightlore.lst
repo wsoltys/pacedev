@@ -5174,18 +5174,18 @@ RAM:C015 CD FB BF		     call    chk_pickup_drop			     ; actually	pressed?
 RAM:C018 C8			     ret     z					     ; no, exit
 RAM:C019 CD 7A C8		     call    chk_plyr_OOB			     ; out of bounds?
 RAM:C01C D0			     ret     nc					     ; yes, exit
-RAM:C01D DD CB 0C 5E		     bit     3,	(ix+12)
-RAM:C021 C0			     ret     nz
-RAM:C022 DD CB 0C 56		     bit     2,	(ix+12)
-RAM:C026 C8			     ret     z
+RAM:C01D DD CB 0C 5E		     bit     3,	(ix+12)				     ; jumping?
+RAM:C021 C0			     ret     nz					     ; yes, exit
+RAM:C022 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
+RAM:C026 C8			     ret     z					     ; ???
 RAM:C027 AF			     xor     a
 RAM:C028 32 D3 5B		     ld	     (byte_5BD3), a
-RAM:C02B DD 7E 03		     ld	     a,	(ix+3)
+RAM:C02B DD 7E 03		     ld	     a,	(ix+3)				     ; Z
 RAM:C02E 47			     ld	     b,	a
-RAM:C02F C6 0C			     add     a,	12
+RAM:C02F C6 0C			     add     a,	12				     ; Z+12
 RAM:C031 DD 77 03		     ld	     (ix+3), a
 RAM:C034 CD FD B4		     call    sub_B4FD
-RAM:C037 DD 70 03		     ld	     (ix+3), b
+RAM:C037 DD 70 03		     ld	     (ix+3), b				     ; restore original	Z
 RAM:C03A 30 05			     jr	     nc, loc_C041
 RAM:C03C 3E 01			     ld	     a,	1
 RAM:C03E 32 D3 5B		     ld	     (byte_5BD3), a
@@ -5240,10 +5240,10 @@ RAM:C09D
 RAM:C09D	     loc_C09D:							     ; CODE XREF: handle_pickup_drop+71j
 RAM:C09D									     ; handle_pickup_drop+B0j ...
 RAM:C09D E1			     pop     hl
-RAM:C09E DD 75 06		     ld	     (ix+6), l
+RAM:C09E DD 75 06		     ld	     (ix+6), l				     ; height
 RAM:C0A1 E1			     pop     hl
-RAM:C0A2 DD 75 04		     ld	     (ix+4), l
-RAM:C0A5 DD 74 05		     ld	     (ix+5), h
+RAM:C0A2 DD 75 04		     ld	     (ix+4), l				     ; depth
+RAM:C0A5 DD 74 05		     ld	     (ix+5), h				     ; width
 RAM:C0A8 C9			     ret
 RAM:C0A9	     ; ---------------------------------------------------------------------------
 RAM:C0A9
@@ -5334,20 +5334,20 @@ RAM:C141	     loc_C141:							     ; CODE XREF: handle_pickup_drop+64j
 RAM:C141 21 D8 5B		     ld	     hl, unk_5BD8
 RAM:C144 AF			     xor     a
 RAM:C145 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
-RAM:C148 FD 7E 00		     ld	     a,	(iy+0)
+RAM:C148 FD 7E 00		     ld	     a,	(iy+0)				     ; graphic_no
 RAM:C14B 77			     ld	     (hl), a
 RAM:C14C 23			     inc     hl
-RAM:C14D FD 7E 07		     ld	     a,	(iy+7)
+RAM:C14D FD 7E 07		     ld	     a,	(iy+7)				     ; flags7
 RAM:C150 77			     ld	     (hl), a
 RAM:C151 23			     inc     hl
-RAM:C152 FD 5E 10		     ld	     e,	(iy+10h)
-RAM:C155 FD 56 11		     ld	     d,	(iy+11h)
+RAM:C152 FD 5E 10		     ld	     e,	(iy+16)
+RAM:C155 FD 56 11		     ld	     d,	(iy+17)				     ; ptr graphic object
 RAM:C158 AF			     xor     a
-RAM:C159 12			     ld	     (de), a
+RAM:C159 12			     ld	     (de), a				     ; zap ptr
 RAM:C15A 73			     ld	     (hl), e
 RAM:C15B 23			     inc     hl
-RAM:C15C 72			     ld	     (hl), d
-RAM:C15D CD 9D C6		     call    sub_C69D
+RAM:C15C 72			     ld	     (hl), d				     ; store ptr
+RAM:C15D CD 9D C6		     call    set_wipe_and_draw_IY
 RAM:C160 FD 36 00 01		     ld	     (iy+0), 1
 RAM:C164 21 E4 5B		     ld	     hl, unk_5BE4
 RAM:C167 7E			     ld	     a,	(hl)
@@ -5378,8 +5378,8 @@ RAM:C180 CD 9D CC		     call    sub_CC9D
 RAM:C183 30 1A			     jr	     nc, loc_C19F
 RAM:C185 CD B2 CC		     call    sub_CCB2
 RAM:C188 30 15			     jr	     nc, loc_C19F
-RAM:C18A DD 7E 03		     ld	     a,	(ix+3)
-RAM:C18D D6 04			     sub     4
+RAM:C18A DD 7E 03		     ld	     a,	(ix+3)				     ; Z
+RAM:C18D D6 04			     sub     4					     ; Z-4
 RAM:C18F DD 77 03		     ld	     (ix+3), a
 RAM:C192 CD C7 CC		     call    sub_CCC7
 RAM:C195 F5			     push    af
@@ -6335,7 +6335,7 @@ RAM:C69D
 RAM:C69D	     ; =============== S U B R O U T I N E =======================================
 RAM:C69D
 RAM:C69D
-RAM:C69D	     sub_C69D:							     ; CODE XREF: handle_pickup_drop+14Fp
+RAM:C69D	     set_wipe_and_draw_IY:					     ; CODE XREF: handle_pickup_drop+14Fp
 RAM:C69D FD E5			     push    iy
 RAM:C69F DD E5			     push    ix
 RAM:C6A1 FD E5			     push    iy
@@ -6344,7 +6344,7 @@ RAM:C6A5 CD 92 C6		     call    set_wipe_and_draw_flags
 RAM:C6A8 DD E1			     pop     ix
 RAM:C6AA FD E1			     pop     iy
 RAM:C6AC C9			     ret
-RAM:C6AC	     ; End of function sub_C69D
+RAM:C6AC	     ; End of function set_wipe_and_draw_IY
 RAM:C6AC
 RAM:C6AD	     ; ---------------------------------------------------------------------------
 RAM:C6AD
