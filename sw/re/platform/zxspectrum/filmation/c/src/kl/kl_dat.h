@@ -28,6 +28,14 @@ typedef struct
 typedef struct
 {
   uint8_t   graphic_no;
+  uint8_t   flags7;
+  uint16_t  ptr_obj_tbl_entry;
+  
+} INVENTORY, *PINVENTORY;
+
+typedef struct
+{
+  uint8_t   graphic_no;
   uint8_t   x;
   uint8_t   y;
   uint8_t   z;

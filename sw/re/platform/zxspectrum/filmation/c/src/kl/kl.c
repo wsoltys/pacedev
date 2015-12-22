@@ -12,6 +12,7 @@
 // build options - all disabled for 'production' build
 //#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_TELEPORT
+//#define BUILD_OPT_INVINCIBLE
 
 #pragma pack(1)
 
@@ -46,7 +47,7 @@
 #define MAX_OBJS          40                          
 #define CAULDRON_SCREEN   136
 // standard is 5
-#define NO_LIVES          1
+#define NO_LIVES          20
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -113,11 +114,9 @@ static uint8_t *word_5BCF;                            // $5BCF
 static uint8_t audio_played;                          // $5BD1
 static uint8_t directional;                           // $5BD2
 static uint8_t byte_5BD3;                             // $5BD3
-static uint8_t unk_5BD8;                              // $5BD8
-static uint8_t unk_5BD9;                              // $5BD9
-static uint16_t unk_5BDA;                             // $5BDA
-static uint8_t unk_5BE4;                              // $5BE4
-static uint8_t objects_carried[3][4];                 // $5BDC
+static INVENTORY inventory[4];                        // $5BD8
+static PINVENTORY objects_carried =
+                &inventory[1];                        // $5BDC
 static uint8_t scrn_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[MAX_OBJS];              // $5C08
 static POBJ32 special_objs_here = 
@@ -879,6 +878,7 @@ void play_audio (uint8_t *audio_data)
 uint8_t sub_B4FD (POBJ32 p_obj)
 {
   POBJ32    p_other;
+  uint8_t   carry = 0;
   unsigned  i;
   
   UNTESTED;
@@ -896,11 +896,12 @@ uint8_t sub_B4FD (POBJ32 p_obj)
       continue;
     if (sub_CCC7 (p_obj, p_other, 0) == 0)
       continue;
-    p_obj->flags7 &= ~(1<<1);
-    return (1);
+    carry = 1;
+    break;
   }
   
-  return (0);
+  p_obj->flags7 &= ~(1<<1);
+  return (carry);
 }
 
 // $B538
@@ -1355,7 +1356,9 @@ void loc_B856 (POBJ32 p_obj)
 // - rumoured to be immunity
 void sub_B85C (POBJ32 p_obj)
 {
+#ifndef BUILD_OPT_INVINCIBLE
   p_obj->flags13 |= (1<<7)|(1<<5);
+#endif  
 }
 
 // $B865
@@ -1902,11 +1905,6 @@ void display_objects (void)
   
   unsigned i;
   
-  // *** remove me
-  objects_carried[0][0] = 0x60;
-  objects_carried[1][0] = 0x61;
-  objects_carried[2][0] = 0x62;
-  
   for (i=0; i<3; i++)
   {
     uint8_t x = ((255-(3-i))+3)*24+16  +24;
@@ -1915,9 +1913,9 @@ void display_objects (void)
     p_obj->pixel_y = 0;
     fill_window (p_obj->pixel_x, p_obj->pixel_y, 3, 24, 0);
 
-    if (objects_carried[i][0] != 0)
+    if (objects_carried[i].graphic_no != 0)
     {
-      p_obj->graphic_no = objects_carried[i][0];
+      p_obj->graphic_no = objects_carried[i].graphic_no;
       print_sprite (p_obj);
     }
     blit_to_screen (p_obj->pixel_x, p_obj->pixel_y, 3, 24);
@@ -1934,12 +1932,12 @@ uint8_t chk_pickup_drop (void)
 // $C00E
 void handle_pickup_drop (POBJ32 p_obj)
 {
+  POBJ32    p_next_obj = p_obj+1;
   POBJ32    p_other;
   uint8_t   z;
   uint8_t   width, depth, height;
   unsigned  i;
   
-  UNIMPLEMENTED;
   UNTESTED;
 
   // registered as pressed?  
@@ -1970,6 +1968,7 @@ void handle_pickup_drop (POBJ32 p_obj)
     byte_5BD3 = 1;
   p_obj->z = z;     // restore
   // audio
+  
   pickup_drop_pressed = 1;
   byte_5BB4 = 1;
   width = p_obj->width;
@@ -1983,7 +1982,7 @@ void handle_pickup_drop (POBJ32 p_obj)
   for (i=0; i<2; i++)
   {
     if (sub_C172 (p_obj, p_other) != 0)
-      goto loc_C141;
+      goto pickup_object;
   }
   if (chk_pickup_drop () != 0)
   {
@@ -1993,6 +1992,8 @@ void handle_pickup_drop (POBJ32 p_obj)
       if (p_other->graphic_no == 0)
         goto loc_C0B2;
   }
+  
+loc_C09D:
   // restore original dimensions
   p_obj->height = height;
   p_obj->depth = depth;
@@ -2000,26 +2001,52 @@ void handle_pickup_drop (POBJ32 p_obj)
   return;
   
 loc_C0B2:
-  ;
-
-loc_C106:
-  ;
+  if (objects_carried[2].graphic_no == 0)
+    goto adjust_carried;
+  if (byte_5BD3 != 0)
+    goto loc_C09D;
+  p_other->graphic_no = objects_carried[2].graphic_no;
+  if (p_obj->scrn == CAULDRON_SCREEN)
+    if (p_obj->z >= 152)
+    {
+      p_other->graphic_no |= (1<<3);
+      byte_5BC4 = 1;
+    }
+  // copy x,y,z
+  memcpy (&p_other->x, &p_obj->x, 3);
+  p_obj->z += 12;
+  p_next_obj += 12;
+  calc_pixel_XY (p_other);
   
-loc_C12B:
-  ;
+drop_object:
+  p_other->width = 5;
+  p_other->depth = 5;
+  p_other->height = 12;
+  p_other->flags7 = objects_carried[2].flags7;
+  p_other->scrn = p_obj->scrn;
+  p_other->u.ptr_obj_tbl_entry = objects_carried[2].ptr_obj_tbl_entry;
+  p_other->flags13 |= (1<<0);
+  
+adjust_carried:
+  // careful, the memory overlaps!
+  memmove (objects_carried, inventory, 3*sizeof(INVENTORY));
+  memset (inventory, 0, 4);
+  goto loc_C09D;
       
-loc_C141:
+pickup_object:
   disable_spike_ball_drop = 0;
-  unk_5BD8 = p_other->graphic_no;
-  unk_5BD9 = p_other->flags7;
-  unk_5BDA = p_other->u.ptr_obj_tbl_entry;
+  inventory[0].graphic_no = p_other->graphic_no;
+  inventory[0].flags7 = p_other->flags7;
+  inventory[0].ptr_obj_tbl_entry = p_other->u.ptr_obj_tbl_entry;
   p_other->u.ptr_obj_tbl_entry = 0;
   set_wipe_and_draw_flags (p_other);
   p_other->graphic_no = 1;  // invalid
-  if (unk_5BE4 == 0)
-    goto loc_C12B;
-  p_other->graphic_no = unk_5BE4;
-  goto loc_C106;
+  // empty slot to pickup, KO
+  if (objects_carried[2].graphic_no == 0)
+    goto adjust_carried;
+  // need to drop 3rd object
+  p_other->graphic_no = objects_carried[2].graphic_no;
+  goto drop_object;
 }
 
 // $C172
@@ -2475,8 +2502,8 @@ void find_special_objs_here (void)
     p_special_obj->z = special_objs_tbl[i].curr_z;
     p_special_obj->width = 5;
     p_special_obj->depth = 5;
-    p_special_obj->height = 20;
-    p_special_obj->flags7 = 0x14;
+    p_special_obj->height = 12;
+    p_special_obj->flags7 = FLAG_DRAW | (1<<2);
     p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
     memset (&p_special_obj->d_x, 0, 7);
     p_special_obj->u.ptr_obj_tbl_entry = i;
@@ -2822,12 +2849,12 @@ void upd_player_bottom (POBJ32 p_obj)
     if (chk_plyr_OOB (p_obj) == 0)
       if (p_obj->d_z >= 0)
         p_obj->d_z = 0;
-    p_next_obj->flags7 |= FLAG_Y_OOB;
+    p_next_obj->flags7 |= (1<<1);
     // the original Z80 code returned to game_loop
     // we'll set a flag internally and simply return
     if (move_player (p_obj, inp) == 1)
       return;
-    p_next_obj->flags7 &= ~FLAG_Y_OOB;
+    p_next_obj->flags7 &= ~(1<<1);
     if (p_obj->flags12 >= 16)
       p_obj->flags12 -= 16;
     set_wipe_and_draw_flags (p_obj);
@@ -3113,7 +3140,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
 {
   int8_t d_x, d_y, d_z;
 
-  if (p_obj->flags7 & (1<<1))
+  if ((p_obj->flags7 & (1<<1)) != 0)
     return;
     
   p_obj->flags7 |= (1<<1);

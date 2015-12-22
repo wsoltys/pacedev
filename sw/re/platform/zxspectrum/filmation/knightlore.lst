@@ -115,7 +115,7 @@ SCRATCH:5BD5 ??				 ds 1
 SCRATCH:5BD6 ??				 ds 1
 SCRATCH:5BD7 ??				 ds 1
 SCRATCH:5BD8 ??		 unk_5BD8:	 ds 1						 ; DATA	XREF: handle_pickup_drop+128o
-SCRATCH:5BD8										 ; handle_pickup_drop:loc_C141o
+SCRATCH:5BD8										 ; handle_pickup_drop:pickup_objecto
 SCRATCH:5BD9 ??				 ds 1
 SCRATCH:5BDA ??				 ds 1
 SCRATCH:5BDB ??				 ds 1
@@ -5214,7 +5214,7 @@ RAM:C06B FD 21 48 5C		     ld	     iy, special_objs_here
 RAM:C06F
 RAM:C06F	     loc_C06F:							     ; CODE XREF: handle_pickup_drop+6Cj
 RAM:C06F CD 72 C1		     call    sub_C172
-RAM:C072 DA 41 C1		     jp	     c,	loc_C141
+RAM:C072 DA 41 C1		     jp	     c,	pickup_object
 RAM:C075 11 20 00		     ld	     de, 32				     ; entry size
 RAM:C078 FD 19			     add     iy, de				     ; next entry
 RAM:C07A 10 F3			     djnz    loc_C06F
@@ -5267,14 +5267,14 @@ RAM:C0BE 20 DD			     jr	     nz, loc_C09D
 RAM:C0C0 2B			     dec     hl
 RAM:C0C1 7E			     ld	     a,	(hl)
 RAM:C0C2 23			     inc     hl
-RAM:C0C3 FD 77 00		     ld	     (iy+0), a
+RAM:C0C3 FD 77 00		     ld	     (iy+0), a				     ; graphic_no
 RAM:C0C6 DD 7E 08		     ld	     a,	(ix+8)				     ; plyr_spr_1 screen
 RAM:C0C9 FE 88			     cp	     136				     ; cauldron	room?
 RAM:C0CB 20 10			     jr	     nz, loc_C0DD			     ; no, skip
 RAM:C0CD DD 7E 03		     ld	     a,	(ix+3)				     ; plyr_spr_1 Z
 RAM:C0D0 FE 98			     cp	     152
 RAM:C0D2 38 09			     jr	     c,	loc_C0DD
-RAM:C0D4 FD CB 00 DE		     set     3,	(iy+0)
+RAM:C0D4 FD CB 00 DE		     set     3,	(iy+0)				     ; graphic_no
 RAM:C0D8 3E 01			     ld	     a,	1
 RAM:C0DA 32 C4 5B		     ld	     (byte_5BC4), a
 RAM:C0DD
@@ -5301,15 +5301,15 @@ RAM:C0FF DD E1			     pop     ix
 RAM:C101 CD C9 D6		     call    calc_pixel_XY
 RAM:C104 DD E1			     pop     ix
 RAM:C106
-RAM:C106	     loc_C106:							     ; CODE XREF: handle_pickup_drop+162j
+RAM:C106	     drop_object:						     ; CODE XREF: handle_pickup_drop+162j
 RAM:C106 FD 36 04 05		     ld	     (iy+4), 5				     ; width=5
 RAM:C10A FD 36 05 05		     ld	     (iy+5), 5				     ; depth=5
 RAM:C10E FD 36 06 0C		     ld	     (iy+6), 12				     ; height=12
 RAM:C112 E1			     pop     hl
 RAM:C113 7E			     ld	     a,	(hl)
 RAM:C114 23			     inc     hl
-RAM:C115 FD 77 07		     ld	     (iy+7), a
-RAM:C118 DD 7E 08		     ld	     a,	(ix+8)
+RAM:C115 FD 77 07		     ld	     (iy+7), a				     ; flags7
+RAM:C118 DD 7E 08		     ld	     a,	(ix+8)				     ; scrn
 RAM:C11B FD 77 08		     ld	     (iy+8), a
 RAM:C11E 7E			     ld	     a,	(hl)
 RAM:C11F 23			     inc     hl
@@ -5330,7 +5330,7 @@ RAM:C13B CD 08 D5		     call    zero_DE
 RAM:C13E C3 9D C0		     jp	     loc_C09D
 RAM:C141	     ; ---------------------------------------------------------------------------
 RAM:C141
-RAM:C141	     loc_C141:							     ; CODE XREF: handle_pickup_drop+64j
+RAM:C141	     pickup_object:						     ; CODE XREF: handle_pickup_drop+64j
 RAM:C141 21 D8 5B		     ld	     hl, unk_5BD8
 RAM:C144 AF			     xor     a
 RAM:C145 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
@@ -5356,7 +5356,7 @@ RAM:C169 A7			     and     a
 RAM:C16A 28 BF			     jr	     z,	loc_C12B
 RAM:C16C FD 77 00		     ld	     (iy+0), a
 RAM:C16F E5			     push    hl
-RAM:C170 18 94			     jr	     loc_C106
+RAM:C170 18 94			     jr	     drop_object
 RAM:C170	     ; End of function handle_pickup_drop
 RAM:C170
 RAM:C172
