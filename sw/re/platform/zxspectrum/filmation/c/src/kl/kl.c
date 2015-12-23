@@ -85,9 +85,9 @@ static uint8_t room_size_Z;                           // $5BAE
 static uint8_t portcullis_moving;                     // $5BAF
 static uint8_t portcullis_move_cnt;                   // $5BB0
 static uint8_t transform_flag_graphic;                // $5BB1
-static uint8_t unk_5BB2;                              // $5BB2
+static uint8_t not_1st_screen;                        // $5BB2
 static uint8_t pickup_drop_pressed;                   // $5BB3
-static uint8_t byte_5BB4;                             // $5BB4
+static uint8_t objects_carried_changed;               // $5BB4
 static uint8_t user_input;                            // $5BB5
 static uint8_t tmp_attrib;                            // $5BB6
 static uint8_t render_status_info;                    // $5BB7
@@ -100,11 +100,11 @@ static uint8_t ball_bounce_height;                    // $5BBD
 static uint8_t rendered_objs_cnt;                     // $5BBE
 static uint8_t is_spike_ball_dropping;                // $5BBF
 static uint8_t disable_spike_ball_drop;               // $5BC0
-static int8_t old_dZ;                                 // $5BC1
+static int8_t tmp_dZ;                                 // $5BC1
 static int8_t tmp_bouncing_ball_dZ;                   // $5BC2
 static uint8_t all_objs_in_cauldron;                  // $5BC3
-static uint8_t byte_5BC4;                             // $5BC4
-static uint8_t byte_5BC5;                             // $5BC5
+static uint8_t obj_dropping_into_cauldron;            // $5BC4
+static uint8_t rising_blocks_Z;                       // $5BC5
 static uint8_t num_scrns_visited;                     // $5BC6
 static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t percent_msw;                           // $5BC9
@@ -114,7 +114,7 @@ static uint8_t *word_5BCD;                            // $5BCD
 static uint8_t *word_5BCF;                            // $5BCF
 static uint8_t audio_played;                          // $5BD1
 static uint8_t directional;                           // $5BD2
-static uint8_t byte_5BD3;                             // $5BD3
+static uint8_t cant_drop;                             // $5BD3
 static INVENTORY inventory[4];                        // $5BD8
 static PINVENTORY objects_carried =
                 &inventory[1];                        // $5BDC
@@ -151,7 +151,7 @@ static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio_until_keypress (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static uint8_t sub_B4FD (POBJ32 p_obj);
-static uint8_t test_obj_flag_bit2 (POBJ32 p_obj);
+static uint8_t test_obj_flag_bit1 (POBJ32 p_obj);
 static void shuffle_objects_required (void);
 static void upd_131_to_133 (POBJ32 p_obj);
 static void dec_dZ_wipe_and_draw (POBJ32 p_obj);
@@ -428,7 +428,7 @@ START_MENU_AF7F:
 MAIN_AF88:
 
   //build_lookup_tbls ();
-  unk_5BB2 = 0;
+  not_1st_screen = 0;
   plyr_spr_1_scratchpad.flags12 = 0;
   lives = NO_LIVES;
   // update seed
@@ -504,12 +504,12 @@ onscreen_loop:
   seed_3 += seed_2;           // add a,l
   seed_3 += (seed_2 >> 8);    // add a,h
 
-  unk_5BB2 |= (1<<0);
+  not_1st_screen |= (1<<0);
   //sub_D50E ();              // audio
   init_cauldron_bubbles ();
   list_objects_to_draw ();
   render_dynamic_objects ();
-  if (byte_5BC5 != 0)
+  if (rising_blocks_Z != 0)
     /*gen_audio_B454 ()*/;
 
   // calc game delay loop
@@ -536,7 +536,7 @@ game_delay:
     reset_objs_wipe_flag ();
   }
 
-  byte_5BC5 = 0;
+  rising_blocks_Z = 0;
   if (graphic_objs_tbl[0].graphic_no == 0 &&
       graphic_objs_tbl[1].graphic_no == 0)
     goto player_dies;
@@ -891,7 +891,7 @@ uint8_t sub_B4FD (POBJ32 p_obj)
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit2 (p_other) == 0)
+    if (test_obj_flag_bit1 (p_other) == 0)
       continue;
     if (sub_CC9D (p_obj, p_other, 0) == 0)
       continue;
@@ -908,12 +908,12 @@ uint8_t sub_B4FD (POBJ32 p_obj)
 }
 
 // $B538
-// returns complement of bit2
-uint8_t test_obj_flag_bit2 (POBJ32 p_obj)
+// returns complement of bit1
+uint8_t test_obj_flag_bit1 (POBJ32 p_obj)
 {
   if (p_obj->graphic_no == 0)
     return (0);
-  return ((p_obj->flags7 & (1<<2)) ? 0 : 1);
+  return ((p_obj->flags7 & (1<<1)) ? 0 : 1);
 }
 
 // $B544
@@ -987,7 +987,7 @@ void upd_131_to_133 (POBJ32 p_obj)
     p_obj->d_z = 1;
     move_towards_plyr (p_obj, 4, 4);
   }
-  byte_5BC5 = p_obj->z;
+  rising_blocks_Z = p_obj->z;
   dec_dZ_wipe_and_draw (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
@@ -1914,9 +1914,9 @@ void upd_119 (POBJ32 p_obj)
 // $BF45
 void display_objects_carried (void)
 {
-  if (byte_5BB4 == 0)
+  if (objects_carried_changed == 0)
     return;
-  byte_5BB4 = 0;
+  objects_carried_changed = 0;
   display_objects ();
 }
 
@@ -1983,16 +1983,16 @@ void handle_pickup_drop (POBJ32 p_obj)
     return;
   if ((p_obj->flags12 & FLAG_Z_OOB) == 0)
     return;
-  byte_5BD3 = 0;
+  cant_drop = 0;
   z = p_obj->z;     // save
   p_obj->z += 12;
   if (sub_B4FD (p_obj) != 0)
-    byte_5BD3 = 1;
+    cant_drop = 1;
   p_obj->z = z;     // restore
   // audio
   
   pickup_drop_pressed = 1;
-  byte_5BB4 = 1;
+  objects_carried_changed = 1;
   width = p_obj->width;
   p_obj->width += 4;
   depth = p_obj->depth;
@@ -2015,7 +2015,7 @@ void handle_pickup_drop (POBJ32 p_obj)
         goto loc_C0B2;
   }
   
-loc_C09D:
+done_pickup_drop:
   // restore original dimensions
   p_obj->height = height;
   p_obj->depth = depth;
@@ -2025,14 +2025,15 @@ loc_C09D:
 loc_C0B2:
   if (objects_carried[2].graphic_no == 0)
     goto adjust_carried;
-  if (byte_5BD3 != 0)
-    goto loc_C09D;
+  if (cant_drop != 0)
+    goto done_pickup_drop;
   p_other->graphic_no = objects_carried[2].graphic_no;
   if (p_obj->scrn == CAULDRON_SCREEN)
     if (p_obj->z >= 152)
     {
+      // convert to sprite being dropped into cauldron
       p_other->graphic_no |= (1<<3);
-      byte_5BC4 = 1;
+      obj_dropping_into_cauldron = 1;
     }
   // copy x,y,z
   memcpy (&p_other->x, &p_obj->x, 3);
@@ -2053,7 +2054,7 @@ adjust_carried:
   // careful, the memory overlaps!
   memmove (objects_carried, inventory, 3*sizeof(INVENTORY));
   memset (inventory, 0, 4);
-  goto loc_C09D;
+  goto done_pickup_drop;
       
 pickup_object:
   disable_spike_ball_drop = 0;
@@ -2176,7 +2177,7 @@ void upd_104_to_110 (POBJ32 p_obj)
         if (objects_put_in_cauldron == 14)
           prepare_final_animation ();
       }
-      byte_5BC4 = 0;
+      obj_dropping_into_cauldron = 0;
       graphic_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
       upd_111 (p_obj);
       return;
@@ -3040,7 +3041,7 @@ uint8_t move_player (POBJ32 p_obj, uint8_t inp)
 {
   UNTESTED;
   
-  if (byte_5BC4 != 0)
+  if (obj_dropping_into_cauldron != 0)
     p_obj->d_z = 2;
   if ((p_obj->flags12 & FLAG_JUMPING) != 0 ||
       (p_obj->flags12 & 0xF0) != 0 ||
@@ -3049,7 +3050,7 @@ uint8_t move_player (POBJ32 p_obj, uint8_t inp)
   if (p_obj->d_z < 0 || (inp & INP_JUMP) == 0)
     p_obj->d_z--;
   p_obj->d_z--;
-  old_dZ = p_obj->d_z;
+  tmp_dZ = p_obj->d_z;
   if (p_obj->d_z < -2)
     /*gen_audio_Z(p_obj)*/;
   adj_for_out_of_bounds (p_obj);
@@ -3057,7 +3058,7 @@ uint8_t move_player (POBJ32 p_obj, uint8_t inp)
     /*return (1)*/;
   add_dXYZ (p_obj);
   if ((p_obj->flags12 & FLAG_Z_OOB) != 0)
-    if (old_dZ < 0)
+    if (tmp_dZ < 0)
       p_obj->flags12 &= ~FLAG_JUMPING;
   clear_dX_dY (p_obj);
   
@@ -3263,7 +3264,7 @@ int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit2 (p_other) == 0)
+    if (test_obj_flag_bit1 (p_other) == 0)
       continue;
     if (sub_CCB2 (p_obj, p_other, d_y) == 0)
       continue;
@@ -3299,7 +3300,7 @@ int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit2 (p_other) == 0)
+    if (test_obj_flag_bit1 (p_other) == 0)
       continue;
     if (sub_CC9D (p_obj, p_other, d_x) == 0)
       continue;
@@ -3335,7 +3336,7 @@ int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit2 (p_other) == 0)
+    if (test_obj_flag_bit1 (p_other) == 0)
       continue;
     if (sub_CC9D (p_obj, p_other, d_x) == 0)
       continue;
@@ -3635,7 +3636,7 @@ void calc_display_order_and_render (void)
 // $D022
 uint8_t check_user_input (void)
 {
-  if (all_objs_in_cauldron != 0 || byte_5BC4 != 0)
+  if (all_objs_in_cauldron != 0 || obj_dropping_into_cauldron != 0)
   {
     user_input = 0;
     goto finished_input;
@@ -3722,7 +3723,7 @@ void init_start_location (void)
 // $D1E6
 void build_screen_objects (void)
 {
-  if (unk_5BB2 != 0)
+  if (not_1st_screen != 0)
     update_special_objs ();
     
   clear_scrn_buffer ();

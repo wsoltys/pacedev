@@ -40,9 +40,9 @@ SCRATCH:5BAE ??		 room_size_Z:	 ds 1
 SCRATCH:5BAF ??		 portcullis_moving:ds 1
 SCRATCH:5BB0 ??		 portcullis_move_cnt:ds	1
 SCRATCH:5BB1 ??		 transform_flag_graphic:ds 1
-SCRATCH:5BB2 ??		 unk_5BB2:	 ds 1
+SCRATCH:5BB2 ??		 not_1st_screen: ds 1
 SCRATCH:5BB3 ??		 pickup_drop_pressed:ds	1
-SCRATCH:5BB4 ??		 byte_5BB4:	 ds 1
+SCRATCH:5BB4 ??		 objects_carried_changed:ds 1
 SCRATCH:5BB5		 ; b5=???
 SCRATCH:5BB5		 ; b4=pickup/drop
 SCRATCH:5BB5		 ; b3=jump
@@ -61,11 +61,11 @@ SCRATCH:5BBD ??		 ball_bounce_height:ds 1
 SCRATCH:5BBE ??		 rendered_objs_cnt:ds 1
 SCRATCH:5BBF ??		 is_spike_ball_dropping:ds 1
 SCRATCH:5BC0 ??		 disable_spike_ball_drop:ds 1
-SCRATCH:5BC1 ??		 old_dZ:	 ds 1
+SCRATCH:5BC1 ??		 tmp_dZ:	 ds 1
 SCRATCH:5BC2 ??		 tmp_bouncing_ball_dZ:ds 1
 SCRATCH:5BC3 ??		 all_objs_in_cauldron:ds 1
-SCRATCH:5BC4 ??		 byte_5BC4:	 ds 1
-SCRATCH:5BC5 ??		 byte_5BC5:	 ds 1
+SCRATCH:5BC4 ??		 obj_dropping_into_cauldron:ds 1
+SCRATCH:5BC5 ??		 rising_blocks_z:ds 1
 SCRATCH:5BC6 ??		 num_scrns_visited:ds 1
 SCRATCH:5BC7 ??	??	 gfxbase_8x8:	 ds 2
 SCRATCH:5BC9 ??		 percent_msw:	 ds 1
@@ -75,12 +75,12 @@ SCRATCH:5BCD ??	??	 word_5BCD:	 ds 2
 SCRATCH:5BCF ??	??	 word_5BCF:	 ds 2
 SCRATCH:5BD1 ??		 audio_played:	 ds 1
 SCRATCH:5BD2 ??		 directional:	 ds 1
-SCRATCH:5BD3 ??		 byte_5BD3:	 ds 1
+SCRATCH:5BD3 ??		 cant_drop:	 ds 1
 SCRATCH:5BD4 ??				 ds 1
 SCRATCH:5BD5 ??				 ds 1
 SCRATCH:5BD6 ??				 ds 1
 SCRATCH:5BD7 ??				 ds 1
-SCRATCH:5BD8 ??		 unk_5BD8:	 ds 1
+SCRATCH:5BD8 ??		 inventory:	 ds 1
 SCRATCH:5BD9 ??				 ds 1
 SCRATCH:5BDA ??				 ds 1
 SCRATCH:5BDB ??				 ds 1
@@ -95,7 +95,7 @@ SCRATCH:5BE3 ??		 unk_5BE3:	 ds 1
 SCRATCH:5BE4 ??		 unk_5BE4:	 ds 1
 SCRATCH:5BE5 ??				 ds 1
 SCRATCH:5BE6 ??				 ds 1
-SCRATCH:5BE7 ??		 unk_5BE7:	 ds 1
+SCRATCH:5BE7 ??		 end_of_objects_carried:ds 1
 SCRATCH:5BE8		 ;
 SCRATCH:5BE8		 ; bit table of	flags denoting room has	been visited
 SCRATCH:5BE8		 ; - as	of yet,	doesn't appear to be used at all
@@ -2439,7 +2439,7 @@ RAM:AF88
 RAM:AF88	     main:							     ; for bit reversal	& shifting
 RAM:AF88 CD 9E D6		     call    build_lookup_tbls
 RAM:AF8B AF			     xor     a
-RAM:AF8C 32 B2 5B		     ld	     (unk_5BB2), a
+RAM:AF8C 32 B2 5B		     ld	     (not_1st_screen), a
 RAM:AF8F 32 6D D1		     ld	     (byte_D16D), a			     ; plyr_spr_1_scratchpad (flags12)
 RAM:AF92 3E 05			     ld	     a,	5				     ; 5 lives to start
 RAM:AF94 32 BA 5B		     ld	     (lives), a
@@ -2517,15 +2517,15 @@ RAM:B00A 86			     add     a,	(hl)
 RAM:B00B 85			     add     a,	l
 RAM:B00C 84			     add     a,	h
 RAM:B00D 32 A5 5B		     ld	     (seed_3), a
-RAM:B010 21 B2 5B		     ld	     hl, unk_5BB2
-RAM:B013 CB C6			     set     0,	(hl)
+RAM:B010 21 B2 5B		     ld	     hl, not_1st_screen
+RAM:B013 CB C6			     set     0,	(hl)				     ; update special objects table next time
 RAM:B015 CD 0E D5		     call    sub_D50E				     ; some audio stuff
 RAM:B018 CD A9 B8		     call    init_cauldron_bubbles
 RAM:B01B CD 62 CE		     call    list_objects_to_draw		     ; builds a	list of	screen objects
 RAM:B01E CD 9F D5		     call    render_dynamic_objects		     ; screen, sun/moon, etc
-RAM:B021 3A C5 5B		     ld	     a,	(byte_5BC5)
-RAM:B024 A7			     and     a
-RAM:B025 C4 54 B4		     call    nz, audio_B454
+RAM:B021 3A C5 5B		     ld	     a,	(rising_blocks_z)
+RAM:B024 A7			     and     a					     ; any blocks rising?
+RAM:B025 C4 54 B4		     call    nz, audio_B454			     ; yes, play audio
 RAM:B028 3A BE 5B		     ld	     a,	(rendered_objs_cnt)
 RAM:B02B ED 44			     neg
 RAM:B02D C6 06			     add     a,	6				     ; calculate delay loop value
@@ -2566,7 +2566,7 @@ RAM:B071 CD 88 B0		     call    reset_objs_wipe_flag
 RAM:B074
 RAM:B074	     loc_B074:
 RAM:B074 AF			     xor     a
-RAM:B075 32 C5 5B		     ld	     (byte_5BC5), a
+RAM:B075 32 C5 5B		     ld	     (rising_blocks_z),	a		     ; clear
 RAM:B078 DD 21 08 5C		     ld	     ix, graphic_objs_tbl
 RAM:B07C DD 7E 00		     ld	     a,	(ix+0)				     ; player sprite half
 RAM:B07F DD B6 20		     or	     (ix+20h)				     ; player other sprite half
@@ -3299,7 +3299,7 @@ RAM:B50B 61			     ld	     h,	c
 RAM:B50C DD CB 07 CE		     set     1,	(ix+7)
 RAM:B510
 RAM:B510	     loc_B510:
-RAM:B510 CD 38 B5		     call    test_object_flag_bit2
+RAM:B510 CD 38 B5		     call    test_object_flag_bit1
 RAM:B513 28 19			     jr	     z,	loc_B52E
 RAM:B515 CD 9D CC		     call    sub_CC9D
 RAM:B518 30 14			     jr	     nc, loc_B52E
@@ -3329,15 +3329,15 @@ RAM:B538
 RAM:B538	     ; =============== S U B R O U T I N E =======================================
 RAM:B538
 RAM:B538
-RAM:B538	     test_object_flag_bit2:
+RAM:B538	     test_object_flag_bit1:
 RAM:B538 FD 7E 00		     ld	     a,	(iy+0)				     ; graphic no.
 RAM:B53B A7			     and     a					     ; null?
 RAM:B53C C8			     ret     z					     ; yes, exit
 RAM:B53D FD 7E 07		     ld	     a,	(iy+7)				     ; flags
 RAM:B540 2F			     cpl
-RAM:B541 E6 02			     and     2					     ; test bit	2
+RAM:B541 E6 02			     and     2					     ; test bit	1
 RAM:B543 C9			     ret
-RAM:B543	     ; End of function test_object_flag_bit2
+RAM:B543	     ; End of function test_object_flag_bit1
 RAM:B543
 RAM:B544
 RAM:B544	     ; =============== S U B R O U T I N E =======================================
@@ -3411,7 +3411,7 @@ RAM:B5A6 DD 77 00		     ld	     (ix+0), a				     ; set graphic no.
 RAM:B5A9
 RAM:B5A9	     loc_B5A9:							     ; Z
 RAM:B5A9 DD 7E 03		     ld	     a,	(ix+3)
-RAM:B5AC 32 C5 5B		     ld	     (byte_5BC5), a
+RAM:B5AC 32 C5 5B		     ld	     (rising_blocks_z),	a
 RAM:B5AF
 RAM:B5AF	     dec_dZ_wipe_and_draw:
 RAM:B5AF CD 00 C7		     call    dec_dZ_and_update_XYZ
@@ -4856,11 +4856,11 @@ RAM:BF45	     ; =============== S U B R O U T I N E ============================
 RAM:BF45
 RAM:BF45
 RAM:BF45	     display_objects_carried:
-RAM:BF45 3A B4 5B		     ld	     a,	(byte_5BB4)
-RAM:BF48 A7			     and     a
-RAM:BF49 C8			     ret     z
-RAM:BF4A AF			     xor     a
-RAM:BF4B 32 B4 5B		     ld	     (byte_5BB4), a
+RAM:BF45 3A B4 5B		     ld	     a,	(objects_carried_changed)
+RAM:BF48 A7			     and     a					     ; anything	changed?
+RAM:BF49 C8			     ret     z					     ; no, return
+RAM:BF4A AF			     xor     a					     ; clear changed flag
+RAM:BF4B 32 B4 5B		     ld	     (objects_carried_changed),	a
 RAM:BF4B	     ; End of function display_objects_carried
 RAM:BF4B
 RAM:BF4E
@@ -4986,7 +4986,7 @@ RAM:C021 C0			     ret     nz					     ; yes, exit
 RAM:C022 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
 RAM:C026 C8			     ret     z					     ; ???
 RAM:C027 AF			     xor     a
-RAM:C028 32 D3 5B		     ld	     (byte_5BD3), a
+RAM:C028 32 D3 5B		     ld	     (cant_drop), a
 RAM:C02B DD 7E 03		     ld	     a,	(ix+3)				     ; Z
 RAM:C02E 47			     ld	     b,	a
 RAM:C02F C6 0C			     add     a,	12				     ; Z+12
@@ -4994,14 +4994,14 @@ RAM:C031 DD 77 03		     ld	     (ix+3), a
 RAM:C034 CD FD B4		     call    sub_B4FD
 RAM:C037 DD 70 03		     ld	     (ix+3), b				     ; restore original	Z
 RAM:C03A 30 05			     jr	     nc, loc_C041
-RAM:C03C 3E 01			     ld	     a,	1
-RAM:C03E 32 D3 5B		     ld	     (byte_5BD3), a
+RAM:C03C 3E 01			     ld	     a,	1				     ; we can't drop anything
+RAM:C03E 32 D3 5B		     ld	     (cant_drop), a
 RAM:C041
 RAM:C041	     loc_C041:
 RAM:C041 CD A3 B4		     call    toggle_FE_bit4_x16
 RAM:C044 3E 01			     ld	     a,	1
 RAM:C046 32 B3 5B		     ld	     (pickup_drop_pressed), a
-RAM:C049 32 B4 5B		     ld	     (byte_5BB4), a
+RAM:C049 32 B4 5B		     ld	     (objects_carried_changed),	a
 RAM:C04C 06 02			     ld	     b,	2
 RAM:C04E DD 6E 04		     ld	     l,	(ix+4)				     ; width
 RAM:C051 7D			     ld	     a,	l
@@ -5026,7 +5026,7 @@ RAM:C075 11 20 00		     ld	     de, 32				     ; entry size
 RAM:C078 FD 19			     add     iy, de				     ; next entry
 RAM:C07A 10 F3			     djnz    loc_C06F
 RAM:C07C CD FB BF		     call    chk_pickup_drop
-RAM:C07F 28 1C			     jr	     z,	loc_C09D
+RAM:C07F 28 1C			     jr	     z,	done_pickup_drop
 RAM:C081 06 02			     ld	     b,	2
 RAM:C083 DD 7E 08		     ld	     a,	(ix+8)				     ; plyr_spr_1 screen
 RAM:C086 FE 88			     cp	     136				     ; cauldron	room?
@@ -5044,7 +5044,7 @@ RAM:C097 28 19			     jr	     z,	loc_C0B2			     ; yes, skip
 RAM:C099 FD 19			     add     iy, de				     ; next entry
 RAM:C09B 10 F6			     djnz    loc_C093				     ; loop
 RAM:C09D
-RAM:C09D	     loc_C09D:
+RAM:C09D	     done_pickup_drop:
 RAM:C09D E1			     pop     hl
 RAM:C09E DD 75 06		     ld	     (ix+6), l				     ; height
 RAM:C0A1 E1			     pop     hl
@@ -5066,10 +5066,10 @@ RAM:C0B2 21 E4 5B		     ld	     hl, unk_5BE4
 RAM:C0B5 7E			     ld	     a,	(hl)
 RAM:C0B6 23			     inc     hl
 RAM:C0B7 A7			     and     a
-RAM:C0B8 28 71			     jr	     z,	loc_C12B
-RAM:C0BA 3A D3 5B		     ld	     a,	(byte_5BD3)
+RAM:C0B8 28 71			     jr	     z,	adjust_carried
+RAM:C0BA 3A D3 5B		     ld	     a,	(cant_drop)
 RAM:C0BD A7			     and     a
-RAM:C0BE 20 DD			     jr	     nz, loc_C09D
+RAM:C0BE 20 DD			     jr	     nz, done_pickup_drop
 RAM:C0C0 2B			     dec     hl
 RAM:C0C1 7E			     ld	     a,	(hl)
 RAM:C0C2 23			     inc     hl
@@ -5082,7 +5082,7 @@ RAM:C0D0 FE 98			     cp	     152
 RAM:C0D2 38 09			     jr	     c,	loc_C0DD
 RAM:C0D4 FD CB 00 DE		     set     3,	(iy+0)				     ; graphic_no
 RAM:C0D8 3E 01			     ld	     a,	1
-RAM:C0DA 32 C4 5B		     ld	     (byte_5BC4), a
+RAM:C0DA 32 C4 5B		     ld	     (obj_dropping_into_cauldron), a
 RAM:C0DD
 RAM:C0DD	     loc_C0DD:
 RAM:C0DD E5			     push    hl
@@ -5123,19 +5123,19 @@ RAM:C123 7E			     ld	     a,	(hl)
 RAM:C124 FD 77 11		     ld	     (iy+17), a
 RAM:C127 FD CB 0D C6		     set     0,	(iy+13)
 RAM:C12B
-RAM:C12B	     loc_C12B:
+RAM:C12B	     adjust_carried:						     ; 2nd-to-last entry
 RAM:C12B 21 E3 5B		     ld	     hl, unk_5BE3
-RAM:C12E 11 E7 5B		     ld	     de, unk_5BE7
+RAM:C12E 11 E7 5B		     ld	     de, end_of_objects_carried		     ; 3 entries (@4 bytes) to shift
 RAM:C131 01 0C 00		     ld	     bc, 12
-RAM:C134 ED B8			     lddr
-RAM:C136 11 D8 5B		     ld	     de, unk_5BD8
+RAM:C134 ED B8			     lddr					     ; shift down by 1 entry
+RAM:C136 11 D8 5B		     ld	     de, inventory
 RAM:C139 06 04			     ld	     b,	4
-RAM:C13B CD 08 D5		     call    zero_DE
-RAM:C13E C3 9D C0		     jp	     loc_C09D
+RAM:C13B CD 08 D5		     call    zero_DE				     ; zap extra slot
+RAM:C13E C3 9D C0		     jp	     done_pickup_drop
 RAM:C141	     ; ---------------------------------------------------------------------------
 RAM:C141
 RAM:C141	     pickup_object:
-RAM:C141 21 D8 5B		     ld	     hl, unk_5BD8
+RAM:C141 21 D8 5B		     ld	     hl, inventory
 RAM:C144 AF			     xor     a
 RAM:C145 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
 RAM:C148 FD 7E 00		     ld	     a,	(iy+0)				     ; graphic_no
@@ -5153,11 +5153,11 @@ RAM:C15B 23			     inc     hl
 RAM:C15C 72			     ld	     (hl), d				     ; store ptr
 RAM:C15D CD 9D C6		     call    set_wipe_and_draw_IY
 RAM:C160 FD 36 00 01		     ld	     (iy+0), 1
-RAM:C164 21 E4 5B		     ld	     hl, unk_5BE4
+RAM:C164 21 E4 5B		     ld	     hl, unk_5BE4			     ; object_carried[2].graphic_no
 RAM:C167 7E			     ld	     a,	(hl)
 RAM:C168 23			     inc     hl
-RAM:C169 A7			     and     a
-RAM:C16A 28 BF			     jr	     z,	loc_C12B
+RAM:C169 A7			     and     a					     ; empty slot?
+RAM:C16A 28 BF			     jr	     z,	adjust_carried
 RAM:C16C FD 77 00		     ld	     (iy+0), a
 RAM:C16F E5			     push    hl
 RAM:C170 18 94			     jr	     drop_object
@@ -5312,7 +5312,7 @@ RAM:C262 CD CC C2		     call    prepare_final_animation
 RAM:C265
 RAM:C265	     loc_C265:
 RAM:C265 AF			     xor     a
-RAM:C266 32 C4 5B		     ld	     (byte_5BC4), a
+RAM:C266 32 C4 5B		     ld	     (obj_dropping_into_cauldron), a
 RAM:C269 DD 6E 10		     ld	     l,	(ix+16)
 RAM:C26C DD 66 11		     ld	     h,	(ix+17)				     ; ptr object table
 RAM:C26F 36 00			     ld	     (hl), 0				     ; zap graphic no.
@@ -6644,7 +6644,7 @@ RAM:C9A1	     ; =============== S U B R O U T I N E ============================
 RAM:C9A1
 RAM:C9A1
 RAM:C9A1	     move_player:
-RAM:C9A1 3A C4 5B		     ld	     a,	(byte_5BC4)
+RAM:C9A1 3A C4 5B		     ld	     a,	(obj_dropping_into_cauldron)
 RAM:C9A4 A7			     and     a
 RAM:C9A5 28 04			     jr	     z,	loc_C9AB
 RAM:C9A7 DD 36 0B 02		     ld	     (ix+11), 2				     ; dZ=2
@@ -6676,7 +6676,7 @@ RAM:C9CD
 RAM:C9CD	     loc_C9CD:
 RAM:C9CD 3D			     dec     a
 RAM:C9CE DD 77 0B		     ld	     (ix+11), a				     ; dZ
-RAM:C9D1 32 C1 5B		     ld	     (old_dZ), a
+RAM:C9D1 32 C1 5B		     ld	     (tmp_dZ), a
 RAM:C9D4 C6 02			     add     a,	2
 RAM:C9D6 FC 51 B4		     call    m,	audio_B451
 RAM:C9D9 CD 45 CB		     call    adj_for_out_of_bounds
@@ -6684,7 +6684,7 @@ RAM:C9DC CD 70 CA		     call    handle_exit_screen
 RAM:C9DF CD 06 C7		     call    add_dXYZ
 RAM:C9E2 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
 RAM:C9E6 28 0B			     jr	     z,	clear_dX_dY			     ; no, go
-RAM:C9E8 3A C1 5B		     ld	     a,	(old_dZ)
+RAM:C9E8 3A C1 5B		     ld	     a,	(tmp_dZ)
 RAM:C9EB A7			     and     a
 RAM:C9EC F2 F3 C9		     jp	     p,	clear_dX_dY
 RAM:C9EF DD CB 0C 9E		     res     3,	(ix+12)				     ; clear jumping flag
@@ -6995,7 +6995,7 @@ RAM:CB9A FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CB9E 06 28			     ld	     b,	40				     ; max objects
 RAM:CBA0
 RAM:CBA0	     loc_CBA0:
-RAM:CBA0 CD 38 B5		     call    test_object_flag_bit2
+RAM:CBA0 CD 38 B5		     call    test_object_flag_bit1
 RAM:CBA3 28 3C			     jr	     z,	loc_CBE1
 RAM:CBA5 CD B2 CC		     call    sub_CCB2
 RAM:CBA8 30 37			     jr	     nc, loc_CBE1
@@ -7044,7 +7044,7 @@ RAM:CBE9 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CBED 06 28			     ld	     b,	40				     ; max objects
 RAM:CBEF
 RAM:CBEF	     loc_CBEF:
-RAM:CBEF CD 38 B5		     call    test_object_flag_bit2
+RAM:CBEF CD 38 B5		     call    test_object_flag_bit1
 RAM:CBF2 28 3C			     jr	     z,	loc_CC30			     ; next entry
 RAM:CBF4 CD 9D CC		     call    sub_CC9D
 RAM:CBF7 30 37			     jr	     nc, loc_CC30			     ; next entry
@@ -7093,7 +7093,7 @@ RAM:CC38 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CC3C 06 28			     ld	     b,	40				     ; max objects
 RAM:CC3E
 RAM:CC3E	     loc_CC3E:
-RAM:CC3E CD 38 B5		     call    test_object_flag_bit2
+RAM:CC3E CD 38 B5		     call    test_object_flag_bit1
 RAM:CC41 28 52			     jr	     z,	loc_CC95			     ; next entry
 RAM:CC43 CD 9D CC		     call    sub_CC9D
 RAM:CC46 30 4D			     jr	     nc, loc_CC95			     ; next entry
@@ -7773,7 +7773,7 @@ RAM:D022
 RAM:D022	     check_user_input:
 RAM:D022 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:D025 4F			     ld	     c,	a
-RAM:D026 3A C4 5B		     ld	     a,	(byte_5BC4)
+RAM:D026 3A C4 5B		     ld	     a,	(obj_dropping_into_cauldron)
 RAM:D029 B1			     or	     c
 RAM:D02A 0E 00			     ld	     c,	0
 RAM:D02C C2 11 D1		     jp	     nz, finished_input
@@ -8105,9 +8105,9 @@ RAM:D1E6	     ; =============== S U B R O U T I N E ============================
 RAM:D1E6
 RAM:D1E6
 RAM:D1E6	     build_screen_objects:
-RAM:D1E6 3A B2 5B		     ld	     a,	(unk_5BB2)
-RAM:D1E9 A7			     and     a
-RAM:D1EA 28 03			     jr	     z,	loc_D1EF
+RAM:D1E6 3A B2 5B		     ld	     a,	(not_1st_screen)
+RAM:D1E9 A7			     and     a					     ; 1st screen of the game?
+RAM:D1EA 28 03			     jr	     z,	loc_D1EF			     ; yes, skip updating special objects
 RAM:D1EC CD 91 C5		     call    update_special_objs		     ; save state in special_objs_tbl
 RAM:D1EF
 RAM:D1EF	     loc_D1EF:
