@@ -30,6 +30,7 @@
 #define FLAG_WIPE         (1<<5)
 #define FLAG_DRAW         (1<<4)
 #define FLAG_AUTO_ADJ     (1<<3)    // for arches
+#define FLAG_MOVEABLE     (1<<2)    // (sic)
 #define FLAG_NEAR_ARCH    (1<<0)
                           
 // byte offset 12 flags   
@@ -42,8 +43,8 @@
 #define FLAG_TRIGGERED    (1<<3)    // dropping block
 #define FLAG_UP           (1<<2)    // bouncing ball
 #define FLAG_DROPPING     (1<<2)    // spiked ball
-#define FLAG_EAST         (1<<0)    // EW fire, EW guard
 #define FLAG_NORTH        (1<<1)    // NS fire
+#define FLAG_EAST         (1<<0)    // EW fire, EW guard
 #define MASK_DIR          0x03      // NSEW guard & wizard
 #define MASK_LOOK_CNT     0x0F      // player (look around cnt)
 
@@ -2580,7 +2581,7 @@ void find_special_objs_here (void)
     p_special_obj->width = 5;
     p_special_obj->depth = 5;
     p_special_obj->height = 12;
-    p_special_obj->flags7 = FLAG_DRAW | (1<<2);
+    p_special_obj->flags7 = FLAG_DRAW | FLAG_MOVEABLE;
     p_special_obj->scrn = special_objs_tbl[i].curr_scrn;
     memset (&p_special_obj->d_x, 0, 7);
     p_special_obj->u.ptr_obj_tbl_entry = i;
@@ -3282,7 +3283,7 @@ int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
       p_other->flags13 |= (p_obj->flags13 >> 1) & (1<<6);
       // other bit 5 -> obj bit 6
       p_obj->flags13 |= (p_other->flags13 << 1) & (1<<6);
-      if ((p_other->flags7 & (1<<2)) != 0)
+      if ((p_other->flags7 & FLAG_MOVEABLE) != 0)
         p_other->d_x = p_obj->d_x;
       if ((d_x = adj_d_for_out_of_bounds (d_x)) == 0)
         return (d_x);
@@ -3318,7 +3319,7 @@ int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
       p_other->flags13 |= (p_obj->flags13 >> 1) & (1<<6);
       // other bit 5 -> obj bit 6
       p_obj->flags13 |= (p_other->flags13 << 1) & (1<<6);
-      if ((p_other->flags7 & (1<<2)) != 0)
+      if ((p_other->flags7 & FLAG_MOVEABLE) != 0)
         p_other->d_y = p_obj->d_y;
       if ((d_y = adj_d_for_out_of_bounds (d_y)) == 0)
         return (d_y);
@@ -3355,7 +3356,7 @@ int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
       // other bit 5 -> obj bit 6
       p_obj->flags13 |= (p_other->flags13 << 1) & (1<<6);
       p_other->flags13 |= (1<<3);
-      if ((p_obj->flags7 & (1<<2)) != 0)
+      if ((p_obj->flags7 & FLAG_MOVEABLE) != 0)
       {
         if (p_obj->d_x == 0)
           p_obj->d_x = p_other->d_x;

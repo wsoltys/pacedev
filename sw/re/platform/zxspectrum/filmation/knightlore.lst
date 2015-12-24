@@ -5881,7 +5881,7 @@ RAM:C552 36 05			     ld	     (hl), 5				     ; depth = 5
 RAM:C554 23			     inc     hl
 RAM:C555 36 0C			     ld	     (hl), 12				     ; height =	12
 RAM:C557 23			     inc     hl
-RAM:C558 36 14			     ld	     (hl), 14h				     ; flags = $14 (bit4=draw)
+RAM:C558 36 14			     ld	     (hl), 14h				     ; flag DRAW & MOVEABLE
 RAM:C55A 23			     inc     hl
 RAM:C55B EB			     ex	     de, hl
 RAM:C55C 7E			     ld	     a,	(hl)				     ; get current screen
@@ -7015,10 +7015,10 @@ RAM:CBC4 07			     rlca
 RAM:CBC5 E6 40			     and     40h ; '@'                               ; bit 5->6
 RAM:CBC7 DD B6 0D		     or	     (ix+13)
 RAM:CBCA DD 77 0D		     ld	     (ix+13), a
-RAM:CBCD FD CB 07 56		     bit     2,	(iy+7)
-RAM:CBD1 28 06			     jr	     z,	loc_CBD9
+RAM:CBCD FD CB 07 56		     bit     2,	(iy+7)				     ; moveable?
+RAM:CBD1 28 06			     jr	     z,	loc_CBD9			     ; no, skip
 RAM:CBD3 DD 7E 09		     ld	     a,	(ix+9)
-RAM:CBD6 FD 77 09		     ld	     (iy+9), a
+RAM:CBD6 FD 77 09		     ld	     (iy+9), a				     ; copy dX
 RAM:CBD9
 RAM:CBD9	     loc_CBD9:
 RAM:CBD9 79			     ld	     a,	c
@@ -7064,10 +7064,10 @@ RAM:CC13 07			     rlca
 RAM:CC14 E6 40			     and     40h ; '@'
 RAM:CC16 DD B6 0D		     or	     (ix+13)
 RAM:CC19 DD 77 0D		     ld	     (ix+13), a
-RAM:CC1C FD CB 07 56		     bit     2,	(iy+7)
-RAM:CC20 28 06			     jr	     z,	loc_CC28
+RAM:CC1C FD CB 07 56		     bit     2,	(iy+7)				     ; moveable?
+RAM:CC20 28 06			     jr	     z,	loc_CC28			     ; no, skip
 RAM:CC22 DD 7E 0A		     ld	     a,	(ix+10)
-RAM:CC25 FD 77 0A		     ld	     (iy+10), a
+RAM:CC25 FD 77 0A		     ld	     (iy+10), a				     ; copy dY
 RAM:CC28
 RAM:CC28	     loc_CC28:
 RAM:CC28 7D			     ld	     a,	l
@@ -7114,20 +7114,20 @@ RAM:CC63 E6 40			     and     40h ; '@'                               ; bit 5->6
 RAM:CC65 DD B6 0D		     or	     (ix+13)
 RAM:CC68 DD 77 0D		     ld	     (ix+13), a
 RAM:CC6B FD CB 0D DE		     set     3,	(iy+13)
-RAM:CC6F DD CB 07 56		     bit     2,	(ix+7)				     ; X,Y routines check IY+7...???
-RAM:CC73 28 18			     jr	     z,	loc_CC8D
+RAM:CC6F DD CB 07 56		     bit     2,	(ix+7)				     ; moveable?
+RAM:CC73 28 18			     jr	     z,	loc_CC8D			     ; no, skip
 RAM:CC75 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
 RAM:CC78 A7			     and     a					     ; zero?
 RAM:CC79 20 06			     jr	     nz, loc_CC81			     ; no, skip
 RAM:CC7B FD 7E 09		     ld	     a,	(iy+9)
-RAM:CC7E DD 77 09		     ld	     (ix+9), a
+RAM:CC7E DD 77 09		     ld	     (ix+9), a				     ; copy dX
 RAM:CC81
 RAM:CC81	     loc_CC81:							     ; objdY
 RAM:CC81 DD 7E 0A		     ld	     a,	(ix+10)
 RAM:CC84 A7			     and     a					     ; moving along Y?
 RAM:CC85 20 06			     jr	     nz, loc_CC8D			     ; yes, skip
-RAM:CC87 FD 7E 0A		     ld	     a,	(iy+10)				     ; thisdY
-RAM:CC8A DD 77 0A		     ld	     (ix+10), a				     ; set as objdY
+RAM:CC87 FD 7E 0A		     ld	     a,	(iy+10)
+RAM:CC8A DD 77 0A		     ld	     (ix+10), a				     ; copy dY
 RAM:CC8D
 RAM:CC8D	     loc_CC8D:
 RAM:CC8D 7C			     ld	     a,	h
