@@ -29,6 +29,8 @@
 #define FLAG_HFLIP        (1<<6)
 #define FLAG_WIPE         (1<<5)
 #define FLAG_DRAW         (1<<4)
+#define FLAG_AUTO_ADJ     (1<<3)    // for arches
+#define FLAG_NEAR_ARCH    (1<<0)
                           
 // byte offset 12 flags   
 #define FLAG_JUMPING      (1<<3)
@@ -261,7 +263,7 @@ static void add_dXYZ (POBJ32 p_obj);
 static void upd_3_5 (POBJ32 p_obj);
 static void set_pixel_adj (POBJ32 p_obj, int8_t h, int8_t l);
 static void upd_2_4 (POBJ32 p_obj);
-static void chk_plyr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y);
+static void chk_plyr_spec_near_arch (POBJ32 p_obj, uint8_t near_x, uint8_t near_y);
 static uint8_t is_near_to (POBJ32 p_obj, POBJ32 p_other, uint8_t near_x, uint8_t near_y);
 static void upd_16_to_21_24_to_29 (POBJ32 p_obj);
 static void upd_48_to_53_56_to_61 (POBJ32 p_obj);
@@ -1468,7 +1470,7 @@ void upd_164_to_167 (POBJ32 p_obj)
   
   adj_m4_m12 (p_obj);
   if (p_obj->scrn != CAULDRON_SCREEN && 
-      (graphic_objs_tbl[0].flags7 & (1<<0)) != 0)
+      (graphic_objs_tbl[0].flags7 & FLAG_NEAR_ARCH) != 0)
     d_x = d_y = 1;
   else
     d_x = d_y = 4;
@@ -2803,7 +2805,7 @@ void upd_2_4 (POBJ32 p_obj)
     p_obj->d_y = p_obj->y + 13;
     p_obj->d_x = p_obj->x;
     p_obj->d_z = p_obj->z;
-    chk_plyr_spec_near_to (p_obj, 15, 6);
+    chk_plyr_spec_near_arch (p_obj, 15, 6);
   }
   else
   {
@@ -2812,7 +2814,7 @@ void upd_2_4 (POBJ32 p_obj)
     p_obj->d_x = p_obj->x - 13;
     p_obj->d_y = p_obj->y;
     p_obj->d_z = p_obj->z;
-    chk_plyr_spec_near_to (p_obj, 6, 15);
+    chk_plyr_spec_near_arch (p_obj, 6, 15);
   }
 
   // player and special objects only
@@ -2821,7 +2823,7 @@ void upd_2_4 (POBJ32 p_obj)
   {
     if (p_other->graphic_no == 0)
       continue;
-    if ((p_other->flags7 & (1<<3)) == 0)
+    if ((p_other->flags7 & FLAG_AUTO_ADJ) == 0)
       continue;
     if (is_near_to (p_obj, p_other, 15, 15) == 0)
       continue;
@@ -2845,7 +2847,7 @@ void upd_2_4 (POBJ32 p_obj)
 }
 
 // $C7DB
-void chk_plyr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y)
+void chk_plyr_spec_near_arch (POBJ32 p_obj, uint8_t near_x, uint8_t near_y)
 {
   POBJ32    p_other;
   unsigned  i;
@@ -2856,11 +2858,11 @@ void chk_plyr_spec_near_to (POBJ32 p_obj, uint8_t near_x, uint8_t near_y)
   {
     if (p_other->graphic_no == 0)
       continue;
-    if ((p_other->flags7 & (1<<3)) == 0)
+    if ((p_other->flags7 & FLAG_AUTO_ADJ) == 0)
       continue;
     if (is_near_to (p_obj, p_other, near_x, near_y) == 0)
       continue;
-    p_other->flags7 |= (1<<0);
+    p_other->flags7 |= FLAG_NEAR_ARCH;
   }
 }
 
@@ -3106,7 +3108,7 @@ void calc_plyr_dXY (POBJ32 p_obj)
 // returns 0-3 (WENS)
 uint8_t get_sprite_dir (POBJ32 p_obj)
 {
-  uint8_t l = (p_obj->flags7>>2) & 0x10;
+  uint8_t l = (p_obj->flags7>>2) & 0x10;    // HFLIP
   uint8_t a = (p_obj->graphic_no & 8) | l;
   
   return ((a>>3) & 3);
@@ -3135,9 +3137,9 @@ uint8_t handle_exit_screen (POBJ32 p_obj)
 
   if ((p_obj->flags12 & 0xF0) != 0)
     return (0);
-  if ((p_obj->flags7 & (1<<0)) == 0)
+  if ((p_obj->flags7 & FLAG_NEAR_ARCH) == 0)
     return (0);
-  p_obj->flags7 &= ~(1<<0);
+  p_obj->flags7 &= ~FLAG_NEAR_ARCH;
   
   switch (get_sprite_dir (p_obj))
   {
@@ -3418,7 +3420,7 @@ int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x)
 {
   if ((p_obj->flags12 & 0xF0) != 0)
     return (d_x);
-  if ((p_obj->flags7 & (1<<0)) != 0)
+  if ((p_obj->flags7 & FLAG_NEAR_ARCH) != 0)
     return (d_x);
   do
   {
@@ -3437,7 +3439,7 @@ int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
 {
   if ((p_obj->flags12 & 0xF0) != 0)
     return (d_y);
-  if ((p_obj->flags7 & (1<<0)) != 0)
+  if ((p_obj->flags7 & FLAG_NEAR_ARCH) != 0)
     return (d_y);
   do
   {

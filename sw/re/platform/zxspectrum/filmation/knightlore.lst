@@ -6233,7 +6233,7 @@ RAM:C760
 RAM:C760	     loc_C760:							     ; Z
 RAM:C760 DD 7E 03		     ld	     a,	(ix+3)
 RAM:C763 DD 77 0B		     ld	     (ix+11), a				     ; dZ?=Z
-RAM:C766 CD DB C7		     call    chk_plyr_spec_near_to
+RAM:C766 CD DB C7		     call    chk_plyr_spec_near_arch
 RAM:C769 C3 85 C7		     jp	     loc_C785
 RAM:C76C	     ; ---------------------------------------------------------------------------
 RAM:C76C
@@ -6308,7 +6308,7 @@ RAM:C7DB
 RAM:C7DB	     ; =============== S U B R O U T I N E =======================================
 RAM:C7DB
 RAM:C7DB
-RAM:C7DB	     chk_plyr_spec_near_to:
+RAM:C7DB	     chk_plyr_spec_near_arch:
 RAM:C7DB FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:C7DF 11 20 00		     ld	     de, 32				     ; entry size
 RAM:C7E2 06 04			     ld	     b,	4				     ; player and special objects only
@@ -6327,7 +6327,7 @@ RAM:C7F9	     loc_C7F9:							     ; next entry
 RAM:C7F9 FD 19			     add     iy, de
 RAM:C7FB 10 E7			     djnz    loc_C7E4				     ; loop through table
 RAM:C7FD C9			     ret
-RAM:C7FD	     ; End of function chk_plyr_spec_near_to
+RAM:C7FD	     ; End of function chk_plyr_spec_near_arch
 RAM:C7FD
 RAM:C7FE
 RAM:C7FE	     ; =============== S U B R O U T I N E =======================================
@@ -6802,9 +6802,9 @@ RAM:CA70	     handle_exit_screen:
 RAM:CA70 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CA73 E6 F0			     and     0F0h ; 'ð'
 RAM:CA75 C0			     ret     nz
-RAM:CA76 DD CB 07 46		     bit     0,	(ix+7)
-RAM:CA7A C8			     ret     z
-RAM:CA7B DD CB 07 86		     res     0,	(ix+7)
+RAM:CA76 DD CB 07 46		     bit     0,	(ix+7)				     ; near an arch?
+RAM:CA7A C8			     ret     z					     ; no, return
+RAM:CA7B DD CB 07 86		     res     0,	(ix+7)				     ; reset flag
 RAM:CA7F 01 92 CA		     ld	     bc, screen_move_tbl
 RAM:CA82 2A AB 5B		     ld	     hl, (room_size_X)
 RAM:CA85 E5			     push    hl
@@ -7212,8 +7212,8 @@ RAM:CCDD	     adj_dX_for_out_of_bounds:
 RAM:CCDD DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CCE0 E6 F0			     and     0F0h ; 'ð'
 RAM:CCE2 C0			     ret     nz
-RAM:CCE3 DD CB 07 46		     bit     0,	(ix+7)
-RAM:CCE7 C0			     ret     nz
+RAM:CCE3 DD CB 07 46		     bit     0,	(ix+7)				     ; near an arch?
+RAM:CCE7 C0			     ret     nz					     ; yes, exit
 RAM:CCE8 3A AB 5B		     ld	     a,	(room_size_X)
 RAM:CCEB 47			     ld	     b,	a
 RAM:CCEC
@@ -7246,8 +7246,8 @@ RAM:CD08	     adj_dY_for_out_of_bounds:
 RAM:CD08 DD 7E 0C		     ld	     a,	(ix+12)
 RAM:CD0B E6 F0			     and     0F0h ; 'ð'
 RAM:CD0D C0			     ret     nz
-RAM:CD0E DD CB 07 46		     bit     0,	(ix+7)
-RAM:CD12 C0			     ret     nz
+RAM:CD0E DD CB 07 46		     bit     0,	(ix+7)				     ; near and	arch?
+RAM:CD12 C0			     ret     nz					     ; yes, exit
 RAM:CD13 3A AC 5B		     ld	     a,	(room_size_Y)
 RAM:CD16 47			     ld	     b,	a
 RAM:CD17
