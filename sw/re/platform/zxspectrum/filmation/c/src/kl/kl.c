@@ -31,6 +31,7 @@
 #define FLAG_DRAW         (1<<4)
 #define FLAG_AUTO_ADJ     (1<<3)    // for arches
 #define FLAG_MOVEABLE     (1<<2)    // (sic)
+#define FLAG_IGNORE_3D    (1<<1)    // ignore for 3D calcs
 #define FLAG_NEAR_ARCH    (1<<0)
                           
 // byte offset 12 flags   
@@ -889,7 +890,7 @@ uint8_t sub_B4FD (POBJ32 p_obj)
   
   UNTESTED;
   
-  p_obj->flags7 |= (1<<1);
+  p_obj->flags7 |= FLAG_IGNORE_3D;
 
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
@@ -906,7 +907,7 @@ uint8_t sub_B4FD (POBJ32 p_obj)
     break;
   }
   
-  p_obj->flags7 &= ~(1<<1);
+  p_obj->flags7 &= ~FLAG_IGNORE_3D;
   return (carry);
 }
 
@@ -916,7 +917,7 @@ uint8_t test_obj_flag_bit1 (POBJ32 p_obj)
 {
   if (p_obj->graphic_no == 0)
     return (0);
-  return ((p_obj->flags7 & (1<<1)) ? 0 : 1);
+  return ((p_obj->flags7 & FLAG_IGNORE_3D) ? 0 : 1);
 }
 
 // $B544
@@ -986,7 +987,7 @@ void upd_131_to_133 (POBJ32 p_obj)
       // longjmp to start_menu
     }
     p_obj->flags13 |= (1<<7);
-    p_obj->flags7 |= (1<<1);
+    p_obj->flags7 |= FLAG_IGNORE_3D;
     p_obj->d_z = 1;
     move_towards_plyr (p_obj, 4, 4);
   }
@@ -1265,7 +1266,7 @@ void upd_63 (POBJ32 p_obj)
     // 1-in-16 chance of starting to drop
     if (seed_3 >= 16)
       return;
-    p_obj->flags13 |= (1<<2);
+    p_obj->flags13 |= FLAG_DROPPING;
     is_spike_ball_dropping = 1;
   }
   else
@@ -1426,7 +1427,7 @@ void upd_160_to_163 (POBJ32 p_obj)
     upd_111 (p_obj);
   else
   {
-    p_obj->flags7 |= (1<<1);
+    p_obj->flags7 |= FLAG_IGNORE_3D;
     dec_dZ_and_update_XYZ (p_obj);
     next_graphic_no_mod_4 (p_obj);
     if (p_obj->z < 160)
@@ -1438,7 +1439,7 @@ void upd_160_to_163 (POBJ32 p_obj)
       {
         // wulf - no hint for next object
         p_obj->graphic_no |= (1<<2);
-        p_obj->flags7 &= ~(1<<1);
+        p_obj->flags7 &= ~FLAG_IGNORE_3D;
       }
       else
       {
@@ -1876,7 +1877,7 @@ void upd_127 (POBJ32 p_obj)
 void init_sparkles (POBJ32 p_obj)
 {
   p_obj->graphic_no = 112;
-  p_obj->flags7 |= (1<<1);   // ???
+  p_obj->flags7 |= FLAG_IGNORE_3D;
   //gen_audio_graphic_no_rom (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
@@ -2186,7 +2187,7 @@ void upd_104_to_110 (POBJ32 p_obj)
       return;
     }
     else
-      p_obj->flags7 |= (1<<1);
+      p_obj->flags7 |= FLAG_IGNORE_3D;
   }
   dec_dZ_and_update_XYZ (p_obj);
   gen_audio_XYZ_wipe_and_draw (p_obj);
@@ -2927,12 +2928,12 @@ void upd_player_bottom (POBJ32 p_obj)
     if (chk_plyr_OOB (p_obj) == 0)
       if (p_obj->d_z >= 0)
         p_obj->d_z = 0;
-    p_next_obj->flags7 |= (1<<1);
+    p_next_obj->flags7 |= FLAG_IGNORE_3D;
     // the original Z80 code returned to game_loop
     // we'll set a flag internally and simply return
     if (move_player (p_obj, inp) == 1)
       return;
-    p_next_obj->flags7 &= ~(1<<1);
+    p_next_obj->flags7 &= ~FLAG_IGNORE_3D;
     if (p_obj->flags12 >= 16)
       p_obj->flags12 -= 16;
     set_wipe_and_draw_flags (p_obj);
@@ -3218,10 +3219,10 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
 {
   int8_t d_x, d_y, d_z;
 
-  if ((p_obj->flags7 & (1<<1)) != 0)
+  if ((p_obj->flags7 & FLAG_IGNORE_3D) != 0)
     return;
     
-  p_obj->flags7 |= (1<<1);
+  p_obj->flags7 |= FLAG_IGNORE_3D;
   p_obj->flags12 &= ~(FLAG_Z_OOB|FLAG_Y_OOB|FLAG_X_OOB);
   d_y = 0;
   d_x = 0;
@@ -3253,7 +3254,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   p_obj->d_x = d_x;
   p_obj->d_y = d_y;
   p_obj->d_z = d_z;
-  p_obj->flags7 &= ~(1<<1);
+  p_obj->flags7 &= ~FLAG_IGNORE_3D;
 }
 
 // $CB9A
@@ -3550,7 +3551,7 @@ void upd_player_top (POBJ32 p_obj)
     // copy x,y,z,w,d,h,flags7 from bottom half
     memcpy (&(p_obj->x), &(p_prev_obj->x), 7);
     p_obj->height = 0;
-    p_obj->flags7 |= (1<<1);
+    p_obj->flags7 |= FLAG_IGNORE_3D;
     if ((p_obj->flags13 & MASK_LOOK_CNT) == 0)
     {
       if (seed_3 < 2)
