@@ -18,41 +18,42 @@
 #pragma pack(1)
 
 // user input
-#define INP_LEFT          (1<<0)
-#define INP_RIGHT         (1<<1)
-#define INP_FORWARD       (1<<2)
-#define INP_JUMP          (1<<3)
-#define INP_PICKUP_DROP   (1<<4)
-                          
-// byte offset 7 flags    
-#define FLAG_VFLIP        (1<<7)
-#define FLAG_HFLIP        (1<<6)
-#define FLAG_WIPE         (1<<5)
-#define FLAG_DRAW         (1<<4)
-#define FLAG_AUTO_ADJ     (1<<3)    // for arches
-#define FLAG_MOVEABLE     (1<<2)    // (sic)
-#define FLAG_IGNORE_3D    (1<<1)    // ignore for 3D calcs
-#define FLAG_NEAR_ARCH    (1<<0)
+#define INP_LEFT            (1<<0)
+#define INP_RIGHT           (1<<1)
+#define INP_FORWARD         (1<<2)
+#define INP_JUMP            (1<<3)
+#define INP_PICKUP_DROP     (1<<4)
+                            
+// byte offset 7 flags      
+#define FLAG_VFLIP          (1<<7)
+#define FLAG_HFLIP          (1<<6)
+#define FLAG_WIPE           (1<<5)
+#define FLAG_DRAW           (1<<4)
+#define FLAG_AUTO_ADJ       (1<<3)    // for arches
+#define FLAG_MOVEABLE       (1<<2)    // (sic)
+#define FLAG_IGNORE_3D      (1<<1)    // ignore for 3D calcs
+#define FLAG_NEAR_ARCH      (1<<0)
                           
 // byte offset 12 flags   
-#define FLAG_JUMPING      (1<<3)
-#define FLAG_Z_OOB        (1<<2)
-#define FLAG_Y_OOB        (1<<1)
-#define FLAG_X_OOB        (1<<0)
-                          
-// byte offset 13 flags   
-#define FLAG_TRIGGERED    (1<<3)    // dropping block
-#define FLAG_UP           (1<<2)    // bouncing ball
-#define FLAG_DROPPING     (1<<2)    // spiked ball
-#define FLAG_NORTH        (1<<1)    // NS fire
-#define FLAG_EAST         (1<<0)    // EW fire, EW guard
-#define MASK_DIR          0x03      // NSEW guard & wizard
-#define MASK_LOOK_CNT     0x0F      // player (look around cnt)
-
-#define MAX_OBJS          40                          
-#define CAULDRON_SCREEN   136
-// standard is 5
-#define NO_LIVES          20
+#define MASK_ENTERING_SCRN  0xF0
+#define FLAG_JUMPING        (1<<3)
+#define FLAG_Z_OOB          (1<<2)
+#define FLAG_Y_OOB          (1<<1)
+#define FLAG_X_OOB          (1<<0)
+                            
+// byte offset 13 flags     
+#define FLAG_TRIGGERED      (1<<3)    // dropping block
+#define FLAG_UP             (1<<2)    // bouncing ball
+#define FLAG_DROPPING       (1<<2)    // spiked ball
+#define FLAG_NORTH          (1<<1)    // NS fire
+#define FLAG_EAST           (1<<0)    // EW fire, EW guard
+#define MASK_DIR            0x03      // NSEW guard & wizard
+#define MASK_LOOK_CNT       0x0F      // player (look around cnt)
+                            
+#define MAX_OBJS            40                          
+#define CAULDRON_SCREEN     136
+// standard is 5            
+#define NO_LIVES            20
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -2268,7 +2269,7 @@ int chk_and_init_transform (POBJ32 p_obj)
   
   if (transform_flag_graphic == 0)
     return (0);
-  if ((p_obj->flags12 & 0xF0) != 0)
+  if ((p_obj->flags12 & MASK_ENTERING_SCRN) != 0)
     return (0);
   if ((p_obj->flags12 & FLAG_JUMPING) != 0)
     return (0);
@@ -2729,7 +2730,7 @@ void upd_9 (POBJ32 p_obj)
   
   adj_m6_m12 (p_obj);
   p_obj->flags13 |= (1<<7);
-  if ((graphic_objs_tbl[0].flags12 & 0xF0) != 0)
+  if ((graphic_objs_tbl[0].flags12 & MASK_ENTERING_SCRN) != 0)
     return;
   if (p_obj->d_z < 0)
   {
@@ -2934,8 +2935,10 @@ void upd_player_bottom (POBJ32 p_obj)
     if (move_player (p_obj, inp) == 1)
       return;
     p_next_obj->flags7 &= ~FLAG_IGNORE_3D;
-    if (p_obj->flags12 >= 16)
-      p_obj->flags12 -= 16;
+    // decrement count of shuffling forward 
+    // when first entering screen
+    if (p_obj->flags12 >= 0x10)
+      p_obj->flags12 -= 0x10;
     set_wipe_and_draw_flags (p_obj);
   }
 }
@@ -2973,7 +2976,7 @@ void handle_left_right (POBJ32 p_obj, uint8_t inp)
   // left or right?
   if ((inp & (INP_LEFT|INP_RIGHT)) == 0)
     return;
-  if ((p_obj->flags12 & 0xF0) != 0)
+  if ((p_obj->flags12 & MASK_ENTERING_SCRN) != 0)
     return;
   if ((p_obj->flags12 & FLAG_JUMPING) != 0)
     return;
@@ -2999,7 +3002,7 @@ void handle_jump (POBJ32 p_obj, uint8_t inp)
   
   if ((inp & INP_JUMP) == 0)
     return;
-  if ((p_obj->flags12 & 0xF0) != 0)
+  if ((p_obj->flags12 & MASK_ENTERING_SCRN) != 0)
     return;
   if ((p_obj->flags12 & FLAG_JUMPING) != 0)
     return;
@@ -3015,7 +3018,7 @@ void handle_forward (POBJ32 p_obj, uint8_t inp)
 {
   UNTESTED;
   
-  if ((p_obj->flags12 & 0xF0) == 0 &&
+  if ((p_obj->flags12 & MASK_ENTERING_SCRN) == 0 &&
       (p_obj->flags12 & FLAG_JUMPING) == 0 &&
       (inp & INP_FORWARD) == 0)
   {
@@ -3048,7 +3051,7 @@ uint8_t move_player (POBJ32 p_obj, uint8_t inp)
   if (obj_dropping_into_cauldron != 0)
     p_obj->d_z = 2;
   if ((p_obj->flags12 & FLAG_JUMPING) != 0 ||
-      (p_obj->flags12 & 0xF0) != 0 ||
+      (p_obj->flags12 & MASK_ENTERING_SCRN) != 0 ||
       (inp & INP_FORWARD) != 0)
     calc_plyr_dXY (p_obj);
   if (p_obj->d_z < 0 || (inp & INP_JUMP) == 0)
@@ -3137,7 +3140,7 @@ uint8_t handle_exit_screen (POBJ32 p_obj)
 {
   UNTESTED;
 
-  if ((p_obj->flags12 & 0xF0) != 0)
+  if ((p_obj->flags12 & MASK_ENTERING_SCRN) != 0)
     return (0);
   if ((p_obj->flags7 & FLAG_NEAR_ARCH) == 0)
     return (0);
@@ -3174,6 +3177,8 @@ uint8_t handle_exit_screen (POBJ32 p_obj)
   
 exit_screen:
   internal.exit_scrn = 1;
+  // init count to shuffle forward 3 steps 
+  // when first entering screen
   p_obj->flags12 |= 0x30;
   if ((p_obj->graphic_no - 16) >= 64)
     return (0);
@@ -3420,7 +3425,7 @@ uint8_t sub_CCC7 (POBJ32 p_obj, POBJ32 p_other, int8_t d_z)
 // $CCDD
 int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x)
 {
-  if ((p_obj->flags12 & 0xF0) != 0)
+  if ((p_obj->flags12 & MASK_ENTERING_SCRN) != 0)
     return (d_x);
   if ((p_obj->flags7 & FLAG_NEAR_ARCH) != 0)
     return (d_x);
@@ -3439,7 +3444,7 @@ int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x)
 // $CD08
 int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
 {
-  if ((p_obj->flags12 & 0xF0) != 0)
+  if ((p_obj->flags12 & MASK_ENTERING_SCRN) != 0)
     return (d_y);
   if ((p_obj->flags7 & FLAG_NEAR_ARCH) != 0)
     return (d_y);
