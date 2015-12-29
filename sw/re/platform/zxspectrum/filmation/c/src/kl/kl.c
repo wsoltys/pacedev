@@ -42,11 +42,15 @@
 #define FLAG_X_OOB          (1<<0)
                             
 // byte offset 13 flags     
-#define FLAG_TRIGGERED      (1<<3)    // dropping block
+#define FLAG_BIT7           (1<<7)    // 
+#define FLAG_DEAD           (1<<6)    // player
+#define FLAG_BIT5           (1<<5)    // 
+#define FLAG_TRIGGERED      (1<<3)    // dropping, collapsing block
 #define FLAG_UP             (1<<2)    // bouncing ball
 #define FLAG_DROPPING       (1<<2)    // spiked ball
 #define FLAG_NORTH          (1<<1)    // NS fire
 #define FLAG_EAST           (1<<0)    // EW fire, EW guard
+#define FLAG_JUST_DROPPED   (1<<0)    // special objects
 #define MASK_DIR            0x03      // NSEW guard & wizard
 #define MASK_LOOK_CNT       0x0F      // player (look around cnt)
                             
@@ -210,7 +214,7 @@ static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], 
 static void multiple_print_sprite (POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n);
 static void upd_120_to_126 (POBJ32 p_obj);
 static void upd_127 (POBJ32 p_obj);
-static void init_sparkles (POBJ32 p_obj);
+static void init_death_sparkles (POBJ32 p_obj);
 static void upd_112_to_118_184 (POBJ32 p_obj);
 static void upd_185_187 (POBJ32 p_obj);
 static void upd_119 (POBJ32 p_obj);
@@ -772,28 +776,28 @@ adjfn_t upd_sprite_jump_tbl[] =
   upd_104_to_110,               // bottle
   upd_104_to_110,               // crystal ball
   upd_111,                      // sparkles
-  upd_112_to_118_184,           // sparkles
-  upd_112_to_118_184,           // sparkles
-  upd_112_to_118_184,           // sparkles
-  upd_112_to_118_184,           // sparkles
-  upd_112_to_118_184,           // sparkles
-  upd_112_to_118_184,           // sparkles
-  upd_112_to_118_184,           // sparkles
-  upd_119,                      // sparkles
+  upd_112_to_118_184,           // death sparkles
+  upd_112_to_118_184,           // "
+  upd_112_to_118_184,           // "
+  upd_112_to_118_184,           // "
+  upd_112_to_118_184,           // "
+  upd_112_to_118_184,           // "
+  upd_112_to_118_184,           // "
+  upd_119,                      // last death sparkle
   upd_120_to_126,               // player appear sparkles
-  upd_120_to_126,               // player appear sparkles
-  upd_120_to_126,               // player appear sparkles
-  upd_120_to_126,               // player appear sparkles
-  upd_120_to_126,               // player appear sparkles
-  upd_120_to_126,               // player appear sparkles
-  upd_120_to_126,               // player appear sparkles
+  upd_120_to_126,               // "
+  upd_120_to_126,               // "
+  upd_120_to_126,               // "
+  upd_120_to_126,               // "
+  upd_120_to_126,               // "
+  upd_120_to_126,               // "
   upd_127,                      // last player appears sparkle
   upd_128_to_130,               // tree wall
   upd_128_to_130,               // tree wall
   upd_128_to_130,               // tree wall
-  upd_131_to_133,               // more sparkles
-  upd_131_to_133,               // more sparkles
-  upd_131_to_133,               // more sparkles
+  upd_131_to_133,               // sparkles in cauldron room end of game
+  upd_131_to_133,               // "
+  upd_131_to_133,               // "
   no_update,
   no_update,
   no_update,
@@ -803,7 +807,7 @@ adjfn_t upd_sprite_jump_tbl[] =
   no_update,
   upd_141,                      // cauldron (bottom)
   upd_142,                      // cauldron (top)
-  upd_143,                      // another block
+  upd_143,                      // block (collapsing)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
   upd_144_to_149_152_to_157,    // guard & wizard (bottom half)
@@ -987,7 +991,7 @@ void upd_131_to_133 (POBJ32 p_obj)
       game_over ();
       // longjmp to start_menu
     }
-    p_obj->flags13 |= (1<<7);
+    p_obj->flags13 |= FLAG_BIT7;
     p_obj->flags7 |= FLAG_IGNORE_3D;
     p_obj->d_z = 1;
     move_towards_plyr (p_obj, 4, 4);
@@ -1105,13 +1109,13 @@ void upd_91 (POBJ32 p_obj)
 }
 
 // $B6A2
-// another block
+// block (collapsing)
 void upd_143 (POBJ32 p_obj)
 {
   UNTESTED;
   
   upd_6_7 (p_obj);
-  if ((p_obj->flags13 & (1<<3)) == 0)
+  if ((p_obj->flags13 & FLAG_TRIGGERED) == 0)
     return;
   p_obj->graphic_no = 184;
   upd_112_to_118_184 (p_obj);
@@ -1366,7 +1370,7 @@ void loc_B856 (POBJ32 p_obj)
 void sub_B85C (POBJ32 p_obj)
 {
 #ifndef BUILD_OPT_INVINCIBLE
-  p_obj->flags13 |= (1<<7)|(1<<5);
+  p_obj->flags13 |= FLAG_BIT7|FLAG_BIT5;
 #endif  
 }
 
@@ -1867,15 +1871,14 @@ void upd_120_to_126 (POBJ32 p_obj)
 void upd_127 (POBJ32 p_obj)
 {
   adj_m4_m12 (p_obj);
-  // no idea what the rest of this does???
-  p_obj->flags13 &= ~(1<<6);
+  p_obj->flags13 &= ~FLAG_DEAD;
   // for player (only), this stores the graphic_no
   p_obj->graphic_no = p_obj->u.plyr_graphic_no;
   upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 }
 
 // $BF21
-void init_sparkles (POBJ32 p_obj)
+void init_death_sparkles (POBJ32 p_obj)
 {
   p_obj->graphic_no = 112;
   p_obj->flags7 |= FLAG_IGNORE_3D;
@@ -1896,7 +1899,7 @@ void upd_112_to_118_184 (POBJ32 p_obj)
 }
 
 // $BF37
-// sparkles (object in cauldron???)
+// sparkles
 void upd_185_187 (POBJ32 p_obj)
 {
   UNTESTED;
@@ -2053,7 +2056,7 @@ drop_object:
   p_other->flags7 = objects_carried[2].flags7;
   p_other->scrn = p_obj->scrn;
   p_other->u.ptr_obj_tbl_entry = objects_carried[2].ptr_obj_tbl_entry;
-  p_other->flags13 |= (1<<0);
+  p_other->flags13 |= FLAG_JUST_DROPPED;
   
 adjust_carried:
   // careful, the memory overlaps!
@@ -2215,11 +2218,10 @@ void upd_96_to_102 (POBJ32 p_obj)
   
   adj_m4_m12 (p_obj);
   dec_dZ_and_update_XYZ (p_obj);
-  // what does this flag represent?
-  if ((p_obj->flags13 & (1<<0)) == 0)
+  if ((p_obj->flags13 & FLAG_JUST_DROPPED) == 0)
     if (!is_obj_moving (p_obj))
       return;
-  p_obj->flags13 &= ~(1<<0);
+  p_obj->flags13 &= ~FLAG_JUST_DROPPED;
   clear_dX_dY (p_obj);
   gen_audio_XYZ_wipe_and_draw (p_obj);
 }
@@ -2295,9 +2297,9 @@ void upd_92_to_95 (POBJ32 p_obj)
   UNTESTED;
   
   upd_11 (p_obj);
-  if ((p_obj->flags13 & (1<<6)) != 0 &&
+  if ((p_obj->flags13 & FLAG_DEAD) != 0 &&
       all_objs_in_cauldron == 0)
-    init_sparkles (p_obj);
+    init_death_sparkles (p_obj);
   else
   {
     if ((seed_2 & 3) != 0)
@@ -2729,7 +2731,7 @@ void upd_9 (POBJ32 p_obj)
   //DBGPRINTF_FN;
   
   adj_m6_m12 (p_obj);
-  p_obj->flags13 |= (1<<7);
+  p_obj->flags13 |= FLAG_BIT7;
   if ((graphic_objs_tbl[0].flags12 & MASK_ENTERING_SCRN) != 0)
     return;
   if (p_obj->d_z < 0)
@@ -2910,11 +2912,11 @@ void upd_player_bottom (POBJ32 p_obj)
     
   UNTESTED;
 
-  if ((p_obj->flags13 & (1<<6)) != 0 &&
+  if ((p_obj->flags13 & FLAG_DEAD) != 0 &&
       all_objs_in_cauldron == 0)
   {
-    p_next_obj->flags13 |= (1<<6);
-    init_sparkles (p_obj);
+    p_next_obj->flags13 |= FLAG_DEAD;
+    init_death_sparkles (p_obj);
   }
   else
   {
@@ -3286,9 +3288,9 @@ int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
         break;
       p_obj->flags12 |= FLAG_X_OOB;
       // obj bit 7 -> other bit 6
-      p_other->flags13 |= (p_obj->flags13 >> 1) & (1<<6);
+      p_other->flags13 |= (p_obj->flags13 >> 1) & FLAG_DEAD;
       // other bit 5 -> obj bit 6
-      p_obj->flags13 |= (p_other->flags13 << 1) & (1<<6);
+      p_obj->flags13 |= (p_other->flags13 << 1) & FLAG_DEAD;
       if ((p_other->flags7 & FLAG_MOVEABLE) != 0)
         p_other->d_x = p_obj->d_x;
       if ((d_x = adj_d_for_out_of_bounds (d_x)) == 0)
@@ -3322,9 +3324,9 @@ int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
         break;
       p_obj->flags12 |= FLAG_Y_OOB;
       // obj bit 7 -> other bit 6
-      p_other->flags13 |= (p_obj->flags13 >> 1) & (1<<6);
+      p_other->flags13 |= (p_obj->flags13 >> 1) & FLAG_DEAD;
       // other bit 5 -> obj bit 6
-      p_obj->flags13 |= (p_other->flags13 << 1) & (1<<6);
+      p_obj->flags13 |= (p_other->flags13 << 1) & FLAG_DEAD;
       if ((p_other->flags7 & FLAG_MOVEABLE) != 0)
         p_other->d_y = p_obj->d_y;
       if ((d_y = adj_d_for_out_of_bounds (d_y)) == 0)
@@ -3358,10 +3360,11 @@ int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
         break;
       p_obj->flags12 |= FLAG_Z_OOB;
       // obj bit 7 -> other bit 6
-      p_other->flags13 |= (p_obj->flags13 >> 1) & (1<<6);
+      p_other->flags13 |= (p_obj->flags13 >> 1) & FLAG_DEAD;
       // other bit 5 -> obj bit 6
-      p_obj->flags13 |= (p_other->flags13 << 1) & (1<<6);
-      p_other->flags13 |= (1<<3);
+      p_obj->flags13 |= (p_other->flags13 << 1) & FLAG_DEAD;
+      // used by dropping, collapsing blocks
+      p_other->flags13 |= FLAG_TRIGGERED;
       if ((p_obj->flags7 & FLAG_MOVEABLE) != 0)
       {
         if (p_obj->d_x == 0)
@@ -3549,8 +3552,8 @@ void upd_player_top (POBJ32 p_obj)
   POBJ32 p_prev_obj = p_obj-1;
   
   if (all_objs_in_cauldron == 0 &&
-      (p_obj->flags13 & (1<<6)) != 0)
-    init_sparkles (p_obj);
+      (p_obj->flags13 & FLAG_DEAD) != 0)
+    init_death_sparkles (p_obj);
   else
   {
     // copy x,y,z,w,d,h,flags7 from bottom half

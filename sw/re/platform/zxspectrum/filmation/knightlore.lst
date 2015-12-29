@@ -2701,14 +2701,14 @@ RAM:B16E F1 C1			     dw	upd_104_to_110				     ;	 " (cup)
 RAM:B170 F1 C1			     dw	upd_104_to_110				     ;	 " (bottle)
 RAM:B172 F1 C1			     dw	upd_104_to_110				     ;	 " (crytsal ball)
 RAM:B174 5E B9			     dw	upd_111					     ; * sparkles
-RAM:B176 2B BF			     dw	upd_112_to_118_184			     ; * sparkles
+RAM:B176 2B BF			     dw	upd_112_to_118_184			     ; * death sparkles
 RAM:B178 2B BF			     dw	upd_112_to_118_184			     ;	 "
 RAM:B17A 2B BF			     dw	upd_112_to_118_184			     ;	 "
 RAM:B17C 2B BF			     dw	upd_112_to_118_184			     ;	 "
 RAM:B17E 2B BF			     dw	upd_112_to_118_184			     ;	 "
 RAM:B180 2B BF			     dw	upd_112_to_118_184			     ;	 "
 RAM:B182 2B BF			     dw	upd_112_to_118_184			     ;	 "
-RAM:B184 3F BF			     dw	upd_119					     ; * sparkles
+RAM:B184 3F BF			     dw	upd_119					     ; * last death sparkle
 RAM:B186 FE BE			     dw	upd_120_to_126				     ; * player	appears	sparkles
 RAM:B188 FE BE			     dw	upd_120_to_126				     ;	 "
 RAM:B18A FE BE			     dw	upd_120_to_126				     ;	 "
@@ -2732,7 +2732,7 @@ RAM:B1AC CB C2			     dw	no_update
 RAM:B1AE CB C2			     dw	no_update
 RAM:B1B0 9C B9			     dw	upd_141					     ; * cauldron (bottom)
 RAM:B1B2 9F B9			     dw	upd_142					     ; * cauldron (top)
-RAM:B1B4 A2 B6			     dw	upd_143					     ; * another block
+RAM:B1B4 A2 B6			     dw	upd_143					     ; * block (collapsing)
 RAM:B1B6 F9 B6			     dw	upd_144_to_149_152_to_157		     ; * guard & wizard	(bottom	half)
 RAM:B1B8 F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
 RAM:B1BA F9 B6			     dw	upd_144_to_149_152_to_157		     ;	 "
@@ -2773,10 +2773,10 @@ RAM:B1FE 0F B8			     dw	upd_180_181				     ; * fire (NS)
 RAM:B200 0F B8			     dw	upd_180_181				     ; * fire (NS)
 RAM:B202 FF B5			     dw	upd_182_183				     ; * ball (bouncing	around)
 RAM:B204 FF B5			     dw	upd_182_183				     ;	 "
-RAM:B206 2B BF			     dw	upd_112_to_118_184			     ; * sparkles
-RAM:B208 37 BF			     dw	upd_185_187				     ; * sparkles
+RAM:B206 2B BF			     dw	upd_112_to_118_184			     ; * death sparkles
+RAM:B208 37 BF			     dw	upd_185_187				     ; * last obj in cauldron sparkle
 RAM:B20A CB C2			     dw	no_update
-RAM:B20C 37 BF			     dw	upd_185_187				     ; * sparkles
+RAM:B20C 37 BF			     dw	upd_185_187				     ; * last obj in cauldron sparkle
 RAM:B20E	     ;
 RAM:B20E	     ; Audio Tunes
 RAM:B20E	     ;
@@ -3565,11 +3565,12 @@ RAM:B69F
 RAM:B69F	     loc_B69F:
 RAM:B69F C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B6A2	     ; ---------------------------------------------------------------------------
+RAM:B6A2	     ; collapsing block
 RAM:B6A2
 RAM:B6A2	     upd_143:
 RAM:B6A2 CD E3 C4		     call    upd_6_7
-RAM:B6A5 DD CB 0D 5E		     bit     3,	(ix+13)
-RAM:B6A9 C8			     ret     z
+RAM:B6A5 DD CB 0D 5E		     bit     3,	(ix+13)				     ; triggered?
+RAM:B6A9 C8			     ret     z					     ; no, return
 RAM:B6AA DD 36 00 B8		     ld	     (ix+0), 184			     ; graphic_no = sparkles
 RAM:B6AE C3 2B BF		     jp	     upd_112_to_118_184
 RAM:B6B1	     ; ---------------------------------------------------------------------------
@@ -4817,23 +4818,23 @@ RAM:BF11
 RAM:BF11	     upd_127:
 RAM:BF11 CD D8 C4		     call    adj_m4_m12
 RAM:BF14 DD CB 0D B6		     res     6,	(ix+13)
-RAM:BF18 DD 7E 10		     ld	     a,	(ix+16)
-RAM:BF1B DD 77 00		     ld	     (ix+0), a
+RAM:BF18 DD 7E 10		     ld	     a,	(ix+16)				     ; player graphic_no
+RAM:BF1B DD 77 00		     ld	     (ix+0), a				     ; set as object graphic_no
 RAM:BF1E C3 D5 AF		     jp	     jump_to_upd_object
 RAM:BF21	     ; ---------------------------------------------------------------------------
 RAM:BF21	     ; START OF	FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF21
-RAM:BF21	     init_sparkles:						     ; twinkly transform
+RAM:BF21	     init_death_sparkles:					     ; twinkly transform
 RAM:BF21 DD 36 00 70		     ld	     (ix+0), 112
-RAM:BF25 DD CB 07 CE		     set     1,	(ix+7)
+RAM:BF25 DD CB 07 CE		     set     1,	(ix+7)				     ; ignore in 3D calcs
 RAM:BF29 18 06			     jr	     loc_BF31
 RAM:BF29	     ; END OF FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF2B	     ; ---------------------------------------------------------------------------
-RAM:BF2B	     ; sparkles
+RAM:BF2B	     ; death sparkles
 RAM:BF2B
 RAM:BF2B	     upd_112_to_118_184:
 RAM:BF2B CD D8 C4		     call    adj_m4_m12
-RAM:BF2E DD 34 00		     inc     (ix+0)
+RAM:BF2E DD 34 00		     inc     (ix+0)				     ; graphic_no
 RAM:BF31	     ; START OF	FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF31
 RAM:BF31	     loc_BF31:
@@ -4841,7 +4842,7 @@ RAM:BF31 CD 03 B4		     call    audio_B403
 RAM:BF34 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:BF34	     ; END OF FUNCTION CHUNK FOR chk_and_init_transform
 RAM:BF37	     ; ---------------------------------------------------------------------------
-RAM:BF37	     ; sparkles	(object	in cauldron?)
+RAM:BF37	     ; sparkles	(object	in cauldron)
 RAM:BF37
 RAM:BF37	     upd_185_187:
 RAM:BF37 DD 6E 10		     ld	     l,	(ix+16)
@@ -5120,8 +5121,8 @@ RAM:C11E 7E			     ld	     a,	(hl)
 RAM:C11F 23			     inc     hl
 RAM:C120 FD 77 10		     ld	     (iy+16), a
 RAM:C123 7E			     ld	     a,	(hl)
-RAM:C124 FD 77 11		     ld	     (iy+17), a
-RAM:C127 FD CB 0D C6		     set     0,	(iy+13)
+RAM:C124 FD 77 11		     ld	     (iy+17), a				     ; set ptr to obj_tbl entry
+RAM:C127 FD CB 0D C6		     set     0,	(iy+13)				     ; flag just dropped
 RAM:C12B
 RAM:C12B	     adjust_carried:						     ; 2nd-to-last entry
 RAM:C12B 21 E3 5B		     ld	     hl, unk_5BE3
@@ -5335,12 +5336,12 @@ RAM:C28B
 RAM:C28B	     upd_96_to_102:
 RAM:C28B CD D8 C4		     call    adj_m4_m12
 RAM:C28E CD 00 C7		     call    dec_dZ_and_update_XYZ
-RAM:C291 DD CB 0D 46		     bit     0,	(ix+13)
-RAM:C295 20 04			     jr	     nz, loc_C29B
+RAM:C291 DD CB 0D 46		     bit     0,	(ix+13)				     ; just dropped?
+RAM:C295 20 04			     jr	     nz, loc_C29B			     ; no, skip
 RAM:C297 CD A1 C1		     call    is_obj_moving
 RAM:C29A C8			     ret     z
 RAM:C29B
-RAM:C29B	     loc_C29B:
+RAM:C29B	     loc_C29B:							     ; clear just dropped flag
 RAM:C29B DD CB 0D 86		     res     0,	(ix+13)
 RAM:C29F CD F3 C9		     call    clear_dX_dY
 RAM:C2A2 C3 32 C2		     jp	     gen_audio_XYZ_wipe_and_draw
@@ -5465,7 +5466,7 @@ RAM:C33E 28 09			     jr	     z,	loc_C349
 RAM:C340 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:C343 A7			     and     a
 RAM:C344 20 03			     jr	     nz, loc_C349
-RAM:C346 C3 21 BF		     jp	     init_sparkles
+RAM:C346 C3 21 BF		     jp	     init_death_sparkles
 RAM:C349	     ; ---------------------------------------------------------------------------
 RAM:C349
 RAM:C349	     loc_C349:
@@ -6379,7 +6380,7 @@ RAM:C831 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:C834 A7			     and     a
 RAM:C835 20 07			     jr	     nz, loc_C83E
 RAM:C837 DD CB 2D F6		     set     6,	(ix+2Dh)			     ; top half	flags13
-RAM:C83B C3 21 BF		     jp	     init_sparkles
+RAM:C83B C3 21 BF		     jp	     init_death_sparkles
 RAM:C83E	     ; ---------------------------------------------------------------------------
 RAM:C83E
 RAM:C83E	     loc_C83E:							     ; returns to caller if transforming
@@ -7113,7 +7114,7 @@ RAM:CC62 07			     rlca
 RAM:CC63 E6 40			     and     40h ; '@'                               ; bit 5->6
 RAM:CC65 DD B6 0D		     or	     (ix+13)
 RAM:CC68 DD 77 0D		     ld	     (ix+13), a
-RAM:CC6B FD CB 0D DE		     set     3,	(iy+13)
+RAM:CC6B FD CB 0D DE		     set     3,	(iy+13)				     ; triggered (falling, collapsing blocks)
 RAM:CC6F DD CB 07 56		     bit     2,	(ix+7)				     ; moveable?
 RAM:CC73 28 18			     jr	     z,	loc_CC8D			     ; no, skip
 RAM:CC75 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
@@ -7419,7 +7420,7 @@ RAM:CDE2 3A C3 5B		     ld	     a,	(all_objs_in_cauldron)
 RAM:CDE5 A7			     and     a
 RAM:CDE6 20 07			     jr	     nz, loc_CDEF
 RAM:CDE8 DD CB 0D 76		     bit     6,	(ix+13)
-RAM:CDEC C2 21 BF		     jp	     nz, init_sparkles
+RAM:CDEC C2 21 BF		     jp	     nz, init_death_sparkles
 RAM:CDEF
 RAM:CDEF	     loc_CDEF:
 RAM:CDEF DD E5			     push    ix
