@@ -12,8 +12,8 @@
 
 // build options - all disabled for 'production' build
 //#define BUILD_OPT_DISABLE_WIPE
-//#define BUILD_OPT_DISABLE_TELEPORT
-//#define BUILD_OPT_INVINCIBLE
+//#define BUILD_OPT_ENABLE_TELEPORT
+//#define BUILD_OPT_ALMOST_INVINCIBLE
 
 #pragma pack(1)
 
@@ -42,9 +42,9 @@
 #define FLAG_X_OOB          (1<<0)
                             
 // byte offset 13 flags     
-#define FLAG_BIT7           (1<<7)    // 
+#define FLAG_FATAL_HIT_YOU  (1<<7)    // deadly if it hits you
 #define FLAG_DEAD           (1<<6)    // player
-#define FLAG_BIT5           (1<<5)    // 
+#define FLAG_FATAL_YOU_HIT  (1<<5)    // deadly if you hit it
 #define FLAG_TRIGGERED      (1<<3)    // dropping, collapsing block
 #define FLAG_UP             (1<<2)    // bouncing ball
 #define FLAG_DROPPING       (1<<2)    // spiked ball
@@ -52,12 +52,13 @@
 #define FLAG_EAST           (1<<0)    // EW fire, EW guard
 #define FLAG_JUST_DROPPED   (1<<0)    // special objects
 #define MASK_DIR            0x03      // NSEW guard & wizard
-#define MASK_LOOK_CNT       0x0F      // player (look around cnt)
+#define MASK_LOOK_CNT       0x0F      // player (top, look around cnt)
+#define MASK_TURN_DELAY     0x07      // player (bottom)
                             
 #define MAX_OBJS            40                          
 #define CAULDRON_SCREEN     136
 // standard is 5            
-#define NO_LIVES            20
+#define NO_LIVES            5
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -160,7 +161,7 @@ static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio_until_keypress (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
 static uint8_t sub_B4FD (POBJ32 p_obj);
-static uint8_t test_obj_flag_bit1 (POBJ32 p_obj);
+static uint8_t is_object_not_ignored (POBJ32 p_obj);
 static void shuffle_objects_required (void);
 static void upd_131_to_133 (POBJ32 p_obj);
 static void dec_dZ_wipe_and_draw (POBJ32 p_obj);
@@ -179,8 +180,8 @@ static void upd_23 (POBJ32 p_obj);
 static void upd_86_87 (POBJ32 p_obj);
 static void upd_180_181 (POBJ32 p_obj);
 static void upd_176_177 (POBJ32 p_obj);
-static void loc_B856 (POBJ32 p_obj);
-static void sub_B85C (POBJ32 p_obj);
+static void set_deadly_wipe_and_draw_flags (POBJ32 p_obj);
+static void set_both_deadly_flags (POBJ32 p_obj);
 static void upd_178_179 (POBJ32 p_obj);
 static void init_cauldron_bubbles (void);
 static void upd_160_to_163 (POBJ32 p_obj);
@@ -567,7 +568,7 @@ game_delay:
     while (osd_key(OSD_KEY_F));
   }
 
-#ifndef BUILD_OPT_DISABLE_TELEPORT
+#ifdef BUILD_OPT_ENABLE_TELEPORT
     
   if (osd_key(OSD_KEY_N))
   {
@@ -632,7 +633,7 @@ game_delay:
     goto game_loop;
   }
 
-#endif //BUILD_OPT_DISABLE_TELEPORT
+#endif //BUILD_OPT_ENABLE_TELEPORT
     
   if (osd_key(OSD_KEY_T))
   {
@@ -895,12 +896,13 @@ uint8_t sub_B4FD (POBJ32 p_obj)
   
   UNTESTED;
   
+  // don't test this object
   p_obj->flags7 |= FLAG_IGNORE_3D;
 
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit1 (p_other) == 0)
+    if (is_object_not_ignored (p_other) == 0)
       continue;
     if (sub_CC9D (p_obj, p_other, 0) == 0)
       continue;
@@ -917,8 +919,7 @@ uint8_t sub_B4FD (POBJ32 p_obj)
 }
 
 // $B538
-// returns complement of bit1
-uint8_t test_obj_flag_bit1 (POBJ32 p_obj)
+uint8_t is_object_not_ignored (POBJ32 p_obj)
 {
   if (p_obj->graphic_no == 0)
     return (0);
@@ -991,7 +992,8 @@ void upd_131_to_133 (POBJ32 p_obj)
       game_over ();
       // longjmp to start_menu
     }
-    p_obj->flags13 |= FLAG_BIT7;
+    // only fatal if it hits you
+    p_obj->flags13 |= FLAG_FATAL_HIT_YOU;
     p_obj->flags7 |= FLAG_IGNORE_3D;
     p_obj->d_z = 1;
     move_towards_plyr (p_obj, 4, 4);
@@ -1088,7 +1090,7 @@ void upd_182_183 (POBJ32 p_obj)
     }
   }
   toggle_next_prev_sprite (p_obj);
-  loc_B856 (p_obj);
+  set_deadly_wipe_and_draw_flags (p_obj);
 }
 
 // $B683
@@ -1220,7 +1222,7 @@ void upd_150_151 (POBJ32 p_obj)
   if (p_obj->flags12 & FLAG_X_OOB)
     p_obj->flags13 ^= FLAG_EAST;
   p_next_obj->x = p_obj->x;
-  loc_B856 (p_obj);
+  set_deadly_wipe_and_draw_flags (p_obj);
 }
 
 // $B76C
@@ -1250,7 +1252,7 @@ void set_guard_wizard_sprite (POBJ32 p_obj)
 // gargoyle
 void upd_22 (POBJ32 p_obj)
 {
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   adj_m7_m12 (p_obj);
 }
 
@@ -1260,7 +1262,7 @@ void upd_22 (POBJ32 p_obj)
 // - drop immediately in even-numbered rooms!
 void upd_63 (POBJ32 p_obj)
 {
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   upd_6_7 (p_obj);
   if (disable_spike_ball_drop != 0)
     return;
@@ -1294,7 +1296,7 @@ void upd_63 (POBJ32 p_obj)
 // spikes
 void upd_23 (POBJ32 p_obj)
 {
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   upd_6_7 (p_obj);
 }
 
@@ -1316,7 +1318,7 @@ void upd_86_87 (POBJ32 p_obj)
     //gen_audio_rom ();
   }
   toggle_next_prev_sprite (p_obj);
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1338,7 +1340,7 @@ void upd_180_181 (POBJ32 p_obj)
     //gen_audio_rom ();
   }
   toggle_next_prev_sprite (p_obj);
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1354,23 +1356,25 @@ void upd_176_177 (POBJ32 p_obj)
   // randomise HFLIP
   p_obj->flags7 ^= seed_3 & FLAG_HFLIP;
   toggle_next_prev_sprite (p_obj);
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
 // $B856
-void loc_B856 (POBJ32 p_obj)
+void set_deadly_wipe_and_draw_flags (POBJ32 p_obj)
 {
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
   
 // $B85C
-// - rumoured to be immunity
-void sub_B85C (POBJ32 p_obj)
+void set_both_deadly_flags (POBJ32 p_obj)
 {
-#ifndef BUILD_OPT_INVINCIBLE
-  p_obj->flags13 |= FLAG_BIT7|FLAG_BIT5;
+  // flags an object to be deadly if
+  // - you hit it
+  // - it hits you
+#ifndef BUILD_OPT_ALMOST_INVINCIBLE
+  p_obj->flags13 |= FLAG_FATAL_HIT_YOU|FLAG_FATAL_YOU_HIT;
 #endif  
 }
 
@@ -1399,7 +1403,7 @@ void upd_178_179 (POBJ32 p_obj)
     if (p_obj->z >= ball_bounce_height)
       p_obj->flags13 &= ~(FLAG_UP);
   }
-  sub_B85C (p_obj);
+  set_both_deadly_flags (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1558,7 +1562,7 @@ void upd_30_31_158_159 (POBJ32 p_obj)
   p_next_obj->x = p_obj->x;
   p_next_obj->y = p_obj->y;
   set_guard_wizard_sprite (p_obj);
-  loc_B856 (p_obj);
+  set_deadly_wipe_and_draw_flags (p_obj);
 }
 
 // $B9CC
@@ -2644,7 +2648,7 @@ void upd_80_to_83 (POBJ32 p_obj)
     //gen_audio_XYZ ();
   }
   toggle_next_prev_sprite (p_obj);
-  loc_B856 (p_obj);
+  set_deadly_wipe_and_draw_flags (p_obj);
 }
 
 // $C603
@@ -2731,7 +2735,9 @@ void upd_9 (POBJ32 p_obj)
   //DBGPRINTF_FN;
   
   adj_m6_m12 (p_obj);
-  p_obj->flags13 |= FLAG_BIT7;
+  // only fatal if it hits you
+  // - ie. you can walk into it without dying
+  p_obj->flags13 |= FLAG_FATAL_HIT_YOU;
   if ((graphic_objs_tbl[0].flags12 & MASK_ENTERING_SCRN) != 0)
     return;
   if (p_obj->d_z < 0)
@@ -2969,8 +2975,9 @@ void handle_left_right (POBJ32 p_obj, uint8_t inp)
   UNTESTED;
   
   // checks user input method
-  
-  if ((p_obj->flags13 & 7) != 0)
+
+  // delay before allowing turning again  
+  if ((p_obj->flags13 & MASK_TURN_DELAY) != 0)
   {
     p_obj->flags13--;
     return;
@@ -2986,6 +2993,7 @@ void handle_left_right (POBJ32 p_obj, uint8_t inp)
   {
     //loc_B4C1 ();
   }
+  // init delay for allowing turning again
   p_obj->flags13 |= 2;
   if (((inp & INP_RIGHT) != 0 &&
       (p_obj->flags7 & FLAG_HFLIP) != 0) ||
@@ -3275,7 +3283,7 @@ int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit1 (p_other) == 0)
+    if (is_object_not_ignored (p_other) == 0)
       continue;
     if (sub_CCB2 (p_obj, p_other, d_y) == 0)
       continue;
@@ -3311,7 +3319,7 @@ int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit1 (p_other) == 0)
+    if (is_object_not_ignored (p_other) == 0)
       continue;
     if (sub_CC9D (p_obj, p_other, d_x) == 0)
       continue;
@@ -3347,7 +3355,7 @@ int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
-    if (test_obj_flag_bit1 (p_other) == 0)
+    if (is_object_not_ignored (p_other) == 0)
       continue;
     if (sub_CC9D (p_obj, p_other, d_x) == 0)
       continue;

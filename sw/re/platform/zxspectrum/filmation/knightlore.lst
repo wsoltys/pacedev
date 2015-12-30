@@ -3299,7 +3299,7 @@ RAM:B50B 61			     ld	     h,	c
 RAM:B50C DD CB 07 CE		     set     1,	(ix+7)
 RAM:B510
 RAM:B510	     loc_B510:
-RAM:B510 CD 38 B5		     call    test_object_flag_bit1
+RAM:B510 CD 38 B5		     call    is_object_not_ignored
 RAM:B513 28 19			     jr	     z,	loc_B52E
 RAM:B515 CD 9D CC		     call    sub_CC9D
 RAM:B518 30 14			     jr	     nc, loc_B52E
@@ -3329,7 +3329,7 @@ RAM:B538
 RAM:B538	     ; =============== S U B R O U T I N E =======================================
 RAM:B538
 RAM:B538
-RAM:B538	     test_object_flag_bit1:
+RAM:B538	     is_object_not_ignored:
 RAM:B538 FD 7E 00		     ld	     a,	(iy+0)				     ; graphic no.
 RAM:B53B A7			     and     a					     ; null?
 RAM:B53C C8			     ret     z					     ; yes, exit
@@ -3337,7 +3337,7 @@ RAM:B53D FD 7E 07		     ld	     a,	(iy+7)				     ; flags
 RAM:B540 2F			     cpl
 RAM:B541 E6 02			     and     2					     ; test bit	1
 RAM:B543 C9			     ret
-RAM:B543	     ; End of function test_object_flag_bit1
+RAM:B543	     ; End of function is_object_not_ignored
 RAM:B543
 RAM:B544
 RAM:B544	     ; =============== S U B R O U T I N E =======================================
@@ -3451,9 +3451,9 @@ RAM:B5DE	     loc_B5DE:							     ; less than 6?
 RAM:B5DE FE 06			     cp	     6
 RAM:B5E0 DA 22 BA		     jp	     c,	game_over			     ; yes, exit
 RAM:B5E3
-RAM:B5E3	     loc_B5E3:
+RAM:B5E3	     loc_B5E3:							     ; fatal if	it hits	player
 RAM:B5E3 DD CB 0D FE		     set     7,	(ix+13)
-RAM:B5E7 DD CB 07 CE		     set     1,	(ix+7)
+RAM:B5E7 DD CB 07 CE		     set     1,	(ix+7)				     ; ignore object in	3D calculations
 RAM:B5EB DD 36 0B 01		     ld	     (ix+11), 1				     ; dZ=1
 RAM:B5EF 01 04 04		     ld	     bc, 404h
 RAM:B5F2 CD 65 B9		     call    move_towards_plyr
@@ -3532,7 +3532,7 @@ RAM:B664 DD 36 09 00		     ld	     (ix+9), 0				     ; new dX=0
 RAM:B668
 RAM:B668	     loc_B668:
 RAM:B668 CD 85 B9		     call    toggle_next_prev_sprite
-RAM:B66B C3 56 B8		     jp	     loc_B856
+RAM:B66B C3 56 B8		     jp	     set_deadly_wipe_and_draw_flags
 RAM:B66E	     ; ---------------------------------------------------------------------------
 RAM:B66E
 RAM:B66E	     loc_B66E:							     ; plyr_spr_1 X
@@ -3689,7 +3689,7 @@ RAM:B763
 RAM:B763	     loc_B763:							     ; X
 RAM:B763 DD 7E 01		     ld	     a,	(ix+1)
 RAM:B766 DD 77 21		     ld	     (ix+21h), a			     ; copy to bottom half
-RAM:B769 C3 56 B8		     jp	     loc_B856
+RAM:B769 C3 56 B8		     jp	     set_deadly_wipe_and_draw_flags
 RAM:B76C
 RAM:B76C	     ; =============== S U B R O U T I N E =======================================
 RAM:B76C
@@ -3734,13 +3734,13 @@ RAM:B7A3	     ; ----------------------------------------------------------------
 RAM:B7A3	     ; gargoyle
 RAM:B7A3
 RAM:B7A3	     upd_22:
-RAM:B7A3 CD 5C B8		     call    sub_B85C
+RAM:B7A3 CD 5C B8		     call    set_both_deadly_flags
 RAM:B7A6 C3 FC C4		     jp	     adj_m7_m12				     ; adj(-7,-12)
 RAM:B7A9	     ; ---------------------------------------------------------------------------
 RAM:B7A9	     ; spiked ball
 RAM:B7A9
 RAM:B7A9	     upd_63:
-RAM:B7A9 CD 5C B8		     call    sub_B85C
+RAM:B7A9 CD 5C B8		     call    set_both_deadly_flags
 RAM:B7AC CD E3 C4		     call    upd_6_7
 RAM:B7AF 3A C0 5B		     ld	     a,	(disable_spike_ball_drop)
 RAM:B7B2 A7			     and     a
@@ -3778,7 +3778,7 @@ RAM:B7E7	     ; ----------------------------------------------------------------
 RAM:B7E7	     ; spikes
 RAM:B7E7
 RAM:B7E7	     upd_23:
-RAM:B7E7 CD 5C B8		     call    sub_B85C
+RAM:B7E7 CD 5C B8		     call    set_both_deadly_flags
 RAM:B7EA C3 E3 C4		     jp	     upd_6_7
 RAM:B7ED	     ; ---------------------------------------------------------------------------
 RAM:B7ED	     ; fire (moving EW)
@@ -3824,7 +3824,7 @@ RAM:B837 CD 2E B4		     call    audio_B42E
 RAM:B83A
 RAM:B83A	     loc_B83A:
 RAM:B83A CD 85 B9		     call    toggle_next_prev_sprite
-RAM:B83D 18 17			     jr	     loc_B856
+RAM:B83D 18 17			     jr	     set_deadly_wipe_and_draw_flags
 RAM:B83F	     ; ---------------------------------------------------------------------------
 RAM:B83F	     ; fire (stationary) (not used)
 RAM:B83F
@@ -3839,19 +3839,19 @@ RAM:B84D DD AE 07		     xor     (ix+7)				     ; randomise hflip
 RAM:B850 DD 77 07		     ld	     (ix+7), a
 RAM:B853 CD 85 B9		     call    toggle_next_prev_sprite
 RAM:B856
-RAM:B856	     loc_B856:
-RAM:B856 CD 5C B8		     call    sub_B85C
+RAM:B856	     set_deadly_wipe_and_draw_flags:
+RAM:B856 CD 5C B8		     call    set_both_deadly_flags
 RAM:B859 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B85C
 RAM:B85C	     ; =============== S U B R O U T I N E =======================================
 RAM:B85C
 RAM:B85C
-RAM:B85C	     sub_B85C:
-RAM:B85C DD 7E 0D		     ld	     a,	(ix+13)				     ; immunity???
-RAM:B85F F6 A0			     or	     0A0h ; ' '                              ; set bits 7,5
+RAM:B85C	     set_both_deadly_flags:
+RAM:B85C DD 7E 0D		     ld	     a,	(ix+13)
+RAM:B85F F6 A0			     or	     0A0h ; ' '                              ; fatal if you hit it, it hits you
 RAM:B861 DD 77 0D		     ld	     (ix+13), a
 RAM:B864 C9			     ret
-RAM:B864	     ; End of function sub_B85C
+RAM:B864	     ; End of function set_both_deadly_flags
 RAM:B864
 RAM:B865	     ; ---------------------------------------------------------------------------
 RAM:B865	     ; ball up/down
@@ -3877,7 +3877,7 @@ RAM:B88B DD CB 0D D6		     set     2,	(ix+13)				     ; set dir=up
 RAM:B88F CD 2E B4		     call    audio_B42E				     ; audio?
 RAM:B892
 RAM:B892	     loc_B892:
-RAM:B892 18 C2			     jr	     loc_B856
+RAM:B892 18 C2			     jr	     set_deadly_wipe_and_draw_flags
 RAM:B894	     ; ---------------------------------------------------------------------------
 RAM:B894
 RAM:B894	     ball_up:							     ; dZ=3
@@ -4070,7 +4070,7 @@ RAM:B9BD DD 77 21		     ld	     (ix+21h), a			     ; copy to next obj	X
 RAM:B9C0 DD 7E 02		     ld	     a,	(ix+2)				     ; Y
 RAM:B9C3 DD 77 22		     ld	     (ix+22h), a			     ; copy to next obj	Y
 RAM:B9C6 CD 6C B7		     call    set_guard_wizard_sprite
-RAM:B9C9 C3 56 B8		     jp	     loc_B856
+RAM:B9C9 C3 56 B8		     jp	     set_deadly_wipe_and_draw_flags
 RAM:B9CC
 RAM:B9CC	     ; =============== S U B R O U T I N E =======================================
 RAM:B9CC
@@ -5995,7 +5995,7 @@ RAM:C5FA CD 67 B4		     call    audio_B467
 RAM:C5FD
 RAM:C5FD	     loc_C5FD:
 RAM:C5FD CD 85 B9		     call    toggle_next_prev_sprite
-RAM:C600 C3 56 B8		     jp	     loc_B856
+RAM:C600 C3 56 B8		     jp	     set_deadly_wipe_and_draw_flags
 RAM:C603
 RAM:C603	     ; =============== S U B R O U T I N E =======================================
 RAM:C603
@@ -6134,7 +6134,7 @@ RAM:C6BD	     ; portcullis (moving)
 RAM:C6BD
 RAM:C6BD	     upd_9:
 RAM:C6BD CD DD C4		     call    adj_m6_m12
-RAM:C6C0 DD CB 0D FE		     set     7,	(ix+13)
+RAM:C6C0 DD CB 0D FE		     set     7,	(ix+13)				     ; fatal if	it hits	player
 RAM:C6C4 3A 14 5C		     ld	     a,	(graphic_objs_tbl+0Ch)
 RAM:C6C7 E6 F0			     and     0F0h ; 'ð'
 RAM:C6C9 C0			     ret     nz
@@ -6518,9 +6518,9 @@ RAM:C8F2	     ; ----------------------------------------------------------------
 RAM:C8F2
 RAM:C8F2	     loc_C8F2:
 RAM:C8F2 DD 7E 0D		     ld	     a,	(ix+13)
-RAM:C8F5 E6 07			     and     7
-RAM:C8F7 28 04			     jr	     z,	loc_C8FD
-RAM:C8F9 DD 35 0D		     dec     (ix+13)
+RAM:C8F5 E6 07			     and     7					     ; too soon	to turn	again?
+RAM:C8F7 28 04			     jr	     z,	loc_C8FD			     ; no, skip
+RAM:C8F9 DD 35 0D		     dec     (ix+13)				     ; dec delay counter
 RAM:C8FC C9			     ret
 RAM:C8FD	     ; ---------------------------------------------------------------------------
 RAM:C8FD
@@ -6541,7 +6541,7 @@ RAM:C914 C1			     pop     bc
 RAM:C915
 RAM:C915	     loc_C915:
 RAM:C915 DD 7E 0D		     ld	     a,	(ix+13)
-RAM:C918 F6 02			     or	     2
+RAM:C918 F6 02			     or	     2					     ; init turning delay counter
 RAM:C91A DD 77 0D		     ld	     (ix+13), a
 RAM:C91D CB 49			     bit     1,	c				     ; right?
 RAM:C91F
@@ -6996,8 +6996,8 @@ RAM:CB9A FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CB9E 06 28			     ld	     b,	40				     ; max objects
 RAM:CBA0
 RAM:CBA0	     loc_CBA0:
-RAM:CBA0 CD 38 B5		     call    test_object_flag_bit1
-RAM:CBA3 28 3C			     jr	     z,	loc_CBE1
+RAM:CBA0 CD 38 B5		     call    is_object_not_ignored
+RAM:CBA3 28 3C			     jr	     z,	loc_CBE1			     ; ignored,	skip
 RAM:CBA5 CD B2 CC		     call    sub_CCB2
 RAM:CBA8 30 37			     jr	     nc, loc_CBE1
 RAM:CBAA CD C7 CC		     call    sub_CCC7
@@ -7045,7 +7045,7 @@ RAM:CBE9 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CBED 06 28			     ld	     b,	40				     ; max objects
 RAM:CBEF
 RAM:CBEF	     loc_CBEF:
-RAM:CBEF CD 38 B5		     call    test_object_flag_bit1
+RAM:CBEF CD 38 B5		     call    is_object_not_ignored
 RAM:CBF2 28 3C			     jr	     z,	loc_CC30			     ; next entry
 RAM:CBF4 CD 9D CC		     call    sub_CC9D
 RAM:CBF7 30 37			     jr	     nc, loc_CC30			     ; next entry
@@ -7094,7 +7094,7 @@ RAM:CC38 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CC3C 06 28			     ld	     b,	40				     ; max objects
 RAM:CC3E
 RAM:CC3E	     loc_CC3E:
-RAM:CC3E CD 38 B5		     call    test_object_flag_bit1
+RAM:CC3E CD 38 B5		     call    is_object_not_ignored
 RAM:CC41 28 52			     jr	     z,	loc_CC95			     ; next entry
 RAM:CC43 CD 9D CC		     call    sub_CC9D
 RAM:CC46 30 4D			     jr	     nc, loc_CC95			     ; next entry
