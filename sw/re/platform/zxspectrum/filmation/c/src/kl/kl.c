@@ -160,7 +160,22 @@ static void reset_objs_wipe_flag (void);
 static void play_audio_wait_key (uint8_t *audio_data);
 static void play_audio_until_keypress (uint8_t *audio_data);
 static void play_audio (uint8_t *audio_data);
-static uint8_t sub_B4FD (POBJ32 p_obj);
+static void audio_B3E9 (void);
+static void audio_B403 (POBJ32 p_obj);
+static void audio_B419 (POBJ32 p_obj);
+static void audio_B42E (void);
+static void audio_B441 (void);
+static void audio_B451 (POBJ32 p_obj);
+static void audio_B454 (uint8_t a);
+static void audio_B45D (POBJ32 p_obj);
+static void audio_B462 (POBJ32 p_obj);
+static void audio_B467 (POBJ32 p_obj);
+static void audio_B472 (POBJ32 p_obj);
+static void audio_B489 (void);
+static void audio_guard_wizard (POBJ32 p_obj);
+static void audio_B4BB (POBJ32 p_obj);
+static void audio_B4C1 (POBJ32 p_obj);
+static uint8_t do_any_objs_intersect (POBJ32 p_obj);
 static uint8_t is_object_not_ignored (POBJ32 p_obj);
 static void shuffle_objects_required (void);
 static void upd_131_to_133 (POBJ32 p_obj);
@@ -224,12 +239,12 @@ static void display_objects (void);
 static void adj_m8_m12 (POBJ32 p_obj);
 static uint8_t chk_pickup_drop (void);
 static void handle_pickup_drop (POBJ32 p_obj);
-static uint8_t sub_C172 (POBJ32 p_obj, POBJ32 p_other);
-static uint8_t loc_C17A (POBJ32 p_obj, POBJ32 p_other);
+static uint8_t can_pickup_spec_obj (POBJ32 p_obj, POBJ32 p_other);
+static uint8_t is_on_or_near_obj (POBJ32 p_obj, POBJ32 p_other);
 static uint8_t is_obj_moving (POBJ32 p_obj);
 static void upd_103 (POBJ32 p_obj);
 static void upd_104_to_110 (POBJ32 p_obj);
-static void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj);
+static void audio_B467_wipe_and_draw (POBJ32 p_obj);
 static uint8_t ret_next_obj_required (void);
 static void upd_96_to_102 (POBJ32 p_obj);
 static void cycle_colours_with_sound (POBJ32 p_obj);
@@ -246,7 +261,7 @@ static void init_special_objects (void);
 static void upd_62 (POBJ32 p_obj);
 static void upd_85 (POBJ32 p_obj);
 static void upd_84 (POBJ32 p_obj);
-static void loc_C4C6 (POBJ32 p_obj);
+static void dec_dZ_upd_XYZ_wipe_if_moving (POBJ32 p_obj);
 static void upd_128_to_130 (POBJ32 p_obj);
 static void adj_m6_m12 (POBJ32 p_obj);
 static void upd_6_7 (POBJ32 p_obj);
@@ -289,12 +304,12 @@ static int8_t adj_dZ_for_out_of_bounds (POBJ32 p_obj, int8_t d_z);
 static uint8_t handle_exit_screen (POBJ32 p_obj);
 static int8_t adj_d_for_out_of_bounds (int8_t d);
 static void adj_for_out_of_bounds (POBJ32 p_obj);
-static int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
-static int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
-static int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
-static uint8_t sub_CC9D (POBJ32 p_obj, POBJ32 p_other, int8_t d_x);
-static uint8_t sub_CCB2 (POBJ32 p_obj, POBJ32 p_other, int8_t d_y);
-static uint8_t sub_CCC7 (POBJ32 p_obj, POBJ32 p_other, int8_t d_z);
+static int8_t adj_dX_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
+static int8_t adj_dY_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
+static int8_t adj_dZ_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z);
+static uint8_t do_objs_intersect_on_x (POBJ32 p_obj, POBJ32 p_other, int8_t d_x);
+static uint8_t do_objs_intersect_on_y (POBJ32 p_obj, POBJ32 p_other, int8_t d_y);
+static uint8_t do_objs_intersect_on_z (POBJ32 p_obj, POBJ32 p_other, int8_t d_z);
 static int8_t adj_dX_for_out_of_bounds (POBJ32 p_obj, int8_t d_x);
 static int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y);
 static void calc_2d_info (POBJ32 p_obj);
@@ -319,6 +334,7 @@ static void colour_sun_moon (void);
 static void adjust_plyr_xyz_for_room_size (POBJ32 p_obj);
 static void adjust_plyr_Z_for_arch (POBJ32 p_obj, uint8_t xy);
 static void retrieve_screen (void);
+static void audio_D50E (void);
 static void fill_attr (uint8_t attr);
 static void clear_scrn (void);
 static void clear_scrn_buffer (void);
@@ -515,12 +531,12 @@ onscreen_loop:
   seed_3 += (seed_2 >> 8);    // add a,h
 
   not_1st_screen |= (1<<0);
-  //sub_D50E ();              // audio
+  audio_D50E ();
   init_cauldron_bubbles ();
   list_objects_to_draw ();
   render_dynamic_objects ();
   if (rising_blocks_Z != 0)
-    /*gen_audio_B454 ()*/;
+    audio_B454 (0);   // *** FIXME
 
   // calc game delay loop
   // using rendered_objs_cnt
@@ -886,9 +902,99 @@ void play_audio (uint8_t *audio_data)
   UNIMPLEMENTED_AUDIO;
 }
 
+// $B3E9
+void audio_B3E9 (void)
+{
+  UNIMPLEMENTED_AUDIO;
+}
+
+// $B403
+void audio_B403 (POBJ32 p_obj)
+{
+  UNIMPLEMENTED_AUDIO;
+}
+
+// $B419
+void audio_B419 (POBJ32 p_obj)
+{
+  UNIMPLEMENTED_AUDIO;
+}
+
+// $B42E
+void audio_B42E (void)
+{
+  UNIMPLEMENTED_AUDIO;
+}
+
+// $B441
+void audio_B441 (void)
+{
+  UNIMPLEMENTED_AUDIO;
+}
+
+// $B451
+void audio_B451 (POBJ32 p_obj)
+{
+  UNIMPLEMENTED_AUDIO;
+}
+
+// $B454
+void audio_B454 (uint8_t a)
+{
+  UNIMPLEMENTED_AUDIO;
+}
+
+// $B45D
+void audio_B45D (POBJ32 p_obj)
+{
+  UNTESTED;
+  
+  audio_B454 (p_obj->x);
+}
+
+// $B462
+void audio_B462 (POBJ32 p_obj)
+{
+  UNTESTED;
+  
+  audio_B454 (p_obj->y);
+}
+
+// $B467
+void audio_B467 (POBJ32 p_obj)
+{
+  UNTESTED;
+  
+  audio_B454 (p_obj->x + p_obj->y + p_obj->z);
+}
+
+// $B472
+void audio_B472 (POBJ32 p_obj)
+{
+}
+
+// $B489
+void audio_B489 (void)
+{
+}
+
+// $B4AD
+void audio_guard_wizard (POBJ32 p_obj)
+{
+}
+
+// $B4BB
+void audio_B4BB (POBJ32 p_obj)
+{
+}
+
+// $B4C1
+void audio_B4C1 (POBJ32 p_obj)
+{
+}
+
 // $B4FD
-// returns (state of carry flag)
-uint8_t sub_B4FD (POBJ32 p_obj)
+uint8_t do_any_objs_intersect (POBJ32 p_obj)
 {
   POBJ32    p_other;
   uint8_t   carry = 0;
@@ -904,11 +1010,11 @@ uint8_t sub_B4FD (POBJ32 p_obj)
   {
     if (is_object_not_ignored (p_other) == 0)
       continue;
-    if (sub_CC9D (p_obj, p_other, 0) == 0)
+    if (do_objs_intersect_on_x (p_obj, p_other, 0) == 0)
       continue;
-    if (sub_CCB2 (p_obj, p_other, 0) == 0)
+    if (do_objs_intersect_on_y (p_obj, p_other, 0) == 0)
       continue;
-    if (sub_CCC7 (p_obj, p_other, 0) == 0)
+    if (do_objs_intersect_on_z (p_obj, p_other, 0) == 0)
       continue;
     carry = 1;
     break;
@@ -1075,7 +1181,7 @@ void upd_182_183 (POBJ32 p_obj)
   {
     p_obj->d_z = d_z;
     if (tmp_bouncing_ball_dZ < 0)
-      /*gen_audio_rom ()*/;
+      audio_B42E ();
     if ((rand () & 1) == 0)
     {
       int8_t s = ((graphic_objs_tbl[0].x - p_obj->x < 0) ? -1 : 1);
@@ -1106,7 +1212,7 @@ void upd_91 (POBJ32 p_obj)
   p_obj->d_z = 0;
   dec_dZ_and_update_XYZ (p_obj);
   if ((p_obj->flags12 & FLAG_Z_OOB) == 0)
-    /*gen_audio_Z (p_obj)*/;
+    audio_B451 (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1131,9 +1237,9 @@ void upd_55 (POBJ32 p_obj)
   uint8_t x_y;
   
   if (p_obj->graphic_no == 54)
-    /*gen_audio_X (p_obj)*/;
+    audio_B45D (p_obj);
   else
-    /*gen_audio_Y (p_obj)*/;
+    audio_B462 (p_obj);
     
   upd_6_7 (p_obj);
   
@@ -1185,7 +1291,7 @@ void upd_144_to_149_152_to_157 (POBJ32 p_obj)
   set_pixel_adj (p_obj, -6, -12);
   if (p_obj->d_x == 0 && p_obj->d_y == 0)
     return;
-  //gen_guard_wizard_audio (p_obj);
+  audio_guard_wizard (p_obj);
   if ((uint8_t)p_obj->d_x < (uint8_t)p_obj->d_y)
   {
     if (p_obj->d_y < 0)
@@ -1280,9 +1386,7 @@ void upd_63 (POBJ32 p_obj)
   {
     dec_dZ_and_update_XYZ (p_obj);
     if ((p_obj->flags12 & FLAG_Z_OOB) == 0)
-    {
-      //gen_audio_Z (p_obj);
-    }
+      audio_B451 (p_obj);
     else
     {
       p_obj->flags13 &= ~FLAG_DROPPING;
@@ -1310,12 +1414,12 @@ void upd_86_87 (POBJ32 p_obj)
     p_obj->d_x = 2;
   else
     p_obj->d_x = -2;
-  //gen_audio_X (p_obj);
+  audio_B45D (p_obj);
   dec_dZ_and_update_XYZ (p_obj);
   if ((p_obj->flags12 & FLAG_X_OOB) != 0)
   {
     p_obj->flags13 ^= FLAG_EAST;
-    //gen_audio_rom ();
+    audio_B42E ();
   }
   toggle_next_prev_sprite (p_obj);
   set_both_deadly_flags (p_obj);
@@ -1332,12 +1436,12 @@ void upd_180_181 (POBJ32 p_obj)
     p_obj->d_y = 2;
   else
     p_obj->d_y = -2;
-  //gen_audio_Y (p_obj);
+  audio_B462 (p_obj);
   dec_dZ_and_update_XYZ (p_obj);
   if ((p_obj->flags12 & FLAG_Y_OOB) != 0)
   {
     p_obj->flags13 ^= FLAG_NORTH;
-    //gen_audio_rom ();
+    audio_B42E ();
   }
   toggle_next_prev_sprite (p_obj);
   set_both_deadly_flags (p_obj);
@@ -1386,14 +1490,14 @@ void upd_178_179 (POBJ32 p_obj)
   if (ball_bounce_height == 0)
     ball_bounce_height = p_obj->z + 32;
   toggle_next_prev_sprite (p_obj);
-  // sub_B451 // audio
+  audio_B451 (p_obj);
   if ((p_obj->flags13 & FLAG_UP) == 0)
   {
     dec_dZ_and_update_XYZ (p_obj);
     if (p_obj->flags12 & FLAG_Z_OOB)
     {
       p_obj->flags13 |= FLAG_UP;
-      //sub_B42E() // audio
+      audio_B42E();
     }
   }
   else
@@ -1493,7 +1597,7 @@ void upd_164_to_167 (POBJ32 p_obj)
     if ((graphic_objs_tbl[0].graphic_no - 0x10) >= 0x40)
       p_obj->graphic_no = 1;  // invalid
   }
-  gen_audio_XYZ_wipe_and_draw (p_obj);
+  audio_B467_wipe_and_draw (p_obj);
 }
 
 // $B95E
@@ -1503,7 +1607,7 @@ void upd_111 (POBJ32 p_obj)
   UNTESTED;
 
   p_obj->graphic_no = 1;  // invalid
-  gen_audio_XYZ_wipe_and_draw (p_obj);
+  audio_B467_wipe_and_draw (p_obj);
 }
 
 // $B965
@@ -1637,7 +1741,7 @@ void game_over (void)
     clear_scrn ();
     suppress_border = 0;
     display_text_list (complete_colours, complete_xy, (char **)complete_text, 6);
-    // some audio
+    play_audio (game_complete_tune);
     wait_for_key_release ();
   }
   clear_scrn_buffer ();
@@ -1866,7 +1970,7 @@ void upd_120_to_126 (POBJ32 p_obj)
   if ((~seed_2 & 1) != 0)
     return;
   p_obj->graphic_no++;
-  //gen_audio_graphic_no (p_obj);
+  audio_B419 (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1886,7 +1990,7 @@ void init_death_sparkles (POBJ32 p_obj)
 {
   p_obj->graphic_no = 112;
   p_obj->flags7 |= FLAG_IGNORE_3D;
-  //gen_audio_graphic_no_rom (p_obj);
+  audio_B403 (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1898,7 +2002,7 @@ void upd_112_to_118_184 (POBJ32 p_obj)
 
   adj_m4_m12 (p_obj);
   p_obj->graphic_no++;
-  //gen_audio_graphic_no_rom (p_obj);
+  audio_B403 (p_obj);
   set_wipe_and_draw_flags (p_obj);
 }
 
@@ -1998,10 +2102,11 @@ void handle_pickup_drop (POBJ32 p_obj)
   cant_drop = 0;
   z = p_obj->z;     // save
   p_obj->z += 12;
-  if (sub_B4FD (p_obj) != 0)
+  if (do_any_objs_intersect (p_obj) != 0)
     cant_drop = 1;
   p_obj->z = z;     // restore
-  // audio
+
+  // audio - toggles FE directly
   
   pickup_drop_pressed = 1;
   objects_carried_changed = 1;
@@ -2015,7 +2120,7 @@ void handle_pickup_drop (POBJ32 p_obj)
   p_other = special_objs_here;  
   for (i=0; i<2; i++)
   {
-    if (sub_C172 (p_obj, p_other) != 0)
+    if (can_pickup_spec_obj (p_obj, p_other) != 0)
       goto pickup_object;
   }
   if (chk_pickup_drop () != 0)
@@ -2085,25 +2190,25 @@ pickup_object:
 }
 
 // $C172
-uint8_t sub_C172 (POBJ32 p_obj, POBJ32 p_other)
+uint8_t can_pickup_spec_obj (POBJ32 p_obj, POBJ32 p_other)
 {
   // special object?
   if ((p_other->graphic_no - 0x60) >= 7)
     return (0);
-  return loc_C17A (p_obj, p_other);
+  return is_on_or_near_obj (p_obj, p_other);
 }
 
 // $C17A
-uint8_t loc_C17A (POBJ32 p_obj, POBJ32 p_other)
+uint8_t is_on_or_near_obj (POBJ32 p_obj, POBJ32 p_other)
 {    
   uint8_t f;
   
-  if (sub_CC9D (p_obj, p_other, 0) == 0)
+  if (do_objs_intersect_on_x (p_obj, p_other, 0) == 0)
     return (0);
-  if (sub_CCB2 (p_obj, p_other, 0) == 0)
+  if (do_objs_intersect_on_y (p_obj, p_other, 0) == 0)
     return (0);
   p_obj->z -= 4;
-  f = sub_CCC7 (p_obj, p_other, 0);
+  f = do_objs_intersect_on_z (p_obj, p_other, 0);
   p_obj->z += 4;
   return (f);
 }
@@ -2128,7 +2233,7 @@ void upd_103 (POBJ32 p_obj)
   p_other = graphic_objs_tbl;
   p_other->width++;
   p_other->depth++;
-  f = loc_C17A (p_other, p_obj);
+  f = is_on_or_near_obj (p_other, p_obj);
   p_other->width--;
   p_other->depth--;
   if (f != 0)
@@ -2138,11 +2243,11 @@ void upd_103 (POBJ32 p_obj)
     p_obj->u.ptr_obj_tbl_entry = 0;
     lives++;
     disable_spike_ball_drop = 0;
-    // audio
+    // audio - toggles FE directly
     print_lives ();
     blit_2x8 (32, 32);
   }
-  loc_C4C6 (p_obj);    
+  dec_dZ_upd_XYZ_wipe_if_moving (p_obj);    
 }
 
 // $C1F1
@@ -2198,13 +2303,13 @@ void upd_104_to_110 (POBJ32 p_obj)
       p_obj->flags7 |= FLAG_IGNORE_3D;
   }
   dec_dZ_and_update_XYZ (p_obj);
-  gen_audio_XYZ_wipe_and_draw (p_obj);
+  audio_B467_wipe_and_draw (p_obj);
 }
 
 // $C232
-void gen_audio_XYZ_wipe_and_draw (POBJ32 p_obj)
+void audio_B467_wipe_and_draw (POBJ32 p_obj)
 {
-  //gen_audio_XYZ (p_obj);
+  audio_B467 (p_obj);
   set_wipe_and_draw_flags (p_obj);    
 }
 
@@ -2227,7 +2332,7 @@ void upd_96_to_102 (POBJ32 p_obj)
       return;
   p_obj->flags13 &= ~FLAG_JUST_DROPPED;
   clear_dX_dY (p_obj);
-  gen_audio_XYZ_wipe_and_draw (p_obj);
+  audio_B467_wipe_and_draw (p_obj);
 }
 
 // $C2A5
@@ -2235,6 +2340,8 @@ void upd_96_to_102 (POBJ32 p_obj)
 void cycle_colours_with_sound (POBJ32 p_obj)
 {
   UNIMPLEMENTED_AUDIO;
+  
+  audio_B403 (p_obj);
 }
   
 // $C2CB
@@ -2308,7 +2415,7 @@ void upd_92_to_95 (POBJ32 p_obj)
   {
     if ((seed_2 & 3) != 0)
       return;
-    //gen_audio_graphic_no_2 (p_obj);
+    audio_B472 (p_obj);
     if (--p_obj->u.plyr_graphic_no == 0)
     {
       POBJ32 p_next_obj = p_obj+1;
@@ -2452,7 +2559,7 @@ void upd_62 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
   clear_dX_dY (p_obj);
-  //sub_B3E9(); // audio
+  audio_B3E9 ();
   dec_dZ_wipe_and_draw (p_obj);
 }
 
@@ -2464,7 +2571,7 @@ void upd_85 (POBJ32 p_obj)
   dec_dZ_and_update_XYZ (p_obj);
   if (!is_obj_moving (p_obj))
     return;
-  gen_audio_XYZ_wipe_and_draw (p_obj);    
+  audio_B467_wipe_and_draw (p_obj);    
 }
 
 // $C4C3
@@ -2472,17 +2579,17 @@ void upd_85 (POBJ32 p_obj)
 void upd_84 (POBJ32 p_obj)
 {
   upd_6_7 (p_obj);
-  loc_C4C6 (p_obj);
+  dec_dZ_upd_XYZ_wipe_if_moving (p_obj);
 }
 
 // $C4C6
-void loc_C4C6 (POBJ32 p_obj)
+void dec_dZ_upd_XYZ_wipe_if_moving (POBJ32 p_obj)
 {
   dec_dZ_and_update_XYZ (p_obj);
   if (!is_obj_moving (p_obj))
     return;
   clear_dX_dY (p_obj);
-  gen_audio_XYZ_wipe_and_draw (p_obj);
+  audio_B467_wipe_and_draw (p_obj);
 }
 
 // $C4D3
@@ -2645,7 +2752,7 @@ void upd_80_to_83 (POBJ32 p_obj)
     p_obj->d_x = get_delta_from_tbl ((seed_3 & 3) + 4);
     p_obj->d_y = get_delta_from_tbl ((seed_2 & 3) + 4);
     calc_ghost_sprite (p_obj);
-    //gen_audio_XYZ ();
+    audio_B467 (p_obj);
   }
   toggle_next_prev_sprite (p_obj);
   set_deadly_wipe_and_draw_flags (p_obj);
@@ -2746,7 +2853,7 @@ void upd_9 (POBJ32 p_obj)
     dec_dZ_and_update_XYZ (p_obj);
     if (p_obj->flags12 & FLAG_Z_OOB)
     {
-      //gen_audio_rnd();
+      audio_B489 ();
     stop_portcullis:
       portcullis_moving = 0;
       // set graphic_no to 8
@@ -2756,6 +2863,7 @@ void upd_9 (POBJ32 p_obj)
   else
   {
     p_obj->d_z = 2;
+    audio_B467 (p_obj);
     dec_dZ_and_update_XYZ (p_obj);
     if (p_obj->z > room_size_Z+31)
       goto stop_portcullis;    
@@ -2990,9 +3098,7 @@ void handle_left_right (POBJ32 p_obj, uint8_t inp)
   if ((p_obj->flags12 & FLAG_JUMPING) != 0)
     return;
   if ((inp & INP_FORWARD) == 0)
-  {
-    //loc_B4C1 ();
-  }
+    audio_B4C1 (p_obj);
   // init delay for allowing turning again
   p_obj->flags13 |= 2;
   if (((inp & INP_RIGHT) != 0 &&
@@ -3020,7 +3126,7 @@ void handle_jump (POBJ32 p_obj, uint8_t inp)
     return;
   p_obj->flags12 |= FLAG_JUMPING;
   p_obj->d_z = 8;
-  //sub_B441 (); audio
+  audio_B441 ();
 }
 
 // $C969
@@ -3037,7 +3143,7 @@ void handle_forward (POBJ32 p_obj, uint8_t inp)
       return;
   }
   else
-    /*loc_B4BB ()*/;  // audio
+    audio_B4BB (p_obj);
 
   animate_guard_wizard_legs (p_obj);
 }
@@ -3069,7 +3175,7 @@ uint8_t move_player (POBJ32 p_obj, uint8_t inp)
   p_obj->d_z--;
   tmp_dZ = p_obj->d_z;
   if (p_obj->d_z < -2)
-    /*gen_audio_Z(p_obj)*/;
+    audio_B451 (p_obj);
   adj_for_out_of_bounds (p_obj);
   if (handle_exit_screen (p_obj) == 1)
     /*return (1)*/;
@@ -3247,7 +3353,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_z = adj_dZ_for_out_of_bounds (p_obj, d_z);
     if (d_z != 0)
-      d_z = sub_CC38 (p_obj, d_x, d_y, d_z);
+      d_z = adj_dZ_for_obj_intersect (p_obj, d_x, d_y, d_z);
   }
 
   d_x = p_obj->d_x;
@@ -3255,7 +3361,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_x = adj_dX_for_out_of_bounds (p_obj, d_x);
     if (d_x != 0)
-      d_x = sub_CB9A (p_obj, d_x, d_y, d_z);
+      d_x = adj_dX_for_obj_intersect (p_obj, d_x, d_y, d_z);
   }
 
   d_y = p_obj->d_y;  
@@ -3263,7 +3369,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
   {
     d_y = adj_dY_for_out_of_bounds (p_obj, d_y);
     if (d_y != 0)
-      d_y = sub_CBE9 (p_obj, d_x, d_y, d_z);
+      d_y = adj_dY_for_obj_intersect (p_obj, d_x, d_y, d_z);
   }
 
   p_obj->d_x = d_x;
@@ -3273,7 +3379,7 @@ void adj_for_out_of_bounds (POBJ32 p_obj)
 }
 
 // $CB9A
-int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
+int8_t adj_dX_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 {
   POBJ32    p_other;
   unsigned  i;
@@ -3285,14 +3391,14 @@ int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   {
     if (is_object_not_ignored (p_other) == 0)
       continue;
-    if (sub_CCB2 (p_obj, p_other, d_y) == 0)
+    if (do_objs_intersect_on_y (p_obj, p_other, d_y) == 0)
       continue;
-    if (sub_CCC7 (p_obj, p_other, d_z) == 0)
+    if (do_objs_intersect_on_z (p_obj, p_other, d_z) == 0)
       continue;
       
     while (1)
     {
-      if (sub_CC9D (p_obj, p_other, d_x) == 0)
+      if (do_objs_intersect_on_x (p_obj, p_other, d_x) == 0)
         break;
       p_obj->flags12 |= FLAG_X_OOB;
       // obj bit 7 -> other bit 6
@@ -3309,7 +3415,7 @@ int8_t sub_CB9A (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 }
 
 // $CBE9
-int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
+int8_t adj_dY_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 {
   POBJ32    p_other;
   unsigned  i;
@@ -3321,14 +3427,14 @@ int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   {
     if (is_object_not_ignored (p_other) == 0)
       continue;
-    if (sub_CC9D (p_obj, p_other, d_x) == 0)
+    if (do_objs_intersect_on_x (p_obj, p_other, d_x) == 0)
       continue;
-    if (sub_CCC7 (p_obj, p_other, d_z) == 0)
+    if (do_objs_intersect_on_z (p_obj, p_other, d_z) == 0)
       continue;
       
     while (1)
     {
-      if (sub_CCB2 (p_obj, p_other, d_y) == 0)
+      if (do_objs_intersect_on_y (p_obj, p_other, d_y) == 0)
         break;
       p_obj->flags12 |= FLAG_Y_OOB;
       // obj bit 7 -> other bit 6
@@ -3345,7 +3451,7 @@ int8_t sub_CBE9 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 }
 
 // $CC38
-int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
+int8_t adj_dZ_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 {
   POBJ32    p_other;
   unsigned  i;
@@ -3357,14 +3463,14 @@ int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
   {
     if (is_object_not_ignored (p_other) == 0)
       continue;
-    if (sub_CC9D (p_obj, p_other, d_x) == 0)
+    if (do_objs_intersect_on_x (p_obj, p_other, d_x) == 0)
       continue;
-    if (sub_CCB2 (p_obj, p_other, d_y) == 0)
+    if (do_objs_intersect_on_y (p_obj, p_other, d_y) == 0)
       continue;
       
     while (1)
     {
-      if (sub_CCC7 (p_obj, p_other, d_z) == 0)
+      if (do_objs_intersect_on_z (p_obj, p_other, d_z) == 0)
         break;
       p_obj->flags12 |= FLAG_Z_OOB;
       // obj bit 7 -> other bit 6
@@ -3389,7 +3495,7 @@ int8_t sub_CC38 (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_z)
 
 // $CC9D
 // return (state of carry flag)
-uint8_t sub_CC9D (POBJ32 p_obj, POBJ32 p_other, int8_t d_x)
+uint8_t do_objs_intersect_on_x (POBJ32 p_obj, POBJ32 p_other, int8_t d_x)
 {
   int8_t d, a;
   
@@ -3402,7 +3508,7 @@ uint8_t sub_CC9D (POBJ32 p_obj, POBJ32 p_other, int8_t d_x)
 }
 
 // $CCB2
-uint8_t sub_CCB2 (POBJ32 p_obj, POBJ32 p_other, int8_t d_y)
+uint8_t do_objs_intersect_on_y (POBJ32 p_obj, POBJ32 p_other, int8_t d_y)
 {
   int8_t d, a;
 
@@ -3415,7 +3521,7 @@ uint8_t sub_CCB2 (POBJ32 p_obj, POBJ32 p_other, int8_t d_y)
 }
 
 // $CCC7
-uint8_t sub_CCC7 (POBJ32 p_obj, POBJ32 p_other, int8_t d_z)
+uint8_t do_objs_intersect_on_z (POBJ32 p_obj, POBJ32 p_other, int8_t d_z)
 {
   int8_t d, a;
 
@@ -4062,6 +4168,11 @@ found_screen:
     memset (p_other_objs++, 0, sizeof(OBJ32));
             
   dump_graphic_objs_tbl(-1, -1);
+}
+
+// $D50E
+void audio_D50E (void)
+{
 }
 
 // $D556

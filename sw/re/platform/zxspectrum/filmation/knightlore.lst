@@ -2519,7 +2519,7 @@ RAM:B00C 84			     add     a,	h
 RAM:B00D 32 A5 5B		     ld	     (seed_3), a
 RAM:B010 21 B2 5B		     ld	     hl, not_1st_screen
 RAM:B013 CB C6			     set     0,	(hl)				     ; update special objects table next time
-RAM:B015 CD 0E D5		     call    sub_D50E				     ; some audio stuff
+RAM:B015 CD 0E D5		     call    audio_D50E				     ; some audio stuff
 RAM:B018 CD A9 B8		     call    init_cauldron_bubbles
 RAM:B01B CD 62 CE		     call    list_objects_to_draw		     ; builds a	list of	screen objects
 RAM:B01E CD 9F D5		     call    render_dynamic_objects		     ; screen, sun/moon, etc
@@ -3211,7 +3211,7 @@ RAM:B4A8 01 18 50		     ld	     bc, 5018h
 RAM:B4AB 18 39			     jr	     toggle_FE_bit4_xC
 RAM:B4AD	     ; ---------------------------------------------------------------------------
 RAM:B4AD
-RAM:B4AD	     gen_guard_wizard_audio:					     ; graphic_no
+RAM:B4AD	     audio_guard_wizard:					     ; graphic_no
 RAM:B4AD DD 7E 00		     ld	     a,	(ix+0)
 RAM:B4B0 E6 01			     and     1					     ; even?
 RAM:B4B2 C0			     ret     nz					     ; no, exit
@@ -3226,7 +3226,7 @@ RAM:B4BB DD 7E 00		     ld	     a,	(ix+0)
 RAM:B4BE E6 01			     and     1
 RAM:B4C0 C0			     ret     nz
 RAM:B4C1
-RAM:B4C1	     loc_B4C1:
+RAM:B4C1	     audio_B4C1:
 RAM:B4C1 06 60			     ld	     b,	60h ; '`'
 RAM:B4C3 3A A2 5B		     ld	     a,	(seed_2)
 RAM:B4C6
@@ -3282,11 +3282,13 @@ RAM:B4FB 47			     ld	     b,	a
 RAM:B4FC C9			     ret
 RAM:B4FC	     ; End of function toggle_FE_bit4
 RAM:B4FC
+RAM:B4FD	     ; returns C flag set if any other object
+RAM:B4FD	     ; intersects with this one
 RAM:B4FD
 RAM:B4FD	     ; =============== S U B R O U T I N E =======================================
 RAM:B4FD
 RAM:B4FD
-RAM:B4FD	     sub_B4FD:
+RAM:B4FD	     do_any_objs_intersect:
 RAM:B4FD C5			     push    bc
 RAM:B4FE D5			     push    de
 RAM:B4FF E5			     push    hl
@@ -3296,25 +3298,25 @@ RAM:B506 06 28			     ld	     b,	40				     ; max objects
 RAM:B508 0E 00			     ld	     c,	0
 RAM:B50A 69			     ld	     l,	c
 RAM:B50B 61			     ld	     h,	c
-RAM:B50C DD CB 07 CE		     set     1,	(ix+7)
+RAM:B50C DD CB 07 CE		     set     1,	(ix+7)				     ; ignore this object
 RAM:B510
 RAM:B510	     loc_B510:
 RAM:B510 CD 38 B5		     call    is_object_not_ignored
-RAM:B513 28 19			     jr	     z,	loc_B52E
-RAM:B515 CD 9D CC		     call    sub_CC9D
-RAM:B518 30 14			     jr	     nc, loc_B52E
-RAM:B51A CD B2 CC		     call    sub_CCB2
-RAM:B51D 30 0F			     jr	     nc, loc_B52E
-RAM:B51F CD C7 CC		     call    sub_CCC7
-RAM:B522 30 0A			     jr	     nc, loc_B52E
+RAM:B513 28 19			     jr	     z,	loc_B52E			     ; no, skip
+RAM:B515 CD 9D CC		     call    do_objs_intersect_on_x
+RAM:B518 30 14			     jr	     nc, loc_B52E			     ; no, skip
+RAM:B51A CD B2 CC		     call    do_objs_intersect_on_y
+RAM:B51D 30 0F			     jr	     nc, loc_B52E			     ; no, skip
+RAM:B51F CD C7 CC		     call    do_objs_intersect_on_z
+RAM:B522 30 0A			     jr	     nc, loc_B52E			     ; no, skip
 RAM:B524
 RAM:B524	     loc_B524:
 RAM:B524 FD E1			     pop     iy
 RAM:B526 E1			     pop     hl
 RAM:B527 D1			     pop     de
 RAM:B528 C1			     pop     bc
-RAM:B529 DD CB 07 8E		     res     1,	(ix+7)
-RAM:B52D C9			     ret
+RAM:B529 DD CB 07 8E		     res     1,	(ix+7)				     ; reset ignore flag
+RAM:B52D C9			     ret					     ; C flag set indicates intersection
 RAM:B52E	     ; ---------------------------------------------------------------------------
 RAM:B52E
 RAM:B52E	     loc_B52E:							     ; entry size
@@ -3323,7 +3325,7 @@ RAM:B531 FD 19			     add     iy, de				     ; next entry
 RAM:B533 10 DB			     djnz    loc_B510				     ; loop through object table
 RAM:B535 A7			     and     a
 RAM:B536 18 EC			     jr	     loc_B524
-RAM:B536	     ; End of function sub_B4FD
+RAM:B536	     ; End of function do_any_objs_intersect
 RAM:B536
 RAM:B538
 RAM:B538	     ; =============== S U B R O U T I N E =======================================
@@ -3631,7 +3633,7 @@ RAM:B6F9 CD DD C4		     call    adj_m6_m12
 RAM:B6FC DD 7E 09		     ld	     a,	(ix+9)				     ; dX
 RAM:B6FF DD B6 0A		     or	     (ix+10)				     ; dX & dY both 0?
 RAM:B702 C8			     ret     z					     ; yes, exit
-RAM:B703 CD AD B4		     call    gen_guard_wizard_audio
+RAM:B703 CD AD B4		     call    audio_guard_wizard
 RAM:B706 DD 7E 09		     ld	     a,	(ix+9)				     ; dX
 RAM:B709 DD BE 0A		     cp	     (ix+10)				     ; dX<dY?
 RAM:B70C 38 18			     jr	     c,	loc_B726			     ; yes, go
@@ -3867,14 +3869,14 @@ RAM:B873 32 BD 5B		     ld	     (ball_bounce_height), a
 RAM:B876
 RAM:B876	     loc_B876:							     ; toggle 178/179
 RAM:B876 CD 85 B9		     call    toggle_next_prev_sprite
-RAM:B879 CD 51 B4		     call    audio_B451				     ; audio?
+RAM:B879 CD 51 B4		     call    audio_B451
 RAM:B87C DD CB 0D 56		     bit     2,	(ix+13)				     ; dir=up?
 RAM:B880 20 12			     jr	     nz, ball_up			     ; yes, skip
 RAM:B882 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B885 DD CB 0C 56		     bit     2,	(ix+12)				     ; Z OOB?
 RAM:B889 28 07			     jr	     z,	loc_B892			     ; no, skip
 RAM:B88B DD CB 0D D6		     set     2,	(ix+13)				     ; set dir=up
-RAM:B88F CD 2E B4		     call    audio_B42E				     ; audio?
+RAM:B88F CD 2E B4		     call    audio_B42E
 RAM:B892
 RAM:B892	     loc_B892:
 RAM:B892 18 C2			     jr	     set_deadly_wipe_and_draw_flags
@@ -3992,7 +3994,7 @@ RAM:B95E	     upd_111:							     ; invalid
 RAM:B95E DD 36 00 01		     ld	     (ix+0), 1
 RAM:B962
 RAM:B962	     loc_B962:
-RAM:B962 C3 32 C2		     jp	     gen_audio_XYZ_wipe_and_draw
+RAM:B962 C3 32 C2		     jp	     audio_B467_wipe_and_draw
 RAM:B965
 RAM:B965	     ; =============== S U B R O U T I N E =======================================
 RAM:B965
@@ -4992,7 +4994,7 @@ RAM:C02B DD 7E 03		     ld	     a,	(ix+3)				     ; Z
 RAM:C02E 47			     ld	     b,	a
 RAM:C02F C6 0C			     add     a,	12				     ; Z+12
 RAM:C031 DD 77 03		     ld	     (ix+3), a
-RAM:C034 CD FD B4		     call    sub_B4FD
+RAM:C034 CD FD B4		     call    do_any_objs_intersect
 RAM:C037 DD 70 03		     ld	     (ix+3), b				     ; restore original	Z
 RAM:C03A 30 05			     jr	     nc, loc_C041
 RAM:C03C 3E 01			     ld	     a,	1				     ; we can't drop anything
@@ -5021,8 +5023,8 @@ RAM:C06A E5			     push    hl
 RAM:C06B FD 21 48 5C		     ld	     iy, special_objs_here
 RAM:C06F
 RAM:C06F	     loc_C06F:
-RAM:C06F CD 72 C1		     call    sub_C172
-RAM:C072 DA 41 C1		     jp	     c,	pickup_object
+RAM:C06F CD 72 C1		     call    can_pickup_spec_obj
+RAM:C072 DA 41 C1		     jp	     c,	pickup_object			     ; yes, go
 RAM:C075 11 20 00		     ld	     de, 32				     ; entry size
 RAM:C078 FD 19			     add     iy, de				     ; next entry
 RAM:C07A 10 F3			     djnz    loc_C06F
@@ -5164,29 +5166,31 @@ RAM:C16F E5			     push    hl
 RAM:C170 18 94			     jr	     drop_object
 RAM:C170	     ; End of function handle_pickup_drop
 RAM:C170
+RAM:C172	     ; returns C flag set if special object
+RAM:C172	     ; and close enough	to pick	up
 RAM:C172
 RAM:C172	     ; =============== S U B R O U T I N E =======================================
 RAM:C172
 RAM:C172
-RAM:C172	     sub_C172:
+RAM:C172	     can_pickup_spec_obj:
 RAM:C172 FD 7E 00		     ld	     a,	(iy+0)				     ; graphic no.
 RAM:C175 D6 60			     sub     60h ; '`'                               ; special objects base no.
 RAM:C177 FE 07			     cp	     7					     ; special object?
 RAM:C179 D0			     ret     nc					     ; no, exit
 RAM:C17A
-RAM:C17A	     loc_C17A:
+RAM:C17A	     is_on_or_near_obj:
 RAM:C17A C5			     push    bc
 RAM:C17B 01 00 00		     ld	     bc, 0
 RAM:C17E 69			     ld	     l,	c
 RAM:C17F 61			     ld	     h,	c
-RAM:C180 CD 9D CC		     call    sub_CC9D
+RAM:C180 CD 9D CC		     call    do_objs_intersect_on_x
 RAM:C183 30 1A			     jr	     nc, loc_C19F
-RAM:C185 CD B2 CC		     call    sub_CCB2
+RAM:C185 CD B2 CC		     call    do_objs_intersect_on_y
 RAM:C188 30 15			     jr	     nc, loc_C19F
 RAM:C18A DD 7E 03		     ld	     a,	(ix+3)				     ; Z
 RAM:C18D D6 04			     sub     4					     ; Z-4
 RAM:C18F DD 77 03		     ld	     (ix+3), a
-RAM:C192 CD C7 CC		     call    sub_CCC7
+RAM:C192 CD C7 CC		     call    do_objs_intersect_on_z
 RAM:C195 F5			     push    af
 RAM:C196 DD 7E 03		     ld	     a,	(ix+3)
 RAM:C199 C6 04			     add     a,	4
@@ -5196,7 +5200,7 @@ RAM:C19F
 RAM:C19F	     loc_C19F:
 RAM:C19F C1			     pop     bc
 RAM:C1A0 C9			     ret
-RAM:C1A0	     ; End of function sub_C172
+RAM:C1A0	     ; End of function can_pickup_spec_obj
 RAM:C1A0
 RAM:C1A1
 RAM:C1A1	     ; =============== S U B R O U T I N E =======================================
@@ -5219,17 +5223,17 @@ RAM:C1B0 FD E1			     pop     iy					     ; iy=extra	life object
 RAM:C1B2 DD 21 08 5C		     ld	     ix, graphic_objs_tbl		     ; ix = player
 RAM:C1B6 DD 34 04		     inc     (ix+4)				     ; width
 RAM:C1B9 DD 34 05		     inc     (ix+5)				     ; depth
-RAM:C1BC CD 7A C1		     call    loc_C17A
+RAM:C1BC CD 7A C1		     call    is_on_or_near_obj
 RAM:C1BF DD 35 04		     dec     (ix+4)				     ; restore width
 RAM:C1C2 DD 35 05		     dec     (ix+5)				     ; restore depth
 RAM:C1C5 FD E5			     push    iy
 RAM:C1C7 DD E1			     pop     ix					     ; restore ix (extra life object)
-RAM:C1C9 30 23			     jr	     nc, loc_C1EE
+RAM:C1C9 30 23			     jr	     nc, loc_C1EE			     ; not on/near, skip
 RAM:C1CB DD CB 00 DE		     set     3,	(ix+0)				     ; graphic_no
 RAM:C1CF CD D8 C4		     call    adj_m4_m12
 RAM:C1D2 DD 6E 10		     ld	     l,	(ix+16)
 RAM:C1D5 DD 66 11		     ld	     h,	(ix+17)
-RAM:C1D8 36 00			     ld	     (hl), 0
+RAM:C1D8 36 00			     ld	     (hl), 0				     ; zap ptr object table entry
 RAM:C1DA 21 BA 5B		     ld	     hl, lives
 RAM:C1DD 34			     inc     (hl)				     ; extra life!
 RAM:C1DE AF			     xor     a
@@ -5240,7 +5244,7 @@ RAM:C1E8 01 20 20		     ld	     bc, 2020h
 RAM:C1EB CD 32 C4		     call    blit_2x8
 RAM:C1EE
 RAM:C1EE	     loc_C1EE:
-RAM:C1EE C3 C6 C4		     jp	     loc_C4C6
+RAM:C1EE C3 C6 C4		     jp	     dec_dZ_upd_XYZ_wipe_if_moving
 RAM:C1F1	     ; ---------------------------------------------------------------------------
 RAM:C1F1	     ; special objects being put in cauldron
 RAM:C1F1
@@ -5283,7 +5287,7 @@ RAM:C22F
 RAM:C22F	     loc_C22F:
 RAM:C22F CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C232
-RAM:C232	     gen_audio_XYZ_wipe_and_draw:				     ; audio?
+RAM:C232	     audio_B467_wipe_and_draw:					     ; audio?
 RAM:C232 CD 67 B4		     call    audio_B467
 RAM:C235 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:C238	     ; ---------------------------------------------------------------------------
@@ -5344,7 +5348,7 @@ RAM:C29B
 RAM:C29B	     loc_C29B:							     ; clear just dropped flag
 RAM:C29B DD CB 0D 86		     res     0,	(ix+13)
 RAM:C29F CD F3 C9		     call    clear_dX_dY
-RAM:C2A2 C3 32 C2		     jp	     gen_audio_XYZ_wipe_and_draw
+RAM:C2A2 C3 32 C2		     jp	     audio_B467_wipe_and_draw
 RAM:C2A5
 RAM:C2A5	     ; =============== S U B R O U T I N E =======================================
 RAM:C2A5
@@ -5680,18 +5684,18 @@ RAM:C4B6 CD E3 C4		     call    upd_6_7
 RAM:C4B9 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C4BC CD A1 C1		     call    is_obj_moving
 RAM:C4BF C8			     ret     z					     ; no, return
-RAM:C4C0 C3 32 C2		     jp	     gen_audio_XYZ_wipe_and_draw
+RAM:C4C0 C3 32 C2		     jp	     audio_B467_wipe_and_draw
 RAM:C4C3	     ; ---------------------------------------------------------------------------
 RAM:C4C3
 RAM:C4C3	     upd_84:
 RAM:C4C3 CD E3 C4		     call    upd_6_7
 RAM:C4C6
-RAM:C4C6	     loc_C4C6:
+RAM:C4C6	     dec_dZ_upd_XYZ_wipe_if_moving:
 RAM:C4C6 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C4C9 CD A1 C1		     call    is_obj_moving
 RAM:C4CC C8			     ret     z
 RAM:C4CD CD F3 C9		     call    clear_dX_dY
-RAM:C4D0 C3 32 C2		     jp	     gen_audio_XYZ_wipe_and_draw
+RAM:C4D0 C3 32 C2		     jp	     audio_B467_wipe_and_draw
 RAM:C4D3
 RAM:C4D3	     ; =============== S U B R O U T I N E =======================================
 RAM:C4D3
@@ -6145,7 +6149,7 @@ RAM:C6D1 DD 35 0B		     dec     (ix+11)				     ; accelerate speed?
 RAM:C6D4 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C6D7 DD CB 0C 56		     bit     2,	(ix+12)				     ; out of bounds?
 RAM:C6DB 28 B5			     jr	     z,	set_wipe_and_draw_flags		     ; no, go
-RAM:C6DD CD 89 B4		     call    audio_B489				     ; audio?
+RAM:C6DD CD 89 B4		     call    audio_B489
 RAM:C6E0
 RAM:C6E0	     stop_portcullis:						     ; flag not	moving
 RAM:C6E0 AF			     xor     a
@@ -6156,7 +6160,7 @@ RAM:C6EA	     ; ----------------------------------------------------------------
 RAM:C6EA
 RAM:C6EA	     move_portcullis_up:					     ; dZ
 RAM:C6EA DD 36 0B 02		     ld	     (ix+11), 2
-RAM:C6EE CD 67 B4		     call    audio_B467				     ; audio?
+RAM:C6EE CD 67 B4		     call    audio_B467
 RAM:C6F1 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:C6F4 3A AE 5B		     ld	     a,	(room_size_Z)
 RAM:C6F7 C6 1F			     add     a,	31
@@ -6536,7 +6540,7 @@ RAM:C90B C0			     ret     nz					     ; yes, exit
 RAM:C90C CB 51			     bit     2,	c				     ; forward?
 RAM:C90E 20 05			     jr	     nz, loc_C915			     ; yes, skip
 RAM:C910 C5			     push    bc
-RAM:C911 CD C1 B4		     call    loc_B4C1				     ; audio?
+RAM:C911 CD C1 B4		     call    audio_B4C1
 RAM:C914 C1			     pop     bc
 RAM:C915
 RAM:C915	     loc_C915:
@@ -6955,7 +6959,7 @@ RAM:CB60 CD 5A CA		     call    adj_dZ_for_out_of_bounds
 RAM:CB63 7C			     ld	     a,	h				     ; new dZ
 RAM:CB64 A7			     and     a					     ; zero?
 RAM:CB65 28 03			     jr	     z,	dZ_ok				     ; yes, skip
-RAM:CB67 CD 38 CC		     call    sub_CC38
+RAM:CB67 CD 38 CC		     call    adj_dZ_for_obj_intersect
 RAM:CB6A
 RAM:CB6A	     dZ_ok:							     ; dX
 RAM:CB6A DD 7E 09		     ld	     a,	(ix+9)
@@ -6966,7 +6970,7 @@ RAM:CB71 CD DD CC		     call    adj_dX_for_out_of_bounds
 RAM:CB74 79			     ld	     a,	c				     ; new dX
 RAM:CB75 A7			     and     a					     ; zero?
 RAM:CB76 28 03			     jr	     z,	loc_CB7B			     ; yes, skip
-RAM:CB78 CD 9A CB		     call    sub_CB9A
+RAM:CB78 CD 9A CB		     call    adj_dX_for_obj_intersect
 RAM:CB7B
 RAM:CB7B	     loc_CB7B:							     ; dY
 RAM:CB7B DD 7E 0A		     ld	     a,	(ix+10)
@@ -6977,7 +6981,7 @@ RAM:CB82 CD 08 CD		     call    adj_dY_for_out_of_bounds
 RAM:CB85 7D			     ld	     a,	l				     ; new dY
 RAM:CB86 A7			     and     a					     ; zero?
 RAM:CB87 28 03			     jr	     z,	loc_CB8C			     ; yes, skip
-RAM:CB89 CD E9 CB		     call    sub_CBE9
+RAM:CB89 CD E9 CB		     call    adj_dY_for_obj_intersect
 RAM:CB8C
 RAM:CB8C	     loc_CB8C:							     ; new dX
 RAM:CB8C DD 71 09		     ld	     (ix+9), c
@@ -6991,20 +6995,20 @@ RAM:CB9A
 RAM:CB9A	     ; =============== S U B R O U T I N E =======================================
 RAM:CB9A
 RAM:CB9A
-RAM:CB9A	     sub_CB9A:
+RAM:CB9A	     adj_dX_for_obj_intersect:
 RAM:CB9A FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CB9E 06 28			     ld	     b,	40				     ; max objects
 RAM:CBA0
 RAM:CBA0	     loc_CBA0:
 RAM:CBA0 CD 38 B5		     call    is_object_not_ignored
 RAM:CBA3 28 3C			     jr	     z,	loc_CBE1			     ; ignored,	skip
-RAM:CBA5 CD B2 CC		     call    sub_CCB2
+RAM:CBA5 CD B2 CC		     call    do_objs_intersect_on_y
 RAM:CBA8 30 37			     jr	     nc, loc_CBE1
-RAM:CBAA CD C7 CC		     call    sub_CCC7
+RAM:CBAA CD C7 CC		     call    do_objs_intersect_on_z
 RAM:CBAD 30 32			     jr	     nc, loc_CBE1
 RAM:CBAF
 RAM:CBAF	     loc_CBAF:
-RAM:CBAF CD 9D CC		     call    sub_CC9D
+RAM:CBAF CD 9D CC		     call    do_objs_intersect_on_x
 RAM:CBB2 30 2D			     jr	     nc, loc_CBE1
 RAM:CBB4 DD CB 0C C6		     set     0,	(ix+12)				     ; set X OOB
 RAM:CBB8 DD 7E 0D		     ld	     a,	(ix+13)
@@ -7034,26 +7038,26 @@ RAM:CBE1 11 20 00		     ld	     de, 32
 RAM:CBE4 FD 19			     add     iy, de				     ; next entry
 RAM:CBE6 10 B8			     djnz    loc_CBA0
 RAM:CBE8 C9			     ret
-RAM:CBE8	     ; End of function sub_CB9A
+RAM:CBE8	     ; End of function adj_dX_for_obj_intersect
 RAM:CBE8
 RAM:CBE9
 RAM:CBE9	     ; =============== S U B R O U T I N E =======================================
 RAM:CBE9
 RAM:CBE9
-RAM:CBE9	     sub_CBE9:
+RAM:CBE9	     adj_dY_for_obj_intersect:
 RAM:CBE9 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CBED 06 28			     ld	     b,	40				     ; max objects
 RAM:CBEF
 RAM:CBEF	     loc_CBEF:
 RAM:CBEF CD 38 B5		     call    is_object_not_ignored
 RAM:CBF2 28 3C			     jr	     z,	loc_CC30			     ; next entry
-RAM:CBF4 CD 9D CC		     call    sub_CC9D
+RAM:CBF4 CD 9D CC		     call    do_objs_intersect_on_x
 RAM:CBF7 30 37			     jr	     nc, loc_CC30			     ; next entry
-RAM:CBF9 CD C7 CC		     call    sub_CCC7
+RAM:CBF9 CD C7 CC		     call    do_objs_intersect_on_z
 RAM:CBFC 30 32			     jr	     nc, loc_CC30			     ; next entry
 RAM:CBFE
 RAM:CBFE	     loc_CBFE:
-RAM:CBFE CD B2 CC		     call    sub_CCB2
+RAM:CBFE CD B2 CC		     call    do_objs_intersect_on_y
 RAM:CC01 30 2D			     jr	     nc, loc_CC30			     ; next entry
 RAM:CC03 DD CB 0C CE		     set     1,	(ix+12)				     ; set Y OOB
 RAM:CC07 DD 7E 0D		     ld	     a,	(ix+13)
@@ -7083,26 +7087,26 @@ RAM:CC30 11 20 00		     ld	     de, 32
 RAM:CC33 FD 19			     add     iy, de				     ; next entry
 RAM:CC35 10 B8			     djnz    loc_CBEF				     ; loop through table
 RAM:CC37 C9			     ret
-RAM:CC37	     ; End of function sub_CBE9
+RAM:CC37	     ; End of function adj_dY_for_obj_intersect
 RAM:CC37
 RAM:CC38
 RAM:CC38	     ; =============== S U B R O U T I N E =======================================
 RAM:CC38
 RAM:CC38
-RAM:CC38	     sub_CC38:
+RAM:CC38	     adj_dZ_for_obj_intersect:
 RAM:CC38 FD 21 08 5C		     ld	     iy, graphic_objs_tbl
 RAM:CC3C 06 28			     ld	     b,	40				     ; max objects
 RAM:CC3E
 RAM:CC3E	     loc_CC3E:
 RAM:CC3E CD 38 B5		     call    is_object_not_ignored
 RAM:CC41 28 52			     jr	     z,	loc_CC95			     ; next entry
-RAM:CC43 CD 9D CC		     call    sub_CC9D
+RAM:CC43 CD 9D CC		     call    do_objs_intersect_on_x
 RAM:CC46 30 4D			     jr	     nc, loc_CC95			     ; next entry
-RAM:CC48 CD B2 CC		     call    sub_CCB2
+RAM:CC48 CD B2 CC		     call    do_objs_intersect_on_y
 RAM:CC4B 30 48			     jr	     nc, loc_CC95			     ; next entry
 RAM:CC4D
 RAM:CC4D	     loc_CC4D:
-RAM:CC4D CD C7 CC		     call    sub_CCC7
+RAM:CC4D CD C7 CC		     call    do_objs_intersect_on_z
 RAM:CC50 30 43			     jr	     nc, loc_CC95			     ; next entry
 RAM:CC52 DD CB 0C D6		     set     2,	(ix+12)				     ; set Z OOB
 RAM:CC56 DD 7E 0D		     ld	     a,	(ix+13)
@@ -7143,13 +7147,13 @@ RAM:CC95 11 20 00		     ld	     de, 32
 RAM:CC98 FD 19			     add     iy, de				     ; next entry
 RAM:CC9A 10 A2			     djnz    loc_CC3E				     ; loop through table
 RAM:CC9C C9			     ret
-RAM:CC9C	     ; End of function sub_CC38
+RAM:CC9C	     ; End of function adj_dZ_for_obj_intersect
 RAM:CC9C
 RAM:CC9D
 RAM:CC9D	     ; =============== S U B R O U T I N E =======================================
 RAM:CC9D
 RAM:CC9D
-RAM:CC9D	     sub_CC9D:
+RAM:CC9D	     do_objs_intersect_on_x:
 RAM:CC9D DD 7E 04		     ld	     a,	(ix+4)				     ; objW (width)
 RAM:CCA0 FD 86 04		     add     a,	(iy+4)				     ; thisW
 RAM:CCA3 57			     ld	     d,	a				     ; objW+thisW
@@ -7161,14 +7165,14 @@ RAM:CCAE ED 44			     neg					     ; abs()
 RAM:CCB0
 RAM:CCB0	     loc_CCB0:							     ; abs(objX+newdX-thisX)-(objW+thisW)
 RAM:CCB0 92			     sub     d
-RAM:CCB1 C9			     ret
-RAM:CCB1	     ; End of function sub_CC9D
+RAM:CCB1 C9			     ret					     ; C flag set indicates intersection
+RAM:CCB1	     ; End of function do_objs_intersect_on_x
 RAM:CCB1
 RAM:CCB2
 RAM:CCB2	     ; =============== S U B R O U T I N E =======================================
 RAM:CCB2
 RAM:CCB2
-RAM:CCB2	     sub_CCB2:
+RAM:CCB2	     do_objs_intersect_on_y:
 RAM:CCB2 DD 7E 05		     ld	     a,	(ix+5)				     ; objD (depth)
 RAM:CCB5 FD 86 05		     add     a,	(iy+5)				     ; thisD
 RAM:CCB8 57			     ld	     d,	a				     ; (objD+thisD)
@@ -7180,14 +7184,14 @@ RAM:CCC3 ED 44			     neg					     ; abs()
 RAM:CCC5
 RAM:CCC5	     loc_CCC5:							     ; (objY+l+thisY)-(objD+thisD)
 RAM:CCC5 92			     sub     d
-RAM:CCC6 C9			     ret
-RAM:CCC6	     ; End of function sub_CCB2
+RAM:CCC6 C9			     ret					     ; C flag set indicates intersection
+RAM:CCC6	     ; End of function do_objs_intersect_on_y
 RAM:CCC6
 RAM:CCC7
 RAM:CCC7	     ; =============== S U B R O U T I N E =======================================
 RAM:CCC7
 RAM:CCC7
-RAM:CCC7	     sub_CCC7:
+RAM:CCC7	     do_objs_intersect_on_z:
 RAM:CCC7 DD 7E 03		     ld	     a,	(ix+3)				     ; objZ
 RAM:CCCA 84			     add     a,	h
 RAM:CCCB FD 96 03		     sub     (iy+3)				     ; (objZ+new dZ-thisZ)
@@ -7197,13 +7201,13 @@ RAM:CCD3 DD 56 06		     ld	     d,	(ix+6)				     ; objH (height)
 RAM:CCD6
 RAM:CCD6	     loc_CCD6:							     ; (objZ+H-thisZ)-(objH or thisH)
 RAM:CCD6 92			     sub     d
-RAM:CCD7 C9			     ret
+RAM:CCD7 C9			     ret					     ; C flag set indicates intersection
 RAM:CCD8	     ; ---------------------------------------------------------------------------
 RAM:CCD8
 RAM:CCD8	     loc_CCD8:							     ; thisH (height)
 RAM:CCD8 FD 56 06		     ld	     d,	(iy+6)
 RAM:CCDB 18 F9			     jr	     loc_CCD6
-RAM:CCDB	     ; End of function sub_CCC7
+RAM:CCDB	     ; End of function do_objs_intersect_on_z
 RAM:CCDB
 RAM:CCDD
 RAM:CCDD	     ; =============== S U B R O U T I N E =======================================
@@ -8693,7 +8697,7 @@ RAM:D50E
 RAM:D50E	     ; =============== S U B R O U T I N E =======================================
 RAM:D50E
 RAM:D50E
-RAM:D50E	     sub_D50E:
+RAM:D50E	     audio_D50E:
 RAM:D50E 3E 7E			     ld	     a,	7Eh ; '~'
 RAM:D510 CD F7 B5		     call    read_port
 RAM:D513 CB 47			     bit     0,	a
@@ -8720,7 +8724,7 @@ RAM:D530 CD F7 B5		     call    read_port
 RAM:D533 CB 47			     bit     0,	a
 RAM:D535 20 F7			     jr	     nz, loc_D52E
 RAM:D537 C3 A8 B4		     jp	     toggle_FE_bit4_x24
-RAM:D537	     ; End of function sub_D50E
+RAM:D537	     ; End of function audio_D50E
 RAM:D537
 RAM:D53A
 RAM:D53A	     ; =============== S U B R O U T I N E =======================================
