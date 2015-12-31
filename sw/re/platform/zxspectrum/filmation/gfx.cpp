@@ -119,6 +119,48 @@ void plot_sprite (unsigned s, unsigned f, unsigned x, unsigned y, unsigned c, un
   plot_sprite_data (s, f, p, x, y, 3, w, h);
 }
 
+#pragma pack(1)
+typedef struct
+{
+  uint8_t   i;
+  uint16_t  hl_, de_, bc_, af_;
+  uint16_t  hl, de, bc, iy, ix;
+  uint8_t   interrupt;
+  uint8_t   r;
+  uint16_t  af, sp;
+  uint8_t   intmode;
+  uint8_t   bordercolor;
+      
+} SNAHDR, *PSNAHDR;
+
+//#define SWAP(d) (((d<<8)&0xFF00)|((d>>8)&0x00FF))
+#define SWAP(d) (d)
+
+void dump_sna_hdr (PSNAHDR hdr)
+{
+  fprintf (stderr, "%16.16s = 0x%02X\n", "I", hdr->i);
+  fprintf (stderr, "%16.16s = 0x%04X\n", "HL'", SWAP(hdr->hl_));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "DE'", SWAP(hdr->de_));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "BC'", SWAP(hdr->bc_));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "AF'", SWAP(hdr->af_));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "HL", SWAP(hdr->hl));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "DE", SWAP(hdr->de));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "BC", SWAP(hdr->bc));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "IY", SWAP(hdr->iy));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "IX", SWAP(hdr->ix));
+  fprintf (stderr, "%16.16s = 0x%02X\n", "Interrupt", hdr->interrupt);
+  fprintf (stderr, "%16.16s = 0x%02X\n", "R", hdr->r);
+  fprintf (stderr, "%16.16s = 0x%04X\n", "AF", SWAP(hdr->af));
+  fprintf (stderr, "%16.16s = 0x%04X\n", "SP", SWAP(hdr->sp));
+  fprintf (stderr, "%16.16s = 0x%02X\n", "IntMode", hdr->intmode);
+  fprintf (stderr, "%16.16s = 0x%02X\n", "BorderColor", hdr->bordercolor);
+
+  uint16_t  sp = SWAP(hdr->sp);
+  uint16_t  ret = ram[sp+1];
+  ret = (ret<<8)|ram[sp+0];
+  fprintf (stderr, "%16.16s = 0x%04X\n", "RET", ret);
+}
+
 void main (int argc, char *argv[])
 {
 	FILE *fp, *fp2;
@@ -141,6 +183,8 @@ void main (int argc, char *argv[])
 	fread (&ram[16384-27], sizeof(uint8_t), fs.st_size, fp);
 	fclose (fp);
 
+  dump_sna_hdr ((PSNAHDR)&ram[16384-27]);
+  
 	fp = fopen ("knightlore.bin", "wb");
 	// write the relevant areas
 	fwrite (&ram[0x6108], 0xd8f3-0x6108, 1, fp);
