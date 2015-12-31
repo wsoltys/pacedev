@@ -660,7 +660,7 @@ RAM:6C0B	     ; +1 = width (x)
 RAM:6C0B	     ; +2 = depth (y)
 RAM:6C0B	     ; +3 = height (z)
 RAM:6C0B	     ; +4 = flags (see code)
-RAM:6C0B	     ' +5 = offsets (see code)
+RAM:6C0B	     ; +5 = offsets (see code)
 RAM:6C0B 07 08 08 0C+block:	     .db 7, 8, 8, 0xC, 0x10, 0,	0
 RAM:6C12 07 08 08 0C+block_high:     .db 7, 8, 8, 0xC, 0x10, 0x30, 0
 RAM:6C19 36 08 08 0C+block_ew:	     .db 0x36, 8, 8, 0xC, 0x10,	0, 0
@@ -4143,7 +4143,7 @@ RAM:B923 CD D8 C4		     call    adj_m4_m12
 RAM:B926 DD 36 00 A0		     ld	     0(ix), #160			     ; graphic_no (sparkles)
 RAM:B92A 18 EA			     jr	     loc_B916
 RAM:B92C	     ; ---------------------------------------------------------------------------
-RAM:B92C	     repel spell
+RAM:B92C	     ; repel spell
 RAM:B92C
 RAM:B92C	     upd_164_to_167:
 RAM:B92C CD D8 C4		     call    adj_m4_m12
@@ -4758,8 +4758,7 @@ RAM:BDA1	     ; End of function flash_menu
 RAM:BDA1
 RAM:BDA1	     ; ---------------------------------------------------------------------------
 RAM:BDA2	     ; colours
-RAM:BDA2 43 C4 44 44+menu_colours:   .db 1000011b, 11000100b, 1000100b,	1000100b, 1000100b
-RAM:BDA2 44 45 47 47		     .db 1000101b, 1000111b, 1000111b
+RAM:BDA2 43 C4 44 44+menu_colours:   .db 0x43, 0xC4, 0x44, 0x44, 0x44, 0x45, 0x47, 0x47
 RAM:BDAA	     ; XY positions
 RAM:BDAA 58 9F 30 8F+menu_xy:	     .db 88, 159, 48, 143, 48, 127, 48,	111, 48, 95, 48, 79
 RAM:BDAA 30 7F 30 6F+		     .db 48, 63, 80, 39
@@ -8949,7 +8948,7 @@ RAM:D54C
 RAM:D54C	     clr_attribute_memory:
 RAM:D54C 21 00 58		     ld	     hl, #0x5800			     ; colour data
 RAM:D54F 01 00 03		     ld	     bc, #0x300				     ; # bytes to clear
-RAM:D552 1E 46			     ld	     e,	#1000110b			     ; bright yellow on	black
+RAM:D552 1E 46			     ld	     e,	#0x46 ;	'F'                          ; bright yellow on black
 RAM:D554 18 E6			     jr	     clr_byte
 RAM:D554	     ; End of function clr_attribute_memory
 RAM:D554

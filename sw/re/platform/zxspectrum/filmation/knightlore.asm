@@ -662,7 +662,7 @@ block_type_tbl:	.dw block					; 0 block 07 block
 ; +2 = depth (y)
 ; +3 = height (z)
 ; +4 = flags (see code)
-' +5 = offsets (see code)
+; +5 = offsets (see code)
 block:		.db 7, 8, 8, 0xC, 0x10,	0, 0
 block_high:	.db 7, 8, 8, 0xC, 0x10,	0x30, 0
 block_ew:	.db 0x36, 8, 8,	0xC, 0x10, 0, 0
@@ -4145,7 +4145,7 @@ upd_168_to_175:
 		ld	0(ix), #160				; graphic_no (sparkles)
 		jr	loc_B916
 ; ---------------------------------------------------------------------------
-repel spell
+; repel	spell
 
 upd_164_to_167:
 		call	adj_m4_m12
@@ -4760,8 +4760,7 @@ flash_menu:
 
 ; ---------------------------------------------------------------------------
 ; colours
-menu_colours:	.db 1000011b, 11000100b, 1000100b, 1000100b, 1000100b
-		.db 1000101b, 1000111b,	1000111b
+menu_colours:	.db 0x43, 0xC4,	0x44, 0x44, 0x44, 0x45,	0x47, 0x47
 ; XY positions
 menu_xy:	.db 88,	159, 48, 143, 48, 127, 48, 111,	48, 95,	48, 79
 		.db 48,	63, 80,	39
@@ -8951,7 +8950,7 @@ clr_bitmap_memory:						; screen memory
 clr_attribute_memory:
 		ld	hl, #0x5800				; colour data
 		ld	bc, #0x300				; # bytes to clear
-		ld	e, #1000110b				; bright yellow	on black
+		ld	e, #0x46 ; 'F'                          ; bright yellow on black
 		jr	clr_byte
 ; End of function clr_attribute_memory
 
