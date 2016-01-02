@@ -8985,7 +8985,7 @@ clear_scrn:
 
 clear_scrn_buffer:
 		ld	bc, #0x1800				; # bytes to clear
-		ld	hl, #0xD8F3				; screen buffer
+		ld	hl, #vidbuf				; screen buffer
 		jr	clr_mem
 ; End of function clear_scrn_buffer
 
@@ -8995,7 +8995,7 @@ clear_scrn_buffer:
 
 
 update_screen:
-		ld	hl, #0xD8F3				; screen buffer
+		ld	hl, #vidbuf				; screen buffer
 		ld	de, #0x57E0				; last line of attribute memory
 		ld	bc, #0x20C0				; B=32 bytes, C=192 lines
 
@@ -9563,7 +9563,7 @@ calc_screen_buffer_addr:
 		rr	c
 		srl	b
 		rr	c
-		ld	hl, #0xD8F3				; bitmap buffer
+		ld	hl, #vidbuf				; bitmap buffer
 		add	hl, bc					; calculate bitmap memory address
 		ld	c, l
 		ld	b, h					; BC = bitmap memory address
@@ -9746,5 +9746,12 @@ loc_D8DC:
 ; ---------------------------------------------------------------------------
 aCopyright1984A_c_g_:.ascii 'COPYRIGHT 1984 A.C.G.'
 ; end of 'RAM'
+
+; ===========================================================================
+
+; Segment type:	Regular
+		.org 0xD8F3
+vidbuf:		.ds 0x1800
+; end of 'VRAM'
 
 ; end of file

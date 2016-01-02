@@ -8983,7 +8983,7 @@ RAM:D567
 RAM:D567
 RAM:D567	     clear_scrn_buffer:
 RAM:D567 01 00 18		     ld	     bc, #0x1800			     ; # bytes to clear
-RAM:D56A 21 F3 D8		     ld	     hl, #0xD8F3			     ; screen buffer
+RAM:D56A 21 F3 D8		     ld	     hl, #vidbuf			     ; screen buffer
 RAM:D56D 18 CB			     jr	     clr_mem
 RAM:D56D	     ; End of function clear_scrn_buffer
 RAM:D56D
@@ -8993,7 +8993,7 @@ RAM:D56F	     ; =============== S U B R O U T I N E ============================
 RAM:D56F
 RAM:D56F
 RAM:D56F	     update_screen:
-RAM:D56F 21 F3 D8		     ld	     hl, #0xD8F3			     ; screen buffer
+RAM:D56F 21 F3 D8		     ld	     hl, #vidbuf			     ; screen buffer
 RAM:D572 11 E0 57		     ld	     de, #0x57E0			     ; last line of attribute memory
 RAM:D575 01 C0 20		     ld	     bc, #0x20C0			     ; B=32 bytes, C=192 lines
 RAM:D578
@@ -9561,7 +9561,7 @@ RAM:D816 CB 38			     srl     b
 RAM:D818 CB 19			     rr	     c
 RAM:D81A CB 38			     srl     b
 RAM:D81C CB 19			     rr	     c
-RAM:D81E 21 F3 D8		     ld	     hl, #0xD8F3			     ; bitmap buffer
+RAM:D81E 21 F3 D8		     ld	     hl, #vidbuf			     ; bitmap buffer
 RAM:D821 09			     add     hl, bc				     ; calculate bitmap	memory address
 RAM:D822 4D			     ld	     c,	l
 RAM:D823 44			     ld	     b,	h				     ; BC = bitmap memory address
@@ -9745,4 +9745,11 @@ RAM:D8DD	     ; ----------------------------------------------------------------
 RAM:D8DE 43 4F 50 59+aCopyright1984A_c_g_:.ascii 'COPYRIGHT 1984 A.C.G.'
 RAM:D8DE 52 49 47 48+; end of 'RAM'
 RAM:D8DE 54 20 31 39+
-RAM:D8DE 38 34 20 41+; end of file
+VRAM:D8F3	      ;	===========================================================================
+VRAM:D8F3
+VRAM:D8F3	      ;	Segment	type: Regular
+VRAM:D8F3			      .org 0xD8F3
+VRAM:D8F3 ?? ??	?? ??+vidbuf:	      .ds 0x1800
+VRAM:D8F3 ?? ??	?? ??+;	end of 'VRAM'
+VRAM:D8F3 ?? ??	?? ??+
+VRAM:D8F3 ?? ??	?? ??+;	end of file
