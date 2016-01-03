@@ -21,8 +21,37 @@
 
 ; ===========================================================================
 
+.define TRS80
+
+.ifdef TRS80
+		.macro GFXMOD, mode
+		ld			a,#mode
+		out			(131),a
+		.endm
+
+		.macro GFXX
+		out			(128),a
+		.endm
+		
+		.macro GFXY
+		out			(129),a
+		.endm
+		
+		.macro GFXDAT
+		out			(130),a
+		.endm
+
+.endif
+
 ; Segment type:	Regular
-		.org 0x5BA0
+
+;		CODEBASE  .equ  #0x6108
+		CODEBASE  .equ  #0x6108
+    LKUPBASE  .equ  #0x2000
+    
+    .org      CODEBASE-(#0x6108-#0x5BA0)
+		STACK     .equ  .-#0x16
+    
 seed_1:		.ds 1
 		.ds 1
 seed_2:		.ds 2
@@ -184,7 +213,8 @@ other_objs_here:.ds 32
 ; ===========================================================================
 
 ; Segment type:	Regular
-		.org 0x6108
+;		.org 0x6108
+		.org CODEBASE
 font:		.db 0x38, 0x6C,	0xD6, 0xD6, 0xD6, 0xD6,	0x6C, 0x38 ; '0'
 		.db 0x18, 0x38,	0x58, 0x18, 0x18, 0x18,	0x18, 0x7C ; '1'
 		.db 0x38, 0x4C,	0xC, 0x3C, 0x60, 0xC2, 0xC2, 0xFE ; '2'
@@ -2600,6 +2630,22 @@ spr_102:	.db 3, 35
 ; ---------------------------------------------------------------------------
 
 START:								; location to clear
+.ifdef TRS80
+    di
+    ld          sp,STACK
+		ld					a,#0x00
+		out					(0xe0),a						; no interrupts
+		ld					a,#0x02
+		out					(0x84),a						; memory map III
+		ld					a,#0x40
+		out					(0xec),a						; 4MHz
+		ld					hl,#0xf800
+		ld					de,#0xf801
+		ld					bc,#0x07ff
+		ld					(hl),#0x20
+		ldir														; clear text screen
+		GFXMOD			0xB3								; 640x240, X-inc on write
+.endif
 		ld	hl, #seed_1
 		ld	bc, #0x568				; # bytes to clear
 		ld	a, (byte_5C68+0x10)
@@ -4334,7 +4380,7 @@ loc_BA29:
 		ld	de, #a_GAME_OVER
 		ld	b, #6
 		call	display_text_list
-		ld	hl, #0xE8E2				; video	buffer address
+		ld	hl, #vidbuf+#0xfef				; video	buffer address
 		ld	de, #days
 		ld	b, #1					; 1 BCD	digit pair
 		call	print_BCD_number
@@ -4367,7 +4413,7 @@ loc_BA29:
 		ld	(de), a					; store	BCD
 
 loc_BA79:							; video	buffer address
-		ld	hl, #0xE2EA
+		ld	hl, #vidbuf+#0x9f7
 		ld	b, #1					; 1 BCD	digit pair
 		call	print_BCD_number
 		call	print_border
@@ -4541,7 +4587,7 @@ loc_BC38:
 		adc	a, #0
 		daa
 		ld	(percent_msw), a			; store	most significant BCD digit
-		ld	hl, #0xE4E6
+		ld	hl, #vidbuf+#0xbf3
 		ld	de, #percent_msw
 		ld	b, #1					; 1 pair = 2 digits
 		ld	a, (de)
@@ -4562,7 +4608,7 @@ loc_BC61:
 
 
 print_days:
-		ld	hl, #0xD9E2				; (120,7)
+		ld	hl, #vidbuf+#0xEF				; (120,7)
 		ld	de, #days
 		ld	b, #1
 		call	print_BCD_number
@@ -4600,7 +4646,7 @@ print_lives_gfx:
 print_lives:
 		ld	de, #lives				; ptr number
 		ld	b, #1					; 1 byte (2 BCD	digits)
-		ld	hl, #0xDDD7				; screen buffer	location
+		ld	hl, #vidbuf+#0x4e4; screen buffer	location
 		jp	print_BCD_number
 ; End of function print_lives
 
@@ -4682,6 +4728,7 @@ menu_loop:
 		call	display_menu
 		ld	de, #menu_tune
 		call	play_audio_wait_key
+.ifdef ZX
 		ld	a, #0xF7 ; '÷'                          ; 1,2,3,4,5
 		call	read_port
 		ld	e, a					; store	keybd status
@@ -4719,7 +4766,6 @@ check_for_directional_control:					; store
 		ld	a, (user_input_method)
 		xor	#8					; toggle directional
 		ld	(user_input_method), a
-
 check_for_start_game:
 		ld	hl, #tmp_input_method
 		cp	(hl)
@@ -4728,6 +4774,15 @@ check_for_start_game:
 		call	read_port
 		bit	0, a					; '0' (Start Game)?
 		ret	NZ					; yes, exit
+.endif
+.ifdef TRS80
+    ld    a,#6
+    ld    (user_input_method),a
+check_for_start_game:
+    ld    a,(#0xf410)
+    bit   0,a
+    ret   nz
+.endif
 		ld	hl, #seed_1
 		inc	(hl)					; remember when	BASIC games did	this?
 		call	flash_menu
@@ -5744,7 +5799,7 @@ display_sun_moon_frame:
 
 display_frame:							; 31 lines, 6 bytes (swapped below)
 		ld	bc, #0x1F06
-		ld	hl, #0xD90A				; (184,0)
+		ld	hl, #vidbuf+0x17; (184,0)
 		push	bc
 		push	hl
 		ld	a, c
@@ -7973,6 +8028,7 @@ check_user_input:
 		ld	a, (obj_dropping_into_cauldron)
 		or	c
 		ld	c, #0
+.ifdef ZX		
 		jp	NZ, finished_input
 		ld	a, (user_input_method)
 		rrca
@@ -8153,7 +8209,79 @@ finished_input:							; (3rd row) SHIFT,Z,X,C,V,SPACE,SYMSHIFT,M,N,B (LEFT/RIGHT
 		pop	bc
 		jr	Z, loc_D125
 		set	5, c
+.endif
 
+.ifdef TRS80
+chkleft:
+    ld      a,(0xf401)      ; <G><F><E><D><C><B><A><@>
+    and     #0x0c           ; <C><B>
+    ld      b,a
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x20           ; <M>
+    or      b
+    ld      b,a
+    ld      a,(0xf408)      ; -,-,-,-,<,><Z><Y><X>
+    and     #0x04           ; <Z>
+    or      b
+    jr      z,chkright
+    set     0,c
+chkright:
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x40           ; <N>
+    ld      b,a
+    ld      a,(0xf404)      ; <W><V><U><T><S><R><Q><P>
+    and     #0x40           ; <V>
+    or      b
+    ld      b,a
+    ld      a,(0xf408)      ; -,-,-,-,<'><Z><Y><X>
+    and     #0x01           ; <X>
+    or      b
+    ld      b,a
+    ld      a,(0xf420)      ; </><.><-><,><;><:><9><8>
+    and     #0x10           ; <,>
+    or      b
+    jr      z,chkfwd        
+    set     1,c    
+chkfwd:
+    ld      a,(0xf401)      ; <G><F><E><D><C><B><A><@>
+    and     #0xD2           ; <G><F><D><A>
+    ld      b,a
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x1D           ; <L><K><J><H>
+    or      b
+    ld      b,a
+    ld      a,(0xf404)      ; <W><V><U><T><S><R><Q><P>
+    and     #0x08           ; <S>
+    or      b    
+    jr      z,chjmp
+    set     2,c
+chjmp:
+    ld      a,(0xf401)      ; <G><F><E><D><C><B><A><@>
+    and     #0x20           ; <E>
+    ld      b,a
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x82           ; <O><I>
+    or      b
+    ld      b,a
+    ld      a,(0xf404)      ; <W><V><U><T><S><R><Q><P>
+    and     #0xB7           ; <W><U><T><R><Q><P>
+    or      b
+    ld      b,a
+    ld      a,(0xf408)      ; -,-,-,-,<'><Z><Y><X>
+    and     #0x02           ; <Y>
+    or      b    
+    jr      z,chkpckdrp
+    set     3,c
+chkpckdrp:
+    ld      a,(0xf410)      ; <7><6><5><4><3><2><1><0>
+    ld      b,a
+    ld      a,(0xf420)      ; </><.><-><,><;><:><9><8>
+    and     #0x03           ; <8><9>
+    or      b
+    jr      z,finished_input
+    set     4,c
+finished_input: 
+.endif
 loc_D125:
 		ld	a, c
 		ld	(user_input), a
@@ -8995,6 +9123,7 @@ clear_scrn_buffer:
 
 
 update_screen:
+.ifdef ZX
 		ld	hl, #vidbuf				; screen buffer
 		ld	de, #0x57E0				; last line of attribute memory
 		ld	bc, #0x20C0				; B=32 bytes, C=192 lines
@@ -9033,6 +9162,28 @@ loc_D59A:							; byte,	line counter
 		dec	c					; dec line counter
 		jr	NZ, loc_D578				; loop through all lines
 		ret
+.endif
+
+.ifdef TRS80
+    ld    hl,#vidbuf
+    ld    bc,#0x20C0
+1$:
+    push  bc
+    ld    a,c
+    GFXY
+    xor   a
+    GFXX
+2$:
+    ld    a,(hl)
+    GFXDAT
+    inc   hl
+    djnz  2$
+    pop   bc
+    dec   c
+    jr    nz,1$
+    ret
+.endif
+		
 ; End of function update_screen
 
 
@@ -9194,6 +9345,7 @@ loc_D679:
 
 
 blit_to_screen:
+.ifdef ZX
 		push	bc
 		push	de
 		push	hl
@@ -9219,7 +9371,51 @@ blit_to_screen:
 loc_D69A:							; done all lines?
 		pop	bc
 		djnz	blit_to_screen				; no, loop
-		ret
+.endif
+
+.ifdef TRS80
+    push  hl          ; vidbuf addr
+    ld    de,#vidbuf
+    sbc   hl,de
+    ex    de,hl       ; DE=vidbuf offset
+    pop   hl
+    ld    a,e
+    rlca
+    rl    d
+    rlca
+    rl    d
+    rlca
+    rl    d           ; D=y
+    ld    a,#192
+    sub   d
+    ld    d,a
+    ld    a,e
+    and   #0x1F
+    ld    e,a         ; E=x
+1$:
+    push  de
+    push  hl
+    push  bc
+    ld    a,d
+    GFXY
+    ld    a,e
+    GFXX
+2$:
+    ld    a,(hl)
+    GFXDAT
+    inc   hl
+    dec   c
+    jr    nz,2$
+    pop   bc
+    pop   hl
+    ld    de,#32
+    add   hl,de
+    pop   de
+    dec   d
+    djnz  1$
+.endif
+    ret    
+
 ; End of function blit_to_screen
 
 ;
@@ -9237,7 +9433,7 @@ build_lookup_tbls:
 loc_D6A0:
 		ld	d, #0
 		ld	e, l
-		ld	h, #0xFF
+		ld	h, #>LKUPBASE|#0x0F
 		ld	b, #7
 
 loc_D6A7:
@@ -9257,7 +9453,7 @@ loc_D6A7:
 ;
 ; Build	a look-up table	of bit-reversed	bytes
 ;
-		ld	hl, #0xF100
+		ld	hl, #LKUPBASE|#0x100
 
 loc_D6BB:							; byte offset from $F100
 		ld	d, l
@@ -9346,7 +9542,7 @@ print_sprite:
 		jr	Z, loc_D76F				; no, skip
 		rlca
 		and	#0xE
-		or	#0xF0 ;	'ð'
+		or	#>LKUPBASE
 		ld	h, a
 		ld	a, (de)
 		inc	de
@@ -9706,7 +9902,7 @@ loc_D8A2:							; sprite data address
 		push	hl
 		exx
 		pop	hl					; HL'=sprite data
-		ld	b, #0xF1 ; 'ñ'
+		ld	b, #>LKUPBASE|#0x01 ;
 		exx
 
 loc_D8BF:
@@ -9750,7 +9946,7 @@ aCopyright1984A_c_g_:.ascii 'COPYRIGHT 1984 A.C.G.'
 ; ===========================================================================
 
 ; Segment type:	Regular
-		.org 0xD8F3
+;		.org 0xD8F3
 vidbuf:		.ds 0x1800
 ; end of 'VRAM'
 

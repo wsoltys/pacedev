@@ -52,6 +52,9 @@ all: $(FQTN)
 %.cmd: %.bin
 	bin2cmd -o6108 -xaf6c kl_z80
 
+
+#	bin2cmd -o6108 -xaf6c kl_z80
+
 clean:
 	$(ECHO) Deleting intermediate files...
 	$(RM) -f *.rel

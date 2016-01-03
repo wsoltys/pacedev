@@ -4334,7 +4334,7 @@ loc_BA29:
 		ld	de, #a_GAME_OVER
 		ld	b, #6
 		call	display_text_list
-		ld	hl, #0xE8E2				; video	buffer address
+		ld	hl, # vidbuf+0xFEF			; video	buffer address
 		ld	de, #days
 		ld	b, #1					; 1 BCD	digit pair
 		call	print_BCD_number
@@ -4367,7 +4367,7 @@ loc_BA29:
 		ld	(de), a					; store	BCD
 
 loc_BA79:							; video	buffer address
-		ld	hl, #0xE2EA
+		ld	hl, # vidbuf+0x9F7
 		ld	b, #1					; 1 BCD	digit pair
 		call	print_BCD_number
 		call	print_border
@@ -4541,7 +4541,7 @@ loc_BC38:
 		adc	a, #0
 		daa
 		ld	(percent_msw), a			; store	most significant BCD digit
-		ld	hl, #0xE4E6
+		ld	hl, # vidbuf+0xBF3
 		ld	de, #percent_msw
 		ld	b, #1					; 1 pair = 2 digits
 		ld	a, (de)
@@ -4562,7 +4562,7 @@ loc_BC61:
 
 
 print_days:
-		ld	hl, #0xD9E2				; (120,7)
+		ld	hl, # vidbuf+0xEF			; (120,7)
 		ld	de, #days
 		ld	b, #1
 		call	print_BCD_number
@@ -4600,7 +4600,7 @@ print_lives_gfx:
 print_lives:
 		ld	de, #lives				; ptr number
 		ld	b, #1					; 1 byte (2 BCD	digits)
-		ld	hl, #0xDDD7				; screen buffer	location
+		ld	hl, # vidbuf+0x4E4			; screen buffer	location
 		jp	print_BCD_number
 ; End of function print_lives
 
@@ -5744,7 +5744,7 @@ display_sun_moon_frame:
 
 display_frame:							; 31 lines, 6 bytes (swapped below)
 		ld	bc, #0x1F06
-		ld	hl, #0xD90A				; (184,0)
+		ld	hl, # vidbuf+0x17			; (184,0)
 		push	bc
 		push	hl
 		ld	a, c

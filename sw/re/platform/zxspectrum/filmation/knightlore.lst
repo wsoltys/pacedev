@@ -4332,7 +4332,7 @@ RAM:BA33 21 52 BB		     ld	     hl, #gameover_xy			     ; game over status	scree
 RAM:BA36 11 5E BB		     ld	     de, #a_GAME_OVER
 RAM:BA39 06 06			     ld	     b,	#6
 RAM:BA3B CD BF BE		     call    display_text_list
-RAM:BA3E 21 E2 E8		     ld	     hl, #0xE8E2			     ; video buffer address
+RAM:BA3E 21 E2 E8		     ld	     hl, # vidbuf+0xFEF			     ; video buffer address
 RAM:BA41 11 B9 5B		     ld	     de, #days
 RAM:BA44 06 01			     ld	     b,	#1				     ; 1 BCD digit pair
 RAM:BA46 CD AE BC		     call    print_BCD_number
@@ -4365,7 +4365,7 @@ RAM:BA76 F6 10			     or	     #0x10				     ; convert to BCD
 RAM:BA78 12			     ld	     (de), a				     ; store BCD
 RAM:BA79
 RAM:BA79	     loc_BA79:							     ; video buffer address
-RAM:BA79 21 EA E2		     ld	     hl, #0xE2EA
+RAM:BA79 21 EA E2		     ld	     hl, # vidbuf+0x9F7
 RAM:BA7C 06 01			     ld	     b,	#1				     ; 1 BCD digit pair
 RAM:BA7E CD AE BC		     call    print_BCD_number
 RAM:BA81 CD 96 D2		     call    print_border
@@ -4539,7 +4539,7 @@ RAM:BC49 3E 00			     ld	     a,	#0
 RAM:BC4B CE 00			     adc     a,	#0
 RAM:BC4D 27			     daa
 RAM:BC4E 32 C9 5B		     ld	     (percent_msw), a			     ; store most significant BCD digit
-RAM:BC51 21 E6 E4		     ld	     hl, #0xE4E6
+RAM:BC51 21 E6 E4		     ld	     hl, # vidbuf+0xBF3
 RAM:BC54 11 C9 5B		     ld	     de, #percent_msw
 RAM:BC57 06 01			     ld	     b,	#1				     ; 1 pair =	2 digits
 RAM:BC59 1A			     ld	     a,	(de)
@@ -4560,7 +4560,7 @@ RAM:BC66	     ; =============== S U B R O U T I N E ============================
 RAM:BC66
 RAM:BC66
 RAM:BC66	     print_days:
-RAM:BC66 21 E2 D9		     ld	     hl, #0xD9E2			     ; (120,7)
+RAM:BC66 21 E2 D9		     ld	     hl, # vidbuf+0xEF			     ; (120,7)
 RAM:BC69 11 B9 5B		     ld	     de, #days
 RAM:BC6C 06 01			     ld	     b,	#1
 RAM:BC6E CD AE BC		     call    print_BCD_number
@@ -4598,7 +4598,7 @@ RAM:BCA3
 RAM:BCA3	     print_lives:
 RAM:BCA3 11 BA 5B		     ld	     de, #lives				     ; ptr number
 RAM:BCA6 06 01			     ld	     b,	#1				     ; 1 byte (2 BCD digits)
-RAM:BCA8 21 D7 DD		     ld	     hl, #0xDDD7			     ; screen buffer location
+RAM:BCA8 21 D7 DD		     ld	     hl, # vidbuf+0x4E4			     ; screen buffer location
 RAM:BCAB C3 AE BC		     jp	     print_BCD_number
 RAM:BCAB	     ; End of function print_lives
 RAM:BCAB
@@ -5742,7 +5742,7 @@ RAM:C3C0 DD 77 1B		     ld	     27(ix), a				     ; pixel Y
 RAM:C3C3
 RAM:C3C3	     display_frame:						     ; 31 lines, 6 bytes (swapped below)
 RAM:C3C3 01 06 1F		     ld	     bc, #0x1F06
-RAM:C3C6 21 0A D9		     ld	     hl, #0xD90A			     ; (184,0)
+RAM:C3C6 21 0A D9		     ld	     hl, # vidbuf+0x17			     ; (184,0)
 RAM:C3C9 C5			     push    bc
 RAM:C3CA E5			     push    hl
 RAM:C3CB 79			     ld	     a,	c
