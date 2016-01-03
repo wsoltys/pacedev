@@ -3043,6 +3043,7 @@ play_audio_wait_key:
 
 
 play_audio_until_keypress:
+.ifdef ZX
 		xor	a
 		call	read_port
 		jr	Z, loc_B2C5
@@ -3055,6 +3056,15 @@ loc_B2C5:							; audio	data
 		jr	Z, end_audio				; yes, exit
 		call	sub_B2DA
 		jr	play_audio_until_keypress
+.endif
+.ifdef TRS80
+    ld    a, (0xf4ff)
+    or    a
+    jr    z,loc_B2C5
+    ret
+loc_B2C5:
+		jr	play_audio_until_keypress
+.endif
 ; End of function play_audio_until_keypress
 
 
@@ -4420,8 +4430,14 @@ loc_BA79:							; video	buffer address
 		call	update_screen
 
 loc_BA87:
+.ifdef ZX
 		xor	a
 		call	read_port
+.endif
+.ifdef TRS80
+    ld    a,(0xf4ff)
+    or    a
+.endif		
 		jr	NZ, loc_BA87				; wait for key release
 		ld	de, #game_over_tune
 		call	play_audio_until_keypress
@@ -4441,8 +4457,14 @@ wait_for_key_release:
 		ld	hl, #0
 
 loc_BA9E:
+.ifdef ZX
 		xor	a
 		call	read_port
+.endif
+.ifdef TRS80
+    ld    a,(0xf4ff)
+    or    a
+.endif		
 		ret	NZ
 		dec	hl
 		ld	a, h
