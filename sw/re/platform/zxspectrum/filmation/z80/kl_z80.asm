@@ -2644,7 +2644,7 @@ START:								; location to clear
 		ld					bc,#0x07ff
 		ld					(hl),#0x20
 		ldir														; clear text screen
-		GFXMOD			0xB3								; 640x240, X-inc on write
+		GFXMOD			0xB1								; 512x192, X-inc on write
 .endif
 		ld	hl, #seed_1
 		ld	bc, #0x568				; # bytes to clear
