@@ -24,6 +24,7 @@
 .define TRS80
 
 .ifdef TRS80
+
 		.macro GFXMOD, mode
 		ld			a,#mode
 		out			(131),a
@@ -40,6 +41,23 @@
 		.macro GFXDAT
 		out			(130),a
 		.endm
+		
+		.macro BITDBL
+		rlca
+		push		af
+		rl			c
+		pop			af
+		rl			c
+		.endm
+		
+		.macro NIBDBL
+		BITDBL
+		BITDBL
+		BITDBL
+		BITDBL
+		.endm
+
+    .define PIXEL_DOUBLE
 
 .endif
 
@@ -9197,6 +9215,15 @@ loc_D59A:							; byte,	line counter
     GFXX
 2$:
     ld    a,(hl)
+.ifdef PIXEL_DOUBLE
+		NIBDBL
+		push				af
+		ld					a,c
+		GFXDAT  		
+		pop					af
+		NIBDBL  		
+		ld					a,c
+.endif		
     GFXDAT
     inc   hl
     djnz  2$
@@ -9413,6 +9440,9 @@ loc_D69A:							; done all lines?
     ld    d,a
     ld    a,e
     and   #0x1F
+.ifdef PIXEL_DOUBLE
+    sla   a
+.endif    
     ld    e,a         ; E=x
 1$:
     push  de
@@ -9424,6 +9454,17 @@ loc_D69A:							; done all lines?
     GFXX
 2$:
     ld    a,(hl)
+    push  bc
+.ifdef PIXEL_DOUBLE
+		NIBDBL
+		push				af
+		ld					a,c
+		GFXDAT  		
+		pop					af
+		NIBDBL  		
+		ld					a,c
+		pop   bc
+.endif
     GFXDAT
     inc   hl
     dec   c
