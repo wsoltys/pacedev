@@ -24,7 +24,7 @@ echo neogeo not supported yet
 goto end
 
 :trs80
-trs80gp -m4 -na -ee kl_z80.cmd
+trs80gp -m4 -gg -na -ee kl_z80.cmd
 goto end
 
 :bad_sys

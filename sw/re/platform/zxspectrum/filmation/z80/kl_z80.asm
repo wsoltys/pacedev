@@ -9210,6 +9210,7 @@ loc_D59A:							; byte,	line counter
 1$:
     push  bc
     ld    a,c
+    dec   a
     GFXY
     xor   a
     GFXX
@@ -9435,7 +9436,7 @@ loc_D69A:							; done all lines?
     rl    d
     rlca
     rl    d           ; D=y
-    ld    a,#192
+    ld    a,#191
     sub   d
     ld    d,a
     ld    a,e
