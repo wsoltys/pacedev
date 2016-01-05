@@ -57,7 +57,7 @@
 		BITDBL
 		.endm
 
-    .define PIXEL_DOUBLE
+;    .define PIXEL_DOUBLE
 
 .endif
 
@@ -9455,8 +9455,8 @@ loc_D69A:							; done all lines?
     GFXX
 2$:
     ld    a,(hl)
-    push  bc
 .ifdef PIXEL_DOUBLE
+    push  bc
 		NIBDBL
 		push				af
 		ld					a,c
