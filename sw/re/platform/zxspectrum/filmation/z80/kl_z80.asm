@@ -57,7 +57,7 @@
 		BITDBL
 		.endm
 
-;    .define PIXEL_DOUBLE
+    .define PIXEL_DOUBLE
 
 .endif
 
