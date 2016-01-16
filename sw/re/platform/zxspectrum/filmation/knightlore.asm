@@ -7744,7 +7744,7 @@ loc_CEC6:							; graphic no.
 		jp	Z, loc_D015				; yes, exit
 		bit	7, a					; already rendered?
 		jr	NZ, loc_CEC6				; yes, skip
-		call	get_ptr_object
+		call	get_ptr_object				; ret=HL
 		ld	(word_5BCD), de
 		push	hl
 		pop	ix					; IX=ptr graphic object	table entry #1
@@ -7771,14 +7771,14 @@ loc_CEDB:							; next object graphic no.
 		ld	l, a					; Z2+H2
 		ld	a, 3(ix)				; Z1
 		sub	l					; Z1-(Z2+H2)
-		jr	NC, loc_CF16
+		jr	NC, loc_CF16				; no overlap (C+=0)
 		ld	a, 3(ix)				; Z1
 		add	a, 6(ix)				; add H1
 		ld	l, a
 		ld	a, 3(iy)				; Z2
 		sub	l					; Z2-(Z1+H1)
-		jr	C, loc_CF15
-		inc	c
+		jr	C, loc_CF15				; overlap (C+=1)
+		inc	c					; no overlap (C+=2)
 
 loc_CF15:
 		inc	c
@@ -7790,7 +7790,7 @@ loc_CF16:							; Y2
 		ld	a, 2(ix)				; Y1
 		sub	5(ix)					; sub D1
 		sub	l					; Y1-D1-(Y2+d2)
-		jr	NC, loc_CF3C
+		jr	NC, loc_CF3C				; no overlap (C+=0)
 		ld	a, 2(ix)				; Y1
 		add	a, 5(ix)				; add D1
 		ld	l, a
@@ -7798,8 +7798,8 @@ loc_CF16:							; Y2
 		sub	5(iy)					; sub D2
 		sub	l					; Y2-D2-(Y1+D1)
 		ld	a, c
-		jr	C, loc_CF39
-		add	a, #3
+		jr	C, loc_CF39				; overlap (C+=3)
+		add	a, #3					; no overlap (C+=6)
 
 loc_CF39:
 		add	a, #3
@@ -7812,7 +7812,7 @@ loc_CF3C:							; X2
 		ld	a, 1(ix)				; X1
 		sub	4(ix)					; sub W1
 		sub	l					; X1-W1-(X2+W2)
-		jr	NC, loc_CF62
+		jr	NC, loc_CF62				; no overlap (C+=0)
 		ld	a, 1(ix)				; X1
 		add	a, 4(ix)				; add W1
 		ld	l, a
@@ -7820,8 +7820,8 @@ loc_CF3C:							; X2
 		sub	4(iy)					; sub W2
 		sub	l					; X2-W2-(X1+W1)
 		ld	a, c
-		jr	C, loc_CF5F
-		add	a, #9
+		jr	C, loc_CF5F				; overlap (C+=9)
+		add	a, #9					; no overlap (c+=18)
 
 loc_CF5F:
 		add	a, #9

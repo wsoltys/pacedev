@@ -7742,7 +7742,7 @@ RAM:CEC8 FE FF			     cp	     #0xFF				     ; end of list?
 RAM:CECA CA 15 D0		     jp	     Z,	loc_D015			     ; yes, exit
 RAM:CECD CB 7F			     bit     7,	a				     ; already rendered?
 RAM:CECF 20 F5			     jr	     NZ, loc_CEC6			     ; yes, skip
-RAM:CED1 CD B5 D3		     call    get_ptr_object
+RAM:CED1 CD B5 D3		     call    get_ptr_object			     ; ret=HL
 RAM:CED4 ED 53 CD 5B		     ld	     (word_5BCD), de
 RAM:CED8 E5			     push    hl
 RAM:CED9 DD E1			     pop     ix					     ; IX=ptr graphic object table entry #1
@@ -7769,14 +7769,14 @@ RAM:CEFD FD 86 06		     add     a,	6(iy)				     ; add height(H2)
 RAM:CF00 6F			     ld	     l,	a				     ; Z2+H2
 RAM:CF01 DD 7E 03		     ld	     a,	3(ix)				     ; Z1
 RAM:CF04 95			     sub     l					     ; Z1-(Z2+H2)
-RAM:CF05 30 0F			     jr	     NC, loc_CF16
+RAM:CF05 30 0F			     jr	     NC, loc_CF16			     ; no overlap (C+=0)
 RAM:CF07 DD 7E 03		     ld	     a,	3(ix)				     ; Z1
 RAM:CF0A DD 86 06		     add     a,	6(ix)				     ; add H1
 RAM:CF0D 6F			     ld	     l,	a
 RAM:CF0E FD 7E 03		     ld	     a,	3(iy)				     ; Z2
 RAM:CF11 95			     sub     l					     ; Z2-(Z1+H1)
-RAM:CF12 38 01			     jr	     C,	loc_CF15
-RAM:CF14 0C			     inc     c
+RAM:CF12 38 01			     jr	     C,	loc_CF15			     ; overlap (C+=1)
+RAM:CF14 0C			     inc     c					     ; no overlap (C+=2)
 RAM:CF15
 RAM:CF15	     loc_CF15:
 RAM:CF15 0C			     inc     c
@@ -7788,7 +7788,7 @@ RAM:CF1C 6F			     ld	     l,	a
 RAM:CF1D DD 7E 02		     ld	     a,	2(ix)				     ; Y1
 RAM:CF20 DD 96 05		     sub     5(ix)				     ; sub D1
 RAM:CF23 95			     sub     l					     ; Y1-D1-(Y2+d2)
-RAM:CF24 30 16			     jr	     NC, loc_CF3C
+RAM:CF24 30 16			     jr	     NC, loc_CF3C			     ; no overlap (C+=0)
 RAM:CF26 DD 7E 02		     ld	     a,	2(ix)				     ; Y1
 RAM:CF29 DD 86 05		     add     a,	5(ix)				     ; add D1
 RAM:CF2C 6F			     ld	     l,	a
@@ -7796,8 +7796,8 @@ RAM:CF2D FD 7E 02		     ld	     a,	2(iy)				     ; Y2
 RAM:CF30 FD 96 05		     sub     5(iy)				     ; sub D2
 RAM:CF33 95			     sub     l					     ; Y2-D2-(Y1+D1)
 RAM:CF34 79			     ld	     a,	c
-RAM:CF35 38 02			     jr	     C,	loc_CF39
-RAM:CF37 C6 03			     add     a,	#3
+RAM:CF35 38 02			     jr	     C,	loc_CF39			     ; overlap (C+=3)
+RAM:CF37 C6 03			     add     a,	#3				     ; no overlap (C+=6)
 RAM:CF39
 RAM:CF39	     loc_CF39:
 RAM:CF39 C6 03			     add     a,	#3
@@ -7810,7 +7810,7 @@ RAM:CF42 6F			     ld	     l,	a
 RAM:CF43 DD 7E 01		     ld	     a,	1(ix)				     ; X1
 RAM:CF46 DD 96 04		     sub     4(ix)				     ; sub W1
 RAM:CF49 95			     sub     l					     ; X1-W1-(X2+W2)
-RAM:CF4A 30 16			     jr	     NC, loc_CF62
+RAM:CF4A 30 16			     jr	     NC, loc_CF62			     ; no overlap (C+=0)
 RAM:CF4C DD 7E 01		     ld	     a,	1(ix)				     ; X1
 RAM:CF4F DD 86 04		     add     a,	4(ix)				     ; add W1
 RAM:CF52 6F			     ld	     l,	a
@@ -7818,8 +7818,8 @@ RAM:CF53 FD 7E 01		     ld	     a,	1(iy)				     ; X2
 RAM:CF56 FD 96 04		     sub     4(iy)				     ; sub W2
 RAM:CF59 95			     sub     l					     ; X2-W2-(X1+W1)
 RAM:CF5A 79			     ld	     a,	c
-RAM:CF5B 38 02			     jr	     C,	loc_CF5F
-RAM:CF5D C6 09			     add     a,	#9
+RAM:CF5B 38 02			     jr	     C,	loc_CF5F			     ; overlap (C+=9)
+RAM:CF5D C6 09			     add     a,	#9				     ; no overlap (c+=18)
 RAM:CF5F
 RAM:CF5F	     loc_CF5F:
 RAM:CF5F C6 09			     add     a,	#9

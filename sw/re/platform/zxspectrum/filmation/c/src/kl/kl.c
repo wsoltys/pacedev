@@ -120,8 +120,8 @@ static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t percent_msw;                           // $5BC9
 static uint8_t percent_lsw;                           // $5BCA
 static uint8_t *tmp_objects_to_draw;                  // $5BCB
-static uint8_t *word_5BCD;                            // $5BCD
-static uint8_t *word_5BCF;                            // $5BCF
+static uint16_t word_5BCD;                            // $5BCD
+static uint16_t word_5BCF;                            // $5BCF
 static uint8_t audio_played;                          // $5BD1
 static uint8_t directional;                           // $5BD2
 static uint8_t cant_drop;                             // $5BD3
@@ -3737,7 +3737,7 @@ void list_objects_to_draw (void)
 // $CEBB
 void calc_display_order_and_render (void)
 {
-  unsigned i;
+  unsigned i, j;
   
   UNIMPLEMENTED;
   
@@ -3750,8 +3750,28 @@ void calc_display_order_and_render (void)
     // already rendered?
     if ((objects_to_draw[i] & (1<<7)) != 0)
       continue;
+    word_5BCD = i+1;
       
     p_obj = &graphic_objs_tbl[objects_to_draw[i]];
+    
+    for (j=i+1; objects_to_draw[j] != 0xFF; j++)
+    {
+      POBJ32 p_other;
+
+      // already rendered?      
+      if ((objects_to_draw[j] & (1<<7)) != 0)
+        continue;
+        
+      p_other = &graphic_objs_tbl[objects_to_draw[j]];
+      word_5BCF = j+1;
+      
+      // same object?
+      if (i == j)
+        continue;
+
+      
+      
+    }
     
     // some maths
     
