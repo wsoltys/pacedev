@@ -163,8 +163,8 @@ void osd_update_screen (void)
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
 {
   blit (scrn_buf, screen, 
-        x, 192-(y+height_lines), 
-        x, 192-(y+height_lines), 
+        x, 191-(y+height_lines), 
+        x, 191-(y+height_lines), 
         width_bytes<<3, height_lines);
 }
 

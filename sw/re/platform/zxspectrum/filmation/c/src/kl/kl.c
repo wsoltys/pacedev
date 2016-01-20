@@ -12,6 +12,7 @@
 
 // build options - all disabled for 'production' build
 //#define BUILD_OPT_DISABLE_WIPE
+//#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
 //#define BUILD_OPT_ALMOST_INVINCIBLE
 
@@ -3765,6 +3766,7 @@ loc_CEC3:
       
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     
+  #ifndef BUILD_OPT_DISABLE_Z_ORDER
     while (objects_to_draw[other_i] != 0xFF)
     {
       POBJ32 p_other;
@@ -3790,9 +3792,9 @@ loc_CEC3:
       if ((p_other->z + p_other->height) > p_obj->z)
       {
         if ((p_obj->z + p_obj->height) > p_other->z)
-          c += 3;
+          c += 1;
         else
-          c += 6;
+          c += 2;
       }
       if ((p_other->y + p_other->depth) > (p_obj->y - p_obj->depth))
       {
@@ -3808,7 +3810,7 @@ loc_CEC3:
         else
           c += 18;
       }
-
+      
       switch (c)
       {
         // original code distinguishes between these two sets of cases
@@ -3842,13 +3844,14 @@ loc_CEC3:
           continue;
           break;
         case 13 :
+          //DBGPRINTF ("case 13\n");
         default :
           // X,Y,Z all overlap
           // - set special objects to twinkle sprites
-          if ((p_obj->graphic_no - 0x60) <= 7)
-            p_obj->graphic_no = 0xBB;
-          else if ((p_other->graphic_no - 0x60) <= 7)
-            p_other->graphic_no = 0xBB;
+          if ((uint8_t)(p_obj->graphic_no - 0x60) <= 7)
+            p_obj->graphic_no = 187;
+          else if ((uint8_t)(p_other->graphic_no - 0x60) <= 7)
+            p_other->graphic_no = 187;
           other_i++;
           continue;
           break;
@@ -3858,20 +3861,24 @@ loc_CEC3:
     // loc_D000
     // flag as rendered
 loc_D003:
-    DBGPRINTF ("rendering %d\n", objects_to_draw[obj_i]);
+    //DBGPRINTF ("rendering %d\n", objects_to_draw[obj_i]);
+    p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     objects_to_draw[obj_i] |= (1<<7);
     // clear stack
     stack[0] = 0xff;
     rendered_objs_cnt++;
 
     // we may have modified obj_i    
-    p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     calc_pixel_XY_and_render (p_obj);
     // and start from the beginning again
     goto loc_CEC3;
+  #else
+    calc_pixel_XY_and_render (p_obj);
+    obj_i++;
+  #endif // BUILD_OPT_DISABLE_Z_ORDER
   }
   
-  DBGPRINTF ("rendered_objs_cnt = %d\n", rendered_objs_cnt);
+  //DBGPRINTF ("rendered_objs_cnt = %d\n", rendered_objs_cnt);
 }
 
 // $D022
@@ -4378,7 +4385,7 @@ loc_D653:
   print_sun_moon ();
   display_objects_carried ();
   rendered_objs_cnt += objs_wiped_cnt;
-  
+
   while (objs_wiped_cnt)
   {
     objs_wiped_cnt--;
