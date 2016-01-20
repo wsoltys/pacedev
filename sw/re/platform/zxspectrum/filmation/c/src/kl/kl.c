@@ -3737,46 +3737,141 @@ void list_objects_to_draw (void)
 // $CEBB
 void calc_display_order_and_render (void)
 {
-  unsigned i, j;
+  unsigned obj_i, other_i;
+  unsigned c;
+  unsigned s;
+    
+  static uint8_t stack[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
   
-  UNIMPLEMENTED;
+  UNTESTED;
   
   rendered_objs_cnt = 0;
+
+loc_CEC3:
+  obj_i = 0;  
+  other_i = obj_i + 1;
   
-  for (i=0; objects_to_draw[i] != 0xFF; i++)
+  while (objects_to_draw[obj_i] != 0xFF)
   {
     POBJ32 p_obj;
     
     // already rendered?
-    if ((objects_to_draw[i] & (1<<7)) != 0)
+    if ((objects_to_draw[obj_i] & (1<<7)) != 0)
+    {
+      obj_i++;
       continue;
-    word_5BCD = i+1;
+    }
+    word_5BCD = obj_i+1;
       
-    p_obj = &graphic_objs_tbl[objects_to_draw[i]];
+    p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     
-    for (j=i+1; objects_to_draw[j] != 0xFF; j++)
+    while (objects_to_draw[other_i] != 0xFF)
     {
       POBJ32 p_other;
 
       // already rendered?      
-      if ((objects_to_draw[j] & (1<<7)) != 0)
+      if ((objects_to_draw[other_i] & (1<<7)) != 0)
+      {
+        other_i++;
         continue;
+      }
         
-      p_other = &graphic_objs_tbl[objects_to_draw[j]];
-      word_5BCF = j+1;
+      p_other = &graphic_objs_tbl[objects_to_draw[other_i]];
+      word_5BCF = other_i+1;
       
       // same object?
-      if (i == j)
+      if (objects_to_draw[obj_i] == objects_to_draw[other_i])
+      {
+        other_i++;
         continue;
+      }
 
-      
-      
+      c = 0;
+      if ((p_other->z + p_other->height) > p_obj->z)
+      {
+        if ((p_obj->z + p_obj->height) > p_other->z)
+          c += 3;
+        else
+          c += 6;
+      }
+      if ((p_other->y + p_other->depth) > (p_obj->y - p_obj->depth))
+      {
+        if ((p_obj->y + p_obj->depth) > (p_other->y - p_other->depth))
+          c += 3;
+        else
+          c += 6;
+      }
+      if ((p_other->x + p_other->width) > (p_obj->x - p_obj->width))
+      {
+        if ((p_obj->x + p_obj->width) > (p_other->x - p_other->width))
+          c += 9;
+        else
+          c += 18;
+      }
+
+      switch (c)
+      {
+        // original code distinguishes between these two sets of cases
+        // but the end result is the same - so follow suit
+        case 0 : case 1 : case 2 : case 5 : case 8 : case 9 : 
+        case 17 : case 18 : case 21 : case 24 : case 25 : case 26 :
+          //break;
+        case 10 : case 11 : case 14 : case 19 : case 20 : 
+        case 22 : case 23 :
+          other_i++;
+          continue;
+          break;
+        case 3 : case 4 : case 6 : case 7 :
+        case 12 : case 15 : case 16 :
+          for (s=0; stack[s]!=0xff; s++)
+          {
+            if (stack[s] == word_5BCF-1)
+            {
+              for (obj_i=0; objects_to_draw[obj_i] != 0xff; obj_i++)
+                if (objects_to_draw[obj_i] == objects_to_draw[word_5BCF-1])
+                  goto loc_D003;
+              goto loc_CEC3;
+            }
+          }
+          stack[s] = word_5BCF-1;
+          stack[++s] = 0xff;
+          obj_i = other_i;
+          p_obj = p_other;
+          other_i = 0;
+          word_5BCD = word_5BCF;
+          continue;
+          break;
+        case 13 :
+        default :
+          // X,Y,Z all overlap
+          // - set special objects to twinkle sprites
+          if ((p_obj->graphic_no - 0x60) <= 7)
+            p_obj->graphic_no = 0xBB;
+          else if ((p_other->graphic_no - 0x60) <= 7)
+            p_other->graphic_no = 0xBB;
+          other_i++;
+          continue;
+          break;
+      }
     }
     
-    // some maths
-    
+    // loc_D000
+    // flag as rendered
+loc_D003:
+    DBGPRINTF ("rendering %d\n", objects_to_draw[obj_i]);
+    objects_to_draw[obj_i] |= (1<<7);
+    // clear stack
+    stack[0] = 0xff;
+    rendered_objs_cnt++;
+
+    // we may have modified obj_i    
+    p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     calc_pixel_XY_and_render (p_obj);
+    // and start from the beginning again
+    goto loc_CEC3;
   }
+  
+  DBGPRINTF ("rendered_objs_cnt = %d\n", rendered_objs_cnt);
 }
 
 // $D022
