@@ -390,6 +390,16 @@ void dump_special_objs_tbl (void)
   }
 }
 
+void dump_objects_to_draw (void)
+{
+  unsigned i;
+
+  DBGPRINTF ("objects_to_draw[] =\n");
+  for (i=0; objects_to_draw[i] != 0xff; i++)
+    DBGPRINTF ("$%02X, ", objects_to_draw[i]);
+  DBGPRINTF ("\n");
+}
+
 void upd_not_implemented (POBJ32 obj)
 {
   // place-holder
@@ -3616,6 +3626,9 @@ void set_draw_objs_overlapped (POBJ32 p_obj)
   if (a < h) a = h;             // highest Y
   h = a - l;                    // combined height
 
+  DBGPRINTF ("l->r=%d->%d(%d), b->t=%d->%d(%d)\n",
+              e, d+e, d, l, h+l, h);
+
   p_other = graphic_objs_tbl;  
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
@@ -3623,11 +3636,17 @@ void set_draw_objs_overlapped (POBJ32 p_obj)
       continue;
     if ((p_other->flags7 & FLAG_DRAW) != 0)
       continue;
+
     a = p_other->pixel_x >> 3;
     if (a < e)
     {
       if ((a + p_other->data_width_bytes) < e)
+      {
+        if (p_obj == graphic_objs_tbl && i == 16)
+          DBGPRINTF ("to the left (a=%d,w=%d)!\n", 
+                      a, p_other->data_width_bytes);
         continue;
+      }
     }
     else if (a >= (e+d))
       continue;
@@ -3745,6 +3764,8 @@ void calc_display_order_and_render (void)
   static uint8_t stack[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
   
   UNTESTED;
+
+  dump_objects_to_draw ();
   
   rendered_objs_cnt = 0;
 
@@ -3861,7 +3882,7 @@ loc_CEC3:
     // loc_D000
     // flag as rendered
 loc_D003:
-    //DBGPRINTF ("rendering %d\n", objects_to_draw[obj_i]);
+    DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     objects_to_draw[obj_i] |= (1<<7);
     // clear stack
@@ -3873,6 +3894,7 @@ loc_D003:
     // and start from the beginning again
     goto loc_CEC3;
   #else
+    DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
     calc_pixel_XY_and_render (p_obj);
     obj_i++;
   #endif // BUILD_OPT_DISABLE_Z_ORDER
@@ -4434,9 +4456,12 @@ uint8_t *flip_sprite (POBJ32 p_obj)
     for (x=0; x<w; x++)
       for (y=0; y<h/2; y++)
       {
-        uint8_t t = psprite[3+2*(y*w+x)];
+        uint8_t m = psprite[2+2*(y*w+x)];
+        uint8_t d = psprite[3+2*(y*w+x)];
+        psprite[2+2*(y*w+x)] = psprite[2+2*((h-1-y)*w+x)];
         psprite[3+2*(y*w+x)] = psprite[3+2*((h-1-y)*w+x)];
-        psprite[3+2*((h-1-y)*w+x)] = t;
+        psprite[2+2*((h-1-y)*w+x)] = m;
+        psprite[3+2*((h-1-y)*w+x)] = d;
       }
     *psprite ^= FLAG_VFLIP;
   }
@@ -4447,13 +4472,19 @@ uint8_t *flip_sprite (POBJ32 p_obj)
     {
       for (x=0; x<w/2; x++)
       {
-        uint8_t t = psprite[3+2*(y*w+x)];
+        uint8_t m = psprite[2+2*(y*w+x)];
+        uint8_t d = psprite[3+2*(y*w+x)];
+        psprite[2+2*(y*w+x)] = REV(psprite[2+2*(y*w+w-1-x)]);
         psprite[3+2*(y*w+x)] = REV(psprite[3+2*(y*w+w-1-x)]);
-        psprite[3+2*(y*w+w-1-x)] = REV(t);
+        psprite[2+2*(y*w+w-1-x)] = REV(m);
+        psprite[3+2*(y*w+w-1-x)] = REV(d);
       }
       if (w & 1)
+      {
+        psprite[2+2*(y*w+x)] = REV(psprite[2+2*(y*w+x)]);
         psprite[3+2*(y*w+x)] = REV(psprite[3+2*(y*w+x)]);
       }
+    }
     *psprite ^= FLAG_HFLIP;
   }
 
@@ -4487,5 +4518,14 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
 // $D718
 void print_sprite (POBJ32 p_obj)
 {
+  uint8_t *psprite = flip_sprite (p_obj);
+  
+  if ((p_obj->pixel_x & 7) == 0)
+    p_obj->data_width_bytes = *psprite & 0x0f;
+  else
+    p_obj->data_width_bytes = (*psprite & 0x07) + 1;
+  psprite++;
+  p_obj->data_height_lines = *psprite;
+    
   osd_print_sprite (p_obj);
 }
