@@ -121,8 +121,8 @@ static uint8_t *gfxbase_8x8;                          // $5BC7
 static uint8_t percent_msw;                           // $5BC9
 static uint8_t percent_lsw;                           // $5BCA
 static uint8_t *tmp_objects_to_draw;                  // $5BCB
-static uint16_t word_5BCD;                            // $5BCD
-static uint16_t word_5BCF;                            // $5BCF
+static uint16_t render_obj_1;                         // $5BCD
+static uint16_t render_obj_2;                         // $5BCF
 static uint8_t audio_played;                          // $5BD1
 static uint8_t directional;                           // $5BD2
 static uint8_t cant_drop;                             // $5BD3
@@ -2189,7 +2189,7 @@ pickup_object:
   inventory[0].graphic_no = p_other->graphic_no;
   inventory[0].flags7 = p_other->flags7;
   inventory[0].ptr_obj_tbl_entry = p_other->u.ptr_obj_tbl_entry;
-  // ** FIXME - graphic_objs_tbl[p_other->u.ptr_obj_tbl_entry].graphic_no = 0;
+  special_objs_tbl[p_other->u.ptr_obj_tbl_entry].graphic_no = 0;
   set_wipe_and_draw_flags (p_other);
   p_other->graphic_no = 1;  // invalid
   // empty slot to pickup, KO
@@ -3753,7 +3753,7 @@ void calc_display_order_and_render (void)
   unsigned c;
   unsigned s;
     
-  static uint8_t list[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+  static uint8_t render_list[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
   
   UNTESTED;
 
@@ -3775,7 +3775,7 @@ loc_CEC3:
       obj_i++;
       continue;
     }
-    word_5BCD = obj_i+1;
+    render_obj_1 = obj_i+1;
       
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     
@@ -3792,7 +3792,7 @@ loc_CEC3:
       }
         
       p_other = &graphic_objs_tbl[objects_to_draw[other_i]];
-      word_5BCF = other_i+1;
+      render_obj_2 = other_i+1;
       
       // same object?
       if (objects_to_draw[obj_i] == objects_to_draw[other_i])
@@ -3838,22 +3838,22 @@ loc_CEC3:
           break;
         case 3 : case 4 : case 6 : case 7 :
         case 12 : case 15 : case 16 :
-          for (s=0; list[s]!=0xff; s++)
+          for (s=0; render_list[s]!=0xff; s++)
           {
-            if (list[s] == word_5BCF-1)
+            if (render_list[s] == render_obj_2-1)
             {
               for (obj_i=0; objects_to_draw[obj_i] != 0xff; obj_i++)
-                if (objects_to_draw[obj_i] == objects_to_draw[word_5BCF-1])
+                if (objects_to_draw[obj_i] == objects_to_draw[render_obj_2-1])
                   goto loc_D003;
               goto loc_CEC3;
             }
           }
-          list[s] = word_5BCF-1;
-          list[++s] = 0xff;
+          render_list[s] = render_obj_2-1;
+          render_list[++s] = 0xff;
           obj_i = other_i;
           p_obj = p_other;
           other_i = 0;
-          word_5BCD = word_5BCF;
+          render_obj_1 = render_obj_2;
           continue;
           break;
         case 13 :
@@ -3878,8 +3878,8 @@ loc_D003:
     // we may have modified obj_i    
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     objects_to_draw[obj_i] |= (1<<7);
-    // clear list
-    list[0] = 0xff;
+    // clear render_list
+    render_list[0] = 0xff;
     rendered_objs_cnt++;
     calc_pixel_XY_and_render (p_obj);
     // and start from the beginning again
