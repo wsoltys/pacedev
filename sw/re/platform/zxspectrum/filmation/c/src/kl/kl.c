@@ -1331,7 +1331,7 @@ void upd_150_151 (POBJ32 p_obj)
   
   set_pixel_adj (p_obj, 7, -12);
   p_obj->d_x = 2;
-  if (p_obj->flags13 & FLAG_EAST)
+  if ((p_obj->flags13 & FLAG_EAST) == 0)
     p_obj->d_x = -p_obj->d_x;
   p_next_obj->d_x = p_obj->d_x;
   set_guard_wizard_sprite (p_obj);
