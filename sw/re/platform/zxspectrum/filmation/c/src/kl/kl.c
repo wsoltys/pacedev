@@ -3626,9 +3626,6 @@ void set_draw_objs_overlapped (POBJ32 p_obj)
   if (a < h) a = h;             // highest Y
   h = a - l;                    // combined height
 
-  DBGPRINTF ("l->r=%d->%d(%d), b->t=%d->%d(%d)\n",
-              e, d+e, d, l, h+l, h);
-
   p_other = graphic_objs_tbl;  
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
@@ -3641,12 +3638,7 @@ void set_draw_objs_overlapped (POBJ32 p_obj)
     if (a < e)
     {
       if ((a + p_other->data_width_bytes) < e)
-      {
-        if (p_obj == graphic_objs_tbl && i == 16)
-          DBGPRINTF ("to the left (a=%d,w=%d)!\n", 
-                      a, p_other->data_width_bytes);
         continue;
-      }
     }
     else if (a >= (e+d))
       continue;
@@ -3765,7 +3757,7 @@ void calc_display_order_and_render (void)
   
   UNTESTED;
 
-  dump_objects_to_draw ();
+  //dump_objects_to_draw ();
   
   rendered_objs_cnt = 0;
 
@@ -3882,7 +3874,7 @@ loc_CEC3:
     // loc_D000
     // flag as rendered
 loc_D003:
-    DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
+    //DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     objects_to_draw[obj_i] |= (1<<7);
     // clear stack
@@ -3894,7 +3886,7 @@ loc_D003:
     // and start from the beginning again
     goto loc_CEC3;
   #else
-    DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
+    //DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
     calc_pixel_XY_and_render (p_obj);
     obj_i++;
   #endif // BUILD_OPT_DISABLE_Z_ORDER
