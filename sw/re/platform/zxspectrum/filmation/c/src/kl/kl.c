@@ -2129,7 +2129,7 @@ void handle_pickup_drop (POBJ32 p_obj)
   p_obj->height += 4;
 
   p_other = special_objs_here;  
-  for (i=0; i<2; i++)
+  for (i=0; i<2; i++, p_other++)
   {
     if (can_pickup_spec_obj (p_obj, p_other) != 0)
       goto pickup_object;
@@ -2189,7 +2189,7 @@ pickup_object:
   inventory[0].graphic_no = p_other->graphic_no;
   inventory[0].flags7 = p_other->flags7;
   inventory[0].ptr_obj_tbl_entry = p_other->u.ptr_obj_tbl_entry;
-  p_other->u.ptr_obj_tbl_entry = 0;
+  // ** FIXME - graphic_objs_tbl[p_other->u.ptr_obj_tbl_entry].graphic_no = 0;
   set_wipe_and_draw_flags (p_other);
   p_other->graphic_no = 1;  // invalid
   // empty slot to pickup, KO
@@ -2722,7 +2722,7 @@ void find_special_objs_here (void)
   // wipe rest of the special_objs_here table  
   for (; n_special_objs_here<2; n_special_objs_here++)
   {
-    memset (p_special_obj, 0, 32);
+    memset (p_special_obj, 0, sizeof(OBJ32));
     p_special_obj++;
   }
 }
@@ -3753,7 +3753,7 @@ void calc_display_order_and_render (void)
   unsigned c;
   unsigned s;
     
-  static uint8_t stack[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+  static uint8_t list[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
   
   UNTESTED;
 
@@ -3838,9 +3838,9 @@ loc_CEC3:
           break;
         case 3 : case 4 : case 6 : case 7 :
         case 12 : case 15 : case 16 :
-          for (s=0; stack[s]!=0xff; s++)
+          for (s=0; list[s]!=0xff; s++)
           {
-            if (stack[s] == word_5BCF-1)
+            if (list[s] == word_5BCF-1)
             {
               for (obj_i=0; objects_to_draw[obj_i] != 0xff; obj_i++)
                 if (objects_to_draw[obj_i] == objects_to_draw[word_5BCF-1])
@@ -3848,8 +3848,8 @@ loc_CEC3:
               goto loc_CEC3;
             }
           }
-          stack[s] = word_5BCF-1;
-          stack[++s] = 0xff;
+          list[s] = word_5BCF-1;
+          list[++s] = 0xff;
           obj_i = other_i;
           p_obj = p_other;
           other_i = 0;
@@ -3875,13 +3875,12 @@ loc_CEC3:
     // flag as rendered
 loc_D003:
     //DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
+    // we may have modified obj_i    
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     objects_to_draw[obj_i] |= (1<<7);
-    // clear stack
-    stack[0] = 0xff;
+    // clear list
+    list[0] = 0xff;
     rendered_objs_cnt++;
-
-    // we may have modified obj_i    
     calc_pixel_XY_and_render (p_obj);
     // and start from the beginning again
     goto loc_CEC3;
