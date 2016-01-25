@@ -173,6 +173,56 @@ void main (int argc, char *argv[])
   unsigned w, h;
 
   fpdbg = fopen ("debug.txt", "wt");
+
+  // ALIEN8
+  
+	fp = fopen ("alien8.sna", "rb");
+	if (!fp)
+		exit (0);
+	fd = fileno (fp);
+	if (fstat	(fd, &fs))
+		exit (0);
+	fread (&ram[16384-27], sizeof(uint8_t), fs.st_size, fp);
+	fclose (fp);
+
+  dump_sna_hdr ((PSNAHDR)&ram[16384-27]);
+
+	fp = fopen ("alien8.bin", "wb");
+	// write the relevant areas
+	fwrite (&ram[0x6288], 0xd1eb-0x6288, 1, fp);
+	fclose (fp);
+
+  unsigned p;
+
+  {
+  // location table
+  unsigned locations = 0;
+  p = 0x6469;
+  fprintf (stdout, "uint8_t location_tbl[] = \n{\n");
+  while (p < 0x73C8)
+  {
+    uint8_t n = ram[p+1];
+    fprintf (stdout, "  // $%04X\n", p);
+    fprintf (stdout, "  %d, %d, %d,\n",
+              ram[p], ram[p+1], ram[p+2]);
+    p += 3;
+    locations++;
+    for (unsigned i=0; i<n-2; i++)
+    {
+      if ((i%8)==0)
+        fprintf (stdout, "  ");
+      fprintf (stdout, "0x%02X", ram[p++]);
+      if (p < 0x73C8)
+        fprintf (stdout, ", ");
+      if ((i%8)==7 || i==n-3)
+        fprintf (stdout, "\n");
+    }
+  }
+  fprintf (stdout, "};\n\n");
+  fprintf (stderr, "#locations = %d\n", locations);
+  }
+
+  // KNIGHT LORE
   	
 	fp = fopen ("knightlore.sna", "rb");
 	if (!fp)
@@ -194,7 +244,7 @@ void main (int argc, char *argv[])
   fp2 = fopen ("data.c", "wt");
   
   // font
-  unsigned p = 0x6108;
+  p = 0x6108;
   const char *font = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
   fprintf (fp2, "uint8_t kl_font[][8] = \n{\n" );
   for (int c=0; c<40; c++)
