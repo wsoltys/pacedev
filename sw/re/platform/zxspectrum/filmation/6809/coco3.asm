@@ -38,7 +38,7 @@ RAMMODE			.equ		0xFFDF
 ;
 
 ;.define       CARTRIDGE
-.define			GFX_1BPP
+;.define			GFX_1BPP
 .define     GFX_RGB
 
 ; *** derived - do no edit
@@ -72,8 +72,8 @@ RAMMODE			.equ		0xFFDF
 ;      -$FE00   $37				6809 System Stack
 ;
 
-ZEROPAGE				.equ			0x3c00
-codebase				.equ		  0x4000
+ZEROPAGE				.equ			0x5c00
+codebase				.equ		  0x6000
 stack						.equ		  0x7fff
 
 ;.define HAS_SOUND
@@ -90,6 +90,6 @@ stack						.equ		  0x7fff
 .endif
   
 ; MMU page mappings
-VIDEOPAGE   .equ        0x38
+VIDEOPAGE   .equ        0x30
 ;GFXPAGE			.equ				0x34
 ;CODEPAGE		.equ				0x36

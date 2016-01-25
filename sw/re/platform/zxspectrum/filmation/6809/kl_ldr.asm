@@ -53,28 +53,16 @@ start:
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
-.ifdef SAUSAGES				
+				
 				ldx			#PALETTE
-	.ifdef GFX_1BPP
-				lda			#0x00										; black
-				sta			,x+
-	.else
-				lda			#0x00										; black
-				sta			,x+
-    .iifdef GFX_RGB         lda #37			; orange
-    .iifdef GFX_COMPOSITE   lda	#53			; orange
-				sta			,x+
-    .iifdef GFX_RGB         lda	#45			; blue
-    .iifdef GFX_COMPOSITE   lda	#25			; blue
-				sta			,x+
-	.endif	; GFX_1BPP
-	.ifdef GFX_MONO
-				lda			#18										  ; green
-	.else				
-				lda			#63                     ; white
-	.endif				
-				sta			,x+
-.endif ; SAUSAGES				
+				ldy     #spectrum
+				ldb     #16
+inipal:
+				lda     ,y+
+				sta     ,x+
+				decb
+				bne     inipal
+				
 				sta			CPU179									; select fast CPU clock (1.79MHz)
         ;sta     RAMMODE
         
@@ -82,11 +70,12 @@ start:
 
         lda     #VIDEOPAGE
         ldx     #(MMUTSK1)              ; $0000-
-        ldb     #2
-  6$:   sta     ,x+
+        ldb     #3
+  mmumap: 
+        sta     ,x+
         inca
         decb
-        bne     6$                      ; map pages $30-$31
+        bne     mmumap                  ; map pages $30-$31
 
   .ifdef HAS_SOUND				
 
@@ -132,7 +121,7 @@ start:
 
 ; copy vram data to video page (1BPP)
         ldx     #vram
-        ldb     #0
+        clrb
 1$:     pshs    b                       ; line counter
         tfr     b,a
         anda    #0xc0                   ; A=(line&0xC0)
@@ -152,23 +141,132 @@ start:
         asrb
         stb     tmp
         ora     tmp                     ; A|=((line&0x38)>>3)
+.ifdef GFX_1BPP        
         ldb     #32
+.else
+        ldb     #128
+.endif
         mul                             ; D=line address
         tfr     d,y
         ldb     #32
-2$:     lda     ,x+
+2$:
+.ifdef GFX_1BPP
+        lda     ,x+
         sta     ,y+
+.else
+        pshs    b
+        lda     ,x
+        clrb
+        bita    #0x80
+        beq     3$
+        orb     #0xf0
+3$:     bita    #0x40
+        beq     4$
+        orb     #0x0f
+4$:     stb     ,y+
+        lda     ,x
+        clrb
+        bita    #0x20
+        beq     5$
+        orb     #0xf0
+5$:     bita    #0x10
+        beq     6$
+        orb     #0x0f
+6$:     stb     ,y+
+        lda     ,x
+        clrb
+        bita    #0x08
+        beq     7$
+        orb     #0xf0
+7$:     bita    #0x04
+        beq     8$
+        orb     #0x0f        
+8$:     stb     ,y+
+        lda     ,x
+        clrb
+        bita    #0x02
+        beq     9$
+        orb     #0xf0
+9$:     bita    #0x01
+        beq     10$
+        orb     #0x0f        
+10$:    stb     ,y+                
+        inx
+        puls    b
+.endif        
         decb
         bne     2$
         puls    b
         incb
         cmpb    #192
         bne     1$
+
+; and now make it colour
+
+        ldx     #aram
+        ldy     #0
+        ldb     #192/8
+19$:    pshs    b        
+        ldb     #8                      ; 8 lines/aram value
+20$:    pshs    b
+        pshs    x
+        ldb     #32                     ; 32 attribute bytes/line
+21$:    pshs    b
+        ldb     #4                      ; 4 bytes (8 pixels)/attribute byte
+25$:    pshs    b
+        ldb     ,y                      ; get 2 pixels
+        clr     tmp
+        lda     ,x                      ; attribute byte
+        bitb    #0x0f                   ; 2nd pixel
+        bne     22$                     ; foreground, skip
+        asra
+        asra
+        asra
+22$:    anda    #0x07
+        sta     tmp
+        lda     ,x                      ; attribute byte
+        bitb    #0xf0                   ; 1st pixel
+        beq     23$                     ; background, skip
+        asla
+        asla
+        asla
+23$:    anda    #0x38
+        asla                            ; shift into high nibble
+        ora     tmp                     ; combine pixels
+        ldb     ,x                      ; attribute again
+        bitb    #0x40                   ; bright?
+        beq     24$
+        ora     #0x88                   ; set bright on both pixels
+24$:    sta     ,y+                     ; write back to screen
+        puls    b                       ; 4 bytes (8 pixels)/attribute byte
+        decb
+        bne     25$
+        inx        
+        puls    b                       ; 32 bytes/line
+        decb
+        bne     21$
+        puls    x
+        puls    b                       ; 8 lines/aram value
+        decb
+        bne     20$                     ; do 8 lines
+        leax    32,x
+        puls    b                       ; 192/8 lines
+        decb
+        bne     19$
         
 loop:
         bra     loop
 
 tmp:    .ds     1
+
+; palette
+; Spectrum  - B=1, R=2, G=4
+; Coco      - RGBRGB
+
+spectrum:
+;       black, blue, red, magenta, green, cyan, yellow, grey/white
+        .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
+        .db 0x00<<3, 0x01<<3, 0x04<<3, 0x05<<3, 0x02<<3, 0x03<<3, 0x06<<3, 0x07<<3
 
 ;
 ; screen memory
