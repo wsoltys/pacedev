@@ -1,6 +1,13 @@
 # platform options
 
+#TARGET = kl
+#TARGET = a8
+
 #PLATFORM = coco3
+
+ifeq (,$(TARGET))
+	TARGET = kl
+endif
 
 ifeq (,$(PLATFORM))
 	PLATFORM = coco3
@@ -14,19 +21,19 @@ ECHO = @echo
 RM = rm
 MD = mkdir
 OBJC = objcopy
-TARGET = kl_ldr
+LOADER = $(TARGET)_ldr
 MAKEFILE = makefile
 
 ifeq ($(PLATFORM),coco3)
-	FQTN = $(TARGET).bin
+	FQLN = $(LOADER).bin
 endif
 
 ASFLAGS = -l -o -s
 LDFLAGS = -t
 
-OBJS = $(TARGET).rel
+OBJS = $(LOADER).rel
 	
-all: $(FQTN)
+all: $(FQLN)
 .PHONY: all
 
 %.rel: %.asm $(MAKEFILE)
@@ -36,7 +43,7 @@ all: $(FQTN)
 %.bin: $(OBJS)
 	$(ECHO) Linking $@...
 	$(LD) $(LDFLAGS) $<
-	file2dsk kl_6809.dsk kl_ldr.bin
+	file2dsk kl_6809.dsk $(LOADER).bin
 
 %.bin: %.ihx
 	$(HEX2BIN) $<
@@ -47,4 +54,4 @@ clean:
 	$(RM) -f *.ihx
 	$(RM) -f *.bin
 	$(ECHO) Deleting executables...
-	$(RM) -f $(FQTN)
+	$(RM) -f $(FQLN)
