@@ -1,5 +1,5 @@
 ;
-;	KNIGHT LORE
+;	ALIEN 8
 ; - ported from the original ZX Spectrum version
 ; - by tcdev 2016 msmcdoug@gmail.com
 ;

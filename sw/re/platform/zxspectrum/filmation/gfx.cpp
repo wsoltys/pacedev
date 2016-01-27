@@ -912,6 +912,46 @@ void main (int argc, char *argv[])
     fclose (fp);
   }
 
+  // dump title data to .ASM
+  fp = fopen ("c/src/pg/pentagram.scr", "rb");
+  if (fp)
+  {
+    fp2 = fopen ("pg_scr.asm", "wt");
+    if (fp2)
+    {
+      fprintf (fp2, ";\n; screen memory\n;\n");
+      fprintf (fp2, "vram:\n");
+      for (unsigned line=0; line<192; line++)
+      {
+        for (unsigned byte=0; byte<32; byte++)
+        {
+          uint8_t data8;
+          
+          fread (&data8, 1, 1, fp);
+          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
+          fprintf (fp2, "0x%02X", data8);
+          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
+        }
+      }
+      fprintf (fp2, ";\n; attribute memory\n;\n");
+      fprintf (fp2, "aram:\n");
+      for (unsigned line=0; line<192; line+=8)
+      {
+        for (unsigned byte=0; byte<32; byte++)
+        {
+          uint8_t data8;
+
+          fread (&data8, 1, 1, fp);
+          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
+          fprintf (fp2, "0x%02X", data8);
+          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
+        }
+      }
+      fclose (fp2);
+    }
+    fclose (fp);
+  }
+
 #else
 
 #ifdef DO_ASCII
