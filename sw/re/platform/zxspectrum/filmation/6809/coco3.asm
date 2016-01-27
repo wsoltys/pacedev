@@ -39,7 +39,7 @@ RAMMODE			.equ		0xFFDF
 
 ;.define       CARTRIDGE
 ;.define			GFX_1BPP
-;.define     GFX_RGB
+.define     GFX_RGB
 
 ; *** derived - do no edit
 
@@ -102,9 +102,9 @@ VIDEOPAGE   .equ        0x30
 
 speccy_pal:
 ;       black, blue, red, magenta, green, cyan, yellow, grey/white
-.ifdef RGB
+.ifdef GFX_RGB
         .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
-        .db 0x00<<3, 0x01<<3, 0x04<<3, 0x05<<3, 0x02<<3, 0x03<<3, 0x06<<3, 0x07<<3
+        .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
 .else
         .db 0, 12, 7, 9, 3, 29, 4, 32
         .db 0, 28, 23, 41, 17, 61, 51, 63
