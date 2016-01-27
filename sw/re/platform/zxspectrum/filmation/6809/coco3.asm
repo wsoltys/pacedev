@@ -34,12 +34,12 @@ ROMMODE			.equ		0xFFDE
 RAMMODE			.equ		0xFFDF
 
 ;
-; *** KNIGHT LORE SPECIFIC CONFIGURATION HERE
+; *** FILMATION-SPECIFIC CONFIGURATION HERE
 ;
 
 ;.define       CARTRIDGE
 ;.define			GFX_1BPP
-.define     GFX_RGB
+;.define     GFX_RGB
 
 ; *** derived - do no edit
 
@@ -73,7 +73,7 @@ RAMMODE			.equ		0xFFDF
 ;
 
 ZEROPAGE				.equ			0x5c00
-codebase				.equ		  0x6000
+codebase				.equ		  0x6010
 stack						.equ		  0x7fff
 
 ;.define HAS_SOUND
@@ -93,3 +93,19 @@ stack						.equ		  0x7fff
 VIDEOPAGE   .equ        0x30
 ;GFXPAGE			.equ				0x34
 ;CODEPAGE		.equ				0x36
+
+; Spectrum Palette for Coco3
+; - spectrum format : B=1, R=2, G=4
+; -     coco format : RGBRGB
+
+                .org      codebase-16
+
+speccy_pal:
+;       black, blue, red, magenta, green, cyan, yellow, grey/white
+.ifdef RGB
+        .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
+        .db 0x00<<3, 0x01<<3, 0x04<<3, 0x05<<3, 0x02<<3, 0x03<<3, 0x06<<3, 0x07<<3
+.else
+        .db 0, 12, 7, 9, 3, 29, 4, 32
+        .db 0, 28, 23, 41, 17, 61, 51, 63
+.endif

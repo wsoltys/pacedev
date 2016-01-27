@@ -55,7 +55,7 @@ start:
 				sta			HOFF      							
 				
 				ldx			#PALETTE
-				ldy     #spectrum
+				ldy     #speccy_pal
 				ldb     #16
 inipal:
 				lda     ,y+
@@ -258,20 +258,6 @@ loop:
         bra     loop
 
 tmp:    .ds     1
-
-; palette
-; Spectrum  - B=1, R=2, G=4
-; Coco      - RGBRGB
-
-spectrum:
-;       black, blue, red, magenta, green, cyan, yellow, grey/white
-.ifdef RGB
-        .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
-        .db 0x00<<3, 0x01<<3, 0x04<<3, 0x05<<3, 0x02<<3, 0x03<<3, 0x06<<3, 0x07<<3
-.else
-        .db 0, 12, 7, 9, 3, 29, 4, 32
-        .db 0, 28, 23, 41, 17, 61, 51, 63
-.endif
 
 ;
 ; screen memory
