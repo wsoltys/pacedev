@@ -34,6 +34,8 @@ OBJS = kl_z80.rel
 all: $(FQTN)
 .PHONY: all
 
+.SECONDARY: kl_z80.bin
+
 %.rel: %.asm $(MAKEFILE)
 	$(AS) $(ASFLAGS) $<
 
