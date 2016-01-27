@@ -265,7 +265,6 @@ void main (int argc, char *argv[])
     // now colour it
     for (line=0; line<192; line+=8)
     {
-      //uint8_t line2 = (line&0xC0) | ((line&0x07) << 3) | ((line &0x38)>>3);
       uint8_t line2 = line;
 
       for (byte=0; byte<32; byte++)
