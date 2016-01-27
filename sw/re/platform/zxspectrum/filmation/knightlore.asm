@@ -11,6 +11,11 @@
 ; Input	MD5   :	9EB6957C285769A5AA2774B23353AE37
 ; Input	CRC32 :	57F860FA
 
+; +--------------------------------------------------+
+; | ZX Spectrum	Knight Lore Disassembly	v1.00rc2     |
+; |    - by tcdev (msmcdoug@gmail.com)		     |
+; +--------------------------------------------------+
+;
 ; Stack	grows down from	here
 ; Variables from here are zeroed at start of game
 
@@ -162,18 +167,10 @@ scrn_visited:	.ds 32
 ; +30 old pixel	X
 ; +31 old pixel	Y
 ;
-graphic_objs_tbl:.ds 0x20
+graphic_objs_tbl:.ds 32
 		.ds 32
-;
-; special object sprites (max=2)
-;
 special_objs_here:.ds 32
 byte_5C68:	.ds 32
-;
-; all other objects (max=36)
-; - background object sprites, then
-; - foreground object sprites
-;
 other_objs_here:.ds 32
 		.ds 1120
 ; end of 'SCRATCH'
@@ -2699,10 +2696,10 @@ loc_B000:
 		ld	(seed_3), a
 		ld	hl, #not_1st_screen
 		set	0, (hl)					; update special objects table next time
-		call	audio_D50E				; some audio stuff
+		call	audio_D50E
 		call	init_cauldron_bubbles
 		call	list_objects_to_draw			; builds a list	of screen objects
-		call	render_dynamic_objects			; screen, sun/moon, etc
+		call	render_dynamic_objects			; renders above	list
 		ld	a, (rising_blocks_z)
 		and	a					; any blocks rising?
 		call	NZ, audio_B454				; yes, play audio
@@ -2730,8 +2727,8 @@ loc_B03F:
 		xor	a					; reset	flag
 		ld	(render_status_info), a
 		ld	a, (curr_room_attrib)			; attribute
-		call	fill_attr
-		call	display_objects
+		call	fill_attr				; set screen colour
+		call	display_objects				; inventory
 		call	colour_panel
 		call	colour_sun_moon
 		call	display_panel
@@ -3658,8 +3655,8 @@ read_port:
 
 ; ---------------------------------------------------------------------------
 ; ball (bouncing around)
-; - bounces towards human
-; - bounces away from wulf
+; - bounces towards wulf
+; - bounces away from sabreman
 
 upd_182_183:							; adj(-4,-8)
 		call	upd_12_to_15
@@ -4232,10 +4229,12 @@ save_graphic_no:						; store	new graphic no
 ; End of function toggle_next_prev_sprite
 
 ; ---------------------------------------------------------------------------
+; cauldron (bottom)
 
 upd_141:
 		jp	upd_88_to_90
 ; ---------------------------------------------------------------------------
+; cauldron (top)
 
 upd_142:							; +12, -24
 		ld	hl, #0xCE8
@@ -5007,6 +5006,7 @@ upd_120_to_126:
 		call	audio_B419				; make a sound?
 		jp	set_wipe_and_draw_flags
 ; ---------------------------------------------------------------------------
+; last player appears sparkle
 
 upd_127:
 		call	adj_m4_m12
@@ -5041,6 +5041,7 @@ upd_185_187:
 		ld	l, 16(ix)
 		ld	h, 17(ix)
 		ld	(hl), #0				; zap graphic_no in graphic_objs_tbl
+; last death sparkle
 
 upd_119:
 		call	adj_m4_m12
@@ -5528,6 +5529,7 @@ ret_next_obj_required:
 objects_required:.db 0,	1, 2, 3, 4, 5, 6, 3
 		.db 5, 0, 6, 1,	2, 4
 ; ---------------------------------------------------------------------------
+; special objects
 
 upd_96_to_102:
 		call	adj_m4_m12
@@ -5863,6 +5865,7 @@ init_obj_loop:
 ; End of function init_special_objects
 
 ; ---------------------------------------------------------------------------
+; block
 
 upd_62:
 		call	upd_6_7
@@ -5870,6 +5873,7 @@ upd_62:
 		call	audio_B3E9				; audio?
 		jp	dec_dZ_wipe_and_draw
 ; ---------------------------------------------------------------------------
+; chest
 
 upd_85:
 		call	upd_6_7
@@ -5878,6 +5882,7 @@ upd_85:
 		ret	Z					; no, return
 		jp	audio_B467_wipe_and_draw
 ; ---------------------------------------------------------------------------
+; table
 
 upd_84:
 		call	upd_6_7
@@ -5888,6 +5893,7 @@ dec_dZ_upd_XYZ_wipe_if_moving:
 		ret	Z
 		call	clear_dX_dY
 		jp	audio_B467_wipe_and_draw
+; tree wall
 
 ; =============== S U B	R O U T	I N E =======================================
 
@@ -5922,7 +5928,7 @@ adj_m6_m12:
 jp_set_pixel_adj:
 		jp	set_pixel_adj
 ; END OF FUNCTION CHUNK	FOR adj_m4_m12
-; blocks
+; rock and block
 
 ; =============== S U B	R O U T	I N E =======================================
 
@@ -6558,7 +6564,7 @@ loc_C820:
 ; End of function is_near_to
 
 ; ---------------------------------------------------------------------------
-; human	legs
+; sabreman legs
 
 upd_16_to_21_24_to_29:
 		call	adj_m6_m12
