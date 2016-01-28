@@ -230,7 +230,7 @@ RAM:6460 ; room sizes
 RAM:6460 room_size_tbl:  .db 64, 64, 64          ; DATA XREF: retrieve_screen+4Do
 RAM:6463                 .db 32, 64, 64
 RAM:6466                 .db 64, 32, 64
-RAM:6469 location_tbl:   .db 2, 32, 48           ; DATA XREF: set_loc_attrso
+RAM:6469 location_tbl:   .db 2, 32, 48           ; DATA XREF: set_room_attrso
 RAM:6469                                         ; retrieve_screen+13o
 RAM:6469                                         ; id=2
 RAM:646C                 .db 0, 0xA, 0xC, 4, 7, 0xFF, 0xF, 0x40, 0x88, 0x78, 0xB0
@@ -779,7 +779,7 @@ RAM:73A8                 .db 248, 31, 24         ; id=248
 RAM:73AB                 .db 2, 3, 5, 6, 0xFF, 0xAD, 0x38, 0x30, 0x28, 0x10, 8
 RAM:73AB                 .db 0, 9, 0x36, 0x76, 0x31, 0x3D, 0x2F, 0xD8, 0xB6, 0xBD
 RAM:73AB                 .db 0x3C, 0x27, 0x2C, 0x25, 0x26, 0x35, 0x88, 0x6D
-RAM:73C8 block_type_tbl: .dw 0                   ; DATA XREF: set_loc_attrs+3o
+RAM:73C8 block_type_tbl: .dw 0                   ; DATA XREF: set_room_attrs+3o
 RAM:73C8                                         ; retrieve_screeno ...
 RAM:73CA                 .dw block               ; block
 RAM:73CC                 .dw rhombus_fat_btm     ; rhombus block fat bottom
@@ -788,38 +788,38 @@ RAM:73D0                 .dw block_UD            ; block moving up and down
 RAM:73D2                 .dw block_fall          ; block fall on contact
 RAM:73D4                 .dw block_collapse      ; block_collapse
 RAM:73D6                 .dw broken_egg          ; broken egg - killer
-RAM:73D8                 .dw byte_7442
-RAM:73DA                 .dw byte_7448
-RAM:73DC                 .dw byte_744E
-RAM:73DE                 .dw byte_7454
-RAM:73E0                 .dw byte_745A
-RAM:73E2                 .dw byte_7460
-RAM:73E4                 .dw byte_7466
-RAM:73E6                 .dw byte_746C
-RAM:73E8                 .dw byte_7472
-RAM:73EA                 .dw byte_748E
-RAM:73EC                 .dw byte_7478
-RAM:73EE                 .dw byte_7483
-RAM:73F0                 .dw byte_7499
-RAM:73F2                 .dw byte_749F
-RAM:73F4                 .dw byte_74A5
-RAM:73F6                 .dw byte_74AB
-RAM:73F8                 .dw byte_74B1
-RAM:73FA                 .dw byte_74BC
-RAM:73FC                 .dw byte_74C7
-RAM:73FE                 .dw byte_74D2
-RAM:7400                 .dw byte_74DD
-RAM:7402                 .dw byte_74E3
-RAM:7404                 .dw byte_74E9
+RAM:73D8                 .dw block_slide_N
+RAM:73DA                 .dw block_slide_E
+RAM:73DC                 .dw block_slide_S
+RAM:73DE                 .dw block_slide_W
+RAM:73E0                 .dw block_plyr_UD
+RAM:73E2                 .dw block_move_EW
+RAM:73E4                 .dw block_move_NS
+RAM:73E6                 .dw pyramid
+RAM:73E8                 .dw stars
+RAM:73EA                 .dw mouse_move_circuit
+RAM:73EC                 .dw mouse_move_EW
+RAM:73EE                 .dw mouse_move_NS
+RAM:73F0                 .dw broken_egg_top
+RAM:73F2                 .dw cryonaught_look_E
+RAM:73F4                 .dw cryonaught_look_S
+RAM:73F6                 .dw tubes
+RAM:73F8                 .dw obj_dropoff_cylinder
+RAM:73FA                 .dw obj_dropoff_square
+RAM:73FC                 .dw obj_dropoff_pyramid
+RAM:73FE                 .dw obj_dropoff_semisphere
+RAM:7400                 .dw clockwork_mouse
+RAM:7402                 .dw cylinder
+RAM:7404                 .dw remote_ctrl_robot
 RAM:7406                 .dw 0
 RAM:7408                 .dw 0
-RAM:740A                 .dw byte_74EF
-RAM:740C                 .dw byte_74F5
-RAM:740E                 .dw byte_74FB
-RAM:7410                 .dw byte_7501
-RAM:7412                 .dw byte_7507
-RAM:7414                 .dw byte_750D
-RAM:7416                 .dw byte_7513
+RAM:740A                 .dw remote_ctrl_arrow_W
+RAM:740C                 .dw remote_ctrl_arrow_N
+RAM:740E                 .dw remote_ctrl_arrow_E
+RAM:7410                 .dw remote_ctrl_arrow_S
+RAM:7412                 .dw remote_ctrl_block
+RAM:7414                 .dw spikey_dome
+RAM:7416                 .dw land_mine
 RAM:7418 block:          .db 0x1E, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73CAo
 RAM:741E rhombus_fat_btm:.db 0x1C, 7, 7, 0xC, 0x14, 0 ; DATA XREF: RAM:73CCo
 RAM:7424 rhombus_fat_top:.db 0x1D, 7, 7, 0xC, 0x14, 0 ; DATA XREF: RAM:73CEo
@@ -827,120 +827,130 @@ RAM:742A block_UD:       .db 0x1F, 8, 8, 0xC, 0x14, 0 ; DATA XREF: RAM:73D0o
 RAM:7430 block_fall:     .db 0x2C, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73D2o
 RAM:7436 block_collapse: .db 0x2D, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73D4o
 RAM:743C broken_egg:     .db 0x2E, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73D6o
-RAM:7442 byte_7442:      .db 0x44, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73D8o
-RAM:7448 byte_7448:      .db 0x45, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73DAo
-RAM:744E byte_744E:      .db 0x46, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73DCo
-RAM:7454 byte_7454:      .db 0x47, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73DEo
-RAM:745A byte_745A:      .db 0x2F, 8, 8, 0xC, 0x14, 0 ; DATA XREF: RAM:73E0o
-RAM:7460 byte_7460:      .db 0x42, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E2o
-RAM:7466 byte_7466:      .db 0x43, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E4o
-RAM:746C byte_746C:      .db 0x48, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E6o
-RAM:7472 byte_7472:      .db 0x4C, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E8o
-RAM:7478 byte_7478:      .db 0x56, 7, 7, 0xC, 0x10, 0xB, 7, 7, 0xC, 0x10, 0
+RAM:7442 block_slide_N:  .db 0x44, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73D8o
+RAM:7448 block_slide_E:  .db 0x45, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73DAo
+RAM:744E block_slide_S:  .db 0x46, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73DCo
+RAM:7454 block_slide_W:  .db 0x47, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73DEo
+RAM:745A block_plyr_UD:  .db 0x2F, 8, 8, 0xC, 0x14, 0 ; DATA XREF: RAM:73E0o
+RAM:7460 block_move_EW:  .db 0x42, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E2o
+RAM:7466 block_move_NS:  .db 0x43, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E4o
+RAM:746C pyramid:        .db 0x48, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E6o
+RAM:7472 stars:          .db 0x4C, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:73E8o
+RAM:7478 mouse_move_EW:  .db 0x56, 7, 7, 0xC, 0x10, 0xB, 7, 7, 0xC, 0x10, 0
 RAM:7478                                         ; DATA XREF: RAM:73ECo
-RAM:7483 byte_7483:      .db 0x57, 7, 7, 0xC, 0x50, 0xB, 7, 7, 0xC, 0x50, 0
+RAM:7483 mouse_move_NS:  .db 0x57, 7, 7, 0xC, 0x50, 0xB, 7, 7, 0xC, 0x50, 0
 RAM:7483                                         ; DATA XREF: RAM:73EEo
-RAM:748E byte_748E:      .db 0x5E, 7, 7, 0xC, 0x10, 0xB, 7, 7, 0xC, 0x10, 0
+RAM:748E mouse_move_circuit:.db 0x5E, 7, 7, 0xC, 0x10, 0xB, 7, 7, 0xC, 0x10, 0
 RAM:748E                                         ; DATA XREF: RAM:73EAo
-RAM:7499 byte_7499:      .db 0x49, 8, 8, 0xC, 0x14, 0 ; DATA XREF: RAM:73F0o
-RAM:749F byte_749F:      .db 0x4A, 8, 8, 0x18, 0x10, 0 ; DATA XREF: RAM:73F2o
-RAM:74A5 byte_74A5:      .db 0x4A, 8, 8, 0x18, 0x50, 0 ; DATA XREF: RAM:73F4o
-RAM:74AB byte_74AB:      .db 0x4B, 8, 8, 0xC, 0x14, 0 ; DATA XREF: RAM:73F6o
-RAM:74B1 byte_74B1:      .db 0x70, 8, 8, 0xC, 0x10, 0x6C, 8, 8, 0xC, 0x12, 0
+RAM:7499 broken_egg_top: .db 0x49, 8, 8, 0xC, 0x14, 0 ; DATA XREF: RAM:73F0o
+RAM:749F cryonaught_look_E:.db 0x4A, 8, 8, 0x18, 0x10, 0 ; DATA XREF: RAM:73F2o
+RAM:74A5 cryonaught_look_S:.db 0x4A, 8, 8, 0x18, 0x50, 0 ; DATA XREF: RAM:73F4o
+RAM:74AB tubes:          .db 0x4B, 8, 8, 0xC, 0x14, 0 ; DATA XREF: RAM:73F6o
+RAM:74B1 obj_dropoff_cylinder:.db 0x70, 8, 8, 0xC, 0x10, 0x6C, 8, 8, 0xC, 0x12, 0
 RAM:74B1                                         ; DATA XREF: RAM:73F8o
-RAM:74BC byte_74BC:      .db 0x71, 8, 8, 0xC, 0x10, 0x6D, 8, 8, 0xC, 0x12, 0
+RAM:74BC obj_dropoff_square:.db 0x71, 8, 8, 0xC, 0x10, 0x6D, 8, 8, 0xC, 0x12, 0
 RAM:74BC                                         ; DATA XREF: RAM:73FAo
-RAM:74C7 byte_74C7:      .db 0x72, 8, 8, 0xC, 0x10, 0x6E, 8, 8, 0xC, 0x12, 0
+RAM:74C7 obj_dropoff_pyramid:.db 0x72, 8, 8, 0xC, 0x10, 0x6E, 8, 8, 0xC, 0x12, 0
 RAM:74C7                                         ; DATA XREF: RAM:73FCo
-RAM:74D2 byte_74D2:      .db 0x73, 8, 8, 0xC, 0x10, 0x6F, 8, 8, 0xC, 0x12, 0
+RAM:74D2 obj_dropoff_semisphere:.db 0x73, 8, 8, 0xC, 0x10, 0x6F, 8, 8, 0xC, 0x12, 0
 RAM:74D2                                         ; DATA XREF: RAM:73FEo
-RAM:74DD byte_74DD:      .db 0x74, 7, 7, 0xC, 0x10, 0 ; DATA XREF: RAM:7400o
-RAM:74E3 byte_74E3:      .db 0x78, 6, 6, 0xC, 0x10, 0 ; DATA XREF: RAM:7402o
-RAM:74E9 byte_74E9:      .db 0x7C, 7, 7, 0xC, 0x10, 0 ; DATA XREF: RAM:7404o
-RAM:74EF byte_74EF:      .db 0x7A, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:740Ao
-RAM:74F5 byte_74F5:      .db 0x7A, 8, 8, 0xC, 0x50, 0 ; DATA XREF: RAM:740Co
-RAM:74FB byte_74FB:      .db 0x7B, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:740Eo
-RAM:7501 byte_7501:      .db 0x7B, 8, 8, 0xC, 0x50, 0 ; DATA XREF: RAM:7410o
-RAM:7507 byte_7507:      .db 0x80, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:7412o
-RAM:750D byte_750D:      .db 0x81, 7, 7, 0xC, 0x14, 0 ; DATA XREF: RAM:7414o
-RAM:7513 byte_7513:      .db 0x82, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:7416o
-RAM:7519 background_type_tbl:.dw byte_7535       ; DATA XREF: retrieve_screen+71o
-RAM:751B                 .dw byte_7546
-RAM:751D                 .dw byte_7579
-RAM:751F                 .dw byte_75AC
-RAM:7521                 .dw byte_75BD
-RAM:7523                 .dw byte_75EE
-RAM:7525                 .dw byte_761F
-RAM:7527                 .dw byte_7640
-RAM:7529                 .dw byte_7661
-RAM:752B                 .dw byte_76A2
-RAM:752D                 .dw byte_7557
-RAM:752F                 .dw byte_758A
-RAM:7531                 .dw byte_7568
-RAM:7533                 .dw byte_759B
-RAM:7535 byte_7535:      .db 2, 0x8D, 0xC5, 0x40, 3, 6, 0x30, 0x50, 3, 0x73, 0xC5
+RAM:74DD clockwork_mouse:.db 0x74, 7, 7, 0xC, 0x10, 0 ; DATA XREF: RAM:7400o
+RAM:74E3 cylinder:       .db 0x78, 6, 6, 0xC, 0x10, 0 ; DATA XREF: RAM:7402o
+RAM:74E9 remote_ctrl_robot:.db 0x7C, 7, 7, 0xC, 0x10, 0 ; DATA XREF: RAM:7404o
+RAM:74EF remote_ctrl_arrow_W:.db 0x7A, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:740Ao
+RAM:74F5 remote_ctrl_arrow_N:.db 0x7A, 8, 8, 0xC, 0x50, 0 ; DATA XREF: RAM:740Co
+RAM:74FB remote_ctrl_arrow_E:.db 0x7B, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:740Eo
+RAM:7501 remote_ctrl_arrow_S:.db 0x7B, 8, 8, 0xC, 0x50, 0 ; DATA XREF: RAM:7410o
+RAM:7507 remote_ctrl_block:.db 0x80, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:7412o
+RAM:750D spikey_dome:    .db 0x81, 7, 7, 0xC, 0x14, 0 ; DATA XREF: RAM:7414o
+RAM:7513 land_mine:      .db 0x82, 8, 8, 0xC, 0x10, 0 ; DATA XREF: RAM:7416o
+RAM:7519 background_type_tbl:.dw door_N          ; DATA XREF: retrieve_screen+71o
+RAM:751B                 .dw door_E
+RAM:751D                 .dw door_S
+RAM:751F                 .dw door_W
+RAM:7521                 .dw long_full_wall_W
+RAM:7523                 .dw long_full_wall_N
+RAM:7525                 .dw long_with_opening_W
+RAM:7527                 .dw long_with_opening_N
+RAM:7529                 .dw thin_room_long_W
+RAM:752B                 .dw thin_room_long_N
+RAM:752D                 .dw high_door_E
+RAM:752F                 .dw high_door_S
+RAM:7531                 .dw high_door_platform_E
+RAM:7533                 .dw high_door_platform_S
+RAM:7535 door_N:         .db 2, 0x8D, 0xC5, 0x40, 3, 6, 0x30, 0x50
 RAM:7535                                         ; DATA XREF: RAM:background_type_tblo
-RAM:7535                 .db 0x40, 3, 6, 0x30, 0x50, 0
-RAM:7546 byte_7546:      .db 2, 0xC5, 0x73, 0x40, 6, 3, 0x30, 0x10, 3, 0xC5, 0x8D
-RAM:7546                                         ; DATA XREF: RAM:751Bo
-RAM:7546                 .db 0x40, 6, 3, 0x30, 0x10, 0
-RAM:7557 byte_7557:      .db 2, 0xC5, 0x73, 0x70, 6, 3, 0x30, 0x10, 3, 0xC5, 0x8D
-RAM:7557                                         ; DATA XREF: RAM:752Do
-RAM:7557                 .db 0x70, 6, 3, 0x30, 0x10, 0
-RAM:7568 byte_7568:      .db 0x1E, 0xC8, 0x78, 0x64, 8, 8, 0xC, 0x10, 0x1E, 0xC8
+RAM:7535                 .db 3, 0x73, 0xC5, 0x40, 3, 6, 0x30, 0x50
+RAM:7535                 .db 0
+RAM:7546 door_E:         .db 2, 0xC5, 0x73, 0x40, 6, 3, 0x30, 0x10 ; DATA XREF: RAM:751Bo
+RAM:7546                 .db 3, 0xC5, 0x8D, 0x40, 6, 3, 0x30, 0x10
+RAM:7546                 .db 0
+RAM:7557 high_door_E:    .db 2, 0xC5, 0x73, 0x70, 6, 3, 0x30, 0x10 ; DATA XREF: RAM:752Do
+RAM:7557                 .db 3, 0xC5, 0x8D, 0x70, 6, 3, 0x30, 0x10
+RAM:7557                 .db 0
+RAM:7568 high_door_platform_E:.db 0x1E, 0xC8, 0x78, 0x64, 8, 8, 0xC, 0x10
 RAM:7568                                         ; DATA XREF: RAM:7531o
-RAM:7568                 .db 0x88, 0x64, 8, 8, 0xC, 0x10, 0
-RAM:7579 byte_7579:      .db 2, 0x8D, 0x3B, 0x40, 3, 6, 0x30, 0x50, 3, 0x73, 0x3B
-RAM:7579                                         ; DATA XREF: RAM:751Do
-RAM:7579                 .db 0x40, 3, 6, 0x30, 0x50, 0
-RAM:758A byte_758A:      .db 2, 0x8D, 0x3B, 0x70, 3, 6, 0x30, 0x50, 3, 0x73, 0x3B
-RAM:758A                                         ; DATA XREF: RAM:752Fo
-RAM:758A                 .db 0x70, 3, 6, 0x30, 0x50, 0
-RAM:759B byte_759B:      .db 0x1E, 0x78, 0x38, 0x64, 8, 8, 0xC, 0x10, 0x1E, 0x88
+RAM:7568                 .db 0x1E, 0xC8, 0x88, 0x64, 8, 8, 0xC, 0x10
+RAM:7568                 .db 0
+RAM:7579 door_S:         .db 2, 0x8D, 0x3B, 0x40, 3, 6, 0x30, 0x50 ; DATA XREF: RAM:751Do
+RAM:7579                 .db 3, 0x73, 0x3B, 0x40, 3, 6, 0x30, 0x50
+RAM:7579                 .db 0
+RAM:758A high_door_S:    .db 2, 0x8D, 0x3B, 0x70, 3, 6, 0x30, 0x50 ; DATA XREF: RAM:752Fo
+RAM:758A                 .db 3, 0x73, 0x3B, 0x70, 3, 6, 0x30, 0x50
+RAM:758A                 .db 0
+RAM:759B high_door_platform_S:.db 0x1E, 0x78, 0x38, 0x64, 8, 8, 0xC, 0x10
 RAM:759B                                         ; DATA XREF: RAM:7533o
-RAM:759B                 .db 0x38, 0x64, 8, 8, 0xC, 0x10, 0
-RAM:75AC byte_75AC:      .db 2, 0x3B, 0x73, 0x40, 6, 3, 0x30, 0x10, 3, 0x3B, 0x8D
-RAM:75AC                                         ; DATA XREF: RAM:751Fo
-RAM:75AC                 .db 0x40, 6, 3, 0x30, 0x10, 0
-RAM:75BD byte_75BD:      .db 0xE, 0x40, 0x44, 0x40, 0, 4, 0x30, 0x50, 0xD, 0x40
-RAM:75BD                                         ; DATA XREF: RAM:7521o
-RAM:75BD                 .db 0x54, 0x40, 0, 0xC, 0x30, 0x50, 0xD, 0x40, 0x6C, 0x40
-RAM:75BD                 .db 0, 0xC, 0x30, 0x50, 0xD, 0x40, 0x84, 0x40, 0, 0xC
-RAM:75BD                 .db 0x30, 0x50, 0xD, 0x40, 0x9C, 0x40, 0, 0xC, 0x30, 0x50
-RAM:75BD                 .db 0xD, 0x40, 0xB4, 0x40, 0, 0xC, 0x30, 0x50, 0
-RAM:75EE byte_75EE:      .db 0xD, 0x4C, 0xC0, 0x40, 0xC, 0, 0x30, 0x10, 0xD, 0x64
+RAM:759B                 .db 0x1E, 0x88, 0x38, 0x64, 8, 8, 0xC, 0x10
+RAM:759B                 .db 0
+RAM:75AC door_W:         .db 2, 0x3B, 0x73, 0x40, 6, 3, 0x30, 0x10 ; DATA XREF: RAM:751Fo
+RAM:75AC                 .db 3, 0x3B, 0x8D, 0x40, 6, 3, 0x30, 0x10
+RAM:75AC                 .db 0
+RAM:75BD long_full_wall_W:.db 0xE, 0x40, 0x44, 0x40, 0, 4, 0x30, 0x50 ; DATA XREF: RAM:7521o
+RAM:75BD                 .db 0xD, 0x40, 0x54, 0x40, 0, 0xC, 0x30, 0x50
+RAM:75BD                 .db 0xD, 0x40, 0x6C, 0x40, 0, 0xC, 0x30, 0x50
+RAM:75BD                 .db 0xD, 0x40, 0x84, 0x40, 0, 0xC, 0x30, 0x50
+RAM:75BD                 .db 0xD, 0x40, 0x9C, 0x40, 0, 0xC, 0x30, 0x50
+RAM:75BD                 .db 0xD, 0x40, 0xB4, 0x40, 0, 0xC, 0x30, 0x50
+RAM:75BD                 .db 0
+RAM:75EE long_full_wall_N:.db 0xD, 0x4C, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
 RAM:75EE                                         ; DATA XREF: RAM:7523o
-RAM:75EE                 .db 0xC0, 0x40, 0xC, 0, 0x30, 0x10, 0xD, 0x7C, 0xC0, 0x40
-RAM:75EE                 .db 0xC, 0, 0x30, 0x10, 0xD, 0x94, 0xC0, 0x40, 0xC, 0
-RAM:75EE                 .db 0x30, 0x10, 0xD, 0xAC, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
-RAM:75EE                 .db 0xE, 0xBC, 0xC0, 0x40, 4, 0, 0x30, 0x10, 0
-RAM:761F byte_761F:      .db 0xD, 0x40, 0x4C, 0x40, 0, 0xC, 0x30, 0x50, 0xD, 0x40
+RAM:75EE                 .db 0xD, 0x64, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:75EE                 .db 0xD, 0x7C, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:75EE                 .db 0xD, 0x94, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:75EE                 .db 0xD, 0xAC, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:75EE                 .db 0xE, 0xBC, 0xC0, 0x40, 4, 0, 0x30, 0x10
+RAM:75EE                 .db 0
+RAM:761F long_with_opening_W:.db 0xD, 0x40, 0x4C, 0x40, 0, 0xC, 0x30, 0x50
 RAM:761F                                         ; DATA XREF: RAM:7525o
-RAM:761F                 .db 0x64, 0x40, 0, 0xC, 0x30, 0x50, 0xD, 0x40, 0x9C, 0x40
-RAM:761F                 .db 0, 0xC, 0x30, 0x50, 0xD, 0x40, 0xB4, 0x40, 0, 0xC
-RAM:761F                 .db 0x30, 0x50, 0
-RAM:7640 byte_7640:      .db 0xD, 0x4C, 0xC0, 0x40, 0xC, 0, 0x30, 0x10, 0xD, 0x64
+RAM:761F                 .db 0xD, 0x40, 0x64, 0x40, 0, 0xC, 0x30, 0x50
+RAM:761F                 .db 0xD, 0x40, 0x9C, 0x40, 0, 0xC, 0x30, 0x50
+RAM:761F                 .db 0xD, 0x40, 0xB4, 0x40, 0, 0xC, 0x30, 0x50
+RAM:761F                 .db 0
+RAM:7640 long_with_opening_N:.db 0xD, 0x4C, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
 RAM:7640                                         ; DATA XREF: RAM:7527o
-RAM:7640                 .db 0xC0, 0x40, 0xC, 0, 0x30, 0x10, 0xD, 0x9C, 0xC0, 0x40
-RAM:7640                 .db 0xC, 0, 0x30, 0x10, 0xD, 0xB4, 0xC0, 0x40, 0xC, 0
-RAM:7640                 .db 0x30, 0x10, 0
-RAM:7661 byte_7661:      .db 0xE, 0x60, 0x44, 0x40, 0, 4, 0x30, 0x50, 0xD, 0x60
-RAM:7661                                         ; DATA XREF: RAM:7529o
-RAM:7661                 .db 0x54, 0x40, 0, 0xC, 0x30, 0x50, 0xD, 0x60, 0x6C, 0x40
-RAM:7661                 .db 0, 0xC, 0x30, 0x50, 0xD, 0x60, 0x84, 0x40, 0, 0xC
-RAM:7661                 .db 0x30, 0x50, 0xD, 0x60, 0x9C, 0x40, 0, 0xC, 0x30, 0x50
-RAM:7661                 .db 0xD, 0x60, 0xB4, 0x40, 0, 0xC, 0x30, 0x50, 0xF, 0x68
-RAM:7661                 .db 0xC0, 0x40, 4, 0, 0x30, 0x10, 0xF, 0x98, 0xC0, 0x40
-RAM:7661                 .db 4, 0, 0x30, 0x10, 0
-RAM:76A2 byte_76A2:      .db 0xD, 0x4C, 0xA0, 0x40, 0xC, 0, 0x30, 0x10, 0xD
+RAM:7640                 .db 0xD, 0x64, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:7640                 .db 0xD, 0x9C, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:7640                 .db 0xD, 0xB4, 0xC0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:7640                 .db 0
+RAM:7661 thin_room_long_W:.db 0xE, 0x60, 0x44, 0x40, 0, 4, 0x30, 0x50 ; DATA XREF: RAM:7529o
+RAM:7661                 .db 0xD, 0x60, 0x54, 0x40, 0, 0xC, 0x30, 0x50
+RAM:7661                 .db 0xD, 0x60, 0x6C, 0x40, 0, 0xC, 0x30, 0x50
+RAM:7661                 .db 0xD, 0x60, 0x84, 0x40, 0, 0xC, 0x30, 0x50
+RAM:7661                 .db 0xD, 0x60, 0x9C, 0x40, 0, 0xC, 0x30, 0x50
+RAM:7661                 .db 0xD, 0x60, 0xB4, 0x40, 0, 0xC, 0x30, 0x50
+RAM:7661                 .db 0xF, 0x68, 0xC0, 0x40, 4, 0, 0x30, 0x10
+RAM:7661                 .db 0xF, 0x98, 0xC0, 0x40, 4, 0, 0x30, 0x10
+RAM:7661                 .db 0
+RAM:76A2 thin_room_long_N:.db 0xD, 0x4C, 0xA0, 0x40, 0xC, 0, 0x30, 0x10
 RAM:76A2                                         ; DATA XREF: RAM:752Bo
-RAM:76A2                 .db 0x64, 0xA0, 0x40, 0xC, 0, 0x30, 0x10, 0xD, 0x7C
-RAM:76A2                 .db 0xA0, 0x40, 0xC, 0, 0x30, 0x10, 0xD, 0x94, 0xA0
-RAM:76A2                 .db 0x40, 0xC, 0, 0x30, 0x10, 0xD, 0xAC, 0xA0, 0x40
-RAM:76A2                 .db 0xC, 0, 0x30, 0x10, 0xE, 0xBC, 0xA0, 0x40, 4
-RAM:76A2                 .db 0, 0x30, 0x10, 0xF, 0x40, 0x68, 0x40, 0, 4
-RAM:76A2                 .db 0x30, 0x50, 0xF, 0x40, 0x98, 0x40, 0, 4, 0x30
-RAM:76A2                 .db 0x50, 0
+RAM:76A2                 .db 0xD, 0x64, 0xA0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:76A2                 .db 0xD, 0x7C, 0xA0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:76A2                 .db 0xD, 0x94, 0xA0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:76A2                 .db 0xD, 0xAC, 0xA0, 0x40, 0xC, 0, 0x30, 0x10
+RAM:76A2                 .db 0xE, 0xBC, 0xA0, 0x40, 4, 0, 0x30, 0x10
+RAM:76A2                 .db 0xF, 0x40, 0x68, 0x40, 0, 4, 0x30, 0x50
+RAM:76A2                 .db 0xF, 0x40, 0x98, 0x40, 0, 4, 0x30, 0x50
+RAM:76A2                 .db 0
 RAM:76E3 special_objs_tbl:.db 0, 0x78, 0x78, 0x4C, 4, 0, 0, 0, 0
 RAM:76E3                                         ; DATA XREF: find_special_objs_here+4o
 RAM:76E3                                         ; init_special_objectso
@@ -2378,7 +2388,7 @@ RAM:A631 ; ---------------------------------------------------------------------
 RAM:A631
 RAM:A631 START:
 RAM:A631                 ld      hl, #seed_1
-RAM:A634                 ld      bc, #0x788
+RAM:A634                 ld      bc, #0x788      ; number of bytes to clear
 RAM:A637                 ld      a, (other_objs_here+0x70)
 RAM:A63A                 push    af
 RAM:A63B                 call    clr_mem
@@ -2391,7 +2401,7 @@ RAM:A647
 RAM:A647 start_menu:                             ; CODE XREF: RAM:A9AEj
 RAM:A647                                         ; RAM:AB6Dj ...
 RAM:A647                 ld      hl, #objs_wiped_cnt
-RAM:A64A                 ld      bc, #0x780
+RAM:A64A                 ld      bc, #0x780      ; number of bytes to clear
 RAM:A64D                 call    clr_mem
 RAM:A650
 RAM:A650 loc_A650:                               ; CODE XREF: RAM:A645j
@@ -2415,7 +2425,7 @@ RAM:A679                 ld      de, #start_game_tune
 RAM:A67C                 call    play_audio
 RAM:A67F                 call    init_start_location
 RAM:A682                 call    init_special_objects
-RAM:A685                 call    set_loc_attrs
+RAM:A685                 call    set_room_attrs
 RAM:A688
 RAM:A688 player_dies:                            ; CODE XREF: RAM:A73Bj
 RAM:A688                 call    lose_life
@@ -8396,12 +8406,12 @@ RAM:CAD2
 RAM:CAD2 ; =============== S U B R O U T I N E =======================================
 RAM:CAD2
 RAM:CAD2
-RAM:CAD2 set_loc_attrs:                          ; CODE XREF: RAM:A685p
+RAM:CAD2 set_room_attrs:                         ; CODE XREF: RAM:A685p
 RAM:CAD2                 ld      hl, #location_tbl
 RAM:CAD5                 ld      bc, #block_type_tbl ; end of location table
 RAM:CAD8                 inc     hl
 RAM:CAD9
-RAM:CAD9 loc_CAD9:                               ; CODE XREF: set_loc_attrs+1Dj
+RAM:CAD9 loc_CAD9:                               ; CODE XREF: set_room_attrs+1Dj
 RAM:CAD9                 ld      e, (hl)         ; #bytes in entry
 RAM:CADA                 inc     hl
 RAM:CADB                 ld      a, (hl)         ; size and attributes
@@ -8421,7 +8431,7 @@ RAM:CAEB                 sbc     hl, bc          ; done?
 RAM:CAED                 ret     NC              ; yes, return
 RAM:CAEE                 add     hl, bc
 RAM:CAEF                 jr      loc_CAD9        ; loop
-RAM:CAEF ; End of function set_loc_attrs
+RAM:CAEF ; End of function set_room_attrs
 RAM:CAEF
 RAM:CAF1
 RAM:CAF1 ; =============== S U B R O U T I N E =======================================
