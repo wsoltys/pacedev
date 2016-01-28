@@ -22,16 +22,19 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ gfx.cpp -o xgf -lalleg
 
-#define DO_C_DATA
+//#define DO_C_DATA
 
 //#define DO_ASCII
 //#define DO_PARSE_MAP
 //#define DO_GA
-//#define DO_FONT
+#define DO_FONT
 //#define DO_SPRITE_DATA
 //#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
 //#define DO_BG_DATA
+
+#define WIDTH 16
+
 
 const char *to_ascii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
 uint8_t ram[64*1024];
@@ -40,11 +43,11 @@ unsigned widest = 0;
 unsigned highest = 0;
 FILE *fpdbg;
 
-static void plot_character (unsigned ch, unsigned cx, unsigned cy, unsigned c)
+static void plot_character (unsigned base, unsigned ch, unsigned cx, unsigned cy, unsigned c)
 {
   for (unsigned y=0; y<8; y++)
   {
-    unsigned char d = ram[0x6108+ch*8+y];
+    unsigned char d = ram[base+ch*8+y];
     
     for (unsigned b=0; b<8; b++)
     {
@@ -55,7 +58,7 @@ static void plot_character (unsigned ch, unsigned cx, unsigned cy, unsigned c)
   }
 }
 
-static void plot_ascii_character (unsigned ch, unsigned cx, unsigned cy, unsigned c)
+static void plot_ascii_character (unsigned base, unsigned ch, unsigned cx, unsigned cy, unsigned c)
 {
   unsigned i;
   
@@ -66,7 +69,7 @@ static void plot_ascii_character (unsigned ch, unsigned cx, unsigned cy, unsigne
   if (i == 40)
     return;
     
-  plot_character (i, cx, cy, c);    
+  plot_character (base, i, cx, cy, c);    
 }
 
 static unsigned plot_sprite_data (unsigned s, unsigned f, unsigned p, unsigned px, unsigned py, unsigned c, unsigned &w, unsigned &h)
@@ -161,69 +164,18 @@ void dump_sna_hdr (PSNAHDR hdr)
   fprintf (stderr, "%16.16s = 0x%04X\n", "RET", ret);
 }
 
-void main (int argc, char *argv[])
+void knight_lore (void)
 {
 	FILE *fp, *fp2;
 	struct stat	fs;
 	int					fd;
 	
 	char				buf[1024];
+  unsigned    p = 0x6248;
 
   unsigned t;
   unsigned w, h;
 
-  fpdbg = fopen ("debug.txt", "wt");
-
-  // ALIEN8
-  
-	fp = fopen ("alien8.sna", "rb");
-	if (!fp)
-		exit (0);
-	fd = fileno (fp);
-	if (fstat	(fd, &fs))
-		exit (0);
-	fread (&ram[16384-27], sizeof(uint8_t), fs.st_size, fp);
-	fclose (fp);
-
-  dump_sna_hdr ((PSNAHDR)&ram[16384-27]);
-
-	fp = fopen ("alien8.bin", "wb");
-	// write the relevant areas
-	fwrite (&ram[0x6288], 0xd1eb-0x6288, 1, fp);
-	fclose (fp);
-
-  unsigned p;
-
-  {
-  // location table
-  unsigned locations = 0;
-  p = 0x6469;
-  fprintf (stdout, "uint8_t location_tbl[] = \n{\n");
-  while (p < 0x73C8)
-  {
-    uint8_t n = ram[p+1];
-    fprintf (stdout, "  // $%04X\n", p);
-    fprintf (stdout, "  %d, %d, %d,\n",
-              ram[p], ram[p+1], ram[p+2]);
-    p += 3;
-    locations++;
-    for (unsigned i=0; i<n-2; i++)
-    {
-      if ((i%8)==0)
-        fprintf (stdout, "  ");
-      fprintf (stdout, "0x%02X", ram[p++]);
-      if (p < 0x73C8)
-        fprintf (stdout, ", ");
-      if ((i%8)==7 || i==n-3)
-        fprintf (stdout, "\n");
-    }
-  }
-  fprintf (stdout, "};\n\n");
-  fprintf (stderr, "#locations = %d\n", locations);
-  }
-
-  // KNIGHT LORE
-  	
 	fp = fopen ("knightlore.sna", "rb");
 	if (!fp)
 		exit (0);
@@ -830,93 +782,11 @@ void main (int argc, char *argv[])
 
   fclose (fp2);
 
-#define WIDTH 16
-
   // dump title data to .ASM
   fp = fopen ("c/src/kl/kl.scr", "rb");
   if (fp)
   {
     fp2 = fopen ("kl_scr.asm", "wt");
-    if (fp2)
-    {
-      fprintf (fp2, ";\n; screen memory\n;\n");
-      fprintf (fp2, "vram:\n");
-      for (unsigned line=0; line<192; line++)
-      {
-        for (unsigned byte=0; byte<32; byte++)
-        {
-          uint8_t data8;
-          
-          fread (&data8, 1, 1, fp);
-          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
-          fprintf (fp2, "0x%02X", data8);
-          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
-        }
-      }
-      fprintf (fp2, ";\n; attribute memory\n;\n");
-      fprintf (fp2, "aram:\n");
-      for (unsigned line=0; line<192; line+=8)
-      {
-        for (unsigned byte=0; byte<32; byte++)
-        {
-          uint8_t data8;
-
-          fread (&data8, 1, 1, fp);
-          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
-          fprintf (fp2, "0x%02X", data8);
-          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
-        }
-      }
-      fclose (fp2);
-    }
-    fclose (fp);
-  }
-
-  // dump title data to .ASM
-  fp = fopen ("c/src/a8/alien8.scr", "rb");
-  if (fp)
-  {
-    fp2 = fopen ("a8_scr.asm", "wt");
-    if (fp2)
-    {
-      fprintf (fp2, ";\n; screen memory\n;\n");
-      fprintf (fp2, "vram:\n");
-      for (unsigned line=0; line<192; line++)
-      {
-        for (unsigned byte=0; byte<32; byte++)
-        {
-          uint8_t data8;
-          
-          fread (&data8, 1, 1, fp);
-          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
-          fprintf (fp2, "0x%02X", data8);
-          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
-        }
-      }
-      fprintf (fp2, ";\n; attribute memory\n;\n");
-      fprintf (fp2, "aram:\n");
-      for (unsigned line=0; line<192; line+=8)
-      {
-        for (unsigned byte=0; byte<32; byte++)
-        {
-          uint8_t data8;
-
-          fread (&data8, 1, 1, fp);
-          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
-          fprintf (fp2, "0x%02X", data8);
-          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
-        }
-      }
-      fclose (fp2);
-    }
-    fclose (fp);
-  }
-
-  // dump title data to .ASM
-  fp = fopen ("c/src/pg/pentagram.scr", "rb");
-  if (fp)
-  {
-    fp2 = fopen ("pg_scr.asm", "wt");
     if (fp2)
     {
       fprintf (fp2, ";\n; screen memory\n;\n");
@@ -1047,27 +917,11 @@ void main (int argc, char *argv[])
 		fprintf (stderr, "$%04X\n", ga[i]);
 #endif
 
-	allegro_init ();
-	install_keyboard ();
-
-	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 320, 192, 0, 0);
-
-  PALETTE pal;
-  for (int c=0; c<16; c++)
-  {
-    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-  }
-	set_palette_range (pal, 0, 7, 1);
-
-
 #ifdef DO_FONT
 	clear_bitmap (screen);
   for (unsigned c=0; c<40; c++)
   {
-      plot_character (c, (c%16)*16, (c/16)*16, 7);
+      plot_character (0x6108, c, (c%16)*16, (c/16)*16, 7);
   }
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
@@ -1086,7 +940,7 @@ void main (int argc, char *argv[])
   for (unsigned m=0; *msg[m]; m++)
   {
     for (unsigned c=0; msg[m][c]; c++)
-      plot_ascii_character (msg[m][c], (320-strlen(msg[m])*8)/2 + c*8, 16+m*16, m+2);
+      plot_ascii_character (0x6108, msg[m][c], (320-strlen(msg[m])*8)/2 + c*8, 16+m*16, m+2);
   }	
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
@@ -1208,12 +1062,216 @@ void main (int argc, char *argv[])
 
   fclose (fpdbg);
   
-  allegro_exit ();
-
 #endif // DO_C_DATA
 
   //fprintf (stdout, "w=%d\n", widest);
   //fprintf (stdout, "h=%d\n", highest);
+}
+
+void alien_8 (void)
+{
+	FILE *fp, *fp2;
+	struct stat	fs;
+	int					fd;
+	
+	char				buf[1024];
+  unsigned    p = 0x6248;
+
+  unsigned t;
+  unsigned w, h;
+
+	fp = fopen ("alien8.sna", "rb");
+	if (!fp)
+		exit (0);
+	fd = fileno (fp);
+	if (fstat	(fd, &fs))
+		exit (0);
+	fread (&ram[16384-27], sizeof(uint8_t), fs.st_size, fp);
+	fclose (fp);
+
+  dump_sna_hdr ((PSNAHDR)&ram[16384-27]);
+
+	fp = fopen ("alien8.bin", "wb");
+	// write the relevant areas
+	fwrite (&ram[0x6288], 0xd1eb-0x6288, 1, fp);
+	fclose (fp);
+
+  {
+  // location table
+  unsigned locations = 0;
+  p = 0x6469;
+  fprintf (stdout, "uint8_t location_tbl[] = \n{\n");
+  while (p < 0x73C8)
+  {
+    uint8_t n = ram[p+1];
+    fprintf (stdout, "  // $%04X\n", p);
+    fprintf (stdout, "  %d, %d, %d,\n",
+              ram[p], ram[p+1], ram[p+2]);
+    p += 3;
+    locations++;
+    for (unsigned i=0; i<n-2; i++)
+    {
+      if ((i%8)==0)
+        fprintf (stdout, "  ");
+      fprintf (stdout, "0x%02X", ram[p++]);
+      if (p < 0x73C8)
+        fprintf (stdout, ", ");
+      if ((i%8)==7 || i==n-3)
+        fprintf (stdout, "\n");
+    }
+  }
+  fprintf (stdout, "};\n\n");
+  fprintf (stderr, "#locations = %d\n", locations);
+  }
+
+  // dump title data to .ASM
+  fp = fopen ("c/src/a8/alien8.scr", "rb");
+  if (fp)
+  {
+    fp2 = fopen ("a8_scr.asm", "wt");
+    if (fp2)
+    {
+      fprintf (fp2, ";\n; screen memory\n;\n");
+      fprintf (fp2, "vram:\n");
+      for (unsigned line=0; line<192; line++)
+      {
+        for (unsigned byte=0; byte<32; byte++)
+        {
+          uint8_t data8;
+          
+          fread (&data8, 1, 1, fp);
+          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
+          fprintf (fp2, "0x%02X", data8);
+          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
+        }
+      }
+      fprintf (fp2, ";\n; attribute memory\n;\n");
+      fprintf (fp2, "aram:\n");
+      for (unsigned line=0; line<192; line+=8)
+      {
+        for (unsigned byte=0; byte<32; byte++)
+        {
+          uint8_t data8;
+
+          fread (&data8, 1, 1, fp);
+          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
+          fprintf (fp2, "0x%02X", data8);
+          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
+        }
+      }
+      fclose (fp2);
+    }
+    fclose (fp);
+  }
+
+#ifdef DO_FONT
+	clear_bitmap (screen);
+  for (unsigned c=0; c<59; c++)
+  {
+      plot_character (0x6288, c, (c%16)*16, (c/16)*16, 7);
+  }
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+
+	clear_bitmap (screen);
+	const char *msg[] = 
+	{
+	  "THIS IS THE FONT FROM A MYSTERY GAME",
+	  "FROM A Z80 PLATFORM",
+	  "THAT I AM CURRENTLY EVALUATING FOR",
+	  "A POSSIBLE PORT TO",
+	  "THE COLOR COMPUTER 3",
+	  ""
+	};
+
+  for (unsigned m=0; *msg[m]; m++)
+  {
+    for (unsigned c=0; msg[m][c]; c++)
+      plot_ascii_character (0x6288, msg[m][c], (320-strlen(msg[m])*8)/2 + c*8, 16+m*16, m+2);
+  }	
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+
+#endif
+}
+
+void pentagram (void)
+{
+	FILE *fp, *fp2;
+	struct stat	fs;
+	int					fd;
+	
+	char				buf[1024];
+  unsigned    p = 0x6248;
+
+  unsigned t;
+  unsigned w, h;
+
+  // dump title data to .ASM
+  fp = fopen ("c/src/pg/pentagram.scr", "rb");
+  if (fp)
+  {
+    fp2 = fopen ("pg_scr.asm", "wt");
+    if (fp2)
+    {
+      fprintf (fp2, ";\n; screen memory\n;\n");
+      fprintf (fp2, "vram:\n");
+      for (unsigned line=0; line<192; line++)
+      {
+        for (unsigned byte=0; byte<32; byte++)
+        {
+          uint8_t data8;
+          
+          fread (&data8, 1, 1, fp);
+          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
+          fprintf (fp2, "0x%02X", data8);
+          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
+        }
+      }
+      fprintf (fp2, ";\n; attribute memory\n;\n");
+      fprintf (fp2, "aram:\n");
+      for (unsigned line=0; line<192; line+=8)
+      {
+        for (unsigned byte=0; byte<32; byte++)
+        {
+          uint8_t data8;
+
+          fread (&data8, 1, 1, fp);
+          if (byte%WIDTH == 0) fprintf (fp2, "    .db ");
+          fprintf (fp2, "0x%02X", data8);
+          if (byte%WIDTH < WIDTH-1) fprintf (fp2, ", "); else fprintf (fp2, "\n");
+        }
+      }
+      fclose (fp2);
+    }
+    fclose (fp);
+  }
+}
+
+void main (int argc, char *argv[])
+{
+  fpdbg = fopen ("debug.txt", "wt");
+
+	allegro_init ();
+	install_keyboard ();
+
+	set_color_depth (8);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 320, 192, 0, 0);
+
+  PALETTE pal;
+  for (int c=0; c<16; c++)
+  {
+    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+  }
+	set_palette_range (pal, 0, 7, 1);
+
+  //knight_lore ();
+  alien_8 ();
+  //pentagram ();
+    
+  allegro_exit ();
 }
 
 END_OF_MAIN();
