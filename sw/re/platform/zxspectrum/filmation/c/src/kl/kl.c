@@ -3761,7 +3761,7 @@ void calc_display_order_and_render (void)
   
   rendered_objs_cnt = 0;
 
-loc_CEC3:
+process_remaining_objs:
   obj_i = 0;  
   other_i = obj_i + 1;
   
@@ -3844,8 +3844,8 @@ loc_CEC3:
             {
               for (obj_i=0; objects_to_draw[obj_i] != 0xff; obj_i++)
                 if (objects_to_draw[obj_i] == objects_to_draw[render_obj_2-1])
-                  goto loc_D003;
-              goto loc_CEC3;
+                  goto render_obj;
+              goto process_remaining_objs;
             }
           }
           render_list[s] = render_obj_2-1;
@@ -3871,19 +3871,18 @@ loc_CEC3:
       }
     }
     
-    // loc_D000
-    // flag as rendered
-loc_D003:
+render_obj:
     //DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
     // we may have modified obj_i    
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
+    // flag as rendered
     objects_to_draw[obj_i] |= (1<<7);
     // clear render_list
     render_list[0] = 0xff;
     rendered_objs_cnt++;
     calc_pixel_XY_and_render (p_obj);
     // and start from the beginning again
-    goto loc_CEC3;
+    goto process_remaining_objs;
   #else
     //DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
     calc_pixel_XY_and_render (p_obj);
