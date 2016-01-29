@@ -19,14 +19,15 @@ ZXVRAM:4000             ; ======================================================
 ZXVRAM:4000
 ZXVRAM:4000             ; Segment type: Regular
 ZXVRAM:4000                             .org 0x4000
-ZXVRAM:4000 ?? ?? ?? ??+zxvram:         .ds 0x1800
+ZXVRAM:4000 ?? ?? ?? ??+zxvram:         .ds 0x1800                      ; DATA XREF: clear_scrn:loc_CE60o
 ZXVRAM:4000 ?? ?? ?? ??+; end of 'ZXVRAM'
 ZXVRAM:4000 ?? ?? ?? ??+
 ZXARAM:5800             ; ===========================================================================
 ZXARAM:5800
 ZXARAM:5800             ; Segment type: Regular
 ZXARAM:5800                             .org 0x5800
-ZXARAM:5800 ?? ?? ?? ??+zxaram:         .ds 0x300
+ZXARAM:5800 ?? ?? ?? ??+zxaram:         .ds 0x300                       ; DATA XREF: RAM:loc_B005o
+ZXARAM:5800 ?? ?? ?? ??+                                                ; clr_attr+3o
 ZXARAM:5800 ?? ?? ?? ??+; end of 'ZXARAM'
 ZXARAM:5800 ?? ?? ?? ??+
 SCRATCH:5B00             ; ===========================================================================
@@ -83,7 +84,7 @@ SCRATCH:5B1B                                                             ; cmp_t
 SCRATCH:5B1C ??                          .ds 1
 SCRATCH:5B1D ??                          .ds 1
 SCRATCH:5B1E ??          rendered_objs_cnt:.ds 1                         ; DATA XREF: RAM:A6FEr
-SCRATCH:5B1E                                                             ; render_dynamic_objects+BDr ...
+SCRATCH:5B1E                                                             ; RAM:C8E0o ...
 SCRATCH:5B1F ??                          .ds 1
 SCRATCH:5B20 ??          block_type_tbl_base:.ds 1
 SCRATCH:5B21 ??          tmp_dZ:         .ds 1                           ; DATA XREF: sub_C2BC+10w
@@ -128,7 +129,8 @@ SCRATCH:5B3E ??          unk_5B3E:       .ds 1
 SCRATCH:5B3F ??          unk_5B3F:       .ds 1
 SCRATCH:5B40 ??          unk_5B40:       .ds 1                           ; DATA XREF: sub_A7A3o
 SCRATCH:5B41 ??          byte_5B41:      .ds 1                           ; DATA XREF: RAM:AC15w
-SCRATCH:5B42 ??          unk_5B42:       .ds 1
+SCRATCH:5B42 ??          unk_5B42:       .ds 1                           ; DATA XREF: RAM:A9CAo
+SCRATCH:5B42                                                             ; RAM:AA59o ...
 SCRATCH:5B43 ??          byte_5B43:      .ds 1                           ; DATA XREF: RAM:A905r
 SCRATCH:5B43                                                             ; RAM:A913w ...
 SCRATCH:5B44 ??                          .ds 1
@@ -176,7 +178,7 @@ RAM:6288
 RAM:6288             ; Segment type: Regular
 RAM:6288                             .org 0x6288
 RAM:6288 00 00 00 00+font:           .db 0, 0, 0, 0, 0, 0, 0, 0      ; DATA XREF: RAM:A6D2o
-RAM:6288 00 00 00 00                                                 ; retrieve_screen:zero_end_of_graphic_objs_tblo
+RAM:6288 00 00 00 00                                                 ; print_text_in_colour+1t ...
 RAM:6290 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
 RAM:6298 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
 RAM:62A0 00 00 00 DB+                .db 0, 0, 0, 0xDB, 2, 0x4D, 0, 0xDB
@@ -842,25 +844,25 @@ RAM:76E3 80 98 64 45+                .db 0, 0xB8, 0x78, 0x40, 0xAB, 0, 0, 0, 0
 RAM:76E3 00 00 00 00+                .db 0, 0x80, 0x78, 0x4C, 0xB7, 0, 0, 0, 0
 RAM:76E3 00 B8 80 70+                .db 0, 0xB8, 0xB8, 0x4C, 0xC8, 0, 0, 0, 0
 RAM:76E3 46 00 00 00+                .db 0, 0xB8, 0xB8, 0x40, 0xD9, 0, 0, 0, 0
-RAM:7827 2F 79 2F 79+sprite_tbl:     .dw spr_000, spr_000, spr_034, spr_035, spr_038, spr_040, spr_039, spr_042, spr_043
+RAM:7827 2F 79 2F 79+sprite_tbl:     .dw spr_00, spr_00, spr_22, spr_23, spr_26, spr_28, spr_27, spr_2A, spr_2B
 RAM:7827 E7 8E E1 8F+                                                ; DATA XREF: something_with_special_objs+44o
 RAM:7827 27 93 5B 94+                                                ; something_with_special_objs+50o ...
-RAM:7827 29 94 75 94+                .dw spr_044, spr_041, spr_024, spr_046, spr_036, spr_065, spr_037, spr_059, spr_061
-RAM:7827 A7 94 E9 94+                .dw spr_063, spr_061, spr_053, spr_055, spr_057, spr_055, spr_049, spr_047, spr_051
-RAM:7827 63 94 4B 87+                .dw spr_051, spr_029, spr_030, spr_031, spr_031, spr_060, spr_062, spr_064, spr_062
-RAM:7827 CD 95 03 91+                .dw spr_054, spr_056, spr_058, spr_056, spr_050, spr_048, spr_052, spr_052, spr_031
-RAM:7827 B7 9F 55 92+                .dw spr_031, spr_026, spr_031, spr_071, spr_070, spr_071, spr_070, spr_069, spr_068
-RAM:7827 7B 9C 8F 9D+                .dw spr_067, spr_066, spr_066, spr_067, spr_068, spr_069, spr_070, spr_071, spr_070
-RAM:7827 A3 9E 8F 9D+                .dw spr_071, spr_071, spr_070, spr_031, spr_031, spr_031, spr_031, spr_031, spr_031
-RAM:7827 3F 99 53 9A+                .dw spr_045, spr_025, spr_027, spr_033, spr_071, spr_070, spr_069, spr_070, spr_019
-RAM:7827 67 9B 53 9A+                .dw spr_018, spr_017, spr_020, spr_023, spr_002, spr_028, spr_032, spr_021, spr_022
-RAM:7827 1F 97 13 96+                .dw spr_047, spr_048, spr_047, spr_048, spr_028, spr_032, spr_073, spr_074, spr_075
-RAM:7827 2B 98 2B 98+                .dw spr_076, spr_073, spr_074, spr_075, spr_076, spr_073, spr_074, spr_075, spr_076
-RAM:7827 D7 8A C1 8B+                .dw spr_069, spr_070, spr_071, spr_070, spr_072, spr_072, spr_072, spr_072, spr_012
-RAM:7827 9B 8C 9B 8C+                .dw spr_013, spr_011, spr_014, spr_015, spr_016, spr_009, spr_010, spr_005, spr_006
-RAM:7827 05 9D 19 9E+                .dw spr_007, spr_008, spr_031, spr_004, spr_003, spr_001
-RAM:792F 00 00       spr_000:        .db 0, 0                        ; DATA XREF: RAM:sprite_tblo
-RAM:7931 03 14       spr_001:        .db 3, 20                       ; DATA XREF: RAM:sprite_tblo
+RAM:7827 29 94 75 94+                .dw spr_2C, spr_29, spr_18, spr_2E, spr_24, spr_41, spr_25, spr_3B, spr_3D
+RAM:7827 A7 94 E9 94+                .dw spr_3F, spr_3D, spr_35, spr_37, spr_39, spr_37, spr_31, spr_2F, spr_33
+RAM:7827 63 94 4B 87+                .dw spr_33, spr_1D, spr_1E, spr_1F, spr_1F, spr_3C, spr_3E, spr_40, spr_3E
+RAM:7827 CD 95 03 91+                .dw spr_36, spr_38, spr_3A, spr_38, spr_32, spr_30, spr_34, spr_34, spr_1F
+RAM:7827 B7 9F 55 92+                .dw spr_1F, spr_1A, spr_1F, spr_47, spr_46, spr_47, spr_46, spr_45, spr_44
+RAM:7827 7B 9C 8F 9D+                .dw spr_43, spr_42, spr_42, spr_43, spr_44, spr_45, spr_46, spr_47, spr_46
+RAM:7827 A3 9E 8F 9D+                .dw spr_47, spr_47, spr_46, spr_1F, spr_1F, spr_1F, spr_1F, spr_1F, spr_1F
+RAM:7827 3F 99 53 9A+                .dw spr_2D, spr_19, spr_1B, spr_21, spr_47, spr_46, spr_45, spr_46, spr_13
+RAM:7827 67 9B 53 9A+                .dw spr_12, spr_11, spr_14, spr_17, spr_02, spr_1C, spr_20, spr_15, spr_16
+RAM:7827 1F 97 13 96+                .dw spr_2F, spr_30, spr_2F, spr_30, spr_1C, spr_20, spr_49, spr_4A, spr_4B
+RAM:7827 2B 98 2B 98+                .dw spr_4C, spr_49, spr_4A, spr_4B, spr_4C, spr_49, spr_4A, spr_4B, spr_4C
+RAM:7827 D7 8A C1 8B+                .dw spr_45, spr_46, spr_47, spr_46, spr_48, spr_48, spr_48, spr_48, spr_0C
+RAM:7827 9B 8C 9B 8C+                .dw spr_0D, spr_0B, spr_0E, spr_0F, spr_10, spr_09, spr_0A, spr_05, spr_06
+RAM:7827 05 9D 19 9E+                .dw spr_07, spr_08, spr_1F, spr_04, spr_03, spr_01
+RAM:792F 00 00       spr_00:         .db 0, 0                        ; DATA XREF: RAM:sprite_tblo
+RAM:7931 03 14       spr_01:         .db 3, 20                       ; DATA XREF: RAM:sprite_tblo
 RAM:7933 03 00 FF 7E+                .db 3, 0, 0xFF, 0x7E, 0xC0, 0, 0xF, 3, 0xFF
 RAM:7933 C0 00 0F 03+                .db 0x81, 0xF0, 0xC0, 0x1F, 0xC, 0xFF, 0x7E, 0xF8, 0x30
 RAM:7933 FF 81 F0 C0+                .db 0x3F, 0x13, 0xFF, 0xFF, 0xFC, 0xC8, 0x7F, 0x23, 0xFF
@@ -875,7 +877,7 @@ RAM:7933 FE FC 3F 1C+                .db 7, 1, 0xFF, 0xBD, 0xE0, 0x80, 7, 3, 0xF
 RAM:7933 FF C3 FC F8+                .db 0x3C, 0xE0, 0xC0, 3, 1, 0xFF, 0xE7, 0xC0, 0x80
 RAM:7933 3F 0F FF 3C+                .db 1, 0, 0xFF, 0xE7, 0x80, 0, 0, 0, 0xFF
 RAM:7933 F8 F0 0F 04+                .db 0x3C, 0, 0
-RAM:79AB 05 23       spr_002:        .db 5, 35                       ; DATA XREF: RAM:sprite_tblo
+RAM:79AB 05 23       spr_02:         .db 5, 35                       ; DATA XREF: RAM:sprite_tblo
 RAM:79AD 00 00 78 00+                .db 0, 0, 0x78, 0, 0, 0, 0x1E, 0, 0
 RAM:79AD 00 00 1E 00+                .db 0, 0, 0, 0xFC, 0x78, 0, 0, 0x3F, 0x1E
 RAM:79AD 00 00 00 00+                .db 0, 0, 0, 0, 0xFC, 0x78, 0, 0, 0x3F
@@ -915,7 +917,7 @@ RAM:79AD 1F 0F FF 8F+                .db 0xFF, 0xFF, 0xFF, 0xFE, 0xFC, 0x7F, 0x3
 RAM:79AD FF FF FF FF+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFC, 0xFF, 0x7F, 0xFF
 RAM:79AD F8 F0 1F 0F+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0x7F, 0
 RAM:79AD FF 8F FF FF+                .db 0xFF, 0, 0xFF, 0, 0xFF, 0, 0xFE, 0
-RAM:7B0B 04 17       spr_003:        .db 4, 23                       ; DATA XREF: RAM:sprite_tblo
+RAM:7B0B 04 17       spr_03:         .db 4, 23                       ; DATA XREF: RAM:sprite_tblo
 RAM:7B0D 00 00 01 00+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0
 RAM:7B0D 80 00 00 00+                .db 0, 3, 1, 0xC0, 0x80, 0, 0, 1, 0
 RAM:7B0D 00 00 03 01+                .db 3, 1, 0xC0, 0x80, 0x80, 0, 3, 1, 0x83
@@ -937,7 +939,7 @@ RAM:7B0D FF B7 FE 7C+                .db 1, 0x83, 1, 0xC1, 0x80, 0xC0, 0x80, 1, 
 RAM:7B0D 7F 3F FF 6D+                .db 3, 1, 0xC0, 0x80, 0x80, 0, 0, 0, 3
 RAM:7B0D FF B6 FE FC+                .db 1, 0xC0, 0x80, 0, 0, 0, 0, 1, 0
 RAM:7B0D 7F 3F FF 28+                .db 0x80, 0, 0, 0
-RAM:7BC5 03 19       spr_004:        .db 3, 25                       ; DATA XREF: RAM:sprite_tblo
+RAM:7BC5 03 19       spr_04:         .db 3, 25                       ; DATA XREF: RAM:sprite_tblo
 RAM:7BC7 00 00 7E 00+                .db 0, 0, 0x7E, 0, 0, 0, 3, 0, 0xFF
 RAM:7BC7 00 00 03 00+                .db 0x7E, 0xC0, 0, 0xF, 3, 0xFF, 0xFF, 0xF0, 0xC0
 RAM:7BC7 FF 7E C0 00+                .db 0x1F, 3, 0xFF, 0xFF, 0xF8, 0xF0, 0x3F, 3, 0xFF
@@ -955,7 +957,7 @@ RAM:7BC7 FE FC 7F 38+                .db 0x2C, 0x1E, 0xC, 0x30, 0, 0x7E, 0x2C, 0
 RAM:7BC7 FF FF FE FC+                .db 0, 0, 0x7E, 8, 0, 0, 0, 0, 0x7E
 RAM:7BC7 3F 1C FF E7+                .db 0x24, 0, 0, 0, 0, 0x3C, 0x18, 0, 0
 RAM:7BC7 FC F8 1F 0E+                .db 0, 0, 0x18, 0, 0, 0
-RAM:7C5D 03 18       spr_005:        .db 3, 0x18                     ; DATA XREF: RAM:sprite_tblo
+RAM:7C5D 03 18       spr_05:         .db 3, 0x18                     ; DATA XREF: RAM:sprite_tblo
 RAM:7C5F 00 00 FF 00+                .db 0, 0, 0xFF, 0, 0, 0, 7, 0, 0xFF
 RAM:7C5F 00 00 07 00+                .db 0xFF, 0xE0, 0, 0x1F, 7, 0xFF, 0xF8, 0xF8, 0xE0
 RAM:7C5F FF FF E0 00+                .db 0x3F, 0x19, 0xFF, 0xF8, 0xFC, 0x78, 0x7F, 0x31, 0xFF
@@ -972,7 +974,7 @@ RAM:7C5F FF 61 FF FF+                .db 7, 3, 0xFF, 0xE7, 0xE0, 0xC0, 0x1F, 4, 
 RAM:7C5F FF E6 FF 51+                .db 0x7E, 0xF8, 0x20, 0x3C, 0x18, 0x7E, 0, 0x3C, 0x18
 RAM:7C5F FF 00 FF FA+                .db 0x3C, 0x18, 0, 0, 0x3C, 0x18, 0x18, 0, 0
 RAM:7C5F 7F 38 FF FF+                .db 0, 0x18, 0, 0, 0, 0, 0, 0, 0
-RAM:7CEF 03 18       spr_006:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:7CEF 03 18       spr_06:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:7CF1 00 00 FF 00+                .db 0, 0, 0xFF, 0, 0, 0, 7, 0, 0xFF
 RAM:7CF1 00 00 07 00+                .db 0xFF, 0xE0, 0, 0x1F, 7, 0xFF, 0x7E, 0xF8, 0xE0
 RAM:7CF1 FF FF E0 00+                .db 0x3F, 0x18, 0xFF, 0x7E, 0xFC, 0x18, 0x7F, 0x38, 0xFF
@@ -989,7 +991,7 @@ RAM:7CF1 FF 61 FF FF+                .db 0x1F, 3, 0xFF, 0xE7, 0xF8, 0xC0, 0x3F, 
 RAM:7CF1 FF E6 FF 51+                .db 0x7E, 0xFC, 0x38, 0x7E, 0x3C, 0x7E, 0, 0x7E, 0x3C
 RAM:7CF1 FF 00 FF FA+                .db 0x7E, 0x3C, 0, 0, 0x7E, 0x3C, 0x3C, 0x1C, 0
 RAM:7CF1 7F 38 FF FF+                .db 0, 0x3C, 0x18, 0x18, 0, 0, 0, 0x18, 0
-RAM:7D81 03 18       spr_007:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:7D81 03 18       spr_07:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:7D83 00 00 FF 00+                .db 0, 0, 0xFF, 0, 0, 0, 7, 0, 0xFF
 RAM:7D83 00 00 07 00+                .db 0xFF, 0xE0, 0, 0x1F, 7, 0xFF, 0x1F, 0xF8, 0xE0
 RAM:7D83 FF FF E0 00+                .db 0x3F, 0x1E, 0xFF, 0x1F, 0xFC, 0x98, 0x7F, 0x3E, 0xFF
@@ -1006,7 +1008,7 @@ RAM:7D83 FF 61 FF FF+                .db 0x1F, 3, 0xFF, 0xE7, 0xF8, 0xC0, 0x3F, 
 RAM:7D83 FF E6 FF 51+                .db 0x7E, 0xFC, 0x38, 0x7E, 0x3C, 0x7E, 0, 0x7E, 0x3C
 RAM:7D83 FF 00 FF FA+                .db 0x7E, 0x3C, 0, 0, 0x7E, 0x3C, 0x3C, 0x1C, 0
 RAM:7D83 7F 38 FF FF+                .db 0, 0x3C, 0x38, 0x18, 0, 0, 0, 0x18, 0
-RAM:7E13 03 18       spr_008:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:7E13 03 18       spr_08:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:7E15 00 00 FF 00+                .db 0, 0, 0xFF, 0, 0, 0, 7, 0, 0xFF
 RAM:7E15 00 00 07 00+                .db 0xFF, 0xE0, 0, 0x1F, 7, 0xFF, 0xC7, 0xF8, 0xE0
 RAM:7E15 FF FF E0 00+                .db 0x3F, 0x1F, 0xFF, 0xC7, 0xFC, 0xF8, 0x7F, 0x2F, 0xFF
@@ -1023,7 +1025,7 @@ RAM:7E15 FF 61 FF FF+                .db 7, 3, 0xFF, 0xE7, 0xE0, 0xC0, 0x1F, 4, 
 RAM:7E15 FF E6 FF 51+                .db 0x7E, 0xF8, 0x20, 0x3C, 0x18, 0x7E, 0, 0x3C, 0x18
 RAM:7E15 FF 00 FF FA+                .db 0x3C, 0x18, 0, 0, 0x3C, 0x18, 0x18, 0, 0
 RAM:7E15 7F 38 FF FF+                .db 0, 0x18, 0, 0, 0, 0, 0, 0, 0
-RAM:7EA5 04 1D       spr_009:        .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
+RAM:7EA5 04 1D       spr_09:         .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
 RAM:7EA7 00 00 01 00+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0
 RAM:7EA7 80 00 00 00+                .db 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0
 RAM:7EA7 00 00 07 01+                .db 0x1F, 2, 0xF8, 0x60, 0, 0, 0, 0, 0x7F
@@ -1050,7 +1052,7 @@ RAM:7EA7 FF 55 FF 55+                .db 0x80, 0, 0, 0, 0x7F, 0x1F, 0xFE, 0xF8, 
 RAM:7EA7 FF FF FF FE+                .db 0, 0, 0, 0x1F, 7, 0xF8, 0xE0, 0, 0
 RAM:7EA7 FF 2A FF AA+                .db 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0
 RAM:7EA7 FF 7F FF FE+                .db 0, 1, 0, 0x80, 0, 0, 0
-RAM:7F8F 04 1D       spr_010:        .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
+RAM:7F8F 04 1D       spr_0A:         .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
 RAM:7F91 00 00 01 00+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0
 RAM:7F91 80 00 00 00+                .db 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0
 RAM:7F91 00 00 07 01+                .db 0x1F, 6, 0xF8, 0x40, 0, 0, 0, 0, 0x7F
@@ -1077,7 +1079,7 @@ RAM:7F91 FF 7F FF FF+                .db 0x80, 0, 0, 0, 0x7F, 0x1F, 0xFE, 0xF8, 
 RAM:7F91 FF AA FF AA+                .db 0, 0, 0, 0x1F, 7, 0xF8, 0xE0, 0, 0
 RAM:7F91 FF 7F FF FE+                .db 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0
 RAM:7F91 FF 55 FF 54+                .db 0, 1, 0, 0x80, 0, 0, 0
-RAM:8079 03 1A       spr_011:        .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
+RAM:8079 03 1A       spr_0B:         .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
 RAM:807B 00 00 00 00+                .db 0, 0, 0, 0, 0x48, 0, 0, 0, 0xF8
 RAM:807B 48 00 00 00+                .db 0, 0xFE, 0x48, 3, 0, 0xFF, 0xF8, 0xFF, 0xAA
 RAM:807B F8 00 FE 48+                .db 0xF, 3, 0xFF, 7, 0xFE, 0x20, 0x1F, 0xC, 0xFF
@@ -1096,7 +1098,7 @@ RAM:807B FF FD F8 F0+                .db 0xF, 7, 0xFF, 0xE6, 0, 0, 7, 3, 0xFF
 RAM:807B FF 67 FF FD+                .db 0xE6, 0, 0, 3, 0, 0xFF, 0x3E, 0, 0
 RAM:807B FC B8 FF 73+                .db 0, 0, 0x3E, 0x1C, 0, 0, 0, 0, 0x1C
 RAM:807B FF FD FC 58+                .db 0, 0, 0
-RAM:8117 03 1A       spr_012:        .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
+RAM:8117 03 1A       spr_0C:         .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
 RAM:8119 00 00 0F 00+                .db 0, 0, 0xF, 0, 0xC0, 0, 0, 0, 0x3F
 RAM:8119 C0 00 00 00+                .db 0xF, 0xF0, 0xC0, 0, 0, 0xFF, 0x30, 0xF8, 0x30
 RAM:8119 3F 0F F0 C0+                .db 1, 0, 0xFF, 0xCF, 0xFC, 0xC8, 3, 1, 0xFF
@@ -1115,7 +1117,7 @@ RAM:8119 FF CF FF E6+                .db 0, 0, 0x7F, 0x3F, 0xF8, 0x30, 0, 0, 0x3
 RAM:8119 7F 2F FF CF+                .db 0x1F, 0xF8, 0x30, 0, 0, 0x1F, 1, 0xF8, 0xF0
 RAM:8119 FF FE FF 5F+                .db 0, 0, 1, 0, 0xF0, 0xE0, 0, 0, 0
 RAM:8119 FF E7 FF FE+                .db 0, 0xE0, 0
-RAM:81B5 03 1A       spr_013:        .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
+RAM:81B5 03 1A       spr_0D:         .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
 RAM:81B7 00 00 0F 00+                .db 0, 0, 0xF, 0, 0xC0, 0, 0, 0, 0x3F
 RAM:81B7 C0 00 00 00+                .db 0xF, 0xF0, 0xC0, 0, 0, 0xFF, 0x30, 0xF8, 0x30
 RAM:81B7 3F 0F F0 C0+                .db 1, 0, 0xFF, 0xCF, 0xFE, 0xC8, 3, 1, 0xFF
@@ -1134,7 +1136,7 @@ RAM:81B7 FF CF FF E6+                .db 0, 0, 0x7F, 0x33, 0xF8, 0xF0, 0, 0, 0x7
 RAM:81B7 7F 2F FF CF+                .db 0x33, 0xF0, 0xE0, 0, 0, 0x7F, 0x3E, 0xE0, 0
 RAM:81B7 FF FE FF 5F+                .db 0, 0, 0x3E, 0x1C, 0, 0, 0, 0, 0x1C
 RAM:81B7 FF EF FF FE+                .db 0, 0, 0
-RAM:8253 03 1A       spr_014:        .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
+RAM:8253 03 1A       spr_0E:         .db 3, 26                       ; DATA XREF: RAM:sprite_tblo
 RAM:8255 00 00 00 00+                .db 0, 0, 0, 0, 0x48, 0, 0, 0, 0xF8
 RAM:8255 48 00 00 00+                .db 0, 0xFE, 0x48, 3, 0, 0xFF, 0xF8, 0xFF, 0xAA
 RAM:8255 F8 00 FE 48+                .db 0xF, 3, 0xFF, 7, 0xFE, 0x20, 0x1F, 0xC, 0xFF
@@ -1153,7 +1155,7 @@ RAM:8255 FF FD F8 F0+                .db 0xF, 6, 0xFF, 0x7E, 0, 0, 0xF, 6, 0xFE
 RAM:8255 FF 67 FF FD+                .db 0x7E, 0, 0, 0xF, 7, 0xFC, 0xC0, 0, 0
 RAM:8255 FC B8 FF 73+                .db 7, 3, 0xC0, 0x80, 0, 0, 3, 0, 0x80
 RAM:8255 FF FD FC 58+                .db 0, 0, 0
-RAM:82F1 03 1E       spr_015:        .db 3, 30                       ; DATA XREF: RAM:sprite_tblo
+RAM:82F1 03 1E       spr_0F:         .db 3, 30                       ; DATA XREF: RAM:sprite_tblo
 RAM:82F3 00 00 7E 00+                .db 0, 0, 0x7E, 0, 0, 0, 1, 0, 0xFF
 RAM:82F3 00 00 01 00+                .db 0x7E, 0x80, 0, 3, 0, 0xFF, 0xFF, 0xC0, 0x80
 RAM:82F3 FF 7E 80 00+                .db 7, 0, 0xFF, 0x81, 0xE0, 0xC0, 0xF, 4, 0xFF
@@ -1174,7 +1176,7 @@ RAM:82F3 FF EE FF 74+                .db 0x3F, 0x1B, 0xFF, 0x3F, 0xFC, 0xD8, 0x1
 RAM:82F3 FF FF FF EE+                .db 0x9F, 0xF8, 0xD0, 0xB, 1, 0xFF, 0xCF, 0xD0, 0x80
 RAM:82F3 FF 74 FF FF+                .db 1, 0, 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF
 RAM:82F3 FF EE 7F 34+                .db 0x3C, 0, 0, 0, 0, 0x3C, 0, 0, 0
-RAM:83A7 03 1E       spr_016:        .db 3, 30                       ; DATA XREF: RAM:sprite_tblo
+RAM:83A7 03 1E       spr_10:         .db 3, 30                       ; DATA XREF: RAM:sprite_tblo
 RAM:83A9 00 00 7E 00+                .db 0, 0, 0x7E, 0, 0, 0, 1, 0, 0xFF
 RAM:83A9 00 00 01 00+                .db 0x3E, 0x80, 0, 3, 0, 0xFF, 0xFF, 0xC0, 0x80
 RAM:83A9 FF 3E 80 00+                .db 7, 0, 0xFF, 0xFF, 0xE0, 0xC0, 0xF, 4, 0xFF
@@ -1195,7 +1197,7 @@ RAM:83A9 FE BC FF 78+                .db 7, 3, 0xFF, 0x3F, 0xE0, 0xC0, 7, 3, 0xF
 RAM:83A9 FF 81 FF DE+                .db 0x9F, 0xE0, 0xC0, 3, 1, 0xFF, 0xCF, 0xC0, 0x80
 RAM:83A9 FF 74 FF 7E+                .db 1, 0, 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF
 RAM:83A9 FF 2E FF 73+                .db 0x3C, 0, 0, 0, 0, 0x3C, 0, 0, 0
-RAM:845D 04 10       spr_017:        .db 4, 16                       ; DATA XREF: RAM:sprite_tblo
+RAM:845D 04 10       spr_11:         .db 4, 16                       ; DATA XREF: RAM:sprite_tblo
 RAM:845F 1F 00 C0 00+                .db 0x1F, 0, 0xC0, 0, 0, 0, 0, 0, 0x3F
 RAM:845F 00 00 00 00+                .db 0x1B, 0xE0, 0xC0, 0, 0, 0, 0, 0x7F, 0x37
 RAM:845F 3F 1B E0 C0+                .db 0xF0, 0xE0, 0, 0, 0, 0, 0x7F, 0, 0xF0
@@ -1211,7 +1213,7 @@ RAM:845F FF 00 FC 00+                .db 0, 0, 0, 0, 0, 0x7F, 0x37, 0xF0, 0xE0
 RAM:845F FF 6F FF FF+                .db 0, 0, 0, 0, 0x3F, 0x1B, 0xE0, 0xC0, 0
 RAM:845F FF FF FE FC+                .db 0, 0, 0, 0x1F, 0, 0xC0, 0, 0, 0
 RAM:845F FF 6F FF F0+                .db 0, 0
-RAM:84DF 04 12       spr_018:        .db 4, 18                       ; DATA XREF: RAM:sprite_tblo
+RAM:84DF 04 12       spr_12:         .db 4, 18                       ; DATA XREF: RAM:sprite_tblo
 RAM:84E1 00 00 7E 00+                .db 0, 0, 0x7E, 0, 0, 0, 0, 0, 1
 RAM:84E1 00 00 00 00+                .db 0, 0xFF, 0x5E, 0xC0, 0, 0, 0, 3, 1
 RAM:84E1 01 00 FF 5E+                .db 0xFF, 0xBF, 0xF1, 0xC0, 0xE0, 0, 7, 3, 0xFF
@@ -1228,7 +1230,7 @@ RAM:84E1 1F 0F FF F4+                .db 0xFF, 0xFF, 0xE0, 0x80, 7, 3, 0xFF, 0xB
 RAM:84E1 FF FB F8 50+                .db 0xFC, 0x80, 0, 3, 1, 0xFF, 0xDF, 0xFC, 0x30
 RAM:84E1 1F 0F FF F3+                .db 0, 0, 1, 0, 0xFF, 0x6F, 0xF0, 0x80, 0
 RAM:84E1 FF 7F F8 F0+                .db 0, 0, 0, 0x7F, 0, 0x80, 0, 0, 0
-RAM:8571 03 0B       spr_019:        .db 3, 11                       ; DATA XREF: RAM:sprite_tblo
+RAM:8571 03 0B       spr_13:         .db 3, 11                       ; DATA XREF: RAM:sprite_tblo
 RAM:8573 10 00 00 00+                .db 0x10, 0, 0, 0, 8, 0, 0x78, 0x10, 0
 RAM:8573 08 00 78 10+                .db 0, 0x1E, 8, 0xF0, 0x60, 0, 0, 0xF, 6
 RAM:8573 00 00 1E 08+                .db 0xE0, 0x80, 0, 0, 7, 1, 0x84, 0, 0
@@ -1237,7 +1239,7 @@ RAM:8573 0F 06 E0 80+                .db 0x1C, 8, 0xEE, 0x44, 0x70, 0x20, 0x39, 
 RAM:8573 00 00 07 01+                .db 0x84, 0xC8, 0x10, 0x11, 0, 0xCE, 0x84, 0x10, 0
 RAM:8573 84 00 00 00+                .db 1, 0, 0xCE, 0x84, 0, 0, 0, 0, 0x84
 RAM:8573 41 00 0E 04+                .db 0, 0, 0
-RAM:85B5 05 11       spr_020:        .db 5, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:85B5 05 11       spr_14:         .db 5, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:85B7 03 00 80 00+                .db 3, 0, 0x80, 0, 0, 0, 0, 0, 0
 RAM:85B7 00 00 00 00+                .db 0, 0xF, 3, 0xC0, 0x80, 0, 0, 0, 0
 RAM:85B7 00 00 0F 03+                .db 0, 0, 0x1F, 0xF, 0xE0, 0xC0, 0, 0, 0
@@ -1257,21 +1259,21 @@ RAM:85B7 FE 7C 00 00+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0x1F, 7, 
 RAM:85B7 00 00 00 00+                .db 0xFF, 0, 0xFF, 0, 0xFF, 2, 7, 0, 0xFF
 RAM:85B7 00 00 FC 58+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFC, 0, 0
 RAM:85B7 00 00 00 00+                .db 0xFF, 0, 0xFF, 0, 0xFF, 0, 0xFC, 0
-RAM:8661 03 08       spr_021:        .db 3, 8                        ; DATA XREF: RAM:sprite_tblo
+RAM:8661 03 08       spr_15:         .db 3, 8                        ; DATA XREF: RAM:sprite_tblo
 RAM:8663 FC FC 6F 6F+                .db 0xFC, 0xFC, 0x6F, 0x6F, 0xFF, 0xFF, 0x7C, 0x7C, 0x2F
 RAM:8663 FF FF 7C 7C+                .db 0x2F, 0xFF, 0xFF, 0x3E, 0x3E, 0x37, 0x37, 0xFF, 0xFF
 RAM:8663 2F 2F FF FF+                .db 0x1F, 0x1F, 0x17, 0x17, 0xFF, 0xFF, 7, 7, 0x8B
 RAM:8663 3E 3E 37 37+                .db 0x8B, 0xFF, 0xFF, 1, 1, 0x80, 0x80, 0, 0
 RAM:8663 FF FF 1F 1F+                .db 0, 0, 0x65, 0x65, 0xFF, 0xFF, 0, 0, 0x65
 RAM:8663 17 17 FF FF+                .db 0x65, 0xFF, 0xFF
-RAM:8693 03 08       spr_022:        .db 3, 8                        ; DATA XREF: RAM:sprite_tblo
+RAM:8693 03 08       spr_16:         .db 3, 8                        ; DATA XREF: RAM:sprite_tblo
 RAM:8695 FF FF FF FF+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 RAM:8695 FF FF FF FF+                .db 0xFF, 0xFE, 0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC, 0xFC
 RAM:8695 FF FF FE FE+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xF0, 0xFF, 0xFF, 0xFF
 RAM:8695 FF FF FF FF+                .db 0xFF, 0xC0, 0xC0, 0, 0, 3, 3, 0, 0
 RAM:8695 FC FC FF FF+                .db 0xFF, 0xFF, 0xFC, 0xFC, 0, 0, 0xFF, 0xFF, 0xFC
 RAM:8695 FF FF F0 F0+                .db 0xFC, 0, 0
-RAM:86C5 03 16       spr_023:        .db 3, 22                       ; DATA XREF: RAM:sprite_tblo
+RAM:86C5 03 16       spr_17:         .db 3, 22                       ; DATA XREF: RAM:sprite_tblo
 RAM:86C7 FF FF FF FF+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0xC0, 0xFF, 0xFF, 0xFF
 RAM:86C7 C0 C0 FF FF+                .db 0xFF, 0xE0, 0xE0, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xF0
 RAM:86C7 FF FF E0 E0+                .db 0, 0, 0, 0, 0x78, 0x78, 0xFF, 0xFF, 0xFF
@@ -1287,7 +1289,7 @@ RAM:86C7 00 00 6E 6E+                .db 0xFF, 0x9E, 0x9E, 0xFF, 0xFF, 0xFF, 0xF
 RAM:86C7 00 00 00 00+                .db 0, 0, 0, 0, 0x78, 0x78, 0xFF, 0xFF, 0xFF
 RAM:86C7 6E 6E 00 00+                .db 0xFF, 0xF0, 0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xE0, 0xE0
 RAM:86C7 00 00 6E 6E+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0xC0
-RAM:874B 03 10       spr_024:        .db 3, 16                       ; DATA XREF: RAM:sprite_tblo
+RAM:874B 03 10       spr_18:         .db 3, 16                       ; DATA XREF: RAM:sprite_tblo
 RAM:874D 00 00 7E 00+                .db 0, 0, 0x7E, 0, 0, 0, 3, 0, 0xFF
 RAM:874D 00 00 03 00+                .db 0x7E, 0xC0, 0, 0xF, 3, 0xFF, 0xBD, 0xF0, 0xC0
 RAM:874D FF 7E C0 00+                .db 0x1F, 0xE, 0xFF, 0x3C, 0xF8, 0x70, 0x3F, 0x16, 0xFF
@@ -1299,7 +1301,7 @@ RAM:874D FC 68 7F 23+                .db 0x99, 0xF8, 0x90, 0x1F, 8, 0xFF, 0xFF, 
 RAM:874D FF 18 FE C4+                .db 0x1F, 0xD, 0xFF, 0x81, 0xF8, 0xB0, 0xF, 6, 0x81
 RAM:874D 7F 33 FF FF+                .db 0, 0xF0, 0x60, 0xE, 4, 0, 0, 0x70, 0x20
 RAM:874D FE CC 3F 13+                .db 4, 0, 0, 0, 0x20, 0
-RAM:87AD 03 13       spr_025:        .db 3, 19                       ; DATA XREF: RAM:sprite_tblo
+RAM:87AD 03 13       spr_19:         .db 3, 19                       ; DATA XREF: RAM:sprite_tblo
 RAM:87AF 00 00 08 00+                .db 0, 0, 8, 0, 0, 0, 2, 0, 0x1C
 RAM:87AF 00 00 02 00+                .db 8, 0, 0, 7, 2, 0x1E, 0xC, 0x40, 0
 RAM:87AF 1C 08 00 00+                .db 7, 3, 0xBF, 0x1E, 0xE0, 0x40, 0x27, 3, 0xFF
@@ -1313,7 +1315,7 @@ RAM:87AF 7F 37 FF FF+                .db 0x3F, 0xF8, 0xF0, 0xF, 7, 0xFF, 0x3F, 0
 RAM:87AF FE CC 7F 37+                .db 7, 3, 0xFF, 0x9F, 0xE0, 0xC0, 3, 1, 0xFF
 RAM:87AF FF FF FE DC+                .db 0xCF, 0xC0, 0x80, 1, 0, 0xFF, 0x7E, 0x80, 0
 RAM:87AF 7F 3E FF FF+                .db 0, 0, 0x7E, 0, 0, 0
-RAM:8821 03 18       spr_026:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:8821 03 18       spr_1A:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:8823 00 00 FF 00+                .db 0, 0, 0xFF, 0, 0, 0, 7, 0, 0xFF
 RAM:8823 00 00 07 00+                .db 0xFF, 0xE0, 0, 0x1F, 7, 0xFF, 0xFF, 0xF8, 0xE0
 RAM:8823 FF FF E0 00+                .db 0x3F, 0x17, 0xFF, 0xFF, 0xFC, 0xF8, 0x7F, 0x33, 0xFF
@@ -1353,7 +1355,7 @@ RAM:8823 01 00 00 00+                .db 0, 7, 3, 0xF8, 0xFE, 0x80, 0, 0, 0
 RAM:8823 04 19 00 00+                .db 3, 1, 0xE0, 0xF8, 0, 0, 0, 0, 1
 RAM:8823 01 00 20 00+                .db 0, 0x80, 0xE0, 0, 0, 0, 0, 0, 0
 RAM:8823 00 00 00 00+                .db 0, 0, 0, 0
-RAM:897D 03 20       spr_027:        .db 3, 32                       ; DATA XREF: RAM:sprite_tblo
+RAM:897D 03 20       spr_1B:         .db 3, 32                       ; DATA XREF: RAM:sprite_tblo
 RAM:897F 00 00 3E 00+                .db 0, 0, 0x3E, 0, 0, 0, 0, 0, 0xFF
 RAM:897F 00 00 00 00+                .db 0x3E, 0, 0, 1, 0, 0xFF, 0xFF, 0xE0, 0
 RAM:897F FF 3E 00 00+                .db 3, 1, 0xFF, 0xFF, 0xF0, 0x60, 3, 1, 0xFF
@@ -1376,7 +1378,7 @@ RAM:897F 3F 1F FF BF+                .db 7, 2, 0xFF, 0xFD, 0xC0, 0x80, 7, 2, 0xF
 RAM:897F E0 80 3F 1F+                .db 0xFF, 0x80, 0, 3, 1, 0xFF, 0x3E, 0, 0
 RAM:897F FF 67 F0 60+                .db 1, 0, 0xFE, 0xDC, 0, 0, 0, 0, 0xFC
 RAM:897F 3F 1F FF 61+                .db 0, 0, 0
-RAM:8A3F 03 19       spr_028:        .db 3, 25                       ; DATA XREF: RAM:sprite_tblo
+RAM:8A3F 03 19       spr_1C:         .db 3, 25                       ; DATA XREF: RAM:sprite_tblo
 RAM:8A41 00 00 3F 00+                .db 0, 0, 0x3F, 0, 0, 0, 0, 0, 0xFF
 RAM:8A41 00 00 00 00+                .db 0x3F, 0xC0, 0, 1, 0, 0xFF, 0xFF, 0xE0, 0xC0
 RAM:8A41 FF 3F C0 00+                .db 3, 1, 0xFF, 0xFF, 0xF0, 0xE0, 7, 3, 0xFF
@@ -1394,7 +1396,7 @@ RAM:8A41 FC D8 3F 19+                .db 0xF, 0xE0, 0, 0x3F, 0x13, 0x8F, 0, 0xF0
 RAM:8A41 FF FF FC E8+                .db 0x1F, 0xE, 3, 1, 0xF8, 0x70, 0xE, 0, 3
 RAM:8A41 1F 01 FF FF+                .db 1, 0xF8, 0x30, 0, 0, 1, 0, 0xF0, 0xE0
 RAM:8A41 F8 F0 1F 05+                .db 0, 0, 0, 0, 0xE0, 0
-RAM:8AD7 04 1D       spr_029:        .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
+RAM:8AD7 04 1D       spr_1D:         .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
 RAM:8AD9 00 00 01 00+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0
 RAM:8AD9 80 00 00 00+                .db 0, 7, 0, 0xE0, 0, 0, 0, 0, 0
 RAM:8AD9 00 00 07 00+                .db 0x1F, 6, 0xF8, 0x20, 0, 0, 0, 0, 0x7F
@@ -1421,7 +1423,7 @@ RAM:8AD9 7F 1F FF FB+                .db 0, 0, 0, 0, 0x3F, 0, 0xFC, 0, 0
 RAM:8AD9 FF D5 FE 50+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:8AD9 7F 2F FF F7+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:8AD9 FF EA FE A4+                .db 0, 0, 0, 0, 0, 0, 0
-RAM:8BC1 04 1B       spr_030:        .db 4, 27                       ; DATA XREF: RAM:sprite_tblo
+RAM:8BC1 04 1B       spr_1E:         .db 4, 27                       ; DATA XREF: RAM:sprite_tblo
 RAM:8BC3 00 00 3F 00+                .db 0, 0, 0x3F, 0, 0xFC, 0, 0, 0, 0
 RAM:8BC3 FC 00 00 00+                .db 0, 0xFF, 0x2F, 0xFF, 0xF4, 0, 0, 1, 0
 RAM:8BC3 00 00 FF 2F+                .db 0xFF, 0xEF, 0xFF, 0xF5, 0x80, 0, 3, 1, 0xFF
@@ -1446,7 +1448,7 @@ RAM:8BC3 1F 0F FF FE+                .db 0xFF, 0xFE, 0x80, 0, 0, 0, 0x7F, 0x1F, 
 RAM:8BC3 FF 55 F8 50+                .db 0xF8, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0xE0
 RAM:8BC3 3F 1F FF F9+                .db 0, 0, 0, 0, 7, 1, 0xE0, 0x80, 0
 RAM:8BC3 FF 8A FC A8+                .db 0, 0, 0, 1, 0, 0x80, 0, 0, 0
-RAM:8C9B 04 1D       spr_031:        .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
+RAM:8C9B 04 1D       spr_1F:         .db 4, 29                       ; DATA XREF: RAM:sprite_tblo
 RAM:8C9D 00 00 01 00+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0
 RAM:8C9D 80 00 00 00+                .db 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0
 RAM:8C9D 00 00 07 01+                .db 0x1F, 5, 0xF8, 0x20, 0, 0, 0, 0, 0x7F
@@ -1473,7 +1475,7 @@ RAM:8C9D 3F 1F FF FD+                .db 0x80, 0, 0, 0, 0x7F, 0x1F, 0xFE, 0xF8, 
 RAM:8C9D FF 55 FC 50+                .db 0, 0, 0, 0x1F, 7, 0xF8, 0xE0, 0, 0
 RAM:8C9D 3F 1F FF FC+                .db 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0
 RAM:8C9D FF AA FC A8+                .db 0, 1, 0, 0x80, 0, 0, 0
-RAM:8D85 03 19       spr_032:        .db 3, 25                       ; DATA XREF: RAM:sprite_tblo
+RAM:8D85 03 19       spr_20:         .db 3, 25                       ; DATA XREF: RAM:sprite_tblo
 RAM:8D87 00 00 7E 00+                .db 0, 0, 0x7E, 0, 0, 0, 1, 0, 0xFF
 RAM:8D87 00 00 01 00+                .db 0x7E, 0x80, 0, 3, 1, 0xFF, 0xF7, 0xE0, 0x80
 RAM:8D87 FF 7E 80 00+                .db 7, 3, 0xFF, 0xFB, 0xF4, 0xE0, 0xF, 7, 0xFF
@@ -1491,7 +1493,7 @@ RAM:8D87 FC A0 03 01+                .db 0x81, 0xE0, 0, 0xF, 7, 0x83, 0, 0xF0, 0
 RAM:8D87 FF 7E FC 58+                .db 7, 0, 3, 1, 0xF8, 0x70, 0, 0, 3
 RAM:8D87 01 00 FF FD+                .db 1, 0xF8, 0x30, 0, 0, 1, 0, 0xF0, 0xE0
 RAM:8D87 FE BC 03 01+                .db 0, 0, 0, 0, 0xE0, 0
-RAM:8E1D 04 19       spr_033:        .db 4, 25                       ; DATA XREF: RAM:sprite_tblo
+RAM:8E1D 04 19       spr_21:         .db 4, 25                       ; DATA XREF: RAM:sprite_tblo
 RAM:8E1F 00 00 01 00+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0
 RAM:8E1F 80 00 00 00+                .db 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0
 RAM:8E1F 00 00 07 01+                .db 0x1F, 7, 0xF8, 0xE0, 0, 0, 0, 0, 0x7F
@@ -1515,7 +1517,7 @@ RAM:8E1F FF 28 FF 66+                .db 0xF, 0xFF, 0xCF, 0xE0, 0xC0, 0, 0, 0x1F
 RAM:8E1F FF 1C FF 63+                .db 0xFF, 0xCF, 0xE0, 0xC0, 0, 0, 0xF, 7, 0xCF
 RAM:8E1F FF C1 FF B8+                .db 0x87, 0xC0, 0x80, 0, 0, 7, 0, 0x87, 0
 RAM:8E1F FF 7A FF 77+                .db 0x80, 0
-RAM:8EE7 02 3E       spr_034:        .db 2, 62                       ; DATA XREF: RAM:sprite_tblo
+RAM:8EE7 02 3E       spr_22:         .db 2, 62                       ; DATA XREF: RAM:sprite_tblo
 RAM:8EE9 0F 00 80 00+                .db 0xF, 0, 0x80, 0, 0x1F, 0xB, 0xE0, 0, 0x3F
 RAM:8EE9 1F 0B E0 00+                .db 0x1B, 0xF8, 0x60, 0x3F, 0x1B, 0xFE, 0x78, 0x3F, 0x1B
 RAM:8EE9 3F 1B F8 60+                .db 0xFF, 0x7E, 0x3F, 0x1B, 0xFF, 0x7E, 0x3F, 0x1B, 0xFF
@@ -1544,7 +1546,7 @@ RAM:8EE9 3F 1B FF 7E+                .db 0, 0, 0x1F, 7, 0, 0, 7, 1, 0
 RAM:8EE9 3F 1B FF 7E+                .db 0, 1, 0, 0, 0, 0, 0, 0, 0
 RAM:8EE9 3F 1B FF 7E+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:8EE9 3F 1B FF 7E+                .db 0, 0, 0, 0, 0
-RAM:8FE1 03 30       spr_035:        .db 3, 48                       ; DATA XREF: RAM:sprite_tblo
+RAM:8FE1 03 30       spr_23:         .db 3, 48                       ; DATA XREF: RAM:sprite_tblo
 RAM:8FE3 00 00 00 00+                .db 0, 0, 0, 0, 0x1C, 0, 0, 0, 0
 RAM:8FE3 1C 00 00 00+                .db 0, 0x7E, 0x14, 0, 0, 1, 0, 0xFF, 0x56
 RAM:8FE3 00 00 7E 14+                .db 0, 0, 7, 1, 0xFF, 0xD6, 0, 0, 0x1F
@@ -1577,7 +1579,7 @@ RAM:8FE3 FF D6 00 00+                .db 0x7F, 0x1C, 0xFF, 0xF9, 0xF8, 0xB0, 0x1
 RAM:8FE3 3F 1F FF D6+                .db 0x3E, 0xF0, 0x60, 7, 1, 0xFF, 0xCF, 0xE0, 0x40
 RAM:8FE3 00 00 3F 1E+                .db 1, 0, 0xFF, 0x72, 0xC0, 0, 0, 0, 0x7E
 RAM:8FE3 FF D6 00 00+                .db 0x1C, 0, 0, 0, 0, 0x1C, 0, 0, 0
-RAM:9103 03 38       spr_036:        .db 3, 56                       ; DATA XREF: RAM:sprite_tblo
+RAM:9103 03 38       spr_24:         .db 3, 56                       ; DATA XREF: RAM:sprite_tblo
 RAM:9105 00 00 00 00+                .db 0, 0, 0, 0, 3, 0, 0, 0, 0
 RAM:9105 03 00 00 00+                .db 0, 0xF, 3, 0, 0, 0, 0, 0x3F, 0xF
 RAM:9105 00 00 0F 03+                .db 0, 0, 0, 0, 0xFF, 0x3F, 0, 0, 3
@@ -1616,7 +1618,7 @@ RAM:9105 FF CF FF F3+                .db 0x7C, 0x28, 0, 0, 0, 0, 0xF8, 0x50, 0
 RAM:9105 FF FF FF 3F+                .db 0, 0, 0, 0xF8, 0x50, 0, 0, 0, 0
 RAM:9105 FF EF FF FF+                .db 0xF0, 0xA0, 0, 0, 0, 0, 0xE0, 0, 0
 RAM:9105 FF 7F FF EF+                .db 0, 0, 0
-RAM:9255 02 34       spr_037:        .db 2, 52                       ; DATA XREF: RAM:sprite_tblo
+RAM:9255 02 34       spr_25:         .db 2, 52                       ; DATA XREF: RAM:sprite_tblo
 RAM:9257 00 00 03 00+                .db 0, 0, 3, 0, 0, 0, 0xF, 3, 0
 RAM:9257 00 00 0F 03+                .db 0, 0x3F, 7, 0, 0, 0xFF, 0x3B, 3, 0
 RAM:9257 00 00 3F 07+                .db 0xFF, 0xFD, 0xF, 3, 0xFF, 0xFE, 0x3F, 7, 0xFF
@@ -1641,7 +1643,7 @@ RAM:9257 FF EF FF FF+                .db 0x3F, 0x13, 0xC5, 0, 0x7F, 0x2C, 0, 0, 
 RAM:9257 FF EF FF FE+                .db 0x28, 0, 0, 0xF8, 0x50, 0, 0, 0xF8, 0x50
 RAM:9257 FF DF FF FE+                .db 0, 0, 0xF0, 0xA0, 0, 0, 0xE0, 0, 0
 RAM:9257 FF DF FF FD+                .db 0
-RAM:9327 04 20       spr_038:        .db 4, 32                       ; DATA XREF: RAM:sprite_tblo
+RAM:9327 04 20       spr_26:         .db 4, 32                       ; DATA XREF: RAM:sprite_tblo
 RAM:9329 EF EF FF FF+                .db 0xEF, 0xEF, 0xFF, 0xFF, 0x70, 0x70, 0, 0, 0xEF
 RAM:9329 70 70 00 00+                .db 0xEF, 0xFF, 0xFF, 0x70, 0x70, 0, 0, 0xFF, 0xFF
 RAM:9329 EF EF FF FF+                .db 0xFF, 0xFF, 0xF0, 0xF0, 0, 0, 0x80, 0x80, 0
@@ -1671,26 +1673,26 @@ RAM:9329 F7 F7 57 57+                .db 0, 0x1E, 0x1E, 0x7F, 0x7F, 0xF4, 0xF4, 
 RAM:9329 3E 3E 7F 7F+                .db 0xE, 0xE, 0xEF, 0xEF, 0xB7, 0xB7, 0, 0, 6
 RAM:9329 FA FA EF EF+                .db 6, 0xC7, 0xC7, 0x17, 0x17, 0, 0, 2, 2
 RAM:9329 79 79 FF FF+                .db 0x82, 0x82, 0xF, 0xF
-RAM:9429 01 18       spr_039:        .db 1, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:9429 01 18       spr_27:         .db 1, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:942B 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0xFF
 RAM:942B 00 00 00 00+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0xFF
 RAM:942B FF FF FF FF+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 RAM:942B FF FF 00 00+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 RAM:942B FF FF FF FF+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0xFF, 0xFF
 RAM:942B FF FF FF FF+                .db 0xFF, 0xFF, 0xFF
-RAM:945B 03 01       spr_040:        .db 3, 1                        ; DATA XREF: RAM:sprite_tblo
+RAM:945B 03 01       spr_28:         .db 3, 1                        ; DATA XREF: RAM:sprite_tblo
 RAM:945D EF EF FF FF+                .db 0xEF, 0xEF, 0xFF, 0xFF, 0x70, 0x70
-RAM:9463 01 08       spr_041:        .db 1, 8                        ; DATA XREF: RAM:sprite_tblo
+RAM:9463 01 08       spr_29:         .db 1, 8                        ; DATA XREF: RAM:sprite_tblo
 RAM:9465 FF FF FF FF+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3
 RAM:9465 C3 C3 C3 C3+                .db 0xC3, 0xC3, 0xC3, 0xFF, 0xFF, 0xFF, 0xFF
-RAM:9475 02 0C       spr_042:        .db 2, 12                       ; DATA XREF: RAM:sprite_tblo
+RAM:9475 02 0C       spr_2A:         .db 2, 12                       ; DATA XREF: RAM:sprite_tblo
 RAM:9477 FB FB 00 00+                .db 0xFB, 0xFB, 0, 0, 0xF1, 0xF1, 0xC0, 0xC0, 0xE0
 RAM:9477 F1 F1 C0 C0+                .db 0xE0, 0xE0, 0xE0, 0x70, 0x70, 0x70, 0x70, 0x38, 0x38
 RAM:9477 E0 E0 E0 E0+                .db 0xF8, 0xF8, 0x1D, 0x1D, 0xFC, 0xFC, 0xF, 0xF, 0xFE
 RAM:9477 70 70 70 70+                .db 0xFE, 7, 7, 0xFF, 0xFF, 3, 3, 0xFF, 0xFF
 RAM:9477 38 38 F8 F8+                .db 1, 1, 0xFC, 0xFC, 0, 0, 0xF0, 0xF0, 0
 RAM:9477 1D 1D FC FC+                .db 0, 0x40, 0x40
-RAM:94A7 02 10       spr_043:        .db 2, 16                       ; DATA XREF: RAM:sprite_tblo
+RAM:94A7 02 10       spr_2B:         .db 2, 16                       ; DATA XREF: RAM:sprite_tblo
 RAM:94A9 FF FF F0 F0+                .db 0xFF, 0xFF, 0xF0, 0xF0, 0x1F, 0x1F, 0xF0, 0xF0, 0x1F
 RAM:94A9 1F 1F F0 F0+                .db 0x1F, 0x38, 0x38, 0xE, 0xE, 0x38, 0x38, 0xE, 0xE
 RAM:94A9 1F 1F 38 38+                .db 0x1C, 0x1C, 7, 7, 0x1C, 0x1C, 7, 7, 0xE
@@ -1699,12 +1701,12 @@ RAM:94A9 0E 0E 1C 1C+                .db 1, 1, 0xFC, 0xFC, 1, 1, 0xF0, 0xF0, 0
 RAM:94A9 07 07 1C 1C+                .db 0, 0xC0, 0xC0, 3, 3, 0, 0, 0xC, 0xC
 RAM:94A9 07 07 0E 0E+                .db 0, 0, 0x30, 0x30, 0, 0, 0xC0, 0xC0, 0
 RAM:94A9 03 03 9E 9E+                .db 0
-RAM:94E9 02 08       spr_044:        .db 2, 8                        ; DATA XREF: RAM:sprite_tblo
+RAM:94E9 02 08       spr_2C:         .db 2, 8                        ; DATA XREF: RAM:sprite_tblo
 RAM:94EB 00 00 03 03+                .db 0, 0, 3, 3, 0, 0, 0xC, 0xC, 0
 RAM:94EB 00 00 0C 0C+                .db 0, 0x30, 0x30, 0, 0, 0xC0, 0xC0, 3, 3
 RAM:94EB 00 00 30 30+                .db 0, 0, 0xC, 0xC, 0, 0, 0x30, 0x30, 0
 RAM:94EB 00 00 C0 C0+                .db 0, 0xC0, 0xC0, 0, 0
-RAM:950B 04 18       spr_045:        .db 4, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:950B 04 18       spr_2D:         .db 4, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:950D 00 00 01 00+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0
 RAM:950D 80 00 00 00+                .db 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0
 RAM:950D 00 00 07 01+                .db 0x1F, 6, 0xF8, 0xE0, 0, 0, 0, 0, 0x7F
@@ -1727,7 +1729,7 @@ RAM:950D 7F 38 FF FA+                .db 0xF, 6, 0xF0, 0xE0, 0, 0, 0, 0, 7
 RAM:950D FF FF FE FC+                .db 2, 0xE0, 0xC0, 0, 0, 0, 0, 3, 1
 RAM:950D 3F 1D FF 7A+                .db 0xC0, 0x80, 0, 0, 0, 0, 1, 0, 0x80
 RAM:950D FF FF FC F8+                .db 0, 0, 0
-RAM:95CD 02 11       spr_046:        .db 2, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:95CD 02 11       spr_2E:         .db 2, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:95CF 0E 00 38 00+                .db 0xE, 0, 0x38, 0, 0x1F, 0xE, 0x7C, 0x38, 0x1F
 RAM:95CF 1F 0E 7C 38+                .db 0xB, 0xFC, 0x78, 0xF, 5, 0xF8, 0x70, 7, 3
 RAM:95CF 1F 0B FC 78+                .db 0xF0, 0x60, 0xF, 3, 0xF8, 0xE0, 0x1F, 0xD, 0xFC
@@ -1736,7 +1738,7 @@ RAM:95CF 07 03 F0 60+                .db 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xE, 0xFC,
 RAM:95CF 0F 03 F8 E0+                .db 1, 0xF8, 0xC0, 0xF, 7, 0xF8, 0xF0, 0xF, 7
 RAM:95CF 1F 0D FC F8+                .db 0xF8, 0xF0, 7, 2, 0xF0, 0xA0, 7, 3, 0xF0
 RAM:95CF 1F 0D FC F8+                .db 0xE0, 3, 0, 0xE0, 0
-RAM:9613 04 11       spr_047:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9613 04 11       spr_2F:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9615 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9615 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9615 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -1753,7 +1755,7 @@ RAM:9615 03 01 FC F8+                .db 0xFF, 0xEF, 0xF8, 0xD0, 0x1F, 9, 0xFF, 
 RAM:9615 3F 1F C0 80+                .db 0xF, 0xF8, 0xB0, 0x1F, 0xD, 0xFF, 0xF8, 0xFF, 0x1F
 RAM:9615 01 00 F8 F0+                .db 0xF8, 0xB0, 0x1F, 0xD, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8
 RAM:9615 1F 0F 80 00+                .db 0xB0
-RAM:969D 04 10       spr_048:        .db 4, 16                       ; DATA XREF: RAM:sprite_tblo
+RAM:969D 04 10       spr_30:         .db 4, 16                       ; DATA XREF: RAM:sprite_tblo
 RAM:969F 1F 0D FF F8+                .db 0x1F, 0xD, 0xFF, 0xF8, 0xFF, 0x1F, 0xF8, 0xB0, 0x1F
 RAM:969F FF 1F F8 B0+                .db 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xB0, 0xF, 5
 RAM:969F 1F 0D FF FF+                .db 0xFF, 0, 0xFF, 0, 0xF0, 0xA0, 5, 0, 0xFF
@@ -1769,7 +1771,7 @@ RAM:969F FF FF 80 00+                .db 0x1F, 0xFC, 0xF8, 0, 0, 0, 0, 0x3F, 0x1
 RAM:969F 01 00 FF F9+                .db 0xFC, 0xF8, 0, 0, 0, 0, 0x1F, 0, 0xF8
 RAM:969F FF 9F 80 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:969F 00 00 FF 74+                .db 0, 0
-RAM:971F 04 11       spr_049:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:971F 04 11       spr_31:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9721 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9721 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9721 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -1786,7 +1788,7 @@ RAM:9721 03 01 FC F8+                .db 0xFF, 0xFF, 0xF8, 0xD0, 0x1F, 9, 0xFF, 
 RAM:9721 3F 1F C0 80+                .db 0xFF, 0xF8, 0xB0, 0x1F, 0xD, 0xFF, 0xFF, 0xFF, 0xFF
 RAM:9721 01 00 F8 F0+                .db 0xF8, 0xB0, 0x1F, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8
 RAM:9721 1F 0F 80 00+                .db 0xB0
-RAM:97A9 04 10       spr_050:        .db 4, 16                       ; DATA XREF: RAM:sprite_tblo
+RAM:97A9 04 10       spr_32:         .db 4, 16                       ; DATA XREF: RAM:sprite_tblo
 RAM:97AB 1F 0D FF FF+                .db 0x1F, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xB0, 0x1F
 RAM:97AB FF FF F8 B0+                .db 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xB0, 0xF, 5
 RAM:97AB 1F 0D FF FF+                .db 0xFF, 0, 0xFF, 0, 0xF0, 0xA0, 5, 0, 0xFF
@@ -1802,7 +1804,7 @@ RAM:97AB FF FF 80 00+                .db 0x1F, 0xFC, 0xF8, 0, 0, 0, 0, 0x3F, 0x1
 RAM:97AB 01 00 FF FF+                .db 0xFC, 0xF8, 0, 0, 0, 0, 0x1F, 0, 0xF8
 RAM:97AB FF FF 80 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:97AB 00 00 FF 7F+                .db 0, 0
-RAM:982B 04 11       spr_051:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:982B 04 11       spr_33:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:982D 00 00 7F 00+                .db 0, 0, 0x7F, 0, 0xFE, 0, 0, 0, 0
 RAM:982D FE 00 00 00+                .db 0, 0xFF, 0x7F, 0xFF, 0xFE, 0, 0, 0, 0
 RAM:982D 00 00 FF 7F+                .db 0xFF, 0x3F, 0xFF, 0xFA, 0, 0, 0, 0, 0xFF
@@ -1819,7 +1821,7 @@ RAM:982D 01 00 FF FF+                .db 0xFF, 0xBE, 0, 0, 1, 0, 0xFF, 0xFC, 0xF
 RAM:982D FF FF 80 00+                .db 0xBF, 0x80, 0, 1, 0, 0xFF, 0xFC, 0xFF, 0xBF
 RAM:982D 01 00 FF FF+                .db 0x80, 0, 1, 0, 0xFF, 0xFD, 0xFF, 0xBF, 0x80
 RAM:982D FF FF 80 00+                .db 0
-RAM:98B5 04 11       spr_052:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:98B5 04 11       spr_34:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:98B7 01 00 FF BC+                .db 1, 0, 0xFF, 0xBC, 0xFF, 0x7D, 0x80, 0, 1
 RAM:98B7 FF 7D 80 00+                .db 0, 0xFF, 0xBF, 0xFF, 0xFD, 0x80, 0, 0, 0
 RAM:98B7 01 00 FF BF+                .db 0xFF, 0x7F, 0xFF, 0xFE, 0, 0, 0, 0, 0xFF
@@ -1836,7 +1838,7 @@ RAM:98B7 00 00 7F 3F+                .db 0xFC, 0xD8, 0, 0, 0, 0, 0x1F, 0xB, 0xF8
 RAM:98B7 FE FC 00 00+                .db 0xD0, 0, 0, 0, 0, 0x1F, 0xF, 0xF8, 0xF0
 RAM:98B7 00 00 7F 3F+                .db 0, 0, 0, 0, 0xF, 0, 0xF0, 0, 0
 RAM:98B7 FE FC 00 00+                .db 0
-RAM:993F 04 11       spr_053:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:993F 04 11       spr_35:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9941 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9941 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9941 00 00 00 00+                .db 0x1E, 0, 0, 0, 0, 0, 0, 0, 0x7F
@@ -1853,7 +1855,7 @@ RAM:9941 0F 07 FF CC+                .db 0xFF, 0x19, 0xF0, 0xE0, 0x1F, 0xE, 0xFF
 RAM:9941 FF CF FC 70+                .db 9, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0x2B, 0xFF, 0xA1
 RAM:9941 07 03 FF 3B+                .db 0xE0, 0xC0, 0x1F, 0xE, 0xFF, 0xDB, 0xFF, 0xB9, 0xE0
 RAM:9941 FF 1C FE FC+                .db 0xC0
-RAM:99C9 04 11       spr_054:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:99C9 04 11       spr_36:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:99CB 1F 0E FF 31+                .db 0x1F, 0xE, 0xFF, 0x31, 0xFF, 0xCB, 0xE0, 0xC0, 0xF
 RAM:99CB FF CB E0 C0+                .db 7, 0xFF, 0xCE, 0xFF, 0x73, 0xC0, 0x80, 0xF, 7
 RAM:99CB 0F 07 FF CE+                .db 0xFF, 0x3F, 0xFF, 0x9F, 0xC0, 0x80, 0xF, 4, 0xFF
@@ -1870,7 +1872,7 @@ RAM:99CB 07 00 FF FB+                .db 0xFC, 0xC8, 0, 0, 0, 0, 0x1F, 7, 0xF8
 RAM:99CB FF E7 80 00+                .db 0xE0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80
 RAM:99CB 07 03 FF FB+                .db 0, 0, 0, 0, 1, 0, 0x80, 0, 0
 RAM:99CB FF 38 00 00+                .db 0
-RAM:9A53 04 11       spr_055:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9A53 04 11       spr_37:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9A55 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9A55 00 00 00 00+                .db 0, 0xF, 0, 0, 0, 0, 0, 0, 0
 RAM:9A55 00 00 0F 00+                .db 0x3F, 0xD, 0xC0, 0, 0, 0, 0, 0, 0xFF
@@ -1887,7 +1889,7 @@ RAM:9A55 03 01 FF CC+                .db 0xFF, 0x19, 0xF0, 0xE0, 0x1F, 0xE, 0xFF
 RAM:9A55 FF C7 E0 00+                .db 9, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0x5B, 0xFF, 0xA1
 RAM:9A55 01 00 FF 3B+                .db 0xE0, 0xC0, 0x1F, 0xE, 0xFF, 0xBB, 0xFF, 0xB9, 0xE0
 RAM:9A55 FF 1E F8 E0+                .db 0xC0
-RAM:9ADD 04 11       spr_056:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9ADD 04 11       spr_38:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9ADF 1F 0E FF 71+                .db 0x1F, 0xE, 0xFF, 0x71, 0xFF, 0xCB, 0xE0, 0xC0, 0xF
 RAM:9ADF FF CB E0 C0+                .db 7, 0xFF, 0xCE, 0xFF, 0x73, 0xC0, 0x80, 0xF, 7
 RAM:9ADF 0F 07 FF CE+                .db 0xFF, 0x3F, 0xFF, 0x9F, 0xC0, 0x80, 0xF, 4, 0xFF
@@ -1904,7 +1906,7 @@ RAM:9ADF 07 00 FF FB+                .db 0xFC, 0xC8, 0, 0, 0, 0, 0x1F, 7, 0xF8
 RAM:9ADF FF E7 80 00+                .db 0xE0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80
 RAM:9ADF 07 03 FF FB+                .db 0, 0, 0, 0, 1, 0, 0x80, 0, 0
 RAM:9ADF FF 38 00 00+                .db 0
-RAM:9B67 04 11       spr_057:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9B67 04 11       spr_39:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9B69 00 00 07 00+                .db 0, 0, 7, 0, 0x80, 0, 0, 0, 0
 RAM:9B69 80 00 00 00+                .db 0, 0x1F, 6, 0xE0, 0x80, 0, 0, 0, 0
 RAM:9B69 00 00 1F 06+                .db 0x7F, 0x1D, 0xF8, 0xE0, 0, 0, 1, 0, 0xFF
@@ -1921,7 +1923,7 @@ RAM:9B69 00 00 FF 4C+                .db 0xFF, 0x19, 0xF0, 0xE0, 0x1F, 0, 0xFF, 
 RAM:9B69 FE C0 00 00+                .db 9, 0xF0, 0xE0, 0x1F, 0xC, 0xFF, 0x5B, 0xFF, 0xA1
 RAM:9B69 00 00 FF 3B+                .db 0xF8, 0xD0, 0x1F, 0xE, 0xFF, 0xBB, 0xFF, 0xB9, 0xF8
 RAM:9B69 FF 0E C0 00+                .db 0xD0
-RAM:9BF1 04 11       spr_058:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9BF1 04 11       spr_3A:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9BF3 1F 0F FF 71+                .db 0x1F, 0xF, 0xFF, 0x71, 0xFF, 0xCB, 0xF8, 0xD0, 0xF
 RAM:9BF3 FF CB F8 D0+                .db 7, 0xFF, 0xCE, 0xFF, 0x73, 0xF8, 0xB0, 0xF, 7
 RAM:9BF3 0F 07 FF CE+                .db 0xFF, 0x3F, 0xFF, 0x9F, 0xF0, 0xA0, 0xF, 4, 0xFF
@@ -1938,7 +1940,7 @@ RAM:9BF3 07 00 FF FB+                .db 0xFC, 0xC8, 0, 0, 0, 0, 0x1F, 7, 0xF8
 RAM:9BF3 FF E7 80 00+                .db 0xE0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80
 RAM:9BF3 07 03 FF FB+                .db 0, 0, 0, 0, 1, 0, 0x80, 0, 0
 RAM:9BF3 FF 38 00 00+                .db 0
-RAM:9C7B 04 11       spr_059:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9C7B 04 11       spr_3B:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9C7D 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9C7D 00 00 00 00+                .db 0, 0xD, 0, 0, 0, 0, 0, 0, 0
 RAM:9C7D 00 00 0D 00+                .db 0x3F, 0xD, 0xC0, 0, 0, 0, 0, 0, 0xFF
@@ -1955,7 +1957,7 @@ RAM:9C7D 03 00 FF CC+                .db 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xE, 0xFF
 RAM:9C7D F0 E0 00 00+                .db 0xFF, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0x2B, 0xFF, 0xFF
 RAM:9C7D 00 00 FF 3B+                .db 0xE0, 0xC0, 0x1F, 0xE, 0xFF, 0xDB, 0xFF, 0xFF, 0xE0
 RAM:9C7D FC 00 00 00+                .db 0xC0
-RAM:9D05 04 11       spr_060:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9D05 04 11       spr_3C:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9D07 1F 0E FF 31+                .db 0x1F, 0xE, 0xFF, 0x31, 0xFF, 0xFF, 0xE0, 0xC0, 0xF
 RAM:9D07 FF FF E0 C0+                .db 7, 0xFF, 0xCE, 0xFF, 0x7F, 0xC0, 0x80, 0xF, 7
 RAM:9D07 0F 07 FF CE+                .db 0xFF, 0x3F, 0xFF, 0x9F, 0xC0, 0x80, 0xF, 4, 0xFF
@@ -1972,7 +1974,7 @@ RAM:9D07 07 00 FF FB+                .db 0xFC, 0xC8, 0, 0, 0, 0, 0x1F, 7, 0xF8
 RAM:9D07 FF E7 80 00+                .db 0xE0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80
 RAM:9D07 07 03 FF FB+                .db 0, 0, 0, 0, 1, 0, 0x80, 0, 0
 RAM:9D07 FF F8 00 00+                .db 0
-RAM:9D8F 04 11       spr_061:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9D8F 04 11       spr_3D:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9D91 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9D91 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9D91 00 00 00 00+                .db 0x1A, 0, 0, 0, 0, 0, 0, 0, 0x7F
@@ -1989,7 +1991,7 @@ RAM:9D91 0F 07 FF CC+                .db 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xE, 0xFF
 RAM:9D91 FA E0 00 00+                .db 0xFF, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0x5B, 0xFF, 0xFF
 RAM:9D91 07 01 FF 3B+                .db 0xE0, 0xC0, 0x1F, 0xE, 0xFF, 0xBB, 0xFF, 0xFF, 0xE0
 RAM:9D91 FF 0A 80 00+                .db 0xC0
-RAM:9E19 04 11       spr_062:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9E19 04 11       spr_3E:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9E1B 1F 0E FF 71+                .db 0x1F, 0xE, 0xFF, 0x71, 0xFF, 0xFF, 0xE0, 0xC0, 0xF
 RAM:9E1B FF FF E0 C0+                .db 7, 0xFF, 0xCE, 0xFF, 0x7F, 0xC0, 0x80, 0xF, 7
 RAM:9E1B 0F 07 FF CE+                .db 0xFF, 0x3F, 0xFF, 0x9F, 0xC0, 0x80, 0xF, 4, 0xFF
@@ -2006,7 +2008,7 @@ RAM:9E1B 07 00 FF FB+                .db 0xFC, 0xC8, 0, 0, 0, 0, 0x1F, 7, 0xF8
 RAM:9E1B FF E7 80 00+                .db 0xE0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80
 RAM:9E1B 0F 03 FF FB+                .db 0, 0, 0, 0, 1, 0, 0x80, 0, 0
 RAM:9E1B FF F8 00 00+                .db 0
-RAM:9EA3 04 11       spr_063:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9EA3 04 11       spr_3F:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9EA5 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9EA5 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:9EA5 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0x34
@@ -2023,7 +2025,7 @@ RAM:9EA5 0F 03 FF CC+                .db 0xFF, 0xFF, 0xF0, 0xE0, 0xF, 0, 0xFF, 0
 RAM:9EA5 FF C5 C0 00+                .db 0xFF, 0xF0, 0xE0, 0x1F, 0xC, 0xFF, 0x5B, 0xFF, 0xFF
 RAM:9EA5 1F 0F FF 3B+                .db 0xF8, 0xD0, 0x1F, 0xE, 0xFF, 0xBB, 0xFF, 0xFF, 0xFC
 RAM:9EA5 FF 1D F0 C0+                .db 0xD8
-RAM:9F2D 04 11       spr_064:        .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
+RAM:9F2D 04 11       spr_40:         .db 4, 17                       ; DATA XREF: RAM:sprite_tblo
 RAM:9F2F 1F 0F FF 71+                .db 0x1F, 0xF, 0xFF, 0x71, 0xFF, 0xFF, 0xFC, 0xD8, 0xF
 RAM:9F2F FF FF FC D8+                .db 7, 0xFF, 0xCE, 0xFF, 0x7F, 0xF8, 0xB0, 0xF, 7
 RAM:9F2F 0F 07 FF CE+                .db 0xFF, 0x3F, 0xFF, 0x9F, 0xF0, 0xA0, 0xF, 4, 0xFF
@@ -2040,7 +2042,7 @@ RAM:9F2F 07 00 FF FB+                .db 0xFC, 0xC8, 0, 0, 0, 0, 0x1F, 7, 0xF8
 RAM:9F2F FF E7 80 00+                .db 0xE0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80
 RAM:9F2F 07 03 FF FB+                .db 0, 0, 0, 0, 1, 0, 0x80, 0, 0
 RAM:9F2F FF F8 00 00+                .db 0
-RAM:9FB7 01 30       spr_065:        .db 1, 48                       ; DATA XREF: RAM:sprite_tblo
+RAM:9FB7 01 30       spr_41:         .db 1, 48                       ; DATA XREF: RAM:sprite_tblo
 RAM:9FB9 03 00 0F 03+                .db 3, 0, 0xF, 3, 0x3F, 7, 0xFF, 0x2F, 0xFF
 RAM:9FB9 3F 07 FF 2F+                .db 0xEF, 0xFF, 0xDF, 0xFF, 0xDF, 0xFF, 0xBF, 0xFF, 0xBF
 RAM:9FB9 FF EF FF DF+                .db 0xFF, 0x7F, 0xFF, 0x7F, 0xFF, 0x7F, 0xFF, 0xBF, 0xFF
@@ -2052,7 +2054,7 @@ RAM:9FB9 FF EC FF F3+                .db 0xDF, 0xFF, 0xDF, 0xFF, 0xBF, 0xFF, 0xB
 RAM:9FB9 FF EF FF EF+                .db 0xFF, 0x7F, 0xFF, 0x7F, 0xFF, 0xBF, 0xFF, 0x5F, 0x7F
 RAM:9FB9 FF DF FF DF+                .db 0x2C, 0x3F, 0x13, 0x7F, 0x2C, 0x7C, 0x28, 0xF8, 0x50
 RAM:9FB9 FF BF FF BF+                .db 0xF8, 0x50, 0xF0, 0xA0, 0xE0, 0
-RAM:A019 03 14       spr_066:        .db 3, 20                       ; DATA XREF: RAM:sprite_tblo
+RAM:A019 03 14       spr_42:         .db 3, 20                       ; DATA XREF: RAM:sprite_tblo
 RAM:A01B 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:A01B 00 00 00 00+                .db 0, 0, 0, 8, 0, 0, 0, 0, 0
 RAM:A01B 00 00 00 00+                .db 0x1C, 8, 0, 0, 0, 0, 8, 0, 0
@@ -2067,7 +2069,7 @@ RAM:A01B 70 20 00 00+                .db 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0x10
 RAM:A01B 00 00 20 00+                .db 0, 0, 0, 1, 0, 0, 0, 0, 0
 RAM:A01B 00 00 00 00+                .db 3, 1, 0x80, 0, 0, 0, 1, 0, 0
 RAM:A01B 00 00 00 00+                .db 0, 0, 0
-RAM:A093 03 15       spr_067:        .db 3, 21                       ; DATA XREF: RAM:sprite_tblo
+RAM:A093 03 15       spr_43:         .db 3, 21                       ; DATA XREF: RAM:sprite_tblo
 RAM:A095 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 8, 0, 0
 RAM:A095 00 00 08 00+                .db 0, 0, 0, 0x1C, 8, 0, 0, 0, 0
 RAM:A095 00 00 00 00+                .db 0x3E, 0x1C, 0, 0, 0, 0, 0x1C, 8, 0
@@ -2082,7 +2084,7 @@ RAM:A095 F8 70 01 00+                .db 0, 0, 0x7C, 0x38, 0, 0, 1, 0, 0x38
 RAM:A095 1C 08 70 20+                .db 0x10, 0, 0, 3, 1, 0x90, 0, 0, 0
 RAM:A095 03 01 88 00+                .db 7, 3, 0xC0, 0x80, 0, 0, 3, 1, 0x80
 RAM:A095 20 00 11 00+                .db 0, 0, 0, 1, 0, 0, 0, 0, 0
-RAM:A113 03 17       spr_068:        .db 3, 23                       ; DATA XREF: RAM:sprite_tblo
+RAM:A113 03 17       spr_44:         .db 3, 23                       ; DATA XREF: RAM:sprite_tblo
 RAM:A115 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:A115 00 00 00 00+                .db 0, 0, 0, 8, 0, 0, 0, 0, 0
 RAM:A115 00 00 00 00+                .db 0x1C, 8, 8, 0, 0, 0, 8, 0, 0x1C
@@ -2099,7 +2101,7 @@ RAM:A115 17 03 DC 88+                .db 3, 1, 0x90, 0, 0, 0, 1, 0, 0
 RAM:A115 00 00 3B 11+                .db 0, 0, 0, 0, 0, 0, 0, 0x80, 0
 RAM:A115 88 00 80 00+                .db 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0
 RAM:A115 7D 38 11 00+                .db 0, 0x80, 0
-RAM:A19F 03 18       spr_069:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:A19F 03 18       spr_45:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:A1A1 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 8, 0, 0
 RAM:A1A1 00 00 08 00+                .db 0, 0, 0, 0x1C, 8, 8, 0, 0, 0
 RAM:A1A1 00 00 00 00+                .db 0x3E, 0x1C, 0x1C, 1, 0, 0, 0x1C, 8, 0x3E
@@ -2116,7 +2118,7 @@ RAM:A1A1 3F 17 FE DC+                .db 7, 3, 0xC0, 0x80, 0, 0, 3, 0x10, 0x80
 RAM:A1A1 20 00 7F 3B+                .db 0, 0x80, 0, 1, 0, 9, 0, 0xC0, 0x80
 RAM:A1A1 DC 88 00 00+                .db 0, 0, 0x1F, 9, 0xE0, 0xC0, 0, 0, 9
 RAM:A1A1 FF 7D 88 00+                .db 0, 0xC0, 0x80, 0, 0, 0, 0, 0x80, 0
-RAM:A231 03 18       spr_070:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:A231 03 18       spr_46:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:A233 08 00 70 20+                .db 8, 0, 0x70, 0x20, 0, 0, 0x1C, 8, 0xF8
 RAM:A233 00 00 1C 08+                .db 0x70, 8, 0, 0x3F, 0x1C, 0xFC, 0xF8, 0x3C, 8
 RAM:A233 F8 70 08 00+                .db 0x7F, 0x36, 0xF8, 0x70, 0x78, 0x20, 0x3E, 0x1C, 0x78
@@ -2133,7 +2135,7 @@ RAM:A233 13 01 C8 00+                .db 0xF, 7, 0xF0, 0xC0, 0x80, 0, 7, 3, 0xC1
 RAM:A233 F8 70 39 10+                .db 0x80, 0xC0, 0x80, 3, 1, 0x8B, 1, 0xE0, 0xC0
 RAM:A233 E0 40 70 40+                .db 1, 0, 0x1F, 0xB, 0xF0, 0xE0, 0, 0, 0xB
 RAM:A233 7C 38 50 00+                .db 1, 0xE0, 0xC0, 0, 0, 1, 0, 0xC0, 0x80
-RAM:A2C3 03 18       spr_071:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:A2C3 03 18       spr_47:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:A2C5 1C 08 00 00+                .db 0x1C, 8, 0, 0, 8, 0, 0x3E, 0x1C, 0x20
 RAM:A2C5 08 00 3E 1C+                .db 0, 0x1C, 8, 0x7F, 0x3E, 0x78, 0x20, 0x3E, 0x1C
 RAM:A2C5 20 00 1C 08+                .db 0xFF, 0x7F, 0xBC, 8, 0x1C, 8, 0x7F, 0x3E, 0x3E
@@ -2150,7 +2152,7 @@ RAM:A2C5 0F 07 FE DC+                .db 0x1F, 0xF, 0xF9, 0xE0, 0, 0, 0xF, 7, 0x
 RAM:A2C5 A0 00 07 03+                .db 0xC8, 0x80, 0, 7, 3, 0xFF, 0x9C, 0xC0, 0x80
 RAM:A2C5 DD 88 C0 80+                .db 3, 1, 0xFF, 0x3F, 0xE0, 0xC0, 1, 0, 0xBF
 RAM:A2C5 13 01 8B 01+                .db 0x1C, 0xC0, 0x80, 0, 0, 0x1C, 8, 0x80, 0
-RAM:A355 04 19       spr_072:        .db 4, 25                       ; DATA XREF: RAM:sprite_tblo
+RAM:A355 04 19       spr_48:         .db 4, 25                       ; DATA XREF: RAM:sprite_tblo
 RAM:A357 00 00 1F 00+                .db 0, 0, 0x1F, 0, 0xF8, 0, 0, 0, 0
 RAM:A357 F8 00 00 00+                .db 0, 0xFF, 0x1F, 0xFF, 0xF8, 0, 0, 3, 0
 RAM:A357 00 00 FF 1F+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0, 7, 3, 0xFF
@@ -2174,7 +2176,7 @@ RAM:A357 FF FF FC F8+                .db 0x73, 0xFF, 0xCE, 0, 0, 0, 0, 0x7F, 0x1
 RAM:A357 3F 1E FF 3C+                .db 0xFE, 0xF8, 0, 0, 0, 0, 0x1F, 3, 0xF8
 RAM:A357 FF 3F FC F8+                .db 0xC0, 0, 0, 0, 0, 3, 0, 0xC0, 0
 RAM:A357 3F 1E FF 23+                .db 0, 0
-RAM:A41F 03 18       spr_073:        .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
+RAM:A41F 03 18       spr_49:         .db 3, 24                       ; DATA XREF: RAM:sprite_tblo
 RAM:A421 00 00 3C 00+                .db 0, 0, 0x3C, 0, 0, 0, 3, 0, 0x7E
 RAM:A421 00 00 03 00+                .db 0x3C, 0xC0, 0, 7, 3, 0xFF, 0x7E, 0xE0, 0xC0
 RAM:A421 7E 3C C0 00+                .db 0xF, 7, 0xFF, 0x42, 0xF0, 0xE0, 0xF, 6, 0xFF
@@ -2191,7 +2193,7 @@ RAM:A421 3F 1C FF 7F+                .db 0x3F, 0x1F, 0xFF, 0xFF, 0xFC, 0xF8, 0x1
 RAM:A421 FC F8 3F 1C+                .db 0xFF, 0xF8, 0xF0, 0xF, 7, 0xFF, 0xFF, 0xF0, 0xE0
 RAM:A421 FF 7F FC F8+                .db 7, 1, 0xFF, 0xFF, 0xE0, 0x80, 1, 0, 0xFF
 RAM:A421 3F 1C FF 7F+                .db 0x3C, 0x80, 0, 0, 0, 0x3C, 0, 0, 0
-RAM:A4B1 03 17       spr_074:        .db 3, 23                       ; DATA XREF: RAM:sprite_tblo
+RAM:A4B1 03 17       spr_4A:         .db 3, 23                       ; DATA XREF: RAM:sprite_tblo
 RAM:A4B3 00 00 18 00+                .db 0, 0, 0x18, 0, 0, 0, 0, 0, 0x3C
 RAM:A4B3 00 00 00 00+                .db 0x18, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0
 RAM:A4B3 3C 18 00 00+                .db 3, 1, 0xFF, 0xBD, 0xC0, 0x80, 7, 3, 0xFF
@@ -2208,7 +2210,7 @@ RAM:A4B3 1F 07 FF EF+                .db 0x1F, 7, 0xFF, 0xFF, 0xF8, 0xE0, 7, 1, 
 RAM:A4B3 F8 E0 3F 1F+                .db 0xFF, 0xE0, 0x80, 1, 0, 0xFF, 0x7E, 0x80, 0
 RAM:A4B3 FF EF FC F8+                .db 0, 0, 0x7E, 0x18, 0, 0, 0, 0, 0x18
 RAM:A4B3 3F 1F FF EF+                .db 0, 0, 0
-RAM:A53D 03 13       spr_075:        .db 3, 19                       ; DATA XREF: RAM:sprite_tblo
+RAM:A53D 03 13       spr_4B:         .db 3, 19                       ; DATA XREF: RAM:sprite_tblo
 RAM:A53F 00 00 18 00+                .db 0, 0, 0x18, 0, 0, 0, 0, 0, 0x3C
 RAM:A53F 00 00 00 00+                .db 0x18, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0
 RAM:A53F 3C 18 00 00+                .db 3, 1, 0xFF, 0xBD, 0xC0, 0x80, 7, 3, 0xFF
@@ -2222,7 +2224,7 @@ RAM:A53F 07 02 FF 6E+                .db 0xEF, 0xC0, 0x80, 1, 0, 0xFF, 0xEF, 0x8
 RAM:A53F E0 40 0F 01+                .db 0, 0, 0xFF, 0x6E, 0, 0, 0, 0, 0x7E
 RAM:A53F FF EF F0 80+                .db 0x2C, 0, 0, 0, 0, 0x3C, 0x18, 0, 0
 RAM:A53F 3F 07 FF EF+                .db 0, 0, 0x18, 0, 0, 0
-RAM:A5B1 03 15       spr_076:        .db 3, 21                       ; DATA XREF: RAM:sprite_tblo
+RAM:A5B1 03 15       spr_4C:         .db 3, 21                       ; DATA XREF: RAM:sprite_tblo
 RAM:A5B3 00 00 3C 00+                .db 0, 0, 0x3C, 0, 0, 0, 3, 0, 0x7E
 RAM:A5B3 00 00 03 00+                .db 0x3C, 0xC0, 0, 7, 3, 0xFF, 0x7E, 0xE0, 0xC0
 RAM:A5B3 7E 3C C0 00+                .db 0xF, 7, 0xFF, 0x42, 0xF0, 0xE0, 0xF, 6, 0xFF
@@ -2658,7 +2660,7 @@ RAM:A8F9
 RAM:A8F9             upd_82:                                         ; DATA XREF: RAM:A8EEo
 RAM:A8F9 CD 3D BF                    call    upd_1E
 RAM:A8FC CD A7 B2                    call    set_both_deadly_flags
-RAM:A8FF DD CB 10 46                 bit     0, 0x10(ix)
+RAM:A8FF DD CB 10 46                 bit     0, 16(ix)
 RAM:A903 20 1C                       jr      NZ, loc_A921
 RAM:A905 3A 43 5B                    ld      a, (byte_5B43)
 RAM:A908 A7                          and     a
@@ -2669,19 +2671,19 @@ RAM:A90E E6 03                       and     #3
 RAM:A910 C0                          ret     NZ
 RAM:A911 3E 01                       ld      a, #1
 RAM:A913 32 43 5B                    ld      (byte_5B43), a
-RAM:A916 DD 77 10                    ld      0x10(ix), a
+RAM:A916 DD 77 10                    ld      16(ix), a
 RAM:A919 DD 7E 03                    ld      a, 3(ix)
 RAM:A91C C6 30                       add     a, #0x30 ; '0'
-RAM:A91E DD 77 11                    ld      0x11(ix), a
+RAM:A91E DD 77 11                    ld      17(ix), a
 RAM:A921
 RAM:A921             loc_A921:                                       ; CODE XREF: RAM:A903j
-RAM:A921 DD CB 10 4E                 bit     1, 0x10(ix)
+RAM:A921 DD CB 10 4E                 bit     1, 16(ix)
 RAM:A925 28 16                       jr      Z, loc_A93D
 RAM:A927 CD B6 BF                    call    dec_dZ_and_update_XYZ
-RAM:A92A DD CB 0C 56                 bit     2, 0xC(ix)
+RAM:A92A DD CB 0C 56                 bit     2, 12(ix)
 RAM:A92E 28 07                       jr      Z, loc_A937
 RAM:A930 AF                          xor     a
-RAM:A931 DD 77 10                    ld      0x10(ix), a
+RAM:A931 DD 77 10                    ld      16(ix), a
 RAM:A934 32 43 5B                    ld      (byte_5B43), a
 RAM:A937
 RAM:A937             loc_A937:                                       ; CODE XREF: RAM:A92Ej
@@ -2691,12 +2693,12 @@ RAM:A93A C3 AB BF                    jp      set_wipe_and_draw_flags
 RAM:A93D             ; ---------------------------------------------------------------------------
 RAM:A93D
 RAM:A93D             loc_A93D:                                       ; CODE XREF: RAM:A925j
-RAM:A93D DD 36 0B 03                 ld      0xB(ix), #3
+RAM:A93D DD 36 0B 03                 ld      11(ix), #3
 RAM:A941 CD B6 BF                    call    dec_dZ_and_update_XYZ
 RAM:A944 DD 7E 03                    ld      a, 3(ix)
-RAM:A947 DD BE 11                    cp      0x11(ix)
+RAM:A947 DD BE 11                    cp      17(ix)
 RAM:A94A 30 08                       jr      NC, loc_A954
-RAM:A94C DD CB 0C 56                 bit     2, 0xC(ix)
+RAM:A94C DD CB 0C 56                 bit     2, 12(ix)
 RAM:A950 20 02                       jr      NZ, loc_A954
 RAM:A952 18 E3                       jr      loc_A937
 RAM:A954             ; ---------------------------------------------------------------------------
@@ -2710,25 +2712,25 @@ RAM:A95A
 RAM:A95A             upd_5D:                                         ; DATA XREF: RAM:A8A4o
 RAM:A95A DD 7E FB                    ld      a, 0xFB(ix)
 RAM:A95D C6 10                       add     a, #0x10
-RAM:A95F DD 77 1B                    ld      0x1B(ix), a
+RAM:A95F DD 77 1B                    ld      27(ix), a
 RAM:A962 DD 7E F0                    ld      a, 0xF0(ix)
-RAM:A965 DD 77 10                    ld      0x10(ix), a
+RAM:A965 DD 77 10                    ld      16(ix), a
 RAM:A968 DD 7E E7                    ld      a, 0xE7(ix)
 RAM:A96B DD 77 07                    ld      7(ix), a
 RAM:A96E C3 21 AC                    jp      upd_55_58_to_5B
 RAM:A971             ; ---------------------------------------------------------------------------
 RAM:A971
 RAM:A971             upd_5C:                                         ; DATA XREF: RAM:A8A2o
-RAM:A971 DD 7E 11                    ld      a, 0x11(ix)
+RAM:A971 DD 7E 11                    ld      a, 17(ix)
 RAM:A974 FE 40                       cp      #0x40 ; '@'
 RAM:A976 38 19                       jr      C, loc_A991
 RAM:A978 FE 80                       cp      #0x80 ; '€'
 RAM:A97A 30 1A                       jr      NC, loc_A996
-RAM:A97C DD 7E 1B                    ld      a, 0x1B(ix)
+RAM:A97C DD 7E 1B                    ld      a, 27(ix)
 RAM:A97F FE 28                       cp      #0x28 ; '('
 RAM:A981 38 0E                       jr      C, loc_A991
 RAM:A983 D6 03                       sub     #3
-RAM:A985 DD 77 1B                    ld      0x1B(ix), a
+RAM:A985 DD 77 1B                    ld      27(ix), a
 RAM:A988
 RAM:A988             loc_A988:                                       ; CODE XREF: RAM:A9A6j
 RAM:A988 CD 3F B6                    call    audio_B63F
@@ -2740,22 +2742,22 @@ RAM:A991             ; ---------------------------------------------------------
 RAM:A991
 RAM:A991             loc_A991:                                       ; CODE XREF: RAM:A976j
 RAM:A991                                                             ; RAM:A981j
-RAM:A991 DD 34 11                    inc     0x11(ix)
+RAM:A991 DD 34 11                    inc     17(ix)
 RAM:A994 18 F8                       jr      loc_A98E
 RAM:A996             ; ---------------------------------------------------------------------------
 RAM:A996
 RAM:A996             loc_A996:                                       ; CODE XREF: RAM:A97Aj
-RAM:A996 DD 7E 1B                    ld      a, 0x1B(ix)
+RAM:A996 DD 7E 1B                    ld      a, 27(ix)
 RAM:A999 FE 80                       cp      #0x80 ; '€'
 RAM:A99B 30 0B                       jr      NC, loc_A9A8
 RAM:A99D C6 03                       add     a, #3
-RAM:A99F DD 77 1B                    ld      0x1B(ix), a
-RAM:A9A2 DD 36 10 47                 ld      0x10(ix), #0x47 ; 'G'
+RAM:A99F DD 77 1B                    ld      27(ix), a
+RAM:A9A2 DD 36 10 47                 ld      16(ix), #0x47 ; 'G'
 RAM:A9A6 18 E0                       jr      loc_A988
 RAM:A9A8             ; ---------------------------------------------------------------------------
 RAM:A9A8
 RAM:A9A8             loc_A9A8:                                       ; CODE XREF: RAM:A99Bj
-RAM:A9A8 11 D7 B3                    ld      de, #0xB3D7
+RAM:A9A8 11 D7 B3                    ld      de, #obj_5C_tune
 RAM:A9AB CD BA B4                    call    play_audio
 RAM:A9AE C3 47 A6                    jp      start_menu
 RAM:A9B1             ; ---------------------------------------------------------------------------
@@ -2763,8 +2765,8 @@ RAM:A9B1
 RAM:A9B1             upd_81:                                         ; DATA XREF: RAM:A8ECo
 RAM:A9B1 CD 6A BF                    call    adj_m4_m12
 RAM:A9B4 DD 7E 09                    ld      a, 9(ix)
-RAM:A9B7 DD B6 0A                    or      0xA(ix)
-RAM:A9BA DD B6 0B                    or      0xB(ix)
+RAM:A9B7 DD B6 0A                    or      10(ix)
+RAM:A9BA DD B6 0B                    or      11(ix)
 RAM:A9BD CA A7 B2                    jp      Z, set_both_deadly_flags
 RAM:A9C0 DD 36 00 36                 ld      0(ix), #0x36 ; '6'
 RAM:A9C4 C3 B0 B2                    jp      set_deadly_wipe_and_draw_flags
@@ -2773,23 +2775,23 @@ RAM:A9C7
 RAM:A9C7             upd_7C_to_7F:                                   ; DATA XREF: RAM:A8E2o
 RAM:A9C7                                                             ; RAM:A8E4o ...
 RAM:A9C7 CD 3D BF                    call    upd_1E
-RAM:A9CA 21 42 5B                    ld      hl, #0x5B42
+RAM:A9CA 21 42 5B                    ld      hl, #unk_5B42
 RAM:A9CD 7E                          ld      a, (hl)
 RAM:A9CE E6 80                       and     #0x80 ; '€'
 RAM:A9D0 28 2C                       jr      Z, loc_A9FE
-RAM:A9D2 DD 7E 10                    ld      a, 0x10(ix)
+RAM:A9D2 DD 7E 10                    ld      a, 16(ix)
 RAM:A9D5 E6 C0                       and     #0xC0 ; 'À'
 RAM:A9D7 28 18                       jr      Z, loc_A9F1
-RAM:A9D9 DD CB 10 7E                 bit     7, 0x10(ix)
+RAM:A9D9 DD CB 10 7E                 bit     7, 16(ix)
 RAM:A9DD 20 27                       jr      NZ, loc_AA06
 RAM:A9DF 7E                          ld      a, (hl)
 RAM:A9E0 E6 3F                       and     #0x3F ; '?'
 RAM:A9E2 20 31                       jr      NZ, loc_AA15
 RAM:A9E4 CB BE                       res     7, (hl)
-RAM:A9E6 DD CB 10 B6                 res     6, 0x10(ix)
+RAM:A9E6 DD CB 10 B6                 res     6, 16(ix)
 RAM:A9EA AF                          xor     a
 RAM:A9EB DD 77 09                    ld      9(ix), a
-RAM:A9EE DD 77 0A                    ld      0xA(ix), a
+RAM:A9EE DD 77 0A                    ld      10(ix), a
 RAM:A9F1
 RAM:A9F1             loc_A9F1:                                       ; CODE XREF: RAM:A9D7j
 RAM:A9F1                                                             ; RAM:AA04j ...
@@ -2802,7 +2804,7 @@ RAM:A9FE             ; ---------------------------------------------------------
 RAM:A9FE
 RAM:A9FE             loc_A9FE:                                       ; CODE XREF: RAM:A9D0j
 RAM:A9FE CB FE                       set     7, (hl)
-RAM:AA00 DD CB 10 FE                 set     7, 0x10(ix)
+RAM:AA00 DD CB 10 FE                 set     7, 16(ix)
 RAM:AA04 18 EB                       jr      loc_A9F1
 RAM:AA06             ; ---------------------------------------------------------------------------
 RAM:AA06
@@ -2810,10 +2812,10 @@ RAM:AA06             loc_AA06:                                       ; CODE XREF
 RAM:AA06 7E                          ld      a, (hl)
 RAM:AA07 E6 7F                       and     #0x7F ; ''
 RAM:AA09 28 E6                       jr      Z, loc_A9F1
-RAM:AA0B DD 7E 10                    ld      a, 0x10(ix)
+RAM:AA0B DD 7E 10                    ld      a, 16(ix)
 RAM:AA0E E6 3F                       and     #0x3F ; '?'
 RAM:AA10 F6 40                       or      #0x40 ; '@'
-RAM:AA12 DD 77 10                    ld      0x10(ix), a
+RAM:AA12 DD 77 10                    ld      16(ix), a
 RAM:AA15
 RAM:AA15             loc_AA15:                                       ; CODE XREF: RAM:A9E2j
 RAM:AA15 7E                          ld      a, (hl)
@@ -2821,36 +2823,37 @@ RAM:AA16 36 80                       ld      (hl), #0x80 ; '€'
 RAM:AA18 3D                          dec     a
 RAM:AA19 07                          rlca
 RAM:AA1A E6 7E                       and     #0x7E ; '~'
-RAM:AA1C 21 43 AA                    ld      hl, #0xAA43
+RAM:AA1C 21 43 AA                    ld      hl, #byte_AA43
 RAM:AA1F CD 06 CE                    call    add_HL_A
 RAM:AA22 7E                          ld      a, (hl)
 RAM:AA23 23                          inc     hl
 RAM:AA24 DD 77 09                    ld      9(ix), a
 RAM:AA27 7E                          ld      a, (hl)
 RAM:AA28 2B                          dec     hl
-RAM:AA29 DD 77 0A                    ld      0xA(ix), a
+RAM:AA29 DD 77 0A                    ld      10(ix), a
 RAM:AA2C CD 8C B1                    call    sub_B18C
 RAM:AA2F DD 7E 09                    ld      a, 9(ix)
-RAM:AA32 DD B6 0A                    or      0xA(ix)
+RAM:AA32 DD B6 0A                    or      10(ix)
 RAM:AA35 28 03                       jr      Z, loc_AA3A
 RAM:AA37 CD B6 BF                    call    dec_dZ_and_update_XYZ
 RAM:AA3A
 RAM:AA3A             loc_AA3A:                                       ; CODE XREF: RAM:AA35j
-RAM:AA3A 21 A9 B6                    ld      hl, #0xB6A9
-RAM:AA3D CD 90 B6                    call    sub_B690
+RAM:AA3A 21 A9 B6                    ld      hl, #byte_B6A9
+RAM:AA3D CD 90 B6                    call    audio_B690
 RAM:AA40 C3 AB BF                    jp      set_wipe_and_draw_flags
 RAM:AA40             ; ---------------------------------------------------------------------------
-RAM:AA43 00 00 FE 00+                .db 0, 0, 0xFE, 0, 0, 2, 2, 0, 0, 0xFE
+RAM:AA43 00 00 FE 00+byte_AA43:      .db 0, 0, 0xFE, 0, 0, 2, 2, 0, 0, 0xFE
+RAM:AA43 00 02 02 00+                                                ; DATA XREF: RAM:AA1Co
 RAM:AA4D             ; ---------------------------------------------------------------------------
 RAM:AA4D
 RAM:AA4D             upd_80:                                         ; DATA XREF: RAM:A8EAo
 RAM:AA4D CD 3D BF                    call    upd_1E
-RAM:AA50 DD 7E 0B                    ld      a, 0xB(ix)
+RAM:AA50 DD 7E 0B                    ld      a, 11(ix)
 RAM:AA53 A7                          and     a
 RAM:AA54 C8                          ret     Z
 RAM:AA55 AF                          xor     a
-RAM:AA56 DD 77 0B                    ld      0xB(ix), a
-RAM:AA59 21 42 5B                    ld      hl, #0x5B42
+RAM:AA56 DD 77 0B                    ld      11(ix), a
+RAM:AA59 21 42 5B                    ld      hl, #unk_5B42
 RAM:AA5C 7E                          ld      a, (hl)
 RAM:AA5D E6 80                       and     #0x80 ; '€'
 RAM:AA5F F6 01                       or      #1
@@ -2861,11 +2864,11 @@ RAM:AA63
 RAM:AA63             upd_7A_7B:                                      ; DATA XREF: RAM:A8DEo
 RAM:AA63                                                             ; RAM:A8E0o
 RAM:AA63 CD 3D BF                    call    upd_1E
-RAM:AA66 DD 7E 0B                    ld      a, 0xB(ix)
+RAM:AA66 DD 7E 0B                    ld      a, 11(ix)
 RAM:AA69 A7                          and     a
 RAM:AA6A C8                          ret     Z
 RAM:AA6B AF                          xor     a
-RAM:AA6C DD 77 0B                    ld      0xB(ix), a
+RAM:AA6C DD 77 0B                    ld      11(ix), a
 RAM:AA6F DD 7E 07                    ld      a, 7(ix)
 RAM:AA72 07                          rlca
 RAM:AA73 E6 80                       and     #0x80 ; '€'
@@ -2876,7 +2879,7 @@ RAM:AA7B B1                          or      c
 RAM:AA7C 07                          rlca
 RAM:AA7D C6 02                       add     a, #2
 RAM:AA7F 4F                          ld      c, a
-RAM:AA80 21 42 5B                    ld      hl, #0x5B42
+RAM:AA80 21 42 5B                    ld      hl, #unk_5B42
 RAM:AA83 7E                          ld      a, (hl)
 RAM:AA84 E6 80                       and     #0x80 ; '€'
 RAM:AA86 B1                          or      c
@@ -2892,7 +2895,7 @@ RAM:AA8F CD 65 B1                    call    sub_B165
 RAM:AA92 CD B6 BF                    call    dec_dZ_and_update_XYZ
 RAM:AA95 CD 85 B1                    call    sub_B185
 RAM:AA98 21 AD B6                    ld      hl, #0xB6AD
-RAM:AA9B CD 90 B6                    call    sub_B690
+RAM:AA9B CD 90 B6                    call    audio_B690
 RAM:AA9E C3 B0 B2                    jp      set_deadly_wipe_and_draw_flags
 RAM:AAA1             ; ---------------------------------------------------------------------------
 RAM:AAA1
@@ -3862,7 +3865,7 @@ RAM:B000 CD BF B3                    call    audio_set_wipe_draw_flags
 RAM:B003 16 10                       ld      d, #0x10
 RAM:B005
 RAM:B005             loc_B005:                                       ; CODE XREF: RAM:B027j
-RAM:B005 21 00 58                    ld      hl, #0x5800
+RAM:B005 21 00 58                    ld      hl, #zxaram
 RAM:B008 01 00 03                    ld      bc, #0x300
 RAM:B00B
 RAM:B00B             loc_B00B:                                       ; CODE XREF: RAM:B019j
@@ -4090,9 +4093,9 @@ RAM:B165
 RAM:B165
 RAM:B165             sub_B165:                                       ; CODE XREF: RAM:AA8Fp
 RAM:B165                                                             ; RAM:B1A2p
-RAM:B165 21 89 5B                    ld      hl, #0x5B89
-RAM:B168 DD 7E 01                    ld      a, 1(ix)
-RAM:B16B 96                          sub     (hl)
+RAM:B165 21 89 5B                    ld      hl, # graphic_objs_tbl+1
+RAM:B168 DD 7E 01                    ld      a, 1(ix)                ; Y
+RAM:B16B 96                          sub     (hl)                    ; sub X
 RAM:B16C 23                          inc     hl
 RAM:B16D 79                          ld      a, c
 RAM:B16E FA 73 B1                    jp      M, loc_B173
@@ -4108,7 +4111,7 @@ RAM:B17C FA 81 B1                    jp      M, loc_B181
 RAM:B17F ED 44                       neg
 RAM:B181
 RAM:B181             loc_B181:                                       ; CODE XREF: sub_B165+17j
-RAM:B181 DD 77 0A                    ld      0xA(ix), a
+RAM:B181 DD 77 0A                    ld      10(ix), a
 RAM:B184 C9                          ret
 RAM:B184             ; End of function sub_B165
 RAM:B184
@@ -4159,10 +4162,10 @@ RAM:B1AE
 RAM:B1AE
 RAM:B1AE             sub_B1AE:                                       ; CODE XREF: RAM:B133p
 RAM:B1AE DD 7E 09                    ld      a, 9(ix)
-RAM:B1B1 DD B6 0A                    or      0xA(ix)
+RAM:B1B1 DD B6 0A                    or      10(ix)
 RAM:B1B4 C8                          ret     Z
 RAM:B1B5 DD 7E 09                    ld      a, 9(ix)
-RAM:B1B8 DD BE 0A                    cp      0xA(ix)
+RAM:B1B8 DD BE 0A                    cp      10(ix)
 RAM:B1BB 38 13                       jr      C, loc_B1D0
 RAM:B1BD CB 7F                       bit     7, a
 RAM:B1BF 20 09                       jr      NZ, loc_B1CA
@@ -4179,7 +4182,7 @@ RAM:B1CE 18 F5                       jr      loc_B1C5
 RAM:B1D0             ; ---------------------------------------------------------------------------
 RAM:B1D0
 RAM:B1D0             loc_B1D0:                                       ; CODE XREF: sub_B1AE+Dj
-RAM:B1D0 DD CB 0A 7E                 bit     7, 0xA(ix)
+RAM:B1D0 DD CB 0A 7E                 bit     7, 10(ix)
 RAM:B1D4 28 09                       jr      Z, loc_B1DF
 RAM:B1D6 DD CB 00 C6                 set     0, 0(ix)
 RAM:B1DA
@@ -4229,7 +4232,7 @@ RAM:B20B
 RAM:B20B             sub_B20B:                                       ; CODE XREF: RAM:loc_B0A2p
 RAM:B20B                                                             ; RAM:loc_B136p
 RAM:B20B DD 7E 03                    ld      a, 3(ix)
-RAM:B20E C6 0C                       add     a, #0xC
+RAM:B20E C6 0C                       add     a, #12
 RAM:B210 DD 77 03                    ld      3(ix), a
 RAM:B213 DD CB 06 3E                 srl     6(ix)
 RAM:B217 DD CB 27 8E                 res     1, 0x27(ix)
@@ -4239,13 +4242,13 @@ RAM:B21B
 RAM:B21C             ; ---------------------------------------------------------------------------
 RAM:B21C
 RAM:B21C             upd_43:                                         ; DATA XREF: RAM:A870o
-RAM:B21C CD 4F B6                    call    sub_B64F
+RAM:B21C CD 4F B6                    call    audio_B64F
 RAM:B21F 21 0A 02                    ld      hl, #0x20A
 RAM:B222 18 06                       jr      loc_B22A
 RAM:B224             ; ---------------------------------------------------------------------------
 RAM:B224
 RAM:B224             upd_42:                                         ; DATA XREF: RAM:A86Eo
-RAM:B224 CD 4A B6                    call    sub_B64A
+RAM:B224 CD 4A B6                    call    audio_B64A
 RAM:B227 21 09 01                    ld      hl, #0x109
 RAM:B22A
 RAM:B22A             loc_B22A:                                       ; CODE XREF: RAM:B222j
@@ -4283,22 +4286,22 @@ RAM:B25A
 RAM:B25A             loc_B25A:                                       ; CODE XREF: RAM:B256j
 RAM:B25A                                                             ; DATA XREF: RAM:B22Fw
 RAM:B25A DD 77 09                    ld      9(ix), a
-RAM:B25D DD 36 0B 01                 ld      0xB(ix), #1
+RAM:B25D DD 36 0B 01                 ld      11(ix), #1
 RAM:B261 CD B6 BF                    call    dec_dZ_and_update_XYZ
 RAM:B264 C3 AB BF                    jp      set_wipe_and_draw_flags
 RAM:B267             ; ---------------------------------------------------------------------------
 RAM:B267
 RAM:B267             upd_44:                                         ; DATA XREF: RAM:A872o
-RAM:B267 DD 36 0A 02                 ld      0xA(ix), #2
+RAM:B267 DD 36 0A 02                 ld      10(ix), #2
 RAM:B26B
 RAM:B26B             loc_B26B:                                       ; CODE XREF: RAM:B27Ej
 RAM:B26B                                                             ; RAM:B284j ...
 RAM:B26B CD 3D BF                    call    upd_1E
-RAM:B26E DD 7E 0B                    ld      a, 0xB(ix)
+RAM:B26E DD 7E 0B                    ld      a, 11(ix)
 RAM:B271 A7                          and     a
 RAM:B272 C4 BB B6                    call    NZ, toggle_FE_bit4_x32
 RAM:B275 AF                          xor     a
-RAM:B276 DD 77 0B                    ld      0xB(ix), a
+RAM:B276 DD 77 0B                    ld      11(ix), a
 RAM:B279 C9                          ret
 RAM:B27A             ; ---------------------------------------------------------------------------
 RAM:B27A
@@ -4308,7 +4311,7 @@ RAM:B27E 18 EB                       jr      loc_B26B
 RAM:B280             ; ---------------------------------------------------------------------------
 RAM:B280
 RAM:B280             upd_46:                                         ; DATA XREF: RAM:A876o
-RAM:B280 DD 36 0A FE                 ld      0xA(ix), #0xFE ; 'þ'
+RAM:B280 DD 36 0A FE                 ld      10(ix), #0xFE ; 'þ'
 RAM:B284 18 E5                       jr      loc_B26B
 RAM:B286             ; ---------------------------------------------------------------------------
 RAM:B286
@@ -4319,8 +4322,8 @@ RAM:B28C             ; ---------------------------------------------------------
 RAM:B28C
 RAM:B28C             upd_2D:                                         ; DATA XREF: RAM:A844o
 RAM:B28C CD 3D BF                    call    upd_1E
-RAM:B28F DD CB 0D 5E                 bit     3, 0xD(ix)
-RAM:B293 DD CB 0D 9E                 res     3, 0xD(ix)
+RAM:B28F DD CB 0D 5E                 bit     3, 13(ix)
+RAM:B293 DD CB 0D 9E                 res     3, 13(ix)
 RAM:B297 C8                          ret     Z
 RAM:B298 DD 36 00 40                 ld      0(ix), #0x40 ; '@'
 RAM:B29C C3 A4 B3                    jp      upd_30_to_36_40
@@ -4441,10 +4444,10 @@ RAM:B32B C6 30                       add     a, #0x30 ; '0'
 RAM:B32D 32 25 5B                    ld      (byte_5B25), a
 RAM:B330
 RAM:B330             loc_B330:                                       ; CODE XREF: RAM:B326j
-RAM:B330 DD CB 0D 5E                 bit     3, 0xD(ix)
-RAM:B334 DD CB 0D 9E                 res     3, 0xD(ix)
+RAM:B330 DD CB 0D 5E                 bit     3, 13(ix)
+RAM:B334 DD CB 0D 9E                 res     3, 13(ix)
 RAM:B338 20 14                       jr      NZ, loc_B34E
-RAM:B33A DD CB 0C 56                 bit     2, 0xC(ix)
+RAM:B33A DD CB 0C 56                 bit     2, 12(ix)
 RAM:B33E C8                          ret     Z
 RAM:B33F
 RAM:B33F             upd_1F:                                         ; DATA XREF: RAM:A828o
@@ -4460,14 +4463,14 @@ RAM:B34E                                                             ; RAM:B346
 RAM:B34E CD 3C B6                    call    audio_B63C
 RAM:B351 AF                          xor     a
 RAM:B352 DD 77 09                    ld      9(ix), a
-RAM:B355 DD 77 0A                    ld      0xA(ix), a
-RAM:B358 DD CB 0D 56                 bit     2, 0xD(ix)
+RAM:B355 DD 77 0A                    ld      10(ix), a
+RAM:B358 DD CB 0D 56                 bit     2, 13(ix)
 RAM:B35C 20 13                       jr      NZ, loc_B371
-RAM:B35E DD 77 0B                    ld      0xB(ix), a
+RAM:B35E DD 77 0B                    ld      11(ix), a
 RAM:B361 CD B6 BF                    call    dec_dZ_and_update_XYZ
-RAM:B364 DD CB 0C 56                 bit     2, 0xC(ix)
+RAM:B364 DD CB 0C 56                 bit     2, 12(ix)
 RAM:B368 28 04                       jr      Z, loc_B36E
-RAM:B36A DD CB 0D D6                 set     2, 0xD(ix)
+RAM:B36A DD CB 0D D6                 set     2, 13(ix)
 RAM:B36E
 RAM:B36E             loc_B36E:                                       ; CODE XREF: RAM:B368j
 RAM:B36E                                                             ; RAM:B392j ...
@@ -4475,21 +4478,21 @@ RAM:B36E C3 AB BF                    jp      set_wipe_and_draw_flags
 RAM:B371             ; ---------------------------------------------------------------------------
 RAM:B371
 RAM:B371             loc_B371:                                       ; CODE XREF: RAM:B35Cj
-RAM:B371 DD 36 0B 03                 ld      0xB(ix), #3
+RAM:B371 DD 36 0B 03                 ld      11(ix), #3
 RAM:B375 CD B6 BF                    call    dec_dZ_and_update_XYZ
-RAM:B378 DD CB 0C 56                 bit     2, 0xC(ix)
+RAM:B378 DD CB 0C 56                 bit     2, 12(ix)
 RAM:B37C 28 0E                       jr      Z, loc_B38C
-RAM:B37E DD 36 0B 04                 ld      0xB(ix), #4
+RAM:B37E DD 36 0B 04                 ld      11(ix), #4
 RAM:B382 AF                          xor     a
 RAM:B383 DD 77 09                    ld      9(ix), a
-RAM:B386 DD 77 0A                    ld      0xA(ix), a
+RAM:B386 DD 77 0A                    ld      10(ix), a
 RAM:B389 CD B6 BF                    call    dec_dZ_and_update_XYZ
 RAM:B38C
 RAM:B38C             loc_B38C:                                       ; CODE XREF: RAM:B37Cj
 RAM:B38C 3A 25 5B                    ld      a, (byte_5B25)
 RAM:B38F DD BE 03                    cp      3(ix)
 RAM:B392 30 DA                       jr      NC, loc_B36E
-RAM:B394 DD CB 0D 96                 res     2, 0xD(ix)
+RAM:B394 DD CB 0D 96                 res     2, 13(ix)
 RAM:B398 18 D4                       jr      loc_B36E
 RAM:B39A             ; ---------------------------------------------------------------------------
 RAM:B39A
@@ -4511,8 +4514,8 @@ RAM:B3AD C3 AB BF                    jp      set_wipe_and_draw_flags
 RAM:B3B0             ; ---------------------------------------------------------------------------
 RAM:B3B0
 RAM:B3B0             upd_41:                                         ; DATA XREF: RAM:A86Co
-RAM:B3B0 DD 6E 10                    ld      l, 0x10(ix)
-RAM:B3B3 DD 66 11                    ld      h, 0x11(ix)
+RAM:B3B0 DD 6E 10                    ld      l, 16(ix)
+RAM:B3B3 DD 66 11                    ld      h, 17(ix)
 RAM:B3B6 36 00                       ld      (hl), #0
 RAM:B3B8
 RAM:B3B8             upd_37:                                         ; DATA XREF: RAM:A858o
@@ -4535,11 +4538,12 @@ RAM:B3C2             ; ---------------------------------------------------------
 RAM:B3C5 25 28 2C 25+start_game_tune:.db 0x25, 0x28, 0x2C, 0x25, 0x2A, 0x2D, 0x2C, 0x2A
 RAM:B3C5 2A 2D 2C 2A+                                                ; DATA XREF: RAM:A679o
 RAM:B3C5 28 2C 2A 28+                .db 0x28, 0x2C, 0x2A, 0x28, 0x27, 0x2A, 0x28, 0x27
-RAM:B3C5 27 2A 28 27+                .db 0x65, 0xFF, 0x25, 0x28, 0x2C, 0x25, 0x2A, 0x2D
-RAM:B3C5 65 FF 25 28+                .db 0x2C, 0x2A, 0x28, 0x2C, 0x2A, 0x28, 0x27, 0x2A
-RAM:B3C5 2C 25 2A 2D+                .db 0x28, 0x27, 0x25, 0x28, 0x2C, 0x25, 0x2A, 0x2D
-RAM:B3C5 2C 2A 28 2C+                .db 0x2C, 0x2A, 0x28, 0x25, 0x27, 0x2C, 0x28, 0x25
-RAM:B3C5 2A 28 27 2A+                .db 0x65, 0xFF
+RAM:B3C5 27 2A 28 27+                .db 0x65, 0xFF
+RAM:B3D7 25 28 2C 25+obj_5C_tune:    .db 0x25, 0x28, 0x2C, 0x25, 0x2A, 0x2D, 0x2C, 0x2A
+RAM:B3D7 2A 2D 2C 2A+                                                ; DATA XREF: RAM:loc_A9A8o
+RAM:B3D7 28 2C 2A 28+                .db 0x28, 0x2C, 0x2A, 0x28, 0x27, 0x2A, 0x28, 0x27
+RAM:B3D7 27 2A 28 27+                .db 0x25, 0x28, 0x2C, 0x25, 0x2A, 0x2D, 0x2C, 0x2A
+RAM:B3D7 25 28 2C 25+                .db 0x28, 0x25, 0x27, 0x2C, 0x28, 0x25, 0x65, 0xFF
 RAM:B3F7 25 29 2C 29+game_over_tune: .db 0x25, 0x29, 0x2C, 0x29, 0x24, 0x29, 0x2C, 0x29
 RAM:B3F7 24 29 2C 29+                                                ; DATA XREF: lose_life-1253o
 RAM:B3F7 22 27 2A 27+                .db 0x22, 0x27, 0x2A, 0x27, 0x21, 0x27, 0x2A, 0x27
@@ -4774,13 +4778,14 @@ RAM:B5D4 3A 02 5B                    ld      a, (seed_2)
 RAM:B5D7 E6 07                       and     #7
 RAM:B5D9 6F                          ld      l, a
 RAM:B5DA 26 00                       ld      h, #0
-RAM:B5DC 01 E6 B5                    ld      bc, #0xB5E6
+RAM:B5DC 01 E6 B5                    ld      bc, #byte_B5E6
 RAM:B5DF 09                          add     hl, bc
 RAM:B5E0 46                          ld      b, (hl)
 RAM:B5E1 0E 04                       ld      c, #4
 RAM:B5E3 C3 FB B6                    jp      toggle_FE_bit4_xC
 RAM:B5E3             ; ---------------------------------------------------------------------------
-RAM:B5E6 A0 B0 C0 90+                .db 0xA0, 0xB0, 0xC0, 0x90, 0xA0, 0xE0, 0x80, 0x60
+RAM:B5E6 A0 B0 C0 90+byte_B5E6:      .db 0xA0, 0xB0, 0xC0, 0x90, 0xA0, 0xE0, 0x80, 0x60
+RAM:B5E6 A0 E0 80 60                                                 ; DATA XREF: RAM:B5DCo
 RAM:B5EE
 RAM:B5EE             ; =============== S U B R O U T I N E =======================================
 RAM:B5EE
@@ -4878,7 +4883,7 @@ RAM:B63C                                                             ; RAM:A9F8
 RAM:B63C DD 7E 03                    ld      a, 3(ix)
 RAM:B63F
 RAM:B63F             audio_B63F:                                     ; CODE XREF: RAM:loc_A988p
-RAM:B63F                                                             ; sub_B64A+3j ...
+RAM:B63F                                                             ; audio_B64A+3j ...
 RAM:B63F C6 40                       add     a, #0x40 ; '@'
 RAM:B641 2F                          cpl
 RAM:B642 07                          rlca
@@ -4892,19 +4897,19 @@ RAM:B64A
 RAM:B64A             ; =============== S U B R O U T I N E =======================================
 RAM:B64A
 RAM:B64A
-RAM:B64A             sub_B64A:                                       ; CODE XREF: RAM:upd_42p
+RAM:B64A             audio_B64A:                                     ; CODE XREF: RAM:upd_42p
 RAM:B64A DD 7E 01                    ld      a, 1(ix)
 RAM:B64D 18 F0                       jr      audio_B63F
-RAM:B64D             ; End of function sub_B64A
+RAM:B64D             ; End of function audio_B64A
 RAM:B64D
 RAM:B64F
 RAM:B64F             ; =============== S U B R O U T I N E =======================================
 RAM:B64F
 RAM:B64F
-RAM:B64F             sub_B64F:                                       ; CODE XREF: RAM:upd_43p
+RAM:B64F             audio_B64F:                                     ; CODE XREF: RAM:upd_43p
 RAM:B64F DD 7E 02                    ld      a, 2(ix)
 RAM:B652 18 EB                       jr      audio_B63F
-RAM:B652             ; End of function sub_B64F
+RAM:B652             ; End of function audio_B64F
 RAM:B652
 RAM:B654
 RAM:B654             ; =============== S U B R O U T I N E =======================================
@@ -4964,14 +4969,14 @@ RAM:B690
 RAM:B690             ; =============== S U B R O U T I N E =======================================
 RAM:B690
 RAM:B690
-RAM:B690             sub_B690:                                       ; CODE XREF: RAM:AA3Dp
+RAM:B690             audio_B690:                                     ; CODE XREF: RAM:AA3Dp
 RAM:B690                                                             ; RAM:AA9Bp
 RAM:B690 3A 02 5B                    ld      a, (seed_2)
 RAM:B693 E6 03                       and     #3
 RAM:B695 CD 06 CE                    call    add_HL_A
 RAM:B698 4E                          ld      c, (hl)
 RAM:B699
-RAM:B699             loc_B699:                                       ; CODE XREF: sub_B690+16j
+RAM:B699             loc_B699:                                       ; CODE XREF: audio_B690+16j
 RAM:B699 3A 02 5B                    ld      a, (seed_2)
 RAM:B69C A9                          xor     c
 RAM:B69D E6 1F                       and     #0x1F
@@ -4981,13 +4986,11 @@ RAM:B6A2 CD 02 B7                    call    toggle_FE_bit4
 RAM:B6A5 0D                          dec     c
 RAM:B6A6 20 F1                       jr      NZ, loc_B699
 RAM:B6A8 C9                          ret
-RAM:B6A8             ; End of function sub_B690
+RAM:B6A8             ; End of function audio_B690
 RAM:B6A8
-RAM:B6A9             ; ---------------------------------------------------------------------------
-RAM:B6A9 08                          ex      af, af'
-RAM:B6AA 0C                          inc     c
-RAM:B6AB 10 14                       djnz    loc_B6C0+1
-RAM:B6AD 18 14                       jr      loc_B6C3
+RAM:B6A8             ; ---------------------------------------------------------------------------
+RAM:B6A9 08 0C 10 14+byte_B6A9:      .db 8, 0xC, 0x10, 0x14, 0x18, 0x14
+RAM:B6A9 18 14                                                       ; DATA XREF: RAM:loc_AA3Ao
 RAM:B6AF             ; ---------------------------------------------------------------------------
 RAM:B6AF 10 0C                       djnz    toggle_FE_bit4_x32+2
 RAM:B6B1
@@ -5013,10 +5016,7 @@ RAM:B6BE 18 3B                       jr      toggle_FE_bit4_xC
 RAM:B6C0             ; ---------------------------------------------------------------------------
 RAM:B6C0
 RAM:B6C0             loc_B6C0:                                       ; CODE XREF: RAM:B065p
-RAM:B6C0                                                             ; RAM:B6ABj
 RAM:B6C0 DD 7E 00                    ld      a, 0(ix)
-RAM:B6C3
-RAM:B6C3             loc_B6C3:                                       ; CODE XREF: RAM:B6ADj
 RAM:B6C3 E6 01                       and     #1
 RAM:B6C5 C0                          ret     NZ
 RAM:B6C6 06 80                       ld      b, #0x80 ; '€'
@@ -5127,7 +5127,7 @@ RAM:B743             ; ---------------------------------------------------------
 RAM:B743
 RAM:B743             loc_B743:                                       ; CODE XREF: do_any_objs_intersect+16j
 RAM:B743                                                             ; do_any_objs_intersect+1Bj ...
-RAM:B743 11 20 00                    ld      de, #0x20 ; ' '
+RAM:B743 11 20 00                    ld      de, #32
 RAM:B746 FD 19                       add     iy, de
 RAM:B748 10 DB                       djnz    loc_B725
 RAM:B74A A7                          and     a
@@ -5220,40 +5220,40 @@ RAM:B7C1 32 24 5B                    ld      (byte_5B24), a
 RAM:B7C4 CD 7B CE                    call    clear_scrn_buffer
 RAM:B7C7 CD 8A CB                    call    print_border
 RAM:B7CA CD 85 CE                    call    update_screen
-RAM:B7CD CD 4E CE                    call    sub_CE4E
+RAM:B7CD CD 4E CE                    call    clr_graphic_objs_tbl
 RAM:B7D0 CD 68 CE                    call    clr_attr
 RAM:B7D3 3A 23 5B                    ld      a, (byte_5B23)
 RAM:B7D6 A7                          and     a
 RAM:B7D7 20 17                       jr      NZ, loc_B7F0
 RAM:B7D9 21 48 9F                    ld      hl, #0x9F48
-RAM:B7DC 11 F5 B7                    ld      de, #0xB7F5
+RAM:B7DC 11 F5 B7                    ld      de, #msg_Reprogramming
 RAM:B7DF CD B1 BB                    call    print_text
-RAM:B7E2 11 2A B8                    ld      de, #0xB82A
+RAM:B7E2 11 2A B8                    ld      de, #byte_B82A
 RAM:B7E5
 RAM:B7E5             loc_B7E5:                                       ; CODE XREF: lose_life-1214j
-RAM:B7E5 CD 04 B8                    call    sub_B804
+RAM:B7E5 CD 04 B8                    call    set_graphic_flags7_pixelXY
 RAM:B7E8 3E 01                       ld      a, #1
 RAM:B7EA 32 17 5B                    ld      (render_status_info), a
 RAM:B7ED C3 8E A6                    jp      onscreen_loop
 RAM:B7F0             ; ---------------------------------------------------------------------------
 RAM:B7F0
 RAM:B7F0             loc_B7F0:                                       ; CODE XREF: lose_life-1230j
-RAM:B7F0 11 53 B8                    ld      de, #0xB853
+RAM:B7F0 11 53 B8                    ld      de, #byte_B853
 RAM:B7F3 18 F0                       jr      loc_B7E5
 RAM:B7F3             ; END OF FUNCTION CHUNK FOR lose_life
 RAM:B7F3             ; ---------------------------------------------------------------------------
-RAM:B7F5 C6                          .db 0xC6 ; Æ
-RAM:B7F6 52 45 3C 50+aReProgrammin:  .ascii 'RE<PROGRAMMIN'
+RAM:B7F5 C6          msg_Reprogramming:.db 0xC6 ; Æ                  ; DATA XREF: lose_life-122Bo
+RAM:B7F6 52 45 3C 50+aReProgramming: .ascii 'RE<PROGRAMMIN'
 RAM:B7F6 52 4F 47 52+                .db 0xC7
 RAM:B804
 RAM:B804             ; =============== S U B R O U T I N E =======================================
 RAM:B804
 RAM:B804
-RAM:B804             sub_B804:                                       ; CODE XREF: lose_life:loc_B7E5p
-RAM:B804 FD 21 88 5B                 ld      iy, #0x5B88
-RAM:B808 01 20 00                    ld      bc, #0x20 ; ' '
+RAM:B804             set_graphic_flags7_pixelXY:                     ; CODE XREF: lose_life:loc_B7E5p
+RAM:B804 FD 21 88 5B                 ld      iy, #graphic_objs_tbl
+RAM:B808 01 20 00                    ld      bc, #32
 RAM:B80B
-RAM:B80B             loc_B80B:                                       ; CODE XREF: sub_B804+24j
+RAM:B80B             loc_B80B:                                       ; CODE XREF: set_graphic_flags7_pixelXY+24j
 RAM:B80B 1A                          ld      a, (de)
 RAM:B80C 13                          inc     de
 RAM:B80D A7                          and     a
@@ -5264,21 +5264,33 @@ RAM:B813 13                          inc     de
 RAM:B814 FD 77 07                    ld      7(iy), a
 RAM:B817 1A                          ld      a, (de)
 RAM:B818 13                          inc     de
-RAM:B819 FD 77 10                    ld      0x10(iy), a
+RAM:B819 FD 77 10                    ld      16(iy), a
 RAM:B81C 1A                          ld      a, (de)
 RAM:B81D 13                          inc     de
-RAM:B81E FD 77 1A                    ld      0x1A(iy), a
+RAM:B81E FD 77 1A                    ld      26(iy), a
 RAM:B821 1A                          ld      a, (de)
 RAM:B822 13                          inc     de
-RAM:B823 FD 77 1B                    ld      0x1B(iy), a
+RAM:B823 FD 77 1B                    ld      27(iy), a
 RAM:B826 FD 09                       add     iy, bc
 RAM:B828 18 E1                       jr      loc_B80B
-RAM:B828             ; End of function sub_B804
+RAM:B828             ; End of function set_graphic_flags7_pixelXY
 RAM:B828
 RAM:B828             ; ---------------------------------------------------------------------------
-RAM:B82A 51 10 42 B8+                .db 0x51, 0x10, 0x42, 0xB8, 0x50, 0x53, 0x10, 0x47, 0x20, 0x50, 0x52, 0x10, 0x44, 0x78, 0x7C, 0x58, 0x10, 0x45, 0x68
-RAM:B82A 50 53 10 47+                .db 0x40, 0x59, 0x10, 0x45, 0x80, 0x40, 0x5A, 0x10, 0x45, 0x70, 0x45, 0x5B, 0x10, 0x45, 0x70, 0x55, 0x50, 0x10, 0x46
-RAM:B82A 20 50 52 10+                .db 0x74, 0x68, 0, 0x5C, 0x10, 7, 0x70, 0x80, 0x5D, 0x10, 7, 0x70, 0x90, 0x55, 0x10, 0x44, 0x6C, 0x20, 0
+RAM:B82A             ; graphic_no, flags7, plyr graphic_no, pixelX, pixelY
+RAM:B82A 51 10 42 B8+byte_B82A:      .db 0x51, 0x10, 0x42, 0xB8, 0x50
+RAM:B82A 50 53 10 47+                                                ; DATA XREF: lose_life-1225o
+RAM:B82A 20 50 52 10+                .db 0x53, 0x10, 0x47, 0x20, 0x50
+RAM:B82A 44 78 7C 58+                .db 0x52, 0x10, 0x44, 0x78, 0x7C
+RAM:B82A 10 45 68 40+                .db 0x58, 0x10, 0x45, 0x68, 0x40
+RAM:B82A 59 10 45 80+                .db 0x59, 0x10, 0x45, 0x80, 0x40
+RAM:B82A 40 5A 10 45+                .db 0x5A, 0x10, 0x45, 0x70, 0x45
+RAM:B82A 70 45 5B 10+                .db 0x5B, 0x10, 0x45, 0x70, 0x55
+RAM:B82A 45 70 55 50+                .db 0x50, 0x10, 0x46, 0x74, 0x68
+RAM:B82A 10 46 74 68+                .db 0
+RAM:B853 5C 10 07 70+byte_B853:      .db 0x5C, 0x10, 7, 0x70, 0x80   ; DATA XREF: lose_life:loc_B7F0o
+RAM:B853 80 5D 10 07+                .db 0x5D, 0x10, 7, 0x70, 0x90
+RAM:B853 70 90 55 10+                .db 0x55, 0x10, 0x44, 0x6C, 0x20
+RAM:B853 44 6C 20 00                 .db 0
 RAM:B863             ; ---------------------------------------------------------------------------
 RAM:B863             ; START OF FUNCTION CHUNK FOR build_screen_objects
 RAM:B863
@@ -5629,8 +5641,8 @@ RAM:BB13
 RAM:BB13             ; ---------------------------------------------------------------------------
 RAM:BB14 43 44 44 44+menu_colours:   .db 0x43, 0x44, 0x44, 0x44, 0x44, 0x45, 0x47, 0x47
 RAM:BB14 44 45 47 47                                                 ; DATA XREF: do_menu_selection+4o
-RAM:BB14                                                             ; flash_menuo
-RAM:BB1C 68 9F 30 8F+menu_xy:        .db 0x68, 0x9F
+RAM:BB14                                                             ; display_menuo ...
+RAM:BB1C 68 9F 30 8F+menu_xy:        .db 0x68, 0x9F                  ; DATA XREF: display_menu+4o
 RAM:BB1C 30 7F 30 6F+                .db 0x30, 0x8F
 RAM:BB1C 30 5F 30 4F+                .db 0x30, 0x7F
 RAM:BB1C 30 3F 50 27                 .db 0x30, 0x6F
@@ -5638,7 +5650,7 @@ RAM:BB1C                             .db 0x30, 0x5F
 RAM:BB1C                             .db 0x30, 0x4F
 RAM:BB1C                             .db 0x30, 0x3F
 RAM:BB1C                             .db 0x50, 0x27
-RAM:BB2C 41 4C 49 45+aAlien:         .ascii 'ALIEN '
+RAM:BB2C 41 4C 49 45+aAlien:         .ascii 'ALIEN '                 ; DATA XREF: display_menu+7o
 RAM:BB2C 4E 20 B8                    .db 0xB8
 RAM:BB33 31 20 4B 45+a1Keyboard:     .ascii '1 KEYBOAR'
 RAM:BB33 59 42 4F 41+                .db 0xC4
@@ -5660,7 +5672,7 @@ RAM:BB9D
 RAM:BB9D
 RAM:BB9D             print_text_in_colour:                           ; CODE XREF: display_text_list+Fp
 RAM:BB9D E5                          push    hl
-RAM:BB9E 21 88 61                    ld      hl, #0x6188
+RAM:BB9E 21 88 61                    ld      hl, #font-#0x100        ; so we can use ASCII
 RAM:BBA1 22 27 5B                    ld      (gfxbase_8x8), hl
 RAM:BBA4 C1                          pop     bc
 RAM:BBA5 C5                          push    bc
@@ -5679,7 +5691,7 @@ RAM:BBB1
 RAM:BBB1             print_text:                                     ; CODE XREF: colour_something+31p
 RAM:BBB1                                                             ; lose_life-1268p ...
 RAM:BBB1 E5                          push    hl
-RAM:BBB2 21 88 61                    ld      hl, #0x6188             ; font-0x200
+RAM:BBB2 21 88 61                    ld      hl, #font-#0x100        ; sp we can use ASCII
 RAM:BBB5 22 27 5B                    ld      (gfxbase_8x8), hl
 RAM:BBB8 C1                          pop     bc
 RAM:BBB9 C5                          push    bc
@@ -5804,10 +5816,10 @@ RAM:BC25
 RAM:BC25
 RAM:BC25             display_menu:                                   ; CODE XREF: do_menu_selection+11p
 RAM:BC25                                                             ; do_menu_selection:menu_loopp
-RAM:BC25 11 14 BB                    ld      de, #0xBB14
+RAM:BC25 11 14 BB                    ld      de, #menu_colours
 RAM:BC28 D9                          exx
-RAM:BC29 21 1C BB                    ld      hl, #0xBB1C
-RAM:BC2C 11 2C BB                    ld      de, #0xBB2C
+RAM:BC29 21 1C BB                    ld      hl, #menu_xy
+RAM:BC2C 11 2C BB                    ld      de, #aAlien             ; "ALIEN ¸"
 RAM:BC2F 06 08                       ld      b, #8
 RAM:BC2F             ; End of function display_menu
 RAM:BC2F
@@ -5856,12 +5868,12 @@ RAM:BC59 CD 27 D0                    call    print_sprite
 RAM:BC5C E1                          pop     hl
 RAM:BC5D D1                          pop     de
 RAM:BC5E C1                          pop     bc
-RAM:BC5F DD 7E 1A                    ld      a, 0x1A(ix)
+RAM:BC5F DD 7E 1A                    ld      a, 26(ix)
 RAM:BC62 83                          add     a, e
-RAM:BC63 DD 77 1A                    ld      0x1A(ix), a
-RAM:BC66 DD 7E 1B                    ld      a, 0x1B(ix)
+RAM:BC63 DD 77 1A                    ld      26(ix), a
+RAM:BC66 DD 7E 1B                    ld      a, 27(ix)
 RAM:BC69 82                          add     a, d
-RAM:BC6A DD 77 1B                    ld      0x1B(ix), a
+RAM:BC6A DD 77 1B                    ld      27(ix), a
 RAM:BC6D 10 E7                       djnz    multiple_print_sprite
 RAM:BC6F C9                          ret
 RAM:BC6F             ; End of function multiple_print_sprite
@@ -5884,10 +5896,10 @@ RAM:BC83             upd_3F:                                         ; DATA XREF
 RAM:BC83 CD 47 BF                    call    sub_BF47
 RAM:BC86 AF                          xor     a
 RAM:BC87 DD 77 09                    ld      9(ix), a
-RAM:BC8A DD 77 0A                    ld      0xA(ix), a
-RAM:BC8D DD 77 0B                    ld      0xB(ix), a
-RAM:BC90 DD CB 0D B6                 res     6, 0xD(ix)
-RAM:BC94 DD 7E 10                    ld      a, 0x10(ix)
+RAM:BC8A DD 77 0A                    ld      10(ix), a
+RAM:BC8D DD 77 0B                    ld      11(ix), a
+RAM:BC90 DD CB 0D B6                 res     6, 13(ix)
+RAM:BC94 DD 7E 10                    ld      a, 16(ix)
 RAM:BC97 DD 77 00                    ld      0(ix), a
 RAM:BC9A C3 B1 A6                    jp      jump_to_upd_object
 RAM:BC9D
@@ -6137,7 +6149,7 @@ RAM:BE3B
 RAM:BE3B             drop_object:                                    ; CODE XREF: handle_pickup_drop+13Aj
 RAM:BE3B FD 36 04 05                 ld      4(iy), #5
 RAM:BE3F FD 36 05 05                 ld      5(iy), #5
-RAM:BE43 FD 36 06 0C                 ld      6(iy), #0xC
+RAM:BE43 FD 36 06 0C                 ld      6(iy), #12
 RAM:BE47 E1                          pop     hl
 RAM:BE48 7E                          ld      a, (hl)
 RAM:BE49 23                          inc     hl
@@ -6146,10 +6158,10 @@ RAM:BE4D DD 7E 08                    ld      a, 8(ix)
 RAM:BE50 FD 77 08                    ld      8(iy), a
 RAM:BE53 7E                          ld      a, (hl)
 RAM:BE54 23                          inc     hl
-RAM:BE55 FD 77 10                    ld      0x10(iy), a
+RAM:BE55 FD 77 10                    ld      16(iy), a
 RAM:BE58 7E                          ld      a, (hl)
-RAM:BE59 FD 77 11                    ld      0x11(iy), a
-RAM:BE5C FD CB 0D C6                 set     0, 0xD(iy)
+RAM:BE59 FD 77 11                    ld      17(iy), a
+RAM:BE5C FD CB 0D C6                 set     0, 13(iy)
 RAM:BE60
 RAM:BE60             adjust_carried:                                 ; CODE XREF: handle_pickup_drop+A1j
 RAM:BE60                                                             ; handle_pickup_drop+134j
@@ -6561,7 +6573,7 @@ RAM:C079 30 02                       jr      NC, loc_C07D
 RAM:C07B ED 44                       neg
 RAM:C07D
 RAM:C07D             loc_C07D:                                       ; CODE XREF: RAM:C079j
-RAM:C07D FD 77 0E                    ld      0xE(iy), a
+RAM:C07D FD 77 0E                    ld      14(iy), a
 RAM:C080
 RAM:C080             loc_C080:                                       ; CODE XREF: RAM:C054j
 RAM:C080                                                             ; RAM:C05Cj ...
@@ -6598,7 +6610,7 @@ RAM:C0A3
 RAM:C0A3             loc_C0A3:                                       ; CODE XREF: sub_C099+6j
 RAM:C0A3 BD                          cp      l
 RAM:C0A4 D0                          ret     NC
-RAM:C0A5 DD 7E 0A                    ld      a, 0xA(ix)
+RAM:C0A5 DD 7E 0A                    ld      a, 10(ix)
 RAM:C0A8 FD 96 02                    sub     2(iy)
 RAM:C0AB 30 02                       jr      NC, loc_C0AF
 RAM:C0AD ED 44                       neg
@@ -6606,7 +6618,7 @@ RAM:C0AF
 RAM:C0AF             loc_C0AF:                                       ; CODE XREF: sub_C099+12j
 RAM:C0AF BC                          cp      h
 RAM:C0B0 D0                          ret     NC
-RAM:C0B1 DD 7E 0B                    ld      a, 0xB(ix)
+RAM:C0B1 DD 7E 0B                    ld      a, 11(ix)
 RAM:C0B4 FD 96 03                    sub     3(iy)
 RAM:C0B7 30 02                       jr      NC, loc_C0BB
 RAM:C0B9 ED 44                       neg
@@ -6784,7 +6796,7 @@ RAM:C1A0
 RAM:C1A0             loc_C1A0:                                       ; CODE XREF: handle_left_right+38j
 RAM:C1A0 20 09                       jr      NZ, loc_C1AB
 RAM:C1A2 DD CB 0D 86                 res     0, 13(ix)
-RAM:C1A6 21 DA C1                    ld      hl, #0xC1DA
+RAM:C1A6 21 DA C1                    ld      hl, #byte_C1DA
 RAM:C1A9 18 07                       jr      loc_C1B2
 RAM:C1AB             ; ---------------------------------------------------------------------------
 RAM:C1AB
@@ -6818,8 +6830,10 @@ RAM:C1D1 C9                          ret
 RAM:C1D1             ; End of function sub_C1BD
 RAM:C1D1
 RAM:C1D1             ; ---------------------------------------------------------------------------
-RAM:C1D2 18 00 19 00+byte_C1D2:      .db 0x18, 0, 0x19, 0, 0x1A, 0, 0x1B, 0x40, 0x1B, 0x40, 0x1A, 0, 0x18, 0, 0x19, 0
-RAM:C1D2 1A 00 1B 40+                                                ; DATA XREF: handle_left_right+73o
+RAM:C1D2 18 00 19 00+byte_C1D2:      .db 0x18, 0, 0x19, 0, 0x1A, 0, 0x1B, 0x40
+RAM:C1D2 1A 00 1B 40                                                 ; DATA XREF: handle_left_right+73o
+RAM:C1DA 1B 40 1A 00+byte_C1DA:      .db 0x1B, 0x40, 0x1A, 0, 0x18, 0, 0x19, 0
+RAM:C1DA 18 00 19 00                                                 ; DATA XREF: handle_left_right+6Ao
 RAM:C1E2             ; ---------------------------------------------------------------------------
 RAM:C1E2
 RAM:C1E2             upd_18_to_1B:                                   ; DATA XREF: RAM:A81Ao
@@ -6828,21 +6842,21 @@ RAM:C1E2 CD 4C BF                    call    adj_m7_m16
 RAM:C1E5 DD 36 06 17                 ld      6(ix), #0x17
 RAM:C1E9 DD 36 26 00                 ld      0x26(ix), #0
 RAM:C1ED CD FF C8                    call    check_user_input
-RAM:C1F0 DD 7E 0D                    ld      a, 0xD(ix)
+RAM:C1F0 DD 7E 0D                    ld      a, 13(ix)
 RAM:C1F3 E6 06                       and     #6
 RAM:C1F5 28 11                       jr      Z, loc_C208
-RAM:C1F7 DD 7E 0D                    ld      a, 0xD(ix)
+RAM:C1F7 DD 7E 0D                    ld      a, 13(ix)
 RAM:C1FA D6 02                       sub     #2
-RAM:C1FC DD 77 0D                    ld      0xD(ix), a
+RAM:C1FC DD 77 0D                    ld      13(ix), a
 RAM:C1FF DD CB 27 CE                 set     1, 0x27(ix)
 RAM:C203 CD BC C2                    call    sub_C2BC
 RAM:C206 18 19                       jr      loc_C221
 RAM:C208             ; ---------------------------------------------------------------------------
 RAM:C208
 RAM:C208             loc_C208:                                       ; CODE XREF: RAM:C1F5j
-RAM:C208 DD CB 0D 46                 bit     0, 0xD(ix)
+RAM:C208 DD CB 0D 46                 bit     0, 13(ix)
 RAM:C20C 28 1A                       jr      Z, loc_C228
-RAM:C20E 21 2D C2                    ld      hl, #0xC22D
+RAM:C20E 21 2D C2                    ld      hl, #byte_C22D
 RAM:C211
 RAM:C211             loc_C211:                                       ; CODE XREF: RAM:C22Bj
 RAM:C211 DD 7E 00                    ld      a, 0(ix)
@@ -6857,10 +6871,13 @@ RAM:C225 C3 FF C0                    jp      loc_C0FF
 RAM:C228             ; ---------------------------------------------------------------------------
 RAM:C228
 RAM:C228             loc_C228:                                       ; CODE XREF: RAM:C20Cj
-RAM:C228 21 35 C2                    ld      hl, #0xC235
+RAM:C228 21 35 C2                    ld      hl, #byte_C235
 RAM:C22B 18 E4                       jr      loc_C211
 RAM:C22B             ; ---------------------------------------------------------------------------
-RAM:C22D 11 40 15 40+                .db 0x11, 0x40, 0x15, 0x40, 0x15, 0, 0x11, 0, 0x11, 0, 0x15, 0, 0x11, 0x40, 0x15, 0x40
+RAM:C22D 11 40 15 40+byte_C22D:      .db 0x11, 0x40, 0x15, 0x40, 0x15, 0, 0x11, 0
+RAM:C22D 15 00 11 00                                                 ; DATA XREF: RAM:C20Eo
+RAM:C235 11 00 15 00+byte_C235:      .db 0x11, 0, 0x15, 0, 0x11, 0x40, 0x15, 0x40
+RAM:C235 11 40 15 40                                                 ; DATA XREF: RAM:loc_C228o
 RAM:C23D             ; Identical to Knight Lore
 RAM:C23D
 RAM:C23D             ; =============== S U B R O U T I N E =======================================
@@ -7107,7 +7124,7 @@ RAM:C35B DD 7E 03                    ld      a, 3(ix)
 RAM:C35E 84                          add     a, h
 RAM:C35F BA                          cp      d
 RAM:C360 D0                          ret     NC
-RAM:C361 DD CB 0C D6                 set     2, 0xC(ix)
+RAM:C361 DD CB 0C D6                 set     2, 12(ix)
 RAM:C365 7C                          ld      a, h
 RAM:C366 CD 86 C3                    call    adj_d_for_out_of_bounds
 RAM:C369 67                          ld      h, a
@@ -7364,7 +7381,7 @@ RAM:C4DE             ; ---------------------------------------------------------
 RAM:C4DE
 RAM:C4DE             loc_C4DE:                                       ; CODE XREF: adj_dX_for_obj_intersect+9j
 RAM:C4DE                                                             ; adj_dX_for_obj_intersect+Ej ...
-RAM:C4DE 11 20 00                    ld      de, #0x20 ; ' '
+RAM:C4DE 11 20 00                    ld      de, #32
 RAM:C4E1 FD 19                       add     iy, de
 RAM:C4E3 10 B8                       djnz    loc_C49D
 RAM:C4E5 C9                          ret
@@ -7389,20 +7406,20 @@ RAM:C4FB
 RAM:C4FB             loc_C4FB:                                       ; CODE XREF: adj_dY_for_obj_intersect+45j
 RAM:C4FB CD BE C5                    call    do_objs_intersect_on_y
 RAM:C4FE 30 2D                       jr      NC, loc_C52D
-RAM:C500 DD CB 0C CE                 set     1, 0xC(ix)
-RAM:C504 DD 7E 0D                    ld      a, 0xD(ix)
+RAM:C500 DD CB 0C CE                 set     1, 12(ix)
+RAM:C504 DD 7E 0D                    ld      a, 13(ix)
 RAM:C507 0F                          rrca
 RAM:C508 E6 40                       and     #0x40 ; '@'
-RAM:C50A FD B6 0D                    or      0xD(iy)
-RAM:C50D FD 77 0D                    ld      0xD(iy), a
+RAM:C50A FD B6 0D                    or      13(iy)
+RAM:C50D FD 77 0D                    ld      13(iy), a
 RAM:C510 07                          rlca
 RAM:C511 E6 40                       and     #0x40 ; '@'
-RAM:C513 DD B6 0D                    or      0xD(ix)
-RAM:C516 DD 77 0D                    ld      0xD(ix), a
+RAM:C513 DD B6 0D                    or      13(ix)
+RAM:C516 DD 77 0D                    ld      13(ix), a
 RAM:C519 FD CB 07 56                 bit     2, 7(iy)
 RAM:C51D 28 06                       jr      Z, loc_C525
-RAM:C51F DD 7E 0A                    ld      a, 0xA(ix)
-RAM:C522 FD 77 0A                    ld      0xA(iy), a
+RAM:C51F DD 7E 0A                    ld      a, 10(ix)
+RAM:C522 FD 77 0A                    ld      10(iy), a
 RAM:C525
 RAM:C525             loc_C525:                                       ; CODE XREF: adj_dY_for_obj_intersect+37j
 RAM:C525 7D                          ld      a, l
@@ -7414,7 +7431,7 @@ RAM:C52D             ; ---------------------------------------------------------
 RAM:C52D
 RAM:C52D             loc_C52D:                                       ; CODE XREF: adj_dY_for_obj_intersect+9j
 RAM:C52D                                                             ; adj_dY_for_obj_intersect+Ej ...
-RAM:C52D 11 20 00                    ld      de, #0x20 ; ' '
+RAM:C52D 11 20 00                    ld      de, #32
 RAM:C530 FD 19                       add     iy, de
 RAM:C532 10 B8                       djnz    loc_C4EC
 RAM:C534 C9                          ret
@@ -7439,27 +7456,27 @@ RAM:C54A
 RAM:C54A             loc_C54A:                                       ; CODE XREF: adj_dZ_for_obj_intersect+6Aj
 RAM:C54A CD D3 C5                    call    do_objs_intersect_on_z
 RAM:C54D 30 52                       jr      NC, loc_C5A1
-RAM:C54F DD CB 0C D6                 set     2, 0xC(ix)
-RAM:C553 DD 7E 0D                    ld      a, 0xD(ix)
+RAM:C54F DD CB 0C D6                 set     2, 12(ix)
+RAM:C553 DD 7E 0D                    ld      a, 13(ix)
 RAM:C556 0F                          rrca
 RAM:C557 E6 40                       and     #0x40 ; '@'
-RAM:C559 FD B6 0D                    or      0xD(iy)
-RAM:C55C FD 77 0D                    ld      0xD(iy), a
+RAM:C559 FD B6 0D                    or      13(iy)
+RAM:C55C FD 77 0D                    ld      13(iy), a
 RAM:C55F 07                          rlca
 RAM:C560 E6 40                       and     #0x40 ; '@'
-RAM:C562 DD B6 0D                    or      0xD(ix)
-RAM:C565 DD 77 0D                    ld      0xD(ix), a
+RAM:C562 DD B6 0D                    or      13(ix)
+RAM:C565 DD 77 0D                    ld      13(ix), a
 RAM:C568 DD CB 07 56                 bit     2, 7(ix)
 RAM:C56C 28 2B                       jr      Z, loc_C599
 RAM:C56E DD 7E 00                    ld      a, 0(ix)
 RAM:C571 D6 10                       sub     #0x10
 RAM:C573 FE 20                       cp      #0x20 ; ' '
 RAM:C575 30 04                       jr      NC, loc_C57B
-RAM:C577 FD CB 0D DE                 set     3, 0xD(iy)
+RAM:C577 FD CB 0D DE                 set     3, 13(iy)
 RAM:C57B
 RAM:C57B             loc_C57B:                                       ; CODE XREF: adj_dZ_for_obj_intersect+40j
-RAM:C57B DD 7E 0B                    ld      a, 0xB(ix)
-RAM:C57E FD 77 0B                    ld      0xB(iy), a
+RAM:C57B DD 7E 0B                    ld      a, 11(ix)
+RAM:C57E FD 77 0B                    ld      11(iy), a
 RAM:C581 DD 7E 09                    ld      a, 9(ix)
 RAM:C584 A7                          and     a
 RAM:C585 20 06                       jr      NZ, loc_C58D
@@ -7467,11 +7484,11 @@ RAM:C587 FD 7E 09                    ld      a, 9(iy)
 RAM:C58A DD 77 09                    ld      9(ix), a
 RAM:C58D
 RAM:C58D             loc_C58D:                                       ; CODE XREF: adj_dZ_for_obj_intersect+50j
-RAM:C58D DD 7E 0A                    ld      a, 0xA(ix)
+RAM:C58D DD 7E 0A                    ld      a, 10(ix)
 RAM:C590 A7                          and     a
 RAM:C591 20 06                       jr      NZ, loc_C599
-RAM:C593 FD 7E 0A                    ld      a, 0xA(iy)
-RAM:C596 DD 77 0A                    ld      0xA(ix), a
+RAM:C593 FD 7E 0A                    ld      a, 10(iy)
+RAM:C596 DD 77 0A                    ld      10(ix), a
 RAM:C599
 RAM:C599             loc_C599:                                       ; CODE XREF: adj_dZ_for_obj_intersect+37j
 RAM:C599                                                             ; adj_dZ_for_obj_intersect+5Cj
@@ -7484,7 +7501,7 @@ RAM:C5A1             ; ---------------------------------------------------------
 RAM:C5A1
 RAM:C5A1             loc_C5A1:                                       ; CODE XREF: adj_dZ_for_obj_intersect+9j
 RAM:C5A1                                                             ; adj_dZ_for_obj_intersect+Ej ...
-RAM:C5A1 11 20 00                    ld      de, #0x20 ; ' '
+RAM:C5A1 11 20 00                    ld      de, #32
 RAM:C5A4 FD 19                       add     iy, de
 RAM:C5A6 10 93                       djnz    loc_C53B
 RAM:C5A8 C9                          ret
@@ -7578,7 +7595,7 @@ RAM:C602             loc_C602:                                       ; CODE XREF
 RAM:C602 DD 86 04                    add     a, 4(ix)
 RAM:C605 B8                          cp      b
 RAM:C606 D8                          ret     C
-RAM:C607 DD CB 0C C6                 set     0, 0xC(ix)
+RAM:C607 DD CB 0C C6                 set     0, 12(ix)
 RAM:C60B 79                          ld      a, c
 RAM:C60C CD 86 C3                    call    adj_d_for_out_of_bounds
 RAM:C60F 4F                          ld      c, a
@@ -7610,7 +7627,7 @@ RAM:C62C             loc_C62C:                                       ; CODE XREF
 RAM:C62C DD 86 05                    add     a, 5(ix)
 RAM:C62F B8                          cp      b
 RAM:C630 D8                          ret     C
-RAM:C631 DD CB 0C CE                 set     1, 0xC(ix)
+RAM:C631 DD CB 0C CE                 set     1, 12(ix)
 RAM:C635 7D                          ld      a, l
 RAM:C636 CD 86 C3                    call    adj_d_for_out_of_bounds
 RAM:C639 6F                          ld      l, a
@@ -7655,7 +7672,7 @@ RAM:C664 0F                          rrca
 RAM:C665 0F                          rrca
 RAM:C666 E6 1F                       and     #0x1F
 RAM:C668 6F                          ld      l, a
-RAM:C669 DD 7E 1E                    ld      a, 0x1E(ix)
+RAM:C669 DD 7E 1E                    ld      a, 30(ix)
 RAM:C66C 0F                          rrca
 RAM:C66D 0F                          rrca
 RAM:C66E 0F                          rrca
@@ -7668,10 +7685,10 @@ RAM:C676
 RAM:C676             loc_C676:                                       ; CODE XREF: set_draw_objs_overlapped+1Cj
 RAM:C676 5F                          ld      e, a
 RAM:C677 7D                          ld      a, l
-RAM:C678 DD 86 18                    add     a, 0x18(ix)
+RAM:C678 DD 86 18                    add     a, 24(ix)
 RAM:C67B 6F                          ld      l, a
 RAM:C67C 7C                          ld      a, h
-RAM:C67D DD 86 1C                    add     a, 0x1C(ix)
+RAM:C67D DD 86 1C                    add     a, 28(ix)
 RAM:C680 BD                          cp      l
 RAM:C681 30 01                       jr      NC, loc_C684
 RAM:C683 7D                          ld      a, l
@@ -7679,18 +7696,18 @@ RAM:C684
 RAM:C684             loc_C684:                                       ; CODE XREF: set_draw_objs_overlapped+2Aj
 RAM:C684 93                          sub     e
 RAM:C685 57                          ld      d, a
-RAM:C686 DD 7E 1B                    ld      a, 0x1B(ix)
-RAM:C689 DD BE 1F                    cp      0x1F(ix)
+RAM:C686 DD 7E 1B                    ld      a, 27(ix)
+RAM:C689 DD BE 1F                    cp      31(ix)
 RAM:C68C 38 03                       jr      C, loc_C691
-RAM:C68E DD 7E 1F                    ld      a, 0x1F(ix)
+RAM:C68E DD 7E 1F                    ld      a, 31(ix)
 RAM:C691
 RAM:C691             loc_C691:                                       ; CODE XREF: set_draw_objs_overlapped+35j
 RAM:C691 6F                          ld      l, a
-RAM:C692 DD 7E 1B                    ld      a, 0x1B(ix)
-RAM:C695 DD 86 19                    add     a, 0x19(ix)
+RAM:C692 DD 7E 1B                    ld      a, 27(ix)
+RAM:C695 DD 86 19                    add     a, 25(ix)
 RAM:C698 67                          ld      h, a
-RAM:C699 DD 7E 1F                    ld      a, 0x1F(ix)
-RAM:C69C DD 86 1D                    add     a, 0x1D(ix)
+RAM:C699 DD 7E 1F                    ld      a, 31(ix)
+RAM:C69C DD 86 1D                    add     a, 29(ix)
 RAM:C69F BC                          cp      h
 RAM:C6A0 30 01                       jr      NC, loc_C6A3
 RAM:C6A2 7C                          ld      a, h
@@ -7705,7 +7722,7 @@ RAM:C6A8 A7                          and     a
 RAM:C6A9 28 21                       jr      Z, loc_C6CC
 RAM:C6AB FD CB 07 66                 bit     4, 7(iy)
 RAM:C6AF 20 1B                       jr      NZ, loc_C6CC
-RAM:C6B1 FD 7E 1A                    ld      a, 0x1A(iy)
+RAM:C6B1 FD 7E 1A                    ld      a, 26(iy)
 RAM:C6B4 0F                          rrca
 RAM:C6B5 0F                          rrca
 RAM:C6B6 0F                          rrca
@@ -7716,7 +7733,7 @@ RAM:C6BC BA                          cp      d
 RAM:C6BD
 RAM:C6BD             loc_C6BD:                                       ; CODE XREF: set_draw_objs_overlapped+84j
 RAM:C6BD 30 0D                       jr      NC, loc_C6CC
-RAM:C6BF FD 7E 1B                    ld      a, 0x1B(iy)
+RAM:C6BF FD 7E 1B                    ld      a, 27(iy)
 RAM:C6C2 95                          sub     l
 RAM:C6C3 38 18                       jr      C, loc_C6DD
 RAM:C6C5 BC                          cp      h
@@ -7728,7 +7745,7 @@ RAM:C6CC
 RAM:C6CC             loc_C6CC:                                       ; CODE XREF: set_draw_objs_overlapped+52j
 RAM:C6CC                                                             ; set_draw_objs_overlapped+58j ...
 RAM:C6CC D9                          exx
-RAM:C6CD 11 20 00                    ld      de, #0x20 ; ' '
+RAM:C6CD 11 20 00                    ld      de, #32
 RAM:C6D0 FD 19                       add     iy, de
 RAM:C6D2 D9                          exx
 RAM:C6D3 10 D0                       djnz    loc_C6A5
@@ -7774,7 +7791,7 @@ RAM:C708 FD 7E 00                    ld      a, 0(iy)
 RAM:C70B C6 10                       add     a, #0x10
 RAM:C70D DD 77 00                    ld      0(ix), a
 RAM:C710 FD 7E 03                    ld      a, 3(iy)
-RAM:C713 C6 0C                       add     a, #0xC
+RAM:C713 C6 0C                       add     a, #12
 RAM:C715 DD 77 03                    ld      3(ix), a
 RAM:C718 CD 57 C6                    call    set_draw_objs_overlapped
 RAM:C71B C9                          ret
@@ -7962,7 +7979,7 @@ RAM:C86F                                                             ; RAM:C83B
 RAM:C86F 2A 2F 5B                    ld      hl, (render_obj_2)
 RAM:C872 2B                          dec     hl
 RAM:C873 4E                          ld      c, (hl)
-RAM:C874 11 EF C8                    ld      de, #0xC8EF
+RAM:C874 11 EF C8                    ld      de, #render_list
 RAM:C877
 RAM:C877             loc_C877:                                       ; CODE XREF: RAM:C880j
 RAM:C877 1A                          ld      a, (de)
@@ -7984,12 +8001,12 @@ RAM:C888 FD E5                       push    iy
 RAM:C88A DD E1                       pop     ix
 RAM:C88C 2A 2F 5B                    ld      hl, (render_obj_2)
 RAM:C88F 22 2D 5B                    ld      (render_obj_1), hl
-RAM:C892 11 45 C7                    ld      de, #0xC745
+RAM:C892 11 45 C7                    ld      de, #objects_to_draw
 RAM:C895 C3 A5 C7                    jp      loc_C7A5
 RAM:C898             ; ---------------------------------------------------------------------------
 RAM:C898
 RAM:C898             loc_C898:                                       ; CODE XREF: RAM:C87Dj
-RAM:C898 21 45 C7                    ld      hl, #0xC745
+RAM:C898 21 45 C7                    ld      hl, #objects_to_draw
 RAM:C89B
 RAM:C89B             loc_C89B:                                       ; CODE XREF: RAM:C8A3j
 RAM:C89B 7E                          ld      a, (hl)
@@ -8036,7 +8053,7 @@ RAM:C8D8 2B                          dec     hl
 RAM:C8D9 CB FE                       set     7, (hl)
 RAM:C8DB 3E FF                       ld      a, #0xFF
 RAM:C8DD 32 EF C8                    ld      (render_list), a
-RAM:C8E0 21 1E 5B                    ld      hl, #0x5B1E
+RAM:C8E0 21 1E 5B                    ld      hl, #rendered_objs_cnt
 RAM:C8E3 34                          inc     (hl)
 RAM:C8E4 CD 13 D0                    call    loc_D013
 RAM:C8E7 C3 8D C7                    jp      calc_display_order_and_render
@@ -8047,10 +8064,11 @@ RAM:C8EA FD E1                       pop     iy
 RAM:C8EC DD E1                       pop     ix
 RAM:C8EE C9                          ret
 RAM:C8EE             ; ---------------------------------------------------------------------------
-RAM:C8EF FF FF FF FF+render_list:    .db 0xFF                        ; DATA XREF: RAM:C8DDw
-RAM:C8EF FF FF FF FF+                .db 0xFF
+RAM:C8EF FF FF FF FF+render_list:    .db 0xFF                        ; DATA XREF: RAM:C874o
+RAM:C8EF FF FF FF FF+                                                ; RAM:C8DDw
 RAM:C8EF FF FF FF FF+                .db 0xFF
 RAM:C8EF FF FF FF FF                 .db 0xFF
+RAM:C8EF                             .db 0xFF
 RAM:C8EF                             .db 0xFF
 RAM:C8EF                             .db 0xFF
 RAM:C8EF                             .db 0xFF
@@ -8074,7 +8092,7 @@ RAM:C902 4F                          ld      c, a
 RAM:C903 3A 24 5B                    ld      a, (byte_5B24)
 RAM:C906 B1                          or      c
 RAM:C907 0E 00                       ld      c, #0
-RAM:C909 C2 EE C9                    jp      NZ, loc_C9EE
+RAM:C909 C2 EE C9                    jp      NZ, finished_input
 RAM:C90C 3A 04 5B                    ld      a, (user_input_method)
 RAM:C90F 0F                          rrca
 RAM:C910 E6 03                       and     #3
@@ -8126,7 +8144,7 @@ RAM:C94D 28 02                       jr      Z, loc_C951
 RAM:C94F CB C1                       set     0, c
 RAM:C951
 RAM:C951             loc_C951:                                       ; CODE XREF: check_user_input+4Ej
-RAM:C951 C3 EE C9                    jp      loc_C9EE
+RAM:C951 C3 EE C9                    jp      finished_input
 RAM:C954             ; ---------------------------------------------------------------------------
 RAM:C954
 RAM:C954             kempston:                                       ; CODE XREF: check_user_input+17j
@@ -8157,7 +8175,7 @@ RAM:C972 28 02                       jr      Z, loc_C976
 RAM:C974 CB D9                       set     3, c
 RAM:C976
 RAM:C976             loc_C976:                                       ; CODE XREF: check_user_input+73j
-RAM:C976 C3 EE C9                    jp      loc_C9EE
+RAM:C976 C3 EE C9                    jp      finished_input
 RAM:C979             ; ---------------------------------------------------------------------------
 RAM:C979
 RAM:C979             cursor:                                         ; CODE XREF: check_user_input+1Aj
@@ -8187,9 +8205,9 @@ RAM:C99B CB C9                       set     1, c
 RAM:C99D
 RAM:C99D             loc_C99D:                                       ; CODE XREF: check_user_input+9Aj
 RAM:C99D CB 67                       bit     4, a
-RAM:C99F 28 4D                       jr      Z, loc_C9EE
+RAM:C99F 28 4D                       jr      Z, finished_input
 RAM:C9A1 CB E1                       set     4, c
-RAM:C9A3 18 49                       jr      loc_C9EE
+RAM:C9A3 18 49                       jr      finished_input
 RAM:C9A5             ; ---------------------------------------------------------------------------
 RAM:C9A5
 RAM:C9A5             keyboard:                                       ; CODE XREF: check_user_input+13j
@@ -8239,10 +8257,10 @@ RAM:C9E5
 RAM:C9E5             loc_C9E5:                                       ; CODE XREF: check_user_input+E2j
 RAM:C9E5 3E E7                       ld      a, #0xE7 ; 'ç'
 RAM:C9E7 CD 59 B7                    call    read_key
-RAM:C9EA 28 02                       jr      Z, loc_C9EE
+RAM:C9EA 28 02                       jr      Z, finished_input
 RAM:C9EC CB E1                       set     4, c
 RAM:C9EE
-RAM:C9EE             loc_C9EE:                                       ; CODE XREF: check_user_input+Aj
+RAM:C9EE             finished_input:                                 ; CODE XREF: check_user_input+Aj
 RAM:C9EE                                                             ; check_user_input:loc_C951j ...
 RAM:C9EE 3E 7E                       ld      a, #0x7E ; '~'
 RAM:C9F0 CD 59 B7                    call    read_key
@@ -8513,14 +8531,14 @@ RAM:CBE3             ; ---------------------------------------------------------
 RAM:CBE3
 RAM:CBE3             colour_panel:
 RAM:CBE3 AF                          xor     a
-RAM:CBE4 21 B6 5A                    ld      hl, #0x5AB6
+RAM:CBE4 21 B6 5A                    ld      hl, # zxaram+0x2B6
 RAM:CBE7 01 03 01                    ld      bc, #0x103
 RAM:CBEA CD 83 BF                    call    fill_window
-RAM:CBED 21 BD 5A                    ld      hl, #0x5ABD
+RAM:CBED 21 BD 5A                    ld      hl, # zxaram+0x2BD
 RAM:CBF0 01 03 01                    ld      bc, #0x103
 RAM:CBF3 CD 83 BF                    call    fill_window
 RAM:CBF6 3E 42                       ld      a, #0x42 ; 'B'
-RAM:CBF8 21 97 5A                    ld      hl, #0x5A97
+RAM:CBF8 21 97 5A                    ld      hl, # zxaram+0x297
 RAM:CBFB 01 04 06                    ld      bc, #0x604
 RAM:CBFE C3 83 BF                    jp      fill_window
 RAM:CC01
@@ -8683,7 +8701,7 @@ RAM:CCD0 21 88 62                    ld      hl, #font
 RAM:CCD3 A7                          and     a
 RAM:CCD4 ED 52                       sbc     hl, de
 RAM:CCD6 C8                          ret     Z
-RAM:CCD7 06 20                       ld      b, #0x20 ; ' '
+RAM:CCD7 06 20                       ld      b, #32
 RAM:CCD9 CD 1C CE                    call    zero_DE
 RAM:CCDC 18 F2                       jr      zero_end_of_graphic_objs_tbl
 RAM:CCDE             ; ---------------------------------------------------------------------------
@@ -8989,11 +9007,11 @@ RAM:CE4E
 RAM:CE4E             ; =============== S U B R O U T I N E =======================================
 RAM:CE4E
 RAM:CE4E
-RAM:CE4E             sub_CE4E:                                       ; CODE XREF: lose_life-123Ap
-RAM:CE4E 21 88 5B                    ld      hl, #0x5B88
+RAM:CE4E             clr_graphic_objs_tbl:                           ; CODE XREF: lose_life-123Ap
+RAM:CE4E 21 88 5B                    ld      hl, #graphic_objs_tbl
 RAM:CE51 01 00 07                    ld      bc, #0x700
 RAM:CE54 18 00                       jr      clr_mem
-RAM:CE54             ; End of function sub_CE4E
+RAM:CE54             ; End of function clr_graphic_objs_tbl
 RAM:CE54
 RAM:CE56
 RAM:CE56             ; =============== S U B R O U T I N E =======================================
@@ -9018,7 +9036,7 @@ RAM:CE60             ; ---------------------------------------------------------
 RAM:CE60             ; START OF FUNCTION CHUNK FOR clear_scrn
 RAM:CE60
 RAM:CE60             loc_CE60:                                       ; CODE XREF: clear_scrn+6j
-RAM:CE60 21 00 40                    ld      hl, #0x4000
+RAM:CE60 21 00 40                    ld      hl, #zxvram
 RAM:CE63 01 00 18                    ld      bc, #0x1800
 RAM:CE66 18 EE                       jr      clr_mem
 RAM:CE66             ; END OF FUNCTION CHUNK FOR clear_scrn
@@ -9032,7 +9050,7 @@ RAM:CE68 3E 42                       ld      a, #0x42 ; 'B'
 RAM:CE6A
 RAM:CE6A             fill_attr:                                      ; CODE XREF: colour_something+5p
 RAM:CE6A 5F                          ld      e, a
-RAM:CE6B 21 00 58                    ld      hl, #0x5800
+RAM:CE6B 21 00 58                    ld      hl, #zxaram
 RAM:CE6E 01 00 03                    ld      bc, #0x300
 RAM:CE71 18 E5                       jr      fill_mem
 RAM:CE71             ; End of function clr_attr
@@ -9071,7 +9089,7 @@ RAM:CE85
 RAM:CE85             update_screen:                                  ; CODE XREF: RAM:A728p
 RAM:CE85                                                             ; lose_life-125Cp ...
 RAM:CE85 21 00 D2                    ld      hl, #vidbuf
-RAM:CE88 11 E0 57                    ld      de, #0x57E0
+RAM:CE88 11 E0 57                    ld      de, # zxvram+0x17E0
 RAM:CE8B 01 20 C0                    ld      bc, #0xC020
 RAM:CE8E
 RAM:CE8E             loc_CE8E:                                       ; CODE XREF: update_screen+23j
@@ -9129,25 +9147,25 @@ RAM:CECF DD E1                       pop     ix
 RAM:CED1 DD CB 07 6E                 bit     5, 7(ix)
 RAM:CED5 28 E7                       jr      Z, wipe_next_object
 RAM:CED7 DD CB 07 AE                 res     5, 7(ix)
-RAM:CEDB DD 7E 1A                    ld      a, 0x1A(ix)
-RAM:CEDE DD 96 1E                    sub     0x1E(ix)
+RAM:CEDB DD 7E 1A                    ld      a, 26(ix)
+RAM:CEDE DD 96 1E                    sub     30(ix)
 RAM:CEE1 DA 55 CF                    jp      C, loc_CF55
-RAM:CEE4 DD 4E 1E                    ld      c, 0x1E(ix)
+RAM:CEE4 DD 4E 1E                    ld      c, 30(ix)
 RAM:CEE7
 RAM:CEE7             loc_CEE7:                                       ; CODE XREF: render_dynamic_objects+ADj
-RAM:CEE7 DD 7E 1E                    ld      a, 0x1E(ix)
+RAM:CEE7 DD 7E 1E                    ld      a, 30(ix)
 RAM:CEEA 0F                          rrca
 RAM:CEEB 0F                          rrca
 RAM:CEEC 0F                          rrca
 RAM:CEED E6 1F                       and     #0x1F
-RAM:CEEF DD 86 1C                    add     a, 0x1C(ix)
+RAM:CEEF DD 86 1C                    add     a, 28(ix)
 RAM:CEF2 5F                          ld      e, a
-RAM:CEF3 DD 7E 1A                    ld      a, 0x1A(ix)
+RAM:CEF3 DD 7E 1A                    ld      a, 26(ix)
 RAM:CEF6 0F                          rrca
 RAM:CEF7 0F                          rrca
 RAM:CEF8 0F                          rrca
 RAM:CEF9 E6 1F                       and     #0x1F
-RAM:CEFB DD 86 18                    add     a, 0x18(ix)
+RAM:CEFB DD 86 18                    add     a, 24(ix)
 RAM:CEFE BB                          cp      e
 RAM:CEFF 38 01                       jr      C, loc_CF02
 RAM:CF01 5F                          ld      e, a
@@ -9162,17 +9180,17 @@ RAM:CF08 47                          ld      b, a
 RAM:CF09 7B                          ld      a, e
 RAM:CF0A 90                          sub     b
 RAM:CF0B 67                          ld      h, a
-RAM:CF0C DD 7E 1B                    ld      a, 0x1B(ix)
-RAM:CF0F DD 96 1F                    sub     0x1F(ix)
+RAM:CF0C DD 7E 1B                    ld      a, 27(ix)
+RAM:CF0F DD 96 1F                    sub     31(ix)
 RAM:CF12 38 46                       jr      C, loc_CF5A
-RAM:CF14 DD 46 1F                    ld      b, 0x1F(ix)
+RAM:CF14 DD 46 1F                    ld      b, 31(ix)
 RAM:CF17
 RAM:CF17             loc_CF17:                                       ; CODE XREF: render_dynamic_objects+B2j
-RAM:CF17 DD 7E 1F                    ld      a, 0x1F(ix)
-RAM:CF1A DD 86 1D                    add     a, 0x1D(ix)
+RAM:CF17 DD 7E 1F                    ld      a, 31(ix)
+RAM:CF1A DD 86 1D                    add     a, 29(ix)
 RAM:CF1D 5F                          ld      e, a
-RAM:CF1E DD 7E 1B                    ld      a, 0x1B(ix)
-RAM:CF21 DD 86 19                    add     a, 0x19(ix)
+RAM:CF1E DD 7E 1B                    ld      a, 27(ix)
+RAM:CF21 DD 86 19                    add     a, 25(ix)
 RAM:CF24 BB                          cp      e
 RAM:CF25 30 01                       jr      NC, loc_CF28
 RAM:CF27 7B                          ld      a, e
@@ -9328,6 +9346,8 @@ RAM:CFCF 20 F3                       jr      NZ, loc_CFC4
 RAM:CFD1 C9                          ret
 RAM:CFD1             ; End of function build_lookup_tbls
 RAM:CFD1
+RAM:CFD2             ; Identical to Knight Lore with prelude (up to ret NZ)
+RAM:CFD2             ; and sub 104->40
 RAM:CFD2
 RAM:CFD2             ; =============== S U B R O U T I N E =======================================
 RAM:CFD2
@@ -9398,7 +9418,7 @@ RAM:D027
 RAM:D027             print_sprite:                                   ; CODE XREF: multiple_print_sprite+3p
 RAM:D027                                                             ; sub_BCAB+44p ...
 RAM:D027 CD FE CF                    call    flip_sprite
-RAM:D02A DD 7E 1A                    ld      a, 0x1A(ix)
+RAM:D02A DD 7E 1A                    ld      a, 26(ix)
 RAM:D02D E6 07                       and     #7
 RAM:D02F 28 4D                       jr      Z, loc_D07E
 RAM:D031 07                          rlca
@@ -9410,7 +9430,7 @@ RAM:D038 13                          inc     de
 RAM:D039 E6 07                       and     #7
 RAM:D03B 3C                          inc     a
 RAM:D03C 47                          ld      b, a
-RAM:D03D DD 77 18                    ld      0x18(ix), a
+RAM:D03D DD 77 18                    ld      24(ix), a
 RAM:D040 3D                          dec     a
 RAM:D041 E6 07                       and     #7
 RAM:D043 87                          add     a, a
@@ -9428,23 +9448,23 @@ RAM:D050 C6 22                       add     a, #0x22 ; '"'
 RAM:D052 32 10 D1                    ld      (loc_D10F+1), a
 RAM:D055 1A                          ld      a, (de)
 RAM:D056 13                          inc     de
-RAM:D057 DD 77 19                    ld      0x19(ix), a
-RAM:D05A DD 86 1B                    add     a, 0x1B(ix)
+RAM:D057 DD 77 19                    ld      25(ix), a
+RAM:D05A DD 86 1B                    add     a, 27(ix)
 RAM:D05D D6 C0                       sub     #0xC0 ; 'À'
 RAM:D05F 38 08                       jr      C, loc_D069
 RAM:D061 ED 44                       neg
-RAM:D063 DD 86 19                    add     a, 0x19(ix)
-RAM:D066 DD 77 19                    ld      0x19(ix), a
+RAM:D063 DD 86 19                    add     a, 25(ix)
+RAM:D066 DD 77 19                    ld      25(ix), a
 RAM:D069
 RAM:D069             loc_D069:                                       ; CODE XREF: RAM:D05Fj
-RAM:D069 DD 4E 1A                    ld      c, 0x1A(ix)
-RAM:D06C DD 46 1B                    ld      b, 0x1B(ix)
+RAM:D069 DD 4E 1A                    ld      c, 26(ix)
+RAM:D06C DD 46 1B                    ld      b, 27(ix)
 RAM:D06F CD 20 D1                    call    calc_screen_buffer_addr
 RAM:D072 ED 73 09 5B                 ld      (tmp_SP), sp
 RAM:D076 EB                          ex      de, hl
 RAM:D077 F9                          ld      sp, hl
 RAM:D078 EB                          ex      de, hl
-RAM:D079 DD 7E 19                    ld      a, 0x19(ix)
+RAM:D079 DD 7E 19                    ld      a, 25(ix)
 RAM:D07C 18 3B                       jr      loc_D0B9
 RAM:D07E             ; ---------------------------------------------------------------------------
 RAM:D07E
@@ -9452,7 +9472,7 @@ RAM:D07E             loc_D07E:                                       ; CODE XREF
 RAM:D07E 1A                          ld      a, (de)
 RAM:D07F 13                          inc     de
 RAM:D080 E6 0F                       and     #0xF
-RAM:D082 DD 77 18                    ld      0x18(ix), a
+RAM:D082 DD 77 18                    ld      24(ix), a
 RAM:D085 47                          ld      b, a
 RAM:D086 87                          add     a, a
 RAM:D087 87                          add     a, a
@@ -9685,7 +9705,7 @@ RAM:D165 CB 3C                       srl     h
 RAM:D167 CB 1D                       rr      l
 RAM:D169 CB 3C                       srl     h
 RAM:D16B CB 1D                       rr      l
-RAM:D16D 11 00 57                    ld      de, #0x5700
+RAM:D16D 11 00 57                    ld      de, # zxvram+0x1700
 RAM:D170 19                          add     hl, de
 RAM:D171 EB                          ex      de, hl
 RAM:D172 E1                          pop     hl
