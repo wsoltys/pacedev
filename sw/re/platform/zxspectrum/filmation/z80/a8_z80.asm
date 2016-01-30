@@ -19,6 +19,56 @@
 
 ; ===========================================================================
 
+;.define ZX
+.define TRS80
+
+.ifdef ZX
+		CODEBASE  .equ  #0x6288
+    LKUPBASE  .equ  #0xF000
+.endif
+
+.ifdef TRS80
+
+		.macro GFXMOD, mode
+		ld			a,#mode
+		out			(131),a
+		.endm
+
+		.macro GFXX
+		out			(128),a
+		.endm
+		
+		.macro GFXY
+		out			(129),a
+		.endm
+		
+		.macro GFXDAT
+		out			(130),a
+		.endm
+		
+		.macro BITDBL
+		rlca
+		push		af
+		rl			c
+		pop			af
+		rl			c
+		.endm
+		
+		.macro NIBDBL
+		BITDBL
+		BITDBL
+		BITDBL
+		BITDBL
+		.endm
+
+    .define PIXEL_DOUBLE
+
+		CODEBASE  .equ  #0x6288
+    LKUPBASE  .equ  #0x2000
+		STACK     .equ  #0xF0FE
+
+.endif
+
 ; Segment type: Regular
                 .org 0x4000
 zxvram:         .ds 0x1800                      ; DATA XREF: clear_scrn:loc_CE60o
@@ -178,7 +228,7 @@ other_objs_here:.ds 1664                        ; DATA XREF: update_special_objs
 ; ===========================================================================
 
 ; Segment type: Regular
-                .org 0x6288
+                .org CODEBASE
 font:           .db 0, 0, 0, 0, 0, 0, 0, 0      ; DATA XREF: RAM:A6D2o
                                                 ; print_text_in_colour+1t ...
                 .db 0, 0, 0, 0, 0, 0, 0, 0
@@ -2276,6 +2326,22 @@ spr_4C:         .db 3, 21                       ; DATA XREF: RAM:sprite_tblo
 ; ---------------------------------------------------------------------------
 
 START:
+.ifdef TRS80
+    di
+    ld          sp,STACK
+		ld					a,#0x00
+		out					(0xe0),a						; no interrupts
+		ld					a,#0x02
+		out					(0x84),a						; memory map III
+		ld					a,#0x40
+		out					(0xec),a						; 4MHz
+		ld					hl,#0xf800
+		ld					de,#0xf801
+		ld					bc,#0x07ff
+		ld					(hl),#0x20
+		ldir														; clear text screen
+		GFXMOD			0xB1								; 512x192, X-inc on write
+.endif
                 ld      hl, #seed_1
                 ld      bc, #0x788              ; number of bytes to clear
                 ld      a, (other_objs_here+0x70)
@@ -4620,6 +4686,7 @@ play_audio_wait_key:                            ; CODE XREF: do_menu_selection+1
 
 play_audio_until_keypress:                      ; CODE XREF: play_audio_until_keypress+Fj
                                                 ; lose_life-1250p
+.ifdef ZX
                 xor     a
                 call    read_key
                 jr      Z, loc_B4B0
@@ -4632,6 +4699,16 @@ loc_B4B0:                                       ; CODE XREF: play_audio_until_ke
                 jr      Z, end_audio
                 call    sub_B4C5
                 jr      play_audio_until_keypress
+.endif
+.ifdef TRS80
+    ld    a, (0xf4ff)
+    or    a
+    jr    z,loc_B2C5
+    ret
+loc_B2C5:
+		jr	play_audio_until_keypress
+.endif
+                
 ; End of function play_audio_until_keypress
 
 
@@ -9108,6 +9185,7 @@ clear_scrn_buffer:                              ; CODE XREF: lose_life:loc_B76B
 
 update_screen:                                  ; CODE XREF: RAM:A728p
                                                 ; lose_life-125Cp ...
+.ifdef ZX
                 ld      hl, #vidbuf
                 ld      de, # zxvram+0x17E0
                 ld      bc, #0xC020
@@ -9137,6 +9215,38 @@ loc_CEA6:                                       ; CODE XREF: update_screen+15j
                 dec     b
                 jr      NZ, loc_CE8E
                 ret
+.endif
+
+.ifdef TRS80
+    ld    hl,#vidbuf
+    ld    bc,#0x20C0
+1$:
+    push  bc
+    ld    a,c
+    dec   a
+    GFXY
+    xor   a
+    GFXX
+2$:
+    ld    a,(hl)
+.ifdef PIXEL_DOUBLE
+		NIBDBL
+		push				af
+		ld					a,c
+		GFXDAT  		
+		pop					af
+		NIBDBL  		
+		ld					a,c
+.endif		
+    GFXDAT
+    inc   hl
+    djnz  2$
+    pop   bc
+    dec   c
+    jr    nz,1$
+    ret
+.endif
+
 ; End of function update_screen
 
 
@@ -9333,7 +9443,7 @@ build_lookup_tbls:                              ; CODE XREF: RAM:loc_A650p
 loc_CFA9:                                       ; CODE XREF: build_lookup_tbls+18j
                 ld      d, #0
                 ld      e, l
-                ld      h, #0xFF
+		            ld	    h, #>LKUPBASE|#0x0F
                 ld      b, #7
 
 loc_CFB0:                                       ; CODE XREF: build_lookup_tbls+15j
@@ -9350,7 +9460,7 @@ loc_CFB0:                                       ; CODE XREF: build_lookup_tbls+1
                 djnz    loc_CFB0
                 inc     l
                 jr      NZ, loc_CFA9
-                ld      hl, #0xF100
+		            ld	    hl, #LKUPBASE|#0x100
 
 loc_CFC4:                                       ; CODE XREF: build_lookup_tbls+28j
                 ld      d, l
@@ -9443,7 +9553,7 @@ print_sprite:                                   ; CODE XREF: multiple_print_spri
                 jr      Z, loc_D07E
                 rlca
                 and     #0xE
-                or      #0xF0 ; 'ð'
+		            or	    #>LKUPBASE
                 ld      h, a
                 ld      a, (de)
                 inc     de
@@ -9804,7 +9914,7 @@ loc_D1AF:                                       ; CODE XREF: flip_sprite+17Dj
                 push    hl
                 exx
                 pop     hl
-                ld      b, #0xF1 ; 'ñ'
+		            ld	    b, #>LKUPBASE|#0x01 ;
                 exx
 
 loc_D1CC:                                       ; CODE XREF: flip_sprite+1D9j

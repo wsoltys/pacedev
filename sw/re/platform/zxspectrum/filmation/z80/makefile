@@ -7,6 +7,22 @@ ifeq (,$(PLATFORM))
 	PLATFORM = zx
 endif
 
+ifeq (,$(GAME))
+  GAME = kl
+endif
+
+ifeq ($(GAME),kl)
+  START=6108
+  EXEC=af6c
+  SP=5b8a
+endif
+
+ifeq ($(GAME),a8)
+  START=6288
+  EXEC=a631
+  SP=f0fe
+endif
+
 # compiler, linker and utilities
 AS = asz80
 LD = aslink
@@ -15,7 +31,7 @@ ECHO = @echo
 RM = rm
 MD = mkdir
 OBJC = objcopy
-TARGET = kl_z80
+TARGET = $(GAME)_z80
 MAKEFILE = makefile
 
 ifeq ($(PLATFORM),zx)
@@ -29,12 +45,12 @@ endif
 ASFLAGS = -l -o -s
 LDFLAGS = -i
 
-OBJS = kl_z80.rel
+OBJS = $(TARGET).rel
 	
 all: $(FQTN)
 .PHONY: all
 
-.SECONDARY: kl_z80.bin
+.SECONDARY: $(TARGET).bin
 
 %.rel: %.asm $(MAKEFILE)
 	$(AS) $(ASFLAGS) $<
@@ -48,14 +64,11 @@ all: $(FQTN)
 
 # ZX SPECTRUM SNA dump format file
 %.sna: %.bin
-	bin2sna -a6108 -i3f -m1 -n0 -s5b8a -xaf6c $<
+	bin2sna -a$(START) -i3f -m1 -n0 -s$(SP) -x$(EXEC) $<
 
 # TRS-80 CMD format file
 %.cmd: %.bin
-	bin2cmd -o6108 -xaf6c kl_z80
-
-
-#	bin2cmd -o6108 -xaf6c kl_z80
+	bin2cmd -o$(START) -x$(EXEC) $(TARGET)
 
 clean:
 	$(ECHO) Deleting intermediate files...
