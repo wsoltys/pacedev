@@ -9,6 +9,22 @@ ZXVRAM:4000             ;
 ZXVRAM:4000             ; Input MD5   : D216E7868E55CCB948866065D5FCCAE3
 ZXVRAM:4000             ; Input CRC32 : FFD7EDCD
 ZXVRAM:4000
+ZXVRAM:4000             ; +--------------------------------------------------+
+ZXVRAM:4000             ; | ZX Spectrum Alien 8 Disassembly v0.9a1           |
+ZXVRAM:4000             ; |    - by tcdev (msmcdoug@gmail.com)               |
+ZXVRAM:4000             ; +--------------------------------------------------+
+ZXVRAM:4000             ;
+ZXVRAM:4000             ; Memory Map:
+ZXVRAM:4000             ;
+ZXVRAM:4000             ; $4000-$57FF - spectrum video memory
+ZXVRAM:4000             ; $5800-$5AFF - spectrum attribute memory
+ZXVRAM:4000             ; $5B00-$6287 - variables
+ZXVRAM:4000             ; $6288-$D1EA - code and data
+ZXVRAM:4000             ; $D200-$D9FF - video buffer
+ZXVRAM:4000             ;       $F0FF - stack
+ZXVRAM:4000             ; $F100-$FFFF - bit-shift & bit-reverse lookup tables
+ZXVRAM:4000             ;             - (built at run-time)
+ZXVRAM:4000
 ZXVRAM:4000
 ZXVRAM:4000             ; Processor       : z80 []
 ZXVRAM:4000             ; Target assembler: ASxxxx by Alan R. Baldwin v1.5

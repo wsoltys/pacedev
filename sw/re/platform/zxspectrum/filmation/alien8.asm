@@ -11,6 +11,22 @@
 ; Input MD5   : D216E7868E55CCB948866065D5FCCAE3
 ; Input CRC32 : FFD7EDCD
 
+; +--------------------------------------------------+
+; | ZX Spectrum Alien 8 Disassembly v0.9a1           |
+; |    - by tcdev (msmcdoug@gmail.com)               |
+; +--------------------------------------------------+
+;
+; Memory Map:
+;
+; $4000-$57FF - spectrum video memory
+; $5800-$5AFF - spectrum attribute memory
+; $5B00-$6287 - variables
+; $6288-$D1EA - code and data
+; $D200-$D9FF - video buffer
+;       $F0FF - stack
+; $F100-$FFFF - bit-shift & bit-reverse lookup tables
+;             - (built at run-time)
+
 
 ; Processor       : z80 []
 ; Target assembler: ASxxxx by Alan R. Baldwin v1.5
