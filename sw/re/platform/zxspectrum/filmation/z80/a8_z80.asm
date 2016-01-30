@@ -5661,6 +5661,7 @@ menu_loop:                                      ; CODE XREF: do_menu_selection+7
                 call    display_menu
                 ld      de, #menu_tune
                 call    play_audio_wait_key
+.ifdef ZX
                 ld      a, #0xF7 ; '÷'
                 call    read_key
                 ld      e, a
@@ -5708,6 +5709,15 @@ check_for_start_game:                           ; CODE XREF: do_menu_selection+5
                 call    read_key
                 bit     0, a
                 ret     NZ
+.endif
+.ifdef TRS80
+    ld    a,#6
+    ld    (user_input_method),a
+check_for_start_game:
+    ld    a,(#0xf410)
+    bit   0,a
+    ret   nz
+.endif
                 ld      hl, #seed_1
                 inc     (hl)
                 call    flash_menu
@@ -8191,6 +8201,7 @@ check_user_input:                               ; CODE XREF: RAM:C0D6p
                 ld      a, (byte_5B24)
                 or      c
                 ld      c, #0
+.ifdef ZX		
                 jp      NZ, finished_input
                 ld      a, (user_input_method)
                 rrca
@@ -8372,6 +8383,78 @@ finished_input:                                 ; CODE XREF: check_user_input+A
                 pop     bc
                 jr      Z, loc_CA02
                 set     5, c
+.endif
+.ifdef TRS80
+chkleft:
+    ld      a,(0xf401)      ; <G><F><E><D><C><B><A><@>
+    and     #0x0c           ; <C><B>
+    ld      b,a
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x20           ; <M>
+    or      b
+    ld      b,a
+    ld      a,(0xf408)      ; -,-,-,-,<,><Z><Y><X>
+    and     #0x04           ; <Z>
+    or      b
+    jr      z,chkright
+    set     0,c
+chkright:
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x40           ; <N>
+    ld      b,a
+    ld      a,(0xf404)      ; <W><V><U><T><S><R><Q><P>
+    and     #0x40           ; <V>
+    or      b
+    ld      b,a
+    ld      a,(0xf408)      ; -,-,-,-,<'><Z><Y><X>
+    and     #0x01           ; <X>
+    or      b
+    ld      b,a
+    ld      a,(0xf420)      ; </><.><-><,><;><:><9><8>
+    and     #0x10           ; <,>
+    or      b
+    jr      z,chkfwd        
+    set     1,c    
+chkfwd:
+    ld      a,(0xf401)      ; <G><F><E><D><C><B><A><@>
+    and     #0xD2           ; <G><F><D><A>
+    ld      b,a
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x1D           ; <L><K><J><H>
+    or      b
+    ld      b,a
+    ld      a,(0xf404)      ; <W><V><U><T><S><R><Q><P>
+    and     #0x08           ; <S>
+    or      b    
+    jr      z,chjmp
+    set     2,c
+chjmp:
+    ld      a,(0xf401)      ; <G><F><E><D><C><B><A><@>
+    and     #0x20           ; <E>
+    ld      b,a
+    ld      a,(0xf402)      ; <O><N><M><L><K><J><I><H>
+    and     #0x82           ; <O><I>
+    or      b
+    ld      b,a
+    ld      a,(0xf404)      ; <W><V><U><T><S><R><Q><P>
+    and     #0xB7           ; <W><U><T><R><Q><P>
+    or      b
+    ld      b,a
+    ld      a,(0xf408)      ; -,-,-,-,<'><Z><Y><X>
+    and     #0x02           ; <Y>
+    or      b    
+    jr      z,chkpckdrp
+    set     3,c
+chkpckdrp:
+    ld      a,(0xf410)      ; <7><6><5><4><3><2><1><0>
+    ld      b,a
+    ld      a,(0xf420)      ; </><.><-><,><;><:><9><8>
+    and     #0x03           ; <8><9>
+    or      b
+    jr      z,finished_input
+    set     4,c
+finished_input: 
+.endif
 
 loc_CA02:                                       ; CODE XREF: check_user_input+FFj
                 ld      a, c
@@ -9404,6 +9487,7 @@ loc_CF82:                                       ; CODE XREF: render_dynamic_obje
 
 blit_to_screen:                                 ; CODE XREF: sub_AD66+39p
                                                 ; sub_BCAB+58p ...
+.ifdef ZX
                 push    bc
                 push    de
                 push    hl
@@ -9430,6 +9514,63 @@ loc_CFA3:                                       ; CODE XREF: blit_to_screen+12j
                                                 ; blit_to_screen+18j
                 pop     bc
                 djnz    blit_to_screen
+.endif
+
+.ifdef TRS80
+    push  hl          ; vidbuf addr
+    ld    de,#vidbuf
+    sbc   hl,de
+    ex    de,hl       ; DE=vidbuf offset
+    pop   hl
+    ld    a,e
+    rlca
+    rl    d
+    rlca
+    rl    d
+    rlca
+    rl    d           ; D=y
+    ld    a,#191
+    sub   d
+    ld    d,a
+    ld    a,e
+    and   #0x1F
+.ifdef PIXEL_DOUBLE
+    sla   a
+.endif    
+    ld    e,a         ; E=x
+1$:
+    push  de
+    push  hl
+    push  bc
+    ld    a,d
+    GFXY
+    ld    a,e
+    GFXX
+2$:
+    ld    a,(hl)
+.ifdef PIXEL_DOUBLE
+    push  bc
+		NIBDBL
+		push				af
+		ld					a,c
+		GFXDAT  		
+		pop					af
+		NIBDBL  		
+		ld					a,c
+		pop   bc
+.endif
+    GFXDAT
+    inc   hl
+    dec   c
+    jr    nz,2$
+    pop   bc
+    pop   hl
+    ld    de,#32
+    add   hl,de
+    pop   de
+    dec   d
+    djnz  1$
+.endif
                 ret
 ; End of function blit_to_screen
 
@@ -9958,7 +10099,7 @@ loc_D1E9:                                       ; CODE XREF: flip_sprite+1B9j
 ; ===========================================================================
 
 ; Segment type: Regular
-                .org 0xD200
+                .org 0xD300
 vidbuf:         .ds 0x1800                      ; DATA XREF: clear_scrn_buffer+3o
                                                 ; update_screeno ...
 ; end of 'VRAM'
