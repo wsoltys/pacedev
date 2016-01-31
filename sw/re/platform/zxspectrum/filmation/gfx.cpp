@@ -1202,10 +1202,26 @@ void pentagram (void)
 	int					fd;
 	
 	char				buf[1024];
-  unsigned    p = 0x6248;
+  unsigned    p;
 
   unsigned t;
   unsigned w, h;
+
+	fp = fopen ("pentagrm.sna", "rb");
+	if (!fp)
+		exit (0);
+	fd = fileno (fp);
+	if (fstat	(fd, &fs))
+		exit (0);
+	fread (&ram[16384-27], sizeof(uint8_t), fs.st_size, fp);
+	fclose (fp);
+
+  dump_sna_hdr ((PSNAHDR)&ram[16384-27]);
+  
+	fp = fopen ("pentagram.bin", "wb");
+	// write the relevant areas
+	fwrite (&ram[0x5e00], 0xd88f-0x5e00, 1, fp);
+	fclose (fp);
 
   // dump title data to .ASM
   fp = fopen ("c/src/pg/pentagram.scr", "rb");
@@ -1268,8 +1284,8 @@ void main (int argc, char *argv[])
 	set_palette_range (pal, 0, 7, 1);
 
   //knight_lore ();
-  alien_8 ();
-  //pentagram ();
+  //alien_8 ();
+  pentagram ();
     
   allegro_exit ();
 }
