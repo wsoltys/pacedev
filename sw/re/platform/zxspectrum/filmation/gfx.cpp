@@ -25,9 +25,9 @@
 //#define DO_C_DATA
 
 //#define DO_ASCII
-//#define DO_PARSE_MAP
+#define DO_PARSE_MAP
 //#define DO_GA
-#define DO_FONT
+//#define DO_FONT
 //#define DO_SPRITE_DATA
 //#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
@@ -842,12 +842,13 @@ void knight_lore (void)
 #ifdef DO_PARSE_MAP
   // parse the map
 
-  unsigned p = 0x6248;
+  p = 0x6248;
   fprintf (stdout, "X,Y,Z=%03d,%03d,%03d\n",
             ram[p+0], ram[p+1], ram[p+2]);
 
   p = 0x6251;
   int n = 0;
+  int total_objs = 0;
   while (1)
   {
     fprintf (stdout, "id=%03d\n", ram[p+0]);
@@ -862,6 +863,7 @@ void knight_lore (void)
       if (4+b == 1+ram[p+1])
       break;
     }
+    total_objs += b;
     if (4+b != 1+ram[p+1])
     {
       unsigned f;
@@ -870,6 +872,7 @@ void knight_lore (void)
         fprintf (stdout, " block=%02d\n", ram[p+4+b+f]>>3);
         unsigned count = (ram[p+4+b+f]&0x07)+1;
         fprintf (stdout, " count=%02d\n", count);
+        total_objs += count;
         unsigned c;
         for (c=0; c<count; c++, f++)
         {
@@ -886,6 +889,8 @@ void knight_lore (void)
     if (++n == 128)
       break;
   }
+  
+  fprintf (stderr, "avg/room = %.2lf\n", (double)total_objs/(double)n);
 #endif
 
 #ifdef DO_GA
@@ -1262,6 +1267,69 @@ void pentagram (void)
     }
     fclose (fp);
   }
+
+#ifdef DO_PARSE_MAP
+  // parse the map
+
+  p = 0x5e07;
+  fprintf (stdout, "X,Y,Z=%03d,%03d,%03d\n",
+            ram[p+0], ram[p+1], ram[p+2]);
+
+  p = 0x5e10;
+  int n = 0;
+  int total_objs = 0;
+  while (1)
+  {
+    fprintf (stdout, "id=%03d\n", ram[p+0]);
+    fprintf (stdout, " byte count =%03d\n", ram[p+1]);
+    fprintf (stdout, " size=%02d\n", ram[p+2]>>3);
+    fprintf (stdout, " attributes =%02d\n", ram[p+2]&0x07);
+
+    unsigned b;
+    for (b=0; ram[p+3+b] != 0xff; b+=2)
+    {
+      fprintf (stdout, " BG=%03d, EXIT=%03d\n", ram[p+3+b], ram[p+3+b+1]);
+      total_objs++;
+      if (4+b+1 == 1+ram[p+1])
+      break;
+    }
+    if (4+b != 1+ram[p+1])
+    {
+      unsigned f;
+      for (f=0; ; f++)
+      {
+        fprintf (stdout, " block=%02d\n", ram[p+4+b+f]>>3);
+        unsigned count = (ram[p+4+b+f]&0x07)+1;
+        fprintf (stdout, " count=%02d\n", count);
+        total_objs += count;
+        unsigned c;
+        for (c=0; c<count; c++, f++)
+        {
+          unsigned xyz = ram[p+5+b+f];
+          fprintf (stdout, "  x,y,z=%02d,%02d,%02d\n",
+                    xyz&0x07, (xyz>>3)&0x07, (xyz>>6)&0x03);
+        }
+        //fprintf (stderr, "5+b+f=%d\n", 5+b+f);
+        if (5+b+f >= 1+ram[p+1])
+        {
+          // there's a bug in the table at room 13
+          if (5+b+f > 1+ram[p+1])
+            p -= (5+b+f-(1+ram[p+1]));
+          break;
+        }
+      }
+    }
+    p += 1 + ram[p+1];
+    ++n;
+    
+    if (n>13) break;
+      
+    if (p >= 0x696d)
+      break;
+  }
+  
+  fprintf (stderr, "avg/room = %.2lf\n", (double)total_objs/(double)n);
+#endif
 }
 
 void main (int argc, char *argv[])
