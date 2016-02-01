@@ -2455,7 +2455,7 @@ RAM:A72B CD DC A7                    call    reset_objs_wipe_flag
 RAM:A72E
 RAM:A72E             loc_A72E:                                       ; CODE XREF: RAM:A71Cj
 RAM:A72E                                                             ; RAM:A745j
-RAM:A72E CD 22 CE                    call    audio_CE22
+RAM:A72E CD 22 CE                    call    handle_pause
 RAM:A731 DD 21 88 5B                 ld      ix, #graphic_objs_tbl
 RAM:A735 DD 7E 00                    ld      a, 0(ix)
 RAM:A738 DD B6 20                    or      0x20(ix)
@@ -5067,8 +5067,8 @@ RAM:B6B1 01 10 80                    ld      bc, #0x8010
 RAM:B6B4 18 45                       jr      toggle_FE_bit4_xC
 RAM:B6B6             ; ---------------------------------------------------------------------------
 RAM:B6B6
-RAM:B6B6             toggle_FE_bit4_x24:                             ; CODE XREF: audio_CE22+14p
-RAM:B6B6                                                             ; audio_CE22+29j
+RAM:B6B6             toggle_FE_bit4_x24:                             ; CODE XREF: handle_pause+14p
+RAM:B6B6                                                             ; handle_pause+29j
 RAM:B6B6 01 18 50                    ld      bc, #0x5018
 RAM:B6B9 18 40                       jr      toggle_FE_bit4_xC
 RAM:B6BB             ; ---------------------------------------------------------------------------
@@ -9049,7 +9049,7 @@ RAM:CE22
 RAM:CE22             ; =============== S U B R O U T I N E =======================================
 RAM:CE22
 RAM:CE22
-RAM:CE22             audio_CE22:                                     ; CODE XREF: RAM:loc_A72Ep
+RAM:CE22             handle_pause:                                   ; CODE XREF: RAM:loc_A72Ep
 RAM:CE22 3E 7E                       ld      a, #0x7E ; '~'
 RAM:CE24 CD 59 B7                    call    read_key
 RAM:CE27 CB 47                       bit     0, a
@@ -9057,26 +9057,26 @@ RAM:CE29 C8                          ret     Z
 RAM:CE2A E6 1E                       and     #0x1E
 RAM:CE2C C0                          ret     NZ
 RAM:CE2D
-RAM:CE2D             loc_CE2D:                                       ; CODE XREF: audio_CE22+12j
+RAM:CE2D             debounce_space_press:                           ; CODE XREF: handle_pause+12j
 RAM:CE2D 3E 7E                       ld      a, #0x7E ; '~'
 RAM:CE2F CD 59 B7                    call    read_key
 RAM:CE32 CB 47                       bit     0, a
-RAM:CE34 20 F7                       jr      NZ, loc_CE2D
+RAM:CE34 20 F7                       jr      NZ, debounce_space_press
 RAM:CE36 CD B6 B6                    call    toggle_FE_bit4_x24
 RAM:CE39
-RAM:CE39             loc_CE39:                                       ; CODE XREF: audio_CE22+1Ej
+RAM:CE39             wait_for_space:                                 ; CODE XREF: handle_pause+1Ej
 RAM:CE39 3E 7E                       ld      a, #0x7E ; '~'
 RAM:CE3B CD 59 B7                    call    read_key
 RAM:CE3E CB 47                       bit     0, a
-RAM:CE40 28 F7                       jr      Z, loc_CE39
+RAM:CE40 28 F7                       jr      Z, wait_for_space
 RAM:CE42
-RAM:CE42             loc_CE42:                                       ; CODE XREF: audio_CE22+27j
+RAM:CE42             debounce_space_release:                         ; CODE XREF: handle_pause+27j
 RAM:CE42 3E 7E                       ld      a, #0x7E ; '~'
 RAM:CE44 CD 59 B7                    call    read_key
 RAM:CE47 CB 47                       bit     0, a
-RAM:CE49 20 F7                       jr      NZ, loc_CE42
+RAM:CE49 20 F7                       jr      NZ, debounce_space_release
 RAM:CE4B C3 B6 B6                    jp      toggle_FE_bit4_x24
-RAM:CE4B             ; End of function audio_CE22
+RAM:CE4B             ; End of function handle_pause
 RAM:CE4B
 RAM:CE4E
 RAM:CE4E             ; =============== S U B R O U T I N E =======================================

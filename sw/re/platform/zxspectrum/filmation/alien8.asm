@@ -2440,7 +2440,7 @@ loc_A724:                                       ; CODE XREF: RAM:A747j
 
 loc_A72E:                                       ; CODE XREF: RAM:A71Cj
                                                 ; RAM:A745j
-                call    audio_CE22
+                call    handle_pause
                 ld      ix, #graphic_objs_tbl
                 ld      a, 0(ix)
                 or      0x20(ix)
@@ -5048,8 +5048,8 @@ toggle_FE_bit4_x16:                             ; CODE XREF: RAM:AC06p
                 jr      toggle_FE_bit4_xC
 ; ---------------------------------------------------------------------------
 
-toggle_FE_bit4_x24:                             ; CODE XREF: audio_CE22+14p
-                                                ; audio_CE22+29j
+toggle_FE_bit4_x24:                             ; CODE XREF: handle_pause+14p
+                                                ; handle_pause+29j
                 ld      bc, #0x5018
                 jr      toggle_FE_bit4_xC
 ; ---------------------------------------------------------------------------
@@ -9020,7 +9020,7 @@ fill_DE:                                        ; CODE XREF: colour_something+F
 ; =============== S U B R O U T I N E =======================================
 
 
-audio_CE22:                                     ; CODE XREF: RAM:loc_A72Ep
+handle_pause:                                   ; CODE XREF: RAM:loc_A72Ep
                 ld      a, #0x7E ; '~'
                 call    read_key
                 bit     0, a
@@ -9028,26 +9028,26 @@ audio_CE22:                                     ; CODE XREF: RAM:loc_A72Ep
                 and     #0x1E
                 ret     NZ
 
-loc_CE2D:                                       ; CODE XREF: audio_CE22+12j
+debounce_space_press:                           ; CODE XREF: handle_pause+12j
                 ld      a, #0x7E ; '~'
                 call    read_key
                 bit     0, a
-                jr      NZ, loc_CE2D
+                jr      NZ, debounce_space_press
                 call    toggle_FE_bit4_x24
 
-loc_CE39:                                       ; CODE XREF: audio_CE22+1Ej
+wait_for_space:                                 ; CODE XREF: handle_pause+1Ej
                 ld      a, #0x7E ; '~'
                 call    read_key
                 bit     0, a
-                jr      Z, loc_CE39
+                jr      Z, wait_for_space
 
-loc_CE42:                                       ; CODE XREF: audio_CE22+27j
+debounce_space_release:                         ; CODE XREF: handle_pause+27j
                 ld      a, #0x7E ; '~'
                 call    read_key
                 bit     0, a
-                jr      NZ, loc_CE42
+                jr      NZ, debounce_space_release
                 jp      toggle_FE_bit4_x24
-; End of function audio_CE22
+; End of function handle_pause
 
 
 ; =============== S U B R O U T I N E =======================================

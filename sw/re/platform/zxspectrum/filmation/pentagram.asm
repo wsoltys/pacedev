@@ -1865,7 +1865,7 @@ byte_A73C:      .db 0                                           ; DATA XREF: RAM
                                                                 ; RAM:C9FAr ...
 byte_A73D:      .db 0                                           ; DATA XREF: RAM:CBB0o
                                                                 ; RAM:CC47w
-word_A73E:      .dw 0                                           ; DATA XREF: RAM:B03Ew
+tmp_SP_2:       .dw 0                                           ; DATA XREF: RAM:B03Ew
 byte_A740:      .db 0                                           ; DATA XREF: RAM:loc_BF79r
                                                                 ; RAM:BFAEw ...
 byte_A741:      .db 0                                           ; DATA XREF: RAM:BF93w
@@ -2275,8 +2275,8 @@ done_sprite_updates:
                 ld      (seed_2), hl
                 call    list_objects_to_draw
                 call    render_dynamic_objects
-                ld      (word_A73E), sp
-                call    loc_B4E0
+                ld      (tmp_SP_2), sp                          ; don't think this is used
+                call    handle_pause
                 ld      a, (rendered_objs_cnt)
                 neg
                 add     a, #6
@@ -3199,7 +3199,7 @@ loc_B4CF:                                                       ; DATA XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B4E0:                                                       ; CODE XREF: RAM:B042p
+handle_pause:                                                   ; CODE XREF: RAM:B042p
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
@@ -3208,25 +3208,25 @@ loc_B4E0:                                                       ; CODE XREF: RAM
                 ret     NZ
                 call    loc_D5D7
 
-loc_B4EE:                                                       ; CODE XREF: RAM:B4F5j
+debounce_space_press:                                           ; CODE XREF: RAM:B4F5j
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
-                jr      NZ, loc_B4EE
-                ld      iy, #0x5C3A                             ; WARNING
+                jr      NZ, debounce_space_press
+                ld      iy, #0x5C3A                             ; for ROM IRQ/keybd routine
                 ei
 
-loc_B4FC:                                                       ; CODE XREF: RAM:B503j
+wait_for_space:                                                 ; CODE XREF: RAM:B503j
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
-                jr      Z, loc_B4FC
+                jr      Z, wait_for_space
 
-loc_B505:                                                       ; CODE XREF: RAM:B50Cj
+debounce_space_release:                                         ; CODE XREF: RAM:B50Cj
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
-                jr      NZ, loc_B505
+                jr      NZ, debounce_space_release
                 di
                 call    loc_D5D7
                 ret

@@ -12,18 +12,43 @@
 ; Input	CRC32 :	57F860FA
 
 ; +--------------------------------------------------+
-; | ZX Spectrum	Knight Lore Disassembly	v1.00rc2     |
+; | ZX Spectrum	Knight Lore Disassembly	v1.00rc4     |
 ; |    - by tcdev (msmcdoug@gmail.com)		     |
 ; +--------------------------------------------------+
 ;
-; Stack	grows down from	here
-; Variables from here are zeroed at start of game
+; Memory Map:
+;
+; $4000-$57FF -	spectrum video memory
+; $5800-$5AFF -	spectrum attribute memory
+;	$5B9F -	stack
+; $5BA0-$6107 -	variables
+; $6108-$D8F2 -	code and data
+; $D8F3-$F0F2 -	video buffer
+; $F100-$FFFF -	bit-shift & bit-reverse	lookup tables
+;	      -	(built at run-time)
+
 
 ; Processor	  : z80	[]
 ; Target assembler: ASxxxx by Alan R. Baldwin v1.5
        .area   idaseg (ABS)
        .hd64 ; this is needed only for HD64180
 
+; ===========================================================================
+
+; Segment type:	Regular
+		.org 0x4000
+zx_vram:	.ds 0x1800
+; end of 'ZX_VRAM'
+
+; ===========================================================================
+
+; Segment type:	Regular
+		.org 0x5800
+zx_aram:	.ds 0x300
+; end of 'ZX_ARAM'
+
+; Stack	grows down from	here
+; Variables from here are zeroed at start of game
 ; ===========================================================================
 
 ; Segment type:	Regular
@@ -85,25 +110,12 @@ render_obj_2:	.ds 2
 audio_played:	.ds 1
 directional:	.ds 1
 cant_drop:	.ds 1
-		.ds 1
-		.ds 1
-		.ds 1
-		.ds 1
-inventory:	.ds 1
-		.ds 1
-		.ds 1
-		.ds 1
-objects_carried:.ds 1
-		.ds 1
-		.ds 1
-		.ds 1
-		.ds 1
-		.ds 1
-		.ds 1
+		.ds 4
+inventory:	.ds 4
+objects_carried:.ds 7
 unk_5BE3:	.ds 1
 unk_5BE4:	.ds 1
-		.ds 1
-		.ds 1
+		.ds 2
 end_of_objects_carried:.ds 1
 ;
 ; table	of bits	(flags)	denoting room has been visited
@@ -2617,7 +2629,7 @@ main:								; for bit reversal & shifting
 		call	build_lookup_tbls
 		xor	a
 		ld	(not_1st_screen), a
-		ld	(byte_D16D), a				; plyr_spr_1_scratchpad	(flags12)
+		ld	(flags12_1), a				; plyr_spr_1_scratchpad
 		ld	a, #5					; 5 lives to start
 		ld	(lives), a
 		ld	hl, #seed_1
@@ -2696,7 +2708,7 @@ loc_B000:
 		ld	(seed_3), a
 		ld	hl, #not_1st_screen
 		set	0, (hl)					; update special objects table next time
-		call	audio_D50E
+		call	handle_pause
 		call	init_cauldron_bubbles
 		call	list_objects_to_draw			; builds a list	of screen objects
 		call	render_dynamic_objects			; renders above	list
@@ -3638,7 +3650,7 @@ loc_B5E3:							; fatal	if it hits player
 		set	7, 13(ix)
 		set	1, 7(ix)				; ignore object	in 3D calculations
 		ld	11(ix),	#1				; dZ=1
-		ld	bc, #0x404
+		ld	bc, #0x404				; dX,dY=4
 		call	move_towards_plyr
 		jr	loc_B5A9
 
@@ -3736,9 +3748,9 @@ loc_B67A:							; new dX
 
 upd_91:
 		call	upd_6_7
-		bit	3, 13(ix)
-		ret	Z
-		res	3, 13(ix)
+		bit	3, 13(ix)				; triggered?
+		ret	Z					; no, exit
+		res	3, 13(ix)				; reset	triggered
 		ld	11(ix),	#0				; dZ=0
 		call	dec_dZ_and_update_XYZ
 		bit	2, 12(ix)				; Z OOB?
@@ -4130,9 +4142,9 @@ loc_B916:
 ; ---------------------------------------------------------------------------
 ; if wulf, no reveal of	next object
 
-loc_B919:
+loc_B919:							; graphic_no
 		set	2, 0(ix)
-		res	1, 7(ix)
+		res	1, 7(ix)				; don't ignore in 3D calcs
 		jr	loc_B916
 ; ---------------------------------------------------------------------------
 ; special objs when 1st	being put into cauldron
@@ -4248,7 +4260,7 @@ upd_30_31_158_159:
 		call	move_guard_wizard_NSEW
 		ld	9(ix), l				; dX
 		ld	0x29(ix), l				; next obj dX
-		ld	0xA(ix), h				; dY
+		ld	10(ix),	h				; dY
 		ld	0x2A(ix), h				; next obj dY
 		ld	a, 1(ix)				; X
 		ld	0x21(ix), a				; copy to next obj X
@@ -4565,7 +4577,7 @@ print_days:
 		ld	de, #days
 		ld	b, #1
 		call	print_BCD_number
-		ld	hl, #0x5AEF				; attribute memory
+		ld	hl, # zx_aram+0x2EF			; attribute memory
 		ld	(hl), #0x47 ; 'G'
 		inc	l
 		ld	(hl), #0x47 ; 'G'
@@ -4584,10 +4596,10 @@ print_lives_gfx:
 		ld	27(ix),	#32				; pixel	Y
 		call	print_sprite
 		ld	a, #0x47 ; 'G'
-		ld	de, #0x5A42
+		ld	de, # zx_aram+0x242
 		ld	b, #2
 		call	fill_DE
-		ld	de, #0x5A62
+		ld	de, # zx_aram+0x262
 		ld	b, #4
 		jp	fill_DE
 ; End of function print_lives_gfx
@@ -5766,7 +5778,7 @@ display_frame:							; 31 lines, 6 bytes (swapped below)
 		call	print_sprite
 		pop	hl
 		pop	bc
-		ld	de, #0x57F7				; (184,0)
+		ld	de, # zx_vram+0x17F7			; (184,0)
 		jp	blit_to_screen
 ; ---------------------------------------------------------------------------
 
@@ -5870,7 +5882,7 @@ init_obj_loop:
 upd_62:
 		call	upd_6_7
 		call	clear_dX_dY
-		call	audio_B3E9				; audio?
+		call	audio_B3E9
 		jp	dec_dZ_wipe_and_draw
 ; ---------------------------------------------------------------------------
 ; chest
@@ -6467,10 +6479,10 @@ loc_C791:							; graphic no.
 		call	is_near_to
 		jr	NC, loc_C7D6
 		push	bc
-		ld	bc, #off_C7A9
-		jp	loc_CA17				; index	into table based on sprite dir
+		ld	bc, #adj_arch_tbl
+		jp	lookup_plyr_dXY				; index	into table based on sprite dir
 ; ---------------------------------------------------------------------------
-off_C7A9:	.dw adj_ew
+adj_arch_tbl:	.dw adj_ew
 		.dw adj_ew
 		.dw adj_ns
 		.dw adj_ns
@@ -6520,11 +6532,11 @@ loc_C7E4:							; graphic no
 		ld	a, 0(iy)
 		and	a					; null?
 		jr	Z, loc_C7F9				; yes, skip
-		bit	3, 7(iy)
-		jr	Z, loc_C7F9				; , skip
+		bit	3, 7(iy)				; auto-adjust?
+		jr	Z, loc_C7F9				; no, skip
 		call	is_near_to
-		jr	NC, loc_C7F9
-		set	0, 7(iy)
+		jr	NC, loc_C7F9				; no, skip
+		set	0, 7(iy)				; flag near arch
 
 loc_C7F9:							; next entry
 		add	iy, de
@@ -6575,13 +6587,13 @@ upd_16_to_21_24_to_29:
 upd_48_to_53_56_to_61:
 		call	adj_m7_m12
 
-upd_player_bottom:
+upd_player_bottom:						; dead?
 		bit	6, 13(ix)
-		jr	Z, loc_C83E
+		jr	Z, loc_C83E				; no, skip
 		ld	a, (all_objs_in_cauldron)
 		and	a
 		jr	NZ, loc_C83E
-		set	6, 0x2D(ix)				; top half flags13
+		set	6, 0x2D(ix)				; set dead top half
 		jp	init_death_sparkles
 ; ---------------------------------------------------------------------------
 
@@ -6593,22 +6605,22 @@ loc_C83E:							; returns to caller if transforming
 		call	handle_jump
 		call	handle_forward
 		call	chk_plyr_OOB
-		jr	NC, loc_C86D
+		jr	NC, plyr_not_OOB
 
-loc_C855:
+loc_C855:							; fudge	near arch
 		set	1, 0x27(ix)
 		call	move_player				; does the moving
-		res	1, 0x27(ix)
-		ld	a, 12(ix)
-		sub	#0x10
-		jr	C, loc_C86A
-		ld	12(ix),	a
+		res	1, 0x27(ix)				; reset	fudge
+		ld	a, 12(ix)				; flags12
+		sub	#0x10					; entering room?
+		jr	C, loc_C86A				; no, skip
+		ld	12(ix),	a				; dec entering room counter
 
 loc_C86A:
 		jp	set_wipe_and_draw_flags
 ; ---------------------------------------------------------------------------
 
-loc_C86D:							; dZ
+plyr_not_OOB:							; dZ
 		ld	a, 11(ix)
 		and	a					; <0?
 		jp	M, loc_C855				; yes, go
@@ -6655,12 +6667,12 @@ handle_left_right:
 		ld	hl, #user_input_method
 		ld	a, (hl)
 		and	#6					; joystick/keyboard bits only
-		jr	Z, loc_C8F2				; keybd? yes, skip
+		jr	Z, left_right_non_directional		; keybd? yes, skip
 		bit	3, (hl)					; directional?
-		jr	Z, loc_C8F2
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		ret	NZ
+		jr	Z, left_right_non_directional
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering screen?
+		ret	NZ					; yes, exit
 		bit	2, 12(ix)				; Z OOB?
 		ret	Z					; no, exit
 		bit	0, c
@@ -6718,7 +6730,7 @@ loc_C8EF:
 		ret
 ; ---------------------------------------------------------------------------
 
-loc_C8F2:
+left_right_non_directional:
 		ld	a, 13(ix)
 		and	#7					; too soon to turn again?
 		jr	Z, loc_C8FD				; no, skip
@@ -6730,9 +6742,9 @@ loc_C8FD:							; user input
 		ld	a, c
 		and	#3					; left or right?
 		ret	Z					; no, return
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		ret	NZ
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering screen?
+		ret	NZ					; yes, exit
 		bit	3, 12(ix)				; already jumping?
 		ret	NZ					; yes, exit
 		bit	2, c					; forward?
@@ -6780,9 +6792,9 @@ loc_C940:							; hflip?
 handle_jump:
 		bit	3, c					; jump?
 		ret	Z					; no, exit
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		ret	NZ
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering screen?
+		ret	NZ					; yes, exit
 		bit	3, 12(ix)				; already jumping?
 		ret	NZ					; yes, exit
 		ld	a, 11(ix)				; dZ
@@ -6801,9 +6813,9 @@ handle_jump:
 
 
 handle_forward:
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		jr	NZ, loc_C97A
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering sccreen?
+		jr	NZ, loc_C97A				; yes, skip
 		bit	3, 12(ix)				; already jumping?
 		jr	NZ, loc_C97A				; yes, skip
 		bit	2, c					; forward?
@@ -6855,9 +6867,9 @@ move_player:
 loc_C9AB:							; already jumping?
 		bit	3, 12(ix)
 		jr	NZ, loc_C9BC				; yes, skip
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		jr	NZ, loc_C9BC
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering screen?
+		jr	NZ, loc_C9BC				; yes, skip
 		bit	2, c					; forward?
 		jr	Z, loc_C9C1				; no, skip
 
@@ -6870,8 +6882,8 @@ loc_C9C1:							; dZ
 		ld	a, 11(ix)
 		and	a
 		jp	M, loc_C9CC
-		bit	3, c
-		jr	NZ, loc_C9CD
+		bit	3, c					; jump?
+		jr	NZ, loc_C9CD				; yes, skip
 
 loc_C9CC:
 		dec	a
@@ -6915,7 +6927,7 @@ calc_plyr_dXY:
 		ld	15(ix),	a				; zap adjustment
 		ld	bc, #off_CA32
 
-loc_CA17:
+lookup_plyr_dXY:
 		call	get_sprite_dir
 		ld	l, a
 		jp	jump_to_tbl_entry
@@ -7002,16 +7014,16 @@ loc_CA5E:							; Z
 
 
 handle_exit_screen:
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		ret	NZ
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering room?
+		ret	NZ					; yes, exit
 		bit	0, 7(ix)				; near an arch?
 		ret	Z					; no, return
 		res	0, 7(ix)				; reset	flag
 		ld	bc, #screen_move_tbl
 		ld	hl, (room_size_X)
 		push	hl
-		jp	loc_CA17
+		jp	lookup_plyr_dXY
 ; End of function handle_exit_screen
 
 ; adjust dX/dY/dZ when out of bounds
@@ -7063,13 +7075,13 @@ screen_e_w:							; low nibble
 
 exit_screen:							; store	new screen
 		ld	8(ix), a
-		ld	a, 12(ix)
-		or	#0x30 ;	'0'
-		ld	12(ix),	a
+		ld	a, 12(ix)				; flags12
+		or	#0x30 ;	'0'                             ; init enter room counter
+		ld	12(ix),	a				; save
 		ld	a, 0(ix)				; graphic no.
 		sub	#0x10
-		cp	#0x40 ;	'@'                             ; sabre wolf?
-		ret	NC
+		cp	#0x40 ;	'@'                             ; wulf?
+		ret	NC					; WHY is wulf handled differently???
 		inc	sp
 		inc	sp
 		inc	sp
@@ -7212,11 +7224,11 @@ loc_CBAF:
 		ld	a, 13(ix)
 		rrca
 		and	#0x40 ;	'@'                             ; bit 7->6
-		or	13(iy)
+		or	13(iy)					; obj2 destroyed?
 		ld	13(iy),	a
 		rlca
 		and	#0x40 ;	'@'                             ; bit 5->6
-		or	13(ix)
+		or	13(ix)					; obj1 destroyed?
 		ld	13(ix),	a
 		bit	2, 7(iy)				; moveable?
 		jr	Z, loc_CBD9				; no, skip
@@ -7260,12 +7272,12 @@ loc_CBFE:
 		set	1, 12(ix)				; set Y	OOB
 		ld	a, 13(ix)
 		rrca
-		and	#0x40 ;	'@'
-		or	13(iy)
+		and	#0x40 ;	'@'                             ; bit 7->6
+		or	13(iy)					; obj2 destroyed?
 		ld	13(iy),	a
 		rlca
-		and	#0x40 ;	'@'
-		or	13(ix)
+		and	#0x40 ;	'@'                             ; bit 5->6
+		or	13(ix)					; obj1 destroyed?
 		ld	13(ix),	a
 		bit	2, 7(iy)				; moveable?
 		jr	Z, loc_CC28				; no, skip
@@ -7310,11 +7322,11 @@ loc_CC4D:
 		ld	a, 13(ix)
 		rrca
 		and	#0x40 ;	'@'                             ; bit 7->6
-		or	13(iy)
+		or	13(iy)					; obj2 destroyed?
 		ld	13(iy),	a
 		rlca
 		and	#0x40 ;	'@'                             ; bit 5->6
-		or	13(ix)
+		or	13(ix)					; obj1 destroyed?
 		ld	13(ix),	a
 		set	3, 13(iy)				; triggered (falling, collapsing blocks)
 		bit	2, 7(ix)				; moveable?
@@ -7412,9 +7424,9 @@ loc_CCD8:							; thisH	(height)
 
 
 adj_dX_for_out_of_bounds:
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		ret	NZ
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering room?
+		ret	NZ					; yes, exit
 		bit	0, 7(ix)				; near an arch?
 		ret	NZ					; yes, exit
 		ld	a, (room_size_X)
@@ -7446,9 +7458,9 @@ dX_ok:
 
 
 adj_dY_for_out_of_bounds:
-		ld	a, 12(ix)
-		and	#0xF0 ;	'ð'
-		ret	NZ
+		ld	a, 12(ix)				; flags12
+		and	#0xF0 ;	'ð'                             ; entering room?
+		ret	NZ					; yes, exit
 		bit	0, 7(ix)				; near and arch?
 		ret	NZ					; yes, exit
 		ld	a, (room_size_Y)
@@ -7636,11 +7648,11 @@ loc_CDEF:
 		ld	bc, #7
 		ldir						; copy x,y,z,w,d,h,flags
 		ld	6(ix), #0				; height (top)
-		set	1, 7(ix)
-		ld	a, 13(ix)
+		set	1, 7(ix)				; ignore in 3D calcs
+		ld	a, 13(ix)				; flags13
 		and	#0xF					; look around counter
 		jr	Z, loc_CE14				; maybe	look around again?
-		dec	13(ix)
+		dec	13(ix)					; dec look around counter
 		jr	loc_CE27
 ; ---------------------------------------------------------------------------
 
@@ -7740,14 +7752,14 @@ calc_display_order_and_render:
 		push	ix
 		push	iy
 
-loc_CEC3:
+process_remaining_objs:
 		ld	de, #objects_to_draw
 
 loc_CEC6:							; graphic no.
 		ld	a, (de)
 		inc	de
 		cp	#0xFF					; end of list?
-		jp	Z, loc_D015				; yes, exit
+		jp	Z, render_done				; yes, exit
 		bit	7, a					; already rendered?
 		jr	NZ, loc_CEC6				; yes, skip
 		call	get_ptr_object				; ret=HL
@@ -7759,7 +7771,7 @@ loc_CEDB:							; next object graphic no.
 		ld	a, (de)
 		inc	de
 		cp	#0xFF					; end of list?
-		jp	Z, loc_D000
+		jp	Z, render_obj_no1
 		bit	7, a
 		jr	NZ, loc_CEDB
 		call	get_ptr_object
@@ -7912,12 +7924,12 @@ loc_CFD1:							; graphic_no
 		ld	a, (hl)
 		inc	hl
 		cp	#0xFF					; end of list?
-		jp	Z, loc_CEC3				; yes, exit
+		jp	Z, process_remaining_objs		; yes, exit
 		cp	c					; what we're looking for?
 		jr	NZ, loc_CFD1				; no, loop
 		push	iy
 		pop	ix					; obj#2=obj#1
-		jr	loc_D003
+		jr	render_obj
 ; ---------------------------------------------------------------------------
 
 objs_coincide:							; obj#1	graphic	no.
@@ -7940,21 +7952,21 @@ loc_CFFD:							; continue
 		jp	loc_CEDB
 ; ---------------------------------------------------------------------------
 
-loc_D000:
+render_obj_no1:
 		ld	hl, (render_obj_1)
 
-loc_D003:							; back to entry	we're searching for
+render_obj:							; back to entry	we're searching for
 		dec	hl
 		set	7, (hl)					; flag as rendered
 		ld	a, #0xFF
 		ld	(render_list), a			; set entry to empty
 		ld	hl, #rendered_objs_cnt
 		inc	(hl)
-		call	calc_pixel_XY_and_render		; this does some rendering!!!
-		jp	loc_CEC3				; restart processing again
+		call	calc_pixel_XY_and_render		; render object	to video buffer
+		jp	process_remaining_objs			; restart processing again
 ; ---------------------------------------------------------------------------
 
-loc_D015:
+render_done:
 		pop	iy
 		pop	ix
 		ret
@@ -8206,71 +8218,14 @@ lose_life:
 ; End of function lose_life
 
 ; ---------------------------------------------------------------------------
-; scratchpad? for player sprite	objects?
-plyr_spr_1_scratchpad:.db 0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-start_loc_1:	.db 0
-		.db    0
-		.db    0
-		.db    0
-byte_D16D:	.db 0
-		.db    0
-		.db    0
-		.db    0
-byte_D171:	.db 0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-plyr_spr_2_scratchpad:.db 0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-start_loc_2:	.db 0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-byte_D191:	.db 0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
-		.db    0
+; scratchpad for player	sprites/objects
+plyr_spr_1_scratchpad:.db 0, 0,	0, 0, 0, 0, 0, 0
+start_loc_1:	.db 0, 0, 0, 0
+flags12_1:	.db 0, 0, 0, 0
+byte_D171:	.db 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0
+plyr_spr_2_scratchpad:.db 0, 0,	0, 0, 0, 0, 0, 0
+start_loc_2:	.db 0, 0, 0, 0,	0, 0, 0, 0
+byte_D191:	.db 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0
 plyr_spr_init_data:.db 0x78, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x1C
 		.db 0x78, 0x80,	0x80, 0x8C, 5, 5, 0, 0x1E
 
@@ -8397,14 +8352,14 @@ display_panel:
 		ld	ix, #sprite_scratchpad
 		ld	hl, #panel_data
 		call	transfer_sprite
-		ld	de, #0xF810
-		ld	b, #5
+		ld	de, #0xF810				; x+=16,y-=8
+		ld	b, #5					; 5 sprites
 		call	multiple_print_sprite
 		call	transfer_sprite_and_print
 		call	transfer_sprite_and_print
 		call	transfer_sprite
-		ld	de, #0x810
-		ld	b, #5
+		ld	de, #0x810				; x+=16,y+=8
+		ld	b, #5					; 5 sprites
 		call	multiple_print_sprite
 		call	transfer_sprite_and_print
 		jp	transfer_sprite_and_print
@@ -8460,14 +8415,14 @@ border_data:	.db 0x89, 0, 0,	0xA0
 
 colour_panel:
 		xor	a
-		ld	hl, #0x5AB6
+		ld	hl, # zx_aram+0x2B6
 		ld	bc, #0x103				; 1 bytes, 3 lines
 		call	fill_window
-		ld	hl, #0x5ABD
+		ld	hl, # zx_aram+0x2BD
 		ld	bc, #0x103				; 1 byte, 3 lines
 		call	fill_window
 		ld	a, #0x42 ; 'B'
-		ld	hl, #0x5A97
+		ld	hl, # zx_aram+0x297
 		ld	bc, #0x604				; 6 bytes, 4 lines
 		jp	fill_window
 ; End of function colour_panel
@@ -8484,7 +8439,7 @@ colour_sun_moon:
 		inc	a
 
 loc_D317:							; attribute memory
-		ld	hl, #0x5AB8
+		ld	hl, # zx_aram+0x2B8
 		ld	bc, #0x402				; 4 bytes, 2 lines
 		jp	fill_window
 ; End of function colour_sun_moon
@@ -8895,34 +8850,34 @@ fill_DE:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-audio_D50E:
-		ld	a, #0x7E ; '~'
+handle_pause:
+		ld	a, #0x7E ; '~'                          ; SPACE,SYMSHIFT,M,N,B
 		call	read_port
-		bit	0, a
-		ret	Z
-		and	#0x1E
-		ret	NZ
+		bit	0, a					; SPACE?
+		ret	Z					; no, exit
+		and	#0x1E					; any other key?
+		ret	NZ					; yes, exit
 
-loc_D519:
+debounce_space_press:
 		ld	a, #0x7E ; '~'
 		call	read_port
-		bit	0, a
-		jr	NZ, loc_D519
+		bit	0, a					; SPACE?
+		jr	NZ, debounce_space_press		; yes, loop
 		call	toggle_FE_bit4_x24
 
-loc_D525:
+wait_for_space:
 		ld	a, #0x7E ; '~'
 		call	read_port
-		bit	0, a
-		jr	Z, loc_D525
+		bit	0, a					; SPACE?
+		jr	Z, wait_for_space			; no, loop
 
-loc_D52E:
+debounce_space_release:
 		ld	a, #0x7E ; '~'
 		call	read_port
-		bit	0, a
-		jr	NZ, loc_D52E
+		bit	0, a					; SPACE?
+		jr	NZ, debounce_space_release		; no, loop
 		jp	toggle_FE_bit4_x24
-; End of function audio_D50E
+; End of function handle_pause
 
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -8945,7 +8900,7 @@ clr_byte:							; zero location
 ; START	OF FUNCTION CHUNK FOR clear_scrn
 
 clr_bitmap_memory:						; screen memory
-		ld	hl, #0x4000
+		ld	hl, #zx_vram
 		ld	bc, #0x1800				; # bytes to clear
 		jr	clr_mem
 ; END OF FUNCTION CHUNK	FOR clear_scrn
@@ -8954,7 +8909,7 @@ clr_bitmap_memory:						; screen memory
 
 
 clr_attribute_memory:
-		ld	hl, #0x5800				; colour data
+		ld	hl, #zx_aram				; colour data
 		ld	bc, #0x300				; # bytes to clear
 		ld	e, #0x46 ; 'F'                          ; bright yellow on black
 		jr	clr_byte
@@ -8965,7 +8920,7 @@ clr_attribute_memory:
 
 
 fill_attr:
-		ld	hl, #0x5800				; colour data
+		ld	hl, #zx_aram				; colour data
 		ld	bc, #0x300				; # bytes to clear
 		ld	e, a					; attribute to set
 		jr	clr_byte				; fill
@@ -9002,7 +8957,7 @@ clear_scrn_buffer:
 
 update_screen:
 		ld	hl, #vidbuf				; screen buffer
-		ld	de, #0x57E0				; last line of attribute memory
+		ld	de, # zx_vram+0x17E0			; last line of attribute memory
 		ld	bc, #0x20C0				; B=32 bytes, C=192 lines
 
 loc_D578:
@@ -9631,7 +9586,7 @@ calc_attrib_addr:
 		rr	l
 		srl	h
 		rr	l
-		ld	de, #0x5700
+		ld	de, # zx_vram+0x1700
 		add	hl, de
 		ex	de, hl
 		pop	hl

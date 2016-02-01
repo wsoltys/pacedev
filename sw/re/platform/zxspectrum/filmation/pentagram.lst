@@ -1864,7 +1864,7 @@ RAM:A73C 00          byte_A73C:      .db 0                                      
 RAM:A73C                                                                             ; RAM:C9FAr ...
 RAM:A73D 00          byte_A73D:      .db 0                                           ; DATA XREF: RAM:CBB0o
 RAM:A73D                                                                             ; RAM:CC47w
-RAM:A73E 00 00       word_A73E:      .dw 0                                           ; DATA XREF: RAM:B03Ew
+RAM:A73E 00 00       tmp_SP_2:       .dw 0                                           ; DATA XREF: RAM:B03Ew
 RAM:A740 00          byte_A740:      .db 0                                           ; DATA XREF: RAM:loc_BF79r
 RAM:A740                                                                             ; RAM:BFAEw ...
 RAM:A741 00          byte_A741:      .db 0                                           ; DATA XREF: RAM:BF93w
@@ -2276,8 +2276,8 @@ RAM:B034 23                          inc     hl
 RAM:B035 22 15 A7                    ld      (seed_2), hl
 RAM:B038 CD 31 B5                    call    list_objects_to_draw
 RAM:B03B CD 9E B1                    call    render_dynamic_objects
-RAM:B03E ED 73 3E A7                 ld      (word_A73E), sp
-RAM:B042 CD E0 B4                    call    loc_B4E0
+RAM:B03E ED 73 3E A7                 ld      (tmp_SP_2), sp                          ; don't think this is used
+RAM:B042 CD E0 B4                    call    handle_pause
 RAM:B045 3A 14 A7                    ld      a, (rendered_objs_cnt)
 RAM:B048 ED 44                       neg
 RAM:B04A C6 06                       add     a, #6
@@ -3200,7 +3200,7 @@ RAM:B4DB ED 7B 17 A7                 ld      sp, (tmp_SP)
 RAM:B4DF C9                          ret
 RAM:B4E0             ; ---------------------------------------------------------------------------
 RAM:B4E0
-RAM:B4E0             loc_B4E0:                                                       ; CODE XREF: RAM:B042p
+RAM:B4E0             handle_pause:                                                   ; CODE XREF: RAM:B042p
 RAM:B4E0 3E 7E                       ld      a, #0x7E ; '~'
 RAM:B4E2 CD 52 B9                    call    read_port
 RAM:B4E5 CB 47                       bit     0, a
@@ -3209,25 +3209,25 @@ RAM:B4E8 E6 1E                       and     #0x1E
 RAM:B4EA C0                          ret     NZ
 RAM:B4EB CD D7 D5                    call    loc_D5D7
 RAM:B4EE
-RAM:B4EE             loc_B4EE:                                                       ; CODE XREF: RAM:B4F5j
+RAM:B4EE             debounce_space_press:                                           ; CODE XREF: RAM:B4F5j
 RAM:B4EE 3E 7E                       ld      a, #0x7E ; '~'
 RAM:B4F0 CD 52 B9                    call    read_port
 RAM:B4F3 CB 47                       bit     0, a
-RAM:B4F5 20 F7                       jr      NZ, loc_B4EE
-RAM:B4F7 FD 21 3A 5C                 ld      iy, #0x5C3A                             ; WARNING
+RAM:B4F5 20 F7                       jr      NZ, debounce_space_press
+RAM:B4F7 FD 21 3A 5C                 ld      iy, #0x5C3A                             ; for ROM IRQ/keybd routine
 RAM:B4FB FB                          ei
 RAM:B4FC
-RAM:B4FC             loc_B4FC:                                                       ; CODE XREF: RAM:B503j
+RAM:B4FC             wait_for_space:                                                 ; CODE XREF: RAM:B503j
 RAM:B4FC 3E 7E                       ld      a, #0x7E ; '~'
 RAM:B4FE CD 52 B9                    call    read_port
 RAM:B501 CB 47                       bit     0, a
-RAM:B503 28 F7                       jr      Z, loc_B4FC
+RAM:B503 28 F7                       jr      Z, wait_for_space
 RAM:B505
-RAM:B505             loc_B505:                                                       ; CODE XREF: RAM:B50Cj
+RAM:B505             debounce_space_release:                                         ; CODE XREF: RAM:B50Cj
 RAM:B505 3E 7E                       ld      a, #0x7E ; '~'
 RAM:B507 CD 52 B9                    call    read_port
 RAM:B50A CB 47                       bit     0, a
-RAM:B50C 20 F7                       jr      NZ, loc_B505
+RAM:B50C 20 F7                       jr      NZ, debounce_space_release
 RAM:B50E F3                          di
 RAM:B50F CD D7 D5                    call    loc_D5D7
 RAM:B512 C9                          ret

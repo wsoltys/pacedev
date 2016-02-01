@@ -25,7 +25,7 @@
 //#define DO_C_DATA
 
 //#define DO_ASCII
-#define DO_PARSE_MAP
+//#define DO_PARSE_MAP
 //#define DO_GA
 //#define DO_FONT
 //#define DO_SPRITE_DATA
