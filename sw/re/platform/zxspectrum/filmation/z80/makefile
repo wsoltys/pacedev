@@ -23,6 +23,12 @@ ifeq ($(GAME),a8)
   SP=f0fe
 endif
 
+ifeq ($(GAME),pg)
+  START=5e00
+  EXEC=5e00
+  SP=5dff
+endif
+
 # compiler, linker and utilities
 AS = asz80
 LD = aslink
