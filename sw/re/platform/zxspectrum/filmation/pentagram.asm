@@ -37,16 +37,14 @@
 
 ; Segment type: Regular
                 .org 0x4000
-zx_vram:        .ds 0x1800                                      ; DATA XREF: RAM:clr_bitmap_memoryo
-                                                                ; RAM:CB5Fo
+zx_vram:        .ds 0x1800
 ; end of 'ZX_VRAM'
 
 ; ===========================================================================
 
 ; Segment type: Regular
                 .org 0x5800
-zx_aram:        .ds 0x300                                       ; DATA XREF: RAM:fill_attro
-                                                                ; RAM:CB6Do
+zx_aram:        .ds 0x300
 ; end of 'ZX_ARAM'
 
 ; ---------------------------------------------------------------------------
@@ -58,513 +56,511 @@ zx_aram:        .ds 0x300                                       ; DATA XREF: RAM
 ; Segment type: Regular
                 .org 0x5E00
 
-EXEC:                                                           ; DATA XREF: RAM:5E01o
+EXEC:
                 di
                 ld      sp, #EXEC
                 jp      START
 ; ---------------------------------------------------------------------------
-room_size_tbl:  .db 64, 64, 128                                 ; DATA XREF: RAM:C969o
+room_size_tbl:  .db 64, 64, 128
                 .db 32, 64, 128
                 .db 64, 32, 128
-location_tbl:   .db 0, 30, 7                                    ; DATA XREF: RAM:C93Fo
-                                                                ; id=0
+location_tbl:   .db 0, 30, 7                                            ; id=0
                 .db 0x18, 0x93, 0x1C, 0, 0xC, 0, 0xD, 0
                 .db 0xFF, 1, 0xFD, 0xFE, 0xBD, 0x5A, 0x75, 0xB5
                 .db 0xF5, 0x35, 0x1A, 0x1D, 0x2E, 0x25, 0x1E, 0x1C
                 .db 0x15, 0x33, 0x88, 0x9D
-                .db 1, 18, 2                                    ; id=1
+                .db 1, 18, 2                                            ; id=1
                 .db 0, 3, 5, 2, 8, 0, 0xB, 0
                 .db 0xFF, 0x2D, 0x2F, 0x26, 0x1E, 0x2D, 0x24, 0x23
-                .db 2, 40, 3                                    ; id=2
+                .db 2, 40, 3                                            ; id=2
                 .db 7, 1, 0x18, 0x95, 0x1C, 0, 0xE, 0
                 .db 0xD, 0, 0xFF, 0x42, 0x2E, 0x16, 0x39, 0x46
                 .db 0x79, 0xB9, 0xF9, 0x56, 0x96, 0x6E, 0xAE, 0x80
                 .db 0x91, 0x88, 0x99, 0x60, 0x38, 1, 0xFD, 0xFE
                 .db 0x2C, 0x19, 0x1B, 9, 0xB, 0x26
-                .db 3, 17, 4                                    ; id=3
+                .db 3, 17, 4                                            ; id=3
                 .db 0, 7, 2, 1, 8, 0, 0xB, 0
                 .db 0xFF, 0x22, 0x1A, 0x1B, 0x1C, 0x90, 0xE
-                .db 4, 25, 5                                    ; id=4
+                .db 4, 25, 5                                            ; id=4
                 .db 0, 9, 8, 0, 0xB, 0, 0xFF, 0x2E
                 .db 0x2A, 0x22, 0x1A, 0x12, 0x1E, 0x27, 0x17, 2
                 .db 0x1F, 0x5F, 0xDF, 0xC0, 0x6A, 0x80, 0x9F
-                .db 5, 21, 6                                    ; id=5
+                .db 5, 21, 6                                            ; id=5
                 .db 1, 6, 8, 0, 9, 0, 0xFF, 0xA
                 .db 0x1A, 0x5A, 0x9A, 0x2B, 0x22, 0x1B, 0x12, 0x19
                 .db 0x21, 0x2D, 0x6D
-                .db 6, 12, 23                                   ; id=6
+                .db 6, 12, 23                                           ; id=6
                 .db 1, 7, 3, 5, 0x11, 0, 0xFF, 0xF1
                 .db 0x14, 0x2B
-                .db 7, 31, 2                                    ; id=7
+                .db 7, 31, 2                                            ; id=7
                 .db 1, 8, 2, 3, 3, 6, 0xA, 0
                 .db 9, 0, 0xFF, 0x1F, 5, 0xE, 0x17, 0x2F
                 .db 0x36, 0x3D, 0x3A, 0x31, 0x1F, 0x28, 0x10, 9
                 .db 2, 0x23, 0x24, 0x1B, 0x1C
-                .db 8, 15, 4                                    ; id=8
+                .db 8, 15, 4                                            ; id=8
                 .db 0, 0x14, 3, 7, 0xA, 0, 0xB, 0
                 .db 0xFF, 0x72, 0xEA, 0xD2, 0xED
-                .db 9, 24, 5                                    ; id=9
+                .db 9, 24, 5                                            ; id=9
                 .db 0, 0x15, 1, 0xA, 2, 4, 8, 0
                 .db 0xB, 0, 0xFF, 0x27, 0x2B, 0x2C, 0x25, 0x1D
                 .db 0x13, 0x14, 0x22, 0x1A, 0x90, 0x24
-                .db 10, 8, 21                                   ; id=10
+                .db 10, 8, 21                                           ; id=10
                 .db 1, 0xB, 3, 9, 0x11, 0
-                .db 11, 29, 22                                  ; id=11
+                .db 11, 29, 22                                          ; id=11
                 .db 1, 0xC, 3, 0xA, 0x11, 0, 0xFF, 0xF
                 .db 0x14, 0x54, 0x94, 0xD4, 0x1C, 0x5C, 0x9C, 0xDC
                 .db 0xB, 0x2C, 0x6C, 0xAC, 0xEC, 0x22, 0x24, 0x64
                 .db 0xA4, 0x78, 0xE4
-                .db 12, 34, 7                                   ; id=12
+                .db 12, 34, 7                                           ; id=12
                 .db 0, 0x16, 1, 0xD, 3, 0xB, 0xA, 0
                 .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
                 .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
                 .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
-                .db 13, 28, 18                                  ; id=13
+                .db 13, 28, 18                                          ; id=13
                 .db 1, 0xE, 3, 0xC, 0x11, 0, 0xFF, 0x1F
                 .db 0x22, 0x23, 0x24, 0x25, 0x1A, 0x1B, 0x1C, 0x1D
                 .db 0x25, 0x12, 0x14, 0x15, 0x2A, 0x2B, 0x2D, 0x92
                 .db 0x2C, 0x13
-                .db 14, 18, 3                                   ; id=14
+                .db 14, 18, 3                                           ; id=14
                 .db 0, 0x17, 3, 0xD, 0xA, 0, 0xB, 0
                 .db 0xFF, 0x73, 0x2B, 0x24, 0x22, 0x1B, 0x90, 0x23
-                .db 15, 32, 4                                   ; id=15
+                .db 15, 32, 4                                           ; id=15
                 .db 4, 0x18, 0xC, 0, 0xF, 0, 0xFF, 0xBA
                 .db 3, 0x43, 0x83, 0x1F, 0x20, 0x21, 0x22, 0x23
                 .db 0x1B, 0x13, 0xB, 4, 0x90, 0x19, 0x80, 0xC5
                 .db 0x50, 0x9D, 0xC0, 0x2D, 0x18, 5
-                .db 16, 21, 5                                   ; id=16
+                .db 16, 21, 5                                           ; id=16
                 .db 5, 0x11, 0xC, 0, 0xD, 0, 0xFF, 0
                 .db 0xD8, 0xC0, 0x88, 0x1C, 0x10, 8, 0, 0x18
                 .db 0x19, 0x38, 0x24
-                .db 17, 10, 6                                   ; id=17
+                .db 17, 10, 6                                           ; id=17
                 .db 7, 0x10, 0, 0x1A, 0xE, 0, 0xB, 0
-                .db 18, 26, 7                                   ; id=18
+                .db 18, 26, 7                                           ; id=18
                 .db 1, 0x13, 8, 0, 9, 0, 0xFF, 0xB
                 .db 9, 0x49, 0x89, 0xC9, 0x21, 0x2D, 0x4C, 0x1F
                 .db 1, 2, 8, 0x11, 0x12, 0xA, 0xB, 0xC
-                .db 19, 19, 2                                   ; id=19
+                .db 19, 19, 2                                           ; id=19
                 .db 0, 0x1C, 1, 0x14, 3, 0x12, 0xA, 0
                 .db 0xB, 0, 0xFF, 0x38, 0x1B, 0x60, 2, 0x70
                 .db 0xD
-                .db 20, 17, 3                                   ; id=20
+                .db 20, 17, 3                                           ; id=20
                 .db 1, 0x15, 2, 8, 3, 0x13, 0xA, 0
                 .db 9, 0, 0xFF, 0x28, 0x1C, 0xA0, 0x9A
-                .db 21, 26, 4                                   ; id=21
+                .db 21, 26, 4                                           ; id=21
                 .db 2, 9, 3, 0x14, 0xA, 0, 9, 0
                 .db 0xFF, 0x2F, 0x39, 0x28, 0, 0x11, 0x22, 0x33
                 .db 0xB, 0x1C, 0x2C, 0x2D, 0x3E, 5, 0x16, 0x27
-                .db 22, 14, 5                                   ; id=22
+                .db 22, 14, 5                                           ; id=22
                 .db 2, 0xC, 0, 0x1D, 8, 0, 0xB, 0
                 .db 0xFF, 0x21, 0xC3, 0xC4
-                .db 23, 10, 6                                   ; id=23
+                .db 23, 10, 6                                           ; id=23
                 .db 2, 0xE, 0, 0x1F, 8, 0, 0xB, 0
-                .db 24, 18, 7                                   ; id=24
+                .db 24, 18, 7                                           ; id=24
                 .db 5, 0x19, 6, 0xF, 0xC, 0, 0xD, 0
                 .db 0xFF, 0x33, 0x14, 0x1B, 0x1D, 0x24, 0x90, 0x1C
-                .db 25, 10, 2                                   ; id=25
+                .db 25, 10, 2                                           ; id=25
                 .db 0, 0x22, 7, 0x18, 0xE, 0, 0xB, 0
-                .db 26, 14, 11                                  ; id=26
+                .db 26, 14, 11                                          ; id=26
                 .db 0, 0x23, 2, 0x11, 0x10, 0, 0xFF, 0x90
                 .db 0x54, 9, 0x14, 0x2C
-                .db 27, 21, 4                                   ; id=27
+                .db 27, 21, 4                                           ; id=27
                 .db 0, 0x24, 8, 0, 0xB, 0, 0xFF, 0xC0
                 .db 0x47, 1, 0xD7, 0xD8, 0x80, 0xDF, 0x29, 5
                 .db 6, 0x78, 7
-                .db 28, 18, 13                                  ; id=28
+                .db 28, 18, 13                                          ; id=28
                 .db 0, 0x28, 2, 0x13, 0x10, 0, 0xFF, 0x2F
                 .db 0x2A, 0x2B, 0x2C, 0x2D, 0x12, 0x13, 0x14, 0x15
-                .db 29, 25, 6                                   ; id=29
+                .db 29, 25, 6                                           ; id=29
                 .db 2, 0x16, 8, 0, 9, 0, 0xFF, 0x98
                 .db 0x31, 0x2E, 0x20, 0x21, 0x22, 0x23, 0x3B, 0x33
                 .db 0x2B, 0x20, 0x1C, 0xE8, 0x18, 0xF0, 0x3C
-                .db 30, 8, 7                                    ; id=30
+                .db 30, 8, 7                                            ; id=30
                 .db 1, 0x1F, 8, 0, 9, 0
-                .db 31, 31, 2                                   ; id=31
+                .db 31, 31, 2                                           ; id=31
                 .db 1, 0x20, 2, 0x17, 3, 0x1E, 0xA, 0
                 .db 9, 0, 0xFF, 7, 2, 0xA, 0x12, 0x1B
                 .db 0x24, 0x2D, 0x2E, 0x2F, 0x1F, 0x42, 0x4A, 0x52
                 .db 0x5B, 0x64, 0x6D, 0x6E, 0x6F
-                .db 32, 12, 3                                   ; id=32
+                .db 32, 12, 3                                           ; id=32
                 .db 0, 0x2E, 1, 0x21, 3, 0x1F, 0xA, 0
                 .db 0xB, 0
-                .db 33, 10, 4                                   ; id=33
+                .db 33, 10, 4                                           ; id=33
                 .db 0, 0x2F, 3, 0x20, 0xA, 0, 0xB, 0
-                .db 34, 18, 5                                   ; id=34
+                .db 34, 18, 5                                           ; id=34
                 .db 0, 0x30, 1, 0x23, 2, 0x19, 8, 0
                 .db 0xB, 0, 0xFF, 0x19, 1, 6, 0xE8, 2
-                .db 35, 12, 6                                   ; id=35
+                .db 35, 12, 6                                           ; id=35
                 .db 1, 0x24, 2, 0x1A, 3, 0x22, 0xA, 0
                 .db 9, 0
-                .db 36, 14, 7                                   ; id=36
+                .db 36, 14, 7                                           ; id=36
                 .db 2, 0x1B, 3, 0x23, 0xA, 0, 9, 0
                 .db 0xFF, 0x29, 0xB, 0xC
-                .db 37, 28, 2                                   ; id=37
+                .db 37, 28, 2                                           ; id=37
                 .db 4, 0x35, 0xC, 0, 0xF, 0, 0xFF, 2
                 .db 0, 0x40, 0x80, 0xCA, 8, 0x10, 0x18, 0xDA
                 .db 1, 2, 3, 0x1D, 9, 0xA, 0xB, 0x11
                 .db 0x12, 0x19
-                .db 38, 28, 3                                   ; id=38
+                .db 38, 28, 3                                           ; id=38
                 .db 4, 0x36, 5, 0x27, 0xC, 0, 0xF, 0
                 .db 0xFF, 4, 0x7A, 0x73, 0x74, 0x75, 0xBE, 0x1F
                 .db 0x3D, 0x3E, 0x36, 0x2E, 0xBA, 0xB3, 0xB4, 0xB5
                 .db 0x80, 0x7F
-                .db 39, 10, 4                                   ; id=39
+                .db 39, 10, 4                                           ; id=39
                 .db 4, 0x37, 7, 0x26, 0xE, 0, 0xF, 0
-                .db 40, 8, 13                                   ; id=40
+                .db 40, 8, 13                                           ; id=40
                 .db 4, 0x38, 2, 0x1C, 0x10, 0
-                .db 41, 30, 3                                   ; id=41
+                .db 41, 30, 3                                           ; id=41
                 .db 4, 0x39, 0x1B, 0x8C, 0x1F, 0, 0xC, 0
                 .db 0xF, 0, 0xFF, 6, 0xD0, 0xC8, 0x12, 0x52
                 .db 0x2A, 0x6A, 0xAA, 0x38, 0x25, 0x70, 0x92, 0x1B
                 .db 0x1A, 0x13, 0xA, 0x11
-                .db 42, 25, 7                                   ; id=42
+                .db 42, 25, 7                                           ; id=42
                 .db 4, 0x3A, 0xC, 0, 0xF, 0, 0xFF, 7
                 .db 0x1A, 0x5A, 0x9A, 0xDA, 0x1C, 0x5C, 0x9C, 0xDC
                 .db 0, 0xDB, 0x59, 0x1B, 0x5B, 0x78, 0x9B
-                .db 43, 10, 2                                   ; id=43
+                .db 43, 10, 2                                           ; id=43
                 .db 4, 0x3B, 5, 0x2C, 0xC, 0, 0xF, 0
-                .db 44, 29, 3                                   ; id=44
+                .db 44, 29, 3                                           ; id=44
                 .db 4, 0x3C, 7, 0x2B, 0xE, 0, 0xF, 0
                 .db 0xFF, 0xF, 0x38, 0x31, 0x2A, 0x23, 0x1C, 0x15
                 .db 0xE, 7, 0x1F, 0x78, 0x71, 0x6A, 0x63, 0x5C
                 .db 0x55, 0x4E, 0x47
-                .db 45, 10, 4                                   ; id=45
+                .db 45, 10, 4                                           ; id=45
                 .db 0, 0x3D, 1, 0x2E, 8, 0, 0xB, 0
-                .db 46, 30, 5                                   ; id=46
+                .db 46, 30, 5                                           ; id=46
                 .db 2, 0x20, 3, 0x2D, 0xA, 0, 9, 0
                 .db 0xFF, 0xE, 0x28, 0x29, 0x22, 0x1A, 0x11, 0x10
                 .db 0x19, 0x80, 0xA4, 0x88, 5, 0x2D, 0x68, 0x69
                 .db 0x62, 0x5A, 0x51, 0x50
-                .db 47, 21, 14                                  ; id=47
+                .db 47, 21, 14                                          ; id=47
                 .db 0, 0x3E, 2, 0x21, 0x10, 0, 0xFF, 0x1B
                 .db 0x22, 0x23, 0x24, 0x25, 0xC3, 0x62, 0x63, 0x64
                 .db 0x65, 0xE8, 0xA2
-                .db 48, 10, 7                                   ; id=48
+                .db 48, 10, 7                                           ; id=48
                 .db 1, 0x31, 2, 0x22, 8, 0, 9, 0
-                .db 49, 12, 18                                  ; id=49
+                .db 49, 12, 18                                          ; id=49
                 .db 1, 0x32, 3, 0x30, 0x11, 0, 0xFF, 0xF1
                 .db 0x14, 0x2C
-                .db 50, 8, 19                                   ; id=50
+                .db 50, 8, 19                                           ; id=50
                 .db 1, 0x33, 3, 0x31, 0x11, 0
-                .db 51, 34, 4                                   ; id=51
+                .db 51, 34, 4                                           ; id=51
                 .db 0, 0x3F, 1, 0x34, 3, 0x32, 0xA, 0
                 .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
                 .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
                 .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
-                .db 52, 16, 21                                  ; id=52
+                .db 52, 16, 21                                          ; id=52
                 .db 5, 0x35, 3, 0x33, 0x11, 0, 0xFF, 0x2B
                 .db 0x12, 0x1A, 0x2D, 0x25, 0xA0, 0x13
-                .db 53, 35, 6                                   ; id=53
+                .db 53, 35, 6                                           ; id=53
                 .db 4, 64, 5, 54, 6, 37, 7, 52
                 .db 14, 0, 15, 0, 255, 31, 56, 49
                 .db 42, 35, 28, 21, 14, 7, 31, 0
                 .db 9, 18, 27, 36, 45, 54, 63, 144
                 .db 92
-                .db 54, 29, 7                                   ; id=54
+                .db 54, 29, 7                                           ; id=54
                 .db 0x18, 0x41, 6, 0x26, 7, 0x35, 0xE, 0
                 .db 0xD, 0, 0x1C, 0, 0xFF, 1, 0xFD, 0xFE
                 .db 0x60, 0x1D, 0xC1, 0x5D, 0xF5, 0x1C, 0x25, 0x1E
                 .db 0x15, 0x1C, 0x35
-                .db 55, 31, 2                                   ; id=55
+                .db 55, 31, 2                                           ; id=55
                 .db 6, 0x27, 0x19, 0x8F, 0x1D, 0, 0xC, 0
                 .db 0xD, 0, 0xFF, 3, 0x29, 0xAA, 0xF7, 0xEF
                 .db 0x1D, 0x2C, 0x2D, 0x2E, 0x2F, 0x2A, 0x2B, 0xC0
                 .db 0xAB, 0x58, 0xEB, 0x78, 0x6C
-                .db 56, 23, 6                                   ; id=56
+                .db 56, 23, 6                                           ; id=56
                 .db 0x19, 0x39, 6, 0x28, 0xC, 0, 0xD, 0
                 .db 0x1D, 0, 0xFF, 2, 0xF7, 0xEF, 0x28, 0x80
                 .db 0x30, 0x58, 0x68, 0x18, 0x37
-                .db 57, 12, 4                                   ; id=57
+                .db 57, 12, 4                                           ; id=57
                 .db 5, 0x3A, 6, 0x29, 7, 0x38, 0xE, 0
                 .db 0xD, 0
-                .db 58, 12, 5                                   ; id=58
+                .db 58, 12, 5                                           ; id=58
                 .db 5, 0x3B, 6, 0x2A, 7, 0x39, 0xE, 0
                 .db 0xD, 0
-                .db 59, 35, 6                                   ; id=59
+                .db 59, 35, 6                                           ; id=59
                 .db 0x18, 0x42, 5, 0x3C, 6, 0x2B, 0x1B, 0x3A
                 .db 0xC, 0, 0xD, 0, 0x1F, 0, 0x1C, 0
                 .db 0xFF, 5, 0xFD, 0xFE, 0xD0, 0xC8, 0xE, 0x4E
                 .db 0x80, 0xC9, 0x88, 0xF6, 0x1B, 0x16, 0xF, 6
                 .db 0xD
-                .db 60, 10, 7                                   ; id=60
+                .db 60, 10, 7                                           ; id=60
                 .db 6, 0x2C, 7, 0x3B, 0xE, 0, 0xD, 0
-                .db 61, 18, 10                                  ; id=61
+                .db 61, 18, 10                                          ; id=61
                 .db 0, 0x43, 2, 0x2D, 0x10, 0, 0xFF, 0x2F
                 .db 0x2A, 0x2B, 0x2C, 0x2D, 0x12, 0x13, 0x14, 0x15
-                .db 62, 26, 3                                   ; id=62
+                .db 62, 26, 3                                           ; id=62
                 .db 2, 0x2F, 8, 0, 9, 0, 0xFF, 0x2D
                 .db 0x3A, 0x33, 0x2B, 0x2D, 0x35, 0x3D, 2, 0xBB
                 .db 0xB4, 0xAC, 0x79, 0x24, 0x3C, 0xC1, 0x64, 0x7C
-                .db 63, 14, 12                                  ; id=63
+                .db 63, 14, 12                                          ; id=63
                 .db 0, 0x45, 2, 0x33, 0x10, 0, 0xFF, 0xAB
                 .db 0xD, 0x13, 0x32, 0x2C
-                .db 64, 23, 13                                  ; id=64
+                .db 64, 23, 13                                          ; id=64
                 .db 0, 0x47, 6, 0x35, 0x10, 0, 0xFF, 0x2F
                 .db 0x1A, 0x1B, 0x1C, 0x1D, 0x22, 0x23, 0x24, 0x25
                 .db 0xC3, 0xD, 0x9D, 0xA5, 0x35
-                .db 65, 8, 14                                   ; id=65
+                .db 65, 8, 14                                           ; id=65
                 .db 4, 0x48, 6, 0x36, 0x14, 0
-                .db 66, 8, 10                                   ; id=66
+                .db 66, 8, 10                                           ; id=66
                 .db 4, 0x49, 6, 0x3B, 0x14, 0
-                .db 67, 19, 11                                  ; id=67
+                .db 67, 19, 11                                          ; id=67
                 .db 0, 76, 2, 61, 16, 0, 255, 219
                 .db 26, 27, 28, 29, 27, 98, 99, 100
                 .db 101
-                .db 69, 33, 5                                   ; id=69
+                .db 69, 33, 5                                           ; id=69
                 .db 2, 0x3F, 8, 0, 9, 0, 0xFF, 0x59
                 .db 0xFE, 0x37, 0x80, 0xFA, 0xC0, 0xE1, 0x28, 0x39
                 .db 0x90, 0x25, 5, 0x3E, 0x51, 0x7E, 0xB7, 0xBE
                 .db 0xF7, 4, 0x11, 0x36, 0x76, 0xB6, 0xF6
-                .db 70, 29, 6                                   ; id=70
+                .db 70, 29, 6                                           ; id=70
                 .db 1, 0x47, 8, 0, 9, 0, 0xFF, 0xF
                 .db 0x2B, 0x2C, 0x22, 0x1A, 0x13, 0x14, 0x1D, 0x25
                 .db 0x2F, 0x6B, 0x6C, 0x62, 0x5A, 0x53, 0x54, 0x5D
                 .db 0x65, 0x20, 0xE
-                .db 71, 31, 7                                   ; id=71
+                .db 71, 31, 7                                           ; id=71
                 .db 5, 0x48, 2, 0x40, 3, 0x46, 0xA, 0
                 .db 9, 0, 0xFF, 0x98, 0x33, 0x21, 0x15, 0x55
                 .db 0x1F, 0x39, 0x31, 0x29, 0x21, 0x22, 0x23, 0x24
                 .db 0x25, 0x1A, 0x2D, 0x35, 0x3D
-                .db 72, 18, 2                                   ; id=72
+                .db 72, 18, 2                                           ; id=72
                 .db 4, 0x50, 0x1A, 0x41, 7, 0x47, 0xE, 0
                 .db 0xF, 0, 0x1E, 0, 0xFF, 1, 0xC1, 0xC2
-                .db 73, 25, 3                                   ; id=73
+                .db 73, 25, 3                                           ; id=73
                 .db 0x18, 0x53, 5, 0x4A, 6, 0x42, 0x1C, 0
                 .db 0xC, 0, 0xD, 0, 0xFF, 0x38, 0x22, 9
                 .db 0x15, 0x55, 0x20, 0x95, 1, 0xFD, 0xFE
-                .db 74, 26, 4                                   ; id=74
+                .db 74, 26, 4                                           ; id=74
                 .db 1, 0x4B, 0x1B, 0x49, 0xC, 0, 9, 0
                 .db 0x1F, 0, 0xFF, 9, 0x14, 0x54, 0x21, 0x94
                 .db 0xD4, 1, 0xD0, 0xC8, 0x2A, 0x1C, 0x13, 0xC
-                .db 75, 10, 5                                   ; id=75
+                .db 75, 10, 5                                           ; id=75
                 .db 0, 0x54, 3, 0x4A, 0xA, 0, 0xB, 0
-                .db 76, 22, 6                                   ; id=76
+                .db 76, 22, 6                                           ; id=76
                 .db 0, 0x56, 1, 0x4D, 2, 0x43, 8, 0
                 .db 0xB, 0, 0xFF, 0x75, 2, 5, 0x17, 0x2F
                 .db 0x3D, 0x3A, 0xA0, 7
-                .db 77, 18, 7                                   ; id=77
+                .db 77, 18, 7                                           ; id=77
                 .db 4, 0x57, 1, 0x4E, 3, 0x4C, 0xA, 0
                 .db 0xF, 0, 0xFF, 0xAB, 0x24, 0x2A, 0x1A, 0x14
-                .db 78, 24, 2                                   ; id=78
+                .db 78, 24, 2                                           ; id=78
                 .db 3, 0x4D, 0xA, 0, 0xD, 0, 0xFF, 0xAD
                 .db 0x2B, 0x24, 0x1D, 0x19, 0x14, 0x1B, 0x6E, 0x2D
                 .db 0x22, 0x26, 0x12, 0x16, 0xB, 0xD
-                .db 80, 39, 4                                   ; id=80
+                .db 80, 39, 4                                           ; id=80
                 .db 4, 0x5D, 0x19, 0x51, 0x1A, 0x48, 0xC, 0
                 .db 0xF, 0, 0x1D, 0, 0x1E, 0, 0xFF, 7
                 .db 0xC1, 0xC2, 0xEF, 0xF7, 0x1B, 0x5B, 0x9B, 0xDB
                 .db 0xC4, 0x44, 0x25, 0x65, 0xA5, 0xE5, 0x50, 0xED
                 .db 0x1B, 4, 0x1A, 0x1D, 0x2F
-                .db 81, 10, 5                                   ; id=81
+                .db 81, 10, 5                                           ; id=81
                 .db 4, 0x5E, 7, 0x50, 0xE, 0, 0xF, 0
-                .db 82, 8, 6                                    ; id=82
+                .db 82, 8, 6                                            ; id=82
                 .db 4, 0x61, 0xC, 0, 0xF, 0
-                .db 83, 20, 15                                  ; id=83
+                .db 83, 20, 15                                          ; id=83
                 .db 4, 0x62, 6, 0x49, 0x14, 0, 0xFF, 0x1F
                 .db 0x2A, 0x2B, 0x2C, 0x2D, 0x12, 0x13, 0x14, 0x15
                 .db 0xE8, 0x6A
-                .db 84, 31, 2                                   ; id=84
+                .db 84, 31, 2                                           ; id=84
                 .db 0, 0x63, 1, 0x55, 2, 0x4B, 8, 0
                 .db 0xB, 0, 0xFF, 0x2F, 2, 0xA, 0x12, 0x1A
                 .db 0x22, 0x2A, 0x32, 0x3A, 0x2F, 5, 0xD, 0x15
                 .db 0x1D, 0x25, 0x2D, 0x35, 0x3D
-                .db 85, 10, 3                                   ; id=85
+                .db 85, 10, 3                                           ; id=85
                 .db 1, 0x56, 3, 0x54, 0xA, 0, 9, 0
-                .db 86, 34, 4                                   ; id=86
+                .db 86, 34, 4                                           ; id=86
                 .db 2, 0x4C, 3, 0x55, 0x19, 0x91, 0x1D, 0
                 .db 0xA, 0, 9, 0, 0xFF, 1, 0xF7, 0xEF
                 .db 0x2C, 0xD, 0x14, 0x16, 0x1D, 0x25, 0x50, 0x95
                 .db 0x41, 0x12, 0x2D, 0x43, 0x52, 0x6D, 0xAD, 0xED
-                .db 87, 38, 5                                   ; id=87
+                .db 87, 38, 5                                           ; id=87
                 .db 0x19, 0x58, 0x1A, 0x4D, 0xC, 0, 0xD, 0
                 .db 0x1D, 0, 0x1E, 0, 0xFF, 7, 0xC1, 0xC2
                 .db 0xC3, 0xC4, 0xF7, 0xEF, 0xE7, 0xDF, 0xC4, 0xCC
                 .db 0xD4, 0xDC, 0xDD, 0xDE, 0x1C, 0xC, 0x14, 0x1C
                 .db 0x1D, 0x1E, 0x60, 0x11
-                .db 88, 14, 6                                   ; id=88
+                .db 88, 14, 6                                           ; id=88
                 .db 4, 0x67, 7, 0x57, 0xE, 0, 0xF, 0
                 .db 0xFF, 0x79, 0xFB, 0xFC
-                .db 91, 14, 3                                   ; id=91
+                .db 91, 14, 3                                           ; id=91
                 .db 0, 0x6A, 1, 0x5C, 8, 0, 0xB, 0
                 .db 0xFF, 0x49, 0xDF, 0xE7
-                .db 92, 34, 4                                   ; id=92
+                .db 92, 34, 4                                           ; id=92
                 .db 0, 0x6B, 5, 0x5D, 3, 0x5B, 0xA, 0
                 .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
                 .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
                 .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
-                .db 93, 33, 5                                   ; id=93
+                .db 93, 33, 5                                           ; id=93
                 .db 6, 0x50, 0x1B, 0x5C, 0xC, 0, 0xD, 0
                 .db 0x1F, 0, 0xFF, 0xC7, 0xC8, 0xD0, 0x7E, 0xFF
                 .db 0xF7, 0xEF, 0xE7, 0xDF, 0x80, 0xD7, 0x1F, 0x3F
                 .db 0x37, 0x2F, 0x27, 0x1F, 0x17, 0x10, 8
-                .db 94, 31, 6                                   ; id=94
+                .db 94, 31, 6                                           ; id=94
                 .db 0x19, 0x5F, 6, 0x51, 0xC, 0, 0xD, 0
                 .db 0x1D, 0, 0xFF, 1, 0xF7, 0xEF, 0x1F, 0x19
                 .db 0x1A, 0x1C, 0x1D, 0xB, 0x13, 0x23, 0x2B, 0x60
                 .db 0x1B, 0x88, 0xEE, 0xC0, 0x59
-                .db 95, 10, 7                                   ; id=95
+                .db 95, 10, 7                                           ; id=95
                 .db 5, 0x60, 7, 0x5E, 0xE, 0, 0xD, 0
-                .db 0x60, 0x18, 2                               ; id=96
+                .db 0x60, 0x18, 2                                       ; id=96
                 .db 4, 0x6C, 5, 0x61, 7, 0x5F, 0xE, 0
                 .db 0xF, 0, 0xFF, 0x1F, 0x28, 0x29, 0x2A, 0x2B
                 .db 0x2C, 0x2D, 0x2E, 0x2F, 0xA0, 0x30
-                .db 97, 14, 3                                   ; id=97
+                .db 97, 14, 3                                           ; id=97
                 .db 4, 0x6D, 5, 0x62, 6, 0x52, 7, 0x60
                 .db 0xE, 0, 0xF, 0
-                .db 98, 18, 4                                   ; id=98
+                .db 98, 18, 4                                           ; id=98
                 .db 6, 0x53, 7, 0x61, 0xE, 0, 0xD, 0
                 .db 0xFF, 0x33, 0x14, 0x1B, 0x1D, 0x24, 0x90, 0x1C
-                .db 99, 20, 5                                   ; id=99
+                .db 99, 20, 5                                           ; id=99
                 .db 1, 0x64, 2, 0x54, 8, 0, 9, 0
                 .db 0xFF, 9, 1, 6, 0xE8, 2, 0xAA, 0x22
                 .db 0x1C, 0x2D
-                .db 100, 34, 6                                  ; id=100
+                .db 100, 34, 6                                          ; id=100
                 .db 0, 0x6E, 1, 0x65, 3, 0x63, 0xA, 0
                 .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
                 .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
                 .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
-                .db 101, 20, 23                                 ; id=101
+                .db 101, 20, 23                                         ; id=101
                 .db 1, 0x66, 3, 0x64, 0x11, 0, 0xFF, 0x2F
                 .db 0x2B, 0x2C, 0x23, 0x24, 0x1B, 0x1C, 0x13, 0x14
                 .db 0x80, 0x6B
-                .db 102, 12, 2                                  ; id=102
+                .db 102, 12, 2                                          ; id=102
                 .db 0, 0x70, 1, 0x67, 3, 0x65, 0xA, 0
                 .db 0xB, 0
-                .db 103, 18, 3                                  ; id=103
+                .db 103, 18, 3                                          ; id=103
                 .db 6, 0x58, 3, 0x66, 0xA, 0, 9, 0
                 .db 0xFF, 0x71, 0xC3, 0xC4, 0xAA, 0x12, 0x1C, 0x2B
-                .db 106, 15, 6                                  ; id=106
+                .db 106, 15, 6                                          ; id=106
                 .db 1, 0x6B, 2, 0x5B, 8, 0, 9, 0
                 .db 0xFF, 0x90, 0x78, 0xA0, 0x38
-                .db 107, 33, 7                                  ; id=107
+                .db 107, 33, 7                                          ; id=107
                 .db 0, 0x75, 2, 0x5C, 3, 0x6A, 0xA, 0
                 .db 0xB, 0, 0xFF, 0x23, 0x2B, 0x2C, 0x6B, 0x6C
                 .db 0x79, 0xAB, 0xAC, 0x2F, 0x38, 0x39, 0x31, 0x32
                 .db 0x2A, 0x3E, 0x3F, 0x35, 0x29, 0x36, 0x2D
-                .db 108, 27, 2                                  ; id=108
+                .db 108, 27, 2                                          ; id=108
                 .db 6, 0x60, 8, 0, 9, 0, 0xFF, 0xD8
                 .db 0x23, 0xE0, 0x33, 2, 0x32, 0x34, 0x7B, 0x19
                 .db 0x72, 0x74, 0x78, 0x2B, 0x2C, 0x39, 0x3A, 0x3C
                 .db 0x3D
-                .db 109, 31, 3                                  ; id=109
+                .db 109, 31, 3                                          ; id=109
                 .db 0, 0x76, 6, 0x61, 8, 0, 0xB, 0
                 .db 0xFF, 0x2F, 6, 0xD, 0x14, 0x1B, 0x23, 0x2C
                 .db 0x35, 0x3E, 0x2F, 2, 9, 0x10, 0x18, 0x20
                 .db 0x28, 0x31, 0x3A, 0x90, 0x1E
-                .db 110, 10, 4                                  ; id=110
+                .db 110, 10, 4                                          ; id=110
                 .db 1, 0x6F, 2, 0x64, 8, 0, 9, 0
-                .db 111, 18, 5                                  ; id=111
+                .db 111, 18, 5                                          ; id=111
                 .db 0, 0x77, 3, 0x6E, 0xA, 0, 0xB, 0
                 .db 0xFF, 0x73, 0x2B, 0x24, 0x22, 0x1B, 0x90, 0x23
-                .db 112, 29, 6                                  ; id=112
+                .db 112, 29, 6                                          ; id=112
                 .db 2, 0x66, 8, 0, 9, 0, 0xFF, 0x6F
                 .db 0x26, 0x2C, 0x2E, 0x2F, 0x35, 0x37, 0x3D, 0x3F
                 .db 0xAD, 0x25, 0x27, 0x2D, 0x34, 0x36, 0x3E, 0xA
                 .db 0xAF, 0x17, 0x57
-                .db 117, 21, 13                                 ; id=117
+                .db 117, 21, 13                                         ; id=117
                 .db 0, 0x7A, 2, 0x6B, 0x10, 0, 0xFF, 0xB
                 .db 0x12, 0x13, 0x2C, 0x2D, 0x2B, 0x52, 0x53, 0x6C
                 .db 0x6D, 0xA0, 0x1A
-                .db 118, 10, 6                                  ; id=118
+                .db 118, 10, 6                                          ; id=118
                 .db 0, 0x7B, 2, 0x6D, 8, 0, 0xB, 0
-                .db 119, 12, 7                                  ; id=119
+                .db 119, 12, 7                                          ; id=119
                 .db 0, 0x80, 1, 0x78, 2, 0x6F, 8, 0
                 .db 0xB, 0
-                .db 120, 27, 2                                  ; id=120
+                .db 120, 27, 2                                          ; id=120
                 .db 3, 0x77, 0xA, 0, 9, 0, 0xFF, 0xE
                 .db 0xB, 0xC, 0xD, 0xE, 0xF, 0x4E, 0x4F, 0x20
                 .db 0x23, 0x2C, 0x4B, 0x4C, 0x4D, 0x8E, 0x8F, 0xE8
                 .db 0
-                .db 122, 8, 4                                   ; id=122
+                .db 122, 8, 4                                           ; id=122
                 .db 2, 0x75, 8, 0, 9, 0
-                .db 123, 32, 5                                  ; id=123
+                .db 123, 32, 5                                          ; id=123
                 .db 1, 0x7C, 2, 0x76, 8, 0, 9, 0
                 .db 0xFF, 0x98, 0x31, 0x6F, 0x20, 0x19, 0x1A, 0x22
                 .db 0x23, 0x2C, 0x34, 0x3B, 0xAC, 0x18, 0x21, 0x2B
                 .db 0x33, 0x3C, 0x50, 0xB4, 8, 0x36
-                .db 124, 10, 6                                  ; id=124
+                .db 124, 10, 6                                          ; id=124
                 .db 1, 0x7D, 3, 0x7B, 0xA, 0, 9, 0
-                .db 125, 22, 7                                  ; id=125
+                .db 125, 22, 7                                          ; id=125
                 .db 1, 0x7E, 3, 0x7C, 0xA, 0, 9, 0
                 .db 0xFF, 0xAF, 0x2A, 0x2C, 0x23, 0x25, 0x1A, 0x1C
                 .db 0x13, 0x15, 0xA0, 0x5C
-                .db 126, 23, 18                                 ; id=126
+                .db 126, 23, 18                                         ; id=126
                 .db 1, 0x7F, 3, 0x7D, 0x11, 0, 0xFF, 0x2F
                 .db 0x2A, 0x2C, 0x23, 0x25, 0x1A, 0x1C, 0x13, 0x15
                 .db 0x23, 0x21, 0x61, 0x1E, 0x5E
-                .db 127, 10, 3                                  ; id=127
+                .db 127, 10, 3                                          ; id=127
                 .db 0, 0x82, 3, 0x7E, 0xA, 0, 0xB, 0
-                .db 128, 8, 4                                   ; id=128
+                .db 128, 8, 4                                           ; id=128
                 .db 2, 0x77, 8, 0, 9, 0
-                .db 129, 26, 5                                  ; id=129
+                .db 129, 26, 5                                          ; id=129
                 .db 0, 0x83, 8, 0, 0xB, 0, 0xFF, 0
                 .db 0x87, 0x80, 0x83, 0xF0, 0xC7, 0xC8, 0x11, 0xAF
                 .db 6, 0xF, 0xD, 0x16, 4, 0x14, 0x1D, 3
-                .db 130, 24, 14                                 ; id=130
+                .db 130, 24, 14                                         ; id=130
                 .db 0, 0x86, 2, 0x7F, 0x10, 0, 0xFF, 0xA
                 .db 0x5B, 0x5C, 0x5D, 0x22, 0x1B, 0x1C, 0x1D, 0x2B
                 .db 0x9A, 0x9B, 0x9C, 0x9D, 0xE8, 0x1A
-                .db 131, 22, 7                                  ; id=131
+                .db 131, 22, 7                                          ; id=131
                 .db 1, 0x84, 2, 0x81, 8, 0, 9, 0
                 .db 0xFF, 0xAF, 6, 0xD, 0x16, 0x14, 0x1D, 0x1B
                 .db 0x24, 0x2D, 0xA0, 0x11
-                .db 132, 8, 18                                  ; id=132
+                .db 132, 8, 18                                          ; id=132
                 .db 1, 0x85, 3, 0x83, 0x11, 0
-                .db 133, 22, 3                                  ; id=133
+                .db 133, 22, 3                                          ; id=133
                 .db 1, 0x86, 3, 0x84, 0xA, 0, 9, 0
                 .db 0xFF, 0x27, 0x2B, 0x2C, 0x25, 0x1D, 0x13, 0x14
                 .db 0x22, 0x1A, 0x90, 0x24
-                .db 134, 17, 4                                  ; id=134
+                .db 134, 17, 4                                          ; id=134
                 .db 4, 0x87, 2, 0x82, 3, 0x85, 0xA, 0
                 .db 0xF, 0, 0xFF, 0x68, 0x13, 0xA8, 0x25
-                .db 135, 12, 5                                  ; id=135
+                .db 135, 12, 5                                          ; id=135
                 .db 4, 0x89, 5, 0x88, 6, 0x86, 0xC, 0
                 .db 0xF, 0
-                .db 136, 10, 6                                  ; id=136
+                .db 136, 10, 6                                          ; id=136
                 .db 4, 0x8A, 7, 0x87, 0xE, 0, 0xF, 0
-                .db 137, 10, 7                                  ; id=137
+                .db 137, 10, 7                                          ; id=137
                 .db 5, 0x8A, 6, 0x87, 0xC, 0, 0xD, 0
-                .db 138, 10, 2                                  ; id=138
+                .db 138, 10, 2                                          ; id=138
                 .db 6, 0x88, 7, 0x89, 0xE, 0, 0xD, 0
-                .db 139, 10, 3                                  ; id=139
+                .db 139, 10, 3                                          ; id=139
                 .db 4, 0x8E, 5, 0x8C, 0xC, 0, 0xF, 0
-                .db 140, 12, 4                                  ; id=140
+                .db 140, 12, 4                                          ; id=140
                 .db 4, 0x8F, 5, 0x29, 7, 0x8B, 0xE, 0
                 .db 0xF, 0
-                .db 141, 19, 5                                  ; id=141
+                .db 141, 19, 5                                          ; id=141
                 .db 4, 0x90, 0xC, 0, 0xF, 0, 0xFF, 0xC2
                 .db 0x14, 0x5C, 0x9B, 0, 0xD3, 0x1A, 0x1C, 0x1B
                 .db 0x13
-                .db 142, 25, 6                                  ; id=142
+                .db 142, 25, 6                                          ; id=142
                 .db 6, 0x8B, 0xC, 0, 0xD, 0, 0xFF, 4
                 .db 0x30, 0x70, 0xB0, 0xE8, 0x38, 0xC2, 0x39, 0x79
                 .db 0xB9, 0x49, 0xF9, 0xF8, 0x91, 0x78, 0xB8
-                .db 143, 12, 7                                  ; id=143
+                .db 143, 12, 7                                          ; id=143
                 .db 5, 0x90, 6, 0x8C, 7, 0x37, 0xE, 0
                 .db 0xD, 0
-                .db 144, 10, 2                                  ; id=144
+                .db 144, 10, 2                                          ; id=144
                 .db 6, 0x8D, 7, 0x8F, 0xE, 0, 0xD, 0
-                .db 145, 15, 3                                  ; id=145
+                .db 145, 15, 3                                          ; id=145
                 .db 5, 0x92, 7, 0x56, 0xE, 0, 0xD, 0
                 .db 0xFF, 0x90, 0x5B, 0, 0x1B
-                .db 146, 28, 4                                  ; id=146
+                .db 146, 28, 4                                          ; id=146
                 .db 7, 0x91, 0xE, 0, 0xD, 0, 0xFF, 0xC3
                 .db 0x19, 0x1B, 0x5B, 0x9B, 0x50, 0x9E, 3, 0x2E
                 .db 0x6E, 0xAE, 0xEE, 0x48, 0xDB, 0x1B, 0x1D, 0x26
                 .db 0x1F, 0x16
-                .db 147, 23, 5                                  ; id=147
+                .db 147, 23, 5                                          ; id=147
                 .db 0x19, 0x94, 6, 0, 0xC, 0, 0xD, 0
                 .db 0x1D, 0, 0xFF, 0x60, 0x2C, 1, 0xEF, 0xF7
                 .db 0xF0, 0xA4, 0x19, 0x37, 0x2F
-                .db 148, 10, 6                                  ; id=148
+                .db 148, 10, 6                                          ; id=148
                 .db 5, 0x95, 7, 0x93, 0xE, 0, 0xD, 0
-                .db 149, 29, 7                                  ; id=149
+                .db 149, 29, 7                                          ; id=149
                 .db 6, 2, 0x1B, 0x94, 0xC, 0, 0xD, 0
                 .db 0x1F, 0, 0xFF, 0x1E, 0x3A, 0x39, 0x31, 0x30
                 .db 0x28, 8, 0x10, 0xC2, 0xC8, 0xD0, 0xE8, 0x60
                 .db 0x3B, 0x50, 0xF8
-background_type_tbl:.dw tree_arch_N                             ; DATA XREF: RAM:6991o
-                                                                ; RAM:6993o ...
+background_type_tbl:.dw tree_arch_N
                 .dw tree_arch_E
                 .dw tree_arch_S
                 .dw tree_arch_W
@@ -596,73 +592,73 @@ background_type_tbl:.dw tree_arch_N                             ; DATA XREF: RAM
                 .dw byte_6A8A
                 .dw byte_6A9B
                 .dw byte_6AAC
-tree_arch_N:    .db 7, 0x73, 0xC5, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:background_type_tblo
+tree_arch_N:    .db 7, 0x73, 0xC5, 0x80, 3, 5, 0x28, 0x50
                 .db 6, 0x8D, 0xC5, 0x80, 3, 5, 0x28, 0x50
                 .db 0
-tree_arch_E:    .db 7, 0xC5, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:696Fo
+tree_arch_E:    .db 7, 0xC5, 0x8D, 0x80, 5, 3, 0x28, 0x10
                 .db 6, 0xC5, 0x73, 0x80, 5, 3, 0x28, 0x10
                 .db 0
-tree_arch_S:    .db 7, 0x73, 0x3B, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:6971o
+tree_arch_S:    .db 7, 0x73, 0x3B, 0x80, 3, 5, 0x28, 0x50
                 .db 6, 0x8D, 0x3B, 0x80, 3, 5, 0x28, 0x50
                 .db 0
-tree_arch_W:    .db 7, 0x3B, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:6973o
+tree_arch_W:    .db 7, 0x3B, 0x8D, 0x80, 5, 3, 0x28, 0x10
                 .db 6, 0x3B, 0x73, 0x80, 5, 3, 0x28, 0x10
                 .db 0
-rock_arch_N:    .db 9, 0x73, 0xC5, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:6975o
+rock_arch_N:    .db 9, 0x73, 0xC5, 0x80, 3, 5, 0x28, 0x50
                 .db 8, 0x8D, 0xC5, 0x80, 3, 5, 0x28, 0x50
                 .db 0
-rock_arch_E:    .db 9, 0xC5, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:6977o
+rock_arch_E:    .db 9, 0xC5, 0x8D, 0x80, 5, 3, 0x28, 0x10
                 .db 8, 0xC5, 0x73, 0x80, 5, 3, 0x28, 0x10
                 .db 0
-rock_arch_S:    .db 9, 0x73, 0x3B, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:6979o
+rock_arch_S:    .db 9, 0x73, 0x3B, 0x80, 3, 5, 0x28, 0x50
                 .db 8, 0x8D, 0x3B, 0x80, 3, 5, 0x28, 0x50
                 .db 0
-rock_arch_W:    .db 9, 0x3B, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:697Bo
+rock_arch_W:    .db 9, 0x3B, 0x8D, 0x80, 5, 3, 0x28, 0x10
                 .db 8, 0x3B, 0x73, 0x80, 5, 3, 0x28, 0x10
                 .db 0
-byte_6A35:      .db 9, 0x93, 0xC5, 0xB0, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:699Do
+byte_6A35:      .db 9, 0x93, 0xC5, 0xB0, 3, 5, 0x28, 0x50
                 .db 8, 0xAD, 0xC5, 0xB0, 3, 5, 0x28, 0x50
                 .db 0
-byte_6A46:      .db 9, 0xC5, 0xAD, 0xB0, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:699Fo
+byte_6A46:      .db 9, 0xC5, 0xAD, 0xB0, 5, 3, 0x28, 0x10
                 .db 8, 0xC5, 0x93, 0xB0, 5, 3, 0x28, 0x10
                 .db 0
-byte_6A57:      .db 9, 0x53, 0x3B, 0xB0, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:69A1o
+byte_6A57:      .db 9, 0x53, 0x3B, 0xB0, 3, 5, 0x28, 0x50
                 .db 8, 0x6D, 0x3B, 0xB0, 3, 5, 0x28, 0x50
                 .db 0
-byte_6A68:      .db 9, 0x3B, 0x6D, 0xB0, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:69A3o
+byte_6A68:      .db 9, 0x3B, 0x6D, 0xB0, 5, 3, 0x28, 0x10
                 .db 8, 0x3B, 0x53, 0xB0, 5, 3, 0x28, 0x10
                 .db 0
-byte_6A79:      .db 0xB, 0x98, 0xC8, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69A5o
+byte_6A79:      .db 0xB, 0x98, 0xC8, 0xA4, 8, 8, 0xC, 0x10
                 .db 0xB, 0xA8, 0xC8, 0xA4, 8, 8, 0xC, 0x10
                 .db 0
-byte_6A8A:      .db 0xB, 0xC8, 0x98, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69A7o
+byte_6A8A:      .db 0xB, 0xC8, 0x98, 0xA4, 8, 8, 0xC, 0x10
                 .db 0xB, 0xC8, 0xA8, 0xA4, 8, 8, 0xC, 0x10
                 .db 0
-byte_6A9B:      .db 0xB, 0x58, 0x39, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69A9o
+byte_6A9B:      .db 0xB, 0x58, 0x39, 0xA4, 8, 8, 0xC, 0x10
                 .db 0xB, 0x68, 0x39, 0xA4, 8, 8, 0xC, 0x10
                 .db 0
-byte_6AAC:      .db 0xB, 0x38, 0x58, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69ABo
+byte_6AAC:      .db 0xB, 0x38, 0x58, 0xA4, 8, 8, 0xC, 0x10
                 .db 0xB, 0x38, 0x68, 0xA4, 8, 8, 0xC, 0x10
                 .db 0
-byte_6ABD:      .db 0xF, 0x40, 0x78, 0x80, 0, 8, 0x18, 0x50     ; DATA XREF: RAM:697Do
+byte_6ABD:      .db 0xF, 0x40, 0x78, 0x80, 0, 8, 0x18, 0x50
                 .db 0xC, 0x40, 0x88, 0x80, 0, 8, 0x18, 0x50
-byte_6ACD:      .db 0xC, 0x40, 0x48, 0x80, 0, 8, 0x18, 0x50     ; DATA XREF: RAM:6981o
+byte_6ACD:      .db 0xC, 0x40, 0x48, 0x80, 0, 8, 0x18, 0x50
                 .db 0xD, 0x40, 0x58, 0x80, 0, 8, 0x18, 0x50
                 .db 0xE, 0x40, 0x68, 0x80, 0, 8, 0x18, 0x50
                 .db 0xD, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x50
                 .db 0xE, 0x40, 0xA8, 0x80, 0, 8, 0x18, 0x50
                 .db 0xF, 0x40, 0xB8, 0x80, 0, 8, 0x18, 0x50
                 .db 0
-byte_6AFE:      .db 0xF, 0x78, 0xC0, 0x80, 8, 0, 0x18, 0x10     ; DATA XREF: RAM:697Fo
+byte_6AFE:      .db 0xF, 0x78, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xC, 0x88, 0xC0, 0x80, 8, 0, 0x18, 0x10
-byte_6B0E:      .db 0xC, 0x48, 0xC0, 0x80, 8, 0, 0x18, 0x10     ; DATA XREF: RAM:6983o
+byte_6B0E:      .db 0xC, 0x48, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xD, 0x58, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xE, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xD, 0x98, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xE, 0xA8, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xF, 0xB8, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0
-byte_6B3F:      .db 0xF, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x50     ; DATA XREF: RAM:698Do
+byte_6B3F:      .db 0xF, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x50
                 .db 0xC, 0x60, 0x88, 0x80, 0, 8, 0x18, 0x50
                 .db 0xC, 0x60, 0x48, 0x80, 0, 8, 0x18, 0x50
                 .db 0xD, 0x60, 0x58, 0x80, 0, 8, 0x18, 0x50
@@ -672,7 +668,7 @@ byte_6B3F:      .db 0xF, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x50     ; DATA XREF: RAM
                 .db 0xF, 0x60, 0xB8, 0x80, 0, 8, 0x18, 0x50
                 .db 0xE, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x10
                 .db 0
-byte_6B88:      .db 0xF, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x10     ; DATA XREF: RAM:698Fo
+byte_6B88:      .db 0xF, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xC, 0x88, 0xA0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xC, 0x48, 0xA0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xD, 0x58, 0xA0, 0x80, 8, 0, 0x18, 0x10
@@ -682,25 +678,25 @@ byte_6B88:      .db 0xF, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x10     ; DATA XREF: RAM
                 .db 0xF, 0xB8, 0xA0, 0x80, 8, 0, 0x18, 0x10
                 .db 0xD, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x50
                 .db 0
-double_brick_1: .db 0x34, 0x40, 0x78, 0x80, 0, 8, 0x18, 0x10    ; DATA XREF: RAM:6985o
+double_brick_1: .db 0x34, 0x40, 0x78, 0x80, 0, 8, 0x18, 0x10
                 .db 0x35, 0x40, 0x88, 0x80, 0, 8, 0x18, 0x10
-double_brick_3: .db 0x39, 0x40, 0x48, 0x80, 0, 8, 0x18, 0x10    ; DATA XREF: RAM:6989o
+double_brick_3: .db 0x39, 0x40, 0x48, 0x80, 0, 8, 0x18, 0x10
                 .db 0x37, 0x40, 0x58, 0x80, 0, 8, 0x18, 0x10
                 .db 0x38, 0x40, 0x68, 0x80, 0, 8, 0x18, 0x10
                 .db 0x37, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x10
                 .db 0x36, 0x40, 0xA8, 0x80, 0, 8, 0x18, 0x10
                 .db 0x35, 0x40, 0xB8, 0x80, 0, 8, 0x18, 0x10
                 .db 0
-double_brick_2: .db 0x37, 0x78, 0xC0, 0x80, 8, 0, 0x18, 0x50    ; DATA XREF: RAM:6987o
+double_brick_2: .db 0x37, 0x78, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x38, 0x88, 0xC0, 0x80, 8, 0, 0x18, 0x50
-double_brick_4: .db 0x36, 0x48, 0xC0, 0x80, 8, 0, 0x18, 0x50    ; DATA XREF: RAM:698Bo
+double_brick_4: .db 0x36, 0x48, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x35, 0x58, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x34, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x36, 0x98, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x37, 0xA8, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x39, 0xB8, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0
-byte_6C53:      .db 0x34, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x10    ; DATA XREF: RAM:6995o
+byte_6C53:      .db 0x34, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x10
                 .db 0x35, 0x60, 0x88, 0x80, 0, 8, 0x18, 0x10
                 .db 0x39, 0x60, 0x48, 0x80, 0, 8, 0x18, 0x10
                 .db 0x37, 0x60, 0x58, 0x80, 0, 8, 0x18, 0x10
@@ -710,7 +706,7 @@ byte_6C53:      .db 0x34, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x10    ; DATA XREF: RAM
                 .db 0x34, 0x60, 0xB8, 0x80, 0, 8, 0x18, 0x10
                 .db 0x36, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x50
                 .db 0
-byte_6C9C:      .db 0x34, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x50    ; DATA XREF: RAM:6997o
+byte_6C9C:      .db 0x34, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x37, 0x88, 0xA0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x36, 0x48, 0xA0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x35, 0x58, 0xA0, 0x80, 8, 0, 0x18, 0x50
@@ -720,7 +716,7 @@ byte_6C9C:      .db 0x34, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x50    ; DATA XREF: RAM
                 .db 0x39, 0xB8, 0xA0, 0x80, 8, 0, 0x18, 0x50
                 .db 0x36, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x10
                 .db 0
-block_type_tbl: .dw brick_0                                     ; DATA XREF: RAM:C92Fo
+block_type_tbl: .dw brick_0
                 .dw brick_1
                 .dw pond
                 .dw lilly_pond
@@ -751,1155 +747,1357 @@ block_type_tbl: .dw brick_0                                     ; DATA XREF: RAM
                 .dw byte_6DD1
                 .dw byte_6D9B
                 .dw byte_6DA1
-stone_block:    .db 0x5B, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CF7o
-                                                                ; RAM:6D11o
-brick_0:        .db 0xB, 8, 8, 0xC, 0x10, 0                     ; DATA XREF: RAM:block_type_tblo
-brick_d:        .db 0x4A, 0xC, 0xC, 1, 0x10, 0                  ; DATA XREF: RAM:6CFFo
-byte_6D35:      .db 0x4B, 0xC, 0xC, 1, 0x10, 0                  ; DATA XREF: RAM:6D0Fo
-brick_1:        .db 0xA, 8, 8, 0xC, 0x10, 0                     ; DATA XREF: RAM:6CE7o
-pond:           .db 0x30, 5, 5, 5, 0x10, 0                      ; DATA XREF: RAM:6CE9o
-lilly_pond:     .db 0x17, 7, 7, 0xA, 0x10, 0                    ; DATA XREF: RAM:6CEBo
-log_4:          .db 0x48, 8, 8, 0xC, 0x14, 0                    ; DATA XREF: RAM:6CEDo
-ghost:          .db 0x1E, 7, 7, 0xA, 0x10, 0                    ; DATA XREF: RAM:6CEFo
-spike_6:        .db 0x3F, 8, 8, 0xC, 0x14, 0                    ; DATA XREF: RAM:6CF1o
-log_7:          .db 0x49, 8, 0xE, 0xC, 0x14, 0                  ; DATA XREF: RAM:6CF3o
-trap:           .db 0x4C, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CF5o
-table:          .db 0x4E, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CF9o
-log_b:          .db 0x4F, 8, 8, 0xC, 0x14, 0                    ; DATA XREF: RAM:6CFBo
-brick_c:        .db 0x54, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CFDo
-brick_e:        .db 0x1C, 7, 7, 0xB, 0x14, 0                    ; DATA XREF: RAM:6D01o
-spike_f:        .db 0x56, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D03o
-dragon_head:    .db 0x57, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D05o
-brick_11:       .db 0x58, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D07o
-brick_12:       .db 0x59, 8, 8, 0xA, 0x10, 0                    ; DATA XREF: RAM:6D09o
-byte_6D9B:      .db 0x5C, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D1Fo
-byte_6DA1:      .db 0x5D, 8, 8, 0xC, 0x50, 0                    ; DATA XREF: RAM:6D21o
-spider:         .db 0x78, 0xA, 0xA, 0xC, 0x10, 0                ; DATA XREF: RAM:6D0Bo
-byte_6DAD:      .db 0x10, 8, 8, 0xA, 0x10, 0                    ; DATA XREF: RAM:6D0Do
-byte_6DB3:      .db 0x52, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D13o
-byte_6DB9:      .db 0x88, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D15o
-byte_6DBF:      .db 0x8C, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D17o
-byte_6DC5:      .db 0x8D, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D19o
-byte_6DCB:      .db 0x8E, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D1Bo
-byte_6DD1:      .db 0x8F, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D1Do
-sprite_tbl:     .dw spr_37, spr_37, spr_44, spr_45, spr_46, spr_47, spr_48, spr_49, spr_55, spr_54, spr_4A
-                                                                ; DATA XREF: RAM:B2F4o
-                .dw spr_28, spr_4B, spr_4C, spr_4D, spr_4E, spr_23, spr_23, spr_40, spr_41, spr_40, spr_3F
-                .dw spr_27, spr_26, spr_37, spr_37, spr_37, spr_37, spr_26, spr_3F, spr_25, spr_25, spr_40
-                .dw spr_3F, spr_3E, spr_3F, spr_42, spr_41, spr_43, spr_41, spr_3A, spr_39, spr_38, spr_39
-                .dw spr_3C, spr_3B, spr_3D, spr_3B, spr_1A, spr_1B, spr_1A, spr_1B, spr_51, spr_50, spr_4F
-                .dw spr_52, spr_53, spr_56, spr_29, spr_2A, spr_2B, spr_2B, spr_2C, spr_24, spr_1C, spr_1D
-                .dw spr_1E, spr_1D, spr_1E, spr_1E, spr_1F, spr_1F, spr_4A, spr_2D, spr_08, spr_09, spr_4A
-                .dw spr_4A, spr_28, spr_28, spr_12, spr_13, spr_24, spr_37, spr_28, spr_28, spr_0D, spr_28
-                .dw spr_28, spr_23, spr_31, spr_28, spr_0D, spr_0D, spr_37, spr_37, spr_37, spr_37, spr_37
-                .dw spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37
-                .dw spr_37, spr_37, spr_2F, spr_2F, spr_2F, spr_2F, spr_30, spr_30, spr_30, spr_30, spr_2E
-                .dw spr_28, spr_28, spr_28, spr_28, spr_28, spr_28, spr_28, spr_00, spr_01, spr_02, spr_03
-                .dw spr_04, spr_05, spr_06, spr_07, spr_28, spr_0A, spr_0B, spr_0C, spr_28, spr_28, spr_28
-                .dw spr_28, spr_32, spr_33, spr_34, spr_35, spr_36, spr_20, spr_21, spr_22, spr_32, spr_33
-                .dw spr_34, spr_35, spr_36, spr_37, spr_37, spr_37, spr_17, spr_18, spr_17, spr_19, spr_15
-                .dw spr_16, spr_15, spr_14, spr_0E, spr_0F, spr_10, spr_11
-spr_00:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70
-                .db 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0
-                .db 0, 0x1E, 0x1E, 0, 0, 0, 0, 0xF, 0xF, 0, 0, 1, 1, 7, 7, 0x80, 0x80, 3, 3, 3, 3, 0xC0
-                .db 0xC0, 7, 7, 1, 1, 0xE0, 0xE0, 0xF, 0xF, 0, 0, 0x78, 0x78, 0x1F, 0x1F, 0, 0, 0x3E
-                .db 0x3E, 0x3C, 0x3C, 0, 0, 0xF, 0xF, 0xA0, 0xA0, 0, 0, 3, 3, 0xE0, 0xE0, 0, 0, 0, 0
-                .db 0xF8, 0xF8, 0, 0, 0, 0, 0x3E, 0x3E, 0, 0, 0, 0, 0xF, 0xF, 0, 0, 0, 0, 1, 1, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-spr_01:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xF, 0xF, 0xC0, 0xC0, 0, 0, 3, 3, 0x80, 0x80, 0, 0, 7, 7, 0, 0, 0, 0, 0xE, 0xE, 0
-                .db 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 0x3C, 0x3C, 0, 0, 0xF, 0xF, 0x78, 0x78, 0, 0, 0xFF
-                .db 0xFF, 0xF0, 0xF0, 0xF, 0xF, 0xFF, 0xFF, 0xE0, 0xE0, 0xFF, 0xFF, 0xF8, 0xF8, 0xCF
-                .db 0xCF, 0xFF, 0xFF, 0, 0, 0xBF, 0xBF, 0xF0, 0xF0, 0, 0, 0xFE, 0xFE, 0, 0, 0, 0, 0xE0
-                .db 0xE0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xC0, 0xC0, 0, 0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0x3F
-                .db 0x3F, 0xF0, 0xF0, 0, 0, 3, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xF, 0xF, 0xFF, 0xFF
-                .db 0, 0, 0, 0, 0, 0
-spr_02:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x7F, 0x7F, 0, 0, 3, 3, 0xFF, 0xFF, 0, 0, 3, 3, 0xF0
-                .db 0xF0, 0, 0, 1, 1, 0x80, 0x80, 0x80, 0x80, 1, 1, 0xC0, 0xC0, 0xE0, 0xE0, 0, 0, 0xC0
-                .db 0xC0, 0xF8, 0xF8, 0, 0, 0xE0, 0xE0, 0xFF, 0xFF, 0, 0, 0x60, 0x60, 0x1F, 0x1F, 0xC0
-                .db 0xC0, 0x70, 0x70, 7, 7, 0xF0, 0xF0, 0x30, 0x30, 0, 0, 0xFE, 0xFE, 0x38, 0x38, 0
-                .db 0, 0x3F, 0x3F, 0x98, 0x98, 0, 0, 7, 7, 0xF8, 0xF8, 0, 0, 1, 1, 0xFC, 0xFC, 0, 0
-                .db 0, 0, 0x3C, 0x3C, 0, 0, 0, 0, 0xE, 0xE, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 3, 3, 0, 0
-                .db 0, 0, 0x3F, 0x3F, 0, 0, 0xF, 0xF, 0xFC, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0xC0
+stone_block:    .db 0x5B, 8, 8, 0xC, 0x10, 0
+brick_0:        .db 0xB, 8, 8, 0xC, 0x10, 0
+brick_d:        .db 0x4A, 0xC, 0xC, 1, 0x10, 0
+byte_6D35:      .db 0x4B, 0xC, 0xC, 1, 0x10, 0
+brick_1:        .db 0xA, 8, 8, 0xC, 0x10, 0
+pond:           .db 0x30, 5, 5, 5, 0x10, 0
+lilly_pond:     .db 0x17, 7, 7, 0xA, 0x10, 0
+log_4:          .db 0x48, 8, 8, 0xC, 0x14, 0
+ghost:          .db 0x1E, 7, 7, 0xA, 0x10, 0
+spike_6:        .db 0x3F, 8, 8, 0xC, 0x14, 0
+log_7:          .db 0x49, 8, 0xE, 0xC, 0x14, 0
+trap:           .db 0x4C, 8, 8, 0xC, 0x10, 0
+table:          .db 0x4E, 8, 8, 0xC, 0x10, 0
+log_b:          .db 0x4F, 8, 8, 0xC, 0x14, 0
+brick_c:        .db 0x54, 8, 8, 0xC, 0x10, 0
+brick_e:        .db 0x1C, 7, 7, 0xB, 0x14, 0
+spike_f:        .db 0x56, 8, 8, 0xC, 0x10, 0
+dragon_head:    .db 0x57, 8, 8, 0xC, 0x10, 0
+brick_11:       .db 0x58, 8, 8, 0xC, 0x10, 0
+brick_12:       .db 0x59, 8, 8, 0xA, 0x10, 0
+byte_6D9B:      .db 0x5C, 8, 8, 0xC, 0x10, 0
+byte_6DA1:      .db 0x5D, 8, 8, 0xC, 0x50, 0
+spider:         .db 0x78, 0xA, 0xA, 0xC, 0x10, 0
+byte_6DAD:      .db 0x10, 8, 8, 0xA, 0x10, 0
+byte_6DB3:      .db 0x52, 8, 8, 0xC, 0x10, 0
+byte_6DB9:      .db 0x88, 8, 8, 0xC, 0x10, 0
+byte_6DBF:      .db 0x8C, 8, 8, 0xC, 0x10, 0
+byte_6DC5:      .db 0x8D, 8, 8, 0xC, 0x10, 0
+byte_6DCB:      .db 0x8E, 8, 8, 0xC, 0x10, 0
+byte_6DD1:      .db 0x8F, 8, 8, 0xC, 0x10, 0
+sprite_tbl:     .dw spr_37, spr_37, spr_44, spr_45, spr_46, spr_47, spr_48, spr_49
+                .dw spr_55, spr_54, spr_4A, spr_28, spr_4B, spr_4C, spr_4D, spr_4E
+                .dw spr_23, spr_23, spr_40, spr_41, spr_40, spr_3F, spr_27, spr_26
+                .dw spr_37, spr_37, spr_37, spr_37, spr_26, spr_3F, spr_25, spr_25
+                .dw spr_40, spr_3F, spr_3E, spr_3F, spr_42, spr_41, spr_43, spr_41
+                .dw spr_3A, spr_39, spr_38, spr_39, spr_3C, spr_3B, spr_3D, spr_3B
+                .dw spr_1A, spr_1B, spr_1A, spr_1B, spr_51, spr_50, spr_4F, spr_52
+                .dw spr_53, spr_56, spr_29, spr_2A, spr_2B, spr_2B, spr_2C, spr_24
+                .dw spr_1C, spr_1D, spr_1E, spr_1D, spr_1E, spr_1E, spr_1F, spr_1F
+                .dw spr_4A, spr_2D, spr_08, spr_09, spr_4A, spr_4A, spr_28, spr_28
+                .dw spr_12, spr_13, spr_24, spr_37, spr_28, spr_28, spr_0D, spr_28
+                .dw spr_28, spr_23, spr_31, spr_28, spr_0D, spr_0D, spr_37, spr_37
+                .dw spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37
+                .dw spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37
+                .dw spr_2F, spr_2F, spr_2F, spr_2F, spr_30, spr_30, spr_30, spr_30
+                .dw spr_2E, spr_28, spr_28, spr_28, spr_28, spr_28, spr_28, spr_28
+                .dw spr_00, spr_01, spr_02, spr_03, spr_04, spr_05, spr_06, spr_07
+                .dw spr_28, spr_0A, spr_0B, spr_0C, spr_28, spr_28, spr_28, spr_28
+                .dw spr_32, spr_33, spr_34, spr_35, spr_36, spr_20, spr_21, spr_22
+                .dw spr_32, spr_33, spr_34, spr_35, spr_36, spr_37, spr_37, spr_37
+                .dw spr_17, spr_18, spr_17, spr_19, spr_15, spr_16, spr_15, spr_14
+                .dw spr_0E, spr_0F, spr_10, spr_11
+spr_00:         .db 3, 24
+                .db 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70, 0
+                .db 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x38
+                .db 0x38, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0, 0, 0x1E, 0x1E, 0, 0, 0
+                .db 0, 0xF, 0xF, 0, 0, 1, 1, 7, 7, 0x80, 0x80, 3, 3, 3, 3, 0xC0
+                .db 0xC0, 7, 7, 1, 1, 0xE0, 0xE0, 0xF, 0xF, 0, 0, 0x78, 0x78, 0x1F
+                .db 0x1F, 0, 0, 0x3E, 0x3E, 0x3C, 0x3C, 0, 0, 0xF, 0xF, 0xA0, 0xA0
+                .db 0, 0, 3, 3, 0xE0, 0xE0, 0, 0, 0, 0, 0xF8, 0xF8, 0, 0, 0, 0, 0x3E
+                .db 0x3E, 0, 0, 0, 0, 0xF, 0xF, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+spr_01:         .db 3, 24
+                .db 0xF, 0xF, 0xC0, 0xC0, 0, 0, 3, 3, 0x80, 0x80, 0, 0, 7, 7, 0
+                .db 0, 0, 0, 0xE, 0xE, 0, 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 0x3C
+                .db 0x3C, 0, 0, 0xF, 0xF, 0x78, 0x78, 0, 0, 0xFF, 0xFF, 0xF0, 0xF0
+                .db 0xF, 0xF, 0xFF, 0xFF, 0xE0, 0xE0, 0xFF, 0xFF, 0xF8, 0xF8, 0xCF
+                .db 0xCF, 0xFF, 0xFF, 0, 0, 0xBF, 0xBF, 0xF0, 0xF0, 0, 0, 0xFE, 0xFE
+                .db 0, 0, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0xC0, 0xC0, 0, 0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0x3F, 0x3F, 0xF0
+                .db 0xF0, 0, 0, 3, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xF, 0xF, 0xFF
+                .db 0xFF, 0, 0, 0, 0, 0, 0
+spr_02:         .db 3, 24
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x7F, 0x7F, 0, 0, 3, 3, 0xFF, 0xFF
+                .db 0, 0, 3, 3, 0xF0, 0xF0, 0, 0, 1, 1, 0x80, 0x80, 0x80, 0x80, 1
+                .db 1, 0xC0, 0xC0, 0xE0, 0xE0, 0, 0, 0xC0, 0xC0, 0xF8, 0xF8, 0, 0
+                .db 0xE0, 0xE0, 0xFF, 0xFF, 0, 0, 0x60, 0x60, 0x1F, 0x1F, 0xC0, 0xC0
+                .db 0x70, 0x70, 7, 7, 0xF0, 0xF0, 0x30, 0x30, 0, 0, 0xFE, 0xFE, 0x38
+                .db 0x38, 0, 0, 0x3F, 0x3F, 0x98, 0x98, 0, 0, 7, 7, 0xF8, 0xF8, 0
+                .db 0, 1, 1, 0xFC, 0xFC, 0, 0, 0, 0, 0x3C, 0x3C, 0, 0, 0, 0, 0xE
+                .db 0xE, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0x3F, 0x3F
+                .db 0, 0, 0xF, 0xF, 0xFC, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0xC0
                 .db 0xFF, 0xFF, 0xF0, 0xF0, 0, 0, 0, 0, 0, 0, 0, 0
-spr_03:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xFF, 0xFF, 0xC0, 0xC0, 0xE, 0xE, 0xFC, 0xFC, 0, 0, 0xE, 0xE, 0x80, 0x80, 0, 0, 0xE
-                .db 0xE, 0, 0, 0, 0, 0xE, 0xE, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0
-                .db 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x78, 0x78, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 1, 1, 0xE0
-                .db 0xE0, 0, 0, 3, 3, 0xC0, 0xC0, 0, 0, 7, 7, 0x80, 0x80, 0, 0, 0x1E, 0x1E, 0, 0, 0
-                .db 0, 0x7C, 0x7C, 0, 0, 1, 1, 0xF0, 0xF0, 0, 0, 7, 7, 0xC0, 0xC0, 0, 0, 0x1F, 0x1F
-                .db 0, 0, 0, 0, 0x7C, 0x7C, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 0, 0, 0x80, 0x80, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-spr_04:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0xF, 0xF, 0, 0, 0, 0, 0x3E, 0x3E, 0, 0, 0
-                .db 0, 0xF8, 0xF8, 0, 0, 3, 3, 0xE0, 0xE0, 0, 0, 0xF, 0xF, 0x80, 0x80, 0, 0, 0x3E, 0x3E
-                .db 0, 0, 0, 0, 0x78, 0x78, 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 3, 3, 0xC0, 0xC0, 0, 0, 7
-                .db 7, 0x80, 0x80, 0, 0, 0xF, 0xF, 0xFF, 0xFF, 0xF0, 0xF0, 0x1E, 0x1E, 0x1F, 0x1F, 0xFF
-                .db 0xFF, 0x1C, 0x1C, 7, 7, 0xFF, 0xFF, 0x38, 0x38, 0, 0, 0xF8, 0xF8, 0x38, 0x38, 0
-                .db 0, 0x3F, 0x3F, 0x70, 0x70, 0, 0, 7, 7, 0x70, 0x70, 0, 0, 1, 1, 0x70, 0x70, 0, 0
-                .db 0, 0
-spr_05:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xF, 0xF, 0xFF, 0xFF, 3, 3, 0xFF, 0xFF
-                .db 0xFF, 0xFF, 0x3F, 0x3F, 0xF0, 0xF0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0xC0, 0xC0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0xF, 0xF
-                .db 0, 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 0x3C, 0x3C, 0, 0, 0, 0, 0x78, 0x78, 0, 0, 0
-                .db 0, 0xF0, 0xF0, 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 3, 3, 0xC0, 0xC0, 0xFF, 0xFF, 7, 7
-                .db 0x80, 0x80, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0x7F, 0x7F, 0xFE, 0xFE, 0, 0, 0, 0, 0x7C
-                .db 0x7C, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0x3F, 0x3F, 0, 0, 0
-                .db 0
-spr_06:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xF0, 0xF0, 0, 0, 0xFF, 0xFF, 0xFF
-                .db 0xFF, 0xC0, 0xC0, 0x3E, 0x3E, 0xF, 0xF, 0xFC, 0xFC, 0x7E, 0x7E, 0, 0, 0x3F, 0x3F
-                .db 0xF7, 0xF7, 0, 0, 3, 3, 0xE7, 0xE7, 0, 0, 0, 0, 0xC3, 0xC3, 0x80, 0x80, 0, 0, 0x83
-                .db 0x83, 0x80, 0x80, 0, 0, 1, 1, 0x80, 0x80, 0, 0, 1, 1, 0xC0, 0xC0, 0, 0, 0, 0, 0xC0
-                .db 0xC0, 0, 0, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0x70, 0x70, 0
-                .db 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0
-                .db 0x1C, 0x1C, 0, 0, 0, 0, 0x1F, 0x1F, 0xF0, 0xF0, 0, 0, 0xF, 0xF, 0xFF, 0xFF, 0, 0
-                .db 0, 0, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0
-spr_07:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0x80, 0x80, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 0, 0, 0x7C, 0x7C, 0, 0, 0, 0
-                .db 0x1F, 0x1F, 0, 0, 0, 0, 7, 7, 0xC0, 0xC0, 0, 0, 1, 1, 0xF0, 0xF0, 0, 0, 0, 0, 0x7C
-                .db 0x7C, 0, 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 7, 7, 0x80, 0x80, 0, 0, 3, 3, 0xC0, 0xC0
-                .db 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 0, 0, 0x78, 0x78, 0, 0, 0
-                .db 0, 0x38, 0x38, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0, 0, 0x1C, 0x1C, 0xFF, 0xFF, 0, 0
-                .db 0xE, 0xE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFE, 0xF, 0xF, 0xFC, 0xFC, 0xE, 0xE
-spr_08:         .db 4, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 5, 5, 0x55, 0x55, 0, 0, 0, 0, 0x2F, 0x2A, 0xFF, 0xAA, 0x80, 0x80, 1, 1, 0x7F
-                .db 0x55, 0xFF, 0x55, 0xC0, 0x40, 0, 0, 0xFF, 0xAA, 0xFF, 0xAA, 0xE8, 0xA8, 0x15, 0x15
-                .db 0xFF, 0x55, 0xFF, 0x55, 0xFC, 0x54, 0x3F, 0x2A, 0xFF, 0xAA, 0xFF, 0xAA, 0xFE, 0xAA
-                .db 0x7F, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0xAA, 0xFF, 0xAA, 0xFF, 0xAA
-                .db 0xFE, 0xAA, 0x7F, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0xAA, 0xFF, 0xAA
-                .db 0xFF, 0xAA, 0xFE, 0xAA, 0x5F, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFD, 0x55, 0xB, 0xA
-                .db 0xFF, 0xAA, 0xFF, 0xAA, 0xF8, 0xA8, 1, 1, 0xFF, 0x55, 0xFF, 0x55, 0xF0, 0x50, 0
-                .db 0, 0xFF, 0xAA, 0xFE, 0xAA, 0xA0, 0xA0, 0, 0, 0x57, 0x55, 0xFC, 0x54, 0, 0, 0, 0
-                .db 3, 2, 0xF8, 0xA8, 0, 0
-spr_09:         .db 4, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0xF, 5, 0xFC, 0x54, 0, 0, 1, 0, 0xFF, 0xAA, 0xFF, 0xAA, 0xE0, 0xA0, 3, 1, 0xFF
-                .db 0x55, 0xFF, 0x55, 0xF0, 0x50, 0xF, 0xA, 0xFF, 0xAA, 0xFF, 0xA, 0xFC, 0xA8, 0x3F
-                .db 0x15, 0xFF, 0x51, 0xFF, 0xE5, 0xFC, 0x54, 0x7F, 0x2A, 0xFF, 0xA7, 0xFF, 0xFA, 0xFD
-                .db 0xA8, 0xFF, 0x55, 0xFF, 0x4F, 0xFF, 0xF5, 0xFF, 0x45, 0xFF, 0xAA, 0xFF, 0x93, 0xFF
-                .db 0xF2, 0xFF, 0xBA, 0xFF, 0x55, 0xFF, 0x47, 0xFF, 0xF9, 0xFF, 0x7D, 0x7F, 0x2A, 0xFF
-                .db 0xA5, 0xFF, 0xAA, 0xFF, 0x54, 0x3F, 0x15, 0xFF, 0x4D, 0xFF, 0xA5, 0xFE, 0x10, 0x1F
-                .db 0xA, 0xFF, 0xA9, 0xFF, 0xA2, 0xFC, 0xA8, 0x1F, 0x15, 0xFF, 0x54, 0xFF, 0xA5, 0xF8
-                .db 0x50, 0x1F, 0xA, 0xFF, 0xAA, 0xFF, 0x8A, 0xF0, 0xA0, 0xF, 5, 0xFF, 0x54, 0xFF, 0x95
-                .db 0xC0, 0x40, 0, 0, 0x3F, 0x2A, 0xF8, 0x28, 0, 0
-spr_0A:         .db 4, 27                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0x1E, 4, 0x20, 0, 0, 0, 0, 0, 0x3F, 0x1E, 0x70, 0x20
-                .db 0, 0, 0, 0, 0x7F, 0x3E, 0xF8, 0x50, 0, 0, 0, 0, 0x7F, 0x3E, 0x74, 0x20, 0, 0, 3
-                .db 0, 0x3E, 0x1C, 0x3E, 0x14, 0, 0, 0x1F, 3, 0xBC, 0, 0x1F, 0xA, 0, 0, 0x3F, 0x1F, 0xFD
-                .db 0x9C, 0xAF, 5, 0x82, 0, 0x7F, 0x3F, 0xFF, 0xCC, 0xF5, 0xA0, 0xC7, 2, 0x7F, 0x3F
-                .db 0xFE, 0xCC, 0xF8, 0x10, 0xEE, 0x44, 0x3F, 3, 0xED, 0xC0, 0xFD, 0x28, 0xDF, 0x82
-                .db 0x1F, 1, 0xE3, 0xC1, 0xF8, 0x90, 0xFE, 0x54, 0x1F, 1, 0xE7, 0xC3, 0xFD, 0xC0, 0xFC
-                .db 0xA0, 0x3F, 0x1C, 0xCF, 0x81, 0xFE, 0xE4, 0xFE, 0x54, 0x7F, 0x3C, 0xFF, 0xC, 0xF9
-                .db 0xF0, 0xF7, 0xA2, 0xFC, 0x78, 0x7F, 0x3E, 0xFF, 0, 0xAE, 4, 0x78, 0x20, 0xFF, 0x7F
-                .db 0xFF, 0xCF, 0x87, 2, 0x23, 0, 0xFF, 0x1F, 0xFF, 0x9F, 0xF2, 0, 0xF, 3, 0xFF, 0x9F
-                .db 0xFF, 0x3E, 0xF8, 0x70, 0x1F, 0xF, 0x9F, 0xC, 0xFF, 0x78, 0xFC, 0xF8, 0x1F, 0xF
-                .db 0xCC, 0x80, 0x7F, 0x30, 0xF8, 0xE0, 0xF, 3, 0x83, 0, 0xFF, 0xE, 0xE0, 0xC0, 3, 0
-                .db 0x3F, 3, 0xFF, 0x9B, 0xC0, 0, 0, 0, 0x7F, 0x3F, 0xFB, 0xB0, 0, 0, 0, 0, 0x3F, 0xF
-                .db 0xF0, 0xA0, 0, 0, 0, 0, 0xF, 3, 0xA0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
-spr_0B:         .db 4, 27                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0xE
-                .db 4, 0x10, 0, 0, 0, 0, 0, 0x1E, 0xC, 0x38, 0x10, 0, 0, 0, 0, 0x3C, 0x18, 0x74, 0x20
-                .db 0, 0, 0, 0, 0x18, 0, 0x3E, 0x14, 0, 0, 3, 0, 4, 0, 0x1C, 8, 0, 0, 0xF, 3, 0x8E, 4
-                .db 0xE, 4, 0, 0, 0x1F, 0xF, 0xDE, 0x8C, 0x14, 0, 0, 0, 0xF, 3, 0xEC, 0xC0, 0x38, 0x10
-                .db 2, 0, 3, 1, 0xE0, 0xC0, 0x7C, 0x28, 0x47, 2, 1, 0, 0xC1, 0x80, 0xF8, 0x10, 0xEE
-                .db 0x44, 0x80, 0, 0x83, 1, 0xF0, 0xC0, 0x74, 0x20, 0x1C, 8, 3, 1, 0xF0, 0xE0, 0xFA
-                .db 0x50, 0x3C, 0x18, 9, 0, 0xE0, 0x40, 0x77, 0x22, 0x78, 0x30, 0x1E, 8, 0x40, 0, 0x2E
-                .db 4, 0x60, 0, 0x3F, 0x1E, 0xE, 0, 4, 0, 0, 0, 0x1F, 0xE, 0x1F, 0xE, 0x60, 0, 7, 0
-                .db 0xE, 4, 0x3E, 0x18, 0xF0, 0x60, 0xF, 7, 0x84, 0, 0x78, 0x30, 0xF0, 0x60, 7, 2, 0
-                .db 0, 0x3F, 0, 0xE0, 0xC0, 2, 0, 0, 0, 0x1F, 0xE, 0xC0, 0, 0, 0, 0xF, 0, 0xBE, 0x18
-                .db 0, 0, 0, 0, 0x1F, 0xF, 0xF8, 0x90, 0, 0, 0, 0, 0xF, 3, 0x90, 0, 0, 0, 0, 0, 3, 0
-                .db 0, 0, 0, 0
-spr_0C:         .db 4, 27                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0xE, 4, 0, 0, 0, 0, 0, 0, 0x1C, 8, 0x10
-                .db 0, 0, 0, 0, 0, 8, 0, 0x38, 0x10, 0, 0, 2, 0, 0, 0, 0x1C, 8, 0, 0, 7, 2, 4, 0, 8
-                .db 0, 0, 0, 0xF, 7, 0xCE, 4, 0x10, 0, 0, 0, 7, 1, 0xE4, 0xC0, 0x38, 0x10, 0, 0, 1, 0
-                .db 0xC0, 0x80, 0x10, 0, 4, 0, 0, 0, 0x80, 0, 0xF8, 0x10, 0x2E, 4, 0, 0, 1, 0, 0xF0
-                .db 0xC0, 0x74, 0x20, 0x18, 0, 1, 0, 0xE0, 0xC0, 0xE0, 0x40, 0x3C, 0x18, 0, 0, 0xC0
-                .db 0, 0x70, 0x20, 0x38, 0x10, 0xC, 0, 0, 0, 0x20, 0, 0x10, 0, 0x1E, 0xC, 8, 0, 0, 0
-                .db 0, 0, 0xE, 4, 0x1C, 8, 0x40, 0, 3, 0, 4, 0, 0x3C, 0x18, 0xE0, 0x20, 7, 3, 0x80, 0
-                .db 0x38, 0x10, 0xF0, 0x60, 3, 0, 0, 0, 0x18, 0, 0x60, 0, 0, 0, 0, 0, 0x1C, 4, 0, 0
-                .db 0, 0, 3, 0, 0x3C, 0x18, 0, 0, 0, 0, 7, 3, 0x98, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
-spr_0D:         .db 4, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x16, 0, 0, 0, 0, 0, 0, 0, 0x3F, 0x16, 0, 0, 0, 0, 3, 0, 0xFF, 0x27, 0x83
-                .db 0, 0, 0, 7, 3, 0xFF, 0xB1, 0xCF, 0x83, 0x80, 0, 0x1F, 7, 0xFF, 0, 0xFF, 0xCE, 0xF0
-                .db 0, 0x3F, 0x14, 0xFF, 0x78, 0xFF, 0x7E, 0xF8, 0xF0, 0x7F, 0x34, 0xFF, 0xCA, 0xFF
-                .db 0x3F, 0xF0, 0xC0, 0x7F, 0x21, 0xFF, 0xCB, 0xFF, 0x1E, 0xC0, 0x80, 0x3F, 0x1F, 0xFF
-                .db 0xFB, 0xFF, 0xCF, 0xF0, 0xC0, 0x7F, 0x33, 0xFF, 0xF7, 0xFF, 0xFF, 0xF8, 0xF0, 0x7F
-                .db 0x33, 0xFF, 0xF, 0xFF, 0xFF, 0xF0, 0xE0, 0x3F, 0x1E, 0xFF, 0xF7, 0xFF, 0x7F, 0xF0
-                .db 0xC0, 0x1F, 0xD, 0xFF, 0xFB, 0xFF, 0x93, 0xF8, 0xF0, 0xF, 3, 0xFF, 0xFC, 0xFF, 0xC7
-                .db 0xFC, 0xF8, 3, 0, 0xFF, 0x1F, 0xFF, 0x7C, 0xF8, 0xC0, 0, 0, 0x7F, 0x2B, 0xFF, 0x83
-                .db 0xE0, 0xC0, 0, 0, 0x3F, 0x13, 0xFF, 0xFF, 0xE0, 0xC0, 0, 0, 0x1F, 0xD, 0xFF, 0xBD
-                .db 0xF0, 0xE0, 0, 0, 0xF, 0, 0xFF, 0x3E, 0xF0, 0xE0, 0, 0, 0xF, 6, 0xFE, 0x9C, 0xF8
-                .db 0x70, 0, 0, 7, 3, 0xDC, 0x88, 0x7C, 0x38, 0, 0, 3, 1, 0xC8, 0x80, 0x78, 0, 0, 0
-                .db 1, 0, 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 0xC0, 0, 0, 0
-spr_0E:         .db 3, 25                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x1C, 0, 0x70, 0, 0, 0, 0x3F, 0x1C, 0xFC
-                .db 0x70, 0, 0, 0x1F, 0xF, 0xFE, 0x3C, 0, 0, 0xF, 7, 0xFE, 0x1C, 0, 0, 0xF, 6, 0xFC
-                .db 0x78, 0, 0, 0x8F, 5, 0xF8, 0xF0, 1, 0, 0xCF, 0x86, 0xF8, 0x18, 3, 1, 0xEF, 0x47
-                .db 0xF8, 0xE8, 0x11, 0, 0xFF, 0xE7, 0xF8, 0xF0, 0x3B, 0x11, 0xFF, 0xE9, 0xF8, 0xF0
-                .db 0x7F, 0x28, 0xFF, 0x5E, 0xF8, 0x70, 0x7F, 0x3D, 0xFF, 0x3F, 0xF8, 0xB0, 0x3F, 0x1D
-                .db 0xFF, 0xDF, 0xFC, 0xF8, 0x1F, 3, 0xFF, 0xEF, 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0xFF, 0xFC
-                .db 0xF8, 0xF, 1, 0xFF, 0xF1, 0xF8, 0xE0, 1, 0, 0xFF, 0x7B, 0xF8, 0xF0, 0, 0, 0x7F, 0x1E
-                .db 0xF8, 0x70, 0, 0, 0x3F, 0x12, 0xF8, 0x70, 0, 0, 0x3F, 0x13, 0xF8, 0xF0, 0, 0, 0x3F
-                .db 0x1F, 0xF0, 0xE0, 0, 0, 0x1F, 0xF, 0xE0, 0xC0, 0, 0, 0xF, 0, 0xC0, 0
-spr_0F:         .db 3, 25                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 6, 0, 0, 0, 0, 0, 0xCF, 6, 0x80, 0, 0, 0, 0x1F, 0xF, 0xC0, 0x80, 0, 0, 0xF
-                .db 7, 0xE0, 0xC0, 0, 0, 7, 1, 0xF0, 0xC0, 0, 0, 3, 1, 0xFC, 0xE0, 0, 0, 3, 0, 0xFE
-                .db 0xEC, 0, 0, 0x47, 2, 0xFE, 0xF4, 0, 0, 0xE7, 0x42, 0xFC, 0x10, 1, 0, 0xF7, 0xA3
-                .db 0xFC, 0xE8, 8, 0, 0xFF, 0x73, 0xF8, 0xF0, 0x1D, 8, 0xFF, 0xF4, 0xFC, 0xF8, 0x3F
-                .db 0x14, 0xFF, 0x2F, 0xFC, 0x38, 0x3F, 0x1E, 0xFF, 0x9F, 0xFC, 0xD8, 0x1F, 0xC, 0xFF
-                .db 0xEF, 0xFE, 0xFC, 0xF, 1, 0xFF, 0xF7, 0xFE, 0xFC, 0xF, 7, 0xFF, 0xFF, 0xFE, 0xFC
-                .db 7, 0, 0xFF, 0xF8, 0xFC, 0xF0, 0, 0, 0xFF, 0x3D, 0xFC, 0xF8, 0, 0, 0x3F, 0xF, 0xFC
-                .db 0x38, 0, 0, 0x1F, 9, 0xFC, 0x38, 0, 0, 0x1F, 9, 0xFC, 0xF8, 0, 0, 0x1F, 0xF, 0xF8
-                .db 0xF0, 0, 0, 0xF, 7, 0xF0, 0xE0, 0, 0, 7, 0, 0xE0, 0
-spr_10:         .db 3, 29                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0xC0, 0, 0, 0, 1, 0, 0xF0, 0xC0, 0, 0, 3, 1, 0xF8, 0xF0, 0, 0, 3, 1, 0xF8
-                .db 0xF0, 0, 0, 3, 0, 0xF0, 0xC0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0xF, 6, 0xF0, 0xE0, 0
-                .db 0, 0xF, 6, 0xFC, 0xE0, 0, 0, 0x1F, 0xF, 0xFE, 0xEC, 0, 0, 0x3F, 0x1F, 0xFE, 0xF4
-                .db 0, 0, 0x3F, 0x18, 0xFC, 0x70, 0, 0, 0x1F, 7, 0xF8, 0x90, 0, 0, 0x3F, 0x1F, 0xF0
-                .db 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F
-                .db 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xFF, 0xFC, 0, 0, 0x7F, 0x38, 0xFF, 0x7F, 0xC0, 0
-                .db 0x7F, 0x37, 0xFF, 0xBF, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0xDF, 0xF8, 0xE0, 0x3F, 0x1F
-                .db 0xFF, 0xEF, 0xFC, 0xE8, 0x7F, 0x3F, 0xFF, 0xF1, 0xFE, 0xEC, 0x7F, 0x3F, 0xFF, 0xF6
-                .db 0xFF, 0x52, 0x3F, 0x1F, 0xFF, 0xEF, 0xFE, 0x18, 0x1F, 0xF, 0xEF, 0xC6, 0xF8, 0xC0
-                .db 0xF, 7, 0xC7, 0x81, 0xE0, 0x40, 7, 0, 0x83, 1, 0xC0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0
-                .db 0, 0, 0, 0x80, 0
-spr_11:         .db 3, 28                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x18, 0, 0, 0, 0, 0, 0x3E, 0x18, 0xC, 0, 0, 0
-                .db 0x3F, 0x1E, 0x9E, 0xC, 0, 0, 0x3F, 0x1F, 0xDF, 0x1E, 0x80, 0, 0x3F, 0x1D, 0xFF, 0x9F
-                .db 0xC0, 0x80, 0x1F, 0xC, 0xFF, 0x7F, 0x80, 0, 0x1F, 0xD, 0xFF, 0xFC, 0, 0, 0x1F, 0xB
-                .db 0xFC, 0xF8, 0, 0, 0x1F, 0xC, 0xF8, 0x30, 0, 0, 0xF, 3, 0xF0, 0xC0, 0, 0, 0x1F, 0xF
-                .db 0xF8, 0xF0, 0, 0, 0x3F, 0x1F, 0xF8, 0xF0, 0, 0, 0x3F, 0x1F, 0xF8, 0xF0, 0, 0, 0x3F
-                .db 0x1F, 0xFE, 0xF8, 0, 0, 0x3F, 0x1F, 0xFF, 0xFE, 0x80, 0, 0x3F, 0x1C, 0xFF, 0x3F
-                .db 0xE0, 0x80, 0x3F, 0x1B, 0xFF, 0xDF, 0xF0, 0xE0, 0x3F, 0x17, 0xFF, 0xEF, 0xFC, 0xF0
-                .db 0x1F, 0xF, 0xFF, 0xF3, 0xFE, 0xF4, 0x3F, 0x1F, 0xFF, 0xF8, 0xFF, 0xF6, 0x3F, 0x1F
-                .db 0xFF, 0xFB, 0xFF, 0x2A, 0x1F, 0xF, 0xFF, 0xF7, 0xFE, 0x8C, 0xF, 7, 0xF7, 0xE3, 0xFC
-                .db 0x60, 7, 3, 0xE3, 0xC0, 0xF0, 0xA0, 3, 0, 0xC0, 0, 0xE0, 0x40, 0, 0, 0, 0, 0x40
-                .db 0
-spr_12:         .db 4, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 2, 0, 0, 0, 0x10, 0, 0, 0, 0x1F, 2, 0xE0, 0, 0x38, 0x10, 0, 0, 0x3F, 0x19
-                .db 0xFF, 0xE0, 0xFC, 0x28, 0, 0, 0x7F, 0, 0xFF, 0xEF, 0xFC, 0xF8, 0x1F, 0, 0xFF, 0x74
-                .db 0xFF, 0xC1, 0xF8, 0xC0, 0xBF, 0x1F, 0xFF, 0xE8, 0xFF, 0xDE, 0xFC, 0xB8, 0x3F, 0x1F
-                .db 0xFF, 0x8C, 0xFF, 0xFF, 0xF8, 0x70, 0x1F, 0, 0xFF, 0x6C, 0xFF, 0x3F, 0xFC, 0x88
-                .db 0, 0, 0x7F, 0x16, 0xFF, 0xFF, 0xFC, 0xB8, 0, 0, 0xFF, 0x66, 0xFF, 0xFF, 0xF8, 0x80
-                .db 0, 0, 0xFF, 0x7B, 0xFF, 0xFF, 0xC0, 0x80, 0, 0, 0x7F, 0xD, 0xFF, 0xFF, 0xC0, 0x80
-                .db 0, 0, 0xFF, 0x76, 0xFF, 0xFF, 0xC0, 0x80, 0, 0, 0xFF, 0x12, 0xFF, 0xBF, 0x80, 0
-                .db 1, 0, 0xFF, 0xA8, 0xFF, 0xBE, 0, 0, 1, 0, 0xFF, 0x83, 0xFF, 0, 0, 0, 0, 0, 0xFF
-                .db 0x7C, 0xC0, 0x80, 0, 0, 0, 0, 0x7F, 0x13, 0xC0, 0x80, 0, 0, 0, 0, 0x1F, 0xF, 0xC0
-                .db 0x80, 0, 0, 0, 0, 0xF, 7, 0xC0, 0x80, 0, 0, 0, 0, 7, 3, 0xC0, 0x80, 0, 0, 0, 0, 3
-                .db 1, 0xC0, 0x80, 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 0x80, 0, 0, 0
-spr_13:         .db 4, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0xE0, 0x40, 0, 0, 0, 0, 5, 0, 0xF0, 0xA0, 0, 0
-                .db 0, 0, 0xF, 5, 0xFC, 0xF0, 0, 0, 0, 0, 0x1F, 0xA, 0xFF, 0x4C, 0, 0, 0, 0, 0x1F, 0xF
-                .db 0xFF, 0xBF, 0xCC, 0, 0, 0, 0xF, 5, 0xFF, 0x7F, 0xFF, 0xCC, 0, 0, 0x1F, 0xE, 0xFF
-                .db 0xFF, 0xFF, 0xEF, 0x80, 0, 0xF, 2, 0xFF, 0xFF, 0xFF, 0xED, 0xC0, 0x80, 3, 0, 0xFF
-                .db 0xFF, 0xFF, 0xFC, 0x80, 0, 1, 0, 0xFF, 0xFF, 0xFF, 0xFE, 0, 0, 1, 0, 0xFF, 0xFF
-                .db 0xFF, 0xFE, 0, 0, 0, 0, 0xFF, 0x7F, 0xFE, 0xE0, 0, 0, 0, 0, 0xFF, 0x7F, 0xFF, 0xFC
-                .db 0xE0, 0, 0, 0, 0x7F, 0x3F, 0xFF, 0x87, 0xF0, 0xC0, 0, 0, 0x3F, 0x1F, 0xFF, 0x78
-                .db 0xF0, 0, 0, 0, 0x1F, 6, 0xFF, 0xFC, 0xFC, 0x70, 0, 0, 7, 1, 0xFF, 0x8E, 0xFE, 0xBC
-                .db 0, 0, 3, 1, 0xFF, 0x76, 0xFF, 0x8E, 0, 0, 3, 0, 0xFF, 0xFA, 0x8F, 2, 0, 0, 0xF, 3
-                .db 0xFF, 0xFA, 2, 0, 0, 0, 0x1F, 0xF, 0xFF, 0xF6, 0, 0, 0, 0, 0x3F, 0x1E, 0xFE, 0xC
-                .db 0, 0, 0, 0, 0x1E, 0, 0xC, 0, 0, 0
-spr_14:         .db 3, 21                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0xFF, 0, 0, 0, 3, 0, 0xFF, 0xFF, 0xC0, 0, 0xF, 3, 0xFF, 0xFF, 0xF0, 0xC0, 0x3F
-                .db 0xF, 0xFF, 0xFF, 0xF8, 0xF0, 0x7F, 0x3F, 0xFF, 0xFF, 0xFC, 0xF8, 0xFF, 0x7F, 0xFF
-                .db 0xFF, 0xFE, 0xFC, 0xFF, 0x71, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0x60, 0xFF, 0xFF, 0xFF
-                .db 0xFE, 0xFF, 0x60, 0xFF, 0x7F, 0xFF, 0xFE, 0x7F, 0x30, 0xFF, 0x7F, 0xFF, 0xFE, 0x3F
-                .db 0x18, 0xFF, 0x3F, 0xFE, 0xFC, 0x1F, 0xE, 0xFF, 0x3F, 0xFC, 0xF8, 0xF, 7, 0xFF, 0x3F
-                .db 0xF8, 0xF0, 7, 3, 0xFF, 0x1F, 0xF0, 0xE0, 7, 3, 0xFF, 0x9F, 0xE0, 0xC0, 3, 1, 0xFF
-                .db 0xCF, 0xC0, 0x80, 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 1, 0, 0xFF, 0xFF, 0x80, 0, 0, 0
-                .db 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0x38, 0, 0, 0, 0, 0x38, 0, 0, 0
-spr_15:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x3C, 0, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0, 7, 1, 0xFF, 0xFF, 0xE0, 0x80, 0xF
-                .db 7, 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xF, 0xFF, 0xFF, 0xF8, 0xF0, 0x3F, 0x1F, 0xFF, 0xFF
-                .db 0xFC, 0xF8, 0x3F, 0x19, 0xFF, 0xFF, 0xFC, 0xF8, 0x7F, 0x30, 0xFF, 0xFF, 0xFF, 0xFC
-                .db 0x7F, 0x30, 0xFF, 0xFF, 0xFE, 0xFC, 0x3F, 0x18, 0xFF, 0x7F, 0xFC, 0xF8, 0x3F, 0x1C
-                .db 0xFF, 0x7F, 0xFC, 0xF8, 0x1F, 0xC, 0xFF, 0x7F, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F
-                .db 0xF8, 0xF0, 0xF, 6, 0xFF, 0x7F, 0xF0, 0xE0, 0xF, 6, 0xFF, 0x3F, 0xF0, 0xE0, 0xF
-                .db 7, 0xFF, 0x3F, 0xF0, 0xE0, 7, 3, 0xFF, 0x3F, 0xE0, 0xC0, 7, 3, 0xFF, 0xBF, 0xE0
-                .db 0xC0, 7, 3, 0xFF, 0xBF, 0xE0, 0xC0, 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 3, 1, 0xFF, 0xFF
-                .db 0xC0, 0x80, 1, 0, 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0, 0
-                .db 0
-spr_16:         .db 3, 26                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x3C, 0, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0, 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 7
-                .db 3, 0xFF, 0xFF, 0xE0, 0xC0, 0xF, 7, 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0xFF
-                .db 0xF8, 0xF0, 0x1F, 0xC, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 8, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F
-                .db 8, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xC, 0xFF, 0x7F, 0xF8, 0xF0, 0x1F, 0xC, 0xFF, 0x7F
-                .db 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F, 0xF8, 0xF0, 0xF, 6, 0xFF, 0x3F, 0xF0, 0xE0, 0xF
-                .db 7, 0xFF, 0x3F, 0xF0, 0xE0, 7, 3, 0xFF, 0x3F, 0xE0, 0xC0, 7, 3, 0xFF, 0x3F, 0xE0
-                .db 0xC0, 3, 1, 0xFF, 0x3F, 0xC0, 0x80, 3, 1, 0xFF, 0x3F, 0xC0, 0x80, 3, 1, 0xFF, 0xBF
-                .db 0xC0, 0x80, 3, 1, 0xFF, 0xBF, 0xC0, 0x80, 1, 0, 0xFF, 0x9F, 0x80, 0, 1, 0, 0xFF
-                .db 0xDF, 0x80, 0, 1, 0, 0xFF, 0xDF, 0x80, 0, 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0x3C
-                .db 0, 0, 0, 0, 0x3C, 0, 0, 0
-spr_17:         .db 4, 23                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0xE, 4, 0, 0, 0, 0, 0
-                .db 0, 0x1E, 0xC, 0, 0, 0, 0, 0, 0, 0x1E, 0xC, 0, 0, 0, 0, 0, 0, 0x3E, 0x1C, 4, 0, 0
-                .db 0, 0, 0, 0x3E, 0x1C, 0xE, 4, 0, 0, 7, 0, 0x7C, 0x38, 0x1E, 0xC, 0, 0, 0x3F, 7, 0xFC
-                .db 0x78, 0x7C, 0x18, 0x40, 0, 0xFF, 0x3E, 0xFB, 0xF0, 0xFC, 0x78, 0xF9, 0x40, 0xFF
-                .db 0xFF, 0xFF, 0x6B, 0xF8, 0xF0, 0xFF, 0x78, 0xFF, 0x7F, 0xFF, 0x9B, 0xF0, 0xE0, 0x7F
-                .db 0x3F, 0xFF, 0xBF, 0xFF, 0xFD, 0xE2, 0x80, 0x3F, 0x1F, 0xFF, 0xBF, 0xFF, 0xFE, 0xDF
-                .db 2, 0x1F, 3, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0xDE, 0x4F, 4, 0xFF, 0xFF, 0xFF, 0xFF
-                .db 0xFE, 0xDC, 0xFF, 0x43, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC, 0xD0, 0xFF, 0x7D, 0xFF, 0xFF
-                .db 0xFF, 0xFF, 0xD0, 0x80, 0x7F, 0x3E, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0, 0x3F, 0x1F
-                .db 0xFF, 0x3F, 0xFF, 0xFC, 0, 0, 0x1F, 0, 0xFF, 0x87, 0xFC, 0xE0, 0, 0, 1, 0, 0xFF
-                .db 0xF8, 0xE0, 0, 0, 0, 0, 0, 0xF8, 0, 0, 0, 0, 0
-spr_18:         .db 4, 23                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0x10, 0, 0, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0, 0, 0x38, 0x10
-                .db 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0, 0, 0, 0x7C
-                .db 0x38, 0, 0, 0, 0, 0, 0, 0x7C, 0x38, 0, 0, 0, 0, 7, 0, 0xFC, 0x78, 6, 0, 0x40, 0
-                .db 0x3F, 7, 0xF8, 0x70, 0x1F, 6, 0xF0, 0x40, 0xFF, 0x3E, 0xFB, 0xF0, 0xFE, 0x1C, 0xFF
-                .db 0x70, 0xFF, 0xFF, 0xFF, 0x6B, 0xFE, 0xFC, 0x7F, 0x3E, 0xFF, 0x7F, 0xFF, 0x9B, 0xFC
-                .db 0xF8, 0x3F, 0x1F, 0xFF, 0xBF, 0xFF, 0xFD, 0xFE, 0xE4, 0x1F, 0xF, 0xFF, 0xBF, 0xFF
-                .db 0xFE, 0xFE, 0xC, 0xF, 3, 0xFF, 0x7F, 0xFF, 0xFF, 0xFC, 0xD8, 0xF, 4, 0xFF, 0xFF
-                .db 0xFF, 0xFF, 0xFC, 0xD8, 0xF, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xD0, 0x7F, 0xD, 0xFF
-                .db 0xFF, 0xFF, 0xFF, 0xD0, 0, 0xFF, 0x7E, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0, 0x7F, 0xF
-                .db 0xFF, 0x3F, 0xFF, 0xFC, 0, 0, 0xF, 0, 0xFF, 0xC7, 0xFC, 0xE0, 0, 0, 0, 0, 0xFF, 0x38
-                .db 0xE0, 0, 0, 0, 0, 0, 0x38, 0, 0, 0, 0, 0
-spr_19:         .db 4, 23                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0x88, 0, 0, 0
-                .db 0, 0, 7, 3, 0x9C, 8, 0, 0, 0, 0, 0xF, 7, 0xBC, 0x18, 0, 0, 0, 0, 0x1F, 0xE, 0x3C
-                .db 0x18, 0, 0, 7, 0, 0x7F, 0x1E, 0x7C, 0x38, 0, 0, 0x3F, 7, 0xFF, 0x7C, 0xFC, 0x78
-                .db 0, 0, 0xFF, 0x3E, 0xFF, 0xF9, 0xF8, 0xF0, 0x41, 0, 0xFF, 0xFF, 0xFF, 0x73, 0xF0
-                .db 0xE0, 0xFF, 0x40, 0xFF, 0x7F, 0xFF, 0x8B, 0xE0, 0xC0, 0xFF, 0x7F, 0xFF, 0xBF, 0xFF
-                .db 0xFD, 0xC0, 0x80, 0x7F, 0x3F, 0xFF, 0xBF, 0xFF, 0xFE, 0xD2, 0, 0x7F, 0xF, 0xFF, 0x7F
-                .db 0xFF, 0xFF, 0xFF, 0xD2, 0xFF, 0x40, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xDE, 0xFF, 0x73
-                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0x7F, 0x3D, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0x80
-                .db 0x3F, 0x1E, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0, 0x1F, 7, 0xFF, 0x3F, 0xFF, 0xFC, 0
-                .db 0, 7, 0, 0xFF, 0xC7, 0xFC, 0xE0, 0, 0, 3, 1, 0xFF, 0xF8, 0xE0, 0, 0, 0, 1, 0, 0xF8
-                .db 0xE0, 0, 0, 0, 0, 0, 0, 0xE0, 0, 0, 0, 0, 0
-spr_1A:         .db 3, 26                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 6, 0, 0, 0, 0, 0, 0xF, 6, 0, 0, 0, 0, 0x1F, 0xE, 0, 0, 0, 0, 0x3E, 0x1C, 0
-                .db 0, 0, 0, 0x3E, 0x1C, 4, 0, 0, 0, 0x3F, 0x1E, 0xE, 4, 0, 0, 0x7F, 0x3E, 0xE, 4, 0x20
-                .db 0, 0xFF, 0x7E, 0x1F, 0xA, 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x71, 0x20, 0xFF, 0xFF
-                .db 0x9F, 0xA, 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x79, 0x30, 0xFF, 0xFF, 0xBF, 0x12
-                .db 0x79, 0x30, 0xFF, 0xFF, 0xFF, 0x32, 0x7D, 0x38, 0xFF, 0xFF, 0xFF, 0xF2, 0x7D, 0x38
-                .db 0xFF, 0xFF, 0xFF, 0xF2, 0x7F, 0x3C, 0xFF, 0xFB, 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0xD3
-                .db 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA
-                .db 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xBE, 0x7F, 0x3F, 0xFF, 0x93, 0xBF, 0xE, 0x7F, 0x3E
-                .db 0xFF, 0x9B, 0x8E, 0, 0x7F, 0x3C, 0xFF, 0xFF, 0x80, 0, 0x7D, 0x3C, 0xFF, 0x7E, 0
-                .db 0, 0x3C, 0x18, 0x7E, 0x3C, 0, 0, 0x18, 0, 0x3C, 0, 0, 0
-spr_1B:         .db 3, 26                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x10, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0x7C, 0x38, 0, 0, 0, 0, 0x3E
-                .db 0x1C, 4, 0, 0, 0, 0x1F, 0xE, 0xE, 4, 0, 0, 0x1F, 0xE, 0xE, 4, 0x20, 0, 0x3F, 0x1E
-                .db 0x1F, 0xA, 0x70, 0x20, 0x7F, 0x3E, 0x1F, 0xA, 0x70, 0x20, 0xFF, 0x7E, 0x1F, 0xA
-                .db 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x79, 0x30, 0xFF, 0xFF, 0xBF, 0x1A, 0x79, 0x30
-                .db 0xFF, 0xFF, 0xFF, 0x32, 0x7D, 0x38, 0xFF, 0xFF, 0xFF, 0x72, 0x7D, 0x38, 0xFF, 0xFF
-                .db 0xFF, 0xF2, 0x7F, 0x3C, 0xFF, 0xFF, 0xFF, 0xF2, 0x7F, 0x3E, 0xFF, 0xFB, 0xFF, 0xF2
-                .db 0x7F, 0x3F, 0xFF, 0xD3, 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F
-                .db 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xE, 0x7F, 0x3F, 0xFF, 0x93
-                .db 0x8E, 0, 0x7F, 0x3E, 0xFF, 0x9B, 0x80, 0, 0x7F, 0x3C, 0xFF, 0xFF, 0x80, 0, 0x3C
-                .db 0x18, 0xFF, 0x7E, 0, 0, 0x18, 0, 0x7E, 0x3C, 0, 0, 0, 0, 0x3C, 0, 0, 0
-spr_1C:         .db 2, 14                                       ; DATA XREF: RAM:sprite_tblo
-                .db 3, 0, 0xE0, 0, 7, 3, 0xF0, 0xE0, 0xF, 7, 0xFC, 0xF0, 0x1F, 7, 0xFE, 0xEC, 0x3F, 0x1F
-                .db 0xFF, 0xFE, 0x7F, 0x3F, 0xFF, 0xFE, 0x7F, 0x3D, 0xFF, 0x9E, 0x3F, 0x1E, 0xFE, 0x5C
-                .db 0x7F, 0x3F, 0xFF, 0xDE, 0x7F, 0x3D, 0xFF, 0xE6, 0x3F, 0x1B, 0xFF, 0xFE, 0x1B, 1
-                .db 0xFE, 0xDC, 1, 0, 0xFC, 0xC0, 0, 0, 0xC0, 0
-spr_1D:         .db 3, 13                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0xFC, 0, 0, 0, 1, 0, 0xFF, 0xFC, 0xC0, 0, 0x3B, 1, 0xFF, 0xFB, 0xE0, 0xC0
-                .db 0x7F, 0x3B, 0xFF, 0xFF, 0xF0, 0xE0, 0xFF, 0x7F, 0xFF, 0xFF, 0xF8, 0xF0, 0xFF, 0x7F
-                .db 0xFF, 0xFB, 0xF8, 0xF0, 0xFF, 0x7D, 0xFF, 0xE5, 0xF0, 0xC0, 0xFF, 0x7E, 0xFF, 0x1D
-                .db 0xF8, 0xF0, 0x7F, 0x3F, 0xFF, 0xFE, 0xFC, 0x78, 0x3F, 7, 0xFF, 0xFF, 0xFC, 0xF8
-                .db 0x1F, 0xF, 0xFF, 0xFB, 0xF8, 0xF0, 0xF, 6, 0xFB, 0xF0, 0xF0, 0xE0, 6, 0, 0xF0, 0
-                .db 0xE0, 0
-spr_1E:         .db 3, 17                                       ; DATA XREF: RAM:sprite_tblo
-byte_81C7:      .db 1, 0, 0xF8, 0, 0, 0, 7, 1, 0xFF, 0xF8, 0, 0, 0xF, 7, 0xFF, 0xFF, 0xBC, 0, 0x1F, 0xF
-                .db 0xFF, 0xFF, 0xFE, 0xBC, 0x3F, 0xF, 0xFF, 0xFF, 0xFF, 0xFE, 0x7F, 0x3F, 0xFF, 0xFF
-                .db 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0x7C, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0x81, 0xFF, 0xFE
-                .db 0xFF, 0x7F, 0xFF, 0xC1, 0xFE, 0xFC, 0xFF, 0x7D, 0xFF, 0x80, 0xFC, 0x78, 0x7F, 0x3D
-                .db 0xFF, 0xE3, 0xFE, 0xFC, 0xFF, 0x7D, 0xFF, 0xF7, 0xFF, 0xFE, 0xFF, 0x63, 0xFF, 0xFF
-                .db 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0xFE, 0x7F, 0x3B, 0xFF, 0xFD, 0xFE, 0xFC
-                .db 0x3B, 1, 0xFD, 0xF0, 0xFC, 0xF0, 1, 0, 0xF0, 0, 0xF0, 0
-spr_1F:         .db 3, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x3F, 0, 0, 0, 0xF8, 0, 0x7F, 0x3F, 0x81, 0, 0xFC, 0xF8, 0xFF, 0x7F, 0xC3, 0x81
-                .db 0xFE, 0xFC, 0xFF, 0x7E, 0x81, 0, 0xFC, 0x38, 0x7E, 0x3C, 0, 0, 0x38, 0, 0x3C, 0
-                .db 0, 0, 0xC, 0, 0, 0, 0, 0, 0x1E, 0xC, 0, 0, 0, 0, 0x3F, 0x1E, 0x18, 0, 0, 0, 0x3F
-                .db 0x1E, 0x3C, 0x18, 0, 0, 0x3F, 0x1E, 0x7E, 0x3C, 0, 0, 0x3F, 0x1E, 0x7E, 0x2C, 0x3C
-                .db 0, 0x1E, 4, 0x7E, 0x24, 0x7E, 0x3C, 0x1C, 8, 0x7E, 0x3C, 0x7F, 0x3E, 8, 0, 0x3C
-                .db 0x18, 0x3E, 0x1C, 0, 0, 0x18, 0, 0x1C, 0, 0, 0
-spr_20:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 8, 0, 0, 0, 0x1C, 8, 0x40, 0, 0x3E, 0x1C, 0xE4, 0x40, 0x3F, 8, 0x4E, 4, 0x7F, 0x27
-                .db 0xDF, 0xE, 0x3F, 0xB, 0xFE, 0xC4, 0x3F, 0x1C, 0xF4, 0xA0, 0x5F, 0xD, 0xFC, 0xB0
-                .db 0xFF, 0x5A, 0xFE, 0x54, 0x5F, 5, 0xFC, 0xF0, 0xF, 1, 0xFC, 0xA8, 0x1F, 9, 0xF8, 0x40
-                .db 0x19, 0, 0x50, 0, 0x39, 0x10, 0x38, 0x10, 0x3F, 0x19, 0x90, 0, 0x19, 0, 0, 0
-spr_21:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 8, 0, 0, 0, 0x1C, 8, 0x20, 0, 9, 0, 0x70, 0x20, 0x23, 1, 0xA8, 0, 0x73, 0x20, 0xBC
-                .db 8, 0x7F, 0x33, 0xF8, 0xA0, 0x3F, 6, 0xE2, 0xC0, 0x1F, 0xD, 0xFF, 0x62, 0x4F, 6, 0xFA
-                .db 0xF0, 0xFF, 0x4A, 0xF8, 0xE0, 0x4F, 3, 0xFC, 0x88, 0xF, 3, 0xFE, 0x5C, 0x1F, 9, 0xDC
-                .db 0x88, 0x3F, 0x1C, 0xC8, 0, 0x1C, 8, 0xE0, 0x40, 8, 0, 0x40, 0
-spr_22:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 8, 0, 0x40, 0, 0x1C, 8, 0xE8, 0x40, 0xB, 0, 0xFC, 0x68, 7, 3, 0xF8, 0, 0x27, 1, 0xFA
-                .db 0xD0, 0x7F, 0x27, 0xFF, 0xBA, 0x3F, 5, 0xFA, 0xD0, 0x3F, 0xF, 0xFC, 0xB0, 0x7F, 0x32
-                .db 0xFE, 0xD4, 0x7F, 0x33, 0xFC, 0xB0, 0x3F, 1, 0xF2, 0x60, 0xF, 2, 0xFF, 0x32, 0x1F
-                .db 8, 0xFA, 0x80, 9, 0, 0x9C, 8, 3, 1, 0x88, 0, 1, 0, 0, 0
-font:           .db 0x38, 0x6C, 0xD6, 0xD6, 0xD6, 0xD6, 0x6C, 0x38 ; DATA XREF: RAM:BB49o
-                                                                ; RAM:BC67t ...
-                .db 0x18, 0x38, 0x58, 0x18, 0x18, 0x18, 0x18, 0x7C
-                .db 0x38, 0x4C, 0xC, 0x3C, 0x60, 0xC2, 0xC2, 0xFE
-                .db 0x38, 0x4C, 0xC, 0x3C, 0xE, 0x86, 0x86, 0xFC
-                .db 0x18, 0x38, 0x58, 0x9A, 0xFE, 0x1A, 0x18, 0x7C
-                .db 0xFE, 0xC2, 0xC0, 0xFC, 6, 6, 0x86, 0x7C
-                .db 0x1E, 0x32, 0x60, 0xEC, 0xC6, 0xC6, 0xC6, 0x7C
-                .db 0x7E, 0x46, 0x4C, 0xC, 0x18, 0x18, 0x38, 0xF8
-                .db 0x38, 0x6C, 0x6C, 0x7C, 0xFE, 0xC6, 0xC6, 0x7C
-                .db 0x7C, 0xC6, 0xC6, 0xC6, 0x7C, 0xC, 0x98, 0xF0
-                .db 0, 0, 0, 0, 0, 0, 0x18, 0x18
-                .db 0, 0xC3, 0xC6, 0xC, 0x18, 0x30, 0x63, 0xC3
-                .db 0x3C, 0x42, 0x99, 0xA1, 0xA1, 0x99, 0x42, 0x3C
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0xC, 0x1C, 0x2E, 0x66, 0x46, 0xCE, 0xD6, 0x66
-                .db 0xF8, 0x6C, 0x6C, 0x78, 0x6C, 0x66, 0x66, 0xFC
-                .db 0xE, 0x32, 0x60, 0x40, 0xC0, 0xC2, 0xE6, 0x7C
-                .db 0x60, 0x70, 0x68, 0x6C, 0x66, 0x66, 0x66, 0xFC
-                .db 0xFE, 0x60, 0x64, 0x7C, 0x64, 0x60, 0x7A, 0xC6
-                .db 0xC6, 0x7A, 0x60, 0x64, 0x7C, 0x64, 0x60, 0x60
-                .db 0xE, 0x30, 0x60, 0xC6, 0xCE, 0xF6, 0x66, 0xE
-                .db 0xEE, 0xC6, 0xC6, 0xFE, 0xC6, 0xC6, 0xC6, 0xEE
-                .db 0x7C, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x7C
-                .db 0x1E, 6, 6, 0x86, 0x86, 0xC6, 0x7E, 0x1C
-                .db 0xE4, 0x68, 0x70, 0x78, 0x6C, 0x64, 0x64, 0xF6
-                .db 0xE0, 0x60, 0x60, 0x60, 0x60, 0x60, 0x62, 0xFE
-                .db 0xC6, 0xEE, 0xEE, 0xD6, 0xD6, 0xD6, 0xC6, 0xEE
-                .db 0xCC, 0xD6, 0xD6, 0xE6, 0xE4, 0xC4, 0xC8, 0xDE
-                .db 0x38, 0x6C, 0xC6, 0xC6, 0xC6, 0xC6, 0x6C, 0x38
-                .db 0xF8, 0x6C, 0x66, 0x76, 0x6E, 0x60, 0x60, 0xF0
-                .db 0x38, 0x6C, 0xC6, 0xC6, 0xC6, 0xD6, 0x6C, 0x3A
-                .db 0xF8, 0x6C, 0x66, 0x76, 0x7E, 0x78, 0x6C, 0xE6
-                .db 0x38, 0x64, 0x60, 0x3C, 6, 0x86, 0xC6, 0x7C
-                .db 0xFE, 0x9A, 0x98, 0x18, 0x18, 0x18, 0x18, 0x18
-                .db 0xF6, 0x26, 0x46, 0x4E, 0xCE, 0xD6, 0xD6, 0x66
-                .db 0xE2, 0x62, 0x64, 0x64, 0x68, 0x68, 0x70, 0x60
-                .db 0xEE, 0xC6, 0xD6, 0xD6, 0xD6, 0xEE, 0xEE, 0xC6
-                .db 0xC6, 0xC6, 0x6C, 0x38, 0x38, 0x6C, 0xC6, 0xC6
-                .db 0x86, 0x66, 0x16, 0xE, 6, 4, 0x4C, 0x38
-                .db 0x7E, 0x46, 0xC, 0x18, 0x30, 0x62, 0xC2, 0xFE
-spr_23:         .db 4, 18                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0x18, 0, 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0, 0x30, 0, 0x3C, 0x18
-                .db 0x30, 0, 0, 0, 0x78, 0x30, 0x38, 0x10, 0x78, 0x30, 0, 0, 0x7C, 0x38, 0x78, 0x30
-                .db 0x78, 0x30, 0x18, 0, 0x3C, 0x18, 0x78, 0x30, 0xF0, 0x60, 0x3E, 0x18, 0x1E, 0xC, 0x79
-                .db 0x30, 0xF0, 0xE0, 0x3F, 0x1E, 0x8F, 6, 0x79, 0x30, 0xE6, 0xC0, 0x1F, 7, 0xCF, 0x86
-                .db 0x7F, 0x31, 0xEF, 0xC6, 7, 1, 0xF7, 0xC3, 0xFF, 0x37, 0xDF, 0x8E, 1, 0, 0xFF, 0x73
-                .db 0xFF, 0x17, 0xFE, 0x98, 1, 0, 0xFF, 0x3C, 0xFF, 0xE1, 0xF8, 0xB0, 3, 1, 0xFF, 0x9D
-                .db 0xFF, 0xAE, 0xF0, 0x60, 3, 1, 0xFF, 0xD9, 0xFF, 0x47, 0xF0, 0xE0, 1, 0, 0xFF, 0x60
-                .db 0xFF, 0x33, 0xE0, 0xC0, 0, 0, 0x7F, 0x1D, 0xFB, 0xB1, 0xC0, 0x80, 0, 0, 0x1F, 0xD
-                .db 0xF1, 0x80, 0x80, 0, 0, 0, 0xD, 0, 0xF8, 0x30, 0, 0
-spr_unused:     .db 0, 0, 0, 0, 0x30, 0, 0, 0, 4, 0x18, 0, 0, 0xF, 0xB, 0xF0, 0xF0, 0, 0, 0, 0, 0xFF
-                .db 0x9D, 0xFF, 0xFB, 0, 0, 1, 1, 0xFF, 0xBD, 0xFF, 0xFB, 0xC0, 0x40, 7, 7, 0xFF, 0xBE
-                .db 0xFF, 0xFB, 0xE0, 0x60, 0x3F, 0xF, 0xFF, 0xBE, 0xFF, 0xF7, 0xFC, 0x78, 0x3F, 0x17
-                .db 0xFF, 0xBD, 0xFF, 0xF7, 0xFC, 0x78, 0x3F, 0x17, 0xFF, 0xBD, 0xFF, 0xEF, 0xFC, 0xB8
-                .db 0x3F, 0x1B, 0xFF, 0xBB, 0xFF, 0xEF, 0xFC, 0xB8, 0x3F, 0x1D, 0xFF, 0xD9, 0xFF, 0xEF
-                .db 0xFC, 0x70, 0x3F, 0x1E, 0xFF, 0xEE, 0xFF, 0xEF, 0xF8, 0xB0, 0x3F, 0xF, 0xFF, 0x76
-                .db 0xFF, 0xF7, 0xF8, 0xD0, 0x1F, 0xF, 0xFF, 0x77, 0xFF, 0x77, 0xF8, 0xB0, 0x1F, 0xE
-                .db 0xFF, 0xF7, 0xFF, 0x7B, 0xFE, 0xB0, 0x1F, 0xD, 0xFF, 0xFF, 0xFF, 0xFB, 0xFE, 0x78
-                .db 0x1F, 0xB, 0xFF, 0xF8, 0xFF, 0x1F, 0xFE, 0x7C, 0x1F, 0xF, 0xFF, 0xC7, 0xFF, 0xE3
-                .db 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0x3B, 0xFF, 0x3C, 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xE3
-                .db 0xFF, 0xC6, 0xFC, 0xF0, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6, 0xF8, 0xF0, 0x1F, 7, 0xFF
-                .db 0x3C, 0xFF, 0x3D, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xC7, 0xFF, 0xE3, 0xF0, 0xC0, 7, 0, 0xFF
-                .db 0xF8, 0xFF, 0x1F, 0xE0, 0, 1, 0, 0xFF, 0xF, 0xFF, 0xF0, 0x80, 0, 0, 0, 0x1F, 0, 0xF8
+spr_03:         .db 3, 24
+                .db 0xFF, 0xFF, 0xC0, 0xC0, 0xE, 0xE, 0xFC, 0xFC, 0, 0, 0xE, 0xE
+                .db 0x80, 0x80, 0, 0, 0xE, 0xE, 0, 0, 0, 0, 0xE, 0xE, 0, 0, 0, 0
+                .db 0x1C, 0x1C, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0, 0, 0x38, 0x38, 0
+                .db 0, 0, 0, 0x78, 0x78, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 1, 1, 0xE0
+                .db 0xE0, 0, 0, 3, 3, 0xC0, 0xC0, 0, 0, 7, 7, 0x80, 0x80, 0, 0, 0x1E
+                .db 0x1E, 0, 0, 0, 0, 0x7C, 0x7C, 0, 0, 1, 1, 0xF0, 0xF0, 0, 0, 7
+                .db 7, 0xC0, 0xC0, 0, 0, 0x1F, 0x1F, 0, 0, 0, 0, 0x7C, 0x7C, 0, 0
+                .db 0, 0, 0xF0, 0xF0, 0, 0, 0, 0, 0x80, 0x80, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+spr_04:         .db 3, 24
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0xF
+                .db 0xF, 0, 0, 0, 0, 0x3E, 0x3E, 0, 0, 0, 0, 0xF8, 0xF8, 0, 0, 3
+                .db 3, 0xE0, 0xE0, 0, 0, 0xF, 0xF, 0x80, 0x80, 0, 0, 0x3E, 0x3E
+                .db 0, 0, 0, 0, 0x78, 0x78, 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 3, 3, 0xC0
+                .db 0xC0, 0, 0, 7, 7, 0x80, 0x80, 0, 0, 0xF, 0xF, 0xFF, 0xFF, 0xF0
+                .db 0xF0, 0x1E, 0x1E, 0x1F, 0x1F, 0xFF, 0xFF, 0x1C, 0x1C, 7, 7, 0xFF
+                .db 0xFF, 0x38, 0x38, 0, 0, 0xF8, 0xF8, 0x38, 0x38, 0, 0, 0x3F, 0x3F
+                .db 0x70, 0x70, 0, 0, 7, 7, 0x70, 0x70, 0, 0, 1, 1, 0x70, 0x70, 0
                 .db 0, 0, 0
-spr_24:         .db 4, 28                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 3, 0, 0xC0, 0, 0, 0, 0, 0, 0xF, 1, 0xF0, 0x80, 0, 0, 0, 0, 0x3F, 7, 0xFC, 0xE0
-                .db 0, 0, 0, 0, 0xFF, 0x1B, 0xFF, 0xD8, 0, 0, 3, 0, 0xFF, 0x7B, 0xFF, 0xDE, 0xC0, 0
-                .db 0xF, 1, 0xFF, 0xFB, 0xFF, 0xDF, 0xF0, 0x80, 0x1F, 7, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8
-                .db 0xE0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF
-                .db 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF
-                .db 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F
-                .db 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xF8, 0xFF, 0x1F, 0xF8
-                .db 0xF0, 0x1F, 0xF, 0xFF, 0xE7, 0xFF, 0xE7, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0x9F, 0xFF
-                .db 0xF9, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F, 0xFF, 0xFE, 0xF8, 0x70, 0x1F, 9, 0xFF, 0xFF
-                .db 0xFF, 0xFF, 0xF8, 0x90, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xE0, 0x1F, 0xF, 0xFF
-                .db 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F
-                .db 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xE0
-                .db 0xF, 1, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x80, 3, 0, 0xFF, 0x7F, 0xFF, 0xFE, 0xC0, 0
-                .db 0, 0, 0xFF, 0x1F, 0xFF, 0xF8, 0, 0, 0, 0, 0x3F, 7, 0xFC, 0xE0, 0, 0, 0, 0, 0xF, 0
-                .db 0xF0, 0, 0, 0
-spr_25:         .db 4, 21                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x1E, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0x1E, 0xE1, 0, 0x80, 0, 7, 0, 0xFF, 0xFF
-                .db 0xF3, 0xE1, 0xC0, 0x80, 0xF, 7, 0xFF, 0xFF, 0xFF, 0xF3, 0xE0, 0xC0, 0x1F, 0xF, 0xFF
-                .db 0xB6, 0xFF, 0x8B, 0xF0, 0xE0, 0x3F, 0x1D, 0xBF, 0x12, 0xFF, 0x3D, 0xF0, 0xE0, 0x7F
-                .db 0x35, 0x93, 0, 0xFF, 0xC6, 0xE0, 0xC0, 0x7F, 0x34, 0xF, 3, 0xFF, 0x3F, 0xE0, 0x40
-                .db 0x7C, 0x30, 0x3F, 0xC, 0xFF, 0xFE, 0xF0, 0xE0, 0x78, 0x30, 0xFF, 0x33, 0xFE, 0xF8
-                .db 0xF0, 0x60, 0x79, 0x30, 0xFF, 0xCF, 0xF8, 0xE0, 0xF8, 0x50, 0x7F, 0x39, 0xFF, 0x3F
-                .db 0xE0, 0x80, 0xF8, 0x70, 0x7F, 0x2E, 0xFF, 0xFE, 0x80, 0, 0xF0, 0x60, 0x3F, 0xB, 0xFE
-                .db 0xF8, 1, 0, 0xF0, 0xE0, 0xF, 3, 0xF8, 0xE0, 7, 1, 0xF0, 0xE0, 3, 1, 0xFF, 0xD8, 0xFF
-                .db 7, 0xF0, 0xA0, 1, 0, 0xDF, 0xF, 0xFF, 0xFF, 0xE0, 0x80, 0, 0, 0x1F, 0xD, 0xFF, 0xFD
-                .db 0xC0, 0x80, 0, 0, 0x1F, 9, 0xFF, 0xD9, 0x80, 0, 0, 0, 9, 0, 0xDD, 0x88, 0, 0, 0
-                .db 0, 0, 0, 0x88, 0, 0, 0
-spr_26:         .db 4, 28                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0xE0
-                .db 0, 0, 0, 0, 0x7F, 0x1E, 0xFE, 0x78, 0, 0, 1, 0, 0xFF, 0x79, 0xFF, 0x9E, 0x80, 0
-                .db 7, 1, 0xFF, 0xE7, 0xFF, 0xE7, 0xE0, 0x80, 0x1F, 7, 0xFF, 0x9D, 0xFF, 0xF9, 0xF8
-                .db 0xE0, 0x7E, 0x1F, 0xFF, 0x7D, 0xFF, 0xBE, 0xFE, 0x78, 0xFF, 0x79, 0xFF, 0xED, 0xFF
-                .db 0xAD, 0xFF, 0x9E, 0xFF, 0x67, 0xFF, 0x6D, 0xFF, 0xAD, 0xFF, 0xE6, 0xFF, 0x1F, 0xFF
-                .db 0x6D, 0xFF, 0xAD, 0xFF, 0xF8, 0xFF, 0x7F, 0xFF, 0xAD, 0xFF, 0x6B, 0xFF, 0xFE, 0xFF
-                .db 0x5D, 0xFF, 0xAD, 0xFF, 0x6B, 0xFF, 0xBA, 0x7F, 0x1D, 0xFF, 0xDD, 0xFF, 0x6B, 0xFE
-                .db 0xB8, 0x1F, 0xD, 0xFF, 0xFD, 0xFF, 0x77, 0xF8, 0xB8, 0x1F, 0xD, 0xFF, 0x6E, 0xFF
-                .db 0xFE, 0xF8, 0xB8, 0x1F, 0xD, 0xFF, 0x6F, 0xFF, 0xFC, 0xF8, 0xB0, 0x1D, 8, 0xFF, 0x6D
-                .db 0xFF, 0xB6, 0xF8, 0x30, 0x1C, 8, 0xFF, 0x6D, 0xFF, 0xB6, 0x38, 0x10, 0x1C, 8, 0xFF
-                .db 0x65, 0xFF, 0xA6, 0x3B, 0x10, 0x1C, 8, 0xE7, 0x41, 0xEF, 0x86, 0x38, 0x10, 0x1C
-                .db 8, 0xE3, 0x41, 0xC7, 0x82, 0x10, 0, 8, 0, 0xE1, 0x40, 0xC7, 0x82, 0, 0, 0, 0, 0xE1
-                .db 0x40, 0xC7, 0x82, 0, 0, 0, 0, 0x41, 0, 0xC2, 0x80, 0, 0, 0, 0, 1, 0, 0xC0, 0x80
-                .db 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 0x80, 0, 0, 0
-spr_27:         .db 2, 17                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xE, 0, 0x38, 0, 0x1F, 0xE, 0x7C, 0x38, 0x1F, 0xB, 0xFC, 0x78, 0xF, 5, 0xF8, 0x70
-                .db 0xE, 3, 0xF0, 0x60, 0xF, 3, 0xF8, 0xE0, 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xD, 0xFC, 0xF8
-                .db 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xE, 0xFC, 0x38, 0xF, 5, 0xF8
-                .db 0xD0, 7, 2, 0xF0, 0xE0, 7, 2, 0xF0, 0xE0, 7, 2, 0xF0, 0xE0, 3, 1, 0xE0, 0x40, 1
-                .db 0, 0xC0, 0
-spr_28:         .db 4, 29                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 0x1F, 1, 0xE0, 0x80, 0, 0, 0, 0, 0x3F, 0x1E, 0xF0
-                .db 0x40, 0, 0, 0, 0, 0x7F, 0x3E, 0xF8, 0xA0, 0, 0, 0, 0, 0xFF, 0x7E, 0xFF, 0x50, 0x80
-                .db 0, 7, 0, 0xFF, 0xFE, 0xFF, 0xA2, 0xE0, 0x80, 0xF, 6, 0xFF, 0x3E, 0xFF, 0x55, 0xF0
-                .db 0x40, 0x7F, 0xF, 0xFF, 0xDE, 0xFF, 0xAA, 0xFE, 0xA0, 0xFF, 0x7F, 0xFF, 0xDE, 0xFF
-                .db 0x15, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xDE, 0xFF, 0xAA, 0xFF, 0xA2, 0xFF, 0x7F, 0xFF
-                .db 0xCE, 0xFF, 0x54, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xEE, 0xFF, 0x28, 0xFF, 0x82, 0xFF
-                .db 0x73, 0xFF, 0xE8, 0xFF, 0x94, 0xFF, 0x54, 0xFF, 0xD, 0xFF, 0xF7, 0xFF, 0xCA, 0xFF
-                .db 0xA2, 0xFF, 0x7D, 0xFF, 0xEF, 0xFF, 0xE4, 0xFF, 0x54, 0xFF, 0x7D, 0xFF, 0x1F, 0xFF
-                .db 0xFC, 0xFF, 0xA2, 0xFF, 0x7C, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 4, 0xFF, 0x79, 0xFF
-                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xE2, 0xFF, 0x43, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF4, 0xFF
-                .db 0x1F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-                .db 0xFE, 0x7F, 0x1F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xF8, 0x1F, 0xF, 0xFF, 0xFF, 0xFF
-                .db 0xFF, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0xE0, 0xC0, 3, 0, 0xFF, 0x7F, 0xFF
-                .db 0xF8, 0xC0, 0, 0, 0, 0x7F, 0x3F, 0xF8, 0xF0, 0, 0, 0, 0, 0x3F, 0x1F, 0xF0, 0xE0
-                .db 0, 0, 0, 0, 0x1F, 7, 0xE0, 0xC0, 0, 0, 0, 0, 7, 0, 0xC0, 0, 0, 0
-spr_29:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xD, 0xD, 0xF5, 0xF5, 0x13, 0x13, 0x80, 0x80, 0x1E, 0x1E, 0, 0, 0xB, 0xB, 0xE0, 0xE0
-                .db 0x1E, 0x1E, 0x18, 0x18, 0x16, 0x16, 6, 6, 0x1B, 0x1B, 0x80, 0x80, 0x1E, 0x1E, 0
-                .db 0, 0xE, 0xE, 0, 0, 0xF, 0xF, 0xD0, 0xD0, 0xF, 0xF, 0, 0, 7, 7, 0x80, 0x80, 7, 7
-                .db 0xEC, 0xEC, 0, 0, 0x78, 0x78, 0, 0, 0xC, 0xC, 0, 0, 3, 3
-spr_2A:         .db 2, 11                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x18, 0x18, 0x7E, 0x7E, 7, 7, 0x80, 0x80, 0, 0, 0x40, 0x40, 0, 0, 0x30, 0x30, 0
-                .db 0, 8, 8, 0, 0, 4, 4, 0x18, 0x18, 6, 6, 7, 7, 0xF8, 0xF8, 0xC0, 0xC0, 0x10, 0x10
-                .db 0x38, 0x38, 0xE, 0xE, 7, 7, 0xFE, 0xFE, 2, 0x10, 0xFF, 0xFF, 0xFE, 0xFE, 7, 7, 0
-                .db 0, 0, 0, 0x78, 0x78, 0, 0, 6, 6, 0xE, 0xE, 6, 6, 0x31, 0x31, 0xC1, 0xC1, 0x6C, 0x6C
-                .db 0xF1, 0xF1, 0x31, 0x31, 0x9E, 0x9E, 0xE, 0xE, 0x60, 0x60, 1, 1, 0x80, 0x80, 0, 0
-                .db 0x80, 0x80, 0, 0, 0x7E, 0x7E, 0, 0, 2, 2, 0, 0, 4, 4, 0, 0, 0x3C, 0x3C, 0, 0, 2
-                .db 2
-spr_2B:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xFF, 0xFF, 0xF0, 0xF0, 8, 8, 0, 0, 7, 7, 0xF8, 0xF8, 0, 0, 4, 4, 0, 0, 8, 8, 3
-                .db 3, 0xE4, 0xE4, 4, 4, 0x1C, 0x1C, 0x79, 0x79, 0xE6, 0xE6, 0x86, 0x86, 0x60, 0x60
-                .db 0x79, 0x79, 0x9E, 0x9E, 6, 6, 0x21, 0x21, 1, 1, 0xC3, 0xC3, 0, 0, 0x1C, 0x1C, 0
-                .db 0, 0xC0, 0xC0, 0, 0, 0x3E, 0x3E, 0, 0, 6, 6
-spr_2C:         .db 2, 8                                        ; DATA XREF: RAM:sprite_tblo
-                .db 0xC0, 0xC0, 0, 0, 0x7F, 0x7F, 0xC0, 0xC0, 0x1C, 0x1C, 0, 0, 3, 3, 0, 0, 0, 0, 0xCE
-                .db 0xCE, 0, 0, 0x78, 0x78, 0, 0, 4, 4, 0, 0, 3, 3
-spr_2D:         .db 5, 34                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 7, 2
-                .db 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0
-                .db 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0xC, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0
-                .db 0, 0x1E, 0xC, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0, 0, 0, 0
-                .db 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0, 0, 0
-                .db 0x30, 0, 0x3F, 0x16, 0xF, 0, 0xE0, 0x20, 0, 0, 0x78, 0x30, 0x3F, 0x16, 0x1F, 0xF
-                .db 0xE0, 0x80, 0, 0, 0xFC, 0x58, 0x3F, 0x16, 0xFF, 0x1E, 0xF8, 0x60, 0, 0, 0xFC, 0x58
-                .db 0x3F, 0x16, 0xFF, 0xD9, 0xFE, 0x98, 0, 0, 0xFC, 0x58, 0x3F, 0x15, 0xFF, 0xE7, 0xFF
-                .db 0xE6, 0x80, 0, 0xFC, 0x58, 0x3F, 3, 0xFF, 0x9F, 0xFF, 0xF9, 0xE0, 0x80, 0xFC, 0x58
-                .db 0x7F, 0x3E, 0xFF, 0x67, 0xFF, 0xFE, 0xF8, 0x60, 0xFC, 0x58, 0xFF, 0x79, 0xFF, 0xF9
-                .db 0xFF, 0xFF, 0xFE, 0x98, 0xFC, 0x58, 0xFF, 0x66, 0xFF, 0x7E, 0xFF, 0x7F, 0xFF, 0xE6
-                .db 0xFC, 0x58, 0xFF, 0x5F, 0xFF, 0x9F, 0xFF, 0x9F, 0xFF, 0xF9, 0xFC, 0x98, 0xFF, 0x7F
-                .db 0xFF, 0xE7, 0xFF, 0xE7, 0xFF, 0xFE, 0xFC, 0x60, 0x7F, 0x1F, 0xFF, 0xF9, 0xFF, 0xF9
-                .db 0xFF, 0xFF, 0xFE, 0x98, 0x1F, 7, 0xFF, 0xFE, 0xFF, 0x7E, 0xFF, 0x7F, 0xFF, 0xE6
-                .db 7, 1, 0xFF, 0xFF, 0xFF, 0x9F, 0xFF, 0x9F, 0xFF, 0xF8, 1, 0, 0xFF, 0x7F, 0xFF, 0xE7
-                .db 0xFF, 0xE7, 0xFF, 0xFE, 0, 0, 0x7F, 0x1F, 0xFF, 0xF9, 0xFF, 0xF9, 0xFE, 0xF8, 0
-                .db 0, 0x1F, 7, 0xFF, 0xFE, 0xFF, 0x7E, 0xF8, 0x60, 0, 0, 7, 1, 0xFF, 0xFF, 0xFF, 0x9F
-                .db 0xE0, 0x80, 0, 0, 1, 0, 0xFF, 0x7F, 0xFF, 0xF6, 0x80, 0, 0, 0, 0, 0, 0x7F, 0x1F
-                .db 0xFE, 0xF8, 0, 0, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0xE0, 0, 0, 0, 0, 0, 0, 7, 1, 0xE0
-                .db 0x80, 0, 0, 0, 0, 0, 0, 1, 0, 0x80, 0, 0, 0
-spr_2E:         .db 5, 32                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0xFF, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0xFF, 0xFC, 0xF0, 0, 0, 0, 0, 0, 0x3F
-                .db 3, 0xFF, 0xFC, 0xFC, 0xF0, 0, 0, 0, 0, 0xFF, 0x3B, 0xFF, 0xFE, 0xFF, 0xFC, 0, 0
-                .db 1, 0, 0xFF, 0xFB, 0xFF, 0xFE, 0xFF, 0xFE, 0x80, 0, 7, 0, 0xFF, 0xFB, 0xFF, 0xE0
-                .db 0xFF, 0x7E, 0xC0, 0x80, 0xF, 4, 0xFF, 0xF9, 0xFF, 0xCE, 0xFF, 0x3D, 0xE0, 0xC0, 0x1F
-                .db 0xE, 0xFF, 0xF0, 0xFF, 0x1F, 0xFF, 0x85, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0xE1, 0xFF
-                .db 0xCF, 0xFF, 0xB9, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x4F, 0xFF, 0x83, 0xFF, 0xBE, 0xF8
-                .db 0xF0, 0x1F, 0xE, 0xFF, 0x1F, 0xFF, 0x79, 0xFF, 0x9E, 0xF8, 0x30, 0x1F, 0xE, 0xFF
-                .db 0x1E, 0xFF, 0x7C, 0xFF, 6, 0xF8, 0xD0, 0x1F, 0xC, 0xFF, 0xD9, 0xFF, 0x3D, 0xFF, 0xF2
-                .db 0xF8, 0xE0, 0x1F, 0xB, 0xFF, 0xC7, 0xFF, 0x7E, 0xFF, 0xF8, 0xF8, 0xF0, 0x1F, 7, 0xFF
-                .db 0x1E, 0xFF, 0x7F, 0xFF, 0x7C, 0xF8, 0x30, 0x1F, 0xE, 0xFF, 0x7E, 0xFF, 0x40, 0xFF
-                .db 0x7E, 0xF8, 0xD0, 0x1F, 8, 0xFF, 0xF1, 0xFF, 0x3F, 0xFF, 6, 0xF8, 0x60, 0x1F, 6
-                .db 0xFF, 0x4F, 0xFF, 0xDF, 0xFF, 0x78, 0xF8, 0x30, 0x1F, 0xE, 0xFF, 0x3F, 0xFF, 0x3E
-                .db 0xFF, 0xFF, 0xF8, 0x10, 0x1F, 0xD, 0xFF, 0x9C, 0xFF, 0, 0xFF, 0x38, 0xF8, 0xD0, 0x1F
-                .db 0xB, 0xFF, 0xC0, 0xFF, 0, 0xFF, 7, 0xF8, 0xE0, 0x1F, 7, 0xFF, 0xF1, 0xFF, 0, 0xFF
-                .db 3, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xE0, 0xFF, 0, 0xFF, 1, 0xF8, 0xF0, 0x1F, 0xF, 0xFF
-                .db 0xC0, 0xFF, 4, 0xFF, 1, 0xF8, 0xF0, 0x1F, 0, 0xFF, 0x21, 0xFF, 1, 0xFF, 0, 0xF0
-                .db 0, 0xF, 7, 0xFF, 0xF0, 0xFF, 0, 0xFF, 3, 0xF0, 0xC0, 0xF, 7, 0xFF, 0xE9, 0xFF, 0x44
-                .db 0xFF, 0xF, 0xE0, 0xC0, 7, 3, 0xFF, 0xDF, 0xFF, 1, 0xFF, 0x67, 0xC0, 0x80, 3, 0, 0xFF
-                .db 0xBE, 0xFF, 0x7D, 0xFF, 0xF2, 0x80, 0, 0, 0, 0xFF, 0xE, 0xFF, 0xFD, 0xFE, 0xF8, 0
-                .db 0, 0, 0, 0xF, 0, 0xFF, 0xFE, 0xF8, 0xE0, 0, 0, 0, 0, 0, 0, 0xFF, 0, 0xE0, 0, 0, 0
-spr_2F:         .db 4, 39                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 3, 1, 0xE0, 0, 0, 0, 0, 0, 0xF, 2, 0xF8, 0xA0, 0
-                .db 0, 0, 0, 0x3F, 0xE, 0xFE, 0x50, 0, 0, 0, 0, 0xFF, 0x3C, 0xFF, 0xAA, 0x80, 0, 3, 0
-                .db 0xFF, 0xFF, 0xFF, 0x55, 0xE0, 0, 0xF, 3, 0xFF, 0xFE, 0xFF, 0xA8, 0xF8, 0xA0, 0x1F
-                .db 0xF, 0xFF, 0xF5, 0xFF, 0x55, 0xFE, 0x50, 0x3F, 0x1F, 0xFF, 0xF2, 0xFF, 0xA8, 0xFF
-                .db 0xAA, 0x7F, 0x3F, 0xFF, 0xF9, 0xFF, 0x54, 0xFF, 0x54, 0x3F, 0x1F, 0xFF, 0xFA, 0xFF
-                .db 0xA2, 0xFE, 0x28, 0x3F, 0x1F, 0xFF, 0xFD, 0xFF, 0x51, 0xFE, 0x54, 0x3F, 0x1F, 0xFF
-                .db 0xFC, 0xFF, 0xAA, 0xFC, 0xA8, 0x3F, 0x1F, 0xFF, 0xFE, 0xFF, 0x51, 0xFC, 0x50, 0x1F
-                .db 7, 0xFF, 0xFE, 0xFF, 0xAA, 0xF8, 0xA0, 0xF, 7, 0xFF, 0xFD, 0xFF, 0x55, 0xF8, 0x50
-                .db 7, 1, 0xFF, 0xFC, 0xFF, 0xAA, 0xF0, 0xA0, 7, 2, 0xFF, 0xFD, 0xFF, 0x55, 0xF0, 0x40
-                .db 7, 3, 0xFF, 0x7E, 0xFF, 0x8A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0x7D, 0xFF, 0x55, 0xF0, 0x40
-                .db 0xF, 7, 0xFF, 0xBC, 0xFF, 0xAA, 0xE0, 0xA0, 0xF, 7, 0xFF, 0xBC, 0xFF, 0x54, 0x80
-                .db 0, 7, 1, 0xFF, 0xDC, 0xFF, 0xAA, 0, 0, 7, 3, 0xFF, 0xEE, 0xFF, 0x54, 0, 0, 7, 3
-                .db 0xFF, 0xDE, 0xFF, 0x8A, 0, 0, 3, 1, 0xFF, 0xEF, 0xFF, 0x45, 0x80, 0, 3, 1, 0xFF
-                .db 0xFF, 0xFF, 0x2A, 0, 0, 3, 1, 0xFF, 0xFE, 0xFF, 0x55, 0x80, 0, 1, 0, 0xFF, 0xFE
-                .db 0xFF, 0xAA, 0, 0, 0, 0, 0xFF, 0x7E, 0xFE, 0x14, 0, 0, 0, 0, 0x7F, 0x38, 0xFE, 0xC8
-                .db 0, 0, 0, 0, 0x3F, 0x16, 0xFE, 0xE4, 0, 0, 0, 0, 0x3F, 0xE, 0xFE, 0xF8, 0, 0, 0, 0
-                .db 0x3F, 0x1F, 0xFE, 0x7C, 0, 0, 0, 0, 0x1F, 7, 0xFC, 0x70, 0, 0, 0, 0, 7, 1, 0xF0
-                .db 0x60, 0, 0, 0, 0, 1, 0, 0xE0, 0xC0, 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 0
+spr_05:         .db 3, 24
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xF, 0xF, 0xFF, 0xFF
+                .db 3, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0x3F, 0x3F, 0xF0, 0xF0, 0, 0, 0xFC
+                .db 0xFC, 0, 0, 0, 0, 0xC0, 0xC0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0
+                .db 0, 0, 0, 3, 3, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0xF, 0xF, 0, 0
+                .db 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 0x3C, 0x3C, 0, 0, 0, 0, 0x78, 0x78
+                .db 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 3, 3, 0xC0
+                .db 0xC0, 0xFF, 0xFF, 7, 7, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 0xFF, 0
+                .db 0, 0x7F, 0x7F, 0xFE, 0xFE, 0, 0, 0, 0, 0x7C, 0x7C, 0, 0, 0xE0
+                .db 0xE0, 0, 0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0x3F, 0x3F, 0, 0, 0
+                .db 0
+spr_06:         .db 3, 24
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xF0, 0xF0, 0
+                .db 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0xC0, 0x3E, 0x3E, 0xF, 0xF
+                .db 0xFC, 0xFC, 0x7E, 0x7E, 0, 0, 0x3F, 0x3F, 0xF7, 0xF7, 0, 0, 3
+                .db 3, 0xE7, 0xE7, 0, 0, 0, 0, 0xC3, 0xC3, 0x80, 0x80, 0, 0, 0x83
+                .db 0x83, 0x80, 0x80, 0, 0, 1, 1, 0x80, 0x80, 0, 0, 1, 1, 0xC0, 0xC0
+                .db 0, 0, 0, 0, 0xC0, 0xC0, 0, 0, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0xE0
+                .db 0xE0, 0, 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70, 0, 0, 0
+                .db 0, 0x38, 0x38, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x1C, 0x1C
+                .db 0, 0, 0, 0, 0x1F, 0x1F, 0xF0, 0xF0, 0, 0, 0xF, 0xF, 0xFF, 0xFF
+                .db 0, 0, 0, 0, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0
+spr_07:         .db 3, 24
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80, 0x80, 0, 0, 0, 0, 0xF0, 0xF0
+                .db 0, 0, 0, 0, 0x7C, 0x7C, 0, 0, 0, 0, 0x1F, 0x1F, 0, 0, 0, 0, 7
+                .db 7, 0xC0, 0xC0, 0, 0, 1, 1, 0xF0, 0xF0, 0, 0, 0, 0, 0x7C, 0x7C
+                .db 0, 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 7, 7, 0x80, 0x80, 0, 0, 3
+                .db 3, 0xC0, 0xC0, 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 0, 0, 0xF0, 0xF0
+                .db 0, 0, 0, 0, 0x78, 0x78, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x1C
+                .db 0x1C, 0, 0, 0, 0, 0x1C, 0x1C, 0xFF, 0xFF, 0, 0, 0xE, 0xE, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xFE, 0xFE, 0xF, 0xF, 0xFC, 0xFC, 0xE, 0xE
+spr_08:         .db 4, 16
+                .db 0, 0, 5, 5, 0x55, 0x55, 0, 0, 0, 0, 0x2F, 0x2A, 0xFF, 0xAA, 0x80
+                .db 0x80, 1, 1, 0x7F, 0x55, 0xFF, 0x55, 0xC0, 0x40, 0, 0, 0xFF, 0xAA
+                .db 0xFF, 0xAA, 0xE8, 0xA8, 0x15, 0x15, 0xFF, 0x55, 0xFF, 0x55, 0xFC
+                .db 0x54, 0x3F, 0x2A, 0xFF, 0xAA, 0xFF, 0xAA, 0xFE, 0xAA, 0x7F, 0x55
+                .db 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0xAA, 0xFF, 0xAA, 0xFF
+                .db 0xAA, 0xFE, 0xAA, 0x7F, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0x55
+                .db 0xFF, 0xAA, 0xFF, 0xAA, 0xFF, 0xAA, 0xFE, 0xAA, 0x5F, 0x55, 0xFF
+                .db 0x55, 0xFF, 0x55, 0xFD, 0x55, 0xB, 0xA, 0xFF, 0xAA, 0xFF, 0xAA
+                .db 0xF8, 0xA8, 1, 1, 0xFF, 0x55, 0xFF, 0x55, 0xF0, 0x50, 0, 0, 0xFF
+                .db 0xAA, 0xFE, 0xAA, 0xA0, 0xA0, 0, 0, 0x57, 0x55, 0xFC, 0x54, 0
+                .db 0, 0, 0, 3, 2, 0xF8, 0xA8, 0, 0
+spr_09:         .db 4, 16
+                .db 0, 0, 0xF, 5, 0xFC, 0x54, 0, 0, 1, 0, 0xFF, 0xAA, 0xFF, 0xAA
+                .db 0xE0, 0xA0, 3, 1, 0xFF, 0x55, 0xFF, 0x55, 0xF0, 0x50, 0xF, 0xA
+                .db 0xFF, 0xAA, 0xFF, 0xA, 0xFC, 0xA8, 0x3F, 0x15, 0xFF, 0x51, 0xFF
+                .db 0xE5, 0xFC, 0x54, 0x7F, 0x2A, 0xFF, 0xA7, 0xFF, 0xFA, 0xFD, 0xA8
+                .db 0xFF, 0x55, 0xFF, 0x4F, 0xFF, 0xF5, 0xFF, 0x45, 0xFF, 0xAA, 0xFF
+                .db 0x93, 0xFF, 0xF2, 0xFF, 0xBA, 0xFF, 0x55, 0xFF, 0x47, 0xFF, 0xF9
+                .db 0xFF, 0x7D, 0x7F, 0x2A, 0xFF, 0xA5, 0xFF, 0xAA, 0xFF, 0x54, 0x3F
+                .db 0x15, 0xFF, 0x4D, 0xFF, 0xA5, 0xFE, 0x10, 0x1F, 0xA, 0xFF, 0xA9
+                .db 0xFF, 0xA2, 0xFC, 0xA8, 0x1F, 0x15, 0xFF, 0x54, 0xFF, 0xA5, 0xF8
+                .db 0x50, 0x1F, 0xA, 0xFF, 0xAA, 0xFF, 0x8A, 0xF0, 0xA0, 0xF, 5
+                .db 0xFF, 0x54, 0xFF, 0x95, 0xC0, 0x40, 0, 0, 0x3F, 0x2A, 0xF8, 0x28
+                .db 0, 0
+spr_0A:         .db 4, 27
+                .db 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0x1E, 4, 0x20, 0, 0, 0, 0, 0, 0x3F
+                .db 0x1E, 0x70, 0x20, 0, 0, 0, 0, 0x7F, 0x3E, 0xF8, 0x50, 0, 0, 0
+                .db 0, 0x7F, 0x3E, 0x74, 0x20, 0, 0, 3, 0, 0x3E, 0x1C, 0x3E, 0x14
+                .db 0, 0, 0x1F, 3, 0xBC, 0, 0x1F, 0xA, 0, 0, 0x3F, 0x1F, 0xFD, 0x9C
+                .db 0xAF, 5, 0x82, 0, 0x7F, 0x3F, 0xFF, 0xCC, 0xF5, 0xA0, 0xC7, 2
+                .db 0x7F, 0x3F, 0xFE, 0xCC, 0xF8, 0x10, 0xEE, 0x44, 0x3F, 3, 0xED
+                .db 0xC0, 0xFD, 0x28, 0xDF, 0x82, 0x1F, 1, 0xE3, 0xC1, 0xF8, 0x90
+                .db 0xFE, 0x54, 0x1F, 1, 0xE7, 0xC3, 0xFD, 0xC0, 0xFC, 0xA0, 0x3F
+                .db 0x1C, 0xCF, 0x81, 0xFE, 0xE4, 0xFE, 0x54, 0x7F, 0x3C, 0xFF, 0xC
+                .db 0xF9, 0xF0, 0xF7, 0xA2, 0xFC, 0x78, 0x7F, 0x3E, 0xFF, 0, 0xAE
+                .db 4, 0x78, 0x20, 0xFF, 0x7F, 0xFF, 0xCF, 0x87, 2, 0x23, 0, 0xFF
+                .db 0x1F, 0xFF, 0x9F, 0xF2, 0, 0xF, 3, 0xFF, 0x9F, 0xFF, 0x3E, 0xF8
+                .db 0x70, 0x1F, 0xF, 0x9F, 0xC, 0xFF, 0x78, 0xFC, 0xF8, 0x1F, 0xF
+                .db 0xCC, 0x80, 0x7F, 0x30, 0xF8, 0xE0, 0xF, 3, 0x83, 0, 0xFF, 0xE
+                .db 0xE0, 0xC0, 3, 0, 0x3F, 3, 0xFF, 0x9B, 0xC0, 0, 0, 0, 0x7F, 0x3F
+                .db 0xFB, 0xB0, 0, 0, 0, 0, 0x3F, 0xF, 0xF0, 0xA0, 0, 0, 0, 0, 0xF
+                .db 3, 0xA0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
+spr_0B:         .db 4, 27
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0
+                .db 0, 0, 0, 0, 0, 0xE, 4, 0x10, 0, 0, 0, 0, 0, 0x1E, 0xC, 0x38
+                .db 0x10, 0, 0, 0, 0, 0x3C, 0x18, 0x74, 0x20, 0, 0, 0, 0, 0x18, 0
+                .db 0x3E, 0x14, 0, 0, 3, 0, 4, 0, 0x1C, 8, 0, 0, 0xF, 3, 0x8E, 4
+                .db 0xE, 4, 0, 0, 0x1F, 0xF, 0xDE, 0x8C, 0x14, 0, 0, 0, 0xF, 3, 0xEC
+                .db 0xC0, 0x38, 0x10, 2, 0, 3, 1, 0xE0, 0xC0, 0x7C, 0x28, 0x47, 2
+                .db 1, 0, 0xC1, 0x80, 0xF8, 0x10, 0xEE, 0x44, 0x80, 0, 0x83, 1, 0xF0
+                .db 0xC0, 0x74, 0x20, 0x1C, 8, 3, 1, 0xF0, 0xE0, 0xFA, 0x50, 0x3C
+                .db 0x18, 9, 0, 0xE0, 0x40, 0x77, 0x22, 0x78, 0x30, 0x1E, 8, 0x40
+                .db 0, 0x2E, 4, 0x60, 0, 0x3F, 0x1E, 0xE, 0, 4, 0, 0, 0, 0x1F, 0xE
+                .db 0x1F, 0xE, 0x60, 0, 7, 0, 0xE, 4, 0x3E, 0x18, 0xF0, 0x60, 0xF
+                .db 7, 0x84, 0, 0x78, 0x30, 0xF0, 0x60, 7, 2, 0, 0, 0x3F, 0, 0xE0
+                .db 0xC0, 2, 0, 0, 0, 0x1F, 0xE, 0xC0, 0, 0, 0, 0xF, 0, 0xBE, 0x18
+                .db 0, 0, 0, 0, 0x1F, 0xF, 0xF8, 0x90, 0, 0, 0, 0, 0xF, 3, 0x90
+                .db 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
+spr_0C:         .db 4, 27
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0
+                .db 0xE, 4, 0, 0, 0, 0, 0, 0, 0x1C, 8, 0x10, 0, 0, 0, 0, 0, 8, 0
+                .db 0x38, 0x10, 0, 0, 2, 0, 0, 0, 0x1C, 8, 0, 0, 7, 2, 4, 0, 8, 0
+                .db 0, 0, 0xF, 7, 0xCE, 4, 0x10, 0, 0, 0, 7, 1, 0xE4, 0xC0, 0x38
+                .db 0x10, 0, 0, 1, 0, 0xC0, 0x80, 0x10, 0, 4, 0, 0, 0, 0x80, 0, 0xF8
+                .db 0x10, 0x2E, 4, 0, 0, 1, 0, 0xF0, 0xC0, 0x74, 0x20, 0x18, 0, 1
+                .db 0, 0xE0, 0xC0, 0xE0, 0x40, 0x3C, 0x18, 0, 0, 0xC0, 0, 0x70, 0x20
+                .db 0x38, 0x10, 0xC, 0, 0, 0, 0x20, 0, 0x10, 0, 0x1E, 0xC, 8, 0
+                .db 0, 0, 0, 0, 0xE, 4, 0x1C, 8, 0x40, 0, 3, 0, 4, 0, 0x3C, 0x18
+                .db 0xE0, 0x20, 7, 3, 0x80, 0, 0x38, 0x10, 0xF0, 0x60, 3, 0, 0, 0
+                .db 0x18, 0, 0x60, 0, 0, 0, 0, 0, 0x1C, 4, 0, 0, 0, 0, 3, 0, 0x3C
+                .db 0x18, 0, 0, 0, 0, 7, 3, 0x98, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
+spr_0D:         .db 4, 24
+                .db 0, 0, 0x16, 0, 0, 0, 0, 0, 0, 0, 0x3F, 0x16, 0, 0, 0, 0, 3, 0
+                .db 0xFF, 0x27, 0x83, 0, 0, 0, 7, 3, 0xFF, 0xB1, 0xCF, 0x83, 0x80
+                .db 0, 0x1F, 7, 0xFF, 0, 0xFF, 0xCE, 0xF0, 0, 0x3F, 0x14, 0xFF, 0x78
+                .db 0xFF, 0x7E, 0xF8, 0xF0, 0x7F, 0x34, 0xFF, 0xCA, 0xFF, 0x3F, 0xF0
+                .db 0xC0, 0x7F, 0x21, 0xFF, 0xCB, 0xFF, 0x1E, 0xC0, 0x80, 0x3F, 0x1F
+                .db 0xFF, 0xFB, 0xFF, 0xCF, 0xF0, 0xC0, 0x7F, 0x33, 0xFF, 0xF7, 0xFF
+                .db 0xFF, 0xF8, 0xF0, 0x7F, 0x33, 0xFF, 0xF, 0xFF, 0xFF, 0xF0, 0xE0
+                .db 0x3F, 0x1E, 0xFF, 0xF7, 0xFF, 0x7F, 0xF0, 0xC0, 0x1F, 0xD, 0xFF
+                .db 0xFB, 0xFF, 0x93, 0xF8, 0xF0, 0xF, 3, 0xFF, 0xFC, 0xFF, 0xC7
+                .db 0xFC, 0xF8, 3, 0, 0xFF, 0x1F, 0xFF, 0x7C, 0xF8, 0xC0, 0, 0, 0x7F
+                .db 0x2B, 0xFF, 0x83, 0xE0, 0xC0, 0, 0, 0x3F, 0x13, 0xFF, 0xFF, 0xE0
+                .db 0xC0, 0, 0, 0x1F, 0xD, 0xFF, 0xBD, 0xF0, 0xE0, 0, 0, 0xF, 0
+                .db 0xFF, 0x3E, 0xF0, 0xE0, 0, 0, 0xF, 6, 0xFE, 0x9C, 0xF8, 0x70
+                .db 0, 0, 7, 3, 0xDC, 0x88, 0x7C, 0x38, 0, 0, 3, 1, 0xC8, 0x80, 0x78
+                .db 0, 0, 0, 1, 0, 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 0xC0, 0, 0, 0
+spr_0E:         .db 3, 25
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x1C, 0, 0x70, 0, 0
+                .db 0, 0x3F, 0x1C, 0xFC, 0x70, 0, 0, 0x1F, 0xF, 0xFE, 0x3C, 0, 0
+                .db 0xF, 7, 0xFE, 0x1C, 0, 0, 0xF, 6, 0xFC, 0x78, 0, 0, 0x8F, 5
+                .db 0xF8, 0xF0, 1, 0, 0xCF, 0x86, 0xF8, 0x18, 3, 1, 0xEF, 0x47, 0xF8
+                .db 0xE8, 0x11, 0, 0xFF, 0xE7, 0xF8, 0xF0, 0x3B, 0x11, 0xFF, 0xE9
+                .db 0xF8, 0xF0, 0x7F, 0x28, 0xFF, 0x5E, 0xF8, 0x70, 0x7F, 0x3D, 0xFF
+                .db 0x3F, 0xF8, 0xB0, 0x3F, 0x1D, 0xFF, 0xDF, 0xFC, 0xF8, 0x1F, 3
+                .db 0xFF, 0xEF, 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0xFF, 0xFC, 0xF8, 0xF
+                .db 1, 0xFF, 0xF1, 0xF8, 0xE0, 1, 0, 0xFF, 0x7B, 0xF8, 0xF0, 0, 0
+                .db 0x7F, 0x1E, 0xF8, 0x70, 0, 0, 0x3F, 0x12, 0xF8, 0x70, 0, 0, 0x3F
+                .db 0x13, 0xF8, 0xF0, 0, 0, 0x3F, 0x1F, 0xF0, 0xE0, 0, 0, 0x1F, 0xF
+                .db 0xE0, 0xC0, 0, 0, 0xF, 0, 0xC0, 0
+spr_0F:         .db 3, 25
+                .db 0, 0, 6, 0, 0, 0, 0, 0, 0xCF, 6, 0x80, 0, 0, 0, 0x1F, 0xF, 0xC0
+                .db 0x80, 0, 0, 0xF, 7, 0xE0, 0xC0, 0, 0, 7, 1, 0xF0, 0xC0, 0, 0
+                .db 3, 1, 0xFC, 0xE0, 0, 0, 3, 0, 0xFE, 0xEC, 0, 0, 0x47, 2, 0xFE
+                .db 0xF4, 0, 0, 0xE7, 0x42, 0xFC, 0x10, 1, 0, 0xF7, 0xA3, 0xFC, 0xE8
+                .db 8, 0, 0xFF, 0x73, 0xF8, 0xF0, 0x1D, 8, 0xFF, 0xF4, 0xFC, 0xF8
+                .db 0x3F, 0x14, 0xFF, 0x2F, 0xFC, 0x38, 0x3F, 0x1E, 0xFF, 0x9F, 0xFC
+                .db 0xD8, 0x1F, 0xC, 0xFF, 0xEF, 0xFE, 0xFC, 0xF, 1, 0xFF, 0xF7
+                .db 0xFE, 0xFC, 0xF, 7, 0xFF, 0xFF, 0xFE, 0xFC, 7, 0, 0xFF, 0xF8
+                .db 0xFC, 0xF0, 0, 0, 0xFF, 0x3D, 0xFC, 0xF8, 0, 0, 0x3F, 0xF, 0xFC
+                .db 0x38, 0, 0, 0x1F, 9, 0xFC, 0x38, 0, 0, 0x1F, 9, 0xFC, 0xF8, 0
+                .db 0, 0x1F, 0xF, 0xF8, 0xF0, 0, 0, 0xF, 7, 0xF0, 0xE0, 0, 0, 7
+                .db 0, 0xE0, 0
+spr_10:         .db 3, 29
+                .db 0, 0, 0xC0, 0, 0, 0, 1, 0, 0xF0, 0xC0, 0, 0, 3, 1, 0xF8, 0xF0
+                .db 0, 0, 3, 1, 0xF8, 0xF0, 0, 0, 3, 0, 0xF0, 0xC0, 0, 0, 7, 2, 0xE0
+                .db 0xC0, 0, 0, 0xF, 6, 0xF0, 0xE0, 0, 0, 0xF, 6, 0xFC, 0xE0, 0
+                .db 0, 0x1F, 0xF, 0xFE, 0xEC, 0, 0, 0x3F, 0x1F, 0xFE, 0xF4, 0, 0
+                .db 0x3F, 0x18, 0xFC, 0x70, 0, 0, 0x1F, 7, 0xF8, 0x90, 0, 0, 0x3F
+                .db 0x1F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F
+                .db 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xFF
+                .db 0xFC, 0, 0, 0x7F, 0x38, 0xFF, 0x7F, 0xC0, 0, 0x7F, 0x37, 0xFF
+                .db 0xBF, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0xDF, 0xF8, 0xE0, 0x3F, 0x1F
+                .db 0xFF, 0xEF, 0xFC, 0xE8, 0x7F, 0x3F, 0xFF, 0xF1, 0xFE, 0xEC, 0x7F
+                .db 0x3F, 0xFF, 0xF6, 0xFF, 0x52, 0x3F, 0x1F, 0xFF, 0xEF, 0xFE, 0x18
+                .db 0x1F, 0xF, 0xEF, 0xC6, 0xF8, 0xC0, 0xF, 7, 0xC7, 0x81, 0xE0
+                .db 0x40, 7, 0, 0x83, 1, 0xC0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0
+                .db 0, 0x80, 0
+spr_11:         .db 3, 28
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x18, 0, 0, 0, 0, 0, 0x3E
+                .db 0x18, 0xC, 0, 0, 0, 0x3F, 0x1E, 0x9E, 0xC, 0, 0, 0x3F, 0x1F
+                .db 0xDF, 0x1E, 0x80, 0, 0x3F, 0x1D, 0xFF, 0x9F, 0xC0, 0x80, 0x1F
+                .db 0xC, 0xFF, 0x7F, 0x80, 0, 0x1F, 0xD, 0xFF, 0xFC, 0, 0, 0x1F
+                .db 0xB, 0xFC, 0xF8, 0, 0, 0x1F, 0xC, 0xF8, 0x30, 0, 0, 0xF, 3, 0xF0
+                .db 0xC0, 0, 0, 0x1F, 0xF, 0xF8, 0xF0, 0, 0, 0x3F, 0x1F, 0xF8, 0xF0
+                .db 0, 0, 0x3F, 0x1F, 0xF8, 0xF0, 0, 0, 0x3F, 0x1F, 0xFE, 0xF8, 0
+                .db 0, 0x3F, 0x1F, 0xFF, 0xFE, 0x80, 0, 0x3F, 0x1C, 0xFF, 0x3F, 0xE0
+                .db 0x80, 0x3F, 0x1B, 0xFF, 0xDF, 0xF0, 0xE0, 0x3F, 0x17, 0xFF, 0xEF
+                .db 0xFC, 0xF0, 0x1F, 0xF, 0xFF, 0xF3, 0xFE, 0xF4, 0x3F, 0x1F, 0xFF
+                .db 0xF8, 0xFF, 0xF6, 0x3F, 0x1F, 0xFF, 0xFB, 0xFF, 0x2A, 0x1F, 0xF
+                .db 0xFF, 0xF7, 0xFE, 0x8C, 0xF, 7, 0xF7, 0xE3, 0xFC, 0x60, 7, 3
+                .db 0xE3, 0xC0, 0xF0, 0xA0, 3, 0, 0xC0, 0, 0xE0, 0x40, 0, 0, 0, 0
+                .db 0x40, 0
+spr_12:         .db 4, 24
+                .db 0, 0, 2, 0, 0, 0, 0x10, 0, 0, 0, 0x1F, 2, 0xE0, 0, 0x38, 0x10
+                .db 0, 0, 0x3F, 0x19, 0xFF, 0xE0, 0xFC, 0x28, 0, 0, 0x7F, 0, 0xFF
+                .db 0xEF, 0xFC, 0xF8, 0x1F, 0, 0xFF, 0x74, 0xFF, 0xC1, 0xF8, 0xC0
+                .db 0xBF, 0x1F, 0xFF, 0xE8, 0xFF, 0xDE, 0xFC, 0xB8, 0x3F, 0x1F, 0xFF
+                .db 0x8C, 0xFF, 0xFF, 0xF8, 0x70, 0x1F, 0, 0xFF, 0x6C, 0xFF, 0x3F
+                .db 0xFC, 0x88, 0, 0, 0x7F, 0x16, 0xFF, 0xFF, 0xFC, 0xB8, 0, 0, 0xFF
+                .db 0x66, 0xFF, 0xFF, 0xF8, 0x80, 0, 0, 0xFF, 0x7B, 0xFF, 0xFF, 0xC0
+                .db 0x80, 0, 0, 0x7F, 0xD, 0xFF, 0xFF, 0xC0, 0x80, 0, 0, 0xFF, 0x76
+                .db 0xFF, 0xFF, 0xC0, 0x80, 0, 0, 0xFF, 0x12, 0xFF, 0xBF, 0x80, 0
+                .db 1, 0, 0xFF, 0xA8, 0xFF, 0xBE, 0, 0, 1, 0, 0xFF, 0x83, 0xFF, 0
+                .db 0, 0, 0, 0, 0xFF, 0x7C, 0xC0, 0x80, 0, 0, 0, 0, 0x7F, 0x13, 0xC0
+                .db 0x80, 0, 0, 0, 0, 0x1F, 0xF, 0xC0, 0x80, 0, 0, 0, 0, 0xF, 7
+                .db 0xC0, 0x80, 0, 0, 0, 0, 7, 3, 0xC0, 0x80, 0, 0, 0, 0, 3, 1, 0xC0
+                .db 0x80, 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 0x80, 0
+                .db 0, 0
+spr_13:         .db 4, 24
+                .db 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0xE0, 0x40, 0, 0, 0, 0, 5, 0
+                .db 0xF0, 0xA0, 0, 0, 0, 0, 0xF, 5, 0xFC, 0xF0, 0, 0, 0, 0, 0x1F
+                .db 0xA, 0xFF, 0x4C, 0, 0, 0, 0, 0x1F, 0xF, 0xFF, 0xBF, 0xCC, 0
+                .db 0, 0, 0xF, 5, 0xFF, 0x7F, 0xFF, 0xCC, 0, 0, 0x1F, 0xE, 0xFF
+                .db 0xFF, 0xFF, 0xEF, 0x80, 0, 0xF, 2, 0xFF, 0xFF, 0xFF, 0xED, 0xC0
+                .db 0x80, 3, 0, 0xFF, 0xFF, 0xFF, 0xFC, 0x80, 0, 1, 0, 0xFF, 0xFF
+                .db 0xFF, 0xFE, 0, 0, 1, 0, 0xFF, 0xFF, 0xFF, 0xFE, 0, 0, 0, 0, 0xFF
+                .db 0x7F, 0xFE, 0xE0, 0, 0, 0, 0, 0xFF, 0x7F, 0xFF, 0xFC, 0xE0, 0
+                .db 0, 0, 0x7F, 0x3F, 0xFF, 0x87, 0xF0, 0xC0, 0, 0, 0x3F, 0x1F, 0xFF
+                .db 0x78, 0xF0, 0, 0, 0, 0x1F, 6, 0xFF, 0xFC, 0xFC, 0x70, 0, 0, 7
+                .db 1, 0xFF, 0x8E, 0xFE, 0xBC, 0, 0, 3, 1, 0xFF, 0x76, 0xFF, 0x8E
+                .db 0, 0, 3, 0, 0xFF, 0xFA, 0x8F, 2, 0, 0, 0xF, 3, 0xFF, 0xFA, 2
+                .db 0, 0, 0, 0x1F, 0xF, 0xFF, 0xF6, 0, 0, 0, 0, 0x3F, 0x1E, 0xFE
+                .db 0xC, 0, 0, 0, 0, 0x1E, 0, 0xC, 0, 0, 0
+spr_14:         .db 3, 21
+                .db 0, 0, 0xFF, 0, 0, 0, 3, 0, 0xFF, 0xFF, 0xC0, 0, 0xF, 3, 0xFF
+                .db 0xFF, 0xF0, 0xC0, 0x3F, 0xF, 0xFF, 0xFF, 0xF8, 0xF0, 0x7F, 0x3F
+                .db 0xFF, 0xFF, 0xFC, 0xF8, 0xFF, 0x7F, 0xFF, 0xFF, 0xFE, 0xFC, 0xFF
+                .db 0x71, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0x60, 0xFF, 0xFF, 0xFF, 0xFE
+                .db 0xFF, 0x60, 0xFF, 0x7F, 0xFF, 0xFE, 0x7F, 0x30, 0xFF, 0x7F, 0xFF
+                .db 0xFE, 0x3F, 0x18, 0xFF, 0x3F, 0xFE, 0xFC, 0x1F, 0xE, 0xFF, 0x3F
+                .db 0xFC, 0xF8, 0xF, 7, 0xFF, 0x3F, 0xF8, 0xF0, 7, 3, 0xFF, 0x1F
+                .db 0xF0, 0xE0, 7, 3, 0xFF, 0x9F, 0xE0, 0xC0, 3, 1, 0xFF, 0xCF, 0xC0
+                .db 0x80, 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 1, 0, 0xFF, 0xFF, 0x80, 0
+                .db 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0x38, 0, 0, 0, 0, 0x38, 0
+                .db 0, 0
+spr_15:         .db 3, 24
+                .db 0, 0, 0x3C, 0, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0, 7, 1, 0xFF, 0xFF
+                .db 0xE0, 0x80, 0xF, 7, 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xF, 0xFF
+                .db 0xFF, 0xF8, 0xF0, 0x3F, 0x1F, 0xFF, 0xFF, 0xFC, 0xF8, 0x3F, 0x19
+                .db 0xFF, 0xFF, 0xFC, 0xF8, 0x7F, 0x30, 0xFF, 0xFF, 0xFF, 0xFC, 0x7F
+                .db 0x30, 0xFF, 0xFF, 0xFE, 0xFC, 0x3F, 0x18, 0xFF, 0x7F, 0xFC, 0xF8
+                .db 0x3F, 0x1C, 0xFF, 0x7F, 0xFC, 0xF8, 0x1F, 0xC, 0xFF, 0x7F, 0xF8
+                .db 0xF0, 0x1F, 0xE, 0xFF, 0x7F, 0xF8, 0xF0, 0xF, 6, 0xFF, 0x7F
+                .db 0xF0, 0xE0, 0xF, 6, 0xFF, 0x3F, 0xF0, 0xE0, 0xF, 7, 0xFF, 0x3F
+                .db 0xF0, 0xE0, 7, 3, 0xFF, 0x3F, 0xE0, 0xC0, 7, 3, 0xFF, 0xBF, 0xE0
+                .db 0xC0, 7, 3, 0xFF, 0xBF, 0xE0, 0xC0, 3, 1, 0xFF, 0xFF, 0xC0, 0x80
+                .db 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 1, 0, 0xFF, 0xFF, 0x80, 0, 0, 0
+                .db 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0, 0, 0
+spr_16:         .db 3, 26
+                .db 0, 0, 0x3C, 0, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0, 3, 1, 0xFF, 0xFF
+                .db 0xC0, 0x80, 7, 3, 0xFF, 0xFF, 0xE0, 0xC0, 0xF, 7, 0xFF, 0xFF
+                .db 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xC, 0xFF
+                .db 0xFF, 0xF8, 0xF0, 0x1F, 8, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 8, 0xFF
+                .db 0xFF, 0xF8, 0xF0, 0x1F, 0xC, 0xFF, 0x7F, 0xF8, 0xF0, 0x1F, 0xC
+                .db 0xFF, 0x7F, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F, 0xF8, 0xF0, 0xF
+                .db 6, 0xFF, 0x3F, 0xF0, 0xE0, 0xF, 7, 0xFF, 0x3F, 0xF0, 0xE0, 7
+                .db 3, 0xFF, 0x3F, 0xE0, 0xC0, 7, 3, 0xFF, 0x3F, 0xE0, 0xC0, 3, 1
+                .db 0xFF, 0x3F, 0xC0, 0x80, 3, 1, 0xFF, 0x3F, 0xC0, 0x80, 3, 1, 0xFF
+                .db 0xBF, 0xC0, 0x80, 3, 1, 0xFF, 0xBF, 0xC0, 0x80, 1, 0, 0xFF, 0x9F
+                .db 0x80, 0, 1, 0, 0xFF, 0xDF, 0x80, 0, 1, 0, 0xFF, 0xDF, 0x80, 0
+                .db 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0x3C, 0, 0, 0, 0, 0x3C, 0
+                .db 0, 0
+spr_17:         .db 4, 23
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0xE
+                .db 4, 0, 0, 0, 0, 0, 0, 0x1E, 0xC, 0, 0, 0, 0, 0, 0, 0x1E, 0xC
+                .db 0, 0, 0, 0, 0, 0, 0x3E, 0x1C, 4, 0, 0, 0, 0, 0, 0x3E, 0x1C, 0xE
+                .db 4, 0, 0, 7, 0, 0x7C, 0x38, 0x1E, 0xC, 0, 0, 0x3F, 7, 0xFC, 0x78
+                .db 0x7C, 0x18, 0x40, 0, 0xFF, 0x3E, 0xFB, 0xF0, 0xFC, 0x78, 0xF9
+                .db 0x40, 0xFF, 0xFF, 0xFF, 0x6B, 0xF8, 0xF0, 0xFF, 0x78, 0xFF, 0x7F
+                .db 0xFF, 0x9B, 0xF0, 0xE0, 0x7F, 0x3F, 0xFF, 0xBF, 0xFF, 0xFD, 0xE2
+                .db 0x80, 0x3F, 0x1F, 0xFF, 0xBF, 0xFF, 0xFE, 0xDF, 2, 0x1F, 3, 0xFF
+                .db 0x7F, 0xFF, 0xFF, 0xFF, 0xDE, 0x4F, 4, 0xFF, 0xFF, 0xFF, 0xFF
+                .db 0xFE, 0xDC, 0xFF, 0x43, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC, 0xD0, 0xFF
+                .db 0x7D, 0xFF, 0xFF, 0xFF, 0xFF, 0xD0, 0x80, 0x7F, 0x3E, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0x80, 0, 0x3F, 0x1F, 0xFF, 0x3F, 0xFF, 0xFC, 0, 0
+                .db 0x1F, 0, 0xFF, 0x87, 0xFC, 0xE0, 0, 0, 1, 0, 0xFF, 0xF8, 0xE0
+                .db 0, 0, 0, 0, 0, 0xF8, 0, 0, 0, 0, 0
+spr_18:         .db 4, 23
+                .db 0, 0, 0, 0, 0x10, 0, 0, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0
+                .db 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0, 0
+                .db 0, 0x3C, 0x18, 0, 0, 0, 0, 0, 0, 0x7C, 0x38, 0, 0, 0, 0, 0, 0
+                .db 0x7C, 0x38, 0, 0, 0, 0, 7, 0, 0xFC, 0x78, 6, 0, 0x40, 0, 0x3F
+                .db 7, 0xF8, 0x70, 0x1F, 6, 0xF0, 0x40, 0xFF, 0x3E, 0xFB, 0xF0, 0xFE
+                .db 0x1C, 0xFF, 0x70, 0xFF, 0xFF, 0xFF, 0x6B, 0xFE, 0xFC, 0x7F, 0x3E
+                .db 0xFF, 0x7F, 0xFF, 0x9B, 0xFC, 0xF8, 0x3F, 0x1F, 0xFF, 0xBF, 0xFF
+                .db 0xFD, 0xFE, 0xE4, 0x1F, 0xF, 0xFF, 0xBF, 0xFF, 0xFE, 0xFE, 0xC
+                .db 0xF, 3, 0xFF, 0x7F, 0xFF, 0xFF, 0xFC, 0xD8, 0xF, 4, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xFC, 0xD8, 0xF, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8
+                .db 0xD0, 0x7F, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0xD0, 0, 0xFF, 0x7E
+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0, 0x7F, 0xF, 0xFF, 0x3F, 0xFF
+                .db 0xFC, 0, 0, 0xF, 0, 0xFF, 0xC7, 0xFC, 0xE0, 0, 0, 0, 0, 0xFF
+                .db 0x38, 0xE0, 0, 0, 0, 0, 0, 0x38, 0, 0, 0, 0, 0
+spr_19:         .db 4, 23
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3
+                .db 1, 0x88, 0, 0, 0, 0, 0, 7, 3, 0x9C, 8, 0, 0, 0, 0, 0xF, 7, 0xBC
+                .db 0x18, 0, 0, 0, 0, 0x1F, 0xE, 0x3C, 0x18, 0, 0, 7, 0, 0x7F, 0x1E
+                .db 0x7C, 0x38, 0, 0, 0x3F, 7, 0xFF, 0x7C, 0xFC, 0x78, 0, 0, 0xFF
+                .db 0x3E, 0xFF, 0xF9, 0xF8, 0xF0, 0x41, 0, 0xFF, 0xFF, 0xFF, 0x73
+                .db 0xF0, 0xE0, 0xFF, 0x40, 0xFF, 0x7F, 0xFF, 0x8B, 0xE0, 0xC0, 0xFF
+                .db 0x7F, 0xFF, 0xBF, 0xFF, 0xFD, 0xC0, 0x80, 0x7F, 0x3F, 0xFF, 0xBF
+                .db 0xFF, 0xFE, 0xD2, 0, 0x7F, 0xF, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF
+                .db 0xD2, 0xFF, 0x40, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xDE, 0xFF, 0x73
+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0x7F, 0x3D, 0xFF, 0xFF, 0xFF
+                .db 0xFF, 0xDC, 0x80, 0x3F, 0x1E, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0
+                .db 0x1F, 7, 0xFF, 0x3F, 0xFF, 0xFC, 0, 0, 7, 0, 0xFF, 0xC7, 0xFC
+                .db 0xE0, 0, 0, 3, 1, 0xFF, 0xF8, 0xE0, 0, 0, 0, 1, 0, 0xF8, 0xE0
+                .db 0, 0, 0, 0, 0, 0, 0xE0, 0, 0, 0, 0, 0
+spr_1A:         .db 3, 26
+                .db 0, 0, 6, 0, 0, 0, 0, 0, 0xF, 6, 0, 0, 0, 0, 0x1F, 0xE, 0, 0
+                .db 0, 0, 0x3E, 0x1C, 0, 0, 0, 0, 0x3E, 0x1C, 4, 0, 0, 0, 0x3F, 0x1E
+                .db 0xE, 4, 0, 0, 0x7F, 0x3E, 0xE, 4, 0x20, 0, 0xFF, 0x7E, 0x1F
+                .db 0xA, 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x71, 0x20, 0xFF, 0xFF
+                .db 0x9F, 0xA, 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x79, 0x30, 0xFF
+                .db 0xFF, 0xBF, 0x12, 0x79, 0x30, 0xFF, 0xFF, 0xFF, 0x32, 0x7D, 0x38
+                .db 0xFF, 0xFF, 0xFF, 0xF2, 0x7D, 0x38, 0xFF, 0xFF, 0xFF, 0xF2, 0x7F
+                .db 0x3C, 0xFF, 0xFB, 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0xD3, 0xFF, 0xF2
+                .db 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F, 0xFF, 0x91, 0xFF
+                .db 0xFA, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xBE, 0x7F, 0x3F, 0xFF, 0x93
+                .db 0xBF, 0xE, 0x7F, 0x3E, 0xFF, 0x9B, 0x8E, 0, 0x7F, 0x3C, 0xFF
+                .db 0xFF, 0x80, 0, 0x7D, 0x3C, 0xFF, 0x7E, 0, 0, 0x3C, 0x18, 0x7E
+                .db 0x3C, 0, 0, 0x18, 0, 0x3C, 0, 0, 0
+spr_1B:         .db 3, 26
+                .db 0, 0, 0x10, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0x7C, 0x38
+                .db 0, 0, 0, 0, 0x3E, 0x1C, 4, 0, 0, 0, 0x1F, 0xE, 0xE, 4, 0, 0
+                .db 0x1F, 0xE, 0xE, 4, 0x20, 0, 0x3F, 0x1E, 0x1F, 0xA, 0x70, 0x20
+                .db 0x7F, 0x3E, 0x1F, 0xA, 0x70, 0x20, 0xFF, 0x7E, 0x1F, 0xA, 0x71
+                .db 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x79, 0x30, 0xFF, 0xFF, 0xBF, 0x1A
+                .db 0x79, 0x30, 0xFF, 0xFF, 0xFF, 0x32, 0x7D, 0x38, 0xFF, 0xFF, 0xFF
+                .db 0x72, 0x7D, 0x38, 0xFF, 0xFF, 0xFF, 0xF2, 0x7F, 0x3C, 0xFF, 0xFF
+                .db 0xFF, 0xF2, 0x7F, 0x3E, 0xFF, 0xFB, 0xFF, 0xF2, 0x7F, 0x3F, 0xFF
+                .db 0xD3, 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F
+                .db 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xE, 0x7F
+                .db 0x3F, 0xFF, 0x93, 0x8E, 0, 0x7F, 0x3E, 0xFF, 0x9B, 0x80, 0, 0x7F
+                .db 0x3C, 0xFF, 0xFF, 0x80, 0, 0x3C, 0x18, 0xFF, 0x7E, 0, 0, 0x18
+                .db 0, 0x7E, 0x3C, 0, 0, 0, 0, 0x3C, 0, 0, 0
+spr_1C:         .db 2, 14
+                .db 3, 0, 0xE0, 0, 7, 3, 0xF0, 0xE0, 0xF, 7, 0xFC, 0xF0, 0x1F, 7
+                .db 0xFE, 0xEC, 0x3F, 0x1F, 0xFF, 0xFE, 0x7F, 0x3F, 0xFF, 0xFE, 0x7F
+                .db 0x3D, 0xFF, 0x9E, 0x3F, 0x1E, 0xFE, 0x5C, 0x7F, 0x3F, 0xFF, 0xDE
+                .db 0x7F, 0x3D, 0xFF, 0xE6, 0x3F, 0x1B, 0xFF, 0xFE, 0x1B, 1, 0xFE
+                .db 0xDC, 1, 0, 0xFC, 0xC0, 0, 0, 0xC0, 0
+spr_1D:         .db 3, 13
+                .db 0, 0, 0xFC, 0, 0, 0, 1, 0, 0xFF, 0xFC, 0xC0, 0, 0x3B, 1, 0xFF
+                .db 0xFB, 0xE0, 0xC0, 0x7F, 0x3B, 0xFF, 0xFF, 0xF0, 0xE0, 0xFF, 0x7F
+                .db 0xFF, 0xFF, 0xF8, 0xF0, 0xFF, 0x7F, 0xFF, 0xFB, 0xF8, 0xF0, 0xFF
+                .db 0x7D, 0xFF, 0xE5, 0xF0, 0xC0, 0xFF, 0x7E, 0xFF, 0x1D, 0xF8, 0xF0
+                .db 0x7F, 0x3F, 0xFF, 0xFE, 0xFC, 0x78, 0x3F, 7, 0xFF, 0xFF, 0xFC
+                .db 0xF8, 0x1F, 0xF, 0xFF, 0xFB, 0xF8, 0xF0, 0xF, 6, 0xFB, 0xF0
+                .db 0xF0, 0xE0, 6, 0, 0xF0, 0, 0xE0, 0
+spr_1E:         .db 3, 17
+byte_81C7:      .db 1, 0, 0xF8, 0, 0, 0, 7, 1, 0xFF, 0xF8, 0, 0, 0xF, 7, 0xFF, 0xFF
+                .db 0xBC, 0, 0x1F, 0xF, 0xFF, 0xFF, 0xFE, 0xBC, 0x3F, 0xF, 0xFF
+                .db 0xFF, 0xFF, 0xFE, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0x7F
+                .db 0xFF, 0x7C, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0x81, 0xFF, 0xFE, 0xFF
+                .db 0x7F, 0xFF, 0xC1, 0xFE, 0xFC, 0xFF, 0x7D, 0xFF, 0x80, 0xFC, 0x78
+                .db 0x7F, 0x3D, 0xFF, 0xE3, 0xFE, 0xFC, 0xFF, 0x7D, 0xFF, 0xF7, 0xFF
+                .db 0xFE, 0xFF, 0x63, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xFF
+                .db 0xFF, 0xFE, 0x7F, 0x3B, 0xFF, 0xFD, 0xFE, 0xFC, 0x3B, 1, 0xFD
+                .db 0xF0, 0xFC, 0xF0, 1, 0, 0xF0, 0, 0xF0, 0
+spr_1F:         .db 3, 16
+                .db 0x3F, 0, 0, 0, 0xF8, 0, 0x7F, 0x3F, 0x81, 0, 0xFC, 0xF8, 0xFF
+                .db 0x7F, 0xC3, 0x81, 0xFE, 0xFC, 0xFF, 0x7E, 0x81, 0, 0xFC, 0x38
+                .db 0x7E, 0x3C, 0, 0, 0x38, 0, 0x3C, 0, 0, 0, 0xC, 0, 0, 0, 0, 0
+                .db 0x1E, 0xC, 0, 0, 0, 0, 0x3F, 0x1E, 0x18, 0, 0, 0, 0x3F, 0x1E
+                .db 0x3C, 0x18, 0, 0, 0x3F, 0x1E, 0x7E, 0x3C, 0, 0, 0x3F, 0x1E, 0x7E
+                .db 0x2C, 0x3C, 0, 0x1E, 4, 0x7E, 0x24, 0x7E, 0x3C, 0x1C, 8, 0x7E
+                .db 0x3C, 0x7F, 0x3E, 8, 0, 0x3C, 0x18, 0x3E, 0x1C, 0, 0, 0x18, 0
+                .db 0x1C, 0, 0, 0
+spr_20:         .db 2, 16
+                .db 8, 0, 0, 0, 0x1C, 8, 0x40, 0, 0x3E, 0x1C, 0xE4, 0x40, 0x3F, 8
+                .db 0x4E, 4, 0x7F, 0x27, 0xDF, 0xE, 0x3F, 0xB, 0xFE, 0xC4, 0x3F
+                .db 0x1C, 0xF4, 0xA0, 0x5F, 0xD, 0xFC, 0xB0, 0xFF, 0x5A, 0xFE, 0x54
+                .db 0x5F, 5, 0xFC, 0xF0, 0xF, 1, 0xFC, 0xA8, 0x1F, 9, 0xF8, 0x40
+                .db 0x19, 0, 0x50, 0, 0x39, 0x10, 0x38, 0x10, 0x3F, 0x19, 0x90, 0
+                .db 0x19, 0, 0, 0
+spr_21:         .db 2, 16
+                .db 8, 0, 0, 0, 0x1C, 8, 0x20, 0, 9, 0, 0x70, 0x20, 0x23, 1, 0xA8
+                .db 0, 0x73, 0x20, 0xBC, 8, 0x7F, 0x33, 0xF8, 0xA0, 0x3F, 6, 0xE2
+                .db 0xC0, 0x1F, 0xD, 0xFF, 0x62, 0x4F, 6, 0xFA, 0xF0, 0xFF, 0x4A
+                .db 0xF8, 0xE0, 0x4F, 3, 0xFC, 0x88, 0xF, 3, 0xFE, 0x5C, 0x1F, 9
+                .db 0xDC, 0x88, 0x3F, 0x1C, 0xC8, 0, 0x1C, 8, 0xE0, 0x40, 8, 0, 0x40
+                .db 0
+spr_22:         .db 2, 16
+                .db 8, 0, 0x40, 0, 0x1C, 8, 0xE8, 0x40, 0xB, 0, 0xFC, 0x68, 7, 3
+                .db 0xF8, 0, 0x27, 1, 0xFA, 0xD0, 0x7F, 0x27, 0xFF, 0xBA, 0x3F, 5
+                .db 0xFA, 0xD0, 0x3F, 0xF, 0xFC, 0xB0, 0x7F, 0x32, 0xFE, 0xD4, 0x7F
+                .db 0x33, 0xFC, 0xB0, 0x3F, 1, 0xF2, 0x60, 0xF, 2, 0xFF, 0x32, 0x1F
+                .db 8, 0xFA, 0x80, 9, 0, 0x9C, 8, 3, 1, 0x88, 0, 1, 0, 0, 0
+font:           .db 0x38, 0x6C, 0xD6, 0xD6, 0xD6, 0xD6, 0x6C, 0x38      ; '0'
+                .db 0x18, 0x38, 0x58, 0x18, 0x18, 0x18, 0x18, 0x7C      ; '1'
+                .db 0x38, 0x4C, 0xC, 0x3C, 0x60, 0xC2, 0xC2, 0xFE       ; '2'
+                .db 0x38, 0x4C, 0xC, 0x3C, 0xE, 0x86, 0x86, 0xFC        ; '3'
+                .db 0x18, 0x38, 0x58, 0x9A, 0xFE, 0x1A, 0x18, 0x7C      ; '4'
+                .db 0xFE, 0xC2, 0xC0, 0xFC, 6, 6, 0x86, 0x7C            ; '5'
+                .db 0x1E, 0x32, 0x60, 0xEC, 0xC6, 0xC6, 0xC6, 0x7C      ; '6'
+                .db 0x7E, 0x46, 0x4C, 0xC, 0x18, 0x18, 0x38, 0xF8       ; '7'
+                .db 0x38, 0x6C, 0x6C, 0x7C, 0xFE, 0xC6, 0xC6, 0x7C      ; '8'
+                .db 0x7C, 0xC6, 0xC6, 0xC6, 0x7C, 0xC, 0x98, 0xF0       ; '9'
+                .db 0, 0, 0, 0, 0, 0, 0x18, 0x18                        ; '.'
+                .db 0, 0xC3, 0xC6, 0xC, 0x18, 0x30, 0x63, 0xC3          ; '%'
+                .db 0x3C, 0x42, 0x99, 0xA1, 0xA1, 0x99, 0x42, 0x3C      ; '(c)'
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0xC, 0x1C, 0x2E, 0x66, 0x46, 0xCE, 0xD6, 0x66       ; 'A'
+                .db 0xF8, 0x6C, 0x6C, 0x78, 0x6C, 0x66, 0x66, 0xFC      ; 'B'
+                .db 0xE, 0x32, 0x60, 0x40, 0xC0, 0xC2, 0xE6, 0x7C       ; 'C'
+                .db 0x60, 0x70, 0x68, 0x6C, 0x66, 0x66, 0x66, 0xFC      ; 'D'
+                .db 0xFE, 0x60, 0x64, 0x7C, 0x64, 0x60, 0x7A, 0xC6      ; 'E'
+                .db 0xC6, 0x7A, 0x60, 0x64, 0x7C, 0x64, 0x60, 0x60      ; 'F'
+                .db 0xE, 0x30, 0x60, 0xC6, 0xCE, 0xF6, 0x66, 0xE        ; 'G'
+                .db 0xEE, 0xC6, 0xC6, 0xFE, 0xC6, 0xC6, 0xC6, 0xEE      ; 'H'
+                .db 0x7C, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x7C      ; 'I'
+                .db 0x1E, 6, 6, 0x86, 0x86, 0xC6, 0x7E, 0x1C            ; 'J'
+                .db 0xE4, 0x68, 0x70, 0x78, 0x6C, 0x64, 0x64, 0xF6      ; 'K'
+                .db 0xE0, 0x60, 0x60, 0x60, 0x60, 0x60, 0x62, 0xFE      ; 'L'
+                .db 0xC6, 0xEE, 0xEE, 0xD6, 0xD6, 0xD6, 0xC6, 0xEE      ; 'M'
+                .db 0xCC, 0xD6, 0xD6, 0xE6, 0xE4, 0xC4, 0xC8, 0xDE      ; 'N'
+                .db 0x38, 0x6C, 0xC6, 0xC6, 0xC6, 0xC6, 0x6C, 0x38      ; 'O'
+                .db 0xF8, 0x6C, 0x66, 0x76, 0x6E, 0x60, 0x60, 0xF0      ; 'P'
+                .db 0x38, 0x6C, 0xC6, 0xC6, 0xC6, 0xD6, 0x6C, 0x3A      ; 'Q'
+                .db 0xF8, 0x6C, 0x66, 0x76, 0x7E, 0x78, 0x6C, 0xE6      ; 'R'
+                .db 0x38, 0x64, 0x60, 0x3C, 6, 0x86, 0xC6, 0x7C         ; 'S'
+                .db 0xFE, 0x9A, 0x98, 0x18, 0x18, 0x18, 0x18, 0x18      ; 'T'
+                .db 0xF6, 0x26, 0x46, 0x4E, 0xCE, 0xD6, 0xD6, 0x66      ; 'U'
+                .db 0xE2, 0x62, 0x64, 0x64, 0x68, 0x68, 0x70, 0x60      ; 'V'
+                .db 0xEE, 0xC6, 0xD6, 0xD6, 0xD6, 0xEE, 0xEE, 0xC6      ; 'W'
+                .db 0xC6, 0xC6, 0x6C, 0x38, 0x38, 0x6C, 0xC6, 0xC6      ; 'X'
+                .db 0x86, 0x66, 0x16, 0xE, 6, 4, 0x4C, 0x38             ; 'Y'
+                .db 0x7E, 0x46, 0xC, 0x18, 0x30, 0x62, 0xC2, 0xFE       ; 'Z'
+spr_23:         .db 4, 18
+                .db 0, 0, 0, 0, 0x18, 0, 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0
+                .db 0x30, 0, 0x3C, 0x18, 0x30, 0, 0, 0, 0x78, 0x30, 0x38, 0x10, 0x78
+                .db 0x30, 0, 0, 0x7C, 0x38, 0x78, 0x30, 0x78, 0x30, 0x18, 0, 0x3C
+                .db 0x18, 0x78, 0x30, 0xF0, 0x60, 0x3E, 0x18, 0x1E, 0xC, 0x79, 0x30
+                .db 0xF0, 0xE0, 0x3F, 0x1E, 0x8F, 6, 0x79, 0x30, 0xE6, 0xC0, 0x1F
+                .db 7, 0xCF, 0x86, 0x7F, 0x31, 0xEF, 0xC6, 7, 1, 0xF7, 0xC3, 0xFF
+                .db 0x37, 0xDF, 0x8E, 1, 0, 0xFF, 0x73, 0xFF, 0x17, 0xFE, 0x98, 1
+                .db 0, 0xFF, 0x3C, 0xFF, 0xE1, 0xF8, 0xB0, 3, 1, 0xFF, 0x9D, 0xFF
+                .db 0xAE, 0xF0, 0x60, 3, 1, 0xFF, 0xD9, 0xFF, 0x47, 0xF0, 0xE0, 1
+                .db 0, 0xFF, 0x60, 0xFF, 0x33, 0xE0, 0xC0, 0, 0, 0x7F, 0x1D, 0xFB
+                .db 0xB1, 0xC0, 0x80, 0, 0, 0x1F, 0xD, 0xF1, 0x80, 0x80, 0, 0, 0
+                .db 0xD, 0, 0xF8, 0x30, 0, 0
+spr_unused:     .db 0, 0, 0, 0, 0x30, 0, 0, 0, 4, 0x18, 0, 0, 0xF, 0xB, 0xF0, 0xF0
+                .db 0, 0, 0, 0, 0xFF, 0x9D, 0xFF, 0xFB, 0, 0, 1, 1, 0xFF, 0xBD, 0xFF
+                .db 0xFB, 0xC0, 0x40, 7, 7, 0xFF, 0xBE, 0xFF, 0xFB, 0xE0, 0x60, 0x3F
+                .db 0xF, 0xFF, 0xBE, 0xFF, 0xF7, 0xFC, 0x78, 0x3F, 0x17, 0xFF, 0xBD
+                .db 0xFF, 0xF7, 0xFC, 0x78, 0x3F, 0x17, 0xFF, 0xBD, 0xFF, 0xEF, 0xFC
+                .db 0xB8, 0x3F, 0x1B, 0xFF, 0xBB, 0xFF, 0xEF, 0xFC, 0xB8, 0x3F, 0x1D
+                .db 0xFF, 0xD9, 0xFF, 0xEF, 0xFC, 0x70, 0x3F, 0x1E, 0xFF, 0xEE, 0xFF
+                .db 0xEF, 0xF8, 0xB0, 0x3F, 0xF, 0xFF, 0x76, 0xFF, 0xF7, 0xF8, 0xD0
+                .db 0x1F, 0xF, 0xFF, 0x77, 0xFF, 0x77, 0xF8, 0xB0, 0x1F, 0xE, 0xFF
+                .db 0xF7, 0xFF, 0x7B, 0xFE, 0xB0, 0x1F, 0xD, 0xFF, 0xFF, 0xFF, 0xFB
+                .db 0xFE, 0x78, 0x1F, 0xB, 0xFF, 0xF8, 0xFF, 0x1F, 0xFE, 0x7C, 0x1F
+                .db 0xF, 0xFF, 0xC7, 0xFF, 0xE3, 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0x3B
+                .db 0xFF, 0x3C, 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6, 0xFC
+                .db 0xF0, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6, 0xF8, 0xF0, 0x1F, 7
+                .db 0xFF, 0x3C, 0xFF, 0x3D, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xC7, 0xFF
+                .db 0xE3, 0xF0, 0xC0, 7, 0, 0xFF, 0xF8, 0xFF, 0x1F, 0xE0, 0, 1, 0
+                .db 0xFF, 0xF, 0xFF, 0xF0, 0x80, 0, 0, 0, 0x1F, 0, 0xF8, 0, 0, 0
+spr_24:         .db 4, 28
+                .db 0, 0, 3, 0, 0xC0, 0, 0, 0, 0, 0, 0xF, 1, 0xF0, 0x80, 0, 0, 0
+                .db 0, 0x3F, 7, 0xFC, 0xE0, 0, 0, 0, 0, 0xFF, 0x1B, 0xFF, 0xD8, 0
+                .db 0, 3, 0, 0xFF, 0x7B, 0xFF, 0xDE, 0xC0, 0, 0xF, 1, 0xFF, 0xFB
+                .db 0xFF, 0xDF, 0xF0, 0x80, 0x1F, 7, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8
+                .db 0xE0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF
+                .db 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF
+                .db 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0
+                .db 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xF8, 0xFF, 0x1F
+                .db 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xE7, 0xFF, 0xE7, 0xF8, 0xF0, 0x1F
+                .db 0xF, 0xFF, 0x9F, 0xFF, 0xF9, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F
+                .db 0xFF, 0xFE, 0xF8, 0x70, 0x1F, 9, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8
+                .db 0x90, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xE0, 0x1F, 0xF
+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF
+                .db 0xFF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0
+                .db 0x1F, 7, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xE0, 0xF, 1, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xF0, 0x80, 3, 0, 0xFF, 0x7F, 0xFF, 0xFE, 0xC0, 0
+                .db 0, 0, 0xFF, 0x1F, 0xFF, 0xF8, 0, 0, 0, 0, 0x3F, 7, 0xFC, 0xE0
+                .db 0, 0, 0, 0, 0xF, 0, 0xF0, 0, 0, 0
+spr_25:         .db 4, 21
+                .db 0, 0, 0x1E, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0x1E, 0xE1, 0, 0x80, 0
+                .db 7, 0, 0xFF, 0xFF, 0xF3, 0xE1, 0xC0, 0x80, 0xF, 7, 0xFF, 0xFF
+                .db 0xFF, 0xF3, 0xE0, 0xC0, 0x1F, 0xF, 0xFF, 0xB6, 0xFF, 0x8B, 0xF0
+                .db 0xE0, 0x3F, 0x1D, 0xBF, 0x12, 0xFF, 0x3D, 0xF0, 0xE0, 0x7F, 0x35
+                .db 0x93, 0, 0xFF, 0xC6, 0xE0, 0xC0, 0x7F, 0x34, 0xF, 3, 0xFF, 0x3F
+                .db 0xE0, 0x40, 0x7C, 0x30, 0x3F, 0xC, 0xFF, 0xFE, 0xF0, 0xE0, 0x78
+                .db 0x30, 0xFF, 0x33, 0xFE, 0xF8, 0xF0, 0x60, 0x79, 0x30, 0xFF, 0xCF
+                .db 0xF8, 0xE0, 0xF8, 0x50, 0x7F, 0x39, 0xFF, 0x3F, 0xE0, 0x80, 0xF8
+                .db 0x70, 0x7F, 0x2E, 0xFF, 0xFE, 0x80, 0, 0xF0, 0x60, 0x3F, 0xB
+                .db 0xFE, 0xF8, 1, 0, 0xF0, 0xE0, 0xF, 3, 0xF8, 0xE0, 7, 1, 0xF0
+                .db 0xE0, 3, 1, 0xFF, 0xD8, 0xFF, 7, 0xF0, 0xA0, 1, 0, 0xDF, 0xF
+                .db 0xFF, 0xFF, 0xE0, 0x80, 0, 0, 0x1F, 0xD, 0xFF, 0xFD, 0xC0, 0x80
+                .db 0, 0, 0x1F, 9, 0xFF, 0xD9, 0x80, 0, 0, 0, 9, 0, 0xDD, 0x88, 0
+                .db 0, 0, 0, 0, 0, 0x88, 0, 0, 0
+spr_26:         .db 4, 28
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0
+                .db 0x1F, 7, 0xF8, 0xE0, 0, 0, 0, 0, 0x7F, 0x1E, 0xFE, 0x78, 0, 0
+                .db 1, 0, 0xFF, 0x79, 0xFF, 0x9E, 0x80, 0, 7, 1, 0xFF, 0xE7, 0xFF
+                .db 0xE7, 0xE0, 0x80, 0x1F, 7, 0xFF, 0x9D, 0xFF, 0xF9, 0xF8, 0xE0
+                .db 0x7E, 0x1F, 0xFF, 0x7D, 0xFF, 0xBE, 0xFE, 0x78, 0xFF, 0x79, 0xFF
+                .db 0xED, 0xFF, 0xAD, 0xFF, 0x9E, 0xFF, 0x67, 0xFF, 0x6D, 0xFF, 0xAD
+                .db 0xFF, 0xE6, 0xFF, 0x1F, 0xFF, 0x6D, 0xFF, 0xAD, 0xFF, 0xF8, 0xFF
+                .db 0x7F, 0xFF, 0xAD, 0xFF, 0x6B, 0xFF, 0xFE, 0xFF, 0x5D, 0xFF, 0xAD
+                .db 0xFF, 0x6B, 0xFF, 0xBA, 0x7F, 0x1D, 0xFF, 0xDD, 0xFF, 0x6B, 0xFE
+                .db 0xB8, 0x1F, 0xD, 0xFF, 0xFD, 0xFF, 0x77, 0xF8, 0xB8, 0x1F, 0xD
+                .db 0xFF, 0x6E, 0xFF, 0xFE, 0xF8, 0xB8, 0x1F, 0xD, 0xFF, 0x6F, 0xFF
+                .db 0xFC, 0xF8, 0xB0, 0x1D, 8, 0xFF, 0x6D, 0xFF, 0xB6, 0xF8, 0x30
+                .db 0x1C, 8, 0xFF, 0x6D, 0xFF, 0xB6, 0x38, 0x10, 0x1C, 8, 0xFF, 0x65
+                .db 0xFF, 0xA6, 0x3B, 0x10, 0x1C, 8, 0xE7, 0x41, 0xEF, 0x86, 0x38
+                .db 0x10, 0x1C, 8, 0xE3, 0x41, 0xC7, 0x82, 0x10, 0, 8, 0, 0xE1, 0x40
+                .db 0xC7, 0x82, 0, 0, 0, 0, 0xE1, 0x40, 0xC7, 0x82, 0, 0, 0, 0, 0x41
+                .db 0, 0xC2, 0x80, 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 1, 0
+                .db 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 0x80, 0, 0, 0
+spr_27:         .db 2, 17
+                .db 0xE, 0, 0x38, 0, 0x1F, 0xE, 0x7C, 0x38, 0x1F, 0xB, 0xFC, 0x78
+                .db 0xF, 5, 0xF8, 0x70, 0xE, 3, 0xF0, 0x60, 0xF, 3, 0xF8, 0xE0, 0x1F
+                .db 0xD, 0xFC, 0xF8, 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xD, 0xFC, 0xF8
+                .db 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xE, 0xFC, 0x38, 0xF, 5, 0xF8, 0xD0
+                .db 7, 2, 0xF0, 0xE0, 7, 2, 0xF0, 0xE0, 7, 2, 0xF0, 0xE0, 3, 1, 0xE0
+                .db 0x40, 1, 0, 0xC0, 0
+spr_28:         .db 4, 29
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 0x1F, 1, 0xE0, 0x80, 0, 0, 0
+                .db 0, 0x3F, 0x1E, 0xF0, 0x40, 0, 0, 0, 0, 0x7F, 0x3E, 0xF8, 0xA0
+                .db 0, 0, 0, 0, 0xFF, 0x7E, 0xFF, 0x50, 0x80, 0, 7, 0, 0xFF, 0xFE
+                .db 0xFF, 0xA2, 0xE0, 0x80, 0xF, 6, 0xFF, 0x3E, 0xFF, 0x55, 0xF0
+                .db 0x40, 0x7F, 0xF, 0xFF, 0xDE, 0xFF, 0xAA, 0xFE, 0xA0, 0xFF, 0x7F
+                .db 0xFF, 0xDE, 0xFF, 0x15, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xDE, 0xFF
+                .db 0xAA, 0xFF, 0xA2, 0xFF, 0x7F, 0xFF, 0xCE, 0xFF, 0x54, 0xFF, 0x54
+                .db 0xFF, 0x7F, 0xFF, 0xEE, 0xFF, 0x28, 0xFF, 0x82, 0xFF, 0x73, 0xFF
+                .db 0xE8, 0xFF, 0x94, 0xFF, 0x54, 0xFF, 0xD, 0xFF, 0xF7, 0xFF, 0xCA
+                .db 0xFF, 0xA2, 0xFF, 0x7D, 0xFF, 0xEF, 0xFF, 0xE4, 0xFF, 0x54, 0xFF
+                .db 0x7D, 0xFF, 0x1F, 0xFF, 0xFC, 0xFF, 0xA2, 0xFF, 0x7C, 0xFF, 0xFF
+                .db 0xFF, 0xFE, 0xFF, 4, 0xFF, 0x79, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+                .db 0xE2, 0xFF, 0x43, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF4, 0xFF, 0x1F
+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xFE, 0x7F, 0x1F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xF8
+                .db 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xE0, 0xF, 3, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xE0, 0xC0, 3, 0, 0xFF, 0x7F, 0xFF, 0xF8, 0xC0
+                .db 0, 0, 0, 0x7F, 0x3F, 0xF8, 0xF0, 0, 0, 0, 0, 0x3F, 0x1F, 0xF0
+                .db 0xE0, 0, 0, 0, 0, 0x1F, 7, 0xE0, 0xC0, 0, 0, 0, 0, 7, 0, 0xC0
+                .db 0, 0, 0
+spr_29:         .db 2, 16
+                .db 0xD, 0xD, 0xF5, 0xF5, 0x13, 0x13, 0x80, 0x80, 0x1E, 0x1E, 0
+                .db 0, 0xB, 0xB, 0xE0, 0xE0, 0x1E, 0x1E, 0x18, 0x18, 0x16, 0x16
+                .db 6, 6, 0x1B, 0x1B, 0x80, 0x80, 0x1E, 0x1E, 0, 0, 0xE, 0xE, 0
+                .db 0, 0xF, 0xF, 0xD0, 0xD0, 0xF, 0xF, 0, 0, 7, 7, 0x80, 0x80, 7
+                .db 7, 0xEC, 0xEC, 0, 0, 0x78, 0x78, 0, 0, 0xC, 0xC, 0, 0, 3, 3
+spr_2A:         .db 2, 11
+                .db 0x18, 0x18, 0x7E, 0x7E, 7, 7, 0x80, 0x80, 0, 0, 0x40, 0x40, 0
+                .db 0, 0x30, 0x30, 0, 0, 8, 8, 0, 0, 4, 4, 0x18, 0x18, 6, 6, 7, 7
+                .db 0xF8, 0xF8, 0xC0, 0xC0, 0x10, 0x10, 0x38, 0x38, 0xE, 0xE, 7
+                .db 7, 0xFE, 0xFE, 2, 0x10, 0xFF, 0xFF, 0xFE, 0xFE, 7, 7, 0, 0, 0
+                .db 0, 0x78, 0x78, 0, 0, 6, 6, 0xE, 0xE, 6, 6, 0x31, 0x31, 0xC1
+                .db 0xC1, 0x6C, 0x6C, 0xF1, 0xF1, 0x31, 0x31, 0x9E, 0x9E, 0xE, 0xE
+                .db 0x60, 0x60, 1, 1, 0x80, 0x80, 0, 0, 0x80, 0x80, 0, 0, 0x7E, 0x7E
+                .db 0, 0, 2, 2, 0, 0, 4, 4, 0, 0, 0x3C, 0x3C, 0, 0, 2, 2
+spr_2B:         .db 2, 16
+                .db 0xFF, 0xFF, 0xF0, 0xF0, 8, 8, 0, 0, 7, 7, 0xF8, 0xF8, 0, 0, 4
+                .db 4, 0, 0, 8, 8, 3, 3, 0xE4, 0xE4, 4, 4, 0x1C, 0x1C, 0x79, 0x79
+                .db 0xE6, 0xE6, 0x86, 0x86, 0x60, 0x60, 0x79, 0x79, 0x9E, 0x9E, 6
+                .db 6, 0x21, 0x21, 1, 1, 0xC3, 0xC3, 0, 0, 0x1C, 0x1C, 0, 0, 0xC0
+                .db 0xC0, 0, 0, 0x3E, 0x3E, 0, 0, 6, 6
+spr_2C:         .db 2, 8
+                .db 0xC0, 0xC0, 0, 0, 0x7F, 0x7F, 0xC0, 0xC0, 0x1C, 0x1C, 0, 0, 3
+                .db 3, 0, 0, 0, 0, 0xCE, 0xCE, 0, 0, 0x78, 0x78, 0, 0, 4, 4, 0, 0
+                .db 3, 3
+spr_2D:         .db 5, 34
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0xC0, 0x80, 0, 0
+                .db 0, 0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0
+                .db 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 7, 2, 0xE0
+                .db 0xC0, 0, 0, 0, 0, 0xC, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0x1E
+                .db 0xC, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0
+                .db 0, 0, 0, 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0x3F, 0x16
+                .db 7, 2, 0xE0, 0xC0, 0, 0, 0x30, 0, 0x3F, 0x16, 0xF, 0, 0xE0, 0x20
+                .db 0, 0, 0x78, 0x30, 0x3F, 0x16, 0x1F, 0xF, 0xE0, 0x80, 0, 0, 0xFC
+                .db 0x58, 0x3F, 0x16, 0xFF, 0x1E, 0xF8, 0x60, 0, 0, 0xFC, 0x58, 0x3F
+                .db 0x16, 0xFF, 0xD9, 0xFE, 0x98, 0, 0, 0xFC, 0x58, 0x3F, 0x15, 0xFF
+                .db 0xE7, 0xFF, 0xE6, 0x80, 0, 0xFC, 0x58, 0x3F, 3, 0xFF, 0x9F, 0xFF
+                .db 0xF9, 0xE0, 0x80, 0xFC, 0x58, 0x7F, 0x3E, 0xFF, 0x67, 0xFF, 0xFE
+                .db 0xF8, 0x60, 0xFC, 0x58, 0xFF, 0x79, 0xFF, 0xF9, 0xFF, 0xFF, 0xFE
+                .db 0x98, 0xFC, 0x58, 0xFF, 0x66, 0xFF, 0x7E, 0xFF, 0x7F, 0xFF, 0xE6
+                .db 0xFC, 0x58, 0xFF, 0x5F, 0xFF, 0x9F, 0xFF, 0x9F, 0xFF, 0xF9, 0xFC
+                .db 0x98, 0xFF, 0x7F, 0xFF, 0xE7, 0xFF, 0xE7, 0xFF, 0xFE, 0xFC, 0x60
+                .db 0x7F, 0x1F, 0xFF, 0xF9, 0xFF, 0xF9, 0xFF, 0xFF, 0xFE, 0x98, 0x1F
+                .db 7, 0xFF, 0xFE, 0xFF, 0x7E, 0xFF, 0x7F, 0xFF, 0xE6, 7, 1, 0xFF
+                .db 0xFF, 0xFF, 0x9F, 0xFF, 0x9F, 0xFF, 0xF8, 1, 0, 0xFF, 0x7F, 0xFF
+                .db 0xE7, 0xFF, 0xE7, 0xFF, 0xFE, 0, 0, 0x7F, 0x1F, 0xFF, 0xF9, 0xFF
+                .db 0xF9, 0xFE, 0xF8, 0, 0, 0x1F, 7, 0xFF, 0xFE, 0xFF, 0x7E, 0xF8
+                .db 0x60, 0, 0, 7, 1, 0xFF, 0xFF, 0xFF, 0x9F, 0xE0, 0x80, 0, 0, 1
+                .db 0, 0xFF, 0x7F, 0xFF, 0xF6, 0x80, 0, 0, 0, 0, 0, 0x7F, 0x1F, 0xFE
+                .db 0xF8, 0, 0, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0xE0, 0, 0, 0, 0, 0, 0
+                .db 7, 1, 0xE0, 0x80, 0, 0, 0, 0, 0, 0, 1, 0, 0x80, 0, 0, 0
+spr_2E:         .db 5, 32
+                .db 0, 0, 0, 0, 0xFF, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0xFF, 0xFC, 0xF0
+                .db 0, 0, 0, 0, 0, 0x3F, 3, 0xFF, 0xFC, 0xFC, 0xF0, 0, 0, 0, 0, 0xFF
+                .db 0x3B, 0xFF, 0xFE, 0xFF, 0xFC, 0, 0, 1, 0, 0xFF, 0xFB, 0xFF, 0xFE
+                .db 0xFF, 0xFE, 0x80, 0, 7, 0, 0xFF, 0xFB, 0xFF, 0xE0, 0xFF, 0x7E
+                .db 0xC0, 0x80, 0xF, 4, 0xFF, 0xF9, 0xFF, 0xCE, 0xFF, 0x3D, 0xE0
+                .db 0xC0, 0x1F, 0xE, 0xFF, 0xF0, 0xFF, 0x1F, 0xFF, 0x85, 0xF0, 0xE0
+                .db 0x1F, 0xE, 0xFF, 0xE1, 0xFF, 0xCF, 0xFF, 0xB9, 0xF8, 0xF0, 0x1F
+                .db 0xE, 0xFF, 0x4F, 0xFF, 0x83, 0xFF, 0xBE, 0xF8, 0xF0, 0x1F, 0xE
+                .db 0xFF, 0x1F, 0xFF, 0x79, 0xFF, 0x9E, 0xF8, 0x30, 0x1F, 0xE, 0xFF
+                .db 0x1E, 0xFF, 0x7C, 0xFF, 6, 0xF8, 0xD0, 0x1F, 0xC, 0xFF, 0xD9
+                .db 0xFF, 0x3D, 0xFF, 0xF2, 0xF8, 0xE0, 0x1F, 0xB, 0xFF, 0xC7, 0xFF
+                .db 0x7E, 0xFF, 0xF8, 0xF8, 0xF0, 0x1F, 7, 0xFF, 0x1E, 0xFF, 0x7F
+                .db 0xFF, 0x7C, 0xF8, 0x30, 0x1F, 0xE, 0xFF, 0x7E, 0xFF, 0x40, 0xFF
+                .db 0x7E, 0xF8, 0xD0, 0x1F, 8, 0xFF, 0xF1, 0xFF, 0x3F, 0xFF, 6, 0xF8
+                .db 0x60, 0x1F, 6, 0xFF, 0x4F, 0xFF, 0xDF, 0xFF, 0x78, 0xF8, 0x30
+                .db 0x1F, 0xE, 0xFF, 0x3F, 0xFF, 0x3E, 0xFF, 0xFF, 0xF8, 0x10, 0x1F
+                .db 0xD, 0xFF, 0x9C, 0xFF, 0, 0xFF, 0x38, 0xF8, 0xD0, 0x1F, 0xB
+                .db 0xFF, 0xC0, 0xFF, 0, 0xFF, 7, 0xF8, 0xE0, 0x1F, 7, 0xFF, 0xF1
+                .db 0xFF, 0, 0xFF, 3, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xE0, 0xFF, 0
+                .db 0xFF, 1, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xC0, 0xFF, 4, 0xFF, 1
+                .db 0xF8, 0xF0, 0x1F, 0, 0xFF, 0x21, 0xFF, 1, 0xFF, 0, 0xF0, 0, 0xF
+                .db 7, 0xFF, 0xF0, 0xFF, 0, 0xFF, 3, 0xF0, 0xC0, 0xF, 7, 0xFF, 0xE9
+                .db 0xFF, 0x44, 0xFF, 0xF, 0xE0, 0xC0, 7, 3, 0xFF, 0xDF, 0xFF, 1
+                .db 0xFF, 0x67, 0xC0, 0x80, 3, 0, 0xFF, 0xBE, 0xFF, 0x7D, 0xFF, 0xF2
+                .db 0x80, 0, 0, 0, 0xFF, 0xE, 0xFF, 0xFD, 0xFE, 0xF8, 0, 0, 0, 0
+                .db 0xF, 0, 0xFF, 0xFE, 0xF8, 0xE0, 0, 0, 0, 0, 0, 0, 0xFF, 0, 0xE0
+                .db 0, 0, 0
+spr_2F:         .db 4, 39
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 3, 1, 0xE0, 0, 0, 0, 0, 0, 0xF
+                .db 2, 0xF8, 0xA0, 0, 0, 0, 0, 0x3F, 0xE, 0xFE, 0x50, 0, 0, 0, 0
+                .db 0xFF, 0x3C, 0xFF, 0xAA, 0x80, 0, 3, 0, 0xFF, 0xFF, 0xFF, 0x55
+                .db 0xE0, 0, 0xF, 3, 0xFF, 0xFE, 0xFF, 0xA8, 0xF8, 0xA0, 0x1F, 0xF
+                .db 0xFF, 0xF5, 0xFF, 0x55, 0xFE, 0x50, 0x3F, 0x1F, 0xFF, 0xF2, 0xFF
+                .db 0xA8, 0xFF, 0xAA, 0x7F, 0x3F, 0xFF, 0xF9, 0xFF, 0x54, 0xFF, 0x54
+                .db 0x3F, 0x1F, 0xFF, 0xFA, 0xFF, 0xA2, 0xFE, 0x28, 0x3F, 0x1F, 0xFF
+                .db 0xFD, 0xFF, 0x51, 0xFE, 0x54, 0x3F, 0x1F, 0xFF, 0xFC, 0xFF, 0xAA
+                .db 0xFC, 0xA8, 0x3F, 0x1F, 0xFF, 0xFE, 0xFF, 0x51, 0xFC, 0x50, 0x1F
+                .db 7, 0xFF, 0xFE, 0xFF, 0xAA, 0xF8, 0xA0, 0xF, 7, 0xFF, 0xFD, 0xFF
+                .db 0x55, 0xF8, 0x50, 7, 1, 0xFF, 0xFC, 0xFF, 0xAA, 0xF0, 0xA0, 7
+                .db 2, 0xFF, 0xFD, 0xFF, 0x55, 0xF0, 0x40, 7, 3, 0xFF, 0x7E, 0xFF
+                .db 0x8A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0x7D, 0xFF, 0x55, 0xF0, 0x40
+                .db 0xF, 7, 0xFF, 0xBC, 0xFF, 0xAA, 0xE0, 0xA0, 0xF, 7, 0xFF, 0xBC
+                .db 0xFF, 0x54, 0x80, 0, 7, 1, 0xFF, 0xDC, 0xFF, 0xAA, 0, 0, 7, 3
+                .db 0xFF, 0xEE, 0xFF, 0x54, 0, 0, 7, 3, 0xFF, 0xDE, 0xFF, 0x8A, 0
+                .db 0, 3, 1, 0xFF, 0xEF, 0xFF, 0x45, 0x80, 0, 3, 1, 0xFF, 0xFF, 0xFF
+                .db 0x2A, 0, 0, 3, 1, 0xFF, 0xFE, 0xFF, 0x55, 0x80, 0, 1, 0, 0xFF
+                .db 0xFE, 0xFF, 0xAA, 0, 0, 0, 0, 0xFF, 0x7E, 0xFE, 0x14, 0, 0, 0
+                .db 0, 0x7F, 0x38, 0xFE, 0xC8, 0, 0, 0, 0, 0x3F, 0x16, 0xFE, 0xE4
+                .db 0, 0, 0, 0, 0x3F, 0xE, 0xFE, 0xF8, 0, 0, 0, 0, 0x3F, 0x1F, 0xFE
+                .db 0x7C, 0, 0, 0, 0, 0x1F, 7, 0xFC, 0x70, 0, 0, 0, 0, 7, 1, 0xF0
+                .db 0x60, 0, 0, 0, 0, 1, 0, 0xE0, 0xC0, 0, 0, 0, 0, 1, 0, 0xC0, 0x80
+                .db 0, 0, 0, 0, 0, 0, 0x80, 0, 0, 0
+spr_30:         .db 4, 51
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0
+                .db 0x1F, 7, 0xF8, 0x20, 0, 0, 0, 0, 0x7F, 0x1F, 0xFE, 0x50, 0, 0
+                .db 1, 0, 0xFF, 0x7F, 0xFF, 0x2A, 0x80, 0, 7, 1, 0xFF, 0xFF, 0xFF
+                .db 0x55, 0xE0, 0, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF1, 0xA0, 0x7F
+                .db 0x1F, 0xFF, 0xFF, 0xFF, 0x55, 0xFE, 0x50, 0xFF, 0x7F, 0xFF, 0xFF
+                .db 0xFF, 0x2A, 0xFF, 0xAA, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x55, 0xFF
+                .db 0x54, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFF, 0xAA, 0xFF, 0x7F
+                .db 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF
+                .db 0x2A, 0xFF, 0xAA, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x55, 0xFE, 0x54
+                .db 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFE, 0xA8, 0x7F, 0x3F, 0xFF
+                .db 0xFF, 0xFF, 0x55, 0xFE, 0x54, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x2A
+                .db 0xFE, 0xA8, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x55, 0xFE, 0x54, 0x3F
+                .db 0x1F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFC, 0xA8, 0x3F, 0x1F, 0xFF, 0xFF
+                .db 0xFF, 0x55, 0xFC, 0x50, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFC
+                .db 0xA8, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x55, 0xFC, 0x50, 0x3F, 0x1F
+                .db 0xFF, 0xFF, 0xFF, 0x2A, 0xFC, 0xA8, 0x1F, 0xF, 0xFF, 0xFF, 0xFF
+                .db 0x55, 0xF8, 0x50, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x2A, 0xF8, 0xA0
+                .db 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55, 0xF8, 0x50, 0x1F, 0xF, 0xFF
+                .db 0xFF, 0xFF, 0x2A, 0xF8, 0xA0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55
+                .db 0xF8, 0x50, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 0xF
+                .db 7, 0xFF, 0xFF, 0xFF, 0x55, 0xF0, 0x40, 0xF, 7, 0xFF, 0xFF, 0xFF
+                .db 0x2A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x55, 0xF0, 0x40
+                .db 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 7, 3, 0xFF, 0xFF
+                .db 0xFF, 0x55, 0xE0, 0x40, 7, 3, 0xFF, 0xFF, 0xFF, 0x2A, 0xE0, 0x80
+                .db 7, 3, 0xFF, 0xFF, 0xFF, 0x55, 0xE0, 0x40, 7, 3, 0xFF, 0xFF, 0xFF
+                .db 0x2A, 0xE0, 0x80, 7, 3, 0xFF, 0xFE, 0xFF, 0x55, 0xE0, 0x40, 3
+                .db 1, 0xFF, 0xF8, 0xFF, 0x8A, 0xC0, 0x80, 3, 1, 0xFF, 0xE3, 0xFF
+                .db 0xE5, 0xC0, 0, 3, 1, 0xFF, 0x9E, 0xFF, 0xF8, 0xC0, 0x80, 3, 0
+                .db 0xFF, 0x7E, 0xFF, 0xFE, 0x80, 0, 1, 0, 0xFF, 0xFE, 0xFF, 0xFF
+                .db 0x80, 0, 0, 0, 0xFF, 0x7E, 0xFF, 0xFE, 0, 0, 0, 0, 0x7F, 0x3E
+                .db 0xFE, 0xFC, 0, 0, 0, 0, 0x3F, 0x1E, 0xFC, 0xF8, 0, 0, 0, 0, 0x1F
+                .db 0xE, 0xF8, 0xF0, 0, 0, 0, 0, 0xF, 6, 0xF0, 0xE0, 0, 0, 0, 0
+                .db 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 3, 1, 0xC0, 0x80, 0, 0, 0, 0, 1
                 .db 0, 0x80, 0, 0, 0
-spr_30:         .db 4, 51                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0x20
-                .db 0, 0, 0, 0, 0x7F, 0x1F, 0xFE, 0x50, 0, 0, 1, 0, 0xFF, 0x7F, 0xFF, 0x2A, 0x80, 0
-                .db 7, 1, 0xFF, 0xFF, 0xFF, 0x55, 0xE0, 0, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF1, 0xA0
-                .db 0x7F, 0x1F, 0xFF, 0xFF, 0xFF, 0x55, 0xFE, 0x50, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x2A
-                .db 0xFF, 0xAA, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xFF
-                .db 0xFF, 0x2A, 0xFF, 0xAA, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0x54, 0xFF, 0x7F
-                .db 0xFF, 0xFF, 0xFF, 0x2A, 0xFF, 0xAA, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x55, 0xFE, 0x54
-                .db 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFE, 0xA8, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x55
-                .db 0xFE, 0x54, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFE, 0xA8, 0x7F, 0x3F, 0xFF, 0xFF
-                .db 0xFF, 0x55, 0xFE, 0x54, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFC, 0xA8, 0x3F, 0x1F
-                .db 0xFF, 0xFF, 0xFF, 0x55, 0xFC, 0x50, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFC, 0xA8
-                .db 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x55, 0xFC, 0x50, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x2A
-                .db 0xFC, 0xA8, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55, 0xF8, 0x50, 0x1F, 0xF, 0xFF, 0xFF
-                .db 0xFF, 0x2A, 0xF8, 0xA0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55, 0xF8, 0x50, 0x1F, 0xF
-                .db 0xFF, 0xFF, 0xFF, 0x2A, 0xF8, 0xA0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55, 0xF8, 0x50
-                .db 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x55, 0xF0
-                .db 0x40, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x55
-                .db 0xF0, 0x40, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 7, 3, 0xFF, 0xFF, 0xFF, 0x55
-                .db 0xE0, 0x40, 7, 3, 0xFF, 0xFF, 0xFF, 0x2A, 0xE0, 0x80, 7, 3, 0xFF, 0xFF, 0xFF, 0x55
-                .db 0xE0, 0x40, 7, 3, 0xFF, 0xFF, 0xFF, 0x2A, 0xE0, 0x80, 7, 3, 0xFF, 0xFE, 0xFF, 0x55
-                .db 0xE0, 0x40, 3, 1, 0xFF, 0xF8, 0xFF, 0x8A, 0xC0, 0x80, 3, 1, 0xFF, 0xE3, 0xFF, 0xE5
-                .db 0xC0, 0, 3, 1, 0xFF, 0x9E, 0xFF, 0xF8, 0xC0, 0x80, 3, 0, 0xFF, 0x7E, 0xFF, 0xFE
-                .db 0x80, 0, 1, 0, 0xFF, 0xFE, 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF, 0x7E, 0xFF, 0xFE, 0
-                .db 0, 0, 0, 0x7F, 0x3E, 0xFE, 0xFC, 0, 0, 0, 0, 0x3F, 0x1E, 0xFC, 0xF8, 0, 0, 0, 0
-                .db 0x1F, 0xE, 0xF8, 0xF0, 0, 0, 0, 0, 0xF, 6, 0xF0, 0xE0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0
-                .db 0, 0, 0, 0, 3, 1, 0xC0, 0x80, 0, 0, 0, 0, 1, 0, 0x80, 0, 0, 0
-spr_31:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x7E, 0, 0, 0, 1, 0, 0xFF, 0x76, 0x80, 0, 3, 1, 0xFF, 0x76, 0xC0, 0x80, 7
-                .db 3, 0xFF, 0, 0xE0, 0xC0, 0xF, 4, 0xFF, 0xF7, 0xF0, 0x20, 0xF, 2, 0xFF, 0xF7, 0xF0
-                .db 0x40, 0x1F, 0xE, 0xFF, 0xF7, 0xF8, 0x70, 0x1F, 0xD, 0xFF, 0xF7, 0xF8, 0x70, 0x1F
-                .db 0xD, 0xFF, 0xF7, 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xF7, 0xFC, 0xB8, 0x3F, 0x1D, 0xFF
-                .db 0, 0xFC, 0xB8, 0x3F, 0x18, 0xFF, 0xFF, 0xFC, 0x18, 0x7F, 0x27, 0xFF, 0, 0xFE, 0xE4
-                .db 0x7F, 0x18, 0xFF, 0x10, 0xFE, 0x18, 0xFF, 0x62, 0xFF, 0x10, 0xFF, 0x46, 0x7F, 0x22
-                .db 0xFF, 0x10, 0xFE, 0x44, 0x7F, 0x3A, 0xFF, 0x10, 0xFE, 0x5C, 0x3F, 0x17, 0xFF, 0x10
-                .db 0xFC, 0xF8, 0x3F, 0x10, 0xFF, 0xFF, 0xFC, 8, 0x1F, 8, 0xFF, 0, 0xF8, 0x10, 0xF, 6
-                .db 0xFF, 0, 0xF0, 0x60, 7, 1, 0xFF, 0x81, 0xE0, 0x80, 1, 0, 0xFF, 0x7E, 0x80, 0, 0
-                .db 0, 0x7E, 0, 0, 0
-spr_32:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 3, 0, 0xE0, 0, 0, 0, 3, 1, 0xFF, 0xE0, 0xF0, 0, 0x3F, 3, 0xFF, 0xFF, 0xF8, 0xF0
-                .db 0x7F, 0x3E, 0xFF, 0x1F, 0xFC, 0xF8, 0xFF, 0x7D, 0xFF, 0xE0, 0xFE, 4, 0xFF, 0x43
-                .db 0xFF, 0xFF, 0xFF, 0xF9, 0xFF, 0x3F, 0xFF, 0xCF, 0xFF, 0xF9, 0xFF, 0x7F, 0xFF, 0x87
-                .db 0xFF, 0xFC, 0xFF, 0x7F, 0xFF, 0xC3, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xE3, 0xFF, 0xFE
-                .db 0x7F, 0x3F, 0xFF, 0xE3, 0xFF, 0xFE, 0x7F, 0x1F, 0xFF, 0xC6, 0xFF, 0x1E, 0x7F, 0x3D
-                .db 0xFF, 0x80, 0xFF, 0xE, 0x7F, 0x38, 0xFF, 0, 0xFE, 0xDC, 0x3F, 0x1C, 0xFF, 0x33, 0xFE
-                .db 0xFC, 0x3F, 0xF, 0xFF, 0xE3, 0xFC, 0xF8, 0x3F, 0x1F, 0xFF, 0xE3, 0xF8, 0xF0, 0x3F
-                .db 0x1F, 0xFF, 0xE1, 0xF0, 0xE0, 0x1F, 0xF, 0xFF, 0xF1, 0xF0, 0xE0, 0xF, 3, 0xFF, 0xFB
-                .db 0xE0, 0xC0, 3, 0, 0xFF, 0xFF, 0xC0, 0, 0, 0, 0xFF, 0x1C, 0, 0, 0, 0, 0x1C, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0
-spr_33:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 7, 0, 0xC0, 0, 0, 0, 0x7F, 0xF, 0xE0, 0xC0, 0, 0, 0xFF, 0x7F, 0xF8, 0xE0, 1
-                .db 0, 0xFF, 0xF8, 0xFC, 0x38, 7, 1, 0xFF, 0x87, 0xFE, 0xDC, 0x1F, 7, 0xFF, 0x7F, 0xFE
-                .db 0xE4, 0x3F, 0x1E, 0xFF, 0xF8, 0xFF, 0xFA, 0x7F, 0x39, 0xFF, 0xE0, 0xFF, 0x3C, 0x7F
-                .db 0x27, 0xFF, 0xC0, 0xFF, 0x1E, 0xFF, 0x5F, 0xFF, 0x87, 0xFF, 7, 0xFF, 0x3F, 0xFF
-                .db 0x8F, 0xFF, 0xC6, 0xFF, 0x7F, 0xFF, 0x8F, 0xFF, 0xE6, 0xFF, 0x70, 0xFF, 7, 0xFF
-                .db 0xE6, 0xFF, 0x60, 0xFF, 3, 0xFF, 0xC6, 0xFF, 0x77, 0xFF, 0xC0, 0xFF, 6, 0xFF, 0x7F
-                .db 0xFF, 0xF8, 0xFF, 0xE, 0xFF, 0x7F, 0xFF, 0xFC, 0xFE, 0x7C, 0x7F, 0x3F, 0xFF, 0xFC
-                .db 0xFE, 0x7C, 0x3F, 0x1F, 0xFF, 0xF0, 0xFC, 0xF8, 0x1F, 7, 0xFF, 0xFC, 0xF8, 0xF0
-                .db 7, 1, 0xFF, 0xFF, 0xF0, 0xE0, 1, 0, 0xFF, 0xFF, 0xE0, 0xC0, 0, 0, 0xFF, 0xF, 0xC0
-                .db 0x80, 0, 0, 0xF, 0, 0x80, 0
-spr_34:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xF, 0, 0xF0, 0, 0xC0, 0, 0x1F, 0xF, 0xFF, 0xF0, 0xF0, 0xC0, 0x3F, 0x1F, 0xFF, 0xFF
-                .db 0xF8, 0xF0, 0x7F, 0x30, 0xFF, 0xF, 0xFC, 0x38, 0x7F, 0x2F, 0xFF, 0xF0, 0xFE, 0xCC
-                .db 0xFF, 0x5F, 0xFF, 0xFF, 0xFE, 0xF4, 0xFF, 0x5F, 0xFF, 0xFF, 0xFF, 0xFA, 0xFF, 0x5F
-                .db 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0x3F, 0xFF, 0xCF, 0xFF, 0xFC, 0xFF, 0x7B, 0xFF, 0xC3
-                .db 0xFF, 0xFE, 0xFF, 0x60, 0xFF, 0x80, 0xFF, 0xFE, 0xFF, 0x78, 0xFF, 0x18, 0xFF, 0x3E
-                .db 0xFF, 0x7E, 0xFF, 0x1E, 0xFF, 0xE, 0x7F, 0x3E, 0xFF, 0x30, 0xFF, 6, 0x3F, 0x1C, 0xFF
-                .db 0, 0xFF, 0xFE, 0x3F, 0x18, 0xFF, 8, 0xFF, 0x3E, 0x3F, 0x18, 0xFF, 0xFE, 0xFF, 0x1E
-                .db 0x7F, 0x3F, 0xFF, 0xFF, 0xFE, 0xB8, 0x7F, 0x3F, 0xFF, 0xFF, 0xF8, 0xF0, 0x3F, 0x1F
-                .db 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 7, 0xFF, 0xFF, 0xF8, 0xF0, 7, 1, 0xFF, 0xF3, 0xF0
-                .db 0xE0, 1, 0, 0xF3, 1, 0xE0, 0xC0, 0, 0, 1, 0, 0xC0, 0
-spr_35:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0xFC, 0, 0, 0, 3, 0, 0xFF, 0xFC, 0, 0, 7, 3, 0xFF, 0xFF, 0xF8, 0, 0xF, 7, 0xFF
-                .db 3, 0xFC, 0xF8, 0x3F, 0xC, 0xFF, 0xFC, 0xFE, 0xFC, 0x7F, 0x3B, 0xFF, 0xFF, 0xFF, 6
-                .db 0x7F, 0x37, 0xFF, 0xDF, 0xFF, 0xFA, 0xFF, 0x4F, 0xFF, 0x8F, 0xFF, 0xFC, 0xFF, 0x7F
-                .db 0xFF, 0x8F, 0xFF, 0xFE, 0xFF, 0x3F, 0xFF, 0x8F, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xCF
-                .db 0xFF, 0xFE, 0xFF, 0x77, 0xFF, 0xC7, 0xFF, 0xE6, 0xFF, 0x61, 0xFF, 0xC1, 0xFF, 0x82
-                .db 0xFF, 0x38, 0xFF, 0x80, 0xF0, 6, 0xFF, 0x7C, 0xFF, 6, 0xFF, 0x1E, 0xFF, 0x78, 0xFF
-                .db 0xF, 0xFE, 0xFC, 0x7F, 0x30, 0xFF, 6, 0xFE, 0xFC, 0x7F, 0x38, 0xFF, 0x21, 0xFE, 0xFC
-                .db 0x3F, 0x1C, 0xFF, 0x77, 0xFC, 0xF0, 0x3F, 0x1F, 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xF
-                .db 0xFF, 0xFF, 0xE0, 0xC0, 0xF, 1, 0xFF, 0xFF, 0xC0, 0x80, 1, 0, 0xFF, 0xFC, 0x80, 0
-                .db 0, 0, 0xFC, 0, 0, 0
-spr_36:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 7, 0, 0xF8, 0, 0, 0, 0xF, 7, 0xFC, 0xF8, 0, 0, 0x1F, 0xF, 0xFF, 0xFC, 0xF0, 0, 0x3F
-                .db 0x18, 0xFF, 7, 0xF8, 0xF0, 0x3F, 0x17, 0xFF, 0xFB, 0xFC, 0xF8, 0x7F, 0x2F, 0xFF
-                .db 0xFC, 0xFE, 0x1C, 0xFF, 0x6F, 0xFF, 0xFF, 0xFE, 0xE4, 0xFF, 0x5C, 0xFF, 0xFF, 0xFE
-                .db 0xF8, 0xFF, 0x3C, 0xFF, 0x3F, 0xFE, 0xFC, 0xFF, 0x7C, 0xFF, 0xF, 0xFF, 0xFA, 0xFF
-                .db 0x7C, 0xFF, 3, 0xFF, 0xFE, 0xFF, 0x7C, 0xFF, 0x30, 0xFF, 0xFC, 0xFF, 0x7E, 0xFF
-                .db 0x7C, 0xFF, 0x3E, 0xFF, 0x7E, 0xFF, 0x7C, 0xFF, 0xE, 0x7F, 0x3E, 0xFF, 0x38, 0xFF
-                .db 6, 0x7F, 0x3E, 0xFF, 0, 0xFF, 0x3E, 0x3F, 0x1F, 0xFF, 1, 0xFF, 0xFE, 0x3F, 0x1F
-                .db 0xFF, 0x1F, 0xFE, 0xFC, 0x3F, 0x1F, 0xFF, 0xFF, 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0xFF
-                .db 0xF8, 0xF0, 0xF, 7, 0xFF, 0xFF, 0xF0, 0xE0, 7, 1, 0xFF, 0xFF, 0xE0, 0xC0, 1, 0, 0xFF
-                .db 0x39, 0xC0, 0x80, 0, 0, 0x39, 0, 0x80, 0
-spr_37:         .db 0, 0                                        ; DATA XREF: RAM:sprite_tblo
-spr_38:         .db 3, 27                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0x80, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 1, 0, 0xE0, 0xC0, 0, 0, 1, 0
-                .db 0xE0, 0xC0, 0, 0, 0xFD, 0, 0xF0, 0xE0, 0xF, 0, 0xFF, 0xFD, 0xF4, 0xE0, 0x1F, 0xF
-                .db 0xFF, 0xFB, 0xFE, 0xF4, 0x1F, 0xF, 0xFF, 0xF7, 0xFF, 0xF6, 0x1F, 0xF, 0xFF, 0xEF
-                .db 0xFF, 0xFA, 0x1F, 0xF, 0xFF, 0xF7, 0xFA, 0xE0, 0x1F, 0xF, 0xFF, 0xF7, 0xE0, 0x80
-                .db 0x3F, 0x1F, 0xFF, 0xFF, 0xC0, 0x80, 0x3F, 0x1F, 0xFF, 0xFF, 0xE0, 0xC0, 0x7F, 0x30
-                .db 0xFF, 0x3F, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0x9F, 0xC0, 0x80, 0x3F, 0xF, 0xFF, 0xEC
-                .db 0x80, 0, 0x1F, 0xF, 0xFF, 0xF0, 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E
-                .db 0xFF, 0x1D, 0x80, 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE, 0, 0
-                .db 0x3F, 0x1B, 0xFE, 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xF0, 0x80
-                .db 0, 0, 0x7F, 0x3C, 0x80, 0, 0, 0, 0xFC, 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
-spr_39:         .db 3, 27                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0x38
-                .db 0x10, 0, 0, 0xFE, 0, 0xF8, 0x30, 0xF, 0, 0xFF, 0xFE, 0xF8, 0xF0, 0x1F, 0xF, 0xFF
-                .db 0xFD, 0xF8, 0xF0, 0x3F, 0xF, 0xFF, 0xFD, 0xFC, 0xF8, 0x7F, 0x2F, 0xFF, 0xFD, 0xFE
-                .db 0xF8, 0x7F, 0x2F, 0xFF, 0xFD, 0xFF, 0xFA, 0x7F, 0x2F, 0xFF, 0xF7, 0xFF, 0x9A, 0x3F
-                .db 0x1F, 0xFF, 0xFF, 0xDF, 0x86, 0x3F, 0x1F, 0xFF, 0xFF, 0xC6, 0x80, 0x7F, 0x30, 0xFF
-                .db 0x3F, 0xC0, 0x80, 0x7F, 0x2F, 0xFF, 0x9F, 0x80, 0, 0x3F, 0xF, 0xFF, 0xEC, 0, 0, 0x1F
-                .db 0xF, 0xFF, 0xF0, 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E, 0xFF, 0x1D, 0x80
-                .db 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE, 0, 0, 0x3F, 0x1B, 0xFE
-                .db 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xF0, 0x80, 0, 0, 0x7F, 0x3C
-                .db 0x80, 0, 0, 0, 0xFC, 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
-spr_3A:         .db 3, 27                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0x1C, 8, 0, 0
-                .db 0xFF, 0, 0x3C, 0x18, 0x4F, 0, 0xFF, 0xFF, 0xFC, 0x18, 0xFF, 0x4F, 0xFF, 0xFE, 0xFC
-                .db 0xF8, 0xFF, 0x6F, 0xFF, 0xFD, 0xFC, 0xF8, 0xFF, 0x6F, 0xFF, 0xFB, 0xFC, 0xF8, 0xFF
-                .db 0x6F, 0xFF, 0xFB, 0xFC, 0xF8, 0xFF, 0x6F, 0xFF, 0xF7, 0xFC, 0xF8, 0xFF, 0x5F, 0xFF
-                .db 0xFF, 0xFE, 0xD8, 0xFF, 0x5F, 0xFF, 0xFF, 0xFF, 0xDA, 0x7F, 0x30, 0xFF, 0x3F, 0xFF
-                .db 0xCA, 0x7F, 0x2F, 0xFF, 0x9F, 0xCF, 0x86, 0x3F, 0xF, 0xFF, 0xEC, 0x86, 0, 0x1F, 0xF
-                .db 0xFF, 0xF0, 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E, 0xFF, 0x1D, 0x80
-                .db 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE, 0, 0, 0x3F, 0x1B, 0xFE
-                .db 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xF0, 0x80, 0, 0, 0x7F, 0x3C
-                .db 0x80, 0, 0, 0, 0xFC, 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
-spr_3B:         .db 3, 34                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 2, 0x80, 0, 0, 0
-                .db 3, 1, 0xC0, 0x80, 0, 0, 7, 2, 0xC0, 0x80, 0x20, 0, 7, 2, 0xE0, 0xC0, 0x70, 0x20
-                .db 7, 2, 0xE0, 0xC0, 0x78, 0x30, 7, 2, 0xF0, 0xE0, 0x78, 0x30, 0x1F, 0xA, 0xF0, 0xE0
-                .db 0x7C, 0x38, 0xFF, 0x16, 0xF0, 0xE0, 0x7F, 0x38, 0xFF, 0xF6, 0xF8, 0xF0, 0x7F, 0x3B
-                .db 0xFF, 0xD1, 0xF8, 0xF0, 0x7F, 0x3B, 0xFF, 0xAE, 0xFC, 0x78, 0x7F, 0x3B, 0xFF, 0x6E
-                .db 0xFC, 0x38, 0x3F, 0x1A, 0xFF, 0xF6, 0xFC, 0x78, 0x1F, 6, 0xFF, 0xF6, 0xF8, 0xF0
-                .db 0x1F, 0xE, 0xFF, 0xFB, 0xF0, 0xE0, 0x1F, 0xD, 0xFF, 0xFB, 0xE0, 0xC0, 0x1F, 0xD
-                .db 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60, 7, 2, 0xFF, 0x68, 0xF0, 0x60
-                .db 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7, 2, 0xFF, 0xC1, 0xF0, 0xE0, 3, 1, 0xFF, 1, 0xF0
-                .db 0xE0, 1, 0, 0xFF, 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78, 0xF0, 0xE0, 0, 0, 0x7F, 0x30
-                .db 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF, 7, 0xF8, 0xB0, 0, 0, 7, 1, 0xF8
-                .db 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0, 0, 0xFC, 0x38, 0, 0, 0, 0, 0x38, 0
-spr_3C:         .db 3, 34                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x40, 0, 0x40
-                .db 0, 0, 0, 0xE0, 0x40, 0xE0, 0x40, 0, 0, 0xE0, 0x40, 0xE0, 0x40, 1, 0, 0xF0, 0xA0
-                .db 0xE0, 0x40, 1, 0, 0xF0, 0xA0, 0xF0, 0x60, 1, 0, 0xF8, 0xB0, 0xF0, 0x60, 0xF, 0xE
-                .db 0xF8, 0xB0, 0xFC, 0x70, 0xFF, 0x3E, 0xF8, 0xB0, 0xFF, 0x78, 0xFF, 0xFD, 0xFC, 0xB8
-                .db 0xFF, 0x7B, 0xFF, 0xDD, 0xFC, 0xF8, 0xFF, 0x7B, 0xFF, 0xAE, 0xFE, 0xFC, 0x7F, 0x3B
-                .db 0xFF, 0x6E, 0xFE, 0x7C, 0x3F, 0x1A, 0xFF, 0xF6, 0xFE, 0xFC, 0x1F, 6, 0xFF, 0xF6
-                .db 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xFB, 0xF8, 0xE0, 0x1F, 0xD, 0xFF, 0xFB, 0xE0, 0xC0
-                .db 0x1F, 0xD, 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60, 7, 2, 0xFF, 0x68
-                .db 0xF0, 0x60, 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7, 2, 0xFF, 0xC1, 0xF0, 0xE0, 3, 1, 0xFF
-                .db 1, 0xF0, 0xE0, 1, 0, 0xFF, 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78, 0xF0, 0xE0, 0, 0
-                .db 0x7F, 0x30, 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF, 7, 0xF8, 0xB0, 0
-                .db 0, 7, 1, 0xF8, 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0, 0, 0xFC, 0x38, 0, 0, 0, 0
-                .db 0x38, 0
-spr_3D:         .db 3, 34                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 4, 0, 0, 0, 0, 0, 0xE, 4, 0, 0, 0, 0, 0x1F, 0xA, 0, 0, 0, 0, 0x1F, 0xA, 0
-                .db 0, 0, 0, 0x3F, 0x13, 0x80, 0, 0, 0, 0x3F, 0x13, 0x80, 0, 0, 0, 0x3F, 0x13, 0xC0
-                .db 0x80, 0x10, 0, 0x3F, 0x13, 0xC0, 0x80, 0x38, 0x10, 0x7F, 0x33, 0xE0, 0xC0, 0x38
-                .db 0x10, 0x7F, 0x33, 0xE0, 0xC0, 0x3C, 0x18, 0xFF, 0xF, 0xF0, 0xE0, 0x3F, 0x18, 0xFF
-                .db 0xF3, 0xF0, 0xE0, 0x3F, 0x1B, 0xFF, 0xD1, 0xF8, 0xF0, 0x3F, 0x1B, 0xFF, 0xAE, 0xF8
-                .db 0xF0, 0x1F, 0xB, 0xFF, 0x6E, 0xF8, 0xF0, 0x1F, 0xA, 0xFF, 0xF6, 0xF8, 0xF0, 0xF
-                .db 6, 0xFF, 0xF6, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0xFB, 0xF0, 0xE0, 0x1F, 0xD, 0xFF, 0xFB
-                .db 0xE0, 0xC0, 0x1F, 0xD, 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60, 7
-                .db 2, 0xFF, 0x68, 0xF0, 0x60, 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7, 2, 0xFF, 0xC1, 0xF0
-                .db 0xE0, 3, 1, 0xFF, 1, 0xF0, 0xE0, 1, 0, 0xFF, 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78
-                .db 0xF0, 0xE0, 0, 0, 0x7F, 0x30, 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF
-                .db 7, 0xF8, 0xB0, 0, 0, 7, 1, 0xF8, 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0, 0, 0xFC
-                .db 0x38, 0, 0, 0, 0, 0x38, 0
-spr_3E:         .db 3, 15                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0, 0xFE
-                .db 0x70, 1, 0, 0x80, 0, 0xFF, 0x7E, 3, 1, 0xC0, 0x80, 0x7F, 0x3F, 0x87, 3, 0xE0, 0xC0
-                .db 0x7F, 0x21, 0x87, 3, 0xF0, 0xE0, 0x3F, 0xE, 7, 0, 0xF8, 0xF0, 0x3F, 0x1F, 0x8F, 7
-                .db 0xFC, 0x38, 0x1F, 0xF, 0x8F, 7, 0xFC, 0x98, 0xF, 7, 0xFF, 0x8F, 0xF8, 0xC0, 0xF
-                .db 7, 0xFF, 0x7F, 0xC0, 0x80, 0x1F, 0xF, 0xFF, 0xFF, 0x80, 0, 0x1F, 0xF, 3, 3, 0x80
+spr_31:         .db 3, 24
+                .db 0, 0, 0x7E, 0, 0, 0, 1, 0, 0xFF, 0x76, 0x80, 0, 3, 1, 0xFF, 0x76
+                .db 0xC0, 0x80, 7, 3, 0xFF, 0, 0xE0, 0xC0, 0xF, 4, 0xFF, 0xF7, 0xF0
+                .db 0x20, 0xF, 2, 0xFF, 0xF7, 0xF0, 0x40, 0x1F, 0xE, 0xFF, 0xF7
+                .db 0xF8, 0x70, 0x1F, 0xD, 0xFF, 0xF7, 0xF8, 0x70, 0x1F, 0xD, 0xFF
+                .db 0xF7, 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xF7, 0xFC, 0xB8, 0x3F, 0x1D
+                .db 0xFF, 0, 0xFC, 0xB8, 0x3F, 0x18, 0xFF, 0xFF, 0xFC, 0x18, 0x7F
+                .db 0x27, 0xFF, 0, 0xFE, 0xE4, 0x7F, 0x18, 0xFF, 0x10, 0xFE, 0x18
+                .db 0xFF, 0x62, 0xFF, 0x10, 0xFF, 0x46, 0x7F, 0x22, 0xFF, 0x10, 0xFE
+                .db 0x44, 0x7F, 0x3A, 0xFF, 0x10, 0xFE, 0x5C, 0x3F, 0x17, 0xFF, 0x10
+                .db 0xFC, 0xF8, 0x3F, 0x10, 0xFF, 0xFF, 0xFC, 8, 0x1F, 8, 0xFF, 0
+                .db 0xF8, 0x10, 0xF, 6, 0xFF, 0, 0xF0, 0x60, 7, 1, 0xFF, 0x81, 0xE0
+                .db 0x80, 1, 0, 0xFF, 0x7E, 0x80, 0, 0, 0, 0x7E, 0, 0, 0
+spr_32:         .db 3, 24
+                .db 3, 0, 0xE0, 0, 0, 0, 3, 1, 0xFF, 0xE0, 0xF0, 0, 0x3F, 3, 0xFF
+                .db 0xFF, 0xF8, 0xF0, 0x7F, 0x3E, 0xFF, 0x1F, 0xFC, 0xF8, 0xFF, 0x7D
+                .db 0xFF, 0xE0, 0xFE, 4, 0xFF, 0x43, 0xFF, 0xFF, 0xFF, 0xF9, 0xFF
+                .db 0x3F, 0xFF, 0xCF, 0xFF, 0xF9, 0xFF, 0x7F, 0xFF, 0x87, 0xFF, 0xFC
+                .db 0xFF, 0x7F, 0xFF, 0xC3, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xE3, 0xFF
+                .db 0xFE, 0x7F, 0x3F, 0xFF, 0xE3, 0xFF, 0xFE, 0x7F, 0x1F, 0xFF, 0xC6
+                .db 0xFF, 0x1E, 0x7F, 0x3D, 0xFF, 0x80, 0xFF, 0xE, 0x7F, 0x38, 0xFF
+                .db 0, 0xFE, 0xDC, 0x3F, 0x1C, 0xFF, 0x33, 0xFE, 0xFC, 0x3F, 0xF
+                .db 0xFF, 0xE3, 0xFC, 0xF8, 0x3F, 0x1F, 0xFF, 0xE3, 0xF8, 0xF0, 0x3F
+                .db 0x1F, 0xFF, 0xE1, 0xF0, 0xE0, 0x1F, 0xF, 0xFF, 0xF1, 0xF0, 0xE0
+                .db 0xF, 3, 0xFF, 0xFB, 0xE0, 0xC0, 3, 0, 0xFF, 0xFF, 0xC0, 0, 0
+                .db 0, 0xFF, 0x1C, 0, 0, 0, 0, 0x1C, 0, 0, 0, 0, 0, 0, 0, 0, 0
+spr_33:         .db 3, 24
+                .db 0, 0, 7, 0, 0xC0, 0, 0, 0, 0x7F, 0xF, 0xE0, 0xC0, 0, 0, 0xFF
+                .db 0x7F, 0xF8, 0xE0, 1, 0, 0xFF, 0xF8, 0xFC, 0x38, 7, 1, 0xFF, 0x87
+                .db 0xFE, 0xDC, 0x1F, 7, 0xFF, 0x7F, 0xFE, 0xE4, 0x3F, 0x1E, 0xFF
+                .db 0xF8, 0xFF, 0xFA, 0x7F, 0x39, 0xFF, 0xE0, 0xFF, 0x3C, 0x7F, 0x27
+                .db 0xFF, 0xC0, 0xFF, 0x1E, 0xFF, 0x5F, 0xFF, 0x87, 0xFF, 7, 0xFF
+                .db 0x3F, 0xFF, 0x8F, 0xFF, 0xC6, 0xFF, 0x7F, 0xFF, 0x8F, 0xFF, 0xE6
+                .db 0xFF, 0x70, 0xFF, 7, 0xFF, 0xE6, 0xFF, 0x60, 0xFF, 3, 0xFF, 0xC6
+                .db 0xFF, 0x77, 0xFF, 0xC0, 0xFF, 6, 0xFF, 0x7F, 0xFF, 0xF8, 0xFF
+                .db 0xE, 0xFF, 0x7F, 0xFF, 0xFC, 0xFE, 0x7C, 0x7F, 0x3F, 0xFF, 0xFC
+                .db 0xFE, 0x7C, 0x3F, 0x1F, 0xFF, 0xF0, 0xFC, 0xF8, 0x1F, 7, 0xFF
+                .db 0xFC, 0xF8, 0xF0, 7, 1, 0xFF, 0xFF, 0xF0, 0xE0, 1, 0, 0xFF, 0xFF
+                .db 0xE0, 0xC0, 0, 0, 0xFF, 0xF, 0xC0, 0x80, 0, 0, 0xF, 0, 0x80
                 .db 0
-spr_3F:         .db 3, 15                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0x1F, 6, 0x80, 0, 0xE
-                .db 0, 0x3F, 0x1F, 0xC0, 0x80, 0x1F, 0xE, 0xBF, 0x17, 0xE0, 0xC0, 0x3F, 0x1F, 0xFF, 0x99
-                .db 0xE0, 0xC0, 0x3F, 0x19, 0xFF, 0xDE, 0xE0, 0xC0, 0x1F, 6, 0xFE, 0xD8, 0xC0, 0, 0x1F
-                .db 0xF, 0xFF, 0x1E, 0, 0, 0x1F, 0xF, 0xFF, 0x1E, 0, 0, 0x1F, 0xF, 0xFF, 0xBE, 0, 0
-                .db 0x1F, 0xF, 0xFF, 0xBF, 0x80, 0, 0xF, 7, 0xFF, 0xFF, 0x80, 0, 0xF, 7, 3, 3, 0x80
+spr_34:         .db 3, 24
+                .db 0xF, 0, 0xF0, 0, 0xC0, 0, 0x1F, 0xF, 0xFF, 0xF0, 0xF0, 0xC0
+                .db 0x3F, 0x1F, 0xFF, 0xFF, 0xF8, 0xF0, 0x7F, 0x30, 0xFF, 0xF, 0xFC
+                .db 0x38, 0x7F, 0x2F, 0xFF, 0xF0, 0xFE, 0xCC, 0xFF, 0x5F, 0xFF, 0xFF
+                .db 0xFE, 0xF4, 0xFF, 0x5F, 0xFF, 0xFF, 0xFF, 0xFA, 0xFF, 0x5F, 0xFF
+                .db 0xFF, 0xFF, 0xFE, 0xFF, 0x3F, 0xFF, 0xCF, 0xFF, 0xFC, 0xFF, 0x7B
+                .db 0xFF, 0xC3, 0xFF, 0xFE, 0xFF, 0x60, 0xFF, 0x80, 0xFF, 0xFE, 0xFF
+                .db 0x78, 0xFF, 0x18, 0xFF, 0x3E, 0xFF, 0x7E, 0xFF, 0x1E, 0xFF, 0xE
+                .db 0x7F, 0x3E, 0xFF, 0x30, 0xFF, 6, 0x3F, 0x1C, 0xFF, 0, 0xFF, 0xFE
+                .db 0x3F, 0x18, 0xFF, 8, 0xFF, 0x3E, 0x3F, 0x18, 0xFF, 0xFE, 0xFF
+                .db 0x1E, 0x7F, 0x3F, 0xFF, 0xFF, 0xFE, 0xB8, 0x7F, 0x3F, 0xFF, 0xFF
+                .db 0xF8, 0xF0, 0x3F, 0x1F, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 7, 0xFF
+                .db 0xFF, 0xF8, 0xF0, 7, 1, 0xFF, 0xF3, 0xF0, 0xE0, 1, 0, 0xF3, 1
+                .db 0xE0, 0xC0, 0, 0, 1, 0, 0xC0, 0
+spr_35:         .db 3, 24
+                .db 0, 0, 0xFC, 0, 0, 0, 3, 0, 0xFF, 0xFC, 0, 0, 7, 3, 0xFF, 0xFF
+                .db 0xF8, 0, 0xF, 7, 0xFF, 3, 0xFC, 0xF8, 0x3F, 0xC, 0xFF, 0xFC
+                .db 0xFE, 0xFC, 0x7F, 0x3B, 0xFF, 0xFF, 0xFF, 6, 0x7F, 0x37, 0xFF
+                .db 0xDF, 0xFF, 0xFA, 0xFF, 0x4F, 0xFF, 0x8F, 0xFF, 0xFC, 0xFF, 0x7F
+                .db 0xFF, 0x8F, 0xFF, 0xFE, 0xFF, 0x3F, 0xFF, 0x8F, 0xFF, 0xFE, 0xFF
+                .db 0x7F, 0xFF, 0xCF, 0xFF, 0xFE, 0xFF, 0x77, 0xFF, 0xC7, 0xFF, 0xE6
+                .db 0xFF, 0x61, 0xFF, 0xC1, 0xFF, 0x82, 0xFF, 0x38, 0xFF, 0x80, 0xF0
+                .db 6, 0xFF, 0x7C, 0xFF, 6, 0xFF, 0x1E, 0xFF, 0x78, 0xFF, 0xF, 0xFE
+                .db 0xFC, 0x7F, 0x30, 0xFF, 6, 0xFE, 0xFC, 0x7F, 0x38, 0xFF, 0x21
+                .db 0xFE, 0xFC, 0x3F, 0x1C, 0xFF, 0x77, 0xFC, 0xF0, 0x3F, 0x1F, 0xFF
+                .db 0xFF, 0xF0, 0xE0, 0x1F, 0xF, 0xFF, 0xFF, 0xE0, 0xC0, 0xF, 1
+                .db 0xFF, 0xFF, 0xC0, 0x80, 1, 0, 0xFF, 0xFC, 0x80, 0, 0, 0, 0xFC
+                .db 0, 0, 0
+spr_36:         .db 3, 24
+                .db 7, 0, 0xF8, 0, 0, 0, 0xF, 7, 0xFC, 0xF8, 0, 0, 0x1F, 0xF, 0xFF
+                .db 0xFC, 0xF0, 0, 0x3F, 0x18, 0xFF, 7, 0xF8, 0xF0, 0x3F, 0x17, 0xFF
+                .db 0xFB, 0xFC, 0xF8, 0x7F, 0x2F, 0xFF, 0xFC, 0xFE, 0x1C, 0xFF, 0x6F
+                .db 0xFF, 0xFF, 0xFE, 0xE4, 0xFF, 0x5C, 0xFF, 0xFF, 0xFE, 0xF8, 0xFF
+                .db 0x3C, 0xFF, 0x3F, 0xFE, 0xFC, 0xFF, 0x7C, 0xFF, 0xF, 0xFF, 0xFA
+                .db 0xFF, 0x7C, 0xFF, 3, 0xFF, 0xFE, 0xFF, 0x7C, 0xFF, 0x30, 0xFF
+                .db 0xFC, 0xFF, 0x7E, 0xFF, 0x7C, 0xFF, 0x3E, 0xFF, 0x7E, 0xFF, 0x7C
+                .db 0xFF, 0xE, 0x7F, 0x3E, 0xFF, 0x38, 0xFF, 6, 0x7F, 0x3E, 0xFF
+                .db 0, 0xFF, 0x3E, 0x3F, 0x1F, 0xFF, 1, 0xFF, 0xFE, 0x3F, 0x1F, 0xFF
+                .db 0x1F, 0xFE, 0xFC, 0x3F, 0x1F, 0xFF, 0xFF, 0xFC, 0xF8, 0x1F, 0xF
+                .db 0xFF, 0xFF, 0xF8, 0xF0, 0xF, 7, 0xFF, 0xFF, 0xF0, 0xE0, 7, 1
+                .db 0xFF, 0xFF, 0xE0, 0xC0, 1, 0, 0xFF, 0x39, 0xC0, 0x80, 0, 0, 0x39
+                .db 0, 0x80, 0
+spr_37:         .db 0, 0
+spr_38:         .db 3, 27
+                .db 0, 0, 0, 0, 0x80, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 1, 0, 0xE0
+                .db 0xC0, 0, 0, 1, 0, 0xE0, 0xC0, 0, 0, 0xFD, 0, 0xF0, 0xE0, 0xF
+                .db 0, 0xFF, 0xFD, 0xF4, 0xE0, 0x1F, 0xF, 0xFF, 0xFB, 0xFE, 0xF4
+                .db 0x1F, 0xF, 0xFF, 0xF7, 0xFF, 0xF6, 0x1F, 0xF, 0xFF, 0xEF, 0xFF
+                .db 0xFA, 0x1F, 0xF, 0xFF, 0xF7, 0xFA, 0xE0, 0x1F, 0xF, 0xFF, 0xF7
+                .db 0xE0, 0x80, 0x3F, 0x1F, 0xFF, 0xFF, 0xC0, 0x80, 0x3F, 0x1F, 0xFF
+                .db 0xFF, 0xE0, 0xC0, 0x7F, 0x30, 0xFF, 0x3F, 0xE0, 0xC0, 0x7F, 0x2F
+                .db 0xFF, 0x9F, 0xC0, 0x80, 0x3F, 0xF, 0xFF, 0xEC, 0x80, 0, 0x1F
+                .db 0xF, 0xFF, 0xF0, 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F
+                .db 0x1E, 0xFF, 0x1D, 0x80, 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F
+                .db 0x19, 0xFF, 0xFE, 0, 0, 0x3F, 0x1B, 0xFE, 0xFC, 0, 0, 0x3F, 0x1B
+                .db 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xF0, 0x80, 0, 0, 0x7F, 0x3C, 0x80
+                .db 0, 0, 0, 0xFC, 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
+spr_39:         .db 3, 27
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10, 0, 0, 0, 0, 0, 0x38, 0x10
+                .db 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0xFE, 0, 0xF8, 0x30, 0xF, 0, 0xFF
+                .db 0xFE, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFD, 0xF8, 0xF0, 0x3F, 0xF
+                .db 0xFF, 0xFD, 0xFC, 0xF8, 0x7F, 0x2F, 0xFF, 0xFD, 0xFE, 0xF8, 0x7F
+                .db 0x2F, 0xFF, 0xFD, 0xFF, 0xFA, 0x7F, 0x2F, 0xFF, 0xF7, 0xFF, 0x9A
+                .db 0x3F, 0x1F, 0xFF, 0xFF, 0xDF, 0x86, 0x3F, 0x1F, 0xFF, 0xFF, 0xC6
+                .db 0x80, 0x7F, 0x30, 0xFF, 0x3F, 0xC0, 0x80, 0x7F, 0x2F, 0xFF, 0x9F
+                .db 0x80, 0, 0x3F, 0xF, 0xFF, 0xEC, 0, 0, 0x1F, 0xF, 0xFF, 0xF0
+                .db 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E, 0xFF, 0x1D
+                .db 0x80, 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE
+                .db 0, 0, 0x3F, 0x1B, 0xFE, 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0
+                .db 0, 0x7F, 0x3F, 0xF0, 0x80, 0, 0, 0x7F, 0x3C, 0x80, 0, 0, 0, 0xFC
+                .db 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
+spr_3A:         .db 3, 27
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0
+                .db 0, 0x1C, 8, 0, 0, 0xFF, 0, 0x3C, 0x18, 0x4F, 0, 0xFF, 0xFF, 0xFC
+                .db 0x18, 0xFF, 0x4F, 0xFF, 0xFE, 0xFC, 0xF8, 0xFF, 0x6F, 0xFF, 0xFD
+                .db 0xFC, 0xF8, 0xFF, 0x6F, 0xFF, 0xFB, 0xFC, 0xF8, 0xFF, 0x6F, 0xFF
+                .db 0xFB, 0xFC, 0xF8, 0xFF, 0x6F, 0xFF, 0xF7, 0xFC, 0xF8, 0xFF, 0x5F
+                .db 0xFF, 0xFF, 0xFE, 0xD8, 0xFF, 0x5F, 0xFF, 0xFF, 0xFF, 0xDA, 0x7F
+                .db 0x30, 0xFF, 0x3F, 0xFF, 0xCA, 0x7F, 0x2F, 0xFF, 0x9F, 0xCF, 0x86
+                .db 0x3F, 0xF, 0xFF, 0xEC, 0x86, 0, 0x1F, 0xF, 0xFF, 0xF0, 0, 0
+                .db 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E, 0xFF, 0x1D, 0x80
+                .db 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE, 0, 0
+                .db 0x3F, 0x1B, 0xFE, 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0, 0, 0x7F
+                .db 0x3F, 0xF0, 0x80, 0, 0, 0x7F, 0x3C, 0x80, 0, 0, 0, 0xFC, 0x70
+                .db 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
+spr_3B:         .db 3, 34
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3
+                .db 2, 0x80, 0, 0, 0, 3, 1, 0xC0, 0x80, 0, 0, 7, 2, 0xC0, 0x80, 0x20
+                .db 0, 7, 2, 0xE0, 0xC0, 0x70, 0x20, 7, 2, 0xE0, 0xC0, 0x78, 0x30
+                .db 7, 2, 0xF0, 0xE0, 0x78, 0x30, 0x1F, 0xA, 0xF0, 0xE0, 0x7C, 0x38
+                .db 0xFF, 0x16, 0xF0, 0xE0, 0x7F, 0x38, 0xFF, 0xF6, 0xF8, 0xF0, 0x7F
+                .db 0x3B, 0xFF, 0xD1, 0xF8, 0xF0, 0x7F, 0x3B, 0xFF, 0xAE, 0xFC, 0x78
+                .db 0x7F, 0x3B, 0xFF, 0x6E, 0xFC, 0x38, 0x3F, 0x1A, 0xFF, 0xF6, 0xFC
+                .db 0x78, 0x1F, 6, 0xFF, 0xF6, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0xFB
+                .db 0xF0, 0xE0, 0x1F, 0xD, 0xFF, 0xFB, 0xE0, 0xC0, 0x1F, 0xD, 0xFF
+                .db 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60, 7, 2, 0xFF
+                .db 0x68, 0xF0, 0x60, 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7, 2, 0xFF, 0xC1
+                .db 0xF0, 0xE0, 3, 1, 0xFF, 1, 0xF0, 0xE0, 1, 0, 0xFF, 0xCF, 0xF0
+                .db 0xE0, 0, 0, 0xFF, 0x78, 0xF0, 0xE0, 0, 0, 0x7F, 0x30, 0xF0, 0x60
+                .db 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF, 7, 0xF8, 0xB0, 0, 0
+                .db 7, 1, 0xF8, 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0, 0, 0xFC, 0x38
+                .db 0, 0, 0, 0, 0x38, 0
+spr_3C:         .db 3, 34
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0x40, 0, 0x40, 0, 0, 0, 0xE0, 0x40, 0xE0, 0x40, 0, 0, 0xE0
+                .db 0x40, 0xE0, 0x40, 1, 0, 0xF0, 0xA0, 0xE0, 0x40, 1, 0, 0xF0, 0xA0
+                .db 0xF0, 0x60, 1, 0, 0xF8, 0xB0, 0xF0, 0x60, 0xF, 0xE, 0xF8, 0xB0
+                .db 0xFC, 0x70, 0xFF, 0x3E, 0xF8, 0xB0, 0xFF, 0x78, 0xFF, 0xFD, 0xFC
+                .db 0xB8, 0xFF, 0x7B, 0xFF, 0xDD, 0xFC, 0xF8, 0xFF, 0x7B, 0xFF, 0xAE
+                .db 0xFE, 0xFC, 0x7F, 0x3B, 0xFF, 0x6E, 0xFE, 0x7C, 0x3F, 0x1A, 0xFF
+                .db 0xF6, 0xFE, 0xFC, 0x1F, 6, 0xFF, 0xF6, 0xFC, 0xF8, 0x1F, 0xE
+                .db 0xFF, 0xFB, 0xF8, 0xE0, 0x1F, 0xD, 0xFF, 0xFB, 0xE0, 0xC0, 0x1F
+                .db 0xD, 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60
+                .db 7, 2, 0xFF, 0x68, 0xF0, 0x60, 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7
+                .db 2, 0xFF, 0xC1, 0xF0, 0xE0, 3, 1, 0xFF, 1, 0xF0, 0xE0, 1, 0, 0xFF
+                .db 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78, 0xF0, 0xE0, 0, 0, 0x7F, 0x30
+                .db 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF, 7, 0xF8
+                .db 0xB0, 0, 0, 7, 1, 0xF8, 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0
+                .db 0, 0xFC, 0x38, 0, 0, 0, 0, 0x38, 0
+spr_3D:         .db 3, 34
+                .db 0, 0, 4, 0, 0, 0, 0, 0, 0xE, 4, 0, 0, 0, 0, 0x1F, 0xA, 0, 0
+                .db 0, 0, 0x1F, 0xA, 0, 0, 0, 0, 0x3F, 0x13, 0x80, 0, 0, 0, 0x3F
+                .db 0x13, 0x80, 0, 0, 0, 0x3F, 0x13, 0xC0, 0x80, 0x10, 0, 0x3F, 0x13
+                .db 0xC0, 0x80, 0x38, 0x10, 0x7F, 0x33, 0xE0, 0xC0, 0x38, 0x10, 0x7F
+                .db 0x33, 0xE0, 0xC0, 0x3C, 0x18, 0xFF, 0xF, 0xF0, 0xE0, 0x3F, 0x18
+                .db 0xFF, 0xF3, 0xF0, 0xE0, 0x3F, 0x1B, 0xFF, 0xD1, 0xF8, 0xF0, 0x3F
+                .db 0x1B, 0xFF, 0xAE, 0xF8, 0xF0, 0x1F, 0xB, 0xFF, 0x6E, 0xF8, 0xF0
+                .db 0x1F, 0xA, 0xFF, 0xF6, 0xF8, 0xF0, 0xF, 6, 0xFF, 0xF6, 0xF0
+                .db 0xE0, 0x1F, 0xE, 0xFF, 0xFB, 0xF0, 0xE0, 0x1F, 0xD, 0xFF, 0xFB
+                .db 0xE0, 0xC0, 0x1F, 0xD, 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF
+                .db 0xE0, 0xF0, 0x60, 7, 2, 0xFF, 0x68, 0xF0, 0x60, 7, 2, 0xFF, 0x98
+                .db 0xF0, 0xE0, 7, 2, 0xFF, 0xC1, 0xF0, 0xE0, 3, 1, 0xFF, 1, 0xF0
+                .db 0xE0, 1, 0, 0xFF, 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78, 0xF0, 0xE0
+                .db 0, 0, 0x7F, 0x30, 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0
+                .db 0, 0xF, 7, 0xF8, 0xB0, 0, 0, 7, 1, 0xF8, 0xF0, 0, 0, 1, 0, 0xF8
+                .db 0xF0, 0, 0, 0, 0, 0xFC, 0x38, 0, 0, 0, 0, 0x38, 0
+spr_3E:         .db 3, 15
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x70, 0
+                .db 0, 0, 0, 0, 0xFE, 0x70, 1, 0, 0x80, 0, 0xFF, 0x7E, 3, 1, 0xC0
+                .db 0x80, 0x7F, 0x3F, 0x87, 3, 0xE0, 0xC0, 0x7F, 0x21, 0x87, 3, 0xF0
+                .db 0xE0, 0x3F, 0xE, 7, 0, 0xF8, 0xF0, 0x3F, 0x1F, 0x8F, 7, 0xFC
+                .db 0x38, 0x1F, 0xF, 0x8F, 7, 0xFC, 0x98, 0xF, 7, 0xFF, 0x8F, 0xF8
+                .db 0xC0, 0xF, 7, 0xFF, 0x7F, 0xC0, 0x80, 0x1F, 0xF, 0xFF, 0xFF
+                .db 0x80, 0, 0x1F, 0xF, 3, 3, 0x80, 0
+spr_3F:         .db 3, 15
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0x1F
+                .db 6, 0x80, 0, 0xE, 0, 0x3F, 0x1F, 0xC0, 0x80, 0x1F, 0xE, 0xBF
+                .db 0x17, 0xE0, 0xC0, 0x3F, 0x1F, 0xFF, 0x99, 0xE0, 0xC0, 0x3F, 0x19
+                .db 0xFF, 0xDE, 0xE0, 0xC0, 0x1F, 6, 0xFE, 0xD8, 0xC0, 0, 0x1F, 0xF
+                .db 0xFF, 0x1E, 0, 0, 0x1F, 0xF, 0xFF, 0x1E, 0, 0, 0x1F, 0xF, 0xFF
+                .db 0xBE, 0, 0, 0x1F, 0xF, 0xFF, 0xBF, 0x80, 0, 0xF, 7, 0xFF, 0xFF
+                .db 0x80, 0, 0xF, 7, 3, 3, 0x80, 0
+spr_40:         .db 3, 15
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0, 0xFC, 0x70, 0, 0
+                .db 1, 0, 0xFE, 0xFC, 0, 0, 1, 0, 0xFF, 0xCE, 0, 0, 3, 0, 0xFF, 0x77
+                .db 0x80, 0, 7, 3, 0xFF, 0xBA, 0, 0, 3, 1, 0xFE, 0xDC, 0, 0, 7, 2
+                .db 0xFF, 0x5E, 0, 0, 7, 3, 0xFF, 0x9F, 0x80, 0, 3, 1, 0xFF, 0xDE
+                .db 0, 0, 3, 1, 0xFF, 0xDE, 0, 0, 7, 3, 0xFF, 0xBF, 0x80, 0, 0xF
+                .db 7, 0xFF, 0xFF, 0xC0, 0x80, 0xF, 7, 3, 2, 0x80, 0
+spr_41:         .db 3, 18
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x38, 0, 0, 0, 0, 0
+                .db 0x7E, 0x38, 0, 0, 6, 0, 0x7F, 0x3E, 0, 0, 0xF, 6, 0xBF, 0x1F
+                .db 0x80, 0, 0x1F, 0xF, 0xDF, 0x83, 0x80, 0, 0xF, 7, 0xEF, 0xC5
+                .db 0x80, 0, 7, 2, 0xFF, 0x66, 0, 0, 3, 1, 0xFF, 0x8F, 0x80, 0, 3
+                .db 1, 0xFF, 0xCF, 0x80, 0, 7, 3, 0xFF, 0xEF, 0x80, 0, 7, 3, 0xFF
+                .db 0xDF, 0x80, 0, 7, 3, 0xFF, 0xCE, 0, 0, 7, 3, 0xFF, 0xF1, 0x80
+                .db 0, 7, 3, 0xF1, 0xC0, 0, 0, 7, 3, 0xC0, 0, 0, 0, 3, 0, 0, 0, 0
                 .db 0
-spr_40:         .db 3, 15                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0, 0xFC, 0x70, 0, 0, 1, 0, 0xFE, 0xFC
-                .db 0, 0, 1, 0, 0xFF, 0xCE, 0, 0, 3, 0, 0xFF, 0x77, 0x80, 0, 7, 3, 0xFF, 0xBA, 0, 0
-                .db 3, 1, 0xFE, 0xDC, 0, 0, 7, 2, 0xFF, 0x5E, 0, 0, 7, 3, 0xFF, 0x9F, 0x80, 0, 3, 1
-                .db 0xFF, 0xDE, 0, 0, 3, 1, 0xFF, 0xDE, 0, 0, 7, 3, 0xFF, 0xBF, 0x80, 0, 0xF, 7, 0xFF
-                .db 0xFF, 0xC0, 0x80, 0xF, 7, 3, 2, 0x80, 0
-spr_41:         .db 3, 18                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x38, 0, 0, 0, 0, 0, 0x7E, 0x38, 0, 0
-                .db 6, 0, 0x7F, 0x3E, 0, 0, 0xF, 6, 0xBF, 0x1F, 0x80, 0, 0x1F, 0xF, 0xDF, 0x83, 0x80
-                .db 0, 0xF, 7, 0xEF, 0xC5, 0x80, 0, 7, 2, 0xFF, 0x66, 0, 0, 3, 1, 0xFF, 0x8F, 0x80, 0
-                .db 3, 1, 0xFF, 0xCF, 0x80, 0, 7, 3, 0xFF, 0xEF, 0x80, 0, 7, 3, 0xFF, 0xDF, 0x80, 0
-                .db 7, 3, 0xFF, 0xCE, 0, 0, 7, 3, 0xFF, 0xF1, 0x80, 0, 7, 3, 0xF1, 0xC0, 0, 0, 7, 3
-                .db 0xC0, 0, 0, 0, 3, 0, 0, 0, 0, 0
-spr_42:         .db 3, 18                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x40, 0, 0, 0, 0, 0, 0xE0, 0x40, 0, 0, 1, 0, 0xF8, 0xE0, 0, 0, 1, 0, 0xFE
-                .db 0xF8, 0, 0, 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7F, 0x26, 0, 0, 1, 0, 0xFF, 0x1A, 0
-                .db 0, 3, 1, 0xFE, 0xBC, 0, 0, 7, 3, 0xFE, 0xBC, 0, 0, 3, 1, 0xFE, 0xBC, 0, 0, 1, 0
-                .db 0xFF, 0x3E, 0, 0, 1, 0, 0xFF, 0xDE, 0, 0, 1, 0, 0xFF, 0xDF, 0x80, 0, 3, 1, 0xFF
-                .db 0xDE, 0, 0, 3, 1, 0xFE, 0xF0, 0, 0, 3, 1, 0xF0, 0xC0, 0, 0, 3, 1, 0xC0, 0, 0, 0
-                .db 1, 0, 0, 0, 0, 0
-spr_43:         .db 3, 18                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x38, 0, 0xC, 0, 0, 0, 0x7C
-                .db 0x38, 0x1E, 0xC, 0, 0, 0x7F, 0x3C, 0x1F, 0xE, 0, 0, 0x3F, 0xF, 0x9F, 0xF, 0x80, 0
-                .db 0xF, 7, 0xCF, 0x85, 0xC0, 0x80, 7, 2, 0x87, 4, 0xE0, 0xC0, 3, 1, 0xCF, 0x87, 0xE0
-                .db 0x40, 7, 3, 0xDF, 0x8F, 0xC0, 0x80, 0xF, 7, 0xFF, 0xCF, 0x80, 0, 0xF, 7, 0xFF, 0xEF
-                .db 0x80, 0, 7, 3, 0xFF, 0xDE, 0, 0, 3, 1, 0xFF, 0xF1, 0x80, 0, 3, 1, 0xF1, 0xC0, 0
+spr_42:         .db 3, 18
+                .db 0, 0, 0x40, 0, 0, 0, 0, 0, 0xE0, 0x40, 0, 0, 1, 0, 0xF8, 0xE0
+                .db 0, 0, 1, 0, 0xFE, 0xF8, 0, 0, 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7F
+                .db 0x26, 0, 0, 1, 0, 0xFF, 0x1A, 0, 0, 3, 1, 0xFE, 0xBC, 0, 0, 7
+                .db 3, 0xFE, 0xBC, 0, 0, 3, 1, 0xFE, 0xBC, 0, 0, 1, 0, 0xFF, 0x3E
+                .db 0, 0, 1, 0, 0xFF, 0xDE, 0, 0, 1, 0, 0xFF, 0xDF, 0x80, 0, 3, 1
+                .db 0xFF, 0xDE, 0, 0, 3, 1, 0xFE, 0xF0, 0, 0, 3, 1, 0xF0, 0xC0, 0
                 .db 0, 3, 1, 0xC0, 0, 0, 0, 1, 0, 0, 0, 0, 0
-spr_44:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xBF, 0xBF, 0x9F, 0x9F, 0xD0, 0xD0, 0xBF, 0xBF, 0xF, 0xF, 0xD0, 0xD0, 0xBE, 0xBE
-                .db 0xC7, 0xC7, 0xD0, 0xD0, 0xBD, 0xBD, 0xDB, 0xDB, 0xD0, 0xD0, 0xBB, 0xBB, 0xBD, 0xBD
-                .db 0xD0, 0xD0, 0xB3, 0xB3, 0x7C, 0x7C, 0xD0, 0xD0, 0xAA, 0xAA, 0xFD, 0xFD, 0x50, 0x50
-                .db 0x99, 0x99, 0xFD, 0xFD, 0x90, 0x90, 0x9B, 0x9B, 0xF9, 0xF9, 0x90, 0x90, 0xAB, 0xAB
-                .db 0xF5, 0xF5, 0x50, 0x50, 0xB3, 0xB3, 0xEC, 0xEC, 0xD0, 0xD0, 0xBB, 0xBB, 0xDD, 0xDD
-                .db 0xD0, 0xD0, 0xBD, 0xBD, 0xBB, 0xBB, 0xD0, 0xD0, 0xBE, 0xBE, 0x37, 0x37, 0xD0, 0xD0
-                .db 0xBF, 0xBF, 0xF, 0xF, 0xD0, 0xD0, 0xBF, 0xBF, 0x9F, 0x9F, 0xD0, 0xD0, 0x9F, 0x9F
-                .db 0xDF, 0xDF, 0x90, 0x90, 0x8F, 0x8F, 0xEF, 0xEF, 0x10, 0x10, 0x97, 0x97, 0xF4, 0xF4
-                .db 0x90, 0x90, 0x9B, 0x9B, 0xF9, 0xF9, 0x90, 0x90, 0x99, 0x99, 0xFD, 0xFD, 0x90, 0x90
-                .db 0x96, 0x96, 0xFE, 0xFE, 0x90, 0x90, 0x8F, 0x8F, 0x7F, 0x7F, 0x10, 0x10, 0x9F, 0x9F
-                .db 0xBF, 0xBF, 0x90, 0x90
-spr_45:         .db 2, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0
-                .db 0, 0xFE, 0xFE, 0x7F, 0x7F, 0xFD, 0xFD, 0xBF, 0xBF, 0xFB, 0xFB, 0xDF, 0xDF, 0xF0
-                .db 0xF0, 0xF, 0xF, 0xEF, 0xEF, 0x77, 0x77, 0xDF, 0xDF, 0xBB, 0xBB, 0x9F, 0x9F, 0xDD
-                .db 0xDD, 0xF, 0xF, 0xEC, 0xEC, 0x37, 0x37, 0xF0, 0xF0, 0xBB, 0xBB, 0xF9, 0xF9, 0xDD
-                .db 0xDD, 0xFB, 0xFB, 0xEE, 0xEE, 0xF7, 0xF7, 0xF0, 0xF0, 0xF, 0xF, 0xFB, 0xFB, 0xDF
-                .db 0xDF, 0xFD, 0xFD, 0xBF, 0xBF, 0xFE, 0xFE, 0x7F, 0x7F, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF
-                .db 0xFF
-spr_46:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF
-                .db 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0xFE, 0xFE, 0x7F, 0x7F, 0, 0, 0xFD, 0xFD
-                .db 0xBF, 0xBF, 0xBD, 0xBD, 0xFB, 0xFB, 0xDF, 0xDF, 0xDB, 0xDB, 0xF0, 0xF0, 0xF, 0xF
-                .db 0xE7, 0xE7, 0xEF, 0xEF, 0x77, 0x77, 0xEF, 0xEF, 0xDF, 0xDF, 0xBB, 0xBB, 0xDF, 0xDF
-                .db 0x9F, 0x9F, 0xDD, 0xDD, 0xBF, 0xBF, 0xF, 0xF, 0xEC, 0xEC, 0x7F, 0x7F, 0x37, 0x37
-                .db 0xF0, 0xF0, 0xFE, 0xFE, 0xBB, 0xBB, 0xF9, 0xF9, 0xFD, 0xFD, 0xDD, 0xDD, 0xFB, 0xFB
-                .db 0xFB, 0xFB, 0xEE, 0xEE, 0xF7, 0xF7, 0xF7, 0xF7, 0xF0, 0xF0, 0xF, 0xF, 0xE7, 0xE7
-                .db 0xFB, 0xFB, 0xDF, 0xDF, 0xDB, 0xDB, 0xFD, 0xFD, 0xBF, 0xBF, 0xBD, 0xBD, 0xFE, 0xFE
-                .db 0x7F, 0x7F, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-spr_47:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x9F, 0x9F, 0xDF, 0xDF, 0x98, 0x98, 0x8F, 0x8F, 0xEF, 0xEF, 4, 4, 0x97, 0x97, 0xF6
-                .db 0xF6, 0xC2, 0xC2, 0x9B, 0x9B, 0xF9, 0xF9, 0xF1, 0xF1, 0x99, 0x99, 0xFC, 0xFC, 0x39
-                .db 0x39, 0x96, 0x96, 0xFE, 0xFE, 0x18, 0x18, 0x8F, 0x8F, 0x7F, 0x7F, 0xC, 0xC, 0x9F
-                .db 0x9F, 0xBF, 0xBF, 0x8D, 0x8D, 0xBF, 0xBF, 0x9F, 0x9F, 0xCB, 0xCB, 0xBF, 0xBF, 0xF
-                .db 0xF, 0xE7, 0xE7, 0xBE, 0xBE, 7, 7, 0xF7, 0xF7, 0xBD, 0xBD, 3, 3, 0xFB, 0xFB, 0xBB
-                .db 0xBB, 0x81, 0x81, 0xFD, 0xFD, 0xB3, 0xB3, 0xC0, 0xC0, 0xFE, 0xFE, 0xAB, 0xAB, 0xE0
-                .db 0xE0, 0x7F, 0x7F, 0x9B, 0x9B, 0xF1, 0xF1, 0xBF, 0xBF, 0x9B, 0x9B, 0xFB, 0xFB, 0xDF
-                .db 0xDF, 0x9B, 0x9B, 0xF7, 0xF7, 0xEF, 0xEF, 0x98, 0x98, 0xF, 0xF, 0xE7, 0xE7, 0x9F
-                .db 0x9F, 0xDF, 0xDF, 0xDB, 0xDB, 0x9F, 0x9F, 0xBF, 0xBF, 0xDB, 0xDB, 0x80, 0x80, 0x7F
-                .db 0x7F, 0, 0, 0x80, 0x80, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-spr_48:         .db 3, 55                                       ; DATA XREF: RAM:sprite_tblo
-                .db 2, 0, 0x80, 0, 0x80, 0, 0x2F, 2, 0xE0, 0x80, 0, 0, 0x7F, 0x2A, 0xFC, 0xA0, 0, 0
-                .db 0xFF, 0x5F, 0xFE, 0xDC, 0, 0, 0xFF, 0xED, 0xFC, 0xB8, 0, 0, 0xFF, 0x6F, 0xF8, 0xB0
-                .db 0, 0, 0xFF, 0x77, 0xF8, 0x70, 0, 0, 0x7F, 0x37, 0xF0, 0x60, 0, 0, 0x7F, 0x3F, 0xF0
-                .db 0x60, 0, 0, 0x7F, 0x3F, 0xF0, 0x60, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F
-                .db 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F
-                .db 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x3B, 0xE0, 0xC0, 0
-                .db 0, 0x7F, 0x37, 0xE0, 0xC0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x2F, 0xF0
-                .db 0xE0, 0, 0, 0x7F, 0x27, 0xF0, 0xE0, 0, 0, 0x7F, 0x1B, 0xF0, 0xE0, 0, 0, 0x7F, 0x3A
-                .db 0xF0, 0xE0, 0, 0, 0x7F, 0x39, 0xF0, 0xE0, 0, 0, 0x3F, 0x1B, 0xF0, 0xE0, 0, 0, 0x3F
-                .db 7, 0xF8, 0xF0, 0, 0, 0x7F, 0x3F, 0xF8, 0xF0, 0, 0, 0xFF, 0x5F, 0xF8, 0xF0, 0, 0
-                .db 0xFF, 0x9F, 0xF8, 0xF0, 0, 0, 0xBF, 0x1F, 0xFC, 0xF8, 0, 0, 0x7F, 0x3F, 0xFC, 0xF8
-                .db 0, 0, 0x7F, 0x3B, 0xFE, 0xBC, 0, 0, 0x7F, 0x3B, 0xFE, 0x9C, 0, 0, 0x7F, 0x33, 0xFF
-                .db 0xCE, 0, 0, 0x7F, 0x33, 0xEF, 0xC7, 0x80, 0, 0x7F, 0x33, 0xE7, 0xC3, 0xC0, 0, 0x77
-                .db 0x23, 0xF3, 0xE1, 0xC0, 0x80, 0xF7, 0x63, 0xF1, 0x60, 0xE0, 0xC0, 0xF7, 0x63, 0xF8
-                .db 0x70, 0xF0, 0x60, 0xF7, 0x63, 0xF8, 0x30, 0x78, 0, 0xE7, 7, 0xFC, 0x38, 0x78, 0x30
-                .db 0xE7, 0x43, 0xBC, 0x18, 0xFC, 0x58, 0xE7, 0xC3, 0x9E, 0xC, 0xFE, 0xC0, 0xCF, 0x87
-                .db 0x9E, 0xC, 0xEF, 0x46, 0xCF, 0x87, 0xBF, 0x16, 0x77, 0x23, 0x8F, 6, 0x3F, 0x16, 0x7E
-                .db 0x21, 0x1F, 0xA, 0x77, 0x23, 0x9E, 0, 0x1F, 0xA, 0x7F, 0x25, 0xDC, 0x80, 0x3F, 0x12
-                .db 0x7F, 0x24, 0xFE, 0xDC, 0x3F, 0x12, 0x3C, 8, 0xFC, 0x60, 0x3F, 0x12, 0x1C, 8, 0x70
-                .db 0x20, 0x3F, 0x12, 0x1C, 8, 0x78, 0x30, 0x17, 2, 8, 0, 0x3C, 0x18, 7, 2, 0, 0, 0x18
-                .db 0, 2, 0, 0, 0, 0, 0
-spr_49:         .db 2, 40                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x50, 0, 1, 0, 0xFC, 0x50, 0xF, 1, 0xFE, 0x54, 0x1F, 0xD, 0xFF, 0xAA, 0xF
-                .db 6, 0xFF, 0xF6, 7, 3, 0xFF, 0x7E, 7, 3, 0xFE, 0x7F, 3, 1, 0xFE, 0xEC, 3, 1, 0xFE
-                .db 0xEC, 3, 1, 0xFE, 0xF4, 7, 1, 0xFE, 0xF4, 0xF, 7, 0xFC, 0xF8, 0x1F, 9, 0xFE, 0xFC
-                .db 0x3B, 0x11, 0xFE, 0xF8, 0x3B, 0x11, 0xFE, 0xC6, 0x77, 0x23, 0xFF, 0xD6, 0x77, 0x23
-                .db 0xFE, 0xD8, 0x2F, 5, 0xFC, 0xB8, 0xF, 5, 0xFC, 0xB8, 0x1F, 9, 0xFC, 0x78, 0x1F, 9
-                .db 0xFC, 0x68, 0x3B, 0x10, 0xFC, 0xE8, 0x73, 0x20, 0xFC, 0xE8, 0x73, 0x21, 0xFE, 0xEC
-                .db 0x27, 3, 0xFE, 0xEC, 7, 3, 0xFE, 0x64, 0xF, 6, 0xFE, 0xE4, 0x3F, 0xD, 0xFE, 0xA4
-                .db 0x7F, 0x39, 0xFE, 0x24, 0xFF, 0x63, 0xFE, 0x24, 0xFF, 0xD2, 0x77, 0x22, 0xFF, 0x96
-                .db 0x77, 0x22, 0x9E, 4, 0x7B, 0x31, 0x3F, 0xE, 0x7F, 0x29, 0xFF, 0x2A, 0x7D, 0x28, 0xFF
-                .db 0xD2, 0xFE, 0x64, 0xFF, 0x14, 0xFE, 0xA4, 0x7F, 0x25, 0xF7, 0x22, 0x75, 0x20, 0x77
+spr_43:         .db 3, 18
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x38, 0
+                .db 0xC, 0, 0, 0, 0x7C, 0x38, 0x1E, 0xC, 0, 0, 0x7F, 0x3C, 0x1F
+                .db 0xE, 0, 0, 0x3F, 0xF, 0x9F, 0xF, 0x80, 0, 0xF, 7, 0xCF, 0x85
+                .db 0xC0, 0x80, 7, 2, 0x87, 4, 0xE0, 0xC0, 3, 1, 0xCF, 0x87, 0xE0
+                .db 0x40, 7, 3, 0xDF, 0x8F, 0xC0, 0x80, 0xF, 7, 0xFF, 0xCF, 0x80
+                .db 0, 0xF, 7, 0xFF, 0xEF, 0x80, 0, 7, 3, 0xFF, 0xDE, 0, 0, 3, 1
+                .db 0xFF, 0xF1, 0x80, 0, 3, 1, 0xF1, 0xC0, 0, 0, 3, 1, 0xC0, 0, 0
+                .db 0, 1, 0, 0, 0, 0, 0
+spr_44:         .db 3, 24
+                .db 0xBF, 0xBF, 0x9F, 0x9F, 0xD0, 0xD0, 0xBF, 0xBF, 0xF, 0xF, 0xD0
+                .db 0xD0, 0xBE, 0xBE, 0xC7, 0xC7, 0xD0, 0xD0, 0xBD, 0xBD, 0xDB, 0xDB
+                .db 0xD0, 0xD0, 0xBB, 0xBB, 0xBD, 0xBD, 0xD0, 0xD0, 0xB3, 0xB3, 0x7C
+                .db 0x7C, 0xD0, 0xD0, 0xAA, 0xAA, 0xFD, 0xFD, 0x50, 0x50, 0x99, 0x99
+                .db 0xFD, 0xFD, 0x90, 0x90, 0x9B, 0x9B, 0xF9, 0xF9, 0x90, 0x90, 0xAB
+                .db 0xAB, 0xF5, 0xF5, 0x50, 0x50, 0xB3, 0xB3, 0xEC, 0xEC, 0xD0, 0xD0
+                .db 0xBB, 0xBB, 0xDD, 0xDD, 0xD0, 0xD0, 0xBD, 0xBD, 0xBB, 0xBB, 0xD0
+                .db 0xD0, 0xBE, 0xBE, 0x37, 0x37, 0xD0, 0xD0, 0xBF, 0xBF, 0xF, 0xF
+                .db 0xD0, 0xD0, 0xBF, 0xBF, 0x9F, 0x9F, 0xD0, 0xD0, 0x9F, 0x9F, 0xDF
+                .db 0xDF, 0x90, 0x90, 0x8F, 0x8F, 0xEF, 0xEF, 0x10, 0x10, 0x97, 0x97
+                .db 0xF4, 0xF4, 0x90, 0x90, 0x9B, 0x9B, 0xF9, 0xF9, 0x90, 0x90, 0x99
+                .db 0x99, 0xFD, 0xFD, 0x90, 0x90, 0x96, 0x96, 0xFE, 0xFE, 0x90, 0x90
+                .db 0x8F, 0x8F, 0x7F, 0x7F, 0x10, 0x10, 0x9F, 0x9F, 0xBF, 0xBF, 0x90
+                .db 0x90
+spr_45:         .db 2, 24
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF
+                .db 0xFF, 0, 0, 0, 0, 0xFE, 0xFE, 0x7F, 0x7F, 0xFD, 0xFD, 0xBF, 0xBF
+                .db 0xFB, 0xFB, 0xDF, 0xDF, 0xF0, 0xF0, 0xF, 0xF, 0xEF, 0xEF, 0x77
+                .db 0x77, 0xDF, 0xDF, 0xBB, 0xBB, 0x9F, 0x9F, 0xDD, 0xDD, 0xF, 0xF
+                .db 0xEC, 0xEC, 0x37, 0x37, 0xF0, 0xF0, 0xBB, 0xBB, 0xF9, 0xF9, 0xDD
+                .db 0xDD, 0xFB, 0xFB, 0xEE, 0xEE, 0xF7, 0xF7, 0xF0, 0xF0, 0xF, 0xF
+                .db 0xFB, 0xFB, 0xDF, 0xDF, 0xFD, 0xFD, 0xBF, 0xBF, 0xFE, 0xFE, 0x7F
+                .db 0x7F, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF
+spr_46:         .db 3, 24
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0
+                .db 0xFE, 0xFE, 0x7F, 0x7F, 0, 0, 0xFD, 0xFD, 0xBF, 0xBF, 0xBD, 0xBD
+                .db 0xFB, 0xFB, 0xDF, 0xDF, 0xDB, 0xDB, 0xF0, 0xF0, 0xF, 0xF, 0xE7
+                .db 0xE7, 0xEF, 0xEF, 0x77, 0x77, 0xEF, 0xEF, 0xDF, 0xDF, 0xBB, 0xBB
+                .db 0xDF, 0xDF, 0x9F, 0x9F, 0xDD, 0xDD, 0xBF, 0xBF, 0xF, 0xF, 0xEC
+                .db 0xEC, 0x7F, 0x7F, 0x37, 0x37, 0xF0, 0xF0, 0xFE, 0xFE, 0xBB, 0xBB
+                .db 0xF9, 0xF9, 0xFD, 0xFD, 0xDD, 0xDD, 0xFB, 0xFB, 0xFB, 0xFB, 0xEE
+                .db 0xEE, 0xF7, 0xF7, 0xF7, 0xF7, 0xF0, 0xF0, 0xF, 0xF, 0xE7, 0xE7
+                .db 0xFB, 0xFB, 0xDF, 0xDF, 0xDB, 0xDB, 0xFD, 0xFD, 0xBF, 0xBF, 0xBD
+                .db 0xBD, 0xFE, 0xFE, 0x7F, 0x7F, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xFF
+spr_47:         .db 3, 24
+                .db 0x9F, 0x9F, 0xDF, 0xDF, 0x98, 0x98, 0x8F, 0x8F, 0xEF, 0xEF, 4
+                .db 4, 0x97, 0x97, 0xF6, 0xF6, 0xC2, 0xC2, 0x9B, 0x9B, 0xF9, 0xF9
+                .db 0xF1, 0xF1, 0x99, 0x99, 0xFC, 0xFC, 0x39, 0x39, 0x96, 0x96, 0xFE
+                .db 0xFE, 0x18, 0x18, 0x8F, 0x8F, 0x7F, 0x7F, 0xC, 0xC, 0x9F, 0x9F
+                .db 0xBF, 0xBF, 0x8D, 0x8D, 0xBF, 0xBF, 0x9F, 0x9F, 0xCB, 0xCB, 0xBF
+                .db 0xBF, 0xF, 0xF, 0xE7, 0xE7, 0xBE, 0xBE, 7, 7, 0xF7, 0xF7, 0xBD
+                .db 0xBD, 3, 3, 0xFB, 0xFB, 0xBB, 0xBB, 0x81, 0x81, 0xFD, 0xFD, 0xB3
+                .db 0xB3, 0xC0, 0xC0, 0xFE, 0xFE, 0xAB, 0xAB, 0xE0, 0xE0, 0x7F, 0x7F
+                .db 0x9B, 0x9B, 0xF1, 0xF1, 0xBF, 0xBF, 0x9B, 0x9B, 0xFB, 0xFB, 0xDF
+                .db 0xDF, 0x9B, 0x9B, 0xF7, 0xF7, 0xEF, 0xEF, 0x98, 0x98, 0xF, 0xF
+                .db 0xE7, 0xE7, 0x9F, 0x9F, 0xDF, 0xDF, 0xDB, 0xDB, 0x9F, 0x9F, 0xBF
+                .db 0xBF, 0xDB, 0xDB, 0x80, 0x80, 0x7F, 0x7F, 0, 0, 0x80, 0x80, 0
+                .db 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+spr_48:         .db 3, 55
+                .db 2, 0, 0x80, 0, 0x80, 0, 0x2F, 2, 0xE0, 0x80, 0, 0, 0x7F, 0x2A
+                .db 0xFC, 0xA0, 0, 0, 0xFF, 0x5F, 0xFE, 0xDC, 0, 0, 0xFF, 0xED, 0xFC
+                .db 0xB8, 0, 0, 0xFF, 0x6F, 0xF8, 0xB0, 0, 0, 0xFF, 0x77, 0xF8, 0x70
+                .db 0, 0, 0x7F, 0x37, 0xF0, 0x60, 0, 0, 0x7F, 0x3F, 0xF0, 0x60, 0
+                .db 0, 0x7F, 0x3F, 0xF0, 0x60, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0
+                .db 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F
+                .db 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x3F
+                .db 0xE0, 0xC0, 0, 0, 0x7F, 0x3B, 0xE0, 0xC0, 0, 0, 0x7F, 0x37, 0xE0
+                .db 0xC0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x2F, 0xF0, 0xE0
+                .db 0, 0, 0x7F, 0x27, 0xF0, 0xE0, 0, 0, 0x7F, 0x1B, 0xF0, 0xE0, 0
+                .db 0, 0x7F, 0x3A, 0xF0, 0xE0, 0, 0, 0x7F, 0x39, 0xF0, 0xE0, 0, 0
+                .db 0x3F, 0x1B, 0xF0, 0xE0, 0, 0, 0x3F, 7, 0xF8, 0xF0, 0, 0, 0x7F
+                .db 0x3F, 0xF8, 0xF0, 0, 0, 0xFF, 0x5F, 0xF8, 0xF0, 0, 0, 0xFF, 0x9F
+                .db 0xF8, 0xF0, 0, 0, 0xBF, 0x1F, 0xFC, 0xF8, 0, 0, 0x7F, 0x3F, 0xFC
+                .db 0xF8, 0, 0, 0x7F, 0x3B, 0xFE, 0xBC, 0, 0, 0x7F, 0x3B, 0xFE, 0x9C
+                .db 0, 0, 0x7F, 0x33, 0xFF, 0xCE, 0, 0, 0x7F, 0x33, 0xEF, 0xC7, 0x80
+                .db 0, 0x7F, 0x33, 0xE7, 0xC3, 0xC0, 0, 0x77, 0x23, 0xF3, 0xE1, 0xC0
+                .db 0x80, 0xF7, 0x63, 0xF1, 0x60, 0xE0, 0xC0, 0xF7, 0x63, 0xF8, 0x70
+                .db 0xF0, 0x60, 0xF7, 0x63, 0xF8, 0x30, 0x78, 0, 0xE7, 7, 0xFC, 0x38
+                .db 0x78, 0x30, 0xE7, 0x43, 0xBC, 0x18, 0xFC, 0x58, 0xE7, 0xC3, 0x9E
+                .db 0xC, 0xFE, 0xC0, 0xCF, 0x87, 0x9E, 0xC, 0xEF, 0x46, 0xCF, 0x87
+                .db 0xBF, 0x16, 0x77, 0x23, 0x8F, 6, 0x3F, 0x16, 0x7E, 0x21, 0x1F
+                .db 0xA, 0x77, 0x23, 0x9E, 0, 0x1F, 0xA, 0x7F, 0x25, 0xDC, 0x80
+                .db 0x3F, 0x12, 0x7F, 0x24, 0xFE, 0xDC, 0x3F, 0x12, 0x3C, 8, 0xFC
+                .db 0x60, 0x3F, 0x12, 0x1C, 8, 0x70, 0x20, 0x3F, 0x12, 0x1C, 8, 0x78
+                .db 0x30, 0x17, 2, 8, 0, 0x3C, 0x18, 7, 2, 0, 0, 0x18, 0, 2, 0, 0
+                .db 0, 0, 0
+spr_49:         .db 2, 40
+                .db 0, 0, 0x50, 0, 1, 0, 0xFC, 0x50, 0xF, 1, 0xFE, 0x54, 0x1F, 0xD
+                .db 0xFF, 0xAA, 0xF, 6, 0xFF, 0xF6, 7, 3, 0xFF, 0x7E, 7, 3, 0xFE
+                .db 0x7F, 3, 1, 0xFE, 0xEC, 3, 1, 0xFE, 0xEC, 3, 1, 0xFE, 0xF4, 7
+                .db 1, 0xFE, 0xF4, 0xF, 7, 0xFC, 0xF8, 0x1F, 9, 0xFE, 0xFC, 0x3B
+                .db 0x11, 0xFE, 0xF8, 0x3B, 0x11, 0xFE, 0xC6, 0x77, 0x23, 0xFF, 0xD6
+                .db 0x77, 0x23, 0xFE, 0xD8, 0x2F, 5, 0xFC, 0xB8, 0xF, 5, 0xFC, 0xB8
+                .db 0x1F, 9, 0xFC, 0x78, 0x1F, 9, 0xFC, 0x68, 0x3B, 0x10, 0xFC, 0xE8
+                .db 0x73, 0x20, 0xFC, 0xE8, 0x73, 0x21, 0xFE, 0xEC, 0x27, 3, 0xFE
+                .db 0xEC, 7, 3, 0xFE, 0x64, 0xF, 6, 0xFE, 0xE4, 0x3F, 0xD, 0xFE
+                .db 0xA4, 0x7F, 0x39, 0xFE, 0x24, 0xFF, 0x63, 0xFE, 0x24, 0xFF, 0xD2
+                .db 0x77, 0x22, 0xFF, 0x96, 0x77, 0x22, 0x9E, 4, 0x7B, 0x31, 0x3F
+                .db 0xE, 0x7F, 0x29, 0xFF, 0x2A, 0x7D, 0x28, 0xFF, 0xD2, 0xFE, 0x64
+                .db 0xFF, 0x14, 0xFE, 0xA4, 0x7F, 0x25, 0xF7, 0x22, 0x75, 0x20, 0x77
                 .db 0x22, 0x20, 0, 0x22, 0
-spr_4A:         .db 4, 25                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0xF, 0, 0xF0, 0, 0, 0, 0, 0, 0xFF, 0xD, 0xFF, 0xD0, 0, 0, 1, 0, 0xFF, 0xBD
-                .db 0xFF, 0xDF, 0xC0, 0, 7, 1, 0xFF, 0xBD, 0xFF, 0xDF, 0xE0, 0x40, 0xF, 5, 0xFF, 0xBD
-                .db 0xFF, 0xEF, 0xF8, 0x60, 0x1F, 0xC, 0xFF, 0xD9, 0xFF, 0xEF, 0xFC, 0x78, 0x1F, 0xC
-                .db 0xFF, 0xD6, 0xFF, 0xEE, 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xB6, 0xFF, 0xEE, 0xFC, 0x50
-                .db 0x1F, 0xE, 0xFF, 0xBA, 0xFF, 0xF6, 0xF8, 0xF0, 0x3F, 0xD, 0xFF, 0xD9, 0xFF, 0xF6
-                .db 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xDD, 0xFF, 0xEE, 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xED
-                .db 0xFF, 0xDF, 0xFC, 0x50, 0x3F, 0x1D, 0xFF, 0xED, 0xFF, 0xEF, 0xFC, 0x58, 0x3F, 0x1B
-                .db 0xFF, 0xD0, 0xFF, 0xF, 0xFC, 0x58, 0x3F, 0xB, 0xFF, 0xF, 0xFF, 0xF0, 0xFC, 0xF8
-                .db 0x1F, 8, 0xFF, 0xF8, 0xFF, 0x1F, 0xFC, 0x38, 0x1F, 0xB, 0xFF, 0xC7, 0xFF, 0xE3, 0xFC
-                .db 0xD8, 0x1F, 7, 0xFF, 0x3C, 0xFF, 0x3D, 0xFC, 0xE8, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6
-                .db 0xFC, 0xF0, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6, 0xF8, 0xF0, 0x1F, 7, 0xFF, 0x3C, 0xFF
-                .db 0x3D, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xC7, 0xFF, 0xE3, 0xF0, 0xC0, 7, 0, 0xFF, 0xF8, 0xFF
-                .db 0x1F, 0xE0, 0, 1, 0, 0xFF, 0xF, 0xFF, 0xF0, 0x80, 0, 0, 0, 0x1F, 0, 0xF8, 0, 0, 0
-spr_4B:         .db 2, 43                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x42, 0x42, 1, 1, 0x51, 0x51, 6, 6, 0xE9, 0xE9, 3, 3, 0xF1, 0xF1, 0x29, 0x29
-                .db 0xB1, 0xB1, 0x7C, 0x7C, 0xB1, 0xB1, 0x38, 0x38, 0xB1, 0xB1, 8, 8, 0xB1, 0xB1, 8
-                .db 8, 0xB1, 0xB1, 8, 8, 0xF3, 0xF3, 0x18, 0x18, 0xE3, 0xE3, 0x18, 0x18, 0xE3, 0xE3
-                .db 0x18, 0x18, 0xE3, 0xE3, 0x39, 0x39, 0xE3, 0xE3, 0x59, 0x59, 0xE3, 0xE3, 0x59, 0x59
-                .db 0xE3, 0xE3, 0x19, 0x19, 0xD3, 0xD3, 0x19, 0x19, 0xD3, 0xD3, 0x19, 0x19, 0xCA, 0xCA
-                .db 0x39, 0x39, 0xCA, 0xCA, 0x29, 0x29, 0x42, 0x42, 0x29, 0x29, 0x42, 0x42, 0x29, 0x29
-                .db 0x42, 0x42, 0x29, 0x29, 0x64, 0x64, 0x49, 0x49, 0x64, 0x64, 0x52, 0x49, 0xE4, 0xE4
-                .db 0x52, 0x52, 0xB2, 0xB2, 0x52, 0x52, 0xB2, 0xB2, 0x43, 0x43, 0x9A, 0x9A, 0x43, 0x43
-                .db 0x98, 0x98, 0x43, 0x43, 0x18, 0x18, 7, 7, 0xC, 0xC, 0xB, 0xB, 0xC, 0xC, 0x13, 0x13
-                .db 4, 4, 0x17, 0x17, 4, 4, 0x27, 0x17, 0x8E, 0x8E, 0x2B, 0x2B, 0x8A, 0x8A, 0x4A, 0x4A
-                .db 0x8A, 0x8A, 0x52, 0x52, 0x92, 0x92, 0x12, 0x12, 0x92, 0x92, 0x24, 0x24, 0x92, 0x92
+spr_4A:         .db 4, 25
+                .db 0, 0, 0xF, 0, 0xF0, 0, 0, 0, 0, 0, 0xFF, 0xD, 0xFF, 0xD0, 0
+                .db 0, 1, 0, 0xFF, 0xBD, 0xFF, 0xDF, 0xC0, 0, 7, 1, 0xFF, 0xBD, 0xFF
+                .db 0xDF, 0xE0, 0x40, 0xF, 5, 0xFF, 0xBD, 0xFF, 0xEF, 0xF8, 0x60
+                .db 0x1F, 0xC, 0xFF, 0xD9, 0xFF, 0xEF, 0xFC, 0x78, 0x1F, 0xC, 0xFF
+                .db 0xD6, 0xFF, 0xEE, 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xB6, 0xFF, 0xEE
+                .db 0xFC, 0x50, 0x1F, 0xE, 0xFF, 0xBA, 0xFF, 0xF6, 0xF8, 0xF0, 0x3F
+                .db 0xD, 0xFF, 0xD9, 0xFF, 0xF6, 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xDD
+                .db 0xFF, 0xEE, 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xED, 0xFF, 0xDF, 0xFC
+                .db 0x50, 0x3F, 0x1D, 0xFF, 0xED, 0xFF, 0xEF, 0xFC, 0x58, 0x3F, 0x1B
+                .db 0xFF, 0xD0, 0xFF, 0xF, 0xFC, 0x58, 0x3F, 0xB, 0xFF, 0xF, 0xFF
+                .db 0xF0, 0xFC, 0xF8, 0x1F, 8, 0xFF, 0xF8, 0xFF, 0x1F, 0xFC, 0x38
+                .db 0x1F, 0xB, 0xFF, 0xC7, 0xFF, 0xE3, 0xFC, 0xD8, 0x1F, 7, 0xFF
+                .db 0x3C, 0xFF, 0x3D, 0xFC, 0xE8, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6
+                .db 0xFC, 0xF0, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6, 0xF8, 0xF0, 0x1F
+                .db 7, 0xFF, 0x3C, 0xFF, 0x3D, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xC7, 0xFF
+                .db 0xE3, 0xF0, 0xC0, 7, 0, 0xFF, 0xF8, 0xFF, 0x1F, 0xE0, 0, 1, 0
+                .db 0xFF, 0xF, 0xFF, 0xF0, 0x80, 0, 0, 0, 0x1F, 0, 0xF8, 0, 0, 0
+spr_4B:         .db 2, 43
+                .db 0, 0, 0x42, 0x42, 1, 1, 0x51, 0x51, 6, 6, 0xE9, 0xE9, 3, 3, 0xF1
+                .db 0xF1, 0x29, 0x29, 0xB1, 0xB1, 0x7C, 0x7C, 0xB1, 0xB1, 0x38, 0x38
+                .db 0xB1, 0xB1, 8, 8, 0xB1, 0xB1, 8, 8, 0xB1, 0xB1, 8, 8, 0xF3, 0xF3
+                .db 0x18, 0x18, 0xE3, 0xE3, 0x18, 0x18, 0xE3, 0xE3, 0x18, 0x18, 0xE3
+                .db 0xE3, 0x39, 0x39, 0xE3, 0xE3, 0x59, 0x59, 0xE3, 0xE3, 0x59, 0x59
+                .db 0xE3, 0xE3, 0x19, 0x19, 0xD3, 0xD3, 0x19, 0x19, 0xD3, 0xD3, 0x19
+                .db 0x19, 0xCA, 0xCA, 0x39, 0x39, 0xCA, 0xCA, 0x29, 0x29, 0x42, 0x42
+                .db 0x29, 0x29, 0x42, 0x42, 0x29, 0x29, 0x42, 0x42, 0x29, 0x29, 0x64
+                .db 0x64, 0x49, 0x49, 0x64, 0x64, 0x52, 0x49, 0xE4, 0xE4, 0x52, 0x52
+                .db 0xB2, 0xB2, 0x52, 0x52, 0xB2, 0xB2, 0x43, 0x43, 0x9A, 0x9A, 0x43
+                .db 0x43, 0x98, 0x98, 0x43, 0x43, 0x18, 0x18, 7, 7, 0xC, 0xC, 0xB
+                .db 0xB, 0xC, 0xC, 0x13, 0x13, 4, 4, 0x17, 0x17, 4, 4, 0x27, 0x17
+                .db 0x8E, 0x8E, 0x2B, 0x2B, 0x8A, 0x8A, 0x4A, 0x4A, 0x8A, 0x8A, 0x52
+                .db 0x52, 0x92, 0x92, 0x12, 0x12, 0x92, 0x92, 0x24, 0x24, 0x92, 0x92
                 .db 0x24, 0x24, 0, 0, 4, 4, 0, 0
-spr_4C:         .db 2, 53                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x41, 0x41, 0x40, 0x40, 0x22, 0x22, 0x52, 0x52, 0xB2, 0xB2, 0xA2, 0xA2, 0xD6, 0xD6
-                .db 0xD0, 0xD0, 0x7F, 0x7F, 0xE0, 0xE0, 0x3E, 0x3E, 0xC2, 0xC2, 0x36, 0x36, 0x94, 0x94
-                .db 0x3A, 0x3A, 0x9C, 0x9C, 0x3B, 0x3B, 0x9C, 0x9C, 0x1B, 0x1B, 0xDE, 0xDE, 0x1D, 0x1D
-                .db 0xDC, 0xDC, 0x1D, 0x1D, 0xDC, 0xDC, 0x1D, 0x1D, 0xDE, 0xDE, 0x1D, 0x1D, 0xDC, 0xDC
-                .db 0x1F, 0x1F, 0x8C, 0x8C, 0x1F, 0x1F, 0x8C, 0x8C, 0x1F, 0x1F, 0x9C, 0x9C, 0x1F, 0x1F
-                .db 0x9E, 0x9E, 0x1D, 0x1D, 0xA6, 0xA6, 0x1D, 0x1D, 0xA6, 0xA6, 0x1D, 0x1D, 0xAE, 0xAE
-                .db 0x1D, 0x1D, 0xAD, 0xAD, 0x1D, 0x1D, 0x8D, 0x8D, 0x15, 0x15, 0x8D, 0x8D, 0xE, 0xE
-                .db 0x8C, 0x8C, 0x1E, 0x1E, 0xCC, 0xCC, 0x3E, 0x3E, 0xD4, 0xD4, 0x37, 0x37, 0x44, 0x44
-                .db 0x2F, 0x2F, 0xE4, 0xE4, 0x2F, 0x2F, 0xE4, 0xE4, 0xD, 0xD, 0xF0, 0xF0, 0x1D, 0x1D
-                .db 0xF8, 0xF8, 0x1D, 0x1D, 0xDC, 0xDC, 0x1D, 0x1D, 0xDC, 0xDC, 0x19, 0x19, 0xDA, 0xDA
-                .db 0x30, 0x30, 0xCD, 0xCD, 0x30, 0x30, 0xCC, 0xCC, 0x30, 0x30, 0xCC, 0xCC, 0x70, 0x70
-                .db 0xC6, 0xC6, 0x58, 0x58, 0xC6, 0xC6, 0x18, 0x18, 0xC6, 0xC6, 0x18, 0x18, 0xE2, 0xE2
-                .db 0x18, 0x18, 0xE2, 0xE2, 0x14, 0x14, 0x53, 0x53, 0x14, 0x14, 0x51, 0x51, 0x12, 0x12
-                .db 0x49, 0x49, 0x12, 0x12, 0x49, 0x49, 0x10, 0x10, 1, 1, 8, 8, 0, 0, 8, 8, 0, 0, 8
-                .db 8, 0, 0, 4, 4, 0, 0, 4, 4, 0, 0
-spr_4D:         .db 2, 53                                       ; DATA XREF: RAM:sprite_tblo
-                .db 1, 1, 0x24, 0x24, 1, 1, 0xA5, 0xA5, 4, 4, 0xAA, 0xAA, 0xA, 0xA, 0xED, 0xED, 0xAF
-                .db 0xAF, 0x7F, 0x7F, 0x5B, 0x5B, 0xBE, 0xBE, 0x73, 0x73, 0x3C, 0x3C, 0x73, 0x73, 0x1C
-                .db 0x1C, 0x71, 0x71, 0x1C, 0x1C, 0x31, 0x31, 0x1C, 0x1C, 0x31, 0x31, 0x9C, 0x9C, 0x31
-                .db 0x31, 0xBC, 0xBC, 0x39, 0x39, 0xBC, 0xBC, 0x35, 0x35, 0xBC, 0xBC, 0x35, 0x35, 0xBC
-                .db 0xBC, 0x31, 0x31, 0xFA, 0xFA, 0x31, 0x31, 0xEA, 0xEA, 0x39, 0x39, 0x69, 0x69, 0x39
-                .db 0x39, 0x69, 0x69, 0x39, 0x39, 0xE9, 0xE9, 0x39, 0x39, 0xB9, 0xB9, 0x59, 0x59, 0xB9
-                .db 0xB9, 0x5D, 0x5D, 0xB8, 0xB8, 0x95, 0x95, 0xB8, 0xB8, 0x95, 0x95, 0xB8, 0xB8, 0xB5
-                .db 0xB5, 0xB8, 0xB8, 0x25, 0x25, 0x3C, 0x3C, 0x27, 0x27, 0x7C, 0x7C, 0x67, 0x67, 0x7A
-                .db 0x7A, 0x43, 0x43, 0x7A, 0x7A, 0x47, 0x47, 0x7A, 0x7A, 0x46, 0x46, 0xBA, 0xBA, 0x46
-                .db 0x46, 0xB8, 0xB8, 0x26, 0x26, 0xB8, 0xB8, 0x26, 0x26, 0x3C, 0x3C, 0x2E, 0x2E, 0x3C
-                .db 0x3C, 0x2C, 0x2C, 0x74, 0x74, 0x2C, 0x2C, 0x76, 0x76, 0x1A, 0x1A, 0xB2, 0xB2, 0x1A
-                .db 0x1A, 0xB2, 0xB2, 0x29, 0x29, 0x31, 0x31, 0x49, 0x49, 0x31, 0x31, 0x52, 0x52, 0xB8
-                .db 0xB8, 0x92, 0x92, 0xD8, 0xD8, 0x92, 0x92, 0x54, 0x54, 0x14, 0x14, 0x94, 0x94, 0x14
-                .db 0x14, 0xB4, 0xB4, 4, 4, 0x32, 0x32, 0, 0, 0x52, 0x52, 0, 0, 0x50, 0x50, 0, 0, 0x90
-                .db 0x90, 0, 0, 0x90, 0x90, 0, 0, 0x10, 0x10
-spr_4E:         .db 2, 50                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x50, 0x50, 0, 0, 0x70, 0x70, 5, 5, 0x27, 0x27, 0x2A, 0x2A, 0x2E, 0x2E, 0x57
-                .db 0x57, 0xAE, 0xAE, 0x7F, 0x7F, 0x26, 0x26, 0x3B, 0x3B, 0x26, 0x26, 0x1A, 0x1A, 0x64
-                .db 0x64, 0x1A, 0x1A, 0x64, 0x64, 0x16, 0x16, 0xA4, 0xA4, 0x16, 0x16, 0xA4, 0xA4, 0x36
-                .db 0x36, 0xB4, 0xB4, 0x56, 0x56, 0x34, 0x34, 0x5C, 0x5C, 0x2C, 0x2C, 0x1C, 0x1C, 0x24
-                .db 0x24, 0x1C, 0x1C, 0x24, 0x24, 0x3E, 0x3E, 0x2A, 0x2A, 0x3E, 0x3E, 0x4A, 0x4A, 0x77
-                .db 0x77, 0x4A, 0x4A, 0x57, 0x57, 8, 8, 0xD6, 0xD6, 0x89, 0x89, 0x96, 0x96, 0x89, 0x89
-                .db 0xB5, 0xB5, 0x41, 0x41, 0xA5, 0xA5, 0x21, 0x21, 0x3C, 0x3C, 0xA1, 0xA1, 0x3A, 0x3A
-                .db 0x91, 0x91, 0x7A, 0x7A, 0x50, 0x50, 0x5A, 0x5A, 0x48, 0x48, 0x59, 0x59, 0x24, 0x24
-                .db 0x59, 0x59, 0x22, 0x22, 0x59, 0x59, 0x11, 0x11, 0x59, 0x59, 0x10, 0x10, 0x58, 0x58
-                .db 0x88, 0x88, 0x98, 0x98, 0x88, 0x88, 0x94, 0x94, 0x84, 0x84, 0x94, 0x94, 0x44, 0x44
-                .db 0x14, 0x14, 0x40, 0x40, 0x14, 0x14, 0x40, 0x40, 0x14, 0x14, 0x40, 0x40, 0x14, 0x14
-                .db 0x20, 0x20, 0x12, 0x12, 0x20, 0x20, 0x12, 0x12, 0x20, 0x20, 0x12, 0x12, 0x10, 0x10
-                .db 0x12, 0x12, 0x10, 0x10, 0x12, 0x12, 0x10, 0x10, 0x12, 0x12, 8, 8, 0x12, 0x12, 8
-                .db 8, 0x12, 0x12, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0
-spr_4F:         .db 2, 26                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x40, 0x40, 0, 0, 0x70, 0x70, 0, 0, 0x7C, 0x7C, 0, 0, 0x7F, 0x7F, 0, 0, 0x7F, 0x7F
-                .db 0x80, 0x80, 0x3F, 0x3F, 0xB0, 0xB0, 0xCF, 0xCF, 0xBC, 0xBC, 0xF3, 0xF3, 0xBF, 0xBF
-                .db 0xFC, 0xFC, 0xBF, 0xBF, 0xFF, 0xFF, 0x3F, 0x3F, 0xFF, 0xFF, 0xBF, 0xBF, 0xFF, 0xFF
-                .db 0xBF, 0xBF, 0x3F, 0x3F, 0xBF, 0xBF, 0x4F, 0x4F, 0xBF, 0xBF, 0x73, 0x73, 0x3F, 0x3F
-                .db 0x7C, 0x7C, 0x3F, 0x3F, 0x1D, 0x1D, 0xCF, 0xCF, 0x65, 0x65, 0xF3, 0xF3, 0x75, 0x75
-                .db 0xFC, 0xFC, 0x38, 0x38, 0xFF, 0xFF, 7, 7, 0x3F, 0x3F, 0x1F, 0x1F, 0xCF, 0xCF, 7
-                .db 7, 0xF3, 0xF3, 1, 1, 0xFD, 0xFD, 0, 0, 0x7E, 0x7E, 0, 0, 0x18, 0x18
-spr_50:         .db 2, 31                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x60, 0x60, 0, 0, 0x70, 0x70, 0, 0, 4, 4, 0, 0, 0x72, 0x72, 0, 0, 0x7B, 0x7B, 0
-                .db 0, 0x78, 0x78, 0x5C, 0x5C, 0x78, 0x78, 0xEE, 0xEE, 0x31, 0x31, 0xCE, 0xCE, 1, 1
-                .db 0xC8, 0xC8, 0, 0, 0xE6, 0xE6, 0x30, 0x30, 0x26, 0x26, 0x3E, 0x3E, 3, 3, 0x1E, 0x1E
-                .db 0x30, 0x30, 0xCF, 0xCF, 0x7C, 0x7C, 0xC7, 0xC7, 0x3E, 0x3E, 0xE3, 0xE3, 0x87, 0x87
-                .db 0xF0, 0xF0, 0x30, 0x30, 0x1B, 0x1B, 0x7E, 0x7E, 0xE9, 0xE9, 0x7E, 0x7E, 0x74, 0x74
-                .db 0x7F, 0x7F, 0x70, 0x70, 0x7F, 0x7F, 0x7F, 0x7F, 0x3F, 0x3F, 0x3E, 0x3E, 0xBF, 0xBF
-                .db 0x3D, 0x3D, 0xBF, 0xBF, 0x13, 0x13, 0xBF, 0xBF, 0xF, 0xF, 0x9F, 0x9F, 6, 6, 0x27
-                .db 0x27, 1, 1, 0xF9, 0xF9, 7, 7, 0xFE, 0xFE, 1, 1, 0xF8, 0xF8, 0, 0, 0x60, 0x60
-spr_51:         .db 2, 33                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0x34, 0x34, 0, 0, 0xF7, 0xF7, 0, 0, 0xF7, 0xF7, 0xC0, 0xC0, 0xC9, 0xC9, 0xF0, 0xF0
-                .db 0x3E, 0x3E, 0x7C, 0x7C, 0xFF, 0xFF, 0x9F, 0x9F, 0xF0, 0xF0, 0x27, 0x27, 0xCF, 0xCF
-                .db 0xC9, 0xC9, 0xBE, 0xBE, 0xF7, 0xF7, 0x7C, 0x7C, 0x7A, 0x7A, 0xFC, 0xFC, 0x7C, 0x7C
-                .db 0xEC, 0xEC, 0x6C, 0x6C, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC
-                .db 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64
-                .db 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC
-                .db 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64
-                .db 0x8F, 0x8F, 0xA4, 0xA4, 0x76, 0x76, 0xE4, 0xE4, 0xBF, 0xBF, 0x78, 0x78, 0x3D, 0x3D
-                .db 0xFC, 0xFC, 0x53, 0x53, 0x54, 0x54, 0x3D, 0x3D, 0xA8, 0xA8, 7, 7, 0xF0, 0xF0, 0
-                .db 0, 0xE0, 0xE0
-spr_52:         .db 2, 24                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xC0, 0xC0, 0, 0, 0xF0, 0xF0, 0, 0, 0xFC, 0xFC, 0, 0, 0x7E, 0x7E, 0, 0, 0x3E, 0x3E
-                .db 0xC0, 0xC0, 0x46, 0x46, 0xF0, 0xF0, 0xF8, 0xF8, 0xF4, 0xF4, 0xFE, 0xFE, 0xF6, 0xF6
-                .db 0x1E, 0x1E, 0xF3, 0xF3, 0x6C, 0x6C, 0x34, 0x34, 0xF1, 0xF1, 0x8E, 0x8E, 0xFB, 0xFB
-                .db 0xFF, 0xFF, 0xBD, 0xBD, 0xFF, 0xFF, 0xDE, 0xDE, 0xFF, 0xFF, 0xEF, 0xEF, 0x7F, 0x7F
-                .db 0xF7, 0xF7, 0x8E, 0x8E, 0x7B, 0x7B, 0xB0, 0xB0, 0x3F, 0x3F, 0x3E, 0x3E, 0x58, 0x58
-                .db 0xBF, 0xBF, 7, 7, 0xDF, 0xDF, 0x1F, 0x1F, 0xE6, 0xE6, 3, 3, 0xF8, 0xF8, 4, 4, 0xC6
-                .db 0xC6, 6, 6, 6, 6
-spr_53:         .db 2, 27                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0xC0, 0xC0, 0, 0, 0xE0, 0xE0, 0, 0, 0xEC, 0xEC, 0, 0, 0x6F, 0x6F, 0, 0, 0xF, 0xF
-                .db 0x80, 0x80, 0xE3, 0xE3, 0xB0, 0xB0, 0xF8, 0xF8, 0xBC, 0xBC, 0xFE, 0xFE, 0xF, 0xF
-                .db 0xFE, 0xFE, 0xE3, 0xE3, 0xFE, 0xFE, 0xF8, 0xF8, 0x3E, 0x3E, 0x7E, 0x7E, 0x8D, 0x8D
-                .db 0xBF, 0xBF, 0xE3, 0xE3, 0x8F, 0x8F, 0xFB, 0xFB, 0x72, 0x72, 0xFA, 0xFA, 0xBC, 0xBC
-                .db 0xF5, 0xF5, 0xDE, 0xDE, 0x6B, 0x6B, 0xDE, 0xDE, 7, 7, 0xEF, 0xEF, 3, 3, 0xEF, 0xEF
-                .db 3, 3, 0xE7, 0xE7, 3, 3, 0xFB, 0xFB, 0, 0, 0x7B, 0x7B, 1, 1, 0x8D, 0x8D, 0, 0, 0xFF
-                .db 0xFF, 0, 0, 0xFC, 0xFC, 0, 0, 0x70, 0x70, 0, 0, 0x40, 0x40
-spr_54:         .db 3, 36                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0, 0, 0x30, 0, 0, 0, 0, 0, 0x7C, 0x30, 0, 0, 1, 0, 0xFF, 0x7C, 0, 0, 3, 1
-                .db 0xFF, 0xBF, 0, 0, 0xF, 3, 0xFF, 0xBF, 0, 0, 0x3F, 0xF, 0xFF, 0xBF, 0, 0, 0xFF, 0x3F
-                .db 0xFF, 0xBE, 1, 0, 0xFF, 0xFF, 0xFF, 0xC6, 1, 0, 0xFF, 0xFF, 0xFF, 0x3C, 1, 0, 0xFF
-                .db 0xFC, 0xFF, 0xFE, 0, 0, 0xFF, 0x33, 0xFF, 0xFF, 0, 0, 0x3F, 0xF, 0xFF, 0xF7, 0, 0
-                .db 0x3F, 3, 0xFF, 0xC8, 0, 0, 0x7F, 0x30, 0xFF, 0x3A, 0, 0, 0xFF, 0x7B, 0xFF, 0xFA
-                .db 0, 0, 0x7F, 0x3B, 0xFF, 0xD3, 0, 0, 0x7F, 0x3B, 0xFF, 0x38, 0, 0, 0x3F, 2, 0xFF
-                .db 0xF7, 0, 0, 3, 0, 0xFF, 0xF7, 0, 0, 1, 0, 0xFF, 0xF7, 0, 0, 1, 0, 0xFF, 0xEE, 0
-                .db 0, 1, 0, 0xFF, 0xEE, 0, 0, 0xF, 0, 0xFF, 0xEE, 0, 0, 0x3F, 0xD, 0xFF, 0xEE, 0, 0
-                .db 0x7F, 0x3D, 0xFE, 0xCC, 1, 0, 0xFF, 0x1D, 0xFE, 0xF0, 7, 1, 0xFF, 0xA5, 0xFE, 0xFC
-                .db 0x1F, 7, 0xFF, 0xB8, 0xFF, 0x7E, 0xBF, 0x1F, 0xFF, 0xBD, 0xFF, 0x9E, 0xFF, 0xBE
-                .db 0xFF, 0x5D, 0xFF, 0xE6, 0xFF, 0xB8, 0xFF, 0xE5, 0xFE, 0xF8, 0xFF, 6, 0xFF, 0x79
-                .db 0xFE, 0xFC, 0xFF, 0xDF, 0xFF, 0x9C, 0xFC, 0x78, 0xFF, 0xDF, 0xFF, 0xE5, 0xFC, 0x98
-                .db 0xFF, 0xF, 0xFF, 0xF0, 0x98, 0, 0xF, 0, 0xF0, 0, 0, 0
-spr_55:         .db 3, 49                                       ; DATA XREF: RAM:sprite_tblo
-                .db 1, 0, 0xC0, 0, 0, 0, 0x37, 1, 0xF0, 0xC0, 0, 0, 0xFF, 0x37, 0xFC, 0xF0, 0, 0, 0xFF
-                .db 0xF3, 0xFF, 0xFC, 0, 0, 0xFF, 0xEE, 0xFF, 0xFC, 0, 0, 0xFF, 0x7E, 0xFF, 0xFA, 0
-                .db 0, 0xFF, 0x7E, 0xFE, 0xBC, 0, 0, 0xFF, 0x7F, 0xFE, 0x5C, 0, 0, 0xFF, 0xF, 0xFF, 0x6E
-                .db 0, 0, 0x7F, 0x3D, 0xFF, 0x72, 0, 0, 0x3F, 0x13, 0xFF, 0xB4, 0, 0, 0x1F, 0xF, 0xFF
-                .db 0xB8, 0, 0, 0x1F, 0xF, 0xFF, 0x76, 0, 0, 0x3F, 0x1E, 0xFE, 0xF0, 0, 0, 0x7F, 0x19
-                .db 0xF8, 0x60, 0, 0, 0xFF, 0x67, 0xFE, 0x98, 0, 0, 0xFF, 0x7F, 0xFF, 0x9E, 0, 0, 0xFF
-                .db 0xFF, 0xFF, 0xAF, 0x80, 0, 0xFF, 0xFC, 0xFF, 0x37, 0x80, 0, 0xFF, 0x7B, 0xFF, 0x73
-                .db 0x80, 0, 0x7F, 0x33, 0xFF, 0x7B, 0x80, 0, 0x3F, 0xD, 0xFF, 0x79, 0x80, 0, 0x1F, 0xD
-                .db 0xFF, 0x1C, 0x80, 0, 0x1F, 9, 0xFF, 0x6F, 0x80, 0, 0x1F, 6, 0xFF, 0x77, 0x80, 0
-                .db 0x7F, 0x1B, 0xFF, 0x7B, 0xC0, 0, 0xFF, 0x7D, 0xFF, 0x78, 0xE0, 0xC0, 0xFF, 0x7B
-                .db 0xFF, 0x37, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0x83, 0xE0, 0xC0, 0x7F, 0x3C, 0xFF, 0x8C
-                .db 0xE0, 0xC0, 0x7F, 0x32, 0xFF, 0x2F, 0xC0, 0, 0x3F, 0xE, 0xFF, 0x77, 0xE0, 0xC0, 0x7F
-                .db 0x3E, 0xFF, 0x7B, 0xF0, 0xE0, 0xFF, 0x7E, 0xFF, 0xFD, 0xF0, 0xE0, 0x7F, 0x38, 0xFF
-                .db 0xDC, 0xF0, 0x60, 0x3F, 6, 0xFF, 0x6D, 0xE0, 0x80, 0x1F, 0xF, 0xFF, 0x7D, 0xF8, 0xE0
-                .db 0xF, 7, 0xFF, 0xBB, 0xFC, 0xF8, 7, 0, 0xFF, 4, 0xFE, 0xFC, 3, 1, 0xFF, 0xFF, 0xFE
-                .db 0x3C, 1, 0, 0xFF, 0x7F, 0xFE, 0xCC, 0, 0, 0x7F, 0x1F, 0xFC, 0x80, 0, 0, 0x1F, 4
-                .db 0xFE, 0x7C, 0, 0, 7, 3, 0xFE, 0xFC, 0, 0, 7, 3, 0xFF, 0xFE, 0, 0, 3, 1, 0xFF, 0xFF
+spr_4C:         .db 2, 53
+                .db 0x41, 0x41, 0x40, 0x40, 0x22, 0x22, 0x52, 0x52, 0xB2, 0xB2, 0xA2
+                .db 0xA2, 0xD6, 0xD6, 0xD0, 0xD0, 0x7F, 0x7F, 0xE0, 0xE0, 0x3E, 0x3E
+                .db 0xC2, 0xC2, 0x36, 0x36, 0x94, 0x94, 0x3A, 0x3A, 0x9C, 0x9C, 0x3B
+                .db 0x3B, 0x9C, 0x9C, 0x1B, 0x1B, 0xDE, 0xDE, 0x1D, 0x1D, 0xDC, 0xDC
+                .db 0x1D, 0x1D, 0xDC, 0xDC, 0x1D, 0x1D, 0xDE, 0xDE, 0x1D, 0x1D, 0xDC
+                .db 0xDC, 0x1F, 0x1F, 0x8C, 0x8C, 0x1F, 0x1F, 0x8C, 0x8C, 0x1F, 0x1F
+                .db 0x9C, 0x9C, 0x1F, 0x1F, 0x9E, 0x9E, 0x1D, 0x1D, 0xA6, 0xA6, 0x1D
+                .db 0x1D, 0xA6, 0xA6, 0x1D, 0x1D, 0xAE, 0xAE, 0x1D, 0x1D, 0xAD, 0xAD
+                .db 0x1D, 0x1D, 0x8D, 0x8D, 0x15, 0x15, 0x8D, 0x8D, 0xE, 0xE, 0x8C
+                .db 0x8C, 0x1E, 0x1E, 0xCC, 0xCC, 0x3E, 0x3E, 0xD4, 0xD4, 0x37, 0x37
+                .db 0x44, 0x44, 0x2F, 0x2F, 0xE4, 0xE4, 0x2F, 0x2F, 0xE4, 0xE4, 0xD
+                .db 0xD, 0xF0, 0xF0, 0x1D, 0x1D, 0xF8, 0xF8, 0x1D, 0x1D, 0xDC, 0xDC
+                .db 0x1D, 0x1D, 0xDC, 0xDC, 0x19, 0x19, 0xDA, 0xDA, 0x30, 0x30, 0xCD
+                .db 0xCD, 0x30, 0x30, 0xCC, 0xCC, 0x30, 0x30, 0xCC, 0xCC, 0x70, 0x70
+                .db 0xC6, 0xC6, 0x58, 0x58, 0xC6, 0xC6, 0x18, 0x18, 0xC6, 0xC6, 0x18
+                .db 0x18, 0xE2, 0xE2, 0x18, 0x18, 0xE2, 0xE2, 0x14, 0x14, 0x53, 0x53
+                .db 0x14, 0x14, 0x51, 0x51, 0x12, 0x12, 0x49, 0x49, 0x12, 0x12, 0x49
+                .db 0x49, 0x10, 0x10, 1, 1, 8, 8, 0, 0, 8, 8, 0, 0, 8, 8, 0, 0, 4
+                .db 4, 0, 0, 4, 4, 0, 0
+spr_4D:         .db 2, 53
+                .db 1, 1, 0x24, 0x24, 1, 1, 0xA5, 0xA5, 4, 4, 0xAA, 0xAA, 0xA, 0xA
+                .db 0xED, 0xED, 0xAF, 0xAF, 0x7F, 0x7F, 0x5B, 0x5B, 0xBE, 0xBE, 0x73
+                .db 0x73, 0x3C, 0x3C, 0x73, 0x73, 0x1C, 0x1C, 0x71, 0x71, 0x1C, 0x1C
+                .db 0x31, 0x31, 0x1C, 0x1C, 0x31, 0x31, 0x9C, 0x9C, 0x31, 0x31, 0xBC
+                .db 0xBC, 0x39, 0x39, 0xBC, 0xBC, 0x35, 0x35, 0xBC, 0xBC, 0x35, 0x35
+                .db 0xBC, 0xBC, 0x31, 0x31, 0xFA, 0xFA, 0x31, 0x31, 0xEA, 0xEA, 0x39
+                .db 0x39, 0x69, 0x69, 0x39, 0x39, 0x69, 0x69, 0x39, 0x39, 0xE9, 0xE9
+                .db 0x39, 0x39, 0xB9, 0xB9, 0x59, 0x59, 0xB9, 0xB9, 0x5D, 0x5D, 0xB8
+                .db 0xB8, 0x95, 0x95, 0xB8, 0xB8, 0x95, 0x95, 0xB8, 0xB8, 0xB5, 0xB5
+                .db 0xB8, 0xB8, 0x25, 0x25, 0x3C, 0x3C, 0x27, 0x27, 0x7C, 0x7C, 0x67
+                .db 0x67, 0x7A, 0x7A, 0x43, 0x43, 0x7A, 0x7A, 0x47, 0x47, 0x7A, 0x7A
+                .db 0x46, 0x46, 0xBA, 0xBA, 0x46, 0x46, 0xB8, 0xB8, 0x26, 0x26, 0xB8
+                .db 0xB8, 0x26, 0x26, 0x3C, 0x3C, 0x2E, 0x2E, 0x3C, 0x3C, 0x2C, 0x2C
+                .db 0x74, 0x74, 0x2C, 0x2C, 0x76, 0x76, 0x1A, 0x1A, 0xB2, 0xB2, 0x1A
+                .db 0x1A, 0xB2, 0xB2, 0x29, 0x29, 0x31, 0x31, 0x49, 0x49, 0x31, 0x31
+                .db 0x52, 0x52, 0xB8, 0xB8, 0x92, 0x92, 0xD8, 0xD8, 0x92, 0x92, 0x54
+                .db 0x54, 0x14, 0x14, 0x94, 0x94, 0x14, 0x14, 0xB4, 0xB4, 4, 4, 0x32
+                .db 0x32, 0, 0, 0x52, 0x52, 0, 0, 0x50, 0x50, 0, 0, 0x90, 0x90, 0
+                .db 0, 0x90, 0x90, 0, 0, 0x10, 0x10
+spr_4E:         .db 2, 50
+                .db 0, 0, 0x50, 0x50, 0, 0, 0x70, 0x70, 5, 5, 0x27, 0x27, 0x2A, 0x2A
+                .db 0x2E, 0x2E, 0x57, 0x57, 0xAE, 0xAE, 0x7F, 0x7F, 0x26, 0x26, 0x3B
+                .db 0x3B, 0x26, 0x26, 0x1A, 0x1A, 0x64, 0x64, 0x1A, 0x1A, 0x64, 0x64
+                .db 0x16, 0x16, 0xA4, 0xA4, 0x16, 0x16, 0xA4, 0xA4, 0x36, 0x36, 0xB4
+                .db 0xB4, 0x56, 0x56, 0x34, 0x34, 0x5C, 0x5C, 0x2C, 0x2C, 0x1C, 0x1C
+                .db 0x24, 0x24, 0x1C, 0x1C, 0x24, 0x24, 0x3E, 0x3E, 0x2A, 0x2A, 0x3E
+                .db 0x3E, 0x4A, 0x4A, 0x77, 0x77, 0x4A, 0x4A, 0x57, 0x57, 8, 8, 0xD6
+                .db 0xD6, 0x89, 0x89, 0x96, 0x96, 0x89, 0x89, 0xB5, 0xB5, 0x41, 0x41
+                .db 0xA5, 0xA5, 0x21, 0x21, 0x3C, 0x3C, 0xA1, 0xA1, 0x3A, 0x3A, 0x91
+                .db 0x91, 0x7A, 0x7A, 0x50, 0x50, 0x5A, 0x5A, 0x48, 0x48, 0x59, 0x59
+                .db 0x24, 0x24, 0x59, 0x59, 0x22, 0x22, 0x59, 0x59, 0x11, 0x11, 0x59
+                .db 0x59, 0x10, 0x10, 0x58, 0x58, 0x88, 0x88, 0x98, 0x98, 0x88, 0x88
+                .db 0x94, 0x94, 0x84, 0x84, 0x94, 0x94, 0x44, 0x44, 0x14, 0x14, 0x40
+                .db 0x40, 0x14, 0x14, 0x40, 0x40, 0x14, 0x14, 0x40, 0x40, 0x14, 0x14
+                .db 0x20, 0x20, 0x12, 0x12, 0x20, 0x20, 0x12, 0x12, 0x20, 0x20, 0x12
+                .db 0x12, 0x10, 0x10, 0x12, 0x12, 0x10, 0x10, 0x12, 0x12, 0x10, 0x10
+                .db 0x12, 0x12, 8, 8, 0x12, 0x12, 8, 8, 0x12, 0x12, 0, 0, 2, 2, 0
+                .db 0, 2, 2, 0, 0
+spr_4F:         .db 2, 26
+                .db 0x40, 0x40, 0, 0, 0x70, 0x70, 0, 0, 0x7C, 0x7C, 0, 0, 0x7F, 0x7F
+                .db 0, 0, 0x7F, 0x7F, 0x80, 0x80, 0x3F, 0x3F, 0xB0, 0xB0, 0xCF, 0xCF
+                .db 0xBC, 0xBC, 0xF3, 0xF3, 0xBF, 0xBF, 0xFC, 0xFC, 0xBF, 0xBF, 0xFF
+                .db 0xFF, 0x3F, 0x3F, 0xFF, 0xFF, 0xBF, 0xBF, 0xFF, 0xFF, 0xBF, 0xBF
+                .db 0x3F, 0x3F, 0xBF, 0xBF, 0x4F, 0x4F, 0xBF, 0xBF, 0x73, 0x73, 0x3F
+                .db 0x3F, 0x7C, 0x7C, 0x3F, 0x3F, 0x1D, 0x1D, 0xCF, 0xCF, 0x65, 0x65
+                .db 0xF3, 0xF3, 0x75, 0x75, 0xFC, 0xFC, 0x38, 0x38, 0xFF, 0xFF, 7
+                .db 7, 0x3F, 0x3F, 0x1F, 0x1F, 0xCF, 0xCF, 7, 7, 0xF3, 0xF3, 1, 1
+                .db 0xFD, 0xFD, 0, 0, 0x7E, 0x7E, 0, 0, 0x18, 0x18
+spr_50:         .db 2, 31
+                .db 0x60, 0x60, 0, 0, 0x70, 0x70, 0, 0, 4, 4, 0, 0, 0x72, 0x72, 0
+                .db 0, 0x7B, 0x7B, 0, 0, 0x78, 0x78, 0x5C, 0x5C, 0x78, 0x78, 0xEE
+                .db 0xEE, 0x31, 0x31, 0xCE, 0xCE, 1, 1, 0xC8, 0xC8, 0, 0, 0xE6, 0xE6
+                .db 0x30, 0x30, 0x26, 0x26, 0x3E, 0x3E, 3, 3, 0x1E, 0x1E, 0x30, 0x30
+                .db 0xCF, 0xCF, 0x7C, 0x7C, 0xC7, 0xC7, 0x3E, 0x3E, 0xE3, 0xE3, 0x87
+                .db 0x87, 0xF0, 0xF0, 0x30, 0x30, 0x1B, 0x1B, 0x7E, 0x7E, 0xE9, 0xE9
+                .db 0x7E, 0x7E, 0x74, 0x74, 0x7F, 0x7F, 0x70, 0x70, 0x7F, 0x7F, 0x7F
+                .db 0x7F, 0x3F, 0x3F, 0x3E, 0x3E, 0xBF, 0xBF, 0x3D, 0x3D, 0xBF, 0xBF
+                .db 0x13, 0x13, 0xBF, 0xBF, 0xF, 0xF, 0x9F, 0x9F, 6, 6, 0x27, 0x27
+                .db 1, 1, 0xF9, 0xF9, 7, 7, 0xFE, 0xFE, 1, 1, 0xF8, 0xF8, 0, 0, 0x60
+                .db 0x60
+spr_51:         .db 2, 33
+                .db 0x34, 0x34, 0, 0, 0xF7, 0xF7, 0, 0, 0xF7, 0xF7, 0xC0, 0xC0, 0xC9
+                .db 0xC9, 0xF0, 0xF0, 0x3E, 0x3E, 0x7C, 0x7C, 0xFF, 0xFF, 0x9F, 0x9F
+                .db 0xF0, 0xF0, 0x27, 0x27, 0xCF, 0xCF, 0xC9, 0xC9, 0xBE, 0xBE, 0xF7
+                .db 0xF7, 0x7C, 0x7C, 0x7A, 0x7A, 0xFC, 0xFC, 0x7C, 0x7C, 0xEC, 0xEC
+                .db 0x6C, 0x6C, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC
+                .db 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64
+                .db 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64
+                .db 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC
+                .db 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0x8F
+                .db 0x8F, 0xA4, 0xA4, 0x76, 0x76, 0xE4, 0xE4, 0xBF, 0xBF, 0x78, 0x78
+                .db 0x3D, 0x3D, 0xFC, 0xFC, 0x53, 0x53, 0x54, 0x54, 0x3D, 0x3D, 0xA8
+                .db 0xA8, 7, 7, 0xF0, 0xF0, 0, 0, 0xE0, 0xE0
+spr_52:         .db 2, 24
+                .db 0xC0, 0xC0, 0, 0, 0xF0, 0xF0, 0, 0, 0xFC, 0xFC, 0, 0, 0x7E, 0x7E
+                .db 0, 0, 0x3E, 0x3E, 0xC0, 0xC0, 0x46, 0x46, 0xF0, 0xF0, 0xF8, 0xF8
+                .db 0xF4, 0xF4, 0xFE, 0xFE, 0xF6, 0xF6, 0x1E, 0x1E, 0xF3, 0xF3, 0x6C
+                .db 0x6C, 0x34, 0x34, 0xF1, 0xF1, 0x8E, 0x8E, 0xFB, 0xFB, 0xFF, 0xFF
+                .db 0xBD, 0xBD, 0xFF, 0xFF, 0xDE, 0xDE, 0xFF, 0xFF, 0xEF, 0xEF, 0x7F
+                .db 0x7F, 0xF7, 0xF7, 0x8E, 0x8E, 0x7B, 0x7B, 0xB0, 0xB0, 0x3F, 0x3F
+                .db 0x3E, 0x3E, 0x58, 0x58, 0xBF, 0xBF, 7, 7, 0xDF, 0xDF, 0x1F, 0x1F
+                .db 0xE6, 0xE6, 3, 3, 0xF8, 0xF8, 4, 4, 0xC6, 0xC6, 6, 6, 6, 6
+spr_53:         .db 2, 27
+                .db 0xC0, 0xC0, 0, 0, 0xE0, 0xE0, 0, 0, 0xEC, 0xEC, 0, 0, 0x6F, 0x6F
+                .db 0, 0, 0xF, 0xF, 0x80, 0x80, 0xE3, 0xE3, 0xB0, 0xB0, 0xF8, 0xF8
+                .db 0xBC, 0xBC, 0xFE, 0xFE, 0xF, 0xF, 0xFE, 0xFE, 0xE3, 0xE3, 0xFE
+                .db 0xFE, 0xF8, 0xF8, 0x3E, 0x3E, 0x7E, 0x7E, 0x8D, 0x8D, 0xBF, 0xBF
+                .db 0xE3, 0xE3, 0x8F, 0x8F, 0xFB, 0xFB, 0x72, 0x72, 0xFA, 0xFA, 0xBC
+                .db 0xBC, 0xF5, 0xF5, 0xDE, 0xDE, 0x6B, 0x6B, 0xDE, 0xDE, 7, 7, 0xEF
+                .db 0xEF, 3, 3, 0xEF, 0xEF, 3, 3, 0xE7, 0xE7, 3, 3, 0xFB, 0xFB, 0
+                .db 0, 0x7B, 0x7B, 1, 1, 0x8D, 0x8D, 0, 0, 0xFF, 0xFF, 0, 0, 0xFC
+                .db 0xFC, 0, 0, 0x70, 0x70, 0, 0, 0x40, 0x40
+spr_54:         .db 3, 36
+                .db 0, 0, 0, 0, 0x30, 0, 0, 0, 0, 0, 0x7C, 0x30, 0, 0, 1, 0, 0xFF
+                .db 0x7C, 0, 0, 3, 1, 0xFF, 0xBF, 0, 0, 0xF, 3, 0xFF, 0xBF, 0, 0
+                .db 0x3F, 0xF, 0xFF, 0xBF, 0, 0, 0xFF, 0x3F, 0xFF, 0xBE, 1, 0, 0xFF
+                .db 0xFF, 0xFF, 0xC6, 1, 0, 0xFF, 0xFF, 0xFF, 0x3C, 1, 0, 0xFF, 0xFC
+                .db 0xFF, 0xFE, 0, 0, 0xFF, 0x33, 0xFF, 0xFF, 0, 0, 0x3F, 0xF, 0xFF
+                .db 0xF7, 0, 0, 0x3F, 3, 0xFF, 0xC8, 0, 0, 0x7F, 0x30, 0xFF, 0x3A
+                .db 0, 0, 0xFF, 0x7B, 0xFF, 0xFA, 0, 0, 0x7F, 0x3B, 0xFF, 0xD3, 0
+                .db 0, 0x7F, 0x3B, 0xFF, 0x38, 0, 0, 0x3F, 2, 0xFF, 0xF7, 0, 0, 3
+                .db 0, 0xFF, 0xF7, 0, 0, 1, 0, 0xFF, 0xF7, 0, 0, 1, 0, 0xFF, 0xEE
+                .db 0, 0, 1, 0, 0xFF, 0xEE, 0, 0, 0xF, 0, 0xFF, 0xEE, 0, 0, 0x3F
+                .db 0xD, 0xFF, 0xEE, 0, 0, 0x7F, 0x3D, 0xFE, 0xCC, 1, 0, 0xFF, 0x1D
+                .db 0xFE, 0xF0, 7, 1, 0xFF, 0xA5, 0xFE, 0xFC, 0x1F, 7, 0xFF, 0xB8
+                .db 0xFF, 0x7E, 0xBF, 0x1F, 0xFF, 0xBD, 0xFF, 0x9E, 0xFF, 0xBE, 0xFF
+                .db 0x5D, 0xFF, 0xE6, 0xFF, 0xB8, 0xFF, 0xE5, 0xFE, 0xF8, 0xFF, 6
+                .db 0xFF, 0x79, 0xFE, 0xFC, 0xFF, 0xDF, 0xFF, 0x9C, 0xFC, 0x78, 0xFF
+                .db 0xDF, 0xFF, 0xE5, 0xFC, 0x98, 0xFF, 0xF, 0xFF, 0xF0, 0x98, 0
+                .db 0xF, 0, 0xF0, 0, 0, 0
+spr_55:         .db 3, 49
+                .db 1, 0, 0xC0, 0, 0, 0, 0x37, 1, 0xF0, 0xC0, 0, 0, 0xFF, 0x37, 0xFC
+                .db 0xF0, 0, 0, 0xFF, 0xF3, 0xFF, 0xFC, 0, 0, 0xFF, 0xEE, 0xFF, 0xFC
+                .db 0, 0, 0xFF, 0x7E, 0xFF, 0xFA, 0, 0, 0xFF, 0x7E, 0xFE, 0xBC, 0
+                .db 0, 0xFF, 0x7F, 0xFE, 0x5C, 0, 0, 0xFF, 0xF, 0xFF, 0x6E, 0, 0
+                .db 0x7F, 0x3D, 0xFF, 0x72, 0, 0, 0x3F, 0x13, 0xFF, 0xB4, 0, 0, 0x1F
+                .db 0xF, 0xFF, 0xB8, 0, 0, 0x1F, 0xF, 0xFF, 0x76, 0, 0, 0x3F, 0x1E
+                .db 0xFE, 0xF0, 0, 0, 0x7F, 0x19, 0xF8, 0x60, 0, 0, 0xFF, 0x67, 0xFE
+                .db 0x98, 0, 0, 0xFF, 0x7F, 0xFF, 0x9E, 0, 0, 0xFF, 0xFF, 0xFF, 0xAF
+                .db 0x80, 0, 0xFF, 0xFC, 0xFF, 0x37, 0x80, 0, 0xFF, 0x7B, 0xFF, 0x73
+                .db 0x80, 0, 0x7F, 0x33, 0xFF, 0x7B, 0x80, 0, 0x3F, 0xD, 0xFF, 0x79
+                .db 0x80, 0, 0x1F, 0xD, 0xFF, 0x1C, 0x80, 0, 0x1F, 9, 0xFF, 0x6F
+                .db 0x80, 0, 0x1F, 6, 0xFF, 0x77, 0x80, 0, 0x7F, 0x1B, 0xFF, 0x7B
+                .db 0xC0, 0, 0xFF, 0x7D, 0xFF, 0x78, 0xE0, 0xC0, 0xFF, 0x7B, 0xFF
+                .db 0x37, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0x83, 0xE0, 0xC0, 0x7F, 0x3C
+                .db 0xFF, 0x8C, 0xE0, 0xC0, 0x7F, 0x32, 0xFF, 0x2F, 0xC0, 0, 0x3F
+                .db 0xE, 0xFF, 0x77, 0xE0, 0xC0, 0x7F, 0x3E, 0xFF, 0x7B, 0xF0, 0xE0
+                .db 0xFF, 0x7E, 0xFF, 0xFD, 0xF0, 0xE0, 0x7F, 0x38, 0xFF, 0xDC, 0xF0
+                .db 0x60, 0x3F, 6, 0xFF, 0x6D, 0xE0, 0x80, 0x1F, 0xF, 0xFF, 0x7D
+                .db 0xF8, 0xE0, 0xF, 7, 0xFF, 0xBB, 0xFC, 0xF8, 7, 0, 0xFF, 4, 0xFE
+                .db 0xFC, 3, 1, 0xFF, 0xFF, 0xFE, 0x3C, 1, 0, 0xFF, 0x7F, 0xFE, 0xCC
+                .db 0, 0, 0x7F, 0x1F, 0xFC, 0x80, 0, 0, 0x1F, 4, 0xFE, 0x7C, 0, 0
+                .db 7, 3, 0xFE, 0xFC, 0, 0, 7, 3, 0xFF, 0xFE, 0, 0, 3, 1, 0xFF, 0xFF
                 .db 0, 0, 1, 0, 0xFF, 0xFF, 0, 0, 0, 0, 0xFF, 7, 0, 0, 0, 0, 7, 0
-spr_56:         .db 2, 34                                       ; DATA XREF: RAM:sprite_tblo
-                .db 0, 0, 0x20, 0x20, 0, 0, 0xD8, 0xD8, 3, 3, 0xDE, 0xDE, 0x1B, 0x1B, 0xDF, 0xDF, 0x7B
-                .db 0x7B, 0xC7, 0xC7, 0xFA, 0xFA, 0x39, 0x39, 0xE1, 0xE1, 0xFC, 0xFC, 0x9B, 0x9B, 0xFE
-                .db 0xFE, 0x7B, 0x7B, 0xFF, 0xFF, 0x7B, 0x7B, 0xFF, 0xFF, 0x7B, 0x7B, 0xFE, 0xFE, 0x7A
-                .db 0x7A, 0x7E, 0x7E, 0x79, 0x79, 0x86, 0x86, 0x43, 0x43, 0xF8, 0xF8, 0x3B, 0x3B, 0xFC
-                .db 0xFC, 0x7B, 0x7B, 0xFE, 0xFE, 0x7B, 0x7B, 0xFF, 0xFF, 0x79, 0x79, 0xFE, 0xFE, 0x7A
-                .db 0x7A, 0xFE, 0xFE, 0xFB, 0xFB, 0x7C, 0x7C, 0xF7, 0xF7, 0xB0, 0xB0, 0xEF, 0xEF, 0x80
-                .db 0x80, 0x13, 0x13, 0x7E, 0x7E, 0x1C, 0x1C, 0xFF, 0xFF, 0xEF, 0xEF, 0x7F, 0x7F, 0xEF
-                .db 0xEF, 0xAF, 0xAF, 0xD3, 0xD3, 0xC3, 0xC3, 0xBC, 0xBC, 0xFC, 0xFC, 0x7F, 0x7F, 0x3E
-                .db 0x3E, 0x3F, 0x3F, 0xCE, 0xCE, 7, 7, 0xF2, 0xF2, 1, 1, 0xFC, 0xFC, 0, 0, 0x78, 0x78
-                .db 0, 0, 0x10, 0x10
+spr_56:         .db 2, 34
+                .db 0, 0, 0x20, 0x20, 0, 0, 0xD8, 0xD8, 3, 3, 0xDE, 0xDE, 0x1B, 0x1B
+                .db 0xDF, 0xDF, 0x7B, 0x7B, 0xC7, 0xC7, 0xFA, 0xFA, 0x39, 0x39, 0xE1
+                .db 0xE1, 0xFC, 0xFC, 0x9B, 0x9B, 0xFE, 0xFE, 0x7B, 0x7B, 0xFF, 0xFF
+                .db 0x7B, 0x7B, 0xFF, 0xFF, 0x7B, 0x7B, 0xFE, 0xFE, 0x7A, 0x7A, 0x7E
+                .db 0x7E, 0x79, 0x79, 0x86, 0x86, 0x43, 0x43, 0xF8, 0xF8, 0x3B, 0x3B
+                .db 0xFC, 0xFC, 0x7B, 0x7B, 0xFE, 0xFE, 0x7B, 0x7B, 0xFF, 0xFF, 0x79
+                .db 0x79, 0xFE, 0xFE, 0x7A, 0x7A, 0xFE, 0xFE, 0xFB, 0xFB, 0x7C, 0x7C
+                .db 0xF7, 0xF7, 0xB0, 0xB0, 0xEF, 0xEF, 0x80, 0x80, 0x13, 0x13, 0x7E
+                .db 0x7E, 0x1C, 0x1C, 0xFF, 0xFF, 0xEF, 0xEF, 0x7F, 0x7F, 0xEF, 0xEF
+                .db 0xAF, 0xAF, 0xD3, 0xD3, 0xC3, 0xC3, 0xBC, 0xBC, 0xFC, 0xFC, 0x7F
+                .db 0x7F, 0x3E, 0x3E, 0x3F, 0x3F, 0xCE, 0xCE, 7, 7, 0xF2, 0xF2, 1
+                .db 1, 0xFC, 0xFC, 0, 0, 0x78, 0x78, 0, 0, 0x10, 0x10
 ; variables here down cleared once
-user_input_method:.db 0                                         ; DATA XREF: RAM:AF8Ao
-                                                                ; RAM:BB9Ar ...
-seed_1:         .db    0                                        ; DATA XREF: RAM:BBCEo
+user_input_method:.db 0
+seed_1:         .db    0
                 .db    0
-tmp_input_method:.db 0                                          ; DATA XREF: RAM:BB9Dw
-                                                                ; RAM:BBC2o
-seed_3:         .db 0                                           ; DATA XREF: RAM:AFAFr
-                                                                ; RAM:AFB3w ...
+tmp_input_method:.db 0
+seed_3:         .db 0
 ; variables here down cleared each game
-unk_A70E:       .db    0                                        ; DATA XREF: RAM:start_menuo
-                                                                ; RAM:CFD8r ...
-unk_A70F:       .db    0                                        ; DATA XREF: RAM:B0D1r
-                                                                ; RAM:CD21r ...
-objs_wiped_cnt: .db 0                                           ; DATA XREF: RAM:B19Fw
-                                                                ; RAM:B237r ...
-render_status_info:.db 0                                        ; DATA XREF: RAM:loc_B05Cr
-                                                                ; RAM:B063w ...
-tmp_objects_to_draw:.dw 0                                       ; DATA XREF: RAM:B1AEw
-                                                                ; RAM:wipe_next_objectr ...
-rendered_objs_cnt:.db 0                                         ; DATA XREF: RAM:B045r
-                                                                ; RAM:B25Br ...
-seed_2:         .dw 0                                           ; DATA XREF: RAM:B00Fr
-                                                                ; RAM:done_sprite_updatesr ...
-tmp_SP:         .dw 0                                           ; DATA XREF: RAM:B432w
-                                                                ; RAM:B4DBr
-render_obj_1:   .dw 0                                           ; DATA XREF: RAM:B5A3w
-                                                                ; RAM:B694w ...
-render_obj_2:   .dw 0                                           ; DATA XREF: RAM:B5B8w
-                                                                ; RAM:d_3467121516r ...
-room_size_X:    .db 0                                           ; DATA XREF: RAM:B8EDr
-                                                                ; RAM:C18Er ...
-room_size_Y:    .db 0                                           ; DATA XREF: RAM:B918r
-                                                                ; RAM:C976w ...
-room_size_Z:    .db 0                                           ; DATA XREF: RAM:adj_dZ_for_out_of_boundsr
-                                                                ; RAM:C97Aw ...
-byte_A720:      .db 0                                           ; DATA XREF: RAM:display_objects_carriedr
-                                                                ; RAM:BA3Aw ...
-lives:          .db 0                                           ; DATA XREF: RAM:AFA9w
-                                                                ; RAM:C2C3o ...
-inventory:      .db 0, 0, 0, 0                                  ; DATA XREF: RAM:C09Co
-                                                                ; RAM:loc_C0A7o
-objects_carried:.db 0, 0, 0, 0                                  ; DATA XREF: RAM:BA45o
-                                                                ; RAM:loc_C091o ...
+unk_A70E:       .db    0
+unk_A70F:       .db    0
+objs_wiped_cnt: .db 0
+render_status_info:.db 0
+tmp_objects_to_draw:.dw 0
+rendered_objs_cnt:.db 0
+seed_2:         .dw 0
+tmp_SP:         .dw 0
+render_obj_1:   .dw 0
+render_obj_2:   .dw 0
+room_size_X:    .db 0
+room_size_Y:    .db 0
+room_size_Z:    .db 0
+byte_A720:      .db 0
+lives:          .db 0
+inventory:      .db 0, 0, 0, 0
+objects_carried:.db 0, 0, 0, 0
                 .db 0, 0, 0, 0
                 .db 0, 0, 0, 0
-gfxbase_8x8:    .dw 0                                           ; DATA XREF: RAM:BAF9r
-                                                                ; RAM:BB4Cw ...
-suppress_border:.db 0                                           ; DATA XREF: RAM:BB75w
-                                                                ; RAM:BCD6r ...
-directional:    .db    0                                        ; DATA XREF: RAM:BBBFo
-tmp_attrib:     .db 0                                           ; DATA XREF: RAM:BB19w
-                                                                ; RAM:BC74r ...
-user_input:     .db 0                                           ; DATA XREF: RAM:BF09w
-                                                                ; RAM:BF6Cr ...
-curr_room_attrib:.db 0                                          ; DATA XREF: RAM:B066r
-                                                                ; RAM:C95Aw
-byte_A739:      .db 0                                           ; DATA XREF: RAM:C643w
-                                                                ; RAM:C657r
-word_A73A:      .dw 0                                           ; DATA XREF: RAM:C932w
-                                                                ; RAM:C9D0r ...
-byte_A73C:      .db 0                                           ; DATA XREF: RAM:C936w
-                                                                ; RAM:C9FAr ...
-byte_A73D:      .db 0                                           ; DATA XREF: RAM:CBB0o
-                                                                ; RAM:CC47w
-tmp_SP_2:       .dw 0                                           ; DATA XREF: RAM:B03Ew
-byte_A740:      .db 0                                           ; DATA XREF: RAM:loc_BF79r
-                                                                ; RAM:BFAEw ...
-byte_A741:      .db 0                                           ; DATA XREF: RAM:BF93w
-                                                                ; RAM:BFA9w ...
-byte_A742:      .db 0                                           ; DATA XREF: RAM:loc_CBA3w
-                                                                ; RAM:upd_monsters???r
-byte_A743:      .db 0                                           ; DATA XREF: RAM:C131w
-                                                                ; RAM:loc_C135r ...
-score:          .db 0, 0, 0                                     ; DATA XREF: RAM:BB43o
-                                                                ; RAM:add_to_score_and_printo
-audio_played:   .db    0                                        ; DATA XREF: RAM:play_audio_wait_keyo
-unk_A748:       .db    0                                        ; DATA XREF: RAM:loc_D635o
-word_A749:      .dw 0                                           ; DATA XREF: RAM:B081w
-                                                                ; RAM:C00Aw ...
-byte_A74B:      .db 0                                           ; DATA XREF: RAM:C70Er
-                                                                ; RAM:CD61r ...
-byte_A74C:      .db 0                                           ; DATA XREF: RAM:loc_C707r
-                                                                ; RAM:CF73r ...
-byte_A74D:      .db 0                                           ; DATA XREF: RAM:C724w
-                                                                ; RAM:C731o
-byte_A74E:      .db 0                                           ; DATA XREF: RAM:C71Dw
-scrn_visited:   .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:C6E3o
-                                                                ; RAM:calc_and_display_percento
+gfxbase_8x8:    .dw 0
+suppress_border:.db 0
+directional:    .db    0
+tmp_attrib:     .db 0
+user_input:     .db 0
+curr_room_attrib:.db 0
+byte_A739:      .db 0
+word_A73A:      .dw 0
+byte_A73C:      .db 0
+byte_A73D:      .db 0
+tmp_SP_2:       .dw 0
+byte_A740:      .db 0
+byte_A741:      .db 0
+byte_A742:      .db 0
+byte_A743:      .db 0
+score:          .db 0, 0, 0
+audio_played:   .db    0
+unk_A748:       .db    0
+word_A749:      .dw 0
+byte_A74B:      .db 0
+byte_A74C:      .db 0
+byte_A74D:      .db 0
+byte_A74E:      .db 0
+scrn_visited:   .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
-graphic_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:AFDDo
-                                                                ; RAM:B087o ...
+graphic_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-graphic_obj_1:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:CC8Er
+graphic_obj_1:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 graphic_obj_2:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                                                                ; DATA XREF: RAM:loc_C126o
-                                                                ; RAM:clr_graphic_objs_tblo ...
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -2003,8 +2201,7 @@ graphic_obj_2:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-upd_sprite_jmp_tbl:.dw no_update                                ; DATA XREF: RAM:AFE5o
-                                                                ; RAM:B028o
+upd_sprite_jmp_tbl:.dw no_update
                 .dw no_update
                 .dw no_update
                 .dw no_update
@@ -2178,14 +2375,14 @@ upd_sprite_jmp_tbl:.dw no_update                                ; DATA XREF: RAM
                 .dw upd_A9_to_AC
 ; ---------------------------------------------------------------------------
 
-START:                                                          ; CODE XREF: RAM:5E04j
+START:
                 xor     a
                 out     (0xFE), a
                 ld      hl, #user_input_method
                 ld      bc, #0x726
                 call    clr_mem
 
-start_menu:                                                     ; CODE XREF: RAM:C35Aj
+start_menu:
                 ld      hl, #unk_A70E
                 ld      bc, #0x721
                 call    clr_mem
@@ -2206,10 +2403,10 @@ start_menu:                                                     ; CODE XREF: RAM
                 call    init_special_objects
                 call    init_start_location
 
-player_dies:                                                    ; CODE XREF: RAM:B091j
+player_dies:
                 call    lose_life
 
-loc_AFC8:                                                       ; CODE XREF: RAM:C871j
+loc_AFC8:
                 call    loc_B115
                 call    build_screen_objects
                 call    loc_B097
@@ -2217,26 +2414,25 @@ loc_AFC8:                                                       ; CODE XREF: RAM
                 call    print_label_and_score
                 call    loc_CC31
 
-onscreen_loop:                                                  ; CODE XREF: RAM:B094j
-                call    upd_monsters???
+onscreen_loop:
+                call    upd_monsters_maybe
                 ld      ix, #graphic_objs_tbl
 
-update_sprite_loop:                                             ; CODE XREF: RAM:B02Ej
+update_sprite_loop:
                 ld      hl, #ret_from_tbl_jp
                 push    hl
                 ld      bc, #upd_sprite_jmp_tbl
-                ld      a, 24(ix)                               ; sprite data width (bytes)
-                ld      28(ix), a                               ; old sprite data width (bytes)
-                ld      a, 25(ix)                               ; sprite data height (lines)
-                ld      29(ix), a                               ; old sprite data height (lines)
-                ld      a, 26(ix)                               ; pixel X
-                ld      30(ix), a                               ; old pixel X
-                ld      a, 27(ix)                               ; pixel Y
-                ld      31(ix), a                               ; old pixel Y
+                ld      a, 24(ix)                                       ; sprite data width (bytes)
+                ld      28(ix), a                                       ; old sprite data width (bytes)
+                ld      a, 25(ix)                                       ; sprite data height (lines)
+                ld      29(ix), a                                       ; old sprite data height (lines)
+                ld      a, 26(ix)                                       ; pixel X
+                ld      30(ix), a                                       ; old pixel X
+                ld      a, 27(ix)                                       ; pixel Y
+                ld      31(ix), a                                       ; old pixel Y
                 ld      l, 0(ix)
 
-jump_to_tbl_entry:                                              ; CODE XREF: RAM:B635j
-                                                                ; RAM:C68Aj ...
+jump_to_tbl_entry:
                 ld      h, #0
                 add     hl, hl
                 add     hl, bc
@@ -2247,7 +2443,7 @@ jump_to_tbl_entry:                                              ; CODE XREF: RAM
                 jp      (hl)
 ; ---------------------------------------------------------------------------
 
-ret_from_tbl_jp:                                                ; DATA XREF: RAM:update_sprite_loopo
+ret_from_tbl_jp:
                 ld      a, r
                 ld      b, a
                 ld      a, (seed_2)
@@ -2275,7 +2471,7 @@ done_sprite_updates:
                 ld      (seed_2), hl
                 call    list_objects_to_draw
                 call    render_dynamic_objects
-                ld      (tmp_SP_2), sp                          ; don't think this is used
+                ld      (tmp_SP_2), sp                                  ; don't think this is used
                 call    handle_pause
                 ld      a, (rendered_objs_cnt)
                 neg
@@ -2284,18 +2480,17 @@ done_sprite_updates:
                 jp      M, loc_B05C
                 jr      Z, loc_B05C
 
-game_delay:                                                     ; CODE XREF: RAM:B05Aj
+game_delay:
                 ld      hl, #0x500
 
-loc_B055:                                                       ; CODE XREF: RAM:B058j
+loc_B055:
                 dec     hl
                 ld      a, l
                 or      h
                 jr      NZ, loc_B055
                 djnz    game_delay
 
-loc_B05C:                                                       ; CODE XREF: RAM:B04Dj
-                                                                ; RAM:B050j
+loc_B05C:
                 ld      a, (render_status_info)
                 and     a
                 jr      Z, loc_B084
@@ -2312,7 +2507,7 @@ loc_B05C:                                                       ; CODE XREF: RAM
                 ld      hl, #4
                 ld      (word_A749), hl
 
-loc_B084:                                                       ; CODE XREF: RAM:B060j
+loc_B084:
                 call    audio_D5F2
                 ld      ix, #graphic_objs_tbl
                 ld      a, 0(ix)
@@ -2321,36 +2516,36 @@ loc_B084:                                                       ; CODE XREF: RAM
                 jp      onscreen_loop
 ; ---------------------------------------------------------------------------
 
-loc_B097:                                                       ; CODE XREF: RAM:AFCEp
+loc_B097:
                 ld      iy, #byte_D422
                 ld      b, #0x12
 
-loc_B09D:                                                       ; CODE XREF: RAM:B112j
+loc_B09D:
                 ld      de, #16
-                ld      a, (graphic_objs_tbl+8)                 ; plyr screen
+                ld      a, (graphic_objs_tbl+8)                         ; plyr screen
                 ld      c, a
 
-loc_B0A4:                                                       ; CODE XREF: RAM:loc_B0B2j
+loc_B0A4:
                 add     iy, de
-                ld      a, 0(iy)                                ; graphic no
-                and     a                                       ; null?
-                jr      Z, loc_B0B2                             ; no, skip
-                ld      a, 8(iy)                                ; curr scrn
-                cp      c                                       ; same as plyr?
-                jr      Z, loc_B0B5                             ; yes, exit
+                ld      a, 0(iy)                                        ; graphic no
+                and     a                                               ; null?
+                jr      Z, loc_B0B2                                     ; no, skip
+                ld      a, 8(iy)                                        ; curr scrn
+                cp      c                                               ; same as plyr?
+                jr      Z, loc_B0B5                                     ; yes, exit
 
-loc_B0B2:                                                       ; CODE XREF: RAM:B0AAj
+loc_B0B2:
                 djnz    loc_B0A4
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B0B5:                                                       ; CODE XREF: RAM:B0B0j
+loc_B0B5:
                 ld      hl, # graphic_obj_2+0x80
                 ld      de, #32
                 push    bc
                 ld      b, #0x30 ; '0'
 
-loc_B0BE:                                                       ; CODE XREF: RAM:B0C3j
+loc_B0BE:
                 ld      a, (hl)
                 and     a
                 jr      Z, loc_B0C7
@@ -2360,7 +2555,7 @@ loc_B0BE:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B0C7:                                                       ; CODE XREF: RAM:B0C0j
+loc_B0C7:
                 ex      de, hl
                 ld      a, 0(iy)
                 and     #0xF8 ; '¯'
@@ -2370,7 +2565,7 @@ loc_B0C7:                                                       ; CODE XREF: RAM
                 and     a
                 jr      Z, loc_B111
 
-loc_B0D7:                                                       ; CODE XREF: RAM:B0CFj
+loc_B0D7:
                 set     4, 7(iy)
                 push    iy
                 pop     hl
@@ -2386,7 +2581,7 @@ loc_B0D7:                                                       ; CODE XREF: RAM
                 ld      b, #0xE
                 xor     a
 
-loc_B0EE:                                                       ; CODE XREF: RAM:B0F0j
+loc_B0EE:
                 ld      (hl), a
                 inc     hl
                 djnz    loc_B0EE
@@ -2399,7 +2594,7 @@ loc_B0EE:                                                       ; CODE XREF: RAM
                 cp      #0x80 ; 'Ä'
                 jr      Z, loc_B111
 
-loc_B102:                                                       ; CODE XREF: RAM:B10Fj
+loc_B102:
                 call    do_any_objs_intersect
                 jr      NC, loc_B111
                 ld      a, 3(ix)
@@ -2408,18 +2603,17 @@ loc_B102:                                                       ; CODE XREF: RAM
                 jr      loc_B102
 ; ---------------------------------------------------------------------------
 
-loc_B111:                                                       ; CODE XREF: RAM:B0D5j
-                                                                ; RAM:B100j ...
+loc_B111:
                 pop     bc
                 djnz    loc_B09D
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B115:                                                       ; CODE XREF: RAM:loc_AFC8p
+loc_B115:
                 ld      iy, # graphic_obj_2+0x60
                 ld      c, #0x30 ; '0'
 
-loc_B11B:                                                       ; CODE XREF: RAM:B132j
+loc_B11B:
                 ld      de, #0x20 ; ' '
                 add     iy, de
                 ld      a, 0(iy)
@@ -2427,19 +2621,19 @@ loc_B11B:                                                       ; CODE XREF: RAM
                 ld      de, #0x10
                 ld      b, #0x12
 
-loc_B12B:                                                       ; CODE XREF: RAM:B12Fj
+loc_B12B:
                 cp      (hl)
                 jr      Z, loc_B135
                 add     hl, de
                 djnz    loc_B12B
 
-loc_B131:                                                       ; CODE XREF: RAM:B143j
+loc_B131:
                 dec     c
                 jr      NZ, loc_B11B
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B135:                                                       ; CODE XREF: RAM:B12Cj
+loc_B135:
                 ex      de, hl
                 push    iy
                 pop     hl
@@ -2451,7 +2645,7 @@ loc_B135:                                                       ; CODE XREF: RAM
                 jr      loc_B131
 ; ---------------------------------------------------------------------------
 
-loc_B145:                                                       ; CODE XREF: RAM:C277p
+loc_B145:
                 ld      bc, #0x9B8
                 call    BC_to_Attr_In_DE
                 call    calc_screen_buffer_addr
@@ -2459,7 +2653,7 @@ loc_B145:                                                       ; CODE XREF: RAM
                 ld      l, c
                 ld      c, #8
 
-loc_B152:                                                       ; CODE XREF: RAM:B175j
+loc_B152:
                 push    bc
                 push    de
                 ld      bc, #6
@@ -2478,8 +2672,7 @@ loc_B152:                                                       ; CODE XREF: RAM
                 add     a, #8
                 ld      d, a
 
-loc_B16B:                                                       ; CODE XREF: RAM:B15Fj
-                                                                ; RAM:B165j
+loc_B16B:
                 pop     bc
                 ld      a, l
                 add     a, #0x1A
@@ -2492,13 +2685,12 @@ loc_B16B:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-update_screen:                                                  ; CODE XREF: RAM:B075p
-                                                                ; RAM:BCE2j ...
+update_screen:
                 ld      hl, #vidbuf
                 ld      de, # zx_vram+0x17E0
                 ld      c, #192
 
-loc_B180:                                                       ; CODE XREF: RAM:B19Bj
+loc_B180:
                 push    bc
                 push    de
                 ld      bc, #32
@@ -2517,15 +2709,14 @@ loc_B180:                                                       ; CODE XREF: RAM
                 add     a, #8
                 ld      d, a
 
-loc_B199:                                                       ; CODE XREF: RAM:B18Dj
-                                                                ; RAM:B193j
+loc_B199:
                 pop     bc
                 dec     c
                 jr      NZ, loc_B180
                 ret
 ; ---------------------------------------------------------------------------
 
-render_dynamic_objects:                                         ; CODE XREF: RAM:B03Bp
+render_dynamic_objects:
                 xor     a
                 ld      (objs_wiped_cnt), a
                 push    ix
@@ -2535,8 +2726,7 @@ render_dynamic_objects:                                         ; CODE XREF: RAM
                 ld      hl, #objects_to_draw
                 ld      (tmp_objects_to_draw), hl
 
-wipe_next_object:                                               ; CODE XREF: RAM:B1C8j
-                                                                ; RAM:B220j ...
+wipe_next_object:
                 ld      hl, (tmp_objects_to_draw)
                 ld      a, (hl)
                 inc     hl
@@ -2554,7 +2744,7 @@ wipe_next_object:                                               ; CODE XREF: RAM
                 jp      C, loc_B248
                 ld      c, 30(ix)
 
-loc_B1DA:                                                       ; CODE XREF: RAM:B24Bj
+loc_B1DA:
                 ld      a, 30(ix)
                 rrca
                 rrca
@@ -2572,7 +2762,7 @@ loc_B1DA:                                                       ; CODE XREF: RAM
                 jr      C, loc_B1F5
                 ld      e, a
 
-loc_B1F5:                                                       ; CODE XREF: RAM:B1F2j
+loc_B1F5:
                 ld      a, c
                 rrca
                 rrca
@@ -2587,7 +2777,7 @@ loc_B1F5:                                                       ; CODE XREF: RAM
                 jr      C, loc_B24D
                 ld      b, 31(ix)
 
-loc_B20A:                                                       ; CODE XREF: RAM:B250j
+loc_B20A:
                 ld      a, 31(ix)
                 add     a, 29(ix)
                 ld      e, a
@@ -2597,7 +2787,7 @@ loc_B20A:                                                       ; CODE XREF: RAM
                 jr      NC, loc_B21B
                 ld      a, e
 
-loc_B21B:                                                       ; CODE XREF: RAM:B218j
+loc_B21B:
                 sub     b
                 ld      l, a
                 ld      a, b
@@ -2610,7 +2800,7 @@ loc_B21B:                                                       ; CODE XREF: RAM
                 add     a, l
                 ld      l, a
 
-loc_B22B:                                                       ; CODE XREF: RAM:B225j
+loc_B22B:
                 call    BC_to_Attr_In_DE
                 call    calc_screen_buffer_addr
                 ld      a, l
@@ -2630,18 +2820,17 @@ loc_B22B:                                                       ; CODE XREF: RAM
                 jp      wipe_next_object
 ; ---------------------------------------------------------------------------
 
-loc_B248:                                                       ; CODE XREF: RAM:B1D4j
+loc_B248:
                 ld      c, 26(ix)
                 jr      loc_B1DA
 ; ---------------------------------------------------------------------------
 
-loc_B24D:                                                       ; CODE XREF: RAM:B205j
+loc_B24D:
                 ld      b, 27(ix)
                 jr      loc_B20A
 ; ---------------------------------------------------------------------------
 
-loc_B252:                                                       ; CODE XREF: RAM:B1A8j
-                                                                ; RAM:B1BBj
+loc_B252:
                 call    calc_display_order_and_render
                 call    display_objects_carried
                 ld      hl, #objs_wiped_cnt
@@ -2649,7 +2838,7 @@ loc_B252:                                                       ; CODE XREF: RAM
                 add     a, (hl)
                 ld      (rendered_objs_cnt), a
 
-loc_B262:                                                       ; CODE XREF: RAM:B273j
+loc_B262:
                 ld      hl, #objs_wiped_cnt
                 ld      a, (hl)
                 and     a
@@ -2665,13 +2854,12 @@ loc_B262:                                                       ; CODE XREF: RAM
                 jr      loc_B262
 ; ---------------------------------------------------------------------------
 
-loc_B275:                                                       ; CODE XREF: RAM:B267j
+loc_B275:
                 pop     ix
                 ret
 ; ---------------------------------------------------------------------------
 
-blit_to_screen:                                                 ; CODE XREF: RAM:B270p
-                                                                ; RAM:B297j ...
+blit_to_screen:
                 push    bc
                 push    de
                 push    hl
@@ -2694,23 +2882,22 @@ blit_to_screen:                                                 ; CODE XREF: RAM
                 add     a, #8
                 ld      d, a
 
-loc_B296:                                                       ; CODE XREF: RAM:B28Aj
-                                                                ; RAM:B290j
+loc_B296:
                 pop     bc
                 djnz    blit_to_screen
                 ret
 ; ---------------------------------------------------------------------------
 
-build_lookup_tbls:                                              ; CODE XREF: RAM:AFA4p
+build_lookup_tbls:
                 ld      l, #0
 
-loc_B29C:                                                       ; CODE XREF: RAM:B2B2j
+loc_B29C:
                 ld      d, #0
                 ld      e, l
                 ld      h, #0xFF
                 ld      b, #7
 
-loc_B2A3:                                                       ; CODE XREF: RAM:B2AFj
+loc_B2A3:
                 sla     e
                 rl      d
                 ld      a, e
@@ -2726,11 +2913,11 @@ loc_B2A3:                                                       ; CODE XREF: RAM
                 jr      NZ, loc_B29C
                 ld      hl, #0xF100
 
-loc_B2B7:                                                       ; CODE XREF: RAM:B2C2j
+loc_B2B7:
                 ld      d, l
                 ld      b, #8
 
-loc_B2BA:                                                       ; CODE XREF: RAM:B2BEj
+loc_B2BA:
                 srl     d
                 rl      e
                 djnz    loc_B2BA
@@ -2741,8 +2928,7 @@ loc_B2BA:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 ; Slighty different to Knight Lore
 
-calc_pixel_XY:                                                  ; CODE XREF: RAM:B3E3p
-                                                                ; RAM:calc_2d_infop ...
+calc_pixel_XY:
                 ld      a, 1(ix)
                 add     a, 2(ix)
                 sub     #128
@@ -2750,7 +2936,7 @@ calc_pixel_XY:                                                  ; CODE XREF: RAM
                 jr      C, loc_B2D3
                 xor     a
 
-loc_B2D3:                                                       ; CODE XREF: RAM:B2D0j
+loc_B2D3:
                 ld      26(ix), a
                 ld      a, 2(ix)
                 sub     1(ix)
@@ -2764,8 +2950,7 @@ loc_B2D3:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-flip_sprite:                                                    ; CODE XREF: RAM:print_spritep
-                                                                ; RAM:B93Bp
+flip_sprite:
                 ld      l, 0(ix)
                 ld      h, #0
                 add     hl, hl
@@ -2782,7 +2967,7 @@ flip_sprite:                                                    ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-vflip_sprite_data:                                              ; CODE XREF: RAM:B2FDj
+vflip_sprite_data:
                 push    de
                 ld      a, (de)
                 xor     7(ix)
@@ -2805,7 +2990,7 @@ vflip_sprite_data:                                              ; CODE XREF: RAM
                 ld      h, d
                 ld      l, d
 
-loc_B31E:                                                       ; CODE XREF: RAM:B31Fj
+loc_B31E:
                 add     hl, de
                 djnz    loc_B31E
                 pop     de
@@ -2818,10 +3003,10 @@ loc_B31E:                                                       ; CODE XREF: RAM
                 dec     hl
                 srl     c
 
-loc_B32D:                                                       ; CODE XREF: RAM:B341j
+loc_B32D:
                 push    bc
 
-loc_B32E:                                                       ; CODE XREF: RAM:B335j
+loc_B32E:
                 ld      a, (de)
                 ld      c, (hl)
                 ld      (hl), a
@@ -2838,7 +3023,7 @@ loc_B32E:                                                       ; CODE XREF: RAM
                 dec     c
                 jr      NZ, loc_B32D
 
-loc_B343:                                                       ; CODE XREF: RAM:B309j
+loc_B343:
                 pop     de
                 push    de
                 ld      a, (de)
@@ -2862,8 +3047,7 @@ loc_B343:                                                       ; CODE XREF: RAM
                 ld      b, #0xF1 ; 'Ò'
                 exx
 
-loc_B360:                                                       ; CODE XREF: RAM:B36Bj
-                                                                ; RAM:B37Bj
+loc_B360:
                 exx
                 ld      c, (hl)
                 ld      a, (bc)
@@ -2878,7 +3062,7 @@ loc_B360:                                                       ; CODE XREF: RAM
                 djnz    loc_B360
                 ld      b, c
 
-loc_B36E:                                                       ; CODE XREF: RAM:B373j
+loc_B36E:
                 pop     de
                 ld      (hl), e
                 inc     hl
@@ -2893,14 +3077,12 @@ loc_B36E:                                                       ; CODE XREF: RAM
                 jr      loc_B360
 ; ---------------------------------------------------------------------------
 
-loc_B37D:                                                       ; CODE XREF: RAM:B34Bj
-                                                                ; RAM:B377j
+loc_B37D:
                 pop     de
                 ret
 ; ---------------------------------------------------------------------------
 
-calc_screen_buffer_addr:                                        ; CODE XREF: RAM:B14Bp
-                                                                ; RAM:B22Ep ...
+calc_screen_buffer_addr:
                 push    hl
                 srl     b
                 rr      c
@@ -2916,8 +3098,7 @@ calc_screen_buffer_addr:                                        ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-BC_to_Attr_In_DE:                                               ; CODE XREF: RAM:B148p
-                                                                ; RAM:loc_B22Bp ...
+BC_to_Attr_In_DE:
                 ld      a, c
                 rrca
                 rrca
@@ -2949,8 +3130,7 @@ BC_to_Attr_In_DE:                                               ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-calc_attrib_addr:                                               ; CODE XREF: RAM:BAACp
-                                                                ; RAM:BC8Ep
+calc_attrib_addr:
                 push    hl
                 ld      a, h
                 cpl
@@ -2971,7 +3151,7 @@ calc_attrib_addr:                                               ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-calc_pixel_XY_and_render:                                       ; CODE XREF: RAM:B6C2p
+calc_pixel_XY_and_render:
                 ld      a, 0(ix)
                 cp      #1
                 jr      NZ, loc_B3DF
@@ -2979,13 +3159,12 @@ calc_pixel_XY_and_render:                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B3DF:                                                       ; CODE XREF: RAM:B3D8j
+loc_B3DF:
                 res     4, 7(ix)
                 call    calc_pixel_XY
                 ret     NC
 
-print_sprite:                                                   ; CODE XREF: RAM:BA7Dp
-                                                                ; RAM:BDD9p ...
+print_sprite:
                 call    flip_sprite
                 ld      a, 26(ix)
                 and     #7
@@ -3009,7 +3188,7 @@ print_sprite:                                                   ; CODE XREF: RAM
                 neg
                 add     a, #0x50 ; 'P'
 
-loc_B40B:                                                       ; CODE XREF: RAM:B44Dj
+loc_B40B:
                 ld      (loc_B47B+1), a
                 ld      a, b
                 cpl
@@ -3025,7 +3204,7 @@ loc_B40B:                                                       ; CODE XREF: RAM
                 add     a, 25(ix)
                 ld      25(ix), a
 
-loc_B429:                                                       ; CODE XREF: RAM:B41Fj
+loc_B429:
                 ld      c, 26(ix)
                 ld      b, 27(ix)
                 call    calc_screen_buffer_addr
@@ -3037,7 +3216,7 @@ loc_B429:                                                       ; CODE XREF: RAM
                 jr      loc_B479
 ; ---------------------------------------------------------------------------
 
-loc_B43E:                                                       ; CODE XREF: RAM:B3EFj
+loc_B43E:
                 ld      a, (de)
                 inc     de
                 and     #0xF
@@ -3092,13 +3271,11 @@ loc_B43E:                                                       ; CODE XREF: RAM
                 jp      loc_B4CE
 ; ---------------------------------------------------------------------------
 
-loc_B479:                                                       ; CODE XREF: RAM:B43Cj
-                                                                ; RAM:B4D8j
+loc_B479:
                 ex      af, af'
                 ld      a, (bc)
 
-loc_B47B:                                                       ; CODE XREF: RAM:loc_B47Bj
-                                                                ; DATA XREF: RAM:loc_B40Bw
+loc_B47B:
                 jr      loc_B47B
 ; ---------------------------------------------------------------------------
                 pop     de
@@ -3183,10 +3360,10 @@ loc_B47B:                                                       ; CODE XREF: RAM
                 dec     h
                 ld      (bc), a
 
-loc_B4CE:                                                       ; CODE XREF: RAM:B476j
+loc_B4CE:
                 ld      a, c
 
-loc_B4CF:                                                       ; DATA XREF: RAM:B412w
+loc_B4CF:
                 add     a, #0
                 ld      c, a
                 ld      a, b
@@ -3199,7 +3376,7 @@ loc_B4CF:                                                       ; DATA XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-handle_pause:                                                   ; CODE XREF: RAM:B042p
+handle_pause:
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
@@ -3208,21 +3385,21 @@ handle_pause:                                                   ; CODE XREF: RAM
                 ret     NZ
                 call    loc_D5D7
 
-debounce_space_press:                                           ; CODE XREF: RAM:B4F5j
+debounce_space_press:
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
                 jr      NZ, debounce_space_press
-                ld      iy, #0x5C3A                             ; for ROM IRQ/keybd routine
+                ld      iy, #0x5C3A                                     ; for ROM IRQ/keybd routine
                 ei
 
-wait_for_space:                                                 ; CODE XREF: RAM:B503j
+wait_for_space:
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
                 jr      Z, wait_for_space
 
-debounce_space_release:                                         ; CODE XREF: RAM:B50Cj
+debounce_space_release:
                 ld      a, #0x7E ; '~'
                 call    read_port
                 bit     0, a
@@ -3232,20 +3409,17 @@ debounce_space_release:                                         ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-zero_DE:                                                        ; CODE XREF: RAM:C0A1p
-                                                                ; RAM:C9A1p
+zero_DE:
                 xor     a
 
-fill_DE:                                                        ; CODE XREF: RAM:B516j
-                                                                ; RAM:C2B8p ...
+fill_DE:
                 ld      (de), a
                 inc     de
                 djnz    fill_DE
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B519:                                                       ; CODE XREF: RAM:B326p
-                                                                ; RAM:B339p ...
+loc_B519:
                 add     a, l
                 ld      l, a
                 ld      a, h
@@ -3254,8 +3428,7 @@ loc_B519:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-get_ptr_object:                                                 ; CODE XREF: RAM:B1BEp
-                                                                ; RAM:B5A0p ...
+get_ptr_object:
                 push    bc
                 and     #0x7F ; ''
                 ld      l, a
@@ -3271,7 +3444,7 @@ get_ptr_object:                                                 ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-list_objects_to_draw:                                           ; CODE XREF: RAM:B038p
+list_objects_to_draw:
                 push    ix
                 ld      b, #54
                 ld      de, #32
@@ -3279,17 +3452,16 @@ list_objects_to_draw:                                           ; CODE XREF: RAM
                 ld      hl, #objects_to_draw
                 ld      c, #0
 
-loc_B541:                                                       ; CODE XREF: RAM:B552j
-                ld      a, 0(ix)                                ; graphic no
-                and     a                                       ; null?
-                jr      Z, loc_B54F                             ; yes, skip
-                bit     4, 7(ix)                                ; draw flag set?
-                jr      Z, loc_B54F                             ; no, skip
+loc_B541:                                                               ; graphic no
+                ld      a, 0(ix)
+                and     a                                               ; null?
+                jr      Z, loc_B54F                                     ; yes, skip
+                bit     4, 7(ix)                                        ; draw flag set?
+                jr      Z, loc_B54F                                     ; no, skip
                 ld      (hl), c
                 inc     hl
 
-loc_B54F:                                                       ; CODE XREF: RAM:B545j
-                                                                ; RAM:B54Bj
+loc_B54F:
                 inc     c
                 add     ix, de
                 djnz    loc_B541
@@ -3299,8 +3471,7 @@ loc_B54F:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 ; this list (48 bytes) is not long enough for all 54 objects
-objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:B1ABo
-                                                                ; RAM:B53Co ...
+objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
@@ -3308,17 +3479,16 @@ objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM
                 .db 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-calc_display_order_and_render:                                  ; CODE XREF: RAM:loc_B252p
+calc_display_order_and_render:
                 xor     a
                 ld      (rendered_objs_cnt), a
                 push    ix
                 push    iy
 
-process_remaining_objs:                                         ; CODE XREF: RAM:B6A4j
-                                                                ; RAM:B6C5j
+process_remaining_objs:
                 ld      de, #objects_to_draw
 
-loc_B595:                                                       ; CODE XREF: RAM:B59Ej
+loc_B595:
                 ld      a, (de)
                 inc     de
                 cp      #0xFF
@@ -3330,8 +3500,7 @@ loc_B595:                                                       ; CODE XREF: RAM
                 push    hl
                 pop     ix
 
-loc_B5AA:                                                       ; CODE XREF: RAM:B5B3j
-                                                                ; RAM:B5C5j ...
+loc_B5AA:
                 ld      a, (de)
                 inc     de
                 cp      #0xFF
@@ -3362,10 +3531,10 @@ loc_B5AA:                                                       ; CODE XREF: RAM
                 jr      C, loc_B5E4
                 inc     c
 
-loc_B5E4:                                                       ; CODE XREF: RAM:B5E1j
+loc_B5E4:
                 inc     c
 
-loc_B5E5:                                                       ; CODE XREF: RAM:B5D4j
+loc_B5E5:
                 ld      a, 2(iy)
                 add     a, 5(iy)
                 ld      l, a
@@ -3383,11 +3552,11 @@ loc_B5E5:                                                       ; CODE XREF: RAM
                 jr      C, loc_B608
                 add     a, #3
 
-loc_B608:                                                       ; CODE XREF: RAM:B604j
+loc_B608:
                 add     a, #3
                 ld      c, a
 
-loc_B60B:                                                       ; CODE XREF: RAM:B5F3j
+loc_B60B:
                 ld      a, 1(iy)
                 add     a, 4(iy)
                 ld      l, a
@@ -3405,16 +3574,16 @@ loc_B60B:                                                       ; CODE XREF: RAM
                 jr      C, loc_B62E
                 add     a, #9
 
-loc_B62E:                                                       ; CODE XREF: RAM:B62Aj
+loc_B62E:
                 add     a, #9
                 ld      c, a
 
-loc_B631:                                                       ; CODE XREF: RAM:B619j
+loc_B631:
                 ld      l, c
                 ld      bc, #off_B638
                 jp      jump_to_tbl_entry
 ; ---------------------------------------------------------------------------
-off_B638:       .dw continue_1                                  ; DATA XREF: RAM:B632o
+off_B638:       .dw continue_1
                 .dw continue_1
                 .dw continue_1
                 .dw d_3467121516
@@ -3443,24 +3612,21 @@ off_B638:       .dw continue_1                                  ; DATA XREF: RAM
                 .dw continue_1
 ; ---------------------------------------------------------------------------
 
-continue_1:                                                     ; DATA XREF: RAM:off_B638o
-                                                                ; RAM:B63Ao ...
+continue_1:
                 jp      loc_B5AA
 ; ---------------------------------------------------------------------------
 
-continue_2:                                                     ; DATA XREF: RAM:B64Co
-                                                                ; RAM:B64Eo ...
+continue_2:
                 jp      loc_B5AA
 ; ---------------------------------------------------------------------------
 
-d_3467121516:                                                   ; DATA XREF: RAM:B63Eo
-                                                                ; RAM:B640o ...
+d_3467121516:
                 ld      hl, (render_obj_2)
                 dec     hl
                 ld      c, (hl)
                 ld      de, #render_list
 
-loc_B67C:                                                       ; CODE XREF: RAM:B685j
+loc_B67C:
                 ld      a, (de)
                 cp      #0xFF
                 jr      Z, loc_B687
@@ -3470,7 +3636,7 @@ loc_B67C:                                                       ; CODE XREF: RAM
                 jr      loc_B67C
 ; ---------------------------------------------------------------------------
 
-loc_B687:                                                       ; CODE XREF: RAM:B67Fj
+loc_B687:
                 ld      a, c
                 ld      (de), a
                 inc     de
@@ -3484,10 +3650,10 @@ loc_B687:                                                       ; CODE XREF: RAM
                 jp      loc_B5AA
 ; ---------------------------------------------------------------------------
 
-loc_B69D:                                                       ; CODE XREF: RAM:B682j
+loc_B69D:
                 ld      hl, #objects_to_draw
 
-loc_B6A0:                                                       ; CODE XREF: RAM:B6A8j
+loc_B6A0:
                 ld      a, (hl)
                 inc     hl
                 cp      #0xFF
@@ -3499,14 +3665,14 @@ loc_B6A0:                                                       ; CODE XREF: RAM
                 jr      loc_B6B6
 ; ---------------------------------------------------------------------------
 
-objs_coincide:                                                  ; DATA XREF: RAM:B652o
+objs_coincide:
                 jp      loc_B5AA
 ; ---------------------------------------------------------------------------
 
-loc_B6B3:                                                       ; CODE XREF: RAM:B5AEj
+loc_B6B3:
                 ld      hl, (render_obj_1)
 
-loc_B6B6:                                                       ; CODE XREF: RAM:B6AEj
+loc_B6B6:
                 dec     hl
                 set     7, (hl)
                 ld      a, #0xFF
@@ -3517,13 +3683,12 @@ loc_B6B6:                                                       ; CODE XREF: RAM
                 jp      process_remaining_objs
 ; ---------------------------------------------------------------------------
 
-loc_B6C8:                                                       ; CODE XREF: RAM:B599j
+loc_B6C8:
                 pop     iy
                 pop     ix
                 ret
 ; ---------------------------------------------------------------------------
-render_list:    .db 0xFF                                        ; DATA XREF: RAM:B679o
-                                                                ; RAM:B6BBw
+render_list:    .db 0xFF
                 .db 0xFF
                 .db 0xFF
                 .db 0xFF
@@ -3542,15 +3707,14 @@ render_list:    .db 0xFF                                        ; DATA XREF: RAM
 ; ---------------------------------------------------------------------------
 ; Identical to Knight Lore, not Alien 8
 
-fill_window:                                                    ; CODE XREF: RAM:B242p
-                                                                ; RAM:BA72p ...
+fill_window:
                 ld      de, #32
 
-loc_B6E0:                                                       ; CODE XREF: RAM:B6EAj
+loc_B6E0:
                 push    bc
                 push    hl
 
-loc_B6E2:                                                       ; CODE XREF: RAM:B6E4j
+loc_B6E2:
                 ld      (hl), a
                 inc     hl
                 djnz    loc_B6E2
@@ -3562,8 +3726,7 @@ loc_B6E2:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_for_out_of_bounds:                                          ; CODE XREF: RAM:loc_B97Cp
-                                                                ; RAM:C648p
+adj_for_out_of_bounds:
                 bit     1, 7(ix)
                 ret     NZ
                 set     1, 7(ix)
@@ -3582,8 +3745,7 @@ adj_for_out_of_bounds:                                          ; CODE XREF: RAM
                 jr      Z, loc_B712
                 call    adj_dZ_for_obj_intersect
 
-loc_B712:                                                       ; CODE XREF: RAM:B706j
-                                                                ; RAM:B70Dj
+loc_B712:
                 ld      a, 9(ix)
                 and     a
                 ld      c, a
@@ -3594,8 +3756,7 @@ loc_B712:                                                       ; CODE XREF: RAM
                 jr      Z, loc_B723
                 call    adj_dX_for_obj_intersect
 
-loc_B723:                                                       ; CODE XREF: RAM:B717j
-                                                                ; RAM:B71Ej
+loc_B723:
                 ld      a, 10(ix)
                 and     a
                 ld      l, a
@@ -3606,8 +3767,7 @@ loc_B723:                                                       ; CODE XREF: RAM
                 jr      Z, loc_B734
                 call    adj_dY_for_obj_intersect
 
-loc_B734:                                                       ; CODE XREF: RAM:B728j
-                                                                ; RAM:B72Fj
+loc_B734:
                 ld      9(ix), c
                 ld      10(ix), l
                 ld      11(ix), h
@@ -3615,11 +3775,11 @@ loc_B734:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_dX_for_obj_intersect:                                       ; CODE XREF: RAM:B720p
+adj_dX_for_obj_intersect:
                 ld      iy, #graphic_objs_tbl
                 ld      b, #54
 
-loc_B748:                                                       ; CODE XREF: RAM:B78Ej
+loc_B748:
                 call    is_object_not_ignored
                 jr      Z, loc_B789
                 call    do_objs_intersect_on_y
@@ -3627,7 +3787,7 @@ loc_B748:                                                       ; CODE XREF: RAM
                 call    do_objs_intersect_on_z
                 jr      NC, loc_B789
 
-loc_B757:                                                       ; CODE XREF: RAM:B787j
+loc_B757:
                 call    do_objs_intersect_on_x
                 jr      NC, loc_B789
                 set     0, 12(ix)
@@ -3645,7 +3805,7 @@ loc_B757:                                                       ; CODE XREF: RAM
                 ld      a, 9(ix)
                 ld      9(iy), a
 
-loc_B781:                                                       ; CODE XREF: RAM:B779j
+loc_B781:
                 ld      a, c
                 call    adj_d_for_out_of_bounds
                 ld      c, a
@@ -3653,19 +3813,18 @@ loc_B781:                                                       ; CODE XREF: RAM
                 jr      loc_B757
 ; ---------------------------------------------------------------------------
 
-loc_B789:                                                       ; CODE XREF: RAM:B74Bj
-                                                                ; RAM:B750j ...
+loc_B789:
                 ld      de, #32
                 add     iy, de
                 djnz    loc_B748
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_dY_for_obj_intersect:                                       ; CODE XREF: RAM:B731p
+adj_dY_for_obj_intersect:
                 ld      iy, #graphic_objs_tbl
                 ld      b, #54
 
-loc_B797:                                                       ; CODE XREF: RAM:B7DDj
+loc_B797:
                 call    is_object_not_ignored
                 jr      Z, loc_B7D8
                 call    do_objs_intersect_on_x
@@ -3673,7 +3832,7 @@ loc_B797:                                                       ; CODE XREF: RAM
                 call    do_objs_intersect_on_z
                 jr      NC, loc_B7D8
 
-loc_B7A6:                                                       ; CODE XREF: RAM:B7D6j
+loc_B7A6:
                 call    do_objs_intersect_on_y
                 jr      NC, loc_B7D8
                 set     1, 12(ix)
@@ -3691,7 +3850,7 @@ loc_B7A6:                                                       ; CODE XREF: RAM
                 ld      a, 10(ix)
                 ld      10(iy), a
 
-loc_B7D0:                                                       ; CODE XREF: RAM:B7C8j
+loc_B7D0:
                 ld      a, l
                 call    adj_d_for_out_of_bounds
                 ld      l, a
@@ -3699,19 +3858,18 @@ loc_B7D0:                                                       ; CODE XREF: RAM
                 jr      loc_B7A6
 ; ---------------------------------------------------------------------------
 
-loc_B7D8:                                                       ; CODE XREF: RAM:B79Aj
-                                                                ; RAM:B79Fj ...
+loc_B7D8:
                 ld      de, #32
                 add     iy, de
                 djnz    loc_B797
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_dZ_for_obj_intersect:                                       ; CODE XREF: RAM:B70Fp
+adj_dZ_for_obj_intersect:
                 ld      iy, #graphic_objs_tbl
                 ld      b, #54
 
-loc_B7E6:                                                       ; CODE XREF: RAM:B863j
+loc_B7E6:
                 call    is_object_not_ignored
                 jr      Z, loc_B85E
                 call    do_objs_intersect_on_x
@@ -3719,7 +3877,7 @@ loc_B7E6:                                                       ; CODE XREF: RAM
                 call    do_objs_intersect_on_y
                 jr      NC, loc_B85E
 
-loc_B7F5:                                                       ; CODE XREF: RAM:B85Cj
+loc_B7F5:
                 call    do_objs_intersect_on_z
                 jr      NC, loc_B85E
                 set     2, 12(ix)
@@ -3731,14 +3889,13 @@ loc_B7F5:                                                       ; CODE XREF: RAM
                 jr      NC, loc_B810
                 set     7, 23(ix)
 
-loc_B810:                                                       ; CODE XREF: RAM:B806j
-                                                                ; RAM:B80Aj
+loc_B810:
                 cp      #0x8C ; 'å'
                 jr      C, loc_B819
                 cp      #0x90 ; 'ê'
                 call    C, loc_B866
 
-loc_B819:                                                       ; CODE XREF: RAM:B812j
+loc_B819:
                 ld      a, 13(ix)
                 rrca
                 and     #0x40 ; '@'
@@ -3759,15 +3916,14 @@ loc_B819:                                                       ; CODE XREF: RAM
                 ld      a, 9(iy)
                 ld      9(ix), a
 
-loc_B84A:                                                       ; CODE XREF: RAM:B842j
+loc_B84A:
                 ld      a, 10(ix)
                 and     a
                 jr      NZ, loc_B856
                 ld      a, 10(iy)
                 ld      10(ix), a
 
-loc_B856:                                                       ; CODE XREF: RAM:B836j
-                                                                ; RAM:B84Ej
+loc_B856:
                 ld      a, h
                 call    adj_d_for_out_of_bounds
                 ld      h, a
@@ -3775,15 +3931,14 @@ loc_B856:                                                       ; CODE XREF: RAM
                 jr      loc_B7F5
 ; ---------------------------------------------------------------------------
 
-loc_B85E:                                                       ; CODE XREF: RAM:B7E9j
-                                                                ; RAM:B7EEj ...
+loc_B85E:
                 ld      de, #32
                 add     iy, de
                 djnz    loc_B7E6
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B866:                                                       ; CODE XREF: RAM:B816p
+loc_B866:
                 bit     3, 13(iy)
                 ret     NZ
                 and     #3
@@ -3798,20 +3953,20 @@ loc_B866:                                                       ; CODE XREF: RAM
                 ld      hl, #byte_D30A
                 add     hl, de
                 ld      a, (hl)
-                add     a, 9(ix)                                ; dX
+                add     a, 9(ix)                                        ; dX
                 ld      9(ix), a
                 inc     hl
                 ld      a, (hl)
-                add     a, 10(ix)                               ; dY
+                add     a, 10(ix)                                       ; dY
                 ld      10(ix), a
 
-loc_B88D:                                                       ; CODE XREF: RAM:B878j
+loc_B88D:
                 pop     hl
                 pop     de
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B890:                                                       ; CODE XREF: RAM:B7FEp
+loc_B890:
                 ld      a, 0(ix)
                 cp      #0x5B ; '['
                 jr      Z, loc_B89D
@@ -3820,13 +3975,12 @@ loc_B890:                                                       ; CODE XREF: RAM
                 cp      #0x28 ; '('
                 ret     NC
 
-loc_B89D:                                                       ; CODE XREF: RAM:B895j
+loc_B89D:
                 set     7, 0x17(iy)
                 ret
 ; ---------------------------------------------------------------------------
 
-do_objs_intersect_on_x:                                         ; CODE XREF: RAM:loc_B757p
-                                                                ; RAM:B79Cp ...
+do_objs_intersect_on_x:
                 ld      a, 4(ix)
                 add     a, 4(iy)
                 ld      d, a
@@ -3836,13 +3990,12 @@ do_objs_intersect_on_x:                                         ; CODE XREF: RAM
                 jp      P, loc_B8B5
                 neg
 
-loc_B8B5:                                                       ; CODE XREF: RAM:B8B0j
+loc_B8B5:
                 sub     d
                 ret
 ; ---------------------------------------------------------------------------
 
-do_objs_intersect_on_y:                                         ; CODE XREF: RAM:B74Dp
-                                                                ; RAM:loc_B7A6p ...
+do_objs_intersect_on_y:
                 ld      a, 5(ix)
                 add     a, 5(iy)
                 ld      d, a
@@ -3852,13 +4005,12 @@ do_objs_intersect_on_y:                                         ; CODE XREF: RAM
                 jp      P, loc_B8CA
                 neg
 
-loc_B8CA:                                                       ; CODE XREF: RAM:B8C5j
+loc_B8CA:
                 sub     d
                 ret
 ; ---------------------------------------------------------------------------
 
-do_objs_intersect_on_z:                                         ; CODE XREF: RAM:B752p
-                                                                ; RAM:B7A1p ...
+do_objs_intersect_on_z:
                 ld      a, 3(ix)
                 add     a, h
                 sub     3(iy)
@@ -3866,17 +4018,17 @@ do_objs_intersect_on_z:                                         ; CODE XREF: RAM
                 neg
                 ld      d, 6(ix)
 
-loc_B8DB:                                                       ; CODE XREF: RAM:B8E0j
+loc_B8DB:
                 sub     d
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B8DD:                                                       ; CODE XREF: RAM:B8D3j
+loc_B8DD:
                 ld      d, 6(iy)
                 jr      loc_B8DB
 ; ---------------------------------------------------------------------------
 
-adj_dX_for_out_of_bounds:                                       ; CODE XREF: RAM:B719p
+adj_dX_for_out_of_bounds:
                 ld      a, 0xC(ix)
                 and     #0xF0 ; ''
                 ret     NZ
@@ -3885,14 +4037,14 @@ adj_dX_for_out_of_bounds:                                       ; CODE XREF: RAM
                 ld      a, (room_size_X)
                 ld      b, a
 
-loc_B8F1:                                                       ; CODE XREF: RAM:B90Aj
+loc_B8F1:
                 ld      a, 1(ix)
                 add     a, c
                 sub     #0x80 ; 'Ä'
                 jr      NC, loc_B8FB
                 neg
 
-loc_B8FB:                                                       ; CODE XREF: RAM:B8F7j
+loc_B8FB:
                 add     a, 4(ix)
                 cp      b
                 jr      C, locret_B90C
@@ -3902,11 +4054,11 @@ loc_B8FB:                                                       ; CODE XREF: RAM
                 ld      c, a
                 jr      NZ, loc_B8F1
 
-locret_B90C:                                                    ; CODE XREF: RAM:B8FFj
+locret_B90C:
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_dY_for_out_of_bounds:                                       ; CODE XREF: RAM:B72Ap
+adj_dY_for_out_of_bounds:
                 ld      a, 0xC(ix)
                 and     #0xF0 ; ''
                 ret     NZ
@@ -3915,14 +4067,14 @@ adj_dY_for_out_of_bounds:                                       ; CODE XREF: RAM
                 ld      a, (room_size_Y)
                 ld      b, a
 
-loc_B91C:                                                       ; CODE XREF: RAM:B935j
+loc_B91C:
                 ld      a, 2(ix)
                 add     a, l
                 sub     #0x80 ; 'Ä'
                 jr      NC, loc_B926
                 neg
 
-loc_B926:                                                       ; CODE XREF: RAM:B922j
+loc_B926:
                 add     a, 5(ix)
                 cp      b
                 jr      C, locret_B937
@@ -3932,11 +4084,11 @@ loc_B926:                                                       ; CODE XREF: RAM
                 ld      l, a
                 jr      NZ, loc_B91C
 
-locret_B937:                                                    ; CODE XREF: RAM:B92Aj
+locret_B937:
                 ret
 ; ---------------------------------------------------------------------------
 
-calc_2d_info:                                                   ; CODE XREF: RAM:B9ABp
+calc_2d_info:
                 call    calc_pixel_XY
                 call    flip_sprite
                 ld      a, 26(ix)
@@ -3946,7 +4098,7 @@ calc_2d_info:                                                   ; CODE XREF: RAM
                 jr      Z, loc_B948
                 inc     a
 
-loc_B948:                                                       ; CODE XREF: RAM:B945j
+loc_B948:
                 and     #0xF
                 ld      24(ix), a
                 ld      a, (de)
@@ -3954,8 +4106,7 @@ loc_B948:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-read_port:                                                      ; CODE XREF: RAM:B4E2p
-                                                                ; RAM:B4F0p ...
+read_port:
                 out     (0xFD), a
                 in      a, (0xFE)
                 cpl
@@ -3963,25 +4114,24 @@ read_port:                                                      ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_d_for_out_of_bounds:                                        ; CODE XREF: RAM:B782p
-                                                                ; RAM:B7D1p ...
+adj_d_for_out_of_bounds:
                 and     a
                 ret     Z
                 jp      P, loc_B961
                 inc     a
                 inc     a
 
-loc_B961:                                                       ; CODE XREF: RAM:B95Cj
+loc_B961:
                 dec     a
                 ret
 ; ---------------------------------------------------------------------------
 ; Identical to Knight Lore
 
-adj_dZ_for_out_of_bounds:                                       ; CODE XREF: RAM:B708p
+adj_dZ_for_out_of_bounds:
                 ld      a, (room_size_Z)
                 ld      d, a
 
-loc_B967:                                                       ; CODE XREF: RAM:B976j
+loc_B967:
                 ld      a, 3(ix)
                 add     a, h
                 cp      d
@@ -3995,15 +4145,13 @@ loc_B967:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 ; Identical to Knight Lore
 
-dec_dZ_and_update_XYZ:                                          ; CODE XREF: RAM:C057p
-                                                                ; RAM:C1C8p ...
+dec_dZ_and_update_XYZ:
                 dec     11(ix)
 
-loc_B97C:                                                       ; CODE XREF: RAM:CD41p
-                                                                ; RAM:loc_CDB6p ...
+loc_B97C:
                 call    adj_for_out_of_bounds
 
-loc_B97F:                                                       ; CODE XREF: RAM:C64Ep
+loc_B97F:
                 ld      a, 1(ix)
                 add     a, 9(ix)
                 ld      1(ix), a
@@ -4016,8 +4164,7 @@ loc_B97F:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-is_object_not_ignored:                                          ; CODE XREF: RAM:loc_B748p
-                                                                ; RAM:loc_B797p ...
+is_object_not_ignored:
                 ld      a, 0(iy)
                 and     a
                 ret     Z
@@ -4027,8 +4174,7 @@ is_object_not_ignored:                                          ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-set_draw_objs_overlapped:                                       ; CODE XREF: RAM:C619p
-                                                                ; RAM:CCE6j
+set_draw_objs_overlapped:
                 ld      iy, #graphic_objs_tbl
                 call    calc_2d_info
                 ld      b, #54
@@ -4048,7 +4194,7 @@ set_draw_objs_overlapped:                                       ; CODE XREF: RAM
                 jr      C, loc_B9C6
                 ld      a, l
 
-loc_B9C6:                                                       ; CODE XREF: RAM:B9C3j
+loc_B9C6:
                 ld      e, a
                 ld      a, l
                 add     a, 24(ix)
@@ -4059,7 +4205,7 @@ loc_B9C6:                                                       ; CODE XREF: RAM
                 jr      NC, loc_B9D4
                 ld      a, l
 
-loc_B9D4:                                                       ; CODE XREF: RAM:B9D1j
+loc_B9D4:
                 sub     e
                 ld      d, a
                 ld      a, 27(ix)
@@ -4067,7 +4213,7 @@ loc_B9D4:                                                       ; CODE XREF: RAM
                 jr      C, loc_B9E1
                 ld      a, 31(ix)
 
-loc_B9E1:                                                       ; CODE XREF: RAM:B9DCj
+loc_B9E1:
                 ld      l, a
                 ld      a, 27(ix)
                 add     a, 25(ix)
@@ -4078,11 +4224,11 @@ loc_B9E1:                                                       ; CODE XREF: RAM
                 jr      NC, loc_B9F3
                 ld      a, h
 
-loc_B9F3:                                                       ; CODE XREF: RAM:B9F0j
+loc_B9F3:
                 sub     l
                 ld      h, a
 
-loc_B9F5:                                                       ; CODE XREF: RAM:BA23j
+loc_B9F5:
                 ld      a, 0(iy)
                 and     a
                 jr      Z, loc_BA1C
@@ -4097,19 +4243,18 @@ loc_B9F5:                                                       ; CODE XREF: RAM
                 jr      C, loc_BA26
                 cp      d
 
-loc_BA0D:                                                       ; CODE XREF: RAM:BA2Bj
+loc_BA0D:
                 jr      NC, loc_BA1C
                 ld      a, 27(iy)
                 sub     l
                 jr      C, loc_BA2D
                 cp      h
 
-loc_BA16:                                                       ; CODE XREF: RAM:BA32j
+loc_BA16:
                 jr      NC, loc_BA1C
                 set     4, 7(iy)
 
-loc_BA1C:                                                       ; CODE XREF: RAM:B9F9j
-                                                                ; RAM:B9FFj ...
+loc_BA1C:
                 exx
                 ld      de, #32
                 add     iy, de
@@ -4118,32 +4263,32 @@ loc_BA1C:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BA26:                                                       ; CODE XREF: RAM:BA0Aj
+loc_BA26:
                 neg
                 cp      24(iy)
                 jr      loc_BA0D
 ; ---------------------------------------------------------------------------
 
-loc_BA2D:                                                       ; CODE XREF: RAM:BA13j
+loc_BA2D:
                 neg
                 cp      25(iy)
                 jr      loc_BA16
 ; ---------------------------------------------------------------------------
 
-display_objects_carried:                                        ; CODE XREF: RAM:B255p
+display_objects_carried:
                 ld      a, (byte_A720)
                 and     a
                 ret     Z
                 xor     a
                 ld      (byte_A720), a
 
-display_objects:                                                ; CODE XREF: RAM:B06Cp
+display_objects:
                 push    ix
                 ld      ix, #sprite_scratchpad
                 ld      b, #3
                 ld      hl, #objects_carried
 
-display_object:                                                 ; CODE XREF: RAM:BABDj
+display_object:
                 push    bc
                 push    hl
                 ld      a, b
@@ -4174,7 +4319,7 @@ display_object:                                                 ; CODE XREF: RAM
                 ld      0(ix), a
                 call    print_sprite
 
-loc_BA80:                                                       ; CODE XREF: RAM:BA78j
+loc_BA80:
                 ld      c, 26(ix)
                 ld      b, 27(ix)
                 call    BC_to_Attr_In_DE
@@ -4213,16 +4358,14 @@ loc_BA80:                                                       ; CODE XREF: RAM
                 pop     ix
                 ret
 ; ---------------------------------------------------------------------------
-byte_BAC2:      .db 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x47 ; DATA XREF: RAM:BA9Eo
-sprite_scratchpad:.db 0, 0, 0, 0, 0, 0, 0, 0                    ; DATA XREF: RAM:BA3Fo
-                                                                ; RAM:display_panelo ...
+byte_BAC2:      .db 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x47
+sprite_scratchpad:.db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-print_8x8:                                                      ; CODE XREF: RAM:BB57p
-                                                                ; RAM:BB5Dp ...
+print_8x8:
                 push    bc
                 push    de
                 push    hl
@@ -4230,7 +4373,7 @@ print_8x8:                                                      ; CODE XREF: RAM
                 jr      NZ, loc_BAF3
                 ld      a, #0x3D ; '='
 
-loc_BAF3:                                                       ; CODE XREF: RAM:BAEFj
+loc_BAF3:
                 ld      l, a
                 ld      h, #0
                 add     hl, hl
@@ -4242,7 +4385,7 @@ loc_BAF3:                                                       ; CODE XREF: RAM
                 pop     hl
                 ld      b, #8
 
-loc_BB02:                                                       ; CODE XREF: RAM:BB0Bj
+loc_BB02:
                 ld      a, (de)
                 ld      (hl), a
                 inc     de
@@ -4258,21 +4401,20 @@ loc_BB02:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-print_label_and_score:                                          ; CODE XREF: RAM:AFD4p
-                                                                ; RAM:B078p
+print_label_and_score:
                 ld      hl, #0x1FC0
                 ld      a, #0x47 ; 'G'
                 ld      (tmp_attrib), a
-                ld      de, #aScore                             ; "SCOR≈"
+                ld      de, #aScore                                     ; "SCOR≈"
                 call    print_text_single_colour
                 jr      print_score
 ; ---------------------------------------------------------------------------
-aScore:         .ascii 'SCOR'                                   ; DATA XREF: RAM:BB1Co
+aScore:         .ascii 'SCOR'
                 .db 0xC5
 ; ---------------------------------------------------------------------------
 ; BC = value to add (BCD)
 
-add_to_score_and_print:                                         ; CODE XREF: RAM:C274p
+add_to_score_and_print:
                 ld      hl, # score+2
                 ld      a, (hl)
                 add     a, c
@@ -4289,7 +4431,7 @@ add_to_score_and_print:                                         ; CODE XREF: RAM
                 daa
                 ld      (hl), a
 
-print_score:                                                    ; CODE XREF: RAM:BB22j
+print_score:
                 ld      bc, #0x10B8
                 call    calc_screen_buffer_addr
                 ld      l, c
@@ -4297,8 +4439,7 @@ print_score:                                                    ; CODE XREF: RAM
                 ld      de, #score
                 ld      b, #3
 
-print_BCD_number:                                               ; CODE XREF: RAM:BB61j
-                                                                ; RAM:C2CBj ...
+print_BCD_number:
                 push    hl
                 ld      hl, #font
                 ld      (gfxbase_8x8), hl
@@ -4311,7 +4452,7 @@ print_BCD_number:                                               ; CODE XREF: RAM
                 and     #0xF
                 call    print_8x8
 
-print_BCD_lsd:                                                  ; CODE XREF: RAM:C742j
+print_BCD_lsd:
                 ld      a, (de)
                 and     #0xF
                 call    print_8x8
@@ -4320,35 +4461,35 @@ print_BCD_lsd:                                                  ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-toggle_selected:                                                ; CODE XREF: RAM:BBE3p
+toggle_selected:
                 and     a
                 jr      NZ, loc_BB6E
 
-loc_BB67:                                                       ; CODE XREF: RAM:BB6Cj
+loc_BB67:
                 set     7, (hl)
                 jr      loc_BB70
 ; ---------------------------------------------------------------------------
 
-loc_BB6B:                                                       ; CODE XREF: RAM:BB71j
+loc_BB6B:
                 dec     a
                 jr      Z, loc_BB67
 
-loc_BB6E:                                                       ; CODE XREF: RAM:BB65j
+loc_BB6E:
                 res     7, (hl)
 
-loc_BB70:                                                       ; CODE XREF: RAM:BB69j
+loc_BB70:
                 inc     hl
                 djnz    loc_BB6B
                 ret
 ; ---------------------------------------------------------------------------
 
-do_menu_selection:                                              ; CODE XREF: RAM:AFB6p
+do_menu_selection:
                 xor     a
                 ld      (suppress_border), a
                 ld      hl, #menu_colours
                 ld      b, #8
 
-loc_BB7D:                                                       ; CODE XREF: RAM:BB80j
+loc_BB7D:
                 res     7, (hl)
                 inc     hl
                 djnz    loc_BB7D
@@ -4356,7 +4497,7 @@ loc_BB7D:                                                       ; CODE XREF: RAM
                 call    display_menu
                 call    flash_menu
 
-menu_loop:                                                      ; CODE XREF: RAM:BBD5j
+menu_loop:
                 call    display_menu
                 ld      de, #menu_tune
                 call    play_audio_wait_key
@@ -4365,30 +4506,30 @@ menu_loop:                                                      ; CODE XREF: RAM
                 ld      e, a
                 ld      a, (user_input_method)
                 ld      (tmp_input_method), a
-                bit     0, e                                    ; keyboard?
-                jr      Z, check_for_kempston_joystick          ; no, skip
+                bit     0, e                                            ; keyboard?
+                jr      Z, check_for_kempston_joystick                  ; no, skip
                 and     #0xF9 ; '˘'
 
-check_for_kempston_joystick:                                    ; CODE XREF: RAM:BBA2j
+check_for_kempston_joystick:
                 bit     1, e
                 jr      Z, check_for_cursor_joystick
                 and     #0xF9 ; '˘'
                 or      #2
 
-check_for_cursor_joystick:                                      ; CODE XREF: RAM:BBA8j
+check_for_cursor_joystick:
                 bit     2, e
                 jr      Z, check_for_interface_ii
                 and     #0xF9 ; '˘'
                 or      #4
 
-check_for_interface_ii:                                         ; CODE XREF: RAM:BBB0j
+check_for_interface_ii:
                 bit     3, e
                 jr      Z, check_for_start_game
                 or      #6
 
-check_for_start_game:                                           ; CODE XREF: RAM:BBB8j
+check_for_start_game:
                 ld      (user_input_method), a
-                ld      hl, #directional                        ; not used - left over from Knight Lore/Alien 8
+                ld      hl, #directional                                ; not used - left over from Knight Lore/Alien 8
                 ld      hl, #tmp_input_method
                 cp      (hl)
                 ld      a, #0xEF ; 'Ô'
@@ -4401,8 +4542,7 @@ check_for_start_game:                                           ; CODE XREF: RAM
                 jp      menu_loop
 ; ---------------------------------------------------------------------------
 
-flash_menu:                                                     ; CODE XREF: RAM:BB88p
-                                                                ; RAM:BBD2p
+flash_menu:
                 ld      hl, # menu_colours+1
                 ld      a, (user_input_method)
                 rrca
@@ -4416,16 +4556,15 @@ flash_menu:                                                     ; CODE XREF: RAM
                 set     7, (hl)
                 ret
 ; ---------------------------------------------------------------------------
-menu_colours:   .db 0x43, 0x44, 0x44, 0x44, 0x44, 0x47, 0x47    ; DATA XREF: RAM:BB78o
-                                                                ; RAM:display_menuo ...
-menu_xy:        .db 0x58, 0x9F                                  ; DATA XREF: RAM:BCB8o
+menu_colours:   .db 0x43, 0x44, 0x44, 0x44, 0x44, 0x47, 0x47
+menu_xy:        .db 0x58, 0x9F
                 .db 0x30, 0x8F
                 .db 0x30, 0x7F
                 .db 0x30, 0x6F
                 .db 0x30, 0x5F
                 .db 0x30, 0x3F
                 .db 0x50, 0x27
-aPentagram:     .ascii 'PENTAGRA'                               ; DATA XREF: RAM:BCBBo
+aPentagram:     .ascii 'PENTAGRA'
                 .db 0xCD
 a1Keyboard:     .ascii '1 KEYBOAR'
                 .db 0xC4
@@ -4441,10 +4580,9 @@ a1986ACG:       .ascii '< 1986 A:C:G'
                 .db 0xBA
 ; ---------------------------------------------------------------------------
 
-print_text_single_colour:                                       ; CODE XREF: RAM:BB1Fp
-                                                                ; RAM:BCCFp
+print_text_single_colour:
                 push    hl
-                ld      hl, #font-#0x180                        ; font-$180 (base='0')
+                ld      hl, #font-#0x180                                ; font-$180 (base='0')
                 ld      (gfxbase_8x8), hl
                 pop     bc
                 push    bc
@@ -4458,7 +4596,7 @@ print_text_single_colour:                                       ; CODE XREF: RAM
 
 print_text_std_font:
                 push    hl
-                ld      hl, #font-#0x180                        ; font-$180 (base='0')
+                ld      hl, #font-#0x180                                ; font-$180 (base='0')
                 ld      (gfxbase_8x8), hl
                 pop     bc
                 push    bc
@@ -4469,7 +4607,7 @@ print_text_std_font:
                 ex      af, af'
                 inc     de
 
-loc_BC8B:                                                       ; CODE XREF: RAM:BC78j
+loc_BC8B:
                 exx
                 pop     hl
                 push    de
@@ -4478,7 +4616,7 @@ loc_BC8B:                                                       ; CODE XREF: RAM
                 ld      h, d
                 pop     de
 
-loc_BC94:                                                       ; CODE XREF: RAM:BCA5j
+loc_BC94:
                 exx
                 ld      a, (de)
                 bit     7, a
@@ -4495,7 +4633,7 @@ loc_BC94:                                                       ; CODE XREF: RAM
                 jr      loc_BC94
 ; ---------------------------------------------------------------------------
 
-loc_BCA7:                                                       ; CODE XREF: RAM:BC98j
+loc_BCA7:
                 and     #0x7F ; ''
                 push    de
                 call    print_8x8
@@ -4508,16 +4646,14 @@ loc_BCA7:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-display_menu:                                                   ; CODE XREF: RAM:BB85p
-                                                                ; RAM:menu_loopp
+display_menu:
                 ld      de, #menu_colours
                 exx
                 ld      hl, #menu_xy
-                ld      de, #aPentagram                         ; "PENTAGRAÕ"
+                ld      de, #aPentagram                                 ; "PENTAGRAÕ"
                 ld      b, #7
 
-display_text_list:                                              ; CODE XREF: RAM:BCD4j
-                                                                ; RAM:C31Ap ...
+display_text_list:
                 exx
                 ld      a, (de)
                 ld      (tmp_attrib), a
@@ -4544,7 +4680,7 @@ display_text_list:                                              ; CODE XREF: RAM
                 jp      update_screen
 ; ---------------------------------------------------------------------------
 
-display_panel:                                                  ; CODE XREF: RAM:B06Fp
+display_panel:
                 ld      ix, #sprite_scratchpad
                 ld      hl, #panel_data
                 call    transfer_sprite
@@ -4573,7 +4709,7 @@ display_panel:                                                  ; CODE XREF: RAM
                 call    transfer_sprite_and_print
                 jp      transfer_sprite_and_print
 ; ---------------------------------------------------------------------------
-panel_data:     .db 0x3E, 0x40, 0x10, 0x34                      ; DATA XREF: RAM:BCE9o
+panel_data:     .db 0x3E, 0x40, 0x10, 0x34
                 .db 0x3E, 0, 0xE0, 0x34
                 .db 0x3D, 0x40, 0, 4
                 .db 0x3D, 0, 0xF0, 4
@@ -4585,8 +4721,7 @@ panel_data:     .db 0x3E, 0x40, 0x10, 0x34                      ; DATA XREF: RAM
                 .db 0x3B, 0, 0xF0, 0x34
 ; ---------------------------------------------------------------------------
 
-print_border:                                                   ; CODE XREF: RAM:BCDFp
-                                                                ; RAM:C32Bp
+print_border:
                 ld      ix, #sprite_scratchpad
                 ld      hl, #border_data
                 call    transfer_sprite_and_print
@@ -4610,7 +4745,7 @@ print_border:                                                   ; CODE XREF: RAM
                 ld      b, #6
                 jp      multiple_print_sprite
 ; ---------------------------------------------------------------------------
-border_data:    .db 5, 0, 0, 0xA8                               ; DATA XREF: RAM:BD5Do
+border_data:    .db 5, 0, 0, 0xA8
                 .db 5, 0x40, 0xE8, 0xA8
                 .db 5, 0xC0, 0xE8, 0
                 .db 5, 0x80, 0, 0
@@ -4622,8 +4757,7 @@ border_data:    .db 5, 0, 0, 0xA8                               ; DATA XREF: RAM
                 .db 2, 0x40, 0xE8, 0x18
 ; ---------------------------------------------------------------------------
 
-transfer_sprite:                                                ; CODE XREF: RAM:BCECp
-                                                                ; RAM:BCF7p ...
+transfer_sprite:
                 ld      a, (hl)
                 inc     hl
                 ld      0(ix), a
@@ -4639,8 +4773,7 @@ transfer_sprite:                                                ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-transfer_sprite_and_print:                                      ; CODE XREF: RAM:BD25p
-                                                                ; RAM:BD28p ...
+transfer_sprite_and_print:
                 call    transfer_sprite
                 push    hl
                 call    print_sprite
@@ -4648,8 +4781,7 @@ transfer_sprite_and_print:                                      ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-multiple_print_sprite:                                          ; CODE XREF: RAM:BCF4p
-                                                                ; RAM:BCFFp ...
+multiple_print_sprite:
                 push    bc
                 push    de
                 push    hl
@@ -4667,7 +4799,7 @@ multiple_print_sprite:                                          ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-check_user_input:                                               ; CODE XREF: RAM:loc_C450p
+check_user_input:
                 ld      a, (user_input_method)
                 rrca
                 and     #3
@@ -4683,7 +4815,7 @@ interface_ii:
                 push    bc
                 ld      b, #5
 
-loc_BE0F:                                                       ; CODE XREF: RAM:BE12j
+loc_BE0F:
                 rra
                 rl      c
                 djnz    loc_BE0F
@@ -4698,62 +4830,62 @@ loc_BE0F:                                                       ; CODE XREF: RAM
                 jr      Z, loc_BE25
                 set     6, c
 
-loc_BE25:                                                       ; CODE XREF: RAM:BE21j
+loc_BE25:
                 bit     1, a
                 jr      Z, loc_BE2B
                 set     2, c
 
-loc_BE2B:                                                       ; CODE XREF: RAM:BE27j
+loc_BE2B:
                 bit     2, a
                 jr      Z, loc_BE31
                 set     3, c
 
-loc_BE31:                                                       ; CODE XREF: RAM:BE2Dj
+loc_BE31:
                 bit     3, a
                 jr      Z, loc_BE37
                 set     1, c
 
-loc_BE37:                                                       ; CODE XREF: RAM:BE33j
+loc_BE37:
                 bit     4, a
                 jr      Z, loc_BE3D
                 set     0, c
 
-loc_BE3D:                                                       ; CODE XREF: RAM:BE39j
+loc_BE3D:
                 jp      finished_input
 ; ---------------------------------------------------------------------------
 
-kempston:                                                       ; CODE XREF: RAM:BE02j
+kempston:
                 in      a, (0x1F)
                 ld      c, #0
                 bit     0, a
                 jr      Z, loc_BE4A
                 set     1, c
 
-loc_BE4A:                                                       ; CODE XREF: RAM:BE46j
+loc_BE4A:
                 bit     1, a
                 jr      Z, loc_BE50
                 set     0, c
 
-loc_BE50:                                                       ; CODE XREF: RAM:BE4Cj
+loc_BE50:
                 bit     2, a
                 jr      Z, loc_BE56
                 set     3, c
 
-loc_BE56:                                                       ; CODE XREF: RAM:BE52j
+loc_BE56:
                 bit     3, a
                 jr      Z, loc_BE5C
                 set     2, c
 
-loc_BE5C:                                                       ; CODE XREF: RAM:BE58j
+loc_BE5C:
                 bit     4, a
                 jr      Z, loc_BE62
                 set     6, c
 
-loc_BE62:                                                       ; CODE XREF: RAM:BE5Ej
+loc_BE62:
                 jp      finished_input
 ; ---------------------------------------------------------------------------
 
-cursor:                                                         ; CODE XREF: RAM:BE05j
+cursor:
                 ld      c, #0
                 ld      a, #0xF7 ; '˜'
                 call    read_port
@@ -4761,31 +4893,31 @@ cursor:                                                         ; CODE XREF: RAM
                 jr      Z, loc_BE72
                 set     0, c
 
-loc_BE72:                                                       ; CODE XREF: RAM:BE6Ej
+loc_BE72:
                 ld      a, #0xEF ; 'Ô'
                 call    read_port
                 bit     0, a
                 jr      Z, loc_BE7D
                 set     6, c
 
-loc_BE7D:                                                       ; CODE XREF: RAM:BE79j
+loc_BE7D:
                 bit     3, a
                 jr      Z, loc_BE83
                 set     2, c
 
-loc_BE83:                                                       ; CODE XREF: RAM:BE7Fj
+loc_BE83:
                 bit     2, a
                 jr      Z, loc_BE89
                 set     1, c
 
-loc_BE89:                                                       ; CODE XREF: RAM:BE85j
+loc_BE89:
                 bit     4, a
                 jr      Z, finished_input
                 set     3, c
                 jr      finished_input
 ; ---------------------------------------------------------------------------
 
-keyboard:                                                       ; CODE XREF: RAM:BDFEj
+keyboard:
                 ld      a, #0xFE ; '˛'
                 call    read_port
                 rrca
@@ -4796,34 +4928,34 @@ keyboard:                                                       ; CODE XREF: RAM
                 or      c
                 and     #3
                 ld      c, a
-                ld      a, #0x7F ; ''                          ; row 7
+                ld      a, #0x7F ; ''                                  ; row 7
                 call    read_port
-                bit     1, a                                    ; SYM SHIFT (right)?
-                jr      Z, loc_BEAD                             ; no, skip
-                set     1, c                                    ; RIGHT
+                bit     1, a                                            ; SYM SHIFT (right)?
+                jr      Z, loc_BEAD                                     ; no, skip
+                set     1, c                                            ; RIGHT
 
-loc_BEAD:                                                       ; CODE XREF: RAM:BEA9j
-                bit     2, a                                    ; 'M' (left)?
-                jr      Z, loc_BEB3                             ; no, skip
-                set     0, c                                    ; LEFT
+loc_BEAD:                                                               ; 'M' (left)?
+                bit     2, a
+                jr      Z, loc_BEB3                                     ; no, skip
+                set     0, c                                            ; LEFT
 
-loc_BEB3:                                                       ; CODE XREF: RAM:BEAFj
-                bit     3, a                                    ; 'N' (right)?
-                jr      Z, loc_BEB9                             ; no, skip
-                set     1, c                                    ; RIGHT
+loc_BEB3:                                                               ; 'N' (right)?
+                bit     3, a
+                jr      Z, loc_BEB9                                     ; no, skip
+                set     1, c                                            ; RIGHT
 
-loc_BEB9:                                                       ; CODE XREF: RAM:BEB5j
-                bit     4, a                                    ; 'B' (left)?
-                jr      Z, loc_BEBF                             ; no, skip
-                set     0, c                                    ; LEFT
+loc_BEB9:                                                               ; 'B' (left)?
+                bit     4, a
+                jr      Z, loc_BEBF                                     ; no, skip
+                set     0, c                                            ; LEFT
 
-loc_BEBF:                                                       ; CODE XREF: RAM:BEBBj
-                ld      a, #0xBD ; 'Ω'                          ; rows 1,6 (2nd row)
+loc_BEBF:                                                               ; rows 1,6 (2nd row)
+                ld      a, #0xBD ; 'Ω'
                 call    read_port
-                jr      Z, loc_BEC8                             ; nothing, skip
-                set     2, c                                    ; FORWARD
+                jr      Z, loc_BEC8                                     ; nothing, skip
+                set     2, c                                            ; FORWARD
 
-loc_BEC8:                                                       ; CODE XREF: RAM:BEC4j
+loc_BEC8:
                 ld      a, #0xDF ; 'ﬂ'
                 call    read_port
                 ld      b, a
@@ -4835,16 +4967,16 @@ loc_BEC8:                                                       ; CODE XREF: RAM
                 and     #0x15
                 jr      Z, loc_BEDE
 
-loc_BEDC:                                                       ; CODE XREF: RAM:BED0j
-                set     3, c                                    ; JUMP
+loc_BEDC:                                                               ; JUMP
+                set     3, c
 
-loc_BEDE:                                                       ; CODE XREF: RAM:BEDAj
-                ld      a, #0xE7 ; 'Á'                          ; rows 3,4
+loc_BEDE:                                                               ; rows 3,4
+                ld      a, #0xE7 ; 'Á'
                 call    read_port
-                jr      Z, loc_BEE7                             ; nothing, skip
-                set     4, c                                    ; PICKUP_DROP
+                jr      Z, loc_BEE7                                     ; nothing, skip
+                set     4, c                                            ; PICKUP_DROP
 
-loc_BEE7:                                                       ; CODE XREF: RAM:BEE3j
+loc_BEE7:
                 ld      a, #0xDF ; 'ﬂ'
                 call    read_port
                 and     #0x15
@@ -4854,40 +4986,37 @@ loc_BEE7:                                                       ; CODE XREF: RAM
                 and     #0xA
                 jr      Z, loc_BF08
 
-loc_BEF9:                                                       ; CODE XREF: RAM:BEEEj
-                set     6, c                                    ; FIRE
+loc_BEF9:                                                               ; FIRE
+                set     6, c
                 jr      loc_BF08
 ; ---------------------------------------------------------------------------
 
-finished_input:                                                 ; CODE XREF: RAM:loc_BE3Dj
-                                                                ; RAM:loc_BE62j ...
+finished_input:
                 ld      a, #0x7E ; '~'
                 call    read_port
                 and     #0x1E
                 jr      Z, loc_BF08
                 set     4, c
 
-loc_BF08:                                                       ; CODE XREF: RAM:BEF7j
-                                                                ; RAM:BEFBj ...
+loc_BF08:
                 ld      a, c
                 ld      (user_input), a
                 ret
 ; ---------------------------------------------------------------------------
 
-reset_objs_wipe_flag:                                           ; CODE XREF: RAM:B07Bp
+reset_objs_wipe_flag:
                 ld      b, #54
                 ld      de, #32
                 ld      hl, # graphic_objs_tbl+7
 
-loc_BF15:                                                       ; CODE XREF: RAM:BF18j
+loc_BF15:
                 res     5, (hl)
                 add     hl, de
                 djnz    loc_BF15
                 ret
 ; ---------------------------------------------------------------------------
 
-do_any_objs_intersect:                                          ; CODE XREF: RAM:loc_B102p
-                                                                ; RAM:BF9Fp ...
+do_any_objs_intersect:
                 push    bc
                 push    de
                 push    hl
@@ -4899,7 +5028,7 @@ do_any_objs_intersect:                                          ; CODE XREF: RAM
                 ld      h, c
                 set     1, 7(ix)
 
-loc_BF2E:                                                       ; CODE XREF: RAM:BF51j
+loc_BF2E:
                 call    is_object_not_ignored
                 jr      Z, loc_BF4C
                 call    do_objs_intersect_on_x
@@ -4909,7 +5038,7 @@ loc_BF2E:                                                       ; CODE XREF: RAM
                 call    do_objs_intersect_on_z
                 jr      NC, loc_BF4C
 
-loc_BF42:                                                       ; CODE XREF: RAM:BF54j
+loc_BF42:
                 pop     iy
                 pop     hl
                 pop     de
@@ -4918,8 +5047,7 @@ loc_BF42:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BF4C:                                                       ; CODE XREF: RAM:BF31j
-                                                                ; RAM:BF36j ...
+loc_BF4C:
                 ld      de, #0x20 ; ' '
                 add     iy, de
                 djnz    loc_BF2E
@@ -4927,8 +5055,7 @@ loc_BF4C:                                                       ; CODE XREF: RAM
                 jr      loc_BF42
 ; ---------------------------------------------------------------------------
 
-loc_BF56:                                                       ; CODE XREF: RAM:C08Ep
-                                                                ; RAM:C0BFp
+loc_BF56:
                 push    iy
                 push    ix
                 push    iy
@@ -4939,8 +5066,7 @@ loc_BF56:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BF66:                                                       ; CODE XREF: RAM:BF80p
-                                                                ; RAM:BFE4p ...
+loc_BF66:
                 ld      hl, #user_input_method
                 ld      a, (hl)
                 and     #6
@@ -4950,13 +5076,12 @@ loc_BF66:                                                       ; CODE XREF: RAM
                 jr      Z, loc_BF76
                 rrca
 
-loc_BF76:                                                       ; CODE XREF: RAM:BF6Fj
-                                                                ; RAM:BF73j
+loc_BF76:
                 and     #0x10
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BF79:                                                       ; CODE XREF: RAM:C463p
+loc_BF79:
                 ld      a, (byte_A740)
                 and     a
                 jp      NZ, loc_C00E
@@ -4980,7 +5105,7 @@ loc_BF79:                                                       ; CODE XREF: RAM
                 ld      a, #1
                 ld      (byte_A741), a
 
-loc_BFAC:                                                       ; CODE XREF: RAM:BFA5j
+loc_BFAC:
                 ld      a, #1
                 ld      (byte_A740), a
                 ld      (byte_A720), a
@@ -5001,7 +5126,7 @@ loc_BFAC:                                                       ; CODE XREF: RAM
                 push    hl
                 ld      iy, # graphic_obj_2+0x80
 
-loc_BFD7:                                                       ; CODE XREF: RAM:BFE2j
+loc_BFD7:
                 call    loc_C0D4
                 jp      C, loc_C0A7
                 ld      de, #0x20 ; ' '
@@ -5013,15 +5138,14 @@ loc_BFD7:                                                       ; CODE XREF: RAM
                 ld      b, #0x30 ; '0'
                 ld      iy, # graphic_obj_2+0x80
 
-loc_BFF2:                                                       ; CODE XREF: RAM:BFFAj
+loc_BFF2:
                 ld      a, 0(iy)
                 and     a
                 jr      Z, loc_C017
                 add     iy, de
                 djnz    loc_BFF2
 
-loc_BFFC:                                                       ; CODE XREF: RAM:BFE7j
-                                                                ; RAM:C023j ...
+loc_BFFC:
                 pop     hl
                 ld      6(ix), l
                 pop     hl
@@ -5032,7 +5156,7 @@ loc_BFFC:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C00E:                                                       ; CODE XREF: RAM:BF7Dj
+loc_C00E:
                 call    loc_BF66
                 ret     NZ
                 xor     a
@@ -5040,7 +5164,7 @@ loc_C00E:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C017:                                                       ; CODE XREF: RAM:BFF6j
+loc_C017:
                 ld      hl, # objects_carried+8
                 ld      a, (hl)
                 inc     hl
@@ -5079,7 +5203,7 @@ loc_C017:                                                       ; CODE XREF: RAM
                 pop     iy
                 pop     ix
 
-loc_C061:                                                       ; CODE XREF: RAM:C0D2j
+loc_C061:
                 ld      4(iy), #5
                 ld      5(iy), #5
                 ld      6(iy), #0xC
@@ -5101,8 +5225,7 @@ loc_C061:                                                       ; CODE XREF: RAM
                 set     0, 0xD(iy)
                 call    loc_BF56
 
-loc_C091:                                                       ; CODE XREF: RAM:C01Dj
-                                                                ; RAM:C0CCj
+loc_C091:
                 ld      hl, # objects_carried+7
                 ld      de, # objects_carried+0xB
                 ld      bc, #0xC
@@ -5113,7 +5236,7 @@ loc_C091:                                                       ; CODE XREF: RAM
                 jp      loc_BFFC
 ; ---------------------------------------------------------------------------
 
-loc_C0A7:                                                       ; CODE XREF: RAM:BFDAj
+loc_C0A7:
                 ld      hl, #inventory
                 ld      a, 0(iy)
                 ld      (hl), a
@@ -5140,7 +5263,7 @@ loc_C0A7:                                                       ; CODE XREF: RAM
                 jr      loc_C061
 ; ---------------------------------------------------------------------------
 
-loc_C0D4:                                                       ; CODE XREF: RAM:loc_BFD7p
+loc_C0D4:
                 ld      a, 0(iy)
                 cp      #0x5A ; 'Z'
                 jr      Z, loc_C0E0
@@ -5148,7 +5271,7 @@ loc_C0D4:                                                       ; CODE XREF: RAM
                 cp      #5
                 ret     NC
 
-loc_C0E0:                                                       ; CODE XREF: RAM:C0D9j
+loc_C0E0:
                 push    bc
                 ld      bc, #0
                 ld      l, c
@@ -5167,39 +5290,35 @@ loc_C0E0:                                                       ; CODE XREF: RAM
                 ld      3(ix), a
                 pop     af
 
-loc_C105:                                                       ; CODE XREF: RAM:C0E9j
-                                                                ; RAM:C0EEj
+loc_C105:
                 pop     bc
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C107:                                                       ; CODE XREF: RAM:C1F4j
-                                                                ; RAM:C44Dj ...
+loc_C107:
                 ld      0(ix), #0x40 ; '@'
                 set     1, 7(ix)
                 jr      loc_C11A
 ; ---------------------------------------------------------------------------
 
-upd_40_to_46:                                                   ; DATA XREF: RAM:AEAFo
-                                                                ; RAM:AEB1o ...
+upd_40_to_46:
                 call    adj_m4_m12
                 call    loc_D64E
                 inc     0(ix)
 
-loc_C11A:                                                       ; CODE XREF: RAM:C10Fj
-                                                                ; RAM:C124j
+loc_C11A:
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-upd_47:                                                         ; DATA XREF: RAM:AEBDo
+upd_47:
                 call    adj_m4_m12
 
-loc_C120:                                                       ; CODE XREF: RAM:C282j
+loc_C120:
                 ld      0(ix), #1
                 jr      loc_C11A
 ; ---------------------------------------------------------------------------
 
-loc_C126:                                                       ; CODE XREF: RAM:C47Dp
+loc_C126:
                 ld      hl, #graphic_obj_2
                 ld      a, (user_input)
                 and     #0x40 ; '@'
@@ -5209,7 +5328,7 @@ loc_C126:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C135:                                                       ; CODE XREF: RAM:C12Ej
+loc_C135:
                 ld      a, (byte_A743)
                 and     a
                 ret     NZ
@@ -5224,7 +5343,7 @@ loc_C135:                                                       ; CODE XREF: RAM
                 and     a
                 ret     NZ
 
-loc_C149:                                                       ; CODE XREF: RAM:C143j
+loc_C149:
                 ex      de, hl
                 push    de
                 pop     iy
@@ -5269,7 +5388,7 @@ loc_C149:                                                       ; CODE XREF: RAM
                 jp      P, loc_C1A5
                 neg
 
-loc_C1A5:                                                       ; CODE XREF: RAM:C1A0j
+loc_C1A5:
                 cp      l
                 jr      NC, loc_C1B8
                 ld      a, 2(iy)
@@ -5277,22 +5396,20 @@ loc_C1A5:                                                       ; CODE XREF: RAM
                 jp      P, loc_C1B2
                 neg
 
-loc_C1B2:                                                       ; CODE XREF: RAM:C1ADj
+loc_C1B2:
                 cp      h
                 jr      NC, loc_C1B8
                 jp      loc_D629
 ; ---------------------------------------------------------------------------
 
-loc_C1B8:                                                       ; CODE XREF: RAM:C1A6j
-                                                                ; RAM:C1B3j
+loc_C1B8:
                 ld      0(iy), #0
                 ret
 ; ---------------------------------------------------------------------------
-byte_C1BD:      .db 0xF8, 0, 8, 0, 0, 8, 0, 0xF8                ; DATA XREF: RAM:C15Co
+byte_C1BD:      .db 0xF8, 0, 8, 0, 0, 8, 0, 0xF8
 ; ---------------------------------------------------------------------------
 
-upd_3C_96_to_98:                                                ; DATA XREF: RAM:AEA7o
-                                                                ; RAM:AF59o ...
+upd_3C_96_to_98:
                 call    adj_m6_m12
                 call    dec_dZ_and_update_XYZ
                 ld      a, 0(ix)
@@ -5301,7 +5418,7 @@ upd_3C_96_to_98:                                                ; DATA XREF: RAM
                 jr      NZ, loc_C1D5
                 ld      a, #0x97 ; 'ó'
 
-loc_C1D5:                                                       ; CODE XREF: RAM:C1D1j
+loc_C1D5:
                 ld      0(ix), a
                 ld      a, 3(ix)
                 cp      #0x84 ; 'Ñ'
@@ -5309,7 +5426,7 @@ loc_C1D5:                                                       ; CODE XREF: RAM
                 ld      3(ix), #0x84 ; 'Ñ'
                 ld      0xB(ix), #0
 
-loc_C1E7:                                                       ; CODE XREF: RAM:C1DDj
+loc_C1E7:
                 call    loc_C206
                 ld      a, d
                 and     a
@@ -5324,7 +5441,7 @@ loc_C1E7:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_C206:                                                       ; CODE XREF: RAM:loc_C1E7p
+loc_C206:
                 ld      d, #1
                 ld      iy, # graphic_obj_2+0x40
                 call    loc_C216
@@ -5333,21 +5450,20 @@ loc_C206:                                                       ; CODE XREF: RAM
                 ret     Z
                 ld      iy, # graphic_obj_2+0x60
 
-loc_C216:                                                       ; CODE XREF: RAM:C20Cp
-                                                                ; RAM:CFCCp
+loc_C216:
                 ld      a, 0(iy)
                 and     #0xF8 ; '¯'
                 ret     Z
                 cp      #0x40 ; '@'
 
-loc_C21E:                                                       ; CODE XREF: RAM:CFBDp
+loc_C21E:
                 ret     Z
                 ld      a, 1(iy)
                 sub     1(ix)
                 jp      P, loc_C22A
                 neg
 
-loc_C22A:                                                       ; CODE XREF: RAM:C225j
+loc_C22A:
                 ld      e, a
                 ld      a, 4(iy)
                 add     a, 4(ix)
@@ -5359,7 +5475,7 @@ loc_C22A:                                                       ; CODE XREF: RAM
                 jp      P, loc_C240
                 neg
 
-loc_C240:                                                       ; CODE XREF: RAM:C23Bj
+loc_C240:
                 ld      e, a
                 ld      a, 5(ix)
                 add     a, 5(iy)
@@ -5371,7 +5487,7 @@ loc_C240:                                                       ; CODE XREF: RAM
                 jp      P, loc_C256
                 neg
 
-loc_C256:                                                       ; CODE XREF: RAM:C251j
+loc_C256:
                 ld      e, a
                 ld      a, 6(ix)
                 add     a, 6(iy)
@@ -5382,7 +5498,7 @@ loc_C256:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C264:                                                       ; CODE XREF: RAM:C1ECj
+loc_C264:
                 ld      a, 0(iy)
                 ld      b, a
                 rlca
@@ -5402,8 +5518,7 @@ loc_C264:                                                       ; CODE XREF: RAM
                 jp      loc_C120
 ; ---------------------------------------------------------------------------
 
-upd_17_1E_4A_4B:                                                ; DATA XREF: RAM:AE5Do
-                                                                ; RAM:AE6Bo ...
+upd_17_1E_4A_4B:
                 call    set_both_deadly_flags
                 jp      adj_m8_m16
 ; ---------------------------------------------------------------------------
@@ -5411,16 +5526,14 @@ upd_17_1E_4A_4B:                                                ; DATA XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-set_both_deadly_flags:                                          ; CODE XREF: RAM:upd_17_1E_4A_4Bp
-                                                                ; RAM:C28Bp ...
+set_both_deadly_flags:
                 ld      a, 13(ix)
                 or      #0xA0 ; '†'
                 ld      13(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
-print_lives:                                                    ; CODE XREF: RAM:B072p
-                                                                ; RAM:CF83p
+print_lives:
                 ld      ix, #sprite_scratchpad
                 ld      0(ix), #0x16
                 ld      7(ix), #0
@@ -5435,12 +5548,12 @@ print_lives:                                                    ; CODE XREF: RAM
                 ld      b, #4
                 call    fill_DE
                 ld      de, #lives
-                ld      b, #1                                   ; 1 digit
+                ld      b, #1                                           ; 1 digit
                 ld      hl, # vidbuf+0x4E4
                 jp      print_BCD_number
 ; ---------------------------------------------------------------------------
 
-init_start_location:                                            ; CODE XREF: RAM:AFC2p
+init_start_location:
                 ld      hl, #plyr_spr_init_data
                 ld      de, #plyr_spr_1_scratchpad
                 ld      bc, #16
@@ -5454,10 +5567,10 @@ init_start_location:                                            ; CODE XREF: RAM
                 ld      (plyr_spr_1_scratchpad+8), a
                 ret
 ; ---------------------------------------------------------------------------
-start_locations:.db 0x33, 0x5C, 0x64, 0xC                       ; DATA XREF: RAM:C2DFo
+start_locations:.db 0x33, 0x5C, 0x64, 0xC
 ; ---------------------------------------------------------------------------
 
-lose_life:                                                      ; CODE XREF: RAM:player_diesp
+lose_life:
                 ld      hl, #plyr_spr_1_scratchpad
                 ld      de, #graphic_objs_tbl
                 push    de
@@ -5470,14 +5583,14 @@ lose_life:                                                      ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-game_completed_msg:                                             ; CODE XREF: RAM:CD6Aj
+game_completed_msg:
                 call    clear_scrn_buffer
                 ld      a, #0x45 ; 'E'
                 call    fill_attr
                 ld      de, #complete_colours
                 exx
                 ld      hl, #complete_xy
-                ld      de, #aCongratulations                   ; "CONGRATULATION”"
+                ld      de, #aCongratulations                           ; "CONGRATULATION”"
                 ld      b, #6
                 xor     a
                 ld      (suppress_border), a
@@ -5485,7 +5598,7 @@ game_completed_msg:                                             ; CODE XREF: RAM
                 ld      de, #game_complete_tune
                 call    play_audio
 
-game_over:                                                      ; CODE XREF: RAM:C2FEj
+game_over:
                 call    clear_scrn_buffer
                 ld      a, #0x46 ; 'F'
                 call    fill_attr
@@ -5493,7 +5606,7 @@ game_over:                                                      ; CODE XREF: RAM
                 ld      de, #gameover_colours
                 exx
                 ld      hl, #gameover_xy
-                ld      de, #aGameOver                          ; "GAME OVE“"
+                ld      de, #aGameOver                                  ; "GAME OVE“"
                 ld      b, #3
                 call    display_text_list
                 call    calc_and_display_percent
@@ -5504,10 +5617,10 @@ game_over:                                                      ; CODE XREF: RAM
                 call    play_audio
                 ld      b, #0x40 ; '@'
 
-loc_C34F:                                                       ; CODE XREF: RAM:C357j
+loc_C34F:
                 ld      hl, #0x2000
 
-loc_C352:                                                       ; CODE XREF: RAM:C355j
+loc_C352:
                 dec     hl
                 ld      a, h
                 or      l
@@ -5516,17 +5629,17 @@ loc_C352:                                                       ; CODE XREF: RAM
                 pop     hl
                 jp      start_menu
 ; ---------------------------------------------------------------------------
-gameover_colours:.db 0x42, 0x43, 0x44                           ; DATA XREF: RAM:C32Eo
-gameover_xy:    .db 0x58, 0x9F                                  ; DATA XREF: RAM:C332o
+gameover_colours:.db 0x42, 0x43, 0x44
+gameover_xy:    .db 0x58, 0x9F
                 .db 0x30, 0x6F
                 .db 0x40, 0x5F
-aGameOver:      .ascii 'GAME OVE'                               ; DATA XREF: RAM:C335o
+aGameOver:      .ascii 'GAME OVE'
                 .db 0xD2
 aPercentageOfQuest:.ascii 'PERCENTAGE OF QUES'
                 .db 0xD4
 aCompleted:     .ascii 'COMPLETE'
                 .db 0xC4
-aCongratulations:.ascii 'CONGRATULATION'                        ; DATA XREF: RAM:C311o
+aCongratulations:.ascii 'CONGRATULATION'
                 .db 0xD3
 aYouHaveCompleated:.ascii 'YOU HAVE COMPLEATE'
                 .db 0xC4
@@ -5538,28 +5651,25 @@ aContinuesIn:   .ascii 'CONTINUES I'
                 .db 0xCE
 aMireMare:      .ascii 'MIRE MAR'
                 .db 0xC5
-complete_xy:    .db 0x48, 0x8F                                  ; DATA XREF: RAM:C30Eo
+complete_xy:    .db 0x48, 0x8F
                 .db 0x38, 0x6F
                 .db 0x50, 0x5F
                 .db 0x48, 0x4F
                 .db 0x50, 0x3F
                 .db 0x60, 0x1F
-complete_colours:.db 0x46, 0x45, 0x45, 0x42, 0x42, 0x43         ; DATA XREF: RAM:C30Ao
+complete_colours:.db 0x46, 0x45, 0x45, 0x42, 0x42, 0x43
 plyr_spr_init_data:.db 0x20, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x5C, 0x62, 0, 0, 0, 0, 0, 0, 0
-                                                                ; DATA XREF: RAM:init_start_locationo
-plyr_spr_1_scratchpad:.db 0x20, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x5C, 0x62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                                                                ; DATA XREF: RAM:C2D1o
-                                                                ; RAM:lose_lifeo ...
-plyr_spr_2_scratchpad:.db 0x28, 0x80, 0x80, 0x8C, 5, 5, 0, 0x5E, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+plyr_spr_1_scratchpad:.db 0x20, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x5C, 0x62, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+plyr_spr_2_scratchpad:.db 0x28, 0x80, 0x80, 0x8C, 5, 5, 0, 0x5E, 1, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-no_update:                                                      ; DATA XREF: RAM:upd_sprite_jmp_tblo
-                                                                ; RAM:AE31o ...
+no_update:
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_20_to_27:                                                   ; DATA XREF: RAM:AE6Fo
-                                                                ; RAM:AE71o ...
+upd_20_to_27:
                 call    adj_m6_m12
                 bit     6, 0xD(ix)
                 jr      Z, loc_C450
@@ -5567,7 +5677,7 @@ upd_20_to_27:                                                   ; DATA XREF: RAM
                 jp      loc_C107
 ; ---------------------------------------------------------------------------
 
-loc_C450:                                                       ; CODE XREF: RAM:C447j
+loc_C450:
                 call    check_user_input
                 xor     a
                 ld      9(ix), a
@@ -5579,15 +5689,14 @@ loc_C450:                                                       ; CODE XREF: RAM
                 call    loc_C4A3
                 jr      NC, loc_C495
 
-loc_C46B:                                                       ; CODE XREF: RAM:C499j
-                                                                ; RAM:C4A0j
+loc_C46B:
                 set     1, 0x27(ix)
                 ld      a, 3(ix)
                 cp      #0xF0 ; ''
                 jr      C, loc_C47A
                 ld      3(ix), #0xF0 ; ''
 
-loc_C47A:                                                       ; CODE XREF: RAM:C474j
+loc_C47A:
                 call    loc_C61D
                 call    loc_C126
                 res     1, 0x27(ix)
@@ -5597,11 +5706,11 @@ loc_C47A:                                                       ; CODE XREF: RAM
                 jr      C, loc_C492
                 ld      0xC(ix), a
 
-loc_C492:                                                       ; CODE XREF: RAM:C48Dj
+loc_C492:
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_C495:                                                       ; CODE XREF: RAM:C469j
+loc_C495:
                 ld      a, 11(ix)
                 and     a
                 jp      M, loc_C46B
@@ -5612,8 +5721,7 @@ loc_C495:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C4A3:                                                       ; CODE XREF: RAM:BF84p
-                                                                ; RAM:C466p
+loc_C4A3:
                 ld      hl, (room_size_X)
                 ld      a, l
                 sub     4(ix)
@@ -5626,7 +5734,7 @@ loc_C4A3:                                                       ; CODE XREF: RAM
                 jp      P, loc_C4BA
                 neg
 
-loc_C4BA:                                                       ; CODE XREF: RAM:C4B5j
+loc_C4BA:
                 cp      l
                 ret     NC
                 ld      a, 2(ix)
@@ -5634,12 +5742,12 @@ loc_C4BA:                                                       ; CODE XREF: RAM
                 jp      P, loc_C4C6
                 neg
 
-loc_C4C6:                                                       ; CODE XREF: RAM:C4C1j
+loc_C4C6:
                 cp      h
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C4C8:                                                       ; CODE XREF: RAM:C45Ap
+loc_C4C8:
                 ld      hl, #user_input_method
                 ld      a, (hl)
                 and     #6
@@ -5656,7 +5764,7 @@ loc_C4C8:                                                       ; CODE XREF: RAM
                 bit     2, c
                 jr      NZ, loc_C4F6
 
-loc_C4E7:                                                       ; CODE XREF: RAM:C4E1j
+loc_C4E7:
                 bit     1, c
                 jr      NZ, loc_C502
                 bit     4, c
@@ -5667,48 +5775,46 @@ loc_C4E7:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C4F6:                                                       ; CODE XREF: RAM:C4E5j
+loc_C4F6:
                 call    loc_C5BD
                 cp      #2
 
-loc_C4FB:                                                       ; CODE XREF: RAM:C507j
+loc_C4FB:
                 jr      Z, loc_C518
                 cpl
 
-loc_C4FE:                                                       ; CODE XREF: RAM:C510j
+loc_C4FE:
                 and     #1
                 jr      loc_C543
 ; ---------------------------------------------------------------------------
 
-loc_C502:                                                       ; CODE XREF: RAM:C4E9j
+loc_C502:
                 call    loc_C5BD
                 cp      #1
                 jr      loc_C4FB
 ; ---------------------------------------------------------------------------
 
-loc_C509:                                                       ; CODE XREF: RAM:C4EDj
+loc_C509:
                 call    loc_C5BD
                 cp      #3
 
-loc_C50E:                                                       ; CODE XREF: RAM:C516j
+loc_C50E:
                 jr      Z, loc_C518
                 jr      loc_C4FE
 ; ---------------------------------------------------------------------------
 
-loc_C512:                                                       ; CODE XREF: RAM:C4F1j
+loc_C512:
                 call    loc_C5BD
                 and     a
                 jr      loc_C50E
 ; ---------------------------------------------------------------------------
 
-loc_C518:                                                       ; CODE XREF: RAM:loc_C4FBj
-                                                                ; RAM:loc_C50Ej
+loc_C518:
                 set     2, c
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C51B:                                                       ; CODE XREF: RAM:C4CEj
-                                                                ; RAM:C4D2j
+loc_C51B:
                 ld      a, 0xD(ix)
                 and     #7
                 jr      Z, loc_C526
@@ -5716,7 +5822,7 @@ loc_C51B:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C526:                                                       ; CODE XREF: RAM:C520j
+loc_C526:
                 ld      a, c
                 and     #3
                 ret     Z
@@ -5728,24 +5834,23 @@ loc_C526:                                                       ; CODE XREF: RAM
                 bit     2, c
                 jr      NZ, loc_C539
 
-loc_C539:                                                       ; CODE XREF: RAM:C537j
+loc_C539:
                 ld      a, 0xD(ix)
                 or      #2
                 ld      0xD(ix), a
                 bit     1, c
 
-loc_C543:                                                       ; CODE XREF: RAM:C500j
+loc_C543:
                 jr      NZ, loc_C564
                 bit     6, 7(ix)
                 jr      Z, loc_C553
 
-loc_C54B:                                                       ; CODE XREF: RAM:C568j
+loc_C54B:
                 ld      a, 0(ix)
                 xor     #4
                 ld      0(ix), a
 
-loc_C553:                                                       ; CODE XREF: RAM:C549j
-                                                                ; RAM:C56Aj
+loc_C553:
                 ld      a, 7(ix)
                 xor     #0x40 ; '@'
                 ld      7(ix), a
@@ -5755,13 +5860,13 @@ loc_C553:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C564:                                                       ; CODE XREF: RAM:loc_C543j
+loc_C564:
                 bit     6, 7(ix)
                 jr      Z, loc_C54B
                 jr      loc_C553
 ; ---------------------------------------------------------------------------
 
-loc_C56C:                                                       ; CODE XREF: RAM:C460p
+loc_C56C:
                 bit     3, c
                 ret     Z
                 ld      a, 0xC(ix)
@@ -5779,7 +5884,7 @@ loc_C56C:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C58D:                                                       ; CODE XREF: RAM:C45Dp
+loc_C58D:
                 ld      a, 0xC(ix)
                 and     #0xF0 ; ''
                 jr      NZ, loc_C59E
@@ -5788,8 +5893,7 @@ loc_C58D:                                                       ; CODE XREF: RAM
                 bit     2, c
                 jr      Z, loc_C5B3
 
-loc_C59E:                                                       ; CODE XREF: RAM:C592j
-                                                                ; RAM:C598j ...
+loc_C59E:
                 ld      a, 0(ix)
                 ld      e, a
                 inc     a
@@ -5805,7 +5909,7 @@ loc_C59E:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C5B3:                                                       ; CODE XREF: RAM:C59Cj
+loc_C5B3:
                 ld      a, 0(ix)
                 and     #3
                 cp      #2
@@ -5813,8 +5917,7 @@ loc_C5B3:                                                       ; CODE XREF: RAM
                 jr      loc_C59E
 ; ---------------------------------------------------------------------------
 
-loc_C5BD:                                                       ; CODE XREF: RAM:C156p
-                                                                ; RAM:loc_C4F6p ...
+loc_C5BD:
                 ld      a, 7(ix)
                 rrca
                 rrca
@@ -5831,8 +5934,7 @@ loc_C5BD:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_28_to_2F:                                                   ; DATA XREF: RAM:AE7Fo
-                                                                ; RAM:AE81o ...
+upd_28_to_2F:
                 call    adj_m8_m12
                 bit     6, 13(ix)
                 jp      NZ, loc_C107
@@ -5855,12 +5957,12 @@ upd_28_to_2F:                                                   ; DATA XREF: RAM
                 jr      loc_C60A
 ; ---------------------------------------------------------------------------
 
-loc_C602:                                                       ; CODE XREF: RAM:C5FBj
+loc_C602:
                 ld      a, 0(iy)
                 add     a, #8
                 ld      0(ix), a
 
-loc_C60A:                                                       ; CODE XREF: RAM:C600j
+loc_C60A:
                 ld      a, 0(iy)
                 and     #4
                 xor     #4
@@ -5871,7 +5973,7 @@ loc_C60A:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C61D:                                                       ; CODE XREF: RAM:loc_C47Ap
+loc_C61D:
                 bit     3, 0xC(ix)
                 jr      NZ, loc_C62E
                 ld      a, 0xC(ix)
@@ -5880,23 +5982,22 @@ loc_C61D:                                                       ; CODE XREF: RAM
                 bit     2, c
                 jr      Z, loc_C633
 
-loc_C62E:                                                       ; CODE XREF: RAM:C621j
-                                                                ; RAM:C628j
+loc_C62E:
                 push    bc
                 call    loc_C66A
                 pop     bc
 
-loc_C633:                                                       ; CODE XREF: RAM:C62Cj
+loc_C633:
                 ld      a, 0xB(ix)
                 and     a
                 jp      M, loc_C63E
                 bit     3, c
                 jr      NZ, loc_C63F
 
-loc_C63E:                                                       ; CODE XREF: RAM:C637j
+loc_C63E:
                 dec     a
 
-loc_C63F:                                                       ; CODE XREF: RAM:C63Cj
+loc_C63F:
                 dec     a
                 ld      0xB(ix), a
                 ld      (byte_A739), a
@@ -5911,15 +6012,14 @@ loc_C63F:                                                       ; CODE XREF: RAM
                 jp      P, loc_C662
                 res     3, 0xC(ix)
 
-loc_C662:                                                       ; CODE XREF: RAM:C655j
-                                                                ; RAM:C65Bj
+loc_C662:
                 xor     a
                 ld      9(ix), a
                 ld      10(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C66A:                                                       ; CODE XREF: RAM:C62Fp
+loc_C66A:
                 ld      a, 9(ix)
                 add     a, 14(ix)
                 ld      9(ix), a
@@ -5931,54 +6031,52 @@ loc_C66A:                                                       ; CODE XREF: RAM
                 ld      15(ix), a
                 ld      bc, #off_C68D
 
-loc_C686:                                                       ; CODE XREF: RAM:C8EEj
-                                                                ; RAM:C8F4j
+loc_C686:
                 call    loc_C5BD
                 ld      l, a
                 jp      jump_to_tbl_entry
 ; ---------------------------------------------------------------------------
-off_C68D:       .dw loc_C695                                    ; DATA XREF: RAM:C683o
-                                                                ; dX-=3
-                .dw loc_C69E                                    ; dX+=3
-                .dw loc_C6A5                                    ; dY+=3
-                .dw loc_C6AE                                    ; dY-=3
+off_C68D:       .dw loc_C695                                            ; dX-=3
+                .dw loc_C69E                                            ; dX+=3
+                .dw loc_C6A5                                            ; dY+=3
+                .dw loc_C6AE                                            ; dY-=3
 ; ---------------------------------------------------------------------------
 
-loc_C695:                                                       ; DATA XREF: RAM:off_C68Do
-                ld      a, 9(ix)                                ; dX
-                add     a, #0xFD ; '˝'                          ; -3
+loc_C695:                                                               ; dX
+                ld      a, 9(ix)
+                add     a, #0xFD ; '˝'                                  ; -3
 
-loc_C69A:                                                       ; CODE XREF: RAM:C6A3j
+loc_C69A:
                 ld      9(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C69E:                                                       ; DATA XREF: RAM:C68Fo
-                ld      a, 9(ix)                                ; dX
-                add     a, #3                                   ; +3
+loc_C69E:                                                               ; dX
+                ld      a, 9(ix)
+                add     a, #3                                           ; +3
                 jr      loc_C69A
 ; ---------------------------------------------------------------------------
 
-loc_C6A5:                                                       ; DATA XREF: RAM:C691o
-                ld      a, 10(ix)                               ; dY
-                add     a, #3                                   ; +3
+loc_C6A5:                                                               ; dY
+                ld      a, 10(ix)
+                add     a, #3                                           ; +3
 
-loc_C6AA:                                                       ; CODE XREF: RAM:C6B3j
+loc_C6AA:
                 ld      10(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C6AE:                                                       ; DATA XREF: RAM:C693o
-                ld      a, 10(ix)                               ; dY
-                add     a, #0xFD ; '˝'                          ; -3
+loc_C6AE:                                                               ; dY
+                ld      a, 10(ix)
+                add     a, #0xFD ; '˝'                                  ; -3
                 jr      loc_C6AA
 ; ---------------------------------------------------------------------------
 
-locret_C6B5:                                                    ; CODE XREF: RAM:C64Bp
+locret_C6B5:
                 ret
 ; ---------------------------------------------------------------------------
 
-build_screen_objects:                                           ; CODE XREF: RAM:AFCBp
+build_screen_objects:
                 ld      ix, #graphic_objs_tbl
                 call    clear_scrn_buffer
                 call    retrieve_screen
@@ -5990,7 +6088,7 @@ build_screen_objects:                                           ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 ; quite different to Knight Lore / Alien 8
 
-flag_room_visited:                                              ; CODE XREF: RAM:C6C3p
+flag_room_visited:
                 ld      a, 8(ix)
                 rra
                 rra
@@ -6004,7 +6102,7 @@ flag_room_visited:                                              ; CODE XREF: RAM
                 xor     a
                 scf
 
-loc_C6DE:                                                       ; CODE XREF: RAM:C6DFj
+loc_C6DE:
                 rra
                 djnz    loc_C6DE
                 ld      d, #0
@@ -6015,21 +6113,21 @@ loc_C6DE:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-calc_and_display_percent:                                       ; CODE XREF: RAM:C33Dp
+calc_and_display_percent:
                 ld      hl, #scrn_visited
                 ld      c, #0x1F
                 ld      e, #0
 
-loc_C6F1:                                                       ; CODE XREF: RAM:C6FCj
+loc_C6F1:
                 ld      b, #8
                 ld      a, (hl)
 
-loc_C6F4:                                                       ; CODE XREF: RAM:loc_C6F8j
+loc_C6F4:
                 rra
                 jr      NC, loc_C6F8
                 inc     e
 
-loc_C6F8:                                                       ; CODE XREF: RAM:C6F5j
+loc_C6F8:
                 djnz    loc_C6F4
                 inc     hl
                 dec     c
@@ -6040,7 +6138,7 @@ loc_C6F8:                                                       ; CODE XREF: RAM
                 jr      C, loc_C707
                 ld      e, #54
 
-loc_C707:                                                       ; CODE XREF: RAM:C703j
+loc_C707:
                 ld      a, (byte_A74C)
                 add     a, a
                 add     a, a
@@ -6055,7 +6153,7 @@ loc_C707:                                                       ; CODE XREF: RAM
                 ld      b, a
                 xor     a
 
-loc_C718:                                                       ; CODE XREF: RAM:C71Bj
+loc_C718:
                 add     a, #1
                 daa
                 djnz    loc_C718
@@ -6081,7 +6179,7 @@ loc_C718:                                                       ; CODE XREF: RAM
                 jp      print_BCD_lsd
 ; ---------------------------------------------------------------------------
 
-loc_C745:                                                       ; CODE XREF: RAM:C737j
+loc_C745:
                 inc     hl
                 inc     de
                 jp      print_BCD_number
@@ -6089,70 +6187,62 @@ loc_C745:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_39:                                                         ; DATA XREF: RAM:AEA1o
-                ld      hl, #0xF8 ; '¯'                         ; 0,-8
+upd_39:                                                                 ; 0,-8
+                ld      hl, #0xF8 ; '¯'
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
-                ld      hl, #0xF4FC                             ; -12,-4
+                ld      hl, #0xF4FC                                     ; -12,-4
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
-                ld      hl, #0xFCDC                             ; -4,-36
+                ld      hl, #0xFCDC                                     ; -4,-36
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
-                ld      hl, #0xF8EC                             ; -8,-20
-                jr      set_pixel_adj
-; ---------------------------------------------------------------------------
-
-adj_m8_m16:                                                     ; CODE XREF: RAM:C051p
-                                                                ; RAM:C288j ...
-                ld      hl, #0xF8F0                             ; -8,-16
+                ld      hl, #0xF8EC                                     ; -8,-20
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m8_m12:                                                     ; CODE XREF: RAM:upd_28_to_2Fp
-                ld      hl, #0xF8F4                             ; -8,-12
+adj_m8_m16:                                                             ; -8,-16
+                ld      hl, #0xF8F0
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m12_m16:                                                    ; CODE XREF: RAM:upd_4Dj
-                                                                ; RAM:upd_49p
-                ld      hl, #0xF4F0                             ; -12,-16
+adj_m8_m12:                                                             ; -8,-12
+                ld      hl, #0xF8F4
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-set_pixel_adj:                                                  ; CODE XREF: RAM:C74Ej
-                                                                ; RAM:C753j ...
+adj_m12_m16:                                                            ; -12,-16
+                ld      hl, #0xF4F0
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+set_pixel_adj:
                 ld      18(ix), l
                 ld      19(ix), h
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_m6_m12:                                                     ; CODE XREF: RAM:upd_3C_96_to_98p
-                                                                ; RAM:upd_20_to_27p ...
-                ld      hl, #0xFAF4                             ; -6,-12
+adj_m6_m12:                                                             ; -6,-12
+                ld      hl, #0xFAF4
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m4_m12:                                                     ; CODE XREF: RAM:upd_40_to_46p
-                                                                ; RAM:upd_47p
-                ld      hl, #0xFCF4                             ; -4,-12
+adj_m4_m12:                                                             ; -4,-12
+                ld      hl, #0xFCF4
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-upd_35_to_38:                                                   ; DATA XREF: RAM:AE99o
-                                                                ; RAM:AE9Bo ...
-                ld      hl, #0xFCF8                             ; -4,-8
+upd_35_to_38:                                                           ; -4,-8
+                ld      hl, #0xFCF8
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-upd_0C_to_0F_34:                                                ; DATA XREF: RAM:AE47o
-                                                                ; RAM:AE49o ...
-                ld      hl, #0xFEF8                             ; -2,-8
+upd_0C_to_0F_34:                                                        ; -2,-8
+                ld      hl, #0xFEF8
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-upd_07_09:                                                      ; DATA XREF: RAM:AE3Do
-                                                                ; RAM:AE41o
+upd_07_09:
                 bit     6, 7(ix)
                 jr      NZ, adj_m4_m7
                 ld      a, 0(ix)
@@ -6162,23 +6252,22 @@ upd_07_09:                                                      ; DATA XREF: RAM
                 jp      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m4_m7:                                                      ; CODE XREF: RAM:C78Dj
-                ld      hl, #0xFCF9                             ; -4,-7
+adj_m4_m7:                                                              ; -4,-7
+                ld      hl, #0xFCF9
                 jp      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m5_m16:                                                     ; CODE XREF: RAM:C794j
-                ld      hl, #0xFBF0                             ; -5,-16
+adj_m5_m16:                                                             ; -5,-16
+                ld      hl, #0xFBF0
                 jp      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-loc_C7A8:                                                       ; CODE XREF: RAM:C7B8j
+loc_C7A8:
                 ld      hl, #0xFBF8
                 jr      loc_C7BD
 ; ---------------------------------------------------------------------------
 
-upd_06_08:                                                      ; DATA XREF: RAM:AE3Bo
-                                                                ; RAM:AE3Fo
+upd_06_08:
                 bit     6, 7(ix)
                 jr      NZ, loc_C7DD
                 ld      a, 0(ix)
@@ -6186,7 +6275,7 @@ upd_06_08:                                                      ; DATA XREF: RAM
                 jr      Z, loc_C7A8
                 ld      hl, #0xFBFB
 
-loc_C7BD:                                                       ; CODE XREF: RAM:C7ABj
+loc_C7BD:
                 call    set_pixel_adj
                 ld      a, 2(ix)
                 add     a, #0xD
@@ -6195,20 +6284,20 @@ loc_C7BD:                                                       ; CODE XREF: RAM
                 ld      9(ix), a
                 ld      hl, #0x60F
 
-loc_C7D1:                                                       ; CODE XREF: RAM:C7FBj
+loc_C7D1:
                 ld      a, 3(ix)
                 ld      11(ix), a
                 call    loc_C802
                 jp      loc_C8D2
 ; ---------------------------------------------------------------------------
 
-loc_C7DD:                                                       ; CODE XREF: RAM:C7B1j
+loc_C7DD:
                 ld      a, 0(ix)
                 cp      #8
                 jr      Z, loc_C7FD
                 ld      hl, #0xFAEF
 
-loc_C7E7:                                                       ; CODE XREF: RAM:C800j
+loc_C7E7:
                 call    set_pixel_adj
                 ld      a, 1(ix)
                 sub     #13
@@ -6219,12 +6308,12 @@ loc_C7E7:                                                       ; CODE XREF: RAM
                 jr      loc_C7D1
 ; ---------------------------------------------------------------------------
 
-loc_C7FD:                                                       ; CODE XREF: RAM:C7E2j
+loc_C7FD:
                 ld      hl, #0xFBF0
                 jr      loc_C7E7
 ; ---------------------------------------------------------------------------
 
-loc_C802:                                                       ; CODE XREF: RAM:C7D7p
+loc_C802:
                 ld      iy, #graphic_objs_tbl
                 ld      a, 0(iy)
                 sub     #0x10
@@ -6254,13 +6343,13 @@ loc_C802:                                                       ; CODE XREF: RAM
                 ld      l, a
                 jp      jump_to_tbl_entry
 ; ---------------------------------------------------------------------------
-off_C83B:       .dw loc_C843                                    ; DATA XREF: RAM:C81Bo
+off_C83B:       .dw loc_C843
                 .dw loc_C874
                 .dw loc_C887
                 .dw loc_C89A
 ; ---------------------------------------------------------------------------
 
-loc_C843:                                                       ; DATA XREF: RAM:off_C83Bo
+loc_C843:
                 pop     hl
                 ld      a, #0x80 ; 'Ä'
                 sub     l
@@ -6271,8 +6360,7 @@ loc_C843:                                                       ; DATA XREF: RAM
                 ret     NC
                 ld      1(iy), #0
 
-loc_C854:                                                       ; CODE XREF: RAM:C885j
-                                                                ; RAM:C898j ...
+loc_C854:
                 ld      a, 8(ix)
                 ld      8(iy), a
                 ld      a, 12(iy)
@@ -6290,7 +6378,7 @@ loc_C854:                                                       ; CODE XREF: RAM
                 jp      loc_AFC8
 ; ---------------------------------------------------------------------------
 
-loc_C874:                                                       ; DATA XREF: RAM:C83Do
+loc_C874:
                 pop     hl
                 ld      a, l
                 add     a, #0x80 ; 'Ä'
@@ -6303,7 +6391,7 @@ loc_C874:                                                       ; DATA XREF: RAM
                 jr      loc_C854
 ; ---------------------------------------------------------------------------
 
-loc_C887:                                                       ; DATA XREF: RAM:C83Fo
+loc_C887:
                 pop     hl
                 ld      a, h
                 add     a, #0x80 ; 'Ä'
@@ -6316,7 +6404,7 @@ loc_C887:                                                       ; DATA XREF: RAM
                 jr      loc_C854
 ; ---------------------------------------------------------------------------
 
-loc_C89A:                                                       ; DATA XREF: RAM:C841o
+loc_C89A:
                 pop     hl
                 ld      a, #0x80 ; 'Ä'
                 sub     h
@@ -6329,14 +6417,13 @@ loc_C89A:                                                       ; DATA XREF: RAM
                 jr      loc_C854
 ; ---------------------------------------------------------------------------
 
-loc_C8AD:                                                       ; CODE XREF: RAM:C813p
-                                                                ; RAM:C8E3p
+loc_C8AD:
                 ld      a, 9(ix)
                 sub     1(iy)
                 jr      NC, loc_C8B7
                 neg
 
-loc_C8B7:                                                       ; CODE XREF: RAM:C8B3j
+loc_C8B7:
                 cp      l
                 ret     NC
                 ld      a, 0xA(ix)
@@ -6344,7 +6431,7 @@ loc_C8B7:                                                       ; CODE XREF: RAM
                 jr      NC, loc_C8C3
                 neg
 
-loc_C8C3:                                                       ; CODE XREF: RAM:C8BFj
+loc_C8C3:
                 cp      h
                 ret     NC
                 ld      a, 0xB(ix)
@@ -6352,12 +6439,12 @@ loc_C8C3:                                                       ; CODE XREF: RAM
                 jr      NC, loc_C8CF
                 neg
 
-loc_C8CF:                                                       ; CODE XREF: RAM:C8CBj
+loc_C8CF:
                 cp      #4
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C8D2:                                                       ; CODE XREF: RAM:C7DAj
+loc_C8D2:
                 ld      hl, #0xF0F
                 ld      iy, #graphic_objs_tbl
                 ld      a, 0(iy)
@@ -6373,18 +6460,17 @@ loc_C8D2:                                                       ; CODE XREF: RAM
                 ld      bc, #off_C8FF
                 jp      loc_C686
 ; ---------------------------------------------------------------------------
-off_C8F7:       .dw loc_C91A                                    ; DATA XREF: RAM:C8E7o
+off_C8F7:       .dw loc_C91A
                 .dw loc_C907
                 .dw loc_C907
                 .dw loc_C91A
-off_C8FF:       .dw loc_C907                                    ; DATA XREF: RAM:C8F1o
+off_C8FF:       .dw loc_C907
                 .dw loc_C91A
                 .dw loc_C91A
                 .dw loc_C907
 ; ---------------------------------------------------------------------------
 
-loc_C907:                                                       ; DATA XREF: RAM:C8F9o
-                                                                ; RAM:C8FBo ...
+loc_C907:
                 ld      a, 0xA(ix)
                 cp      2(iy)
                 jr      Z, locret_C92B
@@ -6392,13 +6478,12 @@ loc_C907:                                                       ; DATA XREF: RAM
                 jr      NC, loc_C915
                 neg
 
-loc_C915:                                                       ; CODE XREF: RAM:C911j
+loc_C915:
                 ld      0xF(iy), a
                 jr      locret_C92B
 ; ---------------------------------------------------------------------------
 
-loc_C91A:                                                       ; DATA XREF: RAM:off_C8F7o
-                                                                ; RAM:C8FDo ...
+loc_C91A:
                 ld      a, 9(ix)
                 cp      1(iy)
                 jr      Z, locret_C92B
@@ -6406,16 +6491,15 @@ loc_C91A:                                                       ; DATA XREF: RAM
                 jr      NC, loc_C928
                 neg
 
-loc_C928:                                                       ; CODE XREF: RAM:C924j
+loc_C928:
                 ld      0xE(iy), a
 
-locret_C92B:                                                    ; CODE XREF: RAM:C90Dj
-                                                                ; RAM:C918j ...
+locret_C92B:
                 ret
 ; ---------------------------------------------------------------------------
 ; Quite different to Knight Lore / Alien 8
 
-retrieve_screen:                                                ; CODE XREF: RAM:C6BDp
+retrieve_screen:
                 call    clr_graphic_objs_tbl
                 ld      hl, #block_type_tbl
                 ld      (word_A73A), hl
@@ -6425,7 +6509,7 @@ retrieve_screen:                                                ; CODE XREF: RAM
                 ld      bc, #background_type_tbl
                 ld      hl, #location_tbl
 
-loc_C942:                                                       ; CODE XREF: RAM:C951j
+loc_C942:
                 ld      a, (hl)
                 inc     hl
                 cp      8(ix)
@@ -6438,7 +6522,7 @@ loc_C942:                                                       ; CODE XREF: RAM
                 jr      loc_C942
 ; ---------------------------------------------------------------------------
 
-found_screen:                                                   ; CODE XREF: RAM:C947j
+found_screen:
                 ld      b, (hl)
                 inc     hl
                 ld      a, (hl)
@@ -6471,7 +6555,7 @@ found_screen:                                                   ; CODE XREF: RAM
                 ex      de, hl
                 pop     de
 
-loc_C981:                                                       ; CODE XREF: RAM:C9B3j
+loc_C981:
                 ld      a, (hl)
                 inc     hl
                 cp      #0xFF
@@ -6488,7 +6572,7 @@ loc_C981:                                                       ; CODE XREF: RAM
                 ld      h, (hl)
                 ld      l, a
 
-loc_C995:                                                       ; CODE XREF: RAM:C9ADj
+loc_C995:
                 ld      bc, #8
                 ldir
                 ex      (sp), hl
@@ -6514,14 +6598,13 @@ loc_C995:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C9B6:                                                       ; CODE XREF: RAM:C985j
+loc_C9B6:
                 dec     b
                 push    iy
                 push    de
                 pop     iy
 
-loc_C9BC:                                                       ; CODE XREF: RAM:CA5Bj
-                                                                ; RAM:CA79j
+loc_C9BC:
                 ld      a, (hl)
                 and     #7
                 inc     a
@@ -6544,10 +6627,10 @@ loc_C9BC:                                                       ; CODE XREF: RAM
                 ld      h, (hl)
                 ld      l, a
 
-loc_C9DA:                                                       ; CODE XREF: RAM:CA63j
+loc_C9DA:
                 push    hl
 
-loc_C9DB:                                                       ; CODE XREF: RAM:CA53j
+loc_C9DB:
                 ld      a, (hl)
                 inc     hl
                 ld      0(iy), a
@@ -6613,7 +6696,7 @@ loc_C9DB:                                                       ; CODE XREF: RAM
                 add     iy, bc
                 ld      b, #0x17
 
-loc_CA43:                                                       ; CODE XREF: RAM:CA49j
+loc_CA43:
                 ld      0(iy), #0
                 inc     iy
                 djnz    loc_CA43
@@ -6637,20 +6720,20 @@ loc_CA43:                                                       ; CODE XREF: RAM
                 jp      loc_C9DA
 ; ---------------------------------------------------------------------------
 
-loc_CA66:                                                       ; CODE XREF: RAM:CA58j
+loc_CA66:
                 push    iy
                 pop     de
                 pop     iy
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CA6C:                                                       ; CODE XREF: RAM:C9CDj
+loc_CA6C:
                 ld      hl, (word_A73A)
                 ld      a, #0x40 ; '@'
                 call    loc_B519
                 ld      (word_A73A), hl
 
-loc_CA77:                                                       ; CODE XREF: RAM:CA80j
+loc_CA77:
                 dec     b
                 pop     hl
                 jp      loc_C9BC
@@ -6660,7 +6743,7 @@ loc_CA77:                                                       ; CODE XREF: RAM
                 jr      loc_CA77
 ; ---------------------------------------------------------------------------
 
-adjust_plyr_xyz_for_room_size:                                  ; CODE XREF: RAM:C6C0p
+adjust_plyr_xyz_for_room_size:
                 ld      a, (room_size_X)
                 sub     #2
                 ld      l, a
@@ -6680,17 +6763,17 @@ adjust_plyr_xyz_for_room_size:                                  ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CAA1:                                                       ; CODE XREF: RAM:CA9Ej
+loc_CAA1:
                 ld      c, #3
-                call    adjust_plyr_XYZ_for_???
+                call    adjust_plyr_XYZ_for_something
                 ld      a, #128
                 sub     h
                 sub     5(ix)
 
-loc_CAAC:                                                       ; CODE XREF: RAM:CACFj
+loc_CAAC:
                 ld      2(ix), a
 
-loc_CAAF:                                                       ; CODE XREF: RAM:CADFj
+loc_CAAF:
                 set     4, 7(ix)
                 set     4, 0x27(ix)
                 ld      a, 1(ix)
@@ -6700,43 +6783,42 @@ loc_CAAF:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CAC4:                                                       ; CODE XREF: RAM:CA9Bj
+loc_CAC4:
                 ld      c, #2
-                call    adjust_plyr_XYZ_for_???
+                call    adjust_plyr_XYZ_for_something
                 ld      a, h
                 add     a, #0x80 ; 'Ä'
                 add     a, 5(ix)
                 jr      loc_CAAC
 ; ---------------------------------------------------------------------------
 
-loc_CAD1:                                                       ; CODE XREF: RAM:CA95j
+loc_CAD1:
                 ld      c, #1
-                call    adjust_plyr_XYZ_for_???
+                call    adjust_plyr_XYZ_for_something
                 ld      a, #0x80 ; 'Ä'
                 sub     l
                 sub     4(ix)
 
-loc_CADC:                                                       ; CODE XREF: RAM:CAECj
+loc_CADC:
                 ld      1(ix), a
                 jr      loc_CAAF
 ; ---------------------------------------------------------------------------
 
-loc_CAE1:                                                       ; CODE XREF: RAM:CA92j
+loc_CAE1:
                 ld      c, #0
-                call    adjust_plyr_XYZ_for_???
+                call    adjust_plyr_XYZ_for_something
                 ld      a, l
                 add     a, #0x80 ; 'Ä'
                 add     a, 4(ix)
                 jr      loc_CADC
 ; ---------------------------------------------------------------------------
 
-adjust_plyr_XYZ_for_???:                                        ; CODE XREF: RAM:CAA3p
-                                                                ; RAM:CAC6p ...
+adjust_plyr_XYZ_for_something:
                 ld      iy, # graphic_obj_2+0x640
                 ld      de, #0xFFC0
                 ld      b, #4
 
-loc_CAF7:                                                       ; CODE XREF: RAM:CB12j
+loc_CAF7:
                 ld      a, 0(iy)
                 sub     #6
                 cp      #4
@@ -6752,20 +6834,18 @@ loc_CAF7:                                                       ; CODE XREF: RAM
                 cp      #0x40 ; '@'
                 jr      C, loc_CB29
 
-loc_CB10:                                                       ; CODE XREF: RAM:CB3Aj
-                                                                ; RAM:CB43j ...
+loc_CB10:
                 add     iy, de
                 djnz    loc_CAF7
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CB15:                                                       ; CODE XREF: RAM:CB38j
-                                                                ; RAM:CB41j
+loc_CB15:
                 ld      a, 2(iy)
                 add     a, #0xD
                 ld      2(ix), a
 
-loc_CB1D:                                                       ; CODE XREF: RAM:CB31j
+loc_CB1D:
                 ld      a, 3(iy)
                 ld      3(ix), a
                 add     a, #12
@@ -6773,52 +6853,50 @@ loc_CB1D:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CB29:                                                       ; CODE XREF: RAM:CB0Ej
-                                                                ; RAM:CB4Aj
+loc_CB29:
                 ld      a, 1(iy)
                 sub     #13
                 ld      1(ix), a
                 jr      loc_CB1D
 ; ---------------------------------------------------------------------------
 
-loc_CB33:                                                       ; CODE XREF: RAM:CB01j
+loc_CB33:
                 ld      a, 1(iy)
                 cp      #0xC0 ; '¿'
                 jr      NC, loc_CB15
                 jr      loc_CB10
 ; ---------------------------------------------------------------------------
 
-loc_CB3C:                                                       ; CODE XREF: RAM:CB04j
+loc_CB3C:
                 ld      a, 1(iy)
                 cp      #0x40 ; '@'
                 jr      C, loc_CB15
                 jr      loc_CB10
 ; ---------------------------------------------------------------------------
 
-loc_CB45:                                                       ; CODE XREF: RAM:CB07j
+loc_CB45:
                 ld      a, 2(iy)
                 cp      #0xC0 ; '¿'
                 jr      NC, loc_CB29
                 jr      loc_CB10
 ; ---------------------------------------------------------------------------
 
-upd_0A_0B_4C_52_99_to_A0:                                       ; DATA XREF: RAM:AE43o
-                                                                ; RAM:AE45o ...
+upd_0A_0B_4C_52_99_to_A0:
                 jp      adj_m8_m16
 ; ---------------------------------------------------------------------------
 
-upd_4D:                                                         ; DATA XREF: RAM:AEC9o
+upd_4D:
                 jp      adj_m12_m16
 ; ---------------------------------------------------------------------------
 
-clr_graphic_objs_tbl:                                           ; CODE XREF: RAM:retrieve_screenp
+clr_graphic_objs_tbl:
                 ld      hl, #graphic_obj_2
                 ld      bc, #0x680
                 jr      clr_mem
 ; ---------------------------------------------------------------------------
 ; Different to Knight Lore, Alien 8
 
-clr_bitmap_memory:                                              ; CODE XREF: RAM:AF9Cp
+clr_bitmap_memory:
                 ld      hl, #zx_vram
                 ld      de, # zx_vram+1
                 ld      bc, #0x1800
@@ -6828,8 +6906,7 @@ clr_bitmap_memory:                                              ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 ; Different to Alien 8
 
-fill_attr:                                                      ; CODE XREF: RAM:AFA1p
-                                                                ; RAM:B069p ...
+fill_attr:
                 ld      hl, #zx_aram
                 ld      de, # zx_aram+1
                 ld      bc, #0x300
@@ -6838,11 +6915,10 @@ fill_attr:                                                      ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-clr_mem:                                                        ; CODE XREF: RAM:AF90p
-                                                                ; RAM:AF99p ...
+clr_mem:
                 ld      e, #0
 
-clr_byte:                                                       ; CODE XREF: RAM:CB7Ej
+clr_byte:
                 ld      (hl), e
                 inc     hl
                 dec     bc
@@ -6853,18 +6929,17 @@ clr_byte:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 ; Different to Alien 8
 
-clear_scrn_buffer:                                              ; CODE XREF: RAM:BB82p
-                                                                ; RAM:game_completed_msgp ...
+clear_scrn_buffer:
                 ld      bc, #0x1800
                 ld      hl, #vidbuf
                 jr      clr_mem
 ; ---------------------------------------------------------------------------
 
-loc_CB89:                                                       ; CODE XREF: RAM:AFD1p
+loc_CB89:
                 call    loc_D071
                 ld      c, #0x70 ; 'p'
 
-loc_CB8E:                                                       ; CODE XREF: RAM:CBA0j
+loc_CB8E:
                 ld      a, 0(iy)
                 cp      #0x78 ; 'x'
                 jr      Z, loc_CBA7
@@ -6877,18 +6952,17 @@ loc_CB8E:                                                       ; CODE XREF: RAM
                 djnz    loc_CB8E
                 xor     a
 
-loc_CBA3:                                                       ; CODE XREF: RAM:CBA9j
+loc_CBA3:
                 ld      (byte_A742), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CBA7:                                                       ; CODE XREF: RAM:CB93j
-                                                                ; RAM:CB98j ...
+loc_CBA7:
                 ld      a, #1
                 jr      loc_CBA3
 ; ---------------------------------------------------------------------------
 
-upd_monsters???:                                                ; CODE XREF: RAM:onscreen_loopp
+upd_monsters_maybe:
                 ld      a, (byte_A742)
                 and     a
                 ret     NZ
@@ -6911,7 +6985,7 @@ upd_monsters???:                                                ; CODE XREF: RAM
                 and     a
                 ret     NZ
 
-loc_CBD1:                                                       ; CODE XREF: RAM:CBCBj
+loc_CBD1:
                 ex      de, hl
                 push    hl
                 pop     ix
@@ -6919,16 +6993,16 @@ loc_CBD1:                                                       ; CODE XREF: RAM
                 ld      a, (seed_3)
                 and     #0x2F ; '/'
                 add     a, #104
-                ld      1(ix), a                                ; X
+                ld      1(ix), a                                        ; X
                 ld      a, r
                 and     #0x2F ; '/'
                 add     a, #104
-                ld      2(ix), a                                ; Y
+                ld      2(ix), a                                        ; Y
                 ld      a, (seed_3)
                 rra
                 rra
                 rra
-                and     #7                                      ; rnd(0-7)
+                and     #7                                              ; rnd(0-7)
                 ld      l, a
                 ld      h, #0
                 ld      de, #byte_CC09
@@ -6941,27 +7015,26 @@ loc_CBD1:                                                       ; CODE XREF: RAM
                 ld      0(ix), #0
                 ret
 ; ---------------------------------------------------------------------------
-byte_CC09:      .db 0xA4, 0xA0, 0x30, 0x50, 0xA8, 0xA0, 0x30, 0x50 ; DATA XREF: RAM:CBF5o
-byte_CC11:      .db 0, 0xA0, 0xA0, 0xD8, 8, 8, 8, 0x10          ; DATA XREF: RAM:CBC6o
+byte_CC09:      .db 0xA4, 0xA0, 0x30, 0x50, 0xA8, 0xA0, 0x30, 0x50
+byte_CC11:      .db 0, 0xA0, 0xA0, 0xD8, 8, 8, 8, 0x10
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-loc_CC31:                                                       ; CODE XREF: RAM:AFD7p
-                                                                ; RAM:CBBDp
+loc_CC31:
                 ld      hl, #special_objs_tbl
                 ld      de, #0x10
                 ld      bc, #0x1202
 
-loc_CC3A:                                                       ; CODE XREF: RAM:loc_CC42j
+loc_CC3A:
                 ld      a, (hl)
                 and     #0xFC ; '¸'
                 cp      #0x70 ; 'p'
                 jr      NZ, loc_CC42
                 inc     c
 
-loc_CC42:                                                       ; CODE XREF: RAM:CC3Fj
+loc_CC42:
                 djnz    loc_CC3A
                 ld      a, c
                 add     a, a
@@ -6970,8 +7043,7 @@ loc_CC42:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_30_to_33_A1_to_A8:                                          ; DATA XREF: RAM:AE8Fo
-                                                                ; RAM:AE91o ...
+upd_30_to_33_A1_to_A8:
                 call    adj_m6_m12
                 ld      4(ix), #0xA
                 ld      5(ix), #0xA
@@ -6984,14 +7056,14 @@ upd_30_to_33_A1_to_A8:                                          ; DATA XREF: RAM
                 bit     1, 0xC(ix)
                 call    NZ, loc_CCF2
 
-loc_CC6C:                                                       ; CODE XREF: RAM:CC5Ej
+loc_CC6C:
                 ld      a, (graphic_objs_tbl+1)
                 sub     1(ix)
                 ld      a, 0x14(ix)
                 jr      NC, loc_CCBD
                 call    loc_CD0D
 
-loc_CC7A:                                                       ; CODE XREF: RAM:CCC0j
+loc_CC7A:
                 ld      0x14(ix), a
                 ld      a, (graphic_objs_tbl+2)
                 sub     2(ix)
@@ -6999,7 +7071,7 @@ loc_CC7A:                                                       ; CODE XREF: RAM
                 jr      NC, loc_CCC2
                 call    loc_CD0D
 
-loc_CC8B:                                                       ; CODE XREF: RAM:CCC5j
+loc_CC8B:
                 ld      0x15(ix), a
                 ld      a, (graphic_obj_1+3)
                 sub     3(ix)
@@ -7007,11 +7079,11 @@ loc_CC8B:                                                       ; CODE XREF: RAM
                 jr      NC, loc_CCC7
                 call    loc_CD0D
 
-loc_CC9C:                                                       ; CODE XREF: RAM:CCCAj
+loc_CC9C:
                 ld      0x16(ix), a
                 ld      b, #3
 
-loc_CCA1:                                                       ; CODE XREF: RAM:CCB3j
+loc_CCA1:
                 inc     ix
                 ld      a, 0x13(ix)
                 add     a, #8
@@ -7027,22 +7099,22 @@ loc_CCA1:                                                       ; CODE XREF: RAM
                 jr      loc_CCCC
 ; ---------------------------------------------------------------------------
 
-loc_CCBD:                                                       ; CODE XREF: RAM:CC75j
+loc_CCBD:
                 call    loc_CD04
                 jr      loc_CC7A
 ; ---------------------------------------------------------------------------
 
-loc_CCC2:                                                       ; CODE XREF: RAM:CC86j
+loc_CCC2:
                 call    loc_CD04
                 jr      loc_CC8B
 ; ---------------------------------------------------------------------------
 
-loc_CCC7:                                                       ; CODE XREF: RAM:CC97j
+loc_CCC7:
                 call    loc_CD04
                 jr      loc_CC9C
 ; ---------------------------------------------------------------------------
 
-loc_CCCC:                                                       ; CODE XREF: RAM:CCBBj
+loc_CCCC:
                 inc     0x10(ix)
                 ld      a, 0x10(ix)
                 and     #3
@@ -7052,22 +7124,21 @@ loc_CCCC:                                                       ; CODE XREF: RAM
                 add     a, b
                 ld      0(ix), a
 
-loc_CCDE:                                                       ; CODE XREF: RAM:BF5Ep
-                                                                ; RAM:C05Ap ...
+loc_CCDE:
                 ld      a, 7(ix)
                 or      #0x30 ; '0'
                 ld      7(ix), a
                 jp      set_draw_objs_overlapped
 ; ---------------------------------------------------------------------------
 
-loc_CCE9:                                                       ; CODE XREF: RAM:CC62p
+loc_CCE9:
                 ld      a, 20(ix)
                 neg
                 ld      20(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CCF2:                                                       ; CODE XREF: RAM:CC69p
+loc_CCF2:
                 ld      a, 21(ix)
                 neg
                 ld      21(ix), a
@@ -7079,8 +7150,7 @@ loc_CCF2:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CD04:                                                       ; CODE XREF: RAM:loc_CCBDp
-                                                                ; RAM:loc_CCC2p ...
+loc_CD04:
                 add     a, #3
                 ret     M
                 cp      #0x38 ; '8'
@@ -7089,8 +7159,7 @@ loc_CD04:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CD0D:                                                       ; CODE XREF: RAM:CC77p
-                                                                ; RAM:CC88p ...
+loc_CD0D:
                 sub     #3
                 ret     P
                 cp      #0xB8 ; '∏'
@@ -7099,8 +7168,7 @@ loc_CD0D:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_91_to_95:                                                   ; DATA XREF: RAM:AF4Fo
-                                                                ; RAM:AF51o ...
+upd_91_to_95:
                 call    adj_m8_m16
                 ld      a, (graphic_objs_tbl+8)
                 cp      #0x52 ; 'R'
@@ -7142,31 +7210,28 @@ upd_91_to_95:                                                   ; DATA XREF: RAM
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-upd_1C:                                                         ; DATA XREF: RAM:AE67o
+upd_1C:
                 call    set_both_deadly_flags
                 jr      upd_3F_48_4F
 ; ---------------------------------------------------------------------------
 
-upd_5B:                                                         ; DATA XREF: RAM:AEE5o
+upd_5B:
                 xor     a
                 ld      9(ix), a
                 ld      0xA(ix), a
 
-upd_49:                                                         ; DATA XREF: RAM:AEC1o
+upd_49:
                 call    adj_m12_m16
                 jr      loc_CD84
 ; ---------------------------------------------------------------------------
 
-upd_3F_48_4F:                                                   ; CODE XREF: RAM:CD73j
-                                                                ; DATA XREF: RAM:AEADo ...
+upd_3F_48_4F:
                 call    adj_m8_m16
 
-loc_CD84:                                                       ; CODE XREF: RAM:CD1Ej
-                                                                ; RAM:CD25j ...
+loc_CD84:
                 call    dec_dZ_and_update_XYZ
 
-loc_CD87:                                                       ; CODE XREF: RAM:CD52j
-                                                                ; RAM:CD6Dj ...
+loc_CD87:
                 ld      a, 9(ix)
                 or      0xA(ix)
                 or      0xB(ix)
@@ -7177,7 +7242,7 @@ loc_CD87:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-upd_4E:                                                         ; DATA XREF: RAM:AECBo
+upd_4E:
                 call    adj_m8_m16
                 ld      9(ix), #0
                 ld      0xA(ix), #0
@@ -7187,12 +7252,12 @@ upd_4E:                                                         ; DATA XREF: RAM
                 ld      a, #0xFF
                 ld      0xB(ix), a
 
-loc_CDB6:                                                       ; CODE XREF: RAM:CDAFj
+loc_CDB6:
                 call    loc_B97C
                 jr      loc_CD87
 ; ---------------------------------------------------------------------------
 
-upd_54:                                                         ; DATA XREF: RAM:AED7o
+upd_54:
                 ld      9(ix), #0
                 ld      0xA(ix), #0
                 call    adj_m8_m16
@@ -7211,7 +7276,7 @@ upd_54:                                                         ; DATA XREF: RAM
                 jr      loc_CE16
 ; ---------------------------------------------------------------------------
 
-loc_CDEC:                                                       ; CODE XREF: RAM:CDD4j
+loc_CDEC:
                 bit     2, 0xC(ix)
                 jr      NZ, loc_CDFD
                 set     1, 0x17(ix)
@@ -7219,7 +7284,7 @@ loc_CDEC:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CDFD:                                                       ; CODE XREF: RAM:CDF0j
+loc_CDFD:
                 bit     1, 0x17(ix)
                 jr      NZ, loc_CE2A
                 ld      a, 3(ix)
@@ -7231,8 +7296,7 @@ loc_CDFD:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CE16:                                                       ; CODE XREF: RAM:CDEAj
-                                                                ; RAM:CE08j
+loc_CE16:
                 ld      0xB(ix), #2
                 ld      a, #3
                 ld      (graphic_objs_tbl+0xB), a
@@ -7242,13 +7306,12 @@ loc_CE16:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CE2A:                                                       ; CODE XREF: RAM:CE01j
+loc_CE2A:
                 ld      0x17(ix), #0
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-upd_55:                                                         ; CODE XREF: RAM:CE9Dj
-                                                                ; DATA XREF: RAM:AED9o
+upd_55:
                 call    adj_m8_m16
                 xor     a
                 ld      9(ix), a
@@ -7262,21 +7325,20 @@ upd_55:                                                         ; CODE XREF: RAM
                 set     2, 0xD(ix)
                 ld      0xB(ix), #2
 
-loc_CE55:                                                       ; CODE XREF: RAM:CE4Bj
-                                                                ; RAM:CE89j ...
+loc_CE55:
                 xor     a
                 ld      9(ix), a
                 ld      0xA(ix), a
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CE5F:                                                       ; CODE XREF: RAM:CE3Fj
+loc_CE5F:
                 ld      a, (graphic_objs_tbl+0xC)
                 and     #8
                 jr      Z, loc_CE6A
                 res     7, 0x17(ix)
 
-loc_CE6A:                                                       ; CODE XREF: RAM:CE64j
+loc_CE6A:
                 ld      a, 0xB(ix)
                 and     a
                 bit     7, 0x17(ix)
@@ -7284,12 +7346,12 @@ loc_CE6A:                                                       ; CODE XREF: RAM
                 and     a
                 jr      Z, loc_CE91
 
-loc_CE77:                                                       ; CODE XREF: RAM:CE72j
+loc_CE77:
                 ld      a, #1
                 jp      P, loc_CE7E
                 add     a, #2
 
-loc_CE7E:                                                       ; CODE XREF: RAM:CE79j
+loc_CE7E:
                 ld      0xB(ix), a
                 call    loc_B97C
                 ld      a, 3(ix)
@@ -7299,21 +7361,21 @@ loc_CE7E:                                                       ; CODE XREF: RAM
                 jr      loc_CE55
 ; ---------------------------------------------------------------------------
 
-loc_CE91:                                                       ; CODE XREF: RAM:CE75j
+loc_CE91:
                 call    dec_dZ_and_update_XYZ
                 res     2, 0xD(ix)
                 jr      loc_CE55
 ; ---------------------------------------------------------------------------
 
-upd_56:                                                         ; DATA XREF: RAM:AEDBo
+upd_56:
                 call    set_both_deadly_flags
                 jp      upd_55
 ; ---------------------------------------------------------------------------
 
-upd_5C:                                                         ; DATA XREF: RAM:AEE7o
+upd_5C:
                 call    set_both_deadly_flags
 
-upd_57:                                                         ; DATA XREF: RAM:AEDDo
+upd_57:
                 call    adj_m8_m16
                 xor     a
                 ld      0xA(ix), a
@@ -7326,12 +7388,11 @@ upd_57:                                                         ; DATA XREF: RAM
                 jr      Z, loc_CEC4
                 res     0, 0x10(ix)
 
-loc_CEC4:                                                       ; CODE XREF: RAM:CEBEj
-                                                                ; RAM:CED2j ...
+loc_CEC4:
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CEC7:                                                       ; CODE XREF: RAM:CEB1j
+loc_CEC7:
                 ld      9(ix), #0xFE ; '˛'
                 call    loc_B97C
                 bit     0, 0xC(ix)
@@ -7340,10 +7401,10 @@ loc_CEC7:                                                       ; CODE XREF: RAM
                 jr      loc_CEC4
 ; ---------------------------------------------------------------------------
 
-upd_5D:                                                         ; DATA XREF: RAM:AEE9o
+upd_5D:
                 call    set_both_deadly_flags
 
-upd_58:                                                         ; DATA XREF: RAM:AEDFo
+upd_58:
                 call    adj_m8_m16
                 xor     a
                 ld      9(ix), a
@@ -7356,12 +7417,11 @@ upd_58:                                                         ; DATA XREF: RAM
                 jr      Z, loc_CEFE
                 res     0, 0x10(ix)
 
-loc_CEFE:                                                       ; CODE XREF: RAM:CEF8j
-                                                                ; RAM:CF0Cj ...
+loc_CEFE:
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CF01:                                                       ; CODE XREF: RAM:CEEBj
+loc_CF01:
                 ld      0xA(ix), #0xFE ; '˛'
                 call    loc_B97C
                 bit     1, 0xC(ix)
@@ -7370,8 +7430,7 @@ loc_CF01:                                                       ; CODE XREF: RAM
                 jr      loc_CEFE
 ; ---------------------------------------------------------------------------
 
-upd_79_to_87:                                                   ; DATA XREF: RAM:AF21o
-                                                                ; RAM:AF23o ...
+upd_79_to_87:
                 call    adj_m8_m16
                 call    loc_B97C
                 bit     2, 7(ix)
@@ -7379,7 +7438,7 @@ upd_79_to_87:                                                   ; DATA XREF: RAM
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-upd_59:                                                         ; DATA XREF: RAM:AEE1o
+upd_59:
                 call    adj_m8_m16
                 call    set_both_deadly_flags
                 ld      0xB(ix), #0
@@ -7390,7 +7449,7 @@ upd_59:                                                         ; DATA XREF: RAM
                 jr      Z, loc_CF3E
                 set     6, 7(ix)
 
-loc_CF3E:                                                       ; CODE XREF: RAM:CF38j
+loc_CF3E:
                 bit     0, 0xC(ix)
                 jr      NZ, loc_CF52
                 bit     1, 0xC(ix)
@@ -7399,8 +7458,7 @@ loc_CF3E:                                                       ; CODE XREF: RAM
                 or      0xA(ix)
                 jr      NZ, loc_CF65
 
-loc_CF52:                                                       ; CODE XREF: RAM:CF42j
-                                                                ; RAM:CF48j
+loc_CF52:
                 ld      a, (seed_3)
                 and     #8
                 sub     #4
@@ -7410,12 +7468,11 @@ loc_CF52:                                                       ; CODE XREF: RAM
                 sub     #4
                 ld      0xA(ix), a
 
-loc_CF65:                                                       ; CODE XREF: RAM:CF50j
+loc_CF65:
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-upd_70_to_77:                                                   ; DATA XREF: RAM:AF0Fo
-                                                                ; RAM:AF11o ...
+upd_70_to_77:
                 call    adj_m8_m16
                 call    loc_B97C
                 bit     0, 0x16(ix)
@@ -7439,11 +7496,10 @@ upd_70_to_77:                                                   ; DATA XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CF9E:                                                       ; CODE XREF: RAM:CD5Ep
-                                                                ; RAM:CF95p
+loc_CF9E:
                 call    loc_D07B
 
-loc_CFA1:                                                       ; CODE XREF: RAM:CFA8j
+loc_CFA1:
                 cp      0(iy)
                 jr      Z, loc_CFAB
                 add     iy, de
@@ -7451,13 +7507,13 @@ loc_CFA1:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CFAB:                                                       ; CODE XREF: RAM:CFA4j
+loc_CFAB:
                 ld      0(iy), c
                 ld      0(ix), c
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CFB2:                                                       ; CODE XREF: RAM:CFDDp
+loc_CFB2:
                 ld      d, #1
                 ld      iy, #graphic_obj_2
                 ld      a, 0(iy)
@@ -7475,7 +7531,7 @@ loc_CFB2:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_78:                                                         ; DATA XREF: RAM:AF1Fo
+upd_78:
                 call    adj_m8_m16
                 call    loc_B97C
                 ld      a, (unk_A70E)
@@ -7491,7 +7547,7 @@ upd_78:                                                         ; DATA XREF: RAM
                 call    loc_D071
                 ld      a, #0x5A ; 'Z'
 
-loc_CFF3:                                                       ; CODE XREF: RAM:CFF9j
+loc_CFF3:
                 cp      0(iy)
                 ret     Z
                 add     iy, de
@@ -7499,7 +7555,7 @@ loc_CFF3:                                                       ; CODE XREF: RAM
                 call    loc_D071
                 xor     a
 
-loc_CFFF:                                                       ; CODE XREF: RAM:D006j
+loc_CFFF:
                 cp      0(iy)
                 jr      Z, loc_D009
                 add     iy, de
@@ -7507,7 +7563,7 @@ loc_CFFF:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D009:                                                       ; CODE XREF: RAM:D002j
+loc_D009:
                 push    ix
                 pop     hl
                 push    iy
@@ -7547,24 +7603,21 @@ loc_D009:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_D071:                                                       ; CODE XREF: RAM:loc_CB89p
-                                                                ; RAM:CFEEp ...
+loc_D071:
                 ld      de, #0x20 ; ' '
                 ld      iy, # graphic_obj_2+0x80
                 ld      b, #0x30 ; '0'
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D07B:                                                       ; CODE XREF: RAM:loc_CF9Ep
-                                                                ; RAM:D0F4p ...
+loc_D07B:
                 ld      de, #0x10
                 ld      iy, #special_objs_tbl
                 ld      b, #0x12
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D085:                                                       ; CODE XREF: RAM:CD3Ep
-                                                                ; RAM:D0B5p
+loc_D085:
                 ld      a, 1(ix)
                 cp      0x15(ix)
                 jr      Z, loc_D099
@@ -7573,11 +7626,10 @@ loc_D085:                                                       ; CODE XREF: RAM
                 jr      loc_D099
 ; ---------------------------------------------------------------------------
 
-loc_D095:                                                       ; CODE XREF: RAM:D08Dj
+loc_D095:
                 ld      9(ix), #1
 
-loc_D099:                                                       ; CODE XREF: RAM:D08Bj
-                                                                ; RAM:D093j
+loc_D099:
                 ld      a, 2(ix)
                 cp      0x16(ix)
                 ret     Z
@@ -7586,12 +7638,12 @@ loc_D099:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D0A7:                                                       ; CODE XREF: RAM:D0A0j
+loc_D0A7:
                 ld      0xA(ix), #1
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_5A:                                                         ; DATA XREF: RAM:AEE3o
+upd_5A:
                 call    adj_m8_m16
                 bit     0, 0x14(ix)
                 jr      Z, loc_D10C
@@ -7601,7 +7653,7 @@ upd_5A:                                                         ; DATA XREF: RAM
                 jr      NC, loc_D0C3
                 ld      0xB(ix), #1
 
-loc_D0C3:                                                       ; CODE XREF: RAM:D0BDj
+loc_D0C3:
                 call    loc_B97C
                 ld      a, 0xA(ix)
                 or      9(ix)
@@ -7610,7 +7662,7 @@ loc_D0C3:                                                       ; CODE XREF: RAM
                 call    loc_D071
                 ld      c, #0x70 ; 'p'
 
-loc_D0D7:                                                       ; CODE XREF: RAM:D0E1j
+loc_D0D7:
                 ld      a, 0(iy)
                 and     #0xFC ; '¸'
                 cp      c
@@ -7620,7 +7672,7 @@ loc_D0D7:                                                       ; CODE XREF: RAM
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-loc_D0E6:                                                       ; CODE XREF: RAM:D0DDj
+loc_D0E6:
                 set     0, 0x16(iy)
                 xor     a
                 ld      (unk_A70E), a
@@ -7629,7 +7681,7 @@ loc_D0E6:                                                       ; CODE XREF: RAM
                 call    loc_D07B
                 ld      a, #0x5A ; 'Z'
 
-loc_D0F9:                                                       ; CODE XREF: RAM:D100j
+loc_D0F9:
                 cp      0(iy)
                 jr      Z, loc_D105
                 add     iy, de
@@ -7637,18 +7689,18 @@ loc_D0F9:                                                       ; CODE XREF: RAM
                 jp      loc_C107
 ; ---------------------------------------------------------------------------
 
-loc_D105:                                                       ; CODE XREF: RAM:D0FCj
+loc_D105:
                 ld      0(iy), #0
                 jp      loc_C107
 ; ---------------------------------------------------------------------------
 
-loc_D10C:                                                       ; CODE XREF: RAM:D0B3j
+loc_D10C:
                 ld      0xB(ix), #0xFF
                 call    loc_B97C
                 call    loc_D071
                 ld      c, #0x70 ; 'p'
 
-loc_D118:                                                       ; CODE XREF: RAM:D122j
+loc_D118:
                 ld      a, 0(iy)
                 and     #0xFC ; '¸'
                 cp      c
@@ -7658,7 +7710,7 @@ loc_D118:                                                       ; CODE XREF: RAM
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-loc_D127:                                                       ; CODE XREF: RAM:D11Ej
+loc_D127:
                 ld      a, 1(iy)
                 ld      0x15(ix), a
                 ld      a, 2(iy)
@@ -7667,18 +7719,18 @@ loc_D127:                                                       ; CODE XREF: RAM
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-loc_D13A:                                                       ; CODE XREF: RAM:CF98p
+loc_D13A:
                 call    loc_D07B
                 ld      c, #0
 
-loc_D13F:                                                       ; CODE XREF: RAM:D14Bj
+loc_D13F:
                 ld      a, 0(iy)
                 and     #0xFC ; '¸'
                 cp      #0x74 ; 't'
                 jr      NZ, loc_D149
                 inc     c
 
-loc_D149:                                                       ; CODE XREF: RAM:D146j
+loc_D149:
                 add     iy, de
                 djnz    loc_D13F
                 ld      a, c
@@ -7686,7 +7738,7 @@ loc_D149:                                                       ; CODE XREF: RAM
                 ret     NZ
                 call    loc_D07B
 
-loc_D154:                                                       ; CODE XREF: RAM:D16Cj
+loc_D154:
                 ld      a, 0(iy)
                 and     #0xF8 ; '¯'
                 cp      #0x80 ; 'Ä'
@@ -7696,13 +7748,13 @@ loc_D154:                                                       ; CODE XREF: RAM
                 ld      a, #1
                 ld      (unk_A70F), a
 
-loc_D16A:                                                       ; CODE XREF: RAM:D15Bj
+loc_D16A:
                 add     iy, de
                 djnz    loc_D154
                 ret
 ; ---------------------------------------------------------------------------
 
-init_special_objects:                                           ; CODE XREF: RAM:AFBFp
+init_special_objects:
                 ld      de, #special_objs_tbl
                 ld      hl, #special_objs_ini_data
                 ld      bc, #0x120
@@ -7714,19 +7766,19 @@ init_special_objects:                                           ; CODE XREF: RAM
                 ld      hl, #spec_obj_ini_loc_data
                 add     hl, de
                 ld      iy, #special_obj_4
-                ld      c, #5                                   ; do 5 objects
-                ld      de, #13                                 ; entry=3+13=16 bytes
+                ld      c, #5                                           ; do 5 objects
+                ld      de, #13                                         ; entry=3+13=16 bytes
 
-loc_D18F:                                                       ; CODE XREF: RAM:D1A2j
+loc_D18F:
                 ld      a, (hl)
-                ld      8(iy), a                                ; screen
+                ld      8(iy), a                                        ; screen
                 ld      b, #3
 
-loc_D195:                                                       ; CODE XREF: RAM:D19Cj
+loc_D195:
                 inc     hl
                 inc     iy
                 ld      a, (hl)
-                ld      0(iy), a                                ; x,y,z
+                ld      0(iy), a                                        ; x,y,z
                 djnz    loc_D195
                 inc     hl
                 add     iy, de
@@ -7734,7 +7786,7 @@ loc_D195:                                                       ; CODE XREF: RAM
                 jr      NZ, loc_D18F
                 ret
 ; ---------------------------------------------------------------------------
-spec_obj_ini_loc_data:.db 0x78, 0xB8, 0x48, 0x80                ; DATA XREF: RAM:D182o
+spec_obj_ini_loc_data:.db 0x78, 0xB8, 0x48, 0x80
                 .db 0x25, 0x48, 0x48, 0xA4
                 .db 0x3E, 0x78, 0xB8, 0x80
                 .db 0x70, 0xB8, 0xB8, 0x81
@@ -7756,14 +7808,12 @@ spec_obj_ini_loc_data:.db 0x78, 0xB8, 0x48, 0x80                ; DATA XREF: RAM
                 .db 0x1B, 0x48, 0x78, 0xB0
 ; ---------------------------------------------------------------------------
 
-upd_10_11:                                                      ; DATA XREF: RAM:AE4Fo
-                                                                ; RAM:AE51o
+upd_10_11:
                 ld      a, 7(ix)
                 xor     #0x40 ; '@'
                 ld      7(ix), a
 
-upd_50_51:                                                      ; DATA XREF: RAM:AECFo
-                                                                ; RAM:AED1o
+upd_50_51:
                 call    adj_m8_m16
                 call    set_both_deadly_flags
                 call    dec_dZ_and_update_XYZ
@@ -7773,7 +7823,7 @@ upd_50_51:                                                      ; DATA XREF: RAM
                 ld      3(ix), #0x81 ; 'Å'
                 ld      0xB(ix), #0
 
-loc_D215:                                                       ; CODE XREF: RAM:D20Bj
+loc_D215:
                 ld      a, 9(ix)
                 or      0xA(ix)
                 jp      NZ, loc_CCDE
@@ -7788,12 +7838,12 @@ loc_D215:                                                       ; CODE XREF: RAM
                 jr      loc_D242
 ; ---------------------------------------------------------------------------
 
-loc_D237:                                                       ; CODE XREF: RAM:D228j
+loc_D237:
                 ld      9(ix), a
                 res     0, 0(ix)
                 set     6, 7(ix)
 
-loc_D242:                                                       ; CODE XREF: RAM:D235j
+loc_D242:
                 and     a
                 jp      P, loc_CCDE
                 ld      a, 0(ix)
@@ -7802,8 +7852,7 @@ loc_D242:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-upd_A9_to_AC:                                                   ; DATA XREF: RAM:AF7Fo
-                                                                ; RAM:AF81o ...
+upd_A9_to_AC:
                 call    adj_m8_m16
                 call    set_both_deadly_flags
                 call    dec_dZ_and_update_XYZ
@@ -7816,7 +7865,7 @@ upd_A9_to_AC:                                                   ; DATA XREF: RAM
                 ld      3(ix), #0x81 ; 'Å'
                 ld      0xB(ix), #0
 
-loc_D271:                                                       ; CODE XREF: RAM:D267j
+loc_D271:
                 ld      a, 9(ix)
                 or      0xA(ix)
                 jp      NZ, loc_CCDE
@@ -7831,12 +7880,12 @@ loc_D271:                                                       ; CODE XREF: RAM
                 jr      loc_D29E
 ; ---------------------------------------------------------------------------
 
-loc_D293:                                                       ; CODE XREF: RAM:D284j
+loc_D293:
                 ld      9(ix), a
                 res     1, 0(ix)
                 set     6, 7(ix)
 
-loc_D29E:                                                       ; CODE XREF: RAM:D291j
+loc_D29E:
                 and     a
                 jp      P, loc_CCDE
                 ld      a, 0(ix)
@@ -7845,8 +7894,7 @@ loc_D29E:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-upd_88_to_8B:                                                   ; DATA XREF: RAM:AF3Fo
-                                                                ; RAM:AF41o ...
+upd_88_to_8B:
                 call    adj_m8_m16
                 ld      0xB(ix), #0
                 call    loc_B97C
@@ -7864,44 +7912,44 @@ upd_88_to_8B:                                                   ; DATA XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_D2D7:                                                       ; CODE XREF: RAM:D2CEj
+loc_D2D7:
                 ld      0(ix), #1
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-upd_8C:                                                         ; DATA XREF: RAM:AF47o
+upd_8C:
                 call    adj_m8_m16
                 res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_8E:                                                         ; DATA XREF: RAM:AF49o
+upd_8E:
                 call    adj_m8_m16
                 res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_8F:                                                         ; DATA XREF: RAM:AF4Bo
+upd_8F:
                 call    adj_m8_m16
                 res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
 
-upd_90:                                                         ; DATA XREF: RAM:AF4Do
+upd_90:
                 call    adj_m8_m16
                 res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
 ; table of dX,dY pairs randomly chosen for ??
-byte_D30A:      .db 2, 0                                        ; DATA XREF: RAM:B87Ao
+byte_D30A:      .db 2, 0
                 .db 0xFE, 0
                 .db 0, 2
                 .db 0, 0xFE
-special_objs_ini_data:.db 0x70, 0x50, 0xA0, 0x80, 8, 8, 0x20, 0x10 ; DATA XREF: RAM:D172o
+special_objs_ini_data:.db 0x70, 0x50, 0xA0, 0x80, 8, 8, 0x20, 0x10
                 .db 0x7A, 0, 0, 0, 0, 0, 0, 0
                 .db 0x71, 0x70, 0xA0, 0x80, 8, 8, 0x20, 0x10
                 .db 0x80, 0, 0, 0, 0, 0, 0, 0
@@ -7935,17 +7983,13 @@ special_objs_ini_data:.db 0x70, 0x50, 0xA0, 0x80, 8, 8, 0x20, 0x10 ; DATA XREF: 
                 .db 0x52, 0, 0, 0, 0, 0, 0, 0
                 .db 0x87, 0x9C, 0x8C, 0x7F, 0xC, 0xC, 0, 0
                 .db 0x52, 0, 0, 0, 0, 0, 0, 0
-byte_D422:      .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:loc_B097o
+byte_D422:      .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
-special_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:B123o
-                                                                ; RAM:loc_CC31o ...
+special_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-special_obj_4:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:D186o
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+special_obj_4:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -7955,24 +7999,25 @@ special_obj_4:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: 
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-byte_D542:      .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                                                                ; DATA XREF: RAM:D030o
-                                                                ; RAM:D060o
-                .db 0, 0, 0, 0, 0
-byte_D562:      .db 0x70, 0xB0, 0x9C, 0xA2, 0xA2, 0x6A, 0x72, 0x5C, 0x50, 0x88, 1, 0x87, 0xD5, 0xDD
-                                                                ; DATA XREF: RAM:CD31o
-                .db 0xCB, 7, 0x4E, 0xDD, 0xCB, 7, 0x8E, 0xC8, 0x3A, 0x15, 0xA7, 0xE6, 0xF, 0x6F, 0x26
-                .db 0, 9, 0x46, 0xE, 0xC, 0xC3, 0x7B, 0xD6, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20, 0x20
-                .db 0x30, 0x40, 0x50, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20, 0x20, 0x20, 0x30, 0x30, 0x40
-                .db 0x40, 0x50, 0x50, 0x60, 0x60, 0x70, 0x70, 0x80, 0x80, 0x90, 0x90, 0x90, 0x90, 0x80
-                .db 0x80, 0x70, 0x70, 0x60, 0x60, 0x50, 0x50, 0x40, 0x40, 0x30, 0x30, 0x20, 0x20, 0x90
-                .db 0x80, 0x70, 0x80, 0x70, 0x60, 0x70, 0x60, 0x50, 0x60, 0x50, 0x40, 0x50, 0x40, 0x30
-                .db 0x20, 0x40, 0x40, 0x40, 0x30, 0x50, 0x50, 0x50, 0x50, 0x40, 0x40, 0x40, 0x30, 0x50
-                .db 0x50, 0x50, 0x50
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+byte_D542:      .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+byte_D562:      .db 0x70, 0xB0, 0x9C, 0xA2, 0xA2, 0x6A, 0x72, 0x5C, 0x50, 0x88, 1
+                .db 0x87, 0xD5, 0xDD, 0xCB, 7, 0x4E, 0xDD, 0xCB, 7, 0x8E, 0xC8, 0x3A
+                .db 0x15, 0xA7, 0xE6, 0xF, 0x6F, 0x26, 0, 9, 0x46, 0xE, 0xC, 0xC3
+                .db 0x7B, 0xD6, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20, 0x20, 0x30, 0x40
+                .db 0x50, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20, 0x20, 0x20, 0x30, 0x30
+                .db 0x40, 0x40, 0x50, 0x50, 0x60, 0x60, 0x70, 0x70, 0x80, 0x80, 0x90
+                .db 0x90, 0x90, 0x90, 0x80, 0x80, 0x70, 0x70, 0x60, 0x60, 0x50, 0x50
+                .db 0x40, 0x40, 0x30, 0x30, 0x20, 0x20, 0x90, 0x80, 0x70, 0x80, 0x70
+                .db 0x60, 0x70, 0x60, 0x50, 0x60, 0x50, 0x40, 0x50, 0x40, 0x30, 0x20
+                .db 0x40, 0x40, 0x40, 0x30, 0x50, 0x50, 0x50, 0x50, 0x40, 0x40, 0x40
+                .db 0x30, 0x50, 0x50, 0x50, 0x50
 ; ---------------------------------------------------------------------------
 
-loc_D5D7:                                                       ; CODE XREF: RAM:B4EBp
-                                                                ; RAM:B50Fp
+loc_D5D7:
                 ld      hl, #word_A749
                 inc     (hl)
                 ld      a, (hl)
@@ -7982,10 +8027,10 @@ loc_D5D7:                                                       ; CODE XREF: RAM
                 jp      loc_D67B
 ; ---------------------------------------------------------------------------
 
-loc_D5E4:                                                       ; CODE XREF: RAM:C588p
+loc_D5E4:
                 ld      c, #0x10
 
-loc_D5E6:                                                       ; CODE XREF: RAM:D5EFj
+loc_D5E6:
                 ld      a, c
                 xor     #0xA5 ; '•'
                 add     a, c
@@ -7996,7 +8041,7 @@ loc_D5E6:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-audio_D5F2:                                                     ; CODE XREF: RAM:loc_B084p
+audio_D5F2:
                 ld      hl, #word_A749
                 ld      a, (hl)
                 and     a
@@ -8015,20 +8060,20 @@ audio_D5F2:                                                     ; CODE XREF: RAM
                 ld      c, #0xC
                 jp      loc_D67B
 ; ---------------------------------------------------------------------------
-off_D60D:       .dw byte_D615                                   ; DATA XREF: RAM:D5FCo
+off_D60D:       .dw byte_D615
                 .dw byte_D619
                 .dw byte_D61E
                 .dw byte_D625
-byte_D615:      .db 0x40, 0x70, 0x40, 0x70                      ; DATA XREF: RAM:off_D60Do
-byte_D619:      .db 0x50, 0x70, 0x60, 0x50, 0x40                ; DATA XREF: RAM:D60Fo
-byte_D61E:      .db 0x40, 0x50, 0x60, 0x70, 0x80, 0x80, 0x80    ; DATA XREF: RAM:D611o
-byte_D625:      .db 0x30, 0x60, 0x30, 0x60                      ; DATA XREF: RAM:D613o
+byte_D615:      .db 0x40, 0x70, 0x40, 0x70
+byte_D619:      .db 0x50, 0x70, 0x60, 0x50, 0x40
+byte_D61E:      .db 0x40, 0x50, 0x60, 0x70, 0x80, 0x80, 0x80
+byte_D625:      .db 0x30, 0x60, 0x30, 0x60
 ; ---------------------------------------------------------------------------
 
-loc_D629:                                                       ; CODE XREF: RAM:C1B5j
+loc_D629:
                 ld      c, #0x20 ; ' '
 
-loc_D62B:                                                       ; CODE XREF: RAM:D632j
+loc_D62B:
                 ld      a, c
                 sub     b
                 ld      b, a
@@ -8038,7 +8083,7 @@ loc_D62B:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D635:                                                       ; CODE XREF: RAM:C5AEp
+loc_D635:
                 ld      hl, #unk_A748
                 inc     (hl)
                 ld      a, (hl)
@@ -8050,21 +8095,21 @@ loc_D635:                                                       ; CODE XREF: RAM
                 jr      loc_D67B
 ; ---------------------------------------------------------------------------
 
-loc_D646:                                                       ; CODE XREF: RAM:D63Cj
+loc_D646:
                 and     #3
                 ret     NZ
                 ld      bc, #0x6002
                 jr      loc_D67B
 ; ---------------------------------------------------------------------------
 
-loc_D64E:                                                       ; CODE XREF: RAM:C114p
+loc_D64E:
                 ld      hl, (seed_3)
                 ld      a, h
                 and     #0x1F
                 ld      h, a
                 ld      e, #4
 
-loc_D657:                                                       ; CODE XREF: RAM:D662j
+loc_D657:
                 ld      a, (hl)
                 inc     hl
                 and     #0x7F ; ''
@@ -8086,41 +8131,39 @@ loc_D657:                                                       ; CODE XREF: RAM
                 jr      loc_D67B
 ; ---------------------------------------------------------------------------
 
-loc_D673:                                                       ; DATA XREF: RAM:D674r
+loc_D673:
                 nop
                 ld      a, (loc_D673)
                 cpl
                 ld      b, a
                 ld      c, #8
 
-loc_D67B:                                                       ; CODE XREF: RAM:D5E1j
-                                                                ; RAM:D60Aj ...
+loc_D67B:
                 call    loc_D682
                 dec     c
                 jr      NZ, loc_D67B
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D682:                                                       ; CODE XREF: RAM:D5EBp
-                                                                ; RAM:D62Ep ...
+loc_D682:
                 ld      a, #0x10
                 out     (0xFE), a
                 ld      a, b
 
-loc_D687:                                                       ; CODE XREF: RAM:loc_D687j
+loc_D687:
                 djnz    loc_D687
                 ld      b, a
                 xor     a
                 out     (0xFE), a
                 ld      a, b
 
-loc_D68E:                                                       ; CODE XREF: RAM:loc_D68Ej
+loc_D68E:
                 djnz    loc_D68E
                 ld      b, a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D692:                                                       ; CODE XREF: RAM:D5FFp
+loc_D692:
                 ld      l, a
                 ld      h, #0
                 add     hl, hl
@@ -8132,21 +8175,21 @@ loc_D692:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-play_audio_wait_key:                                            ; CODE XREF: RAM:BB91p
+play_audio_wait_key:
                 ld      hl, #audio_played
                 ld      a, (hl)
                 and     a
                 ret     NZ
                 set     0, (hl)
 
-loc_D6A4:                                                       ; CODE XREF: RAM:D6B3j
+loc_D6A4:
                 xor     a
                 call    read_port
                 jr      Z, loc_D6AB
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D6AB:                                                       ; CODE XREF: RAM:D6A8j
+loc_D6AB:
                 ld      a, (de)
                 cp      #0xFF
                 jr      Z, locret_D6BF
@@ -8154,8 +8197,7 @@ loc_D6AB:                                                       ; CODE XREF: RAM
                 jr      loc_D6A4
 ; ---------------------------------------------------------------------------
 
-play_audio:                                                     ; CODE XREF: RAM:AFBCp
-                                                                ; RAM:C320p ...
+play_audio:
                 ld      a, (de)
                 cp      #0xFF
                 jr      Z, locret_D6BF
@@ -8163,13 +8205,11 @@ play_audio:                                                     ; CODE XREF: RAM
                 jr      play_audio
 ; ---------------------------------------------------------------------------
 
-locret_D6BF:                                                    ; CODE XREF: RAM:D6AEj
-                                                                ; RAM:D6B8j
+locret_D6BF:
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D6C0:                                                       ; CODE XREF: RAM:D6B0p
-                                                                ; RAM:D6BAp
+loc_D6C0:
                 and     #0x3F ; '?'
                 jr      Z, loc_D702
                 ld      l, a
@@ -8193,23 +8233,22 @@ loc_D6C0:                                                       ; CODE XREF: RAM
                 ld      e, l
                 ld      d, h
 
-loc_D6DF:                                                       ; CODE XREF: RAM:D6E3j
+loc_D6DF:
                 dec     a
                 jr      Z, loc_D6E5
                 add     hl, de
                 jr      loc_D6DF
 ; ---------------------------------------------------------------------------
 
-loc_D6E5:                                                       ; CODE XREF: RAM:D6E0j
+loc_D6E5:
                 pop     de
 
-loc_D6E6:                                                       ; CODE XREF: RAM:D6FEj
+loc_D6E6:
                 push    bc
                 xor     a
                 out     (0xFE), a
 
-loc_D6EA:                                                       ; CODE XREF: RAM:loc_D6EAj
-                                                                ; RAM:D6EDj
+loc_D6EA:
                 djnz    loc_D6EA
                 dec     c
                 jr      NZ, loc_D6EA
@@ -8218,8 +8257,7 @@ loc_D6EA:                                                       ; CODE XREF: RAM
                 ld      a, #0x10
                 out     (0xFE), a
 
-loc_D6F5:                                                       ; CODE XREF: RAM:loc_D6F5j
-                                                                ; RAM:D6F8j
+loc_D6F5:
                 djnz    loc_D6F5
                 dec     c
                 jr      NZ, loc_D6F5
@@ -8232,7 +8270,7 @@ loc_D6F5:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D702:                                                       ; CODE XREF: RAM:D6C2j
+loc_D702:
                 ld      a, (de)
                 inc     de
                 rlca
@@ -8242,10 +8280,10 @@ loc_D702:                                                       ; CODE XREF: RAM
                 ld      l, a
                 ld      bc, #0x430B
 
-loc_D70D:                                                       ; CODE XREF: RAM:D715j
+loc_D70D:
                 push    bc
 
-loc_D70E:                                                       ; CODE XREF: RAM:D711j
+loc_D70E:
                 dec     bc
                 ld      a, b
                 or      c
@@ -8255,7 +8293,7 @@ loc_D70E:                                                       ; CODE XREF: RAM
                 jr      NZ, loc_D70D
                 ret
 ; ---------------------------------------------------------------------------
-byte_D718:      .db 0, 0, 0                                     ; DATA XREF: RAM:D6CBo
+byte_D718:      .db 0, 0, 0
                 .db 0xF4, 0xA, 8
                 .db 0x65, 0xA, 9
                 .db 0xDE, 9, 9
@@ -8316,7 +8354,7 @@ byte_D718:      .db 0, 0, 0                                     ; DATA XREF: RAM
                 .db 0x5F, 1, 0xDC
                 .db 0x59, 1, 0xE9
                 .db 0x54, 1, 0xF7
-menu_tune:      .db 0x6C, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29 ; DATA XREF: RAM:BB8Eo
+menu_tune:      .db 0x6C, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29
                 .db 0x2A, 0x2C, 0x29, 0x67, 0x6C, 0x29, 0x2A, 0x2C
                 .db 0x29, 0x6A, 0x29, 0x2A, 0x6C, 0x60, 0x65, 0x6C
                 .db 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29, 0x2A
@@ -8329,16 +8367,15 @@ menu_tune:      .db 0x6C, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29 ; DATA XREF: 
                 .db 0x2A, 0x6C, 0x60, 0xA5, 0xFF, 0x27, 0x67, 0x67
                 .db 0x23, 0x67, 0xEA, 0xDE, 0x23, 0x23, 0x5E, 0x5B
                 .db 0x59, 0xD7, 0x23, 0xFF
-start_game_tune:.db 0x65, 0x68, 0x6C, 0x71, 0x6F, 0x2D, 0x2C, 0x2F, 0x2D, 0x6A, 0x6D, 0x2C, 0x2A, 0x2C
-                                                                ; DATA XREF: RAM:AFB9o
-                .db 0x31, 0x6C, 0x68, 0x67, 0xE5, 0xFF
-tbd_tune:       .db 0x20, 0x20, 0x25, 0x26, 0x2C, 0x69, 0x20, 0x20, 0x22, 0x24, 0xE5, 0xFF
-                                                                ; DATA XREF: RAM:D0EEo
-game_over_tune: .db 0x60, 0x65, 0x69, 0x6C, 0x69, 0x65, 0x65, 0x67 ; DATA XREF: RAM:C347o
+start_game_tune:.db 0x65, 0x68, 0x6C, 0x71, 0x6F, 0x2D, 0x2C, 0x2F, 0x2D, 0x6A, 0x6D
+                .db 0x2C, 0x2A, 0x2C, 0x31, 0x6C, 0x68, 0x67, 0xE5, 0xFF
+tbd_tune:       .db 0x20, 0x20, 0x25, 0x26, 0x2C, 0x69, 0x20, 0x20, 0x22, 0x24, 0xE5
+                .db 0xFF
+game_over_tune: .db 0x60, 0x65, 0x69, 0x6C, 0x69, 0x65, 0x65, 0x67
                 .db 0x2A, 0x29, 0x27, 0x25, 0x64, 0x60, 0x60, 0x65
                 .db 0x29, 0x27, 0x25, 0x24, 0x62, 0x5E, 0x62, 0x60
                 .db 0x65, 0x64, 0xE5, 0xFF
-game_complete_tune:.db 0x29, 0x2A, 0x6C, 0x29, 0x2A, 0x2C, 0x2E, 0x6C ; DATA XREF: RAM:C31Do
+game_complete_tune:.db 0x29, 0x2A, 0x6C, 0x29, 0x2A, 0x2C, 0x2E, 0x6C
                 .db 0x6A, 0x69, 0x6A, 0x27, 0x29, 0x2A, 0x2C, 0x6A
                 .db 0x69, 0x67, 0x69, 0x25, 0x27, 0x29, 0x2A, 0x69
                 .db 0x67, 0x65, 0x27, 0x20, 0x6C, 0x64, 0xE5, 0xFF
@@ -8348,8 +8385,7 @@ game_complete_tune:.db 0x29, 0x2A, 0x6C, 0x29, 0x2A, 0x2C, 0x2E, 0x6C ; DATA XRE
 
 ; Segment type: Regular
                 .org 0xD88F
-vidbuf:         .ds 0x1800                                      ; DATA XREF: RAM:update_screeno
-                                                                ; RAM:B38Co ...
+vidbuf:         .ds 0x1800
 ; end of 'VRAM'
 
 ; end of file

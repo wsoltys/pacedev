@@ -27,7 +27,7 @@
 //#define DO_ASCII
 //#define DO_PARSE_MAP
 //#define DO_GA
-//#define DO_FONT
+#define DO_FONT
 //#define DO_SPRITE_DATA
 //#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
@@ -1329,6 +1329,36 @@ void pentagram (void)
   }
   
   fprintf (stderr, "avg/room = %.2lf\n", (double)total_objs/(double)n);
+#endif
+
+#ifdef DO_FONT
+	clear_bitmap (screen);
+  for (unsigned c=0; c<43; c++)
+  {
+      plot_character (0x8355, c, (c%16)*16, (c/16)*16, 7);
+  }
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+
+	clear_bitmap (screen);
+	const char *msg[] = 
+	{
+	  "THIS IS THE FONT FROM A MYSTERY GAME",
+	  "FROM A Z80 PLATFORM",
+	  "THAT I AM CURRENTLY EVALUATING FOR",
+	  "A POSSIBLE PORT TO",
+	  "THE COLOR COMPUTER 3",
+	  ""
+	};
+
+  for (unsigned m=0; *msg[m]; m++)
+  {
+    for (unsigned c=0; msg[m][c]; c++)
+      plot_ascii_character (0x6288, msg[m][c], (320-strlen(msg[m])*8)/2 + c*8, 16+m*16, m+2);
+  }	
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+
 #endif
 }
 
