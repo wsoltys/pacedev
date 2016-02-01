@@ -1139,6 +1139,7 @@ spr_22:         .db 2, 16                                       ; DATA XREF: RAM
                 .db 0xFE, 0xD4, 0x7F, 0x33, 0xFC, 0xB0, 0x3F, 1, 0xF2, 0x60, 0xF, 2, 0xFF, 0x32, 0x1F
                 .db 8, 0xFA, 0x80, 9, 0, 0x9C, 8, 3, 1, 0x88, 0, 1, 0, 0, 0
 font:           .db 0x38, 0x6C, 0xD6, 0xD6, 0xD6, 0xD6, 0x6C, 0x38 ; DATA XREF: RAM:BB49o
+                                                                ; RAM:BC67t ...
                 .db 0x18, 0x38, 0x58, 0x18, 0x18, 0x18, 0x18, 0x7C
                 .db 0x38, 0x4C, 0xC, 0x3C, 0x60, 0xC2, 0xC2, 0xFE
                 .db 0x38, 0x4C, 0xC, 0x3C, 0xE, 0x86, 0x86, 0xFC
@@ -1799,14 +1800,16 @@ spr_56:         .db 2, 34                                       ; DATA XREF: RAM
                 .db 0xEF, 0xAF, 0xAF, 0xD3, 0xD3, 0xC3, 0xC3, 0xBC, 0xBC, 0xFC, 0xFC, 0x7F, 0x7F, 0x3E
                 .db 0x3E, 0x3F, 0x3F, 0xCE, 0xCE, 7, 7, 0xF2, 0xF2, 1, 1, 0xFC, 0xFC, 0, 0, 0x78, 0x78
                 .db 0, 0, 0x10, 0x10
+; variables here down cleared once
 user_input_method:.db 0                                         ; DATA XREF: RAM:AF8Ao
                                                                 ; RAM:BB9Ar ...
-unk_A70A:       .db    0                                        ; DATA XREF: RAM:BBCEo
+seed_1:         .db    0                                        ; DATA XREF: RAM:BBCEo
                 .db    0
-byte_A70C:      .db 0                                           ; DATA XREF: RAM:BB9Dw
+tmp_input_method:.db 0                                          ; DATA XREF: RAM:BB9Dw
                                                                 ; RAM:BBC2o
 seed_3:         .db 0                                           ; DATA XREF: RAM:AFAFr
                                                                 ; RAM:AFB3w ...
+; variables here down cleared each game
 unk_A70E:       .db    0                                        ; DATA XREF: RAM:start_menuo
                                                                 ; RAM:CFD8r ...
 unk_A70F:       .db    0                                        ; DATA XREF: RAM:B0D1r
@@ -1827,23 +1830,27 @@ render_obj_1:   .dw 0                                           ; DATA XREF: RAM
                                                                 ; RAM:B694w ...
 render_obj_2:   .dw 0                                           ; DATA XREF: RAM:B5B8w
                                                                 ; RAM:d_3467121516r ...
-word_A71D:      .dw 0                                           ; DATA XREF: RAM:B8EDr
+room_size_X:    .db 0                                           ; DATA XREF: RAM:B8EDr
                                                                 ; RAM:C18Er ...
+room_size_Y:    .db 0                                           ; DATA XREF: RAM:B918r
+                                                                ; RAM:C976w ...
 room_size_Z:    .db 0                                           ; DATA XREF: RAM:adj_dZ_for_out_of_boundsr
                                                                 ; RAM:C97Aw ...
 byte_A720:      .db 0                                           ; DATA XREF: RAM:display_objects_carriedr
                                                                 ; RAM:BA3Aw ...
 lives:          .db 0                                           ; DATA XREF: RAM:AFA9w
                                                                 ; RAM:C2C3o ...
-inventory:      .db 0, 0, 0, 0
+inventory:      .db 0, 0, 0, 0                                  ; DATA XREF: RAM:C09Co
+                                                                ; RAM:loc_C0A7o
 objects_carried:.db 0, 0, 0, 0                                  ; DATA XREF: RAM:BA45o
+                                                                ; RAM:loc_C091o ...
                 .db 0, 0, 0, 0
                 .db 0, 0, 0, 0
 gfxbase_8x8:    .dw 0                                           ; DATA XREF: RAM:BAF9r
                                                                 ; RAM:BB4Cw ...
-byte_A734:      .db 0                                           ; DATA XREF: RAM:BB75w
+suppress_border:.db 0                                           ; DATA XREF: RAM:BB75w
                                                                 ; RAM:BCD6r ...
-unk_A735:       .db    0                                        ; DATA XREF: RAM:BBBFo
+directional:    .db    0                                        ; DATA XREF: RAM:BBBFo
 tmp_attrib:     .db 0                                           ; DATA XREF: RAM:BB19w
                                                                 ; RAM:BC74r ...
 user_input:     .db 0                                           ; DATA XREF: RAM:BF09w
@@ -1869,7 +1876,7 @@ byte_A743:      .db 0                                           ; DATA XREF: RAM
                                                                 ; RAM:loc_C135r ...
 score:          .db 0, 0, 0                                     ; DATA XREF: RAM:BB43o
                                                                 ; RAM:add_to_score_and_printo
-                .db    0
+audio_played:   .db    0                                        ; DATA XREF: RAM:play_audio_wait_keyo
 unk_A748:       .db    0                                        ; DATA XREF: RAM:loc_D635o
 word_A749:      .dw 0                                           ; DATA XREF: RAM:B081w
                                                                 ; RAM:C00Aw ...
@@ -1878,46 +1885,21 @@ byte_A74B:      .db 0                                           ; DATA XREF: RAM
 byte_A74C:      .db 0                                           ; DATA XREF: RAM:loc_C707r
                                                                 ; RAM:CF73r ...
 byte_A74D:      .db 0                                           ; DATA XREF: RAM:C724w
+                                                                ; RAM:C731o
 byte_A74E:      .db 0                                           ; DATA XREF: RAM:C71Dw
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
-                .db    0
+scrn_visited:   .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:C6E3o
+                                                                ; RAM:calc_and_display_percento
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
 graphic_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:AFDDo
                                                                 ; RAM:B087o ...
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-byte_A78F:      .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:CC8Er
+graphic_obj_1:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:CC8Er
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-byte_A7AF:      .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                                                                ; DATA XREF: RAM:clr_layout_mem_???o
+graphic_obj_2:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                                                                ; DATA XREF: RAM:loc_C126o
+                                                                ; RAM:clr_graphic_objs_tblo ...
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -2032,96 +2014,90 @@ upd_sprite_jmp_tbl:.dw no_update                                ; DATA XREF: RAM
                 .dw upd_07_09
                 .dw upd_06_08
                 .dw upd_07_09
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw adj_m2_m8
-                .dw adj_m2_m8
-                .dw adj_m2_m8
-                .dw adj_m2_m8
-                .dw loc_D1F5
-                .dw loc_D1F5
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0C_to_0F_34
+                .dw upd_0C_to_0F_34
+                .dw upd_0C_to_0F_34
+                .dw upd_0C_to_0F_34
+                .dw upd_10_11
+                .dw upd_10_11
                 .dw no_update
                 .dw no_update
                 .dw no_update
                 .dw no_update
                 .dw no_update
-                .dw loc_C285
+                .dw upd_17_1E_4A_4B
                 .dw no_update
                 .dw no_update
                 .dw no_update
                 .dw no_update
-                .dw loc_CD70
+                .dw upd_1C
                 .dw no_update
-                .dw loc_C285
+                .dw upd_17_1E_4A_4B
                 .dw no_update
-                .dw loc_C440
-                .dw loc_C440
-                .dw loc_C440
-                .dw loc_C440
-                .dw loc_C440
-                .dw loc_C440
-                .dw loc_C440
-                .dw loc_C440
-                .dw loc_C5D3
-                .dw loc_C5D3
-                .dw loc_C5D3
-                .dw loc_C5D3
-                .dw loc_C5D3
-                .dw loc_C5D3
-                .dw loc_C5D3
-                .dw loc_C5D3
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw adj_m2_m8
-                .dw adj_m4_m8
-                .dw adj_m4_m8
-                .dw adj_m4_m8
-                .dw adj_m4_m8
-                .dw adj_0_m8
-                .dw no_update
-                .dw no_update
-                .dw loc_C1C5
+                .dw upd_20_to_27
+                .dw upd_20_to_27
+                .dw upd_20_to_27
+                .dw upd_20_to_27
+                .dw upd_20_to_27
+                .dw upd_20_to_27
+                .dw upd_20_to_27
+                .dw upd_20_to_27
+                .dw upd_28_to_2F
+                .dw upd_28_to_2F
+                .dw upd_28_to_2F
+                .dw upd_28_to_2F
+                .dw upd_28_to_2F
+                .dw upd_28_to_2F
+                .dw upd_28_to_2F
+                .dw upd_28_to_2F
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_0C_to_0F_34
+                .dw upd_35_to_38
+                .dw upd_35_to_38
+                .dw upd_35_to_38
+                .dw upd_35_to_38
+                .dw upd_39
                 .dw no_update
                 .dw no_update
-                .dw loc_CD81
-                .dw loc_C111
-                .dw loc_C111
-                .dw loc_C111
-                .dw loc_C111
-                .dw loc_C111
-                .dw loc_C111
-                .dw loc_C111
-                .dw loc_C11D
-                .dw loc_CD81
-                .dw loc_CD7C
-                .dw loc_C285
-                .dw loc_C285
-                .dw loc_CB4E
-                .dw loc_CB51
-                .dw loc_CDA0
-                .dw loc_CD81
-                .dw loc_D1FD
-                .dw loc_D1FD
-                .dw loc_CB4E
-                .dw no_update
-                .dw loc_CDBB
-                .dw loc_CE31
-                .dw loc_CE9A
-                .dw loc_CEA3
-                .dw loc_CEDD
-                .dw loc_CF22
-                .dw loc_D0AC
-                .dw loc_CD75
-                .dw loc_CEA0
-                .dw loc_CEDA
+                .dw upd_3C_96_to_98
                 .dw no_update
                 .dw no_update
+                .dw upd_3F_48_4F
+                .dw upd_40_to_46
+                .dw upd_40_to_46
+                .dw upd_40_to_46
+                .dw upd_40_to_46
+                .dw upd_40_to_46
+                .dw upd_40_to_46
+                .dw upd_40_to_46
+                .dw upd_47
+                .dw upd_3F_48_4F
+                .dw upd_49
+                .dw upd_17_1E_4A_4B
+                .dw upd_17_1E_4A_4B
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_4D
+                .dw upd_4E
+                .dw upd_3F_48_4F
+                .dw upd_50_51
+                .dw upd_50_51
+                .dw upd_0A_0B_4C_52_99_to_A0
                 .dw no_update
-                .dw no_update
-                .dw no_update
-                .dw no_update
+                .dw upd_54
+                .dw upd_55
+                .dw upd_56
+                .dw upd_57
+                .dw upd_58
+                .dw upd_59
+                .dw upd_5A
+                .dw upd_5B
+                .dw upd_5C
+                .dw upd_5D
                 .dw no_update
                 .dw no_update
                 .dw no_update
@@ -2134,66 +2110,72 @@ upd_sprite_jmp_tbl:.dw no_update                                ; DATA XREF: RAM
                 .dw no_update
                 .dw no_update
                 .dw no_update
-                .dw loc_CF68
-                .dw loc_CF68
-                .dw loc_CF68
-                .dw loc_CF68
-                .dw loc_CF68
-                .dw loc_CF68
-                .dw loc_CF68
-                .dw loc_CF68
-                .dw loc_CFD2
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_CF14
-                .dw loc_D2AD
-                .dw loc_D2AD
-                .dw loc_D2AD
-                .dw loc_D2AD
-                .dw loc_D2DE
-                .dw loc_D2E9
-                .dw loc_D2F4
-                .dw loc_D2FF
-                .dw loc_CD16
-                .dw loc_CD16
-                .dw loc_CD16
-                .dw loc_CD16
-                .dw loc_CD16
-                .dw loc_C1C5
-                .dw loc_C1C5
-                .dw loc_C1C5
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw loc_CB4E
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_CC4B
-                .dw loc_D251
-                .dw loc_D251
-                .dw loc_D251
-                .dw loc_D251
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw upd_70_to_77
+                .dw upd_70_to_77
+                .dw upd_70_to_77
+                .dw upd_70_to_77
+                .dw upd_70_to_77
+                .dw upd_70_to_77
+                .dw upd_70_to_77
+                .dw upd_70_to_77
+                .dw upd_78
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_79_to_87
+                .dw upd_88_to_8B
+                .dw upd_88_to_8B
+                .dw upd_88_to_8B
+                .dw upd_88_to_8B
+                .dw upd_8C
+                .dw upd_8E
+                .dw upd_8F
+                .dw upd_90
+                .dw upd_91_to_95
+                .dw upd_91_to_95
+                .dw upd_91_to_95
+                .dw upd_91_to_95
+                .dw upd_91_to_95
+                .dw upd_3C_96_to_98
+                .dw upd_3C_96_to_98
+                .dw upd_3C_96_to_98
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_0A_0B_4C_52_99_to_A0
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_30_to_33_A1_to_A8
+                .dw upd_A9_to_AC
+                .dw upd_A9_to_AC
+                .dw upd_A9_to_AC
+                .dw upd_A9_to_AC
 ; ---------------------------------------------------------------------------
 
 START:                                                          ; CODE XREF: RAM:5E04j
@@ -2221,7 +2203,7 @@ start_menu:                                                     ; CODE XREF: RAM
                 call    do_menu_selection
                 ld      de, #start_game_tune
                 call    play_audio
-                call    init_objects???
+                call    init_special_objects
                 call    init_start_location
 
 player_dies:                                                    ; CODE XREF: RAM:B091j
@@ -2229,7 +2211,7 @@ player_dies:                                                    ; CODE XREF: RAM
 
 loc_AFC8:                                                       ; CODE XREF: RAM:C871j
                 call    loc_B115
-                call    display_location???
+                call    build_screen_objects
                 call    loc_B097
                 call    loc_CB89
                 call    print_label_and_score
@@ -2322,8 +2304,8 @@ loc_B05C:                                                       ; CODE XREF: RAM
                 ld      a, (curr_room_attrib)
                 call    fill_attr
                 call    display_objects
-                call    loc_BCE5
-                call    loc_C29A
+                call    display_panel
+                call    print_lives
                 call    update_screen
                 call    print_label_and_score
                 call    reset_objs_wipe_flag
@@ -2363,7 +2345,7 @@ loc_B0B2:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_B0B5:                                                       ; CODE XREF: RAM:B0B0j
-                ld      hl, # byte_A7AF+0x80
+                ld      hl, # graphic_obj_2+0x80
                 ld      de, #32
                 push    bc
                 ld      b, #0x30 ; '0'
@@ -2434,14 +2416,14 @@ loc_B111:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_B115:                                                       ; CODE XREF: RAM:loc_AFC8p
-                ld      iy, # byte_A7AF+0x60
+                ld      iy, # graphic_obj_2+0x60
                 ld      c, #0x30 ; '0'
 
 loc_B11B:                                                       ; CODE XREF: RAM:B132j
                 ld      de, #0x20 ; ' '
                 add     iy, de
                 ld      a, 0(iy)
-                ld      hl, #byte_D432
+                ld      hl, #special_objs_tbl
                 ld      de, #0x10
                 ld      b, #0x12
 
@@ -3005,7 +2987,7 @@ loc_B3DF:                                                       ; CODE XREF: RAM
 print_sprite:                                                   ; CODE XREF: RAM:BA7Dp
                                                                 ; RAM:BDD9p ...
                 call    flip_sprite
-                ld      a, 0x1A(ix)
+                ld      a, 26(ix)
                 and     #7
                 jr      Z, loc_B43E
                 rlca
@@ -3017,7 +2999,7 @@ print_sprite:                                                   ; CODE XREF: RAM
                 and     #7
                 inc     a
                 ld      b, a
-                ld      0x18(ix), a
+                ld      24(ix), a
                 dec     a
                 and     #7
                 add     a, a
@@ -3035,23 +3017,23 @@ loc_B40B:                                                       ; CODE XREF: RAM
                 ld      (loc_B4CF+1), a
                 ld      a, (de)
                 inc     de
-                ld      0x19(ix), a
-                add     a, 0x1B(ix)
-                sub     #0xC0 ; '¿'
+                ld      25(ix), a
+                add     a, 27(ix)
+                sub     #192
                 jr      C, loc_B429
                 neg
-                add     a, 0x19(ix)
-                ld      0x19(ix), a
+                add     a, 25(ix)
+                ld      25(ix), a
 
 loc_B429:                                                       ; CODE XREF: RAM:B41Fj
-                ld      c, 0x1A(ix)
-                ld      b, 0x1B(ix)
+                ld      c, 26(ix)
+                ld      b, 27(ix)
                 call    calc_screen_buffer_addr
                 ld      (tmp_SP), sp
                 ex      de, hl
                 ld      sp, hl
                 ex      de, hl
-                ld      a, 0x19(ix)
+                ld      a, 25(ix)
                 jr      loc_B479
 ; ---------------------------------------------------------------------------
 
@@ -3059,7 +3041,7 @@ loc_B43E:                                                       ; CODE XREF: RAM
                 ld      a, (de)
                 inc     de
                 and     #0xF
-                ld      0x18(ix), a
+                ld      24(ix), a
                 ld      b, a
                 add     a, a
                 add     a, a
@@ -3231,7 +3213,7 @@ loc_B4EE:                                                       ; CODE XREF: RAM
                 call    read_port
                 bit     0, a
                 jr      NZ, loc_B4EE
-                ld      iy, #0x5C3A
+                ld      iy, #0x5C3A                             ; WARNING
                 ei
 
 loc_B4FC:                                                       ; CODE XREF: RAM:B503j
@@ -3250,15 +3232,15 @@ loc_B505:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B513:                                                       ; CODE XREF: RAM:C0A1p
+zero_DE:                                                        ; CODE XREF: RAM:C0A1p
                                                                 ; RAM:C9A1p
                 xor     a
 
-loc_B514:                                                       ; CODE XREF: RAM:B516j
+fill_DE:                                                        ; CODE XREF: RAM:B516j
                                                                 ; RAM:C2B8p ...
                 ld      (de), a
                 inc     de
-                djnz    loc_B514
+                djnz    fill_DE
                 ret
 ; ---------------------------------------------------------------------------
 
@@ -3648,16 +3630,16 @@ loc_B748:                                                       ; CODE XREF: RAM
 loc_B757:                                                       ; CODE XREF: RAM:B787j
                 call    do_objs_intersect_on_x
                 jr      NC, loc_B789
-                set     0, 0xC(ix)
-                ld      a, 0xD(ix)
+                set     0, 12(ix)
+                ld      a, 13(ix)
                 rrca
                 and     #0x40 ; '@'
-                or      0xD(iy)
-                ld      0xD(iy), a
+                or      13(iy)
+                ld      13(iy), a
                 rlca
                 and     #0x40 ; '@'
-                or      0xD(ix)
-                ld      0xD(ix), a
+                or      13(ix)
+                ld      13(ix), a
                 bit     2, 7(iy)
                 jr      Z, loc_B781
                 ld      a, 9(ix)
@@ -3673,15 +3655,15 @@ loc_B781:                                                       ; CODE XREF: RAM
 
 loc_B789:                                                       ; CODE XREF: RAM:B74Bj
                                                                 ; RAM:B750j ...
-                ld      de, #0x20 ; ' '
+                ld      de, #32
                 add     iy, de
                 djnz    loc_B748
                 ret
 ; ---------------------------------------------------------------------------
 
 adj_dY_for_obj_intersect:                                       ; CODE XREF: RAM:B731p
-                ld      iy, #0xA76F
-                ld      b, #0x36 ; '6'
+                ld      iy, #graphic_objs_tbl
+                ld      b, #54
 
 loc_B797:                                                       ; CODE XREF: RAM:B7DDj
                 call    is_object_not_ignored
@@ -3694,20 +3676,20 @@ loc_B797:                                                       ; CODE XREF: RAM
 loc_B7A6:                                                       ; CODE XREF: RAM:B7D6j
                 call    do_objs_intersect_on_y
                 jr      NC, loc_B7D8
-                set     1, 0xC(ix)
-                ld      a, 0xD(ix)
+                set     1, 12(ix)
+                ld      a, 13(ix)
                 rrca
                 and     #0x40 ; '@'
-                or      0xD(iy)
-                ld      0xD(iy), a
+                or      13(iy)
+                ld      13(iy), a
                 rlca
                 and     #0x40 ; '@'
-                or      0xD(ix)
-                ld      0xD(ix), a
+                or      13(ix)
+                ld      13(ix), a
                 bit     2, 7(iy)
                 jr      Z, loc_B7D0
-                ld      a, 0xA(ix)
-                ld      0xA(iy), a
+                ld      a, 10(ix)
+                ld      10(iy), a
 
 loc_B7D0:                                                       ; CODE XREF: RAM:B7C8j
                 ld      a, l
@@ -3719,7 +3701,7 @@ loc_B7D0:                                                       ; CODE XREF: RAM
 
 loc_B7D8:                                                       ; CODE XREF: RAM:B79Aj
                                                                 ; RAM:B79Fj ...
-                ld      de, #0x20 ; ' '
+                ld      de, #32
                 add     iy, de
                 djnz    loc_B797
                 ret
@@ -3740,14 +3722,14 @@ loc_B7E6:                                                       ; CODE XREF: RAM
 loc_B7F5:                                                       ; CODE XREF: RAM:B85Cj
                 call    do_objs_intersect_on_z
                 jr      NC, loc_B85E
-                set     2, 0xC(ix)
+                set     2, 12(ix)
                 call    loc_B890
                 ld      a, 0(iy)
-                cp      #0x20 ; ' '
+                cp      #32
                 jr      C, loc_B810
                 cp      #0x28 ; '('
                 jr      NC, loc_B810
-                set     7, 0x17(ix)
+                set     7, 23(ix)
 
 loc_B810:                                                       ; CODE XREF: RAM:B806j
                                                                 ; RAM:B80Aj
@@ -3757,20 +3739,20 @@ loc_B810:                                                       ; CODE XREF: RAM
                 call    C, loc_B866
 
 loc_B819:                                                       ; CODE XREF: RAM:B812j
-                ld      a, 0xD(ix)
+                ld      a, 13(ix)
                 rrca
                 and     #0x40 ; '@'
-                or      0xD(iy)
-                ld      0xD(iy), a
+                or      13(iy)
+                ld      13(iy), a
                 rlca
                 and     #0x40 ; '@'
-                or      0xD(ix)
-                ld      0xD(ix), a
-                set     3, 0xD(iy)
+                or      13(ix)
+                ld      13(ix), a
+                set     3, 13(iy)
                 bit     2, 7(ix)
                 jr      Z, loc_B856
-                ld      a, 0xB(ix)
-                ld      0xB(iy), a
+                ld      a, 11(ix)
+                ld      11(iy), a
                 ld      a, 9(ix)
                 and     a
                 jr      NZ, loc_B84A
@@ -3778,11 +3760,11 @@ loc_B819:                                                       ; CODE XREF: RAM
                 ld      9(ix), a
 
 loc_B84A:                                                       ; CODE XREF: RAM:B842j
-                ld      a, 0xA(ix)
+                ld      a, 10(ix)
                 and     a
                 jr      NZ, loc_B856
-                ld      a, 0xA(iy)
-                ld      0xA(ix), a
+                ld      a, 10(iy)
+                ld      10(ix), a
 
 loc_B856:                                                       ; CODE XREF: RAM:B836j
                                                                 ; RAM:B84Ej
@@ -3795,7 +3777,7 @@ loc_B856:                                                       ; CODE XREF: RAM
 
 loc_B85E:                                                       ; CODE XREF: RAM:B7E9j
                                                                 ; RAM:B7EEj ...
-                ld      de, #0x20 ; ' '
+                ld      de, #32
                 add     iy, de
                 djnz    loc_B7E6
                 ret
@@ -3813,15 +3795,15 @@ loc_B866:                                                       ; CODE XREF: RAM
                 ld      a, (seed_2)
                 and     #1
                 jr      Z, loc_B88D
-                ld      hl, #0xD30A
+                ld      hl, #byte_D30A
                 add     hl, de
                 ld      a, (hl)
-                add     a, 9(ix)
+                add     a, 9(ix)                                ; dX
                 ld      9(ix), a
                 inc     hl
                 ld      a, (hl)
-                add     a, 0xA(ix)
-                ld      0xA(ix), a
+                add     a, 10(ix)                               ; dY
+                ld      10(ix), a
 
 loc_B88D:                                                       ; CODE XREF: RAM:B878j
                 pop     hl
@@ -3900,7 +3882,7 @@ adj_dX_for_out_of_bounds:                                       ; CODE XREF: RAM
                 ret     NZ
                 bit     0, 7(ix)
                 ret     NZ
-                ld      a, (word_A71D)
+                ld      a, (room_size_X)
                 ld      b, a
 
 loc_B8F1:                                                       ; CODE XREF: RAM:B90Aj
@@ -3930,7 +3912,7 @@ adj_dY_for_out_of_bounds:                                       ; CODE XREF: RAM
                 ret     NZ
                 bit     0, 7(ix)
                 ret     NZ
-                ld      a, (word_A71D+1)
+                ld      a, (room_size_Y)
                 ld      b, a
 
 loc_B91C:                                                       ; CODE XREF: RAM:B935j
@@ -4193,8 +4175,8 @@ display_object:                                                 ; CODE XREF: RAM
                 call    print_sprite
 
 loc_BA80:                                                       ; CODE XREF: RAM:BA78j
-                ld      c, 0x1A(ix)
-                ld      b, 0x1B(ix)
+                ld      c, 26(ix)
+                ld      b, 27(ix)
                 call    BC_to_Attr_In_DE
                 call    calc_screen_buffer_addr
                 ld      l, c
@@ -4212,8 +4194,8 @@ loc_BA80:                                                       ; CODE XREF: RAM
                 ld      hl, #byte_BAC2
                 add     hl, de
                 ld      c, (hl)
-                ld      l, 0x1A(ix)
-                ld      a, 0x1B(ix)
+                ld      l, 26(ix)
+                ld      a, 27(ix)
                 add     a, #0x17
                 ld      h, a
                 call    calc_attrib_addr
@@ -4233,7 +4215,7 @@ loc_BA80:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 byte_BAC2:      .db 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x47 ; DATA XREF: RAM:BA9Eo
 sprite_scratchpad:.db 0, 0, 0, 0, 0, 0, 0, 0                    ; DATA XREF: RAM:BA3Fo
-                                                                ; RAM:loc_BCE5o ...
+                                                                ; RAM:display_panelo ...
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
                 .db 0, 0, 0, 0, 0, 0, 0, 0
@@ -4338,7 +4320,7 @@ print_BCD_lsd:                                                  ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BB64:                                                       ; CODE XREF: RAM:BBE3p
+toggle_selected:                                                ; CODE XREF: RAM:BBE3p
                 and     a
                 jr      NZ, loc_BB6E
 
@@ -4362,8 +4344,8 @@ loc_BB70:                                                       ; CODE XREF: RAM
 
 do_menu_selection:                                              ; CODE XREF: RAM:AFB6p
                 xor     a
-                ld      (byte_A734), a
-                ld      hl, #unk_BBF1
+                ld      (suppress_border), a
+                ld      hl, #menu_colours
                 ld      b, #8
 
 loc_BB7D:                                                       ; CODE XREF: RAM:BB80j
@@ -4371,62 +4353,62 @@ loc_BB7D:                                                       ; CODE XREF: RAM
                 inc     hl
                 djnz    loc_BB7D
                 call    clear_scrn_buffer
-                call    loc_BCB4
-                call    loc_BBD8
+                call    display_menu
+                call    flash_menu
 
-loc_BB8B:                                                       ; CODE XREF: RAM:BBD5j
-                call    loc_BCB4
-                ld      de, #byte_D7CF
-                call    loc_D69C
+menu_loop:                                                      ; CODE XREF: RAM:BBD5j
+                call    display_menu
+                ld      de, #menu_tune
+                call    play_audio_wait_key
                 ld      a, #0xF7 ; '˜'
                 call    read_port
                 ld      e, a
                 ld      a, (user_input_method)
-                ld      (byte_A70C), a
-                bit     0, e
-                jr      Z, loc_BBA6
+                ld      (tmp_input_method), a
+                bit     0, e                                    ; keyboard?
+                jr      Z, check_for_kempston_joystick          ; no, skip
                 and     #0xF9 ; '˘'
 
-loc_BBA6:                                                       ; CODE XREF: RAM:BBA2j
+check_for_kempston_joystick:                                    ; CODE XREF: RAM:BBA2j
                 bit     1, e
-                jr      Z, loc_BBAE
+                jr      Z, check_for_cursor_joystick
                 and     #0xF9 ; '˘'
                 or      #2
 
-loc_BBAE:                                                       ; CODE XREF: RAM:BBA8j
+check_for_cursor_joystick:                                      ; CODE XREF: RAM:BBA8j
                 bit     2, e
-                jr      Z, loc_BBB6
+                jr      Z, check_for_interface_ii
                 and     #0xF9 ; '˘'
                 or      #4
 
-loc_BBB6:                                                       ; CODE XREF: RAM:BBB0j
+check_for_interface_ii:                                         ; CODE XREF: RAM:BBB0j
                 bit     3, e
-                jr      Z, loc_BBBC
+                jr      Z, check_for_start_game
                 or      #6
 
-loc_BBBC:                                                       ; CODE XREF: RAM:BBB8j
+check_for_start_game:                                           ; CODE XREF: RAM:BBB8j
                 ld      (user_input_method), a
-                ld      hl, #unk_A735
-                ld      hl, #byte_A70C
+                ld      hl, #directional                        ; not used - left over from Knight Lore/Alien 8
+                ld      hl, #tmp_input_method
                 cp      (hl)
                 ld      a, #0xEF ; 'Ô'
                 call    read_port
                 bit     0, a
                 ret     NZ
-                ld      hl, #unk_A70A
+                ld      hl, #seed_1
                 inc     (hl)
-                call    loc_BBD8
-                jp      loc_BB8B
+                call    flash_menu
+                jp      menu_loop
 ; ---------------------------------------------------------------------------
 
-loc_BBD8:                                                       ; CODE XREF: RAM:BB88p
+flash_menu:                                                     ; CODE XREF: RAM:BB88p
                                                                 ; RAM:BBD2p
-                ld      hl, #unk_BBF2
+                ld      hl, # menu_colours+1
                 ld      a, (user_input_method)
                 rrca
                 and     #3
                 ld      b, #4
-                call    loc_BB64
+                call    toggle_selected
                 res     7, (hl)
                 ld      a, (user_input_method)
                 and     #8
@@ -4434,28 +4416,15 @@ loc_BBD8:                                                       ; CODE XREF: RAM
                 set     7, (hl)
                 ret
 ; ---------------------------------------------------------------------------
-unk_BBF1:       .db 0x43 ; C                                    ; DATA XREF: RAM:BB78o
-                                                                ; RAM:loc_BCB4o
-unk_BBF2:       .db 0x44 ; D                                    ; DATA XREF: RAM:loc_BBD8o
-                .db 0x44 ; D
-                .db 0x44 ; D
-                .db 0x44 ; D
-                .db 0x47 ; G
-                .db 0x47 ; G
-unk_BBF8:       .db 0x58 ; X                                    ; DATA XREF: RAM:BCB8o
-                .db 0x9F ; ü
-                .db 0x30 ; 0
-                .db 0x8F ; è
-                .db 0x30 ; 0
-                .db 0x7F ; 
-                .db 0x30 ; 0
-                .db 0x6F ; o
-                .db 0x30 ; 0
-                .db 0x5F ; _
-                .db 0x30 ; 0
-                .db 0x3F ; ?
-                .db 0x50 ; P
-                .db 0x27 ; '
+menu_colours:   .db 0x43, 0x44, 0x44, 0x44, 0x44, 0x47, 0x47    ; DATA XREF: RAM:BB78o
+                                                                ; RAM:display_menuo ...
+menu_xy:        .db 0x58, 0x9F                                  ; DATA XREF: RAM:BCB8o
+                .db 0x30, 0x8F
+                .db 0x30, 0x7F
+                .db 0x30, 0x6F
+                .db 0x30, 0x5F
+                .db 0x30, 0x3F
+                .db 0x50, 0x27
 aPentagram:     .ascii 'PENTAGRA'                               ; DATA XREF: RAM:BCBBo
                 .db 0xCD
 a1Keyboard:     .ascii '1 KEYBOAR'
@@ -4475,7 +4444,7 @@ a1986ACG:       .ascii '< 1986 A:C:G'
 print_text_single_colour:                                       ; CODE XREF: RAM:BB1Fp
                                                                 ; RAM:BCCFp
                 push    hl
-                ld      hl, #0x81D5                             ; font-$180 (base='0')
+                ld      hl, #font-#0x180                        ; font-$180 (base='0')
                 ld      (gfxbase_8x8), hl
                 pop     bc
                 push    bc
@@ -4489,7 +4458,7 @@ print_text_single_colour:                                       ; CODE XREF: RAM
 
 print_text_std_font:
                 push    hl
-                ld      hl, #0x81D5                             ; font-$180 (base='0')
+                ld      hl, #font-#0x180                        ; font-$180 (base='0')
                 ld      (gfxbase_8x8), hl
                 pop     bc
                 push    bc
@@ -4539,15 +4508,15 @@ loc_BCA7:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BCB4:                                                       ; CODE XREF: RAM:BB85p
-                                                                ; RAM:loc_BB8Bp
-                ld      de, #unk_BBF1
+display_menu:                                                   ; CODE XREF: RAM:BB85p
+                                                                ; RAM:menu_loopp
+                ld      de, #menu_colours
                 exx
-                ld      hl, #unk_BBF8
+                ld      hl, #menu_xy
                 ld      de, #aPentagram                         ; "PENTAGRAÕ"
                 ld      b, #7
 
-loc_BCC0:                                                       ; CODE XREF: RAM:BCD4j
+display_text_list:                                              ; CODE XREF: RAM:BCD4j
                                                                 ; RAM:C31Ap ...
                 exx
                 ld      a, (de)
@@ -4565,46 +4534,46 @@ loc_BCC0:                                                       ; CODE XREF: RAM
                 call    print_text_single_colour
                 pop     hl
                 pop     bc
-                djnz    loc_BCC0
-                ld      a, (byte_A734)
+                djnz    display_text_list
+                ld      a, (suppress_border)
                 and     a
                 ret     NZ
                 inc     a
-                ld      (byte_A734), a
-                call    loc_BD59
+                ld      (suppress_border), a
+                call    print_border
                 jp      update_screen
 ; ---------------------------------------------------------------------------
 
-loc_BCE5:                                                       ; CODE XREF: RAM:B06Fp
+display_panel:                                                  ; CODE XREF: RAM:B06Fp
                 ld      ix, #sprite_scratchpad
-                ld      hl, #byte_BD31
-                call    loc_BDC0
+                ld      hl, #panel_data
+                call    transfer_sprite
                 ld      de, #0xF810
                 ld      b, #5
-                call    nultiple_print_sprite
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite
                 ld      de, #0xF8F0
                 ld      b, #5
-                call    nultiple_print_sprite
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite
                 ld      de, #0x2000
                 ld      b, #2
-                call    nultiple_print_sprite
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite
                 ld      b, #2
-                call    nultiple_print_sprite
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite
                 ld      b, #2
-                call    nultiple_print_sprite
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite
                 ld      b, #2
-                call    nultiple_print_sprite
-                call    loc_BDD5
-                call    loc_BDD5
-                call    loc_BDD5
-                jp      loc_BDD5
+                call    multiple_print_sprite
+                call    transfer_sprite_and_print
+                call    transfer_sprite_and_print
+                call    transfer_sprite_and_print
+                jp      transfer_sprite_and_print
 ; ---------------------------------------------------------------------------
-byte_BD31:      .db 0x3E, 0x40, 0x10, 0x34                      ; DATA XREF: RAM:BCE9o
+panel_data:     .db 0x3E, 0x40, 0x10, 0x34                      ; DATA XREF: RAM:BCE9o
                 .db 0x3E, 0, 0xE0, 0x34
                 .db 0x3D, 0x40, 0, 4
                 .db 0x3D, 0, 0xF0, 4
@@ -4616,32 +4585,32 @@ byte_BD31:      .db 0x3E, 0x40, 0x10, 0x34                      ; DATA XREF: RAM
                 .db 0x3B, 0, 0xF0, 0x34
 ; ---------------------------------------------------------------------------
 
-loc_BD59:                                                       ; CODE XREF: RAM:BCDFp
+print_border:                                                   ; CODE XREF: RAM:BCDFp
                                                                 ; RAM:C32Bp
                 ld      ix, #sprite_scratchpad
-                ld      hl, #byte_BD98
-                call    loc_BDD5
-                call    loc_BDD5
-                call    loc_BDD5
-                call    loc_BDD5
-                call    loc_BDC0
+                ld      hl, #border_data
+                call    transfer_sprite_and_print
+                call    transfer_sprite_and_print
+                call    transfer_sprite_and_print
+                call    transfer_sprite_and_print
+                call    transfer_sprite
                 ld      de, #0x18
                 ld      b, #8
-                call    nultiple_print_sprite
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite
                 ld      b, #8
-                call    nultiple_print_sprite
-                call    loc_BDD5
-                call    loc_BDD5
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite_and_print
+                call    transfer_sprite_and_print
+                call    transfer_sprite
                 ld      de, #0x1800
                 ld      b, #6
-                call    nultiple_print_sprite
-                call    loc_BDC0
+                call    multiple_print_sprite
+                call    transfer_sprite
                 ld      b, #6
-                jp      nultiple_print_sprite
+                jp      multiple_print_sprite
 ; ---------------------------------------------------------------------------
-byte_BD98:      .db 5, 0, 0, 0xA8                               ; DATA XREF: RAM:BD5Do
+border_data:    .db 5, 0, 0, 0xA8                               ; DATA XREF: RAM:BD5Do
                 .db 5, 0x40, 0xE8, 0xA8
                 .db 5, 0xC0, 0xE8, 0
                 .db 5, 0x80, 0, 0
@@ -4653,7 +4622,7 @@ byte_BD98:      .db 5, 0, 0, 0xA8                               ; DATA XREF: RAM
                 .db 2, 0x40, 0xE8, 0x18
 ; ---------------------------------------------------------------------------
 
-loc_BDC0:                                                       ; CODE XREF: RAM:BCECp
+transfer_sprite:                                                ; CODE XREF: RAM:BCECp
                                                                 ; RAM:BCF7p ...
                 ld      a, (hl)
                 inc     hl
@@ -4670,16 +4639,16 @@ loc_BDC0:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BDD5:                                                       ; CODE XREF: RAM:BD25p
+transfer_sprite_and_print:                                      ; CODE XREF: RAM:BD25p
                                                                 ; RAM:BD28p ...
-                call    loc_BDC0
+                call    transfer_sprite
                 push    hl
                 call    print_sprite
                 pop     hl
                 ret
 ; ---------------------------------------------------------------------------
 
-nultiple_print_sprite:                                          ; CODE XREF: RAM:BCF4p
+multiple_print_sprite:                                          ; CODE XREF: RAM:BCF4p
                                                                 ; RAM:BCFFp ...
                 push    bc
                 push    de
@@ -4694,7 +4663,7 @@ nultiple_print_sprite:                                          ; CODE XREF: RAM
                 ld      a, 27(ix)
                 add     a, d
                 ld      27(ix), a
-                djnz    nultiple_print_sprite
+                djnz    multiple_print_sprite
                 ret
 ; ---------------------------------------------------------------------------
 
@@ -4972,7 +4941,7 @@ loc_BF56:                                                       ; CODE XREF: RAM
 
 loc_BF66:                                                       ; CODE XREF: RAM:BF80p
                                                                 ; RAM:BFE4p ...
-                ld      hl, #0xA709
+                ld      hl, #user_input_method
                 ld      a, (hl)
                 and     #6
                 ld      a, (user_input)
@@ -4995,9 +4964,9 @@ loc_BF79:                                                       ; CODE XREF: RAM
                 ret     Z
                 call    loc_C4A3
                 ret     NC
-                bit     3, 0xC(ix)
+                bit     3, 12(ix)
                 ret     NZ
-                bit     2, 0xC(ix)
+                bit     2, 12(ix)
                 ret     Z
                 xor     a
                 ld      (byte_A741), a
@@ -5030,7 +4999,7 @@ loc_BFAC:                                                       ; CODE XREF: RAM
                 add     a, #4
                 ld      6(ix), a
                 push    hl
-                ld      iy, #0xA82F
+                ld      iy, # graphic_obj_2+0x80
 
 loc_BFD7:                                                       ; CODE XREF: RAM:BFE2j
                 call    loc_C0D4
@@ -5042,7 +5011,7 @@ loc_BFD7:                                                       ; CODE XREF: RAM
                 jr      Z, loc_BFFC
                 ld      de, #0x20 ; ' '
                 ld      b, #0x30 ; '0'
-                ld      iy, #0xA82F
+                ld      iy, # graphic_obj_2+0x80
 
 loc_BFF2:                                                       ; CODE XREF: RAM:BFFAj
                 ld      a, 0(iy)
@@ -5072,7 +5041,7 @@ loc_C00E:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_C017:                                                       ; CODE XREF: RAM:BFF6j
-                ld      hl, #0xA72E
+                ld      hl, # objects_carried+8
                 ld      a, (hl)
                 inc     hl
                 and     a
@@ -5134,18 +5103,18 @@ loc_C061:                                                       ; CODE XREF: RAM
 
 loc_C091:                                                       ; CODE XREF: RAM:C01Dj
                                                                 ; RAM:C0CCj
-                ld      hl, #0xA72D
-                ld      de, #0xA731
+                ld      hl, # objects_carried+7
+                ld      de, # objects_carried+0xB
                 ld      bc, #0xC
                 lddr
-                ld      de, #0xA722
+                ld      de, #inventory
                 ld      b, #4
-                call    loc_B513
+                call    zero_DE
                 jp      loc_BFFC
 ; ---------------------------------------------------------------------------
 
 loc_C0A7:                                                       ; CODE XREF: RAM:BFDAj
-                ld      hl, #0xA722
+                ld      hl, #inventory
                 ld      a, 0(iy)
                 ld      (hl), a
                 inc     hl
@@ -5161,7 +5130,7 @@ loc_C0A7:                                                       ; CODE XREF: RAM
                 ld      (hl), d
                 call    loc_BF56
                 ld      0(iy), #1
-                ld      hl, #0xA72E
+                ld      hl, # objects_carried+8
                 ld      a, (hl)
                 inc     hl
                 and     a
@@ -5211,7 +5180,7 @@ loc_C107:                                                       ; CODE XREF: RAM
                 jr      loc_C11A
 ; ---------------------------------------------------------------------------
 
-loc_C111:                                                       ; DATA XREF: RAM:AEAFo
+upd_40_to_46:                                                   ; DATA XREF: RAM:AEAFo
                                                                 ; RAM:AEB1o ...
                 call    adj_m4_m12
                 call    loc_D64E
@@ -5222,7 +5191,7 @@ loc_C11A:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_C11D:                                                       ; DATA XREF: RAM:AEBDo
+upd_47:                                                         ; DATA XREF: RAM:AEBDo
                 call    adj_m4_m12
 
 loc_C120:                                                       ; CODE XREF: RAM:C282j
@@ -5231,7 +5200,7 @@ loc_C120:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_C126:                                                       ; CODE XREF: RAM:C47Dp
-                ld      hl, #0xA7AF
+                ld      hl, #graphic_obj_2
                 ld      a, (user_input)
                 and     #0x40 ; '@'
                 jr      NZ, loc_C135
@@ -5266,16 +5235,16 @@ loc_C149:                                                       ; CODE XREF: RAM
                 call    loc_C5BD
                 ld      l, a
                 ld      h, #0
-                ld      de, #0xC1BD
+                ld      de, #byte_C1BD
                 add     hl, hl
                 add     hl, de
                 ld      a, (hl)
-                ld      0x14(iy), a
+                ld      20(iy), a
                 add     a, a
                 ld      e, a
                 inc     hl
                 ld      a, (hl)
-                ld      0x15(iy), a
+                ld      21(iy), a
                 add     a, a
                 add     a, 2(iy)
                 ld      2(iy), a
@@ -5288,7 +5257,7 @@ loc_C149:                                                       ; CODE XREF: RAM
                 ld      7(iy), #0x14
                 ld      0xC(iy), #0
                 ld      6(iy), #8
-                ld      hl, (word_A71D)
+                ld      hl, (room_size_X)
                 ld      a, l
                 sub     4(iy)
                 ld      l, a
@@ -5319,17 +5288,10 @@ loc_C1B8:                                                       ; CODE XREF: RAM
                 ld      0(iy), #0
                 ret
 ; ---------------------------------------------------------------------------
-                .db 0xF8 ; ¯
-                .db    0
-                .db    8
-                .db    0
-                .db    0
-                .db    8
-                .db    0
-                .db 0xF8 ; ¯
+byte_C1BD:      .db 0xF8, 0, 8, 0, 0, 8, 0, 0xF8                ; DATA XREF: RAM:C15Co
 ; ---------------------------------------------------------------------------
 
-loc_C1C5:                                                       ; DATA XREF: RAM:AEA7o
+upd_3C_96_to_98:                                                ; DATA XREF: RAM:AEA7o
                                                                 ; RAM:AF59o ...
                 call    adj_m6_m12
                 call    dec_dZ_and_update_XYZ
@@ -5364,12 +5326,12 @@ loc_C1E7:                                                       ; CODE XREF: RAM
 
 loc_C206:                                                       ; CODE XREF: RAM:loc_C1E7p
                 ld      d, #1
-                ld      iy, #0xA7EF
+                ld      iy, # graphic_obj_2+0x40
                 call    loc_C216
                 ld      a, d
                 and     a
                 ret     Z
-                ld      iy, #0xA80F
+                ld      iy, # graphic_obj_2+0x60
 
 loc_C216:                                                       ; CODE XREF: RAM:C20Cp
                                                                 ; RAM:CFCCp
@@ -5440,7 +5402,7 @@ loc_C264:                                                       ; CODE XREF: RAM
                 jp      loc_C120
 ; ---------------------------------------------------------------------------
 
-loc_C285:                                                       ; DATA XREF: RAM:AE5Do
+upd_17_1E_4A_4B:                                                ; DATA XREF: RAM:AE5Do
                                                                 ; RAM:AE6Bo ...
                 call    set_both_deadly_flags
                 jp      adj_m8_m16
@@ -5449,7 +5411,7 @@ loc_C285:                                                       ; DATA XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-set_both_deadly_flags:                                          ; CODE XREF: RAM:loc_C285p
+set_both_deadly_flags:                                          ; CODE XREF: RAM:upd_17_1E_4A_4Bp
                                                                 ; RAM:C28Bp ...
                 ld      a, 13(ix)
                 or      #0xA0 ; '†'
@@ -5457,7 +5419,7 @@ set_both_deadly_flags:                                          ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C29A:                                                       ; CODE XREF: RAM:B072p
+print_lives:                                                    ; CODE XREF: RAM:B072p
                                                                 ; RAM:CF83p
                 ld      ix, #sprite_scratchpad
                 ld      0(ix), #0x16
@@ -5466,12 +5428,12 @@ loc_C29A:                                                       ; CODE XREF: RAM
                 ld      0x1B(ix), #0x20 ; ' '
                 call    print_sprite
                 ld      a, #0x47 ; 'G'
-                ld      de, #0x5A42
+                ld      de, # zx_aram+0x242
                 ld      b, #2
-                call    loc_B514
-                ld      de, #0x5A62
+                call    fill_DE
+                ld      de, # zx_aram+0x262
                 ld      b, #4
-                call    loc_B514
+                call    fill_DE
                 ld      de, #lives
                 ld      b, #1                                   ; 1 digit
                 ld      hl, # vidbuf+0x4E4
@@ -5504,41 +5466,41 @@ lose_life:                                                      ; CODE XREF: RAM
                 ldir
                 ld      hl, #lives
                 dec     (hl)
-                jp      M, loc_C323
+                jp      M, game_over
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C302:                                                       ; CODE XREF: RAM:CD6Aj
+game_completed_msg:                                             ; CODE XREF: RAM:CD6Aj
                 call    clear_scrn_buffer
                 ld      a, #0x45 ; 'E'
                 call    fill_attr
-                ld      de, #unk_C3E9
+                ld      de, #complete_colours
                 exx
-                ld      hl, #unk_C3DD
-                ld      de, #unk_C38B
+                ld      hl, #complete_xy
+                ld      de, #aCongratulations                   ; "CONGRATULATION”"
                 ld      b, #6
                 xor     a
-                ld      (byte_A734), a
-                call    loc_BCC0
-                ld      de, #byte_D86F
+                ld      (suppress_border), a
+                call    display_text_list
+                ld      de, #game_complete_tune
                 call    play_audio
 
-loc_C323:                                                       ; CODE XREF: RAM:C2FEj
+game_over:                                                      ; CODE XREF: RAM:C2FEj
                 call    clear_scrn_buffer
                 ld      a, #0x46 ; 'F'
                 call    fill_attr
-                call    loc_BD59
-                ld      de, #unk_C35D
+                call    print_border
+                ld      de, #gameover_colours
                 exx
-                ld      hl, #unk_C360
-                ld      de, #unk_C366
+                ld      hl, #gameover_xy
+                ld      de, #aGameOver                          ; "GAME OVE“"
                 ld      b, #3
-                call    loc_BCC0
-                call    loc_C6EA
+                call    display_text_list
+                call    calc_and_display_percent
                 xor     a
-                ld      (byte_A734), a
+                ld      (suppress_border), a
                 call    update_screen
-                ld      de, #byte_D853
+                ld      de, #game_over_tune
                 call    play_audio
                 ld      b, #0x40 ; '@'
 
@@ -5554,152 +5516,35 @@ loc_C352:                                                       ; CODE XREF: RAM
                 pop     hl
                 jp      start_menu
 ; ---------------------------------------------------------------------------
-unk_C35D:       .db 0x42 ; B                                    ; DATA XREF: RAM:C32Eo
-                .db 0x43 ; C
-                .db 0x44 ; D
-unk_C360:       .db 0x58 ; X                                    ; DATA XREF: RAM:C332o
-                .db 0x9F ; ü
-                .db 0x30 ; 0
-                .db 0x6F ; o
-                .db 0x40 ; @
-                .db 0x5F ; _
-unk_C366:       .db 0x47 ; G                                    ; DATA XREF: RAM:C335o
-                .db 0x41 ; A
-                .db 0x4D ; M
-                .db 0x45 ; E
-                .db 0x20
-                .db 0x4F ; O
-                .db 0x56 ; V
-                .db 0x45 ; E
-                .db 0xD2 ; “
-                .db 0x50 ; P
-                .db 0x45 ; E
-                .db 0x52 ; R
-                .db 0x43 ; C
-                .db 0x45 ; E
-                .db 0x4E ; N
-                .db 0x54 ; T
-                .db 0x41 ; A
-                .db 0x47 ; G
-                .db 0x45 ; E
-                .db 0x20
-                .db 0x4F ; O
-                .db 0x46 ; F
-                .db 0x20
-                .db 0x51 ; Q
-                .db 0x55 ; U
-                .db 0x45 ; E
-                .db 0x53 ; S
-                .db 0xD4 ; ‘
-                .db 0x43 ; C
-                .db 0x4F ; O
-                .db 0x4D ; M
-                .db 0x50 ; P
-                .db 0x4C ; L
-                .db 0x45 ; E
-                .db 0x54 ; T
-                .db 0x45 ; E
-                .db 0xC4 ; ƒ
-unk_C38B:       .db 0x43 ; C                                    ; DATA XREF: RAM:C311o
-                .db 0x4F ; O
-                .db 0x4E ; N
-                .db 0x47 ; G
-                .db 0x52 ; R
-                .db 0x41 ; A
-                .db 0x54 ; T
-                .db 0x55 ; U
-                .db 0x4C ; L
-                .db 0x41 ; A
-                .db 0x54 ; T
-                .db 0x49 ; I
-                .db 0x4F ; O
-                .db 0x4E ; N
-                .db 0xD3 ; ”
-                .db 0x59 ; Y
-                .db 0x4F ; O
-                .db 0x55 ; U
-                .db 0x20
-                .db 0x48 ; H
-                .db 0x41 ; A
-                .db 0x56 ; V
-                .db 0x45 ; E
-                .db 0x20
-                .db 0x43 ; C
-                .db 0x4F ; O
-                .db 0x4D ; M
-                .db 0x50 ; P
-                .db 0x4C ; L
-                .db 0x45 ; E
-                .db 0x41 ; A
-                .db 0x54 ; T
-                .db 0x45 ; E
-                .db 0xC4 ; ƒ
-                .db 0x54 ; T
-                .db 0x48 ; H
-                .db 0x45 ; E
-                .db 0x20
-                .db 0x50 ; P
-                .db 0x45 ; E
-                .db 0x4E ; N
-                .db 0x54 ; T
-                .db 0x41 ; A
-                .db 0x47 ; G
-                .db 0x52 ; R
-                .db 0x41 ; A
-                .db 0xCD ; Õ
-                .db 0x59 ; Y
-                .db 0x4F ; O
-                .db 0x55 ; U
-                .db 0x52 ; R
-                .db 0x20
-                .db 0x41 ; A
-                .db 0x44 ; D
-                .db 0x56 ; V
-                .db 0x45 ; E
-                .db 0x4E ; N
-                .db 0x54 ; T
-                .db 0x55 ; U
-                .db 0x52 ; R
-                .db 0xC5 ; ≈
-                .db 0x43 ; C
-                .db 0x4F ; O
-                .db 0x4E ; N
-                .db 0x54 ; T
-                .db 0x49 ; I
-                .db 0x4E ; N
-                .db 0x55 ; U
-                .db 0x45 ; E
-                .db 0x53 ; S
-                .db 0x20
-                .db 0x49 ; I
-                .db 0xCE ; Œ
-                .db 0x4D ; M
-                .db 0x49 ; I
-                .db 0x52 ; R
-                .db 0x45 ; E
-                .db 0x20
-                .db 0x4D ; M
-                .db 0x41 ; A
-                .db 0x52 ; R
-                .db 0xC5 ; ≈
-unk_C3DD:       .db 0x48 ; H                                    ; DATA XREF: RAM:C30Eo
-                .db 0x8F ; è
-                .db 0x38 ; 8
-                .db 0x6F ; o
-                .db 0x50 ; P
-                .db 0x5F ; _
-                .db 0x48 ; H
-                .db 0x4F ; O
-                .db 0x50 ; P
-                .db 0x3F ; ?
-                .db 0x60 ; `
-                .db 0x1F
-unk_C3E9:       .db 0x46 ; F                                    ; DATA XREF: RAM:C30Ao
-                .db 0x45 ; E
-                .db 0x45 ; E
-                .db 0x42 ; B
-                .db 0x42 ; B
-                .db 0x43 ; C
+gameover_colours:.db 0x42, 0x43, 0x44                           ; DATA XREF: RAM:C32Eo
+gameover_xy:    .db 0x58, 0x9F                                  ; DATA XREF: RAM:C332o
+                .db 0x30, 0x6F
+                .db 0x40, 0x5F
+aGameOver:      .ascii 'GAME OVE'                               ; DATA XREF: RAM:C335o
+                .db 0xD2
+aPercentageOfQuest:.ascii 'PERCENTAGE OF QUES'
+                .db 0xD4
+aCompleted:     .ascii 'COMPLETE'
+                .db 0xC4
+aCongratulations:.ascii 'CONGRATULATION'                        ; DATA XREF: RAM:C311o
+                .db 0xD3
+aYouHaveCompleated:.ascii 'YOU HAVE COMPLEATE'
+                .db 0xC4
+aThePentagram:  .ascii 'THE PENTAGRA'
+                .db 0xCD
+aYourAdventure: .ascii 'YOUR ADVENTUR'
+                .db 0xC5
+aContinuesIn:   .ascii 'CONTINUES I'
+                .db 0xCE
+aMireMare:      .ascii 'MIRE MAR'
+                .db 0xC5
+complete_xy:    .db 0x48, 0x8F                                  ; DATA XREF: RAM:C30Eo
+                .db 0x38, 0x6F
+                .db 0x50, 0x5F
+                .db 0x48, 0x4F
+                .db 0x50, 0x3F
+                .db 0x60, 0x1F
+complete_colours:.db 0x46, 0x45, 0x45, 0x42, 0x42, 0x43         ; DATA XREF: RAM:C30Ao
 plyr_spr_init_data:.db 0x20, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x5C, 0x62, 0, 0, 0, 0, 0, 0, 0
                                                                 ; DATA XREF: RAM:init_start_locationo
 plyr_spr_1_scratchpad:.db 0x20, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x5C, 0x62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -5713,7 +5558,7 @@ no_update:                                                      ; DATA XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C440:                                                       ; DATA XREF: RAM:AE6Fo
+upd_20_to_27:                                                   ; DATA XREF: RAM:AE6Fo
                                                                 ; RAM:AE71o ...
                 call    adj_m6_m12
                 bit     6, 0xD(ix)
@@ -5726,7 +5571,7 @@ loc_C450:                                                       ; CODE XREF: RAM
                 call    check_user_input
                 xor     a
                 ld      9(ix), a
-                ld      0xA(ix), a
+                ld      10(ix), a
                 call    loc_C4C8
                 call    loc_C58D
                 call    loc_C56C
@@ -5757,19 +5602,19 @@ loc_C492:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_C495:                                                       ; CODE XREF: RAM:C469j
-                ld      a, 0xB(ix)
+                ld      a, 11(ix)
                 and     a
                 jp      M, loc_C46B
                 xor     a
-                ld      0xB(ix), a
+                ld      11(ix), a
                 jr      loc_C46B
 ; ---------------------------------------------------------------------------
-                .db 0xC9 ; …
+                ret
 ; ---------------------------------------------------------------------------
 
 loc_C4A3:                                                       ; CODE XREF: RAM:BF84p
                                                                 ; RAM:C466p
-                ld      hl, (word_A71D)
+                ld      hl, (room_size_X)
                 ld      a, l
                 sub     4(ix)
                 ld      l, a
@@ -5795,7 +5640,7 @@ loc_C4C6:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_C4C8:                                                       ; CODE XREF: RAM:C45Ap
-                ld      hl, #0xA709
+                ld      hl, #user_input_method
                 ld      a, (hl)
                 and     #6
                 jr      Z, loc_C51B
@@ -5986,10 +5831,10 @@ loc_C5BD:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C5D3:                                                       ; DATA XREF: RAM:AE7Fo
+upd_28_to_2F:                                                   ; DATA XREF: RAM:AE7Fo
                                                                 ; RAM:AE81o ...
                 call    adj_m8_m12
-                bit     6, 0xD(ix)
+                bit     6, 13(ix)
                 jp      NZ, loc_C107
                 push    ix
                 pop     de
@@ -6003,10 +5848,10 @@ loc_C5D3:                                                       ; DATA XREF: RAM
                 ldir
                 ld      6(ix), #0
                 set     1, 7(ix)
-                ld      a, 0xD(ix)
+                ld      a, 13(ix)
                 and     #0xF
                 jr      Z, loc_C602
-                dec     0xD(ix)
+                dec     13(ix)
                 jr      loc_C60A
 ; ---------------------------------------------------------------------------
 
@@ -6070,20 +5915,20 @@ loc_C662:                                                       ; CODE XREF: RAM
                                                                 ; RAM:C65Bj
                 xor     a
                 ld      9(ix), a
-                ld      0xA(ix), a
+                ld      10(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_C66A:                                                       ; CODE XREF: RAM:C62Fp
                 ld      a, 9(ix)
-                add     a, 0xE(ix)
+                add     a, 14(ix)
                 ld      9(ix), a
-                ld      a, 0xA(ix)
-                add     a, 0xF(ix)
-                ld      0xA(ix), a
+                ld      a, 10(ix)
+                add     a, 15(ix)
+                ld      10(ix), a
                 xor     a
-                ld      0xE(ix), a
-                ld      0xF(ix), a
+                ld      14(ix), a
+                ld      15(ix), a
                 ld      bc, #off_C68D
 
 loc_C686:                                                       ; CODE XREF: RAM:C8EEj
@@ -6093,14 +5938,15 @@ loc_C686:                                                       ; CODE XREF: RAM
                 jp      jump_to_tbl_entry
 ; ---------------------------------------------------------------------------
 off_C68D:       .dw loc_C695                                    ; DATA XREF: RAM:C683o
-                .dw loc_C69E
-                .dw loc_C6A5
-                .dw loc_C6AE
+                                                                ; dX-=3
+                .dw loc_C69E                                    ; dX+=3
+                .dw loc_C6A5                                    ; dY+=3
+                .dw loc_C6AE                                    ; dY-=3
 ; ---------------------------------------------------------------------------
 
 loc_C695:                                                       ; DATA XREF: RAM:off_C68Do
-                ld      a, 9(ix)
-                add     a, #0xFD ; '˝'
+                ld      a, 9(ix)                                ; dX
+                add     a, #0xFD ; '˝'                          ; -3
 
 loc_C69A:                                                       ; CODE XREF: RAM:C6A3j
                 ld      9(ix), a
@@ -6108,23 +5954,23 @@ loc_C69A:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_C69E:                                                       ; DATA XREF: RAM:C68Fo
-                ld      a, 9(ix)
-                add     a, #3
+                ld      a, 9(ix)                                ; dX
+                add     a, #3                                   ; +3
                 jr      loc_C69A
 ; ---------------------------------------------------------------------------
 
 loc_C6A5:                                                       ; DATA XREF: RAM:C691o
-                ld      a, 0xA(ix)
-                add     a, #3
+                ld      a, 10(ix)                               ; dY
+                add     a, #3                                   ; +3
 
 loc_C6AA:                                                       ; CODE XREF: RAM:C6B3j
-                ld      0xA(ix), a
+                ld      10(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_C6AE:                                                       ; DATA XREF: RAM:C693o
-                ld      a, 0xA(ix)
-                add     a, #0xFD ; '˝'
+                ld      a, 10(ix)                               ; dY
+                add     a, #0xFD ; '˝'                          ; -3
                 jr      loc_C6AA
 ; ---------------------------------------------------------------------------
 
@@ -6132,18 +5978,19 @@ locret_C6B5:                                                    ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-display_location???:                                            ; CODE XREF: RAM:AFCBp
+build_screen_objects:                                           ; CODE XREF: RAM:AFCBp
                 ld      ix, #graphic_objs_tbl
                 call    clear_scrn_buffer
-                call    loc_C92C
-                call    loc_CA82
-                call    loc_C6CC
+                call    retrieve_screen
+                call    adjust_plyr_xyz_for_room_size
+                call    flag_room_visited
                 ld      a, #1
                 ld      (render_status_info), a
                 ret
 ; ---------------------------------------------------------------------------
+; quite different to Knight Lore / Alien 8
 
-loc_C6CC:                                                       ; CODE XREF: RAM:C6C3p
+flag_room_visited:                                              ; CODE XREF: RAM:C6C3p
                 ld      a, 8(ix)
                 rra
                 rra
@@ -6161,15 +6008,15 @@ loc_C6DE:                                                       ; CODE XREF: RAM
                 rra
                 djnz    loc_C6DE
                 ld      d, #0
-                ld      hl, #0xA74F
+                ld      hl, #scrn_visited
                 add     hl, de
                 or      (hl)
                 ld      (hl), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_C6EA:                                                       ; CODE XREF: RAM:C33Dp
-                ld      hl, #0xA74F
+calc_and_display_percent:                                       ; CODE XREF: RAM:C33Dp
+                ld      hl, #scrn_visited
                 ld      c, #0x1F
                 ld      e, #0
 
@@ -6189,9 +6036,9 @@ loc_C6F8:                                                       ; CODE XREF: RAM
                 jr      NZ, loc_C6F1
                 srl     e
                 ld      a, e
-                cp      #0x36 ; '6'
+                cp      #54
                 jr      C, loc_C707
-                ld      e, #0x36 ; '6'
+                ld      e, #54
 
 loc_C707:                                                       ; CODE XREF: RAM:C703j
                 ld      a, (byte_A74C)
@@ -6222,13 +6069,13 @@ loc_C718:                                                       ; CODE XREF: RAM
                 ld      l, c
                 ld      h, b
                 ex      af, af'
-                ld      de, #0xA74D
+                ld      de, #byte_A74D
                 ld      b, #1
                 and     a
                 jr      Z, loc_C745
                 inc     b
                 push    hl
-                ld      hl, #0x8355
+                ld      hl, #font
                 ld      (gfxbase_8x8), hl
                 pop     hl
                 jp      print_BCD_lsd
@@ -6242,7 +6089,7 @@ loc_C745:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_0_m8:                                                       ; DATA XREF: RAM:AEA1o
+upd_39:                                                         ; DATA XREF: RAM:AEA1o
                 ld      hl, #0xF8 ; '¯'                         ; 0,-8
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
@@ -6262,13 +6109,13 @@ adj_m8_m16:                                                     ; CODE XREF: RAM
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m8_m12:                                                     ; CODE XREF: RAM:loc_C5D3p
+adj_m8_m12:                                                     ; CODE XREF: RAM:upd_28_to_2Fp
                 ld      hl, #0xF8F4                             ; -8,-12
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m12_m16:                                                    ; CODE XREF: RAM:loc_CB51j
-                                                                ; RAM:loc_CD7Cp
+adj_m12_m16:                                                    ; CODE XREF: RAM:upd_4Dj
+                                                                ; RAM:upd_49p
                 ld      hl, #0xF4F0                             ; -12,-16
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
@@ -6280,25 +6127,25 @@ set_pixel_adj:                                                  ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-adj_m6_m12:                                                     ; CODE XREF: RAM:loc_C1C5p
-                                                                ; RAM:loc_C440p ...
+adj_m6_m12:                                                     ; CODE XREF: RAM:upd_3C_96_to_98p
+                                                                ; RAM:upd_20_to_27p ...
                 ld      hl, #0xFAF4                             ; -6,-12
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m4_m12:                                                     ; CODE XREF: RAM:loc_C111p
-                                                                ; RAM:loc_C11Dp
+adj_m4_m12:                                                     ; CODE XREF: RAM:upd_40_to_46p
+                                                                ; RAM:upd_47p
                 ld      hl, #0xFCF4                             ; -4,-12
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m4_m8:                                                      ; DATA XREF: RAM:AE99o
+upd_35_to_38:                                                   ; DATA XREF: RAM:AE99o
                                                                 ; RAM:AE9Bo ...
                 ld      hl, #0xFCF8                             ; -4,-8
                 jr      set_pixel_adj
 ; ---------------------------------------------------------------------------
 
-adj_m2_m8:                                                      ; DATA XREF: RAM:AE47o
+upd_0C_to_0F_34:                                                ; DATA XREF: RAM:AE47o
                                                                 ; RAM:AE49o ...
                 ld      hl, #0xFEF8                             ; -2,-8
                 jr      set_pixel_adj
@@ -6343,14 +6190,14 @@ loc_C7BD:                                                       ; CODE XREF: RAM
                 call    set_pixel_adj
                 ld      a, 2(ix)
                 add     a, #0xD
-                ld      0xA(ix), a
+                ld      10(ix), a
                 ld      a, 1(ix)
                 ld      9(ix), a
                 ld      hl, #0x60F
 
 loc_C7D1:                                                       ; CODE XREF: RAM:C7FBj
                 ld      a, 3(ix)
-                ld      0xB(ix), a
+                ld      11(ix), a
                 call    loc_C802
                 jp      loc_C8D2
 ; ---------------------------------------------------------------------------
@@ -6364,10 +6211,10 @@ loc_C7DD:                                                       ; CODE XREF: RAM
 loc_C7E7:                                                       ; CODE XREF: RAM:C800j
                 call    set_pixel_adj
                 ld      a, 1(ix)
-                sub     #0xD
+                sub     #13
                 ld      9(ix), a
                 ld      a, 2(ix)
-                ld      0xA(ix), a
+                ld      10(ix), a
                 ld      hl, #0xF06
                 jr      loc_C7D1
 ; ---------------------------------------------------------------------------
@@ -6378,7 +6225,7 @@ loc_C7FD:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_C802:                                                       ; CODE XREF: RAM:C7D7p
-                ld      iy, #0xA76F
+                ld      iy, #graphic_objs_tbl
                 ld      a, 0(iy)
                 sub     #0x10
                 cp      #0x20 ; ' '
@@ -6388,8 +6235,8 @@ loc_C802:                                                       ; CODE XREF: RAM
                 call    loc_C8AD
                 ret     NC
                 set     0, 7(iy)
-                ld      bc, #0xC83B
-                ld      hl, (word_A71D)
+                ld      bc, #off_C83B
+                ld      hl, (room_size_X)
                 push    hl
                 ld      a, 7(iy)
                 rrca
@@ -6407,13 +6254,13 @@ loc_C802:                                                       ; CODE XREF: RAM
                 ld      l, a
                 jp      jump_to_tbl_entry
 ; ---------------------------------------------------------------------------
-                .dw loc_C843
+off_C83B:       .dw loc_C843                                    ; DATA XREF: RAM:C81Bo
                 .dw loc_C874
                 .dw loc_C887
                 .dw loc_C89A
 ; ---------------------------------------------------------------------------
 
-loc_C843:                                                       ; DATA XREF: RAM:C83Bo
+loc_C843:                                                       ; DATA XREF: RAM:off_C83Bo
                 pop     hl
                 ld      a, #0x80 ; 'Ä'
                 sub     l
@@ -6428,9 +6275,9 @@ loc_C854:                                                       ; CODE XREF: RAM
                                                                 ; RAM:C898j ...
                 ld      a, 8(ix)
                 ld      8(iy), a
-                ld      a, 0xC(iy)
+                ld      a, 12(iy)
                 or      #0x30 ; '0'
-                ld      0xC(iy), a
+                ld      12(iy), a
                 push    iy
                 pop     hl
                 ld      de, #plyr_spr_1_scratchpad
@@ -6566,14 +6413,15 @@ locret_C92B:                                                    ; CODE XREF: RAM
                                                                 ; RAM:C918j ...
                 ret
 ; ---------------------------------------------------------------------------
+; Quite different to Knight Lore / Alien 8
 
-loc_C92C:                                                       ; CODE XREF: RAM:C6BDp
-                call    clr_layout_mem_???
+retrieve_screen:                                                ; CODE XREF: RAM:C6BDp
+                call    clr_graphic_objs_tbl
                 ld      hl, #block_type_tbl
                 ld      (word_A73A), hl
                 xor     a
                 ld      (byte_A73C), a
-                ld      de, # byte_A7AF+0x660
+                ld      de, # graphic_obj_2+0x660
                 ld      bc, #background_type_tbl
                 ld      hl, #location_tbl
 
@@ -6581,7 +6429,7 @@ loc_C942:                                                       ; CODE XREF: RAM
                 ld      a, (hl)
                 inc     hl
                 cp      8(ix)
-                jr      Z, loc_C953
+                jr      Z, found_screen
                 ld      a, (hl)
                 call    loc_B519
                 and     a
@@ -6590,7 +6438,7 @@ loc_C942:                                                       ; CODE XREF: RAM
                 jr      loc_C942
 ; ---------------------------------------------------------------------------
 
-loc_C953:                                                       ; CODE XREF: RAM:C947j
+found_screen:                                                   ; CODE XREF: RAM:C947j
                 ld      b, (hl)
                 inc     hl
                 ld      a, (hl)
@@ -6612,10 +6460,10 @@ loc_C953:                                                       ; CODE XREF: RAM
                 call    loc_B519
                 ld      a, (hl)
                 inc     hl
-                ld      (word_A71D), a
+                ld      (room_size_X), a
                 ld      a, (hl)
                 inc     hl
-                ld      (word_A71D+1), a
+                ld      (room_size_Y), a
                 ld      a, (hl)
                 ld      (room_size_Z), a
                 dec     b
@@ -6649,7 +6497,7 @@ loc_C995:                                                       ; CODE XREF: RAM
                 ld      (de), a
                 inc     de
                 ld      b, #0x17
-                call    loc_B513
+                call    zero_DE
                 push    hl
                 ld      hl, #0xFFC0
                 add     hl, de
@@ -6812,11 +6660,11 @@ loc_CA77:                                                       ; CODE XREF: RAM
                 jr      loc_CA77
 ; ---------------------------------------------------------------------------
 
-loc_CA82:                                                       ; CODE XREF: RAM:C6C0p
-                ld      a, (word_A71D)
+adjust_plyr_xyz_for_room_size:                                  ; CODE XREF: RAM:C6C0p
+                ld      a, (room_size_X)
                 sub     #2
                 ld      l, a
-                ld      a, (word_A71D+1)
+                ld      a, (room_size_Y)
                 sub     #2
                 ld      h, a
                 ld      a, 1(ix)
@@ -6834,8 +6682,8 @@ loc_CA82:                                                       ; CODE XREF: RAM
 
 loc_CAA1:                                                       ; CODE XREF: RAM:CA9Ej
                 ld      c, #3
-                call    loc_CAEE
-                ld      a, #0x80 ; 'Ä'
+                call    adjust_plyr_XYZ_for_???
+                ld      a, #128
                 sub     h
                 sub     5(ix)
 
@@ -6854,7 +6702,7 @@ loc_CAAF:                                                       ; CODE XREF: RAM
 
 loc_CAC4:                                                       ; CODE XREF: RAM:CA9Bj
                 ld      c, #2
-                call    loc_CAEE
+                call    adjust_plyr_XYZ_for_???
                 ld      a, h
                 add     a, #0x80 ; 'Ä'
                 add     a, 5(ix)
@@ -6863,7 +6711,7 @@ loc_CAC4:                                                       ; CODE XREF: RAM
 
 loc_CAD1:                                                       ; CODE XREF: RAM:CA95j
                 ld      c, #1
-                call    loc_CAEE
+                call    adjust_plyr_XYZ_for_???
                 ld      a, #0x80 ; 'Ä'
                 sub     l
                 sub     4(ix)
@@ -6875,16 +6723,16 @@ loc_CADC:                                                       ; CODE XREF: RAM
 
 loc_CAE1:                                                       ; CODE XREF: RAM:CA92j
                 ld      c, #0
-                call    loc_CAEE
+                call    adjust_plyr_XYZ_for_???
                 ld      a, l
                 add     a, #0x80 ; 'Ä'
                 add     a, 4(ix)
                 jr      loc_CADC
 ; ---------------------------------------------------------------------------
 
-loc_CAEE:                                                       ; CODE XREF: RAM:CAA3p
+adjust_plyr_XYZ_for_???:                                        ; CODE XREF: RAM:CAA3p
                                                                 ; RAM:CAC6p ...
-                ld      iy, # byte_A7AF+0x640
+                ld      iy, # graphic_obj_2+0x640
                 ld      de, #0xFFC0
                 ld      b, #4
 
@@ -6920,7 +6768,7 @@ loc_CB15:                                                       ; CODE XREF: RAM
 loc_CB1D:                                                       ; CODE XREF: RAM:CB31j
                 ld      a, 3(iy)
                 ld      3(ix), a
-                add     a, #0xC
+                add     a, #12
                 ld      0x23(ix), a
                 ret
 ; ---------------------------------------------------------------------------
@@ -6928,7 +6776,7 @@ loc_CB1D:                                                       ; CODE XREF: RAM
 loc_CB29:                                                       ; CODE XREF: RAM:CB0Ej
                                                                 ; RAM:CB4Aj
                 ld      a, 1(iy)
-                sub     #0xD
+                sub     #13
                 ld      1(ix), a
                 jr      loc_CB1D
 ; ---------------------------------------------------------------------------
@@ -6954,17 +6802,17 @@ loc_CB45:                                                       ; CODE XREF: RAM
                 jr      loc_CB10
 ; ---------------------------------------------------------------------------
 
-loc_CB4E:                                                       ; DATA XREF: RAM:AE43o
+upd_0A_0B_4C_52_99_to_A0:                                       ; DATA XREF: RAM:AE43o
                                                                 ; RAM:AE45o ...
                 jp      adj_m8_m16
 ; ---------------------------------------------------------------------------
 
-loc_CB51:                                                       ; DATA XREF: RAM:AEC9o
+upd_4D:                                                         ; DATA XREF: RAM:AEC9o
                 jp      adj_m12_m16
 ; ---------------------------------------------------------------------------
 
-clr_layout_mem_???:                                             ; CODE XREF: RAM:loc_C92Cp
-                ld      hl, #byte_A7AF
+clr_graphic_objs_tbl:                                           ; CODE XREF: RAM:retrieve_screenp
+                ld      hl, #graphic_obj_2
                 ld      bc, #0x680
                 jr      clr_mem
 ; ---------------------------------------------------------------------------
@@ -7006,7 +6854,7 @@ clr_byte:                                                       ; CODE XREF: RAM
 ; Different to Alien 8
 
 clear_scrn_buffer:                                              ; CODE XREF: RAM:BB82p
-                                                                ; RAM:loc_C302p ...
+                                                                ; RAM:game_completed_msgp ...
                 ld      bc, #0x1800
                 ld      hl, #vidbuf
                 jr      clr_mem
@@ -7052,7 +6900,7 @@ upd_monsters???:                                                ; CODE XREF: RAM
                 and     #3
                 ret     NZ
                 call    loc_CC31
-                ld      hl, # byte_A7AF+0x40
+                ld      hl, # graphic_obj_2+0x40
                 ld      bc, #0x20 ; ' '
                 ld      de, #byte_CC11
                 ld      a, (hl)
@@ -7102,7 +6950,7 @@ byte_CC11:      .db 0, 0xA0, 0xA0, 0xD8, 8, 8, 8, 0x10          ; DATA XREF: RAM
 
 loc_CC31:                                                       ; CODE XREF: RAM:AFD7p
                                                                 ; RAM:CBBDp
-                ld      hl, #byte_D432
+                ld      hl, #special_objs_tbl
                 ld      de, #0x10
                 ld      bc, #0x1202
 
@@ -7122,7 +6970,7 @@ loc_CC42:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CC4B:                                                       ; DATA XREF: RAM:AE8Fo
+upd_30_to_33_A1_to_A8:                                          ; DATA XREF: RAM:AE8Fo
                                                                 ; RAM:AE91o ...
                 call    adj_m6_m12
                 ld      4(ix), #0xA
@@ -7153,7 +7001,7 @@ loc_CC7A:                                                       ; CODE XREF: RAM
 
 loc_CC8B:                                                       ; CODE XREF: RAM:CCC5j
                 ld      0x15(ix), a
-                ld      a, (byte_A78F+3)
+                ld      a, (graphic_obj_1+3)
                 sub     3(ix)
                 ld      a, 0x16(ix)
                 jr      NC, loc_CCC7
@@ -7213,21 +7061,21 @@ loc_CCDE:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_CCE9:                                                       ; CODE XREF: RAM:CC62p
-                ld      a, 0x14(ix)
+                ld      a, 20(ix)
                 neg
-                ld      0x14(ix), a
+                ld      20(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_CCF2:                                                       ; CODE XREF: RAM:CC69p
-                ld      a, 0x15(ix)
+                ld      a, 21(ix)
                 neg
-                ld      0x15(ix), a
+                ld      21(ix), a
                 ret
 ; ---------------------------------------------------------------------------
-                ld      a, 0x16(ix)
+                ld      a, 22(ix)
                 neg
-                ld      0x16(ix), a
+                ld      22(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
@@ -7251,7 +7099,7 @@ loc_CD0D:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CD16:                                                       ; DATA XREF: RAM:AF4Fo
+upd_91_to_95:                                                   ; DATA XREF: RAM:AF4Fo
                                                                 ; RAM:AF51o ...
                 call    adj_m8_m16
                 ld      a, (graphic_objs_tbl+8)
@@ -7265,7 +7113,7 @@ loc_CD16:                                                       ; DATA XREF: RAM
                 add     a, a
                 ld      l, a
                 ld      h, #0
-                ld      de, # byte_D472+0xF0
+                ld      de, #byte_D562
                 add     hl, de
                 ld      a, (hl)
                 ld      0x15(ix), a
@@ -7290,26 +7138,26 @@ loc_CD16:                                                       ; DATA XREF: RAM
                 inc     a
                 ld      (byte_A74B), a
                 cp      #5
-                jp      NC, loc_C302
+                jp      NC, game_completed_msg
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-loc_CD70:                                                       ; DATA XREF: RAM:AE67o
+upd_1C:                                                         ; DATA XREF: RAM:AE67o
                 call    set_both_deadly_flags
-                jr      loc_CD81
+                jr      upd_3F_48_4F
 ; ---------------------------------------------------------------------------
 
-loc_CD75:                                                       ; DATA XREF: RAM:AEE5o
+upd_5B:                                                         ; DATA XREF: RAM:AEE5o
                 xor     a
                 ld      9(ix), a
                 ld      0xA(ix), a
 
-loc_CD7C:                                                       ; DATA XREF: RAM:AEC1o
+upd_49:                                                         ; DATA XREF: RAM:AEC1o
                 call    adj_m12_m16
                 jr      loc_CD84
 ; ---------------------------------------------------------------------------
 
-loc_CD81:                                                       ; CODE XREF: RAM:CD73j
+upd_3F_48_4F:                                                   ; CODE XREF: RAM:CD73j
                                                                 ; DATA XREF: RAM:AEADo ...
                 call    adj_m8_m16
 
@@ -7329,7 +7177,7 @@ loc_CD87:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CDA0:                                                       ; DATA XREF: RAM:AECBo
+upd_4E:                                                         ; DATA XREF: RAM:AECBo
                 call    adj_m8_m16
                 ld      9(ix), #0
                 ld      0xA(ix), #0
@@ -7344,7 +7192,7 @@ loc_CDB6:                                                       ; CODE XREF: RAM
                 jr      loc_CD87
 ; ---------------------------------------------------------------------------
 
-loc_CDBB:                                                       ; DATA XREF: RAM:AED7o
+upd_54:                                                         ; DATA XREF: RAM:AED7o
                 ld      9(ix), #0
                 ld      0xA(ix), #0
                 call    adj_m8_m16
@@ -7399,7 +7247,7 @@ loc_CE2A:                                                       ; CODE XREF: RAM
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-loc_CE31:                                                       ; CODE XREF: RAM:CE9Dj
+upd_55:                                                         ; CODE XREF: RAM:CE9Dj
                                                                 ; DATA XREF: RAM:AED9o
                 call    adj_m8_m16
                 xor     a
@@ -7457,15 +7305,15 @@ loc_CE91:                                                       ; CODE XREF: RAM
                 jr      loc_CE55
 ; ---------------------------------------------------------------------------
 
-loc_CE9A:                                                       ; DATA XREF: RAM:AEDBo
+upd_56:                                                         ; DATA XREF: RAM:AEDBo
                 call    set_both_deadly_flags
-                jp      loc_CE31
+                jp      upd_55
 ; ---------------------------------------------------------------------------
 
-loc_CEA0:                                                       ; DATA XREF: RAM:AEE7o
+upd_5C:                                                         ; DATA XREF: RAM:AEE7o
                 call    set_both_deadly_flags
 
-loc_CEA3:                                                       ; DATA XREF: RAM:AEDDo
+upd_57:                                                         ; DATA XREF: RAM:AEDDo
                 call    adj_m8_m16
                 xor     a
                 ld      0xA(ix), a
@@ -7492,10 +7340,10 @@ loc_CEC7:                                                       ; CODE XREF: RAM
                 jr      loc_CEC4
 ; ---------------------------------------------------------------------------
 
-loc_CEDA:                                                       ; DATA XREF: RAM:AEE9o
+upd_5D:                                                         ; DATA XREF: RAM:AEE9o
                 call    set_both_deadly_flags
 
-loc_CEDD:                                                       ; DATA XREF: RAM:AEDFo
+upd_58:                                                         ; DATA XREF: RAM:AEDFo
                 call    adj_m8_m16
                 xor     a
                 ld      9(ix), a
@@ -7522,7 +7370,7 @@ loc_CF01:                                                       ; CODE XREF: RAM
                 jr      loc_CEFE
 ; ---------------------------------------------------------------------------
 
-loc_CF14:                                                       ; DATA XREF: RAM:AF21o
+upd_79_to_87:                                                   ; DATA XREF: RAM:AF21o
                                                                 ; RAM:AF23o ...
                 call    adj_m8_m16
                 call    loc_B97C
@@ -7531,7 +7379,7 @@ loc_CF14:                                                       ; DATA XREF: RAM
                 jp      loc_CD87
 ; ---------------------------------------------------------------------------
 
-loc_CF22:                                                       ; DATA XREF: RAM:AEE1o
+upd_59:                                                         ; DATA XREF: RAM:AEE1o
                 call    adj_m8_m16
                 call    set_both_deadly_flags
                 ld      0xB(ix), #0
@@ -7566,7 +7414,7 @@ loc_CF65:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_CF68:                                                       ; DATA XREF: RAM:AF0Fo
+upd_70_to_77:                                                   ; DATA XREF: RAM:AF0Fo
                                                                 ; RAM:AF11o ...
                 call    adj_m8_m16
                 call    loc_B97C
@@ -7579,7 +7427,7 @@ loc_CF68:                                                       ; DATA XREF: RAM
                 inc     a
                 ld      (lives), a
                 push    ix
-                call    loc_C29A
+                call    print_lives
                 pop     ix
                 res     0, 0x16(ix)
                 ld      a, 0(ix)
@@ -7611,14 +7459,14 @@ loc_CFAB:                                                       ; CODE XREF: RAM
 
 loc_CFB2:                                                       ; CODE XREF: RAM:CFDDp
                 ld      d, #1
-                ld      iy, #0xA7AF
+                ld      iy, #graphic_obj_2
                 ld      a, 0(iy)
                 and     #0xF8 ; '¯'
                 call    loc_C21E
                 ld      a, d
                 and     a
                 ret     Z
-                ld      iy, #0xA7CF
+                ld      iy, # graphic_obj_2+0x20
                 ld      a, 0(iy)
                 and     #0xF8 ; '¯'
                 call    loc_C216
@@ -7627,7 +7475,7 @@ loc_CFB2:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_CFD2:                                                       ; DATA XREF: RAM:AF1Fo
+upd_78:                                                         ; DATA XREF: RAM:AF1Fo
                 call    adj_m8_m16
                 call    loc_B97C
                 ld      a, (unk_A70E)
@@ -7674,7 +7522,7 @@ loc_D009:                                                       ; CODE XREF: RAM
                 ld      6(iy), #0xC
                 ld      7(iy), #0x14
                 ld      0xB(iy), #1
-                ld      de, # byte_D472+0xD0
+                ld      de, #byte_D542
                 ld      0x10(iy), e
                 ld      0x11(iy), d
                 ld      a, 1(ix)
@@ -7692,7 +7540,7 @@ loc_D009:                                                       ; CODE XREF: RAM
                 call    dec_dZ_and_update_XYZ
                 call    loc_CCDE
                 pop     ix
-                ld      iy, # byte_D472+0xD0
+                ld      iy, #byte_D542
                 ld      0(iy), #0x5A ; 'Z'
                 ld      a, 8(ix)
                 ld      8(iy), a
@@ -7702,7 +7550,7 @@ loc_D009:                                                       ; CODE XREF: RAM
 loc_D071:                                                       ; CODE XREF: RAM:loc_CB89p
                                                                 ; RAM:CFEEp ...
                 ld      de, #0x20 ; ' '
-                ld      iy, # byte_A7AF+0x80
+                ld      iy, # graphic_obj_2+0x80
                 ld      b, #0x30 ; '0'
                 ret
 ; ---------------------------------------------------------------------------
@@ -7710,7 +7558,7 @@ loc_D071:                                                       ; CODE XREF: RAM
 loc_D07B:                                                       ; CODE XREF: RAM:loc_CF9Ep
                                                                 ; RAM:D0F4p ...
                 ld      de, #0x10
-                ld      iy, #0xD432
+                ld      iy, #special_objs_tbl
                 ld      b, #0x12
                 ret
 ; ---------------------------------------------------------------------------
@@ -7743,7 +7591,7 @@ loc_D0A7:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D0AC:                                                       ; DATA XREF: RAM:AEE3o
+upd_5A:                                                         ; DATA XREF: RAM:AEE3o
                 call    adj_m8_m16
                 bit     0, 0x14(ix)
                 jr      Z, loc_D10C
@@ -7776,7 +7624,7 @@ loc_D0E6:                                                       ; CODE XREF: RAM
                 set     0, 0x16(iy)
                 xor     a
                 ld      (unk_A70E), a
-                ld      de, #0xD847
+                ld      de, #tbd_tune
                 call    play_audio
                 call    loc_D07B
                 ld      a, #0x5A ; 'Z'
@@ -7854,31 +7702,31 @@ loc_D16A:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-init_objects???:                                                ; CODE XREF: RAM:AFBFp
-                ld      de, #byte_D432
-                ld      hl, #byte_D312
+init_special_objects:                                           ; CODE XREF: RAM:AFBFp
+                ld      de, #special_objs_tbl
+                ld      hl, #special_objs_ini_data
                 ld      bc, #0x120
                 ldir
                 ld      a, (seed_3)
                 and     #0x3C ; '<'
                 ld      e, a
                 ld      d, #0
-                ld      hl, #byte_D1A5
+                ld      hl, #spec_obj_ini_loc_data
                 add     hl, de
-                ld      iy, #byte_D472
-                ld      c, #5
-                ld      de, #0xD
+                ld      iy, #special_obj_4
+                ld      c, #5                                   ; do 5 objects
+                ld      de, #13                                 ; entry=3+13=16 bytes
 
 loc_D18F:                                                       ; CODE XREF: RAM:D1A2j
                 ld      a, (hl)
-                ld      8(iy), a
+                ld      8(iy), a                                ; screen
                 ld      b, #3
 
 loc_D195:                                                       ; CODE XREF: RAM:D19Cj
                 inc     hl
                 inc     iy
                 ld      a, (hl)
-                ld      0(iy), a
+                ld      0(iy), a                                ; x,y,z
                 djnz    loc_D195
                 inc     hl
                 add     iy, de
@@ -7886,25 +7734,35 @@ loc_D195:                                                       ; CODE XREF: RAM
                 jr      NZ, loc_D18F
                 ret
 ; ---------------------------------------------------------------------------
-byte_D1A5:      .db 0x78, 0xB8, 0x48, 0x80, 0x25, 0x48, 0x48, 0xA4 ; DATA XREF: RAM:D182o
-                .db 0x3E, 0x78, 0xB8, 0x80, 0x70, 0xB8, 0xB8, 0x81
-                .db 0x6C, 0x78, 0xB8, 0x98, 0, 0x68, 0x78, 0x98
-                .db 0x45, 0xB8, 0xB8, 0x80, 0x8E, 0x48, 0x98, 0xB0
-                .db 0x4E, 0x80, 0x80, 0x81, 0xF, 0x78, 0x48, 0xA4
-                .db 0x2A, 0x78, 0x78, 0xB0, 5, 0x68, 0x78, 0xA4
-                .db 0x8D, 0x78, 0x68, 0xB0, 0x46, 0x80, 0x80, 0x80
-                .db 4, 0xB8, 0x78, 0xB0, 0x10, 0x48, 0x78, 0xB0
-                .db 0x81, 0xA8, 0x48, 0x81, 0x12, 0x58, 0x58, 0xB0
-                .db 0x92, 0xA8, 0x98, 0xB0, 0x1B, 0x48, 0x78, 0xB0
+spec_obj_ini_loc_data:.db 0x78, 0xB8, 0x48, 0x80                ; DATA XREF: RAM:D182o
+                .db 0x25, 0x48, 0x48, 0xA4
+                .db 0x3E, 0x78, 0xB8, 0x80
+                .db 0x70, 0xB8, 0xB8, 0x81
+                .db 0x6C, 0x78, 0xB8, 0x98
+                .db 0, 0x68, 0x78, 0x98
+                .db 0x45, 0xB8, 0xB8, 0x80
+                .db 0x8E, 0x48, 0x98, 0xB0
+                .db 0x4E, 0x80, 0x80, 0x81
+                .db 0xF, 0x78, 0x48, 0xA4
+                .db 0x2A, 0x78, 0x78, 0xB0
+                .db 5, 0x68, 0x78, 0xA4
+                .db 0x8D, 0x78, 0x68, 0xB0
+                .db 0x46, 0x80, 0x80, 0x80
+                .db 4, 0xB8, 0x78, 0xB0
+                .db 0x10, 0x48, 0x78, 0xB0
+                .db 0x81, 0xA8, 0x48, 0x81
+                .db 0x12, 0x58, 0x58, 0xB0
+                .db 0x92, 0xA8, 0x98, 0xB0
+                .db 0x1B, 0x48, 0x78, 0xB0
 ; ---------------------------------------------------------------------------
 
-loc_D1F5:                                                       ; DATA XREF: RAM:AE4Fo
+upd_10_11:                                                      ; DATA XREF: RAM:AE4Fo
                                                                 ; RAM:AE51o
                 ld      a, 7(ix)
                 xor     #0x40 ; '@'
                 ld      7(ix), a
 
-loc_D1FD:                                                       ; DATA XREF: RAM:AECFo
+upd_50_51:                                                      ; DATA XREF: RAM:AECFo
                                                                 ; RAM:AED1o
                 call    adj_m8_m16
                 call    set_both_deadly_flags
@@ -7944,7 +7802,7 @@ loc_D242:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_D251:                                                       ; DATA XREF: RAM:AF7Fo
+upd_A9_to_AC:                                                   ; DATA XREF: RAM:AF7Fo
                                                                 ; RAM:AF81o ...
                 call    adj_m8_m16
                 call    set_both_deadly_flags
@@ -7987,7 +7845,7 @@ loc_D29E:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_D2AD:                                                       ; DATA XREF: RAM:AF3Fo
+upd_88_to_8B:                                                   ; DATA XREF: RAM:AF3Fo
                                                                 ; RAM:AF41o ...
                 call    adj_m8_m16
                 ld      0xB(ix), #0
@@ -8011,42 +7869,39 @@ loc_D2D7:                                                       ; CODE XREF: RAM
                 jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
-loc_D2DE:                                                       ; DATA XREF: RAM:AF47o
+upd_8C:                                                         ; DATA XREF: RAM:AF47o
                 call    adj_m8_m16
-                res     3, 0xD(ix)
+                res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D2E9:                                                       ; DATA XREF: RAM:AF49o
+upd_8E:                                                         ; DATA XREF: RAM:AF49o
                 call    adj_m8_m16
-                res     3, 0xD(ix)
+                res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D2F4:                                                       ; DATA XREF: RAM:AF4Bo
+upd_8F:                                                         ; DATA XREF: RAM:AF4Bo
                 call    adj_m8_m16
-                res     3, 0xD(ix)
+                res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D2FF:                                                       ; DATA XREF: RAM:AF4Do
+upd_90:                                                         ; DATA XREF: RAM:AF4Do
                 call    adj_m8_m16
-                res     3, 0xD(ix)
+                res     3, 13(ix)
                 call    loc_B97C
                 ret
 ; ---------------------------------------------------------------------------
-                .db    2
-                .db    0
-                .db 0xFE ; ˛
-                .db    0
-                .db    0
-                .db    2
-                .db    0
-                .db 0xFE ; ˛
-byte_D312:      .db 0x70, 0x50, 0xA0, 0x80, 8, 8, 0x20, 0x10    ; DATA XREF: RAM:D172o
+; table of dX,dY pairs randomly chosen for ??
+byte_D30A:      .db 2, 0                                        ; DATA XREF: RAM:B87Ao
+                .db 0xFE, 0
+                .db 0, 2
+                .db 0, 0xFE
+special_objs_ini_data:.db 0x70, 0x50, 0xA0, 0x80, 8, 8, 0x20, 0x10 ; DATA XREF: RAM:D172o
                 .db 0x7A, 0, 0, 0, 0, 0, 0, 0
                 .db 0x71, 0x70, 0xA0, 0x80, 8, 8, 0x20, 0x10
                 .db 0x80, 0, 0, 0, 0, 0, 0, 0
@@ -8082,60 +7937,38 @@ byte_D312:      .db 0x70, 0x50, 0xA0, 0x80, 8, 8, 0x20, 0x10    ; DATA XREF: RAM
                 .db 0x52, 0, 0, 0, 0, 0, 0, 0
 byte_D422:      .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:loc_B097o
                 .db 0, 0, 0, 0, 0, 0, 0, 0
-byte_D432:      .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:B123o
+special_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:B123o
                                                                 ; RAM:loc_CC31o ...
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-byte_D472:      .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:D186o
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0x70, 0xB0, 0x9C, 0xA2, 0xA2, 0x6A, 0x72, 0x5C
-                .db 0x50, 0x88, 1, 0x87, 0xD5, 0xDD, 0xCB, 7
-                .db 0x4E, 0xDD, 0xCB, 7, 0x8E, 0xC8, 0x3A, 0x15
-                .db 0xA7, 0xE6, 0xF, 0x6F, 0x26, 0, 9, 0x46
-                .db 0xE, 0xC, 0xC3, 0x7B, 0xD6, 0x20, 0x20, 0x30
-                .db 0x40, 0x50, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20
-                .db 0x20, 0x30, 0x40, 0x50, 0x20, 0x20, 0x20, 0x30
-                .db 0x30, 0x40, 0x40, 0x50, 0x50, 0x60, 0x60, 0x70
-                .db 0x70, 0x80, 0x80, 0x90, 0x90, 0x90, 0x90, 0x80
-                .db 0x80, 0x70, 0x70, 0x60, 0x60, 0x50, 0x50, 0x40
-                .db 0x40, 0x30, 0x30, 0x20, 0x20, 0x90, 0x80, 0x70
-                .db 0x80, 0x70, 0x60, 0x70, 0x60, 0x50, 0x60, 0x50
-                .db 0x40, 0x50, 0x40, 0x30, 0x20, 0x40, 0x40, 0x40
-                .db 0x30, 0x50, 0x50, 0x50, 0x50, 0x40, 0x40, 0x40
-                .db 0x30, 0x50, 0x50, 0x50, 0x50
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+special_obj_4:  .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:D186o
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+byte_D542:      .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                                                                ; DATA XREF: RAM:D030o
+                                                                ; RAM:D060o
+                .db 0, 0, 0, 0, 0
+byte_D562:      .db 0x70, 0xB0, 0x9C, 0xA2, 0xA2, 0x6A, 0x72, 0x5C, 0x50, 0x88, 1, 0x87, 0xD5, 0xDD
+                                                                ; DATA XREF: RAM:CD31o
+                .db 0xCB, 7, 0x4E, 0xDD, 0xCB, 7, 0x8E, 0xC8, 0x3A, 0x15, 0xA7, 0xE6, 0xF, 0x6F, 0x26
+                .db 0, 9, 0x46, 0xE, 0xC, 0xC3, 0x7B, 0xD6, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20, 0x20
+                .db 0x30, 0x40, 0x50, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20, 0x20, 0x20, 0x30, 0x30, 0x40
+                .db 0x40, 0x50, 0x50, 0x60, 0x60, 0x70, 0x70, 0x80, 0x80, 0x90, 0x90, 0x90, 0x90, 0x80
+                .db 0x80, 0x70, 0x70, 0x60, 0x60, 0x50, 0x50, 0x40, 0x40, 0x30, 0x30, 0x20, 0x20, 0x90
+                .db 0x80, 0x70, 0x80, 0x70, 0x60, 0x70, 0x60, 0x50, 0x60, 0x50, 0x40, 0x50, 0x40, 0x30
+                .db 0x20, 0x40, 0x40, 0x40, 0x30, 0x50, 0x50, 0x50, 0x50, 0x40, 0x40, 0x40, 0x30, 0x50
+                .db 0x50, 0x50, 0x50
 ; ---------------------------------------------------------------------------
 
 loc_D5D7:                                                       ; CODE XREF: RAM:B4EBp
@@ -8242,29 +8075,23 @@ loc_D657:                                                       ; CODE XREF: RAM
                 jr      NZ, loc_D657
                 ret
 ; ---------------------------------------------------------------------------
-                .db 0xDD ; ›
-                .db 0x7E ; ~
-                .db    0
-                .db 0x2F ; /
-                .db  0xF
-                .db  0xF
-                .db  0xF
-                .db 0xE6 ; Ê
-                .db 0xE0 ; ‡
-                .db 0x47 ; G
-                .db  0xE
-                .db    6
-                .db 0x18
-                .db    8
-                .db    0
-                .db 0x3A ; :
-                .db 0x73 ; s
-                .db 0xD6 ; ÷
-                .db 0x2F ; /
-                .db 0x47 ; G
-                .db  0xE
-                .db    8
+                ld      a, 0(ix)
+                cpl
+                rrca
+                rrca
+                rrca
+                and     #0xE0 ; '‡'
+                ld      b, a
+                ld      c, #6
+                jr      loc_D67B
 ; ---------------------------------------------------------------------------
+
+loc_D673:                                                       ; DATA XREF: RAM:D674r
+                nop
+                ld      a, (loc_D673)
+                cpl
+                ld      b, a
+                ld      c, #8
 
 loc_D67B:                                                       ; CODE XREF: RAM:D5E1j
                                                                 ; RAM:D60Aj ...
@@ -8305,8 +8132,8 @@ loc_D692:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D69C:                                                       ; CODE XREF: RAM:BB91p
-                ld      hl, #0xA747
+play_audio_wait_key:                                            ; CODE XREF: RAM:BB91p
+                ld      hl, #audio_played
                 ld      a, (hl)
                 and     a
                 ret     NZ
@@ -8349,7 +8176,7 @@ loc_D6C0:                                                       ; CODE XREF: RAM
                 ld      h, #0
                 add     hl, hl
                 call    loc_B519
-                ld      bc, #0xD718
+                ld      bc, #byte_D718
                 add     hl, bc
                 ld      b, (hl)
                 inc     hl
@@ -8428,7 +8255,7 @@ loc_D70E:                                                       ; CODE XREF: RAM
                 jr      NZ, loc_D70D
                 ret
 ; ---------------------------------------------------------------------------
-                .db 0, 0, 0
+byte_D718:      .db 0, 0, 0                                     ; DATA XREF: RAM:D6CBo
                 .db 0xF4, 0xA, 8
                 .db 0x65, 0xA, 9
                 .db 0xDE, 9, 9
@@ -8489,7 +8316,7 @@ loc_D70E:                                                       ; CODE XREF: RAM
                 .db 0x5F, 1, 0xDC
                 .db 0x59, 1, 0xE9
                 .db 0x54, 1, 0xF7
-byte_D7CF:      .db 0x6C, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29 ; DATA XREF: RAM:BB8Eo
+menu_tune:      .db 0x6C, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29 ; DATA XREF: RAM:BB8Eo
                 .db 0x2A, 0x2C, 0x29, 0x67, 0x6C, 0x29, 0x2A, 0x2C
                 .db 0x29, 0x6A, 0x29, 0x2A, 0x6C, 0x60, 0x65, 0x6C
                 .db 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29, 0x2A
@@ -8502,15 +8329,16 @@ byte_D7CF:      .db 0x6C, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29 ; DATA XREF: 
                 .db 0x2A, 0x6C, 0x60, 0xA5, 0xFF, 0x27, 0x67, 0x67
                 .db 0x23, 0x67, 0xEA, 0xDE, 0x23, 0x23, 0x5E, 0x5B
                 .db 0x59, 0xD7, 0x23, 0xFF
-start_game_tune:.db 0x65, 0x68, 0x6C, 0x71, 0x6F, 0x2D, 0x2C, 0x2F ; DATA XREF: RAM:AFB9o
-                .db 0x2D, 0x6A, 0x6D, 0x2C, 0x2A, 0x2C, 0x31, 0x6C
-                .db 0x68, 0x67, 0xE5, 0xFF, 0x20, 0x20, 0x25, 0x26
-                .db 0x2C, 0x69, 0x20, 0x20, 0x22, 0x24, 0xE5, 0xFF
-byte_D853:      .db 0x60, 0x65, 0x69, 0x6C, 0x69, 0x65, 0x65, 0x67 ; DATA XREF: RAM:C347o
+start_game_tune:.db 0x65, 0x68, 0x6C, 0x71, 0x6F, 0x2D, 0x2C, 0x2F, 0x2D, 0x6A, 0x6D, 0x2C, 0x2A, 0x2C
+                                                                ; DATA XREF: RAM:AFB9o
+                .db 0x31, 0x6C, 0x68, 0x67, 0xE5, 0xFF
+tbd_tune:       .db 0x20, 0x20, 0x25, 0x26, 0x2C, 0x69, 0x20, 0x20, 0x22, 0x24, 0xE5, 0xFF
+                                                                ; DATA XREF: RAM:D0EEo
+game_over_tune: .db 0x60, 0x65, 0x69, 0x6C, 0x69, 0x65, 0x65, 0x67 ; DATA XREF: RAM:C347o
                 .db 0x2A, 0x29, 0x27, 0x25, 0x64, 0x60, 0x60, 0x65
                 .db 0x29, 0x27, 0x25, 0x24, 0x62, 0x5E, 0x62, 0x60
                 .db 0x65, 0x64, 0xE5, 0xFF
-byte_D86F:      .db 0x29, 0x2A, 0x6C, 0x29, 0x2A, 0x2C, 0x2E, 0x6C ; DATA XREF: RAM:C31Do
+game_complete_tune:.db 0x29, 0x2A, 0x6C, 0x29, 0x2A, 0x2C, 0x2E, 0x6C ; DATA XREF: RAM:C31Do
                 .db 0x6A, 0x69, 0x6A, 0x27, 0x29, 0x2A, 0x2C, 0x6A
                 .db 0x69, 0x67, 0x69, 0x25, 0x27, 0x29, 0x2A, 0x69
                 .db 0x67, 0x65, 0x27, 0x20, 0x6C, 0x64, 0xE5, 0xFF
