@@ -102,7 +102,7 @@ tmp_XYZ:        .ds 1                           ; DATA XREF: save_XYZo
                 .ds 1
                 .ds 1
 rendered_objs_cnt:.ds 1                         ; DATA XREF: RAM:A6FEr
-                                                ; RAM:C8E0o ...
+                                                ; RAM:C786w ...
                 .ds 1
 block_type_tbl_base:.ds 1
 tmp_dZ:         .ds 1                           ; DATA XREF: sub_C2BC+10w
@@ -175,7 +175,7 @@ scrn_visited:   .ds 32                          ; DATA XREF: build_screen_object
                                                 ; count_screens+5o
 inventory:      .ds 4                           ; DATA XREF: handle_pickup_drop+100o
                                                 ; handle_pickup_drop:pickup_objecto
-byte_5B7C:      .ds 4                           ; DATA XREF: sub_BCAB+8o
+objects_carried:.ds 4                           ; DATA XREF: sub_BCAB+8o
 byte_5B80:      .ds 4                           ; DATA XREF: handle_pickup_drop:adjust_carriedo
 byte_5B84:      .ds 3                           ; DATA XREF: handle_pickup_drop:loc_BE06o
                                                 ; handle_pickup_drop+12Eo
@@ -2443,7 +2443,7 @@ loc_A72E:                                       ; CODE XREF: RAM:A71Cj
                 call    audio_CE22
                 ld      ix, #graphic_objs_tbl
                 ld      a, 0(ix)
-                or      32(ix)
+                or      0x20(ix)
                 jp      Z, player_dies
                 jp      onscreen_loop
 ; ---------------------------------------------------------------------------
@@ -5966,7 +5966,7 @@ sub_BCAB:                                       ; CODE XREF: colour_something+1D
                 push    ix
                 ld      ix, #sprite_scratchpad
                 ld      b, #3
-                ld      hl, #byte_5B7C
+                ld      hl, #objects_carried
 
 loc_BCB6:                                       ; CODE XREF: sub_BCAB+84j
                 push    bc
@@ -7866,14 +7866,24 @@ loc_C73A:                                       ; CODE XREF: list_objects_to_dra
 ; End of function list_objects_to_draw
 
 ; ---------------------------------------------------------------------------
-objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                                                ; DATA XREF: list_objects_to_draw+Bo
-                                                ; RAM:calc_display_order_and_rendero ...
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xAF, 0x32, 0x1E, 0x5B, 0xDD, 0xE5, 0xFD, 0xE5
+objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0      ; DATA XREF: list_objects_to_draw+Bo
+                                                ; RAM:process_remaining_objso ...
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-calc_display_order_and_render:                  ; CODE XREF: RAM:C89Fj
+calc_display_order_and_render:                  ; CODE XREF: render_dynamic_objects:loc_CF5Fp
+                xor     a
+                ld      (rendered_objs_cnt), a
+                push    ix
+                push    iy
+
+process_remaining_objs:                         ; CODE XREF: RAM:C89Fj
                                                 ; RAM:C8E7j
                 ld      de, #objects_to_draw
 
@@ -8050,7 +8060,7 @@ loc_C89B:                                       ; CODE XREF: RAM:C8A3j
                 ld      a, (hl)
                 inc     hl
                 cp      #0xFF
-                jp      Z, calc_display_order_and_render
+                jp      Z, process_remaining_objs
                 cp      c
                 jr      NZ, loc_C89B
                 push    iy
@@ -8093,8 +8103,8 @@ loc_C8D8:                                       ; CODE XREF: RAM:C8A9j
                 ld      (render_list), a
                 ld      hl, #rendered_objs_cnt
                 inc     (hl)
-                call    loc_D013
-                jp      calc_display_order_and_render
+                call    calc_pixel_XY_and_render
+                jp      process_remaining_objs
 ; ---------------------------------------------------------------------------
 
 loc_C8EA:                                       ; CODE XREF: RAM:C794j
@@ -9276,7 +9286,7 @@ loc_CF5A:                                       ; CODE XREF: render_dynamic_obje
 
 loc_CF5F:                                       ; CODE XREF: render_dynamic_objects+Aj
                                                 ; render_dynamic_objects+1Dj
-                call    objects_to_draw+0x40
+                call    calc_display_order_and_render
                 call    display_objects_carried
                 ld      hl, #objs_wiped_cnt
                 ld      a, (rendered_objs_cnt)
@@ -9438,7 +9448,7 @@ flip_sprite:                                    ; CODE XREF: calc_2d_info+3p
 
 ; ---------------------------------------------------------------------------
 
-loc_D013:                                       ; CODE XREF: RAM:C8E4p
+calc_pixel_XY_and_render:                       ; CODE XREF: RAM:C8E4p
                 ld      a, 0(ix)
                 cp      #1
                 jr      NZ, loc_D01F

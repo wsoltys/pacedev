@@ -100,7 +100,7 @@ SCRATCH:5B1B                                                             ; cmp_t
 SCRATCH:5B1C ??                          .ds 1
 SCRATCH:5B1D ??                          .ds 1
 SCRATCH:5B1E ??          rendered_objs_cnt:.ds 1                         ; DATA XREF: RAM:A6FEr
-SCRATCH:5B1E                                                             ; RAM:C8E0o ...
+SCRATCH:5B1E                                                             ; RAM:C786w ...
 SCRATCH:5B1F ??                          .ds 1
 SCRATCH:5B20 ??          block_type_tbl_base:.ds 1
 SCRATCH:5B21 ??          tmp_dZ:         .ds 1                           ; DATA XREF: sub_C2BC+10w
@@ -173,7 +173,7 @@ SCRATCH:5B58 ?? ?? ?? ??+scrn_visited:   .ds 32                          ; DATA 
 SCRATCH:5B58 ?? ?? ?? ??+                                                ; count_screens+5o
 SCRATCH:5B78 ?? ?? ?? ?? inventory:      .ds 4                           ; DATA XREF: handle_pickup_drop+100o
 SCRATCH:5B78                                                             ; handle_pickup_drop:pickup_objecto
-SCRATCH:5B7C ?? ?? ?? ?? byte_5B7C:      .ds 4                           ; DATA XREF: sub_BCAB+8o
+SCRATCH:5B7C ?? ?? ?? ?? objects_carried:.ds 4                           ; DATA XREF: sub_BCAB+8o
 SCRATCH:5B80 ?? ?? ?? ?? byte_5B80:      .ds 4                           ; DATA XREF: handle_pickup_drop:adjust_carriedo
 SCRATCH:5B84 ?? ?? ??    byte_5B84:      .ds 3                           ; DATA XREF: handle_pickup_drop:loc_BE06o
 SCRATCH:5B84                                                             ; handle_pickup_drop+12Eo
@@ -2458,7 +2458,7 @@ RAM:A72E                                                             ; RAM:A745
 RAM:A72E CD 22 CE                    call    audio_CE22
 RAM:A731 DD 21 88 5B                 ld      ix, #graphic_objs_tbl
 RAM:A735 DD 7E 00                    ld      a, 0(ix)
-RAM:A738 DD B6 20                    or      32(ix)
+RAM:A738 DD B6 20                    or      0x20(ix)
 RAM:A73B CA 88 A6                    jp      Z, player_dies
 RAM:A73E C3 8E A6                    jp      onscreen_loop
 RAM:A741             ; ---------------------------------------------------------------------------
@@ -5989,7 +5989,7 @@ RAM:BCAB             sub_BCAB:                                       ; CODE XREF
 RAM:BCAB DD E5                       push    ix
 RAM:BCAD DD 21 38 BD                 ld      ix, #sprite_scratchpad
 RAM:BCB1 06 03                       ld      b, #3
-RAM:BCB3 21 7C 5B                    ld      hl, #byte_5B7C
+RAM:BCB3 21 7C 5B                    ld      hl, #objects_carried
 RAM:BCB6
 RAM:BCB6             loc_BCB6:                                       ; CODE XREF: sub_BCAB+84j
 RAM:BCB6 C5                          push    bc
@@ -7893,14 +7893,24 @@ RAM:C744 C9                          ret
 RAM:C744             ; End of function list_objects_to_draw
 RAM:C744
 RAM:C744             ; ---------------------------------------------------------------------------
-RAM:C745 00 00 00 00+objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-RAM:C745 00 00 00 00+                                                ; DATA XREF: list_objects_to_draw+Bo
-RAM:C745 00 00 00 00+                                                ; RAM:calc_display_order_and_rendero ...
-RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xAF, 0x32, 0x1E, 0x5B, 0xDD, 0xE5, 0xFD, 0xE5
-RAM:C78D             ; ---------------------------------------------------------------------------
+RAM:C745 00 00 00 00+objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0      ; DATA XREF: list_objects_to_draw+Bo
+RAM:C745 00 00 00 00+                                                ; RAM:process_remaining_objso ...
+RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
+RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
+RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
+RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
+RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
+RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
+RAM:C745 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0
+RAM:C785             ; ---------------------------------------------------------------------------
+RAM:C785
+RAM:C785             calc_display_order_and_render:                  ; CODE XREF: render_dynamic_objects:loc_CF5Fp
+RAM:C785 AF                          xor     a
+RAM:C786 32 1E 5B                    ld      (rendered_objs_cnt), a
+RAM:C789 DD E5                       push    ix
+RAM:C78B FD E5                       push    iy
 RAM:C78D
-RAM:C78D             calc_display_order_and_render:                  ; CODE XREF: RAM:C89Fj
+RAM:C78D             process_remaining_objs:                         ; CODE XREF: RAM:C89Fj
 RAM:C78D                                                             ; RAM:C8E7j
 RAM:C78D 11 45 C7                    ld      de, #objects_to_draw
 RAM:C790
@@ -8077,7 +8087,7 @@ RAM:C89B             loc_C89B:                                       ; CODE XREF
 RAM:C89B 7E                          ld      a, (hl)
 RAM:C89C 23                          inc     hl
 RAM:C89D FE FF                       cp      #0xFF
-RAM:C89F CA 8D C7                    jp      Z, calc_display_order_and_render
+RAM:C89F CA 8D C7                    jp      Z, process_remaining_objs
 RAM:C8A2 B9                          cp      c
 RAM:C8A3 20 F6                       jr      NZ, loc_C89B
 RAM:C8A5 FD E5                       push    iy
@@ -8120,8 +8130,8 @@ RAM:C8DB 3E FF                       ld      a, #0xFF
 RAM:C8DD 32 EF C8                    ld      (render_list), a
 RAM:C8E0 21 1E 5B                    ld      hl, #rendered_objs_cnt
 RAM:C8E3 34                          inc     (hl)
-RAM:C8E4 CD 13 D0                    call    loc_D013
-RAM:C8E7 C3 8D C7                    jp      calc_display_order_and_render
+RAM:C8E4 CD 13 D0                    call    calc_pixel_XY_and_render
+RAM:C8E7 C3 8D C7                    jp      process_remaining_objs
 RAM:C8EA             ; ---------------------------------------------------------------------------
 RAM:C8EA
 RAM:C8EA             loc_C8EA:                                       ; CODE XREF: RAM:C794j
@@ -9305,7 +9315,7 @@ RAM:CF5F             ; ---------------------------------------------------------
 RAM:CF5F
 RAM:CF5F             loc_CF5F:                                       ; CODE XREF: render_dynamic_objects+Aj
 RAM:CF5F                                                             ; render_dynamic_objects+1Dj
-RAM:CF5F CD 85 C7                    call    objects_to_draw+0x40
+RAM:CF5F CD 85 C7                    call    calc_display_order_and_render
 RAM:CF62 CD 9D BC                    call    display_objects_carried
 RAM:CF65 21 08 5B                    ld      hl, #objs_wiped_cnt
 RAM:CF68 3A 1E 5B                    ld      a, (rendered_objs_cnt)
@@ -9467,7 +9477,7 @@ RAM:D012             ; End of function flip_sprite
 RAM:D012
 RAM:D013             ; ---------------------------------------------------------------------------
 RAM:D013
-RAM:D013             loc_D013:                                       ; CODE XREF: RAM:C8E4p
+RAM:D013             calc_pixel_XY_and_render:                       ; CODE XREF: RAM:C8E4p
 RAM:D013 DD 7E 00                    ld      a, 0(ix)
 RAM:D016 FE 01                       cp      #1
 RAM:D018 20 05                       jr      NZ, loc_D01F

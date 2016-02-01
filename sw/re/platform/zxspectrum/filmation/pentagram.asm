@@ -21,31 +21,31 @@
 ; $4000-$57FF - spectrum video memory
 ; $5800-$5AFF - spectrum attribute memory
 ;       $5DFF - stack
-; $5E00-$XXXX - code and data
-; $XXXX-$XXXX - variables
+; $5E00-$D88D - code and data
+; $A709-$AE2E - variables
 ; $D88E-$F08D - video buffer
 ; $F100-$FFFF - bit-shift & bit-reverse lookup tables
 ;             - (built at run-time)
 
 
 ; Processor       : z80 []
-; Target assembler: Zilog Macro Assembler
+; Target assembler: ASxxxx by Alan R. Baldwin v1.5
+       .area   idaseg (ABS)
+       .hd64 ; this is needed only for HD64180
 
 ; ===========================================================================
 
 ; Segment type: Regular
-                segment ZX_VRAM
-                org 4000h
-zx_vram:        ds 1800h                                        ; DATA XREF: RAM:loc_CB5Co
+                .org 0x4000
+zx_vram:        .ds 0x1800                                      ; DATA XREF: RAM:clr_bitmap_memoryo
                                                                 ; RAM:CB5Fo
 ; end of 'ZX_VRAM'
 
 ; ===========================================================================
 
 ; Segment type: Regular
-                segment ZX_ARAM
-                org 5800h
-zx_aram:        ds 300h                                         ; DATA XREF: RAM:loc_CB6Ao
+                .org 0x5800
+zx_aram:        .ds 0x300                                       ; DATA XREF: RAM:fill_attro
                                                                 ; RAM:CB6Do
 ; end of 'ZX_ARAM'
 
@@ -56,10091 +56,2206 @@ zx_aram:        ds 300h                                         ; DATA XREF: RAM
 ; ===========================================================================
 
 ; Segment type: Regular
-                segment RAM
-                org 5E00h
+                .org 0x5E00
 
 EXEC:                                                           ; DATA XREF: RAM:5E01o
                 di
-                ld      sp, EXEC
+                ld      sp, #EXEC
                 jp      START
 ; ---------------------------------------------------------------------------
-room_size_tbl:  db 64, 64, 128
-                db 32, 64, 128
-                db 64, 32, 128
-location_tbl:   db 0, 30, 7                                     ; id=0
-                db 18h, 93h, 1Ch, 0, 0Ch, 0, 0Dh, 0
-                db 0FFh, 1, 0FDh, 0FEh, 0BDh, 5Ah, 75h, 0B5h
-                db 0F5h, 35h, 1Ah, 1Dh, 2Eh, 25h, 1Eh, 1Ch
-                db 15h, 33h, 88h, 9Dh
-                db 1, 18, 2                                     ; id=1
-                db 0, 3, 5, 2, 8, 0, 0Bh, 0
-                db 0FFh, 2Dh, 2Fh, 26h, 1Eh, 2Dh, 24h, 23h
-                db 2, 40, 3                                     ; id=2
-                db 7, 1, 18h, 95h, 1Ch, 0, 0Eh, 0
-                db 0Dh, 0, 0FFh, 42h, 2Eh, 16h, 39h, 46h
-                db 79h, 0B9h, 0F9h, 56h, 96h, 6Eh, 0AEh, 80h
-                db 91h, 88h, 99h, 60h, 38h, 1, 0FDh, 0FEh
-                db 2Ch, 19h, 1Bh, 9, 0Bh, 26h
-                db 3, 17, 4                                     ; id=3
-                db 0, 7, 2, 1, 8, 0, 0Bh, 0
-                db 0FFh, 22h, 1Ah, 1Bh, 1Ch, 90h, 0Eh
-                db 4, 25, 5                                     ; id=4
-                db 0, 9, 8, 0, 0Bh, 0, 0FFh, 2Eh
-                db 2Ah, 22h, 1Ah, 12h, 1Eh, 27h, 17h, 2
-                db 1Fh, 5Fh, 0DFh, 0C0h, 6Ah, 80h, 9Fh
-                db 5, 21, 6                                     ; id=5
-                db 1, 6, 8, 0, 9, 0, 0FFh, 0Ah
-                db 1Ah, 5Ah, 9Ah, 2Bh, 22h, 1Bh, 12h, 19h
-                db 21h, 2Dh, 6Dh
-                db 6, 12, 23                                    ; id=6
-                db 1, 7, 3, 5, 11h, 0, 0FFh, 0F1h
-                db 14h, 2Bh
-                db 7, 31, 2                                     ; id=7
-                db 1, 8, 2, 3, 3, 6, 0Ah, 0
-                db 9, 0, 0FFh, 1Fh, 5, 0Eh, 17h, 2Fh
-                db 36h, 3Dh, 3Ah, 31h, 1Fh, 28h, 10h, 9
-                db 2, 23h, 24h, 1Bh, 1Ch
-                db 8, 15, 4                                     ; id=8
-                db 0, 14h, 3, 7, 0Ah, 0, 0Bh, 0
-                db 0FFh, 72h, 0EAh, 0D2h, 0EDh
-                db 9, 24, 5                                     ; id=9
-                db 0, 15h, 1, 0Ah, 2, 4, 8, 0
-                db 0Bh, 0, 0FFh, 27h, 2Bh, 2Ch, 25h, 1Dh
-                db 13h, 14h, 22h, 1Ah, 90h, 24h
-                db 10, 8, 21                                    ; id=10
-                db 1, 0Bh, 3, 9, 11h, 0
-                db 11, 29, 22                                   ; id=11
-                db 1, 0Ch, 3, 0Ah, 11h, 0, 0FFh, 0Fh
-                db 14h, 54h, 94h, 0D4h, 1Ch, 5Ch, 9Ch, 0DCh
-                db 0Bh, 2Ch, 6Ch, 0ACh, 0ECh, 22h, 24h, 64h
-                db 0A4h, 78h, 0E4h
-                db 12, 34, 7                                    ; id=12
-                db 0, 16h, 1, 0Dh, 3, 0Bh, 0Ah, 0
-                db 0Bh, 0, 0FFh, 1Fh, 10h, 11h, 12h, 13h
-                db 14h, 15h, 16h, 17h, 1Fh, 28h, 29h, 2Ah
-                db 32h, 3Ah, 3Dh, 35h, 2Dh, 19h, 2Eh, 2Fh
-                db 13, 28, 18                                   ; id=13
-                db 1, 0Eh, 3, 0Ch, 11h, 0, 0FFh, 1Fh
-                db 22h, 23h, 24h, 25h, 1Ah, 1Bh, 1Ch, 1Dh
-                db 25h, 12h, 14h, 15h, 2Ah, 2Bh, 2Dh, 92h
-                db 2Ch, 13h
-                db 14, 18, 3                                    ; id=14
-                db 0, 17h, 3, 0Dh, 0Ah, 0, 0Bh, 0
-                db 0FFh, 73h, 2Bh, 24h, 22h, 1Bh, 90h, 23h
-                db 15, 32, 4                                    ; id=15
-                db 4, 18h, 0Ch, 0, 0Fh, 0, 0FFh, 0BAh
-                db 3, 43h, 83h, 1Fh, 20h, 21h, 22h, 23h
-                db 1Bh, 13h, 0Bh, 4, 90h, 19h, 80h, 0C5h
-                db 50h, 9Dh, 0C0h, 2Dh, 18h, 5
-                db 16, 21, 5                                    ; id=16
-                db 5, 11h, 0Ch, 0, 0Dh, 0, 0FFh, 0
-                db 0D8h, 0C0h, 88h, 1Ch, 10h, 8, 0, 18h
-                db 19h, 38h, 24h
-                db 17, 10, 6                                    ; id=17
-                db 7, 10h, 0, 1Ah, 0Eh, 0, 0Bh, 0
-                db 18, 26, 7                                    ; id=18
-                db 1, 13h, 8, 0, 9, 0, 0FFh, 0Bh
-                db 9, 49h, 89h, 0C9h, 21h, 2Dh, 4Ch, 1Fh
-                db 1, 2, 8, 11h, 12h, 0Ah, 0Bh, 0Ch
-                db 19, 19, 2                                    ; id=19
-                db 0, 1Ch, 1, 14h, 3, 12h, 0Ah, 0
-                db 0Bh, 0, 0FFh, 38h, 1Bh, 60h, 2, 70h
-                db 0Dh
-                db 20, 17, 3                                    ; id=20
-                db 1, 15h, 2, 8, 3, 13h, 0Ah, 0
-                db 9, 0, 0FFh, 28h, 1Ch, 0A0h, 9Ah
-                db 21, 26, 4                                    ; id=21
-                db 2, 9, 3, 14h, 0Ah, 0, 9, 0
-                db 0FFh, 2Fh, 39h, 28h, 0, 11h, 22h, 33h
-                db 0Bh, 1Ch, 2Ch, 2Dh, 3Eh, 5, 16h, 27h
-                db 22, 14, 5                                    ; id=22
-                db 2, 0Ch, 0, 1Dh, 8, 0, 0Bh, 0
-                db 0FFh, 21h, 0C3h, 0C4h
-                db 23, 10, 6                                    ; id=23
-                db 2, 0Eh, 0, 1Fh, 8, 0, 0Bh, 0
-                db 24, 18, 7                                    ; id=24
-                db 5, 19h, 6, 0Fh, 0Ch, 0, 0Dh, 0
-                db 0FFh, 33h, 14h, 1Bh, 1Dh, 24h, 90h, 1Ch
-                db 25, 10, 2                                    ; id=25
-                db 0, 22h, 7, 18h, 0Eh, 0, 0Bh, 0
-                db 26, 14, 11                                   ; id=26
-                db 0, 23h, 2, 11h, 10h, 0, 0FFh, 90h
-                db 54h, 9, 14h, 2Ch
-                db 27, 21, 4                                    ; id=27
-                db 0, 24h, 8, 0, 0Bh, 0, 0FFh, 0C0h
-                db 47h, 1, 0D7h, 0D8h, 80h, 0DFh, 29h, 5
-                db 6, 78h, 7
-                db 28, 18, 13                                   ; id=28
-                db 0, 28h, 2, 13h, 10h, 0, 0FFh, 2Fh
-                db 2Ah, 2Bh, 2Ch, 2Dh, 12h, 13h, 14h, 15h
-                db 29, 25, 6                                    ; id=29
-                db 2, 16h, 8, 0, 9, 0, 0FFh, 98h
-                db 31h, 2Eh, 20h, 21h, 22h, 23h, 3Bh, 33h
-                db 2Bh, 20h, 1Ch, 0E8h, 18h, 0F0h, 3Ch
-                db 30, 8, 7                                     ; id=30
-                db 1, 1Fh, 8, 0, 9, 0
-                db 31, 31, 2                                    ; id=31
-                db 1, 20h, 2, 17h, 3, 1Eh, 0Ah, 0
-                db 9, 0, 0FFh, 7, 2, 0Ah, 12h, 1Bh
-                db 24h, 2Dh, 2Eh, 2Fh, 1Fh, 42h, 4Ah, 52h
-                db 5Bh, 64h, 6Dh, 6Eh, 6Fh
-                db 32, 12, 3                                    ; id=32
-                db 0, 2Eh, 1, 21h, 3, 1Fh, 0Ah, 0
-                db 0Bh, 0
-                db 33, 10, 4                                    ; id=33
-                db 0, 2Fh, 3, 20h, 0Ah, 0, 0Bh, 0
-                db 34, 18, 5                                    ; id=34
-                db 0, 30h, 1, 23h, 2, 19h, 8, 0
-                db 0Bh, 0, 0FFh, 19h, 1, 6, 0E8h, 2
-                db 35, 12, 6                                    ; id=35
-                db 1, 24h, 2, 1Ah, 3, 22h, 0Ah, 0
-                db 9, 0
-                db 36, 14, 7                                    ; id=36
-                db 2, 1Bh, 3, 23h, 0Ah, 0, 9, 0
-                db 0FFh, 29h, 0Bh, 0Ch
-                db 37, 28, 2                                    ; id=37
-                db 4, 35h, 0Ch, 0, 0Fh, 0, 0FFh, 2
-                db 0, 40h, 80h, 0CAh, 8, 10h, 18h, 0DAh
-                db 1, 2, 3, 1Dh, 9, 0Ah, 0Bh, 11h
-                db 12h, 19h
-                db 38, 28, 3                                    ; id=38
-                db 4, 36h, 5, 27h, 0Ch, 0, 0Fh, 0
-                db 0FFh, 4, 7Ah, 73h, 74h, 75h, 0BEh, 1Fh
-                db 3Dh, 3Eh, 36h, 2Eh, 0BAh, 0B3h, 0B4h, 0B5h
-                db 80h, 7Fh
-                db 39, 10, 4                                    ; id=39
-                db 4, 37h, 7, 26h, 0Eh, 0, 0Fh, 0
-                db 40, 8, 13                                    ; id=40
-                db 4, 38h, 2, 1Ch, 10h, 0
-                db 41, 30, 3                                    ; id=41
-                db 4, 39h, 1Bh, 8Ch, 1Fh, 0, 0Ch, 0
-                db 0Fh, 0, 0FFh, 6, 0D0h, 0C8h, 12h, 52h
-                db 2Ah, 6Ah, 0AAh, 38h, 25h, 70h, 92h, 1Bh
-                db 1Ah, 13h, 0Ah, 11h
-                db 42, 25, 7                                    ; id=42
-                db 4, 3Ah, 0Ch, 0, 0Fh, 0, 0FFh, 7
-                db 1Ah, 5Ah, 9Ah, 0DAh, 1Ch, 5Ch, 9Ch, 0DCh
-                db 0, 0DBh, 59h, 1Bh, 5Bh, 78h, 9Bh
-                db 43, 10, 2                                    ; id=43
-                db 4, 3Bh, 5, 2Ch, 0Ch, 0, 0Fh, 0
-                db 44, 29, 3                                    ; id=44
-                db 4, 3Ch, 7, 2Bh, 0Eh, 0, 0Fh, 0
-                db 0FFh, 0Fh, 38h, 31h, 2Ah, 23h, 1Ch, 15h
-                db 0Eh, 7, 1Fh, 78h, 71h, 6Ah, 63h, 5Ch
-                db 55h, 4Eh, 47h
-                db 45, 10, 4                                    ; id=45
-                db 0, 3Dh, 1, 2Eh, 8, 0, 0Bh, 0
-                db 46, 30, 5                                    ; id=46
-                db 2, 20h, 3, 2Dh, 0Ah, 0, 9, 0
-                db 0FFh, 0Eh, 28h, 29h, 22h, 1Ah, 11h, 10h
-                db 19h, 80h, 0A4h, 88h, 5, 2Dh, 68h, 69h
-                db 62h, 5Ah, 51h, 50h
-                db 47, 21, 14                                   ; id=47
-                db 0, 3Eh, 2, 21h, 10h, 0, 0FFh, 1Bh
-                db 22h, 23h, 24h, 25h, 0C3h, 62h, 63h, 64h
-                db 65h, 0E8h, 0A2h
-                db 48, 10, 7                                    ; id=48
-                db 1, 31h, 2, 22h, 8, 0, 9, 0
-                db 49, 12, 18                                   ; id=49
-                db 1, 32h, 3, 30h, 11h, 0, 0FFh, 0F1h
-                db 14h, 2Ch
-                db 50, 8, 19                                    ; id=50
-                db 1, 33h, 3, 31h, 11h, 0
-                db 51, 34, 4                                    ; id=51
-                db 0, 3Fh, 1, 34h, 3, 32h, 0Ah, 0
-                db 0Bh, 0, 0FFh, 1Fh, 10h, 11h, 12h, 13h
-                db 14h, 15h, 16h, 17h, 1Fh, 28h, 29h, 2Ah
-                db 32h, 3Ah, 3Dh, 35h, 2Dh, 19h, 2Eh, 2Fh
-                db 52, 16, 21                                   ; id=52
-                db 5, 35h, 3, 33h, 11h, 0, 0FFh, 2Bh
-                db 12h, 1Ah, 2Dh, 25h, 0A0h, 13h
-                db 53, 35, 6                                    ; id=53
-                db 4, 64, 5, 54, 6, 37, 7, 52
-                db 14, 0, 15, 0, 255, 31, 56, 49
-                db 42, 35, 28, 21, 14, 7, 31, 0
-                db 9, 18, 27, 36, 45, 54, 63, 144
-                db 92
-                db 54, 29, 7                                    ; id=54
-                db 18h, 41h, 6, 26h, 7, 35h, 0Eh, 0
-                db 0Dh, 0, 1Ch, 0, 0FFh, 1, 0FDh, 0FEh
-                db 60h, 1Dh, 0C1h, 5Dh, 0F5h, 1Ch, 25h, 1Eh
-                db 15h, 1Ch, 35h
-                db 55, 31, 2                                    ; id=55
-                db 6, 27h, 19h, 8Fh, 1Dh, 0, 0Ch, 0
-                db 0Dh, 0, 0FFh, 3, 29h, 0AAh, 0F7h, 0EFh
-                db 1Dh, 2Ch, 2Dh, 2Eh, 2Fh, 2Ah, 2Bh, 0C0h
-                db 0ABh, 58h, 0EBh, 78h, 6Ch
-                db 56, 23, 6                                    ; id=56
-                db 19h, 39h, 6, 28h, 0Ch, 0, 0Dh, 0
-                db 1Dh, 0, 0FFh, 2, 0F7h, 0EFh, 28h, 80h
-                db 30h, 58h, 68h, 18h, 37h
-                db 57, 12, 4                                    ; id=57
-                db 5, 3Ah, 6, 29h, 7, 38h, 0Eh, 0
-                db 0Dh, 0
-                db 58, 12, 5                                    ; id=58
-                db 5, 3Bh, 6, 2Ah, 7, 39h, 0Eh, 0
-                db 0Dh, 0
-                db 59, 35, 6                                    ; id=59
-                db 18h, 42h, 5, 3Ch, 6, 2Bh, 1Bh, 3Ah
-                db 0Ch, 0, 0Dh, 0, 1Fh, 0, 1Ch, 0
-                db 0FFh, 5, 0FDh, 0FEh, 0D0h, 0C8h, 0Eh, 4Eh
-                db 80h, 0C9h, 88h, 0F6h, 1Bh, 16h, 0Fh, 6
-                db 0Dh
-                db 60, 10, 7                                    ; id=60
-                db 6, 2Ch, 7, 3Bh, 0Eh, 0, 0Dh, 0
-                db 61, 18, 10                                   ; id=61
-                db 0, 43h, 2, 2Dh, 10h, 0, 0FFh, 2Fh
-                db 2Ah, 2Bh, 2Ch, 2Dh, 12h, 13h, 14h, 15h
-                db 62, 26, 3                                    ; id=62
-                db 2, 2Fh, 8, 0, 9, 0, 0FFh, 2Dh
-                db 3Ah, 33h, 2Bh, 2Dh, 35h, 3Dh, 2, 0BBh
-                db 0B4h, 0ACh, 79h, 24h, 3Ch, 0C1h, 64h, 7Ch
-                db 63, 14, 12                                   ; id=63
-                db 0, 45h, 2, 33h, 10h, 0, 0FFh, 0ABh
-                db 0Dh, 13h, 32h, 2Ch
-                db 64, 23, 13                                   ; id=64
-                db 0, 47h, 6, 35h, 10h, 0, 0FFh, 2Fh
-                db 1Ah, 1Bh, 1Ch, 1Dh, 22h, 23h, 24h, 25h
-                db 0C3h, 0Dh, 9Dh, 0A5h, 35h
-                db 65, 8, 14                                    ; id=65
-                db 4, 48h, 6, 36h, 14h, 0
-                db 66, 8, 10                                    ; id=66
-                db 4, 49h, 6, 3Bh, 14h, 0
-                db 67, 19, 11                                   ; id=67
-                db 0, 76, 2, 61, 16, 0, 255, 219
-                db 26, 27, 28, 29, 27, 98, 99, 100
-                db 101
-                db 69, 33, 5                                    ; id=69
-                db 2, 3Fh, 8, 0, 9, 0, 0FFh, 59h
-                db 0FEh, 37h, 80h, 0FAh, 0C0h, 0E1h, 28h, 39h
-                db 90h, 25h, 5, 3Eh, 51h, 7Eh, 0B7h, 0BEh
-                db 0F7h, 4, 11h, 36h, 76h, 0B6h, 0F6h
-                db 70, 29, 6                                    ; id=70
-                db 1, 47h, 8, 0, 9, 0, 0FFh, 0Fh
-                db 2Bh, 2Ch, 22h, 1Ah, 13h, 14h, 1Dh, 25h
-                db 2Fh, 6Bh, 6Ch, 62h, 5Ah, 53h, 54h, 5Dh
-                db 65h, 20h, 0Eh
-                db 71, 31, 7                                    ; id=71
-                db 5, 48h, 2, 40h, 3, 46h, 0Ah, 0
-                db 9, 0, 0FFh, 98h, 33h, 21h, 15h, 55h
-                db 1Fh, 39h, 31h, 29h, 21h, 22h, 23h, 24h
-                db 25h, 1Ah, 2Dh, 35h, 3Dh
-                db 72, 18, 2                                    ; id=72
-                db 4, 50h, 1Ah, 41h, 7, 47h, 0Eh, 0
-                db 0Fh, 0, 1Eh, 0, 0FFh, 1, 0C1h, 0C2h
-                db 73, 25, 3                                    ; id=73
-                db 18h, 53h, 5, 4Ah, 6, 42h, 1Ch, 0
-                db 0Ch, 0, 0Dh, 0, 0FFh, 38h, 22h, 9
-                db 15h, 55h, 20h, 95h, 1, 0FDh, 0FEh
-                db 74, 26, 4                                    ; id=74
-                db 1, 4Bh, 1Bh, 49h, 0Ch, 0, 9, 0
-                db 1Fh, 0, 0FFh, 9, 14h, 54h, 21h, 94h
-                db 0D4h, 1, 0D0h, 0C8h, 2Ah, 1Ch, 13h, 0Ch
-                db 75, 10, 5                                    ; id=75
-                db 0, 54h, 3, 4Ah, 0Ah, 0, 0Bh, 0
-                db 76, 22, 6                                    ; id=76
-                db 0, 56h, 1, 4Dh, 2, 43h, 8, 0
-                db 0Bh, 0, 0FFh, 75h, 2, 5, 17h, 2Fh
-                db 3Dh, 3Ah, 0A0h, 7
-                db 77, 18, 7                                    ; id=77
-                db 4, 57h, 1, 4Eh, 3, 4Ch, 0Ah, 0
-                db 0Fh, 0, 0FFh, 0ABh, 24h, 2Ah, 1Ah, 14h
-                db 78, 24, 2                                    ; id=78
-                db 3, 4Dh, 0Ah, 0, 0Dh, 0, 0FFh, 0ADh
-                db 2Bh, 24h, 1Dh, 19h, 14h, 1Bh, 6Eh, 2Dh
-                db 22h, 26h, 12h, 16h, 0Bh, 0Dh
-                db 80, 39, 4                                    ; id=80
-                db 4, 5Dh, 19h, 51h, 1Ah, 48h, 0Ch, 0
-                db 0Fh, 0, 1Dh, 0, 1Eh, 0, 0FFh, 7
-                db 0C1h, 0C2h, 0EFh, 0F7h, 1Bh, 5Bh, 9Bh, 0DBh
-                db 0C4h, 44h, 25h, 65h, 0A5h, 0E5h, 50h, 0EDh
-                db 1Bh, 4, 1Ah, 1Dh, 2Fh
-                db 81, 10, 5                                    ; id=81
-                db 4, 5Eh, 7, 50h, 0Eh, 0, 0Fh, 0
-                db 82, 8, 6                                     ; id=82
-                db 4, 61h, 0Ch, 0, 0Fh, 0
-                db 83, 20, 15                                   ; id=83
-                db 4, 62h, 6, 49h, 14h, 0, 0FFh, 1Fh
-                db 2Ah, 2Bh, 2Ch, 2Dh, 12h, 13h, 14h, 15h
-                db 0E8h, 6Ah
-                db 84, 31, 2                                    ; id=84
-                db 0, 63h, 1, 55h, 2, 4Bh, 8, 0
-                db 0Bh, 0, 0FFh, 2Fh, 2, 0Ah, 12h, 1Ah
-                db 22h, 2Ah, 32h, 3Ah, 2Fh, 5, 0Dh, 15h
-                db 1Dh, 25h, 2Dh, 35h, 3Dh
-                db 85, 10, 3                                    ; id=85
-                db 1, 56h, 3, 54h, 0Ah, 0, 9, 0
-                db 86, 34, 4                                    ; id=86
-                db 2, 4Ch, 3, 55h, 19h, 91h, 1Dh, 0
-                db 0Ah, 0, 9, 0, 0FFh, 1, 0F7h, 0EFh
-                db 2Ch, 0Dh, 14h, 16h, 1Dh, 25h, 50h, 95h
-                db 41h, 12h, 2Dh, 43h, 52h, 6Dh, 0ADh, 0EDh
-                db 87, 38, 5                                    ; id=87
-                db 19h, 58h, 1Ah, 4Dh, 0Ch, 0, 0Dh, 0
-                db 1Dh, 0, 1Eh, 0, 0FFh, 7, 0C1h, 0C2h
-                db 0C3h, 0C4h, 0F7h, 0EFh, 0E7h, 0DFh, 0C4h, 0CCh
-                db 0D4h, 0DCh, 0DDh, 0DEh, 1Ch, 0Ch, 14h, 1Ch
-                db 1Dh, 1Eh, 60h, 11h
-                db 88, 14, 6                                    ; id=88
-                db 4, 67h, 7, 57h, 0Eh, 0, 0Fh, 0
-                db 0FFh, 79h, 0FBh, 0FCh
-                db 91, 14, 3                                    ; id=91
-                db 0, 6Ah, 1, 5Ch, 8, 0, 0Bh, 0
-                db 0FFh, 49h, 0DFh, 0E7h
-                db 92, 34, 4                                    ; id=92
-                db 0, 6Bh, 5, 5Dh, 3, 5Bh, 0Ah, 0
-                db 0Bh, 0, 0FFh, 1Fh, 10h, 11h, 12h, 13h
-                db 14h, 15h, 16h, 17h, 1Fh, 28h, 29h, 2Ah
-                db 32h, 3Ah, 3Dh, 35h, 2Dh, 19h, 2Eh, 2Fh
-                db 93, 33, 5                                    ; id=93
-                db 6, 50h, 1Bh, 5Ch, 0Ch, 0, 0Dh, 0
-                db 1Fh, 0, 0FFh, 0C7h, 0C8h, 0D0h, 7Eh, 0FFh
-                db 0F7h, 0EFh, 0E7h, 0DFh, 80h, 0D7h, 1Fh, 3Fh
-                db 37h, 2Fh, 27h, 1Fh, 17h, 10h, 8
-                db 94, 31, 6                                    ; id=94
-                db 19h, 5Fh, 6, 51h, 0Ch, 0, 0Dh, 0
-                db 1Dh, 0, 0FFh, 1, 0F7h, 0EFh, 1Fh, 19h
-                db 1Ah, 1Ch, 1Dh, 0Bh, 13h, 23h, 2Bh, 60h
-                db 1Bh, 88h, 0EEh, 0C0h, 59h
-                db 95, 10, 7                                    ; id=95
-                db 5, 60h, 7, 5Eh, 0Eh, 0, 0Dh, 0
-                db 60h, 18h, 2                                  ; id=96
-                db 4, 6Ch, 5, 61h, 7, 5Fh, 0Eh, 0
-                db 0Fh, 0, 0FFh, 1Fh, 28h, 29h, 2Ah, 2Bh
-                db 2Ch, 2Dh, 2Eh, 2Fh, 0A0h, 30h
-                db 97, 14, 3                                    ; id=97
-                db 4, 6Dh, 5, 62h, 6, 52h, 7, 60h
-                db 0Eh, 0, 0Fh, 0
-                db 98, 18, 4                                    ; id=98
-                db 6, 53h, 7, 61h, 0Eh, 0, 0Dh, 0
-                db 0FFh, 33h, 14h, 1Bh, 1Dh, 24h, 90h, 1Ch
-                db 99, 20, 5                                    ; id=99
-                db 1, 64h, 2, 54h, 8, 0, 9, 0
-                db 0FFh, 9, 1, 6, 0E8h, 2, 0AAh, 22h
-                db 1Ch, 2Dh
-                db 100, 34, 6                                   ; id=100
-                db 0, 6Eh, 1, 65h, 3, 63h, 0Ah, 0
-                db 0Bh, 0, 0FFh, 1Fh, 10h, 11h, 12h, 13h
-                db 14h, 15h, 16h, 17h, 1Fh, 28h, 29h, 2Ah
-                db 32h, 3Ah, 3Dh, 35h, 2Dh, 19h, 2Eh, 2Fh
-                db 101, 20, 23                                  ; id=101
-                db 1, 66h, 3, 64h, 11h, 0, 0FFh, 2Fh
-                db 2Bh, 2Ch, 23h, 24h, 1Bh, 1Ch, 13h, 14h
-                db 80h, 6Bh
-                db 102, 12, 2                                   ; id=102
-                db 0, 70h, 1, 67h, 3, 65h, 0Ah, 0
-                db 0Bh, 0
-                db 103, 18, 3                                   ; id=103
-                db 6, 58h, 3, 66h, 0Ah, 0, 9, 0
-                db 0FFh, 71h, 0C3h, 0C4h, 0AAh, 12h, 1Ch, 2Bh
-                db 106, 15, 6                                   ; id=106
-                db 1, 6Bh, 2, 5Bh, 8, 0, 9, 0
-                db 0FFh, 90h, 78h, 0A0h, 38h
-                db 107, 33, 7                                   ; id=107
-                db 0, 75h, 2, 5Ch, 3, 6Ah, 0Ah, 0
-                db 0Bh, 0, 0FFh, 23h, 2Bh, 2Ch, 6Bh, 6Ch
-                db 79h, 0ABh, 0ACh, 2Fh, 38h, 39h, 31h, 32h
-                db 2Ah, 3Eh, 3Fh, 35h, 29h, 36h, 2Dh
-                db 108, 27, 2                                   ; id=108
-                db 6, 60h, 8, 0, 9, 0, 0FFh, 0D8h
-                db 23h, 0E0h, 33h, 2, 32h, 34h, 7Bh, 19h
-                db 72h, 74h, 78h, 2Bh, 2Ch, 39h, 3Ah, 3Ch
-                db 3Dh
-                db 109, 31, 3                                   ; id=109
-                db 0, 76h, 6, 61h, 8, 0, 0Bh, 0
-                db 0FFh, 2Fh, 6, 0Dh, 14h, 1Bh, 23h, 2Ch
-                db 35h, 3Eh, 2Fh, 2, 9, 10h, 18h, 20h
-                db 28h, 31h, 3Ah, 90h, 1Eh
-                db 110, 10, 4                                   ; id=110
-                db 1, 6Fh, 2, 64h, 8, 0, 9, 0
-                db 111, 18, 5                                   ; id=111
-                db 0, 77h, 3, 6Eh, 0Ah, 0, 0Bh, 0
-                db 0FFh, 73h, 2Bh, 24h, 22h, 1Bh, 90h, 23h
-                db 112, 29, 6                                   ; id=112
-                db 2, 66h, 8, 0, 9, 0, 0FFh, 6Fh
-                db 26h, 2Ch, 2Eh, 2Fh, 35h, 37h, 3Dh, 3Fh
-                db 0ADh, 25h, 27h, 2Dh, 34h, 36h, 3Eh, 0Ah
-                db 0AFh, 17h, 57h
-                db 117, 21, 13                                  ; id=117
-                db 0, 7Ah, 2, 6Bh, 10h, 0, 0FFh, 0Bh
-                db 12h, 13h, 2Ch, 2Dh, 2Bh, 52h, 53h, 6Ch
-                db 6Dh, 0A0h, 1Ah
-                db 118, 10, 6                                   ; id=118
-                db 0, 7Bh, 2, 6Dh, 8, 0, 0Bh, 0
-                db 119, 12, 7                                   ; id=119
-                db 0, 80h, 1, 78h, 2, 6Fh, 8, 0
-                db 0Bh, 0
-                db 120, 27, 2                                   ; id=120
-                db 3, 77h, 0Ah, 0, 9, 0, 0FFh, 0Eh
-                db 0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 4Eh, 4Fh, 20h
-                db 23h, 2Ch, 4Bh, 4Ch, 4Dh, 8Eh, 8Fh, 0E8h
-                db 0
-                db 122, 8, 4                                    ; id=122
-                db 2, 75h, 8, 0, 9, 0
-                db 123, 32, 5                                   ; id=123
-                db 1, 7Ch, 2, 76h, 8, 0, 9, 0
-                db 0FFh, 98h, 31h, 6Fh, 20h, 19h, 1Ah, 22h
-                db 23h, 2Ch, 34h, 3Bh, 0ACh, 18h, 21h, 2Bh
-                db 33h, 3Ch, 50h, 0B4h, 8, 36h
-                db 124, 10, 6                                   ; id=124
-                db 1, 7Dh, 3, 7Bh, 0Ah, 0, 9, 0
-                db 125, 22, 7                                   ; id=125
-                db 1, 7Eh, 3, 7Ch, 0Ah, 0, 9, 0
-                db 0FFh, 0AFh, 2Ah, 2Ch, 23h, 25h, 1Ah, 1Ch
-                db 13h, 15h, 0A0h, 5Ch
-                db 126, 23, 18                                  ; id=126
-                db 1, 7Fh, 3, 7Dh, 11h, 0, 0FFh, 2Fh
-                db 2Ah, 2Ch, 23h, 25h, 1Ah, 1Ch, 13h, 15h
-                db 23h, 21h, 61h, 1Eh, 5Eh
-                db 127, 10, 3                                   ; id=127
-                db 0, 82h, 3, 7Eh, 0Ah, 0, 0Bh, 0
-                db 128, 8, 4                                    ; id=128
-                db 2, 77h, 8, 0, 9, 0
-                db 129, 26, 5                                   ; id=129
-                db 0, 83h, 8, 0, 0Bh, 0, 0FFh, 0
-                db 87h, 80h, 83h, 0F0h, 0C7h, 0C8h, 11h, 0AFh
-                db 6, 0Fh, 0Dh, 16h, 4, 14h, 1Dh, 3
-                db 130, 24, 14                                  ; id=130
-                db 0, 86h, 2, 7Fh, 10h, 0, 0FFh, 0Ah
-                db 5Bh, 5Ch, 5Dh, 22h, 1Bh, 1Ch, 1Dh, 2Bh
-                db 9Ah, 9Bh, 9Ch, 9Dh, 0E8h, 1Ah
-                db 131, 22, 7                                   ; id=131
-                db 1, 84h, 2, 81h, 8, 0, 9, 0
-                db 0FFh, 0AFh, 6, 0Dh, 16h, 14h, 1Dh, 1Bh
-                db 24h, 2Dh, 0A0h, 11h
-                db 132, 8, 18                                   ; id=132
-                db 1, 85h, 3, 83h, 11h, 0
-                db 133, 22, 3                                   ; id=133
-                db 1, 86h, 3, 84h, 0Ah, 0, 9, 0
-                db 0FFh, 27h, 2Bh, 2Ch, 25h, 1Dh, 13h, 14h
-                db 22h, 1Ah, 90h, 24h
-                db 134, 17, 4                                   ; id=134
-                db 4, 87h, 2, 82h, 3, 85h, 0Ah, 0
-                db 0Fh, 0, 0FFh, 68h, 13h, 0A8h, 25h
-                db 135, 12, 5                                   ; id=135
-                db 4, 89h, 5, 88h, 6, 86h, 0Ch, 0
-                db 0Fh, 0
-                db 136, 10, 6                                   ; id=136
-                db 4, 8Ah, 7, 87h, 0Eh, 0, 0Fh, 0
-                db 137, 10, 7                                   ; id=137
-                db 5, 8Ah, 6, 87h, 0Ch, 0, 0Dh, 0
-                db 138, 10, 2                                   ; id=138
-                db 6, 88h, 7, 89h, 0Eh, 0, 0Dh, 0
-                db 139, 10, 3                                   ; id=139
-                db 4, 8Eh, 5, 8Ch, 0Ch, 0, 0Fh, 0
-                db 140, 12, 4                                   ; id=140
-                db 4, 8Fh, 5, 29h, 7, 8Bh, 0Eh, 0
-                db 0Fh, 0
-                db 141, 19, 5                                   ; id=141
-                db 4, 90h, 0Ch, 0, 0Fh, 0, 0FFh, 0C2h
-                db 14h, 5Ch, 9Bh, 0, 0D3h, 1Ah, 1Ch, 1Bh
-                db 13h
-                db 142, 25, 6                                   ; id=142
-                db 6, 8Bh, 0Ch, 0, 0Dh, 0, 0FFh, 4
-                db 30h, 70h, 0B0h, 0E8h, 38h, 0C2h, 39h, 79h
-                db 0B9h, 49h, 0F9h, 0F8h, 91h, 78h, 0B8h
-                db 143, 12, 7                                   ; id=143
-                db 5, 90h, 6, 8Ch, 7, 37h, 0Eh, 0
-                db 0Dh, 0
-                db 144, 10, 2                                   ; id=144
-                db 6, 8Dh, 7, 8Fh, 0Eh, 0, 0Dh, 0
-                db 145, 15, 3                                   ; id=145
-                db 5, 92h, 7, 56h, 0Eh, 0, 0Dh, 0
-                db 0FFh, 90h, 5Bh, 0, 1Bh
-                db 146, 28, 4                                   ; id=146
-                db 7, 91h, 0Eh, 0, 0Dh, 0, 0FFh, 0C3h
-                db 19h, 1Bh, 5Bh, 9Bh, 50h, 9Eh, 3, 2Eh
-                db 6Eh, 0AEh, 0EEh, 48h, 0DBh, 1Bh, 1Dh, 26h
-                db 1Fh, 16h
-                db 147, 23, 5                                   ; id=147
-                db 19h, 94h, 6, 0, 0Ch, 0, 0Dh, 0
-                db 1Dh, 0, 0FFh, 60h, 2Ch, 1, 0EFh, 0F7h
-                db 0F0h, 0A4h, 19h, 37h, 2Fh
-                db 148, 10, 6                                   ; id=148
-                db 5, 95h, 7, 93h, 0Eh, 0, 0Dh, 0
-                db 149, 29, 7                                   ; id=149
-                db 6, 2, 1Bh, 94h, 0Ch, 0, 0Dh, 0
-                db 1Fh, 0, 0FFh, 1Eh, 3Ah, 39h, 31h, 30h
-                db 28h, 8, 10h, 0C2h, 0C8h, 0D0h, 0E8h, 60h
-                db 3Bh, 50h, 0F8h
-background_type_tbl:dw tree_arch_N                              ; DATA XREF: RAM:6991o
+room_size_tbl:  .db 64, 64, 128                                 ; DATA XREF: RAM:C969o
+                .db 32, 64, 128
+                .db 64, 32, 128
+location_tbl:   .db 0, 30, 7                                    ; DATA XREF: RAM:C93Fo
+                                                                ; id=0
+                .db 0x18, 0x93, 0x1C, 0, 0xC, 0, 0xD, 0
+                .db 0xFF, 1, 0xFD, 0xFE, 0xBD, 0x5A, 0x75, 0xB5
+                .db 0xF5, 0x35, 0x1A, 0x1D, 0x2E, 0x25, 0x1E, 0x1C
+                .db 0x15, 0x33, 0x88, 0x9D
+                .db 1, 18, 2                                    ; id=1
+                .db 0, 3, 5, 2, 8, 0, 0xB, 0
+                .db 0xFF, 0x2D, 0x2F, 0x26, 0x1E, 0x2D, 0x24, 0x23
+                .db 2, 40, 3                                    ; id=2
+                .db 7, 1, 0x18, 0x95, 0x1C, 0, 0xE, 0
+                .db 0xD, 0, 0xFF, 0x42, 0x2E, 0x16, 0x39, 0x46
+                .db 0x79, 0xB9, 0xF9, 0x56, 0x96, 0x6E, 0xAE, 0x80
+                .db 0x91, 0x88, 0x99, 0x60, 0x38, 1, 0xFD, 0xFE
+                .db 0x2C, 0x19, 0x1B, 9, 0xB, 0x26
+                .db 3, 17, 4                                    ; id=3
+                .db 0, 7, 2, 1, 8, 0, 0xB, 0
+                .db 0xFF, 0x22, 0x1A, 0x1B, 0x1C, 0x90, 0xE
+                .db 4, 25, 5                                    ; id=4
+                .db 0, 9, 8, 0, 0xB, 0, 0xFF, 0x2E
+                .db 0x2A, 0x22, 0x1A, 0x12, 0x1E, 0x27, 0x17, 2
+                .db 0x1F, 0x5F, 0xDF, 0xC0, 0x6A, 0x80, 0x9F
+                .db 5, 21, 6                                    ; id=5
+                .db 1, 6, 8, 0, 9, 0, 0xFF, 0xA
+                .db 0x1A, 0x5A, 0x9A, 0x2B, 0x22, 0x1B, 0x12, 0x19
+                .db 0x21, 0x2D, 0x6D
+                .db 6, 12, 23                                   ; id=6
+                .db 1, 7, 3, 5, 0x11, 0, 0xFF, 0xF1
+                .db 0x14, 0x2B
+                .db 7, 31, 2                                    ; id=7
+                .db 1, 8, 2, 3, 3, 6, 0xA, 0
+                .db 9, 0, 0xFF, 0x1F, 5, 0xE, 0x17, 0x2F
+                .db 0x36, 0x3D, 0x3A, 0x31, 0x1F, 0x28, 0x10, 9
+                .db 2, 0x23, 0x24, 0x1B, 0x1C
+                .db 8, 15, 4                                    ; id=8
+                .db 0, 0x14, 3, 7, 0xA, 0, 0xB, 0
+                .db 0xFF, 0x72, 0xEA, 0xD2, 0xED
+                .db 9, 24, 5                                    ; id=9
+                .db 0, 0x15, 1, 0xA, 2, 4, 8, 0
+                .db 0xB, 0, 0xFF, 0x27, 0x2B, 0x2C, 0x25, 0x1D
+                .db 0x13, 0x14, 0x22, 0x1A, 0x90, 0x24
+                .db 10, 8, 21                                   ; id=10
+                .db 1, 0xB, 3, 9, 0x11, 0
+                .db 11, 29, 22                                  ; id=11
+                .db 1, 0xC, 3, 0xA, 0x11, 0, 0xFF, 0xF
+                .db 0x14, 0x54, 0x94, 0xD4, 0x1C, 0x5C, 0x9C, 0xDC
+                .db 0xB, 0x2C, 0x6C, 0xAC, 0xEC, 0x22, 0x24, 0x64
+                .db 0xA4, 0x78, 0xE4
+                .db 12, 34, 7                                   ; id=12
+                .db 0, 0x16, 1, 0xD, 3, 0xB, 0xA, 0
+                .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
+                .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
+                .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
+                .db 13, 28, 18                                  ; id=13
+                .db 1, 0xE, 3, 0xC, 0x11, 0, 0xFF, 0x1F
+                .db 0x22, 0x23, 0x24, 0x25, 0x1A, 0x1B, 0x1C, 0x1D
+                .db 0x25, 0x12, 0x14, 0x15, 0x2A, 0x2B, 0x2D, 0x92
+                .db 0x2C, 0x13
+                .db 14, 18, 3                                   ; id=14
+                .db 0, 0x17, 3, 0xD, 0xA, 0, 0xB, 0
+                .db 0xFF, 0x73, 0x2B, 0x24, 0x22, 0x1B, 0x90, 0x23
+                .db 15, 32, 4                                   ; id=15
+                .db 4, 0x18, 0xC, 0, 0xF, 0, 0xFF, 0xBA
+                .db 3, 0x43, 0x83, 0x1F, 0x20, 0x21, 0x22, 0x23
+                .db 0x1B, 0x13, 0xB, 4, 0x90, 0x19, 0x80, 0xC5
+                .db 0x50, 0x9D, 0xC0, 0x2D, 0x18, 5
+                .db 16, 21, 5                                   ; id=16
+                .db 5, 0x11, 0xC, 0, 0xD, 0, 0xFF, 0
+                .db 0xD8, 0xC0, 0x88, 0x1C, 0x10, 8, 0, 0x18
+                .db 0x19, 0x38, 0x24
+                .db 17, 10, 6                                   ; id=17
+                .db 7, 0x10, 0, 0x1A, 0xE, 0, 0xB, 0
+                .db 18, 26, 7                                   ; id=18
+                .db 1, 0x13, 8, 0, 9, 0, 0xFF, 0xB
+                .db 9, 0x49, 0x89, 0xC9, 0x21, 0x2D, 0x4C, 0x1F
+                .db 1, 2, 8, 0x11, 0x12, 0xA, 0xB, 0xC
+                .db 19, 19, 2                                   ; id=19
+                .db 0, 0x1C, 1, 0x14, 3, 0x12, 0xA, 0
+                .db 0xB, 0, 0xFF, 0x38, 0x1B, 0x60, 2, 0x70
+                .db 0xD
+                .db 20, 17, 3                                   ; id=20
+                .db 1, 0x15, 2, 8, 3, 0x13, 0xA, 0
+                .db 9, 0, 0xFF, 0x28, 0x1C, 0xA0, 0x9A
+                .db 21, 26, 4                                   ; id=21
+                .db 2, 9, 3, 0x14, 0xA, 0, 9, 0
+                .db 0xFF, 0x2F, 0x39, 0x28, 0, 0x11, 0x22, 0x33
+                .db 0xB, 0x1C, 0x2C, 0x2D, 0x3E, 5, 0x16, 0x27
+                .db 22, 14, 5                                   ; id=22
+                .db 2, 0xC, 0, 0x1D, 8, 0, 0xB, 0
+                .db 0xFF, 0x21, 0xC3, 0xC4
+                .db 23, 10, 6                                   ; id=23
+                .db 2, 0xE, 0, 0x1F, 8, 0, 0xB, 0
+                .db 24, 18, 7                                   ; id=24
+                .db 5, 0x19, 6, 0xF, 0xC, 0, 0xD, 0
+                .db 0xFF, 0x33, 0x14, 0x1B, 0x1D, 0x24, 0x90, 0x1C
+                .db 25, 10, 2                                   ; id=25
+                .db 0, 0x22, 7, 0x18, 0xE, 0, 0xB, 0
+                .db 26, 14, 11                                  ; id=26
+                .db 0, 0x23, 2, 0x11, 0x10, 0, 0xFF, 0x90
+                .db 0x54, 9, 0x14, 0x2C
+                .db 27, 21, 4                                   ; id=27
+                .db 0, 0x24, 8, 0, 0xB, 0, 0xFF, 0xC0
+                .db 0x47, 1, 0xD7, 0xD8, 0x80, 0xDF, 0x29, 5
+                .db 6, 0x78, 7
+                .db 28, 18, 13                                  ; id=28
+                .db 0, 0x28, 2, 0x13, 0x10, 0, 0xFF, 0x2F
+                .db 0x2A, 0x2B, 0x2C, 0x2D, 0x12, 0x13, 0x14, 0x15
+                .db 29, 25, 6                                   ; id=29
+                .db 2, 0x16, 8, 0, 9, 0, 0xFF, 0x98
+                .db 0x31, 0x2E, 0x20, 0x21, 0x22, 0x23, 0x3B, 0x33
+                .db 0x2B, 0x20, 0x1C, 0xE8, 0x18, 0xF0, 0x3C
+                .db 30, 8, 7                                    ; id=30
+                .db 1, 0x1F, 8, 0, 9, 0
+                .db 31, 31, 2                                   ; id=31
+                .db 1, 0x20, 2, 0x17, 3, 0x1E, 0xA, 0
+                .db 9, 0, 0xFF, 7, 2, 0xA, 0x12, 0x1B
+                .db 0x24, 0x2D, 0x2E, 0x2F, 0x1F, 0x42, 0x4A, 0x52
+                .db 0x5B, 0x64, 0x6D, 0x6E, 0x6F
+                .db 32, 12, 3                                   ; id=32
+                .db 0, 0x2E, 1, 0x21, 3, 0x1F, 0xA, 0
+                .db 0xB, 0
+                .db 33, 10, 4                                   ; id=33
+                .db 0, 0x2F, 3, 0x20, 0xA, 0, 0xB, 0
+                .db 34, 18, 5                                   ; id=34
+                .db 0, 0x30, 1, 0x23, 2, 0x19, 8, 0
+                .db 0xB, 0, 0xFF, 0x19, 1, 6, 0xE8, 2
+                .db 35, 12, 6                                   ; id=35
+                .db 1, 0x24, 2, 0x1A, 3, 0x22, 0xA, 0
+                .db 9, 0
+                .db 36, 14, 7                                   ; id=36
+                .db 2, 0x1B, 3, 0x23, 0xA, 0, 9, 0
+                .db 0xFF, 0x29, 0xB, 0xC
+                .db 37, 28, 2                                   ; id=37
+                .db 4, 0x35, 0xC, 0, 0xF, 0, 0xFF, 2
+                .db 0, 0x40, 0x80, 0xCA, 8, 0x10, 0x18, 0xDA
+                .db 1, 2, 3, 0x1D, 9, 0xA, 0xB, 0x11
+                .db 0x12, 0x19
+                .db 38, 28, 3                                   ; id=38
+                .db 4, 0x36, 5, 0x27, 0xC, 0, 0xF, 0
+                .db 0xFF, 4, 0x7A, 0x73, 0x74, 0x75, 0xBE, 0x1F
+                .db 0x3D, 0x3E, 0x36, 0x2E, 0xBA, 0xB3, 0xB4, 0xB5
+                .db 0x80, 0x7F
+                .db 39, 10, 4                                   ; id=39
+                .db 4, 0x37, 7, 0x26, 0xE, 0, 0xF, 0
+                .db 40, 8, 13                                   ; id=40
+                .db 4, 0x38, 2, 0x1C, 0x10, 0
+                .db 41, 30, 3                                   ; id=41
+                .db 4, 0x39, 0x1B, 0x8C, 0x1F, 0, 0xC, 0
+                .db 0xF, 0, 0xFF, 6, 0xD0, 0xC8, 0x12, 0x52
+                .db 0x2A, 0x6A, 0xAA, 0x38, 0x25, 0x70, 0x92, 0x1B
+                .db 0x1A, 0x13, 0xA, 0x11
+                .db 42, 25, 7                                   ; id=42
+                .db 4, 0x3A, 0xC, 0, 0xF, 0, 0xFF, 7
+                .db 0x1A, 0x5A, 0x9A, 0xDA, 0x1C, 0x5C, 0x9C, 0xDC
+                .db 0, 0xDB, 0x59, 0x1B, 0x5B, 0x78, 0x9B
+                .db 43, 10, 2                                   ; id=43
+                .db 4, 0x3B, 5, 0x2C, 0xC, 0, 0xF, 0
+                .db 44, 29, 3                                   ; id=44
+                .db 4, 0x3C, 7, 0x2B, 0xE, 0, 0xF, 0
+                .db 0xFF, 0xF, 0x38, 0x31, 0x2A, 0x23, 0x1C, 0x15
+                .db 0xE, 7, 0x1F, 0x78, 0x71, 0x6A, 0x63, 0x5C
+                .db 0x55, 0x4E, 0x47
+                .db 45, 10, 4                                   ; id=45
+                .db 0, 0x3D, 1, 0x2E, 8, 0, 0xB, 0
+                .db 46, 30, 5                                   ; id=46
+                .db 2, 0x20, 3, 0x2D, 0xA, 0, 9, 0
+                .db 0xFF, 0xE, 0x28, 0x29, 0x22, 0x1A, 0x11, 0x10
+                .db 0x19, 0x80, 0xA4, 0x88, 5, 0x2D, 0x68, 0x69
+                .db 0x62, 0x5A, 0x51, 0x50
+                .db 47, 21, 14                                  ; id=47
+                .db 0, 0x3E, 2, 0x21, 0x10, 0, 0xFF, 0x1B
+                .db 0x22, 0x23, 0x24, 0x25, 0xC3, 0x62, 0x63, 0x64
+                .db 0x65, 0xE8, 0xA2
+                .db 48, 10, 7                                   ; id=48
+                .db 1, 0x31, 2, 0x22, 8, 0, 9, 0
+                .db 49, 12, 18                                  ; id=49
+                .db 1, 0x32, 3, 0x30, 0x11, 0, 0xFF, 0xF1
+                .db 0x14, 0x2C
+                .db 50, 8, 19                                   ; id=50
+                .db 1, 0x33, 3, 0x31, 0x11, 0
+                .db 51, 34, 4                                   ; id=51
+                .db 0, 0x3F, 1, 0x34, 3, 0x32, 0xA, 0
+                .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
+                .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
+                .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
+                .db 52, 16, 21                                  ; id=52
+                .db 5, 0x35, 3, 0x33, 0x11, 0, 0xFF, 0x2B
+                .db 0x12, 0x1A, 0x2D, 0x25, 0xA0, 0x13
+                .db 53, 35, 6                                   ; id=53
+                .db 4, 64, 5, 54, 6, 37, 7, 52
+                .db 14, 0, 15, 0, 255, 31, 56, 49
+                .db 42, 35, 28, 21, 14, 7, 31, 0
+                .db 9, 18, 27, 36, 45, 54, 63, 144
+                .db 92
+                .db 54, 29, 7                                   ; id=54
+                .db 0x18, 0x41, 6, 0x26, 7, 0x35, 0xE, 0
+                .db 0xD, 0, 0x1C, 0, 0xFF, 1, 0xFD, 0xFE
+                .db 0x60, 0x1D, 0xC1, 0x5D, 0xF5, 0x1C, 0x25, 0x1E
+                .db 0x15, 0x1C, 0x35
+                .db 55, 31, 2                                   ; id=55
+                .db 6, 0x27, 0x19, 0x8F, 0x1D, 0, 0xC, 0
+                .db 0xD, 0, 0xFF, 3, 0x29, 0xAA, 0xF7, 0xEF
+                .db 0x1D, 0x2C, 0x2D, 0x2E, 0x2F, 0x2A, 0x2B, 0xC0
+                .db 0xAB, 0x58, 0xEB, 0x78, 0x6C
+                .db 56, 23, 6                                   ; id=56
+                .db 0x19, 0x39, 6, 0x28, 0xC, 0, 0xD, 0
+                .db 0x1D, 0, 0xFF, 2, 0xF7, 0xEF, 0x28, 0x80
+                .db 0x30, 0x58, 0x68, 0x18, 0x37
+                .db 57, 12, 4                                   ; id=57
+                .db 5, 0x3A, 6, 0x29, 7, 0x38, 0xE, 0
+                .db 0xD, 0
+                .db 58, 12, 5                                   ; id=58
+                .db 5, 0x3B, 6, 0x2A, 7, 0x39, 0xE, 0
+                .db 0xD, 0
+                .db 59, 35, 6                                   ; id=59
+                .db 0x18, 0x42, 5, 0x3C, 6, 0x2B, 0x1B, 0x3A
+                .db 0xC, 0, 0xD, 0, 0x1F, 0, 0x1C, 0
+                .db 0xFF, 5, 0xFD, 0xFE, 0xD0, 0xC8, 0xE, 0x4E
+                .db 0x80, 0xC9, 0x88, 0xF6, 0x1B, 0x16, 0xF, 6
+                .db 0xD
+                .db 60, 10, 7                                   ; id=60
+                .db 6, 0x2C, 7, 0x3B, 0xE, 0, 0xD, 0
+                .db 61, 18, 10                                  ; id=61
+                .db 0, 0x43, 2, 0x2D, 0x10, 0, 0xFF, 0x2F
+                .db 0x2A, 0x2B, 0x2C, 0x2D, 0x12, 0x13, 0x14, 0x15
+                .db 62, 26, 3                                   ; id=62
+                .db 2, 0x2F, 8, 0, 9, 0, 0xFF, 0x2D
+                .db 0x3A, 0x33, 0x2B, 0x2D, 0x35, 0x3D, 2, 0xBB
+                .db 0xB4, 0xAC, 0x79, 0x24, 0x3C, 0xC1, 0x64, 0x7C
+                .db 63, 14, 12                                  ; id=63
+                .db 0, 0x45, 2, 0x33, 0x10, 0, 0xFF, 0xAB
+                .db 0xD, 0x13, 0x32, 0x2C
+                .db 64, 23, 13                                  ; id=64
+                .db 0, 0x47, 6, 0x35, 0x10, 0, 0xFF, 0x2F
+                .db 0x1A, 0x1B, 0x1C, 0x1D, 0x22, 0x23, 0x24, 0x25
+                .db 0xC3, 0xD, 0x9D, 0xA5, 0x35
+                .db 65, 8, 14                                   ; id=65
+                .db 4, 0x48, 6, 0x36, 0x14, 0
+                .db 66, 8, 10                                   ; id=66
+                .db 4, 0x49, 6, 0x3B, 0x14, 0
+                .db 67, 19, 11                                  ; id=67
+                .db 0, 76, 2, 61, 16, 0, 255, 219
+                .db 26, 27, 28, 29, 27, 98, 99, 100
+                .db 101
+                .db 69, 33, 5                                   ; id=69
+                .db 2, 0x3F, 8, 0, 9, 0, 0xFF, 0x59
+                .db 0xFE, 0x37, 0x80, 0xFA, 0xC0, 0xE1, 0x28, 0x39
+                .db 0x90, 0x25, 5, 0x3E, 0x51, 0x7E, 0xB7, 0xBE
+                .db 0xF7, 4, 0x11, 0x36, 0x76, 0xB6, 0xF6
+                .db 70, 29, 6                                   ; id=70
+                .db 1, 0x47, 8, 0, 9, 0, 0xFF, 0xF
+                .db 0x2B, 0x2C, 0x22, 0x1A, 0x13, 0x14, 0x1D, 0x25
+                .db 0x2F, 0x6B, 0x6C, 0x62, 0x5A, 0x53, 0x54, 0x5D
+                .db 0x65, 0x20, 0xE
+                .db 71, 31, 7                                   ; id=71
+                .db 5, 0x48, 2, 0x40, 3, 0x46, 0xA, 0
+                .db 9, 0, 0xFF, 0x98, 0x33, 0x21, 0x15, 0x55
+                .db 0x1F, 0x39, 0x31, 0x29, 0x21, 0x22, 0x23, 0x24
+                .db 0x25, 0x1A, 0x2D, 0x35, 0x3D
+                .db 72, 18, 2                                   ; id=72
+                .db 4, 0x50, 0x1A, 0x41, 7, 0x47, 0xE, 0
+                .db 0xF, 0, 0x1E, 0, 0xFF, 1, 0xC1, 0xC2
+                .db 73, 25, 3                                   ; id=73
+                .db 0x18, 0x53, 5, 0x4A, 6, 0x42, 0x1C, 0
+                .db 0xC, 0, 0xD, 0, 0xFF, 0x38, 0x22, 9
+                .db 0x15, 0x55, 0x20, 0x95, 1, 0xFD, 0xFE
+                .db 74, 26, 4                                   ; id=74
+                .db 1, 0x4B, 0x1B, 0x49, 0xC, 0, 9, 0
+                .db 0x1F, 0, 0xFF, 9, 0x14, 0x54, 0x21, 0x94
+                .db 0xD4, 1, 0xD0, 0xC8, 0x2A, 0x1C, 0x13, 0xC
+                .db 75, 10, 5                                   ; id=75
+                .db 0, 0x54, 3, 0x4A, 0xA, 0, 0xB, 0
+                .db 76, 22, 6                                   ; id=76
+                .db 0, 0x56, 1, 0x4D, 2, 0x43, 8, 0
+                .db 0xB, 0, 0xFF, 0x75, 2, 5, 0x17, 0x2F
+                .db 0x3D, 0x3A, 0xA0, 7
+                .db 77, 18, 7                                   ; id=77
+                .db 4, 0x57, 1, 0x4E, 3, 0x4C, 0xA, 0
+                .db 0xF, 0, 0xFF, 0xAB, 0x24, 0x2A, 0x1A, 0x14
+                .db 78, 24, 2                                   ; id=78
+                .db 3, 0x4D, 0xA, 0, 0xD, 0, 0xFF, 0xAD
+                .db 0x2B, 0x24, 0x1D, 0x19, 0x14, 0x1B, 0x6E, 0x2D
+                .db 0x22, 0x26, 0x12, 0x16, 0xB, 0xD
+                .db 80, 39, 4                                   ; id=80
+                .db 4, 0x5D, 0x19, 0x51, 0x1A, 0x48, 0xC, 0
+                .db 0xF, 0, 0x1D, 0, 0x1E, 0, 0xFF, 7
+                .db 0xC1, 0xC2, 0xEF, 0xF7, 0x1B, 0x5B, 0x9B, 0xDB
+                .db 0xC4, 0x44, 0x25, 0x65, 0xA5, 0xE5, 0x50, 0xED
+                .db 0x1B, 4, 0x1A, 0x1D, 0x2F
+                .db 81, 10, 5                                   ; id=81
+                .db 4, 0x5E, 7, 0x50, 0xE, 0, 0xF, 0
+                .db 82, 8, 6                                    ; id=82
+                .db 4, 0x61, 0xC, 0, 0xF, 0
+                .db 83, 20, 15                                  ; id=83
+                .db 4, 0x62, 6, 0x49, 0x14, 0, 0xFF, 0x1F
+                .db 0x2A, 0x2B, 0x2C, 0x2D, 0x12, 0x13, 0x14, 0x15
+                .db 0xE8, 0x6A
+                .db 84, 31, 2                                   ; id=84
+                .db 0, 0x63, 1, 0x55, 2, 0x4B, 8, 0
+                .db 0xB, 0, 0xFF, 0x2F, 2, 0xA, 0x12, 0x1A
+                .db 0x22, 0x2A, 0x32, 0x3A, 0x2F, 5, 0xD, 0x15
+                .db 0x1D, 0x25, 0x2D, 0x35, 0x3D
+                .db 85, 10, 3                                   ; id=85
+                .db 1, 0x56, 3, 0x54, 0xA, 0, 9, 0
+                .db 86, 34, 4                                   ; id=86
+                .db 2, 0x4C, 3, 0x55, 0x19, 0x91, 0x1D, 0
+                .db 0xA, 0, 9, 0, 0xFF, 1, 0xF7, 0xEF
+                .db 0x2C, 0xD, 0x14, 0x16, 0x1D, 0x25, 0x50, 0x95
+                .db 0x41, 0x12, 0x2D, 0x43, 0x52, 0x6D, 0xAD, 0xED
+                .db 87, 38, 5                                   ; id=87
+                .db 0x19, 0x58, 0x1A, 0x4D, 0xC, 0, 0xD, 0
+                .db 0x1D, 0, 0x1E, 0, 0xFF, 7, 0xC1, 0xC2
+                .db 0xC3, 0xC4, 0xF7, 0xEF, 0xE7, 0xDF, 0xC4, 0xCC
+                .db 0xD4, 0xDC, 0xDD, 0xDE, 0x1C, 0xC, 0x14, 0x1C
+                .db 0x1D, 0x1E, 0x60, 0x11
+                .db 88, 14, 6                                   ; id=88
+                .db 4, 0x67, 7, 0x57, 0xE, 0, 0xF, 0
+                .db 0xFF, 0x79, 0xFB, 0xFC
+                .db 91, 14, 3                                   ; id=91
+                .db 0, 0x6A, 1, 0x5C, 8, 0, 0xB, 0
+                .db 0xFF, 0x49, 0xDF, 0xE7
+                .db 92, 34, 4                                   ; id=92
+                .db 0, 0x6B, 5, 0x5D, 3, 0x5B, 0xA, 0
+                .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
+                .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
+                .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
+                .db 93, 33, 5                                   ; id=93
+                .db 6, 0x50, 0x1B, 0x5C, 0xC, 0, 0xD, 0
+                .db 0x1F, 0, 0xFF, 0xC7, 0xC8, 0xD0, 0x7E, 0xFF
+                .db 0xF7, 0xEF, 0xE7, 0xDF, 0x80, 0xD7, 0x1F, 0x3F
+                .db 0x37, 0x2F, 0x27, 0x1F, 0x17, 0x10, 8
+                .db 94, 31, 6                                   ; id=94
+                .db 0x19, 0x5F, 6, 0x51, 0xC, 0, 0xD, 0
+                .db 0x1D, 0, 0xFF, 1, 0xF7, 0xEF, 0x1F, 0x19
+                .db 0x1A, 0x1C, 0x1D, 0xB, 0x13, 0x23, 0x2B, 0x60
+                .db 0x1B, 0x88, 0xEE, 0xC0, 0x59
+                .db 95, 10, 7                                   ; id=95
+                .db 5, 0x60, 7, 0x5E, 0xE, 0, 0xD, 0
+                .db 0x60, 0x18, 2                               ; id=96
+                .db 4, 0x6C, 5, 0x61, 7, 0x5F, 0xE, 0
+                .db 0xF, 0, 0xFF, 0x1F, 0x28, 0x29, 0x2A, 0x2B
+                .db 0x2C, 0x2D, 0x2E, 0x2F, 0xA0, 0x30
+                .db 97, 14, 3                                   ; id=97
+                .db 4, 0x6D, 5, 0x62, 6, 0x52, 7, 0x60
+                .db 0xE, 0, 0xF, 0
+                .db 98, 18, 4                                   ; id=98
+                .db 6, 0x53, 7, 0x61, 0xE, 0, 0xD, 0
+                .db 0xFF, 0x33, 0x14, 0x1B, 0x1D, 0x24, 0x90, 0x1C
+                .db 99, 20, 5                                   ; id=99
+                .db 1, 0x64, 2, 0x54, 8, 0, 9, 0
+                .db 0xFF, 9, 1, 6, 0xE8, 2, 0xAA, 0x22
+                .db 0x1C, 0x2D
+                .db 100, 34, 6                                  ; id=100
+                .db 0, 0x6E, 1, 0x65, 3, 0x63, 0xA, 0
+                .db 0xB, 0, 0xFF, 0x1F, 0x10, 0x11, 0x12, 0x13
+                .db 0x14, 0x15, 0x16, 0x17, 0x1F, 0x28, 0x29, 0x2A
+                .db 0x32, 0x3A, 0x3D, 0x35, 0x2D, 0x19, 0x2E, 0x2F
+                .db 101, 20, 23                                 ; id=101
+                .db 1, 0x66, 3, 0x64, 0x11, 0, 0xFF, 0x2F
+                .db 0x2B, 0x2C, 0x23, 0x24, 0x1B, 0x1C, 0x13, 0x14
+                .db 0x80, 0x6B
+                .db 102, 12, 2                                  ; id=102
+                .db 0, 0x70, 1, 0x67, 3, 0x65, 0xA, 0
+                .db 0xB, 0
+                .db 103, 18, 3                                  ; id=103
+                .db 6, 0x58, 3, 0x66, 0xA, 0, 9, 0
+                .db 0xFF, 0x71, 0xC3, 0xC4, 0xAA, 0x12, 0x1C, 0x2B
+                .db 106, 15, 6                                  ; id=106
+                .db 1, 0x6B, 2, 0x5B, 8, 0, 9, 0
+                .db 0xFF, 0x90, 0x78, 0xA0, 0x38
+                .db 107, 33, 7                                  ; id=107
+                .db 0, 0x75, 2, 0x5C, 3, 0x6A, 0xA, 0
+                .db 0xB, 0, 0xFF, 0x23, 0x2B, 0x2C, 0x6B, 0x6C
+                .db 0x79, 0xAB, 0xAC, 0x2F, 0x38, 0x39, 0x31, 0x32
+                .db 0x2A, 0x3E, 0x3F, 0x35, 0x29, 0x36, 0x2D
+                .db 108, 27, 2                                  ; id=108
+                .db 6, 0x60, 8, 0, 9, 0, 0xFF, 0xD8
+                .db 0x23, 0xE0, 0x33, 2, 0x32, 0x34, 0x7B, 0x19
+                .db 0x72, 0x74, 0x78, 0x2B, 0x2C, 0x39, 0x3A, 0x3C
+                .db 0x3D
+                .db 109, 31, 3                                  ; id=109
+                .db 0, 0x76, 6, 0x61, 8, 0, 0xB, 0
+                .db 0xFF, 0x2F, 6, 0xD, 0x14, 0x1B, 0x23, 0x2C
+                .db 0x35, 0x3E, 0x2F, 2, 9, 0x10, 0x18, 0x20
+                .db 0x28, 0x31, 0x3A, 0x90, 0x1E
+                .db 110, 10, 4                                  ; id=110
+                .db 1, 0x6F, 2, 0x64, 8, 0, 9, 0
+                .db 111, 18, 5                                  ; id=111
+                .db 0, 0x77, 3, 0x6E, 0xA, 0, 0xB, 0
+                .db 0xFF, 0x73, 0x2B, 0x24, 0x22, 0x1B, 0x90, 0x23
+                .db 112, 29, 6                                  ; id=112
+                .db 2, 0x66, 8, 0, 9, 0, 0xFF, 0x6F
+                .db 0x26, 0x2C, 0x2E, 0x2F, 0x35, 0x37, 0x3D, 0x3F
+                .db 0xAD, 0x25, 0x27, 0x2D, 0x34, 0x36, 0x3E, 0xA
+                .db 0xAF, 0x17, 0x57
+                .db 117, 21, 13                                 ; id=117
+                .db 0, 0x7A, 2, 0x6B, 0x10, 0, 0xFF, 0xB
+                .db 0x12, 0x13, 0x2C, 0x2D, 0x2B, 0x52, 0x53, 0x6C
+                .db 0x6D, 0xA0, 0x1A
+                .db 118, 10, 6                                  ; id=118
+                .db 0, 0x7B, 2, 0x6D, 8, 0, 0xB, 0
+                .db 119, 12, 7                                  ; id=119
+                .db 0, 0x80, 1, 0x78, 2, 0x6F, 8, 0
+                .db 0xB, 0
+                .db 120, 27, 2                                  ; id=120
+                .db 3, 0x77, 0xA, 0, 9, 0, 0xFF, 0xE
+                .db 0xB, 0xC, 0xD, 0xE, 0xF, 0x4E, 0x4F, 0x20
+                .db 0x23, 0x2C, 0x4B, 0x4C, 0x4D, 0x8E, 0x8F, 0xE8
+                .db 0
+                .db 122, 8, 4                                   ; id=122
+                .db 2, 0x75, 8, 0, 9, 0
+                .db 123, 32, 5                                  ; id=123
+                .db 1, 0x7C, 2, 0x76, 8, 0, 9, 0
+                .db 0xFF, 0x98, 0x31, 0x6F, 0x20, 0x19, 0x1A, 0x22
+                .db 0x23, 0x2C, 0x34, 0x3B, 0xAC, 0x18, 0x21, 0x2B
+                .db 0x33, 0x3C, 0x50, 0xB4, 8, 0x36
+                .db 124, 10, 6                                  ; id=124
+                .db 1, 0x7D, 3, 0x7B, 0xA, 0, 9, 0
+                .db 125, 22, 7                                  ; id=125
+                .db 1, 0x7E, 3, 0x7C, 0xA, 0, 9, 0
+                .db 0xFF, 0xAF, 0x2A, 0x2C, 0x23, 0x25, 0x1A, 0x1C
+                .db 0x13, 0x15, 0xA0, 0x5C
+                .db 126, 23, 18                                 ; id=126
+                .db 1, 0x7F, 3, 0x7D, 0x11, 0, 0xFF, 0x2F
+                .db 0x2A, 0x2C, 0x23, 0x25, 0x1A, 0x1C, 0x13, 0x15
+                .db 0x23, 0x21, 0x61, 0x1E, 0x5E
+                .db 127, 10, 3                                  ; id=127
+                .db 0, 0x82, 3, 0x7E, 0xA, 0, 0xB, 0
+                .db 128, 8, 4                                   ; id=128
+                .db 2, 0x77, 8, 0, 9, 0
+                .db 129, 26, 5                                  ; id=129
+                .db 0, 0x83, 8, 0, 0xB, 0, 0xFF, 0
+                .db 0x87, 0x80, 0x83, 0xF0, 0xC7, 0xC8, 0x11, 0xAF
+                .db 6, 0xF, 0xD, 0x16, 4, 0x14, 0x1D, 3
+                .db 130, 24, 14                                 ; id=130
+                .db 0, 0x86, 2, 0x7F, 0x10, 0, 0xFF, 0xA
+                .db 0x5B, 0x5C, 0x5D, 0x22, 0x1B, 0x1C, 0x1D, 0x2B
+                .db 0x9A, 0x9B, 0x9C, 0x9D, 0xE8, 0x1A
+                .db 131, 22, 7                                  ; id=131
+                .db 1, 0x84, 2, 0x81, 8, 0, 9, 0
+                .db 0xFF, 0xAF, 6, 0xD, 0x16, 0x14, 0x1D, 0x1B
+                .db 0x24, 0x2D, 0xA0, 0x11
+                .db 132, 8, 18                                  ; id=132
+                .db 1, 0x85, 3, 0x83, 0x11, 0
+                .db 133, 22, 3                                  ; id=133
+                .db 1, 0x86, 3, 0x84, 0xA, 0, 9, 0
+                .db 0xFF, 0x27, 0x2B, 0x2C, 0x25, 0x1D, 0x13, 0x14
+                .db 0x22, 0x1A, 0x90, 0x24
+                .db 134, 17, 4                                  ; id=134
+                .db 4, 0x87, 2, 0x82, 3, 0x85, 0xA, 0
+                .db 0xF, 0, 0xFF, 0x68, 0x13, 0xA8, 0x25
+                .db 135, 12, 5                                  ; id=135
+                .db 4, 0x89, 5, 0x88, 6, 0x86, 0xC, 0
+                .db 0xF, 0
+                .db 136, 10, 6                                  ; id=136
+                .db 4, 0x8A, 7, 0x87, 0xE, 0, 0xF, 0
+                .db 137, 10, 7                                  ; id=137
+                .db 5, 0x8A, 6, 0x87, 0xC, 0, 0xD, 0
+                .db 138, 10, 2                                  ; id=138
+                .db 6, 0x88, 7, 0x89, 0xE, 0, 0xD, 0
+                .db 139, 10, 3                                  ; id=139
+                .db 4, 0x8E, 5, 0x8C, 0xC, 0, 0xF, 0
+                .db 140, 12, 4                                  ; id=140
+                .db 4, 0x8F, 5, 0x29, 7, 0x8B, 0xE, 0
+                .db 0xF, 0
+                .db 141, 19, 5                                  ; id=141
+                .db 4, 0x90, 0xC, 0, 0xF, 0, 0xFF, 0xC2
+                .db 0x14, 0x5C, 0x9B, 0, 0xD3, 0x1A, 0x1C, 0x1B
+                .db 0x13
+                .db 142, 25, 6                                  ; id=142
+                .db 6, 0x8B, 0xC, 0, 0xD, 0, 0xFF, 4
+                .db 0x30, 0x70, 0xB0, 0xE8, 0x38, 0xC2, 0x39, 0x79
+                .db 0xB9, 0x49, 0xF9, 0xF8, 0x91, 0x78, 0xB8
+                .db 143, 12, 7                                  ; id=143
+                .db 5, 0x90, 6, 0x8C, 7, 0x37, 0xE, 0
+                .db 0xD, 0
+                .db 144, 10, 2                                  ; id=144
+                .db 6, 0x8D, 7, 0x8F, 0xE, 0, 0xD, 0
+                .db 145, 15, 3                                  ; id=145
+                .db 5, 0x92, 7, 0x56, 0xE, 0, 0xD, 0
+                .db 0xFF, 0x90, 0x5B, 0, 0x1B
+                .db 146, 28, 4                                  ; id=146
+                .db 7, 0x91, 0xE, 0, 0xD, 0, 0xFF, 0xC3
+                .db 0x19, 0x1B, 0x5B, 0x9B, 0x50, 0x9E, 3, 0x2E
+                .db 0x6E, 0xAE, 0xEE, 0x48, 0xDB, 0x1B, 0x1D, 0x26
+                .db 0x1F, 0x16
+                .db 147, 23, 5                                  ; id=147
+                .db 0x19, 0x94, 6, 0, 0xC, 0, 0xD, 0
+                .db 0x1D, 0, 0xFF, 0x60, 0x2C, 1, 0xEF, 0xF7
+                .db 0xF0, 0xA4, 0x19, 0x37, 0x2F
+                .db 148, 10, 6                                  ; id=148
+                .db 5, 0x95, 7, 0x93, 0xE, 0, 0xD, 0
+                .db 149, 29, 7                                  ; id=149
+                .db 6, 2, 0x1B, 0x94, 0xC, 0, 0xD, 0
+                .db 0x1F, 0, 0xFF, 0x1E, 0x3A, 0x39, 0x31, 0x30
+                .db 0x28, 8, 0x10, 0xC2, 0xC8, 0xD0, 0xE8, 0x60
+                .db 0x3B, 0x50, 0xF8
+background_type_tbl:.dw tree_arch_N                             ; DATA XREF: RAM:6991o
                                                                 ; RAM:6993o ...
-                dw tree_arch_E
-                dw tree_arch_S
-                dw tree_arch_W
-                dw rock_arch_N
-                dw rock_arch_E
-                dw rock_arch_S
-                dw rock_arch_W
-                dw byte_6ABD
-                dw byte_6AFE
-                dw byte_6ACD
-                dw byte_6B0E
-                dw double_brick_1
-                dw double_brick_2
-                dw double_brick_3
-                dw double_brick_4
-                dw byte_6B3F
-                dw byte_6B88
-                dw background_type_tbl
-                dw background_type_tbl
-                dw byte_6C53
-                dw byte_6C9C
-                dw background_type_tbl
-                dw background_type_tbl
-                dw byte_6A35
-                dw byte_6A46
-                dw byte_6A57
-                dw byte_6A68
-                dw byte_6A79
-                dw byte_6A8A
-                dw byte_6A9B
-                dw byte_6AAC
-tree_arch_N:    db 7, 73h, 0C5h, 80h, 3, 5, 28h, 50h            ; DATA XREF: RAM:background_type_tblo
-                db 6, 8Dh, 0C5h, 80h, 3, 5, 28h, 50h
-                db 0
-tree_arch_E:    db 7, 0C5h, 8Dh, 80h, 5, 3, 28h, 10h            ; DATA XREF: RAM:696Fo
-                db 6, 0C5h, 73h, 80h, 5, 3, 28h, 10h
-                db 0
-tree_arch_S:    db 7, 73h, 3Bh, 80h, 3, 5, 28h, 50h             ; DATA XREF: RAM:6971o
-                db 6, 8Dh, 3Bh, 80h, 3, 5, 28h, 50h
-                db 0
-tree_arch_W:    db 7, 3Bh, 8Dh, 80h, 5, 3, 28h, 10h             ; DATA XREF: RAM:6973o
-                db 6, 3Bh, 73h, 80h, 5, 3, 28h, 10h
-                db 0
-rock_arch_N:    db 9, 73h, 0C5h, 80h, 3, 5, 28h, 50h            ; DATA XREF: RAM:6975o
-                db 8, 8Dh, 0C5h, 80h, 3, 5, 28h, 50h
-                db 0
-rock_arch_E:    db 9, 0C5h, 8Dh, 80h, 5, 3, 28h, 10h            ; DATA XREF: RAM:6977o
-                db 8, 0C5h, 73h, 80h, 5, 3, 28h, 10h
-                db 0
-rock_arch_S:    db 9, 73h, 3Bh, 80h, 3, 5, 28h, 50h             ; DATA XREF: RAM:6979o
-                db 8, 8Dh, 3Bh, 80h, 3, 5, 28h, 50h
-                db 0
-rock_arch_W:    db 9, 3Bh, 8Dh, 80h, 5, 3, 28h, 10h             ; DATA XREF: RAM:697Bo
-                db 8, 3Bh, 73h, 80h, 5, 3, 28h, 10h
-                db 0
-byte_6A35:      db 9, 93h, 0C5h, 0B0h, 3, 5, 28h, 50h           ; DATA XREF: RAM:699Do
-                db 8, 0ADh, 0C5h, 0B0h, 3, 5, 28h, 50h
-                db 0
-byte_6A46:      db 9, 0C5h, 0ADh, 0B0h, 5, 3, 28h, 10h          ; DATA XREF: RAM:699Fo
-                db 8, 0C5h, 93h, 0B0h, 5, 3, 28h, 10h
-                db 0
-byte_6A57:      db 9, 53h, 3Bh, 0B0h, 3, 5, 28h, 50h            ; DATA XREF: RAM:69A1o
-                db 8, 6Dh, 3Bh, 0B0h, 3, 5, 28h, 50h
-                db 0
-byte_6A68:      db 9, 3Bh, 6Dh, 0B0h, 5, 3, 28h, 10h            ; DATA XREF: RAM:69A3o
-                db 8, 3Bh, 53h, 0B0h, 5, 3, 28h, 10h
-                db 0
-byte_6A79:      db 0Bh, 98h, 0C8h, 0A4h, 8, 8, 0Ch, 10h         ; DATA XREF: RAM:69A5o
-                db 0Bh, 0A8h, 0C8h, 0A4h, 8, 8, 0Ch, 10h
-                db 0
-byte_6A8A:      db 0Bh, 0C8h, 98h, 0A4h, 8, 8, 0Ch, 10h         ; DATA XREF: RAM:69A7o
-                db 0Bh, 0C8h, 0A8h, 0A4h, 8, 8, 0Ch, 10h
-                db 0
-byte_6A9B:      db 0Bh, 58h, 39h, 0A4h, 8, 8, 0Ch, 10h          ; DATA XREF: RAM:69A9o
-                db 0Bh, 68h, 39h, 0A4h, 8, 8, 0Ch, 10h
-                db 0
-byte_6AAC:      db 0Bh, 38h, 58h, 0A4h, 8, 8, 0Ch, 10h          ; DATA XREF: RAM:69ABo
-                db 0Bh, 38h, 68h, 0A4h, 8, 8, 0Ch, 10h
-                db 0
-byte_6ABD:      db 0Fh, 40h, 78h, 80h, 0, 8, 18h, 50h           ; DATA XREF: RAM:697Do
-                db 0Ch, 40h, 88h, 80h, 0, 8, 18h, 50h
-byte_6ACD:      db 0Ch, 40h, 48h, 80h, 0, 8, 18h, 50h           ; DATA XREF: RAM:6981o
-                db 0Dh, 40h, 58h, 80h, 0, 8, 18h, 50h
-                db 0Eh, 40h, 68h, 80h, 0, 8, 18h, 50h
-                db 0Dh, 40h, 98h, 80h, 0, 8, 18h, 50h
-                db 0Eh, 40h, 0A8h, 80h, 0, 8, 18h, 50h
-                db 0Fh, 40h, 0B8h, 80h, 0, 8, 18h, 50h
-                db 0
-byte_6AFE:      db 0Fh, 78h, 0C0h, 80h, 8, 0, 18h, 10h          ; DATA XREF: RAM:697Fo
-                db 0Ch, 88h, 0C0h, 80h, 8, 0, 18h, 10h
-byte_6B0E:      db 0Ch, 48h, 0C0h, 80h, 8, 0, 18h, 10h          ; DATA XREF: RAM:6983o
-                db 0Dh, 58h, 0C0h, 80h, 8, 0, 18h, 10h
-                db 0Eh, 68h, 0C0h, 80h, 8, 0, 18h, 10h
-                db 0Dh, 98h, 0C0h, 80h, 8, 0, 18h, 10h
-                db 0Eh, 0A8h, 0C0h, 80h, 8, 0, 18h, 10h
-                db 0Fh, 0B8h, 0C0h, 80h, 8, 0, 18h, 10h
-                db 0
-byte_6B3F:      db 0Fh, 60h, 78h, 80h, 0, 8, 18h, 50h           ; DATA XREF: RAM:698Do
-                db 0Ch, 60h, 88h, 80h, 0, 8, 18h, 50h
-                db 0Ch, 60h, 48h, 80h, 0, 8, 18h, 50h
-                db 0Dh, 60h, 58h, 80h, 0, 8, 18h, 50h
-                db 0Eh, 60h, 68h, 80h, 0, 8, 18h, 50h
-                db 0Dh, 60h, 98h, 80h, 0, 8, 18h, 50h
-                db 0Eh, 60h, 0A8h, 80h, 0, 8, 18h, 50h
-                db 0Fh, 60h, 0B8h, 80h, 0, 8, 18h, 50h
-                db 0Eh, 68h, 0C0h, 80h, 8, 0, 18h, 10h
-                db 0
-byte_6B88:      db 0Fh, 78h, 0A0h, 80h, 8, 0, 18h, 10h          ; DATA XREF: RAM:698Fo
-                db 0Ch, 88h, 0A0h, 80h, 8, 0, 18h, 10h
-                db 0Ch, 48h, 0A0h, 80h, 8, 0, 18h, 10h
-                db 0Dh, 58h, 0A0h, 80h, 8, 0, 18h, 10h
-                db 0Eh, 68h, 0A0h, 80h, 8, 0, 18h, 10h
-                db 0Dh, 98h, 0A0h, 80h, 8, 0, 18h, 10h
-                db 0Eh, 0A8h, 0A0h, 80h, 8, 0, 18h, 10h
-                db 0Fh, 0B8h, 0A0h, 80h, 8, 0, 18h, 10h
-                db 0Dh, 40h, 98h, 80h, 0, 8, 18h, 50h
-                db 0
-double_brick_1: db 34h, 40h, 78h, 80h, 0, 8, 18h, 10h           ; DATA XREF: RAM:6985o
-                db 35h, 40h, 88h, 80h, 0, 8, 18h, 10h
-double_brick_3: db 39h, 40h, 48h, 80h, 0, 8, 18h, 10h           ; DATA XREF: RAM:6989o
-                db 37h, 40h, 58h, 80h, 0, 8, 18h, 10h
-                db 38h, 40h, 68h, 80h, 0, 8, 18h, 10h
-                db 37h, 40h, 98h, 80h, 0, 8, 18h, 10h
-                db 36h, 40h, 0A8h, 80h, 0, 8, 18h, 10h
-                db 35h, 40h, 0B8h, 80h, 0, 8, 18h, 10h
-                db 0
-double_brick_2: db 37h, 78h, 0C0h, 80h, 8, 0, 18h, 50h          ; DATA XREF: RAM:6987o
-                db 38h, 88h, 0C0h, 80h, 8, 0, 18h, 50h
-double_brick_4: db 36h, 48h, 0C0h, 80h, 8, 0, 18h, 50h          ; DATA XREF: RAM:698Bo
-                db 35h, 58h, 0C0h, 80h, 8, 0, 18h, 50h
-                db 34h, 68h, 0C0h, 80h, 8, 0, 18h, 50h
-                db 36h, 98h, 0C0h, 80h, 8, 0, 18h, 50h
-                db 37h, 0A8h, 0C0h, 80h, 8, 0, 18h, 50h
-                db 39h, 0B8h, 0C0h, 80h, 8, 0, 18h, 50h
-                db 0
-byte_6C53:      db 34h, 60h, 78h, 80h, 0, 8, 18h, 10h           ; DATA XREF: RAM:6995o
-                db 35h, 60h, 88h, 80h, 0, 8, 18h, 10h
-                db 39h, 60h, 48h, 80h, 0, 8, 18h, 10h
-                db 37h, 60h, 58h, 80h, 0, 8, 18h, 10h
-                db 36h, 60h, 68h, 80h, 0, 8, 18h, 10h
-                db 37h, 60h, 98h, 80h, 0, 8, 18h, 10h
-                db 35h, 60h, 0A8h, 80h, 0, 8, 18h, 10h
-                db 34h, 60h, 0B8h, 80h, 0, 8, 18h, 10h
-                db 36h, 68h, 0C0h, 80h, 8, 0, 18h, 50h
-                db 0
-byte_6C9C:      db 34h, 78h, 0A0h, 80h, 8, 0, 18h, 50h          ; DATA XREF: RAM:6997o
-                db 37h, 88h, 0A0h, 80h, 8, 0, 18h, 50h
-                db 36h, 48h, 0A0h, 80h, 8, 0, 18h, 50h
-                db 35h, 58h, 0A0h, 80h, 8, 0, 18h, 50h
-                db 36h, 68h, 0A0h, 80h, 8, 0, 18h, 50h
-                db 37h, 98h, 0A0h, 80h, 8, 0, 18h, 50h
-                db 35h, 0A8h, 0A0h, 80h, 8, 0, 18h, 50h
-                db 39h, 0B8h, 0A0h, 80h, 8, 0, 18h, 50h
-                db 36h, 40h, 98h, 80h, 0, 8, 18h, 10h
-                db 0
-block_type_tbl: dw brick_0
-                dw brick_1
-                dw pond
-                dw lilly_pond
-                dw log_4
-                dw ghost
-                dw spike_6
-                dw log_7
-                dw trap
-                dw stone_block
-                dw table
-                dw log_b
-                dw brick_c
-                dw brick_d
-                dw brick_e
-                dw spike_f
-                dw dragon_head
-                dw brick_11
-                dw brick_12
-                dw spider
-                dw byte_6DAD
-                dw byte_6D35
-                dw stone_block
-                dw byte_6DB3
-                dw byte_6DB9
-                dw byte_6DBF
-                dw byte_6DC5
-                dw byte_6DCB
-                dw byte_6DD1
-                dw byte_6D9B
-                dw byte_6DA1
-stone_block:    db 5Bh, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6CF7o
+                .dw tree_arch_E
+                .dw tree_arch_S
+                .dw tree_arch_W
+                .dw rock_arch_N
+                .dw rock_arch_E
+                .dw rock_arch_S
+                .dw rock_arch_W
+                .dw byte_6ABD
+                .dw byte_6AFE
+                .dw byte_6ACD
+                .dw byte_6B0E
+                .dw double_brick_1
+                .dw double_brick_2
+                .dw double_brick_3
+                .dw double_brick_4
+                .dw byte_6B3F
+                .dw byte_6B88
+                .dw background_type_tbl
+                .dw background_type_tbl
+                .dw byte_6C53
+                .dw byte_6C9C
+                .dw background_type_tbl
+                .dw background_type_tbl
+                .dw byte_6A35
+                .dw byte_6A46
+                .dw byte_6A57
+                .dw byte_6A68
+                .dw byte_6A79
+                .dw byte_6A8A
+                .dw byte_6A9B
+                .dw byte_6AAC
+tree_arch_N:    .db 7, 0x73, 0xC5, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:background_type_tblo
+                .db 6, 0x8D, 0xC5, 0x80, 3, 5, 0x28, 0x50
+                .db 0
+tree_arch_E:    .db 7, 0xC5, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:696Fo
+                .db 6, 0xC5, 0x73, 0x80, 5, 3, 0x28, 0x10
+                .db 0
+tree_arch_S:    .db 7, 0x73, 0x3B, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:6971o
+                .db 6, 0x8D, 0x3B, 0x80, 3, 5, 0x28, 0x50
+                .db 0
+tree_arch_W:    .db 7, 0x3B, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:6973o
+                .db 6, 0x3B, 0x73, 0x80, 5, 3, 0x28, 0x10
+                .db 0
+rock_arch_N:    .db 9, 0x73, 0xC5, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:6975o
+                .db 8, 0x8D, 0xC5, 0x80, 3, 5, 0x28, 0x50
+                .db 0
+rock_arch_E:    .db 9, 0xC5, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:6977o
+                .db 8, 0xC5, 0x73, 0x80, 5, 3, 0x28, 0x10
+                .db 0
+rock_arch_S:    .db 9, 0x73, 0x3B, 0x80, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:6979o
+                .db 8, 0x8D, 0x3B, 0x80, 3, 5, 0x28, 0x50
+                .db 0
+rock_arch_W:    .db 9, 0x3B, 0x8D, 0x80, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:697Bo
+                .db 8, 0x3B, 0x73, 0x80, 5, 3, 0x28, 0x10
+                .db 0
+byte_6A35:      .db 9, 0x93, 0xC5, 0xB0, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:699Do
+                .db 8, 0xAD, 0xC5, 0xB0, 3, 5, 0x28, 0x50
+                .db 0
+byte_6A46:      .db 9, 0xC5, 0xAD, 0xB0, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:699Fo
+                .db 8, 0xC5, 0x93, 0xB0, 5, 3, 0x28, 0x10
+                .db 0
+byte_6A57:      .db 9, 0x53, 0x3B, 0xB0, 3, 5, 0x28, 0x50       ; DATA XREF: RAM:69A1o
+                .db 8, 0x6D, 0x3B, 0xB0, 3, 5, 0x28, 0x50
+                .db 0
+byte_6A68:      .db 9, 0x3B, 0x6D, 0xB0, 5, 3, 0x28, 0x10       ; DATA XREF: RAM:69A3o
+                .db 8, 0x3B, 0x53, 0xB0, 5, 3, 0x28, 0x10
+                .db 0
+byte_6A79:      .db 0xB, 0x98, 0xC8, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69A5o
+                .db 0xB, 0xA8, 0xC8, 0xA4, 8, 8, 0xC, 0x10
+                .db 0
+byte_6A8A:      .db 0xB, 0xC8, 0x98, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69A7o
+                .db 0xB, 0xC8, 0xA8, 0xA4, 8, 8, 0xC, 0x10
+                .db 0
+byte_6A9B:      .db 0xB, 0x58, 0x39, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69A9o
+                .db 0xB, 0x68, 0x39, 0xA4, 8, 8, 0xC, 0x10
+                .db 0
+byte_6AAC:      .db 0xB, 0x38, 0x58, 0xA4, 8, 8, 0xC, 0x10      ; DATA XREF: RAM:69ABo
+                .db 0xB, 0x38, 0x68, 0xA4, 8, 8, 0xC, 0x10
+                .db 0
+byte_6ABD:      .db 0xF, 0x40, 0x78, 0x80, 0, 8, 0x18, 0x50     ; DATA XREF: RAM:697Do
+                .db 0xC, 0x40, 0x88, 0x80, 0, 8, 0x18, 0x50
+byte_6ACD:      .db 0xC, 0x40, 0x48, 0x80, 0, 8, 0x18, 0x50     ; DATA XREF: RAM:6981o
+                .db 0xD, 0x40, 0x58, 0x80, 0, 8, 0x18, 0x50
+                .db 0xE, 0x40, 0x68, 0x80, 0, 8, 0x18, 0x50
+                .db 0xD, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x50
+                .db 0xE, 0x40, 0xA8, 0x80, 0, 8, 0x18, 0x50
+                .db 0xF, 0x40, 0xB8, 0x80, 0, 8, 0x18, 0x50
+                .db 0
+byte_6AFE:      .db 0xF, 0x78, 0xC0, 0x80, 8, 0, 0x18, 0x10     ; DATA XREF: RAM:697Fo
+                .db 0xC, 0x88, 0xC0, 0x80, 8, 0, 0x18, 0x10
+byte_6B0E:      .db 0xC, 0x48, 0xC0, 0x80, 8, 0, 0x18, 0x10     ; DATA XREF: RAM:6983o
+                .db 0xD, 0x58, 0xC0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xE, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xD, 0x98, 0xC0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xE, 0xA8, 0xC0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xF, 0xB8, 0xC0, 0x80, 8, 0, 0x18, 0x10
+                .db 0
+byte_6B3F:      .db 0xF, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x50     ; DATA XREF: RAM:698Do
+                .db 0xC, 0x60, 0x88, 0x80, 0, 8, 0x18, 0x50
+                .db 0xC, 0x60, 0x48, 0x80, 0, 8, 0x18, 0x50
+                .db 0xD, 0x60, 0x58, 0x80, 0, 8, 0x18, 0x50
+                .db 0xE, 0x60, 0x68, 0x80, 0, 8, 0x18, 0x50
+                .db 0xD, 0x60, 0x98, 0x80, 0, 8, 0x18, 0x50
+                .db 0xE, 0x60, 0xA8, 0x80, 0, 8, 0x18, 0x50
+                .db 0xF, 0x60, 0xB8, 0x80, 0, 8, 0x18, 0x50
+                .db 0xE, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x10
+                .db 0
+byte_6B88:      .db 0xF, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x10     ; DATA XREF: RAM:698Fo
+                .db 0xC, 0x88, 0xA0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xC, 0x48, 0xA0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xD, 0x58, 0xA0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xE, 0x68, 0xA0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xD, 0x98, 0xA0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xE, 0xA8, 0xA0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xF, 0xB8, 0xA0, 0x80, 8, 0, 0x18, 0x10
+                .db 0xD, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x50
+                .db 0
+double_brick_1: .db 0x34, 0x40, 0x78, 0x80, 0, 8, 0x18, 0x10    ; DATA XREF: RAM:6985o
+                .db 0x35, 0x40, 0x88, 0x80, 0, 8, 0x18, 0x10
+double_brick_3: .db 0x39, 0x40, 0x48, 0x80, 0, 8, 0x18, 0x10    ; DATA XREF: RAM:6989o
+                .db 0x37, 0x40, 0x58, 0x80, 0, 8, 0x18, 0x10
+                .db 0x38, 0x40, 0x68, 0x80, 0, 8, 0x18, 0x10
+                .db 0x37, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x10
+                .db 0x36, 0x40, 0xA8, 0x80, 0, 8, 0x18, 0x10
+                .db 0x35, 0x40, 0xB8, 0x80, 0, 8, 0x18, 0x10
+                .db 0
+double_brick_2: .db 0x37, 0x78, 0xC0, 0x80, 8, 0, 0x18, 0x50    ; DATA XREF: RAM:6987o
+                .db 0x38, 0x88, 0xC0, 0x80, 8, 0, 0x18, 0x50
+double_brick_4: .db 0x36, 0x48, 0xC0, 0x80, 8, 0, 0x18, 0x50    ; DATA XREF: RAM:698Bo
+                .db 0x35, 0x58, 0xC0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x34, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x36, 0x98, 0xC0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x37, 0xA8, 0xC0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x39, 0xB8, 0xC0, 0x80, 8, 0, 0x18, 0x50
+                .db 0
+byte_6C53:      .db 0x34, 0x60, 0x78, 0x80, 0, 8, 0x18, 0x10    ; DATA XREF: RAM:6995o
+                .db 0x35, 0x60, 0x88, 0x80, 0, 8, 0x18, 0x10
+                .db 0x39, 0x60, 0x48, 0x80, 0, 8, 0x18, 0x10
+                .db 0x37, 0x60, 0x58, 0x80, 0, 8, 0x18, 0x10
+                .db 0x36, 0x60, 0x68, 0x80, 0, 8, 0x18, 0x10
+                .db 0x37, 0x60, 0x98, 0x80, 0, 8, 0x18, 0x10
+                .db 0x35, 0x60, 0xA8, 0x80, 0, 8, 0x18, 0x10
+                .db 0x34, 0x60, 0xB8, 0x80, 0, 8, 0x18, 0x10
+                .db 0x36, 0x68, 0xC0, 0x80, 8, 0, 0x18, 0x50
+                .db 0
+byte_6C9C:      .db 0x34, 0x78, 0xA0, 0x80, 8, 0, 0x18, 0x50    ; DATA XREF: RAM:6997o
+                .db 0x37, 0x88, 0xA0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x36, 0x48, 0xA0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x35, 0x58, 0xA0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x36, 0x68, 0xA0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x37, 0x98, 0xA0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x35, 0xA8, 0xA0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x39, 0xB8, 0xA0, 0x80, 8, 0, 0x18, 0x50
+                .db 0x36, 0x40, 0x98, 0x80, 0, 8, 0x18, 0x10
+                .db 0
+block_type_tbl: .dw brick_0                                     ; DATA XREF: RAM:C92Fo
+                .dw brick_1
+                .dw pond
+                .dw lilly_pond
+                .dw log_4
+                .dw ghost
+                .dw spike_6
+                .dw log_7
+                .dw trap
+                .dw stone_block
+                .dw table
+                .dw log_b
+                .dw brick_c
+                .dw brick_d
+                .dw brick_e
+                .dw spike_f
+                .dw dragon_head
+                .dw brick_11
+                .dw brick_12
+                .dw spider
+                .dw byte_6DAD
+                .dw byte_6D35
+                .dw stone_block
+                .dw byte_6DB3
+                .dw byte_6DB9
+                .dw byte_6DBF
+                .dw byte_6DC5
+                .dw byte_6DCB
+                .dw byte_6DD1
+                .dw byte_6D9B
+                .dw byte_6DA1
+stone_block:    .db 0x5B, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CF7o
                                                                 ; RAM:6D11o
-brick_0:        db 0Bh, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:block_type_tblo
-brick_d:        db 4Ah, 0Ch, 0Ch, 1, 10h, 0                     ; DATA XREF: RAM:6CFFo
-byte_6D35:      db 4Bh, 0Ch, 0Ch, 1, 10h, 0                     ; DATA XREF: RAM:6D0Fo
-brick_1:        db 0Ah, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6CE7o
-pond:           db 30h, 5, 5, 5, 10h, 0                         ; DATA XREF: RAM:6CE9o
-lilly_pond:     db 17h, 7, 7, 0Ah, 10h, 0                       ; DATA XREF: RAM:6CEBo
-log_4:          db 48h, 8, 8, 0Ch, 14h, 0                       ; DATA XREF: RAM:6CEDo
-ghost:          db 1Eh, 7, 7, 0Ah, 10h, 0                       ; DATA XREF: RAM:6CEFo
-spike_6:        db 3Fh, 8, 8, 0Ch, 14h, 0                       ; DATA XREF: RAM:6CF1o
-log_7:          db 49h, 8, 0Eh, 0Ch, 14h, 0                     ; DATA XREF: RAM:6CF3o
-trap:           db 4Ch, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6CF5o
-table:          db 4Eh, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6CF9o
-log_b:          db 4Fh, 8, 8, 0Ch, 14h, 0                       ; DATA XREF: RAM:6CFBo
-brick_c:        db 54h, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6CFDo
-brick_e:        db 1Ch, 7, 7, 0Bh, 14h, 0                       ; DATA XREF: RAM:6D01o
-spike_f:        db 56h, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D03o
-dragon_head:    db 57h, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D05o
-brick_11:       db 58h, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D07o
-brick_12:       db 59h, 8, 8, 0Ah, 10h, 0                       ; DATA XREF: RAM:6D09o
-byte_6D9B:      db 5Ch, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D1Fo
-byte_6DA1:      db 5Dh, 8, 8, 0Ch, 50h, 0                       ; DATA XREF: RAM:6D21o
-spider:         db 78h, 0Ah, 0Ah, 0Ch, 10h, 0                   ; DATA XREF: RAM:6D0Bo
-byte_6DAD:      db 10h, 8, 8, 0Ah, 10h, 0                       ; DATA XREF: RAM:6D0Do
-byte_6DB3:      db 52h, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D13o
-byte_6DB9:      db 88h, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D15o
-byte_6DBF:      db 8Ch, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D17o
-byte_6DC5:      db 8Dh, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D19o
-byte_6DCB:      db 8Eh, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D1Bo
-byte_6DD1:      db 8Fh, 8, 8, 0Ch, 10h, 0                       ; DATA XREF: RAM:6D1Do
-sprite_tbl:     dw unk_9395, unk_9395, unk_9A4B, unk_9ADD, unk_9B3F, unk_9BD1, unk_9C63, unk_9DAF, unk_A557
-                dw unk_A47D, unk_9E51, spr_28, unk_9F1B, unk_9FC9, unk_A09F, unk_A175, spr_23, spr_23
-                dw unk_98A5, unk_9901, unk_98A5, unk_9849, spr_27, spr_26, unk_9395, unk_9395, unk_9395
-                dw unk_9395, spr_26, unk_9849, spr_25, spr_25, unk_98A5, unk_9849, unk_97ED, unk_9849
-                dw unk_996F, unk_9901, unk_99DD, unk_9901, unk_94DF, unk_943B, unk_9397, unk_943B, unk_9651
-                dw unk_9583, unk_971F, unk_9583, spr_1A, spr_1B, spr_1A, spr_1B, unk_A327, unk_A2A9
-                dw unk_A23F, unk_A3AD, unk_A40F, unk_A67F, spr_29, spr_2A, spr_2B, spr_2B, spr_2C, spr_24
-                dw spr_1C, spr_1D, spr_1E, spr_1D, spr_1E, spr_1E, spr_1F, spr_1F, unk_9E51, spr_2D
-                dw spr_08, spr_09, unk_9E51, unk_9E51, spr_28, spr_28, spr_12, spr_13, spr_24, unk_9395
-                dw spr_28, spr_28, spr_0D, spr_28, spr_28, spr_23, unk_9029, spr_28, spr_0D, spr_0D
-                dw unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395
-                dw unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395, unk_9395
-                dw spr_2F, spr_2F, spr_2F, spr_2F, unk_8E8F, unk_8E8F, unk_8E8F, unk_8E8F, spr_2E, spr_28
-                dw spr_28, spr_28, spr_28, spr_28, spr_28, spr_28, spr_00, spr_01, spr_02, spr_03, spr_04
-                dw spr_05, spr_06, spr_07, spr_28, spr_0A, spr_0B, spr_0C, spr_28, spr_28, spr_28, spr_28
-                dw unk_90BB, unk_914D, unk_91DF, unk_9271, unk_9303, spr_20, spr_21, spr_22, unk_90BB
-                dw unk_914D, unk_91DF, unk_9271, unk_9303, unk_9395, unk_9395, unk_9395, spr_17, spr_18
-                dw spr_17, spr_19, spr_15, spr_16, spr_15, spr_14, spr_0E, spr_0F, spr_10, spr_11
-spr_00:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 70h, 70h, 0, 0, 0, 0, 70h, 70h, 0, 0, 0, 0, 70h, 70h, 0, 0, 0, 0, 70h, 70h, 0, 0
-                db 0, 0, 38h, 38h, 0, 0, 0, 0, 38h, 38h, 0, 0, 0, 0, 1Ch, 1Ch, 0, 0, 0, 0, 1Eh, 1Eh
-                db 0, 0, 0, 0, 0Fh, 0Fh, 0, 0, 1, 1, 7, 7, 80h, 80h, 3, 3, 3, 3, 0C0h, 0C0h, 7, 7, 1
-                db 1, 0E0h, 0E0h, 0Fh, 0Fh, 0, 0, 78h, 78h, 1Fh, 1Fh, 0, 0, 3Eh, 3Eh, 3Ch, 3Ch, 0, 0
-                db 0Fh, 0Fh, 0A0h, 0A0h, 0, 0, 3, 3, 0E0h, 0E0h, 0, 0, 0, 0, 0F8h, 0F8h, 0, 0, 0, 0
-                db 3Eh, 3Eh, 0, 0, 0, 0, 0Fh, 0Fh, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-spr_01:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0Fh, 0Fh, 0C0h, 0C0h, 0, 0, 3, 3, 80h, 80h, 0, 0, 7, 7, 0, 0, 0, 0, 0Eh, 0Eh, 0, 0
-                db 0, 0, 1Eh, 1Eh, 0, 0, 0, 0, 3Ch, 3Ch, 0, 0, 0Fh, 0Fh, 78h, 78h, 0, 0, 0FFh, 0FFh
-                db 0F0h, 0F0h, 0Fh, 0Fh, 0FFh, 0FFh, 0E0h, 0E0h, 0FFh, 0FFh, 0F8h, 0F8h, 0CFh, 0CFh
-                db 0FFh, 0FFh, 0, 0, 0BFh, 0BFh, 0F0h, 0F0h, 0, 0, 0FEh, 0FEh, 0, 0, 0, 0, 0E0h, 0E0h
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                db 0, 0, 0, 0, 0, 0, 0C0h, 0C0h, 0, 0, 0, 0, 0FCh, 0FCh, 0, 0, 0, 0, 3Fh, 3Fh, 0F0h
-                db 0F0h, 0, 0, 3, 3, 0FFh, 0FFh, 0FFh, 0FFh, 0, 0, 0Fh, 0Fh, 0FFh, 0FFh, 0, 0, 0, 0
-                db 0, 0
-spr_02:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7Fh, 7Fh, 0, 0, 3, 3, 0FFh, 0FFh, 0, 0, 3, 3, 0F0h
-                db 0F0h, 0, 0, 1, 1, 80h, 80h, 80h, 80h, 1, 1, 0C0h, 0C0h, 0E0h, 0E0h, 0, 0, 0C0h, 0C0h
-                db 0F8h, 0F8h, 0, 0, 0E0h, 0E0h, 0FFh, 0FFh, 0, 0, 60h, 60h, 1Fh, 1Fh, 0C0h, 0C0h, 70h
-                db 70h, 7, 7, 0F0h, 0F0h, 30h, 30h, 0, 0, 0FEh, 0FEh, 38h, 38h, 0, 0, 3Fh, 3Fh, 98h
-                db 98h, 0, 0, 7, 7, 0F8h, 0F8h, 0, 0, 1, 1, 0FCh, 0FCh, 0, 0, 0, 0, 3Ch, 3Ch, 0, 0, 0
-                db 0, 0Eh, 0Eh, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 3Fh, 3Fh, 0, 0, 0Fh
-                db 0Fh, 0FCh, 0FCh, 0FFh, 0FFh, 0FFh, 0FFh, 0C0h, 0C0h, 0FFh, 0FFh, 0F0h, 0F0h, 0, 0
-                db 0, 0, 0, 0, 0, 0
-spr_03:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0FFh, 0FFh, 0C0h, 0C0h, 0Eh, 0Eh, 0FCh, 0FCh, 0, 0, 0Eh, 0Eh, 80h, 80h, 0, 0, 0Eh
-                db 0Eh, 0, 0, 0, 0, 0Eh, 0Eh, 0, 0, 0, 0, 1Ch, 1Ch, 0, 0, 0, 0, 1Ch, 1Ch, 0, 0, 0, 0
-                db 38h, 38h, 0, 0, 0, 0, 78h, 78h, 0, 0, 0, 0, 0F0h, 0F0h, 0, 0, 1, 1, 0E0h, 0E0h, 0
-                db 0, 3, 3, 0C0h, 0C0h, 0, 0, 7, 7, 80h, 80h, 0, 0, 1Eh, 1Eh, 0, 0, 0, 0, 7Ch, 7Ch, 0
-                db 0, 1, 1, 0F0h, 0F0h, 0, 0, 7, 7, 0C0h, 0C0h, 0, 0, 1Fh, 1Fh, 0, 0, 0, 0, 7Ch, 7Ch
-                db 0, 0, 0, 0, 0F0h, 0F0h, 0, 0, 0, 0, 80h, 80h, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-spr_04:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                db 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0Fh, 0Fh, 0, 0, 0, 0, 3Eh, 3Eh, 0, 0, 0, 0, 0F8h
-                db 0F8h, 0, 0, 3, 3, 0E0h, 0E0h, 0, 0, 0Fh, 0Fh, 80h, 80h, 0, 0, 3Eh, 3Eh, 0, 0, 0, 0
-                db 78h, 78h, 0, 0, 1, 1, 0E0h, 0E0h, 0, 0, 3, 3, 0C0h, 0C0h, 0, 0, 7, 7, 80h, 80h, 0
-                db 0, 0Fh, 0Fh, 0FFh, 0FFh, 0F0h, 0F0h, 1Eh, 1Eh, 1Fh, 1Fh, 0FFh, 0FFh, 1Ch, 1Ch, 7
-                db 7, 0FFh, 0FFh, 38h, 38h, 0, 0, 0F8h, 0F8h, 38h, 38h, 0, 0, 3Fh, 3Fh, 70h, 70h, 0
-                db 0, 7, 7, 70h, 70h, 0, 0, 1, 1, 70h, 70h, 0, 0, 0, 0
-spr_05:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0Fh, 0Fh, 0FFh, 0FFh, 3, 3, 0FFh, 0FFh
-                db 0FFh, 0FFh, 3Fh, 3Fh, 0F0h, 0F0h, 0, 0, 0FCh, 0FCh, 0, 0, 0, 0, 0C0h, 0C0h, 0, 0
-                db 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0Fh, 0Fh
-                db 0, 0, 0, 0, 1Eh, 1Eh, 0, 0, 0, 0, 3Ch, 3Ch, 0, 0, 0, 0, 78h, 78h, 0, 0, 0, 0, 0F0h
-                db 0F0h, 0, 0, 1, 1, 0E0h, 0E0h, 0, 0, 3, 3, 0C0h, 0C0h, 0FFh, 0FFh, 7, 7, 80h, 80h
-                db 0FFh, 0FFh, 0FFh, 0FFh, 0, 0, 7Fh, 7Fh, 0FEh, 0FEh, 0, 0, 0, 0, 7Ch, 7Ch, 0, 0, 0E0h
-                db 0E0h, 0, 0, 0, 0, 0FCh, 0FCh, 0, 0, 0, 0, 3Fh, 3Fh, 0, 0, 0, 0
-spr_06:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0FFh, 0FFh, 0F0h, 0F0h, 0, 0, 0FFh, 0FFh, 0FFh
-                db 0FFh, 0C0h, 0C0h, 3Eh, 3Eh, 0Fh, 0Fh, 0FCh, 0FCh, 7Eh, 7Eh, 0, 0, 3Fh, 3Fh, 0F7h
-                db 0F7h, 0, 0, 3, 3, 0E7h, 0E7h, 0, 0, 0, 0, 0C3h, 0C3h, 80h, 80h, 0, 0, 83h, 83h, 80h
-                db 80h, 0, 0, 1, 1, 80h, 80h, 0, 0, 1, 1, 0C0h, 0C0h, 0, 0, 0, 0, 0C0h, 0C0h, 0, 0, 0
-                db 0, 0E0h, 0E0h, 0, 0, 0, 0, 0E0h, 0E0h, 0, 0, 0, 0, 70h, 70h, 0, 0, 0, 0, 70h, 70h
-                db 0, 0, 0, 0, 38h, 38h, 0, 0, 0, 0, 38h, 38h, 0, 0, 0, 0, 1Ch, 1Ch, 0, 0, 0, 0, 1Fh
-                db 1Fh, 0F0h, 0F0h, 0, 0, 0Fh, 0Fh, 0FFh, 0FFh, 0, 0, 0, 0, 0FFh, 0FFh, 0, 0, 0, 0, 0
-                db 0
-spr_07:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                db 0, 0, 80h, 80h, 0, 0, 0, 0, 0F0h, 0F0h, 0, 0, 0, 0, 7Ch, 7Ch, 0, 0, 0, 0, 1Fh, 1Fh
-                db 0, 0, 0, 0, 7, 7, 0C0h, 0C0h, 0, 0, 1, 1, 0F0h, 0F0h, 0, 0, 0, 0, 7Ch, 7Ch, 0, 0
-                db 0, 0, 1Eh, 1Eh, 0, 0, 0, 0, 7, 7, 80h, 80h, 0, 0, 3, 3, 0C0h, 0C0h, 0, 0, 1, 1, 0E0h
-                db 0E0h, 0, 0, 0, 0, 0F0h, 0F0h, 0, 0, 0, 0, 78h, 78h, 0, 0, 0, 0, 38h, 38h, 0, 0, 0
-                db 0, 1Ch, 1Ch, 0, 0, 0, 0, 1Ch, 1Ch, 0FFh, 0FFh, 0, 0, 0Eh, 0Eh, 0FFh, 0FFh, 0FFh, 0FFh
-                db 0FEh, 0FEh, 0Fh, 0Fh, 0FCh, 0FCh, 0Eh, 0Eh
-spr_08:         db 4, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 5, 5, 55h, 55h, 0, 0, 0, 0, 2Fh, 2Ah, 0FFh, 0AAh, 80h, 80h, 1, 1, 7Fh, 55h
-                db 0FFh, 55h, 0C0h, 40h, 0, 0, 0FFh, 0AAh, 0FFh, 0AAh, 0E8h, 0A8h, 15h, 15h, 0FFh, 55h
-                db 0FFh, 55h, 0FCh, 54h, 3Fh, 2Ah, 0FFh, 0AAh, 0FFh, 0AAh, 0FEh, 0AAh, 7Fh, 55h, 0FFh
-                db 55h, 0FFh, 55h, 0FFh, 55h, 0FFh, 0AAh, 0FFh, 0AAh, 0FFh, 0AAh, 0FEh, 0AAh, 7Fh, 55h
-                db 0FFh, 55h, 0FFh, 55h, 0FFh, 55h, 0FFh, 0AAh, 0FFh, 0AAh, 0FFh, 0AAh, 0FEh, 0AAh, 5Fh
-                db 55h, 0FFh, 55h, 0FFh, 55h, 0FDh, 55h, 0Bh, 0Ah, 0FFh, 0AAh, 0FFh, 0AAh, 0F8h, 0A8h
-                db 1, 1, 0FFh, 55h, 0FFh, 55h, 0F0h, 50h, 0, 0, 0FFh, 0AAh, 0FEh, 0AAh, 0A0h, 0A0h, 0
-                db 0, 57h, 55h, 0FCh, 54h, 0, 0, 0, 0, 3, 2, 0F8h, 0A8h, 0, 0
-spr_09:         db 4, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0Fh, 5, 0FCh, 54h, 0, 0, 1, 0, 0FFh, 0AAh, 0FFh, 0AAh, 0E0h, 0A0h, 3, 1, 0FFh
-                db 55h, 0FFh, 55h, 0F0h, 50h, 0Fh, 0Ah, 0FFh, 0AAh, 0FFh, 0Ah, 0FCh, 0A8h, 3Fh, 15h
-                db 0FFh, 51h, 0FFh, 0E5h, 0FCh, 54h, 7Fh, 2Ah, 0FFh, 0A7h, 0FFh, 0FAh, 0FDh, 0A8h, 0FFh
-                db 55h, 0FFh, 4Fh, 0FFh, 0F5h, 0FFh, 45h, 0FFh, 0AAh, 0FFh, 93h, 0FFh, 0F2h, 0FFh, 0BAh
-                db 0FFh, 55h, 0FFh, 47h, 0FFh, 0F9h, 0FFh, 7Dh, 7Fh, 2Ah, 0FFh, 0A5h, 0FFh, 0AAh, 0FFh
-                db 54h, 3Fh, 15h, 0FFh, 4Dh, 0FFh, 0A5h, 0FEh, 10h, 1Fh, 0Ah, 0FFh, 0A9h, 0FFh, 0A2h
-                db 0FCh, 0A8h, 1Fh, 15h, 0FFh, 54h, 0FFh, 0A5h, 0F8h, 50h, 1Fh, 0Ah, 0FFh, 0AAh, 0FFh
-                db 8Ah, 0F0h, 0A0h, 0Fh, 5, 0FFh, 54h, 0FFh, 95h, 0C0h, 40h, 0, 0, 3Fh, 2Ah, 0F8h, 28h
-                db 0, 0
-spr_0A:         db 4, 27                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1Eh, 4, 20h, 0, 0, 0, 0, 0, 3Fh, 1Eh, 70h, 20h, 0, 0
-                db 0, 0, 7Fh, 3Eh, 0F8h, 50h, 0, 0, 0, 0, 7Fh, 3Eh, 74h, 20h, 0, 0, 3, 0, 3Eh, 1Ch, 3Eh
-                db 14h, 0, 0, 1Fh, 3, 0BCh, 0, 1Fh, 0Ah, 0, 0, 3Fh, 1Fh, 0FDh, 9Ch, 0AFh, 5, 82h, 0
-                db 7Fh, 3Fh, 0FFh, 0CCh, 0F5h, 0A0h, 0C7h, 2, 7Fh, 3Fh, 0FEh, 0CCh, 0F8h, 10h, 0EEh
-                db 44h, 3Fh, 3, 0EDh, 0C0h, 0FDh, 28h, 0DFh, 82h, 1Fh, 1, 0E3h, 0C1h, 0F8h, 90h, 0FEh
-                db 54h, 1Fh, 1, 0E7h, 0C3h, 0FDh, 0C0h, 0FCh, 0A0h, 3Fh, 1Ch, 0CFh, 81h, 0FEh, 0E4h
-                db 0FEh, 54h, 7Fh, 3Ch, 0FFh, 0Ch, 0F9h, 0F0h, 0F7h, 0A2h, 0FCh, 78h, 7Fh, 3Eh, 0FFh
-                db 0, 0AEh, 4, 78h, 20h, 0FFh, 7Fh, 0FFh, 0CFh, 87h, 2, 23h, 0, 0FFh, 1Fh, 0FFh, 9Fh
-                db 0F2h, 0, 0Fh, 3, 0FFh, 9Fh, 0FFh, 3Eh, 0F8h, 70h, 1Fh, 0Fh, 9Fh, 0Ch, 0FFh, 78h, 0FCh
-                db 0F8h, 1Fh, 0Fh, 0CCh, 80h, 7Fh, 30h, 0F8h, 0E0h, 0Fh, 3, 83h, 0, 0FFh, 0Eh, 0E0h
-                db 0C0h, 3, 0, 3Fh, 3, 0FFh, 9Bh, 0C0h, 0, 0, 0, 7Fh, 3Fh, 0FBh, 0B0h, 0, 0, 0, 0, 3Fh
-                db 0Fh, 0F0h, 0A0h, 0, 0, 0, 0, 0Fh, 3, 0A0h, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
-spr_0B:         db 4, 27                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0Eh
-                db 4, 10h, 0, 0, 0, 0, 0, 1Eh, 0Ch, 38h, 10h, 0, 0, 0, 0, 3Ch, 18h, 74h, 20h, 0, 0, 0
-                db 0, 18h, 0, 3Eh, 14h, 0, 0, 3, 0, 4, 0, 1Ch, 8, 0, 0, 0Fh, 3, 8Eh, 4, 0Eh, 4, 0, 0
-                db 1Fh, 0Fh, 0DEh, 8Ch, 14h, 0, 0, 0, 0Fh, 3, 0ECh, 0C0h, 38h, 10h, 2, 0, 3, 1, 0E0h
-                db 0C0h, 7Ch, 28h, 47h, 2, 1, 0, 0C1h, 80h, 0F8h, 10h, 0EEh, 44h, 80h, 0, 83h, 1, 0F0h
-                db 0C0h, 74h, 20h, 1Ch, 8, 3, 1, 0F0h, 0E0h, 0FAh, 50h, 3Ch, 18h, 9, 0, 0E0h, 40h, 77h
-                db 22h, 78h, 30h, 1Eh, 8, 40h, 0, 2Eh, 4, 60h, 0, 3Fh, 1Eh, 0Eh, 0, 4, 0, 0, 0, 1Fh
-                db 0Eh, 1Fh, 0Eh, 60h, 0, 7, 0, 0Eh, 4, 3Eh, 18h, 0F0h, 60h, 0Fh, 7, 84h, 0, 78h, 30h
-                db 0F0h, 60h, 7, 2, 0, 0, 3Fh, 0, 0E0h, 0C0h, 2, 0, 0, 0, 1Fh, 0Eh, 0C0h, 0, 0, 0, 0Fh
-                db 0, 0BEh, 18h, 0, 0, 0, 0, 1Fh, 0Fh, 0F8h, 90h, 0, 0, 0, 0, 0Fh, 3, 90h, 0, 0, 0, 0
-                db 0, 3, 0, 0, 0, 0, 0
-spr_0C:         db 4, 27                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                db 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0Eh, 4, 0, 0, 0, 0, 0, 0, 1Ch, 8, 10h, 0
-                db 0, 0, 0, 0, 8, 0, 38h, 10h, 0, 0, 2, 0, 0, 0, 1Ch, 8, 0, 0, 7, 2, 4, 0, 8, 0, 0, 0
-                db 0Fh, 7, 0CEh, 4, 10h, 0, 0, 0, 7, 1, 0E4h, 0C0h, 38h, 10h, 0, 0, 1, 0, 0C0h, 80h
-                db 10h, 0, 4, 0, 0, 0, 80h, 0, 0F8h, 10h, 2Eh, 4, 0, 0, 1, 0, 0F0h, 0C0h, 74h, 20h, 18h
-                db 0, 1, 0, 0E0h, 0C0h, 0E0h, 40h, 3Ch, 18h, 0, 0, 0C0h, 0, 70h, 20h, 38h, 10h, 0Ch
-                db 0, 0, 0, 20h, 0, 10h, 0, 1Eh, 0Ch, 8, 0, 0, 0, 0, 0, 0Eh, 4, 1Ch, 8, 40h, 0, 3, 0
-                db 4, 0, 3Ch, 18h, 0E0h, 20h, 7, 3, 80h, 0, 38h, 10h, 0F0h, 60h, 3, 0, 0, 0, 18h, 0
-                db 60h, 0, 0, 0, 0, 0, 1Ch, 4, 0, 0, 0, 0, 3, 0, 3Ch, 18h, 0, 0, 0, 0, 7, 3, 98h, 0
-                db 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
-spr_0D:         db 4, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 16h, 0, 0, 0, 0, 0, 0, 0, 3Fh, 16h, 0, 0, 0, 0, 3, 0, 0FFh, 27h, 83h, 0, 0
-                db 0, 7, 3, 0FFh, 0B1h, 0CFh, 83h, 80h, 0, 1Fh, 7, 0FFh, 0, 0FFh, 0CEh, 0F0h, 0, 3Fh
-                db 14h, 0FFh, 78h, 0FFh, 7Eh, 0F8h, 0F0h, 7Fh, 34h, 0FFh, 0CAh, 0FFh, 3Fh, 0F0h, 0C0h
-                db 7Fh, 21h, 0FFh, 0CBh, 0FFh, 1Eh, 0C0h, 80h, 3Fh, 1Fh, 0FFh, 0FBh, 0FFh, 0CFh, 0F0h
-                db 0C0h, 7Fh, 33h, 0FFh, 0F7h, 0FFh, 0FFh, 0F8h, 0F0h, 7Fh, 33h, 0FFh, 0Fh, 0FFh, 0FFh
-                db 0F0h, 0E0h, 3Fh, 1Eh, 0FFh, 0F7h, 0FFh, 7Fh, 0F0h, 0C0h, 1Fh, 0Dh, 0FFh, 0FBh, 0FFh
-                db 93h, 0F8h, 0F0h, 0Fh, 3, 0FFh, 0FCh, 0FFh, 0C7h, 0FCh, 0F8h, 3, 0, 0FFh, 1Fh, 0FFh
-                db 7Ch, 0F8h, 0C0h, 0, 0, 7Fh, 2Bh, 0FFh, 83h, 0E0h, 0C0h, 0, 0, 3Fh, 13h, 0FFh, 0FFh
-                db 0E0h, 0C0h, 0, 0, 1Fh, 0Dh, 0FFh, 0BDh, 0F0h, 0E0h, 0, 0, 0Fh, 0, 0FFh, 3Eh, 0F0h
-                db 0E0h, 0, 0, 0Fh, 6, 0FEh, 9Ch, 0F8h, 70h, 0, 0, 7, 3, 0DCh, 88h, 7Ch, 38h, 0, 0, 3
-                db 1, 0C8h, 80h, 78h, 0, 0, 0, 1, 0, 0E0h, 0C0h, 0, 0, 0, 0, 0, 0, 0C0h, 0, 0, 0
-spr_0E:         db 3, 25                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1Ch, 0, 70h, 0, 0, 0, 3Fh, 1Ch, 0FCh, 70h
-                db 0, 0, 1Fh, 0Fh, 0FEh, 3Ch, 0, 0, 0Fh, 7, 0FEh, 1Ch, 0, 0, 0Fh, 6, 0FCh, 78h, 0, 0
-                db 8Fh, 5, 0F8h, 0F0h, 1, 0, 0CFh, 86h, 0F8h, 18h, 3, 1, 0EFh, 47h, 0F8h, 0E8h, 11h
-                db 0, 0FFh, 0E7h, 0F8h, 0F0h, 3Bh, 11h, 0FFh, 0E9h, 0F8h, 0F0h, 7Fh, 28h, 0FFh, 5Eh
-                db 0F8h, 70h, 7Fh, 3Dh, 0FFh, 3Fh, 0F8h, 0B0h, 3Fh, 1Dh, 0FFh, 0DFh, 0FCh, 0F8h, 1Fh
-                db 3, 0FFh, 0EFh, 0FCh, 0F8h, 1Fh, 0Fh, 0FFh, 0FFh, 0FCh, 0F8h, 0Fh, 1, 0FFh, 0F1h, 0F8h
-                db 0E0h, 1, 0, 0FFh, 7Bh, 0F8h, 0F0h, 0, 0, 7Fh, 1Eh, 0F8h, 70h, 0, 0, 3Fh, 12h, 0F8h
-                db 70h, 0, 0, 3Fh, 13h, 0F8h, 0F0h, 0, 0, 3Fh, 1Fh, 0F0h, 0E0h, 0, 0, 1Fh, 0Fh, 0E0h
-                db 0C0h, 0, 0, 0Fh, 0, 0C0h, 0
-spr_0F:         db 3, 25                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 6, 0, 0, 0, 0, 0, 0CFh, 6, 80h, 0, 0, 0, 1Fh, 0Fh, 0C0h, 80h, 0, 0, 0Fh, 7
-                db 0E0h, 0C0h, 0, 0, 7, 1, 0F0h, 0C0h, 0, 0, 3, 1, 0FCh, 0E0h, 0, 0, 3, 0, 0FEh, 0ECh
-                db 0, 0, 47h, 2, 0FEh, 0F4h, 0, 0, 0E7h, 42h, 0FCh, 10h, 1, 0, 0F7h, 0A3h, 0FCh, 0E8h
-                db 8, 0, 0FFh, 73h, 0F8h, 0F0h, 1Dh, 8, 0FFh, 0F4h, 0FCh, 0F8h, 3Fh, 14h, 0FFh, 2Fh
-                db 0FCh, 38h, 3Fh, 1Eh, 0FFh, 9Fh, 0FCh, 0D8h, 1Fh, 0Ch, 0FFh, 0EFh, 0FEh, 0FCh, 0Fh
-                db 1, 0FFh, 0F7h, 0FEh, 0FCh, 0Fh, 7, 0FFh, 0FFh, 0FEh, 0FCh, 7, 0, 0FFh, 0F8h, 0FCh
-                db 0F0h, 0, 0, 0FFh, 3Dh, 0FCh, 0F8h, 0, 0, 3Fh, 0Fh, 0FCh, 38h, 0, 0, 1Fh, 9, 0FCh
-                db 38h, 0, 0, 1Fh, 9, 0FCh, 0F8h, 0, 0, 1Fh, 0Fh, 0F8h, 0F0h, 0, 0, 0Fh, 7, 0F0h, 0E0h
-                db 0, 0, 7, 0, 0E0h, 0
-spr_10:         db 3, 29                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0C0h, 0, 0, 0, 1, 0, 0F0h, 0C0h, 0, 0, 3, 1, 0F8h, 0F0h, 0, 0, 3, 1, 0F8h, 0F0h
-                db 0, 0, 3, 0, 0F0h, 0C0h, 0, 0, 7, 2, 0E0h, 0C0h, 0, 0, 0Fh, 6, 0F0h, 0E0h, 0, 0, 0Fh
-                db 6, 0FCh, 0E0h, 0, 0, 1Fh, 0Fh, 0FEh, 0ECh, 0, 0, 3Fh, 1Fh, 0FEh, 0F4h, 0, 0, 3Fh
-                db 18h, 0FCh, 70h, 0, 0, 1Fh, 7, 0F8h, 90h, 0, 0, 3Fh, 1Fh, 0F0h, 0E0h, 0, 0, 7Fh, 3Fh
-                db 0F0h, 0E0h, 0, 0, 7Fh, 3Fh, 0F0h, 0E0h, 0, 0, 7Fh, 3Fh, 0FCh, 0F0h, 0, 0, 7Fh, 3Fh
-                db 0FFh, 0FCh, 0, 0, 7Fh, 38h, 0FFh, 7Fh, 0C0h, 0, 7Fh, 37h, 0FFh, 0BFh, 0E0h, 0C0h
-                db 7Fh, 2Fh, 0FFh, 0DFh, 0F8h, 0E0h, 3Fh, 1Fh, 0FFh, 0EFh, 0FCh, 0E8h, 7Fh, 3Fh, 0FFh
-                db 0F1h, 0FEh, 0ECh, 7Fh, 3Fh, 0FFh, 0F6h, 0FFh, 52h, 3Fh, 1Fh, 0FFh, 0EFh, 0FEh, 18h
-                db 1Fh, 0Fh, 0EFh, 0C6h, 0F8h, 0C0h, 0Fh, 7, 0C7h, 81h, 0E0h, 40h, 7, 0, 83h, 1, 0C0h
-                db 0, 0, 0, 1, 0, 0C0h, 80h, 0, 0, 0, 0, 80h, 0
-spr_11:         db 3, 28                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18h, 0, 0, 0, 0, 0, 3Eh, 18h, 0Ch, 0, 0, 0, 3Fh
-                db 1Eh, 9Eh, 0Ch, 0, 0, 3Fh, 1Fh, 0DFh, 1Eh, 80h, 0, 3Fh, 1Dh, 0FFh, 9Fh, 0C0h, 80h
-                db 1Fh, 0Ch, 0FFh, 7Fh, 80h, 0, 1Fh, 0Dh, 0FFh, 0FCh, 0, 0, 1Fh, 0Bh, 0FCh, 0F8h, 0
-                db 0, 1Fh, 0Ch, 0F8h, 30h, 0, 0, 0Fh, 3, 0F0h, 0C0h, 0, 0, 1Fh, 0Fh, 0F8h, 0F0h, 0, 0
-                db 3Fh, 1Fh, 0F8h, 0F0h, 0, 0, 3Fh, 1Fh, 0F8h, 0F0h, 0, 0, 3Fh, 1Fh, 0FEh, 0F8h, 0, 0
-                db 3Fh, 1Fh, 0FFh, 0FEh, 80h, 0, 3Fh, 1Ch, 0FFh, 3Fh, 0E0h, 80h, 3Fh, 1Bh, 0FFh, 0DFh
-                db 0F0h, 0E0h, 3Fh, 17h, 0FFh, 0EFh, 0FCh, 0F0h, 1Fh, 0Fh, 0FFh, 0F3h, 0FEh, 0F4h, 3Fh
-                db 1Fh, 0FFh, 0F8h, 0FFh, 0F6h, 3Fh, 1Fh, 0FFh, 0FBh, 0FFh, 2Ah, 1Fh, 0Fh, 0FFh, 0F7h
-                db 0FEh, 8Ch, 0Fh, 7, 0F7h, 0E3h, 0FCh, 60h, 7, 3, 0E3h, 0C0h, 0F0h, 0A0h, 3, 0, 0C0h
-                db 0, 0E0h, 40h, 0, 0, 0, 0, 40h, 0
-spr_12:         db 4, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 2, 0, 0, 0, 10h, 0, 0, 0, 1Fh, 2, 0E0h, 0, 38h, 10h, 0, 0, 3Fh, 19h, 0FFh, 0E0h
-                db 0FCh, 28h, 0, 0, 7Fh, 0, 0FFh, 0EFh, 0FCh, 0F8h, 1Fh, 0, 0FFh, 74h, 0FFh, 0C1h, 0F8h
-                db 0C0h, 0BFh, 1Fh, 0FFh, 0E8h, 0FFh, 0DEh, 0FCh, 0B8h, 3Fh, 1Fh, 0FFh, 8Ch, 0FFh, 0FFh
-                db 0F8h, 70h, 1Fh, 0, 0FFh, 6Ch, 0FFh, 3Fh, 0FCh, 88h, 0, 0, 7Fh, 16h, 0FFh, 0FFh, 0FCh
-                db 0B8h, 0, 0, 0FFh, 66h, 0FFh, 0FFh, 0F8h, 80h, 0, 0, 0FFh, 7Bh, 0FFh, 0FFh, 0C0h, 80h
-                db 0, 0, 7Fh, 0Dh, 0FFh, 0FFh, 0C0h, 80h, 0, 0, 0FFh, 76h, 0FFh, 0FFh, 0C0h, 80h, 0
-                db 0, 0FFh, 12h, 0FFh, 0BFh, 80h, 0, 1, 0, 0FFh, 0A8h, 0FFh, 0BEh, 0, 0, 1, 0, 0FFh
-                db 83h, 0FFh, 0, 0, 0, 0, 0, 0FFh, 7Ch, 0C0h, 80h, 0, 0, 0, 0, 7Fh, 13h, 0C0h, 80h, 0
-                db 0, 0, 0, 1Fh, 0Fh, 0C0h, 80h, 0, 0, 0, 0, 0Fh, 7, 0C0h, 80h, 0, 0, 0, 0, 7, 3, 0C0h
-                db 80h, 0, 0, 0, 0, 3, 1, 0C0h, 80h, 0, 0, 0, 0, 1, 0, 0C0h, 80h, 0, 0, 0, 0, 0, 0, 80h
-                db 0, 0, 0
-spr_13:         db 4, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 40h, 0, 0, 0, 0, 0, 0, 0, 0E0h, 40h, 0, 0, 0, 0, 5, 0, 0F0h, 0A0h, 0, 0, 0
-                db 0, 0Fh, 5, 0FCh, 0F0h, 0, 0, 0, 0, 1Fh, 0Ah, 0FFh, 4Ch, 0, 0, 0, 0, 1Fh, 0Fh, 0FFh
-                db 0BFh, 0CCh, 0, 0, 0, 0Fh, 5, 0FFh, 7Fh, 0FFh, 0CCh, 0, 0, 1Fh, 0Eh, 0FFh, 0FFh, 0FFh
-                db 0EFh, 80h, 0, 0Fh, 2, 0FFh, 0FFh, 0FFh, 0EDh, 0C0h, 80h, 3, 0, 0FFh, 0FFh, 0FFh, 0FCh
-                db 80h, 0, 1, 0, 0FFh, 0FFh, 0FFh, 0FEh, 0, 0, 1, 0, 0FFh, 0FFh, 0FFh, 0FEh, 0, 0, 0
-                db 0, 0FFh, 7Fh, 0FEh, 0E0h, 0, 0, 0, 0, 0FFh, 7Fh, 0FFh, 0FCh, 0E0h, 0, 0, 0, 7Fh, 3Fh
-                db 0FFh, 87h, 0F0h, 0C0h, 0, 0, 3Fh, 1Fh, 0FFh, 78h, 0F0h, 0, 0, 0, 1Fh, 6, 0FFh, 0FCh
-                db 0FCh, 70h, 0, 0, 7, 1, 0FFh, 8Eh, 0FEh, 0BCh, 0, 0, 3, 1, 0FFh, 76h, 0FFh, 8Eh, 0
-                db 0, 3, 0, 0FFh, 0FAh, 8Fh, 2, 0, 0, 0Fh, 3, 0FFh, 0FAh, 2, 0, 0, 0, 1Fh, 0Fh, 0FFh
-                db 0F6h, 0, 0, 0, 0, 3Fh, 1Eh, 0FEh, 0Ch, 0, 0, 0, 0, 1Eh, 0, 0Ch, 0, 0, 0
-spr_14:         db 3, 21                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0FFh, 0, 0, 0, 3, 0, 0FFh, 0FFh, 0C0h, 0, 0Fh, 3, 0FFh, 0FFh, 0F0h, 0C0h, 3Fh
-                db 0Fh, 0FFh, 0FFh, 0F8h, 0F0h, 7Fh, 3Fh, 0FFh, 0FFh, 0FCh, 0F8h, 0FFh, 7Fh, 0FFh, 0FFh
-                db 0FEh, 0FCh, 0FFh, 71h, 0FFh, 0FFh, 0FFh, 0FEh, 0FFh, 60h, 0FFh, 0FFh, 0FFh, 0FEh
-                db 0FFh, 60h, 0FFh, 7Fh, 0FFh, 0FEh, 7Fh, 30h, 0FFh, 7Fh, 0FFh, 0FEh, 3Fh, 18h, 0FFh
-                db 3Fh, 0FEh, 0FCh, 1Fh, 0Eh, 0FFh, 3Fh, 0FCh, 0F8h, 0Fh, 7, 0FFh, 3Fh, 0F8h, 0F0h, 7
-                db 3, 0FFh, 1Fh, 0F0h, 0E0h, 7, 3, 0FFh, 9Fh, 0E0h, 0C0h, 3, 1, 0FFh, 0CFh, 0C0h, 80h
-                db 3, 1, 0FFh, 0FFh, 0C0h, 80h, 1, 0, 0FFh, 0FFh, 80h, 0, 0, 0, 0FFh, 7Eh, 0, 0, 0, 0
-                db 7Eh, 38h, 0, 0, 0, 0, 38h, 0, 0, 0
-spr_15:         db 3, 24                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 3Ch, 0, 0, 0, 1, 0, 0FFh, 3Ch, 80h, 0, 7, 1, 0FFh, 0FFh, 0E0h, 80h, 0Fh, 7
-                db 0FFh, 0FFh, 0F0h, 0E0h, 1Fh, 0Fh, 0FFh, 0FFh, 0F8h, 0F0h, 3Fh, 1Fh, 0FFh, 0FFh, 0FCh
-                db 0F8h, 3Fh, 19h, 0FFh, 0FFh, 0FCh, 0F8h, 7Fh, 30h, 0FFh, 0FFh, 0FFh, 0FCh, 7Fh, 30h
-                db 0FFh, 0FFh, 0FEh, 0FCh, 3Fh, 18h, 0FFh, 7Fh, 0FCh, 0F8h, 3Fh, 1Ch, 0FFh, 7Fh, 0FCh
-                db 0F8h, 1Fh, 0Ch, 0FFh, 7Fh, 0F8h, 0F0h, 1Fh, 0Eh, 0FFh, 7Fh, 0F8h, 0F0h, 0Fh, 6, 0FFh
-                db 7Fh, 0F0h, 0E0h, 0Fh, 6, 0FFh, 3Fh, 0F0h, 0E0h, 0Fh, 7, 0FFh, 3Fh, 0F0h, 0E0h, 7
-                db 3, 0FFh, 3Fh, 0E0h, 0C0h, 7, 3, 0FFh, 0BFh, 0E0h, 0C0h, 7, 3, 0FFh, 0BFh, 0E0h, 0C0h
-                db 3, 1, 0FFh, 0FFh, 0C0h, 80h, 3, 1, 0FFh, 0FFh, 0C0h, 80h, 1, 0, 0FFh, 0FFh, 80h, 0
-                db 0, 0, 0FFh, 7Eh, 0, 0, 0, 0, 7Eh, 0, 0, 0
-spr_16:         db 3, 26                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 3Ch, 0, 0, 0, 1, 0, 0FFh, 3Ch, 80h, 0, 3, 1, 0FFh, 0FFh, 0C0h, 80h, 7, 3, 0FFh
-                db 0FFh, 0E0h, 0C0h, 0Fh, 7, 0FFh, 0FFh, 0F0h, 0E0h, 1Fh, 0Eh, 0FFh, 0FFh, 0F8h, 0F0h
-                db 1Fh, 0Ch, 0FFh, 0FFh, 0F8h, 0F0h, 1Fh, 8, 0FFh, 0FFh, 0F8h, 0F0h, 1Fh, 8, 0FFh, 0FFh
-                db 0F8h, 0F0h, 1Fh, 0Ch, 0FFh, 7Fh, 0F8h, 0F0h, 1Fh, 0Ch, 0FFh, 7Fh, 0F8h, 0F0h, 1Fh
-                db 0Eh, 0FFh, 7Fh, 0F8h, 0F0h, 0Fh, 6, 0FFh, 3Fh, 0F0h, 0E0h, 0Fh, 7, 0FFh, 3Fh, 0F0h
-                db 0E0h, 7, 3, 0FFh, 3Fh, 0E0h, 0C0h, 7, 3, 0FFh, 3Fh, 0E0h, 0C0h, 3, 1, 0FFh, 3Fh, 0C0h
-                db 80h, 3, 1, 0FFh, 3Fh, 0C0h, 80h, 3, 1, 0FFh, 0BFh, 0C0h, 80h, 3, 1, 0FFh, 0BFh, 0C0h
-                db 80h, 1, 0, 0FFh, 9Fh, 80h, 0, 1, 0, 0FFh, 0DFh, 80h, 0, 1, 0, 0FFh, 0DFh, 80h, 0
-                db 0, 0, 0FFh, 7Eh, 0, 0, 0, 0, 7Eh, 3Ch, 0, 0, 0, 0, 3Ch, 0, 0, 0
-spr_17:         db 4, 23                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0Eh, 4, 0, 0, 0, 0, 0
-                db 0, 1Eh, 0Ch, 0, 0, 0, 0, 0, 0, 1Eh, 0Ch, 0, 0, 0, 0, 0, 0, 3Eh, 1Ch, 4, 0, 0, 0, 0
-                db 0, 3Eh, 1Ch, 0Eh, 4, 0, 0, 7, 0, 7Ch, 38h, 1Eh, 0Ch, 0, 0, 3Fh, 7, 0FCh, 78h, 7Ch
-                db 18h, 40h, 0, 0FFh, 3Eh, 0FBh, 0F0h, 0FCh, 78h, 0F9h, 40h, 0FFh, 0FFh, 0FFh, 6Bh, 0F8h
-                db 0F0h, 0FFh, 78h, 0FFh, 7Fh, 0FFh, 9Bh, 0F0h, 0E0h, 7Fh, 3Fh, 0FFh, 0BFh, 0FFh, 0FDh
-                db 0E2h, 80h, 3Fh, 1Fh, 0FFh, 0BFh, 0FFh, 0FEh, 0DFh, 2, 1Fh, 3, 0FFh, 7Fh, 0FFh, 0FFh
-                db 0FFh, 0DEh, 4Fh, 4, 0FFh, 0FFh, 0FFh, 0FFh, 0FEh, 0DCh, 0FFh, 43h, 0FFh, 0FFh, 0FFh
-                db 0FFh, 0FCh, 0D0h, 0FFh, 7Dh, 0FFh, 0FFh, 0FFh, 0FFh, 0D0h, 80h, 7Fh, 3Eh, 0FFh, 0FFh
-                db 0FFh, 0FFh, 80h, 0, 3Fh, 1Fh, 0FFh, 3Fh, 0FFh, 0FCh, 0, 0, 1Fh, 0, 0FFh, 87h, 0FCh
-                db 0E0h, 0, 0, 1, 0, 0FFh, 0F8h, 0E0h, 0, 0, 0, 0, 0, 0F8h, 0, 0, 0, 0, 0
-spr_18:         db 4, 23                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 10h, 0, 0, 0, 0, 0, 0, 0, 38h, 10h, 0, 0, 0, 0, 0, 0, 38h, 10h, 0, 0
-                db 0, 0, 0, 0, 3Ch, 18h, 0, 0, 0, 0, 0, 0, 3Ch, 18h, 0, 0, 0, 0, 0, 0, 7Ch, 38h, 0, 0
-                db 0, 0, 0, 0, 7Ch, 38h, 0, 0, 0, 0, 7, 0, 0FCh, 78h, 6, 0, 40h, 0, 3Fh, 7, 0F8h, 70h
-                db 1Fh, 6, 0F0h, 40h, 0FFh, 3Eh, 0FBh, 0F0h, 0FEh, 1Ch, 0FFh, 70h, 0FFh, 0FFh, 0FFh
-                db 6Bh, 0FEh, 0FCh, 7Fh, 3Eh, 0FFh, 7Fh, 0FFh, 9Bh, 0FCh, 0F8h, 3Fh, 1Fh, 0FFh, 0BFh
-                db 0FFh, 0FDh, 0FEh, 0E4h, 1Fh, 0Fh, 0FFh, 0BFh, 0FFh, 0FEh, 0FEh, 0Ch, 0Fh, 3, 0FFh
-                db 7Fh, 0FFh, 0FFh, 0FCh, 0D8h, 0Fh, 4, 0FFh, 0FFh, 0FFh, 0FFh, 0FCh, 0D8h, 0Fh, 3, 0FFh
-                db 0FFh, 0FFh, 0FFh, 0F8h, 0D0h, 7Fh, 0Dh, 0FFh, 0FFh, 0FFh, 0FFh, 0D0h, 0, 0FFh, 7Eh
-                db 0FFh, 0FFh, 0FFh, 0FFh, 80h, 0, 7Fh, 0Fh, 0FFh, 3Fh, 0FFh, 0FCh, 0, 0, 0Fh, 0, 0FFh
-                db 0C7h, 0FCh, 0E0h, 0, 0, 0, 0, 0FFh, 38h, 0E0h, 0, 0, 0, 0, 0, 38h, 0, 0, 0, 0, 0
-spr_19:         db 4, 23                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 1, 88h, 0, 0, 0, 0
-                db 0, 7, 3, 9Ch, 8, 0, 0, 0, 0, 0Fh, 7, 0BCh, 18h, 0, 0, 0, 0, 1Fh, 0Eh, 3Ch, 18h, 0
-                db 0, 7, 0, 7Fh, 1Eh, 7Ch, 38h, 0, 0, 3Fh, 7, 0FFh, 7Ch, 0FCh, 78h, 0, 0, 0FFh, 3Eh
-                db 0FFh, 0F9h, 0F8h, 0F0h, 41h, 0, 0FFh, 0FFh, 0FFh, 73h, 0F0h, 0E0h, 0FFh, 40h, 0FFh
-                db 7Fh, 0FFh, 8Bh, 0E0h, 0C0h, 0FFh, 7Fh, 0FFh, 0BFh, 0FFh, 0FDh, 0C0h, 80h, 7Fh, 3Fh
-                db 0FFh, 0BFh, 0FFh, 0FEh, 0D2h, 0, 7Fh, 0Fh, 0FFh, 7Fh, 0FFh, 0FFh, 0FFh, 0D2h, 0FFh
-                db 40h, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0DEh, 0FFh, 73h, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh
-                db 0DCh, 7Fh, 3Dh, 0FFh, 0FFh, 0FFh, 0FFh, 0DCh, 80h, 3Fh, 1Eh, 0FFh, 0FFh, 0FFh, 0FFh
-                db 80h, 0, 1Fh, 7, 0FFh, 3Fh, 0FFh, 0FCh, 0, 0, 7, 0, 0FFh, 0C7h, 0FCh, 0E0h, 0, 0, 3
-                db 1, 0FFh, 0F8h, 0E0h, 0, 0, 0, 1, 0, 0F8h, 0E0h, 0, 0, 0, 0, 0, 0, 0E0h, 0, 0, 0, 0
-                db 0
-spr_1A:         db 3, 26                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 6, 0, 0, 0, 0, 0, 0Fh, 6, 0, 0, 0, 0, 1Fh, 0Eh, 0, 0, 0, 0, 3Eh, 1Ch, 0, 0
-                db 0, 0, 3Eh, 1Ch, 4, 0, 0, 0, 3Fh, 1Eh, 0Eh, 4, 0, 0, 7Fh, 3Eh, 0Eh, 4, 20h, 0, 0FFh
-                db 7Eh, 1Fh, 0Ah, 71h, 20h, 0FFh, 0FFh, 9Fh, 0Ah, 71h, 20h, 0FFh, 0FFh, 9Fh, 0Ah, 71h
-                db 20h, 0FFh, 0FFh, 9Fh, 0Ah, 79h, 30h, 0FFh, 0FFh, 0BFh, 12h, 79h, 30h, 0FFh, 0FFh
-                db 0FFh, 32h, 7Dh, 38h, 0FFh, 0FFh, 0FFh, 0F2h, 7Dh, 38h, 0FFh, 0FFh, 0FFh, 0F2h, 7Fh
-                db 3Ch, 0FFh, 0FBh, 0FFh, 0F2h, 7Fh, 3Fh, 0FFh, 0D3h, 0FFh, 0F2h, 7Fh, 3Fh, 0FFh, 91h
-                db 0FFh, 0FAh, 7Fh, 3Fh, 0FFh, 91h, 0FFh, 0FAh, 7Fh, 3Fh, 0FFh, 91h, 0FFh, 0BEh, 7Fh
-                db 3Fh, 0FFh, 93h, 0BFh, 0Eh, 7Fh, 3Eh, 0FFh, 9Bh, 8Eh, 0, 7Fh, 3Ch, 0FFh, 0FFh, 80h
-                db 0, 7Dh, 3Ch, 0FFh, 7Eh, 0, 0, 3Ch, 18h, 7Eh, 3Ch, 0, 0, 18h, 0, 3Ch, 0, 0, 0
-spr_1B:         db 3, 26                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 10h, 0, 0, 0, 0, 0, 38h, 10h, 0, 0, 0, 0, 7Ch, 38h, 0, 0, 0, 0, 3Eh, 1Ch, 4
-                db 0, 0, 0, 1Fh, 0Eh, 0Eh, 4, 0, 0, 1Fh, 0Eh, 0Eh, 4, 20h, 0, 3Fh, 1Eh, 1Fh, 0Ah, 70h
-                db 20h, 7Fh, 3Eh, 1Fh, 0Ah, 70h, 20h, 0FFh, 7Eh, 1Fh, 0Ah, 71h, 20h, 0FFh, 0FFh, 9Fh
-                db 0Ah, 79h, 30h, 0FFh, 0FFh, 0BFh, 1Ah, 79h, 30h, 0FFh, 0FFh, 0FFh, 32h, 7Dh, 38h, 0FFh
-                db 0FFh, 0FFh, 72h, 7Dh, 38h, 0FFh, 0FFh, 0FFh, 0F2h, 7Fh, 3Ch, 0FFh, 0FFh, 0FFh, 0F2h
-                db 7Fh, 3Eh, 0FFh, 0FBh, 0FFh, 0F2h, 7Fh, 3Fh, 0FFh, 0D3h, 0FFh, 0F2h, 7Fh, 3Fh, 0FFh
-                db 91h, 0FFh, 0FAh, 7Fh, 3Fh, 0FFh, 91h, 0FFh, 0FAh, 7Fh, 3Fh, 0FFh, 91h, 0FFh, 0Eh
-                db 7Fh, 3Fh, 0FFh, 93h, 8Eh, 0, 7Fh, 3Eh, 0FFh, 9Bh, 80h, 0, 7Fh, 3Ch, 0FFh, 0FFh, 80h
-                db 0, 3Ch, 18h, 0FFh, 7Eh, 0, 0, 18h, 0, 7Eh, 3Ch, 0, 0, 0, 0, 3Ch, 0, 0, 0
-spr_1C:         db 2, 14                                        ; DATA XREF: RAM:sprite_tblo
-                db 3, 0, 0E0h, 0, 7, 3, 0F0h, 0E0h, 0Fh, 7, 0FCh, 0F0h, 1Fh, 7, 0FEh, 0ECh, 3Fh, 1Fh
-                db 0FFh, 0FEh, 7Fh, 3Fh, 0FFh, 0FEh, 7Fh, 3Dh, 0FFh, 9Eh, 3Fh, 1Eh, 0FEh, 5Ch, 7Fh, 3Fh
-                db 0FFh, 0DEh, 7Fh, 3Dh, 0FFh, 0E6h, 3Fh, 1Bh, 0FFh, 0FEh, 1Bh, 1, 0FEh, 0DCh, 1, 0
-                db 0FCh, 0C0h, 0, 0, 0C0h, 0
-spr_1D:         db 3, 13                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0FCh, 0, 0, 0, 1, 0, 0FFh, 0FCh, 0C0h, 0, 3Bh, 1, 0FFh, 0FBh, 0E0h, 0C0h, 7Fh
-                db 3Bh, 0FFh, 0FFh, 0F0h, 0E0h, 0FFh, 7Fh, 0FFh, 0FFh, 0F8h, 0F0h, 0FFh, 7Fh, 0FFh, 0FBh
-                db 0F8h, 0F0h, 0FFh, 7Dh, 0FFh, 0E5h, 0F0h, 0C0h, 0FFh, 7Eh, 0FFh, 1Dh, 0F8h, 0F0h, 7Fh
-                db 3Fh, 0FFh, 0FEh, 0FCh, 78h, 3Fh, 7, 0FFh, 0FFh, 0FCh, 0F8h, 1Fh, 0Fh, 0FFh, 0FBh
-                db 0F8h, 0F0h, 0Fh, 6, 0FBh, 0F0h, 0F0h, 0E0h, 6, 0, 0F0h, 0, 0E0h, 0
-spr_1E:         db 3, 17                                        ; DATA XREF: RAM:sprite_tblo
-                db 1, 0, 0F8h, 0, 0, 0, 7, 1, 0FFh, 0F8h, 0, 0, 0Fh, 7, 0FFh, 0FFh, 0BCh, 0, 1Fh, 0Fh
-                db 0FFh, 0FFh, 0FEh, 0BCh, 3Fh, 0Fh, 0FFh, 0FFh, 0FFh, 0FEh, 7Fh, 3Fh, 0FFh, 0FFh, 0FFh
-                db 0FEh, 0FFh, 7Fh, 0FFh, 7Ch, 0FFh, 0FEh, 0FFh, 7Fh, 0FFh, 81h, 0FFh, 0FEh, 0FFh, 7Fh
-                db 0FFh, 0C1h, 0FEh, 0FCh, 0FFh, 7Dh, 0FFh, 80h, 0FCh, 78h, 7Fh, 3Dh, 0FFh, 0E3h, 0FEh
-                db 0FCh, 0FFh, 7Dh, 0FFh, 0F7h, 0FFh, 0FEh, 0FFh, 63h, 0FFh, 0FFh, 0FFh, 0FEh, 0FFh
-                db 7Fh, 0FFh, 0FFh, 0FFh, 0FEh, 7Fh, 3Bh, 0FFh, 0FDh, 0FEh, 0FCh, 3Bh, 1, 0FDh, 0F0h
-                db 0FCh, 0F0h, 1, 0, 0F0h, 0, 0F0h, 0
-spr_1F:         db 3, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 3Fh, 0, 0, 0, 0F8h, 0, 7Fh, 3Fh, 81h, 0, 0FCh, 0F8h, 0FFh, 7Fh, 0C3h, 81h, 0FEh, 0FCh
-                db 0FFh, 7Eh, 81h, 0, 0FCh, 38h, 7Eh, 3Ch, 0, 0, 38h, 0, 3Ch, 0, 0, 0, 0Ch, 0, 0, 0
-                db 0, 0, 1Eh, 0Ch, 0, 0, 0, 0, 3Fh, 1Eh, 18h, 0, 0, 0, 3Fh, 1Eh, 3Ch, 18h, 0, 0, 3Fh
-                db 1Eh, 7Eh, 3Ch, 0, 0, 3Fh, 1Eh, 7Eh, 2Ch, 3Ch, 0, 1Eh, 4, 7Eh, 24h, 7Eh, 3Ch, 1Ch
-                db 8, 7Eh, 3Ch, 7Fh, 3Eh, 8, 0, 3Ch, 18h, 3Eh, 1Ch, 0, 0, 18h, 0, 1Ch, 0, 0, 0
-spr_20:         db 2, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 8, 0, 0, 0, 1Ch, 8, 40h, 0, 3Eh, 1Ch, 0E4h, 40h, 3Fh, 8, 4Eh, 4, 7Fh, 27h, 0DFh, 0Eh
-                db 3Fh, 0Bh, 0FEh, 0C4h, 3Fh, 1Ch, 0F4h, 0A0h, 5Fh, 0Dh, 0FCh, 0B0h, 0FFh, 5Ah, 0FEh
-                db 54h, 5Fh, 5, 0FCh, 0F0h, 0Fh, 1, 0FCh, 0A8h, 1Fh, 9, 0F8h, 40h, 19h, 0, 50h, 0, 39h
-                db 10h, 38h, 10h, 3Fh, 19h, 90h, 0, 19h, 0, 0, 0
-spr_21:         db 2, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 8, 0, 0, 0, 1Ch, 8, 20h, 0, 9, 0, 70h, 20h, 23h, 1, 0A8h, 0, 73h, 20h, 0BCh, 8, 7Fh
-                db 33h, 0F8h, 0A0h, 3Fh, 6, 0E2h, 0C0h, 1Fh, 0Dh, 0FFh, 62h, 4Fh, 6, 0FAh, 0F0h, 0FFh
-                db 4Ah, 0F8h, 0E0h, 4Fh, 3, 0FCh, 88h, 0Fh, 3, 0FEh, 5Ch, 1Fh, 9, 0DCh, 88h, 3Fh, 1Ch
-                db 0C8h, 0, 1Ch, 8, 0E0h, 40h, 8, 0, 40h, 0
-spr_22:         db 2, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 8, 0, 40h, 0, 1Ch, 8, 0E8h, 40h, 0Bh, 0, 0FCh, 68h, 7, 3, 0F8h, 0, 27h, 1, 0FAh, 0D0h
-                db 7Fh, 27h, 0FFh, 0BAh, 3Fh, 5, 0FAh, 0D0h, 3Fh, 0Fh, 0FCh, 0B0h, 7Fh, 32h, 0FEh, 0D4h
-                db 7Fh, 33h, 0FCh, 0B0h, 3Fh, 1, 0F2h, 60h, 0Fh, 2, 0FFh, 32h, 1Fh, 8, 0FAh, 80h, 9
-                db 0, 9Ch, 8, 3, 1, 88h, 0, 1, 0, 0, 0
-                db  38h ; 8
-                db  6Ch ; l
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db  6Ch ; l
-                db  38h ; 8
-                db  18h
-                db  38h ; 8
-                db  58h ; X
-                db  18h
-                db  18h
-                db  18h
-                db  18h
-                db  7Ch ; |
-                db  38h ; 8
-                db  4Ch ; L
-                db  0Ch
-                db  3Ch ; <
-                db  60h ; `
-                db 0C2h ; ¬
-                db 0C2h ; ¬
-                db 0FEh ; ˛
-                db  38h ; 8
-                db  4Ch ; L
-                db  0Ch
-                db  3Ch ; <
-                db  0Eh
-                db  86h ; Ü
-                db  86h ; Ü
-                db 0FCh ; ¸
-                db  18h
-                db  38h ; 8
-                db  58h ; X
-                db  9Ah ; ö
-                db 0FEh ; ˛
-                db  1Ah
-                db  18h
-                db  7Ch ; |
-                db 0FEh ; ˛
-                db 0C2h ; ¬
-                db 0C0h ; ¿
-                db 0FCh ; ¸
-                db    6
-                db    6
-                db  86h ; Ü
-                db  7Ch ; |
-                db  1Eh
-                db  32h ; 2
-                db  60h ; `
-                db 0ECh ; Ï
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  7Ch ; |
-                db  7Eh ; ~
-                db  46h ; F
-                db  4Ch ; L
-                db  0Ch
-                db  18h
-                db  18h
-                db  38h ; 8
-                db 0F8h ; ¯
-                db  38h ; 8
-                db  6Ch ; l
-                db  6Ch ; l
-                db  7Ch ; |
-                db 0FEh ; ˛
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  7Ch ; |
-                db  7Ch ; |
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  7Ch ; |
-                db  0Ch
-                db  98h ; ò
-                db 0F0h ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  18h
-                db  18h
-                db    0
-                db 0C3h ; √
-                db 0C6h ; ∆
-                db  0Ch
-                db  18h
-                db  30h ; 0
-                db  63h ; c
-                db 0C3h ; √
-                db  3Ch ; <
-                db  42h ; B
-                db  99h ; ô
-                db 0A1h ; °
-                db 0A1h ; °
-                db  99h ; ô
-                db  42h ; B
-                db  3Ch ; <
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  0Ch
-                db  1Ch
-                db  2Eh ; .
-                db  66h ; f
-                db  46h ; F
-                db 0CEh ; Œ
-                db 0D6h ; ÷
-                db  66h ; f
-                db 0F8h ; ¯
-                db  6Ch ; l
-                db  6Ch ; l
-                db  78h ; x
-                db  6Ch ; l
-                db  66h ; f
-                db  66h ; f
-                db 0FCh ; ¸
-                db  0Eh
-                db  32h ; 2
-                db  60h ; `
-                db  40h ; @
-                db 0C0h ; ¿
-                db 0C2h ; ¬
-                db 0E6h ; Ê
-                db  7Ch ; |
-                db  60h ; `
-                db  70h ; p
-                db  68h ; h
-                db  6Ch ; l
-                db  66h ; f
-                db  66h ; f
-                db  66h ; f
-                db 0FCh ; ¸
-                db 0FEh ; ˛
-                db  60h ; `
-                db  64h ; d
-                db  7Ch ; |
-                db  64h ; d
-                db  60h ; `
-                db  7Ah ; z
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  7Ah ; z
-                db  60h ; `
-                db  64h ; d
-                db  7Ch ; |
-                db  64h ; d
-                db  60h ; `
-                db  60h ; `
-                db  0Eh
-                db  30h ; 0
-                db  60h ; `
-                db 0C6h ; ∆
-                db 0CEh ; Œ
-                db 0F6h ; ˆ
-                db  66h ; f
-                db  0Eh
-                db 0EEh ; Ó
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0FEh ; ˛
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0EEh ; Ó
-                db  7Ch ; |
-                db  18h
-                db  18h
-                db  18h
-                db  18h
-                db  18h
-                db  18h
-                db  7Ch ; |
-                db  1Eh
-                db    6
-                db    6
-                db  86h ; Ü
-                db  86h ; Ü
-                db 0C6h ; ∆
-                db  7Eh ; ~
-                db  1Ch
-                db 0E4h ; ‰
-                db  68h ; h
-                db  70h ; p
-                db  78h ; x
-                db  6Ch ; l
-                db  64h ; d
-                db  64h ; d
-                db 0F6h ; ˆ
-                db 0E0h ; ‡
-                db  60h ; `
-                db  60h ; `
-                db  60h ; `
-                db  60h ; `
-                db  60h ; `
-                db  62h ; b
-                db 0FEh ; ˛
-                db 0C6h ; ∆
-                db 0EEh ; Ó
-                db 0EEh ; Ó
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0C6h ; ∆
-                db 0EEh ; Ó
-                db 0CCh ; Ã
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0E6h ; Ê
-                db 0E4h ; ‰
-                db 0C4h ; ƒ
-                db 0C8h ; »
-                db 0DEh ; ﬁ
-                db  38h ; 8
-                db  6Ch ; l
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  6Ch ; l
-                db  38h ; 8
-                db 0F8h ; ¯
-                db  6Ch ; l
-                db  66h ; f
-                db  76h ; v
-                db  6Eh ; n
-                db  60h ; `
-                db  60h ; `
-                db 0F0h ; 
-                db  38h ; 8
-                db  6Ch ; l
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0D6h ; ÷
-                db  6Ch ; l
-                db  3Ah ; :
-                db 0F8h ; ¯
-                db  6Ch ; l
-                db  66h ; f
-                db  76h ; v
-                db  7Eh ; ~
-                db  78h ; x
-                db  6Ch ; l
-                db 0E6h ; Ê
-                db  38h ; 8
-                db  64h ; d
-                db  60h ; `
-                db  3Ch ; <
-                db    6
-                db  86h ; Ü
-                db 0C6h ; ∆
-                db  7Ch ; |
-                db 0FEh ; ˛
-                db  9Ah ; ö
-                db  98h ; ò
-                db  18h
-                db  18h
-                db  18h
-                db  18h
-                db  18h
-                db 0F6h ; ˆ
-                db  26h ; &
-                db  46h ; F
-                db  4Eh ; N
-                db 0CEh ; Œ
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db  66h ; f
-                db 0E2h ; ‚
-                db  62h ; b
-                db  64h ; d
-                db  64h ; d
-                db  68h ; h
-                db  68h ; h
-                db  70h ; p
-                db  60h ; `
-                db 0EEh ; Ó
-                db 0C6h ; ∆
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0EEh ; Ó
-                db 0EEh ; Ó
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  6Ch ; l
-                db  38h ; 8
-                db  38h ; 8
-                db  6Ch ; l
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  86h ; Ü
-                db  66h ; f
-                db  16h
-                db  0Eh
-                db    6
-                db    4
-                db  4Ch ; L
-                db  38h ; 8
-                db  7Eh ; ~
-                db  46h ; F
-                db  0Ch
-                db  18h
-                db  30h ; 0
-                db  62h ; b
-                db 0C2h ; ¬
-                db 0FEh ; ˛
-spr_23:         db 4, 18                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 18h, 0, 0, 0, 0, 0, 0, 0, 3Ch, 18h, 0, 0, 0, 0, 30h, 0, 3Ch, 18h, 30h
-                db 0, 0, 0, 78h, 30h, 38h, 10h, 78h, 30h, 0, 0, 7Ch, 38h, 78h, 30h, 78h, 30h, 18h, 0
-                db 3Ch, 18h, 78h, 30h, 0F0h, 60h, 3Eh, 18h, 1Eh, 0Ch, 79h, 30h, 0F0h, 0E0h, 3Fh, 1Eh
-                db 8Fh, 6, 79h, 30h, 0E6h, 0C0h, 1Fh, 7, 0CFh, 86h, 7Fh, 31h, 0EFh, 0C6h, 7, 1, 0F7h
-                db 0C3h, 0FFh, 37h, 0DFh, 8Eh, 1, 0, 0FFh, 73h, 0FFh, 17h, 0FEh, 98h, 1, 0, 0FFh, 3Ch
-                db 0FFh, 0E1h, 0F8h, 0B0h, 3, 1, 0FFh, 9Dh, 0FFh, 0AEh, 0F0h, 60h, 3, 1, 0FFh, 0D9h
-                db 0FFh, 47h, 0F0h, 0E0h, 1, 0, 0FFh, 60h, 0FFh, 33h, 0E0h, 0C0h, 0, 0, 7Fh, 1Dh, 0FBh
-                db 0B1h, 0C0h, 80h, 0, 0, 1Fh, 0Dh, 0F1h, 80h, 80h, 0, 0, 0, 0Dh, 0, 0F8h, 30h, 0, 0
-spr_unused:     db 0, 0, 0, 0, 30h, 0, 0, 0, 4, 18h, 0, 0, 0Fh, 0Bh, 0F0h, 0F0h, 0, 0, 0, 0, 0FFh, 9Dh
-                db 0FFh, 0FBh, 0, 0, 1, 1, 0FFh, 0BDh, 0FFh, 0FBh, 0C0h, 40h, 7, 7, 0FFh, 0BEh, 0FFh
-                db 0FBh, 0E0h, 60h, 3Fh, 0Fh, 0FFh, 0BEh, 0FFh, 0F7h, 0FCh, 78h, 3Fh, 17h, 0FFh, 0BDh
-                db 0FFh, 0F7h, 0FCh, 78h, 3Fh, 17h, 0FFh, 0BDh, 0FFh, 0EFh, 0FCh, 0B8h, 3Fh, 1Bh, 0FFh
-                db 0BBh, 0FFh, 0EFh, 0FCh, 0B8h, 3Fh, 1Dh, 0FFh, 0D9h, 0FFh, 0EFh, 0FCh, 70h, 3Fh, 1Eh
-                db 0FFh, 0EEh, 0FFh, 0EFh, 0F8h, 0B0h, 3Fh, 0Fh, 0FFh, 76h, 0FFh, 0F7h, 0F8h, 0D0h, 1Fh
-                db 0Fh, 0FFh, 77h, 0FFh, 77h, 0F8h, 0B0h, 1Fh, 0Eh, 0FFh, 0F7h, 0FFh, 7Bh, 0FEh, 0B0h
-                db 1Fh, 0Dh, 0FFh, 0FFh, 0FFh, 0FBh, 0FEh, 78h, 1Fh, 0Bh, 0FFh, 0F8h, 0FFh, 1Fh, 0FEh
-                db 7Ch, 1Fh, 0Fh, 0FFh, 0C7h, 0FFh, 0E3h, 0FCh, 0F8h, 1Fh, 0Fh, 0FFh, 3Bh, 0FFh, 3Ch
-                db 0FCh, 0F8h, 1Fh, 0Eh, 0FFh, 0E3h, 0FFh, 0C6h, 0FCh, 0F0h, 1Fh, 0Eh, 0FFh, 0E3h, 0FFh
-                db 0C6h, 0F8h, 0F0h, 1Fh, 7, 0FFh, 3Ch, 0FFh, 3Dh, 0F8h, 0E0h, 0Fh, 3, 0FFh, 0C7h, 0FFh
-                db 0E3h, 0F0h, 0C0h, 7, 0, 0FFh, 0F8h, 0FFh, 1Fh, 0E0h, 0, 1, 0, 0FFh, 0Fh, 0FFh, 0F0h
-                db 80h, 0, 0, 0, 1Fh, 0, 0F8h, 0, 0, 0
-spr_24:         db 4, 28                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 3, 0, 0C0h, 0, 0, 0, 0, 0, 0Fh, 1, 0F0h, 80h, 0, 0, 0, 0, 3Fh, 7, 0FCh, 0E0h
-                db 0, 0, 0, 0, 0FFh, 1Bh, 0FFh, 0D8h, 0, 0, 3, 0, 0FFh, 7Bh, 0FFh, 0DEh, 0C0h, 0, 0Fh
-                db 1, 0FFh, 0FBh, 0FFh, 0DFh, 0F0h, 80h, 1Fh, 7, 0FFh, 0FBh, 0FFh, 0DFh, 0F8h, 0E0h
-                db 1Fh, 0Fh, 0FFh, 0FBh, 0FFh, 0DFh, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0FBh, 0FFh, 0DFh, 0F8h
-                db 0F0h, 1Fh, 0Fh, 0FFh, 0FBh, 0FFh, 0DFh, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0FBh, 0FFh, 0DFh
-                db 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0FBh, 0FFh, 0DFh, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0FFh, 0FFh
-                db 0FFh, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0F8h, 0FFh, 1Fh, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0E7h
-                db 0FFh, 0E7h, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 9Fh, 0FFh, 0F9h, 0F8h, 0F0h, 1Fh, 0Eh, 0FFh
-                db 7Fh, 0FFh, 0FEh, 0F8h, 70h, 1Fh, 9, 0FFh, 0FFh, 0FFh, 0FFh, 0F8h, 90h, 1Fh, 7, 0FFh
-                db 0FFh, 0FFh, 0FFh, 0F8h, 0E0h, 1Fh, 0Fh, 0FFh, 0FFh, 0FFh, 0FFh, 0F8h, 0F0h, 1Fh, 0Fh
-                db 0FFh, 0FFh, 0FFh, 0FFh, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0FFh, 0FFh, 0FFh, 0F8h, 0F0h
-                db 1Fh, 7, 0FFh, 0FFh, 0FFh, 0FFh, 0F8h, 0E0h, 0Fh, 1, 0FFh, 0FFh, 0FFh, 0FFh, 0F0h
-                db 80h, 3, 0, 0FFh, 7Fh, 0FFh, 0FEh, 0C0h, 0, 0, 0, 0FFh, 1Fh, 0FFh, 0F8h, 0, 0, 0, 0
-                db 3Fh, 7, 0FCh, 0E0h, 0, 0, 0, 0, 0Fh, 0, 0F0h, 0, 0, 0
-spr_25:         db 4, 21                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 1Eh, 0, 0, 0, 0, 0, 0, 0, 0FFh, 1Eh, 0E1h, 0, 80h, 0, 7, 0, 0FFh, 0FFh, 0F3h
-                db 0E1h, 0C0h, 80h, 0Fh, 7, 0FFh, 0FFh, 0FFh, 0F3h, 0E0h, 0C0h, 1Fh, 0Fh, 0FFh, 0B6h
-                db 0FFh, 8Bh, 0F0h, 0E0h, 3Fh, 1Dh, 0BFh, 12h, 0FFh, 3Dh, 0F0h, 0E0h, 7Fh, 35h, 93h
-                db 0, 0FFh, 0C6h, 0E0h, 0C0h, 7Fh, 34h, 0Fh, 3, 0FFh, 3Fh, 0E0h, 40h, 7Ch, 30h, 3Fh
-                db 0Ch, 0FFh, 0FEh, 0F0h, 0E0h, 78h, 30h, 0FFh, 33h, 0FEh, 0F8h, 0F0h, 60h, 79h, 30h
-                db 0FFh, 0CFh, 0F8h, 0E0h, 0F8h, 50h, 7Fh, 39h, 0FFh, 3Fh, 0E0h, 80h, 0F8h, 70h, 7Fh
-                db 2Eh, 0FFh, 0FEh, 80h, 0, 0F0h, 60h, 3Fh, 0Bh, 0FEh, 0F8h, 1, 0, 0F0h, 0E0h, 0Fh, 3
-                db 0F8h, 0E0h, 7, 1, 0F0h, 0E0h, 3, 1, 0FFh, 0D8h, 0FFh, 7, 0F0h, 0A0h, 1, 0, 0DFh, 0Fh
-                db 0FFh, 0FFh, 0E0h, 80h, 0, 0, 1Fh, 0Dh, 0FFh, 0FDh, 0C0h, 80h, 0, 0, 1Fh, 9, 0FFh
-                db 0D9h, 80h, 0, 0, 0, 9, 0, 0DDh, 88h, 0, 0, 0, 0, 0, 0, 88h, 0, 0, 0
-spr_26:         db 4, 28                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 1, 0, 80h, 0, 0, 0, 0, 0, 7, 1, 0E0h, 80h, 0, 0, 0, 0, 1Fh, 7, 0F8h, 0E0h, 0
-                db 0, 0, 0, 7Fh, 1Eh, 0FEh, 78h, 0, 0, 1, 0, 0FFh, 79h, 0FFh, 9Eh, 80h, 0, 7, 1, 0FFh
-                db 0E7h, 0FFh, 0E7h, 0E0h, 80h, 1Fh, 7, 0FFh, 9Dh, 0FFh, 0F9h, 0F8h, 0E0h, 7Eh, 1Fh
-                db 0FFh, 7Dh, 0FFh, 0BEh, 0FEh, 78h, 0FFh, 79h, 0FFh, 0EDh, 0FFh, 0ADh, 0FFh, 9Eh, 0FFh
-                db 67h, 0FFh, 6Dh, 0FFh, 0ADh, 0FFh, 0E6h, 0FFh, 1Fh, 0FFh, 6Dh, 0FFh, 0ADh, 0FFh, 0F8h
-                db 0FFh, 7Fh, 0FFh, 0ADh, 0FFh, 6Bh, 0FFh, 0FEh, 0FFh, 5Dh, 0FFh, 0ADh, 0FFh, 6Bh, 0FFh
-                db 0BAh, 7Fh, 1Dh, 0FFh, 0DDh, 0FFh, 6Bh, 0FEh, 0B8h, 1Fh, 0Dh, 0FFh, 0FDh, 0FFh, 77h
-                db 0F8h, 0B8h, 1Fh, 0Dh, 0FFh, 6Eh, 0FFh, 0FEh, 0F8h, 0B8h, 1Fh, 0Dh, 0FFh, 6Fh, 0FFh
-                db 0FCh, 0F8h, 0B0h, 1Dh, 8, 0FFh, 6Dh, 0FFh, 0B6h, 0F8h, 30h, 1Ch, 8, 0FFh, 6Dh, 0FFh
-                db 0B6h, 38h, 10h, 1Ch, 8, 0FFh, 65h, 0FFh, 0A6h, 3Bh, 10h, 1Ch, 8, 0E7h, 41h, 0EFh
-                db 86h, 38h, 10h, 1Ch, 8, 0E3h, 41h, 0C7h, 82h, 10h, 0, 8, 0, 0E1h, 40h, 0C7h, 82h, 0
-                db 0, 0, 0, 0E1h, 40h, 0C7h, 82h, 0, 0, 0, 0, 41h, 0, 0C2h, 80h, 0, 0, 0, 0, 1, 0, 0C0h
-                db 80h, 0, 0, 0, 0, 1, 0, 0C0h, 80h, 0, 0, 0, 0, 0, 0, 80h, 0, 0, 0
-spr_27:         db 2, 17                                        ; DATA XREF: RAM:sprite_tblo
-                db 0Eh, 0, 38h, 0, 1Fh, 0Eh, 7Ch, 38h, 1Fh, 0Bh, 0FCh, 78h, 0Fh, 5, 0F8h, 70h, 0Eh, 3
-                db 0F0h, 60h, 0Fh, 3, 0F8h, 0E0h, 1Fh, 0Dh, 0FCh, 0F8h, 1Fh, 0Dh, 0FCh, 0F8h, 1Fh, 0Dh
-                db 0FCh, 0F8h, 1Fh, 0Dh, 0FCh, 0F8h, 1Fh, 0Eh, 0FCh, 38h, 0Fh, 5, 0F8h, 0D0h, 7, 2, 0F0h
-                db 0E0h, 7, 2, 0F0h, 0E0h, 7, 2, 0F0h, 0E0h, 3, 1, 0E0h, 40h, 1, 0, 0C0h, 0
-spr_28:         db 4, 29                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 1, 0, 80h, 0, 0, 0, 0, 0, 1Fh, 1, 0E0h, 80h, 0, 0, 0, 0, 3Fh, 1Eh, 0F0h, 40h
-                db 0, 0, 0, 0, 7Fh, 3Eh, 0F8h, 0A0h, 0, 0, 0, 0, 0FFh, 7Eh, 0FFh, 50h, 80h, 0, 7, 0
-                db 0FFh, 0FEh, 0FFh, 0A2h, 0E0h, 80h, 0Fh, 6, 0FFh, 3Eh, 0FFh, 55h, 0F0h, 40h, 7Fh, 0Fh
-                db 0FFh, 0DEh, 0FFh, 0AAh, 0FEh, 0A0h, 0FFh, 7Fh, 0FFh, 0DEh, 0FFh, 15h, 0FFh, 54h, 0FFh
-                db 7Fh, 0FFh, 0DEh, 0FFh, 0AAh, 0FFh, 0A2h, 0FFh, 7Fh, 0FFh, 0CEh, 0FFh, 54h, 0FFh, 54h
-                db 0FFh, 7Fh, 0FFh, 0EEh, 0FFh, 28h, 0FFh, 82h, 0FFh, 73h, 0FFh, 0E8h, 0FFh, 94h, 0FFh
-                db 54h, 0FFh, 0Dh, 0FFh, 0F7h, 0FFh, 0CAh, 0FFh, 0A2h, 0FFh, 7Dh, 0FFh, 0EFh, 0FFh, 0E4h
-                db 0FFh, 54h, 0FFh, 7Dh, 0FFh, 1Fh, 0FFh, 0FCh, 0FFh, 0A2h, 0FFh, 7Ch, 0FFh, 0FFh, 0FFh
-                db 0FEh, 0FFh, 4, 0FFh, 79h, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0E2h, 0FFh, 43h, 0FFh, 0FFh
-                db 0FFh, 0FFh, 0FFh, 0F4h, 0FFh, 1Fh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0F8h, 0FFh, 7Fh
-                db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FEh, 7Fh, 1Fh, 0FFh, 0FFh, 0FFh, 0FFh, 0FEh, 0F8h
-                db 1Fh, 0Fh, 0FFh, 0FFh, 0FFh, 0FFh, 0F8h, 0E0h, 0Fh, 3, 0FFh, 0FFh, 0FFh, 0FFh, 0E0h
-                db 0C0h, 3, 0, 0FFh, 7Fh, 0FFh, 0F8h, 0C0h, 0, 0, 0, 7Fh, 3Fh, 0F8h, 0F0h, 0, 0, 0, 0
-                db 3Fh, 1Fh, 0F0h, 0E0h, 0, 0, 0, 0, 1Fh, 7, 0E0h, 0C0h, 0, 0, 0, 0, 7, 0, 0C0h, 0, 0
-                db 0
-spr_29:         db 2, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 0Dh, 0Dh, 0F5h, 0F5h, 13h, 13h, 80h, 80h, 1Eh, 1Eh, 0, 0, 0Bh, 0Bh, 0E0h, 0E0h, 1Eh
-                db 1Eh, 18h, 18h, 16h, 16h, 6, 6, 1Bh, 1Bh, 80h, 80h, 1Eh, 1Eh, 0, 0, 0Eh, 0Eh, 0, 0
-                db 0Fh, 0Fh, 0D0h, 0D0h, 0Fh, 0Fh, 0, 0, 7, 7, 80h, 80h, 7, 7, 0ECh, 0ECh, 0, 0, 78h
-                db 78h, 0, 0, 0Ch, 0Ch, 0, 0, 3, 3
-spr_2A:         db 2, 11                                        ; DATA XREF: RAM:sprite_tblo
-                db 18h, 18h, 7Eh, 7Eh, 7, 7, 80h, 80h, 0, 0, 40h, 40h, 0, 0, 30h, 30h, 0, 0, 8, 8, 0
-                db 0, 4, 4, 18h, 18h, 6, 6, 7, 7, 0F8h, 0F8h, 0C0h, 0C0h, 10h, 10h, 38h, 38h, 0Eh, 0Eh
-                db 7, 7, 0FEh, 0FEh, 2, 10h, 0FFh, 0FFh, 0FEh, 0FEh, 7, 7, 0, 0, 0, 0, 78h, 78h, 0, 0
-                db 6, 6, 0Eh, 0Eh, 6, 6, 31h, 31h, 0C1h, 0C1h, 6Ch, 6Ch, 0F1h, 0F1h, 31h, 31h, 9Eh, 9Eh
-                db 0Eh, 0Eh, 60h, 60h, 1, 1, 80h, 80h, 0, 0, 80h, 80h, 0, 0, 7Eh, 7Eh, 0, 0, 2, 2, 0
-                db 0, 4, 4, 0, 0, 3Ch, 3Ch, 0, 0, 2, 2
-spr_2B:         db 2, 16                                        ; DATA XREF: RAM:sprite_tblo
-                db 0FFh, 0FFh, 0F0h, 0F0h, 8, 8, 0, 0, 7, 7, 0F8h, 0F8h, 0, 0, 4, 4, 0, 0, 8, 8, 3, 3
-                db 0E4h, 0E4h, 4, 4, 1Ch, 1Ch, 79h, 79h, 0E6h, 0E6h, 86h, 86h, 60h, 60h, 79h, 79h, 9Eh
-                db 9Eh, 6, 6, 21h, 21h, 1, 1, 0C3h, 0C3h, 0, 0, 1Ch, 1Ch, 0, 0, 0C0h, 0C0h, 0, 0, 3Eh
-                db 3Eh, 0, 0, 6, 6
-spr_2C:         db 2, 8                                         ; DATA XREF: RAM:sprite_tblo
-                db 0C0h, 0C0h, 0, 0, 7Fh, 7Fh, 0C0h, 0C0h, 1Ch, 1Ch, 0, 0, 3, 3, 0, 0, 0, 0, 0CEh, 0CEh
-                db 0, 0, 78h, 78h, 0, 0, 4, 4, 0, 0, 3, 3
-spr_2D:         db 5, 34                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 1, 0, 80h, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0C0h, 80h, 0, 0, 0, 0, 0, 0, 7, 2, 0E0h
-                db 0C0h, 0, 0, 0, 0, 0, 0, 7, 2, 0E0h, 0C0h, 0, 0, 0, 0, 0, 0, 7, 2, 0E0h, 0C0h, 0, 0
-                db 0, 0, 0, 0, 7, 2, 0E0h, 0C0h, 0, 0, 0, 0, 0Ch, 0, 7, 2, 0E0h, 0C0h, 0, 0, 0, 0, 1Eh
-                db 0Ch, 7, 2, 0E0h, 0C0h, 0, 0, 0, 0, 3Fh, 16h, 7, 2, 0E0h, 0C0h, 0, 0, 0, 0, 3Fh, 16h
-                db 7, 2, 0E0h, 0C0h, 0, 0, 0, 0, 3Fh, 16h, 7, 2, 0E0h, 0C0h, 0, 0, 30h, 0, 3Fh, 16h
-                db 0Fh, 0, 0E0h, 20h, 0, 0, 78h, 30h, 3Fh, 16h, 1Fh, 0Fh, 0E0h, 80h, 0, 0, 0FCh, 58h
-                db 3Fh, 16h, 0FFh, 1Eh, 0F8h, 60h, 0, 0, 0FCh, 58h, 3Fh, 16h, 0FFh, 0D9h, 0FEh, 98h
-                db 0, 0, 0FCh, 58h, 3Fh, 15h, 0FFh, 0E7h, 0FFh, 0E6h, 80h, 0, 0FCh, 58h, 3Fh, 3, 0FFh
-                db 9Fh, 0FFh, 0F9h, 0E0h, 80h, 0FCh, 58h, 7Fh, 3Eh, 0FFh, 67h, 0FFh, 0FEh, 0F8h, 60h
-                db 0FCh, 58h, 0FFh, 79h, 0FFh, 0F9h, 0FFh, 0FFh, 0FEh, 98h, 0FCh, 58h, 0FFh, 66h, 0FFh
-                db 7Eh, 0FFh, 7Fh, 0FFh, 0E6h, 0FCh, 58h, 0FFh, 5Fh, 0FFh, 9Fh, 0FFh, 9Fh, 0FFh, 0F9h
-                db 0FCh, 98h, 0FFh, 7Fh, 0FFh, 0E7h, 0FFh, 0E7h, 0FFh, 0FEh, 0FCh, 60h, 7Fh, 1Fh, 0FFh
-                db 0F9h, 0FFh, 0F9h, 0FFh, 0FFh, 0FEh, 98h, 1Fh, 7, 0FFh, 0FEh, 0FFh, 7Eh, 0FFh, 7Fh
-                db 0FFh, 0E6h, 7, 1, 0FFh, 0FFh, 0FFh, 9Fh, 0FFh, 9Fh, 0FFh, 0F8h, 1, 0, 0FFh, 7Fh, 0FFh
-                db 0E7h, 0FFh, 0E7h, 0FFh, 0FEh, 0, 0, 7Fh, 1Fh, 0FFh, 0F9h, 0FFh, 0F9h, 0FEh, 0F8h
-                db 0, 0, 1Fh, 7, 0FFh, 0FEh, 0FFh, 7Eh, 0F8h, 60h, 0, 0, 7, 1, 0FFh, 0FFh, 0FFh, 9Fh
-                db 0E0h, 80h, 0, 0, 1, 0, 0FFh, 7Fh, 0FFh, 0F6h, 80h, 0, 0, 0, 0, 0, 7Fh, 1Fh, 0FEh
-                db 0F8h, 0, 0, 0, 0, 0, 0, 1Fh, 7, 0F8h, 0E0h, 0, 0, 0, 0, 0, 0, 7, 1, 0E0h, 80h, 0
-                db 0, 0, 0, 0, 0, 1, 0, 80h, 0, 0, 0
-spr_2E:         db 5, 32                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 0, 0, 0FFh, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0FFh, 0FCh, 0F0h, 0, 0, 0, 0, 0, 3Fh
-                db 3, 0FFh, 0FCh, 0FCh, 0F0h, 0, 0, 0, 0, 0FFh, 3Bh, 0FFh, 0FEh, 0FFh, 0FCh, 0, 0, 1
-                db 0, 0FFh, 0FBh, 0FFh, 0FEh, 0FFh, 0FEh, 80h, 0, 7, 0, 0FFh, 0FBh, 0FFh, 0E0h, 0FFh
-                db 7Eh, 0C0h, 80h, 0Fh, 4, 0FFh, 0F9h, 0FFh, 0CEh, 0FFh, 3Dh, 0E0h, 0C0h, 1Fh, 0Eh, 0FFh
-                db 0F0h, 0FFh, 1Fh, 0FFh, 85h, 0F0h, 0E0h, 1Fh, 0Eh, 0FFh, 0E1h, 0FFh, 0CFh, 0FFh, 0B9h
-                db 0F8h, 0F0h, 1Fh, 0Eh, 0FFh, 4Fh, 0FFh, 83h, 0FFh, 0BEh, 0F8h, 0F0h, 1Fh, 0Eh, 0FFh
-                db 1Fh, 0FFh, 79h, 0FFh, 9Eh, 0F8h, 30h, 1Fh, 0Eh, 0FFh, 1Eh, 0FFh, 7Ch, 0FFh, 6, 0F8h
-                db 0D0h, 1Fh, 0Ch, 0FFh, 0D9h, 0FFh, 3Dh, 0FFh, 0F2h, 0F8h, 0E0h, 1Fh, 0Bh, 0FFh, 0C7h
-                db 0FFh, 7Eh, 0FFh, 0F8h, 0F8h, 0F0h, 1Fh, 7, 0FFh, 1Eh, 0FFh, 7Fh, 0FFh, 7Ch, 0F8h
-                db 30h, 1Fh, 0Eh, 0FFh, 7Eh, 0FFh, 40h, 0FFh, 7Eh, 0F8h, 0D0h, 1Fh, 8, 0FFh, 0F1h, 0FFh
-                db 3Fh, 0FFh, 6, 0F8h, 60h, 1Fh, 6, 0FFh, 4Fh, 0FFh, 0DFh, 0FFh, 78h, 0F8h, 30h, 1Fh
-                db 0Eh, 0FFh, 3Fh, 0FFh, 3Eh, 0FFh, 0FFh, 0F8h, 10h, 1Fh, 0Dh, 0FFh, 9Ch, 0FFh, 0, 0FFh
-                db 38h, 0F8h, 0D0h, 1Fh, 0Bh, 0FFh, 0C0h, 0FFh, 0, 0FFh, 7, 0F8h, 0E0h, 1Fh, 7, 0FFh
-                db 0F1h, 0FFh, 0, 0FFh, 3, 0F8h, 0F0h, 1Fh, 0Fh, 0FFh, 0E0h, 0FFh, 0, 0FFh, 1, 0F8h
-                db 0F0h, 1Fh, 0Fh, 0FFh, 0C0h, 0FFh, 4, 0FFh, 1, 0F8h, 0F0h, 1Fh, 0, 0FFh, 21h, 0FFh
-                db 1, 0FFh, 0, 0F0h, 0, 0Fh, 7, 0FFh, 0F0h, 0FFh, 0, 0FFh, 3, 0F0h, 0C0h, 0Fh, 7, 0FFh
-                db 0E9h, 0FFh, 44h, 0FFh, 0Fh, 0E0h, 0C0h, 7, 3, 0FFh, 0DFh, 0FFh, 1, 0FFh, 67h, 0C0h
-                db 80h, 3, 0, 0FFh, 0BEh, 0FFh, 7Dh, 0FFh, 0F2h, 80h, 0, 0, 0, 0FFh, 0Eh, 0FFh, 0FDh
-                db 0FEh, 0F8h, 0, 0, 0, 0, 0Fh, 0, 0FFh, 0FEh, 0F8h, 0E0h, 0, 0, 0, 0, 0, 0, 0FFh, 0
-                db 0E0h, 0, 0, 0
-spr_2F:         db 4, 39                                        ; DATA XREF: RAM:sprite_tblo
-                db 0, 0, 1, 0, 80h, 0, 0, 0, 0, 0, 3, 1, 0E0h, 0, 0, 0, 0, 0, 0Fh, 2, 0F8h, 0A0h, 0
-                db 0, 0, 0, 3Fh, 0Eh, 0FEh, 50h, 0, 0, 0, 0, 0FFh, 3Ch, 0FFh, 0AAh, 80h, 0, 3, 0, 0FFh
-                db 0FFh, 0FFh, 55h, 0E0h, 0, 0Fh, 3, 0FFh, 0FEh, 0FFh, 0A8h, 0F8h, 0A0h, 1Fh, 0Fh, 0FFh
-                db 0F5h, 0FFh, 55h, 0FEh, 50h, 3Fh, 1Fh, 0FFh, 0F2h, 0FFh, 0A8h, 0FFh, 0AAh, 7Fh, 3Fh
-                db 0FFh, 0F9h, 0FFh, 54h, 0FFh, 54h, 3Fh, 1Fh, 0FFh, 0FAh, 0FFh, 0A2h, 0FEh, 28h, 3Fh
-                db 1Fh, 0FFh, 0FDh, 0FFh, 51h, 0FEh, 54h, 3Fh, 1Fh, 0FFh, 0FCh, 0FFh, 0AAh, 0FCh, 0A8h
-                db 3Fh, 1Fh, 0FFh, 0FEh, 0FFh, 51h, 0FCh, 50h, 1Fh, 7, 0FFh, 0FEh, 0FFh, 0AAh, 0F8h
-                db 0A0h, 0Fh, 7, 0FFh, 0FDh, 0FFh, 55h, 0F8h, 50h, 7, 1, 0FFh, 0FCh, 0FFh, 0AAh, 0F0h
-                db 0A0h, 7, 2, 0FFh, 0FDh, 0FFh, 55h, 0F0h, 40h, 7, 3, 0FFh, 7Eh, 0FFh, 8Ah, 0F0h, 0A0h
-                db 0Fh, 7, 0FFh, 7Dh, 0FFh, 55h, 0F0h, 40h, 0Fh, 7, 0FFh, 0BCh, 0FFh, 0AAh, 0E0h, 0A0h
-                db 0Fh, 7, 0FFh, 0BCh, 0FFh, 54h, 80h, 0, 7, 1, 0FFh, 0DCh, 0FFh, 0AAh, 0, 0, 7, 3, 0FFh
-                db 0EEh, 0FFh, 54h, 0, 0, 7, 3, 0FFh, 0DEh, 0FFh, 8Ah, 0, 0, 3, 1, 0FFh, 0EFh, 0FFh
-                db 45h, 80h, 0, 3, 1, 0FFh, 0FFh, 0FFh, 2Ah, 0, 0, 3, 1, 0FFh, 0FEh, 0FFh, 55h, 80h
-                db 0, 1, 0, 0FFh, 0FEh, 0FFh, 0AAh, 0, 0, 0, 0, 0FFh, 7Eh, 0FEh, 14h, 0, 0, 0, 0, 7Fh
-                db 38h, 0FEh, 0C8h, 0, 0, 0, 0, 3Fh, 16h, 0FEh, 0E4h, 0, 0, 0, 0, 3Fh, 0Eh, 0FEh, 0F8h
-                db 0, 0, 0, 0, 3Fh, 1Fh, 0FEh, 7Ch, 0, 0, 0, 0, 1Fh, 7, 0FCh, 70h, 0, 0, 0, 0, 7, 1
-                db 0F0h, 60h, 0, 0, 0, 0, 1, 0, 0E0h, 0C0h, 0, 0, 0, 0, 1, 0, 0C0h, 80h, 0, 0, 0, 0
-                db 0, 0, 80h, 0, 0, 0
-unk_8E8F:       db    4                                         ; DATA XREF: RAM:sprite_tblo
-                db  33h ; 3
-                db    0
-                db    0
-                db    1
-                db    0
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    7
-                db    1
-                db 0E0h ; ‡
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db    0
-                db  1Fh
-                db    7
-                db 0F8h ; ¯
-                db  20h
-                db    0
-                db    0
-                db    0
-                db    0
-                db  7Fh ; 
-                db  1Fh
-                db 0FEh ; ˛
-                db  50h ; P
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db  2Ah ; *
-                db  80h ; Ä
-                db    0
-                db    7
-                db    1
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0E0h ; ‡
-                db    0
-                db  1Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0F1h ; Ò
-                db 0A0h ; †
-                db  7Fh ; 
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FEh ; ˛
-                db  50h ; P
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FFh
-                db 0AAh ; ™
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FFh
-                db  54h ; T
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FFh
-                db 0AAh ; ™
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FFh
-                db  54h ; T
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FFh
-                db 0AAh ; ™
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FEh ; ˛
-                db  54h ; T
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FEh ; ˛
-                db 0A8h ; ®
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FEh ; ˛
-                db  54h ; T
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FEh ; ˛
-                db 0A8h ; ®
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FEh ; ˛
-                db  54h ; T
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FCh ; ¸
-                db 0A8h ; ®
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FCh ; ¸
-                db  50h ; P
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FCh ; ¸
-                db 0A8h ; ®
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0FCh ; ¸
-                db  50h ; P
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0FCh ; ¸
-                db 0A8h ; ®
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0F8h ; ¯
-                db  50h ; P
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0F8h ; ¯
-                db 0A0h ; †
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0F8h ; ¯
-                db  50h ; P
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0F8h ; ¯
-                db 0A0h ; †
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0F8h ; ¯
-                db  50h ; P
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0F0h ; 
-                db 0A0h ; †
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0F0h ; 
-                db  40h ; @
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0F0h ; 
-                db 0A0h ; †
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0F0h ; 
-                db  40h ; @
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0F0h ; 
-                db 0A0h ; †
-                db    7
-                db    3
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0E0h ; ‡
-                db  40h ; @
-                db    7
-                db    3
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0E0h ; ‡
-                db  80h ; Ä
-                db    7
-                db    3
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  55h ; U
-                db 0E0h ; ‡
-                db  40h ; @
-                db    7
-                db    3
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  2Ah ; *
-                db 0E0h ; ‡
-                db  80h ; Ä
-                db    7
-                db    3
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  55h ; U
-                db 0E0h ; ‡
-                db  40h ; @
-                db    3
-                db    1
-                db 0FFh
-                db 0F8h ; ¯
-                db 0FFh
-                db  8Ah ; ä
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    3
-                db    1
-                db 0FFh
-                db 0E3h ; „
-                db 0FFh
-                db 0E5h ; Â
-                db 0C0h ; ¿
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db  9Eh ; û
-                db 0FFh
-                db 0F8h ; ¯
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    3
-                db    0
-                db 0FFh
-                db  7Eh ; ~
-                db 0FFh
-                db 0FEh ; ˛
-                db  80h ; Ä
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db 0FFh
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db  7Eh ; ~
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Eh ; >
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Eh
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db    0
-                db    0
-                db  1Fh
-                db  0Eh
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db  0Fh
-                db    6
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db    0
-                db    0
-                db    7
-                db    2
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db    0
-                db    1
-                db    0
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-unk_9029:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db    0
-                db    0
-                db  7Eh ; ~
-                db    0
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db  76h ; v
-                db  80h ; Ä
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db  76h ; v
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    7
-                db    3
-                db 0FFh
-                db    0
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  0Fh
-                db    4
-                db 0FFh
-                db 0F7h ; ˜
-                db 0F0h ; 
-                db  20h
-                db  0Fh
-                db    2
-                db 0FFh
-                db 0F7h ; ˜
-                db 0F0h ; 
-                db  40h ; @
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0F7h ; ˜
-                db 0F8h ; ¯
-                db  70h ; p
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db 0F7h ; ˜
-                db 0F8h ; ¯
-                db  70h ; p
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db 0F7h ; ˜
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Dh
-                db 0FFh
-                db 0F7h ; ˜
-                db 0FCh ; ¸
-                db 0B8h ; ∏
-                db  3Fh ; ?
-                db  1Dh
-                db 0FFh
-                db    0
-                db 0FCh ; ¸
-                db 0B8h ; ∏
-                db  3Fh ; ?
-                db  18h
-                db 0FFh
-                db 0FFh
-                db 0FCh ; ¸
-                db  18h
-                db  7Fh ; 
-                db  27h ; '
-                db 0FFh
-                db    0
-                db 0FEh ; ˛
-                db 0E4h ; ‰
-                db  7Fh ; 
-                db  18h
-                db 0FFh
-                db  10h
-                db 0FEh ; ˛
-                db  18h
-                db 0FFh
-                db  62h ; b
-                db 0FFh
-                db  10h
-                db 0FFh
-                db  46h ; F
-                db  7Fh ; 
-                db  22h ; "
-                db 0FFh
-                db  10h
-                db 0FEh ; ˛
-                db  44h ; D
-                db  7Fh ; 
-                db  3Ah ; :
-                db 0FFh
-                db  10h
-                db 0FEh ; ˛
-                db  5Ch ; \
-                db  3Fh ; ?
-                db  17h
-                db 0FFh
-                db  10h
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  3Fh ; ?
-                db  10h
-                db 0FFh
-                db 0FFh
-                db 0FCh ; ¸
-                db    8
-                db  1Fh
-                db    8
-                db 0FFh
-                db    0
-                db 0F8h ; ¯
-                db  10h
-                db  0Fh
-                db    6
-                db 0FFh
-                db    0
-                db 0F0h ; 
-                db  60h ; `
-                db    7
-                db    1
-                db 0FFh
-                db  81h ; Å
-                db 0E0h ; ‡
-                db  80h ; Ä
-                db    1
-                db    0
-                db 0FFh
-                db  7Eh ; ~
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db  7Eh ; ~
-                db    0
-                db    0
-                db    0
-unk_90BB:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db    3
-                db    0
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0E0h ; ‡
-                db 0F0h ; 
-                db    0
-                db  3Fh ; ?
-                db    3
-                db 0FFh
-                db 0FFh
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  7Fh ; 
-                db  3Eh ; >
-                db 0FFh
-                db  1Fh
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0FFh
-                db  7Dh ; }
-                db 0FFh
-                db 0E0h ; ‡
-                db 0FEh ; ˛
-                db    4
-                db 0FFh
-                db  43h ; C
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0F9h ; ˘
-                db 0FFh
-                db  3Fh ; ?
-                db 0FFh
-                db 0CFh ; œ
-                db 0FFh
-                db 0F9h ; ˘
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db  87h ; á
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0C3h ; √
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0E3h ; „
-                db 0FFh
-                db 0FEh ; ˛
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0E3h ; „
-                db 0FFh
-                db 0FEh ; ˛
-                db  7Fh ; 
-                db  1Fh
-                db 0FFh
-                db 0C6h ; ∆
-                db 0FFh
-                db  1Eh
-                db  7Fh ; 
-                db  3Dh ; =
-                db 0FFh
-                db  80h ; Ä
-                db 0FFh
-                db  0Eh
-                db  7Fh ; 
-                db  38h ; 8
-                db 0FFh
-                db    0
-                db 0FEh ; ˛
-                db 0DCh ; ‹
-                db  3Fh ; ?
-                db  1Ch
-                db 0FFh
-                db  33h ; 3
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  3Fh ; ?
-                db  0Fh
-                db 0FFh
-                db 0E3h ; „
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0E3h ; „
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0E1h ; ·
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F1h ; Ò
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  0Fh
-                db    3
-                db 0FFh
-                db 0FBh ; ˚
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    3
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db  1Ch
-                db    0
-                db    0
-                db    0
-                db    0
-                db  1Ch
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_914D:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db    0
-                db    0
-                db    7
-                db    0
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    0
-                db  7Fh ; 
-                db  0Fh
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db 0FFh
-                db  7Fh ; 
-                db 0F8h ; ¯
-                db 0E0h ; ‡
-                db    1
-                db    0
-                db 0FFh
-                db 0F8h ; ¯
-                db 0FCh ; ¸
-                db  38h ; 8
-                db    7
-                db    1
-                db 0FFh
-                db  87h ; á
-                db 0FEh ; ˛
-                db 0DCh ; ‹
-                db  1Fh
-                db    7
-                db 0FFh
-                db  7Fh ; 
-                db 0FEh ; ˛
-                db 0E4h ; ‰
-                db  3Fh ; ?
-                db  1Eh
-                db 0FFh
-                db 0F8h ; ¯
-                db 0FFh
-                db 0FAh ; ˙
-                db  7Fh ; 
-                db  39h ; 9
-                db 0FFh
-                db 0E0h ; ‡
-                db 0FFh
-                db  3Ch ; <
-                db  7Fh ; 
-                db  27h ; '
-                db 0FFh
-                db 0C0h ; ¿
-                db 0FFh
-                db  1Eh
-                db 0FFh
-                db  5Fh ; _
-                db 0FFh
-                db  87h ; á
-                db 0FFh
-                db    7
-                db 0FFh
-                db  3Fh ; ?
-                db 0FFh
-                db  8Fh ; è
-                db 0FFh
-                db 0C6h ; ∆
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db  8Fh ; è
-                db 0FFh
-                db 0E6h ; Ê
-                db 0FFh
-                db  70h ; p
-                db 0FFh
-                db    7
-                db 0FFh
-                db 0E6h ; Ê
-                db 0FFh
-                db  60h ; `
-                db 0FFh
-                db    3
-                db 0FFh
-                db 0C6h ; ∆
-                db 0FFh
-                db  77h ; w
-                db 0FFh
-                db 0C0h ; ¿
-                db 0FFh
-                db    6
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0F8h ; ¯
-                db 0FFh
-                db  0Eh
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FEh ; ˛
-                db  7Ch ; |
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FEh ; ˛
-                db  7Ch ; |
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0F0h ; 
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  1Fh
-                db    7
-                db 0FFh
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    7
-                db    1
-                db 0FFh
-                db 0FFh
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    1
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db 0FFh
-                db  0Fh
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    0
-                db    0
-                db  0Fh
-                db    0
-                db  80h ; Ä
-                db    0
-unk_91DF:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db  0Fh
-                db    0
-                db 0F0h ; 
-                db    0
-                db 0C0h ; ¿
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F0h ; 
-                db 0F0h ; 
-                db 0C0h ; ¿
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  7Fh ; 
-                db  30h ; 0
-                db 0FFh
-                db  0Fh
-                db 0FCh ; ¸
-                db  38h ; 8
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db 0F0h ; 
-                db 0FEh ; ˛
-                db 0CCh ; Ã
-                db 0FFh
-                db  5Fh ; _
-                db 0FFh
-                db 0FFh
-                db 0FEh ; ˛
-                db 0F4h ; Ù
-                db 0FFh
-                db  5Fh ; _
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FAh ; ˙
-                db 0FFh
-                db  5Fh ; _
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  3Fh ; ?
-                db 0FFh
-                db 0CFh ; œ
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FFh
-                db  7Bh ; {
-                db 0FFh
-                db 0C3h ; √
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  60h ; `
-                db 0FFh
-                db  80h ; Ä
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  78h ; x
-                db 0FFh
-                db  18h
-                db 0FFh
-                db  3Eh ; >
-                db 0FFh
-                db  7Eh ; ~
-                db 0FFh
-                db  1Eh
-                db 0FFh
-                db  0Eh
-                db  7Fh ; 
-                db  3Eh ; >
-                db 0FFh
-                db  30h ; 0
-                db 0FFh
-                db    6
-                db  3Fh ; ?
-                db  1Ch
-                db 0FFh
-                db    0
-                db 0FFh
-                db 0FEh ; ˛
-                db  3Fh ; ?
-                db  18h
-                db 0FFh
-                db    8
-                db 0FFh
-                db  3Eh ; >
-                db  3Fh ; ?
-                db  18h
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  1Eh
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0FEh ; ˛
-                db 0B8h ; ∏
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  1Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    7
-                db    1
-                db 0FFh
-                db 0F3h ; Û
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    1
-                db    0
-                db 0F3h ; Û
-                db    1
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0C0h ; ¿
-                db    0
-unk_9271:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db    0
-                db    3
-                db    0
-                db 0FFh
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0FFh
-                db 0F8h ; ¯
-                db    0
-                db  0Fh
-                db    7
-                db 0FFh
-                db    3
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  3Fh ; ?
-                db  0Ch
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db    6
-                db  7Fh ; 
-                db  37h ; 7
-                db 0FFh
-                db 0DFh ; ﬂ
-                db 0FFh
-                db 0FAh ; ˙
-                db 0FFh
-                db  4Fh ; O
-                db 0FFh
-                db  8Fh ; è
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db  8Fh ; è
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  3Fh ; ?
-                db 0FFh
-                db  8Fh ; è
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db 0CFh ; œ
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  77h ; w
-                db 0FFh
-                db 0C7h ; «
-                db 0FFh
-                db 0E6h ; Ê
-                db 0FFh
-                db  61h ; a
-                db 0FFh
-                db 0C1h ; ¡
-                db 0FFh
-                db  82h ; Ç
-                db 0FFh
-                db  38h ; 8
-                db 0FFh
-                db  80h ; Ä
-                db 0F0h ; 
-                db    6
-                db 0FFh
-                db  7Ch ; |
-                db 0FFh
-                db    6
-                db 0FFh
-                db  1Eh
-                db 0FFh
-                db  78h ; x
-                db 0FFh
-                db  0Fh
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  7Fh ; 
-                db  30h ; 0
-                db 0FFh
-                db    6
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  7Fh ; 
-                db  38h ; 8
-                db 0FFh
-                db  21h ; !
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  3Fh ; ?
-                db  1Ch
-                db 0FFh
-                db  77h ; w
-                db 0FCh ; ¸
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  0Fh
-                db    1
-                db 0FFh
-                db 0FFh
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    1
-                db    0
-                db 0FFh
-                db 0FCh ; ¸
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db    0
-unk_9303:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db    7
-                db    0
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db    0
-                db  0Fh
-                db    7
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FCh ; ¸
-                db 0F0h ; 
-                db    0
-                db  3Fh ; ?
-                db  18h
-                db 0FFh
-                db    7
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  17h
-                db 0FFh
-                db 0FBh ; ˚
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FEh ; ˛
-                db  1Ch
-                db 0FFh
-                db  6Fh ; o
-                db 0FFh
-                db 0FFh
-                db 0FEh ; ˛
-                db 0E4h ; ‰
-                db 0FFh
-                db  5Ch ; \
-                db 0FFh
-                db 0FFh
-                db 0FEh ; ˛
-                db 0F8h ; ¯
-                db 0FFh
-                db  3Ch ; <
-                db 0FFh
-                db  3Fh ; ?
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db 0FFh
-                db  7Ch ; |
-                db 0FFh
-                db  0Fh
-                db 0FFh
-                db 0FAh ; ˙
-                db 0FFh
-                db  7Ch ; |
-                db 0FFh
-                db    3
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FFh
-                db  7Ch ; |
-                db 0FFh
-                db  30h ; 0
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FFh
-                db  7Eh ; ~
-                db 0FFh
-                db  7Ch ; |
-                db 0FFh
-                db  3Eh ; >
-                db 0FFh
-                db  7Eh ; ~
-                db 0FFh
-                db  7Ch ; |
-                db 0FFh
-                db  0Eh
-                db  7Fh ; 
-                db  3Eh ; >
-                db 0FFh
-                db  38h ; 8
-                db 0FFh
-                db    6
-                db  7Fh ; 
-                db  3Eh ; >
-                db 0FFh
-                db    0
-                db 0FFh
-                db  3Eh ; >
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db    1
-                db 0FFh
-                db 0FEh ; ˛
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db  1Fh
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    7
-                db    1
-                db 0FFh
-                db 0FFh
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    1
-                db    0
-                db 0FFh
-                db  39h ; 9
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    0
-                db    0
-                db  39h ; 9
-                db    0
-                db  80h ; Ä
-                db    0
-unk_9395:       db    0                                         ; DATA XREF: RAM:sprite_tblo
-                db    0
-unk_9397:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  1Bh
-                db    0
-                db    0
-                db    0
-                db    0
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db 0FDh ; ˝
-                db    0
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  0Fh
-                db    0
-                db 0FFh
-                db 0FDh ; ˝
-                db 0F4h ; Ù
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FBh ; ˚
-                db 0FEh ; ˛
-                db 0F4h ; Ù
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F7h ; ˜
-                db 0FFh
-                db 0F6h ; ˆ
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0EFh ; Ô
-                db 0FFh
-                db 0FAh ; ˙
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F7h ; ˜
-                db 0FAh ; ˙
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F7h ; ˜
-                db 0E0h ; ‡
-                db  80h ; Ä
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  7Fh ; 
-                db  30h ; 0
-                db 0FFh
-                db  3Fh ; ?
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db  9Fh ; ü
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  3Fh ; ?
-                db  0Fh
-                db 0FFh
-                db 0ECh ; Ï
-                db  80h ; Ä
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F0h ; 
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FBh ; ˚
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  1Eh
-                db 0FFh
-                db  1Dh
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  1Ch
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  19h
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Bh
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Bh
-                db 0FCh ; ¸
-                db 0F0h ; 
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db  80h ; Ä
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Ch ; <
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_943B:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  1Bh
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  10h
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  38h ; 8
-                db  10h
-                db    0
-                db    0
-                db    0
-                db    0
-                db  38h ; 8
-                db  10h
-                db    0
-                db    0
-                db 0FEh ; ˛
-                db    0
-                db 0F8h ; ¯
-                db  30h ; 0
-                db  0Fh
-                db    0
-                db 0FFh
-                db 0FEh ; ˛
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FDh ; ˝
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  0Fh
-                db 0FFh
-                db 0FDh ; ˝
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db 0FDh ; ˝
-                db 0FEh ; ˛
-                db 0F8h ; ¯
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db 0FDh ; ˝
-                db 0FFh
-                db 0FAh ; ˙
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db 0F7h ; ˜
-                db 0FFh
-                db  9Ah ; ö
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0DFh ; ﬂ
-                db  86h ; Ü
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FFh
-                db 0C6h ; ∆
-                db  80h ; Ä
-                db  7Fh ; 
-                db  30h ; 0
-                db 0FFh
-                db  3Fh ; ?
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db  9Fh ; ü
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  0Fh
-                db 0FFh
-                db 0ECh ; Ï
-                db    0
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F0h ; 
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FBh ; ˚
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  1Eh
-                db 0FFh
-                db  1Dh
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  1Ch
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  19h
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Bh
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Bh
-                db 0FCh ; ¸
-                db 0F0h ; 
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db  80h ; Ä
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Ch ; <
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_94DF:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  1Bh
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    8
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  1Ch
-                db    8
-                db    0
-                db    0
-                db 0FFh
-                db    0
-                db  3Ch ; <
-                db  18h
-                db  4Fh ; O
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FCh ; ¸
-                db  18h
-                db 0FFh
-                db  4Fh ; O
-                db 0FFh
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0FFh
-                db  6Fh ; o
-                db 0FFh
-                db 0FDh ; ˝
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0FFh
-                db  6Fh ; o
-                db 0FFh
-                db 0FBh ; ˚
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0FFh
-                db  6Fh ; o
-                db 0FFh
-                db 0FBh ; ˚
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0FFh
-                db  6Fh ; o
-                db 0FFh
-                db 0F7h ; ˜
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0FFh
-                db  5Fh ; _
-                db 0FFh
-                db 0FFh
-                db 0FEh ; ˛
-                db 0D8h ; ÿ
-                db 0FFh
-                db  5Fh ; _
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0DAh ; ⁄
-                db  7Fh ; 
-                db  30h ; 0
-                db 0FFh
-                db  3Fh ; ?
-                db 0FFh
-                db 0CAh ;  
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db  9Fh ; ü
-                db 0CFh ; œ
-                db  86h ; Ü
-                db  3Fh ; ?
-                db  0Fh
-                db 0FFh
-                db 0ECh ; Ï
-                db  86h ; Ü
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0F0h ; 
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db 0FBh ; ˚
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  1Eh
-                db 0FFh
-                db  1Dh
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  1Ch
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  19h
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Bh
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Bh
-                db 0FCh ; ¸
-                db 0F0h ; 
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db  80h ; Ä
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Ch ; <
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_9583:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  22h ; "
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    1
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    3
-                db    2
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    0
-                db    0
-                db    7
-                db    2
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  20h
-                db    0
-                db    7
-                db    2
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  70h ; p
-                db  20h
-                db    7
-                db    2
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  78h ; x
-                db  30h ; 0
-                db    7
-                db    2
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  78h ; x
-                db  30h ; 0
-                db  1Fh
-                db  0Ah
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  7Ch ; |
-                db  38h ; 8
-                db 0FFh
-                db  16h
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  7Fh ; 
-                db  38h ; 8
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FFh
-                db 0D1h ; —
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FFh
-                db 0AEh ; Æ
-                db 0FCh ; ¸
-                db  78h ; x
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FFh
-                db  6Eh ; n
-                db 0FCh ; ¸
-                db  38h ; 8
-                db  3Fh ; ?
-                db  1Ah
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0FCh ; ¸
-                db  78h ; x
-                db  1Fh
-                db    6
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0FBh ; ˚
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db 0FBh ; ˚
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db  99h ; ô
-                db 0F0h ; 
-                db  20h
-                db  0Fh
-                db    2
-                db 0FFh
-                db 0E0h ; ‡
-                db 0F0h ; 
-                db  60h ; `
-                db    7
-                db    2
-                db 0FFh
-                db  68h ; h
-                db 0F0h ; 
-                db  60h ; `
-                db    7
-                db    2
-                db 0FFh
-                db  98h ; ò
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    7
-                db    2
-                db 0FFh
-                db 0C1h ; ¡
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    3
-                db    1
-                db 0FFh
-                db    1
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    1
-                db    0
-                db 0FFh
-                db 0CFh ; œ
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db 0FFh
-                db  78h ; x
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  30h ; 0
-                db 0F0h ; 
-                db  60h ; `
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  0Fh
-                db 0F0h ; 
-                db  20h
-                db    0
-                db    0
-                db  0Fh
-                db    7
-                db 0F8h ; ¯
-                db 0B0h ; ∞
-                db    0
-                db    0
-                db    7
-                db    1
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db  38h ; 8
-                db    0
-                db    0
-                db    0
-                db    0
-                db  38h ; 8
-                db    0
-unk_9651:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  22h ; "
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  40h ; @
-                db    0
-                db  40h ; @
-                db    0
-                db    0
-                db    0
-                db 0E0h ; ‡
-                db  40h ; @
-                db 0E0h ; ‡
-                db  40h ; @
-                db    0
-                db    0
-                db 0E0h ; ‡
-                db  40h ; @
-                db 0E0h ; ‡
-                db  40h ; @
-                db    1
-                db    0
-                db 0F0h ; 
-                db 0A0h ; †
-                db 0E0h ; ‡
-                db  40h ; @
-                db    1
-                db    0
-                db 0F0h ; 
-                db 0A0h ; †
-                db 0F0h ; 
-                db  60h ; `
-                db    1
-                db    0
-                db 0F8h ; ¯
-                db 0B0h ; ∞
-                db 0F0h ; 
-                db  60h ; `
-                db  0Fh
-                db  0Eh
-                db 0F8h ; ¯
-                db 0B0h ; ∞
-                db 0FCh ; ¸
-                db  70h ; p
-                db 0FFh
-                db  3Eh ; >
-                db 0F8h ; ¯
-                db 0B0h ; ∞
-                db 0FFh
-                db  78h ; x
-                db 0FFh
-                db 0FDh ; ˝
-                db 0FCh ; ¸
-                db 0B8h ; ∏
-                db 0FFh
-                db  7Bh ; {
-                db 0FFh
-                db 0DDh ; ›
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db 0FFh
-                db  7Bh ; {
-                db 0FFh
-                db 0AEh ; Æ
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FFh
-                db  6Eh ; n
-                db 0FEh ; ˛
-                db  7Ch ; |
-                db  3Fh ; ?
-                db  1Ah
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  1Fh
-                db    6
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0FBh ; ˚
-                db 0F8h ; ¯
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db 0FBh ; ˚
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db  99h ; ô
-                db 0F0h ; 
-                db  20h
-                db  0Fh
-                db    2
-                db 0FFh
-                db 0E0h ; ‡
-                db 0F0h ; 
-                db  60h ; `
-                db    7
-                db    2
-                db 0FFh
-                db  68h ; h
-                db 0F0h ; 
-                db  60h ; `
-                db    7
-                db    2
-                db 0FFh
-                db  98h ; ò
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    7
-                db    2
-                db 0FFh
-                db 0C1h ; ¡
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    3
-                db    1
-                db 0FFh
-                db    1
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    1
-                db    0
-                db 0FFh
-                db 0CFh ; œ
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db 0FFh
-                db  78h ; x
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  30h ; 0
-                db 0F0h ; 
-                db  60h ; `
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  0Fh
-                db 0F0h ; 
-                db  20h
-                db    0
-                db    0
-                db  0Fh
-                db    7
-                db 0F8h ; ¯
-                db 0B0h ; ∞
-                db    0
-                db    0
-                db    7
-                db    1
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db  38h ; 8
-                db    0
-                db    0
-                db    0
-                db    0
-                db  38h ; 8
-                db    0
-unk_971F:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  22h ; "
-                db    0
-                db    0
-                db    4
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  0Eh
-                db    4
-                db    0
-                db    0
-                db    0
-                db    0
-                db  1Fh
-                db  0Ah
-                db    0
-                db    0
-                db    0
-                db    0
-                db  1Fh
-                db  0Ah
-                db    0
-                db    0
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  13h
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  13h
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  13h
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  10h
-                db    0
-                db  3Fh ; ?
-                db  13h
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  38h ; 8
-                db  10h
-                db  7Fh ; 
-                db  33h ; 3
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  38h ; 8
-                db  10h
-                db  7Fh ; 
-                db  33h ; 3
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  3Ch ; <
-                db  18h
-                db 0FFh
-                db  0Fh
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  3Fh ; ?
-                db  18h
-                db 0FFh
-                db 0F3h ; Û
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  3Fh ; ?
-                db  1Bh
-                db 0FFh
-                db 0D1h ; —
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Bh
-                db 0FFh
-                db 0AEh ; Æ
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  1Fh
-                db  0Bh
-                db 0FFh
-                db  6Eh ; n
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  1Fh
-                db  0Ah
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  0Fh
-                db    6
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0FBh ; ˚
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db 0FBh ; ˚
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db  99h ; ô
-                db 0F0h ; 
-                db  20h
-                db  0Fh
-                db    2
-                db 0FFh
-                db 0E0h ; ‡
-                db 0F0h ; 
-                db  60h ; `
-                db    7
-                db    2
-                db 0FFh
-                db  68h ; h
-                db 0F0h ; 
-                db  60h ; `
-                db    7
-                db    2
-                db 0FFh
-                db  98h ; ò
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    7
-                db    2
-                db 0FFh
-                db 0C1h ; ¡
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    3
-                db    1
-                db 0FFh
-                db    1
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    1
-                db    0
-                db 0FFh
-                db 0CFh ; œ
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db 0FFh
-                db  78h ; x
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  30h ; 0
-                db 0F0h ; 
-                db  60h ; `
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  0Fh
-                db 0F0h ; 
-                db  20h
-                db    0
-                db    0
-                db  0Fh
-                db    7
-                db 0F8h ; ¯
-                db 0B0h ; ∞
-                db    0
-                db    0
-                db    7
-                db    1
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db  38h ; 8
-                db    0
-                db    0
-                db    0
-                db    0
-                db  38h ; 8
-                db    0
-unk_97ED:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  0Fh
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FEh ; ˛
-                db  70h ; p
-                db    1
-                db    0
-                db  80h ; Ä
-                db    0
-                db 0FFh
-                db  7Eh ; ~
-                db    3
-                db    1
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  7Fh ; 
-                db  3Fh ; ?
-                db  87h ; á
-                db    3
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  7Fh ; 
-                db  21h ; !
-                db  87h ; á
-                db    3
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  3Fh ; ?
-                db  0Eh
-                db    7
-                db    0
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Fh
-                db  8Fh ; è
-                db    7
-                db 0FCh ; ¸
-                db  38h ; 8
-                db  1Fh
-                db  0Fh
-                db  8Fh ; è
-                db    7
-                db 0FCh ; ¸
-                db  98h ; ò
-                db  0Fh
-                db    7
-                db 0FFh
-                db  8Fh ; è
-                db 0F8h ; ¯
-                db 0C0h ; ¿
-                db  0Fh
-                db    7
-                db 0FFh
-                db  7Fh ; 
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0FFh
-                db  80h ; Ä
-                db    0
-                db  1Fh
-                db  0Fh
-                db    3
-                db    3
-                db  80h ; Ä
-                db    0
-unk_9849:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  0Fh
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    6
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  1Fh
-                db    6
-                db  80h ; Ä
-                db    0
-                db  0Eh
-                db    0
-                db  3Fh ; ?
-                db  1Fh
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  1Fh
-                db  0Eh
-                db 0BFh ; ø
-                db  17h
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  3Fh ; ?
-                db  1Fh
-                db 0FFh
-                db  99h ; ô
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  3Fh ; ?
-                db  19h
-                db 0FFh
-                db 0DEh ; ﬁ
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  1Fh
-                db    6
-                db 0FEh ; ˛
-                db 0D8h ; ÿ
-                db 0C0h ; ¿
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db  1Eh
-                db    0
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db  1Eh
-                db    0
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0BEh ; æ
-                db    0
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0BFh ; ø
-                db  80h ; Ä
-                db    0
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db  80h ; Ä
-                db    0
-                db  0Fh
-                db    7
-                db    3
-                db    3
-                db  80h ; Ä
-                db    0
-unk_98A5:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  0Fh
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  70h ; p
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db  70h ; p
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0CEh ; Œ
-                db    0
-                db    0
-                db    3
-                db    0
-                db 0FFh
-                db  77h ; w
-                db  80h ; Ä
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0BAh ; ∫
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FEh ; ˛
-                db 0DCh ; ‹
-                db    0
-                db    0
-                db    7
-                db    2
-                db 0FFh
-                db  5Eh ; ^
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db  9Fh ; ü
-                db  80h ; Ä
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0DEh ; ﬁ
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0DEh ; ﬁ
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0BFh ; ø
-                db  80h ; Ä
-                db    0
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0FFh
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  0Fh
-                db    7
-                db    3
-                db    2
-                db  80h ; Ä
-                db    0
-unk_9901:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  12h
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  38h ; 8
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  7Eh ; ~
-                db  38h ; 8
-                db    0
-                db    0
-                db    6
-                db    0
-                db  7Fh ; 
-                db  3Eh ; >
-                db    0
-                db    0
-                db  0Fh
-                db    6
-                db 0BFh ; ø
-                db  1Fh
-                db  80h ; Ä
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0DFh ; ﬂ
-                db  83h ; É
-                db  80h ; Ä
-                db    0
-                db  0Fh
-                db    7
-                db 0EFh ; Ô
-                db 0C5h ; ≈
-                db  80h ; Ä
-                db    0
-                db    7
-                db    2
-                db 0FFh
-                db  66h ; f
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db  8Fh ; è
-                db  80h ; Ä
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0CFh ; œ
-                db  80h ; Ä
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0EFh ; Ô
-                db  80h ; Ä
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0DFh ; ﬂ
-                db  80h ; Ä
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0CEh ; Œ
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0F1h ; Ò
-                db  80h ; Ä
-                db    0
-                db    7
-                db    3
-                db 0F1h ; Ò
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    0
-                db    3
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_996F:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  12h
-                db    0
-                db    0
-                db  40h ; @
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0E0h ; ‡
-                db  40h ; @
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0F8h ; ¯
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FEh ; ˛
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db  7Eh ; ~
-                db    0
-                db    0
-                db    0
-                db    0
-                db  7Fh ; 
-                db  26h ; &
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db  1Ah
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FEh ; ˛
-                db 0BCh ; º
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0FEh ; ˛
-                db 0BCh ; º
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FEh ; ˛
-                db 0BCh ; º
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db  3Eh ; >
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0DEh ; ﬁ
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0DFh ; ﬂ
-                db  80h ; Ä
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0DEh ; ﬁ
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FEh ; ˛
-                db 0F0h ; 
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0F0h ; 
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    0
-                db    1
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_99DD:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  12h
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  38h ; 8
-                db    0
-                db  0Ch
-                db    0
-                db    0
-                db    0
-                db  7Ch ; |
-                db  38h ; 8
-                db  1Eh
-                db  0Ch
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Ch ; <
-                db  1Fh
-                db  0Eh
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  0Fh
-                db  9Fh ; ü
-                db  0Fh
-                db  80h ; Ä
-                db    0
-                db  0Fh
-                db    7
-                db 0CFh ; œ
-                db  85h ; Ö
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db    7
-                db    2
-                db  87h ; á
-                db    4
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    3
-                db    1
-                db 0CFh ; œ
-                db  87h ; á
-                db 0E0h ; ‡
-                db  40h ; @
-                db    7
-                db    3
-                db 0DFh ; ﬂ
-                db  8Fh ; è
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0CFh ; œ
-                db  80h ; Ä
-                db    0
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0EFh ; Ô
-                db  80h ; Ä
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0DEh ; ﬁ
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0F1h ; Ò
-                db  80h ; Ä
-                db    0
-                db    3
-                db    1
-                db 0F1h ; Ò
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    0
-                db    1
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_9A4B:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  0Fh
-                db  0Fh
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BEh ; æ
-                db 0BEh ; æ
-                db 0C7h ; «
-                db 0C7h ; «
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BDh ; Ω
-                db 0BDh ; Ω
-                db 0DBh ; €
-                db 0DBh ; €
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db 0BDh ; Ω
-                db 0BDh ; Ω
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0B3h ; ≥
-                db 0B3h ; ≥
-                db  7Ch ; |
-                db  7Ch ; |
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0AAh ; ™
-                db 0AAh ; ™
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db  50h ; P
-                db  50h ; P
-                db  99h ; ô
-                db  99h ; ô
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db  90h ; ê
-                db  90h ; ê
-                db  9Bh ; õ
-                db  9Bh ; õ
-                db 0F9h ; ˘
-                db 0F9h ; ˘
-                db  90h ; ê
-                db  90h ; ê
-                db 0ABh ; ´
-                db 0ABh ; ´
-                db 0F5h ; ı
-                db 0F5h ; ı
-                db  50h ; P
-                db  50h ; P
-                db 0B3h ; ≥
-                db 0B3h ; ≥
-                db 0ECh ; Ï
-                db 0ECh ; Ï
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db 0DDh ; ›
-                db 0DDh ; ›
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BDh ; Ω
-                db 0BDh ; Ω
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BEh ; æ
-                db 0BEh ; æ
-                db  37h ; 7
-                db  37h ; 7
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  0Fh
-                db  0Fh
-                db 0D0h ; –
-                db 0D0h ; –
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0D0h ; –
-                db 0D0h ; –
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db  90h ; ê
-                db  90h ; ê
-                db  8Fh ; è
-                db  8Fh ; è
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db  10h
-                db  10h
-                db  97h ; ó
-                db  97h ; ó
-                db 0F4h ; Ù
-                db 0F4h ; Ù
-                db  90h ; ê
-                db  90h ; ê
-                db  9Bh ; õ
-                db  9Bh ; õ
-                db 0F9h ; ˘
-                db 0F9h ; ˘
-                db  90h ; ê
-                db  90h ; ê
-                db  99h ; ô
-                db  99h ; ô
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db  90h ; ê
-                db  90h ; ê
-                db  96h ; ñ
-                db  96h ; ñ
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  90h ; ê
-                db  90h ; ê
-                db  8Fh ; è
-                db  8Fh ; è
-                db  7Fh ; 
-                db  7Fh ; 
-                db  10h
-                db  10h
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  90h ; ê
-                db  90h ; ê
-unk_9ADD:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Fh ; 
-                db  7Fh ; 
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db 0F0h ; 
-                db 0F0h ; 
-                db  0Fh
-                db  0Fh
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db  77h ; w
-                db  77h ; w
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0DDh ; ›
-                db 0DDh ; ›
-                db  0Fh
-                db  0Fh
-                db 0ECh ; Ï
-                db 0ECh ; Ï
-                db  37h ; 7
-                db  37h ; 7
-                db 0F0h ; 
-                db 0F0h ; 
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db 0F9h ; ˘
-                db 0F9h ; ˘
-                db 0DDh ; ›
-                db 0DDh ; ›
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0EEh ; Ó
-                db 0EEh ; Ó
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0F0h ; 
-                db 0F0h ; 
-                db  0Fh
-                db  0Fh
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Fh ; 
-                db  7Fh ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-unk_9B3F:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Fh ; 
-                db  7Fh ; 
-                db    0
-                db    0
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0BDh ; Ω
-                db 0BDh ; Ω
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db 0DBh ; €
-                db 0DBh ; €
-                db 0F0h ; 
-                db 0F0h ; 
-                db  0Fh
-                db  0Fh
-                db 0E7h ; Á
-                db 0E7h ; Á
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db  77h ; w
-                db  77h ; w
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0DDh ; ›
-                db 0DDh ; ›
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  0Fh
-                db  0Fh
-                db 0ECh ; Ï
-                db 0ECh ; Ï
-                db  7Fh ; 
-                db  7Fh ; 
-                db  37h ; 7
-                db  37h ; 7
-                db 0F0h ; 
-                db 0F0h ; 
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db 0F9h ; ˘
-                db 0F9h ; ˘
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db 0DDh ; ›
-                db 0DDh ; ›
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0EEh ; Ó
-                db 0EEh ; Ó
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0F0h ; 
-                db 0F0h ; 
-                db  0Fh
-                db  0Fh
-                db 0E7h ; Á
-                db 0E7h ; Á
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db 0DBh ; €
-                db 0DBh ; €
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0BDh ; Ω
-                db 0BDh ; Ω
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Fh ; 
-                db  7Fh ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-unk_9BD1:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db  98h ; ò
-                db  98h ; ò
-                db  8Fh ; è
-                db  8Fh ; è
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db    4
-                db    4
-                db  97h ; ó
-                db  97h ; ó
-                db 0F6h ; ˆ
-                db 0F6h ; ˆ
-                db 0C2h ; ¬
-                db 0C2h ; ¬
-                db  9Bh ; õ
-                db  9Bh ; õ
-                db 0F9h ; ˘
-                db 0F9h ; ˘
-                db 0F1h ; Ò
-                db 0F1h ; Ò
-                db  99h ; ô
-                db  99h ; ô
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db  39h ; 9
-                db  39h ; 9
-                db  96h ; ñ
-                db  96h ; ñ
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  18h
-                db  18h
-                db  8Fh ; è
-                db  8Fh ; è
-                db  7Fh ; 
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  8Dh ; ç
-                db  8Dh ; ç
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0CBh ; À
-                db 0CBh ; À
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  0Fh
-                db  0Fh
-                db 0E7h ; Á
-                db 0E7h ; Á
-                db 0BEh ; æ
-                db 0BEh ; æ
-                db    7
-                db    7
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0BDh ; Ω
-                db 0BDh ; Ω
-                db    3
-                db    3
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0BBh ; ª
-                db 0BBh ; ª
-                db  81h ; Å
-                db  81h ; Å
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db 0B3h ; ≥
-                db 0B3h ; ≥
-                db 0C0h ; ¿
-                db 0C0h ; ¿
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db 0ABh ; ´
-                db 0ABh ; ´
-                db 0E0h ; ‡
-                db 0E0h ; ‡
-                db  7Fh ; 
-                db  7Fh ; 
-                db  9Bh ; õ
-                db  9Bh ; õ
-                db 0F1h ; Ò
-                db 0F1h ; Ò
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  9Bh ; õ
-                db  9Bh ; õ
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db  9Bh ; õ
-                db  9Bh ; õ
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db  98h ; ò
-                db  98h ; ò
-                db  0Fh
-                db  0Fh
-                db 0E7h ; Á
-                db 0E7h ; Á
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db 0DBh ; €
-                db 0DBh ; €
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0DBh ; €
-                db 0DBh ; €
-                db  80h ; Ä
-                db  80h ; Ä
-                db  7Fh ; 
-                db  7Fh ; 
-                db    0
-                db    0
-                db  80h ; Ä
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-unk_9C63:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  37h ; 7
-                db    2
-                db    0
-                db  80h ; Ä
-                db    0
-                db  80h ; Ä
-                db    0
-                db  2Fh ; /
-                db    2
-                db 0E0h ; ‡
-                db  80h ; Ä
-                db    0
-                db    0
-                db  7Fh ; 
-                db  2Ah ; *
-                db 0FCh ; ¸
-                db 0A0h ; †
-                db    0
-                db    0
-                db 0FFh
-                db  5Fh ; _
-                db 0FEh ; ˛
-                db 0DCh ; ‹
-                db    0
-                db    0
-                db 0FFh
-                db 0EDh ; Ì
-                db 0FCh ; ¸
-                db 0B8h ; ∏
-                db    0
-                db    0
-                db 0FFh
-                db  6Fh ; o
-                db 0F8h ; ¯
-                db 0B0h ; ∞
-                db    0
-                db    0
-                db 0FFh
-                db  77h ; w
-                db 0F8h ; ¯
-                db  70h ; p
-                db    0
-                db    0
-                db  7Fh ; 
-                db  37h ; 7
-                db 0F0h ; 
-                db  60h ; `
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db  60h ; `
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db  60h ; `
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db  7Fh ; 
-                db  37h ; 7
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  27h ; '
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  1Bh
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Ah ; :
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  7Fh ; 
-                db  39h ; 9
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Bh
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db  3Fh ; ?
-                db    7
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db 0FFh
-                db  5Fh ; _
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db 0FFh
-                db  9Fh ; ü
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db    0
-                db    0
-                db 0BFh ; ø
-                db  1Fh
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Fh ; ?
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FEh ; ˛
-                db 0BCh ; º
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FEh ; ˛
-                db  9Ch ; ú
-                db    0
-                db    0
-                db  7Fh ; 
-                db  33h ; 3
-                db 0FFh
-                db 0CEh ; Œ
-                db    0
-                db    0
-                db  7Fh ; 
-                db  33h ; 3
-                db 0EFh ; Ô
-                db 0C7h ; «
-                db  80h ; Ä
-                db    0
-                db  7Fh ; 
-                db  33h ; 3
-                db 0E7h ; Á
-                db 0C3h ; √
-                db 0C0h ; ¿
-                db    0
-                db  77h ; w
-                db  23h ; #
-                db 0F3h ; Û
-                db 0E1h ; ·
-                db 0C0h ; ¿
-                db  80h ; Ä
-                db 0F7h ; ˜
-                db  63h ; c
-                db 0F1h ; Ò
-                db  60h ; `
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db 0F7h ; ˜
-                db  63h ; c
-                db 0F8h ; ¯
-                db  70h ; p
-                db 0F0h ; 
-                db  60h ; `
-                db 0F7h ; ˜
-                db  63h ; c
-                db 0F8h ; ¯
-                db  30h ; 0
-                db  78h ; x
-                db    0
-                db 0E7h ; Á
-                db    7
-                db 0FCh ; ¸
-                db  38h ; 8
-                db  78h ; x
-                db  30h ; 0
-                db 0E7h ; Á
-                db  43h ; C
-                db 0BCh ; º
-                db  18h
-                db 0FCh ; ¸
-                db  58h ; X
-                db 0E7h ; Á
-                db 0C3h ; √
-                db  9Eh ; û
-                db  0Ch
-                db 0FEh ; ˛
-                db 0C0h ; ¿
-                db 0CFh ; œ
-                db  87h ; á
-                db  9Eh ; û
-                db  0Ch
-                db 0EFh ; Ô
-                db  46h ; F
-                db 0CFh ; œ
-                db  87h ; á
-                db 0BFh ; ø
-                db  16h
-                db  77h ; w
-                db  23h ; #
-                db  8Fh ; è
-                db    6
-                db  3Fh ; ?
-                db  16h
-                db  7Eh ; ~
-                db  21h ; !
-                db  1Fh
-                db  0Ah
-                db  77h ; w
-                db  23h ; #
-                db  9Eh ; û
-                db    0
-                db  1Fh
-                db  0Ah
-                db  7Fh ; 
-                db  25h ; %
-                db 0DCh ; ‹
-                db  80h ; Ä
-                db  3Fh ; ?
-                db  12h
-                db  7Fh ; 
-                db  24h ; $
-                db 0FEh ; ˛
-                db 0DCh ; ‹
-                db  3Fh ; ?
-                db  12h
-                db  3Ch ; <
-                db    8
-                db 0FCh ; ¸
-                db  60h ; `
-                db  3Fh ; ?
-                db  12h
-                db  1Ch
-                db    8
-                db  70h ; p
-                db  20h
-                db  3Fh ; ?
-                db  12h
-                db  1Ch
-                db    8
-                db  78h ; x
-                db  30h ; 0
-                db  17h
-                db    2
-                db    8
-                db    0
-                db  3Ch ; <
-                db  18h
-                db    7
-                db    2
-                db    0
-                db    0
-                db  18h
-                db    0
-                db    2
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_9DAF:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  28h ; (
-                db    0
-                db    0
-                db  50h ; P
-                db    0
-                db    1
-                db    0
-                db 0FCh ; ¸
-                db  50h ; P
-                db  0Fh
-                db    1
-                db 0FEh ; ˛
-                db  54h ; T
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db 0AAh ; ™
-                db  0Fh
-                db    6
-                db 0FFh
-                db 0F6h ; ˆ
-                db    7
-                db    3
-                db 0FFh
-                db  7Eh ; ~
-                db    7
-                db    3
-                db 0FEh ; ˛
-                db  7Fh ; 
-                db    3
-                db    1
-                db 0FEh ; ˛
-                db 0ECh ; Ï
-                db    3
-                db    1
-                db 0FEh ; ˛
-                db 0ECh ; Ï
-                db    3
-                db    1
-                db 0FEh ; ˛
-                db 0F4h ; Ù
-                db    7
-                db    1
-                db 0FEh ; ˛
-                db 0F4h ; Ù
-                db  0Fh
-                db    7
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  1Fh
-                db    9
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  3Bh ; ;
-                db  11h
-                db 0FEh ; ˛
-                db 0F8h ; ¯
-                db  3Bh ; ;
-                db  11h
-                db 0FEh ; ˛
-                db 0C6h ; ∆
-                db  77h ; w
-                db  23h ; #
-                db 0FFh
-                db 0D6h ; ÷
-                db  77h ; w
-                db  23h ; #
-                db 0FEh ; ˛
-                db 0D8h ; ÿ
-                db  2Fh ; /
-                db    5
-                db 0FCh ; ¸
-                db 0B8h ; ∏
-                db  0Fh
-                db    5
-                db 0FCh ; ¸
-                db 0B8h ; ∏
-                db  1Fh
-                db    9
-                db 0FCh ; ¸
-                db  78h ; x
-                db  1Fh
-                db    9
-                db 0FCh ; ¸
-                db  68h ; h
-                db  3Bh ; ;
-                db  10h
-                db 0FCh ; ¸
-                db 0E8h ; Ë
-                db  73h ; s
-                db  20h
-                db 0FCh ; ¸
-                db 0E8h ; Ë
-                db  73h ; s
-                db  21h ; !
-                db 0FEh ; ˛
-                db 0ECh ; Ï
-                db  27h ; '
-                db    3
-                db 0FEh ; ˛
-                db 0ECh ; Ï
-                db    7
-                db    3
-                db 0FEh ; ˛
-                db  64h ; d
-                db  0Fh
-                db    6
-                db 0FEh ; ˛
-                db 0E4h ; ‰
-                db  3Fh ; ?
-                db  0Dh
-                db 0FEh ; ˛
-                db 0A4h ; §
-                db  7Fh ; 
-                db  39h ; 9
-                db 0FEh ; ˛
-                db  24h ; $
-                db 0FFh
-                db  63h ; c
-                db 0FEh ; ˛
-                db  24h ; $
-                db 0FFh
-                db 0D2h ; “
-                db  77h ; w
-                db  22h ; "
-                db 0FFh
-                db  96h ; ñ
-                db  77h ; w
-                db  22h ; "
-                db  9Eh ; û
-                db    4
-                db  7Bh ; {
-                db  31h ; 1
-                db  3Fh ; ?
-                db  0Eh
-                db  7Fh ; 
-                db  29h ; )
-                db 0FFh
-                db  2Ah ; *
-                db  7Dh ; }
-                db  28h ; (
-                db 0FFh
-                db 0D2h ; “
-                db 0FEh ; ˛
-                db  64h ; d
-                db 0FFh
-                db  14h
-                db 0FEh ; ˛
-                db 0A4h ; §
-                db  7Fh ; 
-                db  25h ; %
-                db 0F7h ; ˜
-                db  22h ; "
-                db  75h ; u
-                db  20h
-                db  77h ; w
-                db  22h ; "
-                db  20h
-                db    0
-                db  22h ; "
-                db    0
-unk_9E51:       db    4                                         ; DATA XREF: RAM:sprite_tblo
-                db  19h
-                db    0
-                db    0
-                db  0Fh
-                db    0
-                db 0F0h ; 
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db  0Dh
-                db 0FFh
-                db 0D0h ; –
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0BDh ; Ω
-                db 0FFh
-                db 0DFh ; ﬂ
-                db 0C0h ; ¿
-                db    0
-                db    7
-                db    1
-                db 0FFh
-                db 0BDh ; Ω
-                db 0FFh
-                db 0DFh ; ﬂ
-                db 0E0h ; ‡
-                db  40h ; @
-                db  0Fh
-                db    5
-                db 0FFh
-                db 0BDh ; Ω
-                db 0FFh
-                db 0EFh ; Ô
-                db 0F8h ; ¯
-                db  60h ; `
-                db  1Fh
-                db  0Ch
-                db 0FFh
-                db 0D9h ; Ÿ
-                db 0FFh
-                db 0EFh ; Ô
-                db 0FCh ; ¸
-                db  78h ; x
-                db  1Fh
-                db  0Ch
-                db 0FFh
-                db 0D6h ; ÷
-                db 0FFh
-                db 0EEh ; Ó
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0B6h ; ∂
-                db 0FFh
-                db 0EEh ; Ó
-                db 0FCh ; ¸
-                db  50h ; P
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0BAh ; ∫
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  0Dh
-                db 0FFh
-                db 0D9h ; Ÿ
-                db 0FFh
-                db 0F6h ; ˆ
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Dh
-                db 0FFh
-                db 0DDh ; ›
-                db 0FFh
-                db 0EEh ; Ó
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  3Fh ; ?
-                db  1Dh
-                db 0FFh
-                db 0EDh ; Ì
-                db 0FFh
-                db 0DFh ; ﬂ
-                db 0FCh ; ¸
-                db  50h ; P
-                db  3Fh ; ?
-                db  1Dh
-                db 0FFh
-                db 0EDh ; Ì
-                db 0FFh
-                db 0EFh ; Ô
-                db 0FCh ; ¸
-                db  58h ; X
-                db  3Fh ; ?
-                db  1Bh
-                db 0FFh
-                db 0D0h ; –
-                db 0FFh
-                db  0Fh
-                db 0FCh ; ¸
-                db  58h ; X
-                db  3Fh ; ?
-                db  0Bh
-                db 0FFh
-                db  0Fh
-                db 0FFh
-                db 0F0h ; 
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db  1Fh
-                db    8
-                db 0FFh
-                db 0F8h ; ¯
-                db 0FFh
-                db  1Fh
-                db 0FCh ; ¸
-                db  38h ; 8
-                db  1Fh
-                db  0Bh
-                db 0FFh
-                db 0C7h ; «
-                db 0FFh
-                db 0E3h ; „
-                db 0FCh ; ¸
-                db 0D8h ; ÿ
-                db  1Fh
-                db    7
-                db 0FFh
-                db  3Ch ; <
-                db 0FFh
-                db  3Dh ; =
-                db 0FCh ; ¸
-                db 0E8h ; Ë
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0E3h ; „
-                db 0FFh
-                db 0C6h ; ∆
-                db 0FCh ; ¸
-                db 0F0h ; 
-                db  1Fh
-                db  0Eh
-                db 0FFh
-                db 0E3h ; „
-                db 0FFh
-                db 0C6h ; ∆
-                db 0F8h ; ¯
-                db 0F0h ; 
-                db  1Fh
-                db    7
-                db 0FFh
-                db  3Ch ; <
-                db 0FFh
-                db  3Dh ; =
-                db 0F8h ; ¯
-                db 0E0h ; ‡
-                db  0Fh
-                db    3
-                db 0FFh
-                db 0C7h ; «
-                db 0FFh
-                db 0E3h ; „
-                db 0F0h ; 
-                db 0C0h ; ¿
-                db    7
-                db    0
-                db 0FFh
-                db 0F8h ; ¯
-                db 0FFh
-                db  1Fh
-                db 0E0h ; ‡
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db  0Fh
-                db 0FFh
-                db 0F0h ; 
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db  1Fh
-                db    0
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db    0
-unk_9F1B:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  2Bh ; +
-                db    0
-                db    0
-                db  42h ; B
-                db  42h ; B
-                db    1
-                db    1
-                db  51h ; Q
-                db  51h ; Q
-                db    6
-                db    6
-                db 0E9h ; È
-                db 0E9h ; È
-                db    3
-                db    3
-                db 0F1h ; Ò
-                db 0F1h ; Ò
-                db  29h ; )
-                db  29h ; )
-                db 0B1h ; ±
-                db 0B1h ; ±
-                db  7Ch ; |
-                db  7Ch ; |
-                db 0B1h ; ±
-                db 0B1h ; ±
-                db  38h ; 8
-                db  38h ; 8
-                db 0B1h ; ±
-                db 0B1h ; ±
-                db    8
-                db    8
-                db 0B1h ; ±
-                db 0B1h ; ±
-                db    8
-                db    8
-                db 0B1h ; ±
-                db 0B1h ; ±
-                db    8
-                db    8
-                db 0F3h ; Û
-                db 0F3h ; Û
-                db  18h
-                db  18h
-                db 0E3h ; „
-                db 0E3h ; „
-                db  18h
-                db  18h
-                db 0E3h ; „
-                db 0E3h ; „
-                db  18h
-                db  18h
-                db 0E3h ; „
-                db 0E3h ; „
-                db  39h ; 9
-                db  39h ; 9
-                db 0E3h ; „
-                db 0E3h ; „
-                db  59h ; Y
-                db  59h ; Y
-                db 0E3h ; „
-                db 0E3h ; „
-                db  59h ; Y
-                db  59h ; Y
-                db 0E3h ; „
-                db 0E3h ; „
-                db  19h
-                db  19h
-                db 0D3h ; ”
-                db 0D3h ; ”
-                db  19h
-                db  19h
-                db 0D3h ; ”
-                db 0D3h ; ”
-                db  19h
-                db  19h
-                db 0CAh ;  
-                db 0CAh ;  
-                db  39h ; 9
-                db  39h ; 9
-                db 0CAh ;  
-                db 0CAh ;  
-                db  29h ; )
-                db  29h ; )
-                db  42h ; B
-                db  42h ; B
-                db  29h ; )
-                db  29h ; )
-                db  42h ; B
-                db  42h ; B
-                db  29h ; )
-                db  29h ; )
-                db  42h ; B
-                db  42h ; B
-                db  29h ; )
-                db  29h ; )
-                db  64h ; d
-                db  64h ; d
-                db  49h ; I
-                db  49h ; I
-                db  64h ; d
-                db  64h ; d
-                db  52h ; R
-                db  49h ; I
-                db 0E4h ; ‰
-                db 0E4h ; ‰
-                db  52h ; R
-                db  52h ; R
-                db 0B2h ; ≤
-                db 0B2h ; ≤
-                db  52h ; R
-                db  52h ; R
-                db 0B2h ; ≤
-                db 0B2h ; ≤
-                db  43h ; C
-                db  43h ; C
-                db  9Ah ; ö
-                db  9Ah ; ö
-                db  43h ; C
-                db  43h ; C
-                db  98h ; ò
-                db  98h ; ò
-                db  43h ; C
-                db  43h ; C
-                db  18h
-                db  18h
-                db    7
-                db    7
-                db  0Ch
-                db  0Ch
-                db  0Bh
-                db  0Bh
-                db  0Ch
-                db  0Ch
-                db  13h
-                db  13h
-                db    4
-                db    4
-                db  17h
-                db  17h
-                db    4
-                db    4
-                db  27h ; '
-                db  17h
-                db  8Eh ; é
-                db  8Eh ; é
-                db  2Bh ; +
-                db  2Bh ; +
-                db  8Ah ; ä
-                db  8Ah ; ä
-                db  4Ah ; J
-                db  4Ah ; J
-                db  8Ah ; ä
-                db  8Ah ; ä
-                db  52h ; R
-                db  52h ; R
-                db  92h ; í
-                db  92h ; í
-                db  12h
-                db  12h
-                db  92h ; í
-                db  92h ; í
-                db  24h ; $
-                db  24h ; $
-                db  92h ; í
-                db  92h ; í
-                db  24h ; $
-                db  24h ; $
-                db    0
-                db    0
-                db    4
-                db    4
-                db    0
-                db    0
-unk_9FC9:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  35h ; 5
-                db  41h ; A
-                db  41h ; A
-                db  40h ; @
-                db  40h ; @
-                db  22h ; "
-                db  22h ; "
-                db  52h ; R
-                db  52h ; R
-                db 0B2h ; ≤
-                db 0B2h ; ≤
-                db 0A2h ; ¢
-                db 0A2h ; ¢
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db 0D0h ; –
-                db 0D0h ; –
-                db  7Fh ; 
-                db  7Fh ; 
-                db 0E0h ; ‡
-                db 0E0h ; ‡
-                db  3Eh ; >
-                db  3Eh ; >
-                db 0C2h ; ¬
-                db 0C2h ; ¬
-                db  36h ; 6
-                db  36h ; 6
-                db  94h ; î
-                db  94h ; î
-                db  3Ah ; :
-                db  3Ah ; :
-                db  9Ch ; ú
-                db  9Ch ; ú
-                db  3Bh ; ;
-                db  3Bh ; ;
-                db  9Ch ; ú
-                db  9Ch ; ú
-                db  1Bh
-                db  1Bh
-                db 0DEh ; ﬁ
-                db 0DEh ; ﬁ
-                db  1Dh
-                db  1Dh
-                db 0DCh ; ‹
-                db 0DCh ; ‹
-                db  1Dh
-                db  1Dh
-                db 0DCh ; ‹
-                db 0DCh ; ‹
-                db  1Dh
-                db  1Dh
-                db 0DEh ; ﬁ
-                db 0DEh ; ﬁ
-                db  1Dh
-                db  1Dh
-                db 0DCh ; ‹
-                db 0DCh ; ‹
-                db  1Fh
-                db  1Fh
-                db  8Ch ; å
-                db  8Ch ; å
-                db  1Fh
-                db  1Fh
-                db  8Ch ; å
-                db  8Ch ; å
-                db  1Fh
-                db  1Fh
-                db  9Ch ; ú
-                db  9Ch ; ú
-                db  1Fh
-                db  1Fh
-                db  9Eh ; û
-                db  9Eh ; û
-                db  1Dh
-                db  1Dh
-                db 0A6h ; ¶
-                db 0A6h ; ¶
-                db  1Dh
-                db  1Dh
-                db 0A6h ; ¶
-                db 0A6h ; ¶
-                db  1Dh
-                db  1Dh
-                db 0AEh ; Æ
-                db 0AEh ; Æ
-                db  1Dh
-                db  1Dh
-                db 0ADh ; ≠
-                db 0ADh ; ≠
-                db  1Dh
-                db  1Dh
-                db  8Dh ; ç
-                db  8Dh ; ç
-                db  15h
-                db  15h
-                db  8Dh ; ç
-                db  8Dh ; ç
-                db  0Eh
-                db  0Eh
-                db  8Ch ; å
-                db  8Ch ; å
-                db  1Eh
-                db  1Eh
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  3Eh ; >
-                db  3Eh ; >
-                db 0D4h ; ‘
-                db 0D4h ; ‘
-                db  37h ; 7
-                db  37h ; 7
-                db  44h ; D
-                db  44h ; D
-                db  2Fh ; /
-                db  2Fh ; /
-                db 0E4h ; ‰
-                db 0E4h ; ‰
-                db  2Fh ; /
-                db  2Fh ; /
-                db 0E4h ; ‰
-                db 0E4h ; ‰
-                db  0Dh
-                db  0Dh
-                db 0F0h ; 
-                db 0F0h ; 
-                db  1Dh
-                db  1Dh
-                db 0F8h ; ¯
-                db 0F8h ; ¯
-                db  1Dh
-                db  1Dh
-                db 0DCh ; ‹
-                db 0DCh ; ‹
-                db  1Dh
-                db  1Dh
-                db 0DCh ; ‹
-                db 0DCh ; ‹
-                db  19h
-                db  19h
-                db 0DAh ; ⁄
-                db 0DAh ; ⁄
-                db  30h ; 0
-                db  30h ; 0
-                db 0CDh ; Õ
-                db 0CDh ; Õ
-                db  30h ; 0
-                db  30h ; 0
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  30h ; 0
-                db  30h ; 0
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  70h ; p
-                db  70h ; p
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  58h ; X
-                db  58h ; X
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  18h
-                db  18h
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db  18h
-                db  18h
-                db 0E2h ; ‚
-                db 0E2h ; ‚
-                db  18h
-                db  18h
-                db 0E2h ; ‚
-                db 0E2h ; ‚
-                db  14h
-                db  14h
-                db  53h ; S
-                db  53h ; S
-                db  14h
-                db  14h
-                db  51h ; Q
-                db  51h ; Q
-                db  12h
-                db  12h
-                db  49h ; I
-                db  49h ; I
-                db  12h
-                db  12h
-                db  49h ; I
-                db  49h ; I
-                db  10h
-                db  10h
-                db    1
-                db    1
-                db    8
-                db    8
-                db    0
-                db    0
-                db    8
-                db    8
-                db    0
-                db    0
-                db    8
-                db    8
-                db    0
-                db    0
-                db    4
-                db    4
-                db    0
-                db    0
-                db    4
-                db    4
-                db    0
-                db    0
-unk_A09F:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  35h ; 5
-                db    1
-                db    1
-                db  24h ; $
-                db  24h ; $
-                db    1
-                db    1
-                db 0A5h ; •
-                db 0A5h ; •
-                db    4
-                db    4
-                db 0AAh ; ™
-                db 0AAh ; ™
-                db  0Ah
-                db  0Ah
-                db 0EDh ; Ì
-                db 0EDh ; Ì
-                db 0AFh ; Ø
-                db 0AFh ; Ø
-                db  7Fh ; 
-                db  7Fh ; 
-                db  5Bh ; [
-                db  5Bh ; [
-                db 0BEh ; æ
-                db 0BEh ; æ
-                db  73h ; s
-                db  73h ; s
-                db  3Ch ; <
-                db  3Ch ; <
-                db  73h ; s
-                db  73h ; s
-                db  1Ch
-                db  1Ch
-                db  71h ; q
-                db  71h ; q
-                db  1Ch
-                db  1Ch
-                db  31h ; 1
-                db  31h ; 1
-                db  1Ch
-                db  1Ch
-                db  31h ; 1
-                db  31h ; 1
-                db  9Ch ; ú
-                db  9Ch ; ú
-                db  31h ; 1
-                db  31h ; 1
-                db 0BCh ; º
-                db 0BCh ; º
-                db  39h ; 9
-                db  39h ; 9
-                db 0BCh ; º
-                db 0BCh ; º
-                db  35h ; 5
-                db  35h ; 5
-                db 0BCh ; º
-                db 0BCh ; º
-                db  35h ; 5
-                db  35h ; 5
-                db 0BCh ; º
-                db 0BCh ; º
-                db  31h ; 1
-                db  31h ; 1
-                db 0FAh ; ˙
-                db 0FAh ; ˙
-                db  31h ; 1
-                db  31h ; 1
-                db 0EAh ; Í
-                db 0EAh ; Í
-                db  39h ; 9
-                db  39h ; 9
-                db  69h ; i
-                db  69h ; i
-                db  39h ; 9
-                db  39h ; 9
-                db  69h ; i
-                db  69h ; i
-                db  39h ; 9
-                db  39h ; 9
-                db 0E9h ; È
-                db 0E9h ; È
-                db  39h ; 9
-                db  39h ; 9
-                db 0B9h ; π
-                db 0B9h ; π
-                db  59h ; Y
-                db  59h ; Y
-                db 0B9h ; π
-                db 0B9h ; π
-                db  5Dh ; ]
-                db  5Dh ; ]
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  95h ; ï
-                db  95h ; ï
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  95h ; ï
-                db  95h ; ï
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db 0B5h ; µ
-                db 0B5h ; µ
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  25h ; %
-                db  25h ; %
-                db  3Ch ; <
-                db  3Ch ; <
-                db  27h ; '
-                db  27h ; '
-                db  7Ch ; |
-                db  7Ch ; |
-                db  67h ; g
-                db  67h ; g
-                db  7Ah ; z
-                db  7Ah ; z
-                db  43h ; C
-                db  43h ; C
-                db  7Ah ; z
-                db  7Ah ; z
-                db  47h ; G
-                db  47h ; G
-                db  7Ah ; z
-                db  7Ah ; z
-                db  46h ; F
-                db  46h ; F
-                db 0BAh ; ∫
-                db 0BAh ; ∫
-                db  46h ; F
-                db  46h ; F
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  26h ; &
-                db  26h ; &
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  26h ; &
-                db  26h ; &
-                db  3Ch ; <
-                db  3Ch ; <
-                db  2Eh ; .
-                db  2Eh ; .
-                db  3Ch ; <
-                db  3Ch ; <
-                db  2Ch ; ,
-                db  2Ch ; ,
-                db  74h ; t
-                db  74h ; t
-                db  2Ch ; ,
-                db  2Ch ; ,
-                db  76h ; v
-                db  76h ; v
-                db  1Ah
-                db  1Ah
-                db 0B2h ; ≤
-                db 0B2h ; ≤
-                db  1Ah
-                db  1Ah
-                db 0B2h ; ≤
-                db 0B2h ; ≤
-                db  29h ; )
-                db  29h ; )
-                db  31h ; 1
-                db  31h ; 1
-                db  49h ; I
-                db  49h ; I
-                db  31h ; 1
-                db  31h ; 1
-                db  52h ; R
-                db  52h ; R
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  92h ; í
-                db  92h ; í
-                db 0D8h ; ÿ
-                db 0D8h ; ÿ
-                db  92h ; í
-                db  92h ; í
-                db  54h ; T
-                db  54h ; T
-                db  14h
-                db  14h
-                db  94h ; î
-                db  94h ; î
-                db  14h
-                db  14h
-                db 0B4h ; ¥
-                db 0B4h ; ¥
-                db    4
-                db    4
-                db  32h ; 2
-                db  32h ; 2
-                db    0
-                db    0
-                db  52h ; R
-                db  52h ; R
-                db    0
-                db    0
-                db  50h ; P
-                db  50h ; P
-                db    0
-                db    0
-                db  90h ; ê
-                db  90h ; ê
-                db    0
-                db    0
-                db  90h ; ê
-                db  90h ; ê
-                db    0
-                db    0
-                db  10h
-                db  10h
-unk_A175:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  32h ; 2
-                db    0
-                db    0
-                db  50h ; P
-                db  50h ; P
-                db    0
-                db    0
-                db  70h ; p
-                db  70h ; p
-                db    5
-                db    5
-                db  27h ; '
-                db  27h ; '
-                db  2Ah ; *
-                db  2Ah ; *
-                db  2Eh ; .
-                db  2Eh ; .
-                db  57h ; W
-                db  57h ; W
-                db 0AEh ; Æ
-                db 0AEh ; Æ
-                db  7Fh ; 
-                db  7Fh ; 
-                db  26h ; &
-                db  26h ; &
-                db  3Bh ; ;
-                db  3Bh ; ;
-                db  26h ; &
-                db  26h ; &
-                db  1Ah
-                db  1Ah
-                db  64h ; d
-                db  64h ; d
-                db  1Ah
-                db  1Ah
-                db  64h ; d
-                db  64h ; d
-                db  16h
-                db  16h
-                db 0A4h ; §
-                db 0A4h ; §
-                db  16h
-                db  16h
-                db 0A4h ; §
-                db 0A4h ; §
-                db  36h ; 6
-                db  36h ; 6
-                db 0B4h ; ¥
-                db 0B4h ; ¥
-                db  56h ; V
-                db  56h ; V
-                db  34h ; 4
-                db  34h ; 4
-                db  5Ch ; \
-                db  5Ch ; \
-                db  2Ch ; ,
-                db  2Ch ; ,
-                db  1Ch
-                db  1Ch
-                db  24h ; $
-                db  24h ; $
-                db  1Ch
-                db  1Ch
-                db  24h ; $
-                db  24h ; $
-                db  3Eh ; >
-                db  3Eh ; >
-                db  2Ah ; *
-                db  2Ah ; *
-                db  3Eh ; >
-                db  3Eh ; >
-                db  4Ah ; J
-                db  4Ah ; J
-                db  77h ; w
-                db  77h ; w
-                db  4Ah ; J
-                db  4Ah ; J
-                db  57h ; W
-                db  57h ; W
-                db    8
-                db    8
-                db 0D6h ; ÷
-                db 0D6h ; ÷
-                db  89h ; â
-                db  89h ; â
-                db  96h ; ñ
-                db  96h ; ñ
-                db  89h ; â
-                db  89h ; â
-                db 0B5h ; µ
-                db 0B5h ; µ
-                db  41h ; A
-                db  41h ; A
-                db 0A5h ; •
-                db 0A5h ; •
-                db  21h ; !
-                db  21h ; !
-                db  3Ch ; <
-                db  3Ch ; <
-                db 0A1h ; °
-                db 0A1h ; °
-                db  3Ah ; :
-                db  3Ah ; :
-                db  91h ; ë
-                db  91h ; ë
-                db  7Ah ; z
-                db  7Ah ; z
-                db  50h ; P
-                db  50h ; P
-                db  5Ah ; Z
-                db  5Ah ; Z
-                db  48h ; H
-                db  48h ; H
-                db  59h ; Y
-                db  59h ; Y
-                db  24h ; $
-                db  24h ; $
-                db  59h ; Y
-                db  59h ; Y
-                db  22h ; "
-                db  22h ; "
-                db  59h ; Y
-                db  59h ; Y
-                db  11h
-                db  11h
-                db  59h ; Y
-                db  59h ; Y
-                db  10h
-                db  10h
-                db  58h ; X
-                db  58h ; X
-                db  88h ; à
-                db  88h ; à
-                db  98h ; ò
-                db  98h ; ò
-                db  88h ; à
-                db  88h ; à
-                db  94h ; î
-                db  94h ; î
-                db  84h ; Ñ
-                db  84h ; Ñ
-                db  94h ; î
-                db  94h ; î
-                db  44h ; D
-                db  44h ; D
-                db  14h
-                db  14h
-                db  40h ; @
-                db  40h ; @
-                db  14h
-                db  14h
-                db  40h ; @
-                db  40h ; @
-                db  14h
-                db  14h
-                db  40h ; @
-                db  40h ; @
-                db  14h
-                db  14h
-                db  20h
-                db  20h
-                db  12h
-                db  12h
-                db  20h
-                db  20h
-                db  12h
-                db  12h
-                db  20h
-                db  20h
-                db  12h
-                db  12h
-                db  10h
-                db  10h
-                db  12h
-                db  12h
-                db  10h
-                db  10h
-                db  12h
-                db  12h
-                db  10h
-                db  10h
-                db  12h
-                db  12h
-                db    8
-                db    8
-                db  12h
-                db  12h
-                db    8
-                db    8
-                db  12h
-                db  12h
-                db    0
-                db    0
-                db    2
-                db    2
-                db    0
-                db    0
-                db    2
-                db    2
-                db    0
-                db    0
-unk_A23F:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  1Ah
-                db  40h ; @
-                db  40h ; @
-                db    0
-                db    0
-                db  70h ; p
-                db  70h ; p
-                db    0
-                db    0
-                db  7Ch ; |
-                db  7Ch ; |
-                db    0
-                db    0
-                db  7Fh ; 
-                db  7Fh ; 
-                db    0
-                db    0
-                db  7Fh ; 
-                db  7Fh ; 
-                db  80h ; Ä
-                db  80h ; Ä
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db 0B0h ; ∞
-                db 0B0h ; ∞
-                db 0CFh ; œ
-                db 0CFh ; œ
-                db 0BCh ; º
-                db 0BCh ; º
-                db 0F3h ; Û
-                db 0F3h ; Û
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0FFh
-                db 0FFh
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db 0FFh
-                db 0FFh
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0FFh
-                db 0FFh
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  4Fh ; O
-                db  4Fh ; O
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  73h ; s
-                db  73h ; s
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db  7Ch ; |
-                db  7Ch ; |
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db  1Dh
-                db  1Dh
-                db 0CFh ; œ
-                db 0CFh ; œ
-                db  65h ; e
-                db  65h ; e
-                db 0F3h ; Û
-                db 0F3h ; Û
-                db  75h ; u
-                db  75h ; u
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db  38h ; 8
-                db  38h ; 8
-                db 0FFh
-                db 0FFh
-                db    7
-                db    7
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db  1Fh
-                db  1Fh
-                db 0CFh ; œ
-                db 0CFh ; œ
-                db    7
-                db    7
-                db 0F3h ; Û
-                db 0F3h ; Û
-                db    1
-                db    1
-                db 0FDh ; ˝
-                db 0FDh ; ˝
-                db    0
-                db    0
-                db  7Eh ; ~
-                db  7Eh ; ~
-                db    0
-                db    0
-                db  18h
-                db  18h
-unk_A2A9:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  1Fh
-                db  60h ; `
-                db  60h ; `
-                db    0
-                db    0
-                db  70h ; p
-                db  70h ; p
-                db    0
-                db    0
-                db    4
-                db    4
-                db    0
-                db    0
-                db  72h ; r
-                db  72h ; r
-                db    0
-                db    0
-                db  7Bh ; {
-                db  7Bh ; {
-                db    0
-                db    0
-                db  78h ; x
-                db  78h ; x
-                db  5Ch ; \
-                db  5Ch ; \
-                db  78h ; x
-                db  78h ; x
-                db 0EEh ; Ó
-                db 0EEh ; Ó
-                db  31h ; 1
-                db  31h ; 1
-                db 0CEh ; Œ
-                db 0CEh ; Œ
-                db    1
-                db    1
-                db 0C8h ; »
-                db 0C8h ; »
-                db    0
-                db    0
-                db 0E6h ; Ê
-                db 0E6h ; Ê
-                db  30h ; 0
-                db  30h ; 0
-                db  26h ; &
-                db  26h ; &
-                db  3Eh ; >
-                db  3Eh ; >
-                db    3
-                db    3
-                db  1Eh
-                db  1Eh
-                db  30h ; 0
-                db  30h ; 0
-                db 0CFh ; œ
-                db 0CFh ; œ
-                db  7Ch ; |
-                db  7Ch ; |
-                db 0C7h ; «
-                db 0C7h ; «
-                db  3Eh ; >
-                db  3Eh ; >
-                db 0E3h ; „
-                db 0E3h ; „
-                db  87h ; á
-                db  87h ; á
-                db 0F0h ; 
-                db 0F0h ; 
-                db  30h ; 0
-                db  30h ; 0
-                db  1Bh
-                db  1Bh
-                db  7Eh ; ~
-                db  7Eh ; ~
-                db 0E9h ; È
-                db 0E9h ; È
-                db  7Eh ; ~
-                db  7Eh ; ~
-                db  74h ; t
-                db  74h ; t
-                db  7Fh ; 
-                db  7Fh ; 
-                db  70h ; p
-                db  70h ; p
-                db  7Fh ; 
-                db  7Fh ; 
-                db  7Fh ; 
-                db  7Fh ; 
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db  3Eh ; >
-                db  3Eh ; >
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  3Dh ; =
-                db  3Dh ; =
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  13h
-                db  13h
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  0Fh
-                db  0Fh
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db    6
-                db    6
-                db  27h ; '
-                db  27h ; '
-                db    1
-                db    1
-                db 0F9h ; ˘
-                db 0F9h ; ˘
-                db    7
-                db    7
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db    1
-                db    1
-                db 0F8h ; ¯
-                db 0F8h ; ¯
-                db    0
-                db    0
-                db  60h ; `
-                db  60h ; `
-unk_A327:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  21h ; !
-                db  34h ; 4
-                db  34h ; 4
-                db    0
-                db    0
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db    0
-                db    0
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0C0h ; ¿
-                db 0C0h ; ¿
-                db 0C9h ; …
-                db 0C9h ; …
-                db 0F0h ; 
-                db 0F0h ; 
-                db  3Eh ; >
-                db  3Eh ; >
-                db  7Ch ; |
-                db  7Ch ; |
-                db 0FFh
-                db 0FFh
-                db  9Fh ; ü
-                db  9Fh ; ü
-                db 0F0h ; 
-                db 0F0h ; 
-                db  27h ; '
-                db  27h ; '
-                db 0CFh ; œ
-                db 0CFh ; œ
-                db 0C9h ; …
-                db 0C9h ; …
-                db 0BEh ; æ
-                db 0BEh ; æ
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db  7Ch ; |
-                db  7Ch ; |
-                db  7Ah ; z
-                db  7Ah ; z
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db  7Ch ; |
-                db  7Ch ; |
-                db 0ECh ; Ï
-                db 0ECh ; Ï
-                db  6Ch ; l
-                db  6Ch ; l
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db 0CCh ; Ã
-                db 0CCh ; Ã
-                db  64h ; d
-                db  64h ; d
-                db  8Fh ; è
-                db  8Fh ; è
-                db 0A4h ; §
-                db 0A4h ; §
-                db  76h ; v
-                db  76h ; v
-                db 0E4h ; ‰
-                db 0E4h ; ‰
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db  78h ; x
-                db  78h ; x
-                db  3Dh ; =
-                db  3Dh ; =
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db  53h ; S
-                db  53h ; S
-                db  54h ; T
-                db  54h ; T
-                db  3Dh ; =
-                db  3Dh ; =
-                db 0A8h ; ®
-                db 0A8h ; ®
-                db    7
-                db    7
-                db 0F0h ; 
-                db 0F0h ; 
-                db    0
-                db    0
-                db 0E0h ; ‡
-                db 0E0h ; ‡
-unk_A3AD:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  18h
-                db 0C0h ; ¿
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db 0F0h ; 
-                db 0F0h ; 
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db  7Eh ; ~
-                db  7Eh ; ~
-                db    0
-                db    0
-                db  3Eh ; >
-                db  3Eh ; >
-                db 0C0h ; ¿
-                db 0C0h ; ¿
-                db  46h ; F
-                db  46h ; F
-                db 0F0h ; 
-                db 0F0h ; 
-                db 0F8h ; ¯
-                db 0F8h ; ¯
-                db 0F4h ; Ù
-                db 0F4h ; Ù
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db 0F6h ; ˆ
-                db 0F6h ; ˆ
-                db  1Eh
-                db  1Eh
-                db 0F3h ; Û
-                db 0F3h ; Û
-                db  6Ch ; l
-                db  6Ch ; l
-                db  34h ; 4
-                db  34h ; 4
-                db 0F1h ; Ò
-                db 0F1h ; Ò
-                db  8Eh ; é
-                db  8Eh ; é
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0FFh
-                db 0FFh
-                db 0BDh ; Ω
-                db 0BDh ; Ω
-                db 0FFh
-                db 0FFh
-                db 0DEh ; ﬁ
-                db 0DEh ; ﬁ
-                db 0FFh
-                db 0FFh
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db  7Fh ; 
-                db  7Fh ; 
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db  8Eh ; é
-                db  8Eh ; é
-                db  7Bh ; {
-                db  7Bh ; {
-                db 0B0h ; ∞
-                db 0B0h ; ∞
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db  3Eh ; >
-                db  3Eh ; >
-                db  58h ; X
-                db  58h ; X
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db    7
-                db    7
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db  1Fh
-                db  1Fh
-                db 0E6h ; Ê
-                db 0E6h ; Ê
-                db    3
-                db    3
-                db 0F8h ; ¯
-                db 0F8h ; ¯
-                db    4
-                db    4
-                db 0C6h ; ∆
-                db 0C6h ; ∆
-                db    6
-                db    6
-                db    6
-                db    6
-unk_A40F:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  1Bh
-                db 0C0h ; ¿
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db 0E0h ; ‡
-                db 0E0h ; ‡
-                db    0
-                db    0
-                db 0ECh ; Ï
-                db 0ECh ; Ï
-                db    0
-                db    0
-                db  6Fh ; o
-                db  6Fh ; o
-                db    0
-                db    0
-                db  0Fh
-                db  0Fh
-                db  80h ; Ä
-                db  80h ; Ä
-                db 0E3h ; „
-                db 0E3h ; „
-                db 0B0h ; ∞
-                db 0B0h ; ∞
-                db 0F8h ; ¯
-                db 0F8h ; ¯
-                db 0BCh ; º
-                db 0BCh ; º
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  0Fh
-                db  0Fh
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db 0E3h ; „
-                db 0E3h ; „
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db 0F8h ; ¯
-                db 0F8h ; ¯
-                db  3Eh ; >
-                db  3Eh ; >
-                db  7Eh ; ~
-                db  7Eh ; ~
-                db  8Dh ; ç
-                db  8Dh ; ç
-                db 0BFh ; ø
-                db 0BFh ; ø
-                db 0E3h ; „
-                db 0E3h ; „
-                db  8Fh ; è
-                db  8Fh ; è
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db  72h ; r
-                db  72h ; r
-                db 0FAh ; ˙
-                db 0FAh ; ˙
-                db 0BCh ; º
-                db 0BCh ; º
-                db 0F5h ; ı
-                db 0F5h ; ı
-                db 0DEh ; ﬁ
-                db 0DEh ; ﬁ
-                db  6Bh ; k
-                db  6Bh ; k
-                db 0DEh ; ﬁ
-                db 0DEh ; ﬁ
-                db    7
-                db    7
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db    3
-                db    3
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db    3
-                db    3
-                db 0E7h ; Á
-                db 0E7h ; Á
-                db    3
-                db    3
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db    0
-                db    0
-                db  7Bh ; {
-                db  7Bh ; {
-                db    1
-                db    1
-                db  8Dh ; ç
-                db  8Dh ; ç
-                db    0
-                db    0
-                db 0FFh
-                db 0FFh
-                db    0
-                db    0
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db  70h ; p
-                db  70h ; p
-                db    0
-                db    0
-                db  40h ; @
-                db  40h ; @
-unk_A47D:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  24h ; $
-                db    0
-                db    0
-                db    0
-                db    0
-                db  30h ; 0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  7Ch ; |
-                db  30h ; 0
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db  7Ch ; |
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0BFh ; ø
-                db    0
-                db    0
-                db  0Fh
-                db    3
-                db 0FFh
-                db 0BFh ; ø
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  0Fh
-                db 0FFh
-                db 0BFh ; ø
-                db    0
-                db    0
-                db 0FFh
-                db  3Fh ; ?
-                db 0FFh
-                db 0BEh ; æ
-                db    1
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0C6h ; ∆
-                db    1
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db  3Ch ; <
-                db    1
-                db    0
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db 0FFh
-                db  33h ; 3
-                db 0FFh
-                db 0FFh
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  0Fh
-                db 0FFh
-                db 0F7h ; ˜
-                db    0
-                db    0
-                db  3Fh ; ?
-                db    3
-                db 0FFh
-                db 0C8h ; »
-                db    0
-                db    0
-                db  7Fh ; 
-                db  30h ; 0
-                db 0FFh
-                db  3Ah ; :
-                db    0
-                db    0
-                db 0FFh
-                db  7Bh ; {
-                db 0FFh
-                db 0FAh ; ˙
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FFh
-                db 0D3h ; ”
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Bh ; ;
-                db 0FFh
-                db  38h ; 8
-                db    0
-                db    0
-                db  3Fh ; ?
-                db    2
-                db 0FFh
-                db 0F7h ; ˜
-                db    0
-                db    0
-                db    3
-                db    0
-                db 0FFh
-                db 0F7h ; ˜
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0F7h ; ˜
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0EEh ; Ó
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0EEh ; Ó
-                db    0
-                db    0
-                db  0Fh
-                db    0
-                db 0FFh
-                db 0EEh ; Ó
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  0Dh
-                db 0FFh
-                db 0EEh ; Ó
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Dh ; =
-                db 0FEh ; ˛
-                db 0CCh ; Ã
-                db    1
-                db    0
-                db 0FFh
-                db  1Dh
-                db 0FEh ; ˛
-                db 0F0h ; 
-                db    7
-                db    1
-                db 0FFh
-                db 0A5h ; •
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db  1Fh
-                db    7
-                db 0FFh
-                db 0B8h ; ∏
-                db 0FFh
-                db  7Eh ; ~
-                db 0BFh ; ø
-                db  1Fh
-                db 0FFh
-                db 0BDh ; Ω
-                db 0FFh
-                db  9Eh ; û
-                db 0FFh
-                db 0BEh ; æ
-                db 0FFh
-                db  5Dh ; ]
-                db 0FFh
-                db 0E6h ; Ê
-                db 0FFh
-                db 0B8h ; ∏
-                db 0FFh
-                db 0E5h ; Â
-                db 0FEh ; ˛
-                db 0F8h ; ¯
-                db 0FFh
-                db    6
-                db 0FFh
-                db  79h ; y
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db 0FFh
-                db 0DFh ; ﬂ
-                db 0FFh
-                db  9Ch ; ú
-                db 0FCh ; ¸
-                db  78h ; x
-                db 0FFh
-                db 0DFh ; ﬂ
-                db 0FFh
-                db 0E5h ; Â
-                db 0FCh ; ¸
-                db  98h ; ò
-                db 0FFh
-                db  0Fh
-                db 0FFh
-                db 0F0h ; 
-                db  98h ; ò
-                db    0
-                db  0Fh
-                db    0
-                db 0F0h ; 
-                db    0
-                db    0
-                db    0
-unk_A557:       db    3                                         ; DATA XREF: RAM:sprite_tblo
-                db  31h ; 1
-                db    1
-                db    0
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db    0
-                db  37h ; 7
-                db    1
-                db 0F0h ; 
-                db 0C0h ; ¿
-                db    0
-                db    0
-                db 0FFh
-                db  37h ; 7
-                db 0FCh ; ¸
-                db 0F0h ; 
-                db    0
-                db    0
-                db 0FFh
-                db 0F3h ; Û
-                db 0FFh
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db 0FFh
-                db 0EEh ; Ó
-                db 0FFh
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db 0FFh
-                db  7Eh ; ~
-                db 0FFh
-                db 0FAh ; ˙
-                db    0
-                db    0
-                db 0FFh
-                db  7Eh ; ~
-                db 0FEh ; ˛
-                db 0BCh ; º
-                db    0
-                db    0
-                db 0FFh
-                db  7Fh ; 
-                db 0FEh ; ˛
-                db  5Ch ; \
-                db    0
-                db    0
-                db 0FFh
-                db  0Fh
-                db 0FFh
-                db  6Eh ; n
-                db    0
-                db    0
-                db  7Fh ; 
-                db  3Dh ; =
-                db 0FFh
-                db  72h ; r
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  13h
-                db 0FFh
-                db 0B4h ; ¥
-                db    0
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db 0B8h ; ∏
-                db    0
-                db    0
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db  76h ; v
-                db    0
-                db    0
-                db  3Fh ; ?
-                db  1Eh
-                db 0FEh ; ˛
-                db 0F0h ; 
-                db    0
-                db    0
-                db  7Fh ; 
-                db  19h
-                db 0F8h ; ¯
-                db  60h ; `
-                db    0
-                db    0
-                db 0FFh
-                db  67h ; g
-                db 0FEh ; ˛
-                db  98h ; ò
-                db    0
-                db    0
-                db 0FFh
-                db  7Fh ; 
-                db 0FFh
-                db  9Eh ; û
-                db    0
-                db    0
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0AFh ; Ø
-                db  80h ; Ä
-                db    0
-                db 0FFh
-                db 0FCh ; ¸
-                db 0FFh
-                db  37h ; 7
-                db  80h ; Ä
-                db    0
-                db 0FFh
-                db  7Bh ; {
-                db 0FFh
-                db  73h ; s
-                db  80h ; Ä
-                db    0
-                db  7Fh ; 
-                db  33h ; 3
-                db 0FFh
-                db  7Bh ; {
-                db  80h ; Ä
-                db    0
-                db  3Fh ; ?
-                db  0Dh
-                db 0FFh
-                db  79h ; y
-                db  80h ; Ä
-                db    0
-                db  1Fh
-                db  0Dh
-                db 0FFh
-                db  1Ch
-                db  80h ; Ä
-                db    0
-                db  1Fh
-                db    9
-                db 0FFh
-                db  6Fh ; o
-                db  80h ; Ä
-                db    0
-                db  1Fh
-                db    6
-                db 0FFh
-                db  77h ; w
-                db  80h ; Ä
-                db    0
-                db  7Fh ; 
-                db  1Bh
-                db 0FFh
-                db  7Bh ; {
-                db 0C0h ; ¿
-                db    0
-                db 0FFh
-                db  7Dh ; }
-                db 0FFh
-                db  78h ; x
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db 0FFh
-                db  7Bh ; {
-                db 0FFh
-                db  37h ; 7
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  7Fh ; 
-                db  2Fh ; /
-                db 0FFh
-                db  83h ; É
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  7Fh ; 
-                db  3Ch ; <
-                db 0FFh
-                db  8Ch ; å
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  7Fh ; 
-                db  32h ; 2
-                db 0FFh
-                db  2Fh ; /
-                db 0C0h ; ¿
-                db    0
-                db  3Fh ; ?
-                db  0Eh
-                db 0FFh
-                db  77h ; w
-                db 0E0h ; ‡
-                db 0C0h ; ¿
-                db  7Fh ; 
-                db  3Eh ; >
-                db 0FFh
-                db  7Bh ; {
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db 0FFh
-                db  7Eh ; ~
-                db 0FFh
-                db 0FDh ; ˝
-                db 0F0h ; 
-                db 0E0h ; ‡
-                db  7Fh ; 
-                db  38h ; 8
-                db 0FFh
-                db 0DCh ; ‹
-                db 0F0h ; 
-                db  60h ; `
-                db  3Fh ; ?
-                db    6
-                db 0FFh
-                db  6Dh ; m
-                db 0E0h ; ‡
-                db  80h ; Ä
-                db  1Fh
-                db  0Fh
-                db 0FFh
-                db  7Dh ; }
-                db 0F8h ; ¯
-                db 0E0h ; ‡
-                db  0Fh
-                db    7
-                db 0FFh
-                db 0BBh ; ª
-                db 0FCh ; ¸
-                db 0F8h ; ¯
-                db    7
-                db    0
-                db 0FFh
-                db    4
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db    3
-                db    1
-                db 0FFh
-                db 0FFh
-                db 0FEh ; ˛
-                db  3Ch ; <
-                db    1
-                db    0
-                db 0FFh
-                db  7Fh ; 
-                db 0FEh ; ˛
-                db 0CCh ; Ã
-                db    0
-                db    0
-                db  7Fh ; 
-                db  1Fh
-                db 0FCh ; ¸
-                db  80h ; Ä
-                db    0
-                db    0
-                db  1Fh
-                db    4
-                db 0FEh ; ˛
-                db  7Ch ; |
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0FEh ; ˛
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db    7
-                db    3
-                db 0FFh
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db    3
-                db    1
-                db 0FFh
-                db 0FFh
-                db    0
-                db    0
-                db    1
-                db    0
-                db 0FFh
-                db 0FFh
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0FFh
-                db    7
-                db    0
-                db    0
-                db    0
-                db    0
-                db    7
-                db    0
-unk_A67F:       db    2                                         ; DATA XREF: RAM:sprite_tblo
-                db  22h ; "
-                db    0
-                db    0
-                db  20h
-                db  20h
-                db    0
-                db    0
-                db 0D8h ; ÿ
-                db 0D8h ; ÿ
-                db    3
-                db    3
-                db 0DEh ; ﬁ
-                db 0DEh ; ﬁ
-                db  1Bh
-                db  1Bh
-                db 0DFh ; ﬂ
-                db 0DFh ; ﬂ
-                db  7Bh ; {
-                db  7Bh ; {
-                db 0C7h ; «
-                db 0C7h ; «
-                db 0FAh ; ˙
-                db 0FAh ; ˙
-                db  39h ; 9
-                db  39h ; 9
-                db 0E1h ; ·
-                db 0E1h ; ·
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db  9Bh ; õ
-                db  9Bh ; õ
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Bh ; {
-                db  7Bh ; {
-                db 0FFh
-                db 0FFh
-                db  7Bh ; {
-                db  7Bh ; {
-                db 0FFh
-                db 0FFh
-                db  7Bh ; {
-                db  7Bh ; {
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Ah ; z
-                db  7Ah ; z
-                db  7Eh ; ~
-                db  7Eh ; ~
-                db  79h ; y
-                db  79h ; y
-                db  86h ; Ü
-                db  86h ; Ü
-                db  43h ; C
-                db  43h ; C
-                db 0F8h ; ¯
-                db 0F8h ; ¯
-                db  3Bh ; ;
-                db  3Bh ; ;
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db  7Bh ; {
-                db  7Bh ; {
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Bh ; {
-                db  7Bh ; {
-                db 0FFh
-                db 0FFh
-                db  79h ; y
-                db  79h ; y
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db  7Ah ; z
-                db  7Ah ; z
-                db 0FEh ; ˛
-                db 0FEh ; ˛
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db  7Ch ; |
-                db  7Ch ; |
-                db 0F7h ; ˜
-                db 0F7h ; ˜
-                db 0B0h ; ∞
-                db 0B0h ; ∞
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db  80h ; Ä
-                db  80h ; Ä
-                db  13h
-                db  13h
-                db  7Eh ; ~
-                db  7Eh ; ~
-                db  1Ch
-                db  1Ch
-                db 0FFh
-                db 0FFh
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db  7Fh ; 
-                db  7Fh ; 
-                db 0EFh ; Ô
-                db 0EFh ; Ô
-                db 0AFh ; Ø
-                db 0AFh ; Ø
-                db 0D3h ; ”
-                db 0D3h ; ”
-                db 0C3h ; √
-                db 0C3h ; √
-                db 0BCh ; º
-                db 0BCh ; º
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db  7Fh ; 
-                db  7Fh ; 
-                db  3Eh ; >
-                db  3Eh ; >
-                db  3Fh ; ?
-                db  3Fh ; ?
-                db 0CEh ; Œ
-                db 0CEh ; Œ
-                db    7
-                db    7
-                db 0F2h ; Ú
-                db 0F2h ; Ú
-                db    1
-                db    1
-                db 0FCh ; ¸
-                db 0FCh ; ¸
-                db    0
-                db    0
-                db  78h ; x
-                db  78h ; x
-                db    0
-                db    0
-                db  10h
-                db  10h
-byte_A709:      db 0                                            ; DATA XREF: RAM:AF8Ao
+brick_0:        .db 0xB, 8, 8, 0xC, 0x10, 0                     ; DATA XREF: RAM:block_type_tblo
+brick_d:        .db 0x4A, 0xC, 0xC, 1, 0x10, 0                  ; DATA XREF: RAM:6CFFo
+byte_6D35:      .db 0x4B, 0xC, 0xC, 1, 0x10, 0                  ; DATA XREF: RAM:6D0Fo
+brick_1:        .db 0xA, 8, 8, 0xC, 0x10, 0                     ; DATA XREF: RAM:6CE7o
+pond:           .db 0x30, 5, 5, 5, 0x10, 0                      ; DATA XREF: RAM:6CE9o
+lilly_pond:     .db 0x17, 7, 7, 0xA, 0x10, 0                    ; DATA XREF: RAM:6CEBo
+log_4:          .db 0x48, 8, 8, 0xC, 0x14, 0                    ; DATA XREF: RAM:6CEDo
+ghost:          .db 0x1E, 7, 7, 0xA, 0x10, 0                    ; DATA XREF: RAM:6CEFo
+spike_6:        .db 0x3F, 8, 8, 0xC, 0x14, 0                    ; DATA XREF: RAM:6CF1o
+log_7:          .db 0x49, 8, 0xE, 0xC, 0x14, 0                  ; DATA XREF: RAM:6CF3o
+trap:           .db 0x4C, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CF5o
+table:          .db 0x4E, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CF9o
+log_b:          .db 0x4F, 8, 8, 0xC, 0x14, 0                    ; DATA XREF: RAM:6CFBo
+brick_c:        .db 0x54, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6CFDo
+brick_e:        .db 0x1C, 7, 7, 0xB, 0x14, 0                    ; DATA XREF: RAM:6D01o
+spike_f:        .db 0x56, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D03o
+dragon_head:    .db 0x57, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D05o
+brick_11:       .db 0x58, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D07o
+brick_12:       .db 0x59, 8, 8, 0xA, 0x10, 0                    ; DATA XREF: RAM:6D09o
+byte_6D9B:      .db 0x5C, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D1Fo
+byte_6DA1:      .db 0x5D, 8, 8, 0xC, 0x50, 0                    ; DATA XREF: RAM:6D21o
+spider:         .db 0x78, 0xA, 0xA, 0xC, 0x10, 0                ; DATA XREF: RAM:6D0Bo
+byte_6DAD:      .db 0x10, 8, 8, 0xA, 0x10, 0                    ; DATA XREF: RAM:6D0Do
+byte_6DB3:      .db 0x52, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D13o
+byte_6DB9:      .db 0x88, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D15o
+byte_6DBF:      .db 0x8C, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D17o
+byte_6DC5:      .db 0x8D, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D19o
+byte_6DCB:      .db 0x8E, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D1Bo
+byte_6DD1:      .db 0x8F, 8, 8, 0xC, 0x10, 0                    ; DATA XREF: RAM:6D1Do
+sprite_tbl:     .dw spr_37, spr_37, spr_44, spr_45, spr_46, spr_47, spr_48, spr_49, spr_55, spr_54, spr_4A
+                                                                ; DATA XREF: RAM:B2F4o
+                .dw spr_28, spr_4B, spr_4C, spr_4D, spr_4E, spr_23, spr_23, spr_40, spr_41, spr_40, spr_3F
+                .dw spr_27, spr_26, spr_37, spr_37, spr_37, spr_37, spr_26, spr_3F, spr_25, spr_25, spr_40
+                .dw spr_3F, spr_3E, spr_3F, spr_42, spr_41, spr_43, spr_41, spr_3A, spr_39, spr_38, spr_39
+                .dw spr_3C, spr_3B, spr_3D, spr_3B, spr_1A, spr_1B, spr_1A, spr_1B, spr_51, spr_50, spr_4F
+                .dw spr_52, spr_53, spr_56, spr_29, spr_2A, spr_2B, spr_2B, spr_2C, spr_24, spr_1C, spr_1D
+                .dw spr_1E, spr_1D, spr_1E, spr_1E, spr_1F, spr_1F, spr_4A, spr_2D, spr_08, spr_09, spr_4A
+                .dw spr_4A, spr_28, spr_28, spr_12, spr_13, spr_24, spr_37, spr_28, spr_28, spr_0D, spr_28
+                .dw spr_28, spr_23, spr_31, spr_28, spr_0D, spr_0D, spr_37, spr_37, spr_37, spr_37, spr_37
+                .dw spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37, spr_37
+                .dw spr_37, spr_37, spr_2F, spr_2F, spr_2F, spr_2F, spr_30, spr_30, spr_30, spr_30, spr_2E
+                .dw spr_28, spr_28, spr_28, spr_28, spr_28, spr_28, spr_28, spr_00, spr_01, spr_02, spr_03
+                .dw spr_04, spr_05, spr_06, spr_07, spr_28, spr_0A, spr_0B, spr_0C, spr_28, spr_28, spr_28
+                .dw spr_28, spr_32, spr_33, spr_34, spr_35, spr_36, spr_20, spr_21, spr_22, spr_32, spr_33
+                .dw spr_34, spr_35, spr_36, spr_37, spr_37, spr_37, spr_17, spr_18, spr_17, spr_19, spr_15
+                .dw spr_16, spr_15, spr_14, spr_0E, spr_0F, spr_10, spr_11
+spr_00:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x70, 0x70
+                .db 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0
+                .db 0, 0x1E, 0x1E, 0, 0, 0, 0, 0xF, 0xF, 0, 0, 1, 1, 7, 7, 0x80, 0x80, 3, 3, 3, 3, 0xC0
+                .db 0xC0, 7, 7, 1, 1, 0xE0, 0xE0, 0xF, 0xF, 0, 0, 0x78, 0x78, 0x1F, 0x1F, 0, 0, 0x3E
+                .db 0x3E, 0x3C, 0x3C, 0, 0, 0xF, 0xF, 0xA0, 0xA0, 0, 0, 3, 3, 0xE0, 0xE0, 0, 0, 0, 0
+                .db 0xF8, 0xF8, 0, 0, 0, 0, 0x3E, 0x3E, 0, 0, 0, 0, 0xF, 0xF, 0, 0, 0, 0, 1, 1, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+spr_01:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xF, 0xF, 0xC0, 0xC0, 0, 0, 3, 3, 0x80, 0x80, 0, 0, 7, 7, 0, 0, 0, 0, 0xE, 0xE, 0
+                .db 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 0x3C, 0x3C, 0, 0, 0xF, 0xF, 0x78, 0x78, 0, 0, 0xFF
+                .db 0xFF, 0xF0, 0xF0, 0xF, 0xF, 0xFF, 0xFF, 0xE0, 0xE0, 0xFF, 0xFF, 0xF8, 0xF8, 0xCF
+                .db 0xCF, 0xFF, 0xFF, 0, 0, 0xBF, 0xBF, 0xF0, 0xF0, 0, 0, 0xFE, 0xFE, 0, 0, 0, 0, 0xE0
+                .db 0xE0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xC0, 0xC0, 0, 0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0x3F
+                .db 0x3F, 0xF0, 0xF0, 0, 0, 3, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xF, 0xF, 0xFF, 0xFF
+                .db 0, 0, 0, 0, 0, 0
+spr_02:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x7F, 0x7F, 0, 0, 3, 3, 0xFF, 0xFF, 0, 0, 3, 3, 0xF0
+                .db 0xF0, 0, 0, 1, 1, 0x80, 0x80, 0x80, 0x80, 1, 1, 0xC0, 0xC0, 0xE0, 0xE0, 0, 0, 0xC0
+                .db 0xC0, 0xF8, 0xF8, 0, 0, 0xE0, 0xE0, 0xFF, 0xFF, 0, 0, 0x60, 0x60, 0x1F, 0x1F, 0xC0
+                .db 0xC0, 0x70, 0x70, 7, 7, 0xF0, 0xF0, 0x30, 0x30, 0, 0, 0xFE, 0xFE, 0x38, 0x38, 0
+                .db 0, 0x3F, 0x3F, 0x98, 0x98, 0, 0, 7, 7, 0xF8, 0xF8, 0, 0, 1, 1, 0xFC, 0xFC, 0, 0
+                .db 0, 0, 0x3C, 0x3C, 0, 0, 0, 0, 0xE, 0xE, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 3, 3, 0, 0
+                .db 0, 0, 0x3F, 0x3F, 0, 0, 0xF, 0xF, 0xFC, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0xC0
+                .db 0xFF, 0xFF, 0xF0, 0xF0, 0, 0, 0, 0, 0, 0, 0, 0
+spr_03:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xFF, 0xFF, 0xC0, 0xC0, 0xE, 0xE, 0xFC, 0xFC, 0, 0, 0xE, 0xE, 0x80, 0x80, 0, 0, 0xE
+                .db 0xE, 0, 0, 0, 0, 0xE, 0xE, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0
+                .db 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x78, 0x78, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 1, 1, 0xE0
+                .db 0xE0, 0, 0, 3, 3, 0xC0, 0xC0, 0, 0, 7, 7, 0x80, 0x80, 0, 0, 0x1E, 0x1E, 0, 0, 0
+                .db 0, 0x7C, 0x7C, 0, 0, 1, 1, 0xF0, 0xF0, 0, 0, 7, 7, 0xC0, 0xC0, 0, 0, 0x1F, 0x1F
+                .db 0, 0, 0, 0, 0x7C, 0x7C, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 0, 0, 0x80, 0x80, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+spr_04:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0xF, 0xF, 0, 0, 0, 0, 0x3E, 0x3E, 0, 0, 0
+                .db 0, 0xF8, 0xF8, 0, 0, 3, 3, 0xE0, 0xE0, 0, 0, 0xF, 0xF, 0x80, 0x80, 0, 0, 0x3E, 0x3E
+                .db 0, 0, 0, 0, 0x78, 0x78, 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 3, 3, 0xC0, 0xC0, 0, 0, 7
+                .db 7, 0x80, 0x80, 0, 0, 0xF, 0xF, 0xFF, 0xFF, 0xF0, 0xF0, 0x1E, 0x1E, 0x1F, 0x1F, 0xFF
+                .db 0xFF, 0x1C, 0x1C, 7, 7, 0xFF, 0xFF, 0x38, 0x38, 0, 0, 0xF8, 0xF8, 0x38, 0x38, 0
+                .db 0, 0x3F, 0x3F, 0x70, 0x70, 0, 0, 7, 7, 0x70, 0x70, 0, 0, 1, 1, 0x70, 0x70, 0, 0
+                .db 0, 0
+spr_05:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xF, 0xF, 0xFF, 0xFF, 3, 3, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0x3F, 0x3F, 0xF0, 0xF0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0xC0, 0xC0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0xF, 0xF
+                .db 0, 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 0x3C, 0x3C, 0, 0, 0, 0, 0x78, 0x78, 0, 0, 0
+                .db 0, 0xF0, 0xF0, 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 3, 3, 0xC0, 0xC0, 0xFF, 0xFF, 7, 7
+                .db 0x80, 0x80, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0x7F, 0x7F, 0xFE, 0xFE, 0, 0, 0, 0, 0x7C
+                .db 0x7C, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0xFC, 0xFC, 0, 0, 0, 0, 0x3F, 0x3F, 0, 0, 0
+                .db 0
+spr_06:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xF0, 0xF0, 0, 0, 0xFF, 0xFF, 0xFF
+                .db 0xFF, 0xC0, 0xC0, 0x3E, 0x3E, 0xF, 0xF, 0xFC, 0xFC, 0x7E, 0x7E, 0, 0, 0x3F, 0x3F
+                .db 0xF7, 0xF7, 0, 0, 3, 3, 0xE7, 0xE7, 0, 0, 0, 0, 0xC3, 0xC3, 0x80, 0x80, 0, 0, 0x83
+                .db 0x83, 0x80, 0x80, 0, 0, 1, 1, 0x80, 0x80, 0, 0, 1, 1, 0xC0, 0xC0, 0, 0, 0, 0, 0xC0
+                .db 0xC0, 0, 0, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0xE0, 0xE0, 0, 0, 0, 0, 0x70, 0x70, 0
+                .db 0, 0, 0, 0x70, 0x70, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0, 0x38, 0x38, 0, 0, 0, 0
+                .db 0x1C, 0x1C, 0, 0, 0, 0, 0x1F, 0x1F, 0xF0, 0xF0, 0, 0, 0xF, 0xF, 0xFF, 0xFF, 0, 0
+                .db 0, 0, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0
+spr_07:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0x80, 0x80, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 0, 0, 0x7C, 0x7C, 0, 0, 0, 0
+                .db 0x1F, 0x1F, 0, 0, 0, 0, 7, 7, 0xC0, 0xC0, 0, 0, 1, 1, 0xF0, 0xF0, 0, 0, 0, 0, 0x7C
+                .db 0x7C, 0, 0, 0, 0, 0x1E, 0x1E, 0, 0, 0, 0, 7, 7, 0x80, 0x80, 0, 0, 3, 3, 0xC0, 0xC0
+                .db 0, 0, 1, 1, 0xE0, 0xE0, 0, 0, 0, 0, 0xF0, 0xF0, 0, 0, 0, 0, 0x78, 0x78, 0, 0, 0
+                .db 0, 0x38, 0x38, 0, 0, 0, 0, 0x1C, 0x1C, 0, 0, 0, 0, 0x1C, 0x1C, 0xFF, 0xFF, 0, 0
+                .db 0xE, 0xE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFE, 0xF, 0xF, 0xFC, 0xFC, 0xE, 0xE
+spr_08:         .db 4, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 5, 5, 0x55, 0x55, 0, 0, 0, 0, 0x2F, 0x2A, 0xFF, 0xAA, 0x80, 0x80, 1, 1, 0x7F
+                .db 0x55, 0xFF, 0x55, 0xC0, 0x40, 0, 0, 0xFF, 0xAA, 0xFF, 0xAA, 0xE8, 0xA8, 0x15, 0x15
+                .db 0xFF, 0x55, 0xFF, 0x55, 0xFC, 0x54, 0x3F, 0x2A, 0xFF, 0xAA, 0xFF, 0xAA, 0xFE, 0xAA
+                .db 0x7F, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0xAA, 0xFF, 0xAA, 0xFF, 0xAA
+                .db 0xFE, 0xAA, 0x7F, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFF, 0xAA, 0xFF, 0xAA
+                .db 0xFF, 0xAA, 0xFE, 0xAA, 0x5F, 0x55, 0xFF, 0x55, 0xFF, 0x55, 0xFD, 0x55, 0xB, 0xA
+                .db 0xFF, 0xAA, 0xFF, 0xAA, 0xF8, 0xA8, 1, 1, 0xFF, 0x55, 0xFF, 0x55, 0xF0, 0x50, 0
+                .db 0, 0xFF, 0xAA, 0xFE, 0xAA, 0xA0, 0xA0, 0, 0, 0x57, 0x55, 0xFC, 0x54, 0, 0, 0, 0
+                .db 3, 2, 0xF8, 0xA8, 0, 0
+spr_09:         .db 4, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0xF, 5, 0xFC, 0x54, 0, 0, 1, 0, 0xFF, 0xAA, 0xFF, 0xAA, 0xE0, 0xA0, 3, 1, 0xFF
+                .db 0x55, 0xFF, 0x55, 0xF0, 0x50, 0xF, 0xA, 0xFF, 0xAA, 0xFF, 0xA, 0xFC, 0xA8, 0x3F
+                .db 0x15, 0xFF, 0x51, 0xFF, 0xE5, 0xFC, 0x54, 0x7F, 0x2A, 0xFF, 0xA7, 0xFF, 0xFA, 0xFD
+                .db 0xA8, 0xFF, 0x55, 0xFF, 0x4F, 0xFF, 0xF5, 0xFF, 0x45, 0xFF, 0xAA, 0xFF, 0x93, 0xFF
+                .db 0xF2, 0xFF, 0xBA, 0xFF, 0x55, 0xFF, 0x47, 0xFF, 0xF9, 0xFF, 0x7D, 0x7F, 0x2A, 0xFF
+                .db 0xA5, 0xFF, 0xAA, 0xFF, 0x54, 0x3F, 0x15, 0xFF, 0x4D, 0xFF, 0xA5, 0xFE, 0x10, 0x1F
+                .db 0xA, 0xFF, 0xA9, 0xFF, 0xA2, 0xFC, 0xA8, 0x1F, 0x15, 0xFF, 0x54, 0xFF, 0xA5, 0xF8
+                .db 0x50, 0x1F, 0xA, 0xFF, 0xAA, 0xFF, 0x8A, 0xF0, 0xA0, 0xF, 5, 0xFF, 0x54, 0xFF, 0x95
+                .db 0xC0, 0x40, 0, 0, 0x3F, 0x2A, 0xF8, 0x28, 0, 0
+spr_0A:         .db 4, 27                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0x1E, 4, 0x20, 0, 0, 0, 0, 0, 0x3F, 0x1E, 0x70, 0x20
+                .db 0, 0, 0, 0, 0x7F, 0x3E, 0xF8, 0x50, 0, 0, 0, 0, 0x7F, 0x3E, 0x74, 0x20, 0, 0, 3
+                .db 0, 0x3E, 0x1C, 0x3E, 0x14, 0, 0, 0x1F, 3, 0xBC, 0, 0x1F, 0xA, 0, 0, 0x3F, 0x1F, 0xFD
+                .db 0x9C, 0xAF, 5, 0x82, 0, 0x7F, 0x3F, 0xFF, 0xCC, 0xF5, 0xA0, 0xC7, 2, 0x7F, 0x3F
+                .db 0xFE, 0xCC, 0xF8, 0x10, 0xEE, 0x44, 0x3F, 3, 0xED, 0xC0, 0xFD, 0x28, 0xDF, 0x82
+                .db 0x1F, 1, 0xE3, 0xC1, 0xF8, 0x90, 0xFE, 0x54, 0x1F, 1, 0xE7, 0xC3, 0xFD, 0xC0, 0xFC
+                .db 0xA0, 0x3F, 0x1C, 0xCF, 0x81, 0xFE, 0xE4, 0xFE, 0x54, 0x7F, 0x3C, 0xFF, 0xC, 0xF9
+                .db 0xF0, 0xF7, 0xA2, 0xFC, 0x78, 0x7F, 0x3E, 0xFF, 0, 0xAE, 4, 0x78, 0x20, 0xFF, 0x7F
+                .db 0xFF, 0xCF, 0x87, 2, 0x23, 0, 0xFF, 0x1F, 0xFF, 0x9F, 0xF2, 0, 0xF, 3, 0xFF, 0x9F
+                .db 0xFF, 0x3E, 0xF8, 0x70, 0x1F, 0xF, 0x9F, 0xC, 0xFF, 0x78, 0xFC, 0xF8, 0x1F, 0xF
+                .db 0xCC, 0x80, 0x7F, 0x30, 0xF8, 0xE0, 0xF, 3, 0x83, 0, 0xFF, 0xE, 0xE0, 0xC0, 3, 0
+                .db 0x3F, 3, 0xFF, 0x9B, 0xC0, 0, 0, 0, 0x7F, 0x3F, 0xFB, 0xB0, 0, 0, 0, 0, 0x3F, 0xF
+                .db 0xF0, 0xA0, 0, 0, 0, 0, 0xF, 3, 0xA0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
+spr_0B:         .db 4, 27                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0xE
+                .db 4, 0x10, 0, 0, 0, 0, 0, 0x1E, 0xC, 0x38, 0x10, 0, 0, 0, 0, 0x3C, 0x18, 0x74, 0x20
+                .db 0, 0, 0, 0, 0x18, 0, 0x3E, 0x14, 0, 0, 3, 0, 4, 0, 0x1C, 8, 0, 0, 0xF, 3, 0x8E, 4
+                .db 0xE, 4, 0, 0, 0x1F, 0xF, 0xDE, 0x8C, 0x14, 0, 0, 0, 0xF, 3, 0xEC, 0xC0, 0x38, 0x10
+                .db 2, 0, 3, 1, 0xE0, 0xC0, 0x7C, 0x28, 0x47, 2, 1, 0, 0xC1, 0x80, 0xF8, 0x10, 0xEE
+                .db 0x44, 0x80, 0, 0x83, 1, 0xF0, 0xC0, 0x74, 0x20, 0x1C, 8, 3, 1, 0xF0, 0xE0, 0xFA
+                .db 0x50, 0x3C, 0x18, 9, 0, 0xE0, 0x40, 0x77, 0x22, 0x78, 0x30, 0x1E, 8, 0x40, 0, 0x2E
+                .db 4, 0x60, 0, 0x3F, 0x1E, 0xE, 0, 4, 0, 0, 0, 0x1F, 0xE, 0x1F, 0xE, 0x60, 0, 7, 0
+                .db 0xE, 4, 0x3E, 0x18, 0xF0, 0x60, 0xF, 7, 0x84, 0, 0x78, 0x30, 0xF0, 0x60, 7, 2, 0
+                .db 0, 0x3F, 0, 0xE0, 0xC0, 2, 0, 0, 0, 0x1F, 0xE, 0xC0, 0, 0, 0, 0xF, 0, 0xBE, 0x18
+                .db 0, 0, 0, 0, 0x1F, 0xF, 0xF8, 0x90, 0, 0, 0, 0, 0xF, 3, 0x90, 0, 0, 0, 0, 0, 3, 0
+                .db 0, 0, 0, 0
+spr_0C:         .db 4, 27                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0xE, 4, 0, 0, 0, 0, 0, 0, 0x1C, 8, 0x10
+                .db 0, 0, 0, 0, 0, 8, 0, 0x38, 0x10, 0, 0, 2, 0, 0, 0, 0x1C, 8, 0, 0, 7, 2, 4, 0, 8
+                .db 0, 0, 0, 0xF, 7, 0xCE, 4, 0x10, 0, 0, 0, 7, 1, 0xE4, 0xC0, 0x38, 0x10, 0, 0, 1, 0
+                .db 0xC0, 0x80, 0x10, 0, 4, 0, 0, 0, 0x80, 0, 0xF8, 0x10, 0x2E, 4, 0, 0, 1, 0, 0xF0
+                .db 0xC0, 0x74, 0x20, 0x18, 0, 1, 0, 0xE0, 0xC0, 0xE0, 0x40, 0x3C, 0x18, 0, 0, 0xC0
+                .db 0, 0x70, 0x20, 0x38, 0x10, 0xC, 0, 0, 0, 0x20, 0, 0x10, 0, 0x1E, 0xC, 8, 0, 0, 0
+                .db 0, 0, 0xE, 4, 0x1C, 8, 0x40, 0, 3, 0, 4, 0, 0x3C, 0x18, 0xE0, 0x20, 7, 3, 0x80, 0
+                .db 0x38, 0x10, 0xF0, 0x60, 3, 0, 0, 0, 0x18, 0, 0x60, 0, 0, 0, 0, 0, 0x1C, 4, 0, 0
+                .db 0, 0, 3, 0, 0x3C, 0x18, 0, 0, 0, 0, 7, 3, 0x98, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0
+spr_0D:         .db 4, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x16, 0, 0, 0, 0, 0, 0, 0, 0x3F, 0x16, 0, 0, 0, 0, 3, 0, 0xFF, 0x27, 0x83
+                .db 0, 0, 0, 7, 3, 0xFF, 0xB1, 0xCF, 0x83, 0x80, 0, 0x1F, 7, 0xFF, 0, 0xFF, 0xCE, 0xF0
+                .db 0, 0x3F, 0x14, 0xFF, 0x78, 0xFF, 0x7E, 0xF8, 0xF0, 0x7F, 0x34, 0xFF, 0xCA, 0xFF
+                .db 0x3F, 0xF0, 0xC0, 0x7F, 0x21, 0xFF, 0xCB, 0xFF, 0x1E, 0xC0, 0x80, 0x3F, 0x1F, 0xFF
+                .db 0xFB, 0xFF, 0xCF, 0xF0, 0xC0, 0x7F, 0x33, 0xFF, 0xF7, 0xFF, 0xFF, 0xF8, 0xF0, 0x7F
+                .db 0x33, 0xFF, 0xF, 0xFF, 0xFF, 0xF0, 0xE0, 0x3F, 0x1E, 0xFF, 0xF7, 0xFF, 0x7F, 0xF0
+                .db 0xC0, 0x1F, 0xD, 0xFF, 0xFB, 0xFF, 0x93, 0xF8, 0xF0, 0xF, 3, 0xFF, 0xFC, 0xFF, 0xC7
+                .db 0xFC, 0xF8, 3, 0, 0xFF, 0x1F, 0xFF, 0x7C, 0xF8, 0xC0, 0, 0, 0x7F, 0x2B, 0xFF, 0x83
+                .db 0xE0, 0xC0, 0, 0, 0x3F, 0x13, 0xFF, 0xFF, 0xE0, 0xC0, 0, 0, 0x1F, 0xD, 0xFF, 0xBD
+                .db 0xF0, 0xE0, 0, 0, 0xF, 0, 0xFF, 0x3E, 0xF0, 0xE0, 0, 0, 0xF, 6, 0xFE, 0x9C, 0xF8
+                .db 0x70, 0, 0, 7, 3, 0xDC, 0x88, 0x7C, 0x38, 0, 0, 3, 1, 0xC8, 0x80, 0x78, 0, 0, 0
+                .db 1, 0, 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 0xC0, 0, 0, 0
+spr_0E:         .db 3, 25                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x1C, 0, 0x70, 0, 0, 0, 0x3F, 0x1C, 0xFC
+                .db 0x70, 0, 0, 0x1F, 0xF, 0xFE, 0x3C, 0, 0, 0xF, 7, 0xFE, 0x1C, 0, 0, 0xF, 6, 0xFC
+                .db 0x78, 0, 0, 0x8F, 5, 0xF8, 0xF0, 1, 0, 0xCF, 0x86, 0xF8, 0x18, 3, 1, 0xEF, 0x47
+                .db 0xF8, 0xE8, 0x11, 0, 0xFF, 0xE7, 0xF8, 0xF0, 0x3B, 0x11, 0xFF, 0xE9, 0xF8, 0xF0
+                .db 0x7F, 0x28, 0xFF, 0x5E, 0xF8, 0x70, 0x7F, 0x3D, 0xFF, 0x3F, 0xF8, 0xB0, 0x3F, 0x1D
+                .db 0xFF, 0xDF, 0xFC, 0xF8, 0x1F, 3, 0xFF, 0xEF, 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0xFF, 0xFC
+                .db 0xF8, 0xF, 1, 0xFF, 0xF1, 0xF8, 0xE0, 1, 0, 0xFF, 0x7B, 0xF8, 0xF0, 0, 0, 0x7F, 0x1E
+                .db 0xF8, 0x70, 0, 0, 0x3F, 0x12, 0xF8, 0x70, 0, 0, 0x3F, 0x13, 0xF8, 0xF0, 0, 0, 0x3F
+                .db 0x1F, 0xF0, 0xE0, 0, 0, 0x1F, 0xF, 0xE0, 0xC0, 0, 0, 0xF, 0, 0xC0, 0
+spr_0F:         .db 3, 25                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 6, 0, 0, 0, 0, 0, 0xCF, 6, 0x80, 0, 0, 0, 0x1F, 0xF, 0xC0, 0x80, 0, 0, 0xF
+                .db 7, 0xE0, 0xC0, 0, 0, 7, 1, 0xF0, 0xC0, 0, 0, 3, 1, 0xFC, 0xE0, 0, 0, 3, 0, 0xFE
+                .db 0xEC, 0, 0, 0x47, 2, 0xFE, 0xF4, 0, 0, 0xE7, 0x42, 0xFC, 0x10, 1, 0, 0xF7, 0xA3
+                .db 0xFC, 0xE8, 8, 0, 0xFF, 0x73, 0xF8, 0xF0, 0x1D, 8, 0xFF, 0xF4, 0xFC, 0xF8, 0x3F
+                .db 0x14, 0xFF, 0x2F, 0xFC, 0x38, 0x3F, 0x1E, 0xFF, 0x9F, 0xFC, 0xD8, 0x1F, 0xC, 0xFF
+                .db 0xEF, 0xFE, 0xFC, 0xF, 1, 0xFF, 0xF7, 0xFE, 0xFC, 0xF, 7, 0xFF, 0xFF, 0xFE, 0xFC
+                .db 7, 0, 0xFF, 0xF8, 0xFC, 0xF0, 0, 0, 0xFF, 0x3D, 0xFC, 0xF8, 0, 0, 0x3F, 0xF, 0xFC
+                .db 0x38, 0, 0, 0x1F, 9, 0xFC, 0x38, 0, 0, 0x1F, 9, 0xFC, 0xF8, 0, 0, 0x1F, 0xF, 0xF8
+                .db 0xF0, 0, 0, 0xF, 7, 0xF0, 0xE0, 0, 0, 7, 0, 0xE0, 0
+spr_10:         .db 3, 29                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0xC0, 0, 0, 0, 1, 0, 0xF0, 0xC0, 0, 0, 3, 1, 0xF8, 0xF0, 0, 0, 3, 1, 0xF8
+                .db 0xF0, 0, 0, 3, 0, 0xF0, 0xC0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0xF, 6, 0xF0, 0xE0, 0
+                .db 0, 0xF, 6, 0xFC, 0xE0, 0, 0, 0x1F, 0xF, 0xFE, 0xEC, 0, 0, 0x3F, 0x1F, 0xFE, 0xF4
+                .db 0, 0, 0x3F, 0x18, 0xFC, 0x70, 0, 0, 0x1F, 7, 0xF8, 0x90, 0, 0, 0x3F, 0x1F, 0xF0
+                .db 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F
+                .db 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xFF, 0xFC, 0, 0, 0x7F, 0x38, 0xFF, 0x7F, 0xC0, 0
+                .db 0x7F, 0x37, 0xFF, 0xBF, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0xDF, 0xF8, 0xE0, 0x3F, 0x1F
+                .db 0xFF, 0xEF, 0xFC, 0xE8, 0x7F, 0x3F, 0xFF, 0xF1, 0xFE, 0xEC, 0x7F, 0x3F, 0xFF, 0xF6
+                .db 0xFF, 0x52, 0x3F, 0x1F, 0xFF, 0xEF, 0xFE, 0x18, 0x1F, 0xF, 0xEF, 0xC6, 0xF8, 0xC0
+                .db 0xF, 7, 0xC7, 0x81, 0xE0, 0x40, 7, 0, 0x83, 1, 0xC0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0
+                .db 0, 0, 0, 0x80, 0
+spr_11:         .db 3, 28                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x18, 0, 0, 0, 0, 0, 0x3E, 0x18, 0xC, 0, 0, 0
+                .db 0x3F, 0x1E, 0x9E, 0xC, 0, 0, 0x3F, 0x1F, 0xDF, 0x1E, 0x80, 0, 0x3F, 0x1D, 0xFF, 0x9F
+                .db 0xC0, 0x80, 0x1F, 0xC, 0xFF, 0x7F, 0x80, 0, 0x1F, 0xD, 0xFF, 0xFC, 0, 0, 0x1F, 0xB
+                .db 0xFC, 0xF8, 0, 0, 0x1F, 0xC, 0xF8, 0x30, 0, 0, 0xF, 3, 0xF0, 0xC0, 0, 0, 0x1F, 0xF
+                .db 0xF8, 0xF0, 0, 0, 0x3F, 0x1F, 0xF8, 0xF0, 0, 0, 0x3F, 0x1F, 0xF8, 0xF0, 0, 0, 0x3F
+                .db 0x1F, 0xFE, 0xF8, 0, 0, 0x3F, 0x1F, 0xFF, 0xFE, 0x80, 0, 0x3F, 0x1C, 0xFF, 0x3F
+                .db 0xE0, 0x80, 0x3F, 0x1B, 0xFF, 0xDF, 0xF0, 0xE0, 0x3F, 0x17, 0xFF, 0xEF, 0xFC, 0xF0
+                .db 0x1F, 0xF, 0xFF, 0xF3, 0xFE, 0xF4, 0x3F, 0x1F, 0xFF, 0xF8, 0xFF, 0xF6, 0x3F, 0x1F
+                .db 0xFF, 0xFB, 0xFF, 0x2A, 0x1F, 0xF, 0xFF, 0xF7, 0xFE, 0x8C, 0xF, 7, 0xF7, 0xE3, 0xFC
+                .db 0x60, 7, 3, 0xE3, 0xC0, 0xF0, 0xA0, 3, 0, 0xC0, 0, 0xE0, 0x40, 0, 0, 0, 0, 0x40
+                .db 0
+spr_12:         .db 4, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 2, 0, 0, 0, 0x10, 0, 0, 0, 0x1F, 2, 0xE0, 0, 0x38, 0x10, 0, 0, 0x3F, 0x19
+                .db 0xFF, 0xE0, 0xFC, 0x28, 0, 0, 0x7F, 0, 0xFF, 0xEF, 0xFC, 0xF8, 0x1F, 0, 0xFF, 0x74
+                .db 0xFF, 0xC1, 0xF8, 0xC0, 0xBF, 0x1F, 0xFF, 0xE8, 0xFF, 0xDE, 0xFC, 0xB8, 0x3F, 0x1F
+                .db 0xFF, 0x8C, 0xFF, 0xFF, 0xF8, 0x70, 0x1F, 0, 0xFF, 0x6C, 0xFF, 0x3F, 0xFC, 0x88
+                .db 0, 0, 0x7F, 0x16, 0xFF, 0xFF, 0xFC, 0xB8, 0, 0, 0xFF, 0x66, 0xFF, 0xFF, 0xF8, 0x80
+                .db 0, 0, 0xFF, 0x7B, 0xFF, 0xFF, 0xC0, 0x80, 0, 0, 0x7F, 0xD, 0xFF, 0xFF, 0xC0, 0x80
+                .db 0, 0, 0xFF, 0x76, 0xFF, 0xFF, 0xC0, 0x80, 0, 0, 0xFF, 0x12, 0xFF, 0xBF, 0x80, 0
+                .db 1, 0, 0xFF, 0xA8, 0xFF, 0xBE, 0, 0, 1, 0, 0xFF, 0x83, 0xFF, 0, 0, 0, 0, 0, 0xFF
+                .db 0x7C, 0xC0, 0x80, 0, 0, 0, 0, 0x7F, 0x13, 0xC0, 0x80, 0, 0, 0, 0, 0x1F, 0xF, 0xC0
+                .db 0x80, 0, 0, 0, 0, 0xF, 7, 0xC0, 0x80, 0, 0, 0, 0, 7, 3, 0xC0, 0x80, 0, 0, 0, 0, 3
+                .db 1, 0xC0, 0x80, 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 0x80, 0, 0, 0
+spr_13:         .db 4, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x40, 0, 0, 0, 0, 0, 0, 0, 0xE0, 0x40, 0, 0, 0, 0, 5, 0, 0xF0, 0xA0, 0, 0
+                .db 0, 0, 0xF, 5, 0xFC, 0xF0, 0, 0, 0, 0, 0x1F, 0xA, 0xFF, 0x4C, 0, 0, 0, 0, 0x1F, 0xF
+                .db 0xFF, 0xBF, 0xCC, 0, 0, 0, 0xF, 5, 0xFF, 0x7F, 0xFF, 0xCC, 0, 0, 0x1F, 0xE, 0xFF
+                .db 0xFF, 0xFF, 0xEF, 0x80, 0, 0xF, 2, 0xFF, 0xFF, 0xFF, 0xED, 0xC0, 0x80, 3, 0, 0xFF
+                .db 0xFF, 0xFF, 0xFC, 0x80, 0, 1, 0, 0xFF, 0xFF, 0xFF, 0xFE, 0, 0, 1, 0, 0xFF, 0xFF
+                .db 0xFF, 0xFE, 0, 0, 0, 0, 0xFF, 0x7F, 0xFE, 0xE0, 0, 0, 0, 0, 0xFF, 0x7F, 0xFF, 0xFC
+                .db 0xE0, 0, 0, 0, 0x7F, 0x3F, 0xFF, 0x87, 0xF0, 0xC0, 0, 0, 0x3F, 0x1F, 0xFF, 0x78
+                .db 0xF0, 0, 0, 0, 0x1F, 6, 0xFF, 0xFC, 0xFC, 0x70, 0, 0, 7, 1, 0xFF, 0x8E, 0xFE, 0xBC
+                .db 0, 0, 3, 1, 0xFF, 0x76, 0xFF, 0x8E, 0, 0, 3, 0, 0xFF, 0xFA, 0x8F, 2, 0, 0, 0xF, 3
+                .db 0xFF, 0xFA, 2, 0, 0, 0, 0x1F, 0xF, 0xFF, 0xF6, 0, 0, 0, 0, 0x3F, 0x1E, 0xFE, 0xC
+                .db 0, 0, 0, 0, 0x1E, 0, 0xC, 0, 0, 0
+spr_14:         .db 3, 21                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0xFF, 0, 0, 0, 3, 0, 0xFF, 0xFF, 0xC0, 0, 0xF, 3, 0xFF, 0xFF, 0xF0, 0xC0, 0x3F
+                .db 0xF, 0xFF, 0xFF, 0xF8, 0xF0, 0x7F, 0x3F, 0xFF, 0xFF, 0xFC, 0xF8, 0xFF, 0x7F, 0xFF
+                .db 0xFF, 0xFE, 0xFC, 0xFF, 0x71, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0x60, 0xFF, 0xFF, 0xFF
+                .db 0xFE, 0xFF, 0x60, 0xFF, 0x7F, 0xFF, 0xFE, 0x7F, 0x30, 0xFF, 0x7F, 0xFF, 0xFE, 0x3F
+                .db 0x18, 0xFF, 0x3F, 0xFE, 0xFC, 0x1F, 0xE, 0xFF, 0x3F, 0xFC, 0xF8, 0xF, 7, 0xFF, 0x3F
+                .db 0xF8, 0xF0, 7, 3, 0xFF, 0x1F, 0xF0, 0xE0, 7, 3, 0xFF, 0x9F, 0xE0, 0xC0, 3, 1, 0xFF
+                .db 0xCF, 0xC0, 0x80, 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 1, 0, 0xFF, 0xFF, 0x80, 0, 0, 0
+                .db 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0x38, 0, 0, 0, 0, 0x38, 0, 0, 0
+spr_15:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x3C, 0, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0, 7, 1, 0xFF, 0xFF, 0xE0, 0x80, 0xF
+                .db 7, 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xF, 0xFF, 0xFF, 0xF8, 0xF0, 0x3F, 0x1F, 0xFF, 0xFF
+                .db 0xFC, 0xF8, 0x3F, 0x19, 0xFF, 0xFF, 0xFC, 0xF8, 0x7F, 0x30, 0xFF, 0xFF, 0xFF, 0xFC
+                .db 0x7F, 0x30, 0xFF, 0xFF, 0xFE, 0xFC, 0x3F, 0x18, 0xFF, 0x7F, 0xFC, 0xF8, 0x3F, 0x1C
+                .db 0xFF, 0x7F, 0xFC, 0xF8, 0x1F, 0xC, 0xFF, 0x7F, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F
+                .db 0xF8, 0xF0, 0xF, 6, 0xFF, 0x7F, 0xF0, 0xE0, 0xF, 6, 0xFF, 0x3F, 0xF0, 0xE0, 0xF
+                .db 7, 0xFF, 0x3F, 0xF0, 0xE0, 7, 3, 0xFF, 0x3F, 0xE0, 0xC0, 7, 3, 0xFF, 0xBF, 0xE0
+                .db 0xC0, 7, 3, 0xFF, 0xBF, 0xE0, 0xC0, 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 3, 1, 0xFF, 0xFF
+                .db 0xC0, 0x80, 1, 0, 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0, 0
+                .db 0
+spr_16:         .db 3, 26                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x3C, 0, 0, 0, 1, 0, 0xFF, 0x3C, 0x80, 0, 3, 1, 0xFF, 0xFF, 0xC0, 0x80, 7
+                .db 3, 0xFF, 0xFF, 0xE0, 0xC0, 0xF, 7, 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0xFF
+                .db 0xF8, 0xF0, 0x1F, 0xC, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 8, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F
+                .db 8, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xC, 0xFF, 0x7F, 0xF8, 0xF0, 0x1F, 0xC, 0xFF, 0x7F
+                .db 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F, 0xF8, 0xF0, 0xF, 6, 0xFF, 0x3F, 0xF0, 0xE0, 0xF
+                .db 7, 0xFF, 0x3F, 0xF0, 0xE0, 7, 3, 0xFF, 0x3F, 0xE0, 0xC0, 7, 3, 0xFF, 0x3F, 0xE0
+                .db 0xC0, 3, 1, 0xFF, 0x3F, 0xC0, 0x80, 3, 1, 0xFF, 0x3F, 0xC0, 0x80, 3, 1, 0xFF, 0xBF
+                .db 0xC0, 0x80, 3, 1, 0xFF, 0xBF, 0xC0, 0x80, 1, 0, 0xFF, 0x9F, 0x80, 0, 1, 0, 0xFF
+                .db 0xDF, 0x80, 0, 1, 0, 0xFF, 0xDF, 0x80, 0, 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7E, 0x3C
+                .db 0, 0, 0, 0, 0x3C, 0, 0, 0
+spr_17:         .db 4, 23                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0xE, 4, 0, 0, 0, 0, 0
+                .db 0, 0x1E, 0xC, 0, 0, 0, 0, 0, 0, 0x1E, 0xC, 0, 0, 0, 0, 0, 0, 0x3E, 0x1C, 4, 0, 0
+                .db 0, 0, 0, 0x3E, 0x1C, 0xE, 4, 0, 0, 7, 0, 0x7C, 0x38, 0x1E, 0xC, 0, 0, 0x3F, 7, 0xFC
+                .db 0x78, 0x7C, 0x18, 0x40, 0, 0xFF, 0x3E, 0xFB, 0xF0, 0xFC, 0x78, 0xF9, 0x40, 0xFF
+                .db 0xFF, 0xFF, 0x6B, 0xF8, 0xF0, 0xFF, 0x78, 0xFF, 0x7F, 0xFF, 0x9B, 0xF0, 0xE0, 0x7F
+                .db 0x3F, 0xFF, 0xBF, 0xFF, 0xFD, 0xE2, 0x80, 0x3F, 0x1F, 0xFF, 0xBF, 0xFF, 0xFE, 0xDF
+                .db 2, 0x1F, 3, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0xDE, 0x4F, 4, 0xFF, 0xFF, 0xFF, 0xFF
+                .db 0xFE, 0xDC, 0xFF, 0x43, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC, 0xD0, 0xFF, 0x7D, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xD0, 0x80, 0x7F, 0x3E, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0, 0x3F, 0x1F
+                .db 0xFF, 0x3F, 0xFF, 0xFC, 0, 0, 0x1F, 0, 0xFF, 0x87, 0xFC, 0xE0, 0, 0, 1, 0, 0xFF
+                .db 0xF8, 0xE0, 0, 0, 0, 0, 0, 0xF8, 0, 0, 0, 0, 0
+spr_18:         .db 4, 23                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0x10, 0, 0, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0, 0, 0x38, 0x10
+                .db 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0, 0, 0, 0x7C
+                .db 0x38, 0, 0, 0, 0, 0, 0, 0x7C, 0x38, 0, 0, 0, 0, 7, 0, 0xFC, 0x78, 6, 0, 0x40, 0
+                .db 0x3F, 7, 0xF8, 0x70, 0x1F, 6, 0xF0, 0x40, 0xFF, 0x3E, 0xFB, 0xF0, 0xFE, 0x1C, 0xFF
+                .db 0x70, 0xFF, 0xFF, 0xFF, 0x6B, 0xFE, 0xFC, 0x7F, 0x3E, 0xFF, 0x7F, 0xFF, 0x9B, 0xFC
+                .db 0xF8, 0x3F, 0x1F, 0xFF, 0xBF, 0xFF, 0xFD, 0xFE, 0xE4, 0x1F, 0xF, 0xFF, 0xBF, 0xFF
+                .db 0xFE, 0xFE, 0xC, 0xF, 3, 0xFF, 0x7F, 0xFF, 0xFF, 0xFC, 0xD8, 0xF, 4, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xFC, 0xD8, 0xF, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xD0, 0x7F, 0xD, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xD0, 0, 0xFF, 0x7E, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0, 0x7F, 0xF
+                .db 0xFF, 0x3F, 0xFF, 0xFC, 0, 0, 0xF, 0, 0xFF, 0xC7, 0xFC, 0xE0, 0, 0, 0, 0, 0xFF, 0x38
+                .db 0xE0, 0, 0, 0, 0, 0, 0x38, 0, 0, 0, 0, 0
+spr_19:         .db 4, 23                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0x88, 0, 0, 0
+                .db 0, 0, 7, 3, 0x9C, 8, 0, 0, 0, 0, 0xF, 7, 0xBC, 0x18, 0, 0, 0, 0, 0x1F, 0xE, 0x3C
+                .db 0x18, 0, 0, 7, 0, 0x7F, 0x1E, 0x7C, 0x38, 0, 0, 0x3F, 7, 0xFF, 0x7C, 0xFC, 0x78
+                .db 0, 0, 0xFF, 0x3E, 0xFF, 0xF9, 0xF8, 0xF0, 0x41, 0, 0xFF, 0xFF, 0xFF, 0x73, 0xF0
+                .db 0xE0, 0xFF, 0x40, 0xFF, 0x7F, 0xFF, 0x8B, 0xE0, 0xC0, 0xFF, 0x7F, 0xFF, 0xBF, 0xFF
+                .db 0xFD, 0xC0, 0x80, 0x7F, 0x3F, 0xFF, 0xBF, 0xFF, 0xFE, 0xD2, 0, 0x7F, 0xF, 0xFF, 0x7F
+                .db 0xFF, 0xFF, 0xFF, 0xD2, 0xFF, 0x40, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xDE, 0xFF, 0x73
+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0x7F, 0x3D, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0x80
+                .db 0x3F, 0x1E, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0, 0x1F, 7, 0xFF, 0x3F, 0xFF, 0xFC, 0
+                .db 0, 7, 0, 0xFF, 0xC7, 0xFC, 0xE0, 0, 0, 3, 1, 0xFF, 0xF8, 0xE0, 0, 0, 0, 1, 0, 0xF8
+                .db 0xE0, 0, 0, 0, 0, 0, 0, 0xE0, 0, 0, 0, 0, 0
+spr_1A:         .db 3, 26                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 6, 0, 0, 0, 0, 0, 0xF, 6, 0, 0, 0, 0, 0x1F, 0xE, 0, 0, 0, 0, 0x3E, 0x1C, 0
+                .db 0, 0, 0, 0x3E, 0x1C, 4, 0, 0, 0, 0x3F, 0x1E, 0xE, 4, 0, 0, 0x7F, 0x3E, 0xE, 4, 0x20
+                .db 0, 0xFF, 0x7E, 0x1F, 0xA, 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x71, 0x20, 0xFF, 0xFF
+                .db 0x9F, 0xA, 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x79, 0x30, 0xFF, 0xFF, 0xBF, 0x12
+                .db 0x79, 0x30, 0xFF, 0xFF, 0xFF, 0x32, 0x7D, 0x38, 0xFF, 0xFF, 0xFF, 0xF2, 0x7D, 0x38
+                .db 0xFF, 0xFF, 0xFF, 0xF2, 0x7F, 0x3C, 0xFF, 0xFB, 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0xD3
+                .db 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA
+                .db 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xBE, 0x7F, 0x3F, 0xFF, 0x93, 0xBF, 0xE, 0x7F, 0x3E
+                .db 0xFF, 0x9B, 0x8E, 0, 0x7F, 0x3C, 0xFF, 0xFF, 0x80, 0, 0x7D, 0x3C, 0xFF, 0x7E, 0
+                .db 0, 0x3C, 0x18, 0x7E, 0x3C, 0, 0, 0x18, 0, 0x3C, 0, 0, 0
+spr_1B:         .db 3, 26                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x10, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0x7C, 0x38, 0, 0, 0, 0, 0x3E
+                .db 0x1C, 4, 0, 0, 0, 0x1F, 0xE, 0xE, 4, 0, 0, 0x1F, 0xE, 0xE, 4, 0x20, 0, 0x3F, 0x1E
+                .db 0x1F, 0xA, 0x70, 0x20, 0x7F, 0x3E, 0x1F, 0xA, 0x70, 0x20, 0xFF, 0x7E, 0x1F, 0xA
+                .db 0x71, 0x20, 0xFF, 0xFF, 0x9F, 0xA, 0x79, 0x30, 0xFF, 0xFF, 0xBF, 0x1A, 0x79, 0x30
+                .db 0xFF, 0xFF, 0xFF, 0x32, 0x7D, 0x38, 0xFF, 0xFF, 0xFF, 0x72, 0x7D, 0x38, 0xFF, 0xFF
+                .db 0xFF, 0xF2, 0x7F, 0x3C, 0xFF, 0xFF, 0xFF, 0xF2, 0x7F, 0x3E, 0xFF, 0xFB, 0xFF, 0xF2
+                .db 0x7F, 0x3F, 0xFF, 0xD3, 0xFF, 0xF2, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F
+                .db 0xFF, 0x91, 0xFF, 0xFA, 0x7F, 0x3F, 0xFF, 0x91, 0xFF, 0xE, 0x7F, 0x3F, 0xFF, 0x93
+                .db 0x8E, 0, 0x7F, 0x3E, 0xFF, 0x9B, 0x80, 0, 0x7F, 0x3C, 0xFF, 0xFF, 0x80, 0, 0x3C
+                .db 0x18, 0xFF, 0x7E, 0, 0, 0x18, 0, 0x7E, 0x3C, 0, 0, 0, 0, 0x3C, 0, 0, 0
+spr_1C:         .db 2, 14                                       ; DATA XREF: RAM:sprite_tblo
+                .db 3, 0, 0xE0, 0, 7, 3, 0xF0, 0xE0, 0xF, 7, 0xFC, 0xF0, 0x1F, 7, 0xFE, 0xEC, 0x3F, 0x1F
+                .db 0xFF, 0xFE, 0x7F, 0x3F, 0xFF, 0xFE, 0x7F, 0x3D, 0xFF, 0x9E, 0x3F, 0x1E, 0xFE, 0x5C
+                .db 0x7F, 0x3F, 0xFF, 0xDE, 0x7F, 0x3D, 0xFF, 0xE6, 0x3F, 0x1B, 0xFF, 0xFE, 0x1B, 1
+                .db 0xFE, 0xDC, 1, 0, 0xFC, 0xC0, 0, 0, 0xC0, 0
+spr_1D:         .db 3, 13                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0xFC, 0, 0, 0, 1, 0, 0xFF, 0xFC, 0xC0, 0, 0x3B, 1, 0xFF, 0xFB, 0xE0, 0xC0
+                .db 0x7F, 0x3B, 0xFF, 0xFF, 0xF0, 0xE0, 0xFF, 0x7F, 0xFF, 0xFF, 0xF8, 0xF0, 0xFF, 0x7F
+                .db 0xFF, 0xFB, 0xF8, 0xF0, 0xFF, 0x7D, 0xFF, 0xE5, 0xF0, 0xC0, 0xFF, 0x7E, 0xFF, 0x1D
+                .db 0xF8, 0xF0, 0x7F, 0x3F, 0xFF, 0xFE, 0xFC, 0x78, 0x3F, 7, 0xFF, 0xFF, 0xFC, 0xF8
+                .db 0x1F, 0xF, 0xFF, 0xFB, 0xF8, 0xF0, 0xF, 6, 0xFB, 0xF0, 0xF0, 0xE0, 6, 0, 0xF0, 0
+                .db 0xE0, 0
+spr_1E:         .db 3, 17                                       ; DATA XREF: RAM:sprite_tblo
+byte_81C7:      .db 1, 0, 0xF8, 0, 0, 0, 7, 1, 0xFF, 0xF8, 0, 0, 0xF, 7, 0xFF, 0xFF, 0xBC, 0, 0x1F, 0xF
+                .db 0xFF, 0xFF, 0xFE, 0xBC, 0x3F, 0xF, 0xFF, 0xFF, 0xFF, 0xFE, 0x7F, 0x3F, 0xFF, 0xFF
+                .db 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0x7C, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0x81, 0xFF, 0xFE
+                .db 0xFF, 0x7F, 0xFF, 0xC1, 0xFE, 0xFC, 0xFF, 0x7D, 0xFF, 0x80, 0xFC, 0x78, 0x7F, 0x3D
+                .db 0xFF, 0xE3, 0xFE, 0xFC, 0xFF, 0x7D, 0xFF, 0xF7, 0xFF, 0xFE, 0xFF, 0x63, 0xFF, 0xFF
+                .db 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0xFE, 0x7F, 0x3B, 0xFF, 0xFD, 0xFE, 0xFC
+                .db 0x3B, 1, 0xFD, 0xF0, 0xFC, 0xF0, 1, 0, 0xF0, 0, 0xF0, 0
+spr_1F:         .db 3, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x3F, 0, 0, 0, 0xF8, 0, 0x7F, 0x3F, 0x81, 0, 0xFC, 0xF8, 0xFF, 0x7F, 0xC3, 0x81
+                .db 0xFE, 0xFC, 0xFF, 0x7E, 0x81, 0, 0xFC, 0x38, 0x7E, 0x3C, 0, 0, 0x38, 0, 0x3C, 0
+                .db 0, 0, 0xC, 0, 0, 0, 0, 0, 0x1E, 0xC, 0, 0, 0, 0, 0x3F, 0x1E, 0x18, 0, 0, 0, 0x3F
+                .db 0x1E, 0x3C, 0x18, 0, 0, 0x3F, 0x1E, 0x7E, 0x3C, 0, 0, 0x3F, 0x1E, 0x7E, 0x2C, 0x3C
+                .db 0, 0x1E, 4, 0x7E, 0x24, 0x7E, 0x3C, 0x1C, 8, 0x7E, 0x3C, 0x7F, 0x3E, 8, 0, 0x3C
+                .db 0x18, 0x3E, 0x1C, 0, 0, 0x18, 0, 0x1C, 0, 0, 0
+spr_20:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 8, 0, 0, 0, 0x1C, 8, 0x40, 0, 0x3E, 0x1C, 0xE4, 0x40, 0x3F, 8, 0x4E, 4, 0x7F, 0x27
+                .db 0xDF, 0xE, 0x3F, 0xB, 0xFE, 0xC4, 0x3F, 0x1C, 0xF4, 0xA0, 0x5F, 0xD, 0xFC, 0xB0
+                .db 0xFF, 0x5A, 0xFE, 0x54, 0x5F, 5, 0xFC, 0xF0, 0xF, 1, 0xFC, 0xA8, 0x1F, 9, 0xF8, 0x40
+                .db 0x19, 0, 0x50, 0, 0x39, 0x10, 0x38, 0x10, 0x3F, 0x19, 0x90, 0, 0x19, 0, 0, 0
+spr_21:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 8, 0, 0, 0, 0x1C, 8, 0x20, 0, 9, 0, 0x70, 0x20, 0x23, 1, 0xA8, 0, 0x73, 0x20, 0xBC
+                .db 8, 0x7F, 0x33, 0xF8, 0xA0, 0x3F, 6, 0xE2, 0xC0, 0x1F, 0xD, 0xFF, 0x62, 0x4F, 6, 0xFA
+                .db 0xF0, 0xFF, 0x4A, 0xF8, 0xE0, 0x4F, 3, 0xFC, 0x88, 0xF, 3, 0xFE, 0x5C, 0x1F, 9, 0xDC
+                .db 0x88, 0x3F, 0x1C, 0xC8, 0, 0x1C, 8, 0xE0, 0x40, 8, 0, 0x40, 0
+spr_22:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 8, 0, 0x40, 0, 0x1C, 8, 0xE8, 0x40, 0xB, 0, 0xFC, 0x68, 7, 3, 0xF8, 0, 0x27, 1, 0xFA
+                .db 0xD0, 0x7F, 0x27, 0xFF, 0xBA, 0x3F, 5, 0xFA, 0xD0, 0x3F, 0xF, 0xFC, 0xB0, 0x7F, 0x32
+                .db 0xFE, 0xD4, 0x7F, 0x33, 0xFC, 0xB0, 0x3F, 1, 0xF2, 0x60, 0xF, 2, 0xFF, 0x32, 0x1F
+                .db 8, 0xFA, 0x80, 9, 0, 0x9C, 8, 3, 1, 0x88, 0, 1, 0, 0, 0
+font:           .db 0x38, 0x6C, 0xD6, 0xD6, 0xD6, 0xD6, 0x6C, 0x38 ; DATA XREF: RAM:BB49o
+                .db 0x18, 0x38, 0x58, 0x18, 0x18, 0x18, 0x18, 0x7C
+                .db 0x38, 0x4C, 0xC, 0x3C, 0x60, 0xC2, 0xC2, 0xFE
+                .db 0x38, 0x4C, 0xC, 0x3C, 0xE, 0x86, 0x86, 0xFC
+                .db 0x18, 0x38, 0x58, 0x9A, 0xFE, 0x1A, 0x18, 0x7C
+                .db 0xFE, 0xC2, 0xC0, 0xFC, 6, 6, 0x86, 0x7C
+                .db 0x1E, 0x32, 0x60, 0xEC, 0xC6, 0xC6, 0xC6, 0x7C
+                .db 0x7E, 0x46, 0x4C, 0xC, 0x18, 0x18, 0x38, 0xF8
+                .db 0x38, 0x6C, 0x6C, 0x7C, 0xFE, 0xC6, 0xC6, 0x7C
+                .db 0x7C, 0xC6, 0xC6, 0xC6, 0x7C, 0xC, 0x98, 0xF0
+                .db 0, 0, 0, 0, 0, 0, 0x18, 0x18
+                .db 0, 0xC3, 0xC6, 0xC, 0x18, 0x30, 0x63, 0xC3
+                .db 0x3C, 0x42, 0x99, 0xA1, 0xA1, 0x99, 0x42, 0x3C
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0xC, 0x1C, 0x2E, 0x66, 0x46, 0xCE, 0xD6, 0x66
+                .db 0xF8, 0x6C, 0x6C, 0x78, 0x6C, 0x66, 0x66, 0xFC
+                .db 0xE, 0x32, 0x60, 0x40, 0xC0, 0xC2, 0xE6, 0x7C
+                .db 0x60, 0x70, 0x68, 0x6C, 0x66, 0x66, 0x66, 0xFC
+                .db 0xFE, 0x60, 0x64, 0x7C, 0x64, 0x60, 0x7A, 0xC6
+                .db 0xC6, 0x7A, 0x60, 0x64, 0x7C, 0x64, 0x60, 0x60
+                .db 0xE, 0x30, 0x60, 0xC6, 0xCE, 0xF6, 0x66, 0xE
+                .db 0xEE, 0xC6, 0xC6, 0xFE, 0xC6, 0xC6, 0xC6, 0xEE
+                .db 0x7C, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x7C
+                .db 0x1E, 6, 6, 0x86, 0x86, 0xC6, 0x7E, 0x1C
+                .db 0xE4, 0x68, 0x70, 0x78, 0x6C, 0x64, 0x64, 0xF6
+                .db 0xE0, 0x60, 0x60, 0x60, 0x60, 0x60, 0x62, 0xFE
+                .db 0xC6, 0xEE, 0xEE, 0xD6, 0xD6, 0xD6, 0xC6, 0xEE
+                .db 0xCC, 0xD6, 0xD6, 0xE6, 0xE4, 0xC4, 0xC8, 0xDE
+                .db 0x38, 0x6C, 0xC6, 0xC6, 0xC6, 0xC6, 0x6C, 0x38
+                .db 0xF8, 0x6C, 0x66, 0x76, 0x6E, 0x60, 0x60, 0xF0
+                .db 0x38, 0x6C, 0xC6, 0xC6, 0xC6, 0xD6, 0x6C, 0x3A
+                .db 0xF8, 0x6C, 0x66, 0x76, 0x7E, 0x78, 0x6C, 0xE6
+                .db 0x38, 0x64, 0x60, 0x3C, 6, 0x86, 0xC6, 0x7C
+                .db 0xFE, 0x9A, 0x98, 0x18, 0x18, 0x18, 0x18, 0x18
+                .db 0xF6, 0x26, 0x46, 0x4E, 0xCE, 0xD6, 0xD6, 0x66
+                .db 0xE2, 0x62, 0x64, 0x64, 0x68, 0x68, 0x70, 0x60
+                .db 0xEE, 0xC6, 0xD6, 0xD6, 0xD6, 0xEE, 0xEE, 0xC6
+                .db 0xC6, 0xC6, 0x6C, 0x38, 0x38, 0x6C, 0xC6, 0xC6
+                .db 0x86, 0x66, 0x16, 0xE, 6, 4, 0x4C, 0x38
+                .db 0x7E, 0x46, 0xC, 0x18, 0x30, 0x62, 0xC2, 0xFE
+spr_23:         .db 4, 18                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0x18, 0, 0, 0, 0, 0, 0, 0, 0x3C, 0x18, 0, 0, 0, 0, 0x30, 0, 0x3C, 0x18
+                .db 0x30, 0, 0, 0, 0x78, 0x30, 0x38, 0x10, 0x78, 0x30, 0, 0, 0x7C, 0x38, 0x78, 0x30
+                .db 0x78, 0x30, 0x18, 0, 0x3C, 0x18, 0x78, 0x30, 0xF0, 0x60, 0x3E, 0x18, 0x1E, 0xC, 0x79
+                .db 0x30, 0xF0, 0xE0, 0x3F, 0x1E, 0x8F, 6, 0x79, 0x30, 0xE6, 0xC0, 0x1F, 7, 0xCF, 0x86
+                .db 0x7F, 0x31, 0xEF, 0xC6, 7, 1, 0xF7, 0xC3, 0xFF, 0x37, 0xDF, 0x8E, 1, 0, 0xFF, 0x73
+                .db 0xFF, 0x17, 0xFE, 0x98, 1, 0, 0xFF, 0x3C, 0xFF, 0xE1, 0xF8, 0xB0, 3, 1, 0xFF, 0x9D
+                .db 0xFF, 0xAE, 0xF0, 0x60, 3, 1, 0xFF, 0xD9, 0xFF, 0x47, 0xF0, 0xE0, 1, 0, 0xFF, 0x60
+                .db 0xFF, 0x33, 0xE0, 0xC0, 0, 0, 0x7F, 0x1D, 0xFB, 0xB1, 0xC0, 0x80, 0, 0, 0x1F, 0xD
+                .db 0xF1, 0x80, 0x80, 0, 0, 0, 0xD, 0, 0xF8, 0x30, 0, 0
+spr_unused:     .db 0, 0, 0, 0, 0x30, 0, 0, 0, 4, 0x18, 0, 0, 0xF, 0xB, 0xF0, 0xF0, 0, 0, 0, 0, 0xFF
+                .db 0x9D, 0xFF, 0xFB, 0, 0, 1, 1, 0xFF, 0xBD, 0xFF, 0xFB, 0xC0, 0x40, 7, 7, 0xFF, 0xBE
+                .db 0xFF, 0xFB, 0xE0, 0x60, 0x3F, 0xF, 0xFF, 0xBE, 0xFF, 0xF7, 0xFC, 0x78, 0x3F, 0x17
+                .db 0xFF, 0xBD, 0xFF, 0xF7, 0xFC, 0x78, 0x3F, 0x17, 0xFF, 0xBD, 0xFF, 0xEF, 0xFC, 0xB8
+                .db 0x3F, 0x1B, 0xFF, 0xBB, 0xFF, 0xEF, 0xFC, 0xB8, 0x3F, 0x1D, 0xFF, 0xD9, 0xFF, 0xEF
+                .db 0xFC, 0x70, 0x3F, 0x1E, 0xFF, 0xEE, 0xFF, 0xEF, 0xF8, 0xB0, 0x3F, 0xF, 0xFF, 0x76
+                .db 0xFF, 0xF7, 0xF8, 0xD0, 0x1F, 0xF, 0xFF, 0x77, 0xFF, 0x77, 0xF8, 0xB0, 0x1F, 0xE
+                .db 0xFF, 0xF7, 0xFF, 0x7B, 0xFE, 0xB0, 0x1F, 0xD, 0xFF, 0xFF, 0xFF, 0xFB, 0xFE, 0x78
+                .db 0x1F, 0xB, 0xFF, 0xF8, 0xFF, 0x1F, 0xFE, 0x7C, 0x1F, 0xF, 0xFF, 0xC7, 0xFF, 0xE3
+                .db 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0x3B, 0xFF, 0x3C, 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xE3
+                .db 0xFF, 0xC6, 0xFC, 0xF0, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6, 0xF8, 0xF0, 0x1F, 7, 0xFF
+                .db 0x3C, 0xFF, 0x3D, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xC7, 0xFF, 0xE3, 0xF0, 0xC0, 7, 0, 0xFF
+                .db 0xF8, 0xFF, 0x1F, 0xE0, 0, 1, 0, 0xFF, 0xF, 0xFF, 0xF0, 0x80, 0, 0, 0, 0x1F, 0, 0xF8
+                .db 0, 0, 0
+spr_24:         .db 4, 28                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 3, 0, 0xC0, 0, 0, 0, 0, 0, 0xF, 1, 0xF0, 0x80, 0, 0, 0, 0, 0x3F, 7, 0xFC, 0xE0
+                .db 0, 0, 0, 0, 0xFF, 0x1B, 0xFF, 0xD8, 0, 0, 3, 0, 0xFF, 0x7B, 0xFF, 0xDE, 0xC0, 0
+                .db 0xF, 1, 0xFF, 0xFB, 0xFF, 0xDF, 0xF0, 0x80, 0x1F, 7, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8
+                .db 0xE0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF
+                .db 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF
+                .db 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFB, 0xFF, 0xDF, 0xF8, 0xF0, 0x1F
+                .db 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xF8, 0xFF, 0x1F, 0xF8
+                .db 0xF0, 0x1F, 0xF, 0xFF, 0xE7, 0xFF, 0xE7, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0x9F, 0xFF
+                .db 0xF9, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x7F, 0xFF, 0xFE, 0xF8, 0x70, 0x1F, 9, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xF8, 0x90, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xE0, 0x1F, 0xF, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F
+                .db 0xF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xE0
+                .db 0xF, 1, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x80, 3, 0, 0xFF, 0x7F, 0xFF, 0xFE, 0xC0, 0
+                .db 0, 0, 0xFF, 0x1F, 0xFF, 0xF8, 0, 0, 0, 0, 0x3F, 7, 0xFC, 0xE0, 0, 0, 0, 0, 0xF, 0
+                .db 0xF0, 0, 0, 0
+spr_25:         .db 4, 21                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x1E, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0x1E, 0xE1, 0, 0x80, 0, 7, 0, 0xFF, 0xFF
+                .db 0xF3, 0xE1, 0xC0, 0x80, 0xF, 7, 0xFF, 0xFF, 0xFF, 0xF3, 0xE0, 0xC0, 0x1F, 0xF, 0xFF
+                .db 0xB6, 0xFF, 0x8B, 0xF0, 0xE0, 0x3F, 0x1D, 0xBF, 0x12, 0xFF, 0x3D, 0xF0, 0xE0, 0x7F
+                .db 0x35, 0x93, 0, 0xFF, 0xC6, 0xE0, 0xC0, 0x7F, 0x34, 0xF, 3, 0xFF, 0x3F, 0xE0, 0x40
+                .db 0x7C, 0x30, 0x3F, 0xC, 0xFF, 0xFE, 0xF0, 0xE0, 0x78, 0x30, 0xFF, 0x33, 0xFE, 0xF8
+                .db 0xF0, 0x60, 0x79, 0x30, 0xFF, 0xCF, 0xF8, 0xE0, 0xF8, 0x50, 0x7F, 0x39, 0xFF, 0x3F
+                .db 0xE0, 0x80, 0xF8, 0x70, 0x7F, 0x2E, 0xFF, 0xFE, 0x80, 0, 0xF0, 0x60, 0x3F, 0xB, 0xFE
+                .db 0xF8, 1, 0, 0xF0, 0xE0, 0xF, 3, 0xF8, 0xE0, 7, 1, 0xF0, 0xE0, 3, 1, 0xFF, 0xD8, 0xFF
+                .db 7, 0xF0, 0xA0, 1, 0, 0xDF, 0xF, 0xFF, 0xFF, 0xE0, 0x80, 0, 0, 0x1F, 0xD, 0xFF, 0xFD
+                .db 0xC0, 0x80, 0, 0, 0x1F, 9, 0xFF, 0xD9, 0x80, 0, 0, 0, 9, 0, 0xDD, 0x88, 0, 0, 0
+                .db 0, 0, 0, 0x88, 0, 0, 0
+spr_26:         .db 4, 28                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0xE0
+                .db 0, 0, 0, 0, 0x7F, 0x1E, 0xFE, 0x78, 0, 0, 1, 0, 0xFF, 0x79, 0xFF, 0x9E, 0x80, 0
+                .db 7, 1, 0xFF, 0xE7, 0xFF, 0xE7, 0xE0, 0x80, 0x1F, 7, 0xFF, 0x9D, 0xFF, 0xF9, 0xF8
+                .db 0xE0, 0x7E, 0x1F, 0xFF, 0x7D, 0xFF, 0xBE, 0xFE, 0x78, 0xFF, 0x79, 0xFF, 0xED, 0xFF
+                .db 0xAD, 0xFF, 0x9E, 0xFF, 0x67, 0xFF, 0x6D, 0xFF, 0xAD, 0xFF, 0xE6, 0xFF, 0x1F, 0xFF
+                .db 0x6D, 0xFF, 0xAD, 0xFF, 0xF8, 0xFF, 0x7F, 0xFF, 0xAD, 0xFF, 0x6B, 0xFF, 0xFE, 0xFF
+                .db 0x5D, 0xFF, 0xAD, 0xFF, 0x6B, 0xFF, 0xBA, 0x7F, 0x1D, 0xFF, 0xDD, 0xFF, 0x6B, 0xFE
+                .db 0xB8, 0x1F, 0xD, 0xFF, 0xFD, 0xFF, 0x77, 0xF8, 0xB8, 0x1F, 0xD, 0xFF, 0x6E, 0xFF
+                .db 0xFE, 0xF8, 0xB8, 0x1F, 0xD, 0xFF, 0x6F, 0xFF, 0xFC, 0xF8, 0xB0, 0x1D, 8, 0xFF, 0x6D
+                .db 0xFF, 0xB6, 0xF8, 0x30, 0x1C, 8, 0xFF, 0x6D, 0xFF, 0xB6, 0x38, 0x10, 0x1C, 8, 0xFF
+                .db 0x65, 0xFF, 0xA6, 0x3B, 0x10, 0x1C, 8, 0xE7, 0x41, 0xEF, 0x86, 0x38, 0x10, 0x1C
+                .db 8, 0xE3, 0x41, 0xC7, 0x82, 0x10, 0, 8, 0, 0xE1, 0x40, 0xC7, 0x82, 0, 0, 0, 0, 0xE1
+                .db 0x40, 0xC7, 0x82, 0, 0, 0, 0, 0x41, 0, 0xC2, 0x80, 0, 0, 0, 0, 1, 0, 0xC0, 0x80
+                .db 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 0x80, 0, 0, 0
+spr_27:         .db 2, 17                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xE, 0, 0x38, 0, 0x1F, 0xE, 0x7C, 0x38, 0x1F, 0xB, 0xFC, 0x78, 0xF, 5, 0xF8, 0x70
+                .db 0xE, 3, 0xF0, 0x60, 0xF, 3, 0xF8, 0xE0, 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xD, 0xFC, 0xF8
+                .db 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xD, 0xFC, 0xF8, 0x1F, 0xE, 0xFC, 0x38, 0xF, 5, 0xF8
+                .db 0xD0, 7, 2, 0xF0, 0xE0, 7, 2, 0xF0, 0xE0, 7, 2, 0xF0, 0xE0, 3, 1, 0xE0, 0x40, 1
+                .db 0, 0xC0, 0
+spr_28:         .db 4, 29                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 0x1F, 1, 0xE0, 0x80, 0, 0, 0, 0, 0x3F, 0x1E, 0xF0
+                .db 0x40, 0, 0, 0, 0, 0x7F, 0x3E, 0xF8, 0xA0, 0, 0, 0, 0, 0xFF, 0x7E, 0xFF, 0x50, 0x80
+                .db 0, 7, 0, 0xFF, 0xFE, 0xFF, 0xA2, 0xE0, 0x80, 0xF, 6, 0xFF, 0x3E, 0xFF, 0x55, 0xF0
+                .db 0x40, 0x7F, 0xF, 0xFF, 0xDE, 0xFF, 0xAA, 0xFE, 0xA0, 0xFF, 0x7F, 0xFF, 0xDE, 0xFF
+                .db 0x15, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xDE, 0xFF, 0xAA, 0xFF, 0xA2, 0xFF, 0x7F, 0xFF
+                .db 0xCE, 0xFF, 0x54, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xEE, 0xFF, 0x28, 0xFF, 0x82, 0xFF
+                .db 0x73, 0xFF, 0xE8, 0xFF, 0x94, 0xFF, 0x54, 0xFF, 0xD, 0xFF, 0xF7, 0xFF, 0xCA, 0xFF
+                .db 0xA2, 0xFF, 0x7D, 0xFF, 0xEF, 0xFF, 0xE4, 0xFF, 0x54, 0xFF, 0x7D, 0xFF, 0x1F, 0xFF
+                .db 0xFC, 0xFF, 0xA2, 0xFF, 0x7C, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 4, 0xFF, 0x79, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0xE2, 0xFF, 0x43, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF4, 0xFF
+                .db 0x1F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF8, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+                .db 0xFE, 0x7F, 0x1F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xF8, 0x1F, 0xF, 0xFF, 0xFF, 0xFF
+                .db 0xFF, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xFF, 0xFF, 0xFF, 0xE0, 0xC0, 3, 0, 0xFF, 0x7F, 0xFF
+                .db 0xF8, 0xC0, 0, 0, 0, 0x7F, 0x3F, 0xF8, 0xF0, 0, 0, 0, 0, 0x3F, 0x1F, 0xF0, 0xE0
+                .db 0, 0, 0, 0, 0x1F, 7, 0xE0, 0xC0, 0, 0, 0, 0, 7, 0, 0xC0, 0, 0, 0
+spr_29:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xD, 0xD, 0xF5, 0xF5, 0x13, 0x13, 0x80, 0x80, 0x1E, 0x1E, 0, 0, 0xB, 0xB, 0xE0, 0xE0
+                .db 0x1E, 0x1E, 0x18, 0x18, 0x16, 0x16, 6, 6, 0x1B, 0x1B, 0x80, 0x80, 0x1E, 0x1E, 0
+                .db 0, 0xE, 0xE, 0, 0, 0xF, 0xF, 0xD0, 0xD0, 0xF, 0xF, 0, 0, 7, 7, 0x80, 0x80, 7, 7
+                .db 0xEC, 0xEC, 0, 0, 0x78, 0x78, 0, 0, 0xC, 0xC, 0, 0, 3, 3
+spr_2A:         .db 2, 11                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x18, 0x18, 0x7E, 0x7E, 7, 7, 0x80, 0x80, 0, 0, 0x40, 0x40, 0, 0, 0x30, 0x30, 0
+                .db 0, 8, 8, 0, 0, 4, 4, 0x18, 0x18, 6, 6, 7, 7, 0xF8, 0xF8, 0xC0, 0xC0, 0x10, 0x10
+                .db 0x38, 0x38, 0xE, 0xE, 7, 7, 0xFE, 0xFE, 2, 0x10, 0xFF, 0xFF, 0xFE, 0xFE, 7, 7, 0
+                .db 0, 0, 0, 0x78, 0x78, 0, 0, 6, 6, 0xE, 0xE, 6, 6, 0x31, 0x31, 0xC1, 0xC1, 0x6C, 0x6C
+                .db 0xF1, 0xF1, 0x31, 0x31, 0x9E, 0x9E, 0xE, 0xE, 0x60, 0x60, 1, 1, 0x80, 0x80, 0, 0
+                .db 0x80, 0x80, 0, 0, 0x7E, 0x7E, 0, 0, 2, 2, 0, 0, 4, 4, 0, 0, 0x3C, 0x3C, 0, 0, 2
+                .db 2
+spr_2B:         .db 2, 16                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xFF, 0xFF, 0xF0, 0xF0, 8, 8, 0, 0, 7, 7, 0xF8, 0xF8, 0, 0, 4, 4, 0, 0, 8, 8, 3
+                .db 3, 0xE4, 0xE4, 4, 4, 0x1C, 0x1C, 0x79, 0x79, 0xE6, 0xE6, 0x86, 0x86, 0x60, 0x60
+                .db 0x79, 0x79, 0x9E, 0x9E, 6, 6, 0x21, 0x21, 1, 1, 0xC3, 0xC3, 0, 0, 0x1C, 0x1C, 0
+                .db 0, 0xC0, 0xC0, 0, 0, 0x3E, 0x3E, 0, 0, 6, 6
+spr_2C:         .db 2, 8                                        ; DATA XREF: RAM:sprite_tblo
+                .db 0xC0, 0xC0, 0, 0, 0x7F, 0x7F, 0xC0, 0xC0, 0x1C, 0x1C, 0, 0, 3, 3, 0, 0, 0, 0, 0xCE
+                .db 0xCE, 0, 0, 0x78, 0x78, 0, 0, 4, 4, 0, 0, 3, 3
+spr_2D:         .db 5, 34                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0xC0, 0x80, 0, 0, 0, 0, 0, 0, 7, 2
+                .db 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0
+                .db 0, 0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0xC, 0, 7, 2, 0xE0, 0xC0, 0, 0, 0
+                .db 0, 0x1E, 0xC, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0, 0, 0, 0
+                .db 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0, 0, 0, 0, 0, 0x3F, 0x16, 7, 2, 0xE0, 0xC0, 0, 0
+                .db 0x30, 0, 0x3F, 0x16, 0xF, 0, 0xE0, 0x20, 0, 0, 0x78, 0x30, 0x3F, 0x16, 0x1F, 0xF
+                .db 0xE0, 0x80, 0, 0, 0xFC, 0x58, 0x3F, 0x16, 0xFF, 0x1E, 0xF8, 0x60, 0, 0, 0xFC, 0x58
+                .db 0x3F, 0x16, 0xFF, 0xD9, 0xFE, 0x98, 0, 0, 0xFC, 0x58, 0x3F, 0x15, 0xFF, 0xE7, 0xFF
+                .db 0xE6, 0x80, 0, 0xFC, 0x58, 0x3F, 3, 0xFF, 0x9F, 0xFF, 0xF9, 0xE0, 0x80, 0xFC, 0x58
+                .db 0x7F, 0x3E, 0xFF, 0x67, 0xFF, 0xFE, 0xF8, 0x60, 0xFC, 0x58, 0xFF, 0x79, 0xFF, 0xF9
+                .db 0xFF, 0xFF, 0xFE, 0x98, 0xFC, 0x58, 0xFF, 0x66, 0xFF, 0x7E, 0xFF, 0x7F, 0xFF, 0xE6
+                .db 0xFC, 0x58, 0xFF, 0x5F, 0xFF, 0x9F, 0xFF, 0x9F, 0xFF, 0xF9, 0xFC, 0x98, 0xFF, 0x7F
+                .db 0xFF, 0xE7, 0xFF, 0xE7, 0xFF, 0xFE, 0xFC, 0x60, 0x7F, 0x1F, 0xFF, 0xF9, 0xFF, 0xF9
+                .db 0xFF, 0xFF, 0xFE, 0x98, 0x1F, 7, 0xFF, 0xFE, 0xFF, 0x7E, 0xFF, 0x7F, 0xFF, 0xE6
+                .db 7, 1, 0xFF, 0xFF, 0xFF, 0x9F, 0xFF, 0x9F, 0xFF, 0xF8, 1, 0, 0xFF, 0x7F, 0xFF, 0xE7
+                .db 0xFF, 0xE7, 0xFF, 0xFE, 0, 0, 0x7F, 0x1F, 0xFF, 0xF9, 0xFF, 0xF9, 0xFE, 0xF8, 0
+                .db 0, 0x1F, 7, 0xFF, 0xFE, 0xFF, 0x7E, 0xF8, 0x60, 0, 0, 7, 1, 0xFF, 0xFF, 0xFF, 0x9F
+                .db 0xE0, 0x80, 0, 0, 1, 0, 0xFF, 0x7F, 0xFF, 0xF6, 0x80, 0, 0, 0, 0, 0, 0x7F, 0x1F
+                .db 0xFE, 0xF8, 0, 0, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0xE0, 0, 0, 0, 0, 0, 0, 7, 1, 0xE0
+                .db 0x80, 0, 0, 0, 0, 0, 0, 1, 0, 0x80, 0, 0, 0
+spr_2E:         .db 5, 32                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0xFF, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0xFF, 0xFC, 0xF0, 0, 0, 0, 0, 0, 0x3F
+                .db 3, 0xFF, 0xFC, 0xFC, 0xF0, 0, 0, 0, 0, 0xFF, 0x3B, 0xFF, 0xFE, 0xFF, 0xFC, 0, 0
+                .db 1, 0, 0xFF, 0xFB, 0xFF, 0xFE, 0xFF, 0xFE, 0x80, 0, 7, 0, 0xFF, 0xFB, 0xFF, 0xE0
+                .db 0xFF, 0x7E, 0xC0, 0x80, 0xF, 4, 0xFF, 0xF9, 0xFF, 0xCE, 0xFF, 0x3D, 0xE0, 0xC0, 0x1F
+                .db 0xE, 0xFF, 0xF0, 0xFF, 0x1F, 0xFF, 0x85, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0xE1, 0xFF
+                .db 0xCF, 0xFF, 0xB9, 0xF8, 0xF0, 0x1F, 0xE, 0xFF, 0x4F, 0xFF, 0x83, 0xFF, 0xBE, 0xF8
+                .db 0xF0, 0x1F, 0xE, 0xFF, 0x1F, 0xFF, 0x79, 0xFF, 0x9E, 0xF8, 0x30, 0x1F, 0xE, 0xFF
+                .db 0x1E, 0xFF, 0x7C, 0xFF, 6, 0xF8, 0xD0, 0x1F, 0xC, 0xFF, 0xD9, 0xFF, 0x3D, 0xFF, 0xF2
+                .db 0xF8, 0xE0, 0x1F, 0xB, 0xFF, 0xC7, 0xFF, 0x7E, 0xFF, 0xF8, 0xF8, 0xF0, 0x1F, 7, 0xFF
+                .db 0x1E, 0xFF, 0x7F, 0xFF, 0x7C, 0xF8, 0x30, 0x1F, 0xE, 0xFF, 0x7E, 0xFF, 0x40, 0xFF
+                .db 0x7E, 0xF8, 0xD0, 0x1F, 8, 0xFF, 0xF1, 0xFF, 0x3F, 0xFF, 6, 0xF8, 0x60, 0x1F, 6
+                .db 0xFF, 0x4F, 0xFF, 0xDF, 0xFF, 0x78, 0xF8, 0x30, 0x1F, 0xE, 0xFF, 0x3F, 0xFF, 0x3E
+                .db 0xFF, 0xFF, 0xF8, 0x10, 0x1F, 0xD, 0xFF, 0x9C, 0xFF, 0, 0xFF, 0x38, 0xF8, 0xD0, 0x1F
+                .db 0xB, 0xFF, 0xC0, 0xFF, 0, 0xFF, 7, 0xF8, 0xE0, 0x1F, 7, 0xFF, 0xF1, 0xFF, 0, 0xFF
+                .db 3, 0xF8, 0xF0, 0x1F, 0xF, 0xFF, 0xE0, 0xFF, 0, 0xFF, 1, 0xF8, 0xF0, 0x1F, 0xF, 0xFF
+                .db 0xC0, 0xFF, 4, 0xFF, 1, 0xF8, 0xF0, 0x1F, 0, 0xFF, 0x21, 0xFF, 1, 0xFF, 0, 0xF0
+                .db 0, 0xF, 7, 0xFF, 0xF0, 0xFF, 0, 0xFF, 3, 0xF0, 0xC0, 0xF, 7, 0xFF, 0xE9, 0xFF, 0x44
+                .db 0xFF, 0xF, 0xE0, 0xC0, 7, 3, 0xFF, 0xDF, 0xFF, 1, 0xFF, 0x67, 0xC0, 0x80, 3, 0, 0xFF
+                .db 0xBE, 0xFF, 0x7D, 0xFF, 0xF2, 0x80, 0, 0, 0, 0xFF, 0xE, 0xFF, 0xFD, 0xFE, 0xF8, 0
+                .db 0, 0, 0, 0xF, 0, 0xFF, 0xFE, 0xF8, 0xE0, 0, 0, 0, 0, 0, 0, 0xFF, 0, 0xE0, 0, 0, 0
+spr_2F:         .db 4, 39                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 3, 1, 0xE0, 0, 0, 0, 0, 0, 0xF, 2, 0xF8, 0xA0, 0
+                .db 0, 0, 0, 0x3F, 0xE, 0xFE, 0x50, 0, 0, 0, 0, 0xFF, 0x3C, 0xFF, 0xAA, 0x80, 0, 3, 0
+                .db 0xFF, 0xFF, 0xFF, 0x55, 0xE0, 0, 0xF, 3, 0xFF, 0xFE, 0xFF, 0xA8, 0xF8, 0xA0, 0x1F
+                .db 0xF, 0xFF, 0xF5, 0xFF, 0x55, 0xFE, 0x50, 0x3F, 0x1F, 0xFF, 0xF2, 0xFF, 0xA8, 0xFF
+                .db 0xAA, 0x7F, 0x3F, 0xFF, 0xF9, 0xFF, 0x54, 0xFF, 0x54, 0x3F, 0x1F, 0xFF, 0xFA, 0xFF
+                .db 0xA2, 0xFE, 0x28, 0x3F, 0x1F, 0xFF, 0xFD, 0xFF, 0x51, 0xFE, 0x54, 0x3F, 0x1F, 0xFF
+                .db 0xFC, 0xFF, 0xAA, 0xFC, 0xA8, 0x3F, 0x1F, 0xFF, 0xFE, 0xFF, 0x51, 0xFC, 0x50, 0x1F
+                .db 7, 0xFF, 0xFE, 0xFF, 0xAA, 0xF8, 0xA0, 0xF, 7, 0xFF, 0xFD, 0xFF, 0x55, 0xF8, 0x50
+                .db 7, 1, 0xFF, 0xFC, 0xFF, 0xAA, 0xF0, 0xA0, 7, 2, 0xFF, 0xFD, 0xFF, 0x55, 0xF0, 0x40
+                .db 7, 3, 0xFF, 0x7E, 0xFF, 0x8A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0x7D, 0xFF, 0x55, 0xF0, 0x40
+                .db 0xF, 7, 0xFF, 0xBC, 0xFF, 0xAA, 0xE0, 0xA0, 0xF, 7, 0xFF, 0xBC, 0xFF, 0x54, 0x80
+                .db 0, 7, 1, 0xFF, 0xDC, 0xFF, 0xAA, 0, 0, 7, 3, 0xFF, 0xEE, 0xFF, 0x54, 0, 0, 7, 3
+                .db 0xFF, 0xDE, 0xFF, 0x8A, 0, 0, 3, 1, 0xFF, 0xEF, 0xFF, 0x45, 0x80, 0, 3, 1, 0xFF
+                .db 0xFF, 0xFF, 0x2A, 0, 0, 3, 1, 0xFF, 0xFE, 0xFF, 0x55, 0x80, 0, 1, 0, 0xFF, 0xFE
+                .db 0xFF, 0xAA, 0, 0, 0, 0, 0xFF, 0x7E, 0xFE, 0x14, 0, 0, 0, 0, 0x7F, 0x38, 0xFE, 0xC8
+                .db 0, 0, 0, 0, 0x3F, 0x16, 0xFE, 0xE4, 0, 0, 0, 0, 0x3F, 0xE, 0xFE, 0xF8, 0, 0, 0, 0
+                .db 0x3F, 0x1F, 0xFE, 0x7C, 0, 0, 0, 0, 0x1F, 7, 0xFC, 0x70, 0, 0, 0, 0, 7, 1, 0xF0
+                .db 0x60, 0, 0, 0, 0, 1, 0, 0xE0, 0xC0, 0, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 0, 0, 0
+                .db 0, 0x80, 0, 0, 0
+spr_30:         .db 4, 51                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 7, 1, 0xE0, 0x80, 0, 0, 0, 0, 0x1F, 7, 0xF8, 0x20
+                .db 0, 0, 0, 0, 0x7F, 0x1F, 0xFE, 0x50, 0, 0, 1, 0, 0xFF, 0x7F, 0xFF, 0x2A, 0x80, 0
+                .db 7, 1, 0xFF, 0xFF, 0xFF, 0x55, 0xE0, 0, 0x1F, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF1, 0xA0
+                .db 0x7F, 0x1F, 0xFF, 0xFF, 0xFF, 0x55, 0xFE, 0x50, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x2A
+                .db 0xFF, 0xAA, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0x54, 0xFF, 0x7F, 0xFF, 0xFF
+                .db 0xFF, 0x2A, 0xFF, 0xAA, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0x54, 0xFF, 0x7F
+                .db 0xFF, 0xFF, 0xFF, 0x2A, 0xFF, 0xAA, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x55, 0xFE, 0x54
+                .db 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFE, 0xA8, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x55
+                .db 0xFE, 0x54, 0x7F, 0x3F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFE, 0xA8, 0x7F, 0x3F, 0xFF, 0xFF
+                .db 0xFF, 0x55, 0xFE, 0x54, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFC, 0xA8, 0x3F, 0x1F
+                .db 0xFF, 0xFF, 0xFF, 0x55, 0xFC, 0x50, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x2A, 0xFC, 0xA8
+                .db 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x55, 0xFC, 0x50, 0x3F, 0x1F, 0xFF, 0xFF, 0xFF, 0x2A
+                .db 0xFC, 0xA8, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55, 0xF8, 0x50, 0x1F, 0xF, 0xFF, 0xFF
+                .db 0xFF, 0x2A, 0xF8, 0xA0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55, 0xF8, 0x50, 0x1F, 0xF
+                .db 0xFF, 0xFF, 0xFF, 0x2A, 0xF8, 0xA0, 0x1F, 0xF, 0xFF, 0xFF, 0xFF, 0x55, 0xF8, 0x50
+                .db 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x55, 0xF0
+                .db 0x40, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x55
+                .db 0xF0, 0x40, 0xF, 7, 0xFF, 0xFF, 0xFF, 0x2A, 0xF0, 0xA0, 7, 3, 0xFF, 0xFF, 0xFF, 0x55
+                .db 0xE0, 0x40, 7, 3, 0xFF, 0xFF, 0xFF, 0x2A, 0xE0, 0x80, 7, 3, 0xFF, 0xFF, 0xFF, 0x55
+                .db 0xE0, 0x40, 7, 3, 0xFF, 0xFF, 0xFF, 0x2A, 0xE0, 0x80, 7, 3, 0xFF, 0xFE, 0xFF, 0x55
+                .db 0xE0, 0x40, 3, 1, 0xFF, 0xF8, 0xFF, 0x8A, 0xC0, 0x80, 3, 1, 0xFF, 0xE3, 0xFF, 0xE5
+                .db 0xC0, 0, 3, 1, 0xFF, 0x9E, 0xFF, 0xF8, 0xC0, 0x80, 3, 0, 0xFF, 0x7E, 0xFF, 0xFE
+                .db 0x80, 0, 1, 0, 0xFF, 0xFE, 0xFF, 0xFF, 0x80, 0, 0, 0, 0xFF, 0x7E, 0xFF, 0xFE, 0
+                .db 0, 0, 0, 0x7F, 0x3E, 0xFE, 0xFC, 0, 0, 0, 0, 0x3F, 0x1E, 0xFC, 0xF8, 0, 0, 0, 0
+                .db 0x1F, 0xE, 0xF8, 0xF0, 0, 0, 0, 0, 0xF, 6, 0xF0, 0xE0, 0, 0, 0, 0, 7, 2, 0xE0, 0xC0
+                .db 0, 0, 0, 0, 3, 1, 0xC0, 0x80, 0, 0, 0, 0, 1, 0, 0x80, 0, 0, 0
+spr_31:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x7E, 0, 0, 0, 1, 0, 0xFF, 0x76, 0x80, 0, 3, 1, 0xFF, 0x76, 0xC0, 0x80, 7
+                .db 3, 0xFF, 0, 0xE0, 0xC0, 0xF, 4, 0xFF, 0xF7, 0xF0, 0x20, 0xF, 2, 0xFF, 0xF7, 0xF0
+                .db 0x40, 0x1F, 0xE, 0xFF, 0xF7, 0xF8, 0x70, 0x1F, 0xD, 0xFF, 0xF7, 0xF8, 0x70, 0x1F
+                .db 0xD, 0xFF, 0xF7, 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xF7, 0xFC, 0xB8, 0x3F, 0x1D, 0xFF
+                .db 0, 0xFC, 0xB8, 0x3F, 0x18, 0xFF, 0xFF, 0xFC, 0x18, 0x7F, 0x27, 0xFF, 0, 0xFE, 0xE4
+                .db 0x7F, 0x18, 0xFF, 0x10, 0xFE, 0x18, 0xFF, 0x62, 0xFF, 0x10, 0xFF, 0x46, 0x7F, 0x22
+                .db 0xFF, 0x10, 0xFE, 0x44, 0x7F, 0x3A, 0xFF, 0x10, 0xFE, 0x5C, 0x3F, 0x17, 0xFF, 0x10
+                .db 0xFC, 0xF8, 0x3F, 0x10, 0xFF, 0xFF, 0xFC, 8, 0x1F, 8, 0xFF, 0, 0xF8, 0x10, 0xF, 6
+                .db 0xFF, 0, 0xF0, 0x60, 7, 1, 0xFF, 0x81, 0xE0, 0x80, 1, 0, 0xFF, 0x7E, 0x80, 0, 0
+                .db 0, 0x7E, 0, 0, 0
+spr_32:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 3, 0, 0xE0, 0, 0, 0, 3, 1, 0xFF, 0xE0, 0xF0, 0, 0x3F, 3, 0xFF, 0xFF, 0xF8, 0xF0
+                .db 0x7F, 0x3E, 0xFF, 0x1F, 0xFC, 0xF8, 0xFF, 0x7D, 0xFF, 0xE0, 0xFE, 4, 0xFF, 0x43
+                .db 0xFF, 0xFF, 0xFF, 0xF9, 0xFF, 0x3F, 0xFF, 0xCF, 0xFF, 0xF9, 0xFF, 0x7F, 0xFF, 0x87
+                .db 0xFF, 0xFC, 0xFF, 0x7F, 0xFF, 0xC3, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xE3, 0xFF, 0xFE
+                .db 0x7F, 0x3F, 0xFF, 0xE3, 0xFF, 0xFE, 0x7F, 0x1F, 0xFF, 0xC6, 0xFF, 0x1E, 0x7F, 0x3D
+                .db 0xFF, 0x80, 0xFF, 0xE, 0x7F, 0x38, 0xFF, 0, 0xFE, 0xDC, 0x3F, 0x1C, 0xFF, 0x33, 0xFE
+                .db 0xFC, 0x3F, 0xF, 0xFF, 0xE3, 0xFC, 0xF8, 0x3F, 0x1F, 0xFF, 0xE3, 0xF8, 0xF0, 0x3F
+                .db 0x1F, 0xFF, 0xE1, 0xF0, 0xE0, 0x1F, 0xF, 0xFF, 0xF1, 0xF0, 0xE0, 0xF, 3, 0xFF, 0xFB
+                .db 0xE0, 0xC0, 3, 0, 0xFF, 0xFF, 0xC0, 0, 0, 0, 0xFF, 0x1C, 0, 0, 0, 0, 0x1C, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0
+spr_33:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 7, 0, 0xC0, 0, 0, 0, 0x7F, 0xF, 0xE0, 0xC0, 0, 0, 0xFF, 0x7F, 0xF8, 0xE0, 1
+                .db 0, 0xFF, 0xF8, 0xFC, 0x38, 7, 1, 0xFF, 0x87, 0xFE, 0xDC, 0x1F, 7, 0xFF, 0x7F, 0xFE
+                .db 0xE4, 0x3F, 0x1E, 0xFF, 0xF8, 0xFF, 0xFA, 0x7F, 0x39, 0xFF, 0xE0, 0xFF, 0x3C, 0x7F
+                .db 0x27, 0xFF, 0xC0, 0xFF, 0x1E, 0xFF, 0x5F, 0xFF, 0x87, 0xFF, 7, 0xFF, 0x3F, 0xFF
+                .db 0x8F, 0xFF, 0xC6, 0xFF, 0x7F, 0xFF, 0x8F, 0xFF, 0xE6, 0xFF, 0x70, 0xFF, 7, 0xFF
+                .db 0xE6, 0xFF, 0x60, 0xFF, 3, 0xFF, 0xC6, 0xFF, 0x77, 0xFF, 0xC0, 0xFF, 6, 0xFF, 0x7F
+                .db 0xFF, 0xF8, 0xFF, 0xE, 0xFF, 0x7F, 0xFF, 0xFC, 0xFE, 0x7C, 0x7F, 0x3F, 0xFF, 0xFC
+                .db 0xFE, 0x7C, 0x3F, 0x1F, 0xFF, 0xF0, 0xFC, 0xF8, 0x1F, 7, 0xFF, 0xFC, 0xF8, 0xF0
+                .db 7, 1, 0xFF, 0xFF, 0xF0, 0xE0, 1, 0, 0xFF, 0xFF, 0xE0, 0xC0, 0, 0, 0xFF, 0xF, 0xC0
+                .db 0x80, 0, 0, 0xF, 0, 0x80, 0
+spr_34:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xF, 0, 0xF0, 0, 0xC0, 0, 0x1F, 0xF, 0xFF, 0xF0, 0xF0, 0xC0, 0x3F, 0x1F, 0xFF, 0xFF
+                .db 0xF8, 0xF0, 0x7F, 0x30, 0xFF, 0xF, 0xFC, 0x38, 0x7F, 0x2F, 0xFF, 0xF0, 0xFE, 0xCC
+                .db 0xFF, 0x5F, 0xFF, 0xFF, 0xFE, 0xF4, 0xFF, 0x5F, 0xFF, 0xFF, 0xFF, 0xFA, 0xFF, 0x5F
+                .db 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0x3F, 0xFF, 0xCF, 0xFF, 0xFC, 0xFF, 0x7B, 0xFF, 0xC3
+                .db 0xFF, 0xFE, 0xFF, 0x60, 0xFF, 0x80, 0xFF, 0xFE, 0xFF, 0x78, 0xFF, 0x18, 0xFF, 0x3E
+                .db 0xFF, 0x7E, 0xFF, 0x1E, 0xFF, 0xE, 0x7F, 0x3E, 0xFF, 0x30, 0xFF, 6, 0x3F, 0x1C, 0xFF
+                .db 0, 0xFF, 0xFE, 0x3F, 0x18, 0xFF, 8, 0xFF, 0x3E, 0x3F, 0x18, 0xFF, 0xFE, 0xFF, 0x1E
+                .db 0x7F, 0x3F, 0xFF, 0xFF, 0xFE, 0xB8, 0x7F, 0x3F, 0xFF, 0xFF, 0xF8, 0xF0, 0x3F, 0x1F
+                .db 0xFF, 0xFF, 0xF8, 0xF0, 0x1F, 7, 0xFF, 0xFF, 0xF8, 0xF0, 7, 1, 0xFF, 0xF3, 0xF0
+                .db 0xE0, 1, 0, 0xF3, 1, 0xE0, 0xC0, 0, 0, 1, 0, 0xC0, 0
+spr_35:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0xFC, 0, 0, 0, 3, 0, 0xFF, 0xFC, 0, 0, 7, 3, 0xFF, 0xFF, 0xF8, 0, 0xF, 7, 0xFF
+                .db 3, 0xFC, 0xF8, 0x3F, 0xC, 0xFF, 0xFC, 0xFE, 0xFC, 0x7F, 0x3B, 0xFF, 0xFF, 0xFF, 6
+                .db 0x7F, 0x37, 0xFF, 0xDF, 0xFF, 0xFA, 0xFF, 0x4F, 0xFF, 0x8F, 0xFF, 0xFC, 0xFF, 0x7F
+                .db 0xFF, 0x8F, 0xFF, 0xFE, 0xFF, 0x3F, 0xFF, 0x8F, 0xFF, 0xFE, 0xFF, 0x7F, 0xFF, 0xCF
+                .db 0xFF, 0xFE, 0xFF, 0x77, 0xFF, 0xC7, 0xFF, 0xE6, 0xFF, 0x61, 0xFF, 0xC1, 0xFF, 0x82
+                .db 0xFF, 0x38, 0xFF, 0x80, 0xF0, 6, 0xFF, 0x7C, 0xFF, 6, 0xFF, 0x1E, 0xFF, 0x78, 0xFF
+                .db 0xF, 0xFE, 0xFC, 0x7F, 0x30, 0xFF, 6, 0xFE, 0xFC, 0x7F, 0x38, 0xFF, 0x21, 0xFE, 0xFC
+                .db 0x3F, 0x1C, 0xFF, 0x77, 0xFC, 0xF0, 0x3F, 0x1F, 0xFF, 0xFF, 0xF0, 0xE0, 0x1F, 0xF
+                .db 0xFF, 0xFF, 0xE0, 0xC0, 0xF, 1, 0xFF, 0xFF, 0xC0, 0x80, 1, 0, 0xFF, 0xFC, 0x80, 0
+                .db 0, 0, 0xFC, 0, 0, 0
+spr_36:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 7, 0, 0xF8, 0, 0, 0, 0xF, 7, 0xFC, 0xF8, 0, 0, 0x1F, 0xF, 0xFF, 0xFC, 0xF0, 0, 0x3F
+                .db 0x18, 0xFF, 7, 0xF8, 0xF0, 0x3F, 0x17, 0xFF, 0xFB, 0xFC, 0xF8, 0x7F, 0x2F, 0xFF
+                .db 0xFC, 0xFE, 0x1C, 0xFF, 0x6F, 0xFF, 0xFF, 0xFE, 0xE4, 0xFF, 0x5C, 0xFF, 0xFF, 0xFE
+                .db 0xF8, 0xFF, 0x3C, 0xFF, 0x3F, 0xFE, 0xFC, 0xFF, 0x7C, 0xFF, 0xF, 0xFF, 0xFA, 0xFF
+                .db 0x7C, 0xFF, 3, 0xFF, 0xFE, 0xFF, 0x7C, 0xFF, 0x30, 0xFF, 0xFC, 0xFF, 0x7E, 0xFF
+                .db 0x7C, 0xFF, 0x3E, 0xFF, 0x7E, 0xFF, 0x7C, 0xFF, 0xE, 0x7F, 0x3E, 0xFF, 0x38, 0xFF
+                .db 6, 0x7F, 0x3E, 0xFF, 0, 0xFF, 0x3E, 0x3F, 0x1F, 0xFF, 1, 0xFF, 0xFE, 0x3F, 0x1F
+                .db 0xFF, 0x1F, 0xFE, 0xFC, 0x3F, 0x1F, 0xFF, 0xFF, 0xFC, 0xF8, 0x1F, 0xF, 0xFF, 0xFF
+                .db 0xF8, 0xF0, 0xF, 7, 0xFF, 0xFF, 0xF0, 0xE0, 7, 1, 0xFF, 0xFF, 0xE0, 0xC0, 1, 0, 0xFF
+                .db 0x39, 0xC0, 0x80, 0, 0, 0x39, 0, 0x80, 0
+spr_37:         .db 0, 0                                        ; DATA XREF: RAM:sprite_tblo
+spr_38:         .db 3, 27                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0x80, 0, 0, 0, 1, 0, 0xC0, 0x80, 0, 0, 1, 0, 0xE0, 0xC0, 0, 0, 1, 0
+                .db 0xE0, 0xC0, 0, 0, 0xFD, 0, 0xF0, 0xE0, 0xF, 0, 0xFF, 0xFD, 0xF4, 0xE0, 0x1F, 0xF
+                .db 0xFF, 0xFB, 0xFE, 0xF4, 0x1F, 0xF, 0xFF, 0xF7, 0xFF, 0xF6, 0x1F, 0xF, 0xFF, 0xEF
+                .db 0xFF, 0xFA, 0x1F, 0xF, 0xFF, 0xF7, 0xFA, 0xE0, 0x1F, 0xF, 0xFF, 0xF7, 0xE0, 0x80
+                .db 0x3F, 0x1F, 0xFF, 0xFF, 0xC0, 0x80, 0x3F, 0x1F, 0xFF, 0xFF, 0xE0, 0xC0, 0x7F, 0x30
+                .db 0xFF, 0x3F, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0x9F, 0xC0, 0x80, 0x3F, 0xF, 0xFF, 0xEC
+                .db 0x80, 0, 0x1F, 0xF, 0xFF, 0xF0, 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E
+                .db 0xFF, 0x1D, 0x80, 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE, 0, 0
+                .db 0x3F, 0x1B, 0xFE, 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xF0, 0x80
+                .db 0, 0, 0x7F, 0x3C, 0x80, 0, 0, 0, 0xFC, 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
+spr_39:         .db 3, 27                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10, 0, 0, 0, 0, 0, 0x38, 0x10, 0, 0, 0, 0, 0x38
+                .db 0x10, 0, 0, 0xFE, 0, 0xF8, 0x30, 0xF, 0, 0xFF, 0xFE, 0xF8, 0xF0, 0x1F, 0xF, 0xFF
+                .db 0xFD, 0xF8, 0xF0, 0x3F, 0xF, 0xFF, 0xFD, 0xFC, 0xF8, 0x7F, 0x2F, 0xFF, 0xFD, 0xFE
+                .db 0xF8, 0x7F, 0x2F, 0xFF, 0xFD, 0xFF, 0xFA, 0x7F, 0x2F, 0xFF, 0xF7, 0xFF, 0x9A, 0x3F
+                .db 0x1F, 0xFF, 0xFF, 0xDF, 0x86, 0x3F, 0x1F, 0xFF, 0xFF, 0xC6, 0x80, 0x7F, 0x30, 0xFF
+                .db 0x3F, 0xC0, 0x80, 0x7F, 0x2F, 0xFF, 0x9F, 0x80, 0, 0x3F, 0xF, 0xFF, 0xEC, 0, 0, 0x1F
+                .db 0xF, 0xFF, 0xF0, 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E, 0xFF, 0x1D, 0x80
+                .db 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE, 0, 0, 0x3F, 0x1B, 0xFE
+                .db 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xF0, 0x80, 0, 0, 0x7F, 0x3C
+                .db 0x80, 0, 0, 0, 0xFC, 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
+spr_3A:         .db 3, 27                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0x1C, 8, 0, 0
+                .db 0xFF, 0, 0x3C, 0x18, 0x4F, 0, 0xFF, 0xFF, 0xFC, 0x18, 0xFF, 0x4F, 0xFF, 0xFE, 0xFC
+                .db 0xF8, 0xFF, 0x6F, 0xFF, 0xFD, 0xFC, 0xF8, 0xFF, 0x6F, 0xFF, 0xFB, 0xFC, 0xF8, 0xFF
+                .db 0x6F, 0xFF, 0xFB, 0xFC, 0xF8, 0xFF, 0x6F, 0xFF, 0xF7, 0xFC, 0xF8, 0xFF, 0x5F, 0xFF
+                .db 0xFF, 0xFE, 0xD8, 0xFF, 0x5F, 0xFF, 0xFF, 0xFF, 0xDA, 0x7F, 0x30, 0xFF, 0x3F, 0xFF
+                .db 0xCA, 0x7F, 0x2F, 0xFF, 0x9F, 0xCF, 0x86, 0x3F, 0xF, 0xFF, 0xEC, 0x86, 0, 0x1F, 0xF
+                .db 0xFF, 0xF0, 0, 0, 0x3F, 0x1F, 0xFF, 0xFB, 0x80, 0, 0x3F, 0x1E, 0xFF, 0x1D, 0x80
+                .db 0, 0x3F, 0x1C, 0xFF, 0xFE, 0, 0, 0x3F, 0x19, 0xFF, 0xFE, 0, 0, 0x3F, 0x1B, 0xFE
+                .db 0xFC, 0, 0, 0x3F, 0x1B, 0xFC, 0xF0, 0, 0, 0x7F, 0x3F, 0xF0, 0x80, 0, 0, 0x7F, 0x3C
+                .db 0x80, 0, 0, 0, 0xFC, 0x70, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0
+spr_3B:         .db 3, 34                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 2, 0x80, 0, 0, 0
+                .db 3, 1, 0xC0, 0x80, 0, 0, 7, 2, 0xC0, 0x80, 0x20, 0, 7, 2, 0xE0, 0xC0, 0x70, 0x20
+                .db 7, 2, 0xE0, 0xC0, 0x78, 0x30, 7, 2, 0xF0, 0xE0, 0x78, 0x30, 0x1F, 0xA, 0xF0, 0xE0
+                .db 0x7C, 0x38, 0xFF, 0x16, 0xF0, 0xE0, 0x7F, 0x38, 0xFF, 0xF6, 0xF8, 0xF0, 0x7F, 0x3B
+                .db 0xFF, 0xD1, 0xF8, 0xF0, 0x7F, 0x3B, 0xFF, 0xAE, 0xFC, 0x78, 0x7F, 0x3B, 0xFF, 0x6E
+                .db 0xFC, 0x38, 0x3F, 0x1A, 0xFF, 0xF6, 0xFC, 0x78, 0x1F, 6, 0xFF, 0xF6, 0xF8, 0xF0
+                .db 0x1F, 0xE, 0xFF, 0xFB, 0xF0, 0xE0, 0x1F, 0xD, 0xFF, 0xFB, 0xE0, 0xC0, 0x1F, 0xD
+                .db 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60, 7, 2, 0xFF, 0x68, 0xF0, 0x60
+                .db 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7, 2, 0xFF, 0xC1, 0xF0, 0xE0, 3, 1, 0xFF, 1, 0xF0
+                .db 0xE0, 1, 0, 0xFF, 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78, 0xF0, 0xE0, 0, 0, 0x7F, 0x30
+                .db 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF, 7, 0xF8, 0xB0, 0, 0, 7, 1, 0xF8
+                .db 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0, 0, 0xFC, 0x38, 0, 0, 0, 0, 0x38, 0
+spr_3C:         .db 3, 34                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x40, 0, 0x40
+                .db 0, 0, 0, 0xE0, 0x40, 0xE0, 0x40, 0, 0, 0xE0, 0x40, 0xE0, 0x40, 1, 0, 0xF0, 0xA0
+                .db 0xE0, 0x40, 1, 0, 0xF0, 0xA0, 0xF0, 0x60, 1, 0, 0xF8, 0xB0, 0xF0, 0x60, 0xF, 0xE
+                .db 0xF8, 0xB0, 0xFC, 0x70, 0xFF, 0x3E, 0xF8, 0xB0, 0xFF, 0x78, 0xFF, 0xFD, 0xFC, 0xB8
+                .db 0xFF, 0x7B, 0xFF, 0xDD, 0xFC, 0xF8, 0xFF, 0x7B, 0xFF, 0xAE, 0xFE, 0xFC, 0x7F, 0x3B
+                .db 0xFF, 0x6E, 0xFE, 0x7C, 0x3F, 0x1A, 0xFF, 0xF6, 0xFE, 0xFC, 0x1F, 6, 0xFF, 0xF6
+                .db 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xFB, 0xF8, 0xE0, 0x1F, 0xD, 0xFF, 0xFB, 0xE0, 0xC0
+                .db 0x1F, 0xD, 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60, 7, 2, 0xFF, 0x68
+                .db 0xF0, 0x60, 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7, 2, 0xFF, 0xC1, 0xF0, 0xE0, 3, 1, 0xFF
+                .db 1, 0xF0, 0xE0, 1, 0, 0xFF, 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78, 0xF0, 0xE0, 0, 0
+                .db 0x7F, 0x30, 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF, 7, 0xF8, 0xB0, 0
+                .db 0, 7, 1, 0xF8, 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0, 0, 0xFC, 0x38, 0, 0, 0, 0
+                .db 0x38, 0
+spr_3D:         .db 3, 34                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 4, 0, 0, 0, 0, 0, 0xE, 4, 0, 0, 0, 0, 0x1F, 0xA, 0, 0, 0, 0, 0x1F, 0xA, 0
+                .db 0, 0, 0, 0x3F, 0x13, 0x80, 0, 0, 0, 0x3F, 0x13, 0x80, 0, 0, 0, 0x3F, 0x13, 0xC0
+                .db 0x80, 0x10, 0, 0x3F, 0x13, 0xC0, 0x80, 0x38, 0x10, 0x7F, 0x33, 0xE0, 0xC0, 0x38
+                .db 0x10, 0x7F, 0x33, 0xE0, 0xC0, 0x3C, 0x18, 0xFF, 0xF, 0xF0, 0xE0, 0x3F, 0x18, 0xFF
+                .db 0xF3, 0xF0, 0xE0, 0x3F, 0x1B, 0xFF, 0xD1, 0xF8, 0xF0, 0x3F, 0x1B, 0xFF, 0xAE, 0xF8
+                .db 0xF0, 0x1F, 0xB, 0xFF, 0x6E, 0xF8, 0xF0, 0x1F, 0xA, 0xFF, 0xF6, 0xF8, 0xF0, 0xF
+                .db 6, 0xFF, 0xF6, 0xF0, 0xE0, 0x1F, 0xE, 0xFF, 0xFB, 0xF0, 0xE0, 0x1F, 0xD, 0xFF, 0xFB
+                .db 0xE0, 0xC0, 0x1F, 0xD, 0xFF, 0x99, 0xF0, 0x20, 0xF, 2, 0xFF, 0xE0, 0xF0, 0x60, 7
+                .db 2, 0xFF, 0x68, 0xF0, 0x60, 7, 2, 0xFF, 0x98, 0xF0, 0xE0, 7, 2, 0xFF, 0xC1, 0xF0
+                .db 0xE0, 3, 1, 0xFF, 1, 0xF0, 0xE0, 1, 0, 0xFF, 0xCF, 0xF0, 0xE0, 0, 0, 0xFF, 0x78
+                .db 0xF0, 0xE0, 0, 0, 0x7F, 0x30, 0xF0, 0x60, 0, 0, 0x3F, 0xF, 0xF0, 0x20, 0, 0, 0xF
+                .db 7, 0xF8, 0xB0, 0, 0, 7, 1, 0xF8, 0xF0, 0, 0, 1, 0, 0xF8, 0xF0, 0, 0, 0, 0, 0xFC
+                .db 0x38, 0, 0, 0, 0, 0x38, 0
+spr_3E:         .db 3, 15                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0, 0xFE
+                .db 0x70, 1, 0, 0x80, 0, 0xFF, 0x7E, 3, 1, 0xC0, 0x80, 0x7F, 0x3F, 0x87, 3, 0xE0, 0xC0
+                .db 0x7F, 0x21, 0x87, 3, 0xF0, 0xE0, 0x3F, 0xE, 7, 0, 0xF8, 0xF0, 0x3F, 0x1F, 0x8F, 7
+                .db 0xFC, 0x38, 0x1F, 0xF, 0x8F, 7, 0xFC, 0x98, 0xF, 7, 0xFF, 0x8F, 0xF8, 0xC0, 0xF
+                .db 7, 0xFF, 0x7F, 0xC0, 0x80, 0x1F, 0xF, 0xFF, 0xFF, 0x80, 0, 0x1F, 0xF, 3, 3, 0x80
+                .db 0
+spr_3F:         .db 3, 15                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0x1F, 6, 0x80, 0, 0xE
+                .db 0, 0x3F, 0x1F, 0xC0, 0x80, 0x1F, 0xE, 0xBF, 0x17, 0xE0, 0xC0, 0x3F, 0x1F, 0xFF, 0x99
+                .db 0xE0, 0xC0, 0x3F, 0x19, 0xFF, 0xDE, 0xE0, 0xC0, 0x1F, 6, 0xFE, 0xD8, 0xC0, 0, 0x1F
+                .db 0xF, 0xFF, 0x1E, 0, 0, 0x1F, 0xF, 0xFF, 0x1E, 0, 0, 0x1F, 0xF, 0xFF, 0xBE, 0, 0
+                .db 0x1F, 0xF, 0xFF, 0xBF, 0x80, 0, 0xF, 7, 0xFF, 0xFF, 0x80, 0, 0xF, 7, 3, 3, 0x80
+                .db 0
+spr_40:         .db 3, 15                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0x70, 0, 0, 0, 0, 0, 0xFC, 0x70, 0, 0, 1, 0, 0xFE, 0xFC
+                .db 0, 0, 1, 0, 0xFF, 0xCE, 0, 0, 3, 0, 0xFF, 0x77, 0x80, 0, 7, 3, 0xFF, 0xBA, 0, 0
+                .db 3, 1, 0xFE, 0xDC, 0, 0, 7, 2, 0xFF, 0x5E, 0, 0, 7, 3, 0xFF, 0x9F, 0x80, 0, 3, 1
+                .db 0xFF, 0xDE, 0, 0, 3, 1, 0xFF, 0xDE, 0, 0, 7, 3, 0xFF, 0xBF, 0x80, 0, 0xF, 7, 0xFF
+                .db 0xFF, 0xC0, 0x80, 0xF, 7, 3, 2, 0x80, 0
+spr_41:         .db 3, 18                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x38, 0, 0, 0, 0, 0, 0x7E, 0x38, 0, 0
+                .db 6, 0, 0x7F, 0x3E, 0, 0, 0xF, 6, 0xBF, 0x1F, 0x80, 0, 0x1F, 0xF, 0xDF, 0x83, 0x80
+                .db 0, 0xF, 7, 0xEF, 0xC5, 0x80, 0, 7, 2, 0xFF, 0x66, 0, 0, 3, 1, 0xFF, 0x8F, 0x80, 0
+                .db 3, 1, 0xFF, 0xCF, 0x80, 0, 7, 3, 0xFF, 0xEF, 0x80, 0, 7, 3, 0xFF, 0xDF, 0x80, 0
+                .db 7, 3, 0xFF, 0xCE, 0, 0, 7, 3, 0xFF, 0xF1, 0x80, 0, 7, 3, 0xF1, 0xC0, 0, 0, 7, 3
+                .db 0xC0, 0, 0, 0, 3, 0, 0, 0, 0, 0
+spr_42:         .db 3, 18                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x40, 0, 0, 0, 0, 0, 0xE0, 0x40, 0, 0, 1, 0, 0xF8, 0xE0, 0, 0, 1, 0, 0xFE
+                .db 0xF8, 0, 0, 0, 0, 0xFF, 0x7E, 0, 0, 0, 0, 0x7F, 0x26, 0, 0, 1, 0, 0xFF, 0x1A, 0
+                .db 0, 3, 1, 0xFE, 0xBC, 0, 0, 7, 3, 0xFE, 0xBC, 0, 0, 3, 1, 0xFE, 0xBC, 0, 0, 1, 0
+                .db 0xFF, 0x3E, 0, 0, 1, 0, 0xFF, 0xDE, 0, 0, 1, 0, 0xFF, 0xDF, 0x80, 0, 3, 1, 0xFF
+                .db 0xDE, 0, 0, 3, 1, 0xFE, 0xF0, 0, 0, 3, 1, 0xF0, 0xC0, 0, 0, 3, 1, 0xC0, 0, 0, 0
+                .db 1, 0, 0, 0, 0, 0
+spr_43:         .db 3, 18                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x38, 0, 0xC, 0, 0, 0, 0x7C
+                .db 0x38, 0x1E, 0xC, 0, 0, 0x7F, 0x3C, 0x1F, 0xE, 0, 0, 0x3F, 0xF, 0x9F, 0xF, 0x80, 0
+                .db 0xF, 7, 0xCF, 0x85, 0xC0, 0x80, 7, 2, 0x87, 4, 0xE0, 0xC0, 3, 1, 0xCF, 0x87, 0xE0
+                .db 0x40, 7, 3, 0xDF, 0x8F, 0xC0, 0x80, 0xF, 7, 0xFF, 0xCF, 0x80, 0, 0xF, 7, 0xFF, 0xEF
+                .db 0x80, 0, 7, 3, 0xFF, 0xDE, 0, 0, 3, 1, 0xFF, 0xF1, 0x80, 0, 3, 1, 0xF1, 0xC0, 0
+                .db 0, 3, 1, 0xC0, 0, 0, 0, 1, 0, 0, 0, 0, 0
+spr_44:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xBF, 0xBF, 0x9F, 0x9F, 0xD0, 0xD0, 0xBF, 0xBF, 0xF, 0xF, 0xD0, 0xD0, 0xBE, 0xBE
+                .db 0xC7, 0xC7, 0xD0, 0xD0, 0xBD, 0xBD, 0xDB, 0xDB, 0xD0, 0xD0, 0xBB, 0xBB, 0xBD, 0xBD
+                .db 0xD0, 0xD0, 0xB3, 0xB3, 0x7C, 0x7C, 0xD0, 0xD0, 0xAA, 0xAA, 0xFD, 0xFD, 0x50, 0x50
+                .db 0x99, 0x99, 0xFD, 0xFD, 0x90, 0x90, 0x9B, 0x9B, 0xF9, 0xF9, 0x90, 0x90, 0xAB, 0xAB
+                .db 0xF5, 0xF5, 0x50, 0x50, 0xB3, 0xB3, 0xEC, 0xEC, 0xD0, 0xD0, 0xBB, 0xBB, 0xDD, 0xDD
+                .db 0xD0, 0xD0, 0xBD, 0xBD, 0xBB, 0xBB, 0xD0, 0xD0, 0xBE, 0xBE, 0x37, 0x37, 0xD0, 0xD0
+                .db 0xBF, 0xBF, 0xF, 0xF, 0xD0, 0xD0, 0xBF, 0xBF, 0x9F, 0x9F, 0xD0, 0xD0, 0x9F, 0x9F
+                .db 0xDF, 0xDF, 0x90, 0x90, 0x8F, 0x8F, 0xEF, 0xEF, 0x10, 0x10, 0x97, 0x97, 0xF4, 0xF4
+                .db 0x90, 0x90, 0x9B, 0x9B, 0xF9, 0xF9, 0x90, 0x90, 0x99, 0x99, 0xFD, 0xFD, 0x90, 0x90
+                .db 0x96, 0x96, 0xFE, 0xFE, 0x90, 0x90, 0x8F, 0x8F, 0x7F, 0x7F, 0x10, 0x10, 0x9F, 0x9F
+                .db 0xBF, 0xBF, 0x90, 0x90
+spr_45:         .db 2, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0
+                .db 0, 0xFE, 0xFE, 0x7F, 0x7F, 0xFD, 0xFD, 0xBF, 0xBF, 0xFB, 0xFB, 0xDF, 0xDF, 0xF0
+                .db 0xF0, 0xF, 0xF, 0xEF, 0xEF, 0x77, 0x77, 0xDF, 0xDF, 0xBB, 0xBB, 0x9F, 0x9F, 0xDD
+                .db 0xDD, 0xF, 0xF, 0xEC, 0xEC, 0x37, 0x37, 0xF0, 0xF0, 0xBB, 0xBB, 0xF9, 0xF9, 0xDD
+                .db 0xDD, 0xFB, 0xFB, 0xEE, 0xEE, 0xF7, 0xF7, 0xF0, 0xF0, 0xF, 0xF, 0xFB, 0xFB, 0xDF
+                .db 0xDF, 0xFD, 0xFD, 0xBF, 0xBF, 0xFE, 0xFE, 0x7F, 0x7F, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF
+                .db 0xFF
+spr_46:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF
+                .db 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0xFE, 0xFE, 0x7F, 0x7F, 0, 0, 0xFD, 0xFD
+                .db 0xBF, 0xBF, 0xBD, 0xBD, 0xFB, 0xFB, 0xDF, 0xDF, 0xDB, 0xDB, 0xF0, 0xF0, 0xF, 0xF
+                .db 0xE7, 0xE7, 0xEF, 0xEF, 0x77, 0x77, 0xEF, 0xEF, 0xDF, 0xDF, 0xBB, 0xBB, 0xDF, 0xDF
+                .db 0x9F, 0x9F, 0xDD, 0xDD, 0xBF, 0xBF, 0xF, 0xF, 0xEC, 0xEC, 0x7F, 0x7F, 0x37, 0x37
+                .db 0xF0, 0xF0, 0xFE, 0xFE, 0xBB, 0xBB, 0xF9, 0xF9, 0xFD, 0xFD, 0xDD, 0xDD, 0xFB, 0xFB
+                .db 0xFB, 0xFB, 0xEE, 0xEE, 0xF7, 0xF7, 0xF7, 0xF7, 0xF0, 0xF0, 0xF, 0xF, 0xE7, 0xE7
+                .db 0xFB, 0xFB, 0xDF, 0xDF, 0xDB, 0xDB, 0xFD, 0xFD, 0xBF, 0xBF, 0xBD, 0xBD, 0xFE, 0xFE
+                .db 0x7F, 0x7F, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+spr_47:         .db 3, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x9F, 0x9F, 0xDF, 0xDF, 0x98, 0x98, 0x8F, 0x8F, 0xEF, 0xEF, 4, 4, 0x97, 0x97, 0xF6
+                .db 0xF6, 0xC2, 0xC2, 0x9B, 0x9B, 0xF9, 0xF9, 0xF1, 0xF1, 0x99, 0x99, 0xFC, 0xFC, 0x39
+                .db 0x39, 0x96, 0x96, 0xFE, 0xFE, 0x18, 0x18, 0x8F, 0x8F, 0x7F, 0x7F, 0xC, 0xC, 0x9F
+                .db 0x9F, 0xBF, 0xBF, 0x8D, 0x8D, 0xBF, 0xBF, 0x9F, 0x9F, 0xCB, 0xCB, 0xBF, 0xBF, 0xF
+                .db 0xF, 0xE7, 0xE7, 0xBE, 0xBE, 7, 7, 0xF7, 0xF7, 0xBD, 0xBD, 3, 3, 0xFB, 0xFB, 0xBB
+                .db 0xBB, 0x81, 0x81, 0xFD, 0xFD, 0xB3, 0xB3, 0xC0, 0xC0, 0xFE, 0xFE, 0xAB, 0xAB, 0xE0
+                .db 0xE0, 0x7F, 0x7F, 0x9B, 0x9B, 0xF1, 0xF1, 0xBF, 0xBF, 0x9B, 0x9B, 0xFB, 0xFB, 0xDF
+                .db 0xDF, 0x9B, 0x9B, 0xF7, 0xF7, 0xEF, 0xEF, 0x98, 0x98, 0xF, 0xF, 0xE7, 0xE7, 0x9F
+                .db 0x9F, 0xDF, 0xDF, 0xDB, 0xDB, 0x9F, 0x9F, 0xBF, 0xBF, 0xDB, 0xDB, 0x80, 0x80, 0x7F
+                .db 0x7F, 0, 0, 0x80, 0x80, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+spr_48:         .db 3, 55                                       ; DATA XREF: RAM:sprite_tblo
+                .db 2, 0, 0x80, 0, 0x80, 0, 0x2F, 2, 0xE0, 0x80, 0, 0, 0x7F, 0x2A, 0xFC, 0xA0, 0, 0
+                .db 0xFF, 0x5F, 0xFE, 0xDC, 0, 0, 0xFF, 0xED, 0xFC, 0xB8, 0, 0, 0xFF, 0x6F, 0xF8, 0xB0
+                .db 0, 0, 0xFF, 0x77, 0xF8, 0x70, 0, 0, 0x7F, 0x37, 0xF0, 0x60, 0, 0, 0x7F, 0x3F, 0xF0
+                .db 0x60, 0, 0, 0x7F, 0x3F, 0xF0, 0x60, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F
+                .db 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xF0, 0xE0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F
+                .db 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x3B, 0xE0, 0xC0, 0
+                .db 0, 0x7F, 0x37, 0xE0, 0xC0, 0, 0, 0x7F, 0x3F, 0xE0, 0xC0, 0, 0, 0x7F, 0x2F, 0xF0
+                .db 0xE0, 0, 0, 0x7F, 0x27, 0xF0, 0xE0, 0, 0, 0x7F, 0x1B, 0xF0, 0xE0, 0, 0, 0x7F, 0x3A
+                .db 0xF0, 0xE0, 0, 0, 0x7F, 0x39, 0xF0, 0xE0, 0, 0, 0x3F, 0x1B, 0xF0, 0xE0, 0, 0, 0x3F
+                .db 7, 0xF8, 0xF0, 0, 0, 0x7F, 0x3F, 0xF8, 0xF0, 0, 0, 0xFF, 0x5F, 0xF8, 0xF0, 0, 0
+                .db 0xFF, 0x9F, 0xF8, 0xF0, 0, 0, 0xBF, 0x1F, 0xFC, 0xF8, 0, 0, 0x7F, 0x3F, 0xFC, 0xF8
+                .db 0, 0, 0x7F, 0x3B, 0xFE, 0xBC, 0, 0, 0x7F, 0x3B, 0xFE, 0x9C, 0, 0, 0x7F, 0x33, 0xFF
+                .db 0xCE, 0, 0, 0x7F, 0x33, 0xEF, 0xC7, 0x80, 0, 0x7F, 0x33, 0xE7, 0xC3, 0xC0, 0, 0x77
+                .db 0x23, 0xF3, 0xE1, 0xC0, 0x80, 0xF7, 0x63, 0xF1, 0x60, 0xE0, 0xC0, 0xF7, 0x63, 0xF8
+                .db 0x70, 0xF0, 0x60, 0xF7, 0x63, 0xF8, 0x30, 0x78, 0, 0xE7, 7, 0xFC, 0x38, 0x78, 0x30
+                .db 0xE7, 0x43, 0xBC, 0x18, 0xFC, 0x58, 0xE7, 0xC3, 0x9E, 0xC, 0xFE, 0xC0, 0xCF, 0x87
+                .db 0x9E, 0xC, 0xEF, 0x46, 0xCF, 0x87, 0xBF, 0x16, 0x77, 0x23, 0x8F, 6, 0x3F, 0x16, 0x7E
+                .db 0x21, 0x1F, 0xA, 0x77, 0x23, 0x9E, 0, 0x1F, 0xA, 0x7F, 0x25, 0xDC, 0x80, 0x3F, 0x12
+                .db 0x7F, 0x24, 0xFE, 0xDC, 0x3F, 0x12, 0x3C, 8, 0xFC, 0x60, 0x3F, 0x12, 0x1C, 8, 0x70
+                .db 0x20, 0x3F, 0x12, 0x1C, 8, 0x78, 0x30, 0x17, 2, 8, 0, 0x3C, 0x18, 7, 2, 0, 0, 0x18
+                .db 0, 2, 0, 0, 0, 0, 0
+spr_49:         .db 2, 40                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x50, 0, 1, 0, 0xFC, 0x50, 0xF, 1, 0xFE, 0x54, 0x1F, 0xD, 0xFF, 0xAA, 0xF
+                .db 6, 0xFF, 0xF6, 7, 3, 0xFF, 0x7E, 7, 3, 0xFE, 0x7F, 3, 1, 0xFE, 0xEC, 3, 1, 0xFE
+                .db 0xEC, 3, 1, 0xFE, 0xF4, 7, 1, 0xFE, 0xF4, 0xF, 7, 0xFC, 0xF8, 0x1F, 9, 0xFE, 0xFC
+                .db 0x3B, 0x11, 0xFE, 0xF8, 0x3B, 0x11, 0xFE, 0xC6, 0x77, 0x23, 0xFF, 0xD6, 0x77, 0x23
+                .db 0xFE, 0xD8, 0x2F, 5, 0xFC, 0xB8, 0xF, 5, 0xFC, 0xB8, 0x1F, 9, 0xFC, 0x78, 0x1F, 9
+                .db 0xFC, 0x68, 0x3B, 0x10, 0xFC, 0xE8, 0x73, 0x20, 0xFC, 0xE8, 0x73, 0x21, 0xFE, 0xEC
+                .db 0x27, 3, 0xFE, 0xEC, 7, 3, 0xFE, 0x64, 0xF, 6, 0xFE, 0xE4, 0x3F, 0xD, 0xFE, 0xA4
+                .db 0x7F, 0x39, 0xFE, 0x24, 0xFF, 0x63, 0xFE, 0x24, 0xFF, 0xD2, 0x77, 0x22, 0xFF, 0x96
+                .db 0x77, 0x22, 0x9E, 4, 0x7B, 0x31, 0x3F, 0xE, 0x7F, 0x29, 0xFF, 0x2A, 0x7D, 0x28, 0xFF
+                .db 0xD2, 0xFE, 0x64, 0xFF, 0x14, 0xFE, 0xA4, 0x7F, 0x25, 0xF7, 0x22, 0x75, 0x20, 0x77
+                .db 0x22, 0x20, 0, 0x22, 0
+spr_4A:         .db 4, 25                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0xF, 0, 0xF0, 0, 0, 0, 0, 0, 0xFF, 0xD, 0xFF, 0xD0, 0, 0, 1, 0, 0xFF, 0xBD
+                .db 0xFF, 0xDF, 0xC0, 0, 7, 1, 0xFF, 0xBD, 0xFF, 0xDF, 0xE0, 0x40, 0xF, 5, 0xFF, 0xBD
+                .db 0xFF, 0xEF, 0xF8, 0x60, 0x1F, 0xC, 0xFF, 0xD9, 0xFF, 0xEF, 0xFC, 0x78, 0x1F, 0xC
+                .db 0xFF, 0xD6, 0xFF, 0xEE, 0xFC, 0xF8, 0x1F, 0xE, 0xFF, 0xB6, 0xFF, 0xEE, 0xFC, 0x50
+                .db 0x1F, 0xE, 0xFF, 0xBA, 0xFF, 0xF6, 0xF8, 0xF0, 0x3F, 0xD, 0xFF, 0xD9, 0xFF, 0xF6
+                .db 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xDD, 0xFF, 0xEE, 0xF8, 0xF0, 0x3F, 0x1D, 0xFF, 0xED
+                .db 0xFF, 0xDF, 0xFC, 0x50, 0x3F, 0x1D, 0xFF, 0xED, 0xFF, 0xEF, 0xFC, 0x58, 0x3F, 0x1B
+                .db 0xFF, 0xD0, 0xFF, 0xF, 0xFC, 0x58, 0x3F, 0xB, 0xFF, 0xF, 0xFF, 0xF0, 0xFC, 0xF8
+                .db 0x1F, 8, 0xFF, 0xF8, 0xFF, 0x1F, 0xFC, 0x38, 0x1F, 0xB, 0xFF, 0xC7, 0xFF, 0xE3, 0xFC
+                .db 0xD8, 0x1F, 7, 0xFF, 0x3C, 0xFF, 0x3D, 0xFC, 0xE8, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6
+                .db 0xFC, 0xF0, 0x1F, 0xE, 0xFF, 0xE3, 0xFF, 0xC6, 0xF8, 0xF0, 0x1F, 7, 0xFF, 0x3C, 0xFF
+                .db 0x3D, 0xF8, 0xE0, 0xF, 3, 0xFF, 0xC7, 0xFF, 0xE3, 0xF0, 0xC0, 7, 0, 0xFF, 0xF8, 0xFF
+                .db 0x1F, 0xE0, 0, 1, 0, 0xFF, 0xF, 0xFF, 0xF0, 0x80, 0, 0, 0, 0x1F, 0, 0xF8, 0, 0, 0
+spr_4B:         .db 2, 43                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x42, 0x42, 1, 1, 0x51, 0x51, 6, 6, 0xE9, 0xE9, 3, 3, 0xF1, 0xF1, 0x29, 0x29
+                .db 0xB1, 0xB1, 0x7C, 0x7C, 0xB1, 0xB1, 0x38, 0x38, 0xB1, 0xB1, 8, 8, 0xB1, 0xB1, 8
+                .db 8, 0xB1, 0xB1, 8, 8, 0xF3, 0xF3, 0x18, 0x18, 0xE3, 0xE3, 0x18, 0x18, 0xE3, 0xE3
+                .db 0x18, 0x18, 0xE3, 0xE3, 0x39, 0x39, 0xE3, 0xE3, 0x59, 0x59, 0xE3, 0xE3, 0x59, 0x59
+                .db 0xE3, 0xE3, 0x19, 0x19, 0xD3, 0xD3, 0x19, 0x19, 0xD3, 0xD3, 0x19, 0x19, 0xCA, 0xCA
+                .db 0x39, 0x39, 0xCA, 0xCA, 0x29, 0x29, 0x42, 0x42, 0x29, 0x29, 0x42, 0x42, 0x29, 0x29
+                .db 0x42, 0x42, 0x29, 0x29, 0x64, 0x64, 0x49, 0x49, 0x64, 0x64, 0x52, 0x49, 0xE4, 0xE4
+                .db 0x52, 0x52, 0xB2, 0xB2, 0x52, 0x52, 0xB2, 0xB2, 0x43, 0x43, 0x9A, 0x9A, 0x43, 0x43
+                .db 0x98, 0x98, 0x43, 0x43, 0x18, 0x18, 7, 7, 0xC, 0xC, 0xB, 0xB, 0xC, 0xC, 0x13, 0x13
+                .db 4, 4, 0x17, 0x17, 4, 4, 0x27, 0x17, 0x8E, 0x8E, 0x2B, 0x2B, 0x8A, 0x8A, 0x4A, 0x4A
+                .db 0x8A, 0x8A, 0x52, 0x52, 0x92, 0x92, 0x12, 0x12, 0x92, 0x92, 0x24, 0x24, 0x92, 0x92
+                .db 0x24, 0x24, 0, 0, 4, 4, 0, 0
+spr_4C:         .db 2, 53                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x41, 0x41, 0x40, 0x40, 0x22, 0x22, 0x52, 0x52, 0xB2, 0xB2, 0xA2, 0xA2, 0xD6, 0xD6
+                .db 0xD0, 0xD0, 0x7F, 0x7F, 0xE0, 0xE0, 0x3E, 0x3E, 0xC2, 0xC2, 0x36, 0x36, 0x94, 0x94
+                .db 0x3A, 0x3A, 0x9C, 0x9C, 0x3B, 0x3B, 0x9C, 0x9C, 0x1B, 0x1B, 0xDE, 0xDE, 0x1D, 0x1D
+                .db 0xDC, 0xDC, 0x1D, 0x1D, 0xDC, 0xDC, 0x1D, 0x1D, 0xDE, 0xDE, 0x1D, 0x1D, 0xDC, 0xDC
+                .db 0x1F, 0x1F, 0x8C, 0x8C, 0x1F, 0x1F, 0x8C, 0x8C, 0x1F, 0x1F, 0x9C, 0x9C, 0x1F, 0x1F
+                .db 0x9E, 0x9E, 0x1D, 0x1D, 0xA6, 0xA6, 0x1D, 0x1D, 0xA6, 0xA6, 0x1D, 0x1D, 0xAE, 0xAE
+                .db 0x1D, 0x1D, 0xAD, 0xAD, 0x1D, 0x1D, 0x8D, 0x8D, 0x15, 0x15, 0x8D, 0x8D, 0xE, 0xE
+                .db 0x8C, 0x8C, 0x1E, 0x1E, 0xCC, 0xCC, 0x3E, 0x3E, 0xD4, 0xD4, 0x37, 0x37, 0x44, 0x44
+                .db 0x2F, 0x2F, 0xE4, 0xE4, 0x2F, 0x2F, 0xE4, 0xE4, 0xD, 0xD, 0xF0, 0xF0, 0x1D, 0x1D
+                .db 0xF8, 0xF8, 0x1D, 0x1D, 0xDC, 0xDC, 0x1D, 0x1D, 0xDC, 0xDC, 0x19, 0x19, 0xDA, 0xDA
+                .db 0x30, 0x30, 0xCD, 0xCD, 0x30, 0x30, 0xCC, 0xCC, 0x30, 0x30, 0xCC, 0xCC, 0x70, 0x70
+                .db 0xC6, 0xC6, 0x58, 0x58, 0xC6, 0xC6, 0x18, 0x18, 0xC6, 0xC6, 0x18, 0x18, 0xE2, 0xE2
+                .db 0x18, 0x18, 0xE2, 0xE2, 0x14, 0x14, 0x53, 0x53, 0x14, 0x14, 0x51, 0x51, 0x12, 0x12
+                .db 0x49, 0x49, 0x12, 0x12, 0x49, 0x49, 0x10, 0x10, 1, 1, 8, 8, 0, 0, 8, 8, 0, 0, 8
+                .db 8, 0, 0, 4, 4, 0, 0, 4, 4, 0, 0
+spr_4D:         .db 2, 53                                       ; DATA XREF: RAM:sprite_tblo
+                .db 1, 1, 0x24, 0x24, 1, 1, 0xA5, 0xA5, 4, 4, 0xAA, 0xAA, 0xA, 0xA, 0xED, 0xED, 0xAF
+                .db 0xAF, 0x7F, 0x7F, 0x5B, 0x5B, 0xBE, 0xBE, 0x73, 0x73, 0x3C, 0x3C, 0x73, 0x73, 0x1C
+                .db 0x1C, 0x71, 0x71, 0x1C, 0x1C, 0x31, 0x31, 0x1C, 0x1C, 0x31, 0x31, 0x9C, 0x9C, 0x31
+                .db 0x31, 0xBC, 0xBC, 0x39, 0x39, 0xBC, 0xBC, 0x35, 0x35, 0xBC, 0xBC, 0x35, 0x35, 0xBC
+                .db 0xBC, 0x31, 0x31, 0xFA, 0xFA, 0x31, 0x31, 0xEA, 0xEA, 0x39, 0x39, 0x69, 0x69, 0x39
+                .db 0x39, 0x69, 0x69, 0x39, 0x39, 0xE9, 0xE9, 0x39, 0x39, 0xB9, 0xB9, 0x59, 0x59, 0xB9
+                .db 0xB9, 0x5D, 0x5D, 0xB8, 0xB8, 0x95, 0x95, 0xB8, 0xB8, 0x95, 0x95, 0xB8, 0xB8, 0xB5
+                .db 0xB5, 0xB8, 0xB8, 0x25, 0x25, 0x3C, 0x3C, 0x27, 0x27, 0x7C, 0x7C, 0x67, 0x67, 0x7A
+                .db 0x7A, 0x43, 0x43, 0x7A, 0x7A, 0x47, 0x47, 0x7A, 0x7A, 0x46, 0x46, 0xBA, 0xBA, 0x46
+                .db 0x46, 0xB8, 0xB8, 0x26, 0x26, 0xB8, 0xB8, 0x26, 0x26, 0x3C, 0x3C, 0x2E, 0x2E, 0x3C
+                .db 0x3C, 0x2C, 0x2C, 0x74, 0x74, 0x2C, 0x2C, 0x76, 0x76, 0x1A, 0x1A, 0xB2, 0xB2, 0x1A
+                .db 0x1A, 0xB2, 0xB2, 0x29, 0x29, 0x31, 0x31, 0x49, 0x49, 0x31, 0x31, 0x52, 0x52, 0xB8
+                .db 0xB8, 0x92, 0x92, 0xD8, 0xD8, 0x92, 0x92, 0x54, 0x54, 0x14, 0x14, 0x94, 0x94, 0x14
+                .db 0x14, 0xB4, 0xB4, 4, 4, 0x32, 0x32, 0, 0, 0x52, 0x52, 0, 0, 0x50, 0x50, 0, 0, 0x90
+                .db 0x90, 0, 0, 0x90, 0x90, 0, 0, 0x10, 0x10
+spr_4E:         .db 2, 50                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x50, 0x50, 0, 0, 0x70, 0x70, 5, 5, 0x27, 0x27, 0x2A, 0x2A, 0x2E, 0x2E, 0x57
+                .db 0x57, 0xAE, 0xAE, 0x7F, 0x7F, 0x26, 0x26, 0x3B, 0x3B, 0x26, 0x26, 0x1A, 0x1A, 0x64
+                .db 0x64, 0x1A, 0x1A, 0x64, 0x64, 0x16, 0x16, 0xA4, 0xA4, 0x16, 0x16, 0xA4, 0xA4, 0x36
+                .db 0x36, 0xB4, 0xB4, 0x56, 0x56, 0x34, 0x34, 0x5C, 0x5C, 0x2C, 0x2C, 0x1C, 0x1C, 0x24
+                .db 0x24, 0x1C, 0x1C, 0x24, 0x24, 0x3E, 0x3E, 0x2A, 0x2A, 0x3E, 0x3E, 0x4A, 0x4A, 0x77
+                .db 0x77, 0x4A, 0x4A, 0x57, 0x57, 8, 8, 0xD6, 0xD6, 0x89, 0x89, 0x96, 0x96, 0x89, 0x89
+                .db 0xB5, 0xB5, 0x41, 0x41, 0xA5, 0xA5, 0x21, 0x21, 0x3C, 0x3C, 0xA1, 0xA1, 0x3A, 0x3A
+                .db 0x91, 0x91, 0x7A, 0x7A, 0x50, 0x50, 0x5A, 0x5A, 0x48, 0x48, 0x59, 0x59, 0x24, 0x24
+                .db 0x59, 0x59, 0x22, 0x22, 0x59, 0x59, 0x11, 0x11, 0x59, 0x59, 0x10, 0x10, 0x58, 0x58
+                .db 0x88, 0x88, 0x98, 0x98, 0x88, 0x88, 0x94, 0x94, 0x84, 0x84, 0x94, 0x94, 0x44, 0x44
+                .db 0x14, 0x14, 0x40, 0x40, 0x14, 0x14, 0x40, 0x40, 0x14, 0x14, 0x40, 0x40, 0x14, 0x14
+                .db 0x20, 0x20, 0x12, 0x12, 0x20, 0x20, 0x12, 0x12, 0x20, 0x20, 0x12, 0x12, 0x10, 0x10
+                .db 0x12, 0x12, 0x10, 0x10, 0x12, 0x12, 0x10, 0x10, 0x12, 0x12, 8, 8, 0x12, 0x12, 8
+                .db 8, 0x12, 0x12, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0
+spr_4F:         .db 2, 26                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x40, 0x40, 0, 0, 0x70, 0x70, 0, 0, 0x7C, 0x7C, 0, 0, 0x7F, 0x7F, 0, 0, 0x7F, 0x7F
+                .db 0x80, 0x80, 0x3F, 0x3F, 0xB0, 0xB0, 0xCF, 0xCF, 0xBC, 0xBC, 0xF3, 0xF3, 0xBF, 0xBF
+                .db 0xFC, 0xFC, 0xBF, 0xBF, 0xFF, 0xFF, 0x3F, 0x3F, 0xFF, 0xFF, 0xBF, 0xBF, 0xFF, 0xFF
+                .db 0xBF, 0xBF, 0x3F, 0x3F, 0xBF, 0xBF, 0x4F, 0x4F, 0xBF, 0xBF, 0x73, 0x73, 0x3F, 0x3F
+                .db 0x7C, 0x7C, 0x3F, 0x3F, 0x1D, 0x1D, 0xCF, 0xCF, 0x65, 0x65, 0xF3, 0xF3, 0x75, 0x75
+                .db 0xFC, 0xFC, 0x38, 0x38, 0xFF, 0xFF, 7, 7, 0x3F, 0x3F, 0x1F, 0x1F, 0xCF, 0xCF, 7
+                .db 7, 0xF3, 0xF3, 1, 1, 0xFD, 0xFD, 0, 0, 0x7E, 0x7E, 0, 0, 0x18, 0x18
+spr_50:         .db 2, 31                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x60, 0x60, 0, 0, 0x70, 0x70, 0, 0, 4, 4, 0, 0, 0x72, 0x72, 0, 0, 0x7B, 0x7B, 0
+                .db 0, 0x78, 0x78, 0x5C, 0x5C, 0x78, 0x78, 0xEE, 0xEE, 0x31, 0x31, 0xCE, 0xCE, 1, 1
+                .db 0xC8, 0xC8, 0, 0, 0xE6, 0xE6, 0x30, 0x30, 0x26, 0x26, 0x3E, 0x3E, 3, 3, 0x1E, 0x1E
+                .db 0x30, 0x30, 0xCF, 0xCF, 0x7C, 0x7C, 0xC7, 0xC7, 0x3E, 0x3E, 0xE3, 0xE3, 0x87, 0x87
+                .db 0xF0, 0xF0, 0x30, 0x30, 0x1B, 0x1B, 0x7E, 0x7E, 0xE9, 0xE9, 0x7E, 0x7E, 0x74, 0x74
+                .db 0x7F, 0x7F, 0x70, 0x70, 0x7F, 0x7F, 0x7F, 0x7F, 0x3F, 0x3F, 0x3E, 0x3E, 0xBF, 0xBF
+                .db 0x3D, 0x3D, 0xBF, 0xBF, 0x13, 0x13, 0xBF, 0xBF, 0xF, 0xF, 0x9F, 0x9F, 6, 6, 0x27
+                .db 0x27, 1, 1, 0xF9, 0xF9, 7, 7, 0xFE, 0xFE, 1, 1, 0xF8, 0xF8, 0, 0, 0x60, 0x60
+spr_51:         .db 2, 33                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0x34, 0x34, 0, 0, 0xF7, 0xF7, 0, 0, 0xF7, 0xF7, 0xC0, 0xC0, 0xC9, 0xC9, 0xF0, 0xF0
+                .db 0x3E, 0x3E, 0x7C, 0x7C, 0xFF, 0xFF, 0x9F, 0x9F, 0xF0, 0xF0, 0x27, 0x27, 0xCF, 0xCF
+                .db 0xC9, 0xC9, 0xBE, 0xBE, 0xF7, 0xF7, 0x7C, 0x7C, 0x7A, 0x7A, 0xFC, 0xFC, 0x7C, 0x7C
+                .db 0xEC, 0xEC, 0x6C, 0x6C, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC
+                .db 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64
+                .db 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC
+                .db 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64, 0xCC, 0xCC, 0x64, 0x64
+                .db 0x8F, 0x8F, 0xA4, 0xA4, 0x76, 0x76, 0xE4, 0xE4, 0xBF, 0xBF, 0x78, 0x78, 0x3D, 0x3D
+                .db 0xFC, 0xFC, 0x53, 0x53, 0x54, 0x54, 0x3D, 0x3D, 0xA8, 0xA8, 7, 7, 0xF0, 0xF0, 0
+                .db 0, 0xE0, 0xE0
+spr_52:         .db 2, 24                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xC0, 0xC0, 0, 0, 0xF0, 0xF0, 0, 0, 0xFC, 0xFC, 0, 0, 0x7E, 0x7E, 0, 0, 0x3E, 0x3E
+                .db 0xC0, 0xC0, 0x46, 0x46, 0xF0, 0xF0, 0xF8, 0xF8, 0xF4, 0xF4, 0xFE, 0xFE, 0xF6, 0xF6
+                .db 0x1E, 0x1E, 0xF3, 0xF3, 0x6C, 0x6C, 0x34, 0x34, 0xF1, 0xF1, 0x8E, 0x8E, 0xFB, 0xFB
+                .db 0xFF, 0xFF, 0xBD, 0xBD, 0xFF, 0xFF, 0xDE, 0xDE, 0xFF, 0xFF, 0xEF, 0xEF, 0x7F, 0x7F
+                .db 0xF7, 0xF7, 0x8E, 0x8E, 0x7B, 0x7B, 0xB0, 0xB0, 0x3F, 0x3F, 0x3E, 0x3E, 0x58, 0x58
+                .db 0xBF, 0xBF, 7, 7, 0xDF, 0xDF, 0x1F, 0x1F, 0xE6, 0xE6, 3, 3, 0xF8, 0xF8, 4, 4, 0xC6
+                .db 0xC6, 6, 6, 6, 6
+spr_53:         .db 2, 27                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0xC0, 0xC0, 0, 0, 0xE0, 0xE0, 0, 0, 0xEC, 0xEC, 0, 0, 0x6F, 0x6F, 0, 0, 0xF, 0xF
+                .db 0x80, 0x80, 0xE3, 0xE3, 0xB0, 0xB0, 0xF8, 0xF8, 0xBC, 0xBC, 0xFE, 0xFE, 0xF, 0xF
+                .db 0xFE, 0xFE, 0xE3, 0xE3, 0xFE, 0xFE, 0xF8, 0xF8, 0x3E, 0x3E, 0x7E, 0x7E, 0x8D, 0x8D
+                .db 0xBF, 0xBF, 0xE3, 0xE3, 0x8F, 0x8F, 0xFB, 0xFB, 0x72, 0x72, 0xFA, 0xFA, 0xBC, 0xBC
+                .db 0xF5, 0xF5, 0xDE, 0xDE, 0x6B, 0x6B, 0xDE, 0xDE, 7, 7, 0xEF, 0xEF, 3, 3, 0xEF, 0xEF
+                .db 3, 3, 0xE7, 0xE7, 3, 3, 0xFB, 0xFB, 0, 0, 0x7B, 0x7B, 1, 1, 0x8D, 0x8D, 0, 0, 0xFF
+                .db 0xFF, 0, 0, 0xFC, 0xFC, 0, 0, 0x70, 0x70, 0, 0, 0x40, 0x40
+spr_54:         .db 3, 36                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0, 0, 0x30, 0, 0, 0, 0, 0, 0x7C, 0x30, 0, 0, 1, 0, 0xFF, 0x7C, 0, 0, 3, 1
+                .db 0xFF, 0xBF, 0, 0, 0xF, 3, 0xFF, 0xBF, 0, 0, 0x3F, 0xF, 0xFF, 0xBF, 0, 0, 0xFF, 0x3F
+                .db 0xFF, 0xBE, 1, 0, 0xFF, 0xFF, 0xFF, 0xC6, 1, 0, 0xFF, 0xFF, 0xFF, 0x3C, 1, 0, 0xFF
+                .db 0xFC, 0xFF, 0xFE, 0, 0, 0xFF, 0x33, 0xFF, 0xFF, 0, 0, 0x3F, 0xF, 0xFF, 0xF7, 0, 0
+                .db 0x3F, 3, 0xFF, 0xC8, 0, 0, 0x7F, 0x30, 0xFF, 0x3A, 0, 0, 0xFF, 0x7B, 0xFF, 0xFA
+                .db 0, 0, 0x7F, 0x3B, 0xFF, 0xD3, 0, 0, 0x7F, 0x3B, 0xFF, 0x38, 0, 0, 0x3F, 2, 0xFF
+                .db 0xF7, 0, 0, 3, 0, 0xFF, 0xF7, 0, 0, 1, 0, 0xFF, 0xF7, 0, 0, 1, 0, 0xFF, 0xEE, 0
+                .db 0, 1, 0, 0xFF, 0xEE, 0, 0, 0xF, 0, 0xFF, 0xEE, 0, 0, 0x3F, 0xD, 0xFF, 0xEE, 0, 0
+                .db 0x7F, 0x3D, 0xFE, 0xCC, 1, 0, 0xFF, 0x1D, 0xFE, 0xF0, 7, 1, 0xFF, 0xA5, 0xFE, 0xFC
+                .db 0x1F, 7, 0xFF, 0xB8, 0xFF, 0x7E, 0xBF, 0x1F, 0xFF, 0xBD, 0xFF, 0x9E, 0xFF, 0xBE
+                .db 0xFF, 0x5D, 0xFF, 0xE6, 0xFF, 0xB8, 0xFF, 0xE5, 0xFE, 0xF8, 0xFF, 6, 0xFF, 0x79
+                .db 0xFE, 0xFC, 0xFF, 0xDF, 0xFF, 0x9C, 0xFC, 0x78, 0xFF, 0xDF, 0xFF, 0xE5, 0xFC, 0x98
+                .db 0xFF, 0xF, 0xFF, 0xF0, 0x98, 0, 0xF, 0, 0xF0, 0, 0, 0
+spr_55:         .db 3, 49                                       ; DATA XREF: RAM:sprite_tblo
+                .db 1, 0, 0xC0, 0, 0, 0, 0x37, 1, 0xF0, 0xC0, 0, 0, 0xFF, 0x37, 0xFC, 0xF0, 0, 0, 0xFF
+                .db 0xF3, 0xFF, 0xFC, 0, 0, 0xFF, 0xEE, 0xFF, 0xFC, 0, 0, 0xFF, 0x7E, 0xFF, 0xFA, 0
+                .db 0, 0xFF, 0x7E, 0xFE, 0xBC, 0, 0, 0xFF, 0x7F, 0xFE, 0x5C, 0, 0, 0xFF, 0xF, 0xFF, 0x6E
+                .db 0, 0, 0x7F, 0x3D, 0xFF, 0x72, 0, 0, 0x3F, 0x13, 0xFF, 0xB4, 0, 0, 0x1F, 0xF, 0xFF
+                .db 0xB8, 0, 0, 0x1F, 0xF, 0xFF, 0x76, 0, 0, 0x3F, 0x1E, 0xFE, 0xF0, 0, 0, 0x7F, 0x19
+                .db 0xF8, 0x60, 0, 0, 0xFF, 0x67, 0xFE, 0x98, 0, 0, 0xFF, 0x7F, 0xFF, 0x9E, 0, 0, 0xFF
+                .db 0xFF, 0xFF, 0xAF, 0x80, 0, 0xFF, 0xFC, 0xFF, 0x37, 0x80, 0, 0xFF, 0x7B, 0xFF, 0x73
+                .db 0x80, 0, 0x7F, 0x33, 0xFF, 0x7B, 0x80, 0, 0x3F, 0xD, 0xFF, 0x79, 0x80, 0, 0x1F, 0xD
+                .db 0xFF, 0x1C, 0x80, 0, 0x1F, 9, 0xFF, 0x6F, 0x80, 0, 0x1F, 6, 0xFF, 0x77, 0x80, 0
+                .db 0x7F, 0x1B, 0xFF, 0x7B, 0xC0, 0, 0xFF, 0x7D, 0xFF, 0x78, 0xE0, 0xC0, 0xFF, 0x7B
+                .db 0xFF, 0x37, 0xE0, 0xC0, 0x7F, 0x2F, 0xFF, 0x83, 0xE0, 0xC0, 0x7F, 0x3C, 0xFF, 0x8C
+                .db 0xE0, 0xC0, 0x7F, 0x32, 0xFF, 0x2F, 0xC0, 0, 0x3F, 0xE, 0xFF, 0x77, 0xE0, 0xC0, 0x7F
+                .db 0x3E, 0xFF, 0x7B, 0xF0, 0xE0, 0xFF, 0x7E, 0xFF, 0xFD, 0xF0, 0xE0, 0x7F, 0x38, 0xFF
+                .db 0xDC, 0xF0, 0x60, 0x3F, 6, 0xFF, 0x6D, 0xE0, 0x80, 0x1F, 0xF, 0xFF, 0x7D, 0xF8, 0xE0
+                .db 0xF, 7, 0xFF, 0xBB, 0xFC, 0xF8, 7, 0, 0xFF, 4, 0xFE, 0xFC, 3, 1, 0xFF, 0xFF, 0xFE
+                .db 0x3C, 1, 0, 0xFF, 0x7F, 0xFE, 0xCC, 0, 0, 0x7F, 0x1F, 0xFC, 0x80, 0, 0, 0x1F, 4
+                .db 0xFE, 0x7C, 0, 0, 7, 3, 0xFE, 0xFC, 0, 0, 7, 3, 0xFF, 0xFE, 0, 0, 3, 1, 0xFF, 0xFF
+                .db 0, 0, 1, 0, 0xFF, 0xFF, 0, 0, 0, 0, 0xFF, 7, 0, 0, 0, 0, 7, 0
+spr_56:         .db 2, 34                                       ; DATA XREF: RAM:sprite_tblo
+                .db 0, 0, 0x20, 0x20, 0, 0, 0xD8, 0xD8, 3, 3, 0xDE, 0xDE, 0x1B, 0x1B, 0xDF, 0xDF, 0x7B
+                .db 0x7B, 0xC7, 0xC7, 0xFA, 0xFA, 0x39, 0x39, 0xE1, 0xE1, 0xFC, 0xFC, 0x9B, 0x9B, 0xFE
+                .db 0xFE, 0x7B, 0x7B, 0xFF, 0xFF, 0x7B, 0x7B, 0xFF, 0xFF, 0x7B, 0x7B, 0xFE, 0xFE, 0x7A
+                .db 0x7A, 0x7E, 0x7E, 0x79, 0x79, 0x86, 0x86, 0x43, 0x43, 0xF8, 0xF8, 0x3B, 0x3B, 0xFC
+                .db 0xFC, 0x7B, 0x7B, 0xFE, 0xFE, 0x7B, 0x7B, 0xFF, 0xFF, 0x79, 0x79, 0xFE, 0xFE, 0x7A
+                .db 0x7A, 0xFE, 0xFE, 0xFB, 0xFB, 0x7C, 0x7C, 0xF7, 0xF7, 0xB0, 0xB0, 0xEF, 0xEF, 0x80
+                .db 0x80, 0x13, 0x13, 0x7E, 0x7E, 0x1C, 0x1C, 0xFF, 0xFF, 0xEF, 0xEF, 0x7F, 0x7F, 0xEF
+                .db 0xEF, 0xAF, 0xAF, 0xD3, 0xD3, 0xC3, 0xC3, 0xBC, 0xBC, 0xFC, 0xFC, 0x7F, 0x7F, 0x3E
+                .db 0x3E, 0x3F, 0x3F, 0xCE, 0xCE, 7, 7, 0xF2, 0xF2, 1, 1, 0xFC, 0xFC, 0, 0, 0x78, 0x78
+                .db 0, 0, 0x10, 0x10
+user_input_method:.db 0                                         ; DATA XREF: RAM:AF8Ao
                                                                 ; RAM:BB9Ar ...
-unk_A70A:       db    0                                         ; DATA XREF: RAM:BBCEo
-                db    0
-byte_A70C:      db 0                                            ; DATA XREF: RAM:BB9Dw
+unk_A70A:       .db    0                                        ; DATA XREF: RAM:BBCEo
+                .db    0
+byte_A70C:      .db 0                                           ; DATA XREF: RAM:BB9Dw
                                                                 ; RAM:BBC2o
-byte_A70D:      db 0                                            ; DATA XREF: RAM:AFAFr
+seed_3:         .db 0                                           ; DATA XREF: RAM:AFAFr
                                                                 ; RAM:AFB3w ...
-unk_A70E:       db    0                                         ; DATA XREF: RAM:loc_AF93o
-byte_A70F:      db 0                                            ; DATA XREF: RAM:B0D1r
-byte_A710:      db 0                                            ; DATA XREF: RAM:B19Fw
+unk_A70E:       .db    0                                        ; DATA XREF: RAM:start_menuo
+                                                                ; RAM:CFD8r ...
+unk_A70F:       .db    0                                        ; DATA XREF: RAM:B0D1r
+                                                                ; RAM:CD21r ...
+objs_wiped_cnt: .db 0                                           ; DATA XREF: RAM:B19Fw
                                                                 ; RAM:B237r ...
-byte_A711:      db 0                                            ; DATA XREF: RAM:loc_B05Cr
+render_status_info:.db 0                                        ; DATA XREF: RAM:loc_B05Cr
                                                                 ; RAM:B063w ...
-word_A712:      dw 0                                            ; DATA XREF: RAM:B1AEw
-                                                                ; RAM:loc_B1B1r ...
-byte_A714:      db 0                                            ; DATA XREF: RAM:B045r
+tmp_objects_to_draw:.dw 0                                       ; DATA XREF: RAM:B1AEw
+                                                                ; RAM:wipe_next_objectr ...
+rendered_objs_cnt:.db 0                                         ; DATA XREF: RAM:B045r
                                                                 ; RAM:B25Br ...
-word_A715:      dw 0                                            ; DATA XREF: RAM:B00Fr
-                                                                ; RAM:B031r ...
-word_A717:      dw 0                                            ; DATA XREF: RAM:B432w
-word_A719:      dw 0                                            ; DATA XREF: RAM:B5A3w
-                                                                ; RAM:loc_B6B3r
-word_A71B:      dw 0                                            ; DATA XREF: RAM:B5B8w
-byte_A71D:      db 0                                            ; DATA XREF: RAM:B8EDr
-                                                                ; RAM:C971w ...
-byte_A71E:      db 0                                            ; DATA XREF: RAM:B918r
-                                                                ; RAM:C976w ...
-byte_A71F:      db 0                                            ; DATA XREF: RAM:loc_B963r
+seed_2:         .dw 0                                           ; DATA XREF: RAM:B00Fr
+                                                                ; RAM:done_sprite_updatesr ...
+tmp_SP:         .dw 0                                           ; DATA XREF: RAM:B432w
+                                                                ; RAM:B4DBr
+render_obj_1:   .dw 0                                           ; DATA XREF: RAM:B5A3w
+                                                                ; RAM:B694w ...
+render_obj_2:   .dw 0                                           ; DATA XREF: RAM:B5B8w
+                                                                ; RAM:d_3467121516r ...
+word_A71D:      .dw 0                                           ; DATA XREF: RAM:B8EDr
+                                                                ; RAM:C18Er ...
+room_size_Z:    .db 0                                           ; DATA XREF: RAM:adj_dZ_for_out_of_boundsr
                                                                 ; RAM:C97Aw ...
-byte_A720:      db 0                                            ; DATA XREF: RAM:loc_BA34r
-                                                                ; RAM:BA3Aw
-byte_A721:      db 0                                            ; DATA XREF: RAM:AFA9w
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-word_A732:      dw 0                                            ; DATA XREF: RAM:BAF9r
+byte_A720:      .db 0                                           ; DATA XREF: RAM:display_objects_carriedr
+                                                                ; RAM:BA3Aw ...
+lives:          .db 0                                           ; DATA XREF: RAM:AFA9w
+                                                                ; RAM:C2C3o ...
+inventory:      .db 0, 0, 0, 0
+objects_carried:.db 0, 0, 0, 0                                  ; DATA XREF: RAM:BA45o
+                .db 0, 0, 0, 0
+                .db 0, 0, 0, 0
+gfxbase_8x8:    .dw 0                                           ; DATA XREF: RAM:BAF9r
                                                                 ; RAM:BB4Cw ...
-byte_A734:      db 0                                            ; DATA XREF: RAM:BB75w
+byte_A734:      .db 0                                           ; DATA XREF: RAM:BB75w
                                                                 ; RAM:BCD6r ...
-unk_A735:       db    0                                         ; DATA XREF: RAM:BBBFo
-byte_A736:      db 0                                            ; DATA XREF: RAM:BB19w
+unk_A735:       .db    0                                        ; DATA XREF: RAM:BBBFo
+tmp_attrib:     .db 0                                           ; DATA XREF: RAM:BB19w
                                                                 ; RAM:BC74r ...
-                db    0
-byte_A738:      db 0                                            ; DATA XREF: RAM:B066r
+user_input:     .db 0                                           ; DATA XREF: RAM:BF09w
+                                                                ; RAM:BF6Cr ...
+curr_room_attrib:.db 0                                          ; DATA XREF: RAM:B066r
                                                                 ; RAM:C95Aw
-                db    0
-word_A73A:      dw 0                                            ; DATA XREF: RAM:C932w
+byte_A739:      .db 0                                           ; DATA XREF: RAM:C643w
+                                                                ; RAM:C657r
+word_A73A:      .dw 0                                           ; DATA XREF: RAM:C932w
                                                                 ; RAM:C9D0r ...
-byte_A73C:      db 0                                            ; DATA XREF: RAM:C936w
+byte_A73C:      .db 0                                           ; DATA XREF: RAM:C936w
                                                                 ; RAM:C9FAr ...
-byte_A73D:      db 0                                            ; DATA XREF: RAM:CBB0o
+byte_A73D:      .db 0                                           ; DATA XREF: RAM:CBB0o
                                                                 ; RAM:CC47w
-word_A73E:      dw 0                                            ; DATA XREF: RAM:B03Ew
-                db    0
-                db    0
-byte_A742:      db 0                                            ; DATA XREF: RAM:loc_CBA3w
-                                                                ; RAM:loc_CBABr
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-word_A749:      dw 0                                            ; DATA XREF: RAM:B081w
-byte_A74B:      db 0                                            ; DATA XREF: RAM:C70Er
-byte_A74C:      db 0                                            ; DATA XREF: RAM:loc_C707r
-byte_A74D:      db 0                                            ; DATA XREF: RAM:C724w
-byte_A74E:      db 0                                            ; DATA XREF: RAM:C71Dw
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_A76F:       db    0                                         ; DATA XREF: RAM:AFDDo
-                                                                ; RAM:B9A7o ...
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-byte_A777:      db 0                                            ; DATA XREF: RAM:B0A0r
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_A7AF:       db    0                                         ; DATA XREF: RAM:loc_CB54o
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_AE2F:       db  3Fh ; ?                                     ; DATA XREF: RAM:AFE5o
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db 0ADh ; ≠
-                db 0C7h ; «
-                db  89h ; â
-                db 0C7h ; «
-                db 0ADh ; ≠
-                db 0C7h ; «
-                db  89h ; â
-                db 0C7h ; «
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  84h ; Ñ
-                db 0C7h ; «
-                db  84h ; Ñ
-                db 0C7h ; «
-                db  84h ; Ñ
-                db 0C7h ; «
-                db  84h ; Ñ
-                db 0C7h ; «
-                db 0F5h ; ı
-                db 0D1h ; —
-                db 0F5h ; ı
-                db 0D1h ; —
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  85h ; Ö
-                db 0C2h ; ¬
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  70h ; p
-                db 0CDh ; Õ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  85h ; Ö
-                db 0C2h ; ¬
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db  40h ; @
-                db 0C4h ; ƒ
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db 0D3h ; ”
-                db 0C5h ; ≈
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  84h ; Ñ
-                db 0C7h ; «
-                db  7Fh ; 
-                db 0C7h ; «
-                db  7Fh ; 
-                db 0C7h ; «
-                db  7Fh ; 
-                db 0C7h ; «
-                db  7Fh ; 
-                db 0C7h ; «
-                db  4Bh ; K
-                db 0C7h ; «
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db 0C5h ; ≈
-                db 0C1h ; ¡
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  81h ; Å
-                db 0CDh ; Õ
-                db  11h
-                db 0C1h ; ¡
-                db  11h
-                db 0C1h ; ¡
-                db  11h
-                db 0C1h ; ¡
-                db  11h
-                db 0C1h ; ¡
-                db  11h
-                db 0C1h ; ¡
-                db  11h
-                db 0C1h ; ¡
-                db  11h
-                db 0C1h ; ¡
-                db  1Dh
-                db 0C1h ; ¡
-                db  81h ; Å
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0CDh ; Õ
-                db  85h ; Ö
-                db 0C2h ; ¬
-                db  85h ; Ö
-                db 0C2h ; ¬
-                db  4Eh ; N
-                db 0CBh ; À
-                db  51h ; Q
-                db 0CBh ; À
-                db 0A0h ; †
-                db 0CDh ; Õ
-                db  81h ; Å
-                db 0CDh ; Õ
-                db 0FDh ; ˝
-                db 0D1h ; —
-                db 0FDh ; ˝
-                db 0D1h ; —
-                db  4Eh ; N
-                db 0CBh ; À
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db 0BBh ; ª
-                db 0CDh ; Õ
-                db  31h ; 1
-                db 0CEh ; Œ
-                db  9Ah ; ö
-                db 0CEh ; Œ
-                db 0A3h ; £
-                db 0CEh ; Œ
-                db 0DDh ; ›
-                db 0CEh ; Œ
-                db  22h ; "
-                db 0CFh ; œ
-                db 0ACh ; ¨
-                db 0D0h ; –
-                db  75h ; u
-                db 0CDh ; Õ
-                db 0A0h ; †
-                db 0CEh ; Œ
-                db 0DAh ; ⁄
-                db 0CEh ; Œ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  3Fh ; ?
-                db 0C4h ; ƒ
-                db  68h ; h
-                db 0CFh ; œ
-                db  68h ; h
-                db 0CFh ; œ
-                db  68h ; h
-                db 0CFh ; œ
-                db  68h ; h
-                db 0CFh ; œ
-                db  68h ; h
-                db 0CFh ; œ
-                db  68h ; h
-                db 0CFh ; œ
-                db  68h ; h
-                db 0CFh ; œ
-                db  68h ; h
-                db 0CFh ; œ
-                db 0D2h ; “
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db  14h
-                db 0CFh ; œ
-                db 0ADh ; ≠
-                db 0D2h ; “
-                db 0ADh ; ≠
-                db 0D2h ; “
-                db 0ADh ; ≠
-                db 0D2h ; “
-                db 0ADh ; ≠
-                db 0D2h ; “
-                db 0DEh ; ﬁ
-                db 0D2h ; “
-                db 0E9h ; È
-                db 0D2h ; “
-                db 0F4h ; Ù
-                db 0D2h ; “
-                db 0FFh
-                db 0D2h ; “
-                db  16h
-                db 0CDh ; Õ
-                db  16h
-                db 0CDh ; Õ
-                db  16h
-                db 0CDh ; Õ
-                db  16h
-                db 0CDh ; Õ
-                db  16h
-                db 0CDh ; Õ
-                db 0C5h ; ≈
-                db 0C1h ; ¡
-                db 0C5h ; ≈
-                db 0C1h ; ¡
-                db 0C5h ; ≈
-                db 0C1h ; ¡
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Eh ; N
-                db 0CBh ; À
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  4Bh ; K
-                db 0CCh ; Ã
-                db  51h ; Q
-                db 0D2h ; “
-                db  51h ; Q
-                db 0D2h ; “
-                db  51h ; Q
-                db 0D2h ; “
-                db  51h ; Q
-                db 0D2h ; “
+word_A73E:      .dw 0                                           ; DATA XREF: RAM:B03Ew
+byte_A740:      .db 0                                           ; DATA XREF: RAM:loc_BF79r
+                                                                ; RAM:BFAEw ...
+byte_A741:      .db 0                                           ; DATA XREF: RAM:BF93w
+                                                                ; RAM:BFA9w ...
+byte_A742:      .db 0                                           ; DATA XREF: RAM:loc_CBA3w
+                                                                ; RAM:upd_monsters???r
+byte_A743:      .db 0                                           ; DATA XREF: RAM:C131w
+                                                                ; RAM:loc_C135r ...
+score:          .db 0, 0, 0                                     ; DATA XREF: RAM:BB43o
+                                                                ; RAM:add_to_score_and_printo
+                .db    0
+unk_A748:       .db    0                                        ; DATA XREF: RAM:loc_D635o
+word_A749:      .dw 0                                           ; DATA XREF: RAM:B081w
+                                                                ; RAM:C00Aw ...
+byte_A74B:      .db 0                                           ; DATA XREF: RAM:C70Er
+                                                                ; RAM:CD61r ...
+byte_A74C:      .db 0                                           ; DATA XREF: RAM:loc_C707r
+                                                                ; RAM:CF73r ...
+byte_A74D:      .db 0                                           ; DATA XREF: RAM:C724w
+byte_A74E:      .db 0                                           ; DATA XREF: RAM:C71Dw
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+                .db    0
+graphic_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:AFDDo
+                                                                ; RAM:B087o ...
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+byte_A78F:      .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; DATA XREF: RAM:CC8Er
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+byte_A7AF:      .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                                                                ; DATA XREF: RAM:clr_layout_mem_???o
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+upd_sprite_jmp_tbl:.dw no_update                                ; DATA XREF: RAM:AFE5o
+                                                                ; RAM:B028o
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw upd_06_08
+                .dw upd_07_09
+                .dw upd_06_08
+                .dw upd_07_09
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw adj_m2_m8
+                .dw adj_m2_m8
+                .dw adj_m2_m8
+                .dw adj_m2_m8
+                .dw loc_D1F5
+                .dw loc_D1F5
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw loc_C285
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw loc_CD70
+                .dw no_update
+                .dw loc_C285
+                .dw no_update
+                .dw loc_C440
+                .dw loc_C440
+                .dw loc_C440
+                .dw loc_C440
+                .dw loc_C440
+                .dw loc_C440
+                .dw loc_C440
+                .dw loc_C440
+                .dw loc_C5D3
+                .dw loc_C5D3
+                .dw loc_C5D3
+                .dw loc_C5D3
+                .dw loc_C5D3
+                .dw loc_C5D3
+                .dw loc_C5D3
+                .dw loc_C5D3
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw adj_m2_m8
+                .dw adj_m4_m8
+                .dw adj_m4_m8
+                .dw adj_m4_m8
+                .dw adj_m4_m8
+                .dw adj_0_m8
+                .dw no_update
+                .dw no_update
+                .dw loc_C1C5
+                .dw no_update
+                .dw no_update
+                .dw loc_CD81
+                .dw loc_C111
+                .dw loc_C111
+                .dw loc_C111
+                .dw loc_C111
+                .dw loc_C111
+                .dw loc_C111
+                .dw loc_C111
+                .dw loc_C11D
+                .dw loc_CD81
+                .dw loc_CD7C
+                .dw loc_C285
+                .dw loc_C285
+                .dw loc_CB4E
+                .dw loc_CB51
+                .dw loc_CDA0
+                .dw loc_CD81
+                .dw loc_D1FD
+                .dw loc_D1FD
+                .dw loc_CB4E
+                .dw no_update
+                .dw loc_CDBB
+                .dw loc_CE31
+                .dw loc_CE9A
+                .dw loc_CEA3
+                .dw loc_CEDD
+                .dw loc_CF22
+                .dw loc_D0AC
+                .dw loc_CD75
+                .dw loc_CEA0
+                .dw loc_CEDA
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw no_update
+                .dw loc_CF68
+                .dw loc_CF68
+                .dw loc_CF68
+                .dw loc_CF68
+                .dw loc_CF68
+                .dw loc_CF68
+                .dw loc_CF68
+                .dw loc_CF68
+                .dw loc_CFD2
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_CF14
+                .dw loc_D2AD
+                .dw loc_D2AD
+                .dw loc_D2AD
+                .dw loc_D2AD
+                .dw loc_D2DE
+                .dw loc_D2E9
+                .dw loc_D2F4
+                .dw loc_D2FF
+                .dw loc_CD16
+                .dw loc_CD16
+                .dw loc_CD16
+                .dw loc_CD16
+                .dw loc_CD16
+                .dw loc_C1C5
+                .dw loc_C1C5
+                .dw loc_C1C5
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw loc_CB4E
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_CC4B
+                .dw loc_D251
+                .dw loc_D251
+                .dw loc_D251
+                .dw loc_D251
 ; ---------------------------------------------------------------------------
 
 START:                                                          ; CODE XREF: RAM:5E04j
                 xor     a
-                out     (0FEh), a
-                ld      hl, byte_A709
-                ld      bc, 726h
+                out     (0xFE), a
+                ld      hl, #user_input_method
+                ld      bc, #0x726
                 call    clr_mem
 
-loc_AF93:                                                       ; CODE XREF: RAM:C35Aj
-                ld      hl, unk_A70E
-                ld      bc, 721h
+start_menu:                                                     ; CODE XREF: RAM:C35Aj
+                ld      hl, #unk_A70E
+                ld      bc, #0x721
                 call    clr_mem
-                call    loc_CB5C
-                ld      a, 43h ; 'C'
-                call    loc_CB6A
-                call    loc_B29A
-                ld      a, 5
-                ld      (byte_A721), a
+                call    clr_bitmap_memory
+                ld      a, #0x43 ; 'C'
+                call    fill_attr
+                call    build_lookup_tbls
+                ld      a, #5
+                ld      (lives), a
                 ld      a, r
                 ld      b, a
-                ld      a, (byte_A70D)
+                ld      a, (seed_3)
                 add     a, b
-                ld      (byte_A70D), a
-                call    loc_BB74
-                ld      de, 0D833h
-                call    loc_D6B5
-                call    loc_D16F
-                call    loc_C2CE
+                ld      (seed_3), a
+                call    do_menu_selection
+                ld      de, #start_game_tune
+                call    play_audio
+                call    init_objects???
+                call    init_start_location
 
-loc_AFC5:                                                       ; CODE XREF: RAM:B091j
-                call    loc_C2EC
+player_dies:                                                    ; CODE XREF: RAM:B091j
+                call    lose_life
+
+loc_AFC8:                                                       ; CODE XREF: RAM:C871j
                 call    loc_B115
-                call    loc_C6B6
+                call    display_location???
                 call    loc_B097
                 call    loc_CB89
-                call    loc_BB14
+                call    print_label_and_score
                 call    loc_CC31
 
-loc_AFDA:                                                       ; CODE XREF: RAM:B094j
-                call    loc_CBAB
-                ld      ix, unk_A76F
+onscreen_loop:                                                  ; CODE XREF: RAM:B094j
+                call    upd_monsters???
+                ld      ix, #graphic_objs_tbl
 
-loc_AFE1:                                                       ; CODE XREF: RAM:B02Ej
-                ld      hl, loc_B00C
+update_sprite_loop:                                             ; CODE XREF: RAM:B02Ej
+                ld      hl, #ret_from_tbl_jp
                 push    hl
-                ld      bc, unk_AE2F
-                ld      a, (ix+18h)
-                ld      (ix+1Ch), a
-                ld      a, (ix+19h)
-                ld      (ix+1Dh), a
-                ld      a, (ix+1Ah)
-                ld      (ix+1Eh), a
-                ld      a, (ix+1Bh)
-                ld      (ix+1Fh), a
-                ld      l, (ix+0)
+                ld      bc, #upd_sprite_jmp_tbl
+                ld      a, 24(ix)                               ; sprite data width (bytes)
+                ld      28(ix), a                               ; old sprite data width (bytes)
+                ld      a, 25(ix)                               ; sprite data height (lines)
+                ld      29(ix), a                               ; old sprite data height (lines)
+                ld      a, 26(ix)                               ; pixel X
+                ld      30(ix), a                               ; old pixel X
+                ld      a, 27(ix)                               ; pixel Y
+                ld      31(ix), a                               ; old pixel Y
+                ld      l, 0(ix)
 
-loc_B003:                                                       ; CODE XREF: RAM:B635j
-                ld      h, 0
+jump_to_tbl_entry:                                              ; CODE XREF: RAM:B635j
+                                                                ; RAM:C68Aj ...
+                ld      h, #0
                 add     hl, hl
                 add     hl, bc
                 ld      a, (hl)
@@ -10150,95 +2265,97 @@ loc_B003:                                                       ; CODE XREF: RAM
                 jp      (hl)
 ; ---------------------------------------------------------------------------
 
-loc_B00C:                                                       ; DATA XREF: RAM:loc_AFE1o
+ret_from_tbl_jp:                                                ; DATA XREF: RAM:update_sprite_loopo
                 ld      a, r
                 ld      b, a
-                ld      a, (word_A715)
+                ld      a, (seed_2)
                 inc     a
-                ld      h, 0
+                ld      h, #0
                 ld      l, a
                 add     a, (hl)
                 add     a, b
                 ld      b, a
-                ld      a, (byte_A70D)
+                ld      a, (seed_3)
                 add     a, b
-                ld      (byte_A70D), a
-                ld      de, 20h ; ' '
+                ld      (seed_3), a
+                ld      de, #0x20 ; ' '
                 add     ix, de
                 push    ix
                 pop     hl
-                ld      de, 0AE2Fh
+                ld      de, #upd_sprite_jmp_tbl
                 and     a
                 sbc     hl, de
-                jp      c, loc_AFE1
-                ld      hl, (word_A715)
+                jp      C, update_sprite_loop
+
+done_sprite_updates:
+                ld      hl, (seed_2)
                 inc     hl
-                ld      (word_A715), hl
-                call    loc_B531
-                call    loc_B19E
+                ld      (seed_2), hl
+                call    list_objects_to_draw
+                call    render_dynamic_objects
                 ld      (word_A73E), sp
                 call    loc_B4E0
-                ld      a, (byte_A714)
+                ld      a, (rendered_objs_cnt)
                 neg
-                add     a, 6
+                add     a, #6
                 ld      b, a
-                jp      m, loc_B05C
-                jr      z, loc_B05C
+                jp      M, loc_B05C
+                jr      Z, loc_B05C
 
-loc_B052:                                                       ; CODE XREF: RAM:B05Aj
-                ld      hl, 500h
+game_delay:                                                     ; CODE XREF: RAM:B05Aj
+                ld      hl, #0x500
 
 loc_B055:                                                       ; CODE XREF: RAM:B058j
                 dec     hl
                 ld      a, l
                 or      h
-                jr      nz, loc_B055
-                djnz    loc_B052
+                jr      NZ, loc_B055
+                djnz    game_delay
 
 loc_B05C:                                                       ; CODE XREF: RAM:B04Dj
                                                                 ; RAM:B050j
-                ld      a, (byte_A711)
+                ld      a, (render_status_info)
                 and     a
-                jr      z, loc_B084
+                jr      Z, loc_B084
                 xor     a
-                ld      (byte_A711), a
-                ld      a, (byte_A738)
-                call    loc_CB6A
-                call    loc_BA3D
+                ld      (render_status_info), a
+                ld      a, (curr_room_attrib)
+                call    fill_attr
+                call    display_objects
                 call    loc_BCE5
                 call    loc_C29A
-                call    loc_B178
-                call    loc_BB14
-                call    loc_BF0D
-                ld      hl, 4
+                call    update_screen
+                call    print_label_and_score
+                call    reset_objs_wipe_flag
+                ld      hl, #4
                 ld      (word_A749), hl
 
 loc_B084:                                                       ; CODE XREF: RAM:B060j
-                call    loc_D5F2
-                ld      ix, 0A76Fh
-                ld      a, (ix+0)
-                or      (ix+20h)
-                jp      z, loc_AFC5
-                jp      loc_AFDA
+                call    audio_D5F2
+                ld      ix, #graphic_objs_tbl
+                ld      a, 0(ix)
+                or      0x20(ix)
+                jp      Z, player_dies
+                jp      onscreen_loop
 ; ---------------------------------------------------------------------------
 
 loc_B097:                                                       ; CODE XREF: RAM:AFCEp
-                ld      iy, 0D422h
-                ld      b, 12h
+                ld      iy, #byte_D422
+                ld      b, #0x12
 
 loc_B09D:                                                       ; CODE XREF: RAM:B112j
-                ld      de, 10h
-                ld      a, (byte_A777)
+                ld      de, #16
+                ld      a, (graphic_objs_tbl+8)                 ; plyr screen
                 ld      c, a
 
 loc_B0A4:                                                       ; CODE XREF: RAM:loc_B0B2j
                 add     iy, de
-                ld      a, (iy+0)
-                and     a
-                jr      z, loc_B0B2
-                ld      a, (iy+8)
-                cp      c
-                jr      z, loc_B0B5
+                ld      a, 0(iy)                                ; graphic no
+                and     a                                       ; null?
+                jr      Z, loc_B0B2                             ; no, skip
+                ld      a, 8(iy)                                ; curr scrn
+                cp      c                                       ; same as plyr?
+                jr      Z, loc_B0B5                             ; yes, exit
 
 loc_B0B2:                                                       ; CODE XREF: RAM:B0AAj
                 djnz    loc_B0A4
@@ -10246,15 +2363,15 @@ loc_B0B2:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_B0B5:                                                       ; CODE XREF: RAM:B0B0j
-                ld      hl, 0A82Fh
-                ld      de, 20h ; ' '
+                ld      hl, # byte_A7AF+0x80
+                ld      de, #32
                 push    bc
-                ld      b, 30h ; '0'
+                ld      b, #0x30 ; '0'
 
 loc_B0BE:                                                       ; CODE XREF: RAM:B0C3j
                 ld      a, (hl)
                 and     a
-                jr      z, loc_B0C7
+                jr      Z, loc_B0C7
                 add     hl, de
                 djnz    loc_B0BE
                 pop     bc
@@ -10263,19 +2380,19 @@ loc_B0BE:                                                       ; CODE XREF: RAM
 
 loc_B0C7:                                                       ; CODE XREF: RAM:B0C0j
                 ex      de, hl
-                ld      a, (iy+0)
-                and     0F8h ; '¯'
-                cp      80h ; 'Ä'
-                jr      nz, loc_B0D7
-                ld      a, (byte_A70F)
+                ld      a, 0(iy)
+                and     #0xF8 ; '¯'
+                cp      #0x80 ; 'Ä'
+                jr      NZ, loc_B0D7
+                ld      a, (unk_A70F)
                 and     a
-                jr      z, loc_B111
+                jr      Z, loc_B111
 
 loc_B0D7:                                                       ; CODE XREF: RAM:B0CFj
-                set     4, (iy+7)
+                set     4, 7(iy)
                 push    iy
                 pop     hl
-                ld      bc, 10h
+                ld      bc, #0x10
                 ldir
                 push    iy
                 pop     hl
@@ -10284,28 +2401,28 @@ loc_B0D7:                                                       ; CODE XREF: RAM
                 inc     hl
                 ld      (hl), d
                 inc     hl
-                ld      b, 0Eh
+                ld      b, #0xE
                 xor     a
 
 loc_B0EE:                                                       ; CODE XREF: RAM:B0F0j
                 ld      (hl), a
                 inc     hl
                 djnz    loc_B0EE
-                ld      de, 0FFE0h
+                ld      de, #0xFFE0
                 add     hl, de
                 push    hl
                 pop     ix
-                ld      a, (ix+0)
-                and     0F8h ; '¯'
-                cp      80h ; 'Ä'
-                jr      z, loc_B111
+                ld      a, 0(ix)
+                and     #0xF8 ; '¯'
+                cp      #0x80 ; 'Ä'
+                jr      Z, loc_B111
 
 loc_B102:                                                       ; CODE XREF: RAM:B10Fj
-                call    loc_BF1B
-                jr      nc, loc_B111
-                ld      a, (ix+3)
-                add     a, 0Ch
-                ld      (ix+3), a
+                call    do_any_objs_intersect
+                jr      NC, loc_B111
+                ld      a, 3(ix)
+                add     a, #0xC
+                ld      3(ix), a
                 jr      loc_B102
 ; ---------------------------------------------------------------------------
 
@@ -10316,27 +2433,27 @@ loc_B111:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B115:                                                       ; CODE XREF: RAM:AFC8p
-                ld      iy, 0A80Fh
-                ld      c, 30h ; '0'
+loc_B115:                                                       ; CODE XREF: RAM:loc_AFC8p
+                ld      iy, # byte_A7AF+0x60
+                ld      c, #0x30 ; '0'
 
 loc_B11B:                                                       ; CODE XREF: RAM:B132j
-                ld      de, 20h ; ' '
+                ld      de, #0x20 ; ' '
                 add     iy, de
-                ld      a, (iy+0)
-                ld      hl, 0D432h
-                ld      de, 10h
-                ld      b, 12h
+                ld      a, 0(iy)
+                ld      hl, #byte_D432
+                ld      de, #0x10
+                ld      b, #0x12
 
 loc_B12B:                                                       ; CODE XREF: RAM:B12Fj
                 cp      (hl)
-                jr      z, loc_B135
+                jr      Z, loc_B135
                 add     hl, de
                 djnz    loc_B12B
 
 loc_B131:                                                       ; CODE XREF: RAM:B143j
                 dec     c
-                jr      nz, loc_B11B
+                jr      NZ, loc_B11B
                 ret
 ; ---------------------------------------------------------------------------
 
@@ -10345,143 +2462,132 @@ loc_B135:                                                       ; CODE XREF: RAM
                 push    iy
                 pop     hl
                 push    bc
-                ld      bc, 10h
+                ld      bc, #0x10
                 ldir
                 pop     bc
-                ld      de, 20h ; ' '
+                ld      de, #0x20 ; ' '
                 jr      loc_B131
 ; ---------------------------------------------------------------------------
-                db    1
-                db 0B8h ; ∏
-                db    9
-                db 0CDh ; Õ
-                db  94h ; î
-                db 0B3h ; ≥
-                db 0CDh ; Õ
-                db  7Fh ; 
-                db 0B3h ; ≥
-                db  60h ; `
-                db  69h ; i
-                db  0Eh
-                db    8
-                db 0C5h ; ≈
-                db 0D5h ; ’
-                db    1
-                db    6
-                db    0
-                db 0EDh ; Ì
-                db 0B0h ; ∞
-                db 0D1h ; —
-                db  15h
-                db  7Ah ; z
-                db  2Fh ; /
-                db 0E6h ; Ê
-                db    7
-                db  20h
-                db  0Ah
-                db  7Bh ; {
-                db 0D6h ; ÷
-                db  20h
-                db  5Fh ; _
-                db  38h ; 8
-                db    4
-                db  7Ah ; z
-                db 0C6h ; ∆
-                db    8
-                db  57h ; W
-                db 0C1h ; ¡
-                db  7Dh ; }
-                db 0C6h ; ∆
-                db  1Ah
-                db  6Fh ; o
-                db  7Ch ; |
-                db 0CEh ; Œ
-                db    0
-                db  67h ; g
-                db  0Dh
-                db  20h
-                db 0DBh ; €
-                db 0C9h ; …
-; ---------------------------------------------------------------------------
 
-loc_B178:                                                       ; CODE XREF: RAM:B075p
-                                                                ; RAM:BCE2j ...
-                ld      hl, 0D88Fh
-                ld      de, 57E0h
-                ld      c, 0C0h ; '¿'
+loc_B145:                                                       ; CODE XREF: RAM:C277p
+                ld      bc, #0x9B8
+                call    BC_to_Attr_In_DE
+                call    calc_screen_buffer_addr
+                ld      h, b
+                ld      l, c
+                ld      c, #8
 
-loc_B180:                                                       ; CODE XREF: RAM:B19Bj
+loc_B152:                                                       ; CODE XREF: RAM:B175j
                 push    bc
                 push    de
-                ld      bc, 20h ; ' '
+                ld      bc, #6
                 ldir
                 pop     de
                 dec     d
                 ld      a, d
                 cpl
-                and     7
-                jr      nz, loc_B199
+                and     #7
+                jr      NZ, loc_B16B
                 ld      a, e
-                sub     20h ; ' '
+                sub     #0x20 ; ' '
                 ld      e, a
-                jr      c, loc_B199
+                jr      C, loc_B16B
                 ld      a, d
-                add     a, 8
+                add     a, #8
+                ld      d, a
+
+loc_B16B:                                                       ; CODE XREF: RAM:B15Fj
+                                                                ; RAM:B165j
+                pop     bc
+                ld      a, l
+                add     a, #0x1A
+                ld      l, a
+                ld      a, h
+                adc     a, #0
+                ld      h, a
+                dec     c
+                jr      NZ, loc_B152
+                ret
+; ---------------------------------------------------------------------------
+
+update_screen:                                                  ; CODE XREF: RAM:B075p
+                                                                ; RAM:BCE2j ...
+                ld      hl, #vidbuf
+                ld      de, # zx_vram+0x17E0
+                ld      c, #192
+
+loc_B180:                                                       ; CODE XREF: RAM:B19Bj
+                push    bc
+                push    de
+                ld      bc, #32
+                ldir
+                pop     de
+                dec     d
+                ld      a, d
+                cpl
+                and     #7
+                jr      NZ, loc_B199
+                ld      a, e
+                sub     #0x20 ; ' '
+                ld      e, a
+                jr      C, loc_B199
+                ld      a, d
+                add     a, #8
                 ld      d, a
 
 loc_B199:                                                       ; CODE XREF: RAM:B18Dj
                                                                 ; RAM:B193j
                 pop     bc
                 dec     c
-                jr      nz, loc_B180
+                jr      NZ, loc_B180
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B19E:                                                       ; CODE XREF: RAM:B03Bp
+render_dynamic_objects:                                         ; CODE XREF: RAM:B03Bp
                 xor     a
-                ld      (byte_A710), a
+                ld      (objs_wiped_cnt), a
                 push    ix
-                ld      a, (byte_A711)
+                ld      a, (render_status_info)
                 and     a
-                jp      nz, loc_B252
-                ld      hl, 0B55Ah
-                ld      (word_A712), hl
+                jp      NZ, loc_B252
+                ld      hl, #objects_to_draw
+                ld      (tmp_objects_to_draw), hl
 
-loc_B1B1:                                                       ; CODE XREF: RAM:B1C8j
+wipe_next_object:                                               ; CODE XREF: RAM:B1C8j
                                                                 ; RAM:B220j ...
-                ld      hl, (word_A712)
+                ld      hl, (tmp_objects_to_draw)
                 ld      a, (hl)
                 inc     hl
-                ld      (word_A712), hl
-                cp      0FFh
-                jp      z, loc_B252
-                call    loc_B520
+                ld      (tmp_objects_to_draw), hl
+                cp      #0xFF
+                jp      Z, loc_B252
+                call    get_ptr_object
                 push    hl
                 pop     ix
-                bit     5, (ix+7)
-                jr      z, loc_B1B1
-                res     5, (ix+7)
-                ld      a, (ix+1Ah)
-                sub     (ix+1Eh)
-                jp      c, loc_B248
-                ld      c, (ix+1Eh)
+                bit     5, 7(ix)
+                jr      Z, wipe_next_object
+                res     5, 7(ix)
+                ld      a, 26(ix)
+                sub     30(ix)
+                jp      C, loc_B248
+                ld      c, 30(ix)
 
 loc_B1DA:                                                       ; CODE XREF: RAM:B24Bj
-                ld      a, (ix+1Eh)
+                ld      a, 30(ix)
                 rrca
                 rrca
                 rrca
-                and     1Fh
-                add     a, (ix+1Ch)
+                and     #0x1F
+                add     a, 28(ix)
                 ld      e, a
-                ld      a, (ix+1Ah)
+                ld      a, 26(ix)
                 rrca
                 rrca
                 rrca
-                and     1Fh
-                add     a, (ix+18h)
+                and     #0x1F
+                add     a, 24(ix)
                 cp      e
-                jr      c, loc_B1F5
+                jr      C, loc_B1F5
                 ld      e, a
 
 loc_B1F5:                                                       ; CODE XREF: RAM:B1F2j
@@ -10489,83 +2595,83 @@ loc_B1F5:                                                       ; CODE XREF: RAM
                 rrca
                 rrca
                 rrca
-                and     1Fh
+                and     #0x1F
                 ld      b, a
                 ld      a, e
                 sub     b
                 ld      h, a
-                ld      a, (ix+1Bh)
-                sub     (ix+1Fh)
-                jr      c, loc_B24D
-                ld      b, (ix+1Fh)
+                ld      a, 27(ix)
+                sub     31(ix)
+                jr      C, loc_B24D
+                ld      b, 31(ix)
 
 loc_B20A:                                                       ; CODE XREF: RAM:B250j
-                ld      a, (ix+1Fh)
-                add     a, (ix+1Dh)
+                ld      a, 31(ix)
+                add     a, 29(ix)
                 ld      e, a
-                ld      a, (ix+1Bh)
-                add     a, (ix+19h)
+                ld      a, 27(ix)
+                add     a, 25(ix)
                 cp      e
-                jr      nc, loc_B21B
+                jr      NC, loc_B21B
                 ld      a, e
 
 loc_B21B:                                                       ; CODE XREF: RAM:B218j
                 sub     b
                 ld      l, a
                 ld      a, b
-                cp      0C0h ; '¿'
-                jr      nc, loc_B1B1
+                cp      #0xC0 ; '¿'
+                jr      NC, wipe_next_object
                 add     a, l
-                sub     0C0h ; '¿'
-                jr      c, loc_B22B
+                sub     #0xC0 ; '¿'
+                jr      C, loc_B22B
                 neg
                 add     a, l
                 ld      l, a
 
 loc_B22B:                                                       ; CODE XREF: RAM:B225j
-                call    loc_B394
-                call    loc_B37F
+                call    BC_to_Attr_In_DE
+                call    calc_screen_buffer_addr
                 ld      a, l
                 ld      l, c
                 ld      c, a
                 ld      a, h
                 ld      h, b
                 ld      b, a
-                ld      a, (byte_A710)
+                ld      a, (objs_wiped_cnt)
                 inc     a
-                ld      (byte_A710), a
+                ld      (objs_wiped_cnt), a
                 push    bc
                 push    de
                 push    hl
                 xor     a
-                call    loc_B6DD
-                jp      loc_B1B1
+                call    fill_window
+                jp      wipe_next_object
 ; ---------------------------------------------------------------------------
 
 loc_B248:                                                       ; CODE XREF: RAM:B1D4j
-                ld      c, (ix+1Ah)
+                ld      c, 26(ix)
                 jr      loc_B1DA
 ; ---------------------------------------------------------------------------
 
 loc_B24D:                                                       ; CODE XREF: RAM:B205j
-                ld      b, (ix+1Bh)
+                ld      b, 27(ix)
                 jr      loc_B20A
 ; ---------------------------------------------------------------------------
 
 loc_B252:                                                       ; CODE XREF: RAM:B1A8j
                                                                 ; RAM:B1BBj
-                call    loc_B58A
-                call    loc_BA34
-                ld      hl, 0A710h
-                ld      a, (byte_A714)
+                call    calc_display_order_and_render
+                call    display_objects_carried
+                ld      hl, #objs_wiped_cnt
+                ld      a, (rendered_objs_cnt)
                 add     a, (hl)
-                ld      (byte_A714), a
+                ld      (rendered_objs_cnt), a
 
 loc_B262:                                                       ; CODE XREF: RAM:B273j
-                ld      hl, 0A710h
+                ld      hl, #objs_wiped_cnt
                 ld      a, (hl)
                 and     a
-                jr      z, loc_B275
+                jr      Z, loc_B275
                 dec     (hl)
                 pop     hl
                 pop     de
@@ -10573,7 +2679,7 @@ loc_B262:                                                       ; CODE XREF: RAM
                 ld      a, b
                 ld      b, c
                 ld      c, a
-                call    loc_B278
+                call    blit_to_screen
                 jr      loc_B262
 ; ---------------------------------------------------------------------------
 
@@ -10582,45 +2688,45 @@ loc_B275:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B278:                                                       ; CODE XREF: RAM:B270p
+blit_to_screen:                                                 ; CODE XREF: RAM:B270p
                                                                 ; RAM:B297j ...
                 push    bc
                 push    de
                 push    hl
-                ld      b, 0
+                ld      b, #0
                 ldir
                 pop     hl
-                ld      de, 20h ; ' '
+                ld      de, #0x20 ; ' '
                 add     hl, de
                 pop     de
                 dec     d
                 ld      a, d
                 cpl
-                and     7
-                jr      nz, loc_B296
+                and     #7
+                jr      NZ, loc_B296
                 ld      a, e
-                sub     20h ; ' '
+                sub     #0x20 ; ' '
                 ld      e, a
-                jr      c, loc_B296
+                jr      C, loc_B296
                 ld      a, d
-                add     a, 8
+                add     a, #8
                 ld      d, a
 
 loc_B296:                                                       ; CODE XREF: RAM:B28Aj
                                                                 ; RAM:B290j
                 pop     bc
-                djnz    loc_B278
+                djnz    blit_to_screen
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B29A:                                                       ; CODE XREF: RAM:AFA4p
-                ld      l, 0
+build_lookup_tbls:                                              ; CODE XREF: RAM:AFA4p
+                ld      l, #0
 
 loc_B29C:                                                       ; CODE XREF: RAM:B2B2j
-                ld      d, 0
+                ld      d, #0
                 ld      e, l
-                ld      h, 0FFh
-                ld      b, 7
+                ld      h, #0xFF
+                ld      b, #7
 
 loc_B2A3:                                                       ; CODE XREF: RAM:B2AFj
                 sla     e
@@ -10635,12 +2741,12 @@ loc_B2A3:                                                       ; CODE XREF: RAM
                 dec     h
                 djnz    loc_B2A3
                 inc     l
-                jr      nz, loc_B29C
-                ld      hl, 0F100h
+                jr      NZ, loc_B29C
+                ld      hl, #0xF100
 
 loc_B2B7:                                                       ; CODE XREF: RAM:B2C2j
                 ld      d, l
-                ld      b, 8
+                ld      b, #8
 
 loc_B2BA:                                                       ; CODE XREF: RAM:B2BEj
                 srl     d
@@ -10648,62 +2754,63 @@ loc_B2BA:                                                       ; CODE XREF: RAM
                 djnz    loc_B2BA
                 ld      (hl), e
                 inc     l
-                jr      nz, loc_B2B7
+                jr      NZ, loc_B2B7
                 ret
 ; ---------------------------------------------------------------------------
+; Slighty different to Knight Lore
 
-loc_B2C5:                                                       ; CODE XREF: RAM:B3E3p
-                                                                ; RAM:loc_B938p ...
-                ld      a, (ix+1)
-                add     a, (ix+2)
-                sub     80h ; 'Ä'
-                add     a, (ix+12h)
-                jr      c, loc_B2D3
+calc_pixel_XY:                                                  ; CODE XREF: RAM:B3E3p
+                                                                ; RAM:calc_2d_infop ...
+                ld      a, 1(ix)
+                add     a, 2(ix)
+                sub     #128
+                add     a, 18(ix)
+                jr      C, loc_B2D3
                 xor     a
 
 loc_B2D3:                                                       ; CODE XREF: RAM:B2D0j
-                ld      (ix+1Ah), a
-                ld      a, (ix+2)
-                sub     (ix+1)
-                add     a, 80h ; 'Ä'
+                ld      26(ix), a
+                ld      a, 2(ix)
+                sub     1(ix)
+                add     a, #128
                 srl     a
-                add     a, (ix+3)
-                sub     68h ; 'h'
-                add     a, (ix+13h)
-                ld      (ix+1Bh), a
-                cp      0C0h ; '¿'
+                add     a, 3(ix)
+                sub     #104
+                add     a, 19(ix)
+                ld      27(ix), a
+                cp      #192
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B2EE:                                                       ; CODE XREF: RAM:loc_B3E7p
+flip_sprite:                                                    ; CODE XREF: RAM:print_spritep
                                                                 ; RAM:B93Bp
-                ld      l, (ix+0)
-                ld      h, 0
+                ld      l, 0(ix)
+                ld      h, #0
                 add     hl, hl
-                ld      bc, 6DD7h
+                ld      bc, #sprite_tbl
                 add     hl, bc
                 ld      e, (hl)
                 inc     hl
                 ld      d, (hl)
                 ld      a, (de)
                 and     a
-                jr      nz, loc_B302
+                jr      NZ, vflip_sprite_data
                 inc     sp
                 inc     sp
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B302:                                                       ; CODE XREF: RAM:B2FDj
+vflip_sprite_data:                                              ; CODE XREF: RAM:B2FDj
                 push    de
                 ld      a, (de)
-                xor     (ix+7)
-                and     80h ; 'Ä'
-                jr      z, loc_B343
+                xor     7(ix)
+                and     #0x80 ; 'Ä'
+                jr      Z, loc_B343
                 ld      a, (de)
-                xor     80h ; 'Ä'
+                xor     #0x80 ; 'Ä'
                 ld      (de), a
                 rlca
-                and     1Eh
+                and     #0x1E
                 ld      b, a
                 inc     de
                 ld      a, (de)
@@ -10712,7 +2819,7 @@ loc_B302:                                                       ; CODE XREF: RAM
                 push    bc
                 push    de
                 ld      e, c
-                ld      d, 0
+                ld      d, #0
                 ld      h, d
                 ld      l, d
 
@@ -10747,19 +2854,19 @@ loc_B32E:                                                       ; CODE XREF: RAM
                 ld      a, b
                 call    loc_B519
                 dec     c
-                jr      nz, loc_B32D
+                jr      NZ, loc_B32D
 
 loc_B343:                                                       ; CODE XREF: RAM:B309j
                 pop     de
                 push    de
                 ld      a, (de)
-                xor     (ix+7)
-                and     40h ; '@'
-                jr      z, loc_B37D
+                xor     7(ix)
+                and     #0x40 ; '@'
+                jr      Z, loc_B37D
                 ld      a, (de)
-                xor     40h ; '@'
+                xor     #0x40 ; '@'
                 ld      (de), a
-                and     0Fh
+                and     #0xF
                 ld      b, a
                 ld      c, a
                 inc     de
@@ -10770,7 +2877,7 @@ loc_B343:                                                       ; CODE XREF: RAM
                 push    hl
                 exx
                 pop     hl
-                ld      b, 0F1h ; 'Ò'
+                ld      b, #0xF1 ; 'Ò'
                 exx
 
 loc_B360:                                                       ; CODE XREF: RAM:B36Bj
@@ -10798,7 +2905,7 @@ loc_B36E:                                                       ; CODE XREF: RAM
                 djnz    loc_B36E
                 ex      af, af'
                 dec     a
-                jr      z, loc_B37D
+                jr      Z, loc_B37D
                 ex      af, af'
                 ld      b, c
                 jr      loc_B360
@@ -10810,8 +2917,8 @@ loc_B37D:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B37F:                                                       ; CODE XREF: RAM:B22Ep
-                                                                ; RAM:B42Fp ...
+calc_screen_buffer_addr:                                        ; CODE XREF: RAM:B14Bp
+                                                                ; RAM:B22Ep ...
                 push    hl
                 srl     b
                 rr      c
@@ -10819,7 +2926,7 @@ loc_B37F:                                                       ; CODE XREF: RAM
                 rr      c
                 srl     b
                 rr      c
-                ld      hl, 0D88Fh
+                ld      hl, #vidbuf
                 add     hl, bc
                 ld      c, l
                 ld      b, h
@@ -10827,23 +2934,23 @@ loc_B37F:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B394:                                                       ; CODE XREF: RAM:loc_B22Bp
-                                                                ; RAM:BA86p
+BC_to_Attr_In_DE:                                               ; CODE XREF: RAM:B148p
+                                                                ; RAM:loc_B22Bp ...
                 ld      a, c
                 rrca
                 rrca
                 rrca
-                and     1Fh
+                and     #0x1F
                 ld      e, a
                 ld      a, b
                 cpl
-                and     7
+                and     #7
                 ex      af, af'
                 ld      a, b
                 cpl
                 rlca
                 rlca
-                and     0E0h ; '‡'
+                and     #0xE0 ; '‡'
                 or      e
                 ld      e, a
                 ld      a, b
@@ -10851,16 +2958,16 @@ loc_B394:                                                       ; CODE XREF: RAM
                 rrca
                 rrca
                 rrca
-                and     18h
+                and     #0x18
                 ld      d, a
                 ex      af, af'
                 or      d
-                add     a, 38h ; '8'
+                add     a, #0x38 ; '8'
                 ld      d, a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B3B6:                                                       ; CODE XREF: RAM:BAACp
+calc_attrib_addr:                                               ; CODE XREF: RAM:BAACp
                                                                 ; RAM:BC8Ep
                 push    hl
                 ld      a, h
@@ -10875,277 +2982,276 @@ loc_B3B6:                                                       ; CODE XREF: RAM
                 rr      l
                 srl     h
                 rr      l
-                ld      de, 5700h
+                ld      de, # zx_vram+0x1700
                 add     hl, de
                 ex      de, hl
                 pop     hl
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B3D3:                                                       ; CODE XREF: RAM:B6C2p
-                ld      a, (ix+0)
-                cp      1
-                jr      nz, loc_B3DF
-                ld      (ix+0), 0
+calc_pixel_XY_and_render:                                       ; CODE XREF: RAM:B6C2p
+                ld      a, 0(ix)
+                cp      #1
+                jr      NZ, loc_B3DF
+                ld      0(ix), #0
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_B3DF:                                                       ; CODE XREF: RAM:B3D8j
-                res     4, (ix+7)
-                call    loc_B2C5
-                ret     nc
+                res     4, 7(ix)
+                call    calc_pixel_XY
+                ret     NC
 
-loc_B3E7:                                                       ; CODE XREF: RAM:BA7Dp
+print_sprite:                                                   ; CODE XREF: RAM:BA7Dp
                                                                 ; RAM:BDD9p ...
-                call    loc_B2EE
-                ld      a, (ix+1Ah)
-                and     7
-                jr      z, loc_B43E
+                call    flip_sprite
+                ld      a, 0x1A(ix)
+                and     #7
+                jr      Z, loc_B43E
                 rlca
-                and     0Eh
-                or      0F0h ; ''
+                and     #0xE
+                or      #0xF0 ; ''
                 ld      h, a
                 ld      a, (de)
                 inc     de
-                and     7
+                and     #7
                 inc     a
                 ld      b, a
-                ld      (ix+18h), a
+                ld      0x18(ix), a
                 dec     a
-                and     7
+                and     #7
                 add     a, a
                 add     a, a
                 add     a, a
                 add     a, a
                 neg
-                add     a, 50h ; 'P'
+                add     a, #0x50 ; 'P'
 
 loc_B40B:                                                       ; CODE XREF: RAM:B44Dj
-                ld      (byte_B47C), a
+                ld      (loc_B47B+1), a
                 ld      a, b
                 cpl
-                add     a, 22h ; '"'
-                ld      (byte_B4D0), a
+                add     a, #0x22 ; '"'
+                ld      (loc_B4CF+1), a
                 ld      a, (de)
                 inc     de
-                ld      (ix+19h), a
-                add     a, (ix+1Bh)
-                sub     0C0h ; '¿'
-                jr      c, loc_B429
+                ld      0x19(ix), a
+                add     a, 0x1B(ix)
+                sub     #0xC0 ; '¿'
+                jr      C, loc_B429
                 neg
-                add     a, (ix+19h)
-                ld      (ix+19h), a
+                add     a, 0x19(ix)
+                ld      0x19(ix), a
 
 loc_B429:                                                       ; CODE XREF: RAM:B41Fj
-                ld      c, (ix+1Ah)
-                ld      b, (ix+1Bh)
-                call    loc_B37F
-                ld      (word_A717), sp
+                ld      c, 0x1A(ix)
+                ld      b, 0x1B(ix)
+                call    calc_screen_buffer_addr
+                ld      (tmp_SP), sp
                 ex      de, hl
                 ld      sp, hl
                 ex      de, hl
-                ld      a, (ix+19h)
+                ld      a, 0x19(ix)
                 jr      loc_B479
 ; ---------------------------------------------------------------------------
 
 loc_B43E:                                                       ; CODE XREF: RAM:B3EFj
                 ld      a, (de)
                 inc     de
-                and     0Fh
-                ld      (ix+18h), a
+                and     #0xF
+                ld      0x18(ix), a
                 ld      b, a
                 add     a, a
                 add     a, a
                 add     a, a
                 neg
-                sub     6
+                sub     #6
                 jr      loc_B40B
 ; ---------------------------------------------------------------------------
-                db 0D1h ; —
-                db  0Ah
-                db  2Fh ; /
-                db 0B3h ; ≥
-                db  2Fh ; /
-                db 0B2h ; ≤
-                db    2
-                db    3
-                db 0D1h ; —
-                db  0Ah
-                db  2Fh ; /
-                db 0B3h ; ≥
-                db  2Fh ; /
-                db 0B2h ; ≤
-                db    2
-                db    3
-                db 0D1h ; —
-                db  0Ah
-                db  2Fh ; /
-                db 0B3h ; ≥
-                db  2Fh ; /
-                db 0B2h ; ≤
-                db    2
-                db    3
-                db 0D1h ; —
-                db  0Ah
-                db  2Fh ; /
-                db 0B3h ; ≥
-                db  2Fh ; /
-                db 0B2h ; ≤
-                db    2
-                db    3
-                db 0D1h ; —
-                db  0Ah
-                db  2Fh ; /
-                db 0B3h ; ≥
-                db  2Fh ; /
-                db 0B2h ; ≤
-                db    2
-                db 0C3h ; √
-                db 0CEh ; Œ
-                db 0B4h ; ¥
+                pop     de
+                ld      a, (bc)
+                cpl
+                or      e
+                cpl
+                or      d
+                ld      (bc), a
+                inc     bc
+                pop     de
+                ld      a, (bc)
+                cpl
+                or      e
+                cpl
+                or      d
+                ld      (bc), a
+                inc     bc
+                pop     de
+                ld      a, (bc)
+                cpl
+                or      e
+                cpl
+                or      d
+                ld      (bc), a
+                inc     bc
+                pop     de
+                ld      a, (bc)
+                cpl
+                or      e
+                cpl
+                or      d
+                ld      (bc), a
+                inc     bc
+                pop     de
+                ld      a, (bc)
+                cpl
+                or      e
+                cpl
+                or      d
+                ld      (bc), a
+                jp      loc_B4CE
 ; ---------------------------------------------------------------------------
 
 loc_B479:                                                       ; CODE XREF: RAM:B43Cj
+                                                                ; RAM:B4D8j
                 ex      af, af'
                 ld      a, (bc)
+
+loc_B47B:                                                       ; CODE XREF: RAM:loc_B47Bj
+                                                                ; DATA XREF: RAM:loc_B40Bw
+                jr      loc_B47B
 ; ---------------------------------------------------------------------------
-                db  18h
-byte_B47C:      db 0FEh                                         ; DATA XREF: RAM:loc_B40Bw
-                db 0D1h ; —
-                db  6Bh ; k
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db    2
-                db    3
-                db  24h ; $
-                db  6Bh ; k
-                db  0Ah
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db  25h ; %
-                db 0D1h ; —
-                db  6Bh ; k
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db    2
-                db    3
-                db  24h ; $
-                db  6Bh ; k
-                db  0Ah
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db  25h ; %
-                db 0D1h ; —
-                db  6Bh ; k
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db    2
-                db    3
-                db  24h ; $
-                db  6Bh ; k
-                db  0Ah
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db  25h ; %
-                db 0D1h ; —
-                db  6Bh ; k
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db    2
-                db    3
-                db  24h ; $
-                db  6Bh ; k
-                db  0Ah
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db  25h ; %
-                db 0D1h ; —
-                db  6Bh ; k
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db    2
-                db    3
-                db  24h ; $
-                db  6Bh ; k
-                db  0Ah
-                db 0A6h ; ¶
-                db  6Ah ; j
-                db 0AEh ; Æ
-                db  2Fh ; /
-                db  25h ; %
-                db    2
-                db  79h ; y
-                db 0C6h ; ∆
-byte_B4D0:      db 0                                            ; DATA XREF: RAM:B412w
-                db  4Fh ; O
-                db  78h ; x
-                db 0CEh ; Œ
-                db    0
-                db  47h ; G
-                db    8
-                db  3Dh ; =
-                db 0C2h ; ¬
-                db  79h ; y
-                db 0B4h ; ¥
-                db 0EDh ; Ì
-                db  7Bh ; {
-                db  17h
-                db 0A7h ; ß
-                db 0C9h ; …
+                pop     de
+                ld      l, e
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                ld      (bc), a
+                inc     bc
+                inc     h
+                ld      l, e
+                ld      a, (bc)
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                dec     h
+                pop     de
+                ld      l, e
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                ld      (bc), a
+                inc     bc
+                inc     h
+                ld      l, e
+                ld      a, (bc)
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                dec     h
+                pop     de
+                ld      l, e
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                ld      (bc), a
+                inc     bc
+                inc     h
+                ld      l, e
+                ld      a, (bc)
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                dec     h
+                pop     de
+                ld      l, e
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                ld      (bc), a
+                inc     bc
+                inc     h
+                ld      l, e
+                ld      a, (bc)
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                dec     h
+                pop     de
+                ld      l, e
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                ld      (bc), a
+                inc     bc
+                inc     h
+                ld      l, e
+                ld      a, (bc)
+                and     (hl)
+                ld      l, d
+                xor     (hl)
+                cpl
+                dec     h
+                ld      (bc), a
+
+loc_B4CE:                                                       ; CODE XREF: RAM:B476j
+                ld      a, c
+
+loc_B4CF:                                                       ; DATA XREF: RAM:B412w
+                add     a, #0
+                ld      c, a
+                ld      a, b
+                adc     a, #0
+                ld      b, a
+                ex      af, af'
+                dec     a
+                jp      NZ, loc_B479
+                ld      sp, (tmp_SP)
+                ret
 ; ---------------------------------------------------------------------------
 
 loc_B4E0:                                                       ; CODE XREF: RAM:B042p
-                ld      a, 7Eh ; '~'
-                call    loc_B952
+                ld      a, #0x7E ; '~'
+                call    read_port
                 bit     0, a
-                ret     z
-                and     1Eh
-                ret     nz
+                ret     Z
+                and     #0x1E
+                ret     NZ
                 call    loc_D5D7
 
 loc_B4EE:                                                       ; CODE XREF: RAM:B4F5j
-                ld      a, 7Eh ; '~'
-                call    loc_B952
+                ld      a, #0x7E ; '~'
+                call    read_port
                 bit     0, a
-                jr      nz, loc_B4EE
-                ld      iy, 5C3Ah
+                jr      NZ, loc_B4EE
+                ld      iy, #0x5C3A
                 ei
 
 loc_B4FC:                                                       ; CODE XREF: RAM:B503j
-                ld      a, 7Eh ; '~'
-                call    loc_B952
+                ld      a, #0x7E ; '~'
+                call    read_port
                 bit     0, a
-                jr      z, loc_B4FC
+                jr      Z, loc_B4FC
 
 loc_B505:                                                       ; CODE XREF: RAM:B50Cj
-                ld      a, 7Eh ; '~'
-                call    loc_B952
+                ld      a, #0x7E ; '~'
+                call    read_port
                 bit     0, a
-                jr      nz, loc_B505
+                jr      NZ, loc_B505
                 di
                 call    loc_D5D7
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B513:                                                       ; CODE XREF: RAM:C9A1p
+loc_B513:                                                       ; CODE XREF: RAM:C0A1p
+                                                                ; RAM:C9A1p
                 xor     a
 
 loc_B514:                                                       ; CODE XREF: RAM:B516j
@@ -11161,42 +3267,42 @@ loc_B519:                                                       ; CODE XREF: RAM
                 add     a, l
                 ld      l, a
                 ld      a, h
-                adc     a, 0
+                adc     a, #0
                 ld      h, a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B520:                                                       ; CODE XREF: RAM:B1BEp
+get_ptr_object:                                                 ; CODE XREF: RAM:B1BEp
                                                                 ; RAM:B5A0p ...
                 push    bc
-                and     7Fh ; ''
+                and     #0x7F ; ''
                 ld      l, a
-                ld      h, 0
+                ld      h, #0
                 add     hl, hl
                 add     hl, hl
                 add     hl, hl
                 add     hl, hl
                 add     hl, hl
-                ld      bc, 0A76Fh
+                ld      bc, #graphic_objs_tbl
                 add     hl, bc
                 pop     bc
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B531:                                                       ; CODE XREF: RAM:B038p
+list_objects_to_draw:                                           ; CODE XREF: RAM:B038p
                 push    ix
-                ld      b, 36h ; '6'
-                ld      de, 20h ; ' '
-                ld      ix, 0A76Fh
-                ld      hl, 0B55Ah
-                ld      c, 0
+                ld      b, #54
+                ld      de, #32
+                ld      ix, #graphic_objs_tbl
+                ld      hl, #objects_to_draw
+                ld      c, #0
 
 loc_B541:                                                       ; CODE XREF: RAM:B552j
-                ld      a, (ix+0)
-                and     a
-                jr      z, loc_B54F
-                bit     4, (ix+7)
-                jr      z, loc_B54F
+                ld      a, 0(ix)                                ; graphic no
+                and     a                                       ; null?
+                jr      Z, loc_B54F                             ; yes, skip
+                bit     4, 7(ix)                                ; draw flag set?
+                jr      Z, loc_B54F                             ; no, skip
                 ld      (hl), c
                 inc     hl
 
@@ -11205,301 +3311,228 @@ loc_B54F:                                                       ; CODE XREF: RAM
                 inc     c
                 add     ix, de
                 djnz    loc_B541
-                ld      a, 0FFh
+                ld      a, #0xFF
                 ld      (hl), a
                 pop     ix
                 ret
 ; ---------------------------------------------------------------------------
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
+; this list (48 bytes) is not long enough for all 54 objects
+objects_to_draw:.db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:B1ABo
+                                                                ; RAM:B53Co ...
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-loc_B58A:                                                       ; CODE XREF: RAM:loc_B252p
+calc_display_order_and_render:                                  ; CODE XREF: RAM:loc_B252p
                 xor     a
-                ld      (byte_A714), a
+                ld      (rendered_objs_cnt), a
                 push    ix
                 push    iy
 
-loc_B592:                                                       ; CODE XREF: RAM:B6C5j
-                ld      de, 0B55Ah
+process_remaining_objs:                                         ; CODE XREF: RAM:B6A4j
+                                                                ; RAM:B6C5j
+                ld      de, #objects_to_draw
 
 loc_B595:                                                       ; CODE XREF: RAM:B59Ej
                 ld      a, (de)
                 inc     de
-                cp      0FFh
-                jp      z, loc_B6C8
+                cp      #0xFF
+                jp      Z, loc_B6C8
                 bit     7, a
-                jr      nz, loc_B595
-                call    loc_B520
-                ld      (word_A719), de
+                jr      NZ, loc_B595
+                call    get_ptr_object
+                ld      (render_obj_1), de
                 push    hl
                 pop     ix
 
 loc_B5AA:                                                       ; CODE XREF: RAM:B5B3j
-                                                                ; RAM:B5C5j
+                                                                ; RAM:B5C5j ...
                 ld      a, (de)
                 inc     de
-                cp      0FFh
-                jp      z, loc_B6B3
+                cp      #0xFF
+                jp      Z, loc_B6B3
                 bit     7, a
-                jr      nz, loc_B5AA
-                call    loc_B520
-                ld      (word_A71B), de
+                jr      NZ, loc_B5AA
+                call    get_ptr_object
+                ld      (render_obj_2), de
                 push    hl
                 pop     iy
                 push    ix
                 pop     bc
                 and     a
                 sbc     hl, bc
-                jr      z, loc_B5AA
-                ld      c, 0
-                ld      a, (iy+3)
-                add     a, (iy+6)
+                jr      Z, loc_B5AA
+                ld      c, #0
+                ld      a, 3(iy)
+                add     a, 6(iy)
                 ld      l, a
-                ld      a, (ix+3)
+                ld      a, 3(ix)
                 sub     l
-                jr      nc, loc_B5E5
-                ld      a, (ix+3)
-                add     a, (ix+6)
+                jr      NC, loc_B5E5
+                ld      a, 3(ix)
+                add     a, 6(ix)
                 ld      l, a
-                ld      a, (iy+3)
+                ld      a, 3(iy)
                 sub     l
-                jr      c, loc_B5E4
+                jr      C, loc_B5E4
                 inc     c
 
 loc_B5E4:                                                       ; CODE XREF: RAM:B5E1j
                 inc     c
 
 loc_B5E5:                                                       ; CODE XREF: RAM:B5D4j
-                ld      a, (iy+2)
-                add     a, (iy+5)
+                ld      a, 2(iy)
+                add     a, 5(iy)
                 ld      l, a
-                ld      a, (ix+2)
-                sub     (ix+5)
+                ld      a, 2(ix)
+                sub     5(ix)
                 sub     l
-                jr      nc, loc_B60B
-                ld      a, (ix+2)
-                add     a, (ix+5)
+                jr      NC, loc_B60B
+                ld      a, 2(ix)
+                add     a, 5(ix)
                 ld      l, a
-                ld      a, (iy+2)
-                sub     (iy+5)
+                ld      a, 2(iy)
+                sub     5(iy)
                 sub     l
                 ld      a, c
-                jr      c, loc_B608
-                add     a, 3
+                jr      C, loc_B608
+                add     a, #3
 
 loc_B608:                                                       ; CODE XREF: RAM:B604j
-                add     a, 3
+                add     a, #3
                 ld      c, a
 
 loc_B60B:                                                       ; CODE XREF: RAM:B5F3j
-                ld      a, (iy+1)
-                add     a, (iy+4)
+                ld      a, 1(iy)
+                add     a, 4(iy)
                 ld      l, a
-                ld      a, (ix+1)
-                sub     (ix+4)
+                ld      a, 1(ix)
+                sub     4(ix)
                 sub     l
-                jr      nc, loc_B631
-                ld      a, (ix+1)
-                add     a, (ix+4)
+                jr      NC, loc_B631
+                ld      a, 1(ix)
+                add     a, 4(ix)
                 ld      l, a
-                ld      a, (iy+1)
-                sub     (iy+4)
+                ld      a, 1(iy)
+                sub     4(iy)
                 sub     l
                 ld      a, c
-                jr      c, loc_B62E
-                add     a, 9
+                jr      C, loc_B62E
+                add     a, #9
 
 loc_B62E:                                                       ; CODE XREF: RAM:B62Aj
-                add     a, 9
+                add     a, #9
                 ld      c, a
 
 loc_B631:                                                       ; CODE XREF: RAM:B619j
                 ld      l, c
-                ld      bc, 0B638h
-                jp      loc_B003
+                ld      bc, #off_B638
+                jp      jump_to_tbl_entry
 ; ---------------------------------------------------------------------------
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  74h ; t
-                db 0B6h ; ∂
-                db  74h ; t
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  74h ; t
-                db 0B6h ; ∂
-                db  74h ; t
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  71h ; q
-                db 0B6h ; ∂
-                db  71h ; q
-                db 0B6h ; ∂
-                db  74h ; t
-                db 0B6h ; ∂
-                db 0B0h ; ∞
-                db 0B6h ; ∂
-                db  71h ; q
-                db 0B6h ; ∂
-                db  74h ; t
-                db 0B6h ; ∂
-                db  74h ; t
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  71h ; q
-                db 0B6h ; ∂
-                db  71h ; q
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  71h ; q
-                db 0B6h ; ∂
-                db  71h ; q
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db  6Eh ; n
-                db 0B6h ; ∂
-                db 0C3h ; √
-                db 0AAh ; ™
-                db 0B5h ; µ
-                db 0C3h ; √
-                db 0AAh ; ™
-                db 0B5h ; µ
-                db  2Ah ; *
-                db  1Bh
-                db 0A7h ; ß
-                db  2Bh ; +
-                db  4Eh ; N
-                db  11h
-                db 0CDh ; Õ
-                db 0B6h ; ∂
-                db  1Ah
-                db 0FEh ; ˛
-                db 0FFh
-                db  28h ; (
-                db    6
-                db 0B9h ; π
-                db  28h ; (
-                db  19h
-                db  13h
-                db  18h
-                db 0F5h ; ı
-                db  79h ; y
-                db  12h
-                db  13h
-                db  3Eh ; >
-                db 0FFh
-                db  12h
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db  2Ah ; *
-                db  1Bh
-                db 0A7h ; ß
-                db  22h ; "
-                db  19h
-                db 0A7h ; ß
-                db  11h
-                db  5Ah ; Z
-                db 0B5h ; µ
-                db 0C3h ; √
-                db 0AAh ; ™
-                db 0B5h ; µ
-                db  21h ; !
-                db  5Ah ; Z
-                db 0B5h ; µ
-                db  7Eh ; ~
-                db  23h ; #
-                db 0FEh ; ˛
-                db 0FFh
-                db 0CAh ;  
-                db  92h ; í
-                db 0B5h ; µ
-                db 0B9h ; π
-                db  20h
-                db 0F6h ; ˆ
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db  18h
-                db    6
-                db 0C3h ; √
-                db 0AAh ; ™
-                db 0B5h ; µ
+off_B638:       .dw continue_1                                  ; DATA XREF: RAM:B632o
+                .dw continue_1
+                .dw continue_1
+                .dw d_3467121516
+                .dw d_3467121516
+                .dw continue_1
+                .dw d_3467121516
+                .dw d_3467121516
+                .dw continue_1
+                .dw continue_1
+                .dw continue_2
+                .dw continue_2
+                .dw d_3467121516
+                .dw objs_coincide
+                .dw continue_2
+                .dw d_3467121516
+                .dw d_3467121516
+                .dw continue_1
+                .dw continue_1
+                .dw continue_2
+                .dw continue_2
+                .dw continue_1
+                .dw continue_2
+                .dw continue_2
+                .dw continue_1
+                .dw continue_1
+                .dw continue_1
+; ---------------------------------------------------------------------------
+
+continue_1:                                                     ; DATA XREF: RAM:off_B638o
+                                                                ; RAM:B63Ao ...
+                jp      loc_B5AA
+; ---------------------------------------------------------------------------
+
+continue_2:                                                     ; DATA XREF: RAM:B64Co
+                                                                ; RAM:B64Eo ...
+                jp      loc_B5AA
+; ---------------------------------------------------------------------------
+
+d_3467121516:                                                   ; DATA XREF: RAM:B63Eo
+                                                                ; RAM:B640o ...
+                ld      hl, (render_obj_2)
+                dec     hl
+                ld      c, (hl)
+                ld      de, #render_list
+
+loc_B67C:                                                       ; CODE XREF: RAM:B685j
+                ld      a, (de)
+                cp      #0xFF
+                jr      Z, loc_B687
+                cp      c
+                jr      Z, loc_B69D
+                inc     de
+                jr      loc_B67C
+; ---------------------------------------------------------------------------
+
+loc_B687:                                                       ; CODE XREF: RAM:B67Fj
+                ld      a, c
+                ld      (de), a
+                inc     de
+                ld      a, #0xFF
+                ld      (de), a
+                push    iy
+                pop     ix
+                ld      hl, (render_obj_2)
+                ld      (render_obj_1), hl
+                ld      de, #objects_to_draw
+                jp      loc_B5AA
+; ---------------------------------------------------------------------------
+
+loc_B69D:                                                       ; CODE XREF: RAM:B682j
+                ld      hl, #objects_to_draw
+
+loc_B6A0:                                                       ; CODE XREF: RAM:B6A8j
+                ld      a, (hl)
+                inc     hl
+                cp      #0xFF
+                jp      Z, process_remaining_objs
+                cp      c
+                jr      NZ, loc_B6A0
+                push    iy
+                pop     ix
+                jr      loc_B6B6
+; ---------------------------------------------------------------------------
+
+objs_coincide:                                                  ; DATA XREF: RAM:B652o
+                jp      loc_B5AA
 ; ---------------------------------------------------------------------------
 
 loc_B6B3:                                                       ; CODE XREF: RAM:B5AEj
-                ld      hl, (word_A719)
+                ld      hl, (render_obj_1)
+
+loc_B6B6:                                                       ; CODE XREF: RAM:B6AEj
                 dec     hl
                 set     7, (hl)
-                ld      a, 0FFh
-                ld      (byte_B6CD), a
-                ld      hl, 0A714h
+                ld      a, #0xFF
+                ld      (render_list), a
+                ld      hl, #rendered_objs_cnt
                 inc     (hl)
-                call    loc_B3D3
-                jp      loc_B592
+                call    calc_pixel_XY_and_render
+                jp      process_remaining_objs
 ; ---------------------------------------------------------------------------
 
 loc_B6C8:                                                       ; CODE XREF: RAM:B599j
@@ -11507,27 +3540,29 @@ loc_B6C8:                                                       ; CODE XREF: RAM
                 pop     ix
                 ret
 ; ---------------------------------------------------------------------------
-byte_B6CD:      db 0FFh                                         ; DATA XREF: RAM:B6BBw
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
-                db 0FFh
+render_list:    .db 0xFF                                        ; DATA XREF: RAM:B679o
+                                                                ; RAM:B6BBw
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
+                .db 0xFF
 ; ---------------------------------------------------------------------------
+; Identical to Knight Lore, not Alien 8
 
-loc_B6DD:                                                       ; CODE XREF: RAM:B242p
+fill_window:                                                    ; CODE XREF: RAM:B242p
                                                                 ; RAM:BA72p ...
-                ld      de, 20h ; ' '
+                ld      de, #32
 
 loc_B6E0:                                                       ; CODE XREF: RAM:B6EAj
                 push    bc
@@ -11541,251 +3576,252 @@ loc_B6E2:                                                       ; CODE XREF: RAM
                 add     hl, de
                 pop     bc
                 dec     c
-                jr      nz, loc_B6E0
+                jr      NZ, loc_B6E0
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B6ED:                                                       ; CODE XREF: RAM:B97Cp
-                bit     1, (ix+7)
-                ret     nz
-                set     1, (ix+7)
-                ld      a, (ix+0Ch)
-                and     0F8h ; '¯'
-                ld      (ix+0Ch), a
-                ld      l, 0
+adj_for_out_of_bounds:                                          ; CODE XREF: RAM:loc_B97Cp
+                                                                ; RAM:C648p
+                bit     1, 7(ix)
+                ret     NZ
+                set     1, 7(ix)
+                ld      a, 12(ix)
+                and     #0xF8 ; '¯'
+                ld      12(ix), a
+                ld      l, #0
                 ld      c, l
-                ld      a, (ix+0Bh)
+                ld      a, 11(ix)
                 and     a
                 ld      h, a
-                jr      z, loc_B712
-                call    loc_B963
+                jr      Z, loc_B712
+                call    adj_dZ_for_out_of_bounds
                 ld      a, h
                 and     a
-                jr      z, loc_B712
-                call    loc_B7E0
+                jr      Z, loc_B712
+                call    adj_dZ_for_obj_intersect
 
 loc_B712:                                                       ; CODE XREF: RAM:B706j
                                                                 ; RAM:B70Dj
-                ld      a, (ix+9)
+                ld      a, 9(ix)
                 and     a
                 ld      c, a
-                jr      z, loc_B723
-                call    loc_B8E2
+                jr      Z, loc_B723
+                call    adj_dX_for_out_of_bounds
                 ld      a, c
                 and     a
-                jr      z, loc_B723
-                call    loc_B742
+                jr      Z, loc_B723
+                call    adj_dX_for_obj_intersect
 
 loc_B723:                                                       ; CODE XREF: RAM:B717j
                                                                 ; RAM:B71Ej
-                ld      a, (ix+0Ah)
+                ld      a, 10(ix)
                 and     a
                 ld      l, a
-                jr      z, loc_B734
-                call    loc_B90D
+                jr      Z, loc_B734
+                call    adj_dY_for_out_of_bounds
                 ld      a, l
                 and     a
-                jr      z, loc_B734
-                call    loc_B791
+                jr      Z, loc_B734
+                call    adj_dY_for_obj_intersect
 
 loc_B734:                                                       ; CODE XREF: RAM:B728j
                                                                 ; RAM:B72Fj
-                ld      (ix+9), c
-                ld      (ix+0Ah), l
-                ld      (ix+0Bh), h
-                res     1, (ix+7)
+                ld      9(ix), c
+                ld      10(ix), l
+                ld      11(ix), h
+                res     1, 7(ix)
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B742:                                                       ; CODE XREF: RAM:B720p
-                ld      iy, 0A76Fh
-                ld      b, 36h ; '6'
+adj_dX_for_obj_intersect:                                       ; CODE XREF: RAM:B720p
+                ld      iy, #graphic_objs_tbl
+                ld      b, #54
 
 loc_B748:                                                       ; CODE XREF: RAM:B78Ej
-                call    loc_B99B
-                jr      z, loc_B789
-                call    loc_B8B7
-                jr      nc, loc_B789
-                call    loc_B8CC
-                jr      nc, loc_B789
+                call    is_object_not_ignored
+                jr      Z, loc_B789
+                call    do_objs_intersect_on_y
+                jr      NC, loc_B789
+                call    do_objs_intersect_on_z
+                jr      NC, loc_B789
 
 loc_B757:                                                       ; CODE XREF: RAM:B787j
-                call    loc_B8A2
-                jr      nc, loc_B789
-                set     0, (ix+0Ch)
-                ld      a, (ix+0Dh)
+                call    do_objs_intersect_on_x
+                jr      NC, loc_B789
+                set     0, 0xC(ix)
+                ld      a, 0xD(ix)
                 rrca
-                and     40h ; '@'
-                or      (iy+0Dh)
-                ld      (iy+0Dh), a
+                and     #0x40 ; '@'
+                or      0xD(iy)
+                ld      0xD(iy), a
                 rlca
-                and     40h ; '@'
-                or      (ix+0Dh)
-                ld      (ix+0Dh), a
-                bit     2, (iy+7)
-                jr      z, loc_B781
-                ld      a, (ix+9)
-                ld      (iy+9), a
+                and     #0x40 ; '@'
+                or      0xD(ix)
+                ld      0xD(ix), a
+                bit     2, 7(iy)
+                jr      Z, loc_B781
+                ld      a, 9(ix)
+                ld      9(iy), a
 
 loc_B781:                                                       ; CODE XREF: RAM:B779j
                 ld      a, c
-                call    loc_B95A
+                call    adj_d_for_out_of_bounds
                 ld      c, a
-                ret     z
+                ret     Z
                 jr      loc_B757
 ; ---------------------------------------------------------------------------
 
 loc_B789:                                                       ; CODE XREF: RAM:B74Bj
                                                                 ; RAM:B750j ...
-                ld      de, 20h ; ' '
+                ld      de, #0x20 ; ' '
                 add     iy, de
                 djnz    loc_B748
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B791:                                                       ; CODE XREF: RAM:B731p
-                ld      iy, 0A76Fh
-                ld      b, 36h ; '6'
+adj_dY_for_obj_intersect:                                       ; CODE XREF: RAM:B731p
+                ld      iy, #0xA76F
+                ld      b, #0x36 ; '6'
 
 loc_B797:                                                       ; CODE XREF: RAM:B7DDj
-                call    loc_B99B
-                jr      z, loc_B7D8
-                call    loc_B8A2
-                jr      nc, loc_B7D8
-                call    loc_B8CC
-                jr      nc, loc_B7D8
+                call    is_object_not_ignored
+                jr      Z, loc_B7D8
+                call    do_objs_intersect_on_x
+                jr      NC, loc_B7D8
+                call    do_objs_intersect_on_z
+                jr      NC, loc_B7D8
 
 loc_B7A6:                                                       ; CODE XREF: RAM:B7D6j
-                call    loc_B8B7
-                jr      nc, loc_B7D8
-                set     1, (ix+0Ch)
-                ld      a, (ix+0Dh)
+                call    do_objs_intersect_on_y
+                jr      NC, loc_B7D8
+                set     1, 0xC(ix)
+                ld      a, 0xD(ix)
                 rrca
-                and     40h ; '@'
-                or      (iy+0Dh)
-                ld      (iy+0Dh), a
+                and     #0x40 ; '@'
+                or      0xD(iy)
+                ld      0xD(iy), a
                 rlca
-                and     40h ; '@'
-                or      (ix+0Dh)
-                ld      (ix+0Dh), a
-                bit     2, (iy+7)
-                jr      z, loc_B7D0
-                ld      a, (ix+0Ah)
-                ld      (iy+0Ah), a
+                and     #0x40 ; '@'
+                or      0xD(ix)
+                ld      0xD(ix), a
+                bit     2, 7(iy)
+                jr      Z, loc_B7D0
+                ld      a, 0xA(ix)
+                ld      0xA(iy), a
 
 loc_B7D0:                                                       ; CODE XREF: RAM:B7C8j
                 ld      a, l
-                call    loc_B95A
+                call    adj_d_for_out_of_bounds
                 ld      l, a
-                ret     z
+                ret     Z
                 jr      loc_B7A6
 ; ---------------------------------------------------------------------------
 
 loc_B7D8:                                                       ; CODE XREF: RAM:B79Aj
                                                                 ; RAM:B79Fj ...
-                ld      de, 20h ; ' '
+                ld      de, #0x20 ; ' '
                 add     iy, de
                 djnz    loc_B797
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B7E0:                                                       ; CODE XREF: RAM:B70Fp
-                ld      iy, 0A76Fh
-                ld      b, 36h ; '6'
+adj_dZ_for_obj_intersect:                                       ; CODE XREF: RAM:B70Fp
+                ld      iy, #graphic_objs_tbl
+                ld      b, #54
 
 loc_B7E6:                                                       ; CODE XREF: RAM:B863j
-                call    loc_B99B
-                jr      z, loc_B85E
-                call    loc_B8A2
-                jr      nc, loc_B85E
-                call    loc_B8B7
-                jr      nc, loc_B85E
+                call    is_object_not_ignored
+                jr      Z, loc_B85E
+                call    do_objs_intersect_on_x
+                jr      NC, loc_B85E
+                call    do_objs_intersect_on_y
+                jr      NC, loc_B85E
 
 loc_B7F5:                                                       ; CODE XREF: RAM:B85Cj
-                call    loc_B8CC
-                jr      nc, loc_B85E
-                set     2, (ix+0Ch)
+                call    do_objs_intersect_on_z
+                jr      NC, loc_B85E
+                set     2, 0xC(ix)
                 call    loc_B890
-                ld      a, (iy+0)
-                cp      20h ; ' '
-                jr      c, loc_B810
-                cp      28h ; '('
-                jr      nc, loc_B810
-                set     7, (ix+17h)
+                ld      a, 0(iy)
+                cp      #0x20 ; ' '
+                jr      C, loc_B810
+                cp      #0x28 ; '('
+                jr      NC, loc_B810
+                set     7, 0x17(ix)
 
 loc_B810:                                                       ; CODE XREF: RAM:B806j
                                                                 ; RAM:B80Aj
-                cp      8Ch ; 'å'
-                jr      c, loc_B819
-                cp      90h ; 'ê'
-                call    c, loc_B866
+                cp      #0x8C ; 'å'
+                jr      C, loc_B819
+                cp      #0x90 ; 'ê'
+                call    C, loc_B866
 
 loc_B819:                                                       ; CODE XREF: RAM:B812j
-                ld      a, (ix+0Dh)
+                ld      a, 0xD(ix)
                 rrca
-                and     40h ; '@'
-                or      (iy+0Dh)
-                ld      (iy+0Dh), a
+                and     #0x40 ; '@'
+                or      0xD(iy)
+                ld      0xD(iy), a
                 rlca
-                and     40h ; '@'
-                or      (ix+0Dh)
-                ld      (ix+0Dh), a
-                set     3, (iy+0Dh)
-                bit     2, (ix+7)
-                jr      z, loc_B856
-                ld      a, (ix+0Bh)
-                ld      (iy+0Bh), a
-                ld      a, (ix+9)
+                and     #0x40 ; '@'
+                or      0xD(ix)
+                ld      0xD(ix), a
+                set     3, 0xD(iy)
+                bit     2, 7(ix)
+                jr      Z, loc_B856
+                ld      a, 0xB(ix)
+                ld      0xB(iy), a
+                ld      a, 9(ix)
                 and     a
-                jr      nz, loc_B84A
-                ld      a, (iy+9)
-                ld      (ix+9), a
+                jr      NZ, loc_B84A
+                ld      a, 9(iy)
+                ld      9(ix), a
 
 loc_B84A:                                                       ; CODE XREF: RAM:B842j
-                ld      a, (ix+0Ah)
+                ld      a, 0xA(ix)
                 and     a
-                jr      nz, loc_B856
-                ld      a, (iy+0Ah)
-                ld      (ix+0Ah), a
+                jr      NZ, loc_B856
+                ld      a, 0xA(iy)
+                ld      0xA(ix), a
 
 loc_B856:                                                       ; CODE XREF: RAM:B836j
                                                                 ; RAM:B84Ej
                 ld      a, h
-                call    loc_B95A
+                call    adj_d_for_out_of_bounds
                 ld      h, a
-                ret     z
+                ret     Z
                 jr      loc_B7F5
 ; ---------------------------------------------------------------------------
 
 loc_B85E:                                                       ; CODE XREF: RAM:B7E9j
                                                                 ; RAM:B7EEj ...
-                ld      de, 20h ; ' '
+                ld      de, #0x20 ; ' '
                 add     iy, de
                 djnz    loc_B7E6
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_B866:                                                       ; CODE XREF: RAM:B816p
-                bit     3, (iy+0Dh)
-                ret     nz
-                and     3
+                bit     3, 13(iy)
+                ret     NZ
+                and     #3
                 add     a, a
                 push    de
                 push    hl
-                ld      d, 0
+                ld      d, #0
                 ld      e, a
-                ld      a, (word_A715)
-                and     1
-                jr      z, loc_B88D
-                ld      hl, 0D30Ah
+                ld      a, (seed_2)
+                and     #1
+                jr      Z, loc_B88D
+                ld      hl, #0xD30A
                 add     hl, de
                 ld      a, (hl)
-                add     a, (ix+9)
-                ld      (ix+9), a
+                add     a, 9(ix)
+                ld      9(ix), a
                 inc     hl
                 ld      a, (hl)
-                add     a, (ix+0Ah)
-                ld      (ix+0Ah), a
+                add     a, 0xA(ix)
+                ld      0xA(ix), a
 
 loc_B88D:                                                       ; CODE XREF: RAM:B878j
                 pop     hl
@@ -11794,28 +3830,28 @@ loc_B88D:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_B890:                                                       ; CODE XREF: RAM:B7FEp
-                ld      a, (ix+0)
-                cp      5Bh ; '['
-                jr      z, loc_B89D
-                cp      20h ; ' '
-                ret     c
-                cp      28h ; '('
-                ret     nc
+                ld      a, 0(ix)
+                cp      #0x5B ; '['
+                jr      Z, loc_B89D
+                cp      #0x20 ; ' '
+                ret     C
+                cp      #0x28 ; '('
+                ret     NC
 
 loc_B89D:                                                       ; CODE XREF: RAM:B895j
-                set     7, (iy+17h)
+                set     7, 0x17(iy)
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B8A2:                                                       ; CODE XREF: RAM:loc_B757p
+do_objs_intersect_on_x:                                         ; CODE XREF: RAM:loc_B757p
                                                                 ; RAM:B79Cp ...
-                ld      a, (ix+4)
-                add     a, (iy+4)
+                ld      a, 4(ix)
+                add     a, 4(iy)
                 ld      d, a
-                ld      a, (ix+1)
+                ld      a, 1(ix)
                 add     a, c
-                sub     (iy+1)
-                jp      p, loc_B8B5
+                sub     1(iy)
+                jp      P, loc_B8B5
                 neg
 
 loc_B8B5:                                                       ; CODE XREF: RAM:B8B0j
@@ -11823,15 +3859,15 @@ loc_B8B5:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B8B7:                                                       ; CODE XREF: RAM:B74Dp
+do_objs_intersect_on_y:                                         ; CODE XREF: RAM:B74Dp
                                                                 ; RAM:loc_B7A6p ...
-                ld      a, (ix+5)
-                add     a, (iy+5)
+                ld      a, 5(ix)
+                add     a, 5(iy)
                 ld      d, a
-                ld      a, (ix+2)
+                ld      a, 2(ix)
                 add     a, l
-                sub     (iy+2)
-                jp      p, loc_B8CA
+                sub     2(iy)
+                jp      P, loc_B8CA
                 neg
 
 loc_B8CA:                                                       ; CODE XREF: RAM:B8C5j
@@ -11839,14 +3875,14 @@ loc_B8CA:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B8CC:                                                       ; CODE XREF: RAM:B752p
+do_objs_intersect_on_z:                                         ; CODE XREF: RAM:B752p
                                                                 ; RAM:B7A1p ...
-                ld      a, (ix+3)
+                ld      a, 3(ix)
                 add     a, h
-                sub     (iy+3)
-                jp      p, loc_B8DD
+                sub     3(iy)
+                jp      P, loc_B8DD
                 neg
-                ld      d, (ix+6)
+                ld      d, 6(ix)
 
 loc_B8DB:                                                       ; CODE XREF: RAM:B8E0j
                 sub     d
@@ -11854,102 +3890,102 @@ loc_B8DB:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_B8DD:                                                       ; CODE XREF: RAM:B8D3j
-                ld      d, (iy+6)
+                ld      d, 6(iy)
                 jr      loc_B8DB
 ; ---------------------------------------------------------------------------
 
-loc_B8E2:                                                       ; CODE XREF: RAM:B719p
-                ld      a, (ix+0Ch)
-                and     0F0h ; ''
-                ret     nz
-                bit     0, (ix+7)
-                ret     nz
-                ld      a, (byte_A71D)
+adj_dX_for_out_of_bounds:                                       ; CODE XREF: RAM:B719p
+                ld      a, 0xC(ix)
+                and     #0xF0 ; ''
+                ret     NZ
+                bit     0, 7(ix)
+                ret     NZ
+                ld      a, (word_A71D)
                 ld      b, a
 
 loc_B8F1:                                                       ; CODE XREF: RAM:B90Aj
-                ld      a, (ix+1)
+                ld      a, 1(ix)
                 add     a, c
-                sub     80h ; 'Ä'
-                jr      nc, loc_B8FB
+                sub     #0x80 ; 'Ä'
+                jr      NC, loc_B8FB
                 neg
 
 loc_B8FB:                                                       ; CODE XREF: RAM:B8F7j
-                add     a, (ix+4)
+                add     a, 4(ix)
                 cp      b
-                jr      c, locret_B90C
-                set     0, (ix+0Ch)
+                jr      C, locret_B90C
+                set     0, 0xC(ix)
                 ld      a, c
-                call    loc_B95A
+                call    adj_d_for_out_of_bounds
                 ld      c, a
-                jr      nz, loc_B8F1
+                jr      NZ, loc_B8F1
 
 locret_B90C:                                                    ; CODE XREF: RAM:B8FFj
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B90D:                                                       ; CODE XREF: RAM:B72Ap
-                ld      a, (ix+0Ch)
-                and     0F0h ; ''
-                ret     nz
-                bit     0, (ix+7)
-                ret     nz
-                ld      a, (byte_A71E)
+adj_dY_for_out_of_bounds:                                       ; CODE XREF: RAM:B72Ap
+                ld      a, 0xC(ix)
+                and     #0xF0 ; ''
+                ret     NZ
+                bit     0, 7(ix)
+                ret     NZ
+                ld      a, (word_A71D+1)
                 ld      b, a
 
 loc_B91C:                                                       ; CODE XREF: RAM:B935j
-                ld      a, (ix+2)
+                ld      a, 2(ix)
                 add     a, l
-                sub     80h ; 'Ä'
-                jr      nc, loc_B926
+                sub     #0x80 ; 'Ä'
+                jr      NC, loc_B926
                 neg
 
 loc_B926:                                                       ; CODE XREF: RAM:B922j
-                add     a, (ix+5)
+                add     a, 5(ix)
                 cp      b
-                jr      c, locret_B937
-                set     1, (ix+0Ch)
+                jr      C, locret_B937
+                set     1, 0xC(ix)
                 ld      a, l
-                call    loc_B95A
+                call    adj_d_for_out_of_bounds
                 ld      l, a
-                jr      nz, loc_B91C
+                jr      NZ, loc_B91C
 
 locret_B937:                                                    ; CODE XREF: RAM:B92Aj
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B938:                                                       ; CODE XREF: RAM:B9ABp
-                call    loc_B2C5
-                call    loc_B2EE
-                ld      a, (ix+1Ah)
-                and     7
+calc_2d_info:                                                   ; CODE XREF: RAM:B9ABp
+                call    calc_pixel_XY
+                call    flip_sprite
+                ld      a, 26(ix)
+                and     #7
                 ld      a, (de)
                 inc     de
-                jr      z, loc_B948
+                jr      Z, loc_B948
                 inc     a
 
 loc_B948:                                                       ; CODE XREF: RAM:B945j
-                and     0Fh
-                ld      (ix+18h), a
+                and     #0xF
+                ld      24(ix), a
                 ld      a, (de)
-                ld      (ix+19h), a
+                ld      25(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B952:                                                       ; CODE XREF: RAM:B4E2p
+read_port:                                                      ; CODE XREF: RAM:B4E2p
                                                                 ; RAM:B4F0p ...
-                out     (0FDh), a
-                in      a, (0FEh)
+                out     (0xFD), a
+                in      a, (0xFE)
                 cpl
-                and     1Fh
+                and     #0x1F
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B95A:                                                       ; CODE XREF: RAM:B782p
+adj_d_for_out_of_bounds:                                        ; CODE XREF: RAM:B782p
                                                                 ; RAM:B7D1p ...
                 and     a
-                ret     z
-                jp      p, loc_B961
+                ret     Z
+                jp      P, loc_B961
                 inc     a
                 inc     a
 
@@ -11957,94 +3993,107 @@ loc_B961:                                                       ; CODE XREF: RAM
                 dec     a
                 ret
 ; ---------------------------------------------------------------------------
+; Identical to Knight Lore
 
-loc_B963:                                                       ; CODE XREF: RAM:B708p
-                ld      a, (byte_A71F)
+adj_dZ_for_out_of_bounds:                                       ; CODE XREF: RAM:B708p
+                ld      a, (room_size_Z)
                 ld      d, a
 
 loc_B967:                                                       ; CODE XREF: RAM:B976j
-                ld      a, (ix+3)
+                ld      a, 3(ix)
                 add     a, h
                 cp      d
-                ret     nc
-                set     2, (ix+0Ch)
+                ret     NC
+                set     2, 12(ix)
                 ld      a, h
-                call    loc_B95A
+                call    adj_d_for_out_of_bounds
                 ld      h, a
-                jr      nz, loc_B967
+                jr      NZ, loc_B967
                 ret
 ; ---------------------------------------------------------------------------
-                dec     (ix+0Bh)
-                call    loc_B6ED
-                ld      a, (ix+1)
-                add     a, (ix+9)
-                ld      (ix+1), a
-                ld      a, (ix+2)
-                add     a, (ix+0Ah)
-                ld      (ix+2), a
-                ld      a, (ix+3)
-                add     a, (ix+0Bh)
-                ld      (ix+3), a
+; Identical to Knight Lore
+
+dec_dZ_and_update_XYZ:                                          ; CODE XREF: RAM:C057p
+                                                                ; RAM:C1C8p ...
+                dec     11(ix)
+
+loc_B97C:                                                       ; CODE XREF: RAM:CD41p
+                                                                ; RAM:loc_CDB6p ...
+                call    adj_for_out_of_bounds
+
+loc_B97F:                                                       ; CODE XREF: RAM:C64Ep
+                ld      a, 1(ix)
+                add     a, 9(ix)
+                ld      1(ix), a
+                ld      a, 2(ix)
+                add     a, 10(ix)
+                ld      2(ix), a
+                ld      a, 3(ix)
+                add     a, 11(ix)
+                ld      3(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_B99B:                                                       ; CODE XREF: RAM:loc_B748p
+is_object_not_ignored:                                          ; CODE XREF: RAM:loc_B748p
                                                                 ; RAM:loc_B797p ...
-                ld      a, (iy+0)
+                ld      a, 0(iy)
                 and     a
-                ret     z
-                ld      a, (iy+7)
+                ret     Z
+                ld      a, 7(iy)
                 cpl
-                and     2
+                and     #2
                 ret
 ; ---------------------------------------------------------------------------
-                ld      iy, unk_A76F
-                call    loc_B938
-                ld      b, 36h ; '6'
-                ld      a, (ix+1Ah)
+
+set_draw_objs_overlapped:                                       ; CODE XREF: RAM:C619p
+                                                                ; RAM:CCE6j
+                ld      iy, #graphic_objs_tbl
+                call    calc_2d_info
+                ld      b, #54
+                ld      a, 26(ix)
                 rrca
                 rrca
                 rrca
-                and     1Fh
+                and     #31
                 ld      l, a
-                ld      a, (ix+1Eh)
+                ld      a, 30(ix)
                 rrca
                 rrca
                 rrca
-                and     1Fh
+                and     #31
                 ld      h, a
                 cp      l
-                jr      c, loc_B9C6
+                jr      C, loc_B9C6
                 ld      a, l
 
 loc_B9C6:                                                       ; CODE XREF: RAM:B9C3j
                 ld      e, a
                 ld      a, l
-                add     a, (ix+18h)
+                add     a, 24(ix)
                 ld      l, a
                 ld      a, h
-                add     a, (ix+1Ch)
+                add     a, 28(ix)
                 cp      l
-                jr      nc, loc_B9D4
+                jr      NC, loc_B9D4
                 ld      a, l
 
 loc_B9D4:                                                       ; CODE XREF: RAM:B9D1j
                 sub     e
                 ld      d, a
-                ld      a, (ix+1Bh)
-                cp      (ix+1Fh)
-                jr      c, loc_B9E1
-                ld      a, (ix+1Fh)
+                ld      a, 27(ix)
+                cp      31(ix)
+                jr      C, loc_B9E1
+                ld      a, 31(ix)
 
 loc_B9E1:                                                       ; CODE XREF: RAM:B9DCj
                 ld      l, a
-                ld      a, (ix+1Bh)
-                add     a, (ix+19h)
+                ld      a, 27(ix)
+                add     a, 25(ix)
                 ld      h, a
-                ld      a, (ix+1Fh)
-                add     a, (ix+1Dh)
+                ld      a, 31(ix)
+                add     a, 29(ix)
                 cp      h
-                jr      nc, loc_B9F3
+                jr      NC, loc_B9F3
                 ld      a, h
 
 loc_B9F3:                                                       ; CODE XREF: RAM:B9F0j
@@ -12052,35 +4101,35 @@ loc_B9F3:                                                       ; CODE XREF: RAM
                 ld      h, a
 
 loc_B9F5:                                                       ; CODE XREF: RAM:BA23j
-                ld      a, (iy+0)
+                ld      a, 0(iy)
                 and     a
-                jr      z, loc_BA1C
-                bit     4, (iy+7)
-                jr      nz, loc_BA1C
-                ld      a, (iy+1Ah)
+                jr      Z, loc_BA1C
+                bit     4, 7(iy)
+                jr      NZ, loc_BA1C
+                ld      a, 26(iy)
                 rrca
                 rrca
                 rrca
-                and     1Fh
+                and     #0x1F
                 sub     e
-                jr      c, loc_BA26
+                jr      C, loc_BA26
                 cp      d
 
 loc_BA0D:                                                       ; CODE XREF: RAM:BA2Bj
-                jr      nc, loc_BA1C
-                ld      a, (iy+1Bh)
+                jr      NC, loc_BA1C
+                ld      a, 27(iy)
                 sub     l
-                jr      c, loc_BA2D
+                jr      C, loc_BA2D
                 cp      h
 
 loc_BA16:                                                       ; CODE XREF: RAM:BA32j
-                jr      nc, loc_BA1C
-                set     4, (iy+7)
+                jr      NC, loc_BA1C
+                set     4, 7(iy)
 
 loc_BA1C:                                                       ; CODE XREF: RAM:B9F9j
                                                                 ; RAM:B9FFj ...
                 exx
-                ld      de, 20h ; ' '
+                ld      de, #32
                 add     iy, de
                 exx
                 djnz    loc_B9F5
@@ -12089,246 +4138,209 @@ loc_BA1C:                                                       ; CODE XREF: RAM
 
 loc_BA26:                                                       ; CODE XREF: RAM:BA0Aj
                 neg
-                cp      (iy+18h)
+                cp      24(iy)
                 jr      loc_BA0D
 ; ---------------------------------------------------------------------------
 
 loc_BA2D:                                                       ; CODE XREF: RAM:BA13j
                 neg
-                cp      (iy+19h)
+                cp      25(iy)
                 jr      loc_BA16
 ; ---------------------------------------------------------------------------
 
-loc_BA34:                                                       ; CODE XREF: RAM:B255p
+display_objects_carried:                                        ; CODE XREF: RAM:B255p
                 ld      a, (byte_A720)
                 and     a
-                ret     z
+                ret     Z
                 xor     a
                 ld      (byte_A720), a
 
-loc_BA3D:                                                       ; CODE XREF: RAM:B06Cp
+display_objects:                                                ; CODE XREF: RAM:B06Cp
                 push    ix
-                ld      ix, 0BACAh
-                ld      b, 3
-                ld      hl, 0A726h
+                ld      ix, #sprite_scratchpad
+                ld      b, #3
+                ld      hl, #objects_carried
 
-loc_BA48:                                                       ; CODE XREF: RAM:BABDj
+display_object:                                                 ; CODE XREF: RAM:BABDj
                 push    bc
                 push    hl
                 ld      a, b
                 neg
-                add     a, 3
+                add     a, #3
                 sla     a
                 sla     a
                 sla     a
                 ld      c, a
                 sla     a
                 add     a, c
-                add     a, 10h
-                ld      (ix+1Ah), a
-                ld      (ix+1Bh), 0
-                ld      c, (ix+1Ah)
-                ld      b, (ix+1Bh)
+                add     a, #0x10
+                ld      26(ix), a
+                ld      27(ix), #0
+                ld      c, 26(ix)
+                ld      b, 27(ix)
                 push    hl
-                call    loc_B37F
+                call    calc_screen_buffer_addr
                 ld      l, c
                 ld      h, b
-                ld      bc, 318h
+                ld      bc, #0x318
                 xor     a
-                call    loc_B6DD
+                call    fill_window
                 pop     hl
                 ld      a, (hl)
                 and     a
-                jr      z, loc_BA80
-                ld      (ix+0), a
-                call    loc_B3E7
+                jr      Z, loc_BA80
+                ld      0(ix), a
+                call    print_sprite
 
 loc_BA80:                                                       ; CODE XREF: RAM:BA78j
-                ld      c, (ix+1Ah)
-                ld      b, (ix+1Bh)
-                call    loc_B394
-                call    loc_B37F
+                ld      c, 0x1A(ix)
+                ld      b, 0x1B(ix)
+                call    BC_to_Attr_In_DE
+                call    calc_screen_buffer_addr
                 ld      l, c
                 ld      h, b
-                ld      bc, 1803h
-                call    loc_B278
+                ld      bc, #0x1803
+                call    blit_to_screen
                 pop     hl
                 pop     bc
                 push    bc
                 push    hl
                 ld      a, (hl)
-                and     7
+                and     #7
                 ld      e, a
-                ld      d, 0
-                ld      hl, 0BAC2h
+                ld      d, #0
+                ld      hl, #byte_BAC2
                 add     hl, de
                 ld      c, (hl)
-                ld      l, (ix+1Ah)
-                ld      a, (ix+1Bh)
-                add     a, 17h
+                ld      l, 0x1A(ix)
+                ld      a, 0x1B(ix)
+                add     a, #0x17
                 ld      h, a
-                call    loc_B3B6
+                call    calc_attrib_addr
                 ex      de, hl
                 ld      a, c
-                ld      bc, 303h
-                call    loc_B6DD
+                ld      bc, #0x303
+                call    fill_window
                 pop     hl
                 pop     bc
                 inc     hl
                 inc     hl
                 inc     hl
                 inc     hl
-                djnz    loc_BA48
+                djnz    display_object
                 pop     ix
                 ret
 ; ---------------------------------------------------------------------------
-                db  41h ; A
-                db  42h ; B
-                db  43h ; C
-                db  44h ; D
-                db  45h ; E
-                db  46h ; F
-                db  47h ; G
-                db  47h ; G
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
+byte_BAC2:      .db 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x47 ; DATA XREF: RAM:BA9Eo
+sprite_scratchpad:.db 0, 0, 0, 0, 0, 0, 0, 0                    ; DATA XREF: RAM:BA3Fo
+                                                                ; RAM:loc_BCE5o ...
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-loc_BAEA:                                                       ; CODE XREF: RAM:BB57p
+print_8x8:                                                      ; CODE XREF: RAM:BB57p
                                                                 ; RAM:BB5Dp ...
                 push    bc
                 push    de
                 push    hl
-                cp      20h ; ' '
-                jr      nz, loc_BAF3
-                ld      a, 3Dh ; '='
+                cp      #0x20 ; ' '
+                jr      NZ, loc_BAF3
+                ld      a, #0x3D ; '='
 
 loc_BAF3:                                                       ; CODE XREF: RAM:BAEFj
                 ld      l, a
-                ld      h, 0
+                ld      h, #0
                 add     hl, hl
                 add     hl, hl
                 add     hl, hl
-                ld      de, (word_A732)
+                ld      de, (gfxbase_8x8)
                 add     hl, de
                 ex      de, hl
                 pop     hl
-                ld      b, 8
+                ld      b, #8
 
 loc_BB02:                                                       ; CODE XREF: RAM:BB0Bj
                 ld      a, (de)
                 ld      (hl), a
                 inc     de
                 push    bc
-                ld      bc, 0FFE0h
+                ld      bc, #0xFFE0
                 add     hl, bc
                 pop     bc
                 djnz    loc_BB02
                 pop     de
-                ld      bc, 101h
+                ld      bc, #0x101
                 add     hl, bc
                 pop     bc
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BB14:                                                       ; CODE XREF: RAM:AFD4p
+print_label_and_score:                                          ; CODE XREF: RAM:AFD4p
                                                                 ; RAM:B078p
-                ld      hl, 1FC0h
-                ld      a, 47h ; 'G'
-                ld      (byte_A736), a
-                ld      de, 0BB24h
-                call    loc_BC66
-                jr      loc_BB3B
+                ld      hl, #0x1FC0
+                ld      a, #0x47 ; 'G'
+                ld      (tmp_attrib), a
+                ld      de, #aScore                             ; "SCOR≈"
+                call    print_text_single_colour
+                jr      print_score
 ; ---------------------------------------------------------------------------
-                db  53h ; S
-                db  43h ; C
-                db  4Fh ; O
-                db  52h ; R
-                db 0C5h ; ≈
-                db  21h ; !
-                db  46h ; F
-                db 0A7h ; ß
-                db  7Eh ; ~
-                db  81h ; Å
-                db  27h ; '
-                db  77h ; w
-                db  2Bh ; +
-                db  7Eh ; ~
-                db  88h ; à
-                db  27h ; '
-                db  77h ; w
-                db  2Bh ; +
-                db  7Eh ; ~
-                db 0CEh ; Œ
-                db    0
-                db  27h ; '
-                db  77h ; w
+aScore:         .ascii 'SCOR'                                   ; DATA XREF: RAM:BB1Co
+                .db 0xC5
 ; ---------------------------------------------------------------------------
+; BC = value to add (BCD)
 
-loc_BB3B:                                                       ; CODE XREF: RAM:BB22j
-                ld      bc, 10B8h
-                call    loc_B37F
+add_to_score_and_print:                                         ; CODE XREF: RAM:C274p
+                ld      hl, # score+2
+                ld      a, (hl)
+                add     a, c
+                daa
+                ld      (hl), a
+                dec     hl
+                ld      a, (hl)
+                adc     a, b
+                daa
+                ld      (hl), a
+                dec     hl
+                ld      a, (hl)
+                adc     a, #0
+                daa
+                ld      (hl), a
+
+print_score:                                                    ; CODE XREF: RAM:BB22j
+                ld      bc, #0x10B8
+                call    calc_screen_buffer_addr
                 ld      l, c
                 ld      h, b
-                ld      de, 0A744h
-                ld      b, 3
+                ld      de, #score
+                ld      b, #3
 
-loc_BB48:                                                       ; CODE XREF: RAM:BB61j
+print_BCD_number:                                               ; CODE XREF: RAM:BB61j
                                                                 ; RAM:C2CBj ...
                 push    hl
-                ld      hl, 8355h
-                ld      (word_A732), hl
+                ld      hl, #font
+                ld      (gfxbase_8x8), hl
                 pop     hl
                 ld      a, (de)
                 rrca
                 rrca
                 rrca
                 rrca
-                and     0Fh
-                call    loc_BAEA
+                and     #0xF
+                call    print_8x8
 
-loc_BB5A:                                                       ; CODE XREF: RAM:C742j
+print_BCD_lsd:                                                  ; CODE XREF: RAM:C742j
                 ld      a, (de)
-                and     0Fh
-                call    loc_BAEA
+                and     #0xF
+                call    print_8x8
                 inc     de
-                djnz    loc_BB48
+                djnz    print_BCD_number
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_BB64:                                                       ; CODE XREF: RAM:BBE3p
                 and     a
-                jr      nz, loc_BB6E
+                jr      NZ, loc_BB6E
 
 loc_BB67:                                                       ; CODE XREF: RAM:BB6Cj
                 set     7, (hl)
@@ -12337,7 +4349,7 @@ loc_BB67:                                                       ; CODE XREF: RAM
 
 loc_BB6B:                                                       ; CODE XREF: RAM:BB71j
                 dec     a
-                jr      z, loc_BB67
+                jr      Z, loc_BB67
 
 loc_BB6E:                                                       ; CODE XREF: RAM:BB65j
                 res     7, (hl)
@@ -12348,60 +4360,60 @@ loc_BB70:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BB74:                                                       ; CODE XREF: RAM:AFB6p
+do_menu_selection:                                              ; CODE XREF: RAM:AFB6p
                 xor     a
                 ld      (byte_A734), a
-                ld      hl, unk_BBF1
-                ld      b, 8
+                ld      hl, #unk_BBF1
+                ld      b, #8
 
 loc_BB7D:                                                       ; CODE XREF: RAM:BB80j
                 res     7, (hl)
                 inc     hl
                 djnz    loc_BB7D
-                call    loc_CB81
+                call    clear_scrn_buffer
                 call    loc_BCB4
                 call    loc_BBD8
 
 loc_BB8B:                                                       ; CODE XREF: RAM:BBD5j
                 call    loc_BCB4
-                ld      de, unk_D7CF
+                ld      de, #byte_D7CF
                 call    loc_D69C
-                ld      a, 0F7h ; '˜'
-                call    loc_B952
+                ld      a, #0xF7 ; '˜'
+                call    read_port
                 ld      e, a
-                ld      a, (byte_A709)
+                ld      a, (user_input_method)
                 ld      (byte_A70C), a
                 bit     0, e
-                jr      z, loc_BBA6
-                and     0F9h ; '˘'
+                jr      Z, loc_BBA6
+                and     #0xF9 ; '˘'
 
 loc_BBA6:                                                       ; CODE XREF: RAM:BBA2j
                 bit     1, e
-                jr      z, loc_BBAE
-                and     0F9h ; '˘'
-                or      2
+                jr      Z, loc_BBAE
+                and     #0xF9 ; '˘'
+                or      #2
 
 loc_BBAE:                                                       ; CODE XREF: RAM:BBA8j
                 bit     2, e
-                jr      z, loc_BBB6
-                and     0F9h ; '˘'
-                or      4
+                jr      Z, loc_BBB6
+                and     #0xF9 ; '˘'
+                or      #4
 
 loc_BBB6:                                                       ; CODE XREF: RAM:BBB0j
                 bit     3, e
-                jr      z, loc_BBBC
-                or      6
+                jr      Z, loc_BBBC
+                or      #6
 
 loc_BBBC:                                                       ; CODE XREF: RAM:BBB8j
-                ld      (byte_A709), a
-                ld      hl, unk_A735
-                ld      hl, byte_A70C
+                ld      (user_input_method), a
+                ld      hl, #unk_A735
+                ld      hl, #byte_A70C
                 cp      (hl)
-                ld      a, 0EFh ; 'Ô'
-                call    loc_B952
+                ld      a, #0xEF ; 'Ô'
+                call    read_port
                 bit     0, a
-                ret     nz
-                ld      hl, unk_A70A
+                ret     NZ
+                ld      hl, #unk_A70A
                 inc     (hl)
                 call    loc_BBD8
                 jp      loc_BB8B
@@ -12409,176 +4421,90 @@ loc_BBBC:                                                       ; CODE XREF: RAM
 
 loc_BBD8:                                                       ; CODE XREF: RAM:BB88p
                                                                 ; RAM:BBD2p
-                ld      hl, unk_BBF2
-                ld      a, (byte_A709)
+                ld      hl, #unk_BBF2
+                ld      a, (user_input_method)
                 rrca
-                and     3
-                ld      b, 4
+                and     #3
+                ld      b, #4
                 call    loc_BB64
                 res     7, (hl)
-                ld      a, (byte_A709)
-                and     8
-                ret     z
+                ld      a, (user_input_method)
+                and     #8
+                ret     Z
                 set     7, (hl)
                 ret
 ; ---------------------------------------------------------------------------
-unk_BBF1:       db  43h ; C                                     ; DATA XREF: RAM:BB78o
-unk_BBF2:       db  44h ; D                                     ; DATA XREF: RAM:loc_BBD8o
-                db  44h ; D
-                db  44h ; D
-                db  44h ; D
-                db  47h ; G
-                db  47h ; G
-                db  58h ; X
-                db  9Fh ; ü
-                db  30h ; 0
-                db  8Fh ; è
-                db  30h ; 0
-                db  7Fh ; 
-                db  30h ; 0
-                db  6Fh ; o
-                db  30h ; 0
-                db  5Fh ; _
-                db  30h ; 0
-                db  3Fh ; ?
-                db  50h ; P
-                db  27h ; '
-                db  50h ; P
-                db  45h ; E
-                db  4Eh ; N
-                db  54h ; T
-                db  41h ; A
-                db  47h ; G
-                db  52h ; R
-                db  41h ; A
-                db 0CDh ; Õ
-                db  31h ; 1
-                db  20h
-                db  4Bh ; K
-                db  45h ; E
-                db  59h ; Y
-                db  42h ; B
-                db  4Fh ; O
-                db  41h ; A
-                db  52h ; R
-                db 0C4h ; ƒ
-                db  32h ; 2
-                db  20h
-                db  4Bh ; K
-                db  45h ; E
-                db  4Dh ; M
-                db  50h ; P
-                db  53h ; S
-                db  54h ; T
-                db  4Fh ; O
-                db  4Eh ; N
-                db  20h
-                db  4Ah ; J
-                db  4Fh ; O
-                db  59h ; Y
-                db  53h ; S
-                db  54h ; T
-                db  49h ; I
-                db  43h ; C
-                db 0CBh ; À
-                db  33h ; 3
-                db  20h
-                db  43h ; C
-                db  55h ; U
-                db  52h ; R
-                db  53h ; S
-                db  4Fh ; O
-                db  52h ; R
-                db  20h
-                db  20h
-                db  20h
-                db  4Ah ; J
-                db  4Fh ; O
-                db  59h ; Y
-                db  53h ; S
-                db  54h ; T
-                db  49h ; I
-                db  43h ; C
-                db 0CBh ; À
-                db  34h ; 4
-                db  20h
-                db  49h ; I
-                db  4Eh ; N
-                db  54h ; T
-                db  45h ; E
-                db  52h ; R
-                db  46h ; F
-                db  41h ; A
-                db  43h ; C
-                db  45h ; E
-                db  20h
-                db  49h ; I
-                db 0C9h ; …
-                db  30h ; 0
-                db  20h
-                db  53h ; S
-                db  54h ; T
-                db  41h ; A
-                db  52h ; R
-                db  54h ; T
-                db  20h
-                db  47h ; G
-                db  41h ; A
-                db  4Dh ; M
-                db 0C5h ; ≈
-                db  3Ch ; <
-                db  20h
-                db  31h ; 1
-                db  39h ; 9
-                db  38h ; 8
-                db  36h ; 6
-                db  20h
-                db  41h ; A
-                db  3Ah ; :
-                db  43h ; C
-                db  3Ah ; :
-                db  47h ; G
-                db 0BAh ; ∫
+unk_BBF1:       .db 0x43 ; C                                    ; DATA XREF: RAM:BB78o
+                                                                ; RAM:loc_BCB4o
+unk_BBF2:       .db 0x44 ; D                                    ; DATA XREF: RAM:loc_BBD8o
+                .db 0x44 ; D
+                .db 0x44 ; D
+                .db 0x44 ; D
+                .db 0x47 ; G
+                .db 0x47 ; G
+unk_BBF8:       .db 0x58 ; X                                    ; DATA XREF: RAM:BCB8o
+                .db 0x9F ; ü
+                .db 0x30 ; 0
+                .db 0x8F ; è
+                .db 0x30 ; 0
+                .db 0x7F ; 
+                .db 0x30 ; 0
+                .db 0x6F ; o
+                .db 0x30 ; 0
+                .db 0x5F ; _
+                .db 0x30 ; 0
+                .db 0x3F ; ?
+                .db 0x50 ; P
+                .db 0x27 ; '
+aPentagram:     .ascii 'PENTAGRA'                               ; DATA XREF: RAM:BCBBo
+                .db 0xCD
+a1Keyboard:     .ascii '1 KEYBOAR'
+                .db 0xC4
+a2KempstonJoystick:.ascii '2 KEMPSTON JOYSTIC'
+                .db 0xCB
+a3CursorJoystick:.ascii '3 CURSOR   JOYSTIC'
+                .db 0xCB
+a4InterfaceII:  .ascii '4 INTERFACE I'
+                .db 0xC9
+a0StartGame:    .ascii '0 START GAM'
+                .db 0xC5
+a1986ACG:       .ascii '< 1986 A:C:G'
+                .db 0xBA
 ; ---------------------------------------------------------------------------
 
-loc_BC66:                                                       ; CODE XREF: RAM:BB1Fp
+print_text_single_colour:                                       ; CODE XREF: RAM:BB1Fp
                                                                 ; RAM:BCCFp
                 push    hl
-                ld      hl, 81D5h
-                ld      (word_A732), hl
+                ld      hl, #0x81D5                             ; font-$180 (base='0')
+                ld      (gfxbase_8x8), hl
                 pop     bc
                 push    bc
-                call    loc_B37F
+                call    calc_screen_buffer_addr
                 ld      l, c
                 ld      h, b
-                ld      a, (byte_A736)
+                ld      a, (tmp_attrib)
                 ex      af, af'
                 jr      loc_BC8B
 ; ---------------------------------------------------------------------------
-                db 0E5h ; Â
-                db  21h ; !
-                db 0D5h ; ’
-                db  81h ; Å
-                db  22h ; "
-                db  32h ; 2
-                db 0A7h ; ß
-                db 0C1h ; ¡
-                db 0C5h ; ≈
-                db 0CDh ; Õ
-                db  7Fh ; 
-                db 0B3h ; ≥
-                db  69h ; i
-                db  60h ; `
-                db  1Ah
-                db    8
-                db  13h
-; ---------------------------------------------------------------------------
+
+print_text_std_font:
+                push    hl
+                ld      hl, #0x81D5                             ; font-$180 (base='0')
+                ld      (gfxbase_8x8), hl
+                pop     bc
+                push    bc
+                call    calc_screen_buffer_addr
+                ld      l, c
+                ld      h, b
+                ld      a, (de)
+                ex      af, af'
+                inc     de
 
 loc_BC8B:                                                       ; CODE XREF: RAM:BC78j
                 exx
                 pop     hl
                 push    de
-                call    loc_B3B6
+                call    calc_attrib_addr
                 ld      l, e
                 ld      h, d
                 pop     de
@@ -12587,9 +4513,9 @@ loc_BC94:                                                       ; CODE XREF: RAM
                 exx
                 ld      a, (de)
                 bit     7, a
-                jr      nz, loc_BCA7
+                jr      NZ, loc_BCA7
                 push    de
-                call    loc_BAEA
+                call    print_8x8
                 pop     de
                 inc     de
                 exx
@@ -12601,9 +4527,9 @@ loc_BC94:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_BCA7:                                                       ; CODE XREF: RAM:BC98j
-                and     7Fh ; ''
+                and     #0x7F ; ''
                 push    de
-                call    loc_BAEA
+                call    print_8x8
                 pop     de
                 inc     de
                 exx
@@ -12615,17 +4541,17 @@ loc_BCA7:                                                       ; CODE XREF: RAM
 
 loc_BCB4:                                                       ; CODE XREF: RAM:BB85p
                                                                 ; RAM:loc_BB8Bp
-                ld      de, 0BBF1h
+                ld      de, #unk_BBF1
                 exx
-                ld      hl, 0BBF8h
-                ld      de, 0BC06h
-                ld      b, 7
+                ld      hl, #unk_BBF8
+                ld      de, #aPentagram                         ; "PENTAGRAÕ"
+                ld      b, #7
 
 loc_BCC0:                                                       ; CODE XREF: RAM:BCD4j
-                                                                ; RAM:C33Ap
+                                                                ; RAM:C31Ap ...
                 exx
                 ld      a, (de)
-                ld      (byte_A736), a
+                ld      (tmp_attrib), a
                 inc     de
                 exx
                 push    bc
@@ -12636,171 +4562,111 @@ loc_BCC0:                                                       ; CODE XREF: RAM
                 dec     hl
                 ld      h, (hl)
                 ld      l, a
-                call    loc_BC66
+                call    print_text_single_colour
                 pop     hl
                 pop     bc
                 djnz    loc_BCC0
                 ld      a, (byte_A734)
                 and     a
-                ret     nz
+                ret     NZ
                 inc     a
                 ld      (byte_A734), a
                 call    loc_BD59
-                jp      loc_B178
+                jp      update_screen
 ; ---------------------------------------------------------------------------
 
 loc_BCE5:                                                       ; CODE XREF: RAM:B06Fp
-                ld      ix, 0BACAh
-                ld      hl, 0BD31h
+                ld      ix, #sprite_scratchpad
+                ld      hl, #byte_BD31
                 call    loc_BDC0
-                ld      de, 0F810h
-                ld      b, 5
-                call    loc_BDDE
+                ld      de, #0xF810
+                ld      b, #5
+                call    nultiple_print_sprite
                 call    loc_BDC0
-                ld      de, 0F8F0h
-                ld      b, 5
-                call    loc_BDDE
+                ld      de, #0xF8F0
+                ld      b, #5
+                call    nultiple_print_sprite
                 call    loc_BDC0
-                ld      de, 2000h
-                ld      b, 2
-                call    loc_BDDE
+                ld      de, #0x2000
+                ld      b, #2
+                call    nultiple_print_sprite
                 call    loc_BDC0
-                ld      b, 2
-                call    loc_BDDE
+                ld      b, #2
+                call    nultiple_print_sprite
                 call    loc_BDC0
-                ld      b, 2
-                call    loc_BDDE
+                ld      b, #2
+                call    nultiple_print_sprite
                 call    loc_BDC0
-                ld      b, 2
-                call    loc_BDDE
+                ld      b, #2
+                call    nultiple_print_sprite
                 call    loc_BDD5
                 call    loc_BDD5
                 call    loc_BDD5
                 jp      loc_BDD5
 ; ---------------------------------------------------------------------------
-                db  3Eh ; >
-                db  40h ; @
-                db  10h
-                db  34h ; 4
-                db  3Eh ; >
-                db    0
-                db 0E0h ; ‡
-                db  34h ; 4
-                db  3Dh ; =
-                db  40h ; @
-                db    0
-                db    4
-                db  3Dh ; =
-                db    0
-                db 0F0h ; 
-                db    4
-                db  3Ch ; <
-                db  40h ; @
-                db    0
-                db  14h
-                db  3Ch ; <
-                db    0
-                db 0F0h ; 
-                db  14h
-                db  3Ah ; :
-                db  40h ; @
-                db  60h ; `
-                db    4
-                db  3Ah ; :
-                db    0
-                db  90h ; ê
-                db    4
-                db  3Bh ; ;
-                db  40h ; @
-                db    0
-                db  34h ; 4
-                db  3Bh ; ;
-                db    0
-                db 0F0h ; 
-                db  34h ; 4
+byte_BD31:      .db 0x3E, 0x40, 0x10, 0x34                      ; DATA XREF: RAM:BCE9o
+                .db 0x3E, 0, 0xE0, 0x34
+                .db 0x3D, 0x40, 0, 4
+                .db 0x3D, 0, 0xF0, 4
+                .db 0x3C, 0x40, 0, 0x14
+                .db 0x3C, 0, 0xF0, 0x14
+                .db 0x3A, 0x40, 0x60, 4
+                .db 0x3A, 0, 0x90, 4
+                .db 0x3B, 0x40, 0, 0x34
+                .db 0x3B, 0, 0xF0, 0x34
 ; ---------------------------------------------------------------------------
 
 loc_BD59:                                                       ; CODE XREF: RAM:BCDFp
                                                                 ; RAM:C32Bp
-                ld      ix, 0BACAh
-                ld      hl, 0BD98h
+                ld      ix, #sprite_scratchpad
+                ld      hl, #byte_BD98
                 call    loc_BDD5
                 call    loc_BDD5
                 call    loc_BDD5
                 call    loc_BDD5
                 call    loc_BDC0
-                ld      de, 18h
-                ld      b, 8
-                call    loc_BDDE
+                ld      de, #0x18
+                ld      b, #8
+                call    nultiple_print_sprite
                 call    loc_BDC0
-                ld      b, 8
-                call    loc_BDDE
+                ld      b, #8
+                call    nultiple_print_sprite
                 call    loc_BDD5
                 call    loc_BDD5
                 call    loc_BDC0
-                ld      de, 1800h
-                ld      b, 6
-                call    loc_BDDE
+                ld      de, #0x1800
+                ld      b, #6
+                call    nultiple_print_sprite
                 call    loc_BDC0
-                ld      b, 6
-                jp      loc_BDDE
+                ld      b, #6
+                jp      nultiple_print_sprite
 ; ---------------------------------------------------------------------------
-                db    5
-                db    0
-                db    0
-                db 0A8h ; ®
-                db    5
-                db  40h ; @
-                db 0E8h ; Ë
-                db 0A8h ; ®
-                db    5
-                db 0C0h ; ¿
-                db 0E8h ; Ë
-                db    0
-                db    5
-                db  80h ; Ä
-                db    0
-                db    0
-                db    4
-                db    0
-                db  18h
-                db 0A8h ; ®
-                db    4
-                db  80h ; Ä
-                db  18h
-                db    0
-                db    3
-                db    0
-                db 0D8h ; ÿ
-                db 0A8h ; ®
-                db    3
-                db  80h ; Ä
-                db 0D8h ; ÿ
-                db    0
-                db    2
-                db    0
-                db    0
-                db  18h
-                db    2
-                db  40h ; @
-                db 0E8h ; Ë
-                db  18h
+byte_BD98:      .db 5, 0, 0, 0xA8                               ; DATA XREF: RAM:BD5Do
+                .db 5, 0x40, 0xE8, 0xA8
+                .db 5, 0xC0, 0xE8, 0
+                .db 5, 0x80, 0, 0
+                .db 4, 0, 0x18, 0xA8
+                .db 4, 0x80, 0x18, 0
+                .db 3, 0, 0xD8, 0xA8
+                .db 3, 0x80, 0xD8, 0
+                .db 2, 0, 0, 0x18
+                .db 2, 0x40, 0xE8, 0x18
 ; ---------------------------------------------------------------------------
 
 loc_BDC0:                                                       ; CODE XREF: RAM:BCECp
                                                                 ; RAM:BCF7p ...
                 ld      a, (hl)
                 inc     hl
-                ld      (ix+0), a
+                ld      0(ix), a
                 ld      a, (hl)
                 inc     hl
-                ld      (ix+7), a
+                ld      7(ix), a
                 ld      a, (hl)
                 inc     hl
-                ld      (ix+1Ah), a
+                ld      0x1A(ix), a
                 ld      a, (hl)
                 inc     hl
-                ld      (ix+1Bh), a
+                ld      0x1B(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
@@ -12808,312 +4674,241 @@ loc_BDD5:                                                       ; CODE XREF: RAM
                                                                 ; RAM:BD28p ...
                 call    loc_BDC0
                 push    hl
-                call    loc_B3E7
+                call    print_sprite
                 pop     hl
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BDDE:                                                       ; CODE XREF: RAM:BCF4p
+nultiple_print_sprite:                                          ; CODE XREF: RAM:BCF4p
                                                                 ; RAM:BCFFp ...
                 push    bc
                 push    de
                 push    hl
-                call    loc_B3E7
+                call    print_sprite
                 pop     hl
                 pop     de
                 pop     bc
-                ld      a, (ix+1Ah)
+                ld      a, 26(ix)
                 add     a, e
-                ld      (ix+1Ah), a
-                ld      a, (ix+1Bh)
+                ld      26(ix), a
+                ld      a, 27(ix)
                 add     a, d
-                ld      (ix+1Bh), a
-                djnz    loc_BDDE
+                ld      27(ix), a
+                djnz    nultiple_print_sprite
                 ret
 ; ---------------------------------------------------------------------------
-                db  3Ah ; :
-                db    9
-                db 0A7h ; ß
-                db  0Fh
-                db 0E6h ; Ê
-                db    3
-                db 0CAh ;  
-                db  91h ; ë
-                db 0BEh ; æ
-                db  3Dh ; =
-                db  28h ; (
-                db  3Ch ; <
-                db  3Dh ; =
-                db  28h ; (
-                db  5Eh ; ^
-                db  3Eh ; >
-                db 0F7h ; ˜
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0C5h ; ≈
-                db    6
-                db    5
-                db  1Fh
-                db 0CBh ; À
-                db  11h
-                db  10h
-                db 0FBh ; ˚
-                db  79h ; y
-                db 0C1h ; ¡
-                db  4Fh ; O
-                db  3Eh ; >
-                db 0EFh ; Ô
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0B1h ; ±
-                db  0Eh
-                db    0
-                db 0CBh ; À
-                db  47h ; G
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0F1h ; Ò
-                db 0CBh ; À
-                db  4Fh ; O
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0D1h ; —
-                db 0CBh ; À
-                db  57h ; W
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0D9h ; Ÿ
-                db 0CBh ; À
-                db  5Fh ; _
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C9h ; …
-                db 0CBh ; À
-                db  67h ; g
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C1h ; ¡
-                db 0C3h ; √
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db 0DBh ; €
-                db  1Fh
-                db  0Eh
-                db    0
-                db 0CBh ; À
-                db  47h ; G
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C9h ; …
-                db 0CBh ; À
-                db  4Fh ; O
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C1h ; ¡
-                db 0CBh ; À
-                db  57h ; W
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0D9h ; Ÿ
-                db 0CBh ; À
-                db  5Fh ; _
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0D1h ; —
-                db 0CBh ; À
-                db  67h ; g
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0F1h ; Ò
-                db 0C3h ; √
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db  0Eh
-                db    0
-                db  3Eh ; >
-                db 0F7h ; ˜
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0CBh ; À
-                db  67h ; g
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C1h ; ¡
-                db  3Eh ; >
-                db 0EFh ; Ô
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0CBh ; À
-                db  47h ; G
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0F1h ; Ò
-                db 0CBh ; À
-                db  5Fh ; _
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0D1h ; —
-                db 0CBh ; À
-                db  57h ; W
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C9h ; …
-                db 0CBh ; À
-                db  67h ; g
-                db  28h ; (
-                db  70h ; p
-                db 0CBh ; À
-                db 0D9h ; Ÿ
-                db  18h
-                db  6Ch ; l
-                db  3Eh ; >
-                db 0FEh ; ˛
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db  0Fh
-                db  4Fh ; O
-                db 0E6h ; Ê
-                db    3
-                db 0CBh ; À
-                db  39h ; 9
-                db 0CBh ; À
-                db  39h ; 9
-                db 0B1h ; ±
-                db 0E6h ; Ê
-                db    3
-                db  4Fh ; O
-                db  3Eh ; >
-                db  7Fh ; 
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0CBh ; À
-                db  4Fh ; O
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C9h ; …
-                db 0CBh ; À
-                db  57h ; W
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C1h ; ¡
-                db 0CBh ; À
-                db  5Fh ; _
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C9h ; …
-                db 0CBh ; À
-                db  67h ; g
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0C1h ; ¡
-                db  3Eh ; >
-                db 0BDh ; Ω
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0D1h ; —
-                db  3Eh ; >
-                db 0DFh ; ﬂ
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db  47h ; G
-                db 0E6h ; Ê
-                db  0Ah
-                db  20h
-                db  0Ah
-                db  3Eh ; >
-                db 0FBh ; ˚
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db  5Fh ; _
-                db 0E6h ; Ê
-                db  15h
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0D9h ; Ÿ
-                db  3Eh ; >
-                db 0E7h ; Á
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0E1h ; ·
-                db  3Eh ; >
-                db 0DFh ; ﬂ
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0E6h ; Ê
-                db  15h
-                db  20h
-                db    9
-                db  3Eh ; >
-                db 0FBh ; ˚
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0E6h ; Ê
-                db  0Ah
-                db  28h ; (
-                db  0Fh
-                db 0CBh ; À
-                db 0F1h ; Ò
-                db  18h
-                db  0Bh
-                db  3Eh ; >
-                db  7Eh ; ~
-                db 0CDh ; Õ
-                db  52h ; R
-                db 0B9h ; π
-                db 0E6h ; Ê
-                db  1Eh
-                db  28h ; (
-                db    2
-                db 0CBh ; À
-                db 0E1h ; ·
-                db  79h ; y
-                db  32h ; 2
-                db  37h ; 7
-                db 0A7h ; ß
-                db 0C9h ; …
+
+check_user_input:                                               ; CODE XREF: RAM:loc_C450p
+                ld      a, (user_input_method)
+                rrca
+                and     #3
+                jp      Z, keyboard
+                dec     a
+                jr      Z, kempston
+                dec     a
+                jr      Z, cursor
+
+interface_ii:
+                ld      a, #0xF7 ; '˜'
+                call    read_port
+                push    bc
+                ld      b, #5
+
+loc_BE0F:                                                       ; CODE XREF: RAM:BE12j
+                rra
+                rl      c
+                djnz    loc_BE0F
+                ld      a, c
+                pop     bc
+                ld      c, a
+                ld      a, #0xEF ; 'Ô'
+                call    read_port
+                or      c
+                ld      c, #0
+                bit     0, a
+                jr      Z, loc_BE25
+                set     6, c
+
+loc_BE25:                                                       ; CODE XREF: RAM:BE21j
+                bit     1, a
+                jr      Z, loc_BE2B
+                set     2, c
+
+loc_BE2B:                                                       ; CODE XREF: RAM:BE27j
+                bit     2, a
+                jr      Z, loc_BE31
+                set     3, c
+
+loc_BE31:                                                       ; CODE XREF: RAM:BE2Dj
+                bit     3, a
+                jr      Z, loc_BE37
+                set     1, c
+
+loc_BE37:                                                       ; CODE XREF: RAM:BE33j
+                bit     4, a
+                jr      Z, loc_BE3D
+                set     0, c
+
+loc_BE3D:                                                       ; CODE XREF: RAM:BE39j
+                jp      finished_input
 ; ---------------------------------------------------------------------------
 
-loc_BF0D:                                                       ; CODE XREF: RAM:B07Bp
-                ld      b, 36h ; '6'
-                ld      de, 20h ; ' '
-                ld      hl, 0A776h
+kempston:                                                       ; CODE XREF: RAM:BE02j
+                in      a, (0x1F)
+                ld      c, #0
+                bit     0, a
+                jr      Z, loc_BE4A
+                set     1, c
+
+loc_BE4A:                                                       ; CODE XREF: RAM:BE46j
+                bit     1, a
+                jr      Z, loc_BE50
+                set     0, c
+
+loc_BE50:                                                       ; CODE XREF: RAM:BE4Cj
+                bit     2, a
+                jr      Z, loc_BE56
+                set     3, c
+
+loc_BE56:                                                       ; CODE XREF: RAM:BE52j
+                bit     3, a
+                jr      Z, loc_BE5C
+                set     2, c
+
+loc_BE5C:                                                       ; CODE XREF: RAM:BE58j
+                bit     4, a
+                jr      Z, loc_BE62
+                set     6, c
+
+loc_BE62:                                                       ; CODE XREF: RAM:BE5Ej
+                jp      finished_input
+; ---------------------------------------------------------------------------
+
+cursor:                                                         ; CODE XREF: RAM:BE05j
+                ld      c, #0
+                ld      a, #0xF7 ; '˜'
+                call    read_port
+                bit     4, a
+                jr      Z, loc_BE72
+                set     0, c
+
+loc_BE72:                                                       ; CODE XREF: RAM:BE6Ej
+                ld      a, #0xEF ; 'Ô'
+                call    read_port
+                bit     0, a
+                jr      Z, loc_BE7D
+                set     6, c
+
+loc_BE7D:                                                       ; CODE XREF: RAM:BE79j
+                bit     3, a
+                jr      Z, loc_BE83
+                set     2, c
+
+loc_BE83:                                                       ; CODE XREF: RAM:BE7Fj
+                bit     2, a
+                jr      Z, loc_BE89
+                set     1, c
+
+loc_BE89:                                                       ; CODE XREF: RAM:BE85j
+                bit     4, a
+                jr      Z, finished_input
+                set     3, c
+                jr      finished_input
+; ---------------------------------------------------------------------------
+
+keyboard:                                                       ; CODE XREF: RAM:BDFEj
+                ld      a, #0xFE ; '˛'
+                call    read_port
+                rrca
+                ld      c, a
+                and     #3
+                srl     c
+                srl     c
+                or      c
+                and     #3
+                ld      c, a
+                ld      a, #0x7F ; ''                          ; row 7
+                call    read_port
+                bit     1, a                                    ; SYM SHIFT (right)?
+                jr      Z, loc_BEAD                             ; no, skip
+                set     1, c                                    ; RIGHT
+
+loc_BEAD:                                                       ; CODE XREF: RAM:BEA9j
+                bit     2, a                                    ; 'M' (left)?
+                jr      Z, loc_BEB3                             ; no, skip
+                set     0, c                                    ; LEFT
+
+loc_BEB3:                                                       ; CODE XREF: RAM:BEAFj
+                bit     3, a                                    ; 'N' (right)?
+                jr      Z, loc_BEB9                             ; no, skip
+                set     1, c                                    ; RIGHT
+
+loc_BEB9:                                                       ; CODE XREF: RAM:BEB5j
+                bit     4, a                                    ; 'B' (left)?
+                jr      Z, loc_BEBF                             ; no, skip
+                set     0, c                                    ; LEFT
+
+loc_BEBF:                                                       ; CODE XREF: RAM:BEBBj
+                ld      a, #0xBD ; 'Ω'                          ; rows 1,6 (2nd row)
+                call    read_port
+                jr      Z, loc_BEC8                             ; nothing, skip
+                set     2, c                                    ; FORWARD
+
+loc_BEC8:                                                       ; CODE XREF: RAM:BEC4j
+                ld      a, #0xDF ; 'ﬂ'
+                call    read_port
+                ld      b, a
+                and     #0xA
+                jr      NZ, loc_BEDC
+                ld      a, #0xFB ; '˚'
+                call    read_port
+                ld      e, a
+                and     #0x15
+                jr      Z, loc_BEDE
+
+loc_BEDC:                                                       ; CODE XREF: RAM:BED0j
+                set     3, c                                    ; JUMP
+
+loc_BEDE:                                                       ; CODE XREF: RAM:BEDAj
+                ld      a, #0xE7 ; 'Á'                          ; rows 3,4
+                call    read_port
+                jr      Z, loc_BEE7                             ; nothing, skip
+                set     4, c                                    ; PICKUP_DROP
+
+loc_BEE7:                                                       ; CODE XREF: RAM:BEE3j
+                ld      a, #0xDF ; 'ﬂ'
+                call    read_port
+                and     #0x15
+                jr      NZ, loc_BEF9
+                ld      a, #0xFB ; '˚'
+                call    read_port
+                and     #0xA
+                jr      Z, loc_BF08
+
+loc_BEF9:                                                       ; CODE XREF: RAM:BEEEj
+                set     6, c                                    ; FIRE
+                jr      loc_BF08
+; ---------------------------------------------------------------------------
+
+finished_input:                                                 ; CODE XREF: RAM:loc_BE3Dj
+                                                                ; RAM:loc_BE62j ...
+                ld      a, #0x7E ; '~'
+                call    read_port
+                and     #0x1E
+                jr      Z, loc_BF08
+                set     4, c
+
+loc_BF08:                                                       ; CODE XREF: RAM:BEF7j
+                                                                ; RAM:BEFBj ...
+                ld      a, c
+                ld      (user_input), a
+                ret
+; ---------------------------------------------------------------------------
+
+reset_objs_wipe_flag:                                           ; CODE XREF: RAM:B07Bp
+                ld      b, #54
+                ld      de, #32
+                ld      hl, # graphic_objs_tbl+7
 
 loc_BF15:                                                       ; CODE XREF: RAM:BF18j
                 res     5, (hl)
@@ -13122,1881 +4917,1241 @@ loc_BF15:                                                       ; CODE XREF: RAM
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_BF1B:                                                       ; CODE XREF: RAM:loc_B102p
-                                                                ; RAM:CC00p
+do_any_objs_intersect:                                          ; CODE XREF: RAM:loc_B102p
+                                                                ; RAM:BF9Fp ...
                 push    bc
                 push    de
                 push    hl
                 push    iy
-                ld      iy, 0A76Fh
-                ld      b, 36h ; '6'
-                ld      c, 0
+                ld      iy, #graphic_objs_tbl
+                ld      b, #54
+                ld      c, #0
                 ld      l, c
                 ld      h, c
-                set     1, (ix+7)
+                set     1, 7(ix)
 
 loc_BF2E:                                                       ; CODE XREF: RAM:BF51j
-                call    loc_B99B
-                jr      z, loc_BF4C
-                call    loc_B8A2
-                jr      nc, loc_BF4C
-                call    loc_B8B7
-                jr      nc, loc_BF4C
-                call    loc_B8CC
-                jr      nc, loc_BF4C
+                call    is_object_not_ignored
+                jr      Z, loc_BF4C
+                call    do_objs_intersect_on_x
+                jr      NC, loc_BF4C
+                call    do_objs_intersect_on_y
+                jr      NC, loc_BF4C
+                call    do_objs_intersect_on_z
+                jr      NC, loc_BF4C
 
 loc_BF42:                                                       ; CODE XREF: RAM:BF54j
                 pop     iy
                 pop     hl
                 pop     de
                 pop     bc
-                res     1, (ix+7)
+                res     1, 7(ix)
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_BF4C:                                                       ; CODE XREF: RAM:BF31j
                                                                 ; RAM:BF36j ...
-                ld      de, 20h ; ' '
+                ld      de, #0x20 ; ' '
                 add     iy, de
                 djnz    loc_BF2E
                 and     a
                 jr      loc_BF42
 ; ---------------------------------------------------------------------------
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db 0CDh ; Õ
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db 0FDh ; ˝
-                db 0E1h ; ·
-                db 0C9h ; …
-                db  21h ; !
-                db    9
-                db 0A7h ; ß
-                db  7Eh ; ~
-                db 0E6h ; Ê
-                db    6
-                db  3Ah ; :
-                db  37h ; 7
-                db 0A7h ; ß
-                db  28h ; (
-                db    5
-                db 0CBh ; À
-                db  5Eh ; ^
-                db  28h ; (
-                db    1
-                db  0Fh
-                db 0E6h ; Ê
-                db  10h
-                db 0C9h ; …
-                db  3Ah ; :
-                db  40h ; @
-                db 0A7h ; ß
-                db 0A7h ; ß
-                db 0C2h ; ¬
-                db  0Eh
-                db 0C0h ; ¿
-                db 0CDh ; Õ
-                db  66h ; f
-                db 0BFh ; ø
-                db 0C8h ; »
-                db 0CDh ; Õ
-                db 0A3h ; £
-                db 0C4h ; ƒ
-                db 0D0h ; –
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  5Eh ; ^
-                db 0C0h ; ¿
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  56h ; V
-                db 0C8h ; »
-                db 0AFh ; Ø
-                db  32h ; 2
-                db  41h ; A
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db  47h ; G
-                db 0C6h ; ∆
-                db  0Ch
-                db 0DDh ; ›
-                db  77h ; w
-                db    3
-                db 0CDh ; Õ
-                db  1Bh
-                db 0BFh ; ø
-                db 0DDh ; ›
-                db  70h ; p
-                db    3
-                db  30h ; 0
-                db    5
-                db  3Eh ; >
-                db    1
-                db  32h ; 2
-                db  41h ; A
-                db 0A7h ; ß
-                db  3Eh ; >
-                db    1
-                db  32h ; 2
-                db  40h ; @
-                db 0A7h ; ß
-                db  32h ; 2
-                db  20h
-                db 0A7h ; ß
-                db    6
-                db  30h ; 0
-                db 0DDh ; ›
-                db  6Eh ; n
-                db    4
-                db  7Dh ; }
-                db 0C6h ; ∆
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db    4
-                db 0DDh ; ›
-                db  66h ; f
-                db    5
-                db  7Ch ; |
-                db 0C6h ; ∆
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db    5
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db  6Eh ; n
-                db    6
-                db  7Dh ; }
-                db 0C6h ; ∆
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db    6
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db  21h ; !
-                db  2Fh ; /
-                db 0A8h ; ®
-                db 0CDh ; Õ
-                db 0D4h ; ‘
-                db 0C0h ; ¿
-                db 0DAh ; ⁄
-                db 0A7h ; ß
-                db 0C0h ; ¿
-                db  11h
-                db  20h
-                db    0
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F3h ; Û
-                db 0CDh ; Õ
-                db  66h ; f
-                db 0BFh ; ø
-                db  28h ; (
-                db  13h
-                db  11h
-                db  20h
-                db    0
-                db    6
-                db  30h ; 0
-                db 0FDh ; ˝
-                db  21h ; !
-                db  2Fh ; /
-                db 0A8h ; ®
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0A7h ; ß
-                db  28h ; (
-                db  1Fh
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F6h ; ˆ
-                db 0E1h ; ·
-                db 0DDh ; ›
-                db  75h ; u
-                db    6
-                db 0E1h ; ·
-                db 0DDh ; ›
-                db  75h ; u
-                db    4
-                db 0DDh ; ›
-                db  74h ; t
-                db    5
-                db  21h ; !
-                db    5
-                db    1
-                db  22h ; "
-                db  49h ; I
-                db 0A7h ; ß
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  66h ; f
-                db 0BFh ; ø
-                db 0C0h ; ¿
-                db 0AFh ; Ø
-                db  32h ; 2
-                db  40h ; @
-                db 0A7h ; ß
-                db 0C9h ; …
-                db  21h ; !
-                db  2Eh ; .
-                db 0A7h ; ß
-                db  7Eh ; ~
-                db  23h ; #
-                db 0A7h ; ß
-                db  28h ; (
-                db  72h ; r
-                db  3Ah ; :
-                db  41h ; A
-                db 0A7h ; ß
-                db 0A7h ; ß
-                db  20h
-                db 0D7h ; ◊
-                db  2Bh ; +
-                db  7Eh ; ~
-                db  23h ; #
-                db 0FDh ; ˝
-                db  77h ; w
-                db    0
-                db 0E5h ; Â
-                db    1
-                db  1Fh
-                db    0
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0E1h ; ·
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0D1h ; —
-                db  13h
-                db  23h ; #
-                db 0EDh ; Ì
-                db 0B0h ; ∞
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0C6h ; ∆
-                db  0Ch
-                db 0DDh ; ›
-                db  77h ; w
-                db    3
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  23h ; #
-                db 0C6h ; ∆
-                db  0Ch
-                db 0DDh ; ›
-                db  77h ; w
-                db  23h ; #
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db 0C5h ; ≈
-                db 0B2h ; ≤
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0CDh ; Õ
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0FDh ; ˝
-                db 0E1h ; ·
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    4
-                db    5
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    5
-                db    5
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    6
-                db  0Ch
-                db 0E1h ; ·
-                db  7Eh ; ~
-                db  23h ; #
-                db 0FDh ; ˝
-                db  77h ; w
-                db    7
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    8
-                db 0FDh ; ˝
-                db  77h ; w
-                db    8
-                db  7Eh ; ~
-                db  23h ; #
-                db 0FDh ; ˝
-                db  77h ; w
-                db  10h
-                db  7Eh ; ~
-                db 0FDh ; ˝
-                db  77h ; w
-                db  11h
-                db  67h ; g
-                db 0FDh ; ˝
-                db  6Eh ; n
-                db  10h
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db  77h ; w
-                db 0FDh ; ˝
-                db 0CBh ; À
-                db  0Dh
-                db 0C6h ; ∆
-                db 0CDh ; Õ
-                db  56h ; V
-                db 0BFh ; ø
-                db  21h ; !
-                db  2Dh ; -
-                db 0A7h ; ß
-                db  11h
-                db  31h ; 1
-                db 0A7h ; ß
-                db    1
-                db  0Ch
-                db    0
-                db 0EDh ; Ì
-                db 0B8h ; ∏
-                db  11h
-                db  22h ; "
-                db 0A7h ; ß
-                db    6
-                db    4
-                db 0CDh ; Õ
-                db  13h
-                db 0B5h ; µ
-                db 0C3h ; √
-                db 0FCh ; ¸
-                db 0BFh ; ø
-                db  21h ; !
-                db  22h ; "
-                db 0A7h ; ß
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db  77h ; w
-                db  23h ; #
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    7
-                db  77h ; w
-                db  23h ; #
-                db 0FDh ; ˝
-                db  5Eh ; ^
-                db  10h
-                db 0FDh ; ˝
-                db  56h ; V
-                db  11h
-                db 0AFh ; Ø
-                db  12h
-                db  73h ; s
-                db  23h ; #
-                db  72h ; r
-                db 0CDh ; Õ
-                db  56h ; V
-                db 0BFh ; ø
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    0
-                db    1
-                db  21h ; !
-                db  2Eh ; .
-                db 0A7h ; ß
-                db  7Eh ; ~
-                db  23h ; #
-                db 0A7h ; ß
-                db  28h ; (
-                db 0C3h ; √
-                db 0FDh ; ˝
-                db  77h ; w
-                db    0
-                db 0E5h ; Â
-                db  18h
-                db  8Dh ; ç
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0FEh ; ˛
-                db  5Ah ; Z
-                db  28h ; (
-                db    5
-                db 0D6h ; ÷
-                db  90h ; ê
-                db 0FEh ; ˛
-                db    5
-                db 0D0h ; –
-                db 0C5h ; ≈
-                db    1
-                db    0
-                db    0
-                db  69h ; i
-                db  61h ; a
-                db 0CDh ; Õ
-                db 0A2h ; ¢
-                db 0B8h ; ∏
-                db  30h ; 0
-                db  1Ah
-                db 0CDh ; Õ
-                db 0B7h ; ∑
-                db 0B8h ; ∏
-                db  30h ; 0
-                db  15h
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0D6h ; ÷
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db    3
-                db 0CDh ; Õ
-                db 0CCh ; Ã
-                db 0B8h ; ∏
-                db 0F5h ; ı
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0C6h ; ∆
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db    3
-                db 0F1h ; Ò
-                db 0C1h ; ¡
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  36h ; 6
-                db    0
-                db  40h ; @
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0CEh ; Œ
-                db  18h
-                db    9
-                db 0CDh ; Õ
-                db  7Ah ; z
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  4Eh ; N
-                db 0D6h ; ÷
-                db 0DDh ; ›
-                db  34h ; 4
-                db    0
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0CDh ; Õ
-                db  7Ah ; z
-                db 0C7h ; «
-                db 0DDh ; ›
-                db  36h ; 6
-                db    0
-                db    1
-                db  18h
-                db 0F4h ; Ù
-                db  21h ; !
-                db 0AFh ; Ø
-                db 0A7h ; ß
-                db  3Ah ; :
-                db  37h ; 7
-                db 0A7h ; ß
-                db 0E6h ; Ê
-                db  40h ; @
-                db  20h
-                db    5
-                db 0AFh ; Ø
-                db  32h ; 2
-                db  43h ; C
-                db 0A7h ; ß
-                db 0C9h ; …
-                db  3Ah ; :
-                db  43h ; C
-                db 0A7h ; ß
-                db 0A7h ; ß
-                db 0C0h ; ¿
-                db  3Ch ; <
-                db  32h ; 2
-                db  43h ; C
-                db 0A7h ; ß
-                db    1
-                db  20h
-                db    0
-                db  7Eh ; ~
-                db 0A7h ; ß
-                db  28h ; (
-                db    4
-                db    9
-                db  7Eh ; ~
-                db 0A7h ; ß
-                db 0C0h ; ¿
-                db 0EBh ; Î
-                db 0D5h ; ’
-                db 0FDh ; ˝
-                db 0E1h ; ·
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0E1h ; ·
-                db 0EDh ; Ì
-                db 0B0h ; ∞
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    0
-                db  96h ; ñ
-                db 0CDh ; Õ
-                db 0BDh ; Ω
-                db 0C5h ; ≈
-                db  6Fh ; o
-                db  26h ; &
-                db    0
-                db  11h
-                db 0BDh ; Ω
-                db 0C1h ; ¡
-                db  29h ; )
-                db  19h
-                db  7Eh ; ~
-                db 0FDh ; ˝
-                db  77h ; w
-                db  14h
-                db  87h ; á
-                db  5Fh ; _
-                db  23h ; #
-                db  7Eh ; ~
-                db 0FDh ; ˝
-                db  77h ; w
-                db  15h
-                db  87h ; á
-                db 0FDh ; ˝
-                db  86h ; Ü
-                db    2
-                db 0FDh ; ˝
-                db  77h ; w
-                db    2
-                db  7Bh ; {
-                db 0FDh ; ˝
-                db  86h ; Ü
-                db    1
-                db 0FDh ; ˝
-                db  77h ; w
-                db    1
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    3
-                db 0C6h ; ∆
-                db    4
-                db 0FDh ; ˝
-                db  77h ; w
-                db    3
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    7
-                db  14h
-                db 0FDh ; ˝
-                db  36h ; 6
-                db  0Ch
-                db    0
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    6
-                db    8
-                db  2Ah ; *
-                db  1Dh
-                db 0A7h ; ß
-                db  7Dh ; }
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    4
-                db  6Fh ; o
-                db  7Ch ; |
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    5
-                db  67h ; g
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    1
-                db 0D6h ; ÷
-                db  80h ; Ä
-                db 0F2h ; Ú
-                db 0A5h ; •
-                db 0C1h ; ¡
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0BDh ; Ω
-                db  30h ; 0
-                db  10h
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    2
-                db 0D6h ; ÷
-                db  80h ; Ä
-                db 0F2h ; Ú
-                db 0B2h ; ≤
-                db 0C1h ; ¡
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0BCh ; º
-                db  30h ; 0
-                db    3
-                db 0C3h ; √
-                db  29h ; )
-                db 0D6h ; ÷
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    0
-                db    0
-                db 0C9h ; …
-                db 0F8h ; ¯
-                db    0
-                db    8
-                db    0
-                db    0
-                db    8
-                db    0
-                db 0F8h ; ¯
-                db 0CDh ; Õ
-                db  75h ; u
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db  3Dh ; =
-                db 0FEh ; ˛
-                db  94h ; î
-                db  20h
-                db    2
-                db  3Eh ; >
-                db  97h ; ó
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FEh ; ˛
-                db  84h ; Ñ
-                db  30h ; 0
-                db    8
-                db 0DDh ; ›
-                db  36h ; 6
-                db    3
-                db  84h ; Ñ
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    0
-                db 0CDh ; Õ
-                db    6
-                db 0C2h ; ¬
-                db  7Ah ; z
-                db 0A7h ; ß
-                db 0CAh ;  
-                db  64h ; d
-                db 0C2h ; ¬
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0E6h ; Ê
-                db    3
-                db 0C2h ; ¬
-                db    7
-                db 0C1h ; ¡
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  14h
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  15h
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db  16h
-                db    1
-                db 0FDh ; ˝
-                db  21h ; !
-                db 0EFh ; Ô
-                db 0A7h ; ß
-                db 0CDh ; Õ
-                db  16h
-                db 0C2h ; ¬
-                db  7Ah ; z
-                db 0A7h ; ß
-                db 0C8h ; »
-                db 0FDh ; ˝
-                db  21h ; !
-                db  0Fh
-                db 0A8h ; ®
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0F8h ; ¯
-                db 0C8h ; »
-                db 0FEh ; ˛
-                db  40h ; @
-                db 0C8h ; »
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    1
-                db 0DDh ; ›
-                db  96h ; ñ
-                db    1
-                db 0F2h ; Ú
-                db  2Ah ; *
-                db 0C2h ; ¬
-                db 0EDh ; Ì
-                db  44h ; D
-                db  5Fh ; _
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    4
-                db 0DDh ; ›
-                db  86h ; Ü
-                db    4
-                db 0C6h ; ∆
-                db    2
-                db 0BBh ; ª
-                db 0D8h ; ÿ
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    2
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    2
-                db 0F2h ; Ú
-                db  40h ; @
-                db 0C2h ; ¬
-                db 0EDh ; Ì
-                db  44h ; D
-                db  5Fh ; _
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    5
-                db 0FDh ; ˝
-                db  86h ; Ü
-                db    5
-                db 0C6h ; ∆
-                db    2
-                db 0BBh ; ª
-                db 0D8h ; ÿ
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    3
-                db 0F2h ; Ú
-                db  56h ; V
-                db 0C2h ; ¬
-                db 0EDh ; Ì
-                db  44h ; D
-                db  5Fh ; _
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    6
-                db 0FDh ; ˝
-                db  86h ; Ü
-                db    6
-                db 0C6h ; ∆
-                db    2
-                db 0BBh ; ª
-                db 0D8h ; ÿ
-                db  16h
-                db    0
-                db 0C9h ; …
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db  47h ; G
-                db    7
-                db    7
-                db 0E6h ; Ê
-                db  77h ; w
-                db  4Fh ; O
-                db  78h ; x
-                db    7
-                db    7
-                db    7
-                db 0E6h ; Ê
-                db    7
-                db  47h ; G
-                db 0CDh ; Õ
-                db  29h ; )
-                db 0BBh ; ª
-                db 0CDh ; Õ
-                db  45h ; E
-                db 0B1h ; ±
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    0
-                db  40h ; @
-                db 0FDh ; ˝
-                db 0CBh ; À
-                db    7
-                db 0CEh ; Œ
-                db 0C3h ; √
-                db  20h
-                db 0C1h ; ¡
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0C3h ; √
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Dh
-                db 0F6h ; ˆ
-                db 0A0h ; †
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Dh
-                db 0C9h ; …
+
+loc_BF56:                                                       ; CODE XREF: RAM:C08Ep
+                                                                ; RAM:C0BFp
+                push    iy
+                push    ix
+                push    iy
+                pop     ix
+                call    loc_CCDE
+                pop     ix
+                pop     iy
+                ret
+; ---------------------------------------------------------------------------
+
+loc_BF66:                                                       ; CODE XREF: RAM:BF80p
+                                                                ; RAM:BFE4p ...
+                ld      hl, #0xA709
+                ld      a, (hl)
+                and     #6
+                ld      a, (user_input)
+                jr      Z, loc_BF76
+                bit     3, (hl)
+                jr      Z, loc_BF76
+                rrca
+
+loc_BF76:                                                       ; CODE XREF: RAM:BF6Fj
+                                                                ; RAM:BF73j
+                and     #0x10
+                ret
+; ---------------------------------------------------------------------------
+
+loc_BF79:                                                       ; CODE XREF: RAM:C463p
+                ld      a, (byte_A740)
+                and     a
+                jp      NZ, loc_C00E
+                call    loc_BF66
+                ret     Z
+                call    loc_C4A3
+                ret     NC
+                bit     3, 0xC(ix)
+                ret     NZ
+                bit     2, 0xC(ix)
+                ret     Z
+                xor     a
+                ld      (byte_A741), a
+                ld      a, 3(ix)
+                ld      b, a
+                add     a, #0xC
+                ld      3(ix), a
+                call    do_any_objs_intersect
+                ld      3(ix), b
+                jr      NC, loc_BFAC
+                ld      a, #1
+                ld      (byte_A741), a
+
+loc_BFAC:                                                       ; CODE XREF: RAM:BFA5j
+                ld      a, #1
+                ld      (byte_A740), a
+                ld      (byte_A720), a
+                ld      b, #0x30 ; '0'
+                ld      l, 4(ix)
+                ld      a, l
+                add     a, #4
+                ld      4(ix), a
+                ld      h, 5(ix)
+                ld      a, h
+                add     a, #4
+                ld      5(ix), a
+                push    hl
+                ld      l, 6(ix)
+                ld      a, l
+                add     a, #4
+                ld      6(ix), a
+                push    hl
+                ld      iy, #0xA82F
+
+loc_BFD7:                                                       ; CODE XREF: RAM:BFE2j
+                call    loc_C0D4
+                jp      C, loc_C0A7
+                ld      de, #0x20 ; ' '
+                add     iy, de
+                djnz    loc_BFD7
+                call    loc_BF66
+                jr      Z, loc_BFFC
+                ld      de, #0x20 ; ' '
+                ld      b, #0x30 ; '0'
+                ld      iy, #0xA82F
+
+loc_BFF2:                                                       ; CODE XREF: RAM:BFFAj
+                ld      a, 0(iy)
+                and     a
+                jr      Z, loc_C017
+                add     iy, de
+                djnz    loc_BFF2
+
+loc_BFFC:                                                       ; CODE XREF: RAM:BFE7j
+                                                                ; RAM:C023j ...
+                pop     hl
+                ld      6(ix), l
+                pop     hl
+                ld      4(ix), l
+                ld      5(ix), h
+                ld      hl, #0x105
+                ld      (word_A749), hl
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C00E:                                                       ; CODE XREF: RAM:BF7Dj
+                call    loc_BF66
+                ret     NZ
+                xor     a
+                ld      (byte_A740), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C017:                                                       ; CODE XREF: RAM:BFF6j
+                ld      hl, #0xA72E
+                ld      a, (hl)
+                inc     hl
+                and     a
+                jr      Z, loc_C091
+                ld      a, (byte_A741)
+                and     a
+                jr      NZ, loc_BFFC
+                dec     hl
+                ld      a, (hl)
+                inc     hl
+                ld      0(iy), a
+                push    hl
+                ld      bc, #0x1F
+                push    ix
+                pop     hl
+                push    iy
+                pop     de
+                inc     de
+                inc     hl
+                ldir
+                ld      a, 3(ix)
+                add     a, #0xC
+                ld      3(ix), a
+                ld      a, 0x23(ix)
+                add     a, #0xC
+                ld      0x23(ix), a
+                push    ix
+                push    iy
+                push    iy
+                pop     ix
+                call    adj_m8_m16
+                call    calc_pixel_XY
+                call    dec_dZ_and_update_XYZ
+                call    loc_CCDE
+                pop     iy
+                pop     ix
+
+loc_C061:                                                       ; CODE XREF: RAM:C0D2j
+                ld      4(iy), #5
+                ld      5(iy), #5
+                ld      6(iy), #0xC
+                pop     hl
+                ld      a, (hl)
+                inc     hl
+                ld      7(iy), a
+                ld      a, 8(ix)
+                ld      8(iy), a
+                ld      a, (hl)
+                inc     hl
+                ld      0x10(iy), a
+                ld      a, (hl)
+                ld      0x11(iy), a
+                ld      h, a
+                ld      l, 0x10(iy)
+                ld      a, 0(iy)
+                ld      (hl), a
+                set     0, 0xD(iy)
+                call    loc_BF56
+
+loc_C091:                                                       ; CODE XREF: RAM:C01Dj
+                                                                ; RAM:C0CCj
+                ld      hl, #0xA72D
+                ld      de, #0xA731
+                ld      bc, #0xC
+                lddr
+                ld      de, #0xA722
+                ld      b, #4
+                call    loc_B513
+                jp      loc_BFFC
+; ---------------------------------------------------------------------------
+
+loc_C0A7:                                                       ; CODE XREF: RAM:BFDAj
+                ld      hl, #0xA722
+                ld      a, 0(iy)
+                ld      (hl), a
+                inc     hl
+                ld      a, 7(iy)
+                ld      (hl), a
+                inc     hl
+                ld      e, 0x10(iy)
+                ld      d, 0x11(iy)
+                xor     a
+                ld      (de), a
+                ld      (hl), e
+                inc     hl
+                ld      (hl), d
+                call    loc_BF56
+                ld      0(iy), #1
+                ld      hl, #0xA72E
+                ld      a, (hl)
+                inc     hl
+                and     a
+                jr      Z, loc_C091
+                ld      0(iy), a
+                push    hl
+                jr      loc_C061
+; ---------------------------------------------------------------------------
+
+loc_C0D4:                                                       ; CODE XREF: RAM:loc_BFD7p
+                ld      a, 0(iy)
+                cp      #0x5A ; 'Z'
+                jr      Z, loc_C0E0
+                sub     #0x90 ; 'ê'
+                cp      #5
+                ret     NC
+
+loc_C0E0:                                                       ; CODE XREF: RAM:C0D9j
+                push    bc
+                ld      bc, #0
+                ld      l, c
+                ld      h, c
+                call    do_objs_intersect_on_x
+                jr      NC, loc_C105
+                call    do_objs_intersect_on_y
+                jr      NC, loc_C105
+                ld      a, 3(ix)
+                sub     #4
+                ld      3(ix), a
+                call    do_objs_intersect_on_z
+                push    af
+                ld      a, 3(ix)
+                add     a, #4
+                ld      3(ix), a
+                pop     af
+
+loc_C105:                                                       ; CODE XREF: RAM:C0E9j
+                                                                ; RAM:C0EEj
+                pop     bc
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C107:                                                       ; CODE XREF: RAM:C1F4j
+                                                                ; RAM:C44Dj ...
+                ld      0(ix), #0x40 ; '@'
+                set     1, 7(ix)
+                jr      loc_C11A
+; ---------------------------------------------------------------------------
+
+loc_C111:                                                       ; DATA XREF: RAM:AEAFo
+                                                                ; RAM:AEB1o ...
+                call    adj_m4_m12
+                call    loc_D64E
+                inc     0(ix)
+
+loc_C11A:                                                       ; CODE XREF: RAM:C10Fj
+                                                                ; RAM:C124j
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_C11D:                                                       ; DATA XREF: RAM:AEBDo
+                call    adj_m4_m12
+
+loc_C120:                                                       ; CODE XREF: RAM:C282j
+                ld      0(ix), #1
+                jr      loc_C11A
+; ---------------------------------------------------------------------------
+
+loc_C126:                                                       ; CODE XREF: RAM:C47Dp
+                ld      hl, #0xA7AF
+                ld      a, (user_input)
+                and     #0x40 ; '@'
+                jr      NZ, loc_C135
+                xor     a
+                ld      (byte_A743), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C135:                                                       ; CODE XREF: RAM:C12Ej
+                ld      a, (byte_A743)
+                and     a
+                ret     NZ
+                inc     a
+                ld      (byte_A743), a
+                ld      bc, #0x20 ; ' '
+                ld      a, (hl)
+                and     a
+                jr      Z, loc_C149
+                add     hl, bc
+                ld      a, (hl)
+                and     a
+                ret     NZ
+
+loc_C149:                                                       ; CODE XREF: RAM:C143j
+                ex      de, hl
+                push    de
+                pop     iy
+                push    ix
+                pop     hl
+                ldir
+                ld      0(iy), #0x96 ; 'ñ'
+                call    loc_C5BD
+                ld      l, a
+                ld      h, #0
+                ld      de, #0xC1BD
+                add     hl, hl
+                add     hl, de
+                ld      a, (hl)
+                ld      0x14(iy), a
+                add     a, a
+                ld      e, a
+                inc     hl
+                ld      a, (hl)
+                ld      0x15(iy), a
+                add     a, a
+                add     a, 2(iy)
+                ld      2(iy), a
+                ld      a, e
+                add     a, 1(iy)
+                ld      1(iy), a
+                ld      a, 3(iy)
+                add     a, #4
+                ld      3(iy), a
+                ld      7(iy), #0x14
+                ld      0xC(iy), #0
+                ld      6(iy), #8
+                ld      hl, (word_A71D)
+                ld      a, l
+                sub     4(iy)
+                ld      l, a
+                ld      a, h
+                sub     5(iy)
+                ld      h, a
+                ld      a, 1(iy)
+                sub     #0x80 ; 'Ä'
+                jp      P, loc_C1A5
+                neg
+
+loc_C1A5:                                                       ; CODE XREF: RAM:C1A0j
+                cp      l
+                jr      NC, loc_C1B8
+                ld      a, 2(iy)
+                sub     #0x80 ; 'Ä'
+                jp      P, loc_C1B2
+                neg
+
+loc_C1B2:                                                       ; CODE XREF: RAM:C1ADj
+                cp      h
+                jr      NC, loc_C1B8
+                jp      loc_D629
+; ---------------------------------------------------------------------------
+
+loc_C1B8:                                                       ; CODE XREF: RAM:C1A6j
+                                                                ; RAM:C1B3j
+                ld      0(iy), #0
+                ret
+; ---------------------------------------------------------------------------
+                .db 0xF8 ; ¯
+                .db    0
+                .db    8
+                .db    0
+                .db    0
+                .db    8
+                .db    0
+                .db 0xF8 ; ¯
+; ---------------------------------------------------------------------------
+
+loc_C1C5:                                                       ; DATA XREF: RAM:AEA7o
+                                                                ; RAM:AF59o ...
+                call    adj_m6_m12
+                call    dec_dZ_and_update_XYZ
+                ld      a, 0(ix)
+                dec     a
+                cp      #0x94 ; 'î'
+                jr      NZ, loc_C1D5
+                ld      a, #0x97 ; 'ó'
+
+loc_C1D5:                                                       ; CODE XREF: RAM:C1D1j
+                ld      0(ix), a
+                ld      a, 3(ix)
+                cp      #0x84 ; 'Ñ'
+                jr      NC, loc_C1E7
+                ld      3(ix), #0x84 ; 'Ñ'
+                ld      0xB(ix), #0
+
+loc_C1E7:                                                       ; CODE XREF: RAM:C1DDj
+                call    loc_C206
+                ld      a, d
+                and     a
+                jp      Z, loc_C264
+                ld      a, 0xC(ix)
+                and     #3
+                jp      NZ, loc_C107
+                ld      a, 0x14(ix)
+                ld      9(ix), a
+                ld      a, 0x15(ix)
+                ld      0xA(ix), a
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_C206:                                                       ; CODE XREF: RAM:loc_C1E7p
+                ld      d, #1
+                ld      iy, #0xA7EF
+                call    loc_C216
+                ld      a, d
+                and     a
+                ret     Z
+                ld      iy, #0xA80F
+
+loc_C216:                                                       ; CODE XREF: RAM:C20Cp
+                                                                ; RAM:CFCCp
+                ld      a, 0(iy)
+                and     #0xF8 ; '¯'
+                ret     Z
+                cp      #0x40 ; '@'
+
+loc_C21E:                                                       ; CODE XREF: RAM:CFBDp
+                ret     Z
+                ld      a, 1(iy)
+                sub     1(ix)
+                jp      P, loc_C22A
+                neg
+
+loc_C22A:                                                       ; CODE XREF: RAM:C225j
+                ld      e, a
+                ld      a, 4(iy)
+                add     a, 4(ix)
+                add     a, #2
+                cp      e
+                ret     C
+                ld      a, 2(ix)
+                sub     2(iy)
+                jp      P, loc_C240
+                neg
+
+loc_C240:                                                       ; CODE XREF: RAM:C23Bj
+                ld      e, a
+                ld      a, 5(ix)
+                add     a, 5(iy)
+                add     a, #2
+                cp      e
+                ret     C
+                ld      a, 3(ix)
+                sub     3(iy)
+                jp      P, loc_C256
+                neg
+
+loc_C256:                                                       ; CODE XREF: RAM:C251j
+                ld      e, a
+                ld      a, 6(ix)
+                add     a, 6(iy)
+                add     a, #2
+                cp      e
+                ret     C
+                ld      d, #0
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C264:                                                       ; CODE XREF: RAM:C1ECj
+                ld      a, 0(iy)
+                ld      b, a
+                rlca
+                rlca
+                and     #0x77 ; 'w'
+                ld      c, a
+                ld      a, b
+                rlca
+                rlca
+                rlca
+                and     #7
+                ld      b, a
+                call    add_to_score_and_print
+                call    loc_B145
+                ld      0(iy), #0x40 ; '@'
+                set     1, 7(iy)
+                jp      loc_C120
+; ---------------------------------------------------------------------------
+
+loc_C285:                                                       ; DATA XREF: RAM:AE5Do
+                                                                ; RAM:AE6Bo ...
+                call    set_both_deadly_flags
+                jp      adj_m8_m16
+; ---------------------------------------------------------------------------
+                call    set_both_deadly_flags
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+set_both_deadly_flags:                                          ; CODE XREF: RAM:loc_C285p
+                                                                ; RAM:C28Bp ...
+                ld      a, 13(ix)
+                or      #0xA0 ; '†'
+                ld      13(ix), a
+                ret
 ; ---------------------------------------------------------------------------
 
 loc_C29A:                                                       ; CODE XREF: RAM:B072p
-                ld      ix, 0BACAh
-                ld      (ix+0), 16h
-                ld      (ix+7), 0
-                ld      (ix+1Ah), 10h
-                ld      (ix+1Bh), 20h ; ' '
-                call    loc_B3E7
-                ld      a, 47h ; 'G'
-                ld      de, 5A42h
-                ld      b, 2
+                                                                ; RAM:CF83p
+                ld      ix, #sprite_scratchpad
+                ld      0(ix), #0x16
+                ld      7(ix), #0
+                ld      0x1A(ix), #0x10
+                ld      0x1B(ix), #0x20 ; ' '
+                call    print_sprite
+                ld      a, #0x47 ; 'G'
+                ld      de, #0x5A42
+                ld      b, #2
                 call    loc_B514
-                ld      de, 5A62h
-                ld      b, 4
+                ld      de, #0x5A62
+                ld      b, #4
                 call    loc_B514
-                ld      de, 0A721h
-                ld      b, 1
-                ld      hl, 0DD73h
-                jp      loc_BB48
+                ld      de, #lives
+                ld      b, #1                                   ; 1 digit
+                ld      hl, # vidbuf+0x4E4
+                jp      print_BCD_number
 ; ---------------------------------------------------------------------------
 
-loc_C2CE:                                                       ; CODE XREF: RAM:AFC2p
-                ld      hl, 0C3EFh
-                ld      de, 0C3FFh
-                ld      bc, 10h
+init_start_location:                                            ; CODE XREF: RAM:AFC2p
+                ld      hl, #plyr_spr_init_data
+                ld      de, #plyr_spr_1_scratchpad
+                ld      bc, #16
                 ldir
-                ld      a, (byte_A70D)
-                and     3
+                ld      a, (seed_3)
+                and     #3
                 ld      c, a
-                ld      hl, 0C2E8h
+                ld      hl, #start_locations
                 add     hl, bc
                 ld      a, (hl)
-                ld      (byte_C407), a
+                ld      (plyr_spr_1_scratchpad+8), a
                 ret
 ; ---------------------------------------------------------------------------
-                db  33h ; 3
-                db  5Ch ; \
-                db  64h ; d
-                db  0Ch
+start_locations:.db 0x33, 0x5C, 0x64, 0xC                       ; DATA XREF: RAM:C2DFo
 ; ---------------------------------------------------------------------------
 
-loc_C2EC:                                                       ; CODE XREF: RAM:loc_AFC5p
-                ld      hl, 0C3FFh
-                ld      de, 0A76Fh
+lose_life:                                                      ; CODE XREF: RAM:player_diesp
+                ld      hl, #plyr_spr_1_scratchpad
+                ld      de, #graphic_objs_tbl
                 push    de
                 pop     ix
-                ld      bc, 40h ; '@'
+                ld      bc, #64
                 ldir
-                ld      hl, 0A721h
+                ld      hl, #lives
                 dec     (hl)
-                jp      m, loc_C323
+                jp      M, loc_C323
                 ret
 ; ---------------------------------------------------------------------------
-                db 0CDh ; Õ
-                db  81h ; Å
-                db 0CBh ; À
-                db  3Eh ; >
-                db  45h ; E
-                db 0CDh ; Õ
-                db  6Ah ; j
-                db 0CBh ; À
-                db  11h
-                db 0E9h ; È
-                db 0C3h ; √
-                db 0D9h ; Ÿ
-                db  21h ; !
-                db 0DDh ; ›
-                db 0C3h ; √
-                db  11h
-                db  8Bh ; ã
-                db 0C3h ; √
-                db    6
-                db    6
-                db 0AFh ; Ø
-                db  32h ; 2
-                db  34h ; 4
-                db 0A7h ; ß
-                db 0CDh ; Õ
-                db 0C0h ; ¿
-                db 0BCh ; º
-                db  11h
-                db  6Fh ; o
-                db 0D8h ; ÿ
-                db 0CDh ; Õ
-                db 0B5h ; µ
-                db 0D6h ; ÷
-; ---------------------------------------------------------------------------
+
+loc_C302:                                                       ; CODE XREF: RAM:CD6Aj
+                call    clear_scrn_buffer
+                ld      a, #0x45 ; 'E'
+                call    fill_attr
+                ld      de, #unk_C3E9
+                exx
+                ld      hl, #unk_C3DD
+                ld      de, #unk_C38B
+                ld      b, #6
+                xor     a
+                ld      (byte_A734), a
+                call    loc_BCC0
+                ld      de, #byte_D86F
+                call    play_audio
 
 loc_C323:                                                       ; CODE XREF: RAM:C2FEj
-                call    loc_CB81
-                ld      a, 46h ; 'F'
-                call    loc_CB6A
+                call    clear_scrn_buffer
+                ld      a, #0x46 ; 'F'
+                call    fill_attr
                 call    loc_BD59
-                ld      de, 0C35Dh
+                ld      de, #unk_C35D
                 exx
-                ld      hl, 0C360h
-                ld      de, 0C366h
-                ld      b, 3
+                ld      hl, #unk_C360
+                ld      de, #unk_C366
+                ld      b, #3
                 call    loc_BCC0
                 call    loc_C6EA
                 xor     a
                 ld      (byte_A734), a
-                call    loc_B178
-                ld      de, 0D853h
-                call    loc_D6B5
-                ld      b, 40h ; '@'
+                call    update_screen
+                ld      de, #byte_D853
+                call    play_audio
+                ld      b, #0x40 ; '@'
 
 loc_C34F:                                                       ; CODE XREF: RAM:C357j
-                ld      hl, 2000h
+                ld      hl, #0x2000
 
 loc_C352:                                                       ; CODE XREF: RAM:C355j
                 dec     hl
                 ld      a, h
                 or      l
-                jr      nz, loc_C352
+                jr      NZ, loc_C352
                 djnz    loc_C34F
                 pop     hl
-                jp      loc_AF93
+                jp      start_menu
 ; ---------------------------------------------------------------------------
-                db  42h ; B
-                db  43h ; C
-                db  44h ; D
-                db  58h ; X
-                db  9Fh ; ü
-                db  30h ; 0
-                db  6Fh ; o
-                db  40h ; @
-                db  5Fh ; _
-                db  47h ; G
-                db  41h ; A
-                db  4Dh ; M
-                db  45h ; E
-                db  20h
-                db  4Fh ; O
-                db  56h ; V
-                db  45h ; E
-                db 0D2h ; “
-                db  50h ; P
-                db  45h ; E
-                db  52h ; R
-                db  43h ; C
-                db  45h ; E
-                db  4Eh ; N
-                db  54h ; T
-                db  41h ; A
-                db  47h ; G
-                db  45h ; E
-                db  20h
-                db  4Fh ; O
-                db  46h ; F
-                db  20h
-                db  51h ; Q
-                db  55h ; U
-                db  45h ; E
-                db  53h ; S
-                db 0D4h ; ‘
-                db  43h ; C
-                db  4Fh ; O
-                db  4Dh ; M
-                db  50h ; P
-                db  4Ch ; L
-                db  45h ; E
-                db  54h ; T
-                db  45h ; E
-                db 0C4h ; ƒ
-                db  43h ; C
-                db  4Fh ; O
-                db  4Eh ; N
-                db  47h ; G
-                db  52h ; R
-                db  41h ; A
-                db  54h ; T
-                db  55h ; U
-                db  4Ch ; L
-                db  41h ; A
-                db  54h ; T
-                db  49h ; I
-                db  4Fh ; O
-                db  4Eh ; N
-                db 0D3h ; ”
-                db  59h ; Y
-                db  4Fh ; O
-                db  55h ; U
-                db  20h
-                db  48h ; H
-                db  41h ; A
-                db  56h ; V
-                db  45h ; E
-                db  20h
-                db  43h ; C
-                db  4Fh ; O
-                db  4Dh ; M
-                db  50h ; P
-                db  4Ch ; L
-                db  45h ; E
-                db  41h ; A
-                db  54h ; T
-                db  45h ; E
-                db 0C4h ; ƒ
-                db  54h ; T
-                db  48h ; H
-                db  45h ; E
-                db  20h
-                db  50h ; P
-                db  45h ; E
-                db  4Eh ; N
-                db  54h ; T
-                db  41h ; A
-                db  47h ; G
-                db  52h ; R
-                db  41h ; A
-                db 0CDh ; Õ
-                db  59h ; Y
-                db  4Fh ; O
-                db  55h ; U
-                db  52h ; R
-                db  20h
-                db  41h ; A
-                db  44h ; D
-                db  56h ; V
-                db  45h ; E
-                db  4Eh ; N
-                db  54h ; T
-                db  55h ; U
-                db  52h ; R
-                db 0C5h ; ≈
-                db  43h ; C
-                db  4Fh ; O
-                db  4Eh ; N
-                db  54h ; T
-                db  49h ; I
-                db  4Eh ; N
-                db  55h ; U
-                db  45h ; E
-                db  53h ; S
-                db  20h
-                db  49h ; I
-                db 0CEh ; Œ
-                db  4Dh ; M
-                db  49h ; I
-                db  52h ; R
-                db  45h ; E
-                db  20h
-                db  4Dh ; M
-                db  41h ; A
-                db  52h ; R
-                db 0C5h ; ≈
-                db  48h ; H
-                db  8Fh ; è
-                db  38h ; 8
-                db  6Fh ; o
-                db  50h ; P
-                db  5Fh ; _
-                db  48h ; H
-                db  4Fh ; O
-                db  50h ; P
-                db  3Fh ; ?
-                db  60h ; `
-                db  1Fh
-                db  46h ; F
-                db  45h ; E
-                db  45h ; E
-                db  42h ; B
-                db  42h ; B
-                db  43h ; C
-                db  20h
-                db  80h ; Ä
-                db  80h ; Ä
-                db  80h ; Ä
-                db    5
-                db    5
-                db  17h
-                db  5Ch ; \
-                db  62h ; b
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  20h
-                db  80h ; Ä
-                db  80h ; Ä
-                db  80h ; Ä
-                db    5
-                db    5
-                db  17h
-                db  5Ch ; \
-byte_C407:      db 62h                                          ; DATA XREF: RAM:C2E4w
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  28h ; (
-                db  80h ; Ä
-                db  80h ; Ä
-                db  8Ch ; å
-                db    5
-                db    5
-                db    0
-                db  5Eh ; ^
-                db    1
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  75h ; u
-                db 0C7h ; «
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  76h ; v
-                db  28h ; (
-                db    7
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  2Dh ; -
-                db 0F6h ; ˆ
-                db 0C3h ; √
-                db    7
-                db 0C1h ; ¡
-                db 0CDh ; Õ
-                db 0F8h ; ¯
-                db 0BDh ; Ω
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0CDh ; Õ
-                db 0C8h ; »
-                db 0C4h ; ƒ
-                db 0CDh ; Õ
-                db  8Dh ; ç
-                db 0C5h ; ≈
-                db 0CDh ; Õ
-                db  6Ch ; l
-                db 0C5h ; ≈
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0BFh ; ø
-                db 0CDh ; Õ
-                db 0A3h ; £
-                db 0C4h ; ƒ
-                db  30h ; 0
-                db  2Ah ; *
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  27h ; '
-                db 0CEh ; Œ
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FEh ; ˛
-                db 0F0h ; 
-                db  38h ; 8
-                db    4
-                db 0DDh ; ›
-                db  36h ; 6
-                db    3
-                db 0F0h ; 
-                db 0CDh ; Õ
-                db  1Dh
-                db 0C6h ; ∆
-                db 0CDh ; Õ
-                db  26h ; &
-                db 0C1h ; ¡
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  27h ; '
-                db  8Eh ; é
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  86h ; Ü
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0D6h ; ÷
-                db  10h
-                db  38h ; 8
-                db    3
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ch
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Bh
-                db 0A7h ; ß
-                db 0FAh ; ˙
-                db  6Bh ; k
-                db 0C4h ; ƒ
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db  18h
-                db 0C9h ; …
-                db 0C9h ; …
-                db  2Ah ; *
-                db  1Dh
-                db 0A7h ; ß
-                db  7Dh ; }
-                db 0DDh ; ›
-                db  96h ; ñ
-                db    4
-                db  6Fh ; o
-                db  7Ch ; |
-                db 0DDh ; ›
-                db  96h ; ñ
-                db    5
-                db  67h ; g
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    1
-                db 0D6h ; ÷
-                db  80h ; Ä
-                db 0F2h ; Ú
-                db 0BAh ; ∫
-                db 0C4h ; ƒ
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0BDh ; Ω
-                db 0D0h ; –
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    2
-                db 0D6h ; ÷
-                db  80h ; Ä
-                db 0F2h ; Ú
-                db 0C6h ; ∆
-                db 0C4h ; ƒ
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0BCh ; º
-                db 0C9h ; …
-                db  21h ; !
-                db    9
-                db 0A7h ; ß
-                db  7Eh ; ~
-                db 0E6h ; Ê
-                db    6
-                db  28h ; (
-                db  4Bh ; K
-                db 0CBh ; À
-                db  5Eh ; ^
-                db  28h ; (
-                db  47h ; G
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0E6h ; Ê
-                db 0F0h ; 
-                db 0C0h ; ¿
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  56h ; V
-                db 0C8h ; »
-                db 0CBh ; À
-                db  41h ; A
-                db  20h
-                db    4
-                db 0CBh ; À
-                db  51h ; Q
-                db  20h
-                db  0Fh
-                db 0CBh ; À
-                db  49h ; I
-                db  20h
-                db  17h
-                db 0CBh ; À
-                db  61h ; a
-                db  20h
-                db  1Ah
-                db 0CBh ; À
-                db  41h ; A
-                db  20h
-                db  1Fh
-                db 0CBh ; À
-                db  91h ; ë
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db 0BDh ; Ω
-                db 0C5h ; ≈
-                db 0FEh ; ˛
-                db    2
-                db  28h ; (
-                db  1Bh
-                db  2Fh ; /
-                db 0E6h ; Ê
-                db    1
-                db  18h
-                db  41h ; A
-                db 0CDh ; Õ
-                db 0BDh ; Ω
-                db 0C5h ; ≈
-                db 0FEh ; ˛
-                db    1
-                db  18h
-                db 0F2h ; Ú
-                db 0CDh ; Õ
-                db 0BDh ; Ω
-                db 0C5h ; ≈
-                db 0FEh ; ˛
-                db    3
-                db  28h ; (
-                db    8
-                db  18h
-                db 0ECh ; Ï
-                db 0CDh ; Õ
-                db 0BDh ; Ω
-                db 0C5h ; ≈
-                db 0A7h ; ß
-                db  18h
-                db 0F6h ; ˆ
-                db 0CBh ; À
-                db 0D1h ; —
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Dh
-                db 0E6h ; Ê
-                db    7
-                db  28h ; (
-                db    4
-                db 0DDh ; ›
-                db  35h ; 5
-                db  0Dh
-                db 0C9h ; …
-                db  79h ; y
-                db 0E6h ; Ê
-                db    3
-                db 0C8h ; »
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0E6h ; Ê
-                db 0F0h ; 
-                db 0C0h ; ¿
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  5Eh ; ^
-                db 0C0h ; ¿
-                db 0CBh ; À
-                db  51h ; Q
-                db  20h
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Dh
-                db 0F6h ; ˆ
-                db    2
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Dh
-                db 0CBh ; À
-                db  49h ; I
-                db  20h
-                db  1Fh
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  76h ; v
-                db  28h ; (
-                db    8
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0EEh ; Ó
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    7
-                db 0EEh ; Ó
-                db  40h ; @
-                db 0DDh ; ›
-                db  77h ; w
-                db    7
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0C6h ; ∆
-                db    8
-                db 0DDh ; ›
-                db  77h ; w
-                db  20h
-                db 0C9h ; …
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  76h ; v
-                db  28h ; (
-                db 0E1h ; ·
-                db  18h
-                db 0E7h ; Á
-                db 0CBh ; À
-                db  59h ; Y
-                db 0C8h ; »
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0E6h ; Ê
-                db 0F0h ; 
-                db 0C0h ; ¿
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  5Eh ; ^
-                db 0C0h ; ¿
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  56h ; V
-                db 0C8h ; »
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db 0DEh ; ﬁ
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    8
-                db 0C5h ; ≈
-                db 0CDh ; Õ
-                db 0E4h ; ‰
-                db 0D5h ; ’
-                db 0C1h ; ¡
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0E6h ; Ê
-                db 0F0h ; 
-                db  20h
-                db  0Ah
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  5Eh ; ^
-                db  20h
-                db    4
-                db 0CBh ; À
-                db  51h ; Q
-                db  28h ; (
-                db  15h
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db  5Fh ; _
-                db  3Ch ; <
-                db 0E6h ; Ê
-                db    3
-                db  57h ; W
-                db  7Bh ; {
-                db 0E6h ; Ê
-                db 0FCh ; ¸
-                db 0B2h ; ≤
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0C5h ; ≈
-                db 0CDh ; Õ
-                db  35h ; 5
-                db 0D6h ; ÷
-                db 0C1h ; ¡
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db    3
-                db 0FEh ; ˛
-                db    2
-                db 0C8h ; »
-                db  18h
-                db 0E1h ; ·
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    7
-                db  0Fh
-                db  0Fh
-                db  0Fh
-                db 0E6h ; Ê
-                db    8
-                db 0EEh ; Ó
-                db    8
-                db  6Fh ; o
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db    4
-                db 0B5h ; µ
-                db  0Fh
-                db  0Fh
-                db 0E6h ; Ê
-                db    3
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  64h ; d
-                db 0C7h ; «
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  76h ; v
-                db 0C2h ; ¬
-                db    7
-                db 0C1h ; ¡
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0D1h ; —
-                db  21h ; !
-                db 0E0h ; ‡
-                db 0FFh
-                db  19h
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db 0E1h ; ·
-                db  13h
-                db  23h ; #
-                db    1
-                db    7
-                db    0
-                db 0EDh ; Ì
-                db 0B0h ; ∞
-                db 0DDh ; ›
-                db  36h ; 6
-                db    6
-                db    0
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0CEh ; Œ
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Dh
-                db 0E6h ; Ê
-                db  0Fh
-                db  28h ; (
-                db    5
-                db 0DDh ; ›
-                db  35h ; 5
-                db  0Dh
-                db  18h
-                db    8
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0C6h ; ∆
-                db    8
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db    4
-                db 0EEh ; Ó
-                db    4
-                db 0C6h ; ∆
-                db    8
-                db 0FDh ; ˝
-                db  86h ; Ü
-                db    3
-                db 0DDh ; ›
-                db  77h ; w
-                db    3
-                db 0CDh ; Õ
-                db 0A7h ; ß
-                db 0B9h ; π
-                db 0C9h ; …
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  5Eh ; ^
-                db  20h
-                db  0Bh
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0E6h ; Ê
-                db 0F0h ; 
-                db  20h
-                db    4
-                db 0CBh ; À
-                db  51h ; Q
-                db  28h ; (
-                db    5
-                db 0C5h ; ≈
-                db 0CDh ; Õ
-                db  6Ah ; j
-                db 0C6h ; ∆
-                db 0C1h ; ¡
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Bh
-                db 0A7h ; ß
-                db 0FAh ; ˙
-                db  3Eh ; >
-                db 0C6h ; ∆
-                db 0CBh ; À
-                db  59h ; Y
-                db  20h
-                db    1
-                db  3Dh ; =
-                db  3Dh ; =
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db  32h ; 2
-                db  39h ; 9
-                db 0A7h ; ß
-                db 0C6h ; ∆
-                db    2
-                db 0CDh ; Õ
-                db 0EDh ; Ì
-                db 0B6h ; ∂
-                db 0CDh ; Õ
-                db 0B5h ; µ
-                db 0C6h ; ∆
-                db 0CDh ; Õ
-                db  7Fh ; 
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  56h ; V
-                db  28h ; (
-                db  0Bh
-                db  3Ah ; :
-                db  39h ; 9
-                db 0A7h ; ß
-                db 0A7h ; ß
-                db 0F2h ; Ú
-                db  62h ; b
-                db 0C6h ; ∆
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  9Eh ; û
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0DDh ; ›
-                db  86h ; Ü
-                db  0Eh
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ah
-                db 0DDh ; ›
-                db  86h ; Ü
-                db  0Fh
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Eh
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Fh
-                db    1
-                db  8Dh ; ç
-                db 0C6h ; ∆
-                db 0CDh ; Õ
-                db 0BDh ; Ω
-                db 0C5h ; ≈
-                db  6Fh ; o
-                db 0C3h ; √
-                db    3
-                db 0B0h ; ∞
-                db  95h ; ï
-                db 0C6h ; ∆
-                db  9Eh ; û
-                db 0C6h ; ∆
-                db 0A5h ; •
-                db 0C6h ; ∆
-                db 0AEh ; Æ
-                db 0C6h ; ∆
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0C6h ; ∆
-                db 0FDh ; ˝
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0C6h ; ∆
-                db    3
-                db  18h
-                db 0F5h ; ı
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ah
-                db 0C6h ; ∆
-                db    3
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ah
-                db 0C6h ; ∆
-                db 0FDh ; ˝
-                db  18h
-                db 0F5h ; ı
-                db 0C9h ; …
+unk_C35D:       .db 0x42 ; B                                    ; DATA XREF: RAM:C32Eo
+                .db 0x43 ; C
+                .db 0x44 ; D
+unk_C360:       .db 0x58 ; X                                    ; DATA XREF: RAM:C332o
+                .db 0x9F ; ü
+                .db 0x30 ; 0
+                .db 0x6F ; o
+                .db 0x40 ; @
+                .db 0x5F ; _
+unk_C366:       .db 0x47 ; G                                    ; DATA XREF: RAM:C335o
+                .db 0x41 ; A
+                .db 0x4D ; M
+                .db 0x45 ; E
+                .db 0x20
+                .db 0x4F ; O
+                .db 0x56 ; V
+                .db 0x45 ; E
+                .db 0xD2 ; “
+                .db 0x50 ; P
+                .db 0x45 ; E
+                .db 0x52 ; R
+                .db 0x43 ; C
+                .db 0x45 ; E
+                .db 0x4E ; N
+                .db 0x54 ; T
+                .db 0x41 ; A
+                .db 0x47 ; G
+                .db 0x45 ; E
+                .db 0x20
+                .db 0x4F ; O
+                .db 0x46 ; F
+                .db 0x20
+                .db 0x51 ; Q
+                .db 0x55 ; U
+                .db 0x45 ; E
+                .db 0x53 ; S
+                .db 0xD4 ; ‘
+                .db 0x43 ; C
+                .db 0x4F ; O
+                .db 0x4D ; M
+                .db 0x50 ; P
+                .db 0x4C ; L
+                .db 0x45 ; E
+                .db 0x54 ; T
+                .db 0x45 ; E
+                .db 0xC4 ; ƒ
+unk_C38B:       .db 0x43 ; C                                    ; DATA XREF: RAM:C311o
+                .db 0x4F ; O
+                .db 0x4E ; N
+                .db 0x47 ; G
+                .db 0x52 ; R
+                .db 0x41 ; A
+                .db 0x54 ; T
+                .db 0x55 ; U
+                .db 0x4C ; L
+                .db 0x41 ; A
+                .db 0x54 ; T
+                .db 0x49 ; I
+                .db 0x4F ; O
+                .db 0x4E ; N
+                .db 0xD3 ; ”
+                .db 0x59 ; Y
+                .db 0x4F ; O
+                .db 0x55 ; U
+                .db 0x20
+                .db 0x48 ; H
+                .db 0x41 ; A
+                .db 0x56 ; V
+                .db 0x45 ; E
+                .db 0x20
+                .db 0x43 ; C
+                .db 0x4F ; O
+                .db 0x4D ; M
+                .db 0x50 ; P
+                .db 0x4C ; L
+                .db 0x45 ; E
+                .db 0x41 ; A
+                .db 0x54 ; T
+                .db 0x45 ; E
+                .db 0xC4 ; ƒ
+                .db 0x54 ; T
+                .db 0x48 ; H
+                .db 0x45 ; E
+                .db 0x20
+                .db 0x50 ; P
+                .db 0x45 ; E
+                .db 0x4E ; N
+                .db 0x54 ; T
+                .db 0x41 ; A
+                .db 0x47 ; G
+                .db 0x52 ; R
+                .db 0x41 ; A
+                .db 0xCD ; Õ
+                .db 0x59 ; Y
+                .db 0x4F ; O
+                .db 0x55 ; U
+                .db 0x52 ; R
+                .db 0x20
+                .db 0x41 ; A
+                .db 0x44 ; D
+                .db 0x56 ; V
+                .db 0x45 ; E
+                .db 0x4E ; N
+                .db 0x54 ; T
+                .db 0x55 ; U
+                .db 0x52 ; R
+                .db 0xC5 ; ≈
+                .db 0x43 ; C
+                .db 0x4F ; O
+                .db 0x4E ; N
+                .db 0x54 ; T
+                .db 0x49 ; I
+                .db 0x4E ; N
+                .db 0x55 ; U
+                .db 0x45 ; E
+                .db 0x53 ; S
+                .db 0x20
+                .db 0x49 ; I
+                .db 0xCE ; Œ
+                .db 0x4D ; M
+                .db 0x49 ; I
+                .db 0x52 ; R
+                .db 0x45 ; E
+                .db 0x20
+                .db 0x4D ; M
+                .db 0x41 ; A
+                .db 0x52 ; R
+                .db 0xC5 ; ≈
+unk_C3DD:       .db 0x48 ; H                                    ; DATA XREF: RAM:C30Eo
+                .db 0x8F ; è
+                .db 0x38 ; 8
+                .db 0x6F ; o
+                .db 0x50 ; P
+                .db 0x5F ; _
+                .db 0x48 ; H
+                .db 0x4F ; O
+                .db 0x50 ; P
+                .db 0x3F ; ?
+                .db 0x60 ; `
+                .db 0x1F
+unk_C3E9:       .db 0x46 ; F                                    ; DATA XREF: RAM:C30Ao
+                .db 0x45 ; E
+                .db 0x45 ; E
+                .db 0x42 ; B
+                .db 0x42 ; B
+                .db 0x43 ; C
+plyr_spr_init_data:.db 0x20, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x5C, 0x62, 0, 0, 0, 0, 0, 0, 0
+                                                                ; DATA XREF: RAM:init_start_locationo
+plyr_spr_1_scratchpad:.db 0x20, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x5C, 0x62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                                                                ; DATA XREF: RAM:C2D1o
+                                                                ; RAM:lose_lifeo ...
+plyr_spr_2_scratchpad:.db 0x28, 0x80, 0x80, 0x8C, 5, 5, 0, 0x5E, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
-loc_C6B6:                                                       ; CODE XREF: RAM:AFCBp
-                ld      ix, unk_A76F
-                call    loc_CB81
+no_update:                                                      ; DATA XREF: RAM:upd_sprite_jmp_tblo
+                                                                ; RAM:AE31o ...
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C440:                                                       ; DATA XREF: RAM:AE6Fo
+                                                                ; RAM:AE71o ...
+                call    adj_m6_m12
+                bit     6, 0xD(ix)
+                jr      Z, loc_C450
+                set     6, 0x2D(ix)
+                jp      loc_C107
+; ---------------------------------------------------------------------------
+
+loc_C450:                                                       ; CODE XREF: RAM:C447j
+                call    check_user_input
+                xor     a
+                ld      9(ix), a
+                ld      0xA(ix), a
+                call    loc_C4C8
+                call    loc_C58D
+                call    loc_C56C
+                call    loc_BF79
+                call    loc_C4A3
+                jr      NC, loc_C495
+
+loc_C46B:                                                       ; CODE XREF: RAM:C499j
+                                                                ; RAM:C4A0j
+                set     1, 0x27(ix)
+                ld      a, 3(ix)
+                cp      #0xF0 ; ''
+                jr      C, loc_C47A
+                ld      3(ix), #0xF0 ; ''
+
+loc_C47A:                                                       ; CODE XREF: RAM:C474j
+                call    loc_C61D
+                call    loc_C126
+                res     1, 0x27(ix)
+                res     0, 7(ix)
+                ld      a, 0xC(ix)
+                sub     #0x10
+                jr      C, loc_C492
+                ld      0xC(ix), a
+
+loc_C492:                                                       ; CODE XREF: RAM:C48Dj
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_C495:                                                       ; CODE XREF: RAM:C469j
+                ld      a, 0xB(ix)
+                and     a
+                jp      M, loc_C46B
+                xor     a
+                ld      0xB(ix), a
+                jr      loc_C46B
+; ---------------------------------------------------------------------------
+                .db 0xC9 ; …
+; ---------------------------------------------------------------------------
+
+loc_C4A3:                                                       ; CODE XREF: RAM:BF84p
+                                                                ; RAM:C466p
+                ld      hl, (word_A71D)
+                ld      a, l
+                sub     4(ix)
+                ld      l, a
+                ld      a, h
+                sub     5(ix)
+                ld      h, a
+                ld      a, 1(ix)
+                sub     #0x80 ; 'Ä'
+                jp      P, loc_C4BA
+                neg
+
+loc_C4BA:                                                       ; CODE XREF: RAM:C4B5j
+                cp      l
+                ret     NC
+                ld      a, 2(ix)
+                sub     #0x80 ; 'Ä'
+                jp      P, loc_C4C6
+                neg
+
+loc_C4C6:                                                       ; CODE XREF: RAM:C4C1j
+                cp      h
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C4C8:                                                       ; CODE XREF: RAM:C45Ap
+                ld      hl, #0xA709
+                ld      a, (hl)
+                and     #6
+                jr      Z, loc_C51B
+                bit     3, (hl)
+                jr      Z, loc_C51B
+                ld      a, 0xC(ix)
+                and     #0xF0 ; ''
+                ret     NZ
+                bit     2, 0xC(ix)
+                ret     Z
+                bit     0, c
+                jr      NZ, loc_C4E7
+                bit     2, c
+                jr      NZ, loc_C4F6
+
+loc_C4E7:                                                       ; CODE XREF: RAM:C4E1j
+                bit     1, c
+                jr      NZ, loc_C502
+                bit     4, c
+                jr      NZ, loc_C509
+                bit     0, c
+                jr      NZ, loc_C512
+                res     2, c
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C4F6:                                                       ; CODE XREF: RAM:C4E5j
+                call    loc_C5BD
+                cp      #2
+
+loc_C4FB:                                                       ; CODE XREF: RAM:C507j
+                jr      Z, loc_C518
+                cpl
+
+loc_C4FE:                                                       ; CODE XREF: RAM:C510j
+                and     #1
+                jr      loc_C543
+; ---------------------------------------------------------------------------
+
+loc_C502:                                                       ; CODE XREF: RAM:C4E9j
+                call    loc_C5BD
+                cp      #1
+                jr      loc_C4FB
+; ---------------------------------------------------------------------------
+
+loc_C509:                                                       ; CODE XREF: RAM:C4EDj
+                call    loc_C5BD
+                cp      #3
+
+loc_C50E:                                                       ; CODE XREF: RAM:C516j
+                jr      Z, loc_C518
+                jr      loc_C4FE
+; ---------------------------------------------------------------------------
+
+loc_C512:                                                       ; CODE XREF: RAM:C4F1j
+                call    loc_C5BD
+                and     a
+                jr      loc_C50E
+; ---------------------------------------------------------------------------
+
+loc_C518:                                                       ; CODE XREF: RAM:loc_C4FBj
+                                                                ; RAM:loc_C50Ej
+                set     2, c
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C51B:                                                       ; CODE XREF: RAM:C4CEj
+                                                                ; RAM:C4D2j
+                ld      a, 0xD(ix)
+                and     #7
+                jr      Z, loc_C526
+                dec     0xD(ix)
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C526:                                                       ; CODE XREF: RAM:C520j
+                ld      a, c
+                and     #3
+                ret     Z
+                ld      a, 0xC(ix)
+                and     #0xF0 ; ''
+                ret     NZ
+                bit     3, 0xC(ix)
+                ret     NZ
+                bit     2, c
+                jr      NZ, loc_C539
+
+loc_C539:                                                       ; CODE XREF: RAM:C537j
+                ld      a, 0xD(ix)
+                or      #2
+                ld      0xD(ix), a
+                bit     1, c
+
+loc_C543:                                                       ; CODE XREF: RAM:C500j
+                jr      NZ, loc_C564
+                bit     6, 7(ix)
+                jr      Z, loc_C553
+
+loc_C54B:                                                       ; CODE XREF: RAM:C568j
+                ld      a, 0(ix)
+                xor     #4
+                ld      0(ix), a
+
+loc_C553:                                                       ; CODE XREF: RAM:C549j
+                                                                ; RAM:C56Aj
+                ld      a, 7(ix)
+                xor     #0x40 ; '@'
+                ld      7(ix), a
+                ld      a, 0(ix)
+                add     a, #8
+                ld      0x20(ix), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C564:                                                       ; CODE XREF: RAM:loc_C543j
+                bit     6, 7(ix)
+                jr      Z, loc_C54B
+                jr      loc_C553
+; ---------------------------------------------------------------------------
+
+loc_C56C:                                                       ; CODE XREF: RAM:C460p
+                bit     3, c
+                ret     Z
+                ld      a, 0xC(ix)
+                and     #0xF0 ; ''
+                ret     NZ
+                bit     3, 0xC(ix)
+                ret     NZ
+                bit     2, 0xC(ix)
+                ret     Z
+                set     3, 0xC(ix)
+                ld      0xB(ix), #8
+                push    bc
+                call    loc_D5E4
+                pop     bc
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C58D:                                                       ; CODE XREF: RAM:C45Dp
+                ld      a, 0xC(ix)
+                and     #0xF0 ; ''
+                jr      NZ, loc_C59E
+                bit     3, 0xC(ix)
+                jr      NZ, loc_C59E
+                bit     2, c
+                jr      Z, loc_C5B3
+
+loc_C59E:                                                       ; CODE XREF: RAM:C592j
+                                                                ; RAM:C598j ...
+                ld      a, 0(ix)
+                ld      e, a
+                inc     a
+                and     #3
+                ld      d, a
+                ld      a, e
+                and     #0xFC ; '¸'
+                or      d
+                ld      0(ix), a
+                push    bc
+                call    loc_D635
+                pop     bc
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C5B3:                                                       ; CODE XREF: RAM:C59Cj
+                ld      a, 0(ix)
+                and     #3
+                cp      #2
+                ret     Z
+                jr      loc_C59E
+; ---------------------------------------------------------------------------
+
+loc_C5BD:                                                       ; CODE XREF: RAM:C156p
+                                                                ; RAM:loc_C4F6p ...
+                ld      a, 7(ix)
+                rrca
+                rrca
+                rrca
+                and     #8
+                xor     #8
+                ld      l, a
+                ld      a, 0(ix)
+                and     #4
+                or      l
+                rrca
+                rrca
+                and     #3
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C5D3:                                                       ; DATA XREF: RAM:AE7Fo
+                                                                ; RAM:AE81o ...
+                call    adj_m8_m12
+                bit     6, 0xD(ix)
+                jp      NZ, loc_C107
+                push    ix
+                pop     de
+                ld      hl, #0xFFE0
+                add     hl, de
+                push    hl
+                pop     iy
+                inc     de
+                inc     hl
+                ld      bc, #7
+                ldir
+                ld      6(ix), #0
+                set     1, 7(ix)
+                ld      a, 0xD(ix)
+                and     #0xF
+                jr      Z, loc_C602
+                dec     0xD(ix)
+                jr      loc_C60A
+; ---------------------------------------------------------------------------
+
+loc_C602:                                                       ; CODE XREF: RAM:C5FBj
+                ld      a, 0(iy)
+                add     a, #8
+                ld      0(ix), a
+
+loc_C60A:                                                       ; CODE XREF: RAM:C600j
+                ld      a, 0(iy)
+                and     #4
+                xor     #4
+                add     a, #8
+                add     a, 3(iy)
+                ld      3(ix), a
+                call    set_draw_objs_overlapped
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C61D:                                                       ; CODE XREF: RAM:loc_C47Ap
+                bit     3, 0xC(ix)
+                jr      NZ, loc_C62E
+                ld      a, 0xC(ix)
+                and     #0xF0 ; ''
+                jr      NZ, loc_C62E
+                bit     2, c
+                jr      Z, loc_C633
+
+loc_C62E:                                                       ; CODE XREF: RAM:C621j
+                                                                ; RAM:C628j
+                push    bc
+                call    loc_C66A
+                pop     bc
+
+loc_C633:                                                       ; CODE XREF: RAM:C62Cj
+                ld      a, 0xB(ix)
+                and     a
+                jp      M, loc_C63E
+                bit     3, c
+                jr      NZ, loc_C63F
+
+loc_C63E:                                                       ; CODE XREF: RAM:C637j
+                dec     a
+
+loc_C63F:                                                       ; CODE XREF: RAM:C63Cj
+                dec     a
+                ld      0xB(ix), a
+                ld      (byte_A739), a
+                add     a, #2
+                call    adj_for_out_of_bounds
+                call    locret_C6B5
+                call    loc_B97F
+                bit     2, 0xC(ix)
+                jr      Z, loc_C662
+                ld      a, (byte_A739)
+                and     a
+                jp      P, loc_C662
+                res     3, 0xC(ix)
+
+loc_C662:                                                       ; CODE XREF: RAM:C655j
+                                                                ; RAM:C65Bj
+                xor     a
+                ld      9(ix), a
+                ld      0xA(ix), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C66A:                                                       ; CODE XREF: RAM:C62Fp
+                ld      a, 9(ix)
+                add     a, 0xE(ix)
+                ld      9(ix), a
+                ld      a, 0xA(ix)
+                add     a, 0xF(ix)
+                ld      0xA(ix), a
+                xor     a
+                ld      0xE(ix), a
+                ld      0xF(ix), a
+                ld      bc, #off_C68D
+
+loc_C686:                                                       ; CODE XREF: RAM:C8EEj
+                                                                ; RAM:C8F4j
+                call    loc_C5BD
+                ld      l, a
+                jp      jump_to_tbl_entry
+; ---------------------------------------------------------------------------
+off_C68D:       .dw loc_C695                                    ; DATA XREF: RAM:C683o
+                .dw loc_C69E
+                .dw loc_C6A5
+                .dw loc_C6AE
+; ---------------------------------------------------------------------------
+
+loc_C695:                                                       ; DATA XREF: RAM:off_C68Do
+                ld      a, 9(ix)
+                add     a, #0xFD ; '˝'
+
+loc_C69A:                                                       ; CODE XREF: RAM:C6A3j
+                ld      9(ix), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C69E:                                                       ; DATA XREF: RAM:C68Fo
+                ld      a, 9(ix)
+                add     a, #3
+                jr      loc_C69A
+; ---------------------------------------------------------------------------
+
+loc_C6A5:                                                       ; DATA XREF: RAM:C691o
+                ld      a, 0xA(ix)
+                add     a, #3
+
+loc_C6AA:                                                       ; CODE XREF: RAM:C6B3j
+                ld      0xA(ix), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C6AE:                                                       ; DATA XREF: RAM:C693o
+                ld      a, 0xA(ix)
+                add     a, #0xFD ; '˝'
+                jr      loc_C6AA
+; ---------------------------------------------------------------------------
+
+locret_C6B5:                                                    ; CODE XREF: RAM:C64Bp
+                ret
+; ---------------------------------------------------------------------------
+
+display_location???:                                            ; CODE XREF: RAM:AFCBp
+                ld      ix, #graphic_objs_tbl
+                call    clear_scrn_buffer
                 call    loc_C92C
                 call    loc_CA82
                 call    loc_C6CC
-                ld      a, 1
-                ld      (byte_A711), a
+                ld      a, #1
+                ld      (render_status_info), a
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_C6CC:                                                       ; CODE XREF: RAM:C6C3p
-                ld      a, (ix+8)
+                ld      a, 8(ix)
                 rra
                 rra
                 rra
-                and     1Fh
+                and     #0x1F
                 ld      e, a
-                ld      a, (ix+8)
-                and     7
+                ld      a, 8(ix)
+                and     #7
                 ld      b, a
                 inc     b
                 xor     a
@@ -15005,8 +6160,8 @@ loc_C6CC:                                                       ; CODE XREF: RAM
 loc_C6DE:                                                       ; CODE XREF: RAM:C6DFj
                 rra
                 djnz    loc_C6DE
-                ld      d, 0
-                ld      hl, 0A74Fh
+                ld      d, #0
+                ld      hl, #0xA74F
                 add     hl, de
                 or      (hl)
                 ld      (hl), a
@@ -15014,29 +6169,29 @@ loc_C6DE:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_C6EA:                                                       ; CODE XREF: RAM:C33Dp
-                ld      hl, 0A74Fh
-                ld      c, 1Fh
-                ld      e, 0
+                ld      hl, #0xA74F
+                ld      c, #0x1F
+                ld      e, #0
 
 loc_C6F1:                                                       ; CODE XREF: RAM:C6FCj
-                ld      b, 8
+                ld      b, #8
                 ld      a, (hl)
 
 loc_C6F4:                                                       ; CODE XREF: RAM:loc_C6F8j
                 rra
-                jr      nc, loc_C6F8
+                jr      NC, loc_C6F8
                 inc     e
 
 loc_C6F8:                                                       ; CODE XREF: RAM:C6F5j
                 djnz    loc_C6F4
                 inc     hl
                 dec     c
-                jr      nz, loc_C6F1
+                jr      NZ, loc_C6F1
                 srl     e
                 ld      a, e
-                cp      36h ; '6'
-                jr      c, loc_C707
-                ld      e, 36h ; '6'
+                cp      #0x36 ; '6'
+                jr      C, loc_C707
+                ld      e, #0x36 ; '6'
 
 loc_C707:                                                       ; CODE XREF: RAM:C703j
                 ld      a, (byte_A74C)
@@ -15054,537 +6209,379 @@ loc_C707:                                                       ; CODE XREF: RAM
                 xor     a
 
 loc_C718:                                                       ; CODE XREF: RAM:C71Bj
-                add     a, 1
+                add     a, #1
                 daa
                 djnz    loc_C718
                 ld      (byte_A74E), a
-                ld      a, 0
-                adc     a, 0
+                ld      a, #0
+                adc     a, #0
                 ld      (byte_A74D), a
                 ex      af, af'
-                ld      bc, 5F90h
-                call    loc_B37F
+                ld      bc, #0x5F90
+                call    calc_screen_buffer_addr
                 ld      l, c
                 ld      h, b
                 ex      af, af'
-                ld      de, 0A74Dh
-                ld      b, 1
+                ld      de, #0xA74D
+                ld      b, #1
                 and     a
-                jr      z, loc_C745
+                jr      Z, loc_C745
                 inc     b
                 push    hl
-                ld      hl, 8355h
-                ld      (word_A732), hl
+                ld      hl, #0x8355
+                ld      (gfxbase_8x8), hl
                 pop     hl
-                jp      loc_BB5A
+                jp      print_BCD_lsd
 ; ---------------------------------------------------------------------------
 
 loc_C745:                                                       ; CODE XREF: RAM:C737j
                 inc     hl
                 inc     de
-                jp      loc_BB48
+                jp      print_BCD_number
 ; ---------------------------------------------------------------------------
-                db 0C9h ; …
-                db  21h ; !
-                db 0F8h ; ¯
-                db    0
-                db  18h
-                db  1Eh
-                db  21h ; !
-                db 0FCh ; ¸
-                db 0F4h ; Ù
-                db  18h
-                db  19h
-                db  21h ; !
-                db 0DCh ; ‹
-                db 0FCh ; ¸
-                db  18h
-                db  14h
-                db  21h ; !
-                db 0ECh ; Ï
-                db 0F8h ; ¯
-                db  18h
-                db  0Fh
-; ---------------------------------------------------------------------------
-
-loc_C75F:                                                       ; CODE XREF: RAM:CB4Ej
-                ld      hl, 0F8F0h
-                jr      loc_C76E
-; ---------------------------------------------------------------------------
-                db  21h ; !
-                db 0F4h ; Ù
-                db 0F8h ; ¯
-                db  18h
-                db    5
-; ---------------------------------------------------------------------------
-
-loc_C769:                                                       ; CODE XREF: RAM:CB51j
-                ld      hl, 0F4F0h
-                jr      loc_C76E
-; ---------------------------------------------------------------------------
-
-loc_C76E:                                                       ; CODE XREF: RAM:C762j
-                                                                ; RAM:C76Cj
-                ld      (ix+12h), l
-                ld      (ix+13h), h
                 ret
 ; ---------------------------------------------------------------------------
-                db  21h ; !
-                db 0F4h ; Ù
-                db 0FAh ; ˙
-                db  18h
-                db 0F4h ; Ù
-                db  21h ; !
-                db 0F4h ; Ù
-                db 0FCh ; ¸
-                db  18h
-                db 0EFh ; Ô
-                db  21h ; !
-                db 0F8h ; ¯
-                db 0FCh ; ¸
-                db  18h
-                db 0EAh ; Í
-                db  21h ; !
-                db 0F8h ; ¯
-                db 0FEh ; ˛
-                db  18h
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  76h ; v
-                db  20h
-                db  0Dh
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0FEh ; ˛
-                db    9
-                db  28h ; (
-                db  0Ch
-                db  21h ; !
-                db 0F9h ; ˘
-                db 0FBh ; ˚
-                db 0C3h ; √
-                db  6Eh ; n
-                db 0C7h ; «
-                db  21h ; !
-                db 0F9h ; ˘
-                db 0FCh ; ¸
-                db 0C3h ; √
-                db  6Eh ; n
-                db 0C7h ; «
-                db  21h ; !
-                db 0F0h ; 
-                db 0FBh ; ˚
-                db 0C3h ; √
-                db  6Eh ; n
-                db 0C7h ; «
-                db  21h ; !
-                db 0F8h ; ¯
-                db 0FBh ; ˚
-                db  18h
-                db  10h
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  76h ; v
-                db  20h
-                db  2Ah ; *
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0FEh ; ˛
-                db    8
-                db  28h ; (
-                db 0EEh ; Ó
-                db  21h ; !
-                db 0FBh ; ˚
-                db 0FBh ; ˚
-                db 0CDh ; Õ
-                db  6Eh ; n
-                db 0C7h ; «
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    2
-                db 0C6h ; ∆
-                db  0Dh
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    1
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db  21h ; !
-                db  0Fh
-                db    6
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db 0CDh ; Õ
-                db    2
-                db 0C8h ; »
-                db 0C3h ; √
-                db 0D2h ; “
-                db 0C8h ; »
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0FEh ; ˛
-                db    8
-                db  28h ; (
-                db  19h
-                db  21h ; !
-                db 0EFh ; Ô
-                db 0FAh ; ˙
-                db 0CDh ; Õ
-                db  6Eh ; n
-                db 0C7h ; «
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    1
-                db 0D6h ; ÷
-                db  0Dh
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    2
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db  21h ; !
-                db    6
-                db  0Fh
-                db  18h
-                db 0D4h ; ‘
-                db  21h ; !
-                db 0F0h ; 
-                db 0FBh ; ˚
-                db  18h
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db  21h ; !
-                db  6Fh ; o
-                db 0A7h ; ß
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0D6h ; ÷
-                db  10h
-                db 0FEh ; ˛
-                db  20h
-                db 0D0h ; –
-                db 0FDh ; ˝
-                db 0CBh ; À
-                db    7
-                db  5Eh ; ^
-                db 0C8h ; »
-                db 0CDh ; Õ
-                db 0ADh ; ≠
-                db 0C8h ; »
-                db 0D0h ; –
-                db 0FDh ; ˝
-                db 0CBh ; À
-                db    7
-                db 0C6h ; ∆
-                db    1
-                db  3Bh ; ;
-                db 0C8h ; »
-                db  2Ah ; *
-                db  1Dh
-                db 0A7h ; ß
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    7
-                db  0Fh
-                db  0Fh
-                db  0Fh
-                db 0E6h ; Ê
-                db    8
-                db 0EEh ; Ó
-                db    8
-                db  6Fh ; o
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db    4
-                db 0B5h ; µ
-                db  0Fh
-                db  0Fh
-                db 0E6h ; Ê
-                db    3
-                db  6Fh ; o
-                db 0C3h ; √
-                db    3
-                db 0B0h ; ∞
-                db  43h ; C
-                db 0C8h ; »
-                db  74h ; t
-                db 0C8h ; »
-                db  87h ; á
-                db 0C8h ; »
-                db  9Ah ; ö
-                db 0C8h ; »
-                db 0E1h ; ·
-                db  3Eh ; >
-                db  80h ; Ä
-                db  95h ; ï
-                db  6Fh ; o
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    1
-                db 0FDh ; ˝
-                db  86h ; Ü
-                db    4
-                db 0BDh ; Ω
-                db 0D0h ; –
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    1
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    8
-                db 0FDh ; ˝
-                db  77h ; w
-                db    8
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db  0Ch
-                db 0F6h ; ˆ
-                db  30h ; 0
-                db 0FDh ; ˝
-                db  77h ; w
-                db  0Ch
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0E1h ; ·
-                db  11h
-                db 0FFh
-                db 0C3h ; √
-                db    1
-                db  40h ; @
-                db    0
-                db 0EDh ; Ì
-                db 0B0h ; ∞
-                db  33h ; 3
-                db  33h ; 3
-                db  33h ; 3
-                db  33h ; 3
-                db 0C3h ; √
-                db 0C8h ; »
-                db 0AFh ; Ø
-                db 0E1h ; ·
-                db  7Dh ; }
-                db 0C6h ; ∆
-                db  80h ; Ä
-                db  6Fh ; o
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    1
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    4
-                db 0BDh ; Ω
-                db 0D8h ; ÿ
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    1
-                db 0FFh
-                db  18h
-                db 0CDh ; Õ
-                db 0E1h ; ·
-                db  7Ch ; |
-                db 0C6h ; ∆
-                db  80h ; Ä
-                db  67h ; g
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    2
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    5
-                db 0BCh ; º
-                db 0D8h ; ÿ
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    2
-                db 0FFh
-                db  18h
-                db 0BAh ; ∫
-                db 0E1h ; ·
-                db  3Eh ; >
-                db  80h ; Ä
-                db  94h ; î
-                db  67h ; g
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    2
-                db 0FDh ; ˝
-                db  86h ; Ü
-                db    5
-                db 0BCh ; º
-                db 0D0h ; –
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    2
-                db    0
-                db  18h
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    1
-                db  30h ; 0
-                db    2
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0BDh ; Ω
-                db 0D0h ; –
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ah
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    2
-                db  30h ; 0
-                db    2
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0BCh ; º
-                db 0D0h ; –
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Bh
-                db 0FDh ; ˝
-                db  96h ; ñ
-                db    3
-                db  30h ; 0
-                db    2
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0FEh ; ˛
-                db    4
-                db 0C9h ; …
-                db  21h ; !
-                db  0Fh
-                db  0Fh
-                db 0FDh ; ˝
-                db  21h ; !
-                db  6Fh ; o
-                db 0A7h ; ß
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0A7h ; ß
-                db 0C8h ; »
-                db 0FDh ; ˝
-                db 0CBh ; À
-                db    7
-                db  5Eh ; ^
-                db 0C8h ; »
-                db 0CDh ; Õ
-                db 0ADh ; ≠
-                db 0C8h ; »
-                db 0D0h ; –
-                db    1
-                db 0F7h ; ˜
-                db 0C8h ; »
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    0
-                db  5Eh ; ^
-                db 0C2h ; ¬
-                db  86h ; Ü
-                db 0C6h ; ∆
-                db    1
-                db 0FFh
-                db 0C8h ; »
-                db 0C3h ; √
-                db  86h ; Ü
-                db 0C6h ; ∆
-                db  1Ah
-                db 0C9h ; …
-                db    7
-                db 0C9h ; …
-                db    7
-                db 0C9h ; …
-                db  1Ah
-                db 0C9h ; …
-                db    7
-                db 0C9h ; …
-                db  1Ah
-                db 0C9h ; …
-                db  1Ah
-                db 0C9h ; …
-                db    7
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ah
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db    2
-                db  28h ; (
-                db  1Ch
-                db  3Eh ; >
-                db    1
-                db  30h ; 0
-                db    2
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0FDh ; ˝
-                db  77h ; w
-                db  0Fh
-                db  18h
-                db  11h
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db    1
-                db  28h ; (
-                db    9
-                db  3Eh ; >
-                db    1
-                db  30h ; 0
-                db    2
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0FDh ; ˝
-                db  77h ; w
-                db  0Eh
-                db 0C9h ; …
+
+adj_0_m8:                                                       ; DATA XREF: RAM:AEA1o
+                ld      hl, #0xF8 ; '¯'                         ; 0,-8
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+                ld      hl, #0xF4FC                             ; -12,-4
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+                ld      hl, #0xFCDC                             ; -4,-36
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+                ld      hl, #0xF8EC                             ; -8,-20
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m8_m16:                                                     ; CODE XREF: RAM:C051p
+                                                                ; RAM:C288j ...
+                ld      hl, #0xF8F0                             ; -8,-16
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m8_m12:                                                     ; CODE XREF: RAM:loc_C5D3p
+                ld      hl, #0xF8F4                             ; -8,-12
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m12_m16:                                                    ; CODE XREF: RAM:loc_CB51j
+                                                                ; RAM:loc_CD7Cp
+                ld      hl, #0xF4F0                             ; -12,-16
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+set_pixel_adj:                                                  ; CODE XREF: RAM:C74Ej
+                                                                ; RAM:C753j ...
+                ld      18(ix), l
+                ld      19(ix), h
+                ret
+; ---------------------------------------------------------------------------
+
+adj_m6_m12:                                                     ; CODE XREF: RAM:loc_C1C5p
+                                                                ; RAM:loc_C440p ...
+                ld      hl, #0xFAF4                             ; -6,-12
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m4_m12:                                                     ; CODE XREF: RAM:loc_C111p
+                                                                ; RAM:loc_C11Dp
+                ld      hl, #0xFCF4                             ; -4,-12
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m4_m8:                                                      ; DATA XREF: RAM:AE99o
+                                                                ; RAM:AE9Bo ...
+                ld      hl, #0xFCF8                             ; -4,-8
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m2_m8:                                                      ; DATA XREF: RAM:AE47o
+                                                                ; RAM:AE49o ...
+                ld      hl, #0xFEF8                             ; -2,-8
+                jr      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+upd_07_09:                                                      ; DATA XREF: RAM:AE3Do
+                                                                ; RAM:AE41o
+                bit     6, 7(ix)
+                jr      NZ, adj_m4_m7
+                ld      a, 0(ix)
+                cp      #9
+                jr      Z, adj_m5_m16
+                ld      hl, #0xFBF9
+                jp      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m4_m7:                                                      ; CODE XREF: RAM:C78Dj
+                ld      hl, #0xFCF9                             ; -4,-7
+                jp      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+adj_m5_m16:                                                     ; CODE XREF: RAM:C794j
+                ld      hl, #0xFBF0                             ; -5,-16
+                jp      set_pixel_adj
+; ---------------------------------------------------------------------------
+
+loc_C7A8:                                                       ; CODE XREF: RAM:C7B8j
+                ld      hl, #0xFBF8
+                jr      loc_C7BD
+; ---------------------------------------------------------------------------
+
+upd_06_08:                                                      ; DATA XREF: RAM:AE3Bo
+                                                                ; RAM:AE3Fo
+                bit     6, 7(ix)
+                jr      NZ, loc_C7DD
+                ld      a, 0(ix)
+                cp      #8
+                jr      Z, loc_C7A8
+                ld      hl, #0xFBFB
+
+loc_C7BD:                                                       ; CODE XREF: RAM:C7ABj
+                call    set_pixel_adj
+                ld      a, 2(ix)
+                add     a, #0xD
+                ld      0xA(ix), a
+                ld      a, 1(ix)
+                ld      9(ix), a
+                ld      hl, #0x60F
+
+loc_C7D1:                                                       ; CODE XREF: RAM:C7FBj
+                ld      a, 3(ix)
+                ld      0xB(ix), a
+                call    loc_C802
+                jp      loc_C8D2
+; ---------------------------------------------------------------------------
+
+loc_C7DD:                                                       ; CODE XREF: RAM:C7B1j
+                ld      a, 0(ix)
+                cp      #8
+                jr      Z, loc_C7FD
+                ld      hl, #0xFAEF
+
+loc_C7E7:                                                       ; CODE XREF: RAM:C800j
+                call    set_pixel_adj
+                ld      a, 1(ix)
+                sub     #0xD
+                ld      9(ix), a
+                ld      a, 2(ix)
+                ld      0xA(ix), a
+                ld      hl, #0xF06
+                jr      loc_C7D1
+; ---------------------------------------------------------------------------
+
+loc_C7FD:                                                       ; CODE XREF: RAM:C7E2j
+                ld      hl, #0xFBF0
+                jr      loc_C7E7
+; ---------------------------------------------------------------------------
+
+loc_C802:                                                       ; CODE XREF: RAM:C7D7p
+                ld      iy, #0xA76F
+                ld      a, 0(iy)
+                sub     #0x10
+                cp      #0x20 ; ' '
+                ret     NC
+                bit     3, 7(iy)
+                ret     Z
+                call    loc_C8AD
+                ret     NC
+                set     0, 7(iy)
+                ld      bc, #0xC83B
+                ld      hl, (word_A71D)
+                push    hl
+                ld      a, 7(iy)
+                rrca
+                rrca
+                rrca
+                and     #8
+                xor     #8
+                ld      l, a
+                ld      a, 0(iy)
+                and     #4
+                or      l
+                rrca
+                rrca
+                and     #3
+                ld      l, a
+                jp      jump_to_tbl_entry
+; ---------------------------------------------------------------------------
+                .dw loc_C843
+                .dw loc_C874
+                .dw loc_C887
+                .dw loc_C89A
+; ---------------------------------------------------------------------------
+
+loc_C843:                                                       ; DATA XREF: RAM:C83Bo
+                pop     hl
+                ld      a, #0x80 ; 'Ä'
+                sub     l
+                ld      l, a
+                ld      a, 1(iy)
+                add     a, 4(iy)
+                cp      l
+                ret     NC
+                ld      1(iy), #0
+
+loc_C854:                                                       ; CODE XREF: RAM:C885j
+                                                                ; RAM:C898j ...
+                ld      a, 8(ix)
+                ld      8(iy), a
+                ld      a, 0xC(iy)
+                or      #0x30 ; '0'
+                ld      0xC(iy), a
+                push    iy
+                pop     hl
+                ld      de, #plyr_spr_1_scratchpad
+                ld      bc, #0x40 ; '@'
+                ldir
+                inc     sp
+                inc     sp
+                inc     sp
+                inc     sp
+                jp      loc_AFC8
+; ---------------------------------------------------------------------------
+
+loc_C874:                                                       ; DATA XREF: RAM:C83Do
+                pop     hl
+                ld      a, l
+                add     a, #0x80 ; 'Ä'
+                ld      l, a
+                ld      a, 1(iy)
+                sub     4(iy)
+                cp      l
+                ret     C
+                ld      1(iy), #0xFF
+                jr      loc_C854
+; ---------------------------------------------------------------------------
+
+loc_C887:                                                       ; DATA XREF: RAM:C83Fo
+                pop     hl
+                ld      a, h
+                add     a, #0x80 ; 'Ä'
+                ld      h, a
+                ld      a, 2(iy)
+                sub     5(iy)
+                cp      h
+                ret     C
+                ld      2(iy), #0xFF
+                jr      loc_C854
+; ---------------------------------------------------------------------------
+
+loc_C89A:                                                       ; DATA XREF: RAM:C841o
+                pop     hl
+                ld      a, #0x80 ; 'Ä'
+                sub     h
+                ld      h, a
+                ld      a, 2(iy)
+                add     a, 5(iy)
+                cp      h
+                ret     NC
+                ld      2(iy), #0
+                jr      loc_C854
+; ---------------------------------------------------------------------------
+
+loc_C8AD:                                                       ; CODE XREF: RAM:C813p
+                                                                ; RAM:C8E3p
+                ld      a, 9(ix)
+                sub     1(iy)
+                jr      NC, loc_C8B7
+                neg
+
+loc_C8B7:                                                       ; CODE XREF: RAM:C8B3j
+                cp      l
+                ret     NC
+                ld      a, 0xA(ix)
+                sub     2(iy)
+                jr      NC, loc_C8C3
+                neg
+
+loc_C8C3:                                                       ; CODE XREF: RAM:C8BFj
+                cp      h
+                ret     NC
+                ld      a, 0xB(ix)
+                sub     3(iy)
+                jr      NC, loc_C8CF
+                neg
+
+loc_C8CF:                                                       ; CODE XREF: RAM:C8CBj
+                cp      #4
+                ret
+; ---------------------------------------------------------------------------
+
+loc_C8D2:                                                       ; CODE XREF: RAM:C7DAj
+                ld      hl, #0xF0F
+                ld      iy, #graphic_objs_tbl
+                ld      a, 0(iy)
+                and     a
+                ret     Z
+                bit     3, 7(iy)
+                ret     Z
+                call    loc_C8AD
+                ret     NC
+                ld      bc, #off_C8F7
+                bit     3, 0(ix)
+                jp      NZ, loc_C686
+                ld      bc, #off_C8FF
+                jp      loc_C686
+; ---------------------------------------------------------------------------
+off_C8F7:       .dw loc_C91A                                    ; DATA XREF: RAM:C8E7o
+                .dw loc_C907
+                .dw loc_C907
+                .dw loc_C91A
+off_C8FF:       .dw loc_C907                                    ; DATA XREF: RAM:C8F1o
+                .dw loc_C91A
+                .dw loc_C91A
+                .dw loc_C907
+; ---------------------------------------------------------------------------
+
+loc_C907:                                                       ; DATA XREF: RAM:C8F9o
+                                                                ; RAM:C8FBo ...
+                ld      a, 0xA(ix)
+                cp      2(iy)
+                jr      Z, locret_C92B
+                ld      a, #1
+                jr      NC, loc_C915
+                neg
+
+loc_C915:                                                       ; CODE XREF: RAM:C911j
+                ld      0xF(iy), a
+                jr      locret_C92B
+; ---------------------------------------------------------------------------
+
+loc_C91A:                                                       ; DATA XREF: RAM:off_C8F7o
+                                                                ; RAM:C8FDo ...
+                ld      a, 9(ix)
+                cp      1(iy)
+                jr      Z, locret_C92B
+                ld      a, #1
+                jr      NC, loc_C928
+                neg
+
+loc_C928:                                                       ; CODE XREF: RAM:C924j
+                ld      0xE(iy), a
+
+locret_C92B:                                                    ; CODE XREF: RAM:C90Dj
+                                                                ; RAM:C918j ...
+                ret
 ; ---------------------------------------------------------------------------
 
 loc_C92C:                                                       ; CODE XREF: RAM:C6BDp
-                call    loc_CB54
-                ld      hl, 6CE5h
+                call    clr_layout_mem_???
+                ld      hl, #block_type_tbl
                 ld      (word_A73A), hl
                 xor     a
                 ld      (byte_A73C), a
-                ld      de, 0AE0Fh
-                ld      bc, 696Dh
-                ld      hl, 5E10h
+                ld      de, # byte_A7AF+0x660
+                ld      bc, #background_type_tbl
+                ld      hl, #location_tbl
 
 loc_C942:                                                       ; CODE XREF: RAM:C951j
                 ld      a, (hl)
                 inc     hl
-                cp      (ix+8)
-                jr      z, loc_C953
+                cp      8(ix)
+                jr      Z, loc_C953
                 ld      a, (hl)
                 call    loc_B519
                 and     a
@@ -15597,9 +6594,9 @@ loc_C953:                                                       ; CODE XREF: RAM
                 ld      b, (hl)
                 inc     hl
                 ld      a, (hl)
-                and     7
-                or      40h ; '@'
-                ld      (byte_A738), a
+                and     #7
+                or      #0x40 ; '@'
+                ld      (curr_room_attrib), a
                 push    de
                 ex      de, hl
                 ld      a, (de)
@@ -15607,20 +6604,20 @@ loc_C953:                                                       ; CODE XREF: RAM
                 rrca
                 rrca
                 rrca
-                and     1Fh
+                and     #0x1F
                 ld      c, a
                 add     a, a
                 add     a, c
-                ld      hl, 5E07h
+                ld      hl, #room_size_tbl
                 call    loc_B519
                 ld      a, (hl)
                 inc     hl
-                ld      (byte_A71D), a
+                ld      (word_A71D), a
                 ld      a, (hl)
                 inc     hl
-                ld      (byte_A71E), a
+                ld      (word_A71D+1), a
                 ld      a, (hl)
-                ld      (byte_A71F), a
+                ld      (room_size_Z), a
                 dec     b
                 dec     b
                 ex      de, hl
@@ -15629,14 +6626,14 @@ loc_C953:                                                       ; CODE XREF: RAM
 loc_C981:                                                       ; CODE XREF: RAM:C9B3j
                 ld      a, (hl)
                 inc     hl
-                cp      0FFh
-                jr      z, loc_C9B6
+                cp      #0xFF
+                jr      Z, loc_C9B6
                 push    bc
                 push    hl
                 ld      l, a
-                ld      h, 0
+                ld      h, #0
                 add     hl, hl
-                ld      bc, 696Dh
+                ld      bc, #background_type_tbl
                 add     hl, bc
                 ld      a, (hl)
                 inc     hl
@@ -15644,23 +6641,23 @@ loc_C981:                                                       ; CODE XREF: RAM
                 ld      l, a
 
 loc_C995:                                                       ; CODE XREF: RAM:C9ADj
-                ld      bc, 8
+                ld      bc, #8
                 ldir
                 ex      (sp), hl
                 ld      a, (hl)
                 ex      (sp), hl
                 ld      (de), a
                 inc     de
-                ld      b, 17h
+                ld      b, #0x17
                 call    loc_B513
                 push    hl
-                ld      hl, 0FFC0h
+                ld      hl, #0xFFC0
                 add     hl, de
                 ex      de, hl
                 pop     hl
                 ld      a, (hl)
                 and     a
-                jr      nz, loc_C995
+                jr      NZ, loc_C995
                 pop     hl
                 pop     bc
                 inc     hl
@@ -15678,7 +6675,7 @@ loc_C9B6:                                                       ; CODE XREF: RAM
 loc_C9BC:                                                       ; CODE XREF: RAM:CA5Bj
                                                                 ; RAM:CA79j
                 ld      a, (hl)
-                and     7
+                and     #7
                 inc     a
                 ld      c, a
                 ld      a, (hl)
@@ -15689,9 +6686,9 @@ loc_C9BC:                                                       ; CODE XREF: RAM
                 push    hl
                 rrca
                 rrca
-                and     3Eh ; '>'
-                cp      3Eh ; '>'
-                jp      z, loc_CA6C
+                and     #0x3E ; '>'
+                cp      #0x3E ; '>'
+                jp      Z, loc_CA6C
                 ld      hl, (word_A73A)
                 call    loc_B519
                 ld      a, (hl)
@@ -15705,51 +6702,51 @@ loc_C9DA:                                                       ; CODE XREF: RAM
 loc_C9DB:                                                       ; CODE XREF: RAM:CA53j
                 ld      a, (hl)
                 inc     hl
-                ld      (iy+0), a
+                ld      0(iy), a
                 ld      a, (hl)
                 inc     hl
-                ld      (iy+4), a
+                ld      4(iy), a
                 ld      a, (hl)
                 inc     hl
-                ld      (iy+5), a
+                ld      5(iy), a
                 ld      a, (hl)
                 inc     hl
-                ld      (iy+6), a
+                ld      6(iy), a
                 ld      a, (hl)
                 inc     hl
-                ld      (iy+7), a
-                ld      a, (ix+8)
-                ld      (iy+8), a
+                ld      7(iy), a
+                ld      a, 8(ix)
+                ld      8(iy), a
                 ld      a, (byte_A73C)
                 rlca
                 rlca
                 rlca
-                and     8
+                and     #8
                 ld      e, a
                 ld      a, d
                 rlca
                 rlca
                 rlca
                 rlca
-                and     70h ; 'p'
+                and     #0x70 ; 'p'
                 add     a, e
-                add     a, 48h ; 'H'
-                ld      (iy+1), a
+                add     a, #0x48 ; 'H'
+                ld      1(iy), a
                 ld      a, (byte_A73C)
                 rlca
                 rlca
-                and     8
+                and     #8
                 ld      e, a
                 ld      a, d
                 rlca
-                and     70h ; 'p'
+                and     #0x70 ; 'p'
                 add     a, e
-                add     a, 48h ; 'H'
-                ld      (iy+2), a
+                add     a, #0x48 ; 'H'
+                ld      2(iy), a
                 ld      a, d
                 rlca
                 rlca
-                and     3
+                and     #3
                 add     a, a
                 add     a, a
                 ld      e, a
@@ -15758,32 +6755,32 @@ loc_C9DB:                                                       ; CODE XREF: RAM
                 ld      e, a
                 ld      a, (byte_A73C)
                 add     a, e
-                and     0FCh ; '¸'
+                and     #0xFC ; '¸'
                 ld      e, a
-                ld      a, (byte_A71F)
+                ld      a, (room_size_Z)
                 add     a, e
-                ld      (iy+3), a
+                ld      3(iy), a
                 push    bc
-                ld      bc, 9
+                ld      bc, #9
                 add     iy, bc
-                ld      b, 17h
+                ld      b, #0x17
 
 loc_CA43:                                                       ; CODE XREF: RAM:CA49j
-                ld      (iy+0), 0
+                ld      0(iy), #0
                 inc     iy
                 djnz    loc_CA43
-                ld      bc, 0FFC0h
+                ld      bc, #0xFFC0
                 add     iy, bc
                 pop     bc
                 ld      a, (hl)
                 and     a
-                jr      nz, loc_C9DB
+                jr      NZ, loc_C9DB
                 pop     de
                 pop     hl
                 dec     b
-                jr      z, loc_CA66
+                jr      Z, loc_CA66
                 dec     c
-                jp      z, loc_C9BC
+                jp      Z, loc_C9BC
                 ld      a, (hl)
                 inc     hl
                 push    hl
@@ -15801,112 +6798,111 @@ loc_CA66:                                                       ; CODE XREF: RAM
 
 loc_CA6C:                                                       ; CODE XREF: RAM:C9CDj
                 ld      hl, (word_A73A)
-                ld      a, 40h ; '@'
+                ld      a, #0x40 ; '@'
                 call    loc_B519
                 ld      (word_A73A), hl
+
+loc_CA77:                                                       ; CODE XREF: RAM:CA80j
                 dec     b
                 pop     hl
                 jp      loc_C9BC
 ; ---------------------------------------------------------------------------
-                db  7Ah ; z
-                db  32h ; 2
-                db  3Ch ; <
-                db 0A7h ; ß
-                db  18h
-                db 0F5h ; ı
+                ld      a, d
+                ld      (byte_A73C), a
+                jr      loc_CA77
 ; ---------------------------------------------------------------------------
 
 loc_CA82:                                                       ; CODE XREF: RAM:C6C0p
-                ld      a, (byte_A71D)
-                sub     2
+                ld      a, (word_A71D)
+                sub     #2
                 ld      l, a
-                ld      a, (byte_A71E)
-                sub     2
+                ld      a, (word_A71D+1)
+                sub     #2
                 ld      h, a
-                ld      a, (ix+1)
+                ld      a, 1(ix)
                 and     a
-                jr      z, loc_CAE1
+                jr      Z, loc_CAE1
                 inc     a
-                jr      z, loc_CAD1
-                ld      a, (ix+2)
+                jr      Z, loc_CAD1
+                ld      a, 2(ix)
                 and     a
-                jr      z, loc_CAC4
+                jr      Z, loc_CAC4
                 inc     a
-                jr      z, loc_CAA1
+                jr      Z, loc_CAA1
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_CAA1:                                                       ; CODE XREF: RAM:CA9Ej
-                ld      c, 3
+                ld      c, #3
                 call    loc_CAEE
-                ld      a, 80h ; 'Ä'
+                ld      a, #0x80 ; 'Ä'
                 sub     h
-                sub     (ix+5)
+                sub     5(ix)
 
 loc_CAAC:                                                       ; CODE XREF: RAM:CACFj
-                ld      (ix+2), a
+                ld      2(ix), a
 
 loc_CAAF:                                                       ; CODE XREF: RAM:CADFj
-                set     4, (ix+7)
-                set     4, (ix+27h)
-                ld      a, (ix+1)
-                ld      (ix+21h), a
-                ld      a, (ix+2)
-                ld      (ix+22h), a
+                set     4, 7(ix)
+                set     4, 0x27(ix)
+                ld      a, 1(ix)
+                ld      0x21(ix), a
+                ld      a, 2(ix)
+                ld      0x22(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_CAC4:                                                       ; CODE XREF: RAM:CA9Bj
-                ld      c, 2
+                ld      c, #2
                 call    loc_CAEE
                 ld      a, h
-                add     a, 80h ; 'Ä'
-                add     a, (ix+5)
+                add     a, #0x80 ; 'Ä'
+                add     a, 5(ix)
                 jr      loc_CAAC
 ; ---------------------------------------------------------------------------
 
 loc_CAD1:                                                       ; CODE XREF: RAM:CA95j
-                ld      c, 1
+                ld      c, #1
                 call    loc_CAEE
-                ld      a, 80h ; 'Ä'
+                ld      a, #0x80 ; 'Ä'
                 sub     l
-                sub     (ix+4)
+                sub     4(ix)
 
 loc_CADC:                                                       ; CODE XREF: RAM:CAECj
-                ld      (ix+1), a
+                ld      1(ix), a
                 jr      loc_CAAF
 ; ---------------------------------------------------------------------------
 
 loc_CAE1:                                                       ; CODE XREF: RAM:CA92j
-                ld      c, 0
+                ld      c, #0
                 call    loc_CAEE
                 ld      a, l
-                add     a, 80h ; 'Ä'
-                add     a, (ix+4)
+                add     a, #0x80 ; 'Ä'
+                add     a, 4(ix)
                 jr      loc_CADC
 ; ---------------------------------------------------------------------------
 
 loc_CAEE:                                                       ; CODE XREF: RAM:CAA3p
                                                                 ; RAM:CAC6p ...
-                ld      iy, 0ADEFh
-                ld      de, 0FFC0h
-                ld      b, 4
+                ld      iy, # byte_A7AF+0x640
+                ld      de, #0xFFC0
+                ld      b, #4
 
 loc_CAF7:                                                       ; CODE XREF: RAM:CB12j
-                ld      a, (iy+0)
-                sub     6
-                cp      4
-                ret     nc
+                ld      a, 0(iy)
+                sub     #6
+                cp      #4
+                ret     NC
                 ld      a, c
                 and     a
-                jr      z, loc_CB33
+                jr      Z, loc_CB33
                 dec     a
-                jr      z, loc_CB3C
+                jr      Z, loc_CB3C
                 dec     a
-                jr      z, loc_CB45
-                ld      a, (iy+2)
-                cp      40h ; '@'
-                jr      c, loc_CB29
+                jr      Z, loc_CB45
+                ld      a, 2(iy)
+                cp      #0x40 ; '@'
+                jr      C, loc_CB29
 
 loc_CB10:                                                       ; CODE XREF: RAM:CB3Aj
                                                                 ; RAM:CB43j ...
@@ -15917,71 +6913,78 @@ loc_CB10:                                                       ; CODE XREF: RAM
 
 loc_CB15:                                                       ; CODE XREF: RAM:CB38j
                                                                 ; RAM:CB41j
-                ld      a, (iy+2)
-                add     a, 0Dh
-                ld      (ix+2), a
+                ld      a, 2(iy)
+                add     a, #0xD
+                ld      2(ix), a
 
 loc_CB1D:                                                       ; CODE XREF: RAM:CB31j
-                ld      a, (iy+3)
-                ld      (ix+3), a
-                add     a, 0Ch
-                ld      (ix+23h), a
+                ld      a, 3(iy)
+                ld      3(ix), a
+                add     a, #0xC
+                ld      0x23(ix), a
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_CB29:                                                       ; CODE XREF: RAM:CB0Ej
                                                                 ; RAM:CB4Aj
-                ld      a, (iy+1)
-                sub     0Dh
-                ld      (ix+1), a
+                ld      a, 1(iy)
+                sub     #0xD
+                ld      1(ix), a
                 jr      loc_CB1D
 ; ---------------------------------------------------------------------------
 
 loc_CB33:                                                       ; CODE XREF: RAM:CB01j
-                ld      a, (iy+1)
-                cp      0C0h ; '¿'
-                jr      nc, loc_CB15
+                ld      a, 1(iy)
+                cp      #0xC0 ; '¿'
+                jr      NC, loc_CB15
                 jr      loc_CB10
 ; ---------------------------------------------------------------------------
 
 loc_CB3C:                                                       ; CODE XREF: RAM:CB04j
-                ld      a, (iy+1)
-                cp      40h ; '@'
-                jr      c, loc_CB15
+                ld      a, 1(iy)
+                cp      #0x40 ; '@'
+                jr      C, loc_CB15
                 jr      loc_CB10
 ; ---------------------------------------------------------------------------
 
 loc_CB45:                                                       ; CODE XREF: RAM:CB07j
-                ld      a, (iy+2)
-                cp      0C0h ; '¿'
-                jr      nc, loc_CB29
+                ld      a, 2(iy)
+                cp      #0xC0 ; '¿'
+                jr      NC, loc_CB29
                 jr      loc_CB10
 ; ---------------------------------------------------------------------------
-                jp      loc_C75F
-; ---------------------------------------------------------------------------
-                jp      loc_C769
+
+loc_CB4E:                                                       ; DATA XREF: RAM:AE43o
+                                                                ; RAM:AE45o ...
+                jp      adj_m8_m16
 ; ---------------------------------------------------------------------------
 
-loc_CB54:                                                       ; CODE XREF: RAM:loc_C92Cp
-                ld      hl, unk_A7AF
-                ld      bc, 680h
+loc_CB51:                                                       ; DATA XREF: RAM:AEC9o
+                jp      adj_m12_m16
+; ---------------------------------------------------------------------------
+
+clr_layout_mem_???:                                             ; CODE XREF: RAM:loc_C92Cp
+                ld      hl, #byte_A7AF
+                ld      bc, #0x680
                 jr      clr_mem
 ; ---------------------------------------------------------------------------
+; Different to Knight Lore, Alien 8
 
-loc_CB5C:                                                       ; CODE XREF: RAM:AF9Cp
-                ld      hl, zx_vram
-                ld      de,  zx_vram+1
-                ld      bc, 1800h
-                ld      (hl), 0
+clr_bitmap_memory:                                              ; CODE XREF: RAM:AF9Cp
+                ld      hl, #zx_vram
+                ld      de, # zx_vram+1
+                ld      bc, #0x1800
+                ld      (hl), #0
                 ldir
                 ret
 ; ---------------------------------------------------------------------------
+; Different to Alien 8
 
-loc_CB6A:                                                       ; CODE XREF: RAM:AFA1p
+fill_attr:                                                      ; CODE XREF: RAM:AFA1p
                                                                 ; RAM:B069p ...
-                ld      hl, zx_aram
-                ld      de,  zx_aram+1
-                ld      bc, 300h
+                ld      hl, #zx_aram
+                ld      de, # zx_aram+1
+                ld      bc, #0x300
                 ld      (hl), a
                 ldir
                 ret
@@ -15989,7 +6992,7 @@ loc_CB6A:                                                       ; CODE XREF: RAM
 
 clr_mem:                                                        ; CODE XREF: RAM:AF90p
                                                                 ; RAM:AF99p ...
-                ld      e, 0
+                ld      e, #0
 
 clr_byte:                                                       ; CODE XREF: RAM:CB7Ej
                 ld      (hl), e
@@ -15997,30 +7000,31 @@ clr_byte:                                                       ; CODE XREF: RAM
                 dec     bc
                 ld      a, b
                 or      c
-                jr      nz, clr_byte
+                jr      NZ, clr_byte
                 ret
 ; ---------------------------------------------------------------------------
+; Different to Alien 8
 
-loc_CB81:                                                       ; CODE XREF: RAM:BB82p
-                                                                ; RAM:loc_C323p ...
-                ld      bc, 1800h
-                ld      hl, vidbuf
+clear_scrn_buffer:                                              ; CODE XREF: RAM:BB82p
+                                                                ; RAM:loc_C302p ...
+                ld      bc, #0x1800
+                ld      hl, #vidbuf
                 jr      clr_mem
 ; ---------------------------------------------------------------------------
 
 loc_CB89:                                                       ; CODE XREF: RAM:AFD1p
                 call    loc_D071
-                ld      c, 70h ; 'p'
+                ld      c, #0x70 ; 'p'
 
 loc_CB8E:                                                       ; CODE XREF: RAM:CBA0j
-                ld      a, (iy+0)
-                cp      78h ; 'x'
-                jr      z, loc_CBA7
-                and     0F8h ; '¯'
+                ld      a, 0(iy)
+                cp      #0x78 ; 'x'
+                jr      Z, loc_CBA7
+                and     #0xF8 ; '¯'
                 cp      c
-                jr      z, loc_CBA7
-                cp      80h ; 'Ä'
-                jr      z, loc_CBA7
+                jr      Z, loc_CBA7
+                cp      #0x80 ; 'Ä'
+                jr      Z, loc_CBA7
                 add     iy, de
                 djnz    loc_CB8E
                 xor     a
@@ -16032,116 +7036,81 @@ loc_CBA3:                                                       ; CODE XREF: RAM
 
 loc_CBA7:                                                       ; CODE XREF: RAM:CB93j
                                                                 ; RAM:CB98j ...
-                ld      a, 1
+                ld      a, #1
                 jr      loc_CBA3
 ; ---------------------------------------------------------------------------
 
-loc_CBAB:                                                       ; CODE XREF: RAM:loc_AFDAp
+upd_monsters???:                                                ; CODE XREF: RAM:onscreen_loopp
                 ld      a, (byte_A742)
                 and     a
-                ret     nz
-                ld      hl, byte_A73D
+                ret     NZ
+                ld      hl, #byte_A73D
                 dec     (hl)
-                ret     nz
-                ld      (hl), 1
-                ld      a, (byte_A70D)
-                and     3
-                ret     nz
+                ret     NZ
+                ld      (hl), #1
+                ld      a, (seed_3)
+                and     #3
+                ret     NZ
                 call    loc_CC31
-                ld      hl, 0A7EFh
-                ld      bc, 20h ; ' '
-                ld      de, 0CC11h
+                ld      hl, # byte_A7AF+0x40
+                ld      bc, #0x20 ; ' '
+                ld      de, #byte_CC11
                 ld      a, (hl)
                 and     a
-                jr      z, loc_CBD1
+                jr      Z, loc_CBD1
                 add     hl, bc
                 ld      a, (hl)
                 and     a
-                ret     nz
+                ret     NZ
 
 loc_CBD1:                                                       ; CODE XREF: RAM:CBCBj
                 ex      de, hl
                 push    hl
                 pop     ix
                 ldir
-                ld      a, (byte_A70D)
-                and     2Fh ; '/'
-                add     a, 68h ; 'h'
-                ld      (ix+1), a
+                ld      a, (seed_3)
+                and     #0x2F ; '/'
+                add     a, #104
+                ld      1(ix), a                                ; X
                 ld      a, r
-                and     2Fh ; '/'
-                add     a, 68h ; 'h'
-                ld      (ix+2), a
-                ld      a, (byte_A70D)
+                and     #0x2F ; '/'
+                add     a, #104
+                ld      2(ix), a                                ; Y
+                ld      a, (seed_3)
                 rra
                 rra
                 rra
-                and     7
+                and     #7                                      ; rnd(0-7)
                 ld      l, a
-                ld      h, 0
-                ld      de, 0CC09h
+                ld      h, #0
+                ld      de, #byte_CC09
                 add     hl, de
                 ld      a, (hl)
-                ld      (ix+0), a
-                call    loc_B2C5
-                call    loc_BF1B
-                ret     nc
-                ld      (ix+0), 0
+                ld      0(ix), a
+                call    calc_pixel_XY
+                call    do_any_objs_intersect
+                ret     NC
+                ld      0(ix), #0
                 ret
 ; ---------------------------------------------------------------------------
-                db 0A4h ; §
-                db 0A0h ; †
-                db  30h ; 0
-                db  50h ; P
-                db 0A8h ; ®
-                db 0A0h ; †
-                db  30h ; 0
-                db  50h ; P
-                db    0
-                db 0A0h ; †
-                db 0A0h ; †
-                db 0D8h ; ÿ
-                db    8
-                db    8
-                db    8
-                db  10h
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
+byte_CC09:      .db 0xA4, 0xA0, 0x30, 0x50, 0xA8, 0xA0, 0x30, 0x50 ; DATA XREF: RAM:CBF5o
+byte_CC11:      .db 0, 0xA0, 0xA0, 0xD8, 8, 8, 8, 0x10          ; DATA XREF: RAM:CBC6o
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
 ; ---------------------------------------------------------------------------
 
 loc_CC31:                                                       ; CODE XREF: RAM:AFD7p
                                                                 ; RAM:CBBDp
-                ld      hl, unk_D432
-                ld      de, 10h
-                ld      bc, 1202h
+                ld      hl, #byte_D432
+                ld      de, #0x10
+                ld      bc, #0x1202
 
 loc_CC3A:                                                       ; CODE XREF: RAM:loc_CC42j
                 ld      a, (hl)
-                and     0FCh ; '¸'
-                cp      70h ; 'p'
-                jr      nz, loc_CC42
+                and     #0xFC ; '¸'
+                cp      #0x70 ; 'p'
+                jr      NZ, loc_CC42
                 inc     c
 
 loc_CC42:                                                       ; CODE XREF: RAM:CC3Fj
@@ -16152,2616 +7121,1181 @@ loc_CC42:                                                       ; CODE XREF: RAM
                 ld      (byte_A73D), a
                 ret
 ; ---------------------------------------------------------------------------
-                db 0CDh ; Õ
-                db  75h ; u
-                db 0C7h ; «
-                db 0DDh ; ›
-                db  36h ; 6
-                db    4
-                db  0Ah
-                db 0DDh ; ›
-                db  36h ; 6
-                db    5
-                db  0Ah
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ch
-                db 0E6h ; Ê
-                db    7
-                db  28h ; (
-                db  0Ch
-                db 0E6h ; Ê
-                db    1
-                db 0C4h ; ƒ
-                db 0E9h ; È
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  4Eh ; N
-                db 0C4h ; ƒ
-                db 0F2h ; Ú
-                db 0CCh ; Ã
-                db  3Ah ; :
-                db  70h ; p
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db  96h ; ñ
-                db    1
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  14h
-                db  30h ; 0
-                db  46h ; F
-                db 0CDh ; Õ
-                db  0Dh
-                db 0CDh ; Õ
-                db 0DDh ; ›
-                db  77h ; w
-                db  14h
-                db  3Ah ; :
-                db  71h ; q
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db  96h ; ñ
-                db    2
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  15h
-                db  30h ; 0
-                db  3Ah ; :
-                db 0CDh ; Õ
-                db  0Dh
-                db 0CDh ; Õ
-                db 0DDh ; ›
-                db  77h ; w
-                db  15h
-                db  3Ah ; :
-                db  92h ; í
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db  96h ; ñ
-                db    3
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  16h
-                db  30h ; 0
-                db  2Eh ; .
-                db 0CDh ; Õ
-                db  0Dh
-                db 0CDh ; Õ
-                db 0DDh ; ›
-                db  77h ; w
-                db  16h
-                db    6
-                db    3
-                db 0DDh ; ›
-                db  23h ; #
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  13h
-                db 0C6h ; ∆
-                db    8
-                db 0CBh ; À
-                db  2Fh ; /
-                db 0CBh ; À
-                db  2Fh ; /
-                db 0CBh ; À
-                db  2Fh ; /
-                db 0CBh ; À
-                db  2Fh ; /
-                db 0DDh ; ›
-                db  77h ; w
-                db    8
-                db  10h
-                db 0ECh ; Ï
-                db 0DDh ; ›
-                db  2Bh ; +
-                db 0DDh ; ›
-                db  2Bh ; +
-                db 0DDh ; ›
-                db  2Bh ; +
-                db  18h
-                db  0Fh
-                db 0CDh ; Õ
-                db    4
-                db 0CDh ; Õ
-                db  18h
-                db 0B8h ; ∏
-                db 0CDh ; Õ
-                db    4
-                db 0CDh ; Õ
-                db  18h
-                db 0C4h ; ƒ
-                db 0CDh ; Õ
-                db    4
-                db 0CDh ; Õ
-                db  18h
-                db 0D0h ; –
-                db 0DDh ; ›
-                db  34h ; 4
-                db  10h
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  10h
-                db 0E6h ; Ê
-                db    3
-                db  47h ; G
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0FCh ; ¸
-                db  80h ; Ä
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    7
-                db 0F6h ; ˆ
-                db  30h ; 0
-                db 0DDh ; ›
-                db  77h ; w
-                db    7
-                db 0C3h ; √
-                db 0A7h ; ß
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  14h
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0DDh ; ›
-                db  77h ; w
-                db  14h
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  15h
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0DDh ; ›
-                db  77h ; w
-                db  15h
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  16h
-                db 0EDh ; Ì
-                db  44h ; D
-                db 0DDh ; ›
-                db  77h ; w
-                db  16h
-                db 0C9h ; …
-                db 0C6h ; ∆
-                db    3
-                db 0F8h ; ¯
-                db 0FEh ; ˛
-                db  38h ; 8
-                db 0D8h ; ÿ
-                db  3Eh ; >
-                db  38h ; 8
-                db 0C9h ; …
-                db 0D6h ; ÷
-                db    3
-                db 0F0h ; 
-                db 0FEh ; ˛
-                db 0B8h ; ∏
-                db 0D0h ; –
-                db  3Eh ; >
-                db 0B8h ; ∏
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db  3Ah ; :
-                db  77h ; w
-                db 0A7h ; ß
-                db 0FEh ; ˛
-                db  52h ; R
-                db 0C2h ; ¬
-                db  84h ; Ñ
-                db 0CDh ; Õ
-                db  3Ah ; :
-                db  0Fh
-                db 0A7h ; ß
-                db 0A7h ; ß
-                db 0CAh ;  
-                db  84h ; Ñ
-                db 0CDh ; Õ
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db    7
-                db  87h ; á
-                db  6Fh ; o
-                db  26h ; &
-                db    0
-                db  11h
-                db  62h ; b
-                db 0D5h ; ’
-                db  19h
-                db  7Eh ; ~
-                db 0DDh ; ›
-                db  77h ; w
-                db  15h
-                db  23h ; #
-                db  7Eh ; ~
-                db 0DDh ; ›
-                db  77h ; w
-                db  16h
-                db 0CDh ; Õ
-                db  85h ; Ö
-                db 0D0h ; –
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    1
-                db 0DDh ; ›
-                db  96h ; ñ
-                db  15h
-                db  4Fh ; O
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    2
-                db 0DDh ; ›
-                db  96h ; ñ
-                db  16h
-                db 0B1h ; ±
-                db 0C2h ; ¬
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0C6h ; ∆
-                db    8
-                db  4Fh ; O
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0CDh ; Õ
-                db  9Eh ; û
-                db 0CFh ; œ
-                db  3Ah ; :
-                db  4Bh ; K
-                db 0A7h ; ß
-                db  3Ch ; <
-                db  32h ; 2
-                db  4Bh ; K
-                db 0A7h ; ß
-                db 0FEh ; ˛
-                db    5
-                db 0D2h ; “
-                db    2
-                db 0C3h ; √
-                db 0C3h ; √
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db  18h
-                db  0Ch
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0CDh ; Õ
-                db  69h ; i
-                db 0C7h ; «
-                db  18h
-                db    3
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0DDh ; ›
-                db 0B6h ; ∂
-                db  0Ah
-                db 0DDh ; ›
-                db 0B6h ; ∂
-                db  0Bh
-                db 0C8h ; »
-                db 0DDh ; ›
-                db  36h ; 6
-                db    9
-                db    0
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Ah
-                db    0
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    0
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0DDh ; ›
-                db  36h ; 6
-                db    9
-                db    0
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Ah
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Bh
-                db 0A7h ; ß
-                db  28h ; (
-                db    5
-                db  3Eh ; >
-                db 0FFh
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db  18h
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  36h ; 6
-                db    9
-                db    0
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Ah
-                db    0
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db  46h ; F
-                db  20h
-                db  16h
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  56h ; V
-                db  28h ; (
-                db 0ABh ; ´
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db  7Eh ; ~
-                db  28h ; (
-                db 0A5h ; •
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db 0BEh ; æ
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db 0C6h ; ∆
-                db  18h
-                db  2Ah ; *
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  56h ; V
-                db  20h
-                db  0Bh
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db 0CEh ; Œ
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db 0FFh
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db  4Eh ; N
-                db  20h
-                db  27h ; '
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FEh ; ˛
-                db 0B0h ; ∞
-                db  38h ; 8
-                db  0Ch
-                db 0DDh ; ›
-                db  36h ; 6
-                db    3
-                db 0B0h ; ∞
-                db  3Eh ; >
-                db 0FEh ; ˛
-                db  32h ; 2
-                db  7Ah ; z
-                db 0A7h ; ß
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    2
-                db  3Eh ; >
-                db    3
-                db  32h ; 2
-                db  7Ah ; z
-                db 0A7h ; ß
-                db  3Ah ; :
-                db  7Bh ; {
-                db 0A7h ; ß
-                db 0F6h ; ˆ
-                db    4
-                db  32h ; 2
-                db  7Bh ; {
-                db 0A7h ; ß
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  36h ; 6
-                db  17h
-                db    0
-                db 0C3h ; √
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  56h ; V
-                db  20h
-                db  1Eh
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  56h ; V
-                db  28h ; (
-                db    8
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db 0D6h ; ÷
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    2
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db  3Ah ; :
-                db  7Bh ; {
-                db 0A7h ; ß
-                db 0E6h ; Ê
-                db    8
-                db  28h ; (
-                db    4
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db 0BEh ; æ
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Bh
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db  7Eh ; ~
-                db  20h
-                db    3
-                db 0A7h ; ß
-                db  28h ; (
-                db  1Ah
-                db  3Eh ; >
-                db    1
-                db 0F2h ; Ú
-                db  7Eh ; ~
-                db 0CEh ; Œ
-                db 0C6h ; ∆
-                db    2
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FEh ; ˛
-                db 0B0h ; ∞
-                db  38h ; 8
-                db 0CAh ;  
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  96h ; ñ
-                db  18h
-                db 0C4h ; ƒ
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  96h ; ñ
-                db  18h
-                db 0BBh ; ª
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0C3h ; √
-                db  31h ; 1
-                db 0CEh ; Œ
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  10h
-                db  46h ; F
-                db  28h ; (
-                db  14h
-                db 0DDh ; ›
-                db  36h ; 6
-                db    9
-                db    2
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  46h ; F
-                db  28h ; (
-                db    4
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  10h
-                db  86h ; Ü
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  36h ; 6
-                db    9
-                db 0FEh ; ˛
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  46h ; F
-                db  28h ; (
-                db 0F0h ; 
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  10h
-                db 0C6h ; ∆
-                db  18h
-                db 0EAh ; Í
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0AFh ; Ø
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Bh
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  10h
-                db  46h ; F
-                db  28h ; (
-                db  14h
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Ah
-                db    2
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  4Eh ; N
-                db  28h ; (
-                db    4
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  10h
-                db  86h ; Ü
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Ah
-                db 0FEh ; ˛
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  4Eh ; N
-                db  28h ; (
-                db 0F0h ; 
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  10h
-                db 0C6h ; ∆
-                db  18h
-                db 0EAh ; Í
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  56h ; V
-                db 0C8h ; »
-                db 0C3h ; √
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    0
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0B6h ; ∂
-                db  3Ah ; :
-                db  15h
-                db 0A7h ; ß
-                db 0E6h ; Ê
-                db    1
-                db  28h ; (
-                db    4
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0F6h ; ˆ
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  46h ; F
-                db  20h
-                db  0Eh
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  4Eh ; N
-                db  20h
-                db    8
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0DDh ; ›
-                db 0B6h ; ∂
-                db  0Ah
-                db  20h
-                db  13h
-                db  3Ah ; :
-                db  0Dh
-                db 0A7h ; ß
-                db 0E6h ; Ê
-                db    8
-                db 0D6h ; ÷
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0EDh ; Ì
-                db  5Fh ; _
-                db 0E6h ; Ê
-                db    8
-                db 0D6h ; ÷
-                db    4
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  16h
-                db  46h ; F
-                db 0C8h ; »
-                db  3Ah ; :
-                db  4Ch ; L
-                db 0A7h ; ß
-                db  3Ch ; <
-                db  32h ; 2
-                db  4Ch ; L
-                db 0A7h ; ß
-                db  3Ah ; :
-                db  21h ; !
-                db 0A7h ; ß
-                db  3Ch ; <
-                db  32h ; 2
-                db  21h ; !
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0CDh ; Õ
-                db  9Ah ; ö
-                db 0C2h ; ¬
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  16h
-                db  86h ; Ü
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0C6h ; ∆
-                db    4
-                db  4Fh ; O
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0CDh ; Õ
-                db  9Eh ; û
-                db 0CFh ; œ
-                db 0CDh ; Õ
-                db  3Ah ; :
-                db 0D1h ; —
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0CDh ; Õ
-                db  7Bh ; {
-                db 0D0h ; –
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db    0
-                db  28h ; (
-                db    5
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F7h ; ˜
-                db 0C9h ; …
-                db 0FDh ; ˝
-                db  71h ; q
-                db    0
-                db 0DDh ; ›
-                db  71h ; q
-                db    0
-                db 0C9h ; …
-                db  16h
-                db    1
-                db 0FDh ; ˝
-                db  21h ; !
-                db 0AFh ; Ø
-                db 0A7h ; ß
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0F8h ; ¯
-                db 0CDh ; Õ
-                db  1Eh
-                db 0C2h ; ¬
-                db  7Ah ; z
-                db 0A7h ; ß
-                db 0C8h ; »
-                db 0FDh ; ˝
-                db  21h ; !
-                db 0CFh ; œ
-                db 0A7h ; ß
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0F8h ; ¯
-                db 0CDh ; Õ
-                db  16h
-                db 0C2h ; ¬
-                db  7Ah ; z
-                db 0A7h ; ß
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db  3Ah ; :
-                db  0Eh
-                db 0A7h ; ß
-                db 0A7h ; ß
-                db 0C0h ; ¿
-                db 0CDh ; Õ
-                db 0B2h ; ≤
-                db 0CFh ; œ
-                db 0C0h ; ¿
-                db 0DDh ; ›
-                db  34h ; 4
-                db  14h
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  14h
-                db 0FEh ; ˛
-                db  20h
-                db 0D8h ; ÿ
-                db 0DDh ; ›
-                db  36h ; 6
-                db  14h
-                db    0
-                db 0CDh ; Õ
-                db  71h ; q
-                db 0D0h ; –
-                db  3Eh ; >
-                db  5Ah ; Z
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db    0
-                db 0C8h ; »
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F8h ; ¯
-                db 0CDh ; Õ
-                db  71h ; q
-                db 0D0h ; –
-                db 0AFh ; Ø
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db    0
-                db  28h ; (
-                db    5
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F7h ; ˜
-                db 0C9h ; …
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0E1h ; ·
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0D1h ; —
-                db    1
-                db  20h
-                db    0
-                db 0EDh ; Ì
-                db 0B0h ; ∞
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    0
-                db  5Ah ; Z
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    3
-                db  8Dh ; ç
-                db  3Eh ; >
-                db    8
-                db 0FDh ; ˝
-                db  77h ; w
-                db    4
-                db 0FDh ; ˝
-                db  77h ; w
-                db    5
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    6
-                db  0Ch
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    7
-                db  14h
-                db 0FDh ; ˝
-                db  36h ; 6
-                db  0Bh
-                db    1
-                db  11h
-                db  42h ; B
-                db 0D5h ; ’
-                db 0FDh ; ˝
-                db  73h ; s
-                db  10h
-                db 0FDh ; ˝
-                db  72h ; r
-                db  11h
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    1
-                db 0FDh ; ˝
-                db  77h ; w
-                db    1
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    2
-                db 0C6h ; ∆
-                db    8
-                db 0FDh ; ˝
-                db  77h ; w
-                db    2
-                db  3Eh ; >
-                db    1
-                db  32h ; 2
-                db  0Eh
-                db 0A7h ; ß
-                db 0DDh ; ›
-                db 0E5h ; Â
-                db 0FDh ; ˝
-                db 0E5h ; Â
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db 0C5h ; ≈
-                db 0B2h ; ≤
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0CDh ; Õ
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db 0E1h ; ·
-                db 0FDh ; ˝
-                db  21h ; !
-                db  42h ; B
-                db 0D5h ; ’
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    0
-                db  5Ah ; Z
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    8
-                db 0FDh ; ˝
-                db  77h ; w
-                db    8
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
+
+loc_CC4B:                                                       ; DATA XREF: RAM:AE8Fo
+                                                                ; RAM:AE91o ...
+                call    adj_m6_m12
+                ld      4(ix), #0xA
+                ld      5(ix), #0xA
+                call    dec_dZ_and_update_XYZ
+                ld      a, 0xC(ix)
+                and     #7
+                jr      Z, loc_CC6C
+                and     #1
+                call    NZ, loc_CCE9
+                bit     1, 0xC(ix)
+                call    NZ, loc_CCF2
+
+loc_CC6C:                                                       ; CODE XREF: RAM:CC5Ej
+                ld      a, (graphic_objs_tbl+1)
+                sub     1(ix)
+                ld      a, 0x14(ix)
+                jr      NC, loc_CCBD
+                call    loc_CD0D
+
+loc_CC7A:                                                       ; CODE XREF: RAM:CCC0j
+                ld      0x14(ix), a
+                ld      a, (graphic_objs_tbl+2)
+                sub     2(ix)
+                ld      a, 0x15(ix)
+                jr      NC, loc_CCC2
+                call    loc_CD0D
+
+loc_CC8B:                                                       ; CODE XREF: RAM:CCC5j
+                ld      0x15(ix), a
+                ld      a, (byte_A78F+3)
+                sub     3(ix)
+                ld      a, 0x16(ix)
+                jr      NC, loc_CCC7
+                call    loc_CD0D
+
+loc_CC9C:                                                       ; CODE XREF: RAM:CCCAj
+                ld      0x16(ix), a
+                ld      b, #3
+
+loc_CCA1:                                                       ; CODE XREF: RAM:CCB3j
+                inc     ix
+                ld      a, 0x13(ix)
+                add     a, #8
+                sra     a
+                sra     a
+                sra     a
+                sra     a
+                ld      8(ix), a
+                djnz    loc_CCA1
+                dec     ix
+                dec     ix
+                dec     ix
+                jr      loc_CCCC
+; ---------------------------------------------------------------------------
+
+loc_CCBD:                                                       ; CODE XREF: RAM:CC75j
+                call    loc_CD04
+                jr      loc_CC7A
+; ---------------------------------------------------------------------------
+
+loc_CCC2:                                                       ; CODE XREF: RAM:CC86j
+                call    loc_CD04
+                jr      loc_CC8B
+; ---------------------------------------------------------------------------
+
+loc_CCC7:                                                       ; CODE XREF: RAM:CC97j
+                call    loc_CD04
+                jr      loc_CC9C
+; ---------------------------------------------------------------------------
+
+loc_CCCC:                                                       ; CODE XREF: RAM:CCBBj
+                inc     0x10(ix)
+                ld      a, 0x10(ix)
+                and     #3
+                ld      b, a
+                ld      a, 0(ix)
+                and     #0xFC ; '¸'
+                add     a, b
+                ld      0(ix), a
+
+loc_CCDE:                                                       ; CODE XREF: RAM:BF5Ep
+                                                                ; RAM:C05Ap ...
+                ld      a, 7(ix)
+                or      #0x30 ; '0'
+                ld      7(ix), a
+                jp      set_draw_objs_overlapped
+; ---------------------------------------------------------------------------
+
+loc_CCE9:                                                       ; CODE XREF: RAM:CC62p
+                ld      a, 0x14(ix)
+                neg
+                ld      0x14(ix), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_CCF2:                                                       ; CODE XREF: RAM:CC69p
+                ld      a, 0x15(ix)
+                neg
+                ld      0x15(ix), a
+                ret
+; ---------------------------------------------------------------------------
+                ld      a, 0x16(ix)
+                neg
+                ld      0x16(ix), a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_CD04:                                                       ; CODE XREF: RAM:loc_CCBDp
+                                                                ; RAM:loc_CCC2p ...
+                add     a, #3
+                ret     M
+                cp      #0x38 ; '8'
+                ret     C
+                ld      a, #0x38 ; '8'
+                ret
+; ---------------------------------------------------------------------------
+
+loc_CD0D:                                                       ; CODE XREF: RAM:CC77p
+                                                                ; RAM:CC88p ...
+                sub     #3
+                ret     P
+                cp      #0xB8 ; '∏'
+                ret     NC
+                ld      a, #0xB8 ; '∏'
+                ret
+; ---------------------------------------------------------------------------
+
+loc_CD16:                                                       ; DATA XREF: RAM:AF4Fo
+                                                                ; RAM:AF51o ...
+                call    adj_m8_m16
+                ld      a, (graphic_objs_tbl+8)
+                cp      #0x52 ; 'R'
+                jp      NZ, loc_CD84
+                ld      a, (unk_A70F)
+                and     a
+                jp      Z, loc_CD84
+                ld      a, 0(ix)
+                and     #7
+                add     a, a
+                ld      l, a
+                ld      h, #0
+                ld      de, # byte_D472+0xF0
+                add     hl, de
+                ld      a, (hl)
+                ld      0x15(ix), a
+                inc     hl
+                ld      a, (hl)
+                ld      0x16(ix), a
+                call    loc_D085
+                call    loc_B97C
+                ld      a, 1(ix)
+                sub     0x15(ix)
+                ld      c, a
+                ld      a, 2(ix)
+                sub     0x16(ix)
+                or      c
+                jp      NZ, loc_CD87
+                ld      a, 0(ix)
+                add     a, #8
+                ld      c, a
+                ld      a, 0(ix)
+                call    loc_CF9E
+                ld      a, (byte_A74B)
+                inc     a
+                ld      (byte_A74B), a
+                cp      #5
+                jp      NC, loc_C302
+                jp      loc_CD87
+; ---------------------------------------------------------------------------
+
+loc_CD70:                                                       ; DATA XREF: RAM:AE67o
+                call    set_both_deadly_flags
+                jr      loc_CD81
+; ---------------------------------------------------------------------------
+
+loc_CD75:                                                       ; DATA XREF: RAM:AEE5o
+                xor     a
+                ld      9(ix), a
+                ld      0xA(ix), a
+
+loc_CD7C:                                                       ; DATA XREF: RAM:AEC1o
+                call    adj_m12_m16
+                jr      loc_CD84
+; ---------------------------------------------------------------------------
+
+loc_CD81:                                                       ; CODE XREF: RAM:CD73j
+                                                                ; DATA XREF: RAM:AEADo ...
+                call    adj_m8_m16
+
+loc_CD84:                                                       ; CODE XREF: RAM:CD1Ej
+                                                                ; RAM:CD25j ...
+                call    dec_dZ_and_update_XYZ
+
+loc_CD87:                                                       ; CODE XREF: RAM:CD52j
+                                                                ; RAM:CD6Dj ...
+                ld      a, 9(ix)
+                or      0xA(ix)
+                or      0xB(ix)
+                ret     Z
+                ld      9(ix), #0
+                ld      0xA(ix), #0
+                ld      0xB(ix), #0
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CDA0:                                                       ; DATA XREF: RAM:AECBo
+                call    adj_m8_m16
+                ld      9(ix), #0
+                ld      0xA(ix), #0
+                ld      a, 0xB(ix)
+                and     a
+                jr      Z, loc_CDB6
+                ld      a, #0xFF
+                ld      0xB(ix), a
+
+loc_CDB6:                                                       ; CODE XREF: RAM:CDAFj
+                call    loc_B97C
+                jr      loc_CD87
+; ---------------------------------------------------------------------------
+
+loc_CDBB:                                                       ; DATA XREF: RAM:AED7o
+                ld      9(ix), #0
+                ld      0xA(ix), #0
+                call    adj_m8_m16
+                call    loc_B97C
+                xor     a
+                ld      9(ix), a
+                ld      0xA(ix), a
+                bit     0, 0x17(ix)
+                jr      NZ, loc_CDEC
+                bit     2, 0xC(ix)
+                jr      Z, loc_CD87
+                bit     7, 0x17(ix)
+                jr      Z, loc_CD87
+                res     7, 0x17(ix)
+                set     0, 0x17(ix)
+                jr      loc_CE16
+; ---------------------------------------------------------------------------
+
+loc_CDEC:                                                       ; CODE XREF: RAM:CDD4j
+                bit     2, 0xC(ix)
+                jr      NZ, loc_CDFD
+                set     1, 0x17(ix)
+                ld      0xB(ix), #0xFF
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CDFD:                                                       ; CODE XREF: RAM:CDF0j
+                bit     1, 0x17(ix)
+                jr      NZ, loc_CE2A
+                ld      a, 3(ix)
+                cp      #0xB0 ; '∞'
+                jr      C, loc_CE16
+                ld      3(ix), #0xB0 ; '∞'
+                ld      a, #0xFE ; '˛'
+                ld      (graphic_objs_tbl+0xB), a
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CE16:                                                       ; CODE XREF: RAM:CDEAj
+                                                                ; RAM:CE08j
+                ld      0xB(ix), #2
+                ld      a, #3
+                ld      (graphic_objs_tbl+0xB), a
+                ld      a, (graphic_objs_tbl+0xC)
+                or      #4
+                ld      (graphic_objs_tbl+0xC), a
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CE2A:                                                       ; CODE XREF: RAM:CE01j
+                ld      0x17(ix), #0
+                jp      loc_CD87
+; ---------------------------------------------------------------------------
+
+loc_CE31:                                                       ; CODE XREF: RAM:CE9Dj
+                                                                ; DATA XREF: RAM:AED9o
+                call    adj_m8_m16
+                xor     a
+                ld      9(ix), a
+                ld      0xA(ix), a
+                bit     2, 0xD(ix)
+                jr      NZ, loc_CE5F
+                ld      0xB(ix), a
+                call    dec_dZ_and_update_XYZ
+                bit     2, 0xC(ix)
+                jr      Z, loc_CE55
+                set     2, 0xD(ix)
+                ld      0xB(ix), #2
+
+loc_CE55:                                                       ; CODE XREF: RAM:CE4Bj
+                                                                ; RAM:CE89j ...
+                xor     a
+                ld      9(ix), a
+                ld      0xA(ix), a
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CE5F:                                                       ; CODE XREF: RAM:CE3Fj
+                ld      a, (graphic_objs_tbl+0xC)
+                and     #8
+                jr      Z, loc_CE6A
+                res     7, 0x17(ix)
+
+loc_CE6A:                                                       ; CODE XREF: RAM:CE64j
+                ld      a, 0xB(ix)
+                and     a
+                bit     7, 0x17(ix)
+                jr      NZ, loc_CE77
+                and     a
+                jr      Z, loc_CE91
+
+loc_CE77:                                                       ; CODE XREF: RAM:CE72j
+                ld      a, #1
+                jp      P, loc_CE7E
+                add     a, #2
+
+loc_CE7E:                                                       ; CODE XREF: RAM:CE79j
+                ld      0xB(ix), a
+                call    loc_B97C
+                ld      a, 3(ix)
+                cp      #0xB0 ; '∞'
+                jr      C, loc_CE55
+                res     2, 0xD(ix)
+                jr      loc_CE55
+; ---------------------------------------------------------------------------
+
+loc_CE91:                                                       ; CODE XREF: RAM:CE75j
+                call    dec_dZ_and_update_XYZ
+                res     2, 0xD(ix)
+                jr      loc_CE55
+; ---------------------------------------------------------------------------
+
+loc_CE9A:                                                       ; DATA XREF: RAM:AEDBo
+                call    set_both_deadly_flags
+                jp      loc_CE31
+; ---------------------------------------------------------------------------
+
+loc_CEA0:                                                       ; DATA XREF: RAM:AEE7o
+                call    set_both_deadly_flags
+
+loc_CEA3:                                                       ; DATA XREF: RAM:AEDDo
+                call    adj_m8_m16
+                xor     a
+                ld      0xA(ix), a
+                ld      0xB(ix), a
+                bit     0, 0x10(ix)
+                jr      Z, loc_CEC7
+                ld      9(ix), #2
+                call    loc_B97C
+                bit     0, 0xC(ix)
+                jr      Z, loc_CEC4
+                res     0, 0x10(ix)
+
+loc_CEC4:                                                       ; CODE XREF: RAM:CEBEj
+                                                                ; RAM:CED2j ...
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CEC7:                                                       ; CODE XREF: RAM:CEB1j
+                ld      9(ix), #0xFE ; '˛'
+                call    loc_B97C
+                bit     0, 0xC(ix)
+                jr      Z, loc_CEC4
+                set     0, 0x10(ix)
+                jr      loc_CEC4
+; ---------------------------------------------------------------------------
+
+loc_CEDA:                                                       ; DATA XREF: RAM:AEE9o
+                call    set_both_deadly_flags
+
+loc_CEDD:                                                       ; DATA XREF: RAM:AEDFo
+                call    adj_m8_m16
+                xor     a
+                ld      9(ix), a
+                ld      0xB(ix), a
+                bit     0, 0x10(ix)
+                jr      Z, loc_CF01
+                ld      0xA(ix), #2
+                call    loc_B97C
+                bit     1, 0xC(ix)
+                jr      Z, loc_CEFE
+                res     0, 0x10(ix)
+
+loc_CEFE:                                                       ; CODE XREF: RAM:CEF8j
+                                                                ; RAM:CF0Cj ...
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CF01:                                                       ; CODE XREF: RAM:CEEBj
+                ld      0xA(ix), #0xFE ; '˛'
+                call    loc_B97C
+                bit     1, 0xC(ix)
+                jr      Z, loc_CEFE
+                set     0, 0x10(ix)
+                jr      loc_CEFE
+; ---------------------------------------------------------------------------
+
+loc_CF14:                                                       ; DATA XREF: RAM:AF21o
+                                                                ; RAM:AF23o ...
+                call    adj_m8_m16
+                call    loc_B97C
+                bit     2, 7(ix)
+                ret     Z
+                jp      loc_CD87
+; ---------------------------------------------------------------------------
+
+loc_CF22:                                                       ; DATA XREF: RAM:AEE1o
+                call    adj_m8_m16
+                call    set_both_deadly_flags
+                ld      0xB(ix), #0
+                call    dec_dZ_and_update_XYZ
+                res     6, 7(ix)
+                ld      a, (seed_2)
+                and     #1
+                jr      Z, loc_CF3E
+                set     6, 7(ix)
+
+loc_CF3E:                                                       ; CODE XREF: RAM:CF38j
+                bit     0, 0xC(ix)
+                jr      NZ, loc_CF52
+                bit     1, 0xC(ix)
+                jr      NZ, loc_CF52
+                ld      a, 9(ix)
+                or      0xA(ix)
+                jr      NZ, loc_CF65
+
+loc_CF52:                                                       ; CODE XREF: RAM:CF42j
+                                                                ; RAM:CF48j
+                ld      a, (seed_3)
+                and     #8
+                sub     #4
+                ld      9(ix), a
+                ld      a, r
+                and     #8
+                sub     #4
+                ld      0xA(ix), a
+
+loc_CF65:                                                       ; CODE XREF: RAM:CF50j
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CF68:                                                       ; DATA XREF: RAM:AF0Fo
+                                                                ; RAM:AF11o ...
+                call    adj_m8_m16
+                call    loc_B97C
+                bit     0, 0x16(ix)
+                ret     Z
+                ld      a, (byte_A74C)
+                inc     a
+                ld      (byte_A74C), a
+                ld      a, (lives)
+                inc     a
+                ld      (lives), a
+                push    ix
+                call    loc_C29A
+                pop     ix
+                res     0, 0x16(ix)
+                ld      a, 0(ix)
+                add     a, #4
+                ld      c, a
+                ld      a, 0(ix)
+                call    loc_CF9E
+                call    loc_D13A
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_CF9E:                                                       ; CODE XREF: RAM:CD5Ep
+                                                                ; RAM:CF95p
+                call    loc_D07B
+
+loc_CFA1:                                                       ; CODE XREF: RAM:CFA8j
+                cp      0(iy)
+                jr      Z, loc_CFAB
+                add     iy, de
+                djnz    loc_CFA1
+                ret
+; ---------------------------------------------------------------------------
+
+loc_CFAB:                                                       ; CODE XREF: RAM:CFA4j
+                ld      0(iy), c
+                ld      0(ix), c
+                ret
+; ---------------------------------------------------------------------------
+
+loc_CFB2:                                                       ; CODE XREF: RAM:CFDDp
+                ld      d, #1
+                ld      iy, #0xA7AF
+                ld      a, 0(iy)
+                and     #0xF8 ; '¯'
+                call    loc_C21E
+                ld      a, d
+                and     a
+                ret     Z
+                ld      iy, #0xA7CF
+                ld      a, 0(iy)
+                and     #0xF8 ; '¯'
+                call    loc_C216
+                ld      a, d
+                and     a
+                ret
+; ---------------------------------------------------------------------------
+
+loc_CFD2:                                                       ; DATA XREF: RAM:AF1Fo
+                call    adj_m8_m16
+                call    loc_B97C
+                ld      a, (unk_A70E)
+                and     a
+                ret     NZ
+                call    loc_CFB2
+                ret     NZ
+                inc     0x14(ix)
+                ld      a, 0x14(ix)
+                cp      #0x20 ; ' '
+                ret     C
+                ld      0x14(ix), #0
+                call    loc_D071
+                ld      a, #0x5A ; 'Z'
+
+loc_CFF3:                                                       ; CODE XREF: RAM:CFF9j
+                cp      0(iy)
+                ret     Z
+                add     iy, de
+                djnz    loc_CFF3
+                call    loc_D071
+                xor     a
+
+loc_CFFF:                                                       ; CODE XREF: RAM:D006j
+                cp      0(iy)
+                jr      Z, loc_D009
+                add     iy, de
+                djnz    loc_CFFF
+                ret
+; ---------------------------------------------------------------------------
+
+loc_D009:                                                       ; CODE XREF: RAM:D002j
+                push    ix
+                pop     hl
+                push    iy
+                pop     de
+                ld      bc, #0x20 ; ' '
+                ldir
+                ld      0(iy), #0x5A ; 'Z'
+                ld      3(iy), #0x8D ; 'ç'
+                ld      a, #8
+                ld      4(iy), a
+                ld      5(iy), a
+                ld      6(iy), #0xC
+                ld      7(iy), #0x14
+                ld      0xB(iy), #1
+                ld      de, # byte_D472+0xD0
+                ld      0x10(iy), e
+                ld      0x11(iy), d
+                ld      a, 1(ix)
+                ld      1(iy), a
+                ld      a, 2(ix)
+                add     a, #8
+                ld      2(iy), a
+                ld      a, #1
+                ld      (unk_A70E), a
+                push    ix
+                push    iy
+                pop     ix
+                call    adj_m8_m16
+                call    calc_pixel_XY
+                call    dec_dZ_and_update_XYZ
+                call    loc_CCDE
+                pop     ix
+                ld      iy, # byte_D472+0xD0
+                ld      0(iy), #0x5A ; 'Z'
+                ld      a, 8(ix)
+                ld      8(iy), a
+                jp      loc_CCDE
 ; ---------------------------------------------------------------------------
 
 loc_D071:                                                       ; CODE XREF: RAM:loc_CB89p
-                ld      de, 20h ; ' '
-                ld      iy, 0A82Fh
-                ld      b, 30h ; '0'
+                                                                ; RAM:CFEEp ...
+                ld      de, #0x20 ; ' '
+                ld      iy, # byte_A7AF+0x80
+                ld      b, #0x30 ; '0'
                 ret
 ; ---------------------------------------------------------------------------
-                db  11h
-                db  10h
-                db    0
-                db 0FDh ; ˝
-                db  21h ; !
-                db  32h ; 2
-                db 0D4h ; ‘
-                db    6
-                db  12h
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    1
-                db 0DDh ; ›
-                db 0BEh ; æ
-                db  15h
-                db  28h ; (
-                db  0Ch
-                db  38h ; 8
-                db    6
-                db 0DDh ; ›
-                db  36h ; 6
-                db    9
-                db 0FFh
-                db  18h
-                db    4
-                db 0DDh ; ›
-                db  36h ; 6
-                db    9
-                db    1
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    2
-                db 0DDh ; ›
-                db 0BEh ; æ
-                db  16h
-                db 0C8h ; »
-                db  38h ; 8
-                db    5
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Ah
-                db 0FFh
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Ah
-                db    1
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  14h
-                db  46h ; F
-                db  28h ; (
-                db  57h ; W
-                db 0CDh ; Õ
-                db  85h ; Ö
-                db 0D0h ; –
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FEh ; ˛
-                db 0B0h ; ∞
-                db  30h ; 0
-                db    4
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    1
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db  0Ah
-                db 0DDh ; ›
-                db 0B6h ; ∂
-                db    9
-                db 0DDh ; ›
-                db 0B6h ; ∂
-                db  0Bh
-                db 0C2h ; ¬
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0CDh ; Õ
-                db  71h ; q
-                db 0D0h ; –
-                db  0Eh
-                db  70h ; p
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0FCh ; ¸
-                db 0B9h ; π
-                db  28h ; (
-                db    7
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F4h ; Ù
-                db 0C3h ; √
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0FDh ; ˝
-                db 0CBh ; À
-                db  16h
-                db 0C6h ; ∆
-                db 0AFh ; Ø
-                db  32h ; 2
-                db  0Eh
-                db 0A7h ; ß
-                db  11h
-                db  47h ; G
-                db 0D8h ; ÿ
-                db 0CDh ; Õ
-                db 0B5h ; µ
-                db 0D6h ; ÷
-                db 0CDh ; Õ
-                db  7Bh ; {
-                db 0D0h ; –
-                db  3Eh ; >
-                db  5Ah ; Z
-                db 0FDh ; ˝
-                db 0BEh ; æ
-                db    0
-                db  28h ; (
-                db    7
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F7h ; ˜
-                db 0C3h ; √
-                db    7
-                db 0C1h ; ¡
-                db 0FDh ; ˝
-                db  36h ; 6
-                db    0
-                db    0
-                db 0C3h ; √
-                db    7
-                db 0C1h ; ¡
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db 0FFh
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0CDh ; Õ
-                db  71h ; q
-                db 0D0h ; –
-                db  0Eh
-                db  70h ; p
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0FCh ; ¸
-                db 0B9h ; π
-                db  28h ; (
-                db    7
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F4h ; Ù
-                db 0C3h ; √
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    1
-                db 0DDh ; ›
-                db  77h ; w
-                db  15h
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    2
-                db 0DDh ; ›
-                db  77h ; w
-                db  16h
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  14h
-                db 0C6h ; ∆
-                db 0C3h ; √
-                db  87h ; á
-                db 0CDh ; Õ
-                db 0CDh ; Õ
-                db  7Bh ; {
-                db 0D0h ; –
-                db  0Eh
-                db    0
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0FCh ; ¸
-                db 0FEh ; ˛
-                db  74h ; t
-                db  20h
-                db    1
-                db  0Ch
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0F2h ; Ú
-                db  79h ; y
-                db 0FEh ; ˛
-                db    4
-                db 0C0h ; ¿
-                db 0CDh ; Õ
-                db  7Bh ; {
-                db 0D0h ; –
-                db 0FDh ; ˝
-                db  7Eh ; ~
-                db    0
-                db 0E6h ; Ê
-                db 0F8h ; ¯
-                db 0FEh ; ˛
-                db  80h ; Ä
-                db  20h
-                db  0Dh
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  11h
-                db 0C6h ; ∆
-                db 0FDh ; ˝
-                db 0CBh ; À
-                db    7
-                db 0E6h ; Ê
-                db  3Eh ; >
-                db    1
-                db  32h ; 2
-                db  0Fh
-                db 0A7h ; ß
-                db 0FDh ; ˝
-                db  19h
-                db  10h
-                db 0E6h ; Ê
-                db 0C9h ; …
+
+loc_D07B:                                                       ; CODE XREF: RAM:loc_CF9Ep
+                                                                ; RAM:D0F4p ...
+                ld      de, #0x10
+                ld      iy, #0xD432
+                ld      b, #0x12
+                ret
 ; ---------------------------------------------------------------------------
 
-loc_D16F:                                                       ; CODE XREF: RAM:AFBFp
-                ld      de, 0D432h
-                ld      hl, 0D312h
-                ld      bc, 120h
+loc_D085:                                                       ; CODE XREF: RAM:CD3Ep
+                                                                ; RAM:D0B5p
+                ld      a, 1(ix)
+                cp      0x15(ix)
+                jr      Z, loc_D099
+                jr      C, loc_D095
+                ld      9(ix), #0xFF
+                jr      loc_D099
+; ---------------------------------------------------------------------------
+
+loc_D095:                                                       ; CODE XREF: RAM:D08Dj
+                ld      9(ix), #1
+
+loc_D099:                                                       ; CODE XREF: RAM:D08Bj
+                                                                ; RAM:D093j
+                ld      a, 2(ix)
+                cp      0x16(ix)
+                ret     Z
+                jr      C, loc_D0A7
+                ld      0xA(ix), #0xFF
+                ret
+; ---------------------------------------------------------------------------
+
+loc_D0A7:                                                       ; CODE XREF: RAM:D0A0j
+                ld      0xA(ix), #1
+                ret
+; ---------------------------------------------------------------------------
+
+loc_D0AC:                                                       ; DATA XREF: RAM:AEE3o
+                call    adj_m8_m16
+                bit     0, 0x14(ix)
+                jr      Z, loc_D10C
+                call    loc_D085
+                ld      a, 3(ix)
+                cp      #0xB0 ; '∞'
+                jr      NC, loc_D0C3
+                ld      0xB(ix), #1
+
+loc_D0C3:                                                       ; CODE XREF: RAM:D0BDj
+                call    loc_B97C
+                ld      a, 0xA(ix)
+                or      9(ix)
+                or      0xB(ix)
+                jp      NZ, loc_CD87
+                call    loc_D071
+                ld      c, #0x70 ; 'p'
+
+loc_D0D7:                                                       ; CODE XREF: RAM:D0E1j
+                ld      a, 0(iy)
+                and     #0xFC ; '¸'
+                cp      c
+                jr      Z, loc_D0E6
+                add     iy, de
+                djnz    loc_D0D7
+                jp      loc_CD87
+; ---------------------------------------------------------------------------
+
+loc_D0E6:                                                       ; CODE XREF: RAM:D0DDj
+                set     0, 0x16(iy)
+                xor     a
+                ld      (unk_A70E), a
+                ld      de, #0xD847
+                call    play_audio
+                call    loc_D07B
+                ld      a, #0x5A ; 'Z'
+
+loc_D0F9:                                                       ; CODE XREF: RAM:D100j
+                cp      0(iy)
+                jr      Z, loc_D105
+                add     iy, de
+                djnz    loc_D0F9
+                jp      loc_C107
+; ---------------------------------------------------------------------------
+
+loc_D105:                                                       ; CODE XREF: RAM:D0FCj
+                ld      0(iy), #0
+                jp      loc_C107
+; ---------------------------------------------------------------------------
+
+loc_D10C:                                                       ; CODE XREF: RAM:D0B3j
+                ld      0xB(ix), #0xFF
+                call    loc_B97C
+                call    loc_D071
+                ld      c, #0x70 ; 'p'
+
+loc_D118:                                                       ; CODE XREF: RAM:D122j
+                ld      a, 0(iy)
+                and     #0xFC ; '¸'
+                cp      c
+                jr      Z, loc_D127
+                add     iy, de
+                djnz    loc_D118
+                jp      loc_CD87
+; ---------------------------------------------------------------------------
+
+loc_D127:                                                       ; CODE XREF: RAM:D11Ej
+                ld      a, 1(iy)
+                ld      0x15(ix), a
+                ld      a, 2(iy)
+                ld      0x16(ix), a
+                set     0, 0x14(ix)
+                jp      loc_CD87
+; ---------------------------------------------------------------------------
+
+loc_D13A:                                                       ; CODE XREF: RAM:CF98p
+                call    loc_D07B
+                ld      c, #0
+
+loc_D13F:                                                       ; CODE XREF: RAM:D14Bj
+                ld      a, 0(iy)
+                and     #0xFC ; '¸'
+                cp      #0x74 ; 't'
+                jr      NZ, loc_D149
+                inc     c
+
+loc_D149:                                                       ; CODE XREF: RAM:D146j
+                add     iy, de
+                djnz    loc_D13F
+                ld      a, c
+                cp      #4
+                ret     NZ
+                call    loc_D07B
+
+loc_D154:                                                       ; CODE XREF: RAM:D16Cj
+                ld      a, 0(iy)
+                and     #0xF8 ; '¯'
+                cp      #0x80 ; 'Ä'
+                jr      NZ, loc_D16A
+                set     0, 0x11(ix)
+                set     4, 7(iy)
+                ld      a, #1
+                ld      (unk_A70F), a
+
+loc_D16A:                                                       ; CODE XREF: RAM:D15Bj
+                add     iy, de
+                djnz    loc_D154
+                ret
+; ---------------------------------------------------------------------------
+
+init_objects???:                                                ; CODE XREF: RAM:AFBFp
+                ld      de, #byte_D432
+                ld      hl, #byte_D312
+                ld      bc, #0x120
                 ldir
-                ld      a, (byte_A70D)
-                and     3Ch ; '<'
+                ld      a, (seed_3)
+                and     #0x3C ; '<'
                 ld      e, a
-                ld      d, 0
-                ld      hl, 0D1A5h
+                ld      d, #0
+                ld      hl, #byte_D1A5
                 add     hl, de
-                ld      iy, 0D472h
-                ld      c, 5
-                ld      de, 0Dh
+                ld      iy, #byte_D472
+                ld      c, #5
+                ld      de, #0xD
 
 loc_D18F:                                                       ; CODE XREF: RAM:D1A2j
                 ld      a, (hl)
-                ld      (iy+8), a
-                ld      b, 3
+                ld      8(iy), a
+                ld      b, #3
 
 loc_D195:                                                       ; CODE XREF: RAM:D19Cj
                 inc     hl
                 inc     iy
                 ld      a, (hl)
-                ld      (iy+0), a
+                ld      0(iy), a
                 djnz    loc_D195
                 inc     hl
                 add     iy, de
                 dec     c
-                jr      nz, loc_D18F
+                jr      NZ, loc_D18F
                 ret
 ; ---------------------------------------------------------------------------
-                db  78h ; x
-                db 0B8h ; ∏
-                db  48h ; H
-                db  80h ; Ä
-                db  25h ; %
-                db  48h ; H
-                db  48h ; H
-                db 0A4h ; §
-                db  3Eh ; >
-                db  78h ; x
-                db 0B8h ; ∏
-                db  80h ; Ä
-                db  70h ; p
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  81h ; Å
-                db  6Ch ; l
-                db  78h ; x
-                db 0B8h ; ∏
-                db  98h ; ò
-                db    0
-                db  68h ; h
-                db  78h ; x
-                db  98h ; ò
-                db  45h ; E
-                db 0B8h ; ∏
-                db 0B8h ; ∏
-                db  80h ; Ä
-                db  8Eh ; é
-                db  48h ; H
-                db  98h ; ò
-                db 0B0h ; ∞
-                db  4Eh ; N
-                db  80h ; Ä
-                db  80h ; Ä
-                db  81h ; Å
-                db  0Fh
-                db  78h ; x
-                db  48h ; H
-                db 0A4h ; §
-                db  2Ah ; *
-                db  78h ; x
-                db  78h ; x
-                db 0B0h ; ∞
-                db    5
-                db  68h ; h
-                db  78h ; x
-                db 0A4h ; §
-                db  8Dh ; ç
-                db  78h ; x
-                db  68h ; h
-                db 0B0h ; ∞
-                db  46h ; F
-                db  80h ; Ä
-                db  80h ; Ä
-                db  80h ; Ä
-                db    4
-                db 0B8h ; ∏
-                db  78h ; x
-                db 0B0h ; ∞
-                db  10h
-                db  48h ; H
-                db  78h ; x
-                db 0B0h ; ∞
-                db  81h ; Å
-                db 0A8h ; ®
-                db  48h ; H
-                db  81h ; Å
-                db  12h
-                db  58h ; X
-                db  58h ; X
-                db 0B0h ; ∞
-                db  92h ; í
-                db 0A8h ; ®
-                db  98h ; ò
-                db 0B0h ; ∞
-                db  1Bh
-                db  48h ; H
-                db  78h ; x
-                db 0B0h ; ∞
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    7
-                db 0EEh ; Ó
-                db  40h ; @
-                db 0DDh ; ›
-                db  77h ; w
-                db    7
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FEh ; ˛
-                db  81h ; Å
-                db  30h ; 0
-                db    8
-                db 0DDh ; ›
-                db  36h ; 6
-                db    3
-                db  81h ; Å
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0DDh ; ›
-                db 0B6h ; ∂
-                db  0Ah
-                db 0C2h ; ¬
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0EDh ; Ì
-                db  5Fh ; _
-                db 0E6h ; Ê
-                db    8
-                db 0D6h ; ÷
-                db    4
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  4Eh ; N
-                db  20h
-                db  0Dh
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    0
-                db 0C6h ; ∆
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0B6h ; ∂
-                db  18h
-                db  0Bh
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    0
-                db  86h ; Ü
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0F6h ; ˆ
-                db 0A7h ; ß
-                db 0F2h ; Ú
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0EEh ; Ó
-                db    1
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0CDh ; Õ
-                db  91h ; ë
-                db 0C2h ; ¬
-                db 0CDh ; Õ
-                db  79h ; y
-                db 0B9h ; π
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0EEh ; Ó
-                db    1
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    3
-                db 0FEh ; ˛
-                db  81h ; Å
-                db  30h ; 0
-                db    8
-                db 0DDh ; ›
-                db  36h ; 6
-                db    3
-                db  81h ; Å
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    0
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    9
-                db 0DDh ; ›
-                db 0B6h ; ∂
-                db  0Ah
-                db 0C2h ; ¬
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0EDh ; Ì
-                db  5Fh ; _
-                db 0E6h ; Ê
-                db    8
-                db 0D6h ; ÷
-                db    4
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Ch
-                db  4Eh ; N
-                db  20h
-                db  0Dh
-                db 0DDh ; ›
-                db  77h ; w
-                db  0Ah
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    0
-                db 0CEh ; Œ
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0B6h ; ∂
-                db  18h
-                db  0Bh
-                db 0DDh ; ›
-                db  77h ; w
-                db    9
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    0
-                db  8Eh ; é
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db 0F6h ; ˆ
-                db 0A7h ; ß
-                db 0F2h ; Ú
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0EEh ; Ó
-                db    2
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0DDh ; ›
-                db  36h ; 6
-                db  0Bh
-                db    0
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db  7Eh ; ~
-                db 0C8h ; »
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  17h
-                db 0BEh ; æ
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  5Eh ; ^
-                db 0C8h ; »
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  9Eh ; û
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db 0FEh ; ˛
-                db  8Bh ; ã
-                db  28h ; (
-                db    7
-                db  3Ch ; <
-                db 0DDh ; ›
-                db  77h ; w
-                db    0
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0DDh ; ›
-                db  36h ; 6
-                db    0
-                db    1
-                db 0C3h ; √
-                db 0DEh ; ﬁ
-                db 0CCh ; Ã
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  9Eh ; û
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  9Eh ; û
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  9Eh ; û
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0C9h ; …
-                db 0CDh ; Õ
-                db  5Fh ; _
-                db 0C7h ; «
-                db 0DDh ; ›
-                db 0CBh ; À
-                db  0Dh
-                db  9Eh ; û
-                db 0CDh ; Õ
-                db  7Ch ; |
-                db 0B9h ; π
-                db 0C9h ; …
-                db    2
-                db    0
-                db 0FEh ; ˛
-                db    0
-                db    0
-                db    2
-                db    0
-                db 0FEh ; ˛
-                db  70h ; p
-                db  50h ; P
-                db 0A0h ; †
-                db  80h ; Ä
-                db    8
-                db    8
-                db  20h
-                db  10h
-                db  7Ah ; z
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  71h ; q
-                db  70h ; p
-                db 0A0h ; †
-                db  80h ; Ä
-                db    8
-                db    8
-                db  20h
-                db  10h
-                db  80h ; Ä
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  72h ; r
-                db  84h ; Ñ
-                db 0A0h ; †
-                db  80h ; Ä
-                db    8
-                db    8
-                db  20h
-                db  10h
-                db  11h
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  73h ; s
-                db 0A0h ; †
-                db 0A0h ; †
-                db  80h ; Ä
-                db    8
-                db    8
-                db  20h
-                db  10h
-                db  21h ; !
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  94h ; î
-                db  50h ; P
-                db  50h ; P
-                db  80h ; Ä
-                db    8
-                db    8
-                db  0Ch
-                db  14h
-                db  61h ; a
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  93h ; ì
-                db  50h ; P
-                db  80h ; Ä
-                db  80h ; Ä
-                db    8
-                db    8
-                db  0Ch
-                db  14h
-                db  61h ; a
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  92h ; í
-                db  70h ; p
-                db  80h ; Ä
-                db  80h ; Ä
-                db    8
-                db    8
-                db  0Ch
-                db  14h
-                db  61h ; a
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  91h ; ë
-                db  80h ; Ä
-                db  80h ; Ä
-                db  80h ; Ä
-                db    8
-                db    8
-                db  0Ch
-                db  14h
-                db  61h ; a
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  90h ; ê
-                db 0A0h ; †
-                db  80h ; Ä
-                db  80h ; Ä
-                db    8
-                db    8
-                db  0Ch
-                db  14h
-                db  61h ; a
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  80h ; Ä
-                db  60h ; `
-                db  80h ; Ä
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  81h ; Å
-                db  6Ch ; l
-                db  8Ch ; å
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  82h ; Ç
-                db  78h ; x
-                db  98h ; ò
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  83h ; É
-                db  84h ; Ñ
-                db 0A4h ; §
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  84h ; Ñ
-                db  78h ; x
-                db  68h ; h
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  85h ; Ö
-                db  84h ; Ñ
-                db  74h ; t
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  86h ; Ü
-                db  90h ; ê
-                db  80h ; Ä
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  87h ; á
-                db  9Ch ; ú
-                db  8Ch ; å
-                db  7Fh ; 
-                db  0Ch
-                db  0Ch
-                db    0
-                db    0
-                db  52h ; R
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-unk_D432:       db    0                                         ; DATA XREF: RAM:loc_CC31o
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db    0
-                db  70h ; p
-                db 0B0h ; ∞
-                db  9Ch ; ú
-                db 0A2h ; ¢
-                db 0A2h ; ¢
-                db  6Ah ; j
-                db  72h ; r
-                db  5Ch ; \
-                db  50h ; P
-                db  88h ; à
-                db    1
-                db  87h ; á
-                db 0D5h ; ’
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  4Eh ; N
-                db 0DDh ; ›
-                db 0CBh ; À
-                db    7
-                db  8Eh ; é
-                db 0C8h ; »
-                db  3Ah ; :
-                db  15h
-                db 0A7h ; ß
-                db 0E6h ; Ê
-                db  0Fh
-                db  6Fh ; o
-                db  26h ; &
-                db    0
-                db    9
-                db  46h ; F
-                db  0Eh
-                db  0Ch
-                db 0C3h ; √
-                db  7Bh ; {
-                db 0D6h ; ÷
-                db  20h
-                db  20h
-                db  30h ; 0
-                db  40h ; @
-                db  50h ; P
-                db  20h
-                db  20h
-                db  30h ; 0
-                db  40h ; @
-                db  50h ; P
-                db  20h
-                db  20h
-                db  30h ; 0
-                db  40h ; @
-                db  50h ; P
-                db  20h
-                db  20h
-                db  20h
-                db  30h ; 0
-                db  30h ; 0
-                db  40h ; @
-                db  40h ; @
-                db  50h ; P
-                db  50h ; P
-                db  60h ; `
-                db  60h ; `
-                db  70h ; p
-                db  70h ; p
-                db  80h ; Ä
-                db  80h ; Ä
-                db  90h ; ê
-                db  90h ; ê
-                db  90h ; ê
-                db  90h ; ê
-                db  80h ; Ä
-                db  80h ; Ä
-                db  70h ; p
-                db  70h ; p
-                db  60h ; `
-                db  60h ; `
-                db  50h ; P
-                db  50h ; P
-                db  40h ; @
-                db  40h ; @
-                db  30h ; 0
-                db  30h ; 0
-                db  20h
-                db  20h
-                db  90h ; ê
-                db  80h ; Ä
-                db  70h ; p
-                db  80h ; Ä
-                db  70h ; p
-                db  60h ; `
-                db  70h ; p
-                db  60h ; `
-                db  50h ; P
-                db  60h ; `
-                db  50h ; P
-                db  40h ; @
-                db  50h ; P
-                db  40h ; @
-                db  30h ; 0
-                db  20h
-                db  40h ; @
-                db  40h ; @
-                db  40h ; @
-                db  30h ; 0
-                db  50h ; P
-                db  50h ; P
-                db  50h ; P
-                db  50h ; P
-                db  40h ; @
-                db  40h ; @
-                db  40h ; @
-                db  30h ; 0
-                db  50h ; P
-                db  50h ; P
-                db  50h ; P
-                db  50h ; P
+byte_D1A5:      .db 0x78, 0xB8, 0x48, 0x80, 0x25, 0x48, 0x48, 0xA4 ; DATA XREF: RAM:D182o
+                .db 0x3E, 0x78, 0xB8, 0x80, 0x70, 0xB8, 0xB8, 0x81
+                .db 0x6C, 0x78, 0xB8, 0x98, 0, 0x68, 0x78, 0x98
+                .db 0x45, 0xB8, 0xB8, 0x80, 0x8E, 0x48, 0x98, 0xB0
+                .db 0x4E, 0x80, 0x80, 0x81, 0xF, 0x78, 0x48, 0xA4
+                .db 0x2A, 0x78, 0x78, 0xB0, 5, 0x68, 0x78, 0xA4
+                .db 0x8D, 0x78, 0x68, 0xB0, 0x46, 0x80, 0x80, 0x80
+                .db 4, 0xB8, 0x78, 0xB0, 0x10, 0x48, 0x78, 0xB0
+                .db 0x81, 0xA8, 0x48, 0x81, 0x12, 0x58, 0x58, 0xB0
+                .db 0x92, 0xA8, 0x98, 0xB0, 0x1B, 0x48, 0x78, 0xB0
+; ---------------------------------------------------------------------------
+
+loc_D1F5:                                                       ; DATA XREF: RAM:AE4Fo
+                                                                ; RAM:AE51o
+                ld      a, 7(ix)
+                xor     #0x40 ; '@'
+                ld      7(ix), a
+
+loc_D1FD:                                                       ; DATA XREF: RAM:AECFo
+                                                                ; RAM:AED1o
+                call    adj_m8_m16
+                call    set_both_deadly_flags
+                call    dec_dZ_and_update_XYZ
+                ld      a, 3(ix)
+                cp      #0x81 ; 'Å'
+                jr      NC, loc_D215
+                ld      3(ix), #0x81 ; 'Å'
+                ld      0xB(ix), #0
+
+loc_D215:                                                       ; CODE XREF: RAM:D20Bj
+                ld      a, 9(ix)
+                or      0xA(ix)
+                jp      NZ, loc_CCDE
+                ld      a, r
+                and     #8
+                sub     #4
+                bit     1, 0xC(ix)
+                jr      NZ, loc_D237
+                ld      0xA(ix), a
+                set     0, 0(ix)
+                res     6, 7(ix)
+                jr      loc_D242
+; ---------------------------------------------------------------------------
+
+loc_D237:                                                       ; CODE XREF: RAM:D228j
+                ld      9(ix), a
+                res     0, 0(ix)
+                set     6, 7(ix)
+
+loc_D242:                                                       ; CODE XREF: RAM:D235j
+                and     a
+                jp      P, loc_CCDE
+                ld      a, 0(ix)
+                xor     #1
+                ld      0(ix), a
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_D251:                                                       ; DATA XREF: RAM:AF7Fo
+                                                                ; RAM:AF81o ...
+                call    adj_m8_m16
+                call    set_both_deadly_flags
+                call    dec_dZ_and_update_XYZ
+                ld      a, 0(ix)
+                xor     #1
+                ld      0(ix), a
+                ld      a, 3(ix)
+                cp      #0x81 ; 'Å'
+                jr      NC, loc_D271
+                ld      3(ix), #0x81 ; 'Å'
+                ld      0xB(ix), #0
+
+loc_D271:                                                       ; CODE XREF: RAM:D267j
+                ld      a, 9(ix)
+                or      0xA(ix)
+                jp      NZ, loc_CCDE
+                ld      a, r
+                and     #8
+                sub     #4
+                bit     1, 0xC(ix)
+                jr      NZ, loc_D293
+                ld      0xA(ix), a
+                set     1, 0(ix)
+                res     6, 7(ix)
+                jr      loc_D29E
+; ---------------------------------------------------------------------------
+
+loc_D293:                                                       ; CODE XREF: RAM:D284j
+                ld      9(ix), a
+                res     1, 0(ix)
+                set     6, 7(ix)
+
+loc_D29E:                                                       ; CODE XREF: RAM:D291j
+                and     a
+                jp      P, loc_CCDE
+                ld      a, 0(ix)
+                xor     #2
+                ld      0(ix), a
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_D2AD:                                                       ; DATA XREF: RAM:AF3Fo
+                                                                ; RAM:AF41o ...
+                call    adj_m8_m16
+                ld      0xB(ix), #0
+                call    loc_B97C
+                bit     7, 0x17(ix)
+                ret     Z
+                res     7, 0x17(ix)
+                bit     3, 0xD(ix)
+                ret     Z
+                res     3, 0xD(ix)
+                ld      a, 0(ix)
+                cp      #0x8B ; 'ã'
+                jr      Z, loc_D2D7
+                inc     a
+                ld      0(ix), a
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_D2D7:                                                       ; CODE XREF: RAM:D2CEj
+                ld      0(ix), #1
+                jp      loc_CCDE
+; ---------------------------------------------------------------------------
+
+loc_D2DE:                                                       ; DATA XREF: RAM:AF47o
+                call    adj_m8_m16
+                res     3, 0xD(ix)
+                call    loc_B97C
+                ret
+; ---------------------------------------------------------------------------
+
+loc_D2E9:                                                       ; DATA XREF: RAM:AF49o
+                call    adj_m8_m16
+                res     3, 0xD(ix)
+                call    loc_B97C
+                ret
+; ---------------------------------------------------------------------------
+
+loc_D2F4:                                                       ; DATA XREF: RAM:AF4Bo
+                call    adj_m8_m16
+                res     3, 0xD(ix)
+                call    loc_B97C
+                ret
+; ---------------------------------------------------------------------------
+
+loc_D2FF:                                                       ; DATA XREF: RAM:AF4Do
+                call    adj_m8_m16
+                res     3, 0xD(ix)
+                call    loc_B97C
+                ret
+; ---------------------------------------------------------------------------
+                .db    2
+                .db    0
+                .db 0xFE ; ˛
+                .db    0
+                .db    0
+                .db    2
+                .db    0
+                .db 0xFE ; ˛
+byte_D312:      .db 0x70, 0x50, 0xA0, 0x80, 8, 8, 0x20, 0x10    ; DATA XREF: RAM:D172o
+                .db 0x7A, 0, 0, 0, 0, 0, 0, 0
+                .db 0x71, 0x70, 0xA0, 0x80, 8, 8, 0x20, 0x10
+                .db 0x80, 0, 0, 0, 0, 0, 0, 0
+                .db 0x72, 0x84, 0xA0, 0x80, 8, 8, 0x20, 0x10
+                .db 0x11, 0, 0, 0, 0, 0, 0, 0
+                .db 0x73, 0xA0, 0xA0, 0x80, 8, 8, 0x20, 0x10
+                .db 0x21, 0, 0, 0, 0, 0, 0, 0
+                .db 0x94, 0x50, 0x50, 0x80, 8, 8, 0xC, 0x14
+                .db 0x61, 0, 0, 0, 0, 0, 0, 0
+                .db 0x93, 0x50, 0x80, 0x80, 8, 8, 0xC, 0x14
+                .db 0x61, 0, 0, 0, 0, 0, 0, 0
+                .db 0x92, 0x70, 0x80, 0x80, 8, 8, 0xC, 0x14
+                .db 0x61, 0, 0, 0, 0, 0, 0, 0
+                .db 0x91, 0x80, 0x80, 0x80, 8, 8, 0xC, 0x14
+                .db 0x61, 0, 0, 0, 0, 0, 0, 0
+                .db 0x90, 0xA0, 0x80, 0x80, 8, 8, 0xC, 0x14
+                .db 0x61, 0, 0, 0, 0, 0, 0, 0
+                .db 0x80, 0x60, 0x80, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+                .db 0x81, 0x6C, 0x8C, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+                .db 0x82, 0x78, 0x98, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+                .db 0x83, 0x84, 0xA4, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+                .db 0x84, 0x78, 0x68, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+                .db 0x85, 0x84, 0x74, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+                .db 0x86, 0x90, 0x80, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+                .db 0x87, 0x9C, 0x8C, 0x7F, 0xC, 0xC, 0, 0
+                .db 0x52, 0, 0, 0, 0, 0, 0, 0
+byte_D422:      .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:loc_B097o
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+byte_D432:      .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:B123o
+                                                                ; RAM:loc_CC31o ...
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+byte_D472:      .db 0, 0, 0, 0, 0, 0, 0, 0                      ; DATA XREF: RAM:D186o
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0, 0, 0, 0, 0, 0, 0, 0
+                .db 0x70, 0xB0, 0x9C, 0xA2, 0xA2, 0x6A, 0x72, 0x5C
+                .db 0x50, 0x88, 1, 0x87, 0xD5, 0xDD, 0xCB, 7
+                .db 0x4E, 0xDD, 0xCB, 7, 0x8E, 0xC8, 0x3A, 0x15
+                .db 0xA7, 0xE6, 0xF, 0x6F, 0x26, 0, 9, 0x46
+                .db 0xE, 0xC, 0xC3, 0x7B, 0xD6, 0x20, 0x20, 0x30
+                .db 0x40, 0x50, 0x20, 0x20, 0x30, 0x40, 0x50, 0x20
+                .db 0x20, 0x30, 0x40, 0x50, 0x20, 0x20, 0x20, 0x30
+                .db 0x30, 0x40, 0x40, 0x50, 0x50, 0x60, 0x60, 0x70
+                .db 0x70, 0x80, 0x80, 0x90, 0x90, 0x90, 0x90, 0x80
+                .db 0x80, 0x70, 0x70, 0x60, 0x60, 0x50, 0x50, 0x40
+                .db 0x40, 0x30, 0x30, 0x20, 0x20, 0x90, 0x80, 0x70
+                .db 0x80, 0x70, 0x60, 0x70, 0x60, 0x50, 0x60, 0x50
+                .db 0x40, 0x50, 0x40, 0x30, 0x20, 0x40, 0x40, 0x40
+                .db 0x30, 0x50, 0x50, 0x50, 0x50, 0x40, 0x40, 0x40
+                .db 0x30, 0x50, 0x50, 0x50, 0x50
 ; ---------------------------------------------------------------------------
 
 loc_D5D7:                                                       ; CODE XREF: RAM:B4EBp
                                                                 ; RAM:B50Fp
-                ld      hl, 0A749h
+                ld      hl, #word_A749
                 inc     (hl)
                 ld      a, (hl)
-                add     a, 40h ; '@'
+                add     a, #0x40 ; '@'
                 ld      b, a
-                ld      c, 0Ch
+                ld      c, #0xC
                 jp      loc_D67B
 ; ---------------------------------------------------------------------------
-                db  0Eh
-                db  10h
-                db  79h ; y
-                db 0EEh ; Ó
-                db 0A5h ; •
-                db  81h ; Å
-                db  47h ; G
-                db 0CDh ; Õ
-                db  82h ; Ç
-                db 0D6h ; ÷
-                db  0Dh
-                db  20h
-                db 0F5h ; ı
-                db 0C9h ; …
+
+loc_D5E4:                                                       ; CODE XREF: RAM:C588p
+                ld      c, #0x10
+
+loc_D5E6:                                                       ; CODE XREF: RAM:D5EFj
+                ld      a, c
+                xor     #0xA5 ; '•'
+                add     a, c
+                ld      b, a
+                call    loc_D682
+                dec     c
+                jr      NZ, loc_D5E6
+                ret
 ; ---------------------------------------------------------------------------
 
-loc_D5F2:                                                       ; CODE XREF: RAM:loc_B084p
-                ld      hl, 0A749h
+audio_D5F2:                                                     ; CODE XREF: RAM:loc_B084p
+                ld      hl, #word_A749
                 ld      a, (hl)
                 and     a
-                ret     z
+                ret     Z
                 dec     (hl)
                 ex      af, af'
                 inc     hl
                 ld      a, (hl)
-                ld      bc, 0D60Dh
+                ld      bc, #off_D60D
                 call    loc_D692
                 ex      af, af'
                 ld      c, a
-                ld      b, 0
+                ld      b, #0
                 add     hl, bc
                 ld      b, (hl)
-                ld      c, 0Ch
+                ld      c, #0xC
                 jp      loc_D67B
 ; ---------------------------------------------------------------------------
-                db  15h
-                db 0D6h ; ÷
-                db  19h
-                db 0D6h ; ÷
-                db  1Eh
-                db 0D6h ; ÷
-                db  25h ; %
-                db 0D6h ; ÷
-                db  40h ; @
-                db  70h ; p
-                db  40h ; @
-                db  70h ; p
-                db  50h ; P
-                db  70h ; p
-                db  60h ; `
-                db  50h ; P
-                db  40h ; @
-                db  40h ; @
-                db  50h ; P
-                db  60h ; `
-                db  70h ; p
-                db  80h ; Ä
-                db  80h ; Ä
-                db  80h ; Ä
-                db  30h ; 0
-                db  60h ; `
-                db  30h ; 0
-                db  60h ; `
-                db  0Eh
-                db  20h
-                db  79h ; y
-                db  90h ; ê
-                db  47h ; G
-                db 0CDh ; Õ
-                db  82h ; Ç
-                db 0D6h ; ÷
-                db  0Dh
-                db  20h
-                db 0F7h ; ˜
-                db 0C9h ; …
-                db  21h ; !
-                db  48h ; H
-                db 0A7h ; ß
-                db  34h ; 4
-                db  7Eh ; ~
-                db 0CBh ; À
-                db  57h ; W
-                db  28h ; (
-                db    8
-                db 0E6h ; Ê
-                db    3
-                db 0C0h ; ¿
-                db    1
-                db    2
-                db  40h ; @
-                db  18h
-                db  35h ; 5
-                db 0E6h ; Ê
-                db    3
-                db 0C0h ; ¿
-                db    1
-                db    2
-                db  60h ; `
-                db  18h
-                db  2Dh ; -
-                db  2Ah ; *
-                db  0Dh
-                db 0A7h ; ß
-                db  7Ch ; |
-                db 0E6h ; Ê
-                db  1Fh
-                db  67h ; g
-                db  1Eh
-                db    4
-                db  7Eh ; ~
-                db  23h ; #
-                db 0E6h ; Ê
-                db  7Fh ; 
-                db  47h ; G
-                db  0Eh
-                db    1
-                db 0CDh ; Õ
-                db  7Bh ; {
-                db 0D6h ; ÷
-                db  1Dh
-                db  20h
-                db 0F3h ; Û
-                db 0C9h ; …
-                db 0DDh ; ›
-                db  7Eh ; ~
-                db    0
-                db  2Fh ; /
-                db  0Fh
-                db  0Fh
-                db  0Fh
-                db 0E6h ; Ê
-                db 0E0h ; ‡
-                db  47h ; G
-                db  0Eh
-                db    6
-                db  18h
-                db    8
-                db    0
-                db  3Ah ; :
-                db  73h ; s
-                db 0D6h ; ÷
-                db  2Fh ; /
-                db  47h ; G
-                db  0Eh
-                db    8
+off_D60D:       .dw byte_D615                                   ; DATA XREF: RAM:D5FCo
+                .dw byte_D619
+                .dw byte_D61E
+                .dw byte_D625
+byte_D615:      .db 0x40, 0x70, 0x40, 0x70                      ; DATA XREF: RAM:off_D60Do
+byte_D619:      .db 0x50, 0x70, 0x60, 0x50, 0x40                ; DATA XREF: RAM:D60Fo
+byte_D61E:      .db 0x40, 0x50, 0x60, 0x70, 0x80, 0x80, 0x80    ; DATA XREF: RAM:D611o
+byte_D625:      .db 0x30, 0x60, 0x30, 0x60                      ; DATA XREF: RAM:D613o
+; ---------------------------------------------------------------------------
+
+loc_D629:                                                       ; CODE XREF: RAM:C1B5j
+                ld      c, #0x20 ; ' '
+
+loc_D62B:                                                       ; CODE XREF: RAM:D632j
+                ld      a, c
+                sub     b
+                ld      b, a
+                call    loc_D682
+                dec     c
+                jr      NZ, loc_D62B
+                ret
+; ---------------------------------------------------------------------------
+
+loc_D635:                                                       ; CODE XREF: RAM:C5AEp
+                ld      hl, #unk_A748
+                inc     (hl)
+                ld      a, (hl)
+                bit     2, a
+                jr      Z, loc_D646
+                and     #3
+                ret     NZ
+                ld      bc, #0x4002
+                jr      loc_D67B
+; ---------------------------------------------------------------------------
+
+loc_D646:                                                       ; CODE XREF: RAM:D63Cj
+                and     #3
+                ret     NZ
+                ld      bc, #0x6002
+                jr      loc_D67B
+; ---------------------------------------------------------------------------
+
+loc_D64E:                                                       ; CODE XREF: RAM:C114p
+                ld      hl, (seed_3)
+                ld      a, h
+                and     #0x1F
+                ld      h, a
+                ld      e, #4
+
+loc_D657:                                                       ; CODE XREF: RAM:D662j
+                ld      a, (hl)
+                inc     hl
+                and     #0x7F ; ''
+                ld      b, a
+                ld      c, #1
+                call    loc_D67B
+                dec     e
+                jr      NZ, loc_D657
+                ret
+; ---------------------------------------------------------------------------
+                .db 0xDD ; ›
+                .db 0x7E ; ~
+                .db    0
+                .db 0x2F ; /
+                .db  0xF
+                .db  0xF
+                .db  0xF
+                .db 0xE6 ; Ê
+                .db 0xE0 ; ‡
+                .db 0x47 ; G
+                .db  0xE
+                .db    6
+                .db 0x18
+                .db    8
+                .db    0
+                .db 0x3A ; :
+                .db 0x73 ; s
+                .db 0xD6 ; ÷
+                .db 0x2F ; /
+                .db 0x47 ; G
+                .db  0xE
+                .db    8
 ; ---------------------------------------------------------------------------
 
 loc_D67B:                                                       ; CODE XREF: RAM:D5E1j
                                                                 ; RAM:D60Aj ...
                 call    loc_D682
                 dec     c
-                jr      nz, loc_D67B
+                jr      NZ, loc_D67B
                 ret
 ; ---------------------------------------------------------------------------
 
-loc_D682:                                                       ; CODE XREF: RAM:loc_D67Bp
-                ld      a, 10h
-                out     (0FEh), a
+loc_D682:                                                       ; CODE XREF: RAM:D5EBp
+                                                                ; RAM:D62Ep ...
+                ld      a, #0x10
+                out     (0xFE), a
                 ld      a, b
 
 loc_D687:                                                       ; CODE XREF: RAM:loc_D687j
-                djnz    $
+                djnz    loc_D687
                 ld      b, a
                 xor     a
-                out     (0FEh), a
+                out     (0xFE), a
                 ld      a, b
 
 loc_D68E:                                                       ; CODE XREF: RAM:loc_D68Ej
-                djnz    $
+                djnz    loc_D68E
                 ld      b, a
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_D692:                                                       ; CODE XREF: RAM:D5FFp
                 ld      l, a
-                ld      h, 0
+                ld      h, #0
                 add     hl, hl
                 add     hl, bc
                 ld      a, (hl)
@@ -18772,34 +8306,34 @@ loc_D692:                                                       ; CODE XREF: RAM
 ; ---------------------------------------------------------------------------
 
 loc_D69C:                                                       ; CODE XREF: RAM:BB91p
-                ld      hl, 0A747h
+                ld      hl, #0xA747
                 ld      a, (hl)
                 and     a
-                ret     nz
+                ret     NZ
                 set     0, (hl)
 
 loc_D6A4:                                                       ; CODE XREF: RAM:D6B3j
                 xor     a
-                call    loc_B952
-                jr      z, loc_D6AB
+                call    read_port
+                jr      Z, loc_D6AB
                 ret
 ; ---------------------------------------------------------------------------
 
 loc_D6AB:                                                       ; CODE XREF: RAM:D6A8j
                 ld      a, (de)
-                cp      0FFh
-                jr      z, locret_D6BF
+                cp      #0xFF
+                jr      Z, locret_D6BF
                 call    loc_D6C0
                 jr      loc_D6A4
 ; ---------------------------------------------------------------------------
 
-loc_D6B5:                                                       ; CODE XREF: RAM:AFBCp
-                                                                ; RAM:C34Ap ...
+play_audio:                                                     ; CODE XREF: RAM:AFBCp
+                                                                ; RAM:C320p ...
                 ld      a, (de)
-                cp      0FFh
-                jr      z, locret_D6BF
+                cp      #0xFF
+                jr      Z, locret_D6BF
                 call    loc_D6C0
-                jr      loc_D6B5
+                jr      play_audio
 ; ---------------------------------------------------------------------------
 
 locret_D6BF:                                                    ; CODE XREF: RAM:D6AEj
@@ -18809,24 +8343,24 @@ locret_D6BF:                                                    ; CODE XREF: RAM
 
 loc_D6C0:                                                       ; CODE XREF: RAM:D6B0p
                                                                 ; RAM:D6BAp
-                and     3Fh ; '?'
-                jr      z, loc_D702
+                and     #0x3F ; '?'
+                jr      Z, loc_D702
                 ld      l, a
-                ld      h, 0
+                ld      h, #0
                 add     hl, hl
                 call    loc_B519
-                ld      bc, 0D718h
+                ld      bc, #0xD718
                 add     hl, bc
                 ld      b, (hl)
                 inc     hl
                 ld      c, (hl)
                 inc     hl
                 ld      l, (hl)
-                ld      h, 0
+                ld      h, #0
                 ld      a, (de)
                 rlca
                 rlca
-                and     3
+                and     #3
                 inc     a
                 push    de
                 ld      e, l
@@ -18834,7 +8368,7 @@ loc_D6C0:                                                       ; CODE XREF: RAM
 
 loc_D6DF:                                                       ; CODE XREF: RAM:D6E3j
                 dec     a
-                jr      z, loc_D6E5
+                jr      Z, loc_D6E5
                 add     hl, de
                 jr      loc_D6DF
 ; ---------------------------------------------------------------------------
@@ -18845,28 +8379,28 @@ loc_D6E5:                                                       ; CODE XREF: RAM
 loc_D6E6:                                                       ; CODE XREF: RAM:D6FEj
                 push    bc
                 xor     a
-                out     (0FEh), a
+                out     (0xFE), a
 
 loc_D6EA:                                                       ; CODE XREF: RAM:loc_D6EAj
                                                                 ; RAM:D6EDj
-                djnz    $
+                djnz    loc_D6EA
                 dec     c
-                jr      nz, loc_D6EA
+                jr      NZ, loc_D6EA
                 pop     bc
                 push    bc
-                ld      a, 10h
-                out     (0FEh), a
+                ld      a, #0x10
+                out     (0xFE), a
 
 loc_D6F5:                                                       ; CODE XREF: RAM:loc_D6F5j
                                                                 ; RAM:D6F8j
-                djnz    $
+                djnz    loc_D6F5
                 dec     c
-                jr      nz, loc_D6F5
+                jr      NZ, loc_D6F5
                 pop     bc
                 dec     hl
                 ld      a, h
                 or      l
-                jr      nz, loc_D6E6
+                jr      NZ, loc_D6E6
                 inc     de
                 ret
 ; ---------------------------------------------------------------------------
@@ -18876,10 +8410,10 @@ loc_D702:                                                       ; CODE XREF: RAM
                 inc     de
                 rlca
                 rlca
-                and     3
+                and     #3
                 inc     a
                 ld      l, a
-                ld      bc, 430Bh
+                ld      bc, #0x430B
 
 loc_D70D:                                                       ; CODE XREF: RAM:D715j
                 push    bc
@@ -18888,396 +8422,106 @@ loc_D70E:                                                       ; CODE XREF: RAM
                 dec     bc
                 ld      a, b
                 or      c
-                jr      nz, loc_D70E
+                jr      NZ, loc_D70E
                 pop     bc
                 dec     l
-                jr      nz, loc_D70D
+                jr      NZ, loc_D70D
                 ret
 ; ---------------------------------------------------------------------------
-                db    0
-                db    0
-                db    0
-                db 0F4h ; Ù
-                db  0Ah
-                db    8
-                db  65h ; e
-                db  0Ah
-                db    9
-                db 0DEh ; ﬁ
-                db    9
-                db    9
-                db  5Eh ; ^
-                db    9
-                db  0Ah
-                db 0E7h ; Á
-                db    8
-                db  0Ah
-                db  75h ; u
-                db    8
-                db  0Bh
-                db  0Ah
-                db    8
-                db  0Ch
-                db 0A5h ; •
-                db    7
-                db  0Ch
-                db  45h ; E
-                db    7
-                db  0Dh
-                db 0EBh ; Î
-                db    6
-                db  0Eh
-                db  96h ; ñ
-                db    6
-                db  0Fh
-                db  46h ; F
-                db    6
-                db  0Fh
-                db 0FAh ; ˙
-                db    5
-                db  10h
-                db 0B3h ; ≥
-                db    5
-                db  11h
-                db  6Fh ; o
-                db    5
-                db  12h
-                db  2Fh ; /
-                db    5
-                db  13h
-                db 0F3h ; Û
-                db    4
-                db  15h
-                db 0F3h ; Û
-                db    4
-                db  16h
-                db  85h ; Ö
-                db    4
-                db  17h
-                db  52h ; R
-                db    4
-                db  19h
-                db  23h ; #
-                db    4
-                db  1Ah
-                db 0F6h ; ˆ
-                db    3
-                db  1Ch
-                db 0CBh ; À
-                db    3
-                db  1Dh
-                db 0A3h ; £
-                db    3
-                db  1Fh
-                db  7Dh ; }
-                db    3
-                db  21h ; !
-                db  59h ; Y
-                db    3
-                db  23h ; #
-                db  38h ; 8
-                db    3
-                db  25h ; %
-                db  18h
-                db    3
-                db  27h ; '
-                db 0FAh ; ˙
-                db    2
-                db  29h ; )
-                db 0DDh ; ›
-                db    2
-                db  2Ch ; ,
-                db 0C2h ; ¬
-                db    2
-                db  2Eh ; .
-                db 0A9h ; ©
-                db    2
-                db  31h ; 1
-                db  91h ; ë
-                db    2
-                db  34h ; 4
-                db  7Bh ; {
-                db    2
-                db  37h ; 7
-                db  66h ; f
-                db    2
-                db  3Ah ; :
-                db  51h ; Q
-                db    2
-                db  3Eh ; >
-                db  3Fh ; ?
-                db    2
-                db  41h ; A
-                db  2Dh ; -
-                db    2
-                db  45h ; E
-                db  1Ch
-                db    2
-                db  49h ; I
-                db  0Ch
-                db    2
-                db  4Eh ; N
-                db 0FDh ; ˝
-                db    1
-                db  52h ; R
-                db 0EFh ; Ô
-                db    1
-                db  57h ; W
-                db 0E2h ; ‚
-                db    1
-                db  5Dh ; ]
-                db 0D5h ; ’
-                db    1
-                db  62h ; b
-                db 0C9h ; …
-                db    1
-                db  68h ; h
-                db 0BDh ; Ω
-                db    1
-                db  6Eh ; n
-                db 0B3h ; ≥
-                db    1
-                db  75h ; u
-                db 0A9h ; ©
-                db    1
-                db  7Bh ; {
-                db  9Fh ; ü
-                db    1
-                db  83h ; É
-                db  96h ; ñ
-                db    1
-                db  8Bh ; ã
-                db  8Eh ; é
-                db    1
-                db  93h ; ì
-                db  86h ; Ü
-                db    1
-                db  9Ch ; ú
-                db  7Eh ; ~
-                db    1
-                db 0A5h ; •
-                db  77h ; w
-                db    1
-                db 0AFh ; Ø
-                db  71h ; q
-                db    1
-                db 0B9h ; π
-                db  6Ah ; j
-                db    1
-                db 0C4h ; ƒ
-                db  64h ; d
-                db    1
-                db 0D0h ; –
-                db  5Fh ; _
-                db    1
-                db 0DCh ; ‹
-                db  59h ; Y
-                db    1
-                db 0E9h ; È
-                db  54h ; T
-                db    1
-                db 0F7h ; ˜
-unk_D7CF:       db  6Ch ; l                                     ; DATA XREF: RAM:BB8Eo
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  6Ah ; j
-                db  6Ah ; j
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  67h ; g
-                db  6Ch ; l
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  6Ah ; j
-                db  29h ; )
-                db  2Ah ; *
-                db  6Ch ; l
-                db  60h ; `
-                db  65h ; e
-                db  6Ch ; l
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  6Ah ; j
-                db  6Ah ; j
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  67h ; g
-                db  6Ch ; l
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  6Ah ; j
-                db  29h ; )
-                db  2Ah ; *
-                db  6Ch ; l
-                db  60h ; `
-                db 0A5h ; •
-                db  27h ; '
-                db  69h ; i
-                db  65h ; e
-                db 0AAh ; ™
-                db  27h ; '
-                db  69h ; i
-                db  65h ; e
-                db 0A7h ; ß
-                db  27h ; '
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  6Ah ; j
-                db  29h ; )
-                db  2Ah ; *
-                db  6Ch ; l
-                db  60h ; `
-                db 0A5h ; •
-                db  27h ; '
-                db  69h ; i
-                db  65h ; e
-                db 0AAh ; ™
-                db  27h ; '
-                db  69h ; i
-                db  65h ; e
-                db 0A7h ; ß
-                db  27h ; '
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  29h ; )
-                db  6Ah ; j
-                db  29h ; )
-                db  2Ah ; *
-                db  6Ch ; l
-                db  60h ; `
-                db 0A5h ; •
-                db 0FFh
-                db  27h ; '
-                db  67h ; g
-                db  67h ; g
-                db  23h ; #
-                db  67h ; g
-                db 0EAh ; Í
-                db 0DEh ; ﬁ
-                db  23h ; #
-                db  23h ; #
-                db  5Eh ; ^
-                db  5Bh ; [
-                db  59h ; Y
-                db 0D7h ; ◊
-                db  23h ; #
-                db 0FFh
-                db  65h ; e
-                db  68h ; h
-                db  6Ch ; l
-                db  71h ; q
-                db  6Fh ; o
-                db  2Dh ; -
-                db  2Ch ; ,
-                db  2Fh ; /
-                db  2Dh ; -
-                db  6Ah ; j
-                db  6Dh ; m
-                db  2Ch ; ,
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  31h ; 1
-                db  6Ch ; l
-                db  68h ; h
-                db  67h ; g
-                db 0E5h ; Â
-                db 0FFh
-                db  20h
-                db  20h
-                db  25h ; %
-                db  26h ; &
-                db  2Ch ; ,
-                db  69h ; i
-                db  20h
-                db  20h
-                db  22h ; "
-                db  24h ; $
-                db 0E5h ; Â
-                db 0FFh
-                db  60h ; `
-                db  65h ; e
-                db  69h ; i
-                db  6Ch ; l
-                db  69h ; i
-                db  65h ; e
-                db  65h ; e
-                db  67h ; g
-                db  2Ah ; *
-                db  29h ; )
-                db  27h ; '
-                db  25h ; %
-                db  64h ; d
-                db  60h ; `
-                db  60h ; `
-                db  65h ; e
-                db  29h ; )
-                db  27h ; '
-                db  25h ; %
-                db  24h ; $
-                db  62h ; b
-                db  5Eh ; ^
-                db  62h ; b
-                db  60h ; `
-                db  65h ; e
-                db  64h ; d
-                db 0E5h ; Â
-                db 0FFh
-                db  29h ; )
-                db  2Ah ; *
-                db  6Ch ; l
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  2Eh ; .
-                db  6Ch ; l
-                db  6Ah ; j
-                db  69h ; i
-                db  6Ah ; j
-                db  27h ; '
-                db  29h ; )
-                db  2Ah ; *
-                db  2Ch ; ,
-                db  6Ah ; j
-                db  69h ; i
-                db  67h ; g
-                db  69h ; i
-                db  25h ; %
-                db  27h ; '
-                db  29h ; )
-                db  2Ah ; *
-                db  69h ; i
-                db  67h ; g
-                db  65h ; e
-                db  27h ; '
-                db  20h
-                db  6Ch ; l
-                db  64h ; d
-                db 0E5h ; Â
-                db 0FFh
+                .db 0, 0, 0
+                .db 0xF4, 0xA, 8
+                .db 0x65, 0xA, 9
+                .db 0xDE, 9, 9
+                .db 0x5E, 9, 0xA
+                .db 0xE7, 8, 0xA
+                .db 0x75, 8, 0xB
+                .db 0xA, 8, 0xC
+                .db 0xA5, 7, 0xC
+                .db 0x45, 7, 0xD
+                .db 0xEB, 6, 0xE
+                .db 0x96, 6, 0xF
+                .db 0x46, 6, 0xF
+                .db 0xFA, 5, 0x10
+                .db 0xB3, 5, 0x11
+                .db 0x6F, 5, 0x12
+                .db 0x2F, 5, 0x13
+                .db 0xF3, 4, 0x15
+                .db 0xF3, 4, 0x16
+                .db 0x85, 4, 0x17
+                .db 0x52, 4, 0x19
+                .db 0x23, 4, 0x1A
+                .db 0xF6, 3, 0x1C
+                .db 0xCB, 3, 0x1D
+                .db 0xA3, 3, 0x1F
+                .db 0x7D, 3, 0x21
+                .db 0x59, 3, 0x23
+                .db 0x38, 3, 0x25
+                .db 0x18, 3, 0x27
+                .db 0xFA, 2, 0x29
+                .db 0xDD, 2, 0x2C
+                .db 0xC2, 2, 0x2E
+                .db 0xA9, 2, 0x31
+                .db 0x91, 2, 0x34
+                .db 0x7B, 2, 0x37
+                .db 0x66, 2, 0x3A
+                .db 0x51, 2, 0x3E
+                .db 0x3F, 2, 0x41
+                .db 0x2D, 2, 0x45
+                .db 0x1C, 2, 0x49
+                .db 0xC, 2, 0x4E
+                .db 0xFD, 1, 0x52
+                .db 0xEF, 1, 0x57
+                .db 0xE2, 1, 0x5D
+                .db 0xD5, 1, 0x62
+                .db 0xC9, 1, 0x68
+                .db 0xBD, 1, 0x6E
+                .db 0xB3, 1, 0x75
+                .db 0xA9, 1, 0x7B
+                .db 0x9F, 1, 0x83
+                .db 0x96, 1, 0x8B
+                .db 0x8E, 1, 0x93
+                .db 0x86, 1, 0x9C
+                .db 0x7E, 1, 0xA5
+                .db 0x77, 1, 0xAF
+                .db 0x71, 1, 0xB9
+                .db 0x6A, 1, 0xC4
+                .db 0x64, 1, 0xD0
+                .db 0x5F, 1, 0xDC
+                .db 0x59, 1, 0xE9
+                .db 0x54, 1, 0xF7
+byte_D7CF:      .db 0x6C, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29 ; DATA XREF: RAM:BB8Eo
+                .db 0x2A, 0x2C, 0x29, 0x67, 0x6C, 0x29, 0x2A, 0x2C
+                .db 0x29, 0x6A, 0x29, 0x2A, 0x6C, 0x60, 0x65, 0x6C
+                .db 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x6A, 0x29, 0x2A
+                .db 0x2C, 0x29, 0x67, 0x6C, 0x29, 0x2A, 0x2C, 0x29
+                .db 0x6A, 0x29, 0x2A, 0x6C, 0x60, 0xA5, 0x27, 0x69
+                .db 0x65, 0xAA, 0x27, 0x69, 0x65, 0xA7, 0x27, 0x29
+                .db 0x2A, 0x2C, 0x29, 0x6A, 0x29, 0x2A, 0x6C, 0x60
+                .db 0xA5, 0x27, 0x69, 0x65, 0xAA, 0x27, 0x69, 0x65
+                .db 0xA7, 0x27, 0x29, 0x2A, 0x2C, 0x29, 0x6A, 0x29
+                .db 0x2A, 0x6C, 0x60, 0xA5, 0xFF, 0x27, 0x67, 0x67
+                .db 0x23, 0x67, 0xEA, 0xDE, 0x23, 0x23, 0x5E, 0x5B
+                .db 0x59, 0xD7, 0x23, 0xFF
+start_game_tune:.db 0x65, 0x68, 0x6C, 0x71, 0x6F, 0x2D, 0x2C, 0x2F ; DATA XREF: RAM:AFB9o
+                .db 0x2D, 0x6A, 0x6D, 0x2C, 0x2A, 0x2C, 0x31, 0x6C
+                .db 0x68, 0x67, 0xE5, 0xFF, 0x20, 0x20, 0x25, 0x26
+                .db 0x2C, 0x69, 0x20, 0x20, 0x22, 0x24, 0xE5, 0xFF
+byte_D853:      .db 0x60, 0x65, 0x69, 0x6C, 0x69, 0x65, 0x65, 0x67 ; DATA XREF: RAM:C347o
+                .db 0x2A, 0x29, 0x27, 0x25, 0x64, 0x60, 0x60, 0x65
+                .db 0x29, 0x27, 0x25, 0x24, 0x62, 0x5E, 0x62, 0x60
+                .db 0x65, 0x64, 0xE5, 0xFF
+byte_D86F:      .db 0x29, 0x2A, 0x6C, 0x29, 0x2A, 0x2C, 0x2E, 0x6C ; DATA XREF: RAM:C31Do
+                .db 0x6A, 0x69, 0x6A, 0x27, 0x29, 0x2A, 0x2C, 0x6A
+                .db 0x69, 0x67, 0x69, 0x25, 0x27, 0x29, 0x2A, 0x69
+                .db 0x67, 0x65, 0x27, 0x20, 0x6C, 0x64, 0xE5, 0xFF
 ; end of 'RAM'
 
 ; ===========================================================================
 
 ; Segment type: Regular
-                segment VRAM
-                org 0D88Fh
-vidbuf:         ds 1800h                                        ; DATA XREF: RAM:CB84o
+                .org 0xD88F
+vidbuf:         .ds 0x1800                                      ; DATA XREF: RAM:update_screeno
+                                                                ; RAM:B38Co ...
 ; end of 'VRAM'
 
-
-                end
+; end of file
