@@ -16,18 +16,21 @@
 
 #define ENABLE_MASK
 
-#define ON_PEN    0
-#define OFF_PEN   1
-
-#define VIDBUF    0
-#define VIDEO     1
+// bitmaps
+#define VIDBUF          0
+#define VIDEO           1
+#define BLANK           2
+#define BM_WIDTH        256
+#define BM_HEIGHT       192
+#define BM_WIDTH_BYTES  (BM_WIDTH/8)
+#define PL_SIZE         (BM_WIDTH_BYTES*BM_HEIGHT)
 
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 static struct IntuitionBase *IntuitionBase;
 static struct GfxBase *GfxBase;
-static struct BitMap *myBitMaps[3];
+static struct BitMap *myBitMaps[BLANK+1];
 static struct Screen *screen;
 static struct NewScreen myNewScreen;
 
@@ -40,12 +43,13 @@ void osd_delay (unsigned ms)
 
 void osd_clear_scrn (void)
 {
-  SetRast (&(screen->RastPort), ON_PEN);
+  //SetRast (&(screen->RastPort), ON_PEN);
+  BltClear (myBitMaps[VIDEO]->Planes[0], PL_SIZE, 1);
 }
 
 void osd_clear_scrn_buffer (void)
 {
-  BltClear (myBitMaps[0]->Planes[0], 256/8*192, 0);
+  BltClear (myBitMaps[VIDBUF]->Planes[0], PL_SIZE, 1);
 }
 
 int osd_key (int _key)
@@ -74,26 +78,26 @@ int osd_readkey (void)
 
 void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
 {
+  uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
+  p += (191-y)*BM_WIDTH_BYTES+x/8;
+
   unsigned c, l, b;
   
-  SetAPen (&(screen->RastPort), ON_PEN);
   for (c=0; ; c++, str++)
   {
     uint8_t code = *str & 0x7f;
 
+    unsigned char *q = p;    
     for (l=0; l<8; l++)
     {
       uint8_t d = gfxbase_8x8[code*8+l];
       
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          WritePixel (&(screen->RastPort), x+c*8+b, 191-y+l);
-        d <<= 1;
-      }
+      *p = d;
+      p += BM_WIDTH_BYTES;
     }  
     if (*str & (1<<7))
       break;
+    p = ++q;
   }
 }
 
@@ -114,7 +118,7 @@ static uint8_t from_ascii (char ch)
 void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
 {
   uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
-  p += (191-y)*256/8+x/8;
+  p += (191-y)*BM_WIDTH_BYTES+x/8;
 
   unsigned c, l, b;
 
@@ -131,17 +135,8 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
         break;
 
       *p = d;
-      p += 256/8;
+      p += BM_WIDTH_BYTES;
 
-#if 0
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          WritePixel (&(screen->RastPort), x+c*8+b, 191-y+l);
-        }
-        d <<= 1;
-      }
-#endif      
     }  
     p = ++q;
   }
@@ -150,7 +145,7 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
 {
   uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
-  p += (191-y)*256/8+x/8;
+  p += (191-y)*BM_WIDTH_BYTES+x/8;
 
   unsigned l, b;
 
@@ -161,35 +156,27 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
       break;
 
     *p = d;
-    p += 256/8;    
+    p += BM_WIDTH_BYTES;    
   }  
   return (x+8);
 }
 
 void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c)
 {
-  BltBitMap (myBitMaps[2], 0, 0,
-              myBitMaps[VIDEO], x, 191-y,
-              x+(width_bytes<<3)-1, 191-(y+height_lines-1), 0, 0, 0);
+  BltBitMap (myBitMaps[BLANK], x, 191-(y+height_lines-1),
+              myBitMaps[VIDBUF], x, 191-(y+height_lines-1),
+              width_bytes<<3, height_lines, 0xc0, 0xff, 0);
 }
 
 void osd_update_screen (void)
 {
   BltBitMapRastPort (myBitMaps[VIDBUF], 0, 0, 
-                      &(screen->RastPort), 0, 0, 256, 192, 
-                      0xC0);
+                      &(screen->RastPort), 0, 0, 
+                      BM_WIDTH, BM_HEIGHT, 0xC0);
 }
 
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
 {
-#if 0
-  if ((int)x + ((int)width_bytes<<3) > 256)
-    return;
-
-  if (191-((int)y+(int)height_lines)-1 < 0)
-    return;
-#endif
-    
   BltBitMapRastPort (myBitMaps[VIDBUF], x, 191-(y+height_lines-1), 
                       &(screen->RastPort), x, 191-(y+height_lines-1), 
                       width_bytes<<3, height_lines, 
@@ -203,7 +190,7 @@ void osd_print_sprite (POBJ32 p_obj)
   uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
   uint8_t o = p_obj->pixel_x & 7;
   
-  p += (191-p_obj->pixel_y)*256/8 + p_obj->pixel_x/8;
+  p += (191-p_obj->pixel_y)*BM_WIDTH_BYTES + p_obj->pixel_x/8;
 
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
@@ -238,9 +225,8 @@ void osd_print_sprite (POBJ32 p_obj)
         v |= (d<<(8-o));
         *p = v;
       }
-      //WritePixel (&(screen->RastPort), p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y));
     }
-    p -= (256/8)+w;
+    p -= BM_WIDTH_BYTES+w;
   }
 }
 
@@ -251,24 +237,26 @@ int main (int argc, char *argv[])
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 0);
   GfxBase = (struct GfxBase *)OpenLibrary ("graphics.library", 0);
 
-  myBitMaps[0] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
-  myBitMaps[1] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
-  myBitMaps[2] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
+  myBitMaps[VIDBUF] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
+  myBitMaps[VIDEO] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
+  myBitMaps[BLANK] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
   
-  InitBitMap (myBitMaps[0], 1, 256, 192);
-  InitBitMap (myBitMaps[1], 1, 256, 192);
+  InitBitMap (myBitMaps[VIDBUF], 1, BM_WIDTH, BM_HEIGHT);
+  InitBitMap (myBitMaps[VIDEO], 1, BM_WIDTH, BM_HEIGHT);
+  InitBitMap (myBitMaps[BLANK], 1, BM_WIDTH, BM_HEIGHT);
 
-  myBitMaps[0]->Planes[0] = (PLANEPTR)AllocRaster (256,192);
-  BltClear (myBitMaps[0]->Planes[0], (256/8)*192, 1);
-  myBitMaps[1]->Planes[0] = (PLANEPTR)AllocRaster (256,192);
-  BltClear (myBitMaps[1]->Planes[0], (256/8)*192, 1);
-  // for fillrect
-  myBitMaps[2]->Planes[0] = 0;
+  myBitMaps[VIDBUF]->Planes[0] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
+  BltClear (myBitMaps[VIDBUF]->Planes[0], PL_SIZE, 1);
+  myBitMaps[VIDEO]->Planes[0] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
+  BltClear (myBitMaps[VIDEO]->Planes[0], PL_SIZE, 1);
+  // for fill_window
+  myBitMaps[BLANK]->Planes[0] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
+  BltClear (myBitMaps[BLANK]->Planes[0], PL_SIZE, 1);
 
   myNewScreen.LeftEdge=0;
   myNewScreen.TopEdge=0;
-  myNewScreen.Width=256;
-  myNewScreen.Height=192;
+  myNewScreen.Width=BM_WIDTH;
+  myNewScreen.Height=BM_HEIGHT;
   myNewScreen.Depth=1;
   myNewScreen.DetailPen=0;
   myNewScreen.BlockPen=1;
@@ -277,12 +265,12 @@ int main (int argc, char *argv[])
   myNewScreen.Font=NULL;
   myNewScreen.DefaultTitle=NULL;
   myNewScreen.Gadgets=NULL;
-  myNewScreen.CustomBitMap=myBitMaps[1];
+  myNewScreen.CustomBitMap=myBitMaps[VIDEO];
   screen = OpenScreen (&myNewScreen);
   //screen->RastPort.Flags = DBUFFER;
 
-  screen->RastPort.BitMap = myBitMaps[1];
-  screen->ViewPort.RasInfo->BitMap = myBitMaps[1];
+  screen->RastPort.BitMap = myBitMaps[VIDEO];
+  screen->ViewPort.RasInfo->BitMap = myBitMaps[VIDEO];
   
   //MakeScreen (screen);
   //RethinkDisplay ();
@@ -293,10 +281,12 @@ int main (int argc, char *argv[])
 
   CloseScreen (screen);
   
-  FreeRaster (myBitMaps[0]->Planes[0], 256, 192);
-  FreeRaster (myBitMaps[1]->Planes[0], 256, 192);
-  FreeMem (myBitMaps[0], (ULONG)sizeof(struct BitMap));
-  FreeMem (myBitMaps[1], (ULONG)sizeof(struct BitMap));
+  FreeRaster (myBitMaps[VIDBUF]->Planes[0], BM_WIDTH, BM_HEIGHT);
+  FreeRaster (myBitMaps[VIDEO]->Planes[0], BM_WIDTH, BM_HEIGHT);
+  FreeRaster (myBitMaps[BLANK]->Planes[0], BM_WIDTH, BM_HEIGHT);
+  FreeMem (myBitMaps[VIDBUF], (ULONG)sizeof(struct BitMap));
+  FreeMem (myBitMaps[VIDEO], (ULONG)sizeof(struct BitMap));
+  FreeMem (myBitMaps[BLANK], (ULONG)sizeof(struct BitMap));
   
   if (GfxBase)
     CloseLibrary ((struct GfxBase *)GfxBase);
