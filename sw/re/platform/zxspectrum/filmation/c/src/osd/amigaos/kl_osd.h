@@ -24,33 +24,48 @@
 #define OSD_KEY_9     (27+'9'-'0')
 
 // A=1, B=2...
+#define OSD_KEY_A     ('A' & 0x3f)
+#define OSD_KEY_B     ('B' & 0x3f)
+#define OSD_KEY_C     ('C' & 0x3f)
 #define OSD_KEY_D     ('D' & 0x3f)
 #define OSD_KEY_E     ('E' & 0x3f)
+#define OSD_KEY_F     ('F' & 0x3f)
 #define OSD_KEY_G     ('G' & 0x3f)
+#define OSD_KEY_H     ('H' & 0x3f)
 #define OSD_KEY_I     ('I' & 0x3f)
 #define OSD_KEY_J     ('J' & 0x3f)
 #define OSD_KEY_K     ('K' & 0x3f)
 #define OSD_KEY_L     ('L' & 0x3f)
+#define OSD_KEY_M     ('M' & 0x3f)
 #define OSD_KEY_N     ('N' & 0x3f)
 #define OSD_KEY_O     ('O' & 0x3f)
 #define OSD_KEY_P     ('P' & 0x3f)
+#define OSD_KEY_Q     ('Q' & 0x3f)
+#define OSD_KEY_R     ('R' & 0x3f)
 #define OSD_KEY_S     ('S' & 0x3f)
+#define OSD_KEY_T     ('T' & 0x3f)
 #define OSD_KEY_U     ('U' & 0x3f)
+#define OSD_KEY_V     ('V' & 0x3f)
 #define OSD_KEY_W     ('W' & 0x3f)
 #define OSD_KEY_X     ('X' & 0x3f)
+#define OSD_KEY_Y     ('Y' & 0x3f)
 #define OSD_KEY_Z     ('Z' & 0x3f)
 #define OSD_KEY_ESC   0x3b
 
 #define OSD_PRINTF(format...)		fprintf (stderr,format)
 
-void osd_cls (void);
 void osd_delay (unsigned ms);
+void osd_clear_scrn (void);
+void osd_clear_scrn_buffer (void);
 int osd_key (int _key);
 int osd_keypressed (void);
 int osd_readkey (void);
 void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str);
 void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str);
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code);
+void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c);
+void osd_update_screen (void);
+void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 void osd_print_sprite (POBJ32 p_obj);
 
 #endif

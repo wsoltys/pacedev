@@ -121,7 +121,7 @@ endif
 
 ifeq ($(PLATFORM),amigaos)
 
-  # run cygwin(64) terminal icon
+  # run cygwin(32) terminal icon
   # run winaue, load congifuration 'mmc'
   
 	M68KGCC = /usr/local/amiga
