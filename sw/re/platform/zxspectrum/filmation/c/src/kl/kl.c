@@ -901,7 +901,7 @@ void play_audio_until_keypress (uint8_t *audio_data)
 
   while (1)
   {
-    if (read_key (0))
+    //if (read_key (0))
       return;
     // keep playing audio
   }
@@ -1875,7 +1875,7 @@ menu_loop:
   // 6,7,8,9,0
   key = read_key (0xEF);
   // start game?
-  if (key & (1<<0))
+  //if (key & (1<<0))
     return;
   seed_1++;
   flash_menu ();
@@ -1938,6 +1938,8 @@ uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
 // $BEB3
 void display_menu (void)
 {
+  DBGPRINTF_FN;
+  
   display_text_list (menu_colours, menu_xy, (char **)menu_text, 8);
   print_border ();
   update_screen ();
@@ -2488,7 +2490,7 @@ display_frame:
   // display sun/moon
   fill_window (184, 0, 6, 31, 0);
   print_sprite (p_obj);
-
+  
   p_frm->flags7 = 0;
   p_frm->graphic_no = 0x5a;
   p_frm->pixel_x = 184;
@@ -3972,6 +3974,7 @@ void init_start_location (void)
   plyr_spr_1_scratchpad.u.plyr_graphic_no = 18;   // legs
   plyr_spr_2_scratchpad.u.plyr_graphic_no = 34;   // top half
   s = start_locations[seed_1 & 3];
+  s = 31;
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
   // start_loc_2
@@ -4301,7 +4304,7 @@ found_screen:
   for (; n_other_objs<MAX_OBJS-4; n_other_objs++)
     memset (p_other_objs++, 0, sizeof(OBJ32));
             
-  dump_graphic_objs_tbl(-1, -1);
+  //dump_graphic_objs_tbl(-1, -1);
 }
 
 // $D50E

@@ -22,7 +22,7 @@
 #define VIDEO           1
 #define BLANK           2
 #define BM_WIDTH        256
-#define BM_HEIGHT       192
+#define BM_HEIGHT       200
 #define BM_WIDTH_BYTES  (BM_WIDTH/8)
 #define PL_SIZE         (BM_WIDTH_BYTES*BM_HEIGHT)
 
@@ -33,7 +33,6 @@ static struct IntuitionBase *IntuitionBase;
 static struct GfxBase *GfxBase;
 static struct BitMap *myBitMaps[BLANK+1];
 static struct Screen *screen;
-static struct NewScreen myNewScreen;
 static struct IOStdReq *KeyIO;
 static struct MsgPort *KeyMP;
 static uint8_t *keyMatrix;
@@ -42,7 +41,7 @@ const char __ver[40] = "$VER: Knight Lore 0.1 (03.02.2016)";
 
 void osd_delay (unsigned ms)
 {
-  Delay (ms/50);
+  Delay (ms/20);
 }
 
 void osd_clear_scrn (void)
@@ -173,9 +172,22 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
 
 void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c)
 {
+#if 1
+  uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
+  p += (191-(y+height_lines-1))*BM_WIDTH_BYTES + x/8;
+  for (; height_lines; height_lines--)
+  {
+    memset (p, 0, width_bytes);
+    p += BM_WIDTH_BYTES;
+  }
+#else  
+  // for some reason this doesn't work for the sun/moon
+  // - passes in (184, 0, 6, 31, 0)
   BltBitMap (myBitMaps[BLANK], x, 191-(y+height_lines-1),
               myBitMaps[VIDBUF], x, 191-(y+height_lines-1),
-              width_bytes<<3, height_lines, 0xc0, 0xff, 0);
+              width_bytes<<3, height_lines, 
+              0xc0, 0xff, 0);
+#endif
 }
 
 void osd_update_screen (void)
@@ -243,16 +255,18 @@ void osd_print_sprite (POBJ32 p_obj)
 int main (int argc, char *argv[])
 {
   unsigned i;
-  
-  IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 0);
-  GfxBase = (struct GfxBase *)OpenLibrary ("graphics.library", 0);
 
+  // the usual AmigaOS stuff  
+  IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 40);
+  GfxBase = (struct GfxBase *)OpenLibrary ("graphics.library", 40);
+
+  // setup keyboard
   KeyMP = (struct MsgPort *)CreatePort (NULL, NULL);
   KeyIO = (struct IOStdReq *)CreateExtIO (KeyMP, sizeof(struct IOStdReq));
   OpenDevice ("keyboard.device", NULL, (struct IORequest *)KeyIO, NULL);
   keyMatrix = AllocMem (16, MEMF_PUBLIC|MEMF_CLEAR);
 
-#if 1
+  // now the video memory
   myBitMaps[VIDBUF] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
   myBitMaps[VIDEO] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
   myBitMaps[BLANK] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
@@ -269,24 +283,31 @@ int main (int argc, char *argv[])
   myBitMaps[BLANK]->Planes[0] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
   BltClear (myBitMaps[BLANK]->Planes[0], PL_SIZE, 1);
 
-  myNewScreen.LeftEdge=0;
-  myNewScreen.TopEdge=0;
-  myNewScreen.Width=BM_WIDTH;
-  myNewScreen.Height=BM_HEIGHT;
-  myNewScreen.Depth=1;
-  myNewScreen.DetailPen=0;
-  myNewScreen.BlockPen=1;
-  myNewScreen.ViewModes=0; //HIRES;
-  myNewScreen.Type=CUSTOMSCREEN | CUSTOMBITMAP | SCREENQUIET;
-  myNewScreen.Font=NULL;
-  myNewScreen.DefaultTitle=NULL;
-  myNewScreen.Gadgets=NULL;
-  myNewScreen.CustomBitMap=myBitMaps[VIDEO];
-  screen = OpenScreen (&myNewScreen);
-
+  // now the screen
+  struct ColorSpec myColours[3] = 
+  { 
+    { 0, 0x0000, 0x0000, 0x0000 },
+    { 1, 0x003F, 0x003F, 0x003F },
+    { -1, 0x0000, 0x0000, 0x0000 },
+  };
+  screen = OpenScreenTags (NULL, 
+              SA_Left, 0,
+              SA_Top, 0,
+              SA_Width, BM_WIDTH,
+              SA_Height, BM_HEIGHT,
+              SA_Depth, 1,
+              SA_Type, CUSTOMSCREEN|CUSTOMBITMAP|SCREENQUIET,
+              SA_BitMap, myBitMaps[VIDEO],
+              SA_Colors, (struct ColorSpec *)myColours,
+              TAG_DONE);
+  
+  // link in the bitmap
   screen->RastPort.BitMap = myBitMaps[VIDEO];
   screen->ViewPort.RasInfo->BitMap = myBitMaps[VIDEO];
-  
+
+  //MakeScreen (screen);
+  //RethinkDisplay ();
+    
 	knight_lore ();
 
   CloseScreen (screen);
@@ -297,29 +318,6 @@ int main (int argc, char *argv[])
   FreeMem (myBitMaps[VIDBUF], (ULONG)sizeof(struct BitMap));
   FreeMem (myBitMaps[VIDEO], (ULONG)sizeof(struct BitMap));
   FreeMem (myBitMaps[BLANK], (ULONG)sizeof(struct BitMap));
-#endif
-
-#if 0
-  {
-    unsigned i, j;
-    
-    for (j=0; j<10; )
-    {
-      KeyIO->io_Command = KBD_READMATRIX;
-      KeyIO->io_Data = (APTR)keyMatrix;
-      //KeyIO->io_Length= SysBase->lib_Version >= 36 ? MATRIX_SIZE : 13;
-      KeyIO->io_Length = 13;
-      DoIO ((struct IORequest *)KeyIO);
-      for (i=0; i<13; i++)
-        if (keyMatrix[i])
-        {
-          DBGPRINTF ("pressed keyMatrix[%02X]=%02X\n", i, keyMatrix[i]);
-          break;
-        }
-      Delay (10);
-    }
-  }    
-#endif
 
   FreeMem (keyMatrix, 16);
   CloseDevice ((struct IORequest *)KeyIO);
