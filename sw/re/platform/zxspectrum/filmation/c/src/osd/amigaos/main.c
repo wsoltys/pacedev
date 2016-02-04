@@ -3,10 +3,11 @@
 
 #include <exec/memory.h>
 #include <proto/intuition.h>
+#include <proto/exec.h>
 #include <proto/dos.h>
 #include <proto/graphics.h>
+#include <devices/keyboard.h>
 #include <intuition/intuition.h>
-//#include <graphics_protos.h>
 #include <graphics/gfx.h>
 #include <hardware/blit.h>
 #include <stdlib.h>
@@ -33,12 +34,15 @@ static struct GfxBase *GfxBase;
 static struct BitMap *myBitMaps[BLANK+1];
 static struct Screen *screen;
 static struct NewScreen myNewScreen;
-
+static struct IOStdReq *KeyIO;
+static struct MsgPort *KeyMP;
+static uint8_t *keyMatrix;
+  
 const char __ver[40] = "$VER: Knight Lore 0.1 (03.02.2016)";
 
 void osd_delay (unsigned ms)
 {
-  Delay (ms/10);
+  Delay (ms/50);
 }
 
 void osd_clear_scrn (void)
@@ -54,9 +58,15 @@ void osd_clear_scrn_buffer (void)
 
 int osd_key (int _key)
 {
-	#if 0
-  return (key[_key]);
-	#endif
+  KeyIO->io_Command = KBD_READMATRIX;
+  KeyIO->io_Data = (APTR)keyMatrix;
+  //KeyIO->io_Length= SysBase->lib_Version >= 36 ? MATRIX_SIZE : 13;
+  KeyIO->io_Length = 13;
+  DoIO ((struct IORequest *)KeyIO);
+
+  if (keyMatrix[_key>>3] & (1<<(_key&7)))
+    return (1);
+      
 	return (0);
 }
 
@@ -237,6 +247,12 @@ int main (int argc, char *argv[])
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 0);
   GfxBase = (struct GfxBase *)OpenLibrary ("graphics.library", 0);
 
+  KeyMP = (struct MsgPort *)CreatePort (NULL, NULL);
+  KeyIO = (struct IOStdReq *)CreateExtIO (KeyMP, sizeof(struct IOStdReq));
+  OpenDevice ("keyboard.device", NULL, (struct IORequest *)KeyIO, NULL);
+  keyMatrix = AllocMem (16, MEMF_PUBLIC|MEMF_CLEAR);
+
+#if 1
   myBitMaps[VIDBUF] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
   myBitMaps[VIDEO] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
   myBitMaps[BLANK] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
@@ -260,24 +276,18 @@ int main (int argc, char *argv[])
   myNewScreen.Depth=1;
   myNewScreen.DetailPen=0;
   myNewScreen.BlockPen=1;
-  myNewScreen.ViewModes=HIRES;
+  myNewScreen.ViewModes=0; //HIRES;
   myNewScreen.Type=CUSTOMSCREEN | CUSTOMBITMAP | SCREENQUIET;
   myNewScreen.Font=NULL;
   myNewScreen.DefaultTitle=NULL;
   myNewScreen.Gadgets=NULL;
   myNewScreen.CustomBitMap=myBitMaps[VIDEO];
   screen = OpenScreen (&myNewScreen);
-  //screen->RastPort.Flags = DBUFFER;
 
   screen->RastPort.BitMap = myBitMaps[VIDEO];
   screen->ViewPort.RasInfo->BitMap = myBitMaps[VIDEO];
   
-  //MakeScreen (screen);
-  //RethinkDisplay ();
-  
 	knight_lore ();
-
-  Delay (100);
 
   CloseScreen (screen);
   
@@ -287,11 +297,39 @@ int main (int argc, char *argv[])
   FreeMem (myBitMaps[VIDBUF], (ULONG)sizeof(struct BitMap));
   FreeMem (myBitMaps[VIDEO], (ULONG)sizeof(struct BitMap));
   FreeMem (myBitMaps[BLANK], (ULONG)sizeof(struct BitMap));
+#endif
+
+#if 0
+  {
+    unsigned i, j;
+    
+    for (j=0; j<10; )
+    {
+      KeyIO->io_Command = KBD_READMATRIX;
+      KeyIO->io_Data = (APTR)keyMatrix;
+      //KeyIO->io_Length= SysBase->lib_Version >= 36 ? MATRIX_SIZE : 13;
+      KeyIO->io_Length = 13;
+      DoIO ((struct IORequest *)KeyIO);
+      for (i=0; i<13; i++)
+        if (keyMatrix[i])
+        {
+          DBGPRINTF ("pressed keyMatrix[%02X]=%02X\n", i, keyMatrix[i]);
+          break;
+        }
+      Delay (10);
+    }
+  }    
+#endif
+
+  FreeMem (keyMatrix, 16);
+  CloseDevice ((struct IORequest *)KeyIO);
+  DeleteExtIO ((struct IORequest *)KeyIO);
+  DeletePort (KeyMP);
   
   if (GfxBase)
-    CloseLibrary ((struct GfxBase *)GfxBase);
+    CloseLibrary ((struct Library *)GfxBase);
   if (IntuitionBase) 
-    CloseLibrary ((struct IntuitionBase *)IntuitionBase);
+    CloseLibrary ((struct Library *)IntuitionBase);
     
   return (0);
 }

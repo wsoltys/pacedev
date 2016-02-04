@@ -12,45 +12,46 @@
 #define DBGPRINTF(format...)		fprintf(stderr, format)
 
 // 0=27, 1=28...
-#define OSD_KEY_0     (27+'0'-'0')
-#define OSD_KEY_1     (27+'1'-'0')
-#define OSD_KEY_2     (27+'2'-'0')
-#define OSD_KEY_3     (27+'3'-'0')
-#define OSD_KEY_4     (27+'4'-'0')
-#define OSD_KEY_5     (27+'5'-'0')
-#define OSD_KEY_6     (27+'6'-'0')
-#define OSD_KEY_7     (27+'7'-'0')
-#define OSD_KEY_8     (27+'8'-'0')
-#define OSD_KEY_9     (27+'9'-'0')
-
-// A=1, B=2...
-#define OSD_KEY_A     ('A' & 0x3f)
-#define OSD_KEY_B     ('B' & 0x3f)
-#define OSD_KEY_C     ('C' & 0x3f)
-#define OSD_KEY_D     ('D' & 0x3f)
-#define OSD_KEY_E     ('E' & 0x3f)
-#define OSD_KEY_F     ('F' & 0x3f)
-#define OSD_KEY_G     ('G' & 0x3f)
-#define OSD_KEY_H     ('H' & 0x3f)
-#define OSD_KEY_I     ('I' & 0x3f)
-#define OSD_KEY_J     ('J' & 0x3f)
-#define OSD_KEY_K     ('K' & 0x3f)
-#define OSD_KEY_L     ('L' & 0x3f)
-#define OSD_KEY_M     ('M' & 0x3f)
-#define OSD_KEY_N     ('N' & 0x3f)
-#define OSD_KEY_O     ('O' & 0x3f)
-#define OSD_KEY_P     ('P' & 0x3f)
-#define OSD_KEY_Q     ('Q' & 0x3f)
-#define OSD_KEY_R     ('R' & 0x3f)
-#define OSD_KEY_S     ('S' & 0x3f)
-#define OSD_KEY_T     ('T' & 0x3f)
-#define OSD_KEY_U     ('U' & 0x3f)
-#define OSD_KEY_V     ('V' & 0x3f)
-#define OSD_KEY_W     ('W' & 0x3f)
-#define OSD_KEY_X     ('X' & 0x3f)
-#define OSD_KEY_Y     ('Y' & 0x3f)
-#define OSD_KEY_Z     ('Z' & 0x3f)
-#define OSD_KEY_ESC   0x3b
+#define OSD_KEY_0       0x0A
+#define OSD_KEY_1       0x01
+#define OSD_KEY_2       0x02
+#define OSD_KEY_3       0x03
+#define OSD_KEY_4       0x04
+#define OSD_KEY_5       0x05
+#define OSD_KEY_6       0x06
+#define OSD_KEY_7       0x07
+#define OSD_KEY_8       0x08
+#define OSD_KEY_9       0x09
+                        
+// A=1, B=2...          
+#define OSD_KEY_A       0x20
+#define OSD_KEY_B       0x35
+#define OSD_KEY_C       0x33
+#define OSD_KEY_D       0x22
+#define OSD_KEY_E       0x12
+#define OSD_KEY_F       0x23
+#define OSD_KEY_G       0x24
+#define OSD_KEY_H       0x25
+#define OSD_KEY_I       0x17
+#define OSD_KEY_J       0x26
+#define OSD_KEY_K       0x27
+#define OSD_KEY_L       0x28
+#define OSD_KEY_M       0x37
+#define OSD_KEY_N       0x36
+#define OSD_KEY_O       0x18
+#define OSD_KEY_P       0x19
+#define OSD_KEY_Q       0x10
+#define OSD_KEY_R       0x13
+#define OSD_KEY_S       0x21
+#define OSD_KEY_T       0x14
+#define OSD_KEY_U       0x16
+#define OSD_KEY_V       0x34
+#define OSD_KEY_W       0x11
+#define OSD_KEY_X       0x32
+#define OSD_KEY_Y       0x15
+#define OSD_KEY_Z       0x31
+#define OSD_KEY_SPACE   0x40
+#define OSD_KEY_ESC     0x45
 
 #define OSD_PRINTF(format...)		fprintf (stderr,format)
 
