@@ -1875,7 +1875,7 @@ menu_loop:
   // 6,7,8,9,0
   key = read_key (0xEF);
   // start game?
-  //if (key & (1<<0))
+  if (key & (1<<0))
     return;
   seed_1++;
   flash_menu ();
@@ -1938,8 +1938,6 @@ uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
 // $BEB3
 void display_menu (void)
 {
-  DBGPRINTF_FN;
-  
   display_text_list (menu_colours, menu_xy, (char **)menu_text, 8);
   print_border ();
   update_screen ();
@@ -2681,7 +2679,8 @@ void fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_line
 {
   // x starts on a byte boundary
   x &= 0xF8;
-  osd_fill_window (x, y, width_bytes, height_lines, c);
+  if (height_lines > 0)
+    osd_fill_window (x, y, width_bytes, height_lines, c);
 }
 
 // $C525
@@ -3594,8 +3593,9 @@ int8_t adj_dY_for_out_of_bounds (POBJ32 p_obj, int8_t d_y)
 void calc_2d_info (POBJ32 p_obj)
 {
   uint8_t *psprite;
-  
+
   calc_pixel_XY (p_obj);
+
   psprite = flip_sprite (p_obj);
   p_obj->data_width_bytes = *(psprite++) & 0x0F;
   if ((p_obj->pixel_x & 7) != 0)
@@ -3974,7 +3974,6 @@ void init_start_location (void)
   plyr_spr_1_scratchpad.u.plyr_graphic_no = 18;   // legs
   plyr_spr_2_scratchpad.u.plyr_graphic_no = 34;   // top half
   s = start_locations[seed_1 & 3];
-  s = 31;
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
   // start_loc_2
@@ -4416,7 +4415,8 @@ void blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_l
 {
   // x starts on a byte boundary
   x &= 0xF8;
-  osd_blit_to_screen (x, y, width_bytes, height_lines);
+  if (height_lines > 0)
+    osd_blit_to_screen (x, y, width_bytes, height_lines);
 }
 
 // $D6C9
