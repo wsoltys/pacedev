@@ -37,7 +37,7 @@ static struct IOStdReq *KeyIO;
 static struct MsgPort *KeyMP;
 static uint8_t *keyMatrix;
   
-const char __ver[40] = "$VER: Knight Lore 0.1 (03.02.2016)";
+const char __ver[40] = "$VER: Knight Lore v0.9a1 (04.02.2016)";
 
 void osd_delay (unsigned ms)
 {

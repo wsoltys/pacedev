@@ -7,9 +7,8 @@
 
 #include "kl_dat.h"
 
-//#define ALLEGRO_STATICLINK
-
-#define DBGPRINTF(format...)		fprintf(stderr, format)
+//#define DBGPRINTF(format...)		fprintf(stderr, format)
+#define DBGPRINTF(format...)
 
 // 0=27, 1=28...
 #define OSD_KEY_0       0x0A
