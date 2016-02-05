@@ -21,39 +21,74 @@
 
 #define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
 
-static uint8_t c13 [208896];
+#define SCRN_W    (2048/4)
+#define SCRN_H    (1024/4)
+
+static uint8_t  *c13 = NULL;
+
+void put_ng_tile (unsigned t, unsigned x, unsigned y)
+{
+  for (int ty=0; ty<16; ty++)
+  	for (int tx=0; tx<16; tx++)
+  	{
+  		int bit = t*64*8 + ty*2*8;
+  		if (tx < 8) bit += 32*8;
+  		uint8_t pel = (c13[(bit>>3)+1] >> (tx%8)) & 0x01;
+  		pel = (pel << 1) | ((c13[(bit>>3)+0] >> (tx%8)) & 0x01);
+      putpixel (screen, x+tx, y+ty, pel);
+  	}
+}
 
 void show_ng_tiles (void)
 {
+	struct stat	    fs;
+	int					    fd;
+
   FILE *fp = fopen ("202-c1.bin", "rb");
-  fread (c13, sizeof(uint8_t), 208896, fp);
+	if (!fp)
+		return;
+	fd = fileno (fp);
+	if (fstat	(fd, &fs))
+		return;
+  if ((c13 = (uint8_t *)malloc (fs.st_size)) == NULL)
+    return;
+  fread (c13, sizeof(uint8_t), fs.st_size, fp);
   fclose (fp);
-    
-	clear_bitmap (screen);
 
-  for (unsigned y=0; y<8; y++)
-    for (unsigned x=0; x<8; x++)
-      for (unsigned c=0; c<4; c++)
-        for (unsigned r=0; r<4; r++)
-        {
-          unsigned t = 256 + y*8*16 + x*16 + c*4 + r;
+  #define SPP (SCRN_H/64*SCRN_W/64/4)
+  
+  fprintf (stderr, "sprites/page = %d\n", SPP);
+  
+  for (unsigned b=0; b<2; b++)
+  {
+  	clear_bitmap (screen);
+  
+    for (unsigned y=0; y<SCRN_H/64; y++)
+      for (unsigned x=0; x<SCRN_W/64; x++)
+      {
+        if (b*SPP+(y*(SCRN_W/48)+x)/4 >= N_SPR_ENTRIES)
+          break;
           
-    			for (int ty=0; ty<16; ty++)
-    				for (int tx=0; tx<16; tx++)
-    				{
-    					int bit = t*64*8 + ty*2*8;
-    					if (tx < 8) bit += 32*8;
-    					uint8_t pel = (c13[(bit>>3)+1] >> (tx%8)) & 0x01;
-    					pel = (pel << 1) | ((c13[(bit>>3)+0] >> (tx%8)) & 0x01);
-              putpixel (screen, 
-                        x*48+c*16+tx, 
-                        y*64+r*16+ty, 
-                        pel);
-    				}
-        }
-
-  while (!key[KEY_ESC]);	  
-	while (key[KEY_ESC]);	  
+        for (unsigned c=0; c<4; c++)
+          for (unsigned r=0; r<4; r++)
+          {
+            unsigned t = 256 +      // BIOS
+                         64 +       // font
+                         SCRN_H/64*SCRN_W/64 * 16 * b +
+                          y*(SCRN_W/64)*16 + x*16 + c*4 + r;
+  					put_ng_tile (t, x*64+c*16, y*64+r*16);
+          }
+      }  
+      
+    if (b == 0)
+      for (unsigned t=0; t<44; t++)
+        put_ng_tile (256+t, 16+8*t, 16);
+    
+    while (!key[KEY_ESC]);	  
+  	while (key[KEY_ESC]);	  
+  }
+  
+  free (c13);
 }
 
 int main (int argc, char *argv[])
@@ -105,55 +140,115 @@ int main (int argc, char *argv[])
 	}
 	fclose (fp1);
 	fclose (fp2);
+
+  // now do the main font & days font
+  // - needs to be a multiple of 16
+  for (s=0; s<64; s++)
+  {
+    uint8_t *pfont;
+    
+    if (s < 40)
+      pfont = kl_font[s];
+    else if (s < 40+4)
+      pfont = days_font[s-40];
+    
+    if (s < 40+4)
+    {
+      // quadrants 0,1
+      fwrite (zeroes, sizeof(uint8_t), 2*2*8, c1);
+      // quadrant 3 (has font data)
+      for (unsigned l=0; l<8; l++)
+      {
+        uint8_t d = REV(pfont[l]);
+        
+        fwrite (&d, sizeof(uint8_t), 1, c1);
+        fwrite (zeroes, sizeof(uint8_t), 1, c1);
+      }
+      // quadrant 3
+      fwrite (zeroes, sizeof(uint8_t), 2*8, c1);
+    }
+    else
+      fwrite (zeroes, sizeof(uint8_t), 64, c1);
+
+    // c2
+    fwrite (zeroes, sizeof(uint8_t), 64, c2);
+  }
+  
+  #define F_VFLIP (1<<7)
+  #define F_HFLIP (1<<6)
   
   for (s=0; s<N_SPR_ENTRIES; s++)
   {
     uint8_t *psprite = sprite_tbl[s];
     
+    uint8_t c = *psprite & 0xc0;
     uint8_t w = *(psprite++) & 0x3f;
     uint8_t h = *(psprite++);
 
-    // construct 4x4 tile array
-    for (int c=0; c<4; c++)
+    if (c)
+      printf ("*** WARNING %d flipped ($%02X)!\n", s, c);
+      
+    // 4 flip orientations
+    for (int f=0; f<4; f++)
     {
-      for (int r=0; r<4; r++)
+      uint8_t vflip = (f&2 ? F_VFLIP : 0);
+      uint8_t hflip = (f&1 ? F_HFLIP : 0);
+      
+      // construct 4x4 tile array
+      for (int c=0; c<4; c++)
       {
-        if (c*2 >= w || r*16 >= h)
-          fwrite (zeroes, 64, sizeof(uint8_t), c1);
-        else
-        {        
-          // we have some sprite data
-          for (unsigned q=0; q<4; q++)
-          {
-            // point to start of data
-            uint8_t *p = psprite + 
-                          (h-1-(r*16 + (q&1)*8)) *w*2 + 
-                          c*2*2 + 2-(q&2);
-
-            for (unsigned l=0; l<8; l++)
+        for (int r=0; r<4; r++)
+        {
+          if (c*2 >= w || r*16 >= h)
+            fwrite (zeroes, 64, sizeof(uint8_t), c1);
+          else
+          {        
+            // we have some sprite data
+            for (unsigned q=0; q<4; q++)
             {
-              // bitplane0 = mask
-              // bitplane1 = colour
-              // gives 4 colours but #2=#3
-
-              if (c*2+1-((q&2)/2) >= w ||
-                  r*16+(q&1)*8+l >= h)
-                fwrite (zeroes, sizeof(uint8_t), 2, c1);
+              // point to start of data
+              uint8_t *p = psprite;
+              if ((c & F_VFLIP) ^ vflip)
+                p += ((r*16 + (q&1)*8)) *w*2;
               else
+                p += (h-1-(r*16 + (q&1)*8)) *w*2;
+              if ((c & F_HFLIP) ^ hflip)
+                p += (2*(w-1))-(c*2*2 + 2-(q&2));
+              else
+                p += c*2*2 + 2-(q&2);
+              for (unsigned l=0; l<8; l++)
               {
-                uint8_t m = REV(*(p+0));
-                uint8_t d = REV(*(p+1));
-                fwrite (&m, sizeof(uint8_t), 1, c1);
-                fwrite (&d, sizeof(uint8_t), 1, c1);
-                              
-                p -= w*2;              
+                // bitplane0 = mask
+                // bitplane1 = colour
+                // gives 4 colours but #2=#3
+  
+                if (c*2+1-((q&2)/2) >= w ||
+                    r*16+(q&1)*8+l >= h)
+                  fwrite (zeroes, sizeof(uint8_t), 2, c1);
+                else
+                {
+                  uint8_t m = *(p+0);
+                  uint8_t d = *(p+1);
+                  if (!hflip)
+                  {
+                    m = REV(m);
+                    d = REV(d);
+                  }
+                  fwrite (&m, sizeof(uint8_t), 1, c1);
+                  fwrite (&d, sizeof(uint8_t), 1, c1);
+
+                  if (vflip)
+                    p += w*2;
+                  else                                
+                    p -= w*2;              
+                }
               }
             }
           }
+                
+          // and always bitplanes 2,3
+          fwrite (zeroes, sizeof(uint8_t), 64, c2);
         }
-              
-        // and always bitplanes 2,3
-        fwrite (zeroes, sizeof(uint8_t), 64, c2);
       }
     }
   }
@@ -168,7 +263,7 @@ int main (int argc, char *argv[])
 	install_keyboard ();
 
 	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 32*3/4*16, 32*16, 0, 0);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, SCRN_W, SCRN_H, 0, 0);
 
   int r[] = { 0x7F>>2, 0, 0xFF>>2, 0xFF>>2 };
   int g[] = { 0x7F>>2, 0, 0xFF>>2, 0xFF>>2 };
