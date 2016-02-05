@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <setjmp.h>
 
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
 //#define UNTESTED        DBGPRINTF ("*** %s(): UNTESTED ***\n", __FUNCTION__)
@@ -65,6 +64,10 @@
 #include "kl_osd.h"
 #include "kl_dat.h"
 
+#ifdef __HAS_SETJMP__
+  #include <setjmp.h>
+#endif
+
 typedef void (*adjfn_t)(POBJ32 p_obj);
 
 typedef struct
@@ -75,8 +78,10 @@ typedef struct
 } INTERNAL, *PINTERNAL;
 static INTERNAL internal = { 0, 0 };
 
-static jmp_buf start_menu_env_buf;
-static jmp_buf game_loop_env_buf;
+#ifdef __HAS_SETJMP__
+  static jmp_buf start_menu_env_buf;
+  static jmp_buf game_loop_env_buf;
+#endif
 
 // start of variables
 
@@ -453,7 +458,9 @@ START_AF6C:
 
 START_MENU_AF7F:
 
+#ifdef __HAS_SETJMP__
   setjmp (start_menu_env_buf);
+#endif
   {
     // fudge fudge fudge
     // clear variables $5BA8-$6107
@@ -491,7 +498,9 @@ player_dies:
 
 game_loop:
 
+#ifdef __HAS_SETJMP__
   setjmp (game_loop_env_buf);
+#endif
 
   // required for C implementation
   internal.exit_scrn = 0;
@@ -1770,8 +1779,10 @@ void game_over (void)
   update_screen ();
   play_audio_until_keypress (NULL);
   wait_for_key_release ();
-  
+
+#ifdef __HAS_SETJMP__  
   longjmp (start_menu_env_buf, 1);
+#endif
 }
 
 // $BC10
@@ -3331,9 +3342,11 @@ exit_screen:
   DBGPRINTF ("%s() got=%d,ps1s=%d\n", __FUNCTION__, 
               graphic_objs_tbl[0].scrn,
               plyr_spr_1_scratchpad.scrn);
-  
+
+#ifdef __HAS_SETJMP__  
   longjmp (game_loop_env_buf, 1);
-  //return (1);
+#endif
+  return (1);
 }
 
 // $CA89
@@ -3674,10 +3687,10 @@ void upd_64_to_79 (POBJ32 p_obj)
 // $CDDA
 void upd_player_top (POBJ32 p_obj)
 {
-  UNTESTED;
-  
   // bottom half
   POBJ32 p_prev_obj = p_obj-1;
+
+  UNTESTED;
   
   if (all_objs_in_cauldron == 0 &&
       (p_obj->flags13 & FLAG_DEAD) != 0)

@@ -112,6 +112,7 @@ ifeq ($(PLATFORM),neogeo)
 	
 	OSD_ASFLAGS = -m68000 --register-prefix-optional --defsym __$(OUTPUT)__=1
 	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin
+	#OSD_CFLAGS += -Wno-unused-label 
 	OSD_CFLAGS += -D__$(OUTPUT)__
 	OSD_LDFLAGS = -m68000 -nostartfiles -nodefaultlibs -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
 
