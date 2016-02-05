@@ -39,7 +39,7 @@ LOGO_START		= 0
 _jp_config:
 _us_config:
 _sp_config:
-	.ascii	"LODE RUNNER     "
+	.ascii	"KNIGHT LORE     "
     .word     0xffff
     .word     0xffff
     .byte     0xff

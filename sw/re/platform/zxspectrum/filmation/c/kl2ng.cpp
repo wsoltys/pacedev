@@ -161,8 +161,9 @@ int main (int argc, char *argv[])
       {
         uint8_t d = REV(pfont[l]);
         
+        // colour = 3
         fwrite (&d, sizeof(uint8_t), 1, c1);
-        fwrite (zeroes, sizeof(uint8_t), 1, c1);
+        fwrite (&d, sizeof(uint8_t), 1, c1);
       }
       // quadrant 3
       fwrite (zeroes, sizeof(uint8_t), 2*8, c1);
