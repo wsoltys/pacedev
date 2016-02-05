@@ -132,7 +132,7 @@ ifeq ($(PLATFORM),amigaos)
 	OSD_LIBS = $(M68KGCC)/lib/gcc/m68k-amigaos/3.4.0
 	
 	OSD_CFLAGS =
-	OSD_LDFLAGS = -lauto
+	OSD_LDFLAGS = -lauto -noixemul
 	
 endif
 
