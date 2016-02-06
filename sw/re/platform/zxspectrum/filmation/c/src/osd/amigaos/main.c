@@ -205,7 +205,7 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
                       0xC0);
 }
 
-void osd_print_sprite (POBJ32 p_obj)
+void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 {
   uint8_t *psprite;
 

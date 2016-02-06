@@ -8,7 +8,8 @@
 #include "osd_types.h"
 #include "kl_osd.h"
 
-TILEMAP obj_map[40*3];
+//TILEMAP obj_map[188][4][3];
+TILEMAP obj_map[40][3];
 
 const unsigned page_sprite[3] = { 32, 64, 96 };
 
@@ -167,41 +168,33 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
 {
 }
 
-void osd_print_sprite (POBJ32 p_obj)
+void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 {
-	#if 0
-  uint8_t *psprite;
+  static TILEMAP obj_map[3];
 
-  //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
-
-  // references p_obj
-  psprite = flip_sprite (p_obj);
-
-  uint8_t w = *(psprite++) & 0x3f;
-  uint8_t h = *(psprite++);
-
-  unsigned x, y, b;
+  unsigned n, c, t;
   
-  for (y=0; y<h; y++)
-  {
-    for (x=0; x<w; x++)
+  if (type != DYNAMIC)
+    return;
+
+  return;
+      
+  n = 256 + 64 + p_obj->graphic_no*4*16;
+  if (p_obj->flags7 & (1<<7))
+    n += 2*16;
+  if (p_obj->flags7 & (1<<6))
+    n += 16;
+
+  // setup sprite
+  for (c=0; c<3; c++)
+    for (t=0; t<4; t++)
     {
-      uint8_t m = *(psprite++);
-      uint8_t d = *(psprite++);
-      for (b=0; b<8; b++)
-      {
-#ifdef ENABLE_MASK
-        if (m & (1<<7))
-          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
-#endif
-        if (d & (1<<7))
-          putpixel (screen, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
-        m <<= 1;
-        d <<= 1;
-      }
+      obj_map[c].tiles[t].block_number = n+c*4+t;
+      obj_map[c].tiles[t].attributes = 16<<8;
     }
-  }
-  #endif
+
+  set_current_sprite (p_obj->unused[0]);
+  write_sprite_data (p_obj->pixel_x, p_obj->pixel_y, 0x0f, 0xff, 4, 3, obj_map);
 }
 
 void eye_catcher (void)
@@ -297,7 +290,7 @@ int main (int argc, char *argv[])
 
 	PALETTE 	pal[2];
 	unsigned	p, c;
-	unsigned 	om, t;
+	unsigned 	o, f, t;
 	unsigned  n;
 
 	for (p=0; p<2; p++)
@@ -319,18 +312,16 @@ int main (int argc, char *argv[])
 	setpalette(0, 2, (const PPALETTE)&pal);
 	setpalette(16, 2, (const PPALETTE)&pal);
 
-  // build 40*3 sprites
-  for (om=0; om<40; om++)
-  {
-    for (c=0; c<3; c++)
-      for (t=0; t<4; t++)
-      {
-        // just the 1st 40 object sprites for now
-        obj_map[om*3+c].tiles[t].block_number =
-          256 + 64 + om*4*16 + c*4 + t;
-        obj_map[om*3+c].tiles[t].attributes = 16<<8;
-      }
-  }
+  // build 40 sprites
+  for (o=0; o<40; o++)
+    //for (f=0; f<4; f++)
+      for (c=0; c<3; c++)
+        for (t=0; t<4; t++)
+        {
+          obj_map[o][c].tiles[t].block_number =
+            256 + 64 + o*4*16 + c*4 + t;
+          obj_map[o][c].tiles[t].attributes = 16<<8;
+        }
   
 	while (1)
 	{
@@ -343,16 +334,20 @@ int main (int argc, char *argv[])
 		_vbl_count = 0;
 		wait_vbl();
 
-    for (om=0; om<40; om++)
+#if 0
+    for (o=0; o<40; o++)
     {
-      set_current_sprite (om*3);
+      set_current_sprite (o*3);
 	    write_sprite_data (
-	      (om%8)*40, (om/8)*48, 0x0f, 0x0ff, 
-	      4, 3, (const PTILEMAP)&obj_map[om*3]);
+	      (o%8)*40, (o/8)*48, 0x0f, 0x0ff, 
+	      4, 3, (const PTILEMAP)obj_map[o]);
     }
 
     while (1);
-		//knight_lore ();
+#endif    
+
+		knight_lore ();
+		while (1);
 	}
   
   return (0);

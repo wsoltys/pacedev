@@ -233,7 +233,7 @@ static void print_text (uint8_t x, uint8_t y, char *str);
 static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
-static void multiple_print_sprite (POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n);
+static void multiple_print_sprite (uint8_t type, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n);
 static void upd_120_to_126 (POBJ32 p_obj);
 static void upd_127 (POBJ32 p_obj);
 static void init_death_sparkles (POBJ32 p_obj);
@@ -332,7 +332,7 @@ static void init_start_location (void);
 static void build_screen_objects (void);
 static void flag_scrn_visited (void);
 static uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite);
-static uint8_t *transfer_sprite_and_print (POBJ32 p_obj, uint8_t *psprite);
+static uint8_t *transfer_sprite_and_print (uint8_t type, POBJ32 p_obj, uint8_t *psprite);
 static void display_panel (void);
 static void print_border (void);
 static void colour_panel (void);
@@ -350,7 +350,7 @@ static void blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t h
 static uint8_t calc_pixel_XY (POBJ32 p_obj);
 uint8_t *flip_sprite (POBJ32 p_obj);
 static void calc_pixel_XY_and_render (POBJ32 p_obj);
-static void print_sprite (POBJ32 p_obj);
+static void print_sprite (uint8_t type, POBJ32 p_obj);
 
 // end of prototypes
 
@@ -494,7 +494,7 @@ player_dies:
   //   each operation, so doesn't matter
   // * now uses longjmp
   if (lose_life () < 0)
-    /*goto START_MENU_AF7F*/;
+    goto START_MENU_AF7F;
 
 game_loop:
 
@@ -528,9 +528,7 @@ onscreen_loop:
       upd_not_implemented (p_obj);
     else
     {
-      // debug only - 7 only
-      //if (p_obj->graphic_no == 7)
-        upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
+      upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 
       // required for C implementation
       if (internal.exit_scrn == 1)
@@ -1828,7 +1826,7 @@ void print_lives_gfx (void)
   p_obj->flags7 = 0;
   p_obj->pixel_x = 16;
   p_obj->pixel_y = 32;
-  print_sprite (p_obj);
+  print_sprite (PANEL_DYNAMIC, p_obj);
   // attributes
   // fill_de (47h,5a42h,2);
   // fill_de (47h,5a62h,4);
@@ -1886,7 +1884,7 @@ menu_loop:
   // 6,7,8,9,0
   key = read_key (0xEF);
   // start game?
-  if (key & (1<<0))
+  //if (key & (1<<0))
     return;
   seed_1++;
   flash_menu ();
@@ -1972,13 +1970,13 @@ void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_
 }
 
 // $BEE4
-void multiple_print_sprite (POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n)
+void multiple_print_sprite (uint8_t type, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n)
 {
   unsigned i;
   
   for (i=0; i<n; i++)
   {
-    print_sprite (p_obj);
+    print_sprite (type, p_obj);
     p_obj->pixel_x += dx;
     p_obj->pixel_y += dy;
   }
@@ -2076,7 +2074,7 @@ void display_objects (void)
     if (objects_carried[i].graphic_no != 0)
     {
       p_obj->graphic_no = objects_carried[i].graphic_no;
-      print_sprite (p_obj);
+      print_sprite (PANEL_DYNAMIC, p_obj);
     }
     blit_to_screen (p_obj->pixel_x, p_obj->pixel_y, 3, 24);
     // do attributes
@@ -2498,16 +2496,16 @@ void display_sun_moon_frame (POBJ32 p_obj)
 display_frame:
   // display sun/moon
   fill_window (184, 0, 6, 31, 0);
-  print_sprite (p_obj);
+  print_sprite (PANEL_DYNAMIC, p_obj);
   
   p_frm->flags7 = 0;
   p_frm->graphic_no = 0x5a;
   p_frm->pixel_x = 184;
   p_frm->pixel_y = 0;
-  print_sprite (p_frm);
+  print_sprite (PANEL_STATIC, p_frm);
   p_frm->pixel_x = 208;
   p_frm->graphic_no = 0xba;
-  print_sprite (p_frm);
+  print_sprite (PANEL_STATIC, p_frm);
   blit_to_screen (184, 0, 6, 31);
   return;
 
@@ -3201,7 +3199,7 @@ uint8_t move_player (POBJ32 p_obj, uint8_t inp)
     audio_B451 (p_obj);
   adj_for_out_of_bounds (p_obj);
   if (handle_exit_screen (p_obj) == 1)
-    /*return (1)*/;
+    return (1);
   add_dXYZ (p_obj);
   if ((p_obj->flags12 & FLAG_Z_OOB) != 0)
     if (tmp_dZ < 0)
@@ -4034,10 +4032,10 @@ uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite)
 }
 
 // $D24C
-uint8_t *transfer_sprite_and_print (POBJ32 p_obj, uint8_t *psprite)
+uint8_t *transfer_sprite_and_print (uint8_t type, POBJ32 p_obj, uint8_t *psprite)
 {
   uint8_t *p = transfer_sprite (p_obj, psprite);
-  print_sprite (p_obj);
+  print_sprite (type, p_obj);
 
   return (p);
 }
@@ -4047,31 +4045,31 @@ void display_panel (void)
 {
   uint8_t *p = (uint8_t *)panel_data;
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (&sprite_scratchpad, 16, (uint8_t)-8, 5);
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  multiple_print_sprite (PANEL_STATIC, &sprite_scratchpad, 16, (uint8_t)-8, 5);
+  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (&sprite_scratchpad, 16, 8, 5);
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  multiple_print_sprite (PANEL_STATIC, &sprite_scratchpad, 16, 8, 5);
+  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
 }
 
 // $D296
 void print_border (void)
 {
   uint8_t *p = (uint8_t *)border_data;
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
-  p = transfer_sprite_and_print (&sprite_scratchpad, p);
+  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (&sprite_scratchpad, 8, 0, 24);
+  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 8, 0, 24);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (&sprite_scratchpad, 8, 0, 24);
+  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 8, 0, 24);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
+  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (&sprite_scratchpad, 0, 1, 128);
+  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
 }
 
 // $D2EF
@@ -4170,7 +4168,9 @@ void retrieve_screen (void)
   uint8_t id;
   uint8_t size;
   uint8_t attr;
-    
+
+  uint8_t obj_no = 4;
+      
   DBGPRINTF_FN;
   
   for (i=0; ; i++)
@@ -4237,7 +4237,7 @@ found_screen:
 
     for (; *p_bg_obj!=0; p_bg_obj+=8)
     {    
-      next_bj_obj_sprite:
+      next_bg_obj_sprite:
         
       // copy sprite,x,y,z,w,d,h,flags7
       memcpy ((uint8_t *)p_other_objs, p_bg_obj, 8);
@@ -4245,7 +4245,10 @@ found_screen:
       p_other_objs->scrn = plyr_spr_1_scratchpad.scrn;
       // zero everything else
       memset (&p_other_objs->d_x, 0, 23);
-      
+
+      // added for hardware sprites
+      p_other_objs->unused[0] = obj_no++;
+            
       p_other_objs++;
       n_other_objs++;
     };
@@ -4299,6 +4302,9 @@ found_screen:
         // zero everything else        
         memset (&p_other_objs->d_x, 0, 23);
 
+        // added for hardware sprites
+        p_other_objs->unused[0] = obj_no++;
+
         // debug ONLY
         //if (p_other_objs->graphic_no == 182)
         //if (0)
@@ -4316,7 +4322,7 @@ found_screen:
   for (; n_other_objs<MAX_OBJS-4; n_other_objs++)
     memset (p_other_objs++, 0, sizeof(OBJ32));
             
-  //dump_graphic_objs_tbl(-1, -1);
+  dump_graphic_objs_tbl(-1, -1);
 }
 
 // $D50E
@@ -4517,12 +4523,12 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
   //if (p_obj->graphic_no != 2 && p_obj->graphic_no != 3)
   //if (p_obj->graphic_no == 7)
   {
-    print_sprite (p_obj);
+    print_sprite (DYNAMIC, p_obj);
   }
 }
 
 // $D718
-void print_sprite (POBJ32 p_obj)
+void print_sprite (uint8_t type, POBJ32 p_obj)
 {
   uint8_t *psprite = flip_sprite (p_obj);
   
@@ -4533,5 +4539,5 @@ void print_sprite (POBJ32 p_obj)
   psprite++;
   p_obj->data_height_lines = *psprite;
     
-  osd_print_sprite (p_obj);
+  osd_print_sprite (type, p_obj);
 }

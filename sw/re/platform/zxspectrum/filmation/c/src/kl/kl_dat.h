@@ -3,6 +3,12 @@
 
 #include "osd_types.h"
 
+// this is for hardware sprites
+#define MENU_STATIC         1
+#define PANEL_STATIC        2
+#define PANEL_DYNAMIC       3
+#define DYNAMIC             4
+
 typedef struct
 {
   uint8_t   x;
