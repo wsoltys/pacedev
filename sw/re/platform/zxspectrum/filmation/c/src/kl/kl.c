@@ -163,9 +163,9 @@ OBJ_WIPED objs_wiped_stack[MAX_OBJS];
 // start of prototypes
 
 static void reset_objs_wipe_flag (void);
-static void play_audio_wait_key (uint8_t *audio_data);
-static void play_audio_until_keypress (uint8_t *audio_data);
-static void play_audio (uint8_t *audio_data);
+static void play_audio_wait_key (const uint8_t *audio_data);
+static void play_audio_until_keypress (const uint8_t *audio_data);
+static void play_audio (const uint8_t *audio_data);
 static void audio_B3E9 (void);
 static void audio_B403 (POBJ32 p_obj);
 static void audio_B419 (POBJ32 p_obj);
@@ -362,9 +362,10 @@ void dump_graphic_objs_tbl (int start, int end)
   
   for (; i<end && i<MAX_OBJS; i++)
   {
-    DBGPRINTF ("%02d: graphic_no=%03d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
+    DBGPRINTF ("%02d: graphic_no=%03d, s=%d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
               i,
               graphic_objs_tbl[i].graphic_no,
+              graphic_objs_tbl[i].unused[0],
               graphic_objs_tbl[i].x,
               graphic_objs_tbl[i].y,
               graphic_objs_tbl[i].z,
@@ -429,7 +430,7 @@ void upd_not_implemented (POBJ32 obj)
   }
 }
 
-extern adjfn_t upd_sprite_jump_tbl[];
+extern adjfn_t const upd_sprite_jump_tbl[];
 
 void knight_lore (void)
 {
@@ -697,7 +698,7 @@ void reset_objs_wipe_flag (void)
 }
 
 // $B096
-adjfn_t upd_sprite_jump_tbl[] =
+adjfn_t const upd_sprite_jump_tbl[] =
 {
   no_update,                    // (unused)
   no_update,                    // (unused)
@@ -890,7 +891,7 @@ adjfn_t upd_sprite_jump_tbl[] =
 };
 
 // $B2B6
-void play_audio_wait_key (uint8_t *audio_data)
+void play_audio_wait_key (const uint8_t *audio_data)
 {
   UNTESTED;
   
@@ -902,7 +903,7 @@ void play_audio_wait_key (uint8_t *audio_data)
 }
 
 // $B2BE
-void play_audio_until_keypress (uint8_t *audio_data)
+void play_audio_until_keypress (const uint8_t *audio_data)
 {
   UNIMPLEMENTED_AUDIO;
 
@@ -915,7 +916,7 @@ void play_audio_until_keypress (uint8_t *audio_data)
 }
 
 // $B2CF
-void play_audio (uint8_t *audio_data)
+void play_audio (const uint8_t *audio_data)
 {
   UNIMPLEMENTED_AUDIO;
 }
@@ -1758,13 +1759,13 @@ void game_over (void)
     clear_scrn_buffer ();
     clear_scrn ();
     suppress_border = 0;
-    display_text_list (complete_colours, complete_xy, (char **)complete_text, 6);
+    display_text_list ((uint8_t *)complete_colours, (uint8_t *)complete_xy, (char **)complete_text, 6);
     play_audio (game_complete_tune);
     wait_for_key_release ();
   }
   clear_scrn_buffer ();
   clear_scrn ();
-  display_text_list (gameover_colours, gameover_xy, (char **)gameover_text, 6);
+  display_text_list ((uint8_t *)gameover_colours, (uint8_t *)gameover_xy, (char **)gameover_text, 6);
   print_bcd_number (120, 127, &days, 1);
   calc_and_display_percent ();
   rating = ((all_objs_in_cauldron & 1) << 2) | ((num_scrns_visited & 0x60) >> 5);
@@ -1864,7 +1865,7 @@ void display_day (void)
   // stick attribute at front
   gfxbase_8x8 = (uint8_t *)days_font;
   // fudge to skip attribute for now
-  print_text_raw (112, 15, (days_txt+1));
+  print_text_raw (112, 15, (char *)(days_txt+1));
 }
 
 // $BD0C
@@ -1947,7 +1948,7 @@ uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
 // $BEB3
 void display_menu (void)
 {
-  display_text_list (menu_colours, menu_xy, (char **)menu_text, 8);
+  display_text_list ((uint8_t *)menu_colours, (uint8_t *)menu_xy, (char **)menu_text, 8);
   print_border ();
   update_screen ();
 }
@@ -2722,7 +2723,9 @@ void find_special_objs_here (void)
     memset (&p_special_obj->d_x, 0, 7);
     p_special_obj->u.ptr_obj_tbl_entry = i;
     memset (&p_special_obj->unused, 0, 32-20);
-    
+
+    p_special_obj->unused[0] = 2+n_special_objs_here;
+        
     p_special_obj++;
     n_special_objs_here++;
   }
@@ -3990,6 +3993,10 @@ void init_start_location (void)
   // start_loc_2
   plyr_spr_2_scratchpad.scrn = s;
   
+  // for hardware sprites
+  plyr_spr_1_scratchpad.unused[0] = 0;
+  plyr_spr_2_scratchpad.unused[0] = 1;
+  
   DBGPRINTF ("%s(): start_location=%d\n", __FUNCTION__, s);
 }
 
@@ -4231,7 +4238,7 @@ found_screen:
     next_bg_obj:
     
     // get background type
-    p_bg_obj = background_type_tbl[location_tbl[p]];
+    p_bg_obj = (uint8_t *)background_type_tbl[location_tbl[p]];
 
     DBGPRINTF ("BG:%d\n", location_tbl[p]);
 
@@ -4272,7 +4279,7 @@ found_screen:
     {
       // LOC = |  Z  |   Y   |   X   |
       //       | 7 6 | 5 4 3 | 2 1 0 |
-      uint8_t *p_fg_obj = block_type_tbl[block];
+      uint8_t *p_fg_obj = (uint8_t *)block_type_tbl[block];
       uint8_t loc = location_tbl[p];
 
       for (; *p_fg_obj!=0; p_fg_obj+=6)
@@ -4453,7 +4460,7 @@ uint8_t calc_pixel_XY (POBJ32 p_obj)
 // $D6EF
 uint8_t *flip_sprite (POBJ32 p_obj)
 {
-  uint8_t *psprite = sprite_tbl[p_obj->graphic_no];
+  uint8_t *psprite = (uint8_t *)sprite_tbl[p_obj->graphic_no];
   
   uint8_t vflip = (p_obj->flags7 ^ (*psprite)) & FLAG_VFLIP;
   uint8_t hflip = (p_obj->flags7 ^ (*psprite)) & FLAG_HFLIP;

@@ -32,9 +32,8 @@ extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 void osd_delay (unsigned ms)
 {
-	#if 0
-  rest (ms);
-	#endif
+  wait_vbl ();
+  wait_vbl ();
 }
 
 void osd_clear_scrn (void)
@@ -172,14 +171,23 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 {
   static TILEMAP obj_map[3];
 
+  char buf[64];
   unsigned n, c, t;
-  
+
+  //if (p_obj->unused[0] != 0)
+  {  
+    sprintf (buf, "OBJ=%03d, SPR=%02d, Y=%03d", 
+              p_obj->graphic_no, p_obj->unused[0], p_obj->pixel_y);
+    if (p_obj->unused[0] == 0)
+      textoutf (0, 0, 0, 0, buf);
+    else
+      textoutf (0, 1, 0, 0, buf);
+  }
+    
   if (type != DYNAMIC)
     return;
 
-  return;
-      
-  n = 256 + 64 + p_obj->graphic_no*4*16;
+  n = 256 + 64 + (unsigned)(p_obj->graphic_no)*4*16;
   if (p_obj->flags7 & (1<<7))
     n += 2*16;
   if (p_obj->flags7 & (1<<6))
@@ -193,8 +201,9 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
       obj_map[c].tiles[t].attributes = 16<<8;
     }
 
-  set_current_sprite (p_obj->unused[0]);
-  write_sprite_data (p_obj->pixel_x, p_obj->pixel_y, 0x0f, 0xff, 4, 3, obj_map);
+  set_current_sprite (p_obj->unused[0]*3);
+  write_sprite_data (p_obj->pixel_x, 191-(p_obj->pixel_y),
+                      0x0f, 0xff, 4, 3, obj_map);
 }
 
 void eye_catcher (void)
@@ -330,7 +339,7 @@ int main (int argc, char *argv[])
 
     //eye_catcher ();
     
-		textoutf (13, 16, 0, 0, "KNIGHT LORE");
+		//textoutf (13, 16, 0, 0, "KNIGHT LORE");
 		_vbl_count = 0;
 		wait_vbl();
 
