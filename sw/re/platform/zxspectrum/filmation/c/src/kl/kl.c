@@ -136,9 +136,9 @@ static PINVENTORY objects_carried =
                 &inventory[1];                        // $5BDC
 static uint8_t scrn_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[MAX_OBJS];              // $5C08
-static POBJ32 special_objs_here = 
+const POBJ32 special_objs_here = 
               &graphic_objs_tbl[2];                   // $5C48
-static POBJ32 other_objs_here =
+const POBJ32 other_objs_here =
               &graphic_objs_tbl[4];                   // $5C88
               
 static OBJ32 sprite_scratchpad;                       // $BFDB
@@ -438,7 +438,7 @@ void knight_lore (void)
   unsigned i;
 
   DBGPRINTF_FN;
-  
+
 START_AF6C:
 
   // the original code initialises seed_1
@@ -1885,7 +1885,7 @@ menu_loop:
   // 6,7,8,9,0
   key = read_key (0xEF);
   // start game?
-  //if (key & (1<<0))
+  if (key & (1<<0))
     return;
   seed_1++;
   flash_menu ();
@@ -3988,6 +3988,7 @@ void init_start_location (void)
   plyr_spr_1_scratchpad.u.plyr_graphic_no = 18;   // legs
   plyr_spr_2_scratchpad.u.plyr_graphic_no = 34;   // top half
   s = start_locations[seed_1 & 3];
+  s = 31;
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
   // start_loc_2

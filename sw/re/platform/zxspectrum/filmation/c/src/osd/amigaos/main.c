@@ -297,8 +297,8 @@ int main (int argc, char *argv[])
               SA_Height, BM_HEIGHT,
               SA_Depth, 1,
               SA_Type, CUSTOMSCREEN|CUSTOMBITMAP|SCREENQUIET,
-              SA_BitMap, myBitMaps[VIDEO],
-              SA_Colors, (struct ColorSpec *)myColours,
+              SA_BitMap, (ULONG)myBitMaps[VIDEO],
+              SA_Colors, (ULONG)myColours,
               TAG_DONE);
   
   // link in the bitmap

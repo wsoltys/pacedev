@@ -38,17 +38,38 @@ void osd_delay (unsigned ms)
 
 void osd_clear_scrn (void)
 {
+  // nothing to do here
 }
 
 void osd_clear_scrn_buffer (void)
 {
+	clear_fix();
+	clear_spr();
 }
 
 int osd_key (int _key)
 {
-	#if 0
-  return (key[_key]);
-	#endif
+  uint16_t joy1;
+  
+  joy1 = poll_joystick (PORT1, READ_DIRECT);
+  
+  switch (_key)
+  {
+    case OSD_KEY_0 :
+      // start & pickup/drop
+      return (joy1 & (JOY_START|JOY_B));
+    case OSD_KEY_Z :
+      return (joy1 & JOY_LEFT);
+    case OSD_KEY_X :
+      return (joy1 & JOY_RIGHT);
+    case OSD_KEY_A :
+      return (joy1 & JOY_UP);
+    case OSD_KEY_Q :
+      // jump
+      return (joy1 & JOY_A);
+    default :
+      break;
+  }
 	return (0);
 }
 
@@ -108,6 +129,8 @@ static uint8_t from_ascii (char ch)
 
 void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
 {
+  textout (x/8, 191-(y/8+7), 0, 0, str);
+  
 	#if 0
   unsigned c, l, b;
   
@@ -174,7 +197,7 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   char buf[64];
   unsigned n, c, t;
 
-  //if (p_obj->unused[0] != 0)
+  if (0)
   {  
     sprintf (buf, "OBJ=%03d, SPR=%02d, Y=%03d", 
               p_obj->graphic_no, p_obj->unused[0], p_obj->pixel_y);
@@ -191,7 +214,7 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   if (p_obj->flags7 & (1<<7))
     n += 2*16;
   if (p_obj->flags7 & (1<<6))
-    n += 16;
+    n += 1*16;
 
   // setup sprite
   for (c=0; c<3; c++)
@@ -202,7 +225,8 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     }
 
   set_current_sprite (p_obj->unused[0]*3);
-  write_sprite_data (p_obj->pixel_x, 191-(p_obj->pixel_y),
+  write_sprite_data (p_obj->pixel_x, 
+                      191-(p_obj->pixel_y+p_obj->data_height_lines-1),
                       0x0f, 0xff, 4, 3, obj_map);
 }
 

@@ -7,6 +7,7 @@
 #include "kl_dat.h"
 
 #define __HAS_HWSPRITES__
+#define __FORCE_RODATA__        __attribute__ ((section (".rodata")))
 
 // 0=27, 1=28...
 #define OSD_KEY_0       0x0A

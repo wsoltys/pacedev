@@ -108,7 +108,7 @@ extern const uint8_t days_txt[];
 extern const uint8_t days_font[][8];
 extern uint8_t menu_colours[];
 extern const uint8_t menu_xy[];
-extern const char *menu_text[];
+extern char const *menu_text[];
 extern uint8_t objects_required[];
 extern const uint8_t sun_moon_yoff[];
 extern const uint8_t plyr_spr_init_data[];

@@ -673,7 +673,7 @@ const uint8_t gate_ud_2[] =
   0
 };
 
-uint8_t const *block_type_tbl[] = 
+uint8_t const *block_type_tbl[] __FORCE_RODATA__ = 
 {
   block,
   fire,
@@ -915,7 +915,7 @@ const uint8_t high_arch_s_base[] =
   0
 };
 
-uint8_t const *background_type_tbl[] = 
+uint8_t const *background_type_tbl[] __FORCE_RODATA__ = 
 {
   arch_n,
   arch_e,
@@ -3662,7 +3662,7 @@ const uint8_t menu_xy[] =
   0x30, 0x5F, 0x30, 0x4F, 0x30, 0x3F, 0x50, 0x27
 };
 
-const char *menu_text[] = 
+char const *menu_text[] __FORCE_RODATA__ = 
 {
   "KNIGHT LORE", 
   "1 KEYBOARD", 

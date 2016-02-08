@@ -7,6 +7,8 @@
 
 #include "kl_dat.h"
 
+#define __FORCE_RODATA__
+
 //#define DBGPRINTF(format...)		fprintf(stderr, format)
 #define DBGPRINTF(format...)
 

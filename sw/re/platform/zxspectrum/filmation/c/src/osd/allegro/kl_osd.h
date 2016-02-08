@@ -8,6 +8,7 @@
 #include "kl_dat.h"
 
 #define __HAS_SETJMP__
+#define __FORCE_RODATA__
 
 //#define ALLEGRO_STATICLINK
 
