@@ -3988,7 +3988,6 @@ void init_start_location (void)
   plyr_spr_1_scratchpad.u.plyr_graphic_no = 18;   // legs
   plyr_spr_2_scratchpad.u.plyr_graphic_no = 34;   // top half
   s = start_locations[seed_1 & 3];
-  s = 31;
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
   // start_loc_2

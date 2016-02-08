@@ -3504,7 +3504,7 @@ uint8_t spr_102[] =
 
 // this should be before sprite data above
 
-const uint8_t *sprite_tbl[] =
+const uint8_t *sprite_tbl[] __FORCE_RODATA__ =
 {
   spr_nul, spr_nul, spr_071, spr_072, spr_023, spr_024, 
   spr_008, spr_020, spr_043, spr_043, spr_076, spr_077, 
@@ -3596,7 +3596,7 @@ const uint8_t complete_xy[] =
   0x40, 0x87, 0x40, 0x77, 0x30, 0x67, 0x30, 0x57, 
   0x50, 0x47, 0x30, 0x37 };
 
-const char *complete_text[] = 
+const char *complete_text[] __FORCE_RODATA__ = 
 {
   "THE POTION CASTS", 
   "ITS MAGIC STRONG", 
@@ -3615,7 +3615,7 @@ const uint8_t gameover_xy[] =
   0x58, 0x9F, 0x50, 0x7F, 0x30, 0x6F, 0x40, 0x5F, 
   0x30, 0x4F, 0x48, 0x37 };
 
-char const *gameover_text[] = 
+char const *gameover_text[] __FORCE_RODATA__ = 
 {
   "GAME  OVER", 
   "TIME    DAYS", 
