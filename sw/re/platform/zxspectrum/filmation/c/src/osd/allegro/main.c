@@ -174,6 +174,9 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
+  if (type != PANEL_STATIC)
+    return;
+    
   // references p_obj
   psprite = flip_sprite (p_obj);
 
@@ -201,6 +204,56 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
       }
     }
   }
+}
+
+void osd_debug_hook (void *context)
+{
+  unsigned state = (unsigned)context;
+  
+  unsigned c, l, b;
+
+  switch (state)
+  {
+    case 0 :
+	    clear_bitmap (scrn_buf);
+	    return;
+      break;
+    case 1 :
+      // attempt to mark out the panel data
+      //for (x=0; x<256; x++)
+      //  putpixel (scrn_buf, x, 128, 2);
+      osd_update_screen ();
+      // now extract data for panel font
+      FILE *fpPanel = fopen ("panel_font.c", "wt");
+      fprintf (fpPanel, "uint8_t panel_font[][8] = \n{\n");
+      for (c=0; c<256; c++)
+      {
+        unsigned x = (c%32)*8;
+        unsigned y = (c/32)*8;
+        
+        fprintf (fpPanel, "  { ");
+        for (l=0; l<8; l++)
+        {
+          uint8_t data = 0;
+          for (b=0; b<8; b++)
+          {
+            data <<= 1;
+            if (getpixel (screen, x+b, 128+y+l) != 0)
+              data |= 1;
+          }
+          fprintf (fpPanel, "0x%02X, ", data);
+        }
+        fprintf (fpPanel, "},\n");
+      }
+      fprintf (fpPanel, "};\n\n");
+      fclose (fpPanel);
+      break;
+    default :
+      break;
+  }
+  
+  while (!osd_key (KEY_ESC));
+  while (osd_key (KEY_ESC));
 }
 
 void main (int argc, char *argv[])

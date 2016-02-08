@@ -108,11 +108,15 @@ static uint8_t from_ascii (char ch)
 
 static uint8_t zeroes[128];
 
+#include "panel_font.c"
+
 void do_fix (void)
 {
   // bank 4 (char $0x400-$0x4ff)
   // $00-$03 - "DAYS"
   // $04-$FF - ascii-based font
+  // bank 5 (256 chars)
+  // panel data
   
   unsigned c;
   unsigned i;
@@ -144,20 +148,25 @@ void do_fix (void)
     }
   }
       
-  for (c=0; c<256; c++)
+  for (c=0; c<512; c++)
   {
     const uint8_t *pfont;
     
-    if (c > 0 && c <= 4)
-      pfont = days_font[c-1];
-    else
-    if ((i = from_ascii ((char)c)) != (uint8_t)-1)
-    {      
-      fprintf (stderr, "$%02X=\'%c\'\n", c, c);
-      pfont = kl_font[i];
+    if (c < 256)
+    {
+      if (c > 0 && c <= 4)
+        pfont = days_font[c-1];
+      else
+      if ((i = from_ascii ((char)c)) != (uint8_t)-1)
+      {      
+        fprintf (stderr, "$%02X=\'%c\'\n", c, c);
+        pfont = kl_font[i];
+      }
+      else
+        pfont = zeroes;
     }
     else
-      pfont = zeroes;
+      pfont = panel_font[c-256];
 
     // create font data
     for (unsigned col=0; col<4; col++)
@@ -179,7 +188,7 @@ void do_fix (void)
     }
   }
   // and skip same bytes in original file
-  fseek (fpFix, 256*32, SEEK_CUR);
+  fseek (fpFix, 512*32, SEEK_CUR);
   
   // and copy remainder of file
   while (!feof (fpFix))

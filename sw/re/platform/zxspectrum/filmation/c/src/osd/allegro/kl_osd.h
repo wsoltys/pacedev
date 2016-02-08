@@ -85,6 +85,7 @@ void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_
 void osd_update_screen (void);
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 void osd_print_sprite (uint8_t type, POBJ32 p_obj);
+void osd_debug_hook (void *context);
 
 #ifdef __cplusplus
 }

@@ -164,7 +164,27 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     else
       textoutf (0, p_obj->unused[0]-40, 0, 0, buf);
   }
+
+  if (type == PANEL_STATIC)
+  {
+    static uint8_t buf[64];
     
+    unsigned r, c;
+    
+    if (p_obj->graphic_no != 0x86 || p_obj->pixel_x != 0x10)
+      return;
+    for (r=0; r<8; r++)
+    {
+      for (c=0; c<32; c++)
+        buf[c] = r * 0x20 + c;
+      buf[c] = '\0';
+      if (r == 0)
+        buf[0] = ' ';
+      textout (XOFF/8+0, YOFF/8+16+r, 0, 5, (const char *)buf);
+    }
+    return;
+  }
+        
   if (type != DYNAMIC && type != PANEL_DYNAMIC)
     return;
 
