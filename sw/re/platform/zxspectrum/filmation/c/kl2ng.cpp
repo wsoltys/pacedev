@@ -15,6 +15,8 @@
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
 
+#define __FORCE_RODATA__
+
 #include "src/kl/kl_dat.c"
 
 #define N_SPR_ENTRIES (sizeof(sprite_tbl)/sizeof(uint8_t *))
@@ -100,7 +102,7 @@ int main (int argc, char *argv[])
   
   for (s=0; s<N_SPR_ENTRIES; s++)
   {
-    uint8_t *psprite = sprite_tbl[s];
+    const uint8_t *psprite = sprite_tbl[s];
     
     uint8_t width = *(psprite++) & 0x3f;
     uint8_t height = *psprite;
@@ -127,8 +129,8 @@ int main (int argc, char *argv[])
   FILE *c2 = fopen ("202-c2.bin", "wb");  
   
 	// copy 1st 256 characters from original file
-	FILE *fp1 = fopen ("002-c1.c1", "rb");
-	FILE *fp2 = fopen ("002-c2.c2", "rb");
+	FILE *fp1 = fopen ("202-c1.c1", "rb");
+	FILE *fp2 = fopen ("202-c2.c2", "rb");
 	for (unsigned i=0; i<256*64; i++)
 	{
 		uint8_t	byte;
@@ -145,7 +147,7 @@ int main (int argc, char *argv[])
   // - needs to be a multiple of 16
   for (s=0; s<64; s++)
   {
-    uint8_t *pfont;
+    const uint8_t *pfont;
     
     if (s < 40)
       pfont = kl_font[s];
@@ -180,7 +182,7 @@ int main (int argc, char *argv[])
   
   for (s=0; s<N_SPR_ENTRIES; s++)
   {
-    uint8_t *psprite = sprite_tbl[s];
+    const uint8_t *psprite = sprite_tbl[s];
     
     uint8_t c = *psprite & 0xc0;
     uint8_t w = *(psprite++) & 0x3f;
@@ -208,7 +210,7 @@ int main (int argc, char *argv[])
             for (unsigned q=0; q<4; q++)
             {
               // point to start of data
-              uint8_t *p = psprite;
+              const uint8_t *p = psprite;
               if ((c & F_VFLIP) ^ vflip)
                 p += ((r*16 + (q&1)*8)) *w*2;
               else

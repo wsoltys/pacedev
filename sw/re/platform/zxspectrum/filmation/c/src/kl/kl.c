@@ -4462,6 +4462,7 @@ uint8_t *flip_sprite (POBJ32 p_obj)
 {
   uint8_t *psprite = (uint8_t *)sprite_tbl[p_obj->graphic_no];
   
+#ifndef __HAS_HWSPRITES__
   uint8_t vflip = (p_obj->flags7 ^ (*psprite)) & FLAG_VFLIP;
   uint8_t hflip = (p_obj->flags7 ^ (*psprite)) & FLAG_HFLIP;
 
@@ -4506,6 +4507,7 @@ uint8_t *flip_sprite (POBJ32 p_obj)
     }
     *psprite ^= FLAG_HFLIP;
   }
+#endif
 
   return (psprite);
 }

@@ -18,7 +18,7 @@ const unsigned page_sprite[3] = { 32, 64, 96 };
 #define DIP_MONO_GREEN  0
 #define DIP_MONO_WHITE  1
 
-#define XOFF            ((320-280)/2)
+#define XOFF            ((320-256)/2)
 #define YOFF            ((224-192)/2)
 #define XZ	            15
 #define YZ	            255
@@ -32,6 +32,7 @@ extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 void osd_delay (unsigned ms)
 {
+  wait_vbl ();
   wait_vbl ();
   wait_vbl ();
 }
@@ -49,9 +50,7 @@ void osd_clear_scrn_buffer (void)
 
 int osd_key (int _key)
 {
-  uint16_t joy1;
-  
-  joy1 = poll_joystick (PORT1, READ_DIRECT);
+  uint16_t joy1 = poll_joystick (PORT1, READ_DIRECT);
   
   switch (_key)
   {
@@ -75,10 +74,9 @@ int osd_key (int _key)
 
 int osd_keypressed (void)
 {
-	#if 0
-  return (keypressed ());
-	#endif
-	return (0);
+  uint16_t joy1 = poll_joystick (PORT1, READ_DIRECT);
+
+  return (joy1 != 0);
 }
 
 int osd_readkey (void)
@@ -180,14 +178,17 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
 
 void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c)
 {
+  // nothing to do here
 }
 
 void osd_update_screen (void)
 {
+  // nothing to do here
 }
 
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines)
 {
+  // nothing to do here
 }
 
 void osd_print_sprite (uint8_t type, POBJ32 p_obj)
@@ -225,8 +226,8 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     }
 
   set_current_sprite (p_obj->unused[0]*3);
-  write_sprite_data (p_obj->pixel_x, 
-                      191-(p_obj->pixel_y+p_obj->data_height_lines-1),
+  write_sprite_data (XOFF + p_obj->pixel_x, 
+                      YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
                       0x0f, 0xff, 4, 3, obj_map);
 }
 
