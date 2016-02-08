@@ -89,28 +89,17 @@ int osd_readkey (void)
 
 void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
 {
-	#if 0
-  unsigned c, l, b;
-  
-  for (c=0; ; c++, str++)
-  {
-    uint8_t code = *str & 0x7f;
+  char      buf[32];
+  unsigned  i = 0;
 
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
-        d <<= 1;
-      }
-    }  
-    if (*str & (1<<7))
-      break;
-  }
-	#endif
+  do
+  {  
+    buf[i++] = (*str & 0x7f) + 1;
+
+  } while ((*(str++) & 0x80) == 0);
+  buf[i] = '\0';
+  
+  textout ((XOFF+x)/8, (YOFF+(191-y))/8, 0, 4, buf);
 }
 
 static uint8_t from_ascii (char ch)
@@ -127,52 +116,20 @@ static uint8_t from_ascii (char ch)
 
 void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
 {
-  textout (x/8, 191-(y/8+7), 0, 0, str);
-  
-	#if 0
-  unsigned c, l, b;
-  
-  for (c=0; *str; c++)
-  {
-    uint8_t ascii = (uint8_t)*(str++);
-    uint8_t code = from_ascii (ascii);
-    
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      if (d == (uint8_t)-1)
-        break;
-      
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          putpixel (screen, x+c*8+b, 191-y+l, 15);
-        d <<= 1;
-      }
-    }  
-  }
-	#endif
+  // only ever printed from the std font
+  // - bank 4 for Knight Lore font
+  textout ((XOFF+x)/8, (YOFF+(191-y))/8, 0, 4, str);
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
 {
-	#if 0
-  unsigned l, b;
+  // only ever called to print numbers
   
-  for (l=0; l<8; l++)
-  {
-    uint8_t d = gfxbase_8x8[code*8+l];
-    if (d == (uint8_t)-1)
-      break;
-    
-    for (b=0; b<8; b++)
-    {
-      if (d & (1<<7))
-        putpixel (screen, x+b, 191-y+l, 15);
-      d <<= 1;
-    }
-  }  
-	#endif
+  static char buf[2] = " ";
+  
+  buf[0] = '0'+code;
+  textout ((XOFF+x)/8, (YOFF+(191-y))/8, 0, 4, buf);
+
   return (x+8);
 }
 
@@ -205,10 +162,10 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     if (p_obj->unused[0] == 0)
       textoutf (0, 0, 0, 0, buf);
     else
-      textoutf (0, 1, 0, 0, buf);
+      textoutf (0, p_obj->unused[0]-40, 0, 0, buf);
   }
     
-  if (type != DYNAMIC)
+  if (type != DYNAMIC && type != PANEL_DYNAMIC)
     return;
 
   n = 256 + 64 + (unsigned)(p_obj->graphic_no)*4*16;

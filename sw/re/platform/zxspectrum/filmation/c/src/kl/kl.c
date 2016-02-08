@@ -132,7 +132,7 @@ static uint8_t audio_played;                          // $5BD1
 static uint8_t directional;                           // $5BD2
 static uint8_t cant_drop;                             // $5BD3
 static INVENTORY inventory[4];                        // $5BD8
-static PINVENTORY objects_carried =
+static const PINVENTORY objects_carried =
                 &inventory[1];                        // $5BDC
 static uint8_t scrn_visited[32];                      // $5BE8
 static OBJ32 graphic_objs_tbl[MAX_OBJS];              // $5C08
@@ -1827,6 +1827,9 @@ void print_lives_gfx (void)
   p_obj->flags7 = 0;
   p_obj->pixel_x = 16;
   p_obj->pixel_y = 32;
+#ifdef __HAS_HWSPRITES__
+  p_obj->unused[0] = MAX_OBJS;
+#endif  
   print_sprite (PANEL_DYNAMIC, p_obj);
   // attributes
   // fill_de (47h,5a42h,2);
@@ -2063,7 +2066,7 @@ void display_objects (void)
   POBJ32 p_obj = &sprite_scratchpad;
   
   unsigned i;
-  
+
   for (i=0; i<3; i++)
   {
     uint8_t x = ((255-(3-i))+3)*24+16  +24;
@@ -2072,9 +2075,14 @@ void display_objects (void)
     p_obj->pixel_y = 0;
     fill_window (p_obj->pixel_x, p_obj->pixel_y, 3, 24, 0);
 
+    objects_carried[i].graphic_no = 0x60+i;
+    
     if (objects_carried[i].graphic_no != 0)
     {
       p_obj->graphic_no = objects_carried[i].graphic_no;
+#ifdef __HAS_HWSPRITES__
+      p_obj->unused[0] = MAX_OBJS+2+i;
+#endif
       print_sprite (PANEL_DYNAMIC, p_obj);
     }
     blit_to_screen (p_obj->pixel_x, p_obj->pixel_y, 3, 24);
@@ -2497,6 +2505,9 @@ void display_sun_moon_frame (POBJ32 p_obj)
 display_frame:
   // display sun/moon
   fill_window (184, 0, 6, 31, 0);
+#ifdef __HAS_HWSPRITES__
+  p_obj->unused[0] = MAX_OBJS+1;
+#endif  
   print_sprite (PANEL_DYNAMIC, p_obj);
   
   p_frm->flags7 = 0;
@@ -2724,7 +2735,9 @@ void find_special_objs_here (void)
     p_special_obj->u.ptr_obj_tbl_entry = i;
     memset (&p_special_obj->unused, 0, 32-20);
 
+#ifdef __HAS_HWSPRITES__
     p_special_obj->unused[0] = 2+n_special_objs_here;
+#endif
         
     p_special_obj++;
     n_special_objs_here++;
@@ -4253,8 +4266,9 @@ found_screen:
       // zero everything else
       memset (&p_other_objs->d_x, 0, 23);
 
-      // added for hardware sprites
+#ifdef __HAS_HWSPRITES__
       p_other_objs->unused[0] = obj_no++;
+#endif
             
       p_other_objs++;
       n_other_objs++;
@@ -4309,8 +4323,9 @@ found_screen:
         // zero everything else        
         memset (&p_other_objs->d_x, 0, 23);
 
-        // added for hardware sprites
+#ifdef __HAS_HWSPRITES__
         p_other_objs->unused[0] = obj_no++;
+#endif
 
         // debug ONLY
         //if (p_other_objs->graphic_no == 182)

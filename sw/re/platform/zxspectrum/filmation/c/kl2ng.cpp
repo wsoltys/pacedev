@@ -22,6 +22,7 @@
 #define N_SPR_ENTRIES (sizeof(sprite_tbl)/sizeof(uint8_t *))
 
 #define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
+#define NIBREV(d) (((d&1)<<3)|((d&2)<<1)|((d&4)>>1)|((d&8)>>3))
 
 #define SCRN_W    (2048/4)
 #define SCRN_H    (1024/4)
@@ -93,10 +94,110 @@ void show_ng_tiles (void)
   free (c13);
 }
 
-int main (int argc, char *argv[])
+static uint8_t from_ascii (char ch)
 {
-  int s;
+  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
+  uint8_t i;
   
+  for (i=0; chrset[i]; i++)
+    if (chrset[i] == ch)
+      return (i);
+      
+    return ((uint8_t)-1);
+}
+
+static uint8_t zeroes[128];
+
+void do_fix (void)
+{
+  // bank 4 (char $0x400-$0x4ff)
+  // $00-$03 - "DAYS"
+  // $04-$FF - ascii-based font
+  
+  unsigned c;
+  unsigned i;
+
+  // open FIX and copy 1st 4 banks
+  // - needs to be patched wth "RETRO PORTS first!!!
+  
+  FILE *fpFix = fopen ("orig/202-s1.s1", "rb");
+  if (!fpFix) 
+  {
+    fprintf (stderr, "unable to open fpFix\n");
+    return;
+  }
+  FILE *fp = fopen ("202-s1.bin", "wb");
+  if (!fp) 
+  {
+    fprintf (stderr, "unable to open fp\n");
+    return;
+  }
+    
+  for (unsigned b=0; b<4; b++)
+  {
+    for (unsigned c=0; c<256; c++)
+    {
+      uint8_t data[32];
+    
+      fread (data, sizeof(uint8_t), 32, fpFix);
+      fwrite (data, sizeof(uint8_t), 32, fp);
+    }
+  }
+      
+  for (c=0; c<256; c++)
+  {
+    const uint8_t *pfont;
+    
+    if (c > 0 && c <= 4)
+      pfont = days_font[c-1];
+    else
+    if ((i = from_ascii ((char)c)) != (uint8_t)-1)
+    {      
+      fprintf (stderr, "$%02X=\'%c\'\n", c, c);
+      pfont = kl_font[i];
+    }
+    else
+      pfont = zeroes;
+
+    // create font data
+    for (unsigned col=0; col<4; col++)
+    {
+      uint8_t shift[] = { 2, 0, 6, 4 };
+      
+      for (unsigned l=0; l<8; l++)
+      {
+        uint8_t data = pfont[l];
+        data = (data >> shift[col]) & 0x03;
+        uint8_t byte = 0;
+        
+        // all fonts are colour 3 to match sprite palettes
+        byte |= (data & (1<<0) ? 0x30 : 0);
+        byte |= (data & (1<<1) ? 0x03 : 0);
+            
+        fwrite (&byte, sizeof(uint8_t), 1, fp);
+      }
+    }
+  }
+  // and skip same bytes in original file
+  fseek (fpFix, 256*32, SEEK_CUR);
+  
+  // and copy remainder of file
+  while (!feof (fpFix))
+  {
+    uint8_t data;
+    
+    fread (&data, sizeof(uint8_t), 1, fpFix);
+    fwrite (&data, sizeof(uint8_t), 1, fp);
+  }
+  
+  fclose (fpFix);
+  fclose (fp);
+}
+
+void do_sprites (void)
+{  
+  int s;
+
   uint8_t widest = 0;
   uint8_t highest = 0;
   
@@ -121,9 +222,6 @@ int main (int argc, char *argv[])
   // and also allocate 3x4=12 tiles for each sprite
   // actually 16 tiles will be quicker again  
   // so 188x16 = 3008 tiles (12 bits) (kiddy stuff for Neo Geo)
-
-  static uint8_t zeroes[128];
-  memset (zeroes, 0, 128);
 
   FILE *c1 = fopen ("202-c1.bin", "wb");  
   FILE *c2 = fopen ("202-c2.bin", "wb");  
@@ -261,7 +359,15 @@ int main (int argc, char *argv[])
 
   //FILE *spr = fopen ("PB_CHR.SPR", "wb");
   //fclose (spr);
+}
 
+int main (int argc, char *argv[])
+{
+  memset (zeroes, 0, 128);
+
+  //do_sprites ();
+  do_fix ();
+  
 	allegro_init ();
 	install_keyboard ();
 
@@ -281,7 +387,7 @@ int main (int argc, char *argv[])
   }
 	set_palette_range (pal, 0, 7, 1);
 
-  show_ng_tiles ();
+  //show_ng_tiles ();
   
   allegro_exit ();
 }
