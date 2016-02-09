@@ -1904,6 +1904,7 @@ menu_loop:
 // $BD89
 void flash_menu (void)
 {
+  #if 0
   unsigned i;
   
   UNTESTED;
@@ -1920,6 +1921,7 @@ void flash_menu (void)
   menu_colours[i] &= ~(1<<7);
   if ((user_input_method & (1<<3)) != 0)
     menu_colours[i] |= (1<<7);
+  #endif    
 }
 
 // $BE31

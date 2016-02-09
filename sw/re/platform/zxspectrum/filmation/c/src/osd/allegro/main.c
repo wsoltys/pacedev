@@ -33,6 +33,7 @@ static BITMAP *scrn_buf;
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
+static uint8_t osd_room_attr = 7; // white
 static unsigned mask_colour = 0;
 
 void osd_delay (unsigned ms)
@@ -80,7 +81,7 @@ void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t att
       for (b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (scrn_buf, x+c*8+b, 191-y+l, 15);
+          putpixel (scrn_buf, x+c*8+b, 191-y+l, attr&7);
         d <<= 1;
       }
     }  
@@ -119,14 +120,14 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, c
       for (b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (scrn_buf, x+c*8+b, 191-y+l, attr&0x0f);
+          putpixel (scrn_buf, x+c*8+b, 191-y+l, attr&7);
         d <<= 1;
       }
     }  
   }
 }
 
-uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
+uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   unsigned l, b;
   
@@ -138,7 +139,7 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
     
     for (b=0; b<8; b++)
     {
-      putpixel (scrn_buf, x+b, 191-y+l, (d&(1<<7)?15:0));
+      putpixel (scrn_buf, x+b, 191-y+l, (d&(1<<7)?(attr&7):0));
       d <<= 1;
     }
   }  
@@ -173,12 +174,35 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
 void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 {
   uint8_t *psprite;
-
+  uint8_t attr;
+  
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
   // this is needed to create panel font
   //if (type != MENU_STATIC && type != PANEL_STATIC)
   //  return;
+
+  switch (type)
+  {
+    case MENU_STATIC :
+      attr = 6;
+      break;
+    case PANEL_STATIC :
+      if (p_obj->graphic_no == 0x5A ||
+          p_obj->graphic_no == 0xBA)
+        attr = 2;
+      else
+        attr = osd_room_attr & 7;
+      break;
+    case PANEL_DYNAMIC :
+      attr = 7;
+      break;
+    case DYNAMIC :
+      attr = osd_room_attr & 7;
+      break;
+    default :
+      break;
+  }
     
   // references p_obj
   psprite = flip_sprite (p_obj);
@@ -201,12 +225,18 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
           putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), mask_colour);
 #endif
         if (d & (1<<7))
-          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
+          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), attr);
         m <<= 1;
         d <<= 1;
       }
     }
   }
+}
+
+void osd_room_attrib (uint8_t attr)
+{
+  // save it for sprites
+  osd_room_attr = attr;
 }
 
 static void grab_fix_tile (BITMAP *bm, int x, int y, FILE *fp)
