@@ -29,6 +29,8 @@
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
+static uint8_t osd_room_attr = 7; // white
+
 static struct IntuitionBase *IntuitionBase;
 static struct GfxBase *GfxBase;
 static struct BitMap *myBitMaps[BLANK+1];
@@ -85,7 +87,7 @@ int osd_readkey (void)
 	return (0);
 }
 
-void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
+void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
 {
   uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
   p += (191-y)*BM_WIDTH_BYTES+x/8;
@@ -124,7 +126,7 @@ static uint8_t from_ascii (char ch)
 
 // always on byte boundary
 // - original code calls print_8x8
-void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
+void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, char *str)
 {
   uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
   p += (191-y)*BM_WIDTH_BYTES+x/8;
@@ -151,7 +153,7 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
   }
 }
 
-uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
+uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
   p += (191-y)*BM_WIDTH_BYTES+x/8;
@@ -250,6 +252,15 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     }
     p -= BM_WIDTH_BYTES+w;
   }
+}
+
+void osd_room_attrib (uint8_t attr)
+{
+  osd_room_attr = attr;
+}
+
+void osd_debug_hook (void *context)
+{
 }
 
 int main (int argc, char *argv[])
