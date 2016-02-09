@@ -2824,7 +2824,7 @@ void calc_ghost_sprite (POBJ32 p_obj)
 // $C645
 int8_t get_delta_from_tbl (unsigned i)
 {
-  static int8_t delta_tbl[] =
+  static const int8_t delta_tbl[] =
   {
     -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6, -7, 7, -8, 8
   };
