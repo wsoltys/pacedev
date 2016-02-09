@@ -4095,6 +4095,8 @@ void print_border (void)
   multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
   p = transfer_sprite (&sprite_scratchpad, p);
   multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
+  
+  osd_debug_hook ((void *)10);
 }
 
 // $D2EF

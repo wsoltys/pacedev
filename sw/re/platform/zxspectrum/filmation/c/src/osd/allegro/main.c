@@ -176,6 +176,10 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
+  // this is needed to create panel font
+  if (type != MENU_STATIC && type != PANEL_STATIC)
+    return;
+    
   // references p_obj
   psprite = flip_sprite (p_obj);
 
@@ -205,17 +209,36 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   }
 }
 
+static void grab_fix_tile (BITMAP *bm, int x, int y, FILE *fp)
+{
+  unsigned l, b;
+  
+  fprintf (fp, "  { ");
+  for (l=0; l<8; l++)
+  {
+    uint8_t data = 0;
+    for (b=0; b<8; b++)
+    {
+      data <<= 1;
+      data |= (getpixel (bm, x+b, y+l) ? 1 : 0);
+    }
+    fprintf (fp, "0x%02X, ", data);
+  }
+  fprintf (fp, "},\n");
+}
+
 void osd_debug_hook (void *context)
 {
+  static unsigned count = 0;
+  
   unsigned state = (unsigned)context;
   
-  unsigned c, l, b;
+  unsigned c, t, l, b;
   unsigned x, y;
 
-  return;
-    
   switch (state)
   {
+#if 1
     case 0 :
 	    clear_bitmap (scrn_buf);
 	    return;
@@ -260,7 +283,36 @@ void osd_debug_hook (void *context)
       fprintf (fpPanel, "};\n\n");
       fclose (fpPanel);
       break;
+#endif      
+    case 10 :
+      if (count) 
+        return;
+      count++;
+      osd_update_screen ();
+      FILE *fpBorder = fopen ("border_font.c", "wt");
+      fprintf (fpBorder, "uint8_t border_font[][8] = \n{\n");
+      // 4 corners
+      for (c=0; c<4; c++)
+      {
+        static uint8_t cx[] = { 0, 32-4, 0, 32-4 };
+        static uint8_t cy[] = { 0, 0, 24-4, 24-4 };
+
+        for (t=0; t<16; t++)
+        {
+          grab_fix_tile (screen, (cx[c]+(t/4))*8, (cy[c]+(t%4))*8, fpBorder);
+        }
+      }
+      // now top, then side
+      for (t=0; t<4; t++)
+        grab_fix_tile (screen, 32, t*8, fpBorder);
+      for (t=0; t<4; t++)
+        grab_fix_tile (screen, t*8, 32, fpBorder);
+      fprintf (fpBorder, "};\n");
+      fclose (fpBorder);
+      break;
+      
     default :
+      return;
       break;
   }
   

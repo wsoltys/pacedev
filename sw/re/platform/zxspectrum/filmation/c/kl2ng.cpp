@@ -108,10 +108,13 @@ static uint8_t from_ascii (char ch)
 
 static uint8_t zeroes[128];
 
+#include "border_font.c"
 #include "panel_font.c"
 
 void do_fix (void)
 {
+  // bank 3 (70 chars)
+  // $00-$47 - main menu border
   // bank 4 (char $0x400-$0x4ff)
   // $00-$03 - "DAYS"
   // $04-$FF - ascii-based font
@@ -121,7 +124,7 @@ void do_fix (void)
   unsigned c;
   unsigned i;
 
-  // open FIX and copy 1st 4 banks
+  // open FIX and copy 1st 3 banks
   // - needs to be patched wth "RETRO PORTS first!!!
   
   FILE *fpFix = fopen ("orig/202-s1.s1", "rb");
@@ -137,7 +140,7 @@ void do_fix (void)
     return;
   }
     
-  for (unsigned b=0; b<4; b++)
+  for (unsigned b=0; b<3; b++)
   {
     for (unsigned c=0; c<256; c++)
     {
@@ -147,7 +150,36 @@ void do_fix (void)
       fwrite (data, sizeof(uint8_t), 32, fp);
     }
   }
+
+  for (c=0; c<256; c++)
+  {
+    const uint8_t *pfont;
+
+    if (c < 16*4+4+4)
+      pfont = border_font[c];
+    else
+      pfont = zeroes;
       
+    // create font data
+    for (unsigned col=0; col<4; col++)
+    {
+      uint8_t shift[] = { 2, 0, 6, 4 };
+      
+      for (unsigned l=0; l<8; l++)
+      {
+        uint8_t data = pfont[l];
+        data = (data >> shift[col]) & 0x03;
+        uint8_t byte = 0;
+        
+        // all fonts are colour 3 to match sprite palettes
+        byte |= (data & (1<<0) ? 0x30 : 0);
+        byte |= (data & (1<<1) ? 0x03 : 0);
+            
+        fwrite (&byte, sizeof(uint8_t), 1, fp);
+      }
+    }
+  }
+        
   for (c=0; c<512; c++)
   {
     const uint8_t *pfont;

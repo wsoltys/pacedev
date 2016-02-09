@@ -171,9 +171,12 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 	  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
     unsigned c;
     
+    // just do this once, triggered when the first panel
+    // sprite is displayed
     if (p_obj->graphic_no != 0x86 || p_obj->pixel_x != 0x10)
       return;
 
+    // show the scrolls and the sun/moon frame
 	  *(vram+2) = 32;
     for (c=0; c<256; c++)
     {
@@ -184,7 +187,55 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 
     return;
   }
-        
+   
+  if (type == MENU_STATIC)
+  {
+    #define BANK 0x0300
+    
+	  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+    unsigned c, r;
+
+    // just do this once, triggered when the first panel
+    // sprite is displayed
+    if (p_obj->graphic_no != 0x89 || p_obj->pixel_x != 0x00)
+      return;
+
+    for (c=0; c<32; c++)
+    {
+      for (r=0; r<24; r++)
+      {
+		    *vram = 0x7000 + (FIX_XOFF+c)*32 + FIX_YOFF+r;
+		    
+		    if (c < 4)
+	      {
+		      if (r < 4)
+		        *(vram+1) = BANK | ((c%4)*4+r);
+		      else if (r < 20)
+		        *(vram+1) = BANK | (0x44+(c%4));
+		      else
+		        *(vram+1) = BANK | (32+(c%4)*4+(r-20));
+		    }
+		    else if (c < 28)
+	      {
+	        if (r < 3)
+		        *(vram+1) = BANK | (0x40+r);
+		      else if (r >= 21)
+		        *(vram+1) = BANK | (0x40+r-21);
+	      }
+	      else
+        {
+		      if (r < 4)
+		        *(vram+1) = BANK | (16+(c%4)*4+r);
+		      else if (r < 20)
+		        *(vram+1) = BANK | (0x43+(c%4));
+		      else
+		        *(vram+1) = BANK | (48+(c%4)*4+(r-20));
+        }
+      }
+    }
+    return;
+  }
+         
   if (type != DYNAMIC && type != PANEL_DYNAMIC)
     return;
 
