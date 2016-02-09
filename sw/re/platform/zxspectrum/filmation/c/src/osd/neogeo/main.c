@@ -2,16 +2,10 @@
 #include <video.h>
 #include <input.h>
 
-
 // osd stuff
 
 #include "osd_types.h"
 #include "kl_osd.h"
-
-//TILEMAP obj_map[188][4][3];
-TILEMAP obj_map[40][3];
-
-const unsigned page_sprite[3] = { 32, 64, 96 };
 
 #define DIP_COLOUR      0
 #define DIP_MONO        1
@@ -28,9 +22,14 @@ extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 void osd_delay (unsigned ms)
 {
-  wait_vbl ();
-  wait_vbl ();
-  wait_vbl ();
+	while (ms--)
+	{
+		unsigned t;
+
+		//for (t=0; t<512; t++)
+		for (t=0; t<256; t++)
+			;
+	}
 }
 
 void osd_clear_scrn (void)
@@ -53,6 +52,8 @@ int osd_key (int _key)
     case OSD_KEY_0 :
       // start & pickup/drop
       return (joy1 & (JOY_START|JOY_B));
+    case OSD_KEY_1 :
+      return (joy1 & JOY_B);
     case OSD_KEY_Z :
       return (joy1 & JOY_LEFT);
     case OSD_KEY_X :
@@ -153,11 +154,13 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 {
   static TILEMAP obj_map[3];
 
-  char buf[64];
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
   unsigned n, c, t;
 
-  if (0)
+  #if 0
   {  
+    char buf[64];
+    
     sprintf (buf, "OBJ=%03d, SPR=%02d, Y=%03d", 
               p_obj->graphic_no, p_obj->unused[0], p_obj->pixel_y);
     if (p_obj->unused[0] == 0)
@@ -165,34 +168,12 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     else
       textoutf (0, p_obj->unused[0]-40, 0, 0, buf);
   }
+  #endif
 
-  if (type == PANEL_STATIC)
-  {
-	  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
-    unsigned c;
-    
-    // just do this once, triggered when the first panel
-    // sprite is displayed
-    if (p_obj->graphic_no != 0x86 || p_obj->pixel_x != 0x10)
-      return;
-
-    // show the scrolls and the sun/moon frame
-	  *(vram+2) = 32;
-    for (c=0; c<256; c++)
-    {
-      if ((c%32) == 0)
-		    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
-      *(vram+1) = 0x0500 | c;
-    }
-
-    return;
-  }
-   
   if (type == MENU_STATIC)
   {
     #define BANK 0x0300
     
-	  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
     unsigned c, r;
 
     // just do this once, triggered when the first panel
@@ -236,6 +217,27 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     return;
   }
          
+  if (type == PANEL_STATIC)
+  {
+    unsigned c;
+    
+    // just do this once, triggered when the first panel
+    // sprite is displayed
+    if (p_obj->graphic_no != 0x86 || p_obj->pixel_x != 0x10)
+      return;
+
+    // show the scrolls and the sun/moon frame
+	  *(vram+2) = 32;
+    for (c=0; c<256; c++)
+    {
+      if ((c%32) == 0)
+		    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
+      *(vram+1) = 0x0500 | c;
+    }
+
+    return;
+  }
+   
   if (type != DYNAMIC && type != PANEL_DYNAMIC)
     return;
 
@@ -344,10 +346,10 @@ void eye_catcher (void)
 
 int main (int argc, char *argv[])
 {
-  uint8_t *dips = (uint8_t *)0x10FD84;
+  //uint8_t *dips = (uint8_t *)0x10FD84;
   
-  uint8_t colour_mono = *(dips+6);
-  uint8_t mono_colour = *(dips+7);
+  //uint8_t colour_mono = *(dips+6);
+  //uint8_t mono_colour = *(dips+7);
 
 	// transparent, black, white, white
   const uint8_t r[] = { 0x00>>3, 0x00>>3, 0xff>>3, 0xff>>3 };
@@ -356,8 +358,6 @@ int main (int argc, char *argv[])
 
 	PALETTE 	pal[2];
 	unsigned	p, c;
-	unsigned 	o, f, t;
-	unsigned  n;
 
 	for (p=0; p<2; p++)
 	{	
@@ -378,17 +378,6 @@ int main (int argc, char *argv[])
 	setpalette(0, 2, (const PPALETTE)&pal);
 	setpalette(16, 2, (const PPALETTE)&pal);
 
-  // build 40 sprites
-  for (o=0; o<40; o++)
-    //for (f=0; f<4; f++)
-      for (c=0; c<3; c++)
-        for (t=0; t<4; t++)
-        {
-          obj_map[o][c].tiles[t].block_number =
-            256 + 64 + o*4*16 + c*4 + t;
-          obj_map[o][c].tiles[t].attributes = 16<<8;
-        }
-  
 	while (1)
 	{
 		clear_fix();
@@ -398,21 +387,8 @@ int main (int argc, char *argv[])
     
 		//textoutf (13, 16, 0, 0, "KNIGHT LORE");
 		_vbl_count = 0;
-		wait_vbl();
-
-#if 0
-    for (o=0; o<40; o++)
-    {
-      set_current_sprite (o*3);
-	    write_sprite_data (
-	      (o%8)*40, (o/8)*48, 0x0f, 0x0ff, 
-	      4, 3, (const PTILEMAP)obj_map[o]);
-    }
-
-    while (1);
-#endif    
-
 		knight_lore ();
+
 		while (1);
 	}
   

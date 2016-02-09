@@ -2080,7 +2080,7 @@ void display_objects (void)
     p_obj->pixel_y = 0;
     fill_window (p_obj->pixel_x, p_obj->pixel_y, 3, 24, 0);
 
-    objects_carried[i].graphic_no = 0x60+i;
+    //objects_carried[i].graphic_no = 0x60+i;
     
     if (objects_carried[i].graphic_no != 0)
     {
