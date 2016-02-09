@@ -18,14 +18,10 @@ const unsigned page_sprite[3] = { 32, 64, 96 };
 #define DIP_MONO_GREEN  0
 #define DIP_MONO_WHITE  1
 
-#define XOFF            ((320-256)/2)
-#define YOFF            ((224-192)/2)
-#define XZ	            15
-#define YZ	            255
-#define CLIP            16
-#define NEO_SPRITE(s)   (128+(s))
-
-#define ENABLE_MASK
+#define FIX_XOFF        ((40-(256/8))/2)
+#define FIX_YOFF        ((32-(192/8))/2)
+#define SPR_XOFF        (FIX_XOFF*8)
+#define SPR_YOFF        (FIX_YOFF*8)-16
 
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
@@ -89,17 +85,15 @@ int osd_readkey (void)
 
 void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
 {
-  char      buf[32];
-  unsigned  i = 0;
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+  *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
+  *(vram+2) = 32;
 
   do
-  {  
-    buf[i++] = (*str & 0x7f) + 1;
-
-  } while ((*(str++) & 0x80) == 0);
-  buf[i] = '\0';
-  
-  textout ((XOFF+x)/8, (YOFF+(191-y))/8, 0, 4, buf);
+  {
+	  *(vram+1) = 0x0400 | (*str & 0x7f);
+	  
+	} while ((*(str++) & 0x80) == 0);
 }
 
 static uint8_t from_ascii (char ch)
@@ -117,19 +111,26 @@ static uint8_t from_ascii (char ch)
 void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
 {
   // only ever printed from the std font
-  // - bank 4 for Knight Lore font
-  textout ((XOFF+x)/8, (YOFF+(191-y))/8, 0, 4, str);
+  // - bank 4 for Knight Lore / DAYS fonts
+
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+  *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
+  *(vram+2) = 32;
+
+  while (*str)
+	  *(vram+1) = 0x0400 | *(str++);
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
 {
   // only ever called to print numbers
+  // - bank 4 for Knight Lore / DAYS fonts
   
-  static char buf[2] = " ";
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+  *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
+  *(vram+2) = 32;
+  *(vram+1) = 0x0400 | ('0' + code);
   
-  buf[0] = '0'+code;
-  textout ((XOFF+x)/8, (YOFF+(191-y))/8, 0, 4, buf);
-
   return (x+8);
 }
 
@@ -167,21 +168,20 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 
   if (type == PANEL_STATIC)
   {
-    static uint8_t buf[64];
-    
-    unsigned r, c;
+	  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+    unsigned c;
     
     if (p_obj->graphic_no != 0x86 || p_obj->pixel_x != 0x10)
       return;
-    for (r=0; r<8; r++)
+
+	  *(vram+2) = 32;
+    for (c=0; c<256; c++)
     {
-      for (c=0; c<32; c++)
-        buf[c] = r * 0x20 + c;
-      buf[c] = '\0';
-      if (r == 0)
-        buf[0] = ' ';
-      textout (XOFF/8+0, YOFF/8+16+r, 0, 5, (const char *)buf);
+      if ((c%32) == 0)
+		    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
+      *(vram+1) = 0x0500 | c;
     }
+
     return;
   }
         
@@ -203,9 +203,13 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     }
 
   set_current_sprite (p_obj->unused[0]*3);
-  write_sprite_data (XOFF + p_obj->pixel_x, 
-                      YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
+  write_sprite_data (SPR_XOFF + p_obj->pixel_x, 
+                      SPR_YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
                       0x0f, 0xff, 4, 3, obj_map);
+}
+
+void osd_debug_hook (void *context)
+{
 }
 
 void eye_catcher (void)

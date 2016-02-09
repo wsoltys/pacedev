@@ -24,8 +24,8 @@
 #define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
 #define NIBREV(d) (((d&1)<<3)|((d&2)<<1)|((d&4)>>1)|((d&8)>>3))
 
-#define SCRN_W    (2048/4)
-#define SCRN_H    (1024/4)
+#define SCRN_W    (2048)
+#define SCRN_H    (1024)
 
 static uint8_t  *c13 = NULL;
 
@@ -154,8 +154,8 @@ void do_fix (void)
     
     if (c < 256)
     {
-      if (c > 0 && c <= 4)
-        pfont = days_font[c-1];
+      if (c < 4)
+        pfont = days_font[c];
       else
       if ((i = from_ascii ((char)c)) != (uint8_t)-1)
       {      
@@ -164,26 +164,48 @@ void do_fix (void)
       }
       else
         pfont = zeroes;
+
+      // create font data
+      for (unsigned col=0; col<4; col++)
+      {
+        uint8_t shift[] = { 2, 0, 6, 4 };
+        
+        for (unsigned l=0; l<8; l++)
+        {
+          uint8_t data = pfont[l];
+          data = (data >> shift[col]) & 0x03;
+          uint8_t byte = 0;
+          
+          // all fonts are colour 3 to match sprite palettes
+          byte |= (data & (1<<0) ? 0x30 : 0);
+          byte |= (data & (1<<1) ? 0x03 : 0);
+              
+          fwrite (&byte, sizeof(uint8_t), 1, fp);
+        }
+      }
     }
     else
-      pfont = panel_font[c-256];
-
-    // create font data
-    for (unsigned col=0; col<4; col++)
-    {
-      uint8_t shift[] = { 2, 0, 6, 4 };
-      
-      for (unsigned l=0; l<8; l++)
       {
-        uint8_t data = pfont[l];
-        data = (data >> shift[col]) & 0x03;
-        uint8_t byte = 0;
-        
-        // all fonts are colour 3 to match sprite palettes
-        byte |= (data & (1<<0) ? 0x30 : 0);
-        byte |= (data & (1<<1) ? 0x03 : 0);
-            
-        fwrite (&byte, sizeof(uint8_t), 1, fp);
+      pfont = panel_font[(c-256)*8];
+
+      // create font data
+      for (unsigned col=0; col<4; col++)
+      {
+        uint8_t offset[] = { 4, 6, 0, 2 };
+        uint8_t i = offset[col];
+        for (unsigned l=0; l<8; l++)
+        {
+          uint8_t byte = 0;
+           
+          uint8_t data = pfont[l*8+i];
+          if (data == 15) byte |= 0x03;
+          else if (data == 2) byte |= 0x01;
+          data = pfont[l*8+i+1];
+          if (data == 15) byte |= 0x30;
+          else if (data == 2) byte |= 0x10;
+              
+          fwrite (&byte, sizeof(uint8_t), 1, fp);
+        }
       }
     }
   }

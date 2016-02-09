@@ -33,6 +33,8 @@ static BITMAP *scrn_buf;
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
+static unsigned mask_colour = 0;
+
 void osd_delay (unsigned ms)
 {
   rest (ms);
@@ -174,9 +176,6 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
 
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
-  if (type != PANEL_STATIC)
-    return;
-    
   // references p_obj
   psprite = flip_sprite (p_obj);
 
@@ -195,7 +194,7 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
       {
 #ifndef BUILD_OPT_DISABLE_MASK
         if (m & (1<<7))
-          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 0);
+          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), mask_colour);
 #endif
         if (d & (1<<7))
           putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), 15);
@@ -211,18 +210,32 @@ void osd_debug_hook (void *context)
   unsigned state = (unsigned)context;
   
   unsigned c, l, b;
+  unsigned x, y;
 
+  return;
+    
   switch (state)
   {
     case 0 :
 	    clear_bitmap (scrn_buf);
 	    return;
       break;
+
     case 1 :
+      mask_colour = 2;
+      return;
+      break;
+      
+    case 2 :
+      mask_colour = 0;
       // attempt to mark out the panel data
       //for (x=0; x<256; x++)
       //  putpixel (scrn_buf, x, 128, 2);
       osd_update_screen ();
+      line (screen, 160, 191, 160, 187, 2);
+      floodfill (screen, 240, 180, 2);      
+      floodfill (screen, 180, 180, 2);      
+      floodfill (screen, 210, 190, 2);      
       // now extract data for panel font
       FILE *fpPanel = fopen ("panel_font.c", "wt");
       fprintf (fpPanel, "uint8_t panel_font[][8] = \n{\n");
@@ -231,19 +244,18 @@ void osd_debug_hook (void *context)
         unsigned x = (c%32)*8;
         unsigned y = (c/32)*8;
         
-        fprintf (fpPanel, "  { ");
         for (l=0; l<8; l++)
         {
           uint8_t data = 0;
+          fprintf (fpPanel, "  { ");
           for (b=0; b<8; b++)
           {
-            data <<= 1;
-            if (getpixel (screen, x+b, 128+y+l) != 0)
-              data |= 1;
+            data = getpixel (screen, x+b, 128+y+l);
+            fprintf (fpPanel, "0x%02X, ", data);
           }
-          fprintf (fpPanel, "0x%02X, ", data);
+          fprintf (fpPanel, "},\n");
         }
-        fprintf (fpPanel, "},\n");
+        fprintf (fpPanel, "\n");
       }
       fprintf (fpPanel, "};\n\n");
       fclose (fpPanel);

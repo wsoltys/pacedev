@@ -572,10 +572,11 @@ game_delay:
     colour_panel ();
     colour_sun_moon ();
     
-    //osd_debug_hook ((void *)0);
+    osd_debug_hook ((void *)0);
     display_panel ();
+    osd_debug_hook ((void *)1);
     display_sun_moon_frame (&sun_moon_scratchpad);
-    //osd_debug_hook ((void *)1);
+    osd_debug_hook ((void *)2);
     
     display_day ();
     print_days ();
