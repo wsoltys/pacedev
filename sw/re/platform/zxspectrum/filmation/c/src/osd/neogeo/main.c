@@ -7,6 +7,33 @@
 #include "osd_types.h"
 #include "kl_osd.h"
 
+//
+//  FIX LAYER
+//  * BANK 3 - main menu border
+//  - $00-$0F - top-left corner (4x4)
+//  - $10-$1F - top-roght corner (4x4)
+//  - $20-$2F - bottom-left corner (4x4)
+//  - $30-$3F - bottom-righter corner (4x4)
+//  - $40-$42 - top/bottom (1x3)
+//  - $44-$46 - left/right (3x1)
+//  * BANK 4 - Knight Lore font and "DAY" font
+//  - $00-$03 - "DAY"
+//  - various - ASCII characters
+//  * BANK 5 - panel
+//  - $00-$FF - panel characters for bottom 8 lines
+//              in display order
+//  * BANKS 6-8 - title screen
+//  - +672 characters in display order
+//
+//  SPRITES
+//  -   0-255 - system reserved
+//  -     +64 - +40 - Kinight Lore font
+//              +4  - "DAY"
+//  -   188*16*4 - 188 graphics sprites
+//  -         - each sprite is 16 tiles
+//  -         - 4 copies of each (h/v-flipped)
+
+
 #define DIP_COLOUR      0
 #define DIP_MONO        1
 #define DIP_MONO_GREEN  0
@@ -113,13 +140,14 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
 {
   // only ever printed from the std font
   // - bank 4 for Knight Lore / DAYS fonts
-
+  // use palette 0
+  
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
-  *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
+  *vram = 0x7000 + ((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
   *(vram+2) = 32;
 
   while (*str)
-	  *(vram+1) = 0x0400 | *(str++);
+	  *(vram+1) = 0x0400 | (0<<12) | *((unsigned char *)str++);
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
@@ -344,6 +372,33 @@ void eye_catcher (void)
 	*(vram+1) = 0xF000 | 0x7B;
 }
 
+static void show_title (void)
+{
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+  uint16_t bank = 0x0600;
+  unsigned r, c;
+  
+  for (r=0; r<21; r++)
+  {
+    *vram = 0x7000 + FIX_XOFF*32 + FIX_YOFF + r;
+    *(vram+2) = 32;
+    bank = 0x0600 + ((r/8)<<8);    
+    for (c=0; c<32; c++)
+      *(vram+1) = bank | (0x000f<<12) | ((r%8)*32 + c);
+  }
+  
+  for (c=0; c<10000/16; c++)
+  {
+    wait_vbl ();
+
+    if (poll_joystick (PORT1, READ_DIRECT))
+    {
+      while (poll_joystick (PORT1, READ_DIRECT));
+      break;
+    }
+  }
+}
+
 int main (int argc, char *argv[])
 {
   //uint8_t *dips = (uint8_t *)0x10FD84;
@@ -378,14 +433,39 @@ int main (int argc, char *argv[])
 	setpalette(0, 2, (const PPALETTE)&pal);
 	setpalette(16, 2, (const PPALETTE)&pal);
 
+  // set full spectrum palette
+	for (p=0; p<1; p++)
+	{	
+		for (c=0; c<16; c++)
+		{
+			uint16_t	pe = 0;
+	    uint8_t r, g, b;
+
+	    r = (c&(1<<1) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
+	    g = (c&(1<<2) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
+	    b = (c&(1<<0) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
+	    
+  		pe |= (r&(1<<0)) << 14;
+  		pe |= (r&0x1E) << 7;
+  		pe |= (b&(1<<0)) << 12;
+  		pe |= (b&0x1E) >> 1;
+			pe |= (g&(1<<0)) << 13;
+			pe |= (g&0x1E) << 3;
+
+			pal[p].color[c] = pe;
+		}
+	}
+	setpalette(15, 1, (const PPALETTE)&pal);
+
 	while (1)
 	{
+    //eye_catcher ();
+
 		clear_fix();
 		clear_spr();
+    show_title ();
+		clear_fix();
 
-    //eye_catcher ();
-    
-		//textoutf (13, 16, 0, 0, "KNIGHT LORE");
 		_vbl_count = 0;
 		knight_lore ();
 

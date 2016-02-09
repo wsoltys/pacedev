@@ -25,7 +25,7 @@
 #include "kl_osd.h"
 #include "kl_dat.h"
 
-#define BUILD_OPT_DISABLE_LOADER
+//#define BUILD_OPT_DISABLE_LOADER
 //#define BUILD_OPT_DISABLE_MASK
 
 static BITMAP *scrn_buf;
@@ -177,8 +177,8 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
   // this is needed to create panel font
-  if (type != MENU_STATIC && type != PANEL_STATIC)
-    return;
+  //if (type != MENU_STATIC && type != PANEL_STATIC)
+  //  return;
     
   // references p_obj
   psprite = flip_sprite (p_obj);
@@ -238,7 +238,7 @@ void osd_debug_hook (void *context)
 
   switch (state)
   {
-#if 1
+#if 0
     case 0 :
 	    clear_bitmap (scrn_buf);
 	    return;
@@ -284,6 +284,7 @@ void osd_debug_hook (void *context)
       fclose (fpPanel);
       break;
 #endif      
+#if 0
     case 10 :
       if (count) 
         return;
@@ -310,7 +311,35 @@ void osd_debug_hook (void *context)
       fprintf (fpBorder, "};\n");
       fclose (fpBorder);
       break;
-      
+#endif      
+    case 20 :
+      {
+        // now extract data for title font
+        FILE *fpTitle = fopen ("title_font.c", "wt");
+        fprintf (fpTitle, "uint8_t title_font[][8] = \n{\n");
+        for (c=0; c<672; c++)
+        {
+          unsigned x = (c%32)*8;
+          unsigned y = (c/32)*8;
+          
+          for (l=0; l<8; l++)
+          {
+            uint8_t data = 0;
+            fprintf (fpTitle, "  { ");
+            for (b=0; b<8; b++)
+            {
+              data = getpixel (screen, x+b, y+l);
+              fprintf (fpTitle, "0x%02X, ", data);
+            }
+            fprintf (fpTitle, "},\n");
+          }
+          fprintf (fpTitle, "\n");
+        }
+        fprintf (fpTitle, "};\n\n");
+        fclose (fpTitle);
+      }
+      break;
+
     default :
       return;
       break;
@@ -402,6 +431,7 @@ void main (int argc, char *argv[])
     }
     
     fclose (fp);
+    osd_debug_hook ((void *)20);
     while (!keypressed ());
   }
 #endif //BUILD_OPT_DISABLE_LOADER

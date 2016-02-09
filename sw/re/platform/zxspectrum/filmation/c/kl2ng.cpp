@@ -110,6 +110,7 @@ static uint8_t zeroes[128];
 
 #include "border_font.c"
 #include "panel_font.c"
+#include "title_font.c"
 
 void do_fix (void)
 {
@@ -120,6 +121,8 @@ void do_fix (void)
   // $04-$FF - ascii-based font
   // bank 5 (256 chars)
   // panel data
+  // bank 6-8 (768 chars)
+  // title screen
   
   unsigned c;
   unsigned i;
@@ -217,7 +220,7 @@ void do_fix (void)
       }
     }
     else
-      {
+    {
       pfont = panel_font[(c-256)*8];
 
       // create font data
@@ -241,8 +244,38 @@ void do_fix (void)
       }
     }
   }
+
+  // title (3 banks)
+  for (c=0; c<768; c++)
+  {  
+    const uint8_t *pfont;
+
+    if (c < 672)    
+      pfont = title_font[c*8];
+    else
+      pfont = zeroes;
+
+    // create font data
+    for (unsigned col=0; col<4; col++)
+    {
+      uint8_t offset[] = { 4, 6, 0, 2 };
+      uint8_t i = offset[col];
+      for (unsigned l=0; l<8; l++)
+      {
+        uint8_t byte = 0;
+         
+        uint8_t data = pfont[l*8+i];
+        byte |= (data & 0x0f);
+        data = pfont[l*8+i+1];
+        byte |= (data & 0x0f) << 4;
+            
+        fwrite (&byte, sizeof(uint8_t), 1, fp);
+      }
+    }
+  }
+
   // and skip same bytes in original file
-  fseek (fpFix, 512*32, SEEK_CUR);
+  fseek (fpFix, (256+512+768)*32, SEEK_CUR);
   
   // and copy remainder of file
   while (!feof (fpFix))
