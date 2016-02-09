@@ -228,8 +228,8 @@ static void do_menu_selection (void);
 static void flash_menu (void);
 static void print_text_single_colour (uint8_t x, uint8_t y, char *str);
 static void print_text_std_font (uint8_t x, uint8_t y, char *str);
-static void print_text_raw (uint8_t x, uint8_t y, uint8_t *str);
-static void print_text (uint8_t x, uint8_t y, char *str);
+static void print_text_raw (uint8_t x, uint8_t y, uint8_t attr, uint8_t *str);
+static void print_text (uint8_t x, uint8_t y, uint8_t attr, char *str);
 static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
@@ -1870,10 +1870,11 @@ void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n)
 // $BCCA
 void display_day (void)
 {
-  // stick attribute at front
+  uint8_t attr;
+  
+  attr = (~curr_room_attrib+2) & 7;
   gfxbase_8x8 = (uint8_t *)days_font;
-  // fudge to skip attribute for now
-  print_text_raw (112, 15, (char *)(days_txt+1));
+  print_text_raw (112, 15, attr, (char *)(days_txt+1));
 }
 
 // $BD0C
@@ -1924,33 +1925,36 @@ void flash_menu (void)
 // $BE31
 void print_text_single_colour (uint8_t x, uint8_t y, char *str)
 {
+  // gets attribute from tmp_attrib
   gfxbase_8x8 = (uint8_t *)kl_font;
-  print_text (x, y, str);
+  print_text (x, y, tmp_attrib, str);
 }
 
 // $BE45
 void print_text_std_font (uint8_t x, uint8_t y, char *str)
 {
+  // attribute is stored as 1st character in str
   gfxbase_8x8 = (uint8_t *)kl_font;
-  print_text (x, y, str);
+  print_text (x, y, *str, str+1);
 }
 
 // $BE4C
-void print_text_raw (uint8_t x, uint8_t y, uint8_t *str)
+void print_text_raw (uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
 {
-  osd_print_text_raw (gfxbase_8x8, x, y, str);
+  osd_print_text_raw (gfxbase_8x8, x, y, attr, str);
 }
 
 // $BE4C
-void print_text (uint8_t x, uint8_t y, char *str)
+void print_text (uint8_t x, uint8_t y, uint8_t attr, char *str)
 {
-  osd_print_text (gfxbase_8x8, x, y, str);
+  // attribute passed down
+  osd_print_text (gfxbase_8x8, x, y, attr, str);
 }
 
 // $BE7F
 uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
 {
-  return (osd_print_8x8 (gfxbase_8x8, x, y, code));
+  return (osd_print_8x8 (gfxbase_8x8, x, y, 7, code));
 }
 
 // $BEB3
@@ -4068,6 +4072,7 @@ uint8_t *transfer_sprite_and_print (uint8_t type, POBJ32 p_obj, uint8_t *psprite
 // $D255
 void display_panel (void)
 {
+#ifndef __HAS_HWSPRITES__  
   uint8_t *p = (uint8_t *)panel_data;
   p = transfer_sprite (&sprite_scratchpad, p);
   multiple_print_sprite (PANEL_STATIC, &sprite_scratchpad, 16, (uint8_t)-8, 5);
@@ -4077,11 +4082,15 @@ void display_panel (void)
   multiple_print_sprite (PANEL_STATIC, &sprite_scratchpad, 16, 8, 5);
   p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
   p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
+#else
+  osd_display_panel (curr_room_attrib);
+#endif
 }
 
 // $D296
 void print_border (void)
 {
+#ifndef __HAS_HWSPRITES__  
   uint8_t *p = (uint8_t *)border_data;
   p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
   p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
@@ -4095,6 +4104,9 @@ void print_border (void)
   multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
   p = transfer_sprite (&sprite_scratchpad, p);
   multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
+#else
+  osd_print_border ();
+#endif
   
   osd_debug_hook ((void *)10);
 }
@@ -4239,6 +4251,9 @@ found_screen:
   // get attribute, set BRIGHT  
   curr_room_attrib = (attr & 7) | 0x40;
 
+  // for systems without attribute memory
+  osd_room_attrib (curr_room_attrib);
+
   room_size = (attr >> 3) & 0x1F;
   room_size_X = room_size_tbl[room_size].x;
   room_size_Y = room_size_tbl[room_size].y;
@@ -4364,6 +4379,7 @@ void fill_attr (uint8_t attr)
 {
   // fills the entire attribute memory
   // with the 'attr' parameter
+  // - too late to tell graphics system here
 }
 
 // $D55F

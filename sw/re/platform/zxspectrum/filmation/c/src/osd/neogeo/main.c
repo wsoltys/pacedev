@@ -44,6 +44,8 @@
 #define SPR_XOFF        (FIX_XOFF*8)
 #define SPR_YOFF        (FIX_YOFF*8)-16
 
+static uint8_t osd_room_attr;
+
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
@@ -111,7 +113,7 @@ int osd_readkey (void)
 	return (0);
 }
 
-void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
+void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
 {
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
   *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
@@ -119,7 +121,7 @@ void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *st
 
   do
   {
-	  *(vram+1) = 0x0400 | (*str & 0x7f);
+	  *(vram+1) = 0x0400 | ((attr&0x07)<<12) | (*str & 0x7f);
 	  
 	} while ((*(str++) & 0x80) == 0);
 }
@@ -136,7 +138,7 @@ static uint8_t from_ascii (char ch)
     return ((uint8_t)-1);
 }
 
-void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
+void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, char *str)
 {
   // only ever printed from the std font
   // - bank 4 for Knight Lore / DAYS fonts
@@ -147,10 +149,10 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
   *(vram+2) = 32;
 
   while (*str)
-	  *(vram+1) = 0x0400 | (0<<12) | *((unsigned char *)str++);
+	  *(vram+1) = 0x0400 | ((attr&0x07)<<12) | *((unsigned char *)str++);
 }
 
-uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
+uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   // only ever called to print numbers
   // - bank 4 for Knight Lore / DAYS fonts
@@ -158,7 +160,7 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code)
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
   *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
   *(vram+2) = 32;
-  *(vram+1) = 0x0400 | ('0' + code);
+  *(vram+1) = 0x0400 | ((attr&7)<<12) | ('0' + code);
   
   return (x+8);
 }
@@ -183,6 +185,8 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   static TILEMAP obj_map[3];
 
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+  uint8_t attr = 7; // white
+  
   unsigned n, c, t;
 
   #if 0
@@ -198,76 +202,19 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   }
   #endif
 
-  if (type == MENU_STATIC)
+  switch (type)
   {
-    #define BANK 0x0300
-    
-    unsigned c, r;
-
-    // just do this once, triggered when the first panel
-    // sprite is displayed
-    if (p_obj->graphic_no != 0x89 || p_obj->pixel_x != 0x00)
+    case PANEL_DYNAMIC :
+      // $58=sun(yellow), $59=moon(white)
+      if ((p_obj->graphic_no & 0x58) == 0x58)
+        attr = (p_obj->graphic_no == 0x58 ? 6 : 7);
+      break;
+    case DYNAMIC :
+      attr = osd_room_attr & 7;
+      break;
+    default :
       return;
-
-    for (c=0; c<32; c++)
-    {
-      for (r=0; r<24; r++)
-      {
-		    *vram = 0x7000 + (FIX_XOFF+c)*32 + FIX_YOFF+r;
-		    
-		    if (c < 4)
-	      {
-		      if (r < 4)
-		        *(vram+1) = BANK | ((c%4)*4+r);
-		      else if (r < 20)
-		        *(vram+1) = BANK | (0x44+(c%4));
-		      else
-		        *(vram+1) = BANK | (32+(c%4)*4+(r-20));
-		    }
-		    else if (c < 28)
-	      {
-	        if (r < 3)
-		        *(vram+1) = BANK | (0x40+r);
-		      else if (r >= 21)
-		        *(vram+1) = BANK | (0x40+r-21);
-	      }
-	      else
-        {
-		      if (r < 4)
-		        *(vram+1) = BANK | (16+(c%4)*4+r);
-		      else if (r < 20)
-		        *(vram+1) = BANK | (0x43+(c%4));
-		      else
-		        *(vram+1) = BANK | (48+(c%4)*4+(r-20));
-        }
-      }
-    }
-    return;
-  }
-         
-  if (type == PANEL_STATIC)
-  {
-    unsigned c;
-    
-    // just do this once, triggered when the first panel
-    // sprite is displayed
-    if (p_obj->graphic_no != 0x86 || p_obj->pixel_x != 0x10)
-      return;
-
-    // show the scrolls and the sun/moon frame
-	  *(vram+2) = 32;
-    for (c=0; c<256; c++)
-    {
-      if ((c%32) == 0)
-		    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
-      *(vram+1) = 0x0500 | c;
-    }
-
-    return;
-  }
-   
-  if (type != DYNAMIC && type != PANEL_DYNAMIC)
-    return;
+  }         
 
   n = 256 + 64 + (unsigned)(p_obj->graphic_no)*4*16;
   if (p_obj->flags7 & (1<<7))
@@ -280,13 +227,83 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     for (t=0; t<4; t++)
     {
       obj_map[c].tiles[t].block_number = n+c*4+t;
-      obj_map[c].tiles[t].attributes = 16<<8;
+      obj_map[c].tiles[t].attributes = (16+attr)<<8;
     }
 
   set_current_sprite (p_obj->unused[0]*3);
   write_sprite_data (SPR_XOFF + p_obj->pixel_x, 
                       SPR_YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
                       0x0f, 0xff, 4, 3, obj_map);
+}
+
+void osd_print_border (void)
+{
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+
+  #define BANK 0x0300
+  
+  unsigned c, r;
+  // this is set by the clear_scrn function
+  unsigned attr = 6;  // yellow
+
+  for (c=0; c<32; c++)
+  {
+    for (r=0; r<24; r++)
+    {
+	    *vram = 0x7000 + (FIX_XOFF+c)*32 + FIX_YOFF+r;
+	    
+	    if (c < 4)
+      {
+	      if (r < 4)
+	        *(vram+1) = BANK | (attr<<12) | ((c%4)*4+r);
+	      else if (r < 20)
+	        *(vram+1) = BANK | (attr<<12) | (0x44+(c%4));
+	      else
+	        *(vram+1) = BANK | (attr<<12) | (32+(c%4)*4+(r-20));
+	    }
+	    else if (c < 28)
+      {
+        if (r < 3)
+	        *(vram+1) = BANK | (attr<<12) | (0x40+r);
+	      else if (r >= 21)
+	        *(vram+1) = BANK | (attr<<12) | (0x40+r-21);
+      }
+      else
+      {
+	      if (r < 4)
+	        *(vram+1) = BANK | (attr<<12) | (16+(c%4)*4+r);
+	      else if (r < 20)
+	        *(vram+1) = BANK | (attr<<12) | (0x43+(c%4));
+	      else
+	        *(vram+1) = BANK | (attr<<12) | (48+(c%4)*4+(r-20));
+      }
+    }
+  }
+}
+
+void osd_room_attrib (uint8_t attr)
+{
+  // save it for sprites
+  osd_room_attr = attr;
+}
+
+void osd_display_panel (uint8_t attr)
+{
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+  unsigned c;
+  uint8_t a;
+
+  // show the scrolls and the sun/moon frame
+  *(vram+2) = 32;
+  for (c=0; c<256; c++)
+  {
+    // the sun/moon frame is RED
+    // - I don't understand (c/32)>3 but it works...
+    a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
+    if ((c%32) == 0)
+	    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
+    *(vram+1) = 0x0500 | ((a&7)<<12) | c;
+  }
 }
 
 void osd_debug_hook (void *context)
@@ -411,27 +428,38 @@ int main (int argc, char *argv[])
   const uint8_t g[] = { 0x00>>3, 0x00>>3, 0xff>>3, 0xff>>3 };
   const uint8_t b[] = { 0x00>>3, 0x00>>3, 0xff>>3, 0xff>>3 };
 
-	PALETTE 	pal[2];
+	PALETTE 	pal[8];
 	unsigned	p, c;
 
-	for (p=0; p<2; p++)
+  // map palettes 0-7 with bright colours
+	for (p=0; p<8; p++)
 	{	
 		for (c=0; c<4; c++)
 		{
 			uint16_t	pe = 0;
+	    uint8_t r, g, b;
 	
-  		pe |= (r[c]&(1<<0)) << 14;
-  		pe |= (r[c]&0x1E) << 7;
-  		pe |= (b[c]&(1<<0)) << 12;
-  		pe |= (b[c]&0x1E) >> 1;
-			pe |= (g[c]&(1<<0)) << 13;
-			pe |= (g[c]&0x1E) << 3;
+	    if (c < 2)
+        r = g = b = 0;
+      else
+      {
+  	    r = (p&(1<<1) ? (0xFF>>3) : 0x00);
+  	    g = (p&(1<<2) ? (0xFF>>3) : 0x00);
+  	    b = (p&(1<<0) ? (0xFF>>3) : 0x00);
+      }
+      
+  		pe |= (r&(1<<0)) << 14;
+  		pe |= (r&0x1E) << 7;
+  		pe |= (b&(1<<0)) << 12;
+  		pe |= (b&0x1E) >> 1;
+			pe |= (g&(1<<0)) << 13;
+			pe |= (g&0x1E) << 3;
 
 			pal[p].color[c] = pe;
 		}
 	}
-	setpalette(0, 2, (const PPALETTE)&pal);
-	setpalette(16, 2, (const PPALETTE)&pal);
+	setpalette(0, 8, (const PPALETTE)&pal);
+	setpalette(16, 8, (const PPALETTE)&pal);
 
   // set full spectrum palette
 	for (p=0; p<1; p++)

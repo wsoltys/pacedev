@@ -64,13 +64,18 @@ void osd_clear_scrn_buffer (void);
 int osd_key (int _key);
 int osd_keypressed (void);
 int osd_readkey (void);
-void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str);
-void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str);
-uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t code);
+void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t *str);
+void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, char *str);
+uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code);
 void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c);
 void osd_update_screen (void);
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 void osd_print_sprite (uint8_t type, POBJ32 p_obj);
+
+void osd_print_border ();
+void osd_room_attrib (uint8_t attr);
+void osd_display_panel (uint8_t attr);
+
 void osd_debug_hook (void *context);
 
 #endif // __KL_OSD_H__

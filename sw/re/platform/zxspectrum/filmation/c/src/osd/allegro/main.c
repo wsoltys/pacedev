@@ -25,7 +25,7 @@
 #include "kl_osd.h"
 #include "kl_dat.h"
 
-//#define BUILD_OPT_DISABLE_LOADER
+#define BUILD_OPT_DISABLE_LOADER
 //#define BUILD_OPT_DISABLE_MASK
 
 static BITMAP *scrn_buf;
@@ -65,7 +65,7 @@ int osd_keypressed (void)
   return (keypressed ());
 }
 
-void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t *str)
+void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
 {
   unsigned c, l, b;
   
@@ -101,7 +101,7 @@ static uint8_t from_ascii (char ch)
     return ((uint8_t)-1);
 }
 
-void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
+void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, char *str)
 {
   unsigned c, l, b;
   
@@ -119,7 +119,7 @@ void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, char *str)
       for (b=0; b<8; b++)
       {
         if (d & (1<<7))
-          putpixel (scrn_buf, x+c*8+b, 191-y+l, 15);
+          putpixel (scrn_buf, x+c*8+b, 191-y+l, attr&0x0f);
         d <<= 1;
       }
     }  

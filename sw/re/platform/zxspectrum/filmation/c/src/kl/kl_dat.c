@@ -3808,7 +3808,8 @@ const uint8_t days_font[][8] =
 };
 
 // not const
-uint8_t menu_colours[] = 
+// - yes, for now because no flashing
+const uint8_t menu_colours[] = 
 {
   0x43, 0xC4, 0x44, 0x44, 0x44, 0x45, 0x47, 0x47
 };
