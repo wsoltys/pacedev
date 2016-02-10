@@ -562,7 +562,7 @@ onscreen_loop:
 
 game_delay:
   // last to-do  
-  osd_delay (internal.turbo ? 5 : 50);
+  osd_delay (internal.turbo ? 4000 : 50);
 
   if (render_status_info)
   {
@@ -2042,13 +2042,27 @@ void upd_112_to_118_184 (POBJ32 p_obj)
 }
 
 // $BF37
-// sparkles
+// sparkles (object in cauldron and collapsing block)
 void upd_185_187 (POBJ32 p_obj)
 {
   UNTESTED;
 
-  // zap the graphic_no so the object no longer appears  
-  graphic_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
+  // BUG: this routine is primarily for special objects
+  //      when dropped into cauldron etc (disappear)
+  // BUT: when the collapsing block disappears, the
+  //      graphic_no is set to 184, which is then
+  //      incremented to 185, and we end up here.
+  // ONLY: there's no special object entry
+  // 
+  // The Z80 code zapped ($0000) which is ROM
+  // - and harmless on the ZX Spectrum.
+
+  // The fix here is to assign -1 to all non-special objects
+  // and check the 'pointer' (index) here before zapping!
+
+  // zap the graphic_no in the special objects table
+  if (p_obj->u.ptr_obj_tbl_entry != (uint16_t)-1)
+    special_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
   upd_119 (p_obj);
 }
 
@@ -2281,7 +2295,7 @@ void upd_103 (POBJ32 p_obj)
   {
     p_obj->graphic_no |= (1<<3);
     adj_m4_m12 (p_obj);
-    p_obj->u.ptr_obj_tbl_entry = 0;
+    special_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
     lives++;
     disable_spike_ball_drop = 0;
     // audio - toggles FE directly
@@ -2336,7 +2350,7 @@ void upd_104_to_110 (POBJ32 p_obj)
           prepare_final_animation ();
       }
       obj_dropping_into_cauldron = 0;
-      graphic_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
+      special_objs_tbl[p_obj->u.ptr_obj_tbl_entry].graphic_no = 0;
       upd_111 (p_obj);
       return;
     }
@@ -4293,6 +4307,9 @@ found_screen:
       // zero everything else
       memset (&p_other_objs->d_x, 0, 23);
 
+      // bugfix!!!
+      p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
+
 #ifdef __HAS_HWSPRITES__
       p_other_objs->unused[0] = obj_no++;
 #endif
@@ -4349,6 +4366,9 @@ found_screen:
         
         // zero everything else        
         memset (&p_other_objs->d_x, 0, 23);
+
+        // bugfix!!!
+        p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
 
 #ifdef __HAS_HWSPRITES__
         p_other_objs->unused[0] = obj_no++;
