@@ -72,7 +72,6 @@ extern "C"
 {
 #endif
   
-void osd_room_attrib (uint8_t attr);
 void osd_delay (unsigned ms);
 void osd_clear_scrn (void);
 void osd_clear_scrn_buffer (void);

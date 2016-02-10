@@ -44,16 +44,8 @@
 #define SPR_XOFF        (FIX_XOFF*8)
 #define SPR_YOFF        (FIX_YOFF*8)-16
 
-static uint8_t osd_room_attr;
-
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
-
-void osd_room_attrib (uint8_t attr)
-{
-  // save it for sprites
-  osd_room_attr = attr;
-}
 
 void osd_delay (unsigned ms)
 {
@@ -150,9 +142,6 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
 void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
   static TILEMAP obj_map[3];
-
-  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
-  
   unsigned n, c, t;
 
   #if 0
@@ -370,11 +359,6 @@ int main (int argc, char *argv[])
   //uint8_t colour_mono = *(dips+6);
   //uint8_t mono_colour = *(dips+7);
 
-	// transparent, black, white, white
-  const uint8_t r[] = { 0x00>>3, 0x00>>3, 0xff>>3, 0xff>>3 };
-  const uint8_t g[] = { 0x00>>3, 0x00>>3, 0xff>>3, 0xff>>3 };
-  const uint8_t b[] = { 0x00>>3, 0x00>>3, 0xff>>3, 0xff>>3 };
-
 	PALETTE 	pal[8];
 	unsigned	p, c;
 
@@ -405,7 +389,9 @@ int main (int argc, char *argv[])
 			pal[p].color[c] = pe;
 		}
 	}
+	// set palette banks for FIX layer
 	setpalette(0, 8, (const PPALETTE)&pal);
+	// set palette banks for SPRITE layer
 	setpalette(16, 8, (const PPALETTE)&pal);
 
   // set full spectrum palette
@@ -430,6 +416,7 @@ int main (int argc, char *argv[])
 			pal[p].color[c] = pe;
 		}
 	}
+	// FIX layer title screen
 	setpalette(15, 1, (const PPALETTE)&pal);
 
 	while (1)
@@ -438,6 +425,7 @@ int main (int argc, char *argv[])
 
 		clear_fix();
 		clear_spr();
+		
     show_title ();
 		clear_fix();
 

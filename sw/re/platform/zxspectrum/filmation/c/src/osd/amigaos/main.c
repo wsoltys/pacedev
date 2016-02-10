@@ -37,8 +37,6 @@
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
-static uint8_t osd_room_attr = 7; // white
-
 static struct IntuitionBase *IntuitionBase;
 static struct GfxBase *GfxBase;
 static struct BitMap *myBitMaps[BLANK+1];
@@ -48,11 +46,6 @@ static struct MsgPort *KeyMP;
 static uint8_t *keyMatrix;
   
 const char __ver[40] = "$VER: Knight Lore v0.9a3 (10.02.2016)";
-
-void osd_room_attrib (uint8_t attr)
-{
-  osd_room_attr = attr;
-}
 
 void osd_delay (unsigned ms)
 {

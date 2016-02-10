@@ -33,14 +33,7 @@ static BITMAP *scrn_buf;
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
-static uint8_t osd_room_attr = 7; // white
 static unsigned mask_colour = 0;
-
-void osd_room_attrib (uint8_t attr)
-{
-  // save it for sprites
-  osd_room_attr = attr;
-}
 
 void osd_delay (unsigned ms)
 {

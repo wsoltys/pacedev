@@ -4259,9 +4259,6 @@ found_screen:
   // get attribute, set BRIGHT  
   curr_room_attrib = (attr & 7) | 0x40;
 
-  // for systems without attribute memory
-  osd_room_attrib (curr_room_attrib);
-
   room_size = (attr >> 3) & 0x1F;
   room_size_X = room_size_tbl[room_size].x;
   room_size_Y = room_size_tbl[room_size].y;
