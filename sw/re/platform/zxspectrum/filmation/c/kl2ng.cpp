@@ -96,7 +96,7 @@ void show_ng_tiles (void)
 
 static uint8_t from_ascii (char ch)
 {
-  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
+  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.@ %";
   uint8_t i;
   
   for (i=0; chrset[i]; i++)
@@ -189,17 +189,20 @@ void do_fix (void)
     
     if (c < 256)
     {
+#if 0      
       if (c < 4)
-        pfont = days_font[c];
+        pfont = day_font[c];
       else
       if ((i = from_ascii ((char)c)) != (uint8_t)-1)
       {      
         fprintf (stderr, "$%02X=\'%c\'\n", c, c);
         pfont = kl_font[i];
       }
+#endif
+      if (c <= 'Z')
+        pfont = kl_font[c];
       else
         pfont = zeroes;
-
       // create font data
       for (unsigned col=0; col<4; col++)
       {
@@ -346,7 +349,7 @@ void do_sprites (void)
     if (s < 40)
       pfont = kl_font[s];
     else if (s < 40+4)
-      pfont = days_font[s-40];
+      pfont = day_font[s-40];
     
     if (s < 40+4)
     {

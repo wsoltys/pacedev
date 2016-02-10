@@ -49,6 +49,12 @@ static uint8_t osd_room_attr;
 extern void knight_lore (void);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
+void osd_room_attrib (uint8_t attr)
+{
+  // save it for sprites
+  osd_room_attr = attr;
+}
+
 void osd_delay (unsigned ms)
 {
 	while (ms--)
@@ -113,45 +119,6 @@ int osd_readkey (void)
 	return (0);
 }
 
-void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
-{
-  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
-  *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
-  *(vram+2) = 32;
-
-  do
-  {
-	  *(vram+1) = 0x0400 | ((attr&0x07)<<12) | (*str & 0x7f);
-	  
-	} while ((*(str++) & 0x80) == 0);
-}
-
-static uint8_t from_ascii (char ch)
-{
-  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
-  uint8_t i;
-  
-  for (i=0; chrset[i]; i++)
-    if (chrset[i] == ch)
-      return (i);
-      
-    return ((uint8_t)-1);
-}
-
-void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, char *str)
-{
-  // only ever printed from the std font
-  // - bank 4 for Knight Lore / DAYS fonts
-  // use palette 0
-  
-  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
-  *vram = 0x7000 + ((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
-  *(vram+2) = 32;
-
-  while (*str)
-	  *(vram+1) = 0x0400 | ((attr&0x07)<<12) | *((unsigned char *)str++);
-}
-
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   // only ever called to print numbers
@@ -160,7 +127,7 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr,
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
   *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
   *(vram+2) = 32;
-  *(vram+1) = 0x0400 | ((attr&7)<<12) | ('0' + code);
+  *(vram+1) = 0x0400 | ((attr&7)<<12) | code;
   
   return (x+8);
 }
@@ -279,12 +246,6 @@ void osd_print_border (void)
       }
     }
   }
-}
-
-void osd_room_attrib (uint8_t attr)
-{
-  // save it for sprites
-  osd_room_attr = attr;
 }
 
 void osd_display_panel (uint8_t attr)
