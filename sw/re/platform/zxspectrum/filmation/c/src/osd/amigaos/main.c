@@ -39,7 +39,12 @@ static struct IOStdReq *KeyIO;
 static struct MsgPort *KeyMP;
 static uint8_t *keyMatrix;
   
-const char __ver[40] = "$VER: Knight Lore v0.9a2 (05.02.2016)";
+const char __ver[40] = "$VER: Knight Lore v0.9a3 (10.02.2016)";
+
+void osd_room_attrib (uint8_t attr)
+{
+  osd_room_attr = attr;
+}
 
 void osd_delay (unsigned ms)
 {
@@ -85,72 +90,6 @@ int osd_readkey (void)
   return (readkey ());
 	#endif
 	return (0);
-}
-
-void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
-{
-  uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
-  p += (191-y)*BM_WIDTH_BYTES+x/8;
-
-  unsigned c, l, b;
-  
-  for (c=0; ; c++, str++)
-  {
-    uint8_t code = *str & 0x7f;
-
-    unsigned char *q = p;    
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      
-      *p = d;
-      p += BM_WIDTH_BYTES;
-    }  
-    if (*str & (1<<7))
-      break;
-    p = ++q;
-  }
-}
-
-static uint8_t from_ascii (char ch)
-{
-  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
-  uint8_t i;
-  
-  for (i=0; chrset[i]; i++)
-    if (chrset[i] == ch)
-      return (i);
-      
-    return ((uint8_t)-1);
-}
-
-// always on byte boundary
-// - original code calls print_8x8
-void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, char *str)
-{
-  uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
-  p += (191-y)*BM_WIDTH_BYTES+x/8;
-
-  unsigned c, l, b;
-
-  for (c=0; *str; c++)
-  {
-    uint8_t ascii = (uint8_t)*(str++);
-    uint8_t code = from_ascii (ascii);
-
-    unsigned char *q = p;    
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      if (d == (uint8_t)-1)
-        break;
-
-      *p = d;
-      p += BM_WIDTH_BYTES;
-
-    }  
-    p = ++q;
-  }
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
@@ -252,11 +191,6 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     }
     p -= BM_WIDTH_BYTES+w;
   }
-}
-
-void osd_room_attrib (uint8_t attr)
-{
-  osd_room_attr = attr;
 }
 
 void osd_debug_hook (void *context)
