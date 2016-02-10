@@ -12,7 +12,7 @@
 ; Input	CRC32 :	57F860FA
 
 ; +--------------------------------------------------+
-; | ZX Spectrum	Knight Lore Disassembly	v1.00rc4     |
+; | ZX Spectrum	Knight Lore Disassembly	v1.00rc5     |
 ; |    - by tcdev (msmcdoug@gmail.com)		     |
 ; +--------------------------------------------------+
 ;
@@ -4656,18 +4656,18 @@ display_day:
 		add	a, #2
 		and	#7
 		or	#0x40 ;	'@'                             ; bright on
-		ld	(days_txt), a
-		ld	hl, #days_font
+		ld	(day_txt), a
+		ld	hl, #day_font
 		ld	(gfxbase_8x8), hl			; set print routine font
-		ld	de, #days_txt
+		ld	de, #day_txt
 		ld	hl, #0xF70				; screen location
 		push	hl
 		jp	print_text
 ; End of function display_day
 
 ; ---------------------------------------------------------------------------
-days_txt:	.db 0, 0, 1, 2,	0x83
-days_font:	.db 6, 7, 6, 6,	6, 6, 6, 0xF
+day_txt:	.db 0, 0, 1, 2,	0x83
+day_font:	.db 6, 7, 6, 6,	6, 6, 6, 0xF
 		.db 0, 1, 0x82,	0xC6, 0x64, 0x6C, 0x6D,	0xC6
 		.db 0xC8, 0xC6,	0xE1, 0x60, 0x60, 0xE0,	0x64, 0x63
 		.db 0x60, 0x60,	0x60, 0xE0, 0x60, 0x40,	0xC0, 0x80
@@ -5052,7 +5052,20 @@ loc_BF31:
 upd_185_187:
 		ld	l, 16(ix)
 		ld	h, 17(ix)
-		ld	(hl), #0				; zap graphic_no in graphic_objs_tbl
+;
+;  BUG:	this routine is	primarily for special objects
+;	when dropped into cauldron etc (disappear)
+;  BUT:	when the collapsing block disappears, the
+;	graphic_no is set to 184, which	is then
+;	incremented to 185, and	we end up here.
+;  ONLY: there's no special object entry (HL=0)
+;
+;  So it zaps [$0000] which is ROM
+;  - and harmless on the ZX Spectrum.
+;
+; BUG VERIFIED!	on the Spectrum	under MESS
+;
+		ld	(hl), #0				; zap graphic_no in special_objs_tbl
 ; last death sparkle
 
 upd_119:

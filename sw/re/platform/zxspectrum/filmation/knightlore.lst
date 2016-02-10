@@ -10,7 +10,7 @@ ZX_VRAM:4000		 ; Input MD5   : 9EB6957C285769A5AA2774B23353AE37
 ZX_VRAM:4000		 ; Input CRC32 : 57F860FA
 ZX_VRAM:4000
 ZX_VRAM:4000		 ; +--------------------------------------------------+
-ZX_VRAM:4000		 ; | ZX	Spectrum Knight	Lore Disassembly v1.00rc4     |
+ZX_VRAM:4000		 ; | ZX	Spectrum Knight	Lore Disassembly v1.00rc5     |
 ZX_VRAM:4000		 ; |	- by tcdev (msmcdoug@gmail.com)		      |
 ZX_VRAM:4000		 ; +--------------------------------------------------+
 ZX_VRAM:4000		 ;
@@ -4654,18 +4654,18 @@ RAM:BCCD 2F			     cpl
 RAM:BCCE C6 02			     add     a,	#2
 RAM:BCD0 E6 07			     and     #7
 RAM:BCD2 F6 40			     or	     #0x40 ; '@'                             ; bright on
-RAM:BCD4 32 E7 BC		     ld	     (days_txt), a
-RAM:BCD7 21 EC BC		     ld	     hl, #days_font
+RAM:BCD4 32 E7 BC		     ld	     (day_txt),	a
+RAM:BCD7 21 EC BC		     ld	     hl, #day_font
 RAM:BCDA 22 C7 5B		     ld	     (gfxbase_8x8), hl			     ; set print routine font
-RAM:BCDD 11 E7 BC		     ld	     de, #days_txt
+RAM:BCDD 11 E7 BC		     ld	     de, #day_txt
 RAM:BCE0 21 70 0F		     ld	     hl, #0xF70				     ; screen location
 RAM:BCE3 E5			     push    hl
 RAM:BCE4 C3 4C BE		     jp	     print_text
 RAM:BCE4	     ; End of function display_day
 RAM:BCE4
 RAM:BCE4	     ; ---------------------------------------------------------------------------
-RAM:BCE7 00 00 01 02+days_txt:	     .db 0, 0, 1, 2, 0x83
-RAM:BCEC 06 07 06 06+days_font:	     .db 6, 7, 6, 6, 6,	6, 6, 0xF
+RAM:BCE7 00 00 01 02+day_txt:	     .db 0, 0, 1, 2, 0x83
+RAM:BCEC 06 07 06 06+day_font:	     .db 6, 7, 6, 6, 6,	6, 6, 0xF
 RAM:BCF4 00 01 82 C6+		     .db 0, 1, 0x82, 0xC6, 0x64, 0x6C, 0x6D, 0xC6
 RAM:BCFC C8 C6 E1 60+		     .db 0xC8, 0xC6, 0xE1, 0x60, 0x60, 0xE0, 0x64, 0x63
 RAM:BD04 60 60 60 E0+		     .db 0x60, 0x60, 0x60, 0xE0, 0x60, 0x40, 0xC0, 0x80
@@ -5050,7 +5050,20 @@ RAM:BF37
 RAM:BF37	     upd_185_187:
 RAM:BF37 DD 6E 10		     ld	     l,	16(ix)
 RAM:BF3A DD 66 11		     ld	     h,	17(ix)
-RAM:BF3D 36 00			     ld	     (hl), #0				     ; zap graphic_no in graphic_objs_tbl
+RAM:BF3D	     ;
+RAM:BF3D	     ;	BUG: this routine is primarily for special objects
+RAM:BF3D	     ;	     when dropped into cauldron	etc (disappear)
+RAM:BF3D	     ;	BUT: when the collapsing block disappears, the
+RAM:BF3D	     ;	     graphic_no	is set to 184, which is	then
+RAM:BF3D	     ;	     incremented to 185, and we	end up here.
+RAM:BF3D	     ;	ONLY: there's no special object entry (HL=0)
+RAM:BF3D	     ;
+RAM:BF3D	     ;	So it zaps [$0000] which is ROM
+RAM:BF3D	     ;	- and harmless on the ZX Spectrum.
+RAM:BF3D	     ;
+RAM:BF3D	     ; BUG VERIFIED! on	the Spectrum under MESS
+RAM:BF3D	     ;
+RAM:BF3D 36 00			     ld	     (hl), #0				     ; zap graphic_no in special_objs_tbl
 RAM:BF3F	     ; last death sparkle
 RAM:BF3F
 RAM:BF3F	     upd_119:
