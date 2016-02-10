@@ -22,12 +22,12 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ gfx.cpp -o xgf -lalleg
 
-//#define DO_C_DATA
+#define DO_C_DATA
 
 //#define DO_ASCII
 //#define DO_PARSE_MAP
 //#define DO_GA
-#define DO_FONT
+//#define DO_FONT
 //#define DO_SPRITE_DATA
 //#define DO_SPRITE_TABLE
 //#define DO_BLOCK_DATA
@@ -626,7 +626,7 @@ void knight_lore (void)
 
   // days_txt
   p = 0xbce7;
-  fprintf (fp2, "uint8_t days_txt[] = \n{\n  ");
+  fprintf (fp2, "uint8_t day_txt[] = \n{\n  ");
   for (unsigned i=0; i<5;i++)
   {
     fprintf (fp2, "0x%02x", ram[p++]);
@@ -653,7 +653,7 @@ void knight_lore (void)
 
   // days_font
   p = 0xbcec;
-  fprintf (fp2, "uint8_t days_font[][8] = \n{\n");
+  fprintf (fp2, "uint8_t day_font[][8] = \n{\n");
   for (int i=0; p<0xbd0c; i++)
   {
     if ((i%8) == 0)
@@ -713,6 +713,21 @@ void knight_lore (void)
   }
   fprintf (fp2, "};\n\n");
 
+  // object_attributes
+  p = 0xbfd3;
+  fprintf (fp2, "uint8_t object_attributes[] = \n{\n");
+  for (int i=0; i<8; i++)
+  {
+    if ((i%8) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "0x%02X", ram[p++]);
+    if ((i%8) == 7)
+      fprintf (fp2, "\n");
+    else
+      fprintf (fp2, ", ");
+  }
+  fprintf (fp2, "};\n\n");
+  
   // objects_required
   p = 0xc27d;
   fprintf (fp2, "uint8_t objects_required[] = \n{\n");
@@ -1381,9 +1396,9 @@ void main (int argc, char *argv[])
   }
 	set_palette_range (pal, 0, 7, 1);
 
-  //knight_lore ();
+  knight_lore ();
   //alien_8 ();
-  pentagram ();
+  //pentagram ();
     
   allegro_exit ();
 }

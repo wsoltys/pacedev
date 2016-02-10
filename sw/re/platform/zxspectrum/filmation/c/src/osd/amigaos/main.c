@@ -15,6 +15,14 @@
 #include "osd_types.h"
 #include "kl_osd.h"
 
+//#define __MONO__
+#ifdef __MONO__
+  #define NPLANES   1
+#else
+  #define __COLOUR__
+  #define NPLANES   3
+#endif
+
 #define ENABLE_MASK
 
 // bitmaps
@@ -53,13 +61,19 @@ void osd_delay (unsigned ms)
 
 void osd_clear_scrn (void)
 {
+  unsigned n;
+  
   //SetRast (&(screen->RastPort), ON_PEN);
-  BltClear (myBitMaps[VIDEO]->Planes[0], PL_SIZE, 1);
+  for (n=0; n<NPLANES; n++)
+    BltClear (myBitMaps[VIDEO]->Planes[n], PL_SIZE, 1);
 }
 
 void osd_clear_scrn_buffer (void)
 {
-  BltClear (myBitMaps[VIDBUF]->Planes[0], PL_SIZE, 1);
+  unsigned n;
+  
+  for (n=0; n<NPLANES; n++)
+    BltClear (myBitMaps[VIDBUF]->Planes[n], PL_SIZE, 1);
 }
 
 int osd_key (int _key)
@@ -94,32 +108,46 @@ int osd_readkey (void)
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
-  uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
-  p += (191-y)*BM_WIDTH_BYTES+x/8;
+  unsigned n;
 
-  unsigned l, b;
-
-  for (l=0; l<8; l++)
+  for (n=0; n<NPLANES; n++)
   {
-    uint8_t d = gfxbase_8x8[code*8+l];
-    if (d == (uint8_t)-1)
-      break;
+    uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[n];
+    p += (191-y)*BM_WIDTH_BYTES+x/8;
 
-    *p = d;
-    p += BM_WIDTH_BYTES;    
-  }  
+    unsigned l;
+    for (l=0; l<8; l++)
+    {
+      uint8_t d;
+      
+      #ifdef __COLOUR__
+        if ((attr & (1<<n)) == 0)
+          *p = 0;
+        else
+      #endif
+          *p = gfxbase_8x8[code*8+l];
+      p += BM_WIDTH_BYTES;    
+    }  
+  }
   return (x+8);
 }
 
 void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c)
 {
 #if 1
-  uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
-  p += (191-(y+height_lines-1))*BM_WIDTH_BYTES + x/8;
-  for (; height_lines; height_lines--)
+  uint8_t *p;
+  unsigned o = (191-((unsigned)y+(unsigned)height_lines-1))*BM_WIDTH_BYTES + (unsigned)x/8;
+  unsigned h = height_lines;
+  unsigned n;
+  
+  for (n=0; n<NPLANES; n++)
   {
-    memset (p, 0, width_bytes);
-    p += BM_WIDTH_BYTES;
+    p = (uint8_t *)(myBitMaps[VIDBUF]->Planes[n]) + o;
+    for (h=0; h<height_lines; h++)
+    {
+      memset (p, c, width_bytes);
+      p += BM_WIDTH_BYTES;
+    }
   }
 #else  
   // for some reason this doesn't work for the sun/moon
@@ -146,15 +174,20 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
                       0xC0);
 }
 
-void osd_print_sprite (uint8_t type, POBJ32 p_obj)
+void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
   uint8_t *psprite;
 
-  uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[0];
+  uint8_t *p[NPLANES];
   uint8_t o = p_obj->pixel_x & 7;
-  
-  p += (191-p_obj->pixel_y)*BM_WIDTH_BYTES + p_obj->pixel_x/8;
 
+  unsigned n;
+  for (n=0; n<NPLANES; n++)
+  {
+    p[n] = (uint8_t *)myBitMaps[VIDBUF]->Planes[n];
+    p[n] += (191-p_obj->pixel_y)*BM_WIDTH_BYTES + p_obj->pixel_x/8;
+  }
+  
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
   // references p_obj
@@ -171,25 +204,35 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     {
       uint8_t m = *(psprite++);
       uint8_t d = *(psprite++);
-      
-      // handle bit-shift
-      uint8_t v = *p;
-#ifdef ENABLE_MASK
-      v &= ~(m>>o);
-#endif
-      v |= (d>>o);
-      *p++ = v;
-      if (o != 0)
-      {
-        v = *p;
-#ifdef ENABLE_MASK
-        v &= ~(m<<(8-o));
-#endif
-        v |= (d<<(8-o));
-        *p = v;
+
+      for (n=0; n<NPLANES; n++)
+      {      
+        // handle bit-shift
+        uint8_t v = *p[n];
+        #ifdef ENABLE_MASK
+          v &= ~(m>>o);
+        #endif
+        #ifdef __COLOUR__
+          if ((attr & (1<<n)) != 0)
+        #endif
+            v |= (d>>o);
+        *(p[n]++) = v;
+        if (o != 0)
+        {
+          v = *p[n];
+          #ifdef ENABLE_MASK
+            v &= ~(m<<(8-o));
+          #endif
+          #ifdef __COLOUR__
+            if ((attr & (1<<n)) != 0)
+          #endif
+              v |= (d<<(8-o));
+          *p[n] = v;
+        }
       }
     }
-    p -= BM_WIDTH_BYTES+w;
+    for (n=0; n<NPLANES; n++)
+      p[n] -= BM_WIDTH_BYTES+w;
   }
 }
 
@@ -216,23 +259,36 @@ int main (int argc, char *argv[])
   myBitMaps[VIDEO] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
   myBitMaps[BLANK] = (struct BitMap *)AllocMem ((LONG)sizeof(struct BitMap), MEMF_CLEAR);
   
-  InitBitMap (myBitMaps[VIDBUF], 1, BM_WIDTH, BM_HEIGHT);
-  InitBitMap (myBitMaps[VIDEO], 1, BM_WIDTH, BM_HEIGHT);
-  InitBitMap (myBitMaps[BLANK], 1, BM_WIDTH, BM_HEIGHT);
+  InitBitMap (myBitMaps[VIDBUF], NPLANES, BM_WIDTH, BM_HEIGHT);
+  InitBitMap (myBitMaps[VIDEO], NPLANES, BM_WIDTH, BM_HEIGHT);
+  InitBitMap (myBitMaps[BLANK], NPLANES, BM_WIDTH, BM_HEIGHT);
 
-  myBitMaps[VIDBUF]->Planes[0] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
-  BltClear (myBitMaps[VIDBUF]->Planes[0], PL_SIZE, 1);
-  myBitMaps[VIDEO]->Planes[0] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
-  BltClear (myBitMaps[VIDEO]->Planes[0], PL_SIZE, 1);
-  // for fill_window
-  myBitMaps[BLANK]->Planes[0] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
-  BltClear (myBitMaps[BLANK]->Planes[0], PL_SIZE, 1);
-
+  for (i=0; i<NPLANES; i++)
+  {
+    myBitMaps[VIDBUF]->Planes[i] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
+    BltClear (myBitMaps[VIDBUF]->Planes[i], PL_SIZE, 1);
+    myBitMaps[VIDEO]->Planes[i] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
+    BltClear (myBitMaps[VIDEO]->Planes[i], PL_SIZE, 1);
+    // for fill_window
+    myBitMaps[BLANK]->Planes[i] = (PLANEPTR)AllocRaster (BM_WIDTH, BM_HEIGHT);
+    BltClear (myBitMaps[BLANK]->Planes[i], PL_SIZE, 1);
+  }
+  
   // now the screen
-  struct ColorSpec myColours[3] = 
+  struct ColorSpec myColours[] = 
   { 
-    { 0, 0x0000, 0x0000, 0x0000 },
-    { 1, 0x003F, 0x003F, 0x003F },
+    {  0, 0x0000, 0x0000, 0x0000 },
+#ifdef __MONO__
+    {  1, 0x003F, 0x003F, 0x003F },
+#else    
+    {  1, 0x0000, 0x0000, 0x003F },
+    {  2, 0x003F, 0x0000, 0x0000 },
+    {  3, 0x003F, 0x0000, 0x003F },
+    {  4, 0x0000, 0x003F, 0x0000 },
+    {  5, 0x0000, 0x003F, 0x003F },
+    {  6, 0x003F, 0x003F, 0x0000 },
+    {  7, 0x003F, 0x003F, 0x003F },
+#endif    
     { -1, 0x0000, 0x0000, 0x0000 },
   };
   screen = OpenScreenTags (NULL, 
@@ -240,7 +296,7 @@ int main (int argc, char *argv[])
               SA_Top, 0,
               SA_Width, BM_WIDTH,
               SA_Height, BM_HEIGHT,
-              SA_Depth, 1,
+              SA_Depth, NPLANES,
               SA_Type, CUSTOMSCREEN|CUSTOMBITMAP|SCREENQUIET,
               SA_BitMap, (ULONG)myBitMaps[VIDEO],
               SA_Colors, (ULONG)myColours,
@@ -257,9 +313,12 @@ int main (int argc, char *argv[])
 
   CloseScreen (screen);
   
-  FreeRaster (myBitMaps[VIDBUF]->Planes[0], BM_WIDTH, BM_HEIGHT);
-  FreeRaster (myBitMaps[VIDEO]->Planes[0], BM_WIDTH, BM_HEIGHT);
-  FreeRaster (myBitMaps[BLANK]->Planes[0], BM_WIDTH, BM_HEIGHT);
+  for (i=0; i<NPLANES; i++)
+  {
+    FreeRaster (myBitMaps[VIDBUF]->Planes[i], BM_WIDTH, BM_HEIGHT);
+    FreeRaster (myBitMaps[VIDEO]->Planes[i], BM_WIDTH, BM_HEIGHT);
+    FreeRaster (myBitMaps[BLANK]->Planes[i], BM_WIDTH, BM_HEIGHT);
+  }
   FreeMem (myBitMaps[VIDBUF], (ULONG)sizeof(struct BitMap));
   FreeMem (myBitMaps[VIDEO], (ULONG)sizeof(struct BitMap));
   FreeMem (myBitMaps[BLANK], (ULONG)sizeof(struct BitMap));

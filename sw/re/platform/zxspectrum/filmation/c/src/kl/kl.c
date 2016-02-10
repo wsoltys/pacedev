@@ -60,17 +60,6 @@
 // standard is 5            
 #define NO_LIVES            5
 
-#define ATTR_BLACK          0
-#define ATTR_BLUE           1
-#define ATTR_RED            2
-#define ATTR_MAGENTA        3
-#define ATTR_GREEN          4
-#define ATTR_CYAN           5
-#define ATTR_YELLOW         6
-#define ATTR_WHITE          7
-
-#define BRIGHT(a)           (0x40|(a))
-
 #include "osd_types.h"
 #include "kl_osd.h"
 #include "kl_dat.h"
@@ -244,7 +233,7 @@ static void print_text (uint8_t x, uint8_t y, uint8_t attr, char *str);
 static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t attr, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
-static void multiple_print_sprite (uint8_t type, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n);
+static void multiple_print_sprite (uint8_t attr, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n);
 static void upd_120_to_126 (POBJ32 p_obj);
 static void upd_127 (POBJ32 p_obj);
 static void init_death_sparkles (POBJ32 p_obj);
@@ -343,7 +332,7 @@ static void init_start_location (void);
 static void build_screen_objects (void);
 static void flag_scrn_visited (void);
 static uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite);
-static uint8_t *transfer_sprite_and_print (uint8_t type, POBJ32 p_obj, uint8_t *psprite);
+static uint8_t *transfer_sprite_and_print (uint8_t attr, POBJ32 p_obj, uint8_t *psprite);
 static void display_panel (void);
 static void print_border (void);
 static void colour_panel (void);
@@ -361,7 +350,7 @@ static void blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t h
 static uint8_t calc_pixel_XY (POBJ32 p_obj);
 uint8_t *flip_sprite (POBJ32 p_obj);
 static void calc_pixel_XY_and_render (POBJ32 p_obj);
-static void print_sprite (uint8_t type, POBJ32 p_obj);
+static void print_sprite (uint8_t attr, POBJ32 p_obj);
 
 // end of prototypes
 
@@ -1846,10 +1835,7 @@ void print_lives_gfx (void)
 #ifdef __HAS_HWSPRITES__
   p_obj->unused[0] = MAX_OBJS;
 #endif  
-  print_sprite (PANEL_DYNAMIC, p_obj);
-  // attributes
-  // fill_de (47h,5a42h,2);
-  // fill_de (47h,5a62h,4);
+  print_sprite (BRIGHT(ATTR_WHITE), p_obj);
 }
 
 // $BCA3
@@ -1999,13 +1985,13 @@ void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_
 }
 
 // $BEE4
-void multiple_print_sprite (uint8_t type, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n)
+void multiple_print_sprite (uint8_t attr, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n)
 {
   unsigned i;
   
   for (i=0; i<n; i++)
   {
-    print_sprite (type, p_obj);
+    print_sprite (attr, p_obj);
     p_obj->pixel_x += dx;
     p_obj->pixel_y += dy;
   }
@@ -2100,6 +2086,7 @@ void display_objects (void)
     p_obj->pixel_y = 0;
     fill_window (p_obj->pixel_x, p_obj->pixel_y, 3, 24, 0);
 
+    // debug only
     //objects_carried[i].graphic_no = 0x60+i;
     
     if (objects_carried[i].graphic_no != 0)
@@ -2108,7 +2095,7 @@ void display_objects (void)
 #ifdef __HAS_HWSPRITES__
       p_obj->unused[0] = MAX_OBJS+2+i;
 #endif
-      print_sprite (PANEL_DYNAMIC, p_obj);
+      print_sprite (object_attributes[p_obj->graphic_no&7], p_obj);
     }
     blit_to_screen (p_obj->pixel_x, p_obj->pixel_y, 3, 24);
     // do attributes
@@ -2533,17 +2520,20 @@ display_frame:
 #ifdef __HAS_HWSPRITES__
   p_obj->unused[0] = MAX_OBJS+1;
 #endif  
-  print_sprite (PANEL_DYNAMIC, p_obj);
+  print_sprite ((p_obj->graphic_no & 1 ? BRIGHT(ATTR_WHITE) : BRIGHT(ATTR_YELLOW)),
+                p_obj);
   
+#ifndef __HAS_HWSPRITES__
   p_frm->flags7 = 0;
   p_frm->graphic_no = 0x5a;
   p_frm->pixel_x = 184;
   p_frm->pixel_y = 0;
-  print_sprite (PANEL_STATIC, p_frm);
+  print_sprite (BRIGHT(ATTR_RED), p_frm);
   p_frm->pixel_x = 208;
   p_frm->graphic_no = 0xba;
-  print_sprite (PANEL_STATIC, p_frm);
+  print_sprite (BRIGHT(ATTR_RED), p_frm);
   blit_to_screen (184, 0, 6, 31);
+#endif  
   return;
 
 toggle_day_night:
@@ -4077,10 +4067,10 @@ uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite)
 }
 
 // $D24C
-uint8_t *transfer_sprite_and_print (uint8_t type, POBJ32 p_obj, uint8_t *psprite)
+uint8_t *transfer_sprite_and_print (uint8_t attr, POBJ32 p_obj, uint8_t *psprite)
 {
   uint8_t *p = transfer_sprite (p_obj, psprite);
-  print_sprite (type, p_obj);
+  print_sprite (attr, p_obj);
 
   return (p);
 }
@@ -4091,13 +4081,13 @@ void display_panel (void)
 #ifndef __HAS_HWSPRITES__  
   uint8_t *p = (uint8_t *)panel_data;
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (PANEL_STATIC, &sprite_scratchpad, 16, (uint8_t)-8, 5);
-  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
-  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
+  multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 16, (uint8_t)-8, 5);
+  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (PANEL_STATIC, &sprite_scratchpad, 16, 8, 5);
-  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
-  p = transfer_sprite_and_print (PANEL_STATIC, &sprite_scratchpad, p);
+  multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 16, 8, 5);
+  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
 #else
   osd_display_panel (curr_room_attrib);
 #endif
@@ -4108,18 +4098,18 @@ void print_border (void)
 {
 #ifndef __HAS_HWSPRITES__  
   uint8_t *p = (uint8_t *)border_data;
-  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
-  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
-  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
-  p = transfer_sprite_and_print (MENU_STATIC, &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, p);
+  p = transfer_sprite_and_print (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, p);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 8, 0, 24);
+  multiple_print_sprite (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, 8, 0, 24);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 8, 0, 24);
+  multiple_print_sprite (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, 8, 0, 24);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
+  multiple_print_sprite (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, 0, 1, 128);
   p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (MENU_STATIC, &sprite_scratchpad, 0, 1, 128);
+  multiple_print_sprite (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, 0, 1, 128);
 #else
   osd_print_border ();
 #endif
@@ -4588,12 +4578,12 @@ void calc_pixel_XY_and_render (POBJ32 p_obj)
   //if (p_obj->graphic_no != 2 && p_obj->graphic_no != 3)
   //if (p_obj->graphic_no == 7)
   {
-    print_sprite (DYNAMIC, p_obj);
+    print_sprite (curr_room_attrib, p_obj);
   }
 }
 
 // $D718
-void print_sprite (uint8_t type, POBJ32 p_obj)
+void print_sprite (uint8_t attr, POBJ32 p_obj)
 {
   uint8_t *psprite = flip_sprite (p_obj);
   
@@ -4604,5 +4594,5 @@ void print_sprite (uint8_t type, POBJ32 p_obj)
   psprite++;
   p_obj->data_height_lines = *psprite;
     
-  osd_print_sprite (type, p_obj);
+  osd_print_sprite (attr, p_obj);
 }

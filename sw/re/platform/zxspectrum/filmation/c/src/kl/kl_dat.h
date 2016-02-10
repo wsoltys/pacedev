@@ -3,11 +3,16 @@
 
 #include "osd_types.h"
 
-// this is for hardware sprites
-#define MENU_STATIC         1
-#define PANEL_STATIC        2
-#define PANEL_DYNAMIC       3
-#define DYNAMIC             4
+#define ATTR_BLACK          0
+#define ATTR_BLUE           1
+#define ATTR_RED            2
+#define ATTR_MAGENTA        3
+#define ATTR_GREEN          4
+#define ATTR_CYAN           5
+#define ATTR_YELLOW         6
+#define ATTR_WHITE          7
+
+#define BRIGHT(a)           (0x40|(a))
 
 typedef struct
 {
@@ -103,6 +108,7 @@ extern const char *complete_text[];
 extern const uint8_t gameover_colours[];
 extern const uint8_t gameover_xy[];
 extern char const *gameover_text[];
+extern const uint8_t object_attributes[];
 extern const RATING rating_tbl[];
 extern const uint8_t day_txt[];
 //extern const uint8_t days_font[][8];

@@ -147,12 +147,11 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
   // nothing to do here
 }
 
-void osd_print_sprite (uint8_t type, POBJ32 p_obj)
+void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
   static TILEMAP obj_map[3];
 
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
-  uint8_t attr = 7; // white
   
   unsigned n, c, t;
 
@@ -169,20 +168,6 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   }
   #endif
 
-  switch (type)
-  {
-    case PANEL_DYNAMIC :
-      // $58=sun(yellow), $59=moon(white)
-      if ((p_obj->graphic_no & 0x58) == 0x58)
-        attr = (p_obj->graphic_no == 0x58 ? 6 : 7);
-      break;
-    case DYNAMIC :
-      attr = osd_room_attr & 7;
-      break;
-    default :
-      return;
-  }         
-
   n = 256 + 64 + (unsigned)(p_obj->graphic_no)*4*16;
   if (p_obj->flags7 & (1<<7))
     n += 2*16;
@@ -190,6 +175,7 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
     n += 1*16;
 
   // setup sprite
+  attr &= 7;
   for (c=0; c<3; c++)
     for (t=0; t<4; t++)
     {

@@ -116,41 +116,18 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
         width_bytes<<3, height_lines);
 }
 
-void osd_print_sprite (uint8_t type, POBJ32 p_obj)
+void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
   uint8_t *psprite;
-  uint8_t attr;
-  
+
+  attr &= 7;
+    
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
   // this is needed to create panel font
   //if (type != MENU_STATIC && type != PANEL_STATIC)
   //  return;
 
-  switch (type)
-  {
-    case MENU_STATIC :
-      attr = 6;
-      break;
-    case PANEL_STATIC :
-      if (p_obj->graphic_no == 0x5A ||
-          p_obj->graphic_no == 0xBA)
-        attr = 2;
-      else
-        attr = osd_room_attr & 7;
-      break;
-    case PANEL_DYNAMIC :
-      // $58=sun(yellow), $59=moon(white)
-      if ((p_obj->graphic_no & 0x58) == 0x58)
-        attr = (p_obj->graphic_no == 0x58 ? 6 : 7);
-      break;
-    case DYNAMIC :
-      attr = osd_room_attr & 7;
-      break;
-    default :
-      break;
-  }
-    
   // references p_obj
   psprite = flip_sprite (p_obj);
 

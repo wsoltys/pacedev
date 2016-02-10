@@ -3838,6 +3838,11 @@ char const *gameover_text[] __FORCE_RODATA__ =
   "OVERALL RATING"
 };
 
+const uint8_t object_attributes[] = 
+{
+  0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x42, 0x47
+};
+
 const RATING rating_tbl[] = 
 {
   { 0x42, "   POOR"     }, 
