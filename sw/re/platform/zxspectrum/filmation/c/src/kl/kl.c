@@ -60,6 +60,17 @@
 // standard is 5            
 #define NO_LIVES            5
 
+#define ATTR_BLACK          0
+#define ATTR_BLUE           1
+#define ATTR_RED            2
+#define ATTR_MAGENTA        3
+#define ATTR_GREEN          4
+#define ATTR_CYAN           5
+#define ATTR_YELLOW         6
+#define ATTR_WHITE          7
+
+#define BRIGHT(a)           (0x40|(a))
+
 #include "osd_types.h"
 #include "kl_osd.h"
 #include "kl_dat.h"
@@ -222,15 +233,15 @@ static void calc_and_display_percent (void);
 static void print_days (void);
 static void print_lives_gfx (void);
 static void print_lives (void);
-static void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n);
+static void print_bcd_number (uint8_t x, uint8_t y, uint8_t attr, uint8_t *bcd, uint8_t n);
 static void display_day (void);
 static void do_menu_selection (void);
 static void flash_menu (void);
 static void print_text_single_colour (uint8_t x, uint8_t y, char *str);
-static void print_text_std_font (uint8_t x, uint8_t y, char *str);
+static void print_text_std_font (uint8_t x, uint8_t y, uint8_t attr, char *str);
 static void print_text_raw (uint8_t x, uint8_t y, uint8_t attr, uint8_t *str);
 static void print_text (uint8_t x, uint8_t y, uint8_t attr, char *str);
-static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code);
+static uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t attr, uint8_t code);
 static void display_menu (void);
 static void display_text_list (uint8_t *clours, uint8_t *xy, char *text_list[], uint8_t n);
 static void multiple_print_sprite (uint8_t type, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n);
@@ -1771,14 +1782,14 @@ void game_over (void)
   clear_scrn_buffer ();
   clear_scrn ();
   display_text_list ((uint8_t *)gameover_colours, (uint8_t *)gameover_xy, (char **)gameover_text, 6);
-  print_bcd_number (120, 127, &days, 1);
+  print_bcd_number (120, 127, gameover_colours[1], &days, 1);
   calc_and_display_percent ();
   rating = ((all_objs_in_cauldron & 1) << 2) | ((num_scrns_visited & 0x60) >> 5);
-  print_text_std_font (88, 39, (char *)rating_tbl[rating].text);
+  print_text_std_font (88, 39, rating_tbl[rating].attr, (char *)rating_tbl[rating].text);
   // convert to BCD
   if (objects_put_in_cauldron >= 10)
     objects_put_in_cauldron += 6;
-  print_bcd_number (184, 79, &objects_put_in_cauldron, 1);
+  print_bcd_number (184, 79, gameover_colours[4], &objects_put_in_cauldron, 1);
   print_border ();
   update_screen ();
   play_audio_until_keypress (NULL);
@@ -1810,15 +1821,15 @@ void calc_and_display_percent (void)
   percent_lsw = ((pc/10)<<4)+(pc%10);
   
   if (percent_msw != 0)
-    print_bcd_number (152, 95, &percent_msw, 2);   // *** FIXME
+    print_bcd_number (152, 95, gameover_colours[3], &percent_msw, 2);   // *** FIXME
   else
-    print_bcd_number (160, 95, &percent_lsw, 1);   // *** FIXME
+    print_bcd_number (160, 95, gameover_colours[3], &percent_lsw, 1);   // *** FIXME
 }
 
 // $BC66
 void print_days (void)
 {
-  print_bcd_number (120, 7, &days, 1);
+  print_bcd_number (120, 7, BRIGHT(ATTR_WHITE), &days, 1);
 }
 
 // $BC7A
@@ -1844,11 +1855,11 @@ void print_lives_gfx (void)
 // $BCA3
 void print_lives (void)
 {
-  print_bcd_number (32, 39, (uint8_t *)&lives, 1);
+  print_bcd_number (32, 39, BRIGHT(ATTR_WHITE), (uint8_t *)&lives, 1);
 }
 
 // $BCAE
-void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n)
+void print_bcd_number (uint8_t x, uint8_t y, uint8_t attr, uint8_t *bcd, uint8_t n)
 {
   unsigned i;
   
@@ -1861,9 +1872,9 @@ void print_bcd_number (uint8_t x, uint8_t y, uint8_t *bcd, uint8_t n)
     // - except one place that jumps into the middle
     //   so only 3 digits are printed
     if (i>0 || n==1)
-      x = print_8x8 (x, y, code);
+      x = print_8x8 (x, y, attr, '0'+code);
     code = (*bcd) & 0x0f;
-    x = print_8x8 (x, y, code);
+    x = print_8x8 (x, y, attr, '0'+code);
   }
 }
 
@@ -1873,8 +1884,8 @@ void display_day (void)
   uint8_t attr;
   
   attr = (~curr_room_attrib+2) & 7;
-  gfxbase_8x8 = (uint8_t *)days_font;
-  print_text_raw (112, 15, attr, (char *)(days_txt+1));
+  gfxbase_8x8 = (uint8_t *)day_font;
+  print_text_raw (112, 15, attr, (char *)(day_txt+1));
 }
 
 // $BD0C
@@ -1933,30 +1944,33 @@ void print_text_single_colour (uint8_t x, uint8_t y, char *str)
 }
 
 // $BE45
-void print_text_std_font (uint8_t x, uint8_t y, char *str)
+void print_text_std_font (uint8_t x, uint8_t y, uint8_t attr, char *str)
 {
-  // attribute is stored as 1st character in str
   gfxbase_8x8 = (uint8_t *)kl_font;
-  print_text (x, y, *str, str+1);
+  print_text (x, y, attr, str);
 }
 
 // $BE4C
 void print_text_raw (uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
 {
-  osd_print_text_raw (gfxbase_8x8, x, y, attr, str);
+  do
+  {
+    x = print_8x8 (x, y, attr, (*str)&0x7f);
+    
+  } while ((*(str++) & (1<<7)) == 0);
 }
 
 // $BE4C
 void print_text (uint8_t x, uint8_t y, uint8_t attr, char *str)
 {
-  // attribute passed down
-  osd_print_text (gfxbase_8x8, x, y, attr, str);
+  while (*str)
+    x = print_8x8 (x, y, attr, *(str++));
 }
 
 // $BE7F
-uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t code)
+uint8_t print_8x8 (uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
-  return (osd_print_8x8 (gfxbase_8x8, x, y, 7, code));
+  return (osd_print_8x8 (gfxbase_8x8, x, y, attr, code));
 }
 
 // $BEB3
@@ -4210,7 +4224,9 @@ void retrieve_screen (void)
   uint8_t size;
   uint8_t attr;
 
+#ifdef __HAS_HWSPRITES__
   uint8_t obj_no = 4;
+#endif
       
   DBGPRINTF_FN;
   

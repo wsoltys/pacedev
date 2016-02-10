@@ -104,8 +104,9 @@ extern const uint8_t gameover_colours[];
 extern const uint8_t gameover_xy[];
 extern char const *gameover_text[];
 extern const RATING rating_tbl[];
-extern const uint8_t days_txt[];
-extern const uint8_t days_font[][8];
+extern const uint8_t day_txt[];
+//extern const uint8_t days_font[][8];
+#define day_font kl_font
 extern const uint8_t menu_colours[];
 extern const uint8_t menu_xy[];
 extern char const *menu_text[];

@@ -36,6 +36,12 @@ extern uint8_t *flip_sprite (POBJ32 p_obj);
 static uint8_t osd_room_attr = 7; // white
 static unsigned mask_colour = 0;
 
+void osd_room_attrib (uint8_t attr)
+{
+  // save it for sprites
+  osd_room_attr = attr;
+}
+
 void osd_delay (unsigned ms)
 {
   rest (ms);
@@ -64,67 +70,6 @@ int osd_key (int _key)
 int osd_keypressed (void)
 {
   return (keypressed ());
-}
-
-void osd_print_text_raw (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t *str)
-{
-  unsigned c, l, b;
-  
-  for (c=0; ; c++, str++)
-  {
-    uint8_t code = *str & 0x7f;
-
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          putpixel (scrn_buf, x+c*8+b, 191-y+l, attr&7);
-        d <<= 1;
-      }
-    }  
-    if (*str & (1<<7))
-      break;
-  }
-}
-
-static uint8_t from_ascii (char ch)
-{
-  const char *chrset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
-  uint8_t i;
-  
-  for (i=0; chrset[i]; i++)
-    if (chrset[i] == ch)
-      return (i);
-      
-    return ((uint8_t)-1);
-}
-
-void osd_print_text (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, char *str)
-{
-  unsigned c, l, b;
-  
-  for (c=0; *str; c++)
-  {
-    uint8_t ascii = (uint8_t)*(str++);
-    uint8_t code = from_ascii (ascii);
-    
-    for (l=0; l<8; l++)
-    {
-      uint8_t d = gfxbase_8x8[code*8+l];
-      if (d == (uint8_t)-1)
-        break;
-      
-      for (b=0; b<8; b++)
-      {
-        if (d & (1<<7))
-          putpixel (scrn_buf, x+c*8+b, 191-y+l, attr&7);
-        d <<= 1;
-      }
-    }  
-  }
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
@@ -195,7 +140,9 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
         attr = osd_room_attr & 7;
       break;
     case PANEL_DYNAMIC :
-      attr = 7;
+      // $58=sun(yellow), $59=moon(white)
+      if ((p_obj->graphic_no & 0x58) == 0x58)
+        attr = (p_obj->graphic_no == 0x58 ? 6 : 7);
       break;
     case DYNAMIC :
       attr = osd_room_attr & 7;
@@ -233,12 +180,7 @@ void osd_print_sprite (uint8_t type, POBJ32 p_obj)
   }
 }
 
-void osd_room_attrib (uint8_t attr)
-{
-  // save it for sprites
-  osd_room_attr = attr;
-}
-
+#if 0
 static void grab_fix_tile (BITMAP *bm, int x, int y, FILE *fp)
 {
   unsigned l, b;
@@ -256,9 +198,11 @@ static void grab_fix_tile (BITMAP *bm, int x, int y, FILE *fp)
   }
   fprintf (fp, "},\n");
 }
+#endif
 
 void osd_debug_hook (void *context)
 {
+#if 0
   static unsigned count = 0;
   
   unsigned state = (unsigned)context;
@@ -377,6 +321,7 @@ void osd_debug_hook (void *context)
   
   while (!osd_key (KEY_ESC));
   while (osd_key (KEY_ESC));
+#endif  
 }
 
 void main (int argc, char *argv[])
