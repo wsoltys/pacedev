@@ -81,7 +81,8 @@ typedef struct
   uint8_t   game_over;
 
   // for __HAS_HWSPRITES__ only
-  uint8_t   hw_sprite_map[MAX_OBJS];
+  uint8_t   initial_render;
+  //uint8_t   hw_sprite_map[MAX_OBJS];
   uint8_t   objs_to_wipe[MAX_DRAW];
   uint8_t   num_objs_to_wipe;
   uint8_t   objs_to_render[MAX_DRAW];
@@ -449,12 +450,14 @@ void upd_not_implemented (POBJ32 obj)
 
 static void dump_hw_sprite_map (void)
 {
+  #if 0
   unsigned i;
   
   DBGPRINTF ("internal.hw_sprite_map[] =\n");
   for (i=0; i<MAX_OBJS; i++)
     DBGPRINTF ("%02d ", internal.hw_sprite_map[i]);
   DBGPRINTF ("\n");
+  #endif
 }
 
 static void render_hw_sprites (void)
@@ -466,17 +469,34 @@ static void render_hw_sprites (void)
   //   and referencing internal.objs_rendered (last frame)
   //   to wipe or assign appropriate sprite priorities 
   //   which are specified in (pobj->hw_sprite)
-  
-  POBJ32    p_obj;
-  uint8_t   lowest_i;
-  uint8_t   gap_size;
-  unsigned  i, j;
+
+  static uint8_t  pri[MAX_OBJS];
+  static uint8_t  n_pri;
+      
+  POBJ32          p_obj;
+  uint8_t         lowest_i;
+  uint8_t         gap_size;
+  unsigned        i, j;
 
   if (internal.num_objs_to_render == 0)
     return;
 
-  wait_vbl ();
-  
+  //wait_vbl ();
+
+  if (internal.initial_render)
+  {
+    // build priority list
+    for (i=0; i<internal.num_objs_to_render; i++)
+    {
+      pri[i] = internal.objs_to_render[i];
+      print_sprite (curr_room_attrib, &graphic_objs_tbl[pri[i]]);
+    }
+    n_pri = i;
+    internal.initial_render = 0;
+    return;
+  }
+    
+#if 0  
   DBGPRINTF ("input:\n");
   dump_hw_sprite_map ();
   
@@ -539,6 +559,7 @@ static void render_hw_sprites (void)
   DBGPRINTF ("output:\n");
   dump_hw_sprite_map ();
   DBGPRINTF ("\n");
+  #endif
 }
 #endif
 
@@ -2894,7 +2915,6 @@ void find_special_objs_here (void)
 
 #ifdef __HAS_HWSPRITES__
     p_special_obj->hw_sprite = 2+n_special_objs_here;
-    internal.hw_sprite_map[2+n_special_objs_here] = 2+n_special_objs_here;
 #endif
         
     p_special_obj++;
@@ -2902,11 +2922,6 @@ void find_special_objs_here (void)
   }
 
   DBGPRINTF ("  n_special_objs_here=%d\n", n_special_objs_here);
-
-#ifdef __HAS_HWSPRITES__
-  if (n_special_objs_here < 2)
-    memset (&internal.hw_sprite_map[2+n_special_objs_here], (uint8_t)-1, 2-n_special_objs_here);
-#endif
 
   // wipe rest of the special_objs_here table  
   for (; n_special_objs_here<2; n_special_objs_here++)
@@ -3510,9 +3525,7 @@ exit_screen:
 
 #ifdef __HAS_HWSPRITES__
   graphic_objs_tbl[0].hw_sprite = 0;
-  internal.hw_sprite_map[0] = 0;
   graphic_objs_tbl[1].hw_sprite = 1;
-  internal.hw_sprite_map[1] = 1;
 #endif
   memcpy (&plyr_spr_1_scratchpad, &graphic_objs_tbl[0], sizeof(OBJ32));
   plyr_spr_1_scratchpad.u.plyr_graphic_no = plyr_spr_1_scratchpad.graphic_no;
@@ -4174,9 +4187,7 @@ void init_start_location (void)
   
 #ifdef __HAS_HWSPRITES__
   plyr_spr_1_scratchpad.hw_sprite = 0;
-  internal.hw_sprite_map[0] = 0;
   plyr_spr_2_scratchpad.hw_sprite = 1;
-  internal.hw_sprite_map[1] = 1;
 #endif
   
   DBGPRINTF ("%s(): start_location=%d\n", __FUNCTION__, s);
@@ -4452,7 +4463,6 @@ found_screen:
 
 #ifdef __HAS_HWSPRITES__
       p_other_objs->hw_sprite = obj_no;
-      internal.hw_sprite_map[obj_no] = obj_no;
       obj_no++;
 #endif
             
@@ -4514,7 +4524,6 @@ found_screen:
 
 #ifdef __HAS_HWSPRITES__
         p_other_objs->hw_sprite = obj_no;
-        internal.hw_sprite_map[obj_no] = obj_no;
         obj_no++;
 #endif
 
@@ -4536,9 +4545,9 @@ found_screen:
     memset (p_other_objs++, 0, sizeof(OBJ32));
 
 #ifdef __HAS_HWSPRITES__
-  memset (&internal.hw_sprite_map[obj_no], (uint8_t)-1, MAX_OBJS-obj_no);
+  internal.initial_render = 1;
 #endif
-            
+  
   dump_graphic_objs_tbl(-1, -1);
 }
 
