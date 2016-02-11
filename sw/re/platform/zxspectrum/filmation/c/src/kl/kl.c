@@ -64,6 +64,7 @@
 #include "kl_osd.h"
 #include "kl_dat.h"
 
+// *** BROKEN - DO NOT USE!
 #ifdef __HAS_SETJMP__
   #include <setjmp.h>
 #endif
@@ -74,9 +75,10 @@ typedef struct
 {
   uint8_t   turbo;
   uint8_t   exit_scrn;
+  uint8_t   game_over;
   
 } INTERNAL, *PINTERNAL;
-static INTERNAL internal = { 0, 0 };
+static INTERNAL internal = { 0, 0, 0 };
 
 #ifdef __HAS_SETJMP__
   static jmp_buf start_menu_env_buf;
@@ -327,7 +329,7 @@ static void save_2d_info (POBJ32 p_obj);
 static void list_objects_to_draw (void);
 static void calc_display_order_and_render (void);
 static uint8_t check_user_input (void);
-static int lose_life (void);
+static void lose_life (void);
 static void init_start_location (void);
 static void build_screen_objects (void);
 static void flag_scrn_visited (void);
@@ -472,6 +474,9 @@ START_MENU_AF7F:
 
 MAIN_AF88:
 
+  // required for C implementation
+  internal.game_over = 0;
+  
   //build_lookup_tbls ();
   not_1st_screen = 0;
   plyr_spr_1_scratchpad.flags12 = 0;
@@ -494,7 +499,8 @@ player_dies:
   // - but update_sprite_loop re-init's the stack ptr
   //   each operation, so doesn't matter
   // * now uses longjmp
-  if (lose_life () < 0)
+  lose_life ();
+  if (internal.game_over)
     goto START_MENU_AF7F;
 
 game_loop:
@@ -532,7 +538,9 @@ onscreen_loop:
       upd_sprite_jump_tbl[p_obj->graphic_no] (p_obj);
 
       // required for C implementation
-      if (internal.exit_scrn == 1)
+      if (internal.game_over)
+        goto START_MENU_AF7F;
+      if (internal.exit_scrn)
         goto game_loop;
     }
 
@@ -554,6 +562,8 @@ onscreen_loop:
   init_cauldron_bubbles ();
   list_objects_to_draw ();
   render_dynamic_objects ();
+  if (internal.game_over)
+    goto START_MENU_AF7F;
   if (rising_blocks_Z != 0)
     audio_B454 (0);   // *** FIXME
 
@@ -562,7 +572,7 @@ onscreen_loop:
 
 game_delay:
   // last to-do  
-  osd_delay (internal.turbo ? 4000 : 50);
+  osd_delay (internal.turbo ? 5 : 50);
 
   if (render_status_info)
   {
@@ -572,11 +582,13 @@ game_delay:
     colour_panel ();
     colour_sun_moon ();
     
-    osd_debug_hook ((void *)0);
+    //osd_debug_hook ((void *)0);
     display_panel ();
-    osd_debug_hook ((void *)1);
+    //osd_debug_hook ((void *)1);
     display_sun_moon_frame (&sun_moon_scratchpad);
-    osd_debug_hook ((void *)2);
+    if (internal.game_over)
+        goto START_MENU_AF7F;
+    //osd_debug_hook ((void *)2);
     
     display_day ();
     print_days ();
@@ -1120,7 +1132,8 @@ void upd_131_to_133 (POBJ32 p_obj)
         abs(graphic_objs_tbl[0].y - p_obj->y) < 6)
     {
       game_over ();
-      // longjmp to start_menu
+      // ^^^ longjmp to start_menu
+      return;
     }
     // only fatal if it hits you
     p_obj->flags13 |= FLAG_FATAL_HIT_YOU;
@@ -1757,6 +1770,9 @@ void game_over (void)
   uint8_t   rating;
   
   UNTESTED;
+  
+  // required for C implementation
+  internal.game_over = 1;
   
   if (all_objs_in_cauldron != 0)
   {
@@ -2522,13 +2538,35 @@ void display_sun_moon_frame (POBJ32 p_obj)
     return;
 
   if (p_obj->pixel_x == 225)
-    goto toggle_day_night;
+  {
+    p_obj->graphic_no ^= 1;
+    colour_sun_moon ();
+    p_obj->pixel_x = 176;
+    transform_flag_graphic = 1;
+    // if just changed to moon, exit
+    if (p_obj->graphic_no & 1)
+      return;
+  
+    // BCD arithmetic
+    days++;
+    if ((days & 0x0f) == 10)
+      days += 6;
+    if (days == 0x40)
+    {
+      game_over ();
+      // ^^^ longjmp to start_menu
+      return;
+    }
+    print_days ();
+    blit_2x8 (120, 0);
+  }
+  else
+  {
+    // adjust Y coordinate
+    x = p_obj->pixel_x + 16;
+    p_obj->pixel_y = sun_moon_yoff[(x>>2)&0x0f];
+  }
 
-  // adjust Y coordinate
-  x = p_obj->pixel_x + 16;
-  p_obj->pixel_y = sun_moon_yoff[(x>>2)&0x0f];
-
-display_frame:
   // display sun/moon
   fill_window (184, 0, 6, 31, 0);
 #ifdef __HAS_HWSPRITES__
@@ -2549,29 +2587,6 @@ display_frame:
   blit_to_screen (184, 0, 6, 31);
 #endif  
   return;
-
-toggle_day_night:
-  p_obj->graphic_no ^= 1;
-  colour_sun_moon ();
-  p_obj->pixel_x = 176;
-  transform_flag_graphic = 1;
-  // if just changed to moon, exit
-  if (p_obj->graphic_no & 1)
-    return;
-
-inc_days:
-  // BCD arithmetic
-  days++;
-  if ((days & 0x0f) == 10)
-    days += 6;
-  if (days == 0x40)
-  {
-    game_over ();
-    // longjmp to start_menu
-  }
-  print_days ();
-  blit_2x8 (120, 0);
-  goto display_frame;  
 }
 
 // $C432
@@ -3990,7 +4005,7 @@ finished_input:
 }
 
 // $D12A
-int lose_life (void)
+void lose_life (void)
 {
   POBJ32  p_obj = graphic_objs_tbl;
   POBJ32  p_next_obj = p_obj+1;
@@ -4004,7 +4019,8 @@ int lose_life (void)
   if (--lives < 0)
   {
     game_over ();
-    // longjmp to start_menu
+    // ^^^ longjmp to start_menu
+    return;
   }
 
   c = (sun_moon_scratchpad.graphic_no << 5) & 0x20;
@@ -4014,9 +4030,6 @@ int lose_life (void)
   DBGPRINTF ("%s() got=%d,ps1s=%d\n", __FUNCTION__, 
               graphic_objs_tbl[0].scrn,
               plyr_spr_1_scratchpad.scrn);
-              
-  // caller needs this value
-  return (lives);  
 }
 
 // $D1B1
@@ -4486,6 +4499,8 @@ void render_dynamic_objects (void)
 loc_D653:
   calc_display_order_and_render ();
   print_sun_moon ();
+  if (internal.game_over)
+    return;
   display_objects_carried ();
   rendered_objs_cnt += objs_wiped_cnt;
 
