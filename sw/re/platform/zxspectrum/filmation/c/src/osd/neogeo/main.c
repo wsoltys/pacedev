@@ -149,11 +149,11 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
     char buf[64];
     
     sprintf (buf, "OBJ=%03d, SPR=%02d, Y=%03d", 
-              p_obj->graphic_no, p_obj->unused[0], p_obj->pixel_y);
-    if (p_obj->unused[0] == 0)
+              p_obj->graphic_no, p_obj->hw_sprite, p_obj->pixel_y);
+    if (p_obj->hw_sprite == 0)
       textoutf (0, 0, 0, 0, buf);
     else
-      textoutf (0, p_obj->unused[0]-40, 0, 0, buf);
+      textoutf (0, p_obj->hw_sprite-40, 0, 0, buf);
   }
   #endif
 
@@ -172,7 +172,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
       obj_map[c].tiles[t].attributes = (16+attr)<<8;
     }
 
-  set_current_sprite (p_obj->unused[0]*3);
+  set_current_sprite (p_obj->hw_sprite*3);
   write_sprite_data (SPR_XOFF + p_obj->pixel_x, 
                       SPR_YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
                       0x0f, 0xff, 4, 3, obj_map);

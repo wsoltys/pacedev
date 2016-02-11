@@ -56,6 +56,7 @@
 #define MASK_TURN_DELAY     0x07      // player (bottom)
                             
 #define MAX_OBJS            40                          
+#define MAX_DRAW            48
 #define CAULDRON_SCREEN     136
 // standard is 5            
 #define NO_LIVES            5
@@ -76,9 +77,18 @@ typedef struct
   uint8_t   turbo;
   uint8_t   exit_scrn;
   uint8_t   game_over;
-  
+
+  // for __HAS_HWSPRITES__ only
+  uint8_t   objs_to_wipe[MAX_DRAW];
+  uint8_t   num_objs_to_wipe;
+  uint8_t   objs_to_render[MAX_DRAW];
+  uint8_t   num_objs_to_render;
+  uint8_t   objs_rendered[MAX_DRAW];
+  uint8_t   num_objs_rendered;
+    
 } INTERNAL, *PINTERNAL;
-static INTERNAL internal = { 0, 0, 0 };
+
+INTERNAL internal = { 0, 0, 0 };
 
 #ifdef __HAS_SETJMP__
   static jmp_buf start_menu_env_buf;
@@ -145,7 +155,7 @@ const POBJ32 other_objs_here =
               
 static OBJ32 sprite_scratchpad;                       // $BFDB
 static OBJ32 sun_moon_scratchpad;                     // $C44D
-static uint8_t objects_to_draw[48];                   // $CE8B
+static uint8_t objects_to_draw[MAX_DRAW];             // $CE8B
 static OBJ32 plyr_spr_1_scratchpad;                   // $D161
 static OBJ32 plyr_spr_2_scratchpad;                   // $D181
 
@@ -351,7 +361,7 @@ static void render_dynamic_objects (void);
 static void blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 static uint8_t calc_pixel_XY (POBJ32 p_obj);
 uint8_t *flip_sprite (POBJ32 p_obj);
-static void calc_pixel_XY_and_render (POBJ32 p_obj);
+static uint8_t calc_pixel_XY_and_render (POBJ32 p_obj);
 static void print_sprite (uint8_t attr, POBJ32 p_obj);
 
 // end of prototypes
@@ -367,7 +377,7 @@ void dump_graphic_objs_tbl (int start, int end)
     DBGPRINTF ("%02d: graphic_no=%03d, s=%d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
               i,
               graphic_objs_tbl[i].graphic_no,
-              graphic_objs_tbl[i].unused[0],
+              graphic_objs_tbl[i].hw_sprite,
               graphic_objs_tbl[i].x,
               graphic_objs_tbl[i].y,
               graphic_objs_tbl[i].z,
@@ -404,7 +414,9 @@ void dump_objects_to_draw (void)
 
   DBGPRINTF ("objects_to_draw[] =\n");
   for (i=0; objects_to_draw[i] != 0xff; i++)
-    DBGPRINTF ("$%02X, ", objects_to_draw[i]);
+    DBGPRINTF ("$%02X(%c), ", 
+                objects_to_draw[i],
+                (graphic_objs_tbl[objects_to_draw[i]].flags7 & FLAG_WIPE ? 'W' : ' '));
   DBGPRINTF ("\n");
 }
 
@@ -431,6 +443,29 @@ void upd_not_implemented (POBJ32 obj)
     printed[obj->graphic_no] = 1;
   }
 }
+
+#ifdef __HAS_HWSPRITES__
+static void render_hw_sprites (void)
+{
+  // this function is for systems with HW sprites (Neo Geo)
+  // - sprite order has been calculated but rendering has been
+  //   deferred until this routine
+  // - parse internal.objs_to_wipe and internal.objs_to_render
+  //   and referencing internal.objs_rendered (last frame)
+  //   to wipe or assign appropriate sprite priorities 
+  //   which are specified in (pobj->hw_sprite)
+  
+  unsigned i;
+
+#if 1
+  for (i=0; i<internal.num_objs_to_render; i++)
+    print_sprite (curr_room_attrib, 
+                  &graphic_objs_tbl[internal.objs_to_render[i]]);
+#else
+#endif                  
+  memcpy (internal.objs_rendered, internal.objs_to_render, MAX_DRAW);
+}
+#endif
 
 extern adjfn_t const upd_sprite_jump_tbl[];
 
@@ -562,6 +597,9 @@ onscreen_loop:
   init_cauldron_bubbles ();
   list_objects_to_draw ();
   render_dynamic_objects ();
+#ifdef __HAS_HWSPRITES__
+  render_hw_sprites ();
+#endif
   if (internal.game_over)
     goto START_MENU_AF7F;
   if (rising_blocks_Z != 0)
@@ -1849,7 +1887,7 @@ void print_lives_gfx (void)
   p_obj->pixel_x = 16;
   p_obj->pixel_y = 32;
 #ifdef __HAS_HWSPRITES__
-  p_obj->unused[0] = MAX_OBJS;
+  p_obj->hw_sprite = MAX_OBJS;
 #endif  
   print_sprite (BRIGHT(ATTR_WHITE), p_obj);
 }
@@ -2123,7 +2161,7 @@ void display_objects (void)
     {
       p_obj->graphic_no = objects_carried[i].graphic_no;
 #ifdef __HAS_HWSPRITES__
-      p_obj->unused[0] = MAX_OBJS+2+i;
+      p_obj->hw_sprite = MAX_OBJS+2+i;
 #endif
       print_sprite (object_attributes[p_obj->graphic_no&7], p_obj);
     }
@@ -2570,7 +2608,7 @@ void display_sun_moon_frame (POBJ32 p_obj)
   // display sun/moon
   fill_window (184, 0, 6, 31, 0);
 #ifdef __HAS_HWSPRITES__
-  p_obj->unused[0] = MAX_OBJS+1;
+  p_obj->hw_sprite = MAX_OBJS+1;
 #endif  
   print_sprite ((p_obj->graphic_no & 1 ? BRIGHT(ATTR_WHITE) : BRIGHT(ATTR_YELLOW)),
                 p_obj);
@@ -2780,7 +2818,7 @@ void find_special_objs_here (void)
     memset (&p_special_obj->unused, 0, 32-20);
 
 #ifdef __HAS_HWSPRITES__
-    p_special_obj->unused[0] = 2+n_special_objs_here;
+    p_special_obj->hw_sprite = 2+n_special_objs_here;
 #endif
         
     p_special_obj++;
@@ -3828,11 +3866,14 @@ void calc_display_order_and_render (void)
     
   static uint8_t render_list[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
   
-  UNTESTED;
+  DBGPRINTF_FN;
 
   //dump_objects_to_draw ();
   
   rendered_objs_cnt = 0;
+#ifdef __HAS_HWSPRITES__
+  internal.num_objs_to_render = 0;
+#endif
 
 process_remaining_objs:
   obj_i = 0;  
@@ -3945,7 +3986,7 @@ process_remaining_objs:
     }
     
 render_obj:
-    //DBGPRINTF ("rendering #%d=%d\n", obj_i, objects_to_draw[obj_i]);
+    DBGPRINTF ("$%02X, ", objects_to_draw[obj_i]);
     // we may have modified obj_i    
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     // flag as rendered
@@ -3953,7 +3994,13 @@ render_obj:
     // clear render_list
     render_list[0] = 0xff;
     rendered_objs_cnt++;
-    calc_pixel_XY_and_render (p_obj);
+    if (calc_pixel_XY_and_render (p_obj))
+    {
+#ifdef __HAS_HWSPRITES__
+      internal.objs_to_render[internal.num_objs_to_render++] = 
+        objects_to_draw[obj_i] & 0x7f;
+#endif
+    }
     // and start from the beginning again
     goto process_remaining_objs;
   #else
@@ -3962,8 +4009,8 @@ render_obj:
     obj_i++;
   #endif // BUILD_OPT_DISABLE_Z_ORDER
   }
-  
-  //DBGPRINTF ("rendered_objs_cnt = %d\n", rendered_objs_cnt);
+  DBGPRINTF ("\n");  
+  DBGPRINTF ("rendered_objs_cnt = %d\n", rendered_objs_cnt);
 }
 
 // $D022
@@ -4048,9 +4095,10 @@ void init_start_location (void)
   // start_loc_2
   plyr_spr_2_scratchpad.scrn = s;
   
-  // for hardware sprites
-  plyr_spr_1_scratchpad.unused[0] = 0;
-  plyr_spr_2_scratchpad.unused[0] = 1;
+#ifdef __HAS_HWSPRITES__
+  plyr_spr_1_scratchpad.hw_sprite = 0;
+  plyr_spr_2_scratchpad.hw_sprite = 1;
+#endif
   
   DBGPRINTF ("%s(): start_location=%d\n", __FUNCTION__, s);
 }
@@ -4324,7 +4372,7 @@ found_screen:
       p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
 
 #ifdef __HAS_HWSPRITES__
-      p_other_objs->unused[0] = obj_no++;
+      p_other_objs->hw_sprite = obj_no++;
 #endif
             
       p_other_objs++;
@@ -4384,7 +4432,7 @@ found_screen:
         p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
 
 #ifdef __HAS_HWSPRITES__
-        p_other_objs->unused[0] = obj_no++;
+        p_other_objs->hw_sprite = obj_no++;
 #endif
 
         // debug ONLY
@@ -4443,9 +4491,13 @@ void update_screen (void)
 // $D59F 
 void render_dynamic_objects (void)
 {
-  UNTESTED;
+  //dump_objects_to_draw ();
   
   objs_wiped_cnt = 0;
+#ifdef __HAS_HWSPRITES__
+  internal.num_objs_to_wipe = 0;
+#endif
+  
   if (render_status_info == 0)
   {
     uint8_t i;
@@ -4493,10 +4545,13 @@ void render_dynamic_objects (void)
       #ifndef BUILD_OPT_DISABLE_WIPE
         fill_window (c, b, h, l, 0);
       #endif
+      
+      #ifdef __HAS_HWSPRITES__
+        internal.objs_to_wipe[internal.num_objs_to_wipe++] = i;
+      #endif
     }
   }
 
-loc_D653:
   calc_display_order_and_render ();
   print_sun_moon ();
   if (internal.game_over)
@@ -4591,27 +4646,31 @@ uint8_t *flip_sprite (POBJ32 p_obj)
 }
 
 // $D704
-void calc_pixel_XY_and_render (POBJ32 p_obj)
+uint8_t calc_pixel_XY_and_render (POBJ32 p_obj)
 {
   // flagged as invalid?
   if (p_obj->graphic_no == 1)
   {
     p_obj->graphic_no = 0;
-    return;
+    return (0);
   }
     
   // flag don't draw
   p_obj->flags7 &= ~FLAG_DRAW;
   
   if (calc_pixel_XY (p_obj) == 0)
-    return;
+    return (0);
   
   // debug only
   //if (p_obj->graphic_no != 2 && p_obj->graphic_no != 3)
   //if (p_obj->graphic_no == 7)
   {
+#ifndef __HAS_HWSPRITES__    
     print_sprite (curr_room_attrib, p_obj);
+#endif    
   }
+  
+  return (1);
 }
 
 // $D718

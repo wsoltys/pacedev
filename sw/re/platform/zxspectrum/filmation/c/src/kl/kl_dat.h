@@ -70,7 +70,9 @@ typedef struct
   } u;  
   int8_t    pixel_x_adj;
   int8_t    pixel_y_adj;
-  uint8_t   unused[4];
+  uint8_t   unused[3];
+  // added for C implementation (was unused[3])
+  uint8_t   hw_sprite;
   uint8_t   data_width_bytes;
   uint8_t   data_height_lines;
   uint8_t   pixel_x;
