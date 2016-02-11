@@ -10,10 +10,12 @@
 #define UNIMPLEMENTED_AUDIO
 
 // build options - all disabled for 'production' build
-//#define BUILD_OPT_DISABLE_WIPE
+#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
 //#define BUILD_OPT_ALMOST_INVINCIBLE
+
+#define __HAS_HWSPRITES__
 
 #pragma pack(1)
 
@@ -79,13 +81,12 @@ typedef struct
   uint8_t   game_over;
 
   // for __HAS_HWSPRITES__ only
+  uint8_t   hw_sprite_map[MAX_OBJS];
   uint8_t   objs_to_wipe[MAX_DRAW];
   uint8_t   num_objs_to_wipe;
   uint8_t   objs_to_render[MAX_DRAW];
   uint8_t   num_objs_to_render;
-  uint8_t   objs_rendered[MAX_DRAW];
-  uint8_t   num_objs_rendered;
-    
+      
 } INTERNAL, *PINTERNAL;
 
 INTERNAL internal = { 0, 0, 0 };
@@ -445,6 +446,17 @@ void upd_not_implemented (POBJ32 obj)
 }
 
 #ifdef __HAS_HWSPRITES__
+
+static void dump_hw_sprite_map (void)
+{
+  unsigned i;
+  
+  DBGPRINTF ("internal.hw_sprite_map[] =\n");
+  for (i=0; i<MAX_OBJS; i++)
+    DBGPRINTF ("%02d ", internal.hw_sprite_map[i]);
+  DBGPRINTF ("\n");
+}
+
 static void render_hw_sprites (void)
 {
   // this function is for systems with HW sprites (Neo Geo)
@@ -455,15 +467,78 @@ static void render_hw_sprites (void)
   //   to wipe or assign appropriate sprite priorities 
   //   which are specified in (pobj->hw_sprite)
   
-  unsigned i;
+  POBJ32    p_obj;
+  uint8_t   lowest_i;
+  uint8_t   gap_size;
+  unsigned  i, j;
 
+  if (internal.num_objs_to_render == 0)
+    return;
+
+  wait_vbl ();
+  
+  DBGPRINTF ("input:\n");
+  dump_hw_sprite_map ();
+  
 #if 1
+  DBGPRINTF ("to render:\n");
   for (i=0; i<internal.num_objs_to_render; i++)
-    print_sprite (curr_room_attrib, 
-                  &graphic_objs_tbl[internal.objs_to_render[i]]);
-#else
-#endif                  
-  memcpy (internal.objs_rendered, internal.objs_to_render, MAX_DRAW);
+    DBGPRINTF ("%02d(%d) ", 
+                internal.objs_to_render[i],
+                graphic_objs_tbl[internal.objs_to_render[i]].hw_sprite);
+  DBGPRINTF ("\n");
+#endif
+
+  // need to find the gaps and move everything down until
+  // there's a gap large enough for the render list
+  
+  // find the lowest priority sprite being re-rendered
+  lowest_i = 0;
+  for (i=0; i<internal.num_objs_to_render; i++)
+  {
+    uint8_t obj_i = internal.objs_to_render[i];
+    p_obj = &graphic_objs_tbl[obj_i];
+    // mark a gap in the table
+    internal.hw_sprite_map[p_obj->hw_sprite] = (uint8_t)-1;
+    if (p_obj->hw_sprite < graphic_objs_tbl[internal.objs_to_render[lowest_i]].hw_sprite)
+      lowest_i = i;
+  }
+  DBGPRINTF ("lowest_i=%d(%d)\n", lowest_i,
+              graphic_objs_tbl[internal.objs_to_render[lowest_i]].hw_sprite);
+
+  DBGPRINTF ("gaps inserted:\n");
+  dump_hw_sprite_map ();
+
+  // now we need to shift down to here
+  gap_size = 1;
+  i = graphic_objs_tbl[internal.objs_to_render[lowest_i]].hw_sprite;
+  while (gap_size < internal.num_objs_to_render)
+  {
+    if (internal.hw_sprite_map[i+gap_size] == (uint8_t)-1)
+    {
+      gap_size++;
+      continue;
+    }
+    // shift sprite down
+    internal.hw_sprite_map[i] = internal.hw_sprite_map[i+gap_size];
+    internal.hw_sprite_map[i+gap_size] = (uint8_t)-1;
+    p_obj = &graphic_objs_tbl[internal.hw_sprite_map[i]];
+    p_obj->hw_sprite = i;
+    print_sprite (curr_room_attrib, p_obj);
+    gap_size = 1;
+    i++;
+  }
+  // and finally render the new sprites
+  for (j=0; j<internal.num_objs_to_render; j++, i++)
+  {
+    internal.hw_sprite_map[i] = internal.objs_to_render[j];
+    p_obj = &graphic_objs_tbl[internal.hw_sprite_map[i]];
+    p_obj->hw_sprite = i;
+    print_sprite (curr_room_attrib, p_obj);
+  }
+  DBGPRINTF ("output:\n");
+  dump_hw_sprite_map ();
+  DBGPRINTF ("\n");
 }
 #endif
 
@@ -2819,6 +2894,7 @@ void find_special_objs_here (void)
 
 #ifdef __HAS_HWSPRITES__
     p_special_obj->hw_sprite = 2+n_special_objs_here;
+    internal.hw_sprite_map[2+n_special_objs_here] = 2+n_special_objs_here;
 #endif
         
     p_special_obj++;
@@ -2826,6 +2902,11 @@ void find_special_objs_here (void)
   }
 
   DBGPRINTF ("  n_special_objs_here=%d\n", n_special_objs_here);
+
+#ifdef __HAS_HWSPRITES__
+  if (n_special_objs_here < 2)
+    memset (&internal.hw_sprite_map[2+n_special_objs_here], (uint8_t)-1, 2-n_special_objs_here);
+#endif
 
   // wipe rest of the special_objs_here table  
   for (; n_special_objs_here<2; n_special_objs_here++)
@@ -3427,6 +3508,12 @@ exit_screen:
   // - fortunately SP is reset a few instructions later
   //   but that begs the question, why bother popping at all?
 
+#ifdef __HAS_HWSPRITES__
+  graphic_objs_tbl[0].hw_sprite = 0;
+  internal.hw_sprite_map[0] = 0;
+  graphic_objs_tbl[1].hw_sprite = 1;
+  internal.hw_sprite_map[1] = 1;
+#endif
   memcpy (&plyr_spr_1_scratchpad, &graphic_objs_tbl[0], sizeof(OBJ32));
   plyr_spr_1_scratchpad.u.plyr_graphic_no = plyr_spr_1_scratchpad.graphic_no;
   memcpy (&plyr_spr_2_scratchpad, &graphic_objs_tbl[1], sizeof(OBJ32));
@@ -3434,10 +3521,6 @@ exit_screen:
   // sparkles
   plyr_spr_1_scratchpad.graphic_no = 120;
   plyr_spr_2_scratchpad.graphic_no = 120;
-
-  DBGPRINTF ("%s() got=%d,ps1s=%d\n", __FUNCTION__, 
-              graphic_objs_tbl[0].scrn,
-              plyr_spr_1_scratchpad.scrn);
 
 #ifdef __HAS_SETJMP__  
   longjmp (game_loop_env_buf, 1);
@@ -3866,7 +3949,7 @@ void calc_display_order_and_render (void)
     
   static uint8_t render_list[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
   
-  DBGPRINTF_FN;
+  //DBGPRINTF_FN;
 
   //dump_objects_to_draw ();
   
@@ -3986,7 +4069,6 @@ process_remaining_objs:
     }
     
 render_obj:
-    DBGPRINTF ("$%02X, ", objects_to_draw[obj_i]);
     // we may have modified obj_i    
     p_obj = &graphic_objs_tbl[objects_to_draw[obj_i]];
     // flag as rendered
@@ -4009,8 +4091,7 @@ render_obj:
     obj_i++;
   #endif // BUILD_OPT_DISABLE_Z_ORDER
   }
-  DBGPRINTF ("\n");  
-  DBGPRINTF ("rendered_objs_cnt = %d\n", rendered_objs_cnt);
+  //DBGPRINTF ("rendered_objs_cnt = %d\n", rendered_objs_cnt);
 }
 
 // $D022
@@ -4073,10 +4154,6 @@ void lose_life (void)
   c = (sun_moon_scratchpad.graphic_no << 5) & 0x20;
   p_obj->u.plyr_graphic_no = (p_obj->u.plyr_graphic_no & 0x1F) + c;
   p_next_obj->u.plyr_graphic_no = (p_next_obj->u.plyr_graphic_no & 0x0F) + c + 32;
-  
-  DBGPRINTF ("%s() got=%d,ps1s=%d\n", __FUNCTION__, 
-              graphic_objs_tbl[0].scrn,
-              plyr_spr_1_scratchpad.scrn);
 }
 
 // $D1B1
@@ -4097,7 +4174,9 @@ void init_start_location (void)
   
 #ifdef __HAS_HWSPRITES__
   plyr_spr_1_scratchpad.hw_sprite = 0;
+  internal.hw_sprite_map[0] = 0;
   plyr_spr_2_scratchpad.hw_sprite = 1;
+  internal.hw_sprite_map[1] = 1;
 #endif
   
   DBGPRINTF ("%s(): start_location=%d\n", __FUNCTION__, s);
@@ -4372,7 +4451,9 @@ found_screen:
       p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
 
 #ifdef __HAS_HWSPRITES__
-      p_other_objs->hw_sprite = obj_no++;
+      p_other_objs->hw_sprite = obj_no;
+      internal.hw_sprite_map[obj_no] = obj_no;
+      obj_no++;
 #endif
             
       p_other_objs++;
@@ -4432,7 +4513,9 @@ found_screen:
         p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
 
 #ifdef __HAS_HWSPRITES__
-        p_other_objs->hw_sprite = obj_no++;
+        p_other_objs->hw_sprite = obj_no;
+        internal.hw_sprite_map[obj_no] = obj_no;
+        obj_no++;
 #endif
 
         // debug ONLY
@@ -4451,6 +4534,10 @@ found_screen:
   // clear the rest of the table
   for (; n_other_objs<MAX_OBJS-4; n_other_objs++)
     memset (p_other_objs++, 0, sizeof(OBJ32));
+
+#ifdef __HAS_HWSPRITES__
+  memset (&internal.hw_sprite_map[obj_no], (uint8_t)-1, MAX_OBJS-obj_no);
+#endif
             
   dump_graphic_objs_tbl(-1, -1);
 }

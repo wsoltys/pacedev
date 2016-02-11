@@ -170,6 +170,16 @@ static void grab_fix_tile (BITMAP *bm, int x, int y, FILE *fp)
 }
 #endif
 
+// for debugging only
+void osd_print_border (void)
+{
+}
+
+// for debugging only
+void osd_display_panel (uint8_t attr)
+{
+}
+
 void osd_debug_hook (void *context)
 {
 #if 0

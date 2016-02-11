@@ -51,7 +51,7 @@
 #define OSD_KEY_SPACE   0x40
 #define OSD_KEY_ESC     0x45
 
-#define DBGPRINT(str) textoutf (0, 0, 0, 0, str)
+#define DBGPRINT(str) textoutf (0, 0, 7, 0, str)
 #define DBGPRINTF(format...)
 //#define OSD_PRINTF(format...)
 //#define OSD_PRINTF(format...) textoutf (0, 27, 0, 0, format)
@@ -70,7 +70,7 @@ void osd_update_screen (void);
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 void osd_print_sprite (uint8_t attr, POBJ32 p_obj);
 
-void osd_print_border ();
+void osd_print_border (void);
 void osd_display_panel (uint8_t attr);
 
 void osd_debug_hook (void *context);
