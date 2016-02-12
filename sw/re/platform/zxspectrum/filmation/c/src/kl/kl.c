@@ -469,65 +469,53 @@ static void render_hw_sprites (void)
   //   to wipe or assign appropriate sprite priorities 
   //   which are specified in (pobj->hw_sprite)
 
-  static uint8_t  pri[MAX_OBJS];
-  static uint8_t  n_pri;
+  static uint8_t  obj[MAX_OBJS];
+  static uint8_t  dirty[MAX_OBJS];
+  static uint8_t  n_objs;
       
   unsigned        i, j, k;
 
   if (internal.num_objs_to_render == 0)
     return;
 
-  //wait_vbl ();
-
+  // clear dirty list
+  memset (dirty, 0, MAX_OBJS);
+  
   // first time - assign priority list
   if (internal.initial_render)
   {
     // build priority list
     for (i=0; i<internal.num_objs_to_render; i++)
     {
-      pri[i] = internal.objs_to_render[i];
+      uint8_t obj_i = internal.objs_to_render[i];
+      
+      obj[i] = obj_i;
       // set sprite number in object
-      graphic_objs_tbl[pri[i]].hw_sprite = i;
+      graphic_objs_tbl[obj_i].hw_sprite = i;
       // render it
-      print_sprite (curr_room_attrib, &graphic_objs_tbl[pri[i]]);
+      print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
     }
-    n_pri = i;
+    n_objs = i;
     internal.initial_render = 0;
     return;
   }
 
   // subsequent renders
-  for (i=0; i<internal.num_objs_to_render;)
+  for (i=0; i<internal.num_objs_to_render; i++)
   {
     uint8_t obj_i = internal.objs_to_render[i];
-
-    // check that it hasn't changed in relation to others in the list
-    for (j=i+1; j<internal.num_objs_to_render;)
-    {
-      uint8_t obj_j = internal.objs_to_render[j];
-      if (graphic_objs_tbl[obj_i].hw_sprite <= graphic_objs_tbl[obj_j].hw_sprite)
-      {
-        print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
-        j++;
-        continue;
-      }
-      // changed priorities - shuffle list
-      for (k=graphic_objs_tbl[obj_i].hw_sprite; k>graphic_objs_tbl[obj_j].hw_sprite; k--)
-      {
-        uint8_t obj_k = pri[k-1];
-        pri[k] = obj_k;
-        graphic_objs_tbl[obj_k].hw_sprite = k;
-        print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_k]);
-      }
-      // and insert behind
-      pri[k] = obj_i;
-      graphic_objs_tbl[obj_i].hw_sprite = k;
-      print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
-      j=i;
-    }
-    i++;
+    POBJ32 p_obj = &graphic_objs_tbl[obj_i];
+    
+    dirty[p_obj->hw_sprite] = 1;
   }
-      
+
+  // and finally do the rendering
+  wait_vbl ();
+  for (i=0; i<n_objs; i++)
+    if (dirty[i])
+      print_sprite (curr_room_attrib,
+                      &graphic_objs_tbl[obj[i]]);
+                              
 #if 0
   DBGPRINTF ("to render:\n");
   for (i=0; i<internal.num_objs_to_render; i++)
