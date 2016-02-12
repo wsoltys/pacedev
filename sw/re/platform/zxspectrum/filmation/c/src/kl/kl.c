@@ -17,7 +17,6 @@
 //#define BUILD_OPT_ALWAYS_RENDER_ALL
 
 #define __HAS_HWSPRITES__
-#define HW_SPRITE(n)  (8+(n))
 
 #pragma pack(1)
 
@@ -231,7 +230,7 @@ static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
 static void upd_30_31_158_159 (POBJ32 p_obj);
 static void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy);
-static void wait_for_key_release (void);
+static void wait_for_key_release (uint8_t time);
 static void game_over (void);
 static void calc_and_display_percent (void);
 static void print_days (void);
@@ -493,7 +492,6 @@ static void render_hw_sprites (void)
       
       obj[HW_SPRITE(i)] = obj_i;
       // set sprite number in object
-      // *** DON'T USE SPRITE #0, priority is inverted!
       graphic_objs_tbl[obj_i].hw_sprite = HW_SPRITE(i);
       // render it
       print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
@@ -1028,7 +1026,7 @@ void play_audio_until_keypress (const uint8_t *audio_data)
 
   while (1)
   {
-    //if (read_key (0))
+    if (osd_keypressed ())
       return;
     // keep playing audio
   }
@@ -1859,11 +1857,10 @@ void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy)
 }
 
 // $BA9B
-void wait_for_key_release (void)
+void wait_for_key_release (uint8_t time)
 {
-  // fixme
-  while (!osd_key(OSD_KEY_ESC));
-  while (osd_key(OSD_KEY_ESC));
+  // this should time out after 'time'
+  while (osd_keypressed ());
 }
 
 // $BA22
@@ -1884,7 +1881,7 @@ void game_over (void)
     suppress_border = 0;
     display_text_list ((uint8_t *)complete_colours, (uint8_t *)complete_xy, (char **)complete_text, 6);
     play_audio (game_complete_tune);
-    wait_for_key_release ();
+    wait_for_key_release (8);
   }
   clear_scrn_buffer ();
   clear_scrn ();
@@ -1899,8 +1896,9 @@ void game_over (void)
   print_bcd_number (184, 79, gameover_colours[4], &objects_put_in_cauldron, 1);
   print_border ();
   update_screen ();
+  while (osd_keypressed ());
   play_audio_until_keypress (NULL);
-  wait_for_key_release ();
+  wait_for_key_release (8);
 
 #ifdef __HAS_SETJMP__  
   longjmp (start_menu_env_buf, 1);
