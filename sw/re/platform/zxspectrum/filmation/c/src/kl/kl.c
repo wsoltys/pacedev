@@ -10,13 +10,11 @@
 #define UNIMPLEMENTED_AUDIO
 
 // build options - all disabled for 'production' build
-#define BUILD_OPT_DISABLE_WIPE
+//#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
 //#define BUILD_OPT_ALMOST_INVINCIBLE
 //#define BUILD_OPT_ALWAYS_RENDER_ALL
-
-#define __HAS_HWSPRITES__
 
 #pragma pack(1)
 

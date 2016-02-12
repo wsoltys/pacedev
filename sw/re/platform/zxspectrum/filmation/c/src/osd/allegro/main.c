@@ -304,41 +304,8 @@ void osd_debug_hook (void *context)
 #endif  
 }
 
-void main (int argc, char *argv[])
+void show_title (void)
 {
-  int c;
-  
-	allegro_init ();
-	install_keyboard ();
-
-	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
-
-  scrn_buf = create_bitmap (256, 192);
-  
-  // spectrum palette
-  PALETTE pal;
-  for (c=0; c<16; c++)
-  {
-    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-  }
-	set_palette_range (pal, 0, 15, 1);
-
-#if 0
-	clear_bitmap (screen);
-	unsigned x, y;
-  for (y=0; y<192; y++)
-    for (x=0; x<256; x++)
-    {
-	    c = x/128*8+y/(192/8);
-      putpixel (screen, x, y, c);
-    }
-  while (!keypressed ());
-#endif
-
-#ifndef BUILD_OPT_DISABLE_LOADER
 	clear_bitmap (screen);
   FILE *fp = fopen ("src/kl/kl.scr", "rb");
   if (fp)
@@ -389,6 +356,44 @@ void main (int argc, char *argv[])
     osd_debug_hook ((void *)20);
     while (!keypressed ());
   }
+}
+
+void main (int argc, char *argv[])
+{
+  int c;
+  
+	allegro_init ();
+	install_keyboard ();
+
+	set_color_depth (8);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
+
+  scrn_buf = create_bitmap (256, 192);
+  
+  // spectrum palette
+  PALETTE pal;
+  for (c=0; c<16; c++)
+  {
+    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+  }
+	set_palette_range (pal, 0, 15, 1);
+
+#if 0
+	clear_bitmap (screen);
+	unsigned x, y;
+  for (y=0; y<192; y++)
+    for (x=0; x<256; x++)
+    {
+	    c = x/128*8+y/(192/8);
+      putpixel (screen, x, y, c);
+    }
+  while (!keypressed ());
+#endif
+
+#ifndef BUILD_OPT_DISABLE_LOADER
+  show_title ();
 #endif //BUILD_OPT_DISABLE_LOADER
 
 	clear_bitmap (scrn_buf);
