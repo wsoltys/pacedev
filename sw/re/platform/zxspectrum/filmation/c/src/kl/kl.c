@@ -82,7 +82,6 @@ typedef struct
 
   // for __HAS_HWSPRITES__ only
   uint8_t   initial_render;
-  //uint8_t   hw_sprite_map[MAX_OBJS];
   uint8_t   objs_to_wipe[MAX_DRAW];
   uint8_t   num_objs_to_wipe;
   uint8_t   objs_to_render[MAX_DRAW];
@@ -473,92 +472,70 @@ static void render_hw_sprites (void)
   static uint8_t  pri[MAX_OBJS];
   static uint8_t  n_pri;
       
-  POBJ32          p_obj;
-  uint8_t         lowest_i;
-  uint8_t         gap_size;
-  unsigned        i, j;
+  unsigned        i, j, k;
 
   if (internal.num_objs_to_render == 0)
     return;
 
   //wait_vbl ();
 
+  // first time - assign priority list
   if (internal.initial_render)
   {
     // build priority list
     for (i=0; i<internal.num_objs_to_render; i++)
     {
       pri[i] = internal.objs_to_render[i];
+      // set sprite number in object
+      graphic_objs_tbl[pri[i]].hw_sprite = i;
+      // render it
       print_sprite (curr_room_attrib, &graphic_objs_tbl[pri[i]]);
     }
     n_pri = i;
     internal.initial_render = 0;
     return;
   }
-    
-#if 0  
-  DBGPRINTF ("input:\n");
-  dump_hw_sprite_map ();
-  
-#if 1
+
+  // subsequent renders
+  for (i=0; i<internal.num_objs_to_render;)
+  {
+    uint8_t obj_i = internal.objs_to_render[i];
+
+    // check that it hasn't changed in relation to others in the list
+    for (j=i+1; j<internal.num_objs_to_render;)
+    {
+      uint8_t obj_j = internal.objs_to_render[j];
+      if (graphic_objs_tbl[obj_i].hw_sprite <= graphic_objs_tbl[obj_j].hw_sprite)
+      {
+        print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
+        j++;
+        continue;
+      }
+      // changed priorities - shuffle list
+      for (k=graphic_objs_tbl[obj_i].hw_sprite; k>graphic_objs_tbl[obj_j].hw_sprite; k--)
+      {
+        uint8_t obj_k = pri[k-1];
+        pri[k] = obj_k;
+        graphic_objs_tbl[obj_k].hw_sprite = k;
+        print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_k]);
+      }
+      // and insert behind
+      pri[k] = obj_i;
+      graphic_objs_tbl[obj_i].hw_sprite = k;
+      print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
+      j=i;
+    }
+    i++;
+  }
+      
+#if 0
   DBGPRINTF ("to render:\n");
   for (i=0; i<internal.num_objs_to_render; i++)
     DBGPRINTF ("%02d(%d) ", 
                 internal.objs_to_render[i],
                 graphic_objs_tbl[internal.objs_to_render[i]].hw_sprite);
   DBGPRINTF ("\n");
-#endif
 
-  // need to find the gaps and move everything down until
-  // there's a gap large enough for the render list
-  
-  // find the lowest priority sprite being re-rendered
-  lowest_i = 0;
-  for (i=0; i<internal.num_objs_to_render; i++)
-  {
-    uint8_t obj_i = internal.objs_to_render[i];
-    p_obj = &graphic_objs_tbl[obj_i];
-    // mark a gap in the table
-    internal.hw_sprite_map[p_obj->hw_sprite] = (uint8_t)-1;
-    if (p_obj->hw_sprite < graphic_objs_tbl[internal.objs_to_render[lowest_i]].hw_sprite)
-      lowest_i = i;
-  }
-  DBGPRINTF ("lowest_i=%d(%d)\n", lowest_i,
-              graphic_objs_tbl[internal.objs_to_render[lowest_i]].hw_sprite);
-
-  DBGPRINTF ("gaps inserted:\n");
-  dump_hw_sprite_map ();
-
-  // now we need to shift down to here
-  gap_size = 1;
-  i = graphic_objs_tbl[internal.objs_to_render[lowest_i]].hw_sprite;
-  while (gap_size < internal.num_objs_to_render)
-  {
-    if (internal.hw_sprite_map[i+gap_size] == (uint8_t)-1)
-    {
-      gap_size++;
-      continue;
-    }
-    // shift sprite down
-    internal.hw_sprite_map[i] = internal.hw_sprite_map[i+gap_size];
-    internal.hw_sprite_map[i+gap_size] = (uint8_t)-1;
-    p_obj = &graphic_objs_tbl[internal.hw_sprite_map[i]];
-    p_obj->hw_sprite = i;
-    print_sprite (curr_room_attrib, p_obj);
-    gap_size = 1;
-    i++;
-  }
-  // and finally render the new sprites
-  for (j=0; j<internal.num_objs_to_render; j++, i++)
-  {
-    internal.hw_sprite_map[i] = internal.objs_to_render[j];
-    p_obj = &graphic_objs_tbl[internal.hw_sprite_map[i]];
-    p_obj->hw_sprite = i;
-    print_sprite (curr_room_attrib, p_obj);
-  }
-  DBGPRINTF ("output:\n");
-  dump_hw_sprite_map ();
-  DBGPRINTF ("\n");
   #endif
 }
 #endif
