@@ -14,8 +14,10 @@
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
 //#define BUILD_OPT_ALMOST_INVINCIBLE
+//#define BUILD_OPT_ALWAYS_RENDER_ALL
 
 #define __HAS_HWSPRITES__
+#define HW_SPRITE(n)  (8+(n))
 
 #pragma pack(1)
 
@@ -469,8 +471,8 @@ static void render_hw_sprites (void)
   //   to wipe or assign appropriate sprite priorities 
   //   which are specified in (pobj->hw_sprite)
 
-  static uint8_t  obj[MAX_OBJS];
-  static uint8_t  dirty[MAX_OBJS];
+  static uint8_t  obj[HW_SPRITE(MAX_OBJS)];
+  static uint8_t  dirty[HW_SPRITE(MAX_OBJS)];
   static uint8_t  n_objs;
       
   unsigned        i, j, k;
@@ -479,7 +481,7 @@ static void render_hw_sprites (void)
     return;
 
   // clear dirty list
-  memset (dirty, 0, MAX_OBJS);
+  memset (dirty, 0, HW_SPRITE(MAX_OBJS));
   
   // first time - assign priority list
   if (internal.initial_render)
@@ -489,9 +491,10 @@ static void render_hw_sprites (void)
     {
       uint8_t obj_i = internal.objs_to_render[i];
       
-      obj[i] = obj_i;
+      obj[HW_SPRITE(i)] = obj_i;
       // set sprite number in object
-      graphic_objs_tbl[obj_i].hw_sprite = i;
+      // *** DON'T USE SPRITE #0, priority is inverted!
+      graphic_objs_tbl[obj_i].hw_sprite = HW_SPRITE(i);
       // render it
       print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
     }
@@ -512,9 +515,9 @@ static void render_hw_sprites (void)
   // and finally do the rendering
   wait_vbl ();
   for (i=0; i<n_objs; i++)
-    if (dirty[i])
+    if (dirty[HW_SPRITE(i)])
       print_sprite (curr_room_attrib,
-                      &graphic_objs_tbl[obj[i]]);
+                      &graphic_objs_tbl[obj[HW_SPRITE(i)]]);
                               
 #if 0
   DBGPRINTF ("to render:\n");
@@ -1948,7 +1951,7 @@ void print_lives_gfx (void)
   p_obj->pixel_x = 16;
   p_obj->pixel_y = 32;
 #ifdef __HAS_HWSPRITES__
-  p_obj->hw_sprite = MAX_OBJS;
+  p_obj->hw_sprite = HW_SPRITE(MAX_OBJS);
 #endif  
   print_sprite (BRIGHT(ATTR_WHITE), p_obj);
 }
@@ -2222,7 +2225,7 @@ void display_objects (void)
     {
       p_obj->graphic_no = objects_carried[i].graphic_no;
 #ifdef __HAS_HWSPRITES__
-      p_obj->hw_sprite = MAX_OBJS+2+i;
+      p_obj->hw_sprite = HW_SPRITE(MAX_OBJS+2+i);
 #endif
       print_sprite (object_attributes[p_obj->graphic_no&7], p_obj);
     }
@@ -2669,7 +2672,7 @@ void display_sun_moon_frame (POBJ32 p_obj)
   // display sun/moon
   fill_window (184, 0, 6, 31, 0);
 #ifdef __HAS_HWSPRITES__
-  p_obj->hw_sprite = MAX_OBJS+1;
+  p_obj->hw_sprite = HW_SPRITE(MAX_OBJS+1);
 #endif  
   print_sprite ((p_obj->graphic_no & 1 ? BRIGHT(ATTR_WHITE) : BRIGHT(ATTR_YELLOW)),
                 p_obj);
@@ -2878,10 +2881,6 @@ void find_special_objs_here (void)
     p_special_obj->u.ptr_obj_tbl_entry = i;
     memset (&p_special_obj->unused, 0, 32-20);
 
-#ifdef __HAS_HWSPRITES__
-    p_special_obj->hw_sprite = 2+n_special_objs_here;
-#endif
-        
     p_special_obj++;
     n_special_objs_here++;
   }
@@ -3488,10 +3487,6 @@ exit_screen:
   // - fortunately SP is reset a few instructions later
   //   but that begs the question, why bother popping at all?
 
-#ifdef __HAS_HWSPRITES__
-  graphic_objs_tbl[0].hw_sprite = 0;
-  graphic_objs_tbl[1].hw_sprite = 1;
-#endif
   memcpy (&plyr_spr_1_scratchpad, &graphic_objs_tbl[0], sizeof(OBJ32));
   plyr_spr_1_scratchpad.u.plyr_graphic_no = plyr_spr_1_scratchpad.graphic_no;
   memcpy (&plyr_spr_2_scratchpad, &graphic_objs_tbl[1], sizeof(OBJ32));
@@ -3905,17 +3900,14 @@ void list_objects_to_draw (void)
   
   for (i=0; i<MAX_OBJS; i++)
   {
-    if ((graphic_objs_tbl[i].graphic_no != 0) &&
-        (graphic_objs_tbl[i].flags7 & FLAG_DRAW))
-    {
-      //DBGPRINTF ("[%02d]=%02d(graphic_no=$%02X,flags7=$%02X)\n",
-      //          n, i, graphic_objs_tbl[i].graphic_no, graphic_objs_tbl[i].flags7);
+    if ((graphic_objs_tbl[i].graphic_no != 0)
+#ifndef BUILD_OPT_ALWAYS_RENDER_ALL      
+        && (graphic_objs_tbl[i].flags7 & FLAG_DRAW)
+#endif        
+        )
       objects_to_draw[n++] = i;
-    }
   }
   objects_to_draw[n] = 0xff;
-
-  //DBGPRINTF ("  n=%d\n", n);
 }
 
 // $CEBB
@@ -4150,11 +4142,6 @@ void init_start_location (void)
   // start_loc_2
   plyr_spr_2_scratchpad.scrn = s;
   
-#ifdef __HAS_HWSPRITES__
-  plyr_spr_1_scratchpad.hw_sprite = 0;
-  plyr_spr_2_scratchpad.hw_sprite = 1;
-#endif
-  
   DBGPRINTF ("%s(): start_location=%d\n", __FUNCTION__, s);
 }
 
@@ -4344,10 +4331,6 @@ void retrieve_screen (void)
   uint8_t size;
   uint8_t attr;
 
-#ifdef __HAS_HWSPRITES__
-  uint8_t obj_no = 4;
-#endif
-      
   DBGPRINTF_FN;
   
   for (i=0; ; i++)
@@ -4426,11 +4409,6 @@ found_screen:
       // bugfix!!!
       p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
 
-#ifdef __HAS_HWSPRITES__
-      p_other_objs->hw_sprite = obj_no;
-      obj_no++;
-#endif
-            
       p_other_objs++;
       n_other_objs++;
     };
@@ -4486,11 +4464,6 @@ found_screen:
 
         // bugfix!!!
         p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
-
-#ifdef __HAS_HWSPRITES__
-        p_other_objs->hw_sprite = obj_no;
-        obj_no++;
-#endif
 
         // debug ONLY
         //if (p_other_objs->graphic_no == 182)
