@@ -143,6 +143,17 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
   static TILEMAP obj_map[3];
   unsigned n, c, t;
+  unsigned sw = (p_obj->data_width_bytes+1)/2;
+  unsigned sh = (p_obj->data_height_lines+15)/16;
+
+  // this happens
+  if (sw == 0 || sh == 0)
+    return;
+    
+  // data_width_bytes may already be 1 byte wider
+  // but max width for Knight Lore is 5
+  // ((5+1)+1)/2 = 3
+  // - so no need to check
 
   #if 0
   {  
@@ -165,8 +176,8 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 
   // setup sprite
   attr &= 7;
-  for (c=0; c<3; c++)
-    for (t=0; t<4; t++)
+  for (c=0; c<sw; c++)
+    for (t=0; t<sh; t++)
     {
       obj_map[c].tiles[t].block_number = n+c*4+t;
       obj_map[c].tiles[t].attributes = (16+attr)<<8;
@@ -175,7 +186,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   set_current_sprite (p_obj->hw_sprite*3);
   write_sprite_data (SPR_XOFF + p_obj->pixel_x, 
                       SPR_YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
-                      0x0f, 0xff, 4, 3, obj_map);
+                      0x0f, 0xff, sh, sw, obj_map);
 }
 
 void osd_print_border (void)

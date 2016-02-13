@@ -76,6 +76,8 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj);
 void osd_print_border (void);
 void osd_display_panel (uint8_t attr);
 
+#define osd_wait_vbl  wait_vbl
+
 void osd_debug_hook (void *context);
 
 #endif // __KL_OSD_H__

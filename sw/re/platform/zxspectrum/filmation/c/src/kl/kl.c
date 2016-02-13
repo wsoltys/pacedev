@@ -500,16 +500,16 @@ static void render_hw_sprites (void)
   }
 
   // subsequent renders
-  for (i=0; i<internal.num_objs_to_render; i++)
+  for (i=0; i<internal.num_objs_to_wipe; i++)
   {
-    uint8_t obj_i = internal.objs_to_render[i];
+    uint8_t obj_i = internal.objs_to_wipe[i];
     POBJ32 p_obj = &graphic_objs_tbl[obj_i];
     
     dirty[p_obj->hw_sprite] = 1;
   }
 
   // and finally do the rendering
-  wait_vbl ();
+  osd_wait_vbl ();
   for (i=0; i<n_objs; i++)
     if (dirty[HW_SPRITE(i)])
       print_sprite (curr_room_attrib,
