@@ -10,7 +10,7 @@ ZX_VRAM:4000		 ; Input MD5   : 9EB6957C285769A5AA2774B23353AE37
 ZX_VRAM:4000		 ; Input CRC32 : 57F860FA
 ZX_VRAM:4000
 ZX_VRAM:4000		 ; +--------------------------------------------------+
-ZX_VRAM:4000		 ; | ZX	Spectrum Knight	Lore Disassembly v1.00rc5     |
+ZX_VRAM:4000		 ; | ZX	Spectrum Knight	Lore Disassembly v1.00rc6     |
 ZX_VRAM:4000		 ; |	- by tcdev (msmcdoug@gmail.com)		      |
 ZX_VRAM:4000		 ; +--------------------------------------------------+
 ZX_VRAM:4000		 ;
@@ -2936,10 +2936,10 @@ RAM:B1CE F9 B6			     .dw upd_144_to_149_152_to_157		     ;	 "
 RAM:B1D0 F9 B6			     .dw upd_144_to_149_152_to_157		     ;	 "
 RAM:B1D2 A5 B9			     .dw upd_30_31_158_159			     ; wizard (top half)
 RAM:B1D4 A5 B9			     .dw upd_30_31_158_159			     ;	 "
-RAM:B1D6 DA B8			     .dw upd_160_163				     ; cauldron	bubbles
-RAM:B1D8 DA B8			     .dw upd_160_163				     ;	 "
-RAM:B1DA DA B8			     .dw upd_160_163				     ;	 "
-RAM:B1DC DA B8			     .dw upd_160_163				     ;	 "
+RAM:B1D6 DA B8			     .dw upd_160_to_163				     ; cauldron	bubbles
+RAM:B1D8 DA B8			     .dw upd_160_to_163				     ;	 "
+RAM:B1DA DA B8			     .dw upd_160_to_163				     ;	 "
+RAM:B1DC DA B8			     .dw upd_160_to_163				     ;	 "
 RAM:B1DE 2C B9			     .dw upd_164_to_167				     ; repel spell
 RAM:B1E0 2C B9			     .dw upd_164_to_167				     ;	 "
 RAM:B1E2 2C B9			     .dw upd_164_to_167				     ;	 "
@@ -4110,7 +4110,7 @@ RAM:B8C8 05 05 0C 10+		     .db 0, 0, 0xA0, 0,	0, 0, 0
 RAM:B8DA	     ; ---------------------------------------------------------------------------
 RAM:B8DA	     ; even more sparkles (showing next	object required)
 RAM:B8DA
-RAM:B8DA	     upd_160_163:
+RAM:B8DA	     upd_160_to_163:
 RAM:B8DA CD D8 C4		     call    adj_m4_m12
 RAM:B8DD 3A 48 5C		     ld	     a,	(special_objs_here)
 RAM:B8E0 A7			     and     a					     ; null?

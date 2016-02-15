@@ -3,6 +3,17 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
+#include <allegro.h>
+
+#define ALLEGRO_FULL_VERSION  ((ALLEGRO_VERSION << 4)|(ALLEGRO_SUB_VERSION))
+#if ALLEGRO_FULL_VERSION < 0x42
+  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
+    textout_centre (s, f, str, w, h, c);
+#else
+  #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
+    textout_centre_ex(s, f, str, w, h, c, 0);
+#endif
+
 uint8_t ram_zx[0x10000];
 uint8_t ram_cpc[0x10000];
 
@@ -186,6 +197,10 @@ int main (int argc, char *argv[])
   a_zx = 0x7112;
   a_cpc = 0x429e;
   s = 0;
+
+  unsigned diff[104];
+  unsigned n_diff = 0;
+    
   while (a_zx < 0x728a)
   {
     unsigned p_zx = ram_zx[a_zx+1];
@@ -200,17 +215,108 @@ int main (int argc, char *argv[])
     uint8_t h_cpc = ram_cpc[p_cpc+1];
 
     if (2*w_zx != w_cpc || h_zx != h_cpc)
-      printf ("%03d (%2dx%2d) != (%2dx%2d) %c %c %c\n",
-              s, w_zx, h_zx, w_cpc, h_cpc,
-              (2*w_zx != w_cpc ? 'W' : ' '),
-              (h_zx != h_cpc ? 'H' : ' '),
-              (w_cpc & 1 ? '*' : ' '));
+    {
+      unsigned i;
+      for (i=0; i<n_diff; i++)
+        if (diff[i] == p_zx)
+          break;
+      if (n_diff == 0 || i == n_diff)
+      {
+        diff[n_diff++] = p_zx;      
+        printf ("@$%04X %03d/$%02X (%2dx%2d) != (%2dx%2d) %c %c %c\n",
+                p_zx, s, s, w_zx, h_zx, w_cpc, h_cpc,
+                (2*w_zx != w_cpc ? 'W' : ' '),
+                (h_zx != h_cpc ? 'H' : ' '),
+                (w_cpc & 1 ? '*' : ' '));
+                  
+        if (1 && h_zx > h_cpc)
+        {
+          printf ("h_zx < h_cpc:\n");
+          printf ("- top\n");
+          for (unsigned i=0; i<w_zx; i++)
+            printf ("$%02X ", ram_zx[p_zx+2+i]);
+          printf ("\n");
+          printf ("- bottom\n");
+          for (unsigned i=0; i<w_zx; i++)
+            printf ("$%02X ", ram_zx[p_zx+2+w_zx*(h_zx-1)+i]);
+          printf ("\n");
+        }
+      }
+    }
     
     a_zx += 2;
     a_cpc += 2;
     s++;
   }
-  
-  
+
   fprintf (stderr, "Done!\n");
+  
+	allegro_init ();
+	install_keyboard ();
+
+	set_color_depth (8);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0);
+
+  PALETTE pal;
+  for (int c=0; c<16; c++)
+  {
+    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+  }
+	set_palette_range (pal, 0, 7, 1);
+
+  a_cpc = 0x429e;
+  s = 0;
+  unsigned x=0;
+  unsigned y=0;
+  unsigned highest;
+  
+  while (a_cpc < 0x4422)
+  {
+    unsigned p_cpc = ram_cpc[a_cpc+1];
+    p_cpc = (p_cpc << 8) + ram_cpc[a_cpc];
+
+    uint8_t w_cpc = ram_cpc[p_cpc] & 0x3f;
+    uint8_t h_cpc = ram_cpc[p_cpc+1];
+
+    if ((s%16) == 0)
+    {
+      x = 0;
+      highest = 0;
+    }
+
+    p_cpc += 3;
+    for (unsigned yb=0; yb<h_cpc; yb++)    
+    {
+      for (unsigned xb=0; xb<w_cpc; xb++)
+      {
+        uint8_t d = ram_cpc[p_cpc+yb*w_cpc+xb];
+        for (unsigned b=0; b<8; b+=2)
+        {
+          static unsigned lu[] = { 0, 4, 5, 0 };
+          unsigned c = ((d&0x80)>>6)|((d&0x08)>>3);
+          putpixel (screen, x+xb*4+b/2, y+(h_cpc-1-yb), lu[c]);
+          d <<= 1;
+        }
+      }
+    }
+    if (h_cpc > highest)
+      highest = h_cpc;
+    
+    x += w_cpc*4 + 4;
+    
+    if ((s%16) == 15)
+      y += highest + 4;
+      
+    a_cpc += 2;
+    s++;
+  }
+
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+  
+  allegro_exit ();
 }
+
+END_OF_MAIN();
