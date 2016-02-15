@@ -127,24 +127,43 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   uint8_t w = *(psprite++) & 0x3f;
   uint8_t h = *(psprite++);
 
+  if (gfx == GFX_CPC)
+    psprite++;
+    
   unsigned x, y, b;
   
   for (y=0; y<h; y++)
   {
     for (x=0; x<w; x++)
     {
-      uint8_t m = *(psprite++);
-      uint8_t d = *(psprite++);
-      for (b=0; b<8; b++)
+      if (gfx == GFX_ZX)
       {
+        uint8_t m = *(psprite++);
+        uint8_t d = *(psprite++);
+        for (b=0; b<8; b++)
+        {
 #ifndef BUILD_OPT_DISABLE_MASK
-        if (m & (1<<7))
-          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), mask_colour);
+          if (m & (1<<7))
+            putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), mask_colour);
 #endif
-        if (d & (1<<7))
-          putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), attr);
-        m <<= 1;
-        d <<= 1;
+          if (d & (1<<7))
+            putpixel (scrn_buf, p_obj->pixel_x+x*8+b, 191-(p_obj->pixel_y+y), attr);
+          m <<= 1;
+          d <<= 1;
+        }
+      }
+      else
+      {
+        // assume GFX_CPC
+        uint8_t d = *(psprite++);
+        for (b=0; b<4; b++)
+        {
+          static unsigned lu[] = { 0, 4, 5, 0 };
+          unsigned c = ((d&0x80)>>6)|((d&0x08)>>3);
+          if (c != 0)
+            putpixel (scrn_buf, p_obj->pixel_x+x*4+b, 191-(p_obj->pixel_y+y), lu[c]);
+          d <<= 1;
+        }
       }
     }
   }

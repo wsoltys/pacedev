@@ -90,8 +90,15 @@ typedef struct
 
 INTERNAL internal = { 0, 0, 0 };
 
+#if 0
+GFX_E gfx = GFX_ZX;
 uint8_t const **background_type_tbl = zx_background_type_tbl;
 const uint8_t **sprite_tbl = zx_sprite_tbl;
+#else
+GFX_E gfx = GFX_CPC;
+uint8_t const **background_type_tbl = cpc_background_type_tbl;
+const uint8_t **sprite_tbl = cpc_sprite_tbl;
+#endif
 
 #ifdef __HAS_SETJMP__
   static jmp_buf start_menu_env_buf;
@@ -4634,22 +4641,29 @@ uint8_t *flip_sprite (POBJ32 p_obj)
 
   uint8_t w = psprite[0] & 0x3f;
   uint8_t h = psprite[1];
-
+  uint8_t *p = &psprite[2];
+  if (gfx == GFX_CPC)
+    p += 1;
+  
   unsigned x, y;
-
+    
   if (vflip)
   {
-    for (x=0; x<w; x++)
-      for (y=0; y<h/2; y++)
-      {
-        uint8_t m = psprite[2+2*(y*w+x)];
-        uint8_t d = psprite[3+2*(y*w+x)];
-        psprite[2+2*(y*w+x)] = psprite[2+2*((h-1-y)*w+x)];
-        psprite[3+2*(y*w+x)] = psprite[3+2*((h-1-y)*w+x)];
-        psprite[2+2*((h-1-y)*w+x)] = m;
-        psprite[3+2*((h-1-y)*w+x)] = d;
-      }
+    if (gfx == GFX_ZX)
+      w *= 2;
+
+    for (y=0; y<h/2; y++)
+    {
+      static uint8_t lbuf[32];
+  
+      memcpy (lbuf, p+y*w, w);
+      memcpy (p+y*w, p+(h-1-y)*w, w);
+      memcpy (p+(h-1-y)*w, lbuf, w);
+    }
     *psprite ^= FLAG_VFLIP;
+
+    if (gfx == GFX_ZX)
+      w /= 2;
   }
 
   if (hflip)
@@ -4658,17 +4672,17 @@ uint8_t *flip_sprite (POBJ32 p_obj)
     {
       for (x=0; x<w/2; x++)
       {
-        uint8_t m = psprite[2+2*(y*w+x)];
-        uint8_t d = psprite[3+2*(y*w+x)];
-        psprite[2+2*(y*w+x)] = REV(psprite[2+2*(y*w+w-1-x)]);
-        psprite[3+2*(y*w+x)] = REV(psprite[3+2*(y*w+w-1-x)]);
-        psprite[2+2*(y*w+w-1-x)] = REV(m);
-        psprite[3+2*(y*w+w-1-x)] = REV(d);
+        uint8_t m = p[2*(y*w+x)];
+        uint8_t d = p[1+2*(y*w+x)];
+        p[2*(y*w+x)] = REV(p[2*(y*w+w-1-x)]);
+        p[1+2*(y*w+x)] = REV(p[1+2*(y*w+w-1-x)]);
+        p[2*(y*w+w-1-x)] = REV(m);
+        p[1+2*(y*w+w-1-x)] = REV(d);
       }
       if (w & 1)
       {
-        psprite[2+2*(y*w+x)] = REV(psprite[2+2*(y*w+x)]);
-        psprite[3+2*(y*w+x)] = REV(psprite[3+2*(y*w+x)]);
+        p[2*(y*w+x)] = REV(p[2*(y*w+x)]);
+        p[1+2*(y*w+x)] = REV(p[1+2*(y*w+x)]);
       }
     }
     *psprite ^= FLAG_HFLIP;

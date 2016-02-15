@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 #include <sys/stat.h>
 
@@ -13,6 +14,8 @@
   #define SS_TEXTOUT_CENTRE(s,f,str,w,h,c) \
     textout_centre_ex(s, f, str, w, h, c, 0);
 #endif
+
+//#define DO_SPRITE_GFX
 
 uint8_t ram_zx[0x10000];
 uint8_t ram_cpc[0x10000];
@@ -229,7 +232,7 @@ int main (int argc, char *argv[])
                 (h_zx != h_cpc ? 'H' : ' '),
                 (w_cpc & 1 ? '*' : ' '));
                   
-        if (1 && h_zx > h_cpc)
+        if (0 && h_zx > h_cpc)
         {
           printf ("h_zx < h_cpc:\n");
           printf ("- top\n");
@@ -249,7 +252,175 @@ int main (int argc, char *argv[])
     s++;
   }
 
+  // now write data out to a C file
+  
+  FILE *fp2 = fopen ("data2.c", "wt");
+  if (!fp2)
+    exit (0);
+      
+  typedef struct
+  {
+    char        label[32];
+    uint16_t    addr;
+    
+  } BLKTYP_T, *PBLKTYP_T;
+
+  // background type table
+  
+  static BLKTYP_T bgtyp[] =
+  {
+    { "arch_n", 0 },
+    { "arch_e", 0 },
+    { "arch_s", 0 },
+    { "arch_w", 0 },
+    { "tree_arch_n", 0 },
+    { "tree_arch_e", 0 },
+    { "tree_arch_s", 0 },
+    { "tree_arch_w", 0 },
+    { "gate_n", 0 },
+    { "gate_e", 0 },
+    { "gate_s", 0 },
+    { "gate_w", 0 },
+    { "wall_size_1", 0 },
+    { "wall_size_2", 0 },
+    { "wall_size_3", 0 },
+    { "tree_room_size_1", 0 },
+    { "tree_filler_w", 0 },
+    { "tree_filler_n", 0 },
+    { "wizard", 0 },
+    { "cauldron", 0 },
+    { "high_arch_e", 0 },
+    { "high_arch_s", 0 },
+    { "high_arch_e_base", 0 },
+    { "high_arch_s_base", 0 }
+  };
+  
+  uint16_t p = 0x3e6e;
+  unsigned n;
+  for (n=0; p<0x3e9e; n++, p+=2)
+  {
+    bgtyp[n].addr = ram_cpc[p+1];
+    bgtyp[n].addr = (bgtyp[n].addr<<8) | ram_cpc[p];
+  }
+  while (p < 0x417e)
+  {
+    unsigned i;
+    
+    // find address
+    for (i=0; i<n; i++)
+      if (p == bgtyp[i].addr)
+        break;
+    if (i == n)
+      fprintf (stderr, "ERR: bg_type addr=$%04X\n", p);
+
+    // do table entry
+    fprintf (fp2, "static const uint8_t %s[] = \n{\n", bgtyp[i].label);
+    do
+    {
+      fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X,\n",
+                ram_cpc[p], ram_cpc[p+1], ram_cpc[p+2], ram_cpc[p+3], 
+                ram_cpc[p+4], ram_cpc[p+5], ram_cpc[p+6], ram_cpc[p+7]);
+      p += 8;
+      
+    } while (ram_cpc[p] != 0);
+    fprintf (fp2, "  0");
+    p++;
+    fprintf (fp2,"\n};\n\n");
+  }
+
+  fprintf (fp2, "uint8_t const *cpc_background_type_tbl[] __FORCE_RODATA__ = \n{\n");
+  for (unsigned i=0; i<n; i++)
+  {
+    fprintf (fp2, "  %s%s\n", bgtyp[i].label,
+      (i<n-1 ? "," : ""));
+  }
+  fprintf (fp2, "};\n\n");
+
+  // create table of sprite addresses
+  uint16_t sprite_a[132];
+  unsigned sprite_n = 0;
+  p = 0x4424;
+  while (p < 0x7ffb)
+  {
+    unsigned w = ram_cpc[p+0] & 0x3f;
+    unsigned h = ram_cpc[p+1];
+    
+    //fprintf (stderr, "spr_%03d=$%04X\n", sprite_n, p);
+    sprite_a[sprite_n++] = p;
+
+    if (w==0 && h==0)
+    {
+      p += 2;
+      continue;
+    }
+
+    p += 3 + w*h;    
+  }
+  //fprintf (stderr, "sprite_n=%d\n", sprite_n);
+
+  // sprite_tbl
+  fprintf (fp2, "const uint8_t *cpc_sprite_tbl[] __FORCE_RODATA__ =\n{\n");
+  n = 0;
+  for (p=0x429e; p<0x4422; p+=2, n++)
+  {
+    char label[16];
+
+    uint16_t a = ram_cpc[p+1];
+    a = (a<<8) | ram_cpc[p];
+    if (a == 0x4422)
+      strcpy (label, "spr_nul");
+    else
+    {
+      // find entry in lookup
+      unsigned i;
+      for (i=0; i<sprite_n; i++)
+      {
+        if (sprite_a[i] == a)
+          break;
+      }
+      if (i < sprite_n)
+        sprintf (label, "spr_%03d", i);
+      else
+        strcpy (label, "(ERROR)");
+    }
+    if ((n%6) == 0)
+      fprintf (fp2, "  ");
+    fprintf (fp2, "%s, ", label);
+    if ((n%6) == 5)
+      fprintf (fp2, "\n");
+  }
+  fprintf (fp2, "\n};\n\n");
+
+  // sprite graphics
+  fprintf (fp2, "static uint8_t spr_nul[] __FORCE_RODATA__ =\n{\n  0, 0\n};\n\n");
+  p = 0x4424;
+  sprite_n = 0;
+  while (p < 0x7ffb)
+  {
+    unsigned w = ram_cpc[p+0] & 0x3f;
+    unsigned h = ram_cpc[p+1];
+    unsigned f = ram_cpc[p+2];
+    
+    if (ram_cpc[p+0] & 0xc0)
+      fprintf (stderr, "*** WARNING sprite %03d flipped ($%02X)\n",
+                sprite_n, ram_cpc[p+0]);
+    fprintf (fp2, "static uint8_t spr_%03d[] __FORCE_RODATA__ =\n{\n  %d, %d, %d,\n",
+              sprite_n++, w, h, f);
+    unsigned i;
+    p += 3;
+    for (unsigned i=0; i<w*h; i++, p++)
+    {
+      if ((i%8)==0) fprintf (fp2, "  ");
+      fprintf (fp2, "0x%02X, ", ram_cpc[p]);
+      if ((i%8)==7) fprintf (fp2, "\n");
+    }
+    fprintf (fp2, "\n};\n\n");
+  }
+
+  fclose (fp2);  
   fprintf (stderr, "Done!\n");
+
+#ifdef DO_SPRITE_GFX
   
 	allegro_init ();
 	install_keyboard ();
@@ -317,6 +488,8 @@ int main (int argc, char *argv[])
 	while (key[KEY_ESC]);	  
   
   allegro_exit ();
+  
+#endif  
 }
 
 END_OF_MAIN();
