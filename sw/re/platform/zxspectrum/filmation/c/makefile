@@ -165,7 +165,8 @@ OBJDIR = obj/$(PLATFORM)
 
 KL_OBJS = \
 	$(OBJDIR)/kl.o	\
-	$(OBJDIR)/kl_dat.o
+	$(OBJDIR)/kl_dat.o \
+	$(OBJDIR)/zx_dat.o
 	
 OSD_OBJS = \
 	$(OBJDIR)/main.o

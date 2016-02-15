@@ -90,6 +90,9 @@ typedef struct
 
 INTERNAL internal = { 0, 0, 0 };
 
+uint8_t const **background_type_tbl = zx_background_type_tbl;
+const uint8_t **sprite_tbl = zx_sprite_tbl;
+
 #ifdef __HAS_SETJMP__
   static jmp_buf start_menu_env_buf;
   static jmp_buf game_loop_env_buf;

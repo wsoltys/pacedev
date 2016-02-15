@@ -96,9 +96,9 @@ extern const uint8_t kl_font[][8];
 extern const ROOM_SIZE_T room_size_tbl[];
 extern const uint8_t location_tbl[];
 extern uint8_t const *block_type_tbl[];
-extern uint8_t const *background_type_tbl[];
+//extern uint8_t const *background_type_tbl[];
 extern SPECOBJ special_objs_tbl[];
-extern const uint8_t *sprite_tbl[];
+//extern const uint8_t *sprite_tbl[];
 extern const uint8_t start_game_tune[];
 extern const uint8_t game_over_tune[];
 extern const uint8_t game_complete_tune[];
@@ -124,5 +124,7 @@ extern const uint8_t plyr_spr_init_data[];
 extern const uint8_t start_locations[];
 extern const uint8_t panel_data[];
 extern const uint8_t border_data[][4];
+
+#include "zx_dat.h"
 
 #endif // __KL_DAT_H__
