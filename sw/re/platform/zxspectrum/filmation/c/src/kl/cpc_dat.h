@@ -5,5 +5,7 @@
 
 extern uint8_t const *cpc_background_type_tbl[];
 extern const uint8_t *cpc_sprite_tbl[];
+extern const uint8_t cpc_panel_data[];
+extern const uint8_t cpc_border_data[][4];
 
 #endif

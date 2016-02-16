@@ -34,7 +34,7 @@
 #define BM_WIDTH_BYTES  (BM_WIDTH/8)
 #define PL_SIZE         (BM_WIDTH_BYTES*BM_HEIGHT)
 
-extern void knight_lore (void);
+extern void knight_lore (GFX_E gfx_);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 static struct IntuitionBase *IntuitionBase;
@@ -233,9 +233,37 @@ void osd_debug_hook (void *context)
 {
 }
 
+void usage (char *argv0)
+{
+  printf ("usage: kl {-cpc|-zx}\n");
+  printf ("  -cpc    use Amstrad CPC graphics\n");
+  printf ("  -zx     use ZX Spectrum graphics\n");
+  exit (0);
+}
+
 int main (int argc, char *argv[])
 {
+  GFX_E gfx = GFX_ZX;
   unsigned i;
+
+  while (--argc)
+  {
+    switch (argv[argc][0])
+    {
+      case '-' :
+      case '/' :
+        if (!stricmp (&argv[argc][1], "cpc"))
+          gfx = GFX_CPC;
+        else if (!stricmp (&argv[argc][1], "zx"))
+          gfx = GFX_ZX;
+        else
+          usage (argv[0]);
+        break;
+      default :
+        usage (argv[0]);
+        break;
+    }
+  }
 
   // the usual AmigaOS stuff  
   IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library", 40);
@@ -302,7 +330,7 @@ int main (int argc, char *argv[])
   //MakeScreen (screen);
   //RethinkDisplay ();
     
-	knight_lore ();
+	knight_lore (gfx);
 
   CloseScreen (screen);
   

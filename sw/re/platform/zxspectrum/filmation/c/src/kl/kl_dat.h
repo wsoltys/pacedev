@@ -132,8 +132,8 @@ extern uint8_t objects_required[];
 extern const uint8_t sun_moon_yoff[];
 extern const uint8_t plyr_spr_init_data[];
 extern const uint8_t start_locations[];
-extern const uint8_t panel_data[];
-extern const uint8_t border_data[][4];
+//extern const uint8_t panel_data[];
+//extern const uint8_t border_data[][4];
 
 #include "cpc_dat.h"
 #include "zx_dat.h"

@@ -44,7 +44,7 @@
 #define SPR_XOFF        (FIX_XOFF*8)
 #define SPR_YOFF        (FIX_YOFF*8)-16
 
-extern void knight_lore (void);
+extern void knight_lore (GFX_E gfx_);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 void osd_delay (unsigned ms)
@@ -336,7 +336,7 @@ void eye_catcher (void)
 	*(vram+1) = 0xF000 | 0x7B;
 }
 
-static void show_title (void)
+static void show_zx_title (void)
 {
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
   uint16_t bank = 0x0600;
@@ -365,10 +365,8 @@ static void show_title (void)
 
 int main (int argc, char *argv[])
 {
-  //uint8_t *dips = (uint8_t *)0x10FD84;
-  
-  //uint8_t colour_mono = *(dips+6);
-  //uint8_t mono_colour = *(dips+7);
+  uint8_t *dips = (uint8_t *)0x10FD84;
+  GFX_E gfx = (*(dips+6) ? GFX_ZX : GFX_CPC);
 
 	PALETTE 	pal[8];
 	unsigned	p, c;
@@ -436,12 +434,15 @@ int main (int argc, char *argv[])
 
 		clear_fix();
 		clear_spr();
-		
-    show_title ();
-		clear_fix();
 
+    if (gfx == GFX_ZX)
+    {		
+      show_zx_title ();
+  		clear_fix();
+    }
+    
 		_vbl_count = 0;
-		knight_lore ();
+		knight_lore (gfx);
 
 		while (1);
 	}

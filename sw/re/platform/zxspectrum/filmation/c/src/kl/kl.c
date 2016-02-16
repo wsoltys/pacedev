@@ -90,20 +90,16 @@ typedef struct
 
 INTERNAL internal = { 0, 0, 0 };
 
-#if 0
-GFX_E gfx = GFX_ZX;
-uint8_t const **background_type_tbl = zx_background_type_tbl;
-const uint8_t **sprite_tbl = zx_sprite_tbl;
-#else
-GFX_E gfx = GFX_CPC;
-uint8_t const **background_type_tbl = cpc_background_type_tbl;
-const uint8_t **sprite_tbl = cpc_sprite_tbl;
-#endif
-
 #ifdef __HAS_SETJMP__
   static jmp_buf start_menu_env_buf;
   static jmp_buf game_loop_env_buf;
 #endif
+
+GFX_E gfx = GFX_NONE;
+static uint8_t const **background_type_tbl;
+static const uint8_t **sprite_tbl;
+static const uint8_t **border_data;
+static const uint8_t *panel_data;
 
 // start of variables
 
@@ -539,12 +535,31 @@ static void render_hw_sprites (void)
 
 extern adjfn_t const upd_sprite_jump_tbl[];
 
-void knight_lore (void)
+void knight_lore (GFX_E gfx_)
 {
   POBJ32 p_obj;
   unsigned i;
 
   DBGPRINTF_FN;
+
+  gfx = gfx_;
+  switch (gfx)
+  {
+    case GFX_CPC :
+      background_type_tbl = cpc_background_type_tbl;
+      sprite_tbl = cpc_sprite_tbl;
+      border_data = (const uint8_t **)cpc_border_data;
+      panel_data = cpc_panel_data;
+      break;
+
+    default :
+    case GFX_ZX :
+      background_type_tbl = zx_background_type_tbl;
+      sprite_tbl = zx_sprite_tbl;
+      border_data = (const uint8_t **)zx_border_data;
+      panel_data = zx_panel_data;
+      break;
+  }      
 
 START_AF6C:
 
@@ -2686,13 +2701,13 @@ void display_sun_moon_frame (POBJ32 p_obj)
 #ifndef __HAS_HWSPRITES__
   p_frm->flags7 = 0;
   p_frm->graphic_no = 0x5a;
-  p_frm->pixel_x = 184;
+  p_frm->pixel_x = (gfx == GFX_ZX ? 184 : 176);
   p_frm->pixel_y = 0;
   print_sprite (BRIGHT(ATTR_RED), p_frm);
   p_frm->pixel_x = 208;
   p_frm->graphic_no = 0xba;
   print_sprite (BRIGHT(ATTR_RED), p_frm);
-  blit_to_screen (184, 0, 6, 31);
+  blit_to_screen ((gfx == GFX_ZX ? 184 : 176), 0, 6, 31);
 #endif  
   return;
 }
@@ -3769,6 +3784,8 @@ void calc_2d_info (POBJ32 p_obj)
 
   psprite = flip_sprite (p_obj);
   p_obj->data_width_bytes = *(psprite++) & 0x0F;
+  if (gfx == GFX_CPC)
+    p_obj->data_width_bytes /= 2;
   if ((p_obj->pixel_x & 7) != 0)
     p_obj->data_width_bytes++;
   p_obj->data_height_lines = *psprite;
@@ -4192,9 +4209,35 @@ uint8_t *transfer_sprite (POBJ32 p_obj, uint8_t *psprite)
 // $D24C
 uint8_t *transfer_sprite_and_print (uint8_t attr, POBJ32 p_obj, uint8_t *psprite)
 {
-  uint8_t *p = transfer_sprite (p_obj, psprite);
+  psprite = transfer_sprite (p_obj, psprite);
   print_sprite (attr, p_obj);
 
+  return (psprite);
+}
+
+// $2B07 (CPC)
+static uint8_t *cpc_multi_transfer_sprite_and_print (uint8_t attr, POBJ32 p_obj, uint8_t dx, uint8_t dy, uint8_t n, uint8_t *psprite)
+{
+  while (n--)
+  {
+    psprite = transfer_sprite_and_print (attr, p_obj, psprite);
+    p_obj->pixel_x += dx;
+    p_obj->pixel_y += dy;
+  }
+
+  return (psprite);
+}
+
+// $2AEC (CPC)
+static uint8_t *cpc_display_scroll (uint8_t *p, uint8_t dx, uint8_t dy)
+{
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, dx, dy, 5);
+  p = cpc_multi_transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, dx, dy, 2, p);
+  p = transfer_sprite (&sprite_scratchpad, p);
+  multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 0, 1, 36);
+  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+  
   return (p);
 }
 
@@ -4203,14 +4246,23 @@ void display_panel (void)
 {
 #ifndef __HAS_HWSPRITES__  
   uint8_t *p = (uint8_t *)panel_data;
-  p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 16, (uint8_t)-8, 5);
-  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
-  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
-  p = transfer_sprite (&sprite_scratchpad, p);
-  multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 16, 8, 5);
-  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
-  p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+  if (gfx == GFX_ZX)
+  {
+    p = transfer_sprite (&sprite_scratchpad, p);
+    multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 16, (uint8_t)-8, 5);
+    p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+    p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+    p = transfer_sprite (&sprite_scratchpad, p);
+    multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 16, 8, 5);
+    p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+    p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+  }
+  else
+  {
+    p = cpc_display_scroll (p, 16, (uint8_t)-8);
+    p = cpc_display_scroll (p, 16, 8);
+    p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
+  }
 #else
   osd_display_panel (curr_room_attrib);
 #endif
@@ -4627,9 +4679,12 @@ uint8_t calc_pixel_XY (POBJ32 p_obj)
   return (p_obj->pixel_y < 192);
 }
 
-#define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
-//#define REV(d) d
-
+#define REV(d) \
+  (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
+  
+#define REV2(d) \
+  (((d&128)>>3)|((d&64)>>1))|(((d&32)<<1)|((d&16)<<3))|(((d&8)>>3)|((d&4)>>1))|(((d&2)<<1)|((d&1)<<3))
+  
 // $D6EF
 uint8_t *flip_sprite (POBJ32 p_obj)
 {
@@ -4670,19 +4725,36 @@ uint8_t *flip_sprite (POBJ32 p_obj)
   {
     for (y=0; y<h; y++)
     {
-      for (x=0; x<w/2; x++)
+      if (gfx == GFX_ZX)
       {
-        uint8_t m = p[2*(y*w+x)];
-        uint8_t d = p[1+2*(y*w+x)];
-        p[2*(y*w+x)] = REV(p[2*(y*w+w-1-x)]);
-        p[1+2*(y*w+x)] = REV(p[1+2*(y*w+w-1-x)]);
-        p[2*(y*w+w-1-x)] = REV(m);
-        p[1+2*(y*w+w-1-x)] = REV(d);
+        for (x=0; x<w/2; x++)
+        {
+          uint8_t m = p[2*(y*w+x)];
+          uint8_t d = p[1+2*(y*w+x)];
+          p[2*(y*w+x)] = REV(p[2*(y*w+w-1-x)]);
+          p[1+2*(y*w+x)] = REV(p[1+2*(y*w+w-1-x)]);
+          p[2*(y*w+w-1-x)] = REV(m);
+          p[1+2*(y*w+w-1-x)] = REV(d);
+        }
+        if (w & 1)
+        {
+          p[2*(y*w+x)] = REV(p[2*(y*w+x)]);
+          p[1+2*(y*w+x)] = REV(p[1+2*(y*w+x)]);
+        }
       }
-      if (w & 1)
+      else
       {
-        p[2*(y*w+x)] = REV(p[2*(y*w+x)]);
-        p[1+2*(y*w+x)] = REV(p[1+2*(y*w+x)]);
+        // assume CPC
+        for (x=0; x<w/2; x++)
+        {
+          uint8_t d = p[y*w+x];
+          p[y*w+x] = REV2(p[(y+1)*w-1-x]);
+          p[(y+1)*w-1-x] = REV2(d);
+        }
+        if (w & 1)
+        {
+          p[y*w+x] = REV2(p[y*w+x]);
+        }
       }
     }
     *psprite ^= FLAG_HFLIP;
@@ -4726,9 +4798,18 @@ void print_sprite (uint8_t attr, POBJ32 p_obj)
   uint8_t *psprite = flip_sprite (p_obj);
   
   if ((p_obj->pixel_x & 7) == 0)
+  {
     p_obj->data_width_bytes = *psprite & 0x0f;
+    if (gfx == GFX_CPC)
+      p_obj->data_width_bytes /= 2;
+  }
   else
-    p_obj->data_width_bytes = (*psprite & 0x07) + 1;
+  {
+    p_obj->data_width_bytes = (*psprite & 0x07);
+    if (gfx == GFX_CPC)
+      p_obj->data_width_bytes /= 2;
+    p_obj->data_width_bytes++;
+  }
   psprite++;
   p_obj->data_height_lines = *psprite;
     

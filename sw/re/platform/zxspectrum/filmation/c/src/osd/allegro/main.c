@@ -30,7 +30,7 @@
 
 static BITMAP *scrn_buf;
 
-extern void knight_lore (void);
+extern void knight_lore (GFX_E gfx_);
 extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 static unsigned mask_colour = 0;
@@ -377,10 +377,38 @@ void show_title (void)
   }
 }
 
+void usage (char *argv0)
+{
+  printf ("usage: kl {-cpc|-zx}\n");
+  printf ("  -cpc    use Amstrad CPC graphics\n");
+  printf ("  -zx     use ZX Spectrum graphics\n");
+  exit (0);
+}
+
 void main (int argc, char *argv[])
 {
+  GFX_E gfx = GFX_ZX;
   int c;
-  
+
+  while (--argc)
+  {
+    switch (argv[argc][0])
+    {
+      case '-' :
+      case '/' :
+        if (!stricmp (&argv[argc][1], "cpc"))
+          gfx = GFX_CPC;
+        else if (!stricmp (&argv[argc][1], "zx"))
+          gfx = GFX_ZX;
+        else
+          usage (argv[0]);
+        break;
+      default :
+        usage (argv[0]);
+        break;
+    }
+  }
+    
 	allegro_init ();
 	install_keyboard ();
 
@@ -417,7 +445,7 @@ void main (int argc, char *argv[])
 
 	clear_bitmap (scrn_buf);
 	clear_bitmap (screen);
-  knight_lore ();
+  knight_lore (gfx);
 
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
