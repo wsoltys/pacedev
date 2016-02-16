@@ -74,7 +74,7 @@ RAM:0028
 RAM:0028             ; =============== S U B R O U T I N E =======================================
 RAM:0028
 RAM:0028
-RAM:0028             jp_to_tbl_entry:                        ; CODE XREF: sub_1C51-1677p
+RAM:0028             jp_to_tbl_entry:                        ; CODE XREF: display_sun_moon_frame-1677p
 RAM:0028                                                     ; sub_A9B+81j ...
 RAM:0028 26 00                       ld      h, #0
 RAM:002A 29                          add     hl, hl
@@ -160,16 +160,16 @@ RAM:0067 45                          .db 0x45 ; E
 RAM:0068 00          byte_68:        .db 0                   ; DATA XREF: RAM:STARTo
 RAM:0068                                                     ; sub_E28r ...
 RAM:0069 00                          .db    0
-RAM:006A 00 00       seed_2:         .dw 0                   ; DATA XREF: sub_1C51-16DAr
-RAM:006A                                                     ; sub_1C51:onscreen_loopr ...
+RAM:006A 00 00       seed_2:         .dw 0                   ; DATA XREF: display_sun_moon_frame-16DAr
+RAM:006A                                                     ; display_sun_moon_frame:onscreen_loopr ...
 RAM:006C 00          byte_6C:        .db 0                   ; DATA XREF: sub_15C2+35r
 RAM:006C                                                     ; sub_15C2:loc_1609w ...
-RAM:006D 00          seed_3:         .db 0                   ; DATA XREF: sub_1C51-1673r
-RAM:006D                                                     ; sub_1C51-166Fw ...
+RAM:006D 00          seed_3:         .db 0                   ; DATA XREF: display_sun_moon_frame-1673r
+RAM:006D                                                     ; display_sun_moon_frame-166Fw ...
 RAM:006E 00          byte_6E:        .db 0                   ; DATA XREF: sub_15C2+38w
 RAM:006F 00          byte_6F:        .db 0                   ; DATA XREF: sub_D79:loc_D7Cw
 RAM:006F                                                     ; sub_D84+1r
-RAM:0070 00          objs_wiped_cnt: .db 0                   ; DATA XREF: sub_1C51:start_menuo
+RAM:0070 00          objs_wiped_cnt: .db 0                   ; DATA XREF: display_sun_moon_frame:start_menuo
 RAM:0070                                                     ; render_dynamic_objects+1w ...
 RAM:0071 00          room_size_X:    .db 0                   ; DATA XREF: chk_plyr_OOBr
 RAM:0071                                                     ; sub_2322+12r ...
@@ -185,7 +185,7 @@ RAM:0076 00          portcullis_move_cnt:.db 0               ; DATA XREF: RAM:1F
 RAM:0076                                                     ; RAM:1F6Fw ...
 RAM:0077 00          transform_flag_graphic:.db 0            ; DATA XREF: chk_and_init_transformr
 RAM:0077                                                     ; chk_and_init_transform+15w ...
-RAM:0078 00          not_1st_screen: .db 0                   ; DATA XREF: sub_1C51-16E8w
+RAM:0078 00          not_1st_screen: .db 0                   ; DATA XREF: display_sun_moon_frame-16E8w
 RAM:0078                                                     ; RAM:build_screen_objectsr
 RAM:0079 00          byte_79:        .db 0                   ; DATA XREF: handle_pickup_dropr
 RAM:0079                                                     ; handle_pickup_drop+3Bw ...
@@ -195,20 +195,20 @@ RAM:007B 00          byte_7B:        .db 0                   ; DATA XREF: sub_18
 RAM:007B                                                     ; check_user_input+57w
 RAM:007C 0F          byte_7C:        .db 0xF                 ; DATA XREF: sub_16DA+Br
 RAM:007C                                                     ; sub_176B+2w
-RAM:007D 00          render_status_info:.db 0                ; DATA XREF: sub_1C51:loc_62Fr
-RAM:007D                                                     ; sub_1C51-15FCw ...
-RAM:007E 01          byte_7E:        .db 1                   ; DATA XREF: sub_1C51-8ACw
+RAM:007D 00          render_status_info:.db 0                ; DATA XREF: display_sun_moon_frame:loc_62Fr
+RAM:007D                                                     ; display_sun_moon_frame-15FCw ...
+RAM:007E 01          byte_7E:        .db 1                   ; DATA XREF: display_sun_moon_frame-8ACw
 RAM:007E                                                     ; sub_15C2+1w ...
 RAM:007F 00                          .db    0
-RAM:0080 05          lives:          .db 5                   ; DATA XREF: sub_1C51-16E0w
+RAM:0080 05          lives:          .db 5                   ; DATA XREF: display_sun_moon_frame-16E0w
 RAM:0080                                                     ; lose_life+12o
 RAM:0081 00          byte_81:        .db 0                   ; DATA XREF: sub_14F5+1Ar
 RAM:0081                                                     ; RAM:1AFBr ...
-RAM:0082 00          fire_seed:      .db 0                   ; DATA XREF: sub_1C51-16A6w
+RAM:0082 00          fire_seed:      .db 0                   ; DATA XREF: display_sun_moon_frame-16A6w
 RAM:0082                                                     ; RAM:1125r
 RAM:0083 00          ball_bounce_height:.db 0                ; DATA XREF: RAM:114Br
 RAM:0083                                                     ; RAM:1156w ...
-RAM:0084 00          rising_blocks_z:.db 0                   ; DATA XREF: sub_1C51-1639r
+RAM:0084 00          rising_blocks_z:.db 0                   ; DATA XREF: display_sun_moon_frame-1639r
 RAM:0084                                                     ; sub_2750+1w ...
 RAM:0085 00          is_spike_ball_dropping:.db 0            ; DATA XREF: RAM:2A87w
 RAM:0086 00          disable_spike_ball_drop:.db 0           ; DATA XREF: RAM:1098r
@@ -218,10 +218,10 @@ RAM:0087                                                     ; move_player+47r
 RAM:0088 00          byte_88:        .db 0                   ; DATA XREF: RAM:0EF2w
 RAM:0088                                                     ; RAM:0F29r
 RAM:0089 00          all_objs_in_cauldron:.db 0              ; DATA XREF: init_cauldron_bubbles+Cr
-RAM:0089                                                     ; sub_1C51:game_overr ...
+RAM:0089                                                     ; display_sun_moon_frame:game_overr ...
 RAM:008A 00          byte_8A:        .db 0                   ; DATA XREF: handle_pickup_drop+CFw
 RAM:008A                                                     ; RAM:1B06w ...
-RAM:008B 00          byte_8B:        .db 0                   ; DATA XREF: sub_1C51-911r
+RAM:008B 00          byte_8B:        .db 0                   ; DATA XREF: display_sun_moon_frame-911r
 RAM:008B                                                     ; sub_14F5+17w
 RAM:008C 94 32       word_8C:        .dw 0x3294              ; DATA XREF: sub_1571+4w
 RAM:008C                                                     ; sub_158D+3w ...
@@ -235,7 +235,7 @@ RAM:0094 00 00       word_94:        .dw 0                   ; DATA XREF: sub_27
 RAM:0096 00                          .db    0
 RAM:0097 00          byte_97:        .db 0                   ; DATA XREF: handle_pickup_drop+1Aw
 RAM:0097                                                     ; handle_pickup_drop+30w ...
-RAM:0098 3F          byte_98:        .db 0x3F                ; DATA XREF: sub_1C51-16EEw
+RAM:0098 3F          byte_98:        .db 0x3F                ; DATA XREF: display_sun_moon_frame-16EEw
 RAM:0099 01          byte_99:        .db 1                   ; DATA XREF: sub_A9B:loc_A9Cw
 RAM:0099                                                     ; sub_A9B:loc_AF3r
 RAM:009A 00                          .db    0
@@ -300,7 +300,7 @@ RAM:00D4 00                          .db    0
 RAM:00D5 00                          .db    0
 RAM:00D6 00                          .db    0
 RAM:00D7 00 00 00 00+graphic_objs_tbl:.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-RAM:00D7 00 00 00 00+                                        ; DATA XREF: sub_1C51-16A3o
+RAM:00D7 00 00 00 00+                                        ; DATA XREF: display_sun_moon_frame-16A3o
 RAM:00D7 00 00 00 00+                                        ; RAM:0EFDr ...
 RAM:00D7 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 RAM:00F3 00 00 00 00+                .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -380,9 +380,9 @@ RAM:053A 01 CF 04                    ld      bc, #0x4CF
 RAM:053D CD 91 2D                    call    clr_mem
 RAM:0540 18 09                       jr      main
 RAM:0542             ; ---------------------------------------------------------------------------
-RAM:0542             ; START OF FUNCTION CHUNK FOR sub_1C51
+RAM:0542             ; START OF FUNCTION CHUNK FOR display_sun_moon_frame
 RAM:0542
-RAM:0542             start_menu:                             ; CODE XREF: sub_1C51-8D7j
+RAM:0542             start_menu:                             ; CODE XREF: display_sun_moon_frame-8D7j
 RAM:0542 21 70 00                    ld      hl, #objs_wiped_cnt
 RAM:0545 01 C7 04                    ld      bc, #0x4C7
 RAM:0548 CD 91 2D                    call    clr_mem
@@ -402,7 +402,9 @@ RAM:0563 32 98 00                    ld      (byte_98), a
 RAM:0566 ED 56                       im      1
 RAM:0568 AF                          xor     a
 RAM:0569 32 78 00                    ld      (not_1st_screen), a
-RAM:056C 32 F7 29                    ld      (byte_29F7), a
+RAM:056C
+RAM:056C             loc_56C:                                ; DATA XREF: display_sun_moon_frame-16CFo
+RAM:056C 32 F7 29                    ld      (flags12_1), a
 RAM:056F 3E 05                       ld      a, #5
 RAM:0571 32 80 00                    ld      (lives), a
 RAM:0574 21 68 00                    ld      hl, #0x68 ; 'h'
@@ -411,12 +413,12 @@ RAM:057A 86                          add     a, (hl)
 RAM:057B 77                          ld      (hl), a
 RAM:057C CD 9B 2D                    call    clear_scrn
 RAM:057F CD 29 08                    call    sub_829
-RAM:0582 21 6E 05                    ld      hl, #0x56E
+RAM:0582 21 6E 05                    ld      hl, # loc_56C+2
 RAM:0585 23                          inc     hl
 RAM:0586 23                          inc     hl
-RAM:0587 7E                          ld      a, (hl)
+RAM:0587 7E                          ld      a, (hl)         ; get lives
 RAM:0588 CB 27                       sla     a
-RAM:058A FE 0A                       cp      #0xA
+RAM:058A FE 0A                       cp      #10             ; anti-cheat!!!
 RAM:058C C0                          ret     NZ
 RAM:058D CD C2 15                    call    sub_15C2
 RAM:0590 21 43 0C                    ld      hl, #0xC43
@@ -426,16 +428,16 @@ RAM:0599 CD 33 2A                    call    init_start_location
 RAM:059C CD 16 1D                    call    sub_1D16
 RAM:059F CD 27 1D                    call    sub_1D27
 RAM:05A2
-RAM:05A2             loc_5A2:                                ; CODE XREF: sub_1C51-15EFj
+RAM:05A2             loc_5A2:                                ; CODE XREF: display_sun_moon_frame-15EFj
 RAM:05A2 CD B4 29                    call    lose_life
 RAM:05A5 CD 68 2A                    call    build_screen_objects
 RAM:05A8
-RAM:05A8             onscreen_loop:                          ; CODE XREF: sub_1C51-15ECj
+RAM:05A8             onscreen_loop:                          ; CODE XREF: display_sun_moon_frame-15ECj
 RAM:05A8 3A 6A 00                    ld      a, (seed_2)
 RAM:05AB 32 82 00                    ld      (fire_seed), a
 RAM:05AE DD 21 D7 00                 ld      ix, #graphic_objs_tbl
 RAM:05B2
-RAM:05B2             update_sprite_loop:                     ; CODE XREF: sub_1C51-165Cj
+RAM:05B2             update_sprite_loop:                     ; CODE XREF: display_sun_moon_frame-165Cj
 RAM:05B2 31 00 81                    ld      sp, #seed_1
 RAM:05B5 CD 79 0D                    call    sub_D79
 RAM:05B8 21 82 00                    ld      hl, #0x82 ; 'Ç'
@@ -471,7 +473,7 @@ RAM:05F3 30 02                       jr      NC, loc_5F7
 RAM:05F5 18 BB                       jr      update_sprite_loop
 RAM:05F7             ; ---------------------------------------------------------------------------
 RAM:05F7
-RAM:05F7             loc_5F7:                                ; CODE XREF: sub_1C51-165Ej
+RAM:05F7             loc_5F7:                                ; CODE XREF: display_sun_moon_frame-165Ej
 RAM:05F7 2A 6A 00                    ld      hl, (seed_2)
 RAM:05FA 23                          inc     hl
 RAM:05FB 22 6A 00                    ld      (seed_2), hl
@@ -493,25 +495,25 @@ RAM:061F 47                          ld      b, a
 RAM:0620 FA 2F 06                    jp      M, loc_62F
 RAM:0623 28 0A                       jr      Z, loc_62F
 RAM:0625
-RAM:0625             game_delay:                             ; CODE XREF: sub_1C51-1624j
+RAM:0625             game_delay:                             ; CODE XREF: display_sun_moon_frame-1624j
 RAM:0625 21 00 05                    ld      hl, #0x500
 RAM:0628
-RAM:0628             loc_628:                                ; CODE XREF: sub_1C51-1626j
+RAM:0628             loc_628:                                ; CODE XREF: display_sun_moon_frame-1626j
 RAM:0628 2B                          dec     hl
 RAM:0629 7D                          ld      a, l
 RAM:062A B4                          or      h
 RAM:062B 20 FB                       jr      NZ, loc_628
 RAM:062D 10 F6                       djnz    game_delay
 RAM:062F
-RAM:062F             loc_62F:                                ; CODE XREF: sub_1C51-1631j
-RAM:062F                                                     ; sub_1C51-162Ej
+RAM:062F             loc_62F:                                ; CODE XREF: display_sun_moon_frame-1631j
+RAM:062F                                                     ; display_sun_moon_frame-162Ej
 RAM:062F 3A 7D 00                    ld      a, (render_status_info)
 RAM:0632 A7                          and     a
 RAM:0633 28 1F                       jr      Z, loc_654
 RAM:0635 CD 0B 18                    call    sub_180B
-RAM:0638 CD D6 2A                    call    sub_2AD6
+RAM:0638 CD D6 2A                    call    display_panel
 RAM:063B DD 21 FA 1C                 ld      ix, #sun_moon_scratchpad
-RAM:063F CD 51 1C                    call    sub_1C51
+RAM:063F CD 51 1C                    call    display_sun_moon_frame
 RAM:0642 CD 8D 15                    call    sub_158D
 RAM:0645 CD 4B 15                    call    sub_154B
 RAM:0648 CD 5E 15                    call    sub_155E
@@ -519,7 +521,7 @@ RAM:064B CD BF 2D                    call    sub_2DBF
 RAM:064E CD EE 07                    call    sub_7EE
 RAM:0651 CD 68 06                    call    sub_668
 RAM:0654
-RAM:0654             loc_654:                                ; CODE XREF: sub_1C51-161Ej
+RAM:0654             loc_654:                                ; CODE XREF: display_sun_moon_frame-161Ej
 RAM:0654 AF                          xor     a
 RAM:0655 32 7D 00                    ld      (render_status_info), a
 RAM:0658 DD 21 D7 00                 ld      ix, #0xD7 ; '◊'
@@ -527,12 +529,12 @@ RAM:065C DD 7E 00                    ld      a, 0(ix)
 RAM:065F DD B6 1C                    or      0x1C(ix)
 RAM:0662 CA A2 05                    jp      Z, loc_5A2
 RAM:0665 C3 A8 05                    jp      onscreen_loop
-RAM:0665             ; END OF FUNCTION CHUNK FOR sub_1C51
+RAM:0665             ; END OF FUNCTION CHUNK FOR display_sun_moon_frame
 RAM:0668
 RAM:0668             ; =============== S U B R O U T I N E =======================================
 RAM:0668
 RAM:0668
-RAM:0668             sub_668:                                ; CODE XREF: sub_1C51-1600p
+RAM:0668             sub_668:                                ; CODE XREF: display_sun_moon_frame-1600p
 RAM:0668 06 28                       ld      b, #0x28 ; '('
 RAM:066A 11 1C 00                    ld      de, #0x1C
 RAM:066D 21 DE 00                    ld      hl, #0xDE ; 'ﬁ'
@@ -545,7 +547,7 @@ RAM:0675 C9                          ret
 RAM:0675             ; End of function sub_668
 RAM:0675
 RAM:0675             ; ---------------------------------------------------------------------------
-RAM:0676 95 08       upd_sprite_jmp_tbl:.dw no_update        ; DATA XREF: sub_1C51-167Ao
+RAM:0676 95 08       upd_sprite_jmp_tbl:.dw no_update        ; DATA XREF: display_sun_moon_frame-167Ao
 RAM:0678 95 08                       .dw no_update
 RAM:067A FC 1F                       .dw upd_2_4
 RAM:067C E2 1F                       .dw upd_3_5
@@ -737,7 +739,7 @@ RAM:07EE
 RAM:07EE             ; =============== S U B R O U T I N E =======================================
 RAM:07EE
 RAM:07EE
-RAM:07EE             sub_7EE:                                ; CODE XREF: sub_1C51-1603p
+RAM:07EE             sub_7EE:                                ; CODE XREF: display_sun_moon_frame-1603p
 RAM:07EE                                                     ; sub_1B43+22p
 RAM:07EE 3A 73 00                    ld      a, (curr_room_attrib)
 RAM:07F1 21 FD 07                    ld      hl, #0x7FD
@@ -799,7 +801,7 @@ RAM:0829
 RAM:0829             ; =============== S U B R O U T I N E =======================================
 RAM:0829
 RAM:0829
-RAM:0829             sub_829:                                ; CODE XREF: sub_1C51-16D2p
+RAM:0829             sub_829:                                ; CODE XREF: display_sun_moon_frame-16D2p
 RAM:0829 21 00 82                    ld      hl, #0x8200
 RAM:082C
 RAM:082C             loc_82C:                                ; CODE XREF: sub_829+29j
@@ -1441,7 +1443,7 @@ RAM:0A97
 RAM:0A97             ; =============== S U B R O U T I N E =======================================
 RAM:0A97
 RAM:0A97
-RAM:0A97             sub_A97:                                ; CODE XREF: sub_1C51-8DDp
+RAM:0A97             sub_A97:                                ; CODE XREF: display_sun_moon_frame-8DDp
 RAM:0A97                                                     ; sub_15C2+23p
 RAM:0A97 3E 01                       ld      a, #1
 RAM:0A99 18 01                       jr      loc_A9C
@@ -1451,8 +1453,8 @@ RAM:0A9B
 RAM:0A9B             ; =============== S U B R O U T I N E =======================================
 RAM:0A9B
 RAM:0A9B
-RAM:0A9B             sub_A9B:                                ; CODE XREF: sub_1C51-16BEp
-RAM:0A9B                                                     ; sub_1C51-8A3p ...
+RAM:0A9B             sub_A9B:                                ; CODE XREF: display_sun_moon_frame-16BEp
+RAM:0A9B                                                     ; display_sun_moon_frame-8A3p ...
 RAM:0A9B AF                          xor     a
 RAM:0A9C
 RAM:0A9C             loc_A9C:                                ; CODE XREF: sub_A97+2j
@@ -1462,7 +1464,7 @@ RAM:0AA2 E5                          push    hl
 RAM:0AA3 21 36 0C                    ld      hl, #0xC36
 RAM:0AA6 CD 67 0D                    call    sub_D67
 RAM:0AA9 E1                          pop     hl
-RAM:0AAA FD 21 77 18                 ld      iy, #0x1877
+RAM:0AAA FD 21 77 18                 ld      iy, #sprite_scratchpad
 RAM:0AAE 11 07 00                    ld      de, #7
 RAM:0AB1 06 03                       ld      b, #3
 RAM:0AB3
@@ -1482,7 +1484,7 @@ RAM:0ACA FD 19                       add     iy, de
 RAM:0ACC 10 E5                       djnz    loc_AB3
 RAM:0ACE
 RAM:0ACE             loc_ACE:                                ; CODE XREF: sub_A9B+55j
-RAM:0ACE FD 21 77 18                 ld      iy, #0x1877
+RAM:0ACE FD 21 77 18                 ld      iy, #sprite_scratchpad
 RAM:0AD2 3E 03                       ld      a, #3
 RAM:0AD4
 RAM:0AD4             loc_AD4:                                ; CODE XREF: sub_A9B+52j
@@ -2095,7 +2097,7 @@ RAM:0D67
 RAM:0D67             ; =============== S U B R O U T I N E =======================================
 RAM:0D67
 RAM:0D67
-RAM:0D67             sub_D67:                                ; CODE XREF: sub_1C51-16F3p
+RAM:0D67             sub_D67:                                ; CODE XREF: display_sun_moon_frame-16F3p
 RAM:0D67                                                     ; sub_A9B+Bp ...
 RAM:0D67 16 00                       ld      d, #0
 RAM:0D69
@@ -2116,8 +2118,8 @@ RAM:0D79
 RAM:0D79             ; =============== S U B R O U T I N E =======================================
 RAM:0D79
 RAM:0D79
-RAM:0D79             sub_D79:                                ; CODE XREF: sub_1C51:mainp
-RAM:0D79                                                     ; sub_1C51-169Cp
+RAM:0D79             sub_D79:                                ; CODE XREF: display_sun_moon_frame:mainp
+RAM:0D79                                                     ; display_sun_moon_frame-169Cp
 RAM:0D79 FB                          ei
 RAM:0D7A 3E 01                       ld      a, #1
 RAM:0D7C
@@ -2278,7 +2280,7 @@ RAM:0E28
 RAM:0E28             ; =============== S U B R O U T I N E =======================================
 RAM:0E28
 RAM:0E28
-RAM:0E28             sub_E28:                                ; CODE XREF: sub_1C51-16BBp
+RAM:0E28             sub_E28:                                ; CODE XREF: display_sun_moon_frame-16BBp
 RAM:0E28 3A 68 00                    ld      a, (byte_68)
 RAM:0E2B E6 03                       and     #3
 RAM:0E2D F6 04                       or      #4
@@ -2873,7 +2875,7 @@ RAM:1188
 RAM:1188             ; =============== S U B R O U T I N E =======================================
 RAM:1188
 RAM:1188
-RAM:1188             init_cauldron_bubbles:                  ; CODE XREF: sub_1C51-1642p
+RAM:1188             init_cauldron_bubbles:                  ; CODE XREF: display_sun_moon_frame-1642p
 RAM:1188 3A DF 00                    ld      a, (graphic_objs_tbl+8)
 RAM:118B FE 88                       cp      #136
 RAM:118D C0                          ret     NZ
@@ -3162,15 +3164,15 @@ RAM:12F8 00                          .db    0
 RAM:12F9 18                          .db 0x18
 RAM:12FA C9                          .db 0xC9 ; …
 RAM:12FB             ; ---------------------------------------------------------------------------
-RAM:12FB             ; START OF FUNCTION CHUNK FOR sub_1C51
+RAM:12FB             ; START OF FUNCTION CHUNK FOR display_sun_moon_frame
 RAM:12FB
 RAM:12FB             game_over:                              ; CODE XREF: RAM:0EBCj
-RAM:12FB                                                     ; sub_1C51+7Fj ...
+RAM:12FB                                                     ; display_sun_moon_frame+7Fj ...
 RAM:12FB 3A 89 00                    ld      a, (all_objs_in_cauldron)
 RAM:12FE A7                          and     a
 RAM:12FF C2 8F 13                    jp      NZ, loc_138F
 RAM:1302
-RAM:1302             loc_1302:                               ; CODE XREF: sub_1C51-89Dj
+RAM:1302             loc_1302:                               ; CODE XREF: display_sun_moon_frame-89Dj
 RAM:1302 CD B7 2D                    call    clear_scrn_buffer
 RAM:1305 CD 9B 2D                    call    clear_scrn
 RAM:1308 11 31 14                    ld      de, #0x1431
@@ -3189,7 +3191,7 @@ RAM:1325 38 03                       jr      C, loc_132A
 RAM:1327 F6 10                       or      #0x10
 RAM:1329 12                          ld      (de), a
 RAM:132A
-RAM:132A             loc_132A:                               ; CODE XREF: sub_1C51-92Cj
+RAM:132A             loc_132A:                               ; CODE XREF: display_sun_moon_frame-92Cj
 RAM:132A 21 EE A3                    ld      hl, #0xA3EE
 RAM:132D 06 01                       ld      b, #1
 RAM:132F CD 71 15                    call    sub_1571
@@ -3218,10 +3220,10 @@ RAM:135A 23                          inc     hl
 RAM:135B 56                          ld      d, (hl)
 RAM:135C 21 58 27                    ld      hl, #0x2758
 RAM:135F CD EA 16                    call    sub_16EA
-RAM:1362 CD 3B 2B                    call    sub_2B3B
+RAM:1362 CD 3B 2B                    call    print_border
 RAM:1365 CD BF 2D                    call    sub_2DBF
 RAM:1368
-RAM:1368             loc_1368:                               ; CODE XREF: sub_1C51-8E2j
+RAM:1368             loc_1368:                               ; CODE XREF: display_sun_moon_frame-8E2j
 RAM:1368 AF                          xor     a
 RAM:1369 21 A1 29                    ld      hl, #0x29A1
 RAM:136C CD 46 29                    call    sub_2946
@@ -3230,13 +3232,13 @@ RAM:1371 21 49 0C                    ld      hl, #0xC49
 RAM:1374 CD 97 0A                    call    sub_A97
 RAM:1377 CD 7D 13                    call    sub_137D
 RAM:137A C3 42 05                    jp      start_menu
-RAM:137A             ; END OF FUNCTION CHUNK FOR sub_1C51
+RAM:137A             ; END OF FUNCTION CHUNK FOR display_sun_moon_frame
 RAM:137D
 RAM:137D             ; =============== S U B R O U T I N E =======================================
 RAM:137D
 RAM:137D
-RAM:137D             sub_137D:                               ; CODE XREF: sub_1C51-8DAp
-RAM:137D                                                     ; sub_1C51-8A0p
+RAM:137D             sub_137D:                               ; CODE XREF: display_sun_moon_frame-8DAp
+RAM:137D                                                     ; display_sun_moon_frame-8A0p
 RAM:137D 21 00 20                    ld      hl, #0x2000
 RAM:1380
 RAM:1380             loc_1380:                               ; CODE XREF: sub_137D+Fj
@@ -3253,12 +3255,12 @@ RAM:138E C9                          ret
 RAM:138E             ; End of function sub_137D
 RAM:138E
 RAM:138F             ; ---------------------------------------------------------------------------
-RAM:138F             ; START OF FUNCTION CHUNK FOR sub_1C51
+RAM:138F             ; START OF FUNCTION CHUNK FOR display_sun_moon_frame
 RAM:138F
-RAM:138F             loc_138F:                               ; CODE XREF: sub_1C51-952j
+RAM:138F             loc_138F:                               ; CODE XREF: display_sun_moon_frame-952j
 RAM:138F CD B7 2D                    call    clear_scrn_buffer
 RAM:1392 CD 9B 2D                    call    clear_scrn
-RAM:1395 CD 3B 2B                    call    sub_2B3B
+RAM:1395 CD 3B 2B                    call    print_border
 RAM:1398 11 B7 13                    ld      de, #0x13B7
 RAM:139B D9                          exx
 RAM:139C 21 BD 13                    ld      hl, #0x13BD
@@ -3271,7 +3273,7 @@ RAM:13AB 21 4F 0C                    ld      hl, #0xC4F
 RAM:13AE CD 9B 0A                    call    sub_A9B
 RAM:13B1 CD 7D 13                    call    sub_137D
 RAM:13B4 C3 02 13                    jp      loc_1302
-RAM:13B4             ; END OF FUNCTION CHUNK FOR sub_1C51
+RAM:13B4             ; END OF FUNCTION CHUNK FOR display_sun_moon_frame
 RAM:13B4             ; ---------------------------------------------------------------------------
 RAM:13B7 0F                          .db  0xF
 RAM:13B8 0F                          .db  0xF
@@ -3595,7 +3597,7 @@ RAM:14F5
 RAM:14F5             ; =============== S U B R O U T I N E =======================================
 RAM:14F5
 RAM:14F5
-RAM:14F5             sub_14F5:                               ; CODE XREF: sub_1C51-914p
+RAM:14F5             sub_14F5:                               ; CODE XREF: display_sun_moon_frame-914p
 RAM:14F5 1E 00                       ld      e, #0
 RAM:14F7 01 20 08                    ld      bc, #0x820
 RAM:14FA 21 B7 00                    ld      hl, #0xB7 ; '∑'
@@ -3661,8 +3663,8 @@ RAM:154B
 RAM:154B             ; =============== S U B R O U T I N E =======================================
 RAM:154B
 RAM:154B
-RAM:154B             sub_154B:                               ; CODE XREF: sub_1C51-160Cp
-RAM:154B                                                     ; sub_1C51+82p
+RAM:154B             sub_154B:                               ; CODE XREF: display_sun_moon_frame-160Cp
+RAM:154B                                                     ; display_sun_moon_frame+82p
 RAM:154B 3E FF                       ld      a, #0xFF
 RAM:154D 32 2C 17                    ld      (byte_172C), a
 RAM:1550 32 3C 17                    ld      (byte_173C), a
@@ -3676,7 +3678,7 @@ RAM:155E
 RAM:155E             ; =============== S U B R O U T I N E =======================================
 RAM:155E
 RAM:155E
-RAM:155E             sub_155E:                               ; CODE XREF: sub_1C51-1609p
+RAM:155E             sub_155E:                               ; CODE XREF: display_sun_moon_frame-1609p
 RAM:155E                                                     ; RAM:1A87p
 RAM:155E 3E FF                       ld      a, #0xFF
 RAM:1560 32 2C 17                    ld      (byte_172C), a
@@ -3691,8 +3693,8 @@ RAM:1571
 RAM:1571             ; =============== S U B R O U T I N E =======================================
 RAM:1571
 RAM:1571
-RAM:1571             sub_1571:                               ; CODE XREF: sub_1C51-922p
-RAM:1571                                                     ; sub_1C51-917p ...
+RAM:1571             sub_1571:                               ; CODE XREF: display_sun_moon_frame-922p
+RAM:1571                                                     ; display_sun_moon_frame-917p ...
 RAM:1571 E5                          push    hl
 RAM:1572 21 94 32                    ld      hl, #0x3294
 RAM:1575 22 8C 00                    ld      (word_8C), hl
@@ -3720,7 +3722,7 @@ RAM:158D
 RAM:158D             ; =============== S U B R O U T I N E =======================================
 RAM:158D
 RAM:158D
-RAM:158D             sub_158D:                               ; CODE XREF: sub_1C51-160Fp
+RAM:158D             sub_158D:                               ; CODE XREF: display_sun_moon_frame-160Fp
 RAM:158D 21 A2 15                    ld      hl, #0x15A2
 RAM:1590 22 8C 00                    ld      (word_8C), hl
 RAM:1593 11 9D 15                    ld      de, #0x159D
@@ -3771,10 +3773,10 @@ RAM:15C2
 RAM:15C2             ; =============== S U B R O U T I N E =======================================
 RAM:15C2
 RAM:15C2
-RAM:15C2             sub_15C2:                               ; CODE XREF: sub_1C51-16C4p
+RAM:15C2             sub_15C2:                               ; CODE XREF: display_sun_moon_frame-16C4p
 RAM:15C2 AF                          xor     a
 RAM:15C3 32 7E 00                    ld      (byte_7E), a
-RAM:15C6 21 7C 16                    ld      hl, #0x167C
+RAM:15C6 21 7C 16                    ld      hl, #menu_colours
 RAM:15C9 06 03                       ld      b, #3
 RAM:15CB
 RAM:15CB             loc_15CB:                               ; CODE XREF: sub_15C2+Cj
@@ -3782,7 +3784,7 @@ RAM:15CB 36 0F                       ld      (hl), #0xF
 RAM:15CD 23                          inc     hl
 RAM:15CE 10 FB                       djnz    loc_15CB
 RAM:15D0 CD B7 2D                    call    clear_scrn_buffer
-RAM:15D3 CD 3B 2B                    call    sub_2B3B
+RAM:15D3 CD 3B 2B                    call    print_border
 RAM:15D6 CD 62 16                    call    sub_1662
 RAM:15D9 21 55 00                    ld      hl, #0x55 ; 'U'
 RAM:15DC CD 49 00                    call    sub_49
@@ -3887,7 +3889,7 @@ RAM:167A             ; End of function sub_1662
 RAM:167A
 RAM:167A             ; ---------------------------------------------------------------------------
 RAM:167B F0                          .db 0xF0 ; 
-RAM:167C FF                          .db 0xFF
+RAM:167C FF          menu_colours:   .db 0xFF                ; DATA XREF: sub_15C2+4o
 RAM:167D 0F                          .db  0xF
 RAM:167E 0F                          .db  0xF
 RAM:167F 0F                          .db  0xF
@@ -3999,7 +4001,7 @@ RAM:16EA
 RAM:16EA             ; =============== S U B R O U T I N E =======================================
 RAM:16EA
 RAM:16EA
-RAM:16EA             sub_16EA:                               ; CODE XREF: sub_1C51-8F2p
+RAM:16EA             sub_16EA:                               ; CODE XREF: display_sun_moon_frame-8F2p
 RAM:16EA E5                          push    hl
 RAM:16EB 21 94 32                    ld      hl, #0x3294
 RAM:16EE 22 8C 00                    ld      (word_8C), hl
@@ -4057,7 +4059,7 @@ RAM:1728 E6 F0                       and     #0xF0 ; ''
 RAM:172A B1                          or      c
 RAM:172A             ; ---------------------------------------------------------------------------
 RAM:172B E6                          .db 0xE6 ; Ê
-RAM:172C 0F          byte_172C:      .db 0xF                 ; DATA XREF: sub_1C51-938w
+RAM:172C 0F          byte_172C:      .db 0xF                 ; DATA XREF: display_sun_moon_frame-938w
 RAM:172C                                                     ; sub_154B+2w ...
 RAM:172D 77                          .db 0x77 ; w
 RAM:172E 23                          .db 0x23 ; #
@@ -4074,7 +4076,7 @@ RAM:1738 E6                          .db 0xE6 ; Ê
 RAM:1739 F0                          .db 0xF0 ; 
 RAM:173A B1                          .db 0xB1 ; ±
 RAM:173B E6                          .db 0xE6 ; Ê
-RAM:173C 0F          byte_173C:      .db 0xF                 ; DATA XREF: sub_1C51-935w
+RAM:173C 0F          byte_173C:      .db 0xF                 ; DATA XREF: display_sun_moon_frame-935w
 RAM:173C                                                     ; sub_154B+5w ...
 RAM:173D 77                          .db 0x77 ; w
 RAM:173E 2B                          .db 0x2B ; +
@@ -4137,8 +4139,8 @@ RAM:176B
 RAM:176B             ; =============== S U B R O U T I N E =======================================
 RAM:176B
 RAM:176B
-RAM:176B             sub_176B:                               ; CODE XREF: sub_1C51-93Dp
-RAM:176B                                                     ; sub_1C51-8A9p ...
+RAM:176B             sub_176B:                               ; CODE XREF: display_sun_moon_frame-93Dp
+RAM:176B                                                     ; display_sun_moon_frame-8A9p ...
 RAM:176B D9                          exx
 RAM:176C 1A                          ld      a, (de)
 RAM:176D 32 7C 00                    ld      (byte_7C), a
@@ -4168,8 +4170,8 @@ RAM:178D
 RAM:178D             ; =============== S U B R O U T I N E =======================================
 RAM:178D
 RAM:178D
-RAM:178D             sub_178D:                               ; CODE XREF: sub_178D+17j
-RAM:178D                                                     ; sub_2AEC+5p ...
+RAM:178D             multiple_print_sprite:                  ; CODE XREF: multiple_print_sprite+17j
+RAM:178D                                                     ; display_scroll+5p ...
 RAM:178D C5                          push    bc
 RAM:178E D5                          push    de
 RAM:178F E5                          push    hl
@@ -4183,9 +4185,9 @@ RAM:179A DD 77 16                    ld      0x16(ix), a
 RAM:179D DD 7E 17                    ld      a, 0x17(ix)
 RAM:17A0 82                          add     a, d
 RAM:17A1 DD 77 17                    ld      0x17(ix), a
-RAM:17A4 10 E7                       djnz    sub_178D
+RAM:17A4 10 E7                       djnz    multiple_print_sprite
 RAM:17A6 C9                          ret
-RAM:17A6             ; End of function sub_178D
+RAM:17A6             ; End of function multiple_print_sprite
 RAM:17A6
 RAM:17A7             ; ---------------------------------------------------------------------------
 RAM:17A7
@@ -4272,7 +4274,7 @@ RAM:180B
 RAM:180B             ; =============== S U B R O U T I N E =======================================
 RAM:180B
 RAM:180B
-RAM:180B             sub_180B:                               ; CODE XREF: sub_1C51-161Cp
+RAM:180B             sub_180B:                               ; CODE XREF: display_sun_moon_frame-161Cp
 RAM:180B DD E5                       push    ix
 RAM:180D DD 21 77 18                 ld      ix, #0x1877
 RAM:1811 06 03                       ld      b, #3
@@ -4322,7 +4324,7 @@ RAM:1860 01 06 18                    ld      bc, #0x1806
 RAM:1863 3A 7D 00                    ld      a, (render_status_info)
 RAM:1866 A7                          and     a
 RAM:1867 20 03                       jr      NZ, loc_186C
-RAM:1869 CD C0 2E                    call    sub_2EC0
+RAM:1869 CD C0 2E                    call    blit_to_screen
 RAM:186C
 RAM:186C             loc_186C:                               ; CODE XREF: sub_180B+5Cj
 RAM:186C E1                          pop     hl
@@ -4338,8 +4340,8 @@ RAM:1876             ; End of function sub_180B
 RAM:1876
 RAM:1876             ; ---------------------------------------------------------------------------
 RAM:1877 5D 0D 58 07+sprite_scratchpad:.db 0x5D, 0xD, 0x58, 7, 0, 0x5B, 0xD, 0xDE, 0xC, 0x62
-RAM:1877 00 5B 0D DE+                                        ; DATA XREF: sub_1C51+2Fo
-RAM:1877 0C 62 0B 02+                                        ; sub_2AD6o
+RAM:1877 00 5B 0D DE+                                        ; DATA XREF: sub_A9B+Fo
+RAM:1877 0C 62 0B 02+                                        ; sub_A9B:loc_ACEo ...
 RAM:1877 C5 0C 99 0C+                .db 0xB, 2, 0xC5, 0xC, 0x99, 0xC, 0x81, 3, 2, 0x61, 0xC
 RAM:1877 81 03 02 61+                .db 1, 0xE8, 0xA0, 0, 0, 0, 0
 RAM:1893 00                          .db    0
@@ -4951,7 +4953,7 @@ RAM:1C51
 RAM:1C51             ; =============== S U B R O U T I N E =======================================
 RAM:1C51
 RAM:1C51
-RAM:1C51             sub_1C51:                               ; CODE XREF: sub_1C51-1612p
+RAM:1C51             display_sun_moon_frame:                 ; CODE XREF: display_sun_moon_frame-1612p
 RAM:1C51
 RAM:1C51             ; FUNCTION CHUNK AT RAM:0542 SIZE 00000126 BYTES
 RAM:1C51             ; FUNCTION CHUNK AT RAM:12FB SIZE 00000082 BYTES
@@ -4973,8 +4975,8 @@ RAM:1C69 CF                          rst     8
 RAM:1C6A 7E                          ld      a, (hl)
 RAM:1C6B DD 77 17                    ld      23(ix), a
 RAM:1C6E
-RAM:1C6E             display_frame:                          ; CODE XREF: sub_1C51+8Bj
-RAM:1C6E 01 0C 1F                    ld      bc, #0x1F0C
+RAM:1C6E             display_frame:                          ; CODE XREF: display_sun_moon_frame+8Bj
+RAM:1C6E 01 0C 1F                    ld      bc, #0x1F0C     ; 31 lines, 12 bytes
 RAM:1C71 21 EE 97                    ld      hl, #0x97EE
 RAM:1C74 C5                          push    bc
 RAM:1C75 E5                          push    hl
@@ -4987,10 +4989,10 @@ RAM:1C7D CD 2B 2F                    call    print_sprite
 RAM:1C80 DD 21 77 18                 ld      ix, #sprite_scratchpad
 RAM:1C84 DD 36 07 00                 ld      7(ix), #0
 RAM:1C88 DD 36 00 5A                 ld      0(ix), #0x5A ; 'Z'
-RAM:1C8C DD 36 16 B0                 ld      0x16(ix), #0xB0 ; '∞'
+RAM:1C8C DD 36 16 B0                 ld      0x16(ix), #176
 RAM:1C90 DD 36 17 00                 ld      0x17(ix), #0
 RAM:1C94 CD 2B 2F                    call    print_sprite
-RAM:1C97 DD 36 16 D0                 ld      0x16(ix), #0xD0 ; '–'
+RAM:1C97 DD 36 16 D0                 ld      0x16(ix), #208
 RAM:1C9B DD 36 00 BA                 ld      0(ix), #0xBA ; '∫'
 RAM:1C9F CD 2B 2F                    call    print_sprite
 RAM:1CA2 E1                          pop     hl
@@ -4999,10 +5001,10 @@ RAM:1CA4 11 76 C6                    ld      de, #0xC676
 RAM:1CA7 3A 7D 00                    ld      a, (render_status_info)
 RAM:1CAA A7                          and     a
 RAM:1CAB C0                          ret     NZ
-RAM:1CAC C3 C0 2E                    jp      sub_2EC0
+RAM:1CAC C3 C0 2E                    jp      blit_to_screen
 RAM:1CAF             ; ---------------------------------------------------------------------------
 RAM:1CAF
-RAM:1CAF             toggle_day_night:                       ; CODE XREF: sub_1C51+Aj
+RAM:1CAF             toggle_day_night:                       ; CODE XREF: display_sun_moon_frame+Aj
 RAM:1CAF DD 7E 00                    ld      a, 0(ix)
 RAM:1CB2 EE 01                       xor     #1
 RAM:1CB4 DD 77 00                    ld      0(ix), a
@@ -5017,30 +5019,30 @@ RAM:1CC9 7E                          ld      a, (hl)
 RAM:1CCA C6 01                       add     a, #1
 RAM:1CCC 27                          daa
 RAM:1CCD 77                          ld      (hl), a
-RAM:1CCE FE 40                       cp      #0x40 ; '@'
+RAM:1CCE FE 40                       cp      #64
 RAM:1CD0 CA FB 12                    jp      Z, game_over
 RAM:1CD3 CD 4B 15                    call    sub_154B
 RAM:1CD6 01 78 07                    ld      bc, #0x778
 RAM:1CD9 CD DF 1C                    call    sub_1CDF
 RAM:1CDC C3 6E 1C                    jp      display_frame
-RAM:1CDC             ; End of function sub_1C51
+RAM:1CDC             ; End of function display_sun_moon_frame
 RAM:1CDC
 RAM:1CDF
 RAM:1CDF             ; =============== S U B R O U T I N E =======================================
 RAM:1CDF
 RAM:1CDF
 RAM:1CDF             sub_1CDF:                               ; CODE XREF: RAM:1A8Dp
-RAM:1CDF                                                     ; sub_1C51+88p
+RAM:1CDF                                                     ; display_sun_moon_frame+88p
 RAM:1CDF CD 95 31                    call    sub_3195
 RAM:1CE2 69                          ld      l, c
 RAM:1CE3 60                          ld      h, b
 RAM:1CE4 CD 86 31                    call    sub_3186
 RAM:1CE7 01 04 08                    ld      bc, #0x804
-RAM:1CEA C3 C0 2E                    jp      sub_2EC0
+RAM:1CEA C3 C0 2E                    jp      blit_to_screen
 RAM:1CEA             ; End of function sub_1CDF
 RAM:1CEA
 RAM:1CEA             ; ---------------------------------------------------------------------------
-RAM:1CED 05          sun_moon_yoff:  .db    5                ; DATA XREF: sub_1C51+11o
+RAM:1CED 05          sun_moon_yoff:  .db    5                ; DATA XREF: display_sun_moon_frame+11o
 RAM:1CEE 06                          .db    6
 RAM:1CEF 07                          .db    7
 RAM:1CF0 08                          .db    8
@@ -5053,8 +5055,8 @@ RAM:1CF6 07                          .db    7
 RAM:1CF7 06                          .db    6
 RAM:1CF8 05                          .db    5
 RAM:1CF9 05                          .db    5
-RAM:1CFA 00          sun_moon_scratchpad:.db 0               ; DATA XREF: sub_1C51-1616o
-RAM:1CFA                                                     ; sub_1C51+6Fr ...
+RAM:1CFA 00          sun_moon_scratchpad:.db 0               ; DATA XREF: display_sun_moon_frame-1616o
+RAM:1CFA                                                     ; display_sun_moon_frame+6Fr ...
 RAM:1CFB 00                          .db    0
 RAM:1CFC 00                          .db    0
 RAM:1CFD 00                          .db    0
@@ -5086,7 +5088,7 @@ RAM:1D16
 RAM:1D16             ; =============== S U B R O U T I N E =======================================
 RAM:1D16
 RAM:1D16
-RAM:1D16             sub_1D16:                               ; CODE XREF: sub_1C51-16B5p
+RAM:1D16             sub_1D16:                               ; CODE XREF: display_sun_moon_frame-16B5p
 RAM:1D16 DD 21 FA 1C                 ld      ix, #0x1CFA
 RAM:1D1A DD 36 00 58                 ld      0(ix), #0x58 ; 'X'
 RAM:1D1E DD 36 16 B0                 ld      0x16(ix), #0xB0 ; '∞'
@@ -5098,7 +5100,7 @@ RAM:1D27
 RAM:1D27             ; =============== S U B R O U T I N E =======================================
 RAM:1D27
 RAM:1D27
-RAM:1D27             sub_1D27:                               ; CODE XREF: sub_1C51-16B2p
+RAM:1D27             sub_1D27:                               ; CODE XREF: display_sun_moon_frame-16B2p
 RAM:1D27 21 7E 41                    ld      hl, #0x417E
 RAM:1D2A 3A 68 00                    ld      a, (byte_68)
 RAM:1D2D 5F                          ld      e, a
@@ -5289,7 +5291,7 @@ RAM:1DBF
 RAM:1DC1             ; ---------------------------------------------------------------------------
 RAM:1DC1
 RAM:1DC1             fill_window:                            ; CODE XREF: sub_180B+36p
-RAM:1DC1                                                     ; sub_1C51+29p ...
+RAM:1DC1                                                     ; display_sun_moon_frame+29p ...
 RAM:1DC1 F5                          push    af
 RAM:1DC2 78                          ld      a, b
 RAM:1DC3 ED 44                       neg
@@ -7075,7 +7077,7 @@ RAM:26F7
 RAM:26F7             ; =============== S U B R O U T I N E =======================================
 RAM:26F7
 RAM:26F7
-RAM:26F7             list_objects_to_draw:                   ; CODE XREF: sub_1C51-163Fp
+RAM:26F7             list_objects_to_draw:                   ; CODE XREF: display_sun_moon_frame-163Fp
 RAM:26F7 DD E5                       push    ix
 RAM:26F9 06 28                       ld      b, #0x28 ; '('
 RAM:26FB 11 1C 00                    ld      de, #0x1C
@@ -7551,7 +7553,7 @@ RAM:2946             ; =============== S U B R O U T I N E =====================
 RAM:2946
 RAM:2946
 RAM:2946             sub_2946:                               ; CODE XREF: sub_A9B+64p
-RAM:2946                                                     ; sub_1C51-8E5p ...
+RAM:2946                                                     ; display_sun_moon_frame-8E5p ...
 RAM:2946 06 00                       ld      b, #0
 RAM:2948
 RAM:2948             loc_2948:                               ; CODE XREF: sub_2946+11j
@@ -7668,7 +7670,7 @@ RAM:29B4
 RAM:29B4             ; =============== S U B R O U T I N E =======================================
 RAM:29B4
 RAM:29B4
-RAM:29B4             lose_life:                              ; CODE XREF: sub_1C51:loc_5A2p
+RAM:29B4             lose_life:                              ; CODE XREF: display_sun_moon_frame:loc_5A2p
 RAM:29B4 21 EB 29                    ld      hl, #plyr_spr_1_scratchpad
 RAM:29B7 11 D7 00                    ld      de, #graphic_objs_tbl
 RAM:29BA D5                          push    de
@@ -7712,7 +7714,7 @@ RAM:29F3 00          start_loc_1:    .db 0                   ; DATA XREF: init_s
 RAM:29F4 00                          .db    0
 RAM:29F5 00                          .db    0
 RAM:29F6 00                          .db    0
-RAM:29F7 00          byte_29F7:      .db 0                   ; DATA XREF: sub_1C51-16E5w
+RAM:29F7 00          flags12_1:      .db 0                   ; DATA XREF: display_sun_moon_frame:loc_56Cw
 RAM:29F8 00                          .db    0
 RAM:29F9 00                          .db    0
 RAM:29FA 00                          .db    0
@@ -7763,7 +7765,7 @@ RAM:2A33
 RAM:2A33             ; =============== S U B R O U T I N E =======================================
 RAM:2A33
 RAM:2A33
-RAM:2A33             init_start_location:                    ; CODE XREF: sub_1C51-16B8p
+RAM:2A33             init_start_location:                    ; CODE XREF: display_sun_moon_frame-16B8p
 RAM:2A33 21 23 2A                    ld      hl, #plyr_spr_init_data
 RAM:2A36 11 EB 29                    ld      de, #plyr_spr_1_scratchpad
 RAM:2A39 01 08 00                    ld      bc, #8
@@ -7792,7 +7794,7 @@ RAM:2A64 2F 44 B3 8F start_locations:.db 0x2F, 0x44, 0xB3, 0x8F
 RAM:2A64                                                     ; DATA XREF: init_start_location+25o
 RAM:2A68             ; ---------------------------------------------------------------------------
 RAM:2A68
-RAM:2A68             build_screen_objects:                   ; CODE XREF: sub_1C51-16ACp
+RAM:2A68             build_screen_objects:                   ; CODE XREF: display_sun_moon_frame-16ACp
 RAM:2A68 3A 78 00                    ld      a, (not_1st_screen)
 RAM:2A6B A7                          and     a
 RAM:2A6C 28 03                       jr      Z, loc_2A71
@@ -7842,8 +7844,8 @@ RAM:2AB8
 RAM:2AB8             ; =============== S U B R O U T I N E =======================================
 RAM:2AB8
 RAM:2AB8
-RAM:2AB8             sub_2AB8:                               ; CODE XREF: sub_2ACDp
-RAM:2AB8                                                     ; sub_2AECp ...
+RAM:2AB8             transfer_sprite:                        ; CODE XREF: transfer_sprite_and_printp
+RAM:2AB8                                                     ; display_scrollp ...
 RAM:2AB8 7E                          ld      a, (hl)
 RAM:2AB9 23                          inc     hl
 RAM:2ABA DD 77 00                    ld      0(ix), a
@@ -7857,170 +7859,113 @@ RAM:2AC7 7E                          ld      a, (hl)
 RAM:2AC8 23                          inc     hl
 RAM:2AC9 DD 77 17                    ld      0x17(ix), a
 RAM:2ACC C9                          ret
-RAM:2ACC             ; End of function sub_2AB8
+RAM:2ACC             ; End of function transfer_sprite
 RAM:2ACC
 RAM:2ACD
 RAM:2ACD             ; =============== S U B R O U T I N E =======================================
 RAM:2ACD
 RAM:2ACD
-RAM:2ACD             sub_2ACD:                               ; CODE XREF: sub_2AD6+13j
-RAM:2ACD                                                     ; sub_2AEC+18j ...
-RAM:2ACD CD B8 2A                    call    sub_2AB8
+RAM:2ACD             transfer_sprite_and_print:              ; CODE XREF: display_panel+13j
+RAM:2ACD                                                     ; display_scroll+18j ...
+RAM:2ACD CD B8 2A                    call    transfer_sprite
 RAM:2AD0 E5                          push    hl
 RAM:2AD1 CD 2B 2F                    call    print_sprite
 RAM:2AD4 E1                          pop     hl
 RAM:2AD5 C9                          ret
-RAM:2AD5             ; End of function sub_2ACD
+RAM:2AD5             ; End of function transfer_sprite_and_print
 RAM:2AD5
 RAM:2AD6
 RAM:2AD6             ; =============== S U B R O U T I N E =======================================
 RAM:2AD6
 RAM:2AD6
-RAM:2AD6             sub_2AD6:                               ; CODE XREF: sub_1C51-1619p
+RAM:2AD6             display_panel:                          ; CODE XREF: display_sun_moon_frame-1619p
 RAM:2AD6 DD 21 77 18                 ld      ix, #sprite_scratchpad
-RAM:2ADA 21 0F 2B                    ld      hl, #unk_2B0F
-RAM:2ADD 11 10 F8                    ld      de, #unk_F810
-RAM:2AE0 CD EC 2A                    call    sub_2AEC
-RAM:2AE3 11 10 08                    ld      de, #0x810
-RAM:2AE6 CD EC 2A                    call    sub_2AEC
-RAM:2AE9 C3 CD 2A                    jp      sub_2ACD
-RAM:2AE9             ; End of function sub_2AD6
+RAM:2ADA 21 0F 2B                    ld      hl, #panel_data
+RAM:2ADD 11 10 F8                    ld      de, #0xF810     ; x+=16, y-=8
+RAM:2AE0 CD EC 2A                    call    display_scroll
+RAM:2AE3 11 10 08                    ld      de, #0x810      ; x+=16, y+=8
+RAM:2AE6 CD EC 2A                    call    display_scroll
+RAM:2AE9 C3 CD 2A                    jp      transfer_sprite_and_print
+RAM:2AE9             ; End of function display_panel
 RAM:2AE9
 RAM:2AEC
 RAM:2AEC             ; =============== S U B R O U T I N E =======================================
 RAM:2AEC
 RAM:2AEC
-RAM:2AEC             sub_2AEC:                               ; CODE XREF: sub_2AD6+Ap
-RAM:2AEC                                                     ; sub_2AD6+10p
-RAM:2AEC CD B8 2A                    call    sub_2AB8
+RAM:2AEC             display_scroll:                         ; CODE XREF: display_panel+Ap
+RAM:2AEC                                                     ; display_panel+10p
+RAM:2AEC CD B8 2A                    call    transfer_sprite
 RAM:2AEF 06 05                       ld      b, #5
-RAM:2AF1 CD 8D 17                    call    sub_178D
+RAM:2AF1 CD 8D 17                    call    multiple_print_sprite
 RAM:2AF4 06 02                       ld      b, #2
-RAM:2AF6 CD 07 2B                    call    sub_2B07
-RAM:2AF9 CD B8 2A                    call    sub_2AB8
-RAM:2AFC 11 00 01                    ld      de, #0x100
-RAM:2AFF 06 24                       ld      b, #0x24 ; '$'
-RAM:2B01 CD 8D 17                    call    sub_178D
-RAM:2B04 C3 CD 2A                    jp      sub_2ACD
-RAM:2B04             ; End of function sub_2AEC
+RAM:2AF6 CD 07 2B                    call    multi_transfer_sprite_and_print
+RAM:2AF9 CD B8 2A                    call    transfer_sprite
+RAM:2AFC 11 00 01                    ld      de, #0x100      ; x+=0, y+=1
+RAM:2AFF 06 24                       ld      b, #36
+RAM:2B01 CD 8D 17                    call    multiple_print_sprite
+RAM:2B04 C3 CD 2A                    jp      transfer_sprite_and_print
+RAM:2B04             ; End of function display_scroll
 RAM:2B04
 RAM:2B07
 RAM:2B07             ; =============== S U B R O U T I N E =======================================
 RAM:2B07
 RAM:2B07
-RAM:2B07             sub_2B07:                               ; CODE XREF: sub_2AEC+Ap
-RAM:2B07                                                     ; sub_2B07+5j ...
+RAM:2B07             multi_transfer_sprite_and_print:        ; CODE XREF: display_scroll+Ap
+RAM:2B07                                                     ; multi_transfer_sprite_and_print+5j ...
 RAM:2B07 C5                          push    bc
-RAM:2B08 CD CD 2A                    call    sub_2ACD
+RAM:2B08 CD CD 2A                    call    transfer_sprite_and_print
 RAM:2B0B C1                          pop     bc
-RAM:2B0C 10 F9                       djnz    sub_2B07
+RAM:2B0C 10 F9                       djnz    multi_transfer_sprite_and_print
 RAM:2B0E C9                          ret
-RAM:2B0E             ; End of function sub_2B07
+RAM:2B0E             ; End of function multi_transfer_sprite_and_print
 RAM:2B0E
 RAM:2B0E             ; ---------------------------------------------------------------------------
-RAM:2B0F 86          unk_2B0F:       .db 0x86 ; Ü            ; DATA XREF: sub_2AD6+4o
-RAM:2B10 00                          .db    0
-RAM:2B11 10                          .db 0x10
-RAM:2B12 34                          .db 0x34 ; 4
-RAM:2B13 87                          .db 0x87 ; á
-RAM:2B14 00                          .db    0
-RAM:2B15 F0                          .db 0xF0 ; 
-RAM:2B16 00                          .db    0
-RAM:2B17 88                          .db 0x88 ; à
-RAM:2B18 00                          .db    0
-RAM:2B19 90                          .db 0x90 ; ê
-RAM:2B1A 04                          .db    4
-RAM:2B1B C0                          .db 0xC0 ; ¿
-RAM:2B1C 00                          .db    0
-RAM:2B1D F0                          .db 0xF0 ; 
-RAM:2B1E 0A                          .db  0xA
-RAM:2B1F C1                          .db 0xC1 ; ¡
-RAM:2B20 00                          .db    0
-RAM:2B21 F0                          .db 0xF0 ; 
-RAM:2B22 2E                          .db 0x2E ; .
-RAM:2B23 86                          .db 0x86 ; Ü
-RAM:2B24 40                          .db 0x40 ; @
-RAM:2B25 A0                          .db 0xA0 ; †
-RAM:2B26 14                          .db 0x14
-RAM:2B27 87                          .db 0x87 ; á
-RAM:2B28 40                          .db 0x40 ; @
-RAM:2B29 00                          .db    0
-RAM:2B2A 00                          .db    0
-RAM:2B2B 88                          .db 0x88 ; à
-RAM:2B2C 40                          .db 0x40 ; @
-RAM:2B2D 60                          .db 0x60 ; `
-RAM:2B2E 04                          .db    4
-RAM:2B2F C0                          .db 0xC0 ; ¿
-RAM:2B30 40                          .db 0x40 ; @
-RAM:2B31 00                          .db    0
-RAM:2B32 0A                          .db  0xA
-RAM:2B33 C1                          .db 0xC1 ; ¡
-RAM:2B34 40                          .db 0x40 ; @
-RAM:2B35 00                          .db    0
-RAM:2B36 2E                          .db 0x2E ; .
-RAM:2B37 8C                          .db 0x8C ; å
-RAM:2B38 00                          .db    0
-RAM:2B39 10                          .db 0x10
-RAM:2B3A 20                          .db 0x20
+RAM:2B0F 86 00 10 34+panel_data:     .db 0x86, 0, 0x10, 0x34 ; DATA XREF: display_panel+4o
+RAM:2B0F 87 00 F0 00+                .db 0x87, 0, 0xF0, 0
+RAM:2B0F 88 00 90 04+                .db 0x88, 0, 0x90, 4
+RAM:2B0F C0 00 F0 0A+                .db 0xC0, 0, 0xF0, 0xA
+RAM:2B0F C1 00 F0 2E+                .db 0xC1, 0, 0xF0, 0x2E
+RAM:2B0F 86 40 A0 14+                .db 0x86, 0x40, 0xA0, 0x14
+RAM:2B0F 87 40 00 00+                .db 0x87, 0x40, 0, 0
+RAM:2B0F 88 40 60 04+                .db 0x88, 0x40, 0x60, 4
+RAM:2B0F C0 40 00 0A+                .db 0xC0, 0x40, 0, 0xA
+RAM:2B0F C1 40 00 2E+                .db 0xC1, 0x40, 0, 0x2E
+RAM:2B0F 8C 00 10 20                 .db 0x8C, 0, 0x10, 0x20
 RAM:2B3B
 RAM:2B3B             ; =============== S U B R O U T I N E =======================================
 RAM:2B3B
 RAM:2B3B
-RAM:2B3B             sub_2B3B:                               ; CODE XREF: sub_1C51-8EFp
-RAM:2B3B                                                     ; sub_1C51-8BCp ...
-RAM:2B3B DD 21 77 18                 ld      ix, #0x1877
-RAM:2B3F 21 6D 2B                    ld      hl, #0x2B6D
+RAM:2B3B             print_border:                           ; CODE XREF: display_sun_moon_frame-8EFp
+RAM:2B3B                                                     ; display_sun_moon_frame-8BCp ...
+RAM:2B3B DD 21 77 18                 ld      ix, #sprite_scratchpad
+RAM:2B3F 21 6D 2B                    ld      hl, #border_data
 RAM:2B42 06 04                       ld      b, #4
-RAM:2B44 CD 07 2B                    call    sub_2B07
-RAM:2B47 CD B8 2A                    call    sub_2AB8
-RAM:2B4A 11 08 00                    ld      de, #8
-RAM:2B4D 06 18                       ld      b, #0x18
-RAM:2B4F CD 8D 17                    call    sub_178D
-RAM:2B52 CD B8 2A                    call    sub_2AB8
-RAM:2B55 06 18                       ld      b, #0x18
-RAM:2B57 CD 8D 17                    call    sub_178D
-RAM:2B5A CD B8 2A                    call    sub_2AB8
-RAM:2B5D 11 00 01                    ld      de, #0x100
-RAM:2B60 06 80                       ld      b, #0x80 ; 'Ä'
-RAM:2B62 CD 8D 17                    call    sub_178D
-RAM:2B65 CD B8 2A                    call    sub_2AB8
-RAM:2B68 06 80                       ld      b, #0x80 ; 'Ä'
-RAM:2B6A C3 8D 17                    jp      sub_178D
-RAM:2B6A             ; End of function sub_2B3B
+RAM:2B44 CD 07 2B                    call    multi_transfer_sprite_and_print
+RAM:2B47 CD B8 2A                    call    transfer_sprite
+RAM:2B4A 11 08 00                    ld      de, #8          ; x+=8, y+=0
+RAM:2B4D 06 18                       ld      b, #24          ; 24 times
+RAM:2B4F CD 8D 17                    call    multiple_print_sprite
+RAM:2B52 CD B8 2A                    call    transfer_sprite
+RAM:2B55 06 18                       ld      b, #24          ; 24 times
+RAM:2B57 CD 8D 17                    call    multiple_print_sprite
+RAM:2B5A CD B8 2A                    call    transfer_sprite
+RAM:2B5D 11 00 01                    ld      de, #0x100      ; x+=0, y+=1
+RAM:2B60 06 80                       ld      b, #128         ; 128 times
+RAM:2B62 CD 8D 17                    call    multiple_print_sprite
+RAM:2B65 CD B8 2A                    call    transfer_sprite
+RAM:2B68 06 80                       ld      b, #128         ; 128 times
+RAM:2B6A C3 8D 17                    jp      multiple_print_sprite
+RAM:2B6A             ; End of function print_border
 RAM:2B6A
 RAM:2B6A             ; ---------------------------------------------------------------------------
-RAM:2B6D 89                          .db 0x89 ; â
-RAM:2B6E 00                          .db    0
-RAM:2B6F 00                          .db    0
-RAM:2B70 A0                          .db 0xA0 ; †
-RAM:2B71 89                          .db 0x89 ; â
-RAM:2B72 40                          .db 0x40 ; @
-RAM:2B73 E0                          .db 0xE0 ; ‡
-RAM:2B74 A0                          .db 0xA0 ; †
-RAM:2B75 89                          .db 0x89 ; â
-RAM:2B76 C0                          .db 0xC0 ; ¿
-RAM:2B77 E0                          .db 0xE0 ; ‡
-RAM:2B78 02                          .db    2
-RAM:2B79 89                          .db 0x89 ; â
-RAM:2B7A 80                          .db 0x80 ; Ä
-RAM:2B7B 00                          .db    0
-RAM:2B7C 02                          .db    2
-RAM:2B7D 8B                          .db 0x8B ; ã
-RAM:2B7E 00                          .db    0
-RAM:2B7F 20                          .db 0x20
-RAM:2B80 A8                          .db 0xA8 ; ®
-RAM:2B81 8B                          .db 0x8B ; ã
-RAM:2B82 00                          .db    0
-RAM:2B83 20                          .db 0x20
-RAM:2B84 00                          .db    0
-RAM:2B85 8A                          .db 0x8A ; ä
-RAM:2B86 00                          .db    0
-RAM:2B87 00                          .db    0
-RAM:2B88 20                          .db 0x20
-RAM:2B89 8A                          .db 0x8A ; ä
-RAM:2B8A 00                          .db    0
-RAM:2B8B E8                          .db 0xE8 ; Ë
-RAM:2B8C 20                          .db 0x20
+RAM:2B6D 89 00 00 A0+border_data:    .db 0x89, 0, 0, 0xA0    ; DATA XREF: print_border+4o
+RAM:2B6D 89 40 E0 A0+                .db 0x89, 0x40, 0xE0, 0xA0
+RAM:2B6D 89 C0 E0 02+                .db 0x89, 0xC0, 0xE0, 2
+RAM:2B6D 89 80 00 02+                .db 0x89, 0x80, 0, 2
+RAM:2B6D 8B 00 20 A8+                .db 0x8B, 0, 0x20, 0xA8
+RAM:2B6D 8B 00 20 00+                .db 0x8B, 0, 0x20, 0
+RAM:2B6D 8A 00 00 20+                .db 0x8A, 0, 0, 0x20
+RAM:2B6D 8A 00 E8 20                 .db 0x8A, 0, 0xE8, 0x20
 RAM:2B8D
 RAM:2B8D             ; =============== S U B R O U T I N E =======================================
 RAM:2B8D
@@ -8401,7 +8346,7 @@ RAM:2D6D
 RAM:2D6D             ; =============== S U B R O U T I N E =======================================
 RAM:2D6D
 RAM:2D6D
-RAM:2D6D             handle_pause:                           ; CODE XREF: sub_1C51-1645p
+RAM:2D6D             handle_pause:                           ; CODE XREF: display_sun_moon_frame-1645p
 RAM:2D6D 3E 02                       ld      a, #2
 RAM:2D6F CD D3 0E                    call    sub_ED3
 RAM:2D72 CB 6F                       bit     5, a
@@ -8432,7 +8377,7 @@ RAM:2D91             ; =============== S U B R O U T I N E =====================
 RAM:2D91
 RAM:2D91
 RAM:2D91             clr_mem:                                ; CODE XREF: RAM:053Dp
-RAM:2D91                                                     ; sub_1C51-1709p ...
+RAM:2D91                                                     ; display_sun_moon_frame-1709p ...
 RAM:2D91 1E 00                       ld      e, #0
 RAM:2D93
 RAM:2D93             clr_byte:                               ; CODE XREF: clr_mem+7j
@@ -8449,8 +8394,8 @@ RAM:2D9B
 RAM:2D9B             ; =============== S U B R O U T I N E =======================================
 RAM:2D9B
 RAM:2D9B
-RAM:2D9B             clear_scrn:                             ; CODE XREF: sub_1C51-16D5p
-RAM:2D9B                                                     ; sub_1C51-94Cp ...
+RAM:2D9B             clear_scrn:                             ; CODE XREF: display_sun_moon_frame-16D5p
+RAM:2D9B                                                     ; display_sun_moon_frame-94Cp ...
 RAM:2D9B 21 00 C0                    ld      hl, #0xC000
 RAM:2D9E 0E 19                       ld      c, #0x19
 RAM:2DA0
@@ -8478,8 +8423,8 @@ RAM:2DB7
 RAM:2DB7             ; =============== S U B R O U T I N E =======================================
 RAM:2DB7
 RAM:2DB7
-RAM:2DB7             clear_scrn_buffer:                      ; CODE XREF: sub_1C51:loc_1302p
-RAM:2DB7                                                     ; sub_1C51:loc_138Fp ...
+RAM:2DB7             clear_scrn_buffer:                      ; CODE XREF: display_sun_moon_frame:loc_1302p
+RAM:2DB7                                                     ; display_sun_moon_frame:loc_138Fp ...
 RAM:2DB7 01 00 30                    ld      bc, #0x3000
 RAM:2DBA 21 00 90                    ld      hl, #0x9000
 RAM:2DBD 18 D2                       jr      clr_mem
@@ -8489,8 +8434,8 @@ RAM:2DBF
 RAM:2DBF             ; =============== S U B R O U T I N E =======================================
 RAM:2DBF
 RAM:2DBF
-RAM:2DBF             sub_2DBF:                               ; CODE XREF: sub_1C51-1606p
-RAM:2DBF                                                     ; sub_1C51-8ECp ...
+RAM:2DBF             sub_2DBF:                               ; CODE XREF: display_sun_moon_frame-1606p
+RAM:2DBF                                                     ; display_sun_moon_frame-8ECp ...
 RAM:2DBF 21 C0 BF                    ld      hl, #0xBFC0
 RAM:2DC2 11 08 C0                    ld      de, #0xC008
 RAM:2DC5 06 C0                       ld      b, #0xC0 ; '¿'
@@ -8520,7 +8465,7 @@ RAM:2DE2
 RAM:2DE2             ; =============== S U B R O U T I N E =======================================
 RAM:2DE2
 RAM:2DE2
-RAM:2DE2             render_dynamic_objects:                 ; CODE XREF: sub_1C51-163Cp
+RAM:2DE2             render_dynamic_objects:                 ; CODE XREF: display_sun_moon_frame-163Cp
 RAM:2DE2 AF                          xor     a
 RAM:2DE3 32 70 00                    ld      (objs_wiped_cnt), a
 RAM:2DE6 DD E5                       push    ix
@@ -8658,7 +8603,7 @@ RAM:2EB4 C1                          pop     bc
 RAM:2EB5 78                          ld      a, b
 RAM:2EB6 41                          ld      b, c
 RAM:2EB7 4F                          ld      c, a
-RAM:2EB8 CD C0 2E                    call    sub_2EC0
+RAM:2EB8 CD C0 2E                    call    blit_to_screen
 RAM:2EBB 18 ED                       jr      loc_2EAA
 RAM:2EBD             ; ---------------------------------------------------------------------------
 RAM:2EBD
@@ -8671,8 +8616,8 @@ RAM:2EC0
 RAM:2EC0             ; =============== S U B R O U T I N E =======================================
 RAM:2EC0
 RAM:2EC0
-RAM:2EC0             sub_2EC0:                               ; CODE XREF: sub_180B+5Ep
-RAM:2EC0                                                     ; sub_1C51+5Bj ...
+RAM:2EC0             blit_to_screen:                         ; CODE XREF: sub_180B+5Ep
+RAM:2EC0                                                     ; display_sun_moon_frame+5Bj ...
 RAM:2EC0 C5                          push    bc
 RAM:2EC1 E5                          push    hl
 RAM:2EC2 D5                          push    de
@@ -8685,15 +8630,15 @@ RAM:2ECC 30 04                       jr      NC, loc_2ED2
 RAM:2ECE 11 50 C0                    ld      de, #0xC050
 RAM:2ED1 19                          add     hl, de
 RAM:2ED2
-RAM:2ED2             loc_2ED2:                               ; CODE XREF: sub_2EC0+Cj
+RAM:2ED2             loc_2ED2:                               ; CODE XREF: blit_to_screen+Cj
 RAM:2ED2 EB                          ex      de, hl
 RAM:2ED3 E1                          pop     hl
 RAM:2ED4 01 C0 FF                    ld      bc, #0xFFC0
 RAM:2ED7 09                          add     hl, bc
 RAM:2ED8 C1                          pop     bc
-RAM:2ED9 10 E5                       djnz    sub_2EC0
+RAM:2ED9 10 E5                       djnz    blit_to_screen
 RAM:2EDB C9                          ret
-RAM:2EDB             ; End of function sub_2EC0
+RAM:2EDB             ; End of function blit_to_screen
 RAM:2EDB
 RAM:2EDC
 RAM:2EDC             ; =============== S U B R O U T I N E =======================================
@@ -8763,7 +8708,7 @@ RAM:2F2A D0                          ret     NC
 RAM:2F2A             ; End of function sub_2F17
 RAM:2F2A
 RAM:2F2B
-RAM:2F2B             print_sprite:                           ; CODE XREF: sub_178D+3p
+RAM:2F2B             print_sprite:                           ; CODE XREF: multiple_print_sprite+3p
 RAM:2F2B                                                     ; sub_180B+41p ...
 RAM:2F2B CD 02 2F                    call    flip_sprite
 RAM:2F2E 1A                          ld      a, (de)         ; width
@@ -14035,7 +13980,7 @@ RAM:7F8F 4F 4C 11 0F+                .db 0x6F, 0xEA, 0x6F, 0xA7, 0, 0xA7, 0, 0x4
 RAM:7F8F 4F 0F 4F 4C+                .db 0xE6, 0x99, 0xA7, 0, 0x41, 0, 0, 0, 0x66, 0x91, 0xAC
 RAM:7F8F 11 0F 6F 0F+                .db 0xFF, 0xDB, 0xE, 0x96, 0, 0x73, 0xB, 0xF, 0, 0x5A
 RAM:7F8F 4F 4C 77 0F+                .db 0xB, 0xE8, 0x15, 0x90, 5
-RAM:8100 00          seed_1:         .db    0                ; DATA XREF: sub_1C51:update_sprite_loopo
+RAM:8100 00          seed_1:         .db    0                ; DATA XREF: display_sun_moon_frame:update_sprite_loopo
 RAM:8101 11                          .db 0x11
 RAM:8102 22                          .db 0x22 ; "
 RAM:8103 33                          .db 0x33 ; 3
@@ -44515,7 +44460,7 @@ RAM:F80C F0                          .db 0xF0 ; 
 RAM:F80D 80                          .db 0x80 ; Ä
 RAM:F80E 70                          .db 0x70 ; p
 RAM:F80F C0                          .db 0xC0 ; ¿
-RAM:F810 00          unk_F810:       .db    0                ; DATA XREF: sub_2AD6+7o
+RAM:F810 00                          .db    0
 RAM:F811 00                          .db    0
 RAM:F812 00                          .db    0
 RAM:F813 00                          .db    0
