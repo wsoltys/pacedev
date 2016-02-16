@@ -45,7 +45,7 @@ static struct IOStdReq *KeyIO;
 static struct MsgPort *KeyMP;
 static uint8_t *keyMatrix;
   
-const char __ver[40] = "$VER: Knight Lore v0.9a3 (10.02.2016)";
+const char __ver[40] = "$VER: Knight Lore v0.9a4 (16.02.2016)";
 
 void osd_delay (unsigned ms)
 {
@@ -85,9 +85,18 @@ int osd_key (int _key)
 
 int osd_keypressed (void)
 {
-	#if 0
-  return (keypressed ());
-	#endif
+  unsigned i;
+  
+  KeyIO->io_Command = KBD_READMATRIX;
+  KeyIO->io_Data = (APTR)keyMatrix;
+  //KeyIO->io_Length= SysBase->lib_Version >= 36 ? MATRIX_SIZE : 13;
+  KeyIO->io_Length = 13;
+  DoIO ((struct IORequest *)KeyIO);
+
+  for (i=0; i<13; i++)
+    if (keyMatrix[i])
+      return (1);
+      
 	return (0);
 }
 
@@ -238,6 +247,7 @@ void usage (char *argv0)
   printf ("usage: kl {-cpc|-zx}\n");
   printf ("  -cpc    use Amstrad CPC graphics\n");
   printf ("  -zx     use ZX Spectrum graphics\n");
+  printf ("  -v      print version information\n");
   exit (0);
 }
 
@@ -257,7 +267,16 @@ int main (int argc, char *argv[])
         else if (!stricmp (&argv[argc][1], "zx"))
           gfx = GFX_ZX;
         else
-          usage (argv[0]);
+        switch (tolower(argv[argc][1]))
+        {
+          case 'v' :
+            printf ("%s\n", __ver);
+            exit (0);
+            break;
+          default :
+            usage (argv[0]);
+            break;
+        }
         break;
       default :
         usage (argv[0]);
