@@ -101,7 +101,11 @@ ifeq ($(PLATFORM),neogeo)
 	endif
 	
 	ifeq ($(OUTPUT),cart)
-		PRG = 202-p1.p1
+	  DRIVER = legendos
+	  GUID = 029
+	  #P_SIZE = 1024
+	  P_SIZE = 512
+		PRG = $(GUID)-p1.p1
 	endif
 	ifeq ($(OUTPUT),cd)
 		PRG = PB_PROG.PRG
@@ -189,31 +193,27 @@ out:
 
 ifeq ($(OUTPUT),cart)
 
-$(PRG): $(FQTN) 202-s1.s1 202-c1.c1 202-c2.c2
+$(PRG): $(FQTN) $(GUID)-s1.s1 $(GUID)-c1.c1 $(GUID)-c2.c2 $(GUID)-c3.c3 $(GUID)-c4.c4
 	$(OBJC) --gap-fill=0x00 --pad-to=0x20000 -R .data -O binary $< $@
 	@romwak /f $@ >nul:
-	@romwak /p $@ $@ 1024 255 >nul:
-	@copy $@ roms\puzzledp
+	@romwak /p $@ $@ $(P_SIZE) 255 >nul:
+	@copy $@ roms\$(DRIVER)
 
 %.s1 : %.bin
-	@copy $< roms\puzzledp\$@
+	@copy $< roms\$(DRIVER)\$@
 
-%.c1 : %.bin
+%.c1 %.c2 %.c3 %.c4 : %.bin
 	@romwak /p $< $@ 1024 255 > nul:
-	@copy $@ roms\puzzledp
-
-%.c2 : %.bin
-	@romwak /p $< $@ 1024 255 > nul:
-	@copy $@ roms\puzzledp
+	@copy $@ roms\$(DRIVER)
 
 else
 
 $(PRG): $(FQTN) PB_CHR.SPR
 	$(OBJC) -O binary $< $@
-	@copy $@ cds\puzzledp
-	@copy PB_CHR.SPR cds\puzzledp
+	@copy $@ cds\$(DRIVER)
+	@copy PB_CHR.SPR cds\$(DRIVER)
 	$(RM) -f $(TARGET).iso
-	mkisofs -iso-level 1 -o $(TARGET).iso -pad -N -V "$(TARGET)" cds\puzzledp
+	mkisofs -iso-level 1 -o $(TARGET).iso -pad -N -V "$(TARGET)" cds\$(DRIVER)
 
 endif
 
@@ -264,5 +264,7 @@ clean:
 	$(RM) -f $(FQTN)
 	$(ECHO) Deleting ROMS...
 	$(RM) -f $(PRG)
-	$(RM) -f 202-c*.c*
-	$(RM) -f 202-s*.s*
+	$(RM) -f $(GUID)-c*.c*
+	$(RM) -f $(GUID)-s*.s*
+	$(RM) -f roms/$(DRIVER)/$(GUID)-c*.c*
+	$(RM) -f roms/$(DRIVER)/$(GUID)-s*.s*

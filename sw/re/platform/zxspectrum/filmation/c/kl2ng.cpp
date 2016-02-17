@@ -19,6 +19,9 @@
 
 #include "src/kl/kl_dat.c"
 
+#define DRIVER    "legendos"
+#define GUID      "029"
+
 #define N_ZX_SPR_ENTRIES    188
 #define N_CPC_SPR_ENTRIES   194
 
@@ -131,13 +134,13 @@ void do_fix (void)
   // open FIX and copy 1st 3 banks
   // - needs to be patched wth "RETRO PORTS first!!!
   
-  FILE *fpFix = fopen ("orig/202-s1.s1", "rb");
+  FILE *fpFix = fopen ("orig/" DRIVER "/" GUID "-s1.bin", "rb");
   if (!fpFix) 
   {
     fprintf (stderr, "unable to open fpFix\n");
     return;
   }
-  FILE *fp = fopen ("202-s1.bin", "wb");
+  FILE *fp = fopen (GUID "-s1.bin", "wb");
   if (!fp) 
   {
     fprintf (stderr, "unable to open fp\n");
@@ -282,12 +285,12 @@ void do_fix (void)
   fseek (fpFix, (256+512+768)*32, SEEK_CUR);
   
   // and copy remainder of file
+  uint8_t data;
+  fread (&data, sizeof(uint8_t), 1, fpFix);
   while (!feof (fpFix))
   {
-    uint8_t data;
-    
-    fread (&data, sizeof(uint8_t), 1, fpFix);
     fwrite (&data, sizeof(uint8_t), 1, fp);
+    fread (&data, sizeof(uint8_t), 1, fpFix);
   }
   
   fclose (fpFix);
@@ -341,14 +344,25 @@ void do_sprites (void)
   // actually 16 tiles will be quicker again  
   // so 188x16 = 3008 tiles (12 bits) (kiddy stuff for Neo Geo)
 
-  FILE *c1 = fopen ("202-c1.bin", "wb");  
-  FILE *c2 = fopen ("202-c2.bin", "wb");  
+  FILE *c1 = fopen (GUID "-c1.bin", "wb");  
+  FILE *c2 = fopen (GUID "-c2.bin", "wb");  
 
   unsigned total_ns = 0;
     
 	// copy 1st 256 characters from original file
-	FILE *fp1 = fopen ("202-c1.c1", "rb");
-	FILE *fp2 = fopen ("202-c2.c2", "rb");
+  // bank = $6F (2nd set of ROMS)
+	FILE *fp1 = fopen ("orig/" DRIVER "/" GUID "-c3.bin", "rb");
+	FILE *fp2 = fopen ("orig/" DRIVER "/" GUID "-c4.bin", "rb");
+	if (!fp1 || !fp2)
+  {
+    fprintf (stderr, "unable to open source c1,c2\n");
+    return;
+  }
+
+  // bank = $6F  
+  fseek (fp1, (0x6F-0x40)*256*64, SEEK_SET);
+  fseek (fp2, (0x6F-0x40)*256*64, SEEK_SET);
+  
 	for (unsigned i=0; i<256*64; i++)
 	{
 		uint8_t	byte;
@@ -573,8 +587,8 @@ void do_sprites (void)
           {
             fclose (c1);
             fclose (c2);
-            c1 = fopen ("202-c3.bin", "wb");
-            c2 = fopen ("202-c4.bin", "wb");
+            c1 = fopen (GUID "-c3.bin", "wb");
+            c2 = fopen (GUID "-c4.bin", "wb");
           }
         }
       }
@@ -594,8 +608,10 @@ int main (int argc, char *argv[])
   memset (zeroes, 0, 128);
 
   do_sprites ();
-  //do_fix ();
-  
+  do_fix ();
+
+  exit (0);
+    
 	allegro_init ();
 	install_keyboard ();
 
