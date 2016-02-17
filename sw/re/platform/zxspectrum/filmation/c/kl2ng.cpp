@@ -19,7 +19,8 @@
 
 #include "src/kl/kl_dat.c"
 
-#define N_SPR_ENTRIES (sizeof(sprite_tbl)/sizeof(uint8_t *))
+#define N_ZX_SPR_ENTRIES    188
+#define N_CPC_SPR_ENTRIES   194
 
 #define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
 #define NIBREV(d) (((d&1)<<3)|((d&2)<<1)|((d&4)>>1)|((d&8)>>3))
@@ -69,7 +70,7 @@ void show_ng_tiles (void)
     for (unsigned y=0; y<SCRN_H/64; y++)
       for (unsigned x=0; x<SCRN_W/64; x++)
       {
-        if (b*SPP+(y*(SCRN_W/48)+x)/4 >= N_SPR_ENTRIES)
+        if (b*SPP+(y*(SCRN_W/48)+x)/4 >= N_ZX_SPR_ENTRIES)
           break;
           
         for (unsigned c=0; c<4; c++)
@@ -300,9 +301,9 @@ void do_sprites (void)
   uint8_t widest = 0;
   uint8_t highest = 0;
   
-  for (s=0; s<N_SPR_ENTRIES; s++)
+  for (s=0; s<N_ZX_SPR_ENTRIES; s++)
   {
-    const uint8_t *psprite = sprite_tbl[s];
+    const uint8_t *psprite = zx_sprite_tbl[s];
     
     uint8_t width = *(psprite++) & 0x3f;
     uint8_t height = *psprite;
@@ -311,11 +312,29 @@ void do_sprites (void)
     if (height > highest) highest = height;
   }
 
+  printf ("ZX:\n");
   // N_SPRITE_ENTRIES = 188  
   printf ("N_SPRITE_ENTIRES=%d\n", s);
   // widest = 5 (3 tiles), highest = 64 (4 tiles)
   printf ("widest=%d, highest=%d\n", widest, highest);
   
+  for (s=0; s<N_CPC_SPR_ENTRIES; s++)
+  {
+    const uint8_t *psprite = cpc_sprite_tbl[s];
+    
+    uint8_t width = *(psprite++) & 0x3f;
+    uint8_t height = *psprite;
+    
+    if (width > widest) widest = width;
+    if (height > highest) highest = height;
+  }
+
+  printf ("CPC:\n");
+  // N_SPRITE_ENTRIES = 194
+  printf ("N_SPRITE_ENTIRES=%d\n", s);
+  // widest = 10/2 = 5 (3 tiles), highest = 64 (4 tiles)
+  printf ("widest=%d, highest=%d\n", widest, highest);
+
   // going to be quicker to define sprites for each entry
   // even if we are duplicating tiles of course
   // and also allocate 3x4=12 tiles for each sprite
@@ -324,7 +343,9 @@ void do_sprites (void)
 
   FILE *c1 = fopen ("202-c1.bin", "wb");  
   FILE *c2 = fopen ("202-c2.bin", "wb");  
-  
+
+  unsigned total_ns = 0;
+    
 	// copy 1st 256 characters from original file
 	FILE *fp1 = fopen ("202-c1.c1", "rb");
 	FILE *fp2 = fopen ("202-c2.c2", "rb");
@@ -340,6 +361,10 @@ void do_sprites (void)
 	fclose (fp1);
 	fclose (fp2);
 
+  total_ns += 256;
+  printf ("after reserved1 total_ns = %d\n", total_ns);
+  
+#if 0
   // now do the main font & days font
   // - needs to be a multiple of 16
   for (s=0; s<64; s++)
@@ -373,13 +398,14 @@ void do_sprites (void)
     // c2
     fwrite (zeroes, sizeof(uint8_t), 64, c2);
   }
+#endif
   
   #define F_VFLIP (1<<7)
   #define F_HFLIP (1<<6)
   
-  for (s=0; s<N_SPR_ENTRIES; s++)
+  for (s=0; s<N_ZX_SPR_ENTRIES; s++)
   {
-    const uint8_t *psprite = sprite_tbl[s];
+    const uint8_t *psprite = zx_sprite_tbl[s];
     
     uint8_t c = *psprite & 0xc0;
     uint8_t w = *(psprite++) & 0x3f;
@@ -448,10 +474,113 @@ void do_sprites (void)
                 
           // and always bitplanes 2,3
           fwrite (zeroes, sizeof(uint8_t), 64, c2);
+          total_ns++;
         }
       }
     }
   }
+
+  printf ("after zx total_ns = %d\n", total_ns);
+
+  // ZX sprites @$0100-$2FFF
+  // so CPC @$3100-$XXXX
+  // fill in 256 tiles
+  for (s=0; s<256; s++)
+  {
+    fwrite (zeroes, sizeof(uint8_t), 64, c1);
+    fwrite (zeroes, sizeof(uint8_t), 64, c2);
+    total_ns++;
+  }
+
+  printf ("after reserved2 total_ns = %d\n", total_ns);
+
+#if 1
+  for (s=0; s<N_CPC_SPR_ENTRIES; s++)
+  {
+    const uint8_t *psprite = cpc_sprite_tbl[s];
+    
+    uint8_t c = *psprite & 0xc0;
+    uint8_t w = *(psprite++) & 0x3f;
+    uint8_t h = *(psprite++);
+    uint8_t f = *(psprite++);
+
+    if (c)
+      printf ("*** WARNING %d flipped ($%02X)!\n", s, c);
+      
+    // 4 flip orientations
+    for (int f=0; f<4; f++)
+    {
+      uint8_t vflip = (f&2 ? F_VFLIP : 0);
+      uint8_t hflip = (f&1 ? F_HFLIP : 0);
+      
+      // construct 4x4 tile array
+      for (int c=0; c<4; c++)
+      {
+        for (int r=0; r<4; r++)
+        {
+          if (c*2 >= w || r*16 >= h)
+            fwrite (zeroes, 64, sizeof(uint8_t), c1);
+          else
+          {        
+            // we have some sprite data
+            for (unsigned q=0; q<4; q++)
+            {
+              // point to start of data
+              const uint8_t *p = psprite;
+              if ((c & F_VFLIP) ^ vflip)
+                p += ((r*16 + (q&1)*8)) *w*2;
+              else
+                p += (h-1-(r*16 + (q&1)*8)) *w*2;
+              if ((c & F_HFLIP) ^ hflip)
+                p += (2*(w-1))-(c*2*2 + 2-(q&2));
+              else
+                p += c*2*2 + 2-(q&2);
+              for (unsigned l=0; l<8; l++)
+              {
+                // bitplane0 = mask
+                // bitplane1 = colour
+                // gives 4 colours but #2=#3
+  
+                if (c*2+1-((q&2)/2) >= w ||
+                    r*16+(q&1)*8+l >= h)
+                  fwrite (zeroes, sizeof(uint8_t), 2, c1);
+                else
+                {
+                  uint8_t m = *(p+0);
+                  uint8_t d = *(p+1);
+                  if (!hflip)
+                  {
+                    m = REV(m);
+                    d = REV(d);
+                  }
+                  fwrite (&m, sizeof(uint8_t), 1, c1);
+                  fwrite (&d, sizeof(uint8_t), 1, c1);
+
+                  if (vflip)
+                    p += w*2;
+                  else                                
+                    p -= w*2;              
+                }
+              }
+            }
+          }
+                
+          // and always bitplanes 2,3
+          fwrite (zeroes, sizeof(uint8_t), 64, c2);
+          
+          total_ns++;
+          if (total_ns == 16384)
+          {
+            fclose (c1);
+            fclose (c2);
+            c1 = fopen ("202-c3.bin", "wb");
+            c2 = fopen ("202-c4.bin", "wb");
+          }
+        }
+      }
+    }
+  }
+#endif
   
   fclose (c1);
   fclose (c2);
@@ -464,8 +593,8 @@ int main (int argc, char *argv[])
 {
   memset (zeroes, 0, 128);
 
-  //do_sprites ();
-  do_fix ();
+  do_sprites ();
+  //do_fix ();
   
 	allegro_init ();
 	install_keyboard ();

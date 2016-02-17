@@ -27,11 +27,12 @@
 //
 //  SPRITES
 //  -   0-255 - system reserved
-//  -     +64 - +40 - Kinight Lore font
-//              +4  - "DAY"
+//  -   $0100-$2FFF ZX graphics
 //  -   188*16*4 - 188 graphics sprites
 //  -         - each sprite is 16 tiles
 //  -         - 4 copies of each (h/v-flipped)
+//  -   $3000-$30FF - unused
+//  -   #3100-$XXXX CPC graphics
 
 
 #define DIP_COLOUR      0
@@ -139,6 +140,8 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
   // nothing to do here
 }
 
+static uint16_t sprite_bank;
+
 void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
   static TILEMAP obj_map[3];
@@ -168,7 +171,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   }
   #endif
 
-  n = 256 + 64 + (unsigned)(p_obj->graphic_no)*4*16;
+  n = sprite_bank + (unsigned)(p_obj->graphic_no)*4*16;
   if (p_obj->flags7 & (1<<7))
     n += 2*16;
   if (p_obj->flags7 & (1<<6))
@@ -427,6 +430,10 @@ int main (int argc, char *argv[])
 	}
 	// FIX layer title screen
 	setpalette(15, 1, (const PPALETTE)&pal);
+
+  sprite_bank = 0x0100;
+  if (gfx == GFX_CPC)
+    sprite_bank |= 0x3000;
 
 	while (1)
 	{
