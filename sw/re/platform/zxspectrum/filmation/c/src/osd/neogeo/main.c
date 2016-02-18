@@ -433,7 +433,7 @@ int main (int argc, char *argv[])
 
   sprite_bank = 0x0100;
   if (gfx == GFX_CPC)
-    sprite_bank |= 0x3000;
+    sprite_bank |= 0x4000;
 
 	while (1)
 	{

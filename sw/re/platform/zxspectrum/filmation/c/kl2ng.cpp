@@ -137,13 +137,13 @@ void do_fix (void)
   FILE *fpFix = fopen ("orig/" DRIVER "/" GUID "-s1.bin", "rb");
   if (!fpFix) 
   {
-    fprintf (stderr, "unable to open fpFix\n");
+    fprintf (stderr, "unable to open \"%s-s1.bin\" for read!\n", GUID);
     return;
   }
   FILE *fp = fopen (GUID "-s1.bin", "wb");
   if (!fp) 
   {
-    fprintf (stderr, "unable to open fp\n");
+    fprintf (stderr, "unable to open \"%s-s1.bin\" for write!\n", GUID);
     return;
   }
     
@@ -496,6 +496,19 @@ void do_sprites (void)
 
   printf ("after zx total_ns = %d\n", total_ns);
 
+  // pad out the rest of C1,C2
+  while (total_ns < 16384)
+  {
+    //fwrite (zeroes, sizeof(uint8_t), 64, c1);
+    //fwrite (zeroes, sizeof(uint8_t), 64, c2);
+    total_ns++;
+  }
+
+  fclose (c1);
+  fclose (c2);
+  c1 = fopen (GUID "-c3.bin", "wb");
+  c2 = fopen (GUID "-c4.bin", "wb");
+
   // ZX sprites @$0100-$2FFF
   // so CPC @$3100-$XXXX
   // fill in 256 tiles
@@ -581,15 +594,6 @@ void do_sprites (void)
                 
           // and always bitplanes 2,3
           fwrite (zeroes, sizeof(uint8_t), 64, c2);
-          
-          total_ns++;
-          if (total_ns == 16384)
-          {
-            fclose (c1);
-            fclose (c2);
-            c1 = fopen (GUID "-c3.bin", "wb");
-            c2 = fopen (GUID "-c4.bin", "wb");
-          }
         }
       }
     }
