@@ -372,6 +372,15 @@ void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
   *b = (c&(1<<0) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
 }
 
+void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  uint8_t lu[] = { 0, 128, 255 };
+  
+  *r = lu[(c/3) % 3];
+  *g = lu[(c/9) % 3];
+  *b = lu[c % 3];
+}
+
 uint16_t make_ng_colour (uint8_t r, uint8_t g, uint8_t b)
 {
   uint16_t pe = 0;

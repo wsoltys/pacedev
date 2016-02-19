@@ -558,7 +558,7 @@ void do_sprites (void)
               else
                 p += (h-1-(r*16 + (q&1)*8)) *w;
               if ((c & F_HFLIP) ^ hflip)
-                p += (w-1)-(c*4 + 2-(q&2));
+                p += (w-2)-(c*4 + 2-(q&2));
               else
                 p += c*4 + 2-(q&2);
               for (unsigned l=0; l<8; l++)
@@ -620,10 +620,27 @@ void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
   *b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
 }
 
+void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  uint8_t lu[] = { 0, 128, 255 };
+  
+  *r = lu[(c/3) % 3];
+  *g = lu[(c/9) % 3];
+  *b = lu[c % 3];
+}
+
 int main (int argc, char *argv[])
 {
   memset (zeroes, 0, 128);
 
+  unsigned c;
+  for (c=0; c<27; c++)
+  {
+    uint8_t r, g, b;
+    make_cpc_colour (c, &r, &g, &b);
+    printf ("%d, %d, %d\n", r, g, b);
+  }
+  
   do_sprites ();
   do_fix ();
 
