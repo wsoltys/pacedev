@@ -124,32 +124,27 @@ RAM:0049
 RAM:0049             ; =============== S U B R O U T I N E =======================================
 RAM:0049
 RAM:0049
-RAM:0049             sub_49:                                 ; CODE XREF: sub_7EE+Cj
+RAM:0049             set_palette:                            ; CODE XREF: sub_7EE+Cj
 RAM:0049                                                     ; sub_15C2+1Ap ...
 RAM:0049 01 00 7F                    ld      bc, #0x7F00
 RAM:004C
-RAM:004C             loc_4C:                                 ; CODE XREF: sub_49+Aj
+RAM:004C             loc_4C:                                 ; CODE XREF: set_palette+Aj
 RAM:004C 7E                          ld      a, (hl)
 RAM:004D 23                          inc     hl
 RAM:004E FE FF                       cp      #0xFF
 RAM:0050 C8                          ret     Z
 RAM:0051 ED 79                       out     (c), a
 RAM:0053 18 F7                       jr      loc_4C
-RAM:0053             ; End of function sub_49
+RAM:0053             ; End of function set_palette
 RAM:0053
 RAM:0053             ; ---------------------------------------------------------------------------
-RAM:0055 8D                          .db 0x8D ; ç
+RAM:0055 8D          menu_colour_tbl:.db 0x8D ; ç            ; DATA XREF: sub_15C2+17o
+RAM:0055                                                     ; sub_15C2:loc_15E8o
 RAM:0056 10                          .db 0x10
 RAM:0057 54                          .db 0x54 ; T
-RAM:0058 00                          .db    0
-RAM:0059 54                          .db 0x54 ; T
-RAM:005A 01                          .db    1
-RAM:005B 4A                          .db 0x4A ; J
-RAM:005C 02                          .db    2
-RAM:005D 55                          .db 0x55 ; U
-RAM:005E 03                          .db    3
-RAM:005F 4B                          .db 0x4B ; K
-RAM:0060 FF                          .db 0xFF
+RAM:0058             ; black, bright yellow, bright blue, bright white
+RAM:0058             ; 0, 24, 2, 26
+RAM:0058 00 54 01 4A+                .db 0, 0x54, 1, 0x4A, 2, 0x55, 3, 0x4B, 0xFF
 RAM:0061 00                          .db    0
 RAM:0062 00                          .db    0
 RAM:0063 00                          .db    0
@@ -742,61 +737,45 @@ RAM:07EE
 RAM:07EE             sub_7EE:                                ; CODE XREF: display_sun_moon_frame-1603p
 RAM:07EE                                                     ; sub_1B43+22p
 RAM:07EE 3A 73 00                    ld      a, (curr_room_attrib)
-RAM:07F1 21 FD 07                    ld      hl, #0x7FD
+RAM:07F1 21 FD 07                    ld      hl, #off_7FD
 RAM:07F4 87                          add     a, a
-RAM:07F5 CF                          rst     8
+RAM:07F5 CF                          rst     add_HL_A
 RAM:07F6 7E                          ld      a, (hl)
 RAM:07F7 23                          inc     hl
 RAM:07F8 66                          ld      h, (hl)
 RAM:07F9 6F                          ld      l, a
-RAM:07FA C3 49 00                    jp      sub_49
+RAM:07FA C3 49 00                    jp      set_palette
 RAM:07FA             ; End of function sub_7EE
 RAM:07FA
 RAM:07FA             ; ---------------------------------------------------------------------------
-RAM:07FD 14                          .db 0x14
-RAM:07FE 08                          .db    8
-RAM:07FF 1B                          .db 0x1B
-RAM:0800 08                          .db    8
-RAM:0801 22                          .db 0x22 ; "
-RAM:0802 08                          .db    8
-RAM:0803 0D                          .db  0xD
-RAM:0804 08                          .db    8
-RAM:0805 14                          .db 0x14
-RAM:0806 08                          .db    8
-RAM:0807 1B                          .db 0x1B
-RAM:0808 08                          .db    8
-RAM:0809 22                          .db 0x22 ; "
-RAM:080A 08                          .db    8
-RAM:080B 0D                          .db  0xD
-RAM:080C 08                          .db    8
-RAM:080D 01                          .db    1
-RAM:080E 4E                          .db 0x4E ; N
-RAM:080F 02                          .db    2
-RAM:0810 4A                          .db 0x4A ; J
-RAM:0811 03                          .db    3
-RAM:0812 4B                          .db 0x4B ; K
-RAM:0813 FF                          .db 0xFF
-RAM:0814 01                          .db    1
-RAM:0815 52                          .db 0x52 ; R
-RAM:0816 02                          .db    2
-RAM:0817 53                          .db 0x53 ; S
-RAM:0818 03                          .db    3
-RAM:0819 4D                          .db 0x4D ; M
-RAM:081A FF                          .db 0xFF
-RAM:081B 01                          .db    1
-RAM:081C 55                          .db 0x55 ; U
-RAM:081D 02                          .db    2
-RAM:081E 53                          .db 0x53 ; S
-RAM:081F 03                          .db    3
-RAM:0820 4A                          .db 0x4A ; J
-RAM:0821 FF                          .db 0xFF
-RAM:0822 01                          .db    1
-RAM:0823 4C                          .db 0x4C ; L
-RAM:0824 02                          .db    2
-RAM:0825 4A                          .db 0x4A ; J
-RAM:0826 03                          .db    3
-RAM:0827 4B                          .db 0x4B ; K
-RAM:0828 FF                          .db 0xFF
+RAM:07FD 14 08       off_7FD:        .dw byte_814            ; DATA XREF: sub_7EE+3o
+RAM:07FF 1B 08                       .dw byte_81B
+RAM:0801 22 08                       .dw byte_822
+RAM:0803 0D 08                       .dw byte_80D
+RAM:0805 14 08                       .dw byte_814
+RAM:0807 1B 08                       .dw byte_81B
+RAM:0809 22 08                       .dw byte_822
+RAM:080B 0D 08                       .dw byte_80D
+RAM:080D             ; orange, bright yellow, bright white
+RAM:080D 01 4E 02 4A+byte_80D:       .db 1, 0x4E, 2, 0x4A, 3, 0x4B, 0xFF
+RAM:080D 03 4B FF                                            ; DATA XREF: RAM:0803o
+RAM:080D                                                     ; RAM:080Bo
+RAM:080D                                                     ; 15, 24, 26
+RAM:0814             ; bright green, bright cyan, bright magenta
+RAM:0814 01 52 02 53+byte_814:       .db 1, 0x52, 2, 0x53, 3, 0x4D, 0xFF
+RAM:0814 03 4D FF                                            ; DATA XREF: RAM:off_7FDo
+RAM:0814                                                     ; RAM:0805o
+RAM:0814                                                     ; 18, 20, 8
+RAM:081B             ; bright blue, bright cyan, bright yellow
+RAM:081B 01 55 02 53+byte_81B:       .db 1, 0x55, 2, 0x53, 3, 0x4A, 0xFF
+RAM:081B 03 4A FF                                            ; DATA XREF: RAM:07FFo
+RAM:081B                                                     ; RAM:0807o
+RAM:081B                                                     ; 2, 20, 24
+RAM:0822             ; bright red, bright yellow, bright white
+RAM:0822 01 4C 02 4A+byte_822:       .db 1, 0x4C, 2, 0x4A, 3, 0x4B, 0xFF
+RAM:0822 03 4B FF                                            ; DATA XREF: RAM:0801o
+RAM:0822                                                     ; RAM:0809o
+RAM:0822                                                     ; 6, 24, 26
 RAM:0829
 RAM:0829             ; =============== S U B R O U T I N E =======================================
 RAM:0829
@@ -3786,15 +3765,15 @@ RAM:15CE 10 FB                       djnz    loc_15CB
 RAM:15D0 CD B7 2D                    call    clear_scrn_buffer
 RAM:15D3 CD 3B 2B                    call    print_border
 RAM:15D6 CD 62 16                    call    sub_1662
-RAM:15D9 21 55 00                    ld      hl, #0x55 ; 'U'
-RAM:15DC CD 49 00                    call    sub_49
+RAM:15D9 21 55 00                    ld      hl, #menu_colour_tbl
+RAM:15DC CD 49 00                    call    set_palette
 RAM:15DF CD 5F 17                    call    sub_175F
 RAM:15E2 21 55 0C                    ld      hl, #0xC55
 RAM:15E5 CD 97 0A                    call    sub_A97
 RAM:15E8
 RAM:15E8             loc_15E8:                               ; CODE XREF: sub_15C2+95j
-RAM:15E8 21 55 00                    ld      hl, #0x55 ; 'U'
-RAM:15EB CD 49 00                    call    sub_49
+RAM:15E8 21 55 00                    ld      hl, #menu_colour_tbl
+RAM:15EB CD 49 00                    call    set_palette
 RAM:15EE CD 5F 17                    call    sub_175F
 RAM:15F1 3E 08                       ld      a, #8
 RAM:15F3 CD D3 0E                    call    sub_ED3
