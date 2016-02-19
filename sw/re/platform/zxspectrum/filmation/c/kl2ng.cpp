@@ -28,8 +28,8 @@
 #define REV(d) (((d&1)<<7)|((d&2)<<5)|((d&4)<<3)|((d&8)<<1)|((d&16)>>1)|((d&32)>>3)|((d&64)>>5)|((d&128)>>7))
 #define NIBREV(d) (((d&1)<<3)|((d&2)<<1)|((d&4)>>1)|((d&8)>>3))
 
-#define SCRN_W    (2048)
-#define SCRN_H    (1024)
+#define SCRN_W    (2048/4)
+#define SCRN_H    (1024/4)
 
 static uint8_t  *c13 = NULL;
 
@@ -376,7 +376,6 @@ void do_sprites (void)
 	fclose (fp2);
 
   total_ns += 256;
-  printf ("after reserved1 total_ns = %d\n", total_ns);
   
 #if 0
   // now do the main font & days font
@@ -509,9 +508,9 @@ void do_sprites (void)
   c1 = fopen (GUID "-c3.bin", "wb");
   c2 = fopen (GUID "-c4.bin", "wb");
 
-  // ZX sprites @$0100-$2FFF
-  // so CPC @$3100-$XXXX
   // fill in 256 tiles
+  // - so CPC sprites have same offset as ZX
+  //   from based of ROM file (ie. $0100 vs $4100)
   for (s=0; s<256; s++)
   {
     fwrite (zeroes, sizeof(uint8_t), 64, c1);
@@ -519,9 +518,6 @@ void do_sprites (void)
     total_ns++;
   }
 
-  printf ("after reserved2 total_ns = %d\n", total_ns);
-
-#if 1
   for (s=0; s<N_CPC_SPR_ENTRIES; s++)
   {
     const uint8_t *psprite = cpc_sprite_tbl[s];
@@ -555,38 +551,46 @@ void do_sprites (void)
               // point to start of data
               const uint8_t *p = psprite;
               if ((c & F_VFLIP) ^ vflip)
-                p += ((r*16 + (q&1)*8)) *w*2;
+                p += ((r*16 + (q&1)*8)) *w;
               else
-                p += (h-1-(r*16 + (q&1)*8)) *w*2;
+                p += (h-1-(r*16 + (q&1)*8)) *w;
               if ((c & F_HFLIP) ^ hflip)
-                p += (2*(w-1))-(c*2*2 + 2-(q&2));
+                p += (w-1)-(c*4 + 2-(q&2));
               else
-                p += c*2*2 + 2-(q&2);
+                p += c*4 + 2-(q&2);
               for (unsigned l=0; l<8; l++)
               {
-                // bitplane0 = mask
-                // bitplane1 = colour
-                // gives 4 colours but #2=#3
+                // 2 bitplanes
   
-                if (c*2+1-((q&2)/2) >= w ||
+                if (c*2+1-((q&2)/2) >= w/2 ||
                     r*16+(q&1)*8+l >= h)
                   fwrite (zeroes, sizeof(uint8_t), 2, c1);
                 else
                 {
-                  uint8_t m = *(p+0);
-                  uint8_t d = *(p+1);
-                  if (!hflip)
+                  uint8_t d1 = *(p+0);
+                  uint8_t d2 = *(p+1);
+                  uint8_t b0 ,b1;
+                  
+                  #define CPC2NGB0(d1,d2) \
+                      ((d1&8)>>3)|((d1&4)>>1)|((d1&2)<<1)|((d1&1)<<3)| \
+                      ((d2&8)<<1)|((d2&4)<<3)|((d2&2)<<5)|((d2&1)<<7)
+                  #define CPC2NGB1(d1,d2) \
+                      ((d1&128)>>7)|((d1&64)>>5)|((d1&32)>>3)|((d1&16)>>1)| \
+                      ((d2&128)>>3)|((d2&64)>>1)|((d2&32)<<1)|((d2&16)<<3)
+                  b0 = CPC2NGB0(d1,d2);
+                  b1 = CPC2NGB1(d1,d2);
+                  if (hflip)
                   {
-                    m = REV(m);
-                    d = REV(d);
+                    b0 = REV(b0);
+                    b1 = REV(b1);
                   }
-                  fwrite (&m, sizeof(uint8_t), 1, c1);
-                  fwrite (&d, sizeof(uint8_t), 1, c1);
+                  fwrite (&b0, sizeof(uint8_t), 1, c1);
+                  fwrite (&b1, sizeof(uint8_t), 1, c1);
 
                   if (vflip)
-                    p += w*2;
+                    p += w;
                   else                                
-                    p -= w*2;              
+                    p -= w;              
                 }
               }
             }
@@ -598,7 +602,6 @@ void do_sprites (void)
       }
     }
   }
-#endif
   
   fclose (c1);
   fclose (c2);
@@ -614,8 +617,6 @@ int main (int argc, char *argv[])
   do_sprites ();
   do_fix ();
 
-  exit (0);
-    
 	allegro_init ();
 	install_keyboard ();
 
@@ -635,7 +636,7 @@ int main (int argc, char *argv[])
   }
 	set_palette_range (pal, 0, 7, 1);
 
-  //show_ng_tiles ();
+  show_ng_tiles ();
   
   allegro_exit ();
 }

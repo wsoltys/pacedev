@@ -4812,6 +4812,8 @@ void print_sprite (uint8_t attr, POBJ32 p_obj)
   }
   psprite++;
   p_obj->data_height_lines = *psprite;
-    
-  osd_print_sprite (attr, p_obj);
+
+  if (p_obj->data_width_bytes != 0 &&
+      p_obj->data_height_lines != 0)    
+    osd_print_sprite (attr, p_obj);
 }

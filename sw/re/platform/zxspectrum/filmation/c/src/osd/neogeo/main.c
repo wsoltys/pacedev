@@ -149,10 +149,9 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   unsigned sw = (p_obj->data_width_bytes+1)/2;
   unsigned sh = (p_obj->data_height_lines+15)/16;
 
-  // this happens
-  if (sw == 0 || sh == 0)
-    return;
-    
+  // override for now
+  attr = 17-16;
+  
   // data_width_bytes may already be 1 byte wider
   // but max width for Knight Lore is 5
   // ((5+1)+1)/2 = 3
@@ -366,6 +365,27 @@ static void show_zx_title (void)
   }
 }
 
+void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  *r = (c&(1<<1) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
+  *g = (c&(1<<2) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
+  *b = (c&(1<<0) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
+}
+
+uint16_t make_ng_colour (uint8_t r, uint8_t g, uint8_t b)
+{
+  uint16_t pe = 0;
+  
+	pe |= (r&(1<<0)) << 14;
+	pe |= (r&0x1E) << 7;
+	pe |= (b&(1<<0)) << 12;
+	pe |= (b&0x1E) >> 1;
+	pe |= (g&(1<<0)) << 13;
+	pe |= (g&0x1E) << 3;
+
+  return (pe);
+}
+
 int main (int argc, char *argv[])
 {
   uint8_t *dips = (uint8_t *)0x10FD84;
@@ -379,26 +399,14 @@ int main (int argc, char *argv[])
 	{	
 		for (c=0; c<4; c++)
 		{
-			uint16_t	pe = 0;
 	    uint8_t r, g, b;
 	
 	    if (c < 2)
         r = g = b = 0;
       else
-      {
-  	    r = (p&(1<<1) ? (0xFF>>3) : 0x00);
-  	    g = (p&(1<<2) ? (0xFF>>3) : 0x00);
-  	    b = (p&(1<<0) ? (0xFF>>3) : 0x00);
-      }
+        make_zx_colour(8+p, &r, &g, &b);
       
-  		pe |= (r&(1<<0)) << 14;
-  		pe |= (r&0x1E) << 7;
-  		pe |= (b&(1<<0)) << 12;
-  		pe |= (b&0x1E) >> 1;
-			pe |= (g&(1<<0)) << 13;
-			pe |= (g&0x1E) << 3;
-
-			pal[p].color[c] = pe;
+			pal[p].color[c] = make_ng_colour (r, g, b);
 		}
 	}
 	// set palette banks for FIX layer
@@ -406,31 +414,38 @@ int main (int argc, char *argv[])
 	// set palette banks for SPRITE layer
 	setpalette(16, 8, (const PPALETTE)&pal);
 
+  // and make up a CPC palette for testing
+	for (p=0; p<1; p++)
+	{	
+    uint8_t r, g, b;
+    unsigned c = 0;
+    
+    make_zx_colour(0, &r, &g, &b);
+		pal[p].color[c++] = make_ng_colour (r, g, b);
+    make_zx_colour(4, &r, &g, &b);
+		pal[p].color[c++] = make_ng_colour (r, g, b);
+    make_zx_colour(5, &r, &g, &b);
+		pal[p].color[c++] = make_ng_colour (r, g, b);
+    make_zx_colour(0, &r, &g, &b);
+		pal[p].color[c++] = make_ng_colour (r, g, b);
+	}
+	setpalette(17, 1, (const PPALETTE)&pal);
+
+
   // set full spectrum palette
 	for (p=0; p<1; p++)
 	{	
 		for (c=0; c<16; c++)
 		{
-			uint16_t	pe = 0;
 	    uint8_t r, g, b;
 
-	    r = (c&(1<<1) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
-	    g = (c&(1<<2) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
-	    b = (c&(1<<0) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
-	    
-  		pe |= (r&(1<<0)) << 14;
-  		pe |= (r&0x1E) << 7;
-  		pe |= (b&(1<<0)) << 12;
-  		pe |= (b&0x1E) >> 1;
-			pe |= (g&(1<<0)) << 13;
-			pe |= (g&0x1E) << 3;
-
-			pal[p].color[c] = pe;
+      make_zx_colour(c, &r, &g, &b);
+			pal[p].color[c] = make_ng_colour (r, g, b);
 		}
 	}
 	// FIX layer title screen
 	setpalette(15, 1, (const PPALETTE)&pal);
-
+  
   sprite_bank = 0x0100;
   if (gfx == GFX_CPC)
     sprite_bank |= 0x4000;
