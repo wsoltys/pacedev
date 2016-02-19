@@ -42,7 +42,10 @@ void put_ng_tile (unsigned t, unsigned x, unsigned y)
   		if (tx < 8) bit += 32*8;
   		uint8_t pel = (c13[(bit>>3)+1] >> (tx%8)) & 0x01;
   		pel = (pel << 1) | ((c13[(bit>>3)+0] >> (tx%8)) & 0x01);
-      putpixel (screen, x+tx, y+ty, pel);
+  		
+  		static unsigned lu[] = { 0, 4, 5, 0 };
+  		unsigned c = lu[pel];
+      putpixel (screen, x+tx, y+ty, 8+c);
   	}
 }
 
@@ -51,7 +54,7 @@ void show_ng_tiles (void)
 	struct stat	    fs;
 	int					    fd;
 
-  FILE *fp = fopen ("202-c1.bin", "rb");
+  FILE *fp = fopen (GUID "-c3.bin", "rb");
 	if (!fp)
 		return;
 	fd = fileno (fp);
@@ -610,6 +613,13 @@ void do_sprites (void)
   //fclose (spr);
 }
 
+void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  *r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+  *g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+  *b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+}
+
 int main (int argc, char *argv[])
 {
   memset (zeroes, 0, 128);
@@ -630,11 +640,20 @@ int main (int argc, char *argv[])
   PALETTE pal;
   for (int c=0; c<16; c++)
   {
-    pal[c].r = (c<4 ? r[c] : 0);
-    pal[c].g = (c<4 ? g[c] : 0);
-    pal[c].b = (c<4 ? b[c] : 0);
+  	uint8_t r, g, b;
+  	
+  	#if 0
+	    pal[c].r = (c<4 ? r[c] : 0);
+	    pal[c].g = (c<4 ? g[c] : 0);
+	    pal[c].b = (c<4 ? b[c] : 0);
+    #else
+    	make_zx_colour (c, &r, &b, &g);
+    	pal[c].r = r;
+    	pal[c].g = g;
+    	pal[c].b = b;
+    #endif
   }
-	set_palette_range (pal, 0, 7, 1);
+	set_palette_range (pal, 0, 15, 1);
 
   show_ng_tiles ();
   
