@@ -641,6 +641,11 @@ int main (int argc, char *argv[])
     printf ("%d, %d, %d\n", r, g, b);
   }
   
+  // 15, 24, 26
+  // 18, 20, 8
+  // 2, 20, 24
+  // 6, 24, 26
+
   do_sprites ();
   do_fix ();
 
