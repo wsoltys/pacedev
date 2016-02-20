@@ -119,7 +119,10 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr,
   
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
 
-  attr &= 7;
+  if (IS_ZX_ATTR(attr))
+    attr &= 7;
+  else
+    attr = 8 + (attr & 3);
 
   *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
   *(vram+2) = 32;
@@ -179,6 +182,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 
   // setup sprite
   attr &= 7;
+  
   for (c=0; c<sw; c++)
     for (t=0; t<sh; t++)
     {
@@ -243,7 +247,10 @@ void osd_display_panel (uint8_t attr)
   unsigned c;
   uint8_t a;
 
-  attr &= 7;
+  if (IS_ZX_ATTR(attr))
+    attr &= 7;
+  else
+    attr = 8 + (attr & 3);
   
   // show the scrolls and the sun/moon frame
   *(vram+2) = 32;
@@ -251,10 +258,7 @@ void osd_display_panel (uint8_t attr)
   {
     // the sun/moon frame is RED
     // - I don't understand (c/32)>3 but it works...
-    if (gfx == GFX_ZX)
-      a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
-    else
-      a = 8 + (attr % 4);
+    a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
     if ((c%32) == 0)
 	    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
     *(vram+1) = 0x0500 | (a<<12) | c;
@@ -380,7 +384,7 @@ void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
 
 void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
 {
-  uint8_t lu[] = { 0, 128, 255 };
+  uint8_t lu[] = { 0>>3, 128>>3, 255>>3 };
   
   *r = lu[(c/3) % 3];
   *g = lu[(c/9) % 3];
@@ -482,7 +486,7 @@ int main (int argc, char *argv[])
       {
         uint8_t r, g, b;
 
-        if (c < 2)
+        if (c < 3)
           r = g = b = 0;
         else  
           make_cpc_colour(room_pal[p][3], &r, &g, &b);
@@ -507,7 +511,7 @@ int main (int argc, char *argv[])
 	    {
         uint8_t r, g, b;
         
-        make_cpc_colour(room_pal[p%4][c], &r, &g, &b);
+        make_cpc_colour(room_pal[p&3][c], &r, &g, &b);
     		pal[p].color[c] = make_ng_colour (r, g, b);
 	    }
 	    // this will be colour3 on the sprites

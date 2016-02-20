@@ -13,6 +13,7 @@ typedef enum
 
 extern GFX_E gfx;
 
+// ZX Spectrum attributes
 #define ATTR_BLACK          0
 #define ATTR_BLUE           1
 #define ATTR_RED            2
@@ -23,6 +24,11 @@ extern GFX_E gfx;
 #define ATTR_WHITE          7
 
 #define BRIGHT(a)           (0x40|(a))
+
+// CPC attributes
+#define CPC_ATTR(n)         (128+n)
+#define IS_ZX_ATTR(n)       (((n)&128) == 0)
+#define IS_CPC_ATTR(n)      (((n)&128) != 0)
 
 typedef struct
 {
