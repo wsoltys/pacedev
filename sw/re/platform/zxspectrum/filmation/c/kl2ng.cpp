@@ -22,6 +22,8 @@
 #define DRIVER    "legendos"
 #define GUID      "029"
 
+//#define SHOW_TILES
+
 #define N_ZX_SPR_ENTRIES    188
 #define N_CPC_SPR_ENTRIES   194
 
@@ -545,7 +547,10 @@ void do_sprites (void)
         for (int r=0; r<4; r++)
         {
           if (c*2 >= w || r*16 >= h)
+          {
             fwrite (zeroes, 64, sizeof(uint8_t), c1);
+            fwrite (zeroes, 64, sizeof(uint8_t), c2);
+          }
           else
           {        
             // we have some sprite data
@@ -567,7 +572,10 @@ void do_sprites (void)
   
                 if (c*2+1-((q&2)/2) >= w/2 ||
                     r*16+(q&1)*8+l >= h)
+                {
                   fwrite (zeroes, sizeof(uint8_t), 2, c1);
+                  fwrite (zeroes, sizeof(uint8_t), 2, c2);
+                }
                 else
                 {
                   uint8_t d1 = *(p+0);
@@ -587,8 +595,14 @@ void do_sprites (void)
                     b0 = REV(b0);
                     b1 = REV(b1);
                   }
+                  
+                  // we want to move colour 3 up to 15
+                  uint8_t col3 = b1 & b0;
+                  
                   fwrite (&b0, sizeof(uint8_t), 1, c1);
                   fwrite (&b1, sizeof(uint8_t), 1, c1);
+                  fwrite (&col3, sizeof(uint8_t), 1, c2);
+                  fwrite (&col3, sizeof(uint8_t), 1, c2);
 
                   if (vflip)
                     p += w;
@@ -598,9 +612,6 @@ void do_sprites (void)
               }
             }
           }
-                
-          // and always bitplanes 2,3
-          fwrite (zeroes, sizeof(uint8_t), 64, c2);
         }
       }
     }
@@ -640,15 +651,20 @@ int main (int argc, char *argv[])
     make_cpc_colour (c, &r, &g, &b);
     printf ("%d, %d, %d\n", r, g, b);
   }
-  
-  // 15, 24, 26
-  // 18, 20, 8
-  // 2, 20, 24
-  // 6, 24, 26
+
+  // menu
+  // 0, 24, 2, 26
+  // room attributes  
+  // 0, 15, 24, 26
+  // 0, 18, 20, 8
+  // 0, 2, 20, 24
+  // 0, 6, 24, 26
 
   do_sprites ();
   do_fix ();
 
+  #ifdef SHOW_TILES
+  
 	allegro_init ();
 	install_keyboard ();
 
@@ -680,6 +696,8 @@ int main (int argc, char *argv[])
   show_ng_tiles ();
   
   allegro_exit ();
+  
+  #endif
 }
 
 END_OF_MAIN();

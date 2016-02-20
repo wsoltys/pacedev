@@ -1974,13 +1974,15 @@ void print_lives_gfx (void)
 #ifdef __HAS_HWSPRITES__
   p_obj->hw_sprite = HW_SPRITE(MAX_OBJS);
 #endif  
-  print_sprite (BRIGHT(ATTR_WHITE), p_obj);
+  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : curr_room_attrib), p_obj);
 }
 
 // $BCA3
 void print_lives (void)
 {
-  print_bcd_number (32, 39, BRIGHT(ATTR_WHITE), (uint8_t *)&lives, 1);
+  print_bcd_number (32, 39, 
+                    (gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : 2),
+                    (uint8_t *)&lives, 1);
 }
 
 // $BCAE

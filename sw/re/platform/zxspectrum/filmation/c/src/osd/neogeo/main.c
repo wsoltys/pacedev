@@ -118,9 +118,12 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr,
   // - bank 4 for Knight Lore / DAYS fonts
   
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+
+  attr &= 7;
+
   *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
   *(vram+2) = 32;
-  *(vram+1) = 0x0400 | ((attr&7)<<12) | code;
+  *(vram+1) = 0x0400 | (attr<<12) | code;
   
   return (x+8);
 }
@@ -141,6 +144,7 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
 }
 
 static uint16_t sprite_bank;
+static uint16_t pal_bank;
 
 void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
@@ -149,9 +153,6 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   unsigned sw = (p_obj->data_width_bytes+1)/2;
   unsigned sh = (p_obj->data_height_lines+15)/16;
 
-  // override for now
-  attr = 17-16;
-  
   // data_width_bytes may already be 1 byte wider
   // but max width for Knight Lore is 5
   // ((5+1)+1)/2 = 3
@@ -182,7 +183,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
     for (t=0; t<sh; t++)
     {
       obj_map[c].tiles[t].block_number = n+c*4+t;
-      obj_map[c].tiles[t].attributes = (16+attr)<<8;
+      obj_map[c].tiles[t].attributes = (pal_bank+attr)<<8;
     }
 
   set_current_sprite (p_obj->hw_sprite*3);
@@ -242,16 +243,21 @@ void osd_display_panel (uint8_t attr)
   unsigned c;
   uint8_t a;
 
+  attr &= 7;
+  
   // show the scrolls and the sun/moon frame
   *(vram+2) = 32;
   for (c=0; c<256; c++)
   {
     // the sun/moon frame is RED
     // - I don't understand (c/32)>3 but it works...
-    a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
+    if (gfx == GFX_ZX)
+      a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
+    else
+      a = 8 + (attr % 4);
     if ((c%32) == 0)
 	    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
-    *(vram+1) = 0x0500 | ((a&7)<<12) | c;
+    *(vram+1) = 0x0500 | (a<<12) | c;
   }
 }
 
@@ -403,9 +409,15 @@ int main (int argc, char *argv[])
 	PALETTE 	pal[8];
 	unsigned	p, c;
 
-  // map palettes 0-7 with bright colours
+  sprite_bank = 0x0100;
+  pal_bank = 16;
+
+  // *all* graphics modes
+  // - map original spectrum palette (bright only)
+  //   to palettes 0-7
+  // - sprites & FIX layer
+  // - 0=transparent, 1=mask (black), 2,3=same colour
 	for (p=0; p<8; p++)
-	{	
 		for (c=0; c<4; c++)
 		{
 	    uint8_t r, g, b;
@@ -417,48 +429,93 @@ int main (int argc, char *argv[])
       
 			pal[p].color[c] = make_ng_colour (r, g, b);
 		}
-	}
 	// set palette banks for FIX layer
 	setpalette(0, 8, (const PPALETTE)&pal);
 	// set palette banks for SPRITE layer
 	setpalette(16, 8, (const PPALETTE)&pal);
-
-  // and make up a CPC palette for testing
-	for (p=0; p<1; p++)
-	{	
-    uint8_t r, g, b;
-    unsigned c = 0;
-    
-    make_zx_colour(0, &r, &g, &b);
-		pal[p].color[c++] = make_ng_colour (r, g, b);
-    make_zx_colour(4, &r, &g, &b);
-		pal[p].color[c++] = make_ng_colour (r, g, b);
-    make_zx_colour(5, &r, &g, &b);
-		pal[p].color[c++] = make_ng_colour (r, g, b);
-    make_zx_colour(0, &r, &g, &b);
-		pal[p].color[c++] = make_ng_colour (r, g, b);
-	}
-	setpalette(17, 1, (const PPALETTE)&pal);
-
-
-  // set full spectrum palette
-	for (p=0; p<1; p++)
-	{	
-		for (c=0; c<16; c++)
-		{
-	    uint8_t r, g, b;
-
-      make_zx_colour(c, &r, &g, &b);
-			pal[p].color[c] = make_ng_colour (r, g, b);
-		}
-	}
-	// FIX layer title screen
-	setpalette(15, 1, (const PPALETTE)&pal);
+  	
+  if (gfx == GFX_ZX)
+  {
+    // set full spectrum palette
+    // used for title screen FIX layer
+  	for (p=0; p<1; p++)
+  	{	
+  		for (c=0; c<16; c++)
+  		{
+  	    uint8_t r, g, b;
   
-  sprite_bank = 0x0100;
+        make_zx_colour(c, &r, &g, &b);
+  			pal[p].color[c] = make_ng_colour (r, g, b);
+  		}
+  	}
+  	// FIX layer title screen
+  	setpalette(15, 1, (const PPALETTE)&pal);
+  }
+  else
   if (gfx == GFX_CPC)
-    sprite_bank |= 0x4000;
+  {
+    const uint8_t menu_pal[] =
+    {
+      // yellow, blue, white
+      0, 24, 2, 26
+    };
 
+    const uint8_t room_pal[][4] =
+    {    
+      // orange, yellow, white
+      { 0, 15, 24, 26 },
+      // green, cyan, magenta
+      { 0, 18, 20, 8 },
+      // blue, cyan, yellow
+      { 0, 2, 20, 24 },
+      // red, yellow, white
+      { 0, 6, 24, 26 }
+    };
+
+    sprite_bank |= 0x4000;
+    pal_bank = 32;
+
+    // panel palette
+    // - use 3rd colour of each room
+    for (p=0; p<4; p++)
+      for (c=0; c<4; c++)
+      {
+        uint8_t r, g, b;
+
+        if (c < 2)
+          r = g = b = 0;
+        else  
+          make_cpc_colour(room_pal[p][3], &r, &g, &b);
+    		pal[p].color[c] = make_ng_colour (r, g, b);
+      }    
+	  setpalette(8, 4, (const PPALETTE)&pal);
+
+    // FIX LAYER menu palette
+    for (c=0; c<4; c++)
+    {
+      uint8_t r, g, b;
+      
+      make_cpc_colour(menu_pal[c], &r, &g, &b);
+  		pal[0].color[c] = make_ng_colour (r, g, b);
+    }    
+	  setpalette(24, 1, (const PPALETTE)&pal);
+	  
+    // SPRITE (room attrib table)	  
+	  for (p=0; p<8; p++)
+	  {
+	    for (c=0; c<4; c++)
+	    {
+        uint8_t r, g, b;
+        
+        make_cpc_colour(room_pal[p%4][c], &r, &g, &b);
+    		pal[p].color[c] = make_ng_colour (r, g, b);
+	    }
+	    // this will be colour3 on the sprites
+	    pal[p].color[15] = 0;
+	  }
+	  setpalette(32, 8, (const PPALETTE)&pal);
+  }
+  
 	while (1)
 	{
     //eye_catcher ();
