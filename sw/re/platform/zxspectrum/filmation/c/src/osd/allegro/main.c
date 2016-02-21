@@ -68,7 +68,12 @@ int osd_keypressed (void)
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   unsigned l, b;
-  
+
+  if (gfx == GFX_CPC && IS_ROOM_ATTR(attr))
+    attr = 8+(attr&3)*4+3;
+  else
+    attr &= 7;
+      
   for (l=0; l<8; l++)
   {
     uint8_t d = gfxbase_8x8[code*8+l];
@@ -158,10 +163,14 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
         uint8_t d = *(psprite++);
         for (b=0; b<4; b++)
         {
-          static unsigned lu[] = { 0, 4, 5, 0 };
           unsigned c = ((d&0x80)>>6)|((d&0x08)>>3);
           if (c != 0)
-            putpixel (scrn_buf, p_obj->pixel_x+x*4+b, 191-(p_obj->pixel_y+y), lu[c]);
+          {
+            if (c == 3)
+              c = 0;
+            putpixel (scrn_buf, p_obj->pixel_x+x*4+b, 191-(p_obj->pixel_y+y), 
+                      8+(attr&3)*4+c);
+          }
           d <<= 1;
         }
       }
@@ -385,6 +394,22 @@ void usage (char *argv0)
   exit (0);
 }
 
+static void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  *r = (c&(1<<1) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *g = (c&(1<<2) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *b = (c&(1<<0) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+}
+
+static void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  uint8_t lu[] = { 0, 128, 255 };
+  
+  *r = lu[(c/3) % 3];
+  *g = lu[(c/9) % 3];
+  *b = lu[c % 3];
+}
+
 void main (int argc, char *argv[])
 {
   GFX_E gfx = GFX_ZX;
@@ -417,16 +442,62 @@ void main (int argc, char *argv[])
 
   scrn_buf = create_bitmap (256, 192);
   
-  // spectrum palette
   PALETTE pal;
-  for (c=0; c<16; c++)
+  
+  // spectrum palette
+  for (c=0; c<8; c++)
   {
-    pal[c].r = (c&(1<<1) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].g = (c&(1<<2) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
-    pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
+    uint8_t r, g, b;
+    
+    make_zx_colour (8+c, &r, &g, &b);
+    pal[0+c].r = r>>2;
+    pal[0+c].g = g>>2;
+    pal[0+c].b = b>>2;
   }
-	set_palette_range (pal, 0, 15, 1);
+	//set_palette_range (pal, 0, 0+8-1, 1);
 
+  if (gfx == GFX_ZX)
+  {
+    for (c=0; c<8; c++)
+    {
+      uint8_t r, g, b;
+      
+      make_zx_colour (8+c, &r, &g, &b);
+      pal[8+c].r = r>>2;
+      pal[8+c].g = g>>2;
+      pal[8+c].b = b>>2;
+    }
+	  //set_palette_range (pal, 8, 8+8-1, 1);
+  }
+  else
+  if (gfx == GFX_CPC)
+  {
+    const uint8_t room_pal[][4] =
+    {    
+      // orange, yellow, white
+      { 0, 15, 24, 26 },
+      // green, cyan, magenta
+      { 0, 18, 20, 8 },
+      // blue, cyan, yellow
+      { 0, 2, 20, 24 },
+      // red, yellow, white
+      { 0, 6, 24, 26 }
+    };
+    
+    for (c=0; c<4*4; c++)
+    {
+      uint8_t r, g, b;
+      
+      make_cpc_colour (room_pal[c/4][c%4], &r, &g, &b);
+      pal[8+c].r = r>>2;
+      pal[8+c].g = g>>2;
+      pal[8+c].b = b>>2;
+    }
+	  //set_palette_range (pal, 8, 8+16-1, 1);
+  }
+
+  set_palette_range (pal, 0, 8+16-1, 1);
+  
 #if 0
 	clear_bitmap (screen);
 	unsigned x, y;
