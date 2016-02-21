@@ -119,10 +119,9 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr,
   
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
 
-  if (IS_ZX_ATTR(attr))
-    attr &= 7;
-  else
-    attr = 8 + (attr & 3);
+  attr &= 7;
+  if (IS_ROOM_ATTR(attr))
+    attr += 8;
 
   *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
   *(vram+2) = 32;
@@ -147,7 +146,6 @@ void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t heig
 }
 
 static uint16_t sprite_bank;
-static uint16_t pal_bank;
 
 void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 {
@@ -187,7 +185,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
     for (t=0; t<sh; t++)
     {
       obj_map[c].tiles[t].block_number = n+c*4+t;
-      obj_map[c].tiles[t].attributes = (pal_bank+attr)<<8;
+      obj_map[c].tiles[t].attributes = (16+attr)<<8;
     }
 
   set_current_sprite (p_obj->hw_sprite*3);
@@ -247,10 +245,9 @@ void osd_display_panel (uint8_t attr)
   unsigned c;
   uint8_t a;
 
-  if (IS_ZX_ATTR(attr))
-    attr &= 7;
-  else
-    attr = 8 + (attr & 3);
+  attr &= 7;
+  if (IS_ROOM_ATTR(attr))
+    attr += 8;
   
   // show the scrolls and the sun/moon frame
   *(vram+2) = 32;
@@ -348,19 +345,67 @@ void eye_catcher (void)
 	*(vram+1) = 0xF000 | 0x7B;
 }
 
+static void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  *r = (c&(1<<1) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *g = (c&(1<<2) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *b = (c&(1<<0) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+}
+
+static void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  uint8_t lu[] = { 0, 128, 255 };
+  
+  *r = lu[(c/3) % 3];
+  *g = lu[(c/9) % 3];
+  *b = lu[c % 3];
+}
+
+static uint16_t make_ng_colour (uint8_t r, uint8_t g, uint8_t b)
+{
+  uint16_t pe = 0;
+  
+  r >>= 3;
+  g >>= 3;
+  b >>= 3;
+  
+	pe |= (r&(1<<0)) << 14;
+	pe |= (r&0x1E) << 7;
+	pe |= (b&(1<<0)) << 12;
+	pe |= (b&0x1E) >> 1;
+	pe |= (g&(1<<0)) << 13;
+	pe |= (g&0x1E) << 3;
+
+  return (pe);
+}
+
 static void show_zx_title (void)
 {
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+	PALETTE 	pal[8];
   uint16_t bank = 0x0600;
-  unsigned r, c;
+  unsigned p, r, c;
   
+  // set full spectrum palette
+	for (p=0; p<1; p++)
+	{	
+		for (c=0; c<16; c++)
+		{
+	    uint8_t r, g, b;
+
+      make_zx_colour(c, &r, &g, &b);
+			pal[p].color[c] = make_ng_colour (r, g, b);
+		}
+	}
+	setpalette(15, 1, (const PPALETTE)&pal);
+
   for (r=0; r<21; r++)
   {
     *vram = 0x7000 + FIX_XOFF*32 + FIX_YOFF + r;
     *(vram+2) = 32;
     bank = 0x0600 + ((r/8)<<8);    
     for (c=0; c<32; c++)
-      *(vram+1) = bank | (0x000f<<12) | ((r%8)*32 + c);
+      *(vram+1) = bank | (15<<12) | ((r%8)*32 + c);
   }
   
   for (c=0; c<10000/16; c++)
@@ -375,52 +420,16 @@ static void show_zx_title (void)
   }
 }
 
-void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+static void init_gfx (GFX_E gfx)
 {
-  *r = (c&(1<<1) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
-  *g = (c&(1<<2) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
-  *b = (c&(1<<0) ? ((c < 8) ? (0xCD>>3) : (0xFF>>3)) : 0x00);
-}
-
-void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
-{
-  uint8_t lu[] = { 0>>3, 128>>3, 255>>3 };
-  
-  *r = lu[(c/3) % 3];
-  *g = lu[(c/9) % 3];
-  *b = lu[c % 3];
-}
-
-uint16_t make_ng_colour (uint8_t r, uint8_t g, uint8_t b)
-{
-  uint16_t pe = 0;
-  
-	pe |= (r&(1<<0)) << 14;
-	pe |= (r&0x1E) << 7;
-	pe |= (b&(1<<0)) << 12;
-	pe |= (b&0x1E) >> 1;
-	pe |= (g&(1<<0)) << 13;
-	pe |= (g&0x1E) << 3;
-
-  return (pe);
-}
-
-int main (int argc, char *argv[])
-{
-  uint8_t *dips = (uint8_t *)0x10FD84;
-  GFX_E gfx = (*(dips+6) ? GFX_ZX : GFX_CPC);
-
 	PALETTE 	pal[8];
 	unsigned	p, c;
-
-  sprite_bank = 0x0100;
-  pal_bank = 16;
 
   // *all* graphics modes
   // - map original spectrum palette (bright only)
   //   to palettes 0-7
-  // - sprites & FIX layer
   // - 0=transparent, 1=mask (black), 2,3=same colour
+  // - for menu etc
 	for (p=0; p<8; p++)
 		for (c=0; c<4; c++)
 		{
@@ -435,29 +444,21 @@ int main (int argc, char *argv[])
 		}
 	// set palette banks for FIX layer
 	setpalette(0, 8, (const PPALETTE)&pal);
-	// set palette banks for SPRITE layer
-	setpalette(16, 8, (const PPALETTE)&pal);
-  	
-  if (gfx == GFX_ZX)
-  {
-    // set full spectrum palette
-    // used for title screen FIX layer
-  	for (p=0; p<1; p++)
-  	{	
-  		for (c=0; c<16; c++)
-  		{
-  	    uint8_t r, g, b;
+	
+  sprite_bank = 0x0100;
   
-        make_zx_colour(c, &r, &g, &b);
-  			pal[p].color[c] = make_ng_colour (r, g, b);
-  		}
-  	}
-  	// FIX layer title screen
-  	setpalette(15, 1, (const PPALETTE)&pal);
-  }
+	if (gfx == GFX_ZX)
+  {
+    // 2nd set of FIX layer
+    // - for curr_room_attrib
+	  setpalette(8, 8, (const PPALETTE)&pal);
+    // set palette banks for SPRITE layer
+	  setpalette(16, 8, (const PPALETTE)&pal);
+	}
   else
   if (gfx == GFX_CPC)
   {
+    // not used
     const uint8_t menu_pal[] =
     {
       // yellow, blue, white
@@ -476,35 +477,7 @@ int main (int argc, char *argv[])
       { 0, 6, 24, 26 }
     };
 
-    sprite_bank |= 0x4000;
-    pal_bank = 32;
-
-    // panel palette
-    // - use 3rd colour of each room
-    for (p=0; p<4; p++)
-      for (c=0; c<4; c++)
-      {
-        uint8_t r, g, b;
-
-        if (c < 3)
-          r = g = b = 0;
-        else  
-          make_cpc_colour(room_pal[p][3], &r, &g, &b);
-    		pal[p].color[c] = make_ng_colour (r, g, b);
-      }    
-	  setpalette(8, 4, (const PPALETTE)&pal);
-
-    // FIX LAYER menu palette
-    for (c=0; c<4; c++)
-    {
-      uint8_t r, g, b;
-      
-      make_cpc_colour(menu_pal[c], &r, &g, &b);
-  		pal[0].color[c] = make_ng_colour (r, g, b);
-    }    
-	  setpalette(24, 1, (const PPALETTE)&pal);
-	  
-    // SPRITE (room attrib table)	  
+    // (room attrib table)	  
 	  for (p=0; p<8; p++)
 	  {
 	    for (c=0; c<4; c++)
@@ -517,9 +490,21 @@ int main (int argc, char *argv[])
 	    // this will be colour3 on the sprites
 	    pal[p].color[15] = 0;
 	  }
-	  setpalette(32, 8, (const PPALETTE)&pal);
+    // 2nd set of FIX layer
+    // - for curr_room_attrib
+	  setpalette(8, 8, (const PPALETTE)&pal);
+    // set palette banks for SPRITE layer
+	  setpalette(16, 8, (const PPALETTE)&pal);
+
+    sprite_bank |= 0x4000;
   }
-  
+}
+
+int main (int argc, char *argv[])
+{
+  uint8_t *dips = (uint8_t *)0x10FD84;
+  GFX_E gfx = (*(dips+6) ? GFX_ZX : GFX_CPC);
+
 	while (1)
 	{
     //eye_catcher ();
@@ -532,7 +517,11 @@ int main (int argc, char *argv[])
       show_zx_title ();
   		clear_fix();
     }
-    
+
+    // needs to be done _after_ show_XX_title
+    // because it resets palette
+    init_gfx (gfx);
+        
 		_vbl_count = 0;
 		knight_lore (gfx);
 

@@ -1958,7 +1958,7 @@ void calc_and_display_percent (void)
 void print_days (void)
 {
   print_bcd_number (120, 7, 
-                    (gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : CPC_ATTR(curr_room_attrib)), 
+                    (gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)), 
                     &days, 1);
 }
 
@@ -1983,7 +1983,7 @@ void print_lives_gfx (void)
 void print_lives (void)
 {
   print_bcd_number (32, 39, 
-                    (gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : CPC_ATTR(curr_room_attrib)),
+                    (gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)),
                     (uint8_t *)&lives, 1);
 }
 
@@ -2015,7 +2015,7 @@ void display_day (void)
   attr = (~curr_room_attrib+2) & 7;
   gfxbase_8x8 = (uint8_t *)day_font;
   print_text_raw (112, 15, 
-                  (gfx == GFX_ZX ? attr : CPC_ATTR(curr_room_attrib)), 
+                  (gfx == GFX_ZX ? attr : ROOM_ATTR(curr_room_attrib)), 
                   (char *)(day_txt+1));
 }
 
@@ -4270,7 +4270,7 @@ void display_panel (void)
     p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
   }
 #else
-  osd_display_panel (gfx == GFX_ZX ? curr_room_attrib : CPC_ATTR(curr_room_attrib));
+  osd_display_panel (ROOM_ATTR(curr_room_attrib));
 #endif
 }
 

@@ -26,9 +26,8 @@ extern GFX_E gfx;
 #define BRIGHT(a)           (0x40|(a))
 
 // CPC attributes
-#define CPC_ATTR(n)         (128+n)
-#define IS_ZX_ATTR(n)       (((n)&128) == 0)
-#define IS_CPC_ATTR(n)      (((n)&128) != 0)
+#define ROOM_ATTR(n)        (128+n)
+#define IS_ROOM_ATTR(n)     (((n)&128) != 0)
 
 typedef struct
 {
