@@ -120,6 +120,7 @@ static uint8_t zeroes[128];
 #include "border_font.c"
 #include "panel_font.c"
 #include "title_font.c"
+#include "cpc_title_font.c"
 
 void do_fix (void)
 {
@@ -131,7 +132,9 @@ void do_fix (void)
   // bank 5 (256 chars)
   // panel data
   // bank 6-8 (768 chars)
-  // title screen
+  // ZX title screen
+  // bank 9-10 (432 chars)
+  // CPC title screen
   
   unsigned c;
   unsigned i;
@@ -264,7 +267,7 @@ void do_fix (void)
     }
   }
 
-  // title (3 banks)
+  // ZX title (3 banks)
   for (c=0; c<768; c++)
   {  
     const uint8_t *pfont;
@@ -293,8 +296,37 @@ void do_fix (void)
     }
   }
 
+  // CPC title (2 banks)
+  for (c=0; c<512; c++)
+  {  
+    const uint8_t *pfont;
+
+    if (c < 432)    
+      pfont = cpc_title_font[c*8];
+    else
+      pfont = zeroes;
+
+    // create font data
+    for (unsigned col=0; col<4; col++)
+    {
+      uint8_t offset[] = { 4, 6, 0, 2 };
+      uint8_t i = offset[col];
+      for (unsigned l=0; l<8; l++)
+      {
+        uint8_t byte = 0;
+         
+        uint8_t data = pfont[l*8+i];
+        byte |= (data & 0x0f);
+        data = pfont[l*8+i+1];
+        byte |= (data & 0x0f) << 4;
+            
+        fwrite (&byte, sizeof(uint8_t), 1, fp);
+      }
+    }
+  }
+
   // and skip same bytes in original file
-  fseek (fpFix, (256+512+768)*32, SEEK_CUR);
+  fseek (fpFix, (256+512+768+432)*32, SEEK_CUR);
   
   // and copy remainder of file
   uint8_t data;
@@ -604,7 +636,7 @@ void do_sprites (void)
                   }
                   
                   // we want to move colour 3 up to 15
-                  uint8_t col3 = 0; b1 & b0;
+                  uint8_t col3 = 0; //b1 & b0;
                   
                   fwrite (&b0, sizeof(uint8_t), 1, c1);
                   fwrite (&b1, sizeof(uint8_t), 1, c1);
@@ -647,7 +679,7 @@ void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
   *b = lu[c % 3];
 }
 
-int main (int argc, char *argv[])
+void main (int argc, char *argv[])
 {
   memset (zeroes, 0, 128);
 

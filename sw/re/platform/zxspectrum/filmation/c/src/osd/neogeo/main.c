@@ -22,8 +22,10 @@
 //  * BANK 5 - panel
 //  - $00-$FF - panel characters for bottom 8 lines
 //              in display order
-//  * BANKS 6-8 - title screen
+//  * BANKS 6-8 - ZX title screen
 //  - +672 characters in display order
+//  * BANKS 9-10 - CPC title screen
+//  - +432 (18x24) characters in display order
 //
 //  SPRITES
 //  -   0-255 - system reserved
@@ -395,20 +397,17 @@ static uint16_t make_ng_colour (uint8_t r, uint8_t g, uint8_t b)
 static void show_zx_title (void)
 {
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
-	PALETTE 	pal[8];
+	PALETTE 	pal[1];
   uint16_t bank = 0x0600;
   unsigned p, r, c;
   
   // set full spectrum palette
-	for (p=0; p<1; p++)
-	{	
-		for (c=0; c<16; c++)
-		{
-	    uint8_t r, g, b;
+	for (c=0; c<16; c++)
+	{
+    uint8_t r, g, b;
 
-      make_zx_colour(c, &r, &g, &b);
-			pal[p].color[c] = make_ng_colour (r, g, b);
-		}
+    make_zx_colour(c, &r, &g, &b);
+		pal[0].color[c] = make_ng_colour (r, g, b);
 	}
 	setpalette(15, 1, (const PPALETTE)&pal);
 
@@ -420,15 +419,39 @@ static void show_zx_title (void)
     for (c=0; c<32; c++)
       *(vram+1) = bank | (15<<12) | ((r%8)*32 + c);
   }
-  
-  for (c=0; c<10000/16; c++)
-  {
-    wait_vbl ();
+}
 
-    if (poll_joystick (PORT1, READ_DIRECT))
+static void show_cpc_title (void)
+{
+  volatile uint16_t  *vram = (uint16_t *)0x3C0000;
+	PALETTE 	pal[1];
+  uint16_t bank = 0x0900;
+  unsigned p, r, c, t;
+  
+  // set full spectrum palette
+	for (c=0; c<4; c++)
+	{
+	  static const uint8_t cpc_pal[] =
+	  {
+      // black, orange, yellow, red
+      0, 24, 6, 15
+    };
+    uint8_t r, g, b;
+
+    make_cpc_colour(cpc_pal[c%4], &r, &g, &b);
+		pal[0].color[c] = make_ng_colour (r, g, b);
+	}
+	setpalette(15, 1, (const PPALETTE)&pal);
+
+  for (t=0, r=0; r<24; r++)
+  {
+    *vram = 0x7000 + (FIX_XOFF+7)*32 + FIX_YOFF + r;
+    *(vram+2) = 32;
+    for (c=0; c<18; c++, t++)
     {
-      while (poll_joystick (PORT1, READ_DIRECT));
-      break;
+      if ((t&0xff) == 0)
+        bank = 0x0900 + t;    
+      *(vram+1) = bank | (15<<12) | (t&0xff);
     }
   }
 }
@@ -538,16 +561,30 @@ int main (int argc, char *argv[])
 
 	while (1)
 	{
+	  unsigned c;
+	  
     //eye_catcher ();
 
 		clear_fix();
 		clear_spr();
 
     if (gfx == GFX_ZX)
-    {		
       show_zx_title ();
-  		clear_fix();
+    else
+    if (gfx == GFX_CPC)
+      show_cpc_title ();
+
+    for (c=0; c<10000/16; c++)
+    {
+      wait_vbl ();
+  
+      if (poll_joystick (PORT1, READ_DIRECT))
+      {
+        while (poll_joystick (PORT1, READ_DIRECT));
+        break;
+      }
     }
+		clear_fix();
 
     // needs to be done _after_ show_XX_title
     // because it resets palette

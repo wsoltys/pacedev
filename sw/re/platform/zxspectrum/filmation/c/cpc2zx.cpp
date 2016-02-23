@@ -16,9 +16,14 @@
 #endif
 
 //#define DO_SPRITE_GFX
+#define DO_TITLE_GFX
 
 uint8_t ram_zx[0x10000];
 uint8_t ram_cpc[0x10000];
+
+#ifdef DO_TITLE_GFX
+#include "cpc_title_font.c"
+#endif
 
 int main (int argc, char *argv[])
 {
@@ -420,7 +425,39 @@ int main (int argc, char *argv[])
   fclose (fp2);  
   fprintf (stderr, "Done!\n");
 
-#ifdef DO_SPRITE_GFX
+  FILE *fpTitle = fopen ("../../../cpc/title.bin", "rb");
+  fread (ram_cpc, sizeof(uint8_t), 64*1024, fpTitle);
+  fclose (fpTitle);
+  
+  fp2 = fopen ("cpc_title_font.c", "wt");
+  fprintf (fp2, "uint8_t cpc_title_font[][8] = \n{\n");
+  for (unsigned y=0; y<192/8; y++)
+  {
+    for (unsigned x=11; x<11+18; x++)
+    {
+      unsigned a = y*0x50 + x*2;
+
+      for (unsigned l=0; l<8; l++)
+      {
+        fprintf (fp2, "  { ");
+        for (unsigned b=0; b<8; b++)
+        {
+          uint8_t d = ram_cpc[0xc000+a+b/4];
+          d >>= (3-(b%4));
+          d = ((d&0x10) >> 3) | (d&0x01);
+          fprintf (fp2, "0x%02X, ", d);
+        }      
+        fprintf (fp2, "},\n");
+        a += 0x800;
+      }
+      fprintf (fp2, "\n");
+    }
+  }
+  fprintf (fp2, "};\n");
+  
+  fclose (fp2);
+  
+#if defined(DO_SPRITE_GFX) || defined(DO_TITLE_GFX)
   
 	allegro_init ();
 	install_keyboard ();
@@ -437,6 +474,7 @@ int main (int argc, char *argv[])
   }
 	set_palette_range (pal, 0, 7, 1);
 
+#ifdef DO_SPRITE_GFX
   a_cpc = 0x429e;
   s = 0;
   unsigned x=0;
@@ -486,6 +524,35 @@ int main (int argc, char *argv[])
 
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
+#endif
+
+#ifdef DO_TITLE_GFX
+
+  for (unsigned y=0; y<24; y++)
+  {
+    for (unsigned x=0; x<18; x++)
+    {
+      unsigned blank = 1;
+      
+      for (unsigned l=0; l<8; l++)
+      {
+        uint8_t *p = cpc_title_font[(y*18+x)*8+l];
+
+        for (unsigned b=0; b<8; b++)
+        {
+          putpixel (screen, x*8+b, y*8+l, p[b]);
+          if (p[b])
+            blank = 0;
+        }
+      }
+      if (blank)
+        rectfill (screen, x*8+1, y*8+1, x*8+6, y*8+6, 4);
+    }
+  }
+  
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+#endif
   
   allegro_exit ();
   

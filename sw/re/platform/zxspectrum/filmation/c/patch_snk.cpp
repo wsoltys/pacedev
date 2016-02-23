@@ -291,7 +291,8 @@ int patch_snk (char *infile, char *outfile)
 
 int main (int argc, char *argv[])
 {
-  patch_snk ("029-s1.bin", "029-s1-rp.bin");
+  if (patch_snk ("029-s1.bin", "029-s1-rp.bin") != 0)
+    printf ("failed!\n");
   
   return (0);
 }
