@@ -195,9 +195,17 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
     }
 
   set_current_sprite (p_obj->hw_sprite*3);
-  write_sprite_data (SPR_XOFF + p_obj->pixel_x, 
-                      SPR_YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
-                      0x0f, 0xff, sh, sw, obj_map);
+  if (p_obj->graphic_no < 2)
+  {
+    textoutf (0, 0, 7, 0, "OBJ %3d=%3d", p_obj->hw_sprite);
+    write_sprite_data (SPR_XOFF+0, 
+                        SPR_YOFF+0,
+                        0x0f, 0xff, sh, sw, obj_map);
+  }
+  else
+    write_sprite_data (SPR_XOFF + p_obj->pixel_x, 
+                        SPR_YOFF+191-(p_obj->pixel_y+p_obj->data_height_lines-1),
+                        0x0f, 0xff, sh, sw, obj_map);
 }
 
 void osd_print_border (void)

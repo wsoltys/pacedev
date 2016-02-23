@@ -485,9 +485,11 @@ static void render_hw_sprites (void)
   static uint8_t  obj[HW_SPRITE(MAX_OBJS)];
   static uint8_t  dirty[HW_SPRITE(MAX_OBJS)];
   static uint8_t  n_objs;
-      
-  unsigned        i, j, k;
 
+  unsigned        i, j, k;
+  uint8_t         action;
+  uint8_t         wait = 0;
+  
   if (internal.num_objs_to_render == 0)
     return;
 
@@ -513,22 +515,60 @@ static void render_hw_sprites (void)
     return;
   }
 
-  // subsequent renders
+  // subsequent renders - wipes
   for (i=0; i<internal.num_objs_to_wipe; i++)
   {
     uint8_t obj_i = internal.objs_to_wipe[i];
     POBJ32 p_obj = &graphic_objs_tbl[obj_i];
     
     dirty[p_obj->hw_sprite] = 1;
+    
+    //textoutf (0, i, 7, 0, "%3d(%3d)=%3d", 
+    //          obj_i, p_obj->graphic_no, p_obj->hw_sprite);
+    if (obj_i == 2)
+      wait = 1;
   }
+  //textoutf (0, i, 7, 0, "             ");
+
+  // and redraws
+  for (i=0; i<internal.num_objs_to_render; i++)
+  {
+    uint8_t obj_i = internal.objs_to_render[i];
+    POBJ32 p_obj = &graphic_objs_tbl[obj_i];
+    
+    if (dirty[p_obj->hw_sprite])
+      dirty[p_obj->hw_sprite] = 2;
+
+    //textoutf (16, i, 7, 0, "%3d(%3d)=%3d", 
+    //          obj_i, p_obj->graphic_no, p_obj->hw_sprite);
+    if (obj_i == 2)
+      wait += 2;
+  }
+  //textoutf (16, i, 7, 0, "             ");
 
   // and finally do the rendering
   osd_wait_vbl ();
   for (i=0; i<n_objs; i++)
-    if (dirty[HW_SPRITE(i)])
-      print_sprite (curr_room_attrib,
-                      &graphic_objs_tbl[obj[HW_SPRITE(i)]]);
-                              
+    if (action = dirty[HW_SPRITE(i)])
+    {
+      uint8_t obj_i = obj[HW_SPRITE(i)];
+      POBJ32 p_obj = &graphic_objs_tbl[obj_i];
+
+      if (action == 1)
+      {
+        textoutf (0, i, 7, 0, "%3d(%3d)=%3d", 
+                  obj_i, p_obj->graphic_no, p_obj->hw_sprite);
+      }
+      print_sprite (curr_room_attrib, p_obj);
+    }
+
+  if (wait == 1 || wait == 3)
+  {
+    while (osd_keypressed ());
+    while (!osd_keypressed ());
+    while (osd_keypressed ());
+  }
+                                  
 #if 0
   DBGPRINTF ("to render:\n");
   for (i=0; i<internal.num_objs_to_render; i++)
