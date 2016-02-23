@@ -101,6 +101,14 @@ static const uint8_t **sprite_tbl;
 static const uint8_t **border_data;
 static const uint8_t *panel_data;
 
+#ifndef neogeo
+  static PSPECOBJ special_objs_tbl = special_objs_tbl_rom;
+  static uint8_t *objects_required = objects_required_rom;
+#else
+  static SPECOBJ special_objs_tbl[32];
+  static uint8_t objects_required[14];
+#endif
+
 // start of variables
 
 static uint8_t seed_1;                                // $5BA0
@@ -560,6 +568,13 @@ void knight_lore (GFX_E gfx_)
       panel_data = zx_panel_data;
       break;
   }      
+
+#ifdef neogeo
+  memcpy (special_objs_tbl,
+          special_objs_tbl_rom,
+          32*sizeof(SPECOBJ));
+  memcpy (objects_required, objects_required_rom, 14);
+#endif
 
 START_AF6C:
 

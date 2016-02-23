@@ -171,7 +171,7 @@ ifeq ($(PLATFORM),genesis)
 endif
 
 	ASFLAGS = -I src/osd/$(PLATFORM) $(OSD_ASFLAGS)
-	CFLAGS = $(OSD_INCS) -I src/osd/$(PLATFORM) -I src/kl $(OSD_CFLAGS) $(BUILD_OPTS)
+	CFLAGS = $(OSD_INCS) -I src/osd/$(PLATFORM) -I src/kl $(OSD_CFLAGS) -D$(PLATFORM)
 	LDFLAGS = -L $(OSD_LIBDIR) $(OSD_LIBS) $(OSD_LDFLAGS)
 
 OBJDIR = obj/$(PLATFORM)

@@ -175,8 +175,6 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   }
   #endif
 
-  uint8_t *psprite = flip_sprite (p_obj);
-
   n = sprite_bank + (unsigned)(p_obj->graphic_no)*4*16;
   if (p_obj->flags7 & (1<<7))
     n += 2*16;
@@ -399,7 +397,7 @@ static void show_zx_title (void)
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
 	PALETTE 	pal[1];
   uint16_t bank = 0x0600;
-  unsigned p, r, c;
+  unsigned r, c;
   
   // set full spectrum palette
 	for (c=0; c<16; c++)
@@ -426,7 +424,7 @@ static void show_cpc_title (void)
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
 	PALETTE 	pal[1];
   uint16_t bank = 0x0900;
-  unsigned p, r, c, t;
+  unsigned r, c, t;
   
   // set full spectrum palette
 	for (c=0; c<4; c++)
@@ -506,12 +504,14 @@ static void init_gfx (GFX_E gfx)
   else
   if (gfx == GFX_CPC)
   {
+#if 0    
     // not used
     const uint8_t menu_pal[] =
     {
       // yellow, blue, white
       0, 24, 2, 26
     };
+#endif
 
     const uint8_t room_pal[][4] =
     {    
