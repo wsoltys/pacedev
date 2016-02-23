@@ -82,7 +82,7 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr,
     
     for (b=0; b<8; b++)
     {
-      putpixel (scrn_buf, x+b, 191-y+l, (d&(1<<7)?(attr&7):0));
+      putpixel (scrn_buf, x+b, 191-y+l, (d&(1<<7)?attr:0));
       d <<= 1;
     }
   }  
@@ -122,18 +122,15 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
     
   //DBGPRINTF("(%d,%d)\n", p_obj->x, p_obj->y);
 
-  // this is needed to create panel font
-  //if (type != MENU_STATIC && type != PANEL_STATIC)
-  //  return;
-
   // references p_obj
   psprite = flip_sprite (p_obj);
 
   uint8_t w = *(psprite++) & 0x3f;
   uint8_t h = *(psprite++);
+  uint8_t f;
 
   if (gfx == GFX_CPC)
-    psprite++;
+    f = *(psprite++);
     
   unsigned x, y, b;
   
@@ -166,7 +163,9 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
           unsigned c = ((d&0x80)>>6)|((d&0x08)>>3);
           if (c != 0)
           {
-            if (c == 3)
+            if (f == 1)
+              c += 2;
+            else if (c == 3)
               c = 0;
             putpixel (scrn_buf, p_obj->pixel_x+x*4+b, 191-(p_obj->pixel_y+y), 
                       8+(attr&3)*4+c);
@@ -210,7 +209,7 @@ void osd_display_panel (uint8_t attr)
 
 void osd_debug_hook (void *context)
 {
-#if 0
+#if 1
   static unsigned count = 0;
   
   unsigned state = (unsigned)context;
@@ -218,29 +217,35 @@ void osd_debug_hook (void *context)
   unsigned c, t, l, b;
   unsigned x, y;
 
+  return;
+  
   switch (state)
   {
-#if 0
+#if 1
     case 0 :
 	    clear_bitmap (scrn_buf);
 	    return;
       break;
 
     case 1 :
-      mask_colour = 2;
+      //mask_colour = 12;
       return;
       break;
       
     case 2 :
-      mask_colour = 0;
+      //mask_colour = 0;
       // attempt to mark out the panel data
       //for (x=0; x<256; x++)
       //  putpixel (scrn_buf, x, 128, 2);
       osd_update_screen ();
+#if 0      
       line (screen, 160, 191, 160, 187, 2);
       floodfill (screen, 240, 180, 2);      
       floodfill (screen, 180, 180, 2);      
       floodfill (screen, 210, 190, 2);      
+#endif      
+      while (!key[KEY_ESC]);
+      while (key[KEY_ESC]);
       // now extract data for panel font
       FILE *fpPanel = fopen ("panel_font.c", "wt");
       fprintf (fpPanel, "uint8_t panel_font[][8] = \n{\n");
@@ -256,7 +261,7 @@ void osd_debug_hook (void *context)
           for (b=0; b<8; b++)
           {
             data = getpixel (screen, x+b, 128+y+l);
-            fprintf (fpPanel, "0x%02X, ", data);
+            fprintf (fpPanel, "0x%02X, ", data&3);
           }
           fprintf (fpPanel, "},\n");
         }
@@ -293,7 +298,6 @@ void osd_debug_hook (void *context)
       fprintf (fpBorder, "};\n");
       fclose (fpBorder);
       break;
-#endif      
     case 20 :
       {
         // now extract data for title font
@@ -321,6 +325,7 @@ void osd_debug_hook (void *context)
         fclose (fpTitle);
       }
       break;
+#endif      
 
     default :
       return;

@@ -184,8 +184,8 @@ void do_fix (void)
         uint8_t byte = 0;
         
         // all fonts are colour 3 to match sprite palettes
-        byte |= (data & (1<<0) ? 0x30 : 0);
-        byte |= (data & (1<<1) ? 0x03 : 0);
+        byte |= (data & (1<<0) ? 0x10 : 0);
+        byte |= (data & (1<<1) ? 0x01 : 0);
             
         fwrite (&byte, sizeof(uint8_t), 1, fp);
       }
@@ -223,9 +223,9 @@ void do_fix (void)
           data = (data >> shift[col]) & 0x03;
           uint8_t byte = 0;
           
-          // all fonts are colour 3 to match sprite palettes
-          byte |= (data & (1<<0) ? 0x30 : 0);
-          byte |= (data & (1<<1) ? 0x03 : 0);
+          // all fonts are colour 1
+          byte |= (data & (1<<0) ? 0x10 : 0);
+          byte |= (data & (1<<1) ? 0x01 : 0);
               
           fwrite (&byte, sizeof(uint8_t), 1, fp);
         }
@@ -242,14 +242,21 @@ void do_fix (void)
         uint8_t i = offset[col];
         for (unsigned l=0; l<8; l++)
         {
+          //static uint8_t lu[] = { 0, 1, 2, 3 };
+          // color 2 is the 'lives' graphic printed on CPC
+          // - make it transparent and use the sprite
+          static uint8_t lu[] = { 0, 1, 0, 3 };
+          
           uint8_t byte = 0;
            
           uint8_t data = pfont[l*8+i];
-          if (data == 15) byte |= 0x03;
-          else if (data == 2) byte |= 0x01;
+          //if (data == 15) byte |= 0x03;
+          //else if (data == 2) byte |= 0x01;
+          byte = lu[(data & 3)];
           data = pfont[l*8+i+1];
-          if (data == 15) byte |= 0x30;
-          else if (data == 2) byte |= 0x10;
+          //if (data == 15) byte |= 0x30;
+          //else if (data == 2) byte |= 0x10;
+          byte |= lu[(data & 3)] << 4;
               
           fwrite (&byte, sizeof(uint8_t), 1, fp);
         }
@@ -462,9 +469,9 @@ void do_sprites (void)
                 p += c*2*2 + 2-(q&2);
               for (unsigned l=0; l<8; l++)
               {
-                // bitplane0 = mask
-                // bitplane1 = colour
-                // gives 4 colours but #2=#3
+                // bitplane0 = colour
+                // bitplane1 = mask
+                // gives 4 colours but #1=#3 (mask)
   
                 if (c*2+1-((q&2)/2) >= w ||
                     r*16+(q&1)*8+l >= h)
@@ -478,8 +485,8 @@ void do_sprites (void)
                     m = REV(m);
                     d = REV(d);
                   }
-                  fwrite (&m, sizeof(uint8_t), 1, c1);
                   fwrite (&d, sizeof(uint8_t), 1, c1);
+                  fwrite (&m, sizeof(uint8_t), 1, c1);
 
                   if (vflip)
                     p += w*2;
@@ -597,7 +604,7 @@ void do_sprites (void)
                   }
                   
                   // we want to move colour 3 up to 15
-                  uint8_t col3 = b1 & b0;
+                  uint8_t col3 = 0; b1 & b0;
                   
                   fwrite (&b0, sizeof(uint8_t), 1, c1);
                   fwrite (&b1, sizeof(uint8_t), 1, c1);

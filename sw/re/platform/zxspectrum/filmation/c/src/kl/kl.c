@@ -1976,7 +1976,7 @@ void print_lives_gfx (void)
 #ifdef __HAS_HWSPRITES__
   p_obj->hw_sprite = HW_SPRITE(MAX_OBJS);
 #endif  
-  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : curr_room_attrib), p_obj);
+  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)), p_obj);
 }
 
 // $BCA3
@@ -2701,19 +2701,23 @@ void display_sun_moon_frame (POBJ32 p_obj)
 #ifdef __HAS_HWSPRITES__
   p_obj->hw_sprite = HW_SPRITE(MAX_OBJS+1);
 #endif  
-  print_sprite ((p_obj->graphic_no & 1 ? BRIGHT(ATTR_WHITE) : BRIGHT(ATTR_YELLOW)),
-                p_obj);
-  
+  if (gfx == GFX_ZX)
+    print_sprite ((p_obj->graphic_no & 1 ? BRIGHT(ATTR_WHITE) : BRIGHT(ATTR_YELLOW)),
+                  p_obj);
+  else
+    print_sprite (ROOM_ATTR(curr_room_attrib), p_obj);
+
 #ifndef __HAS_HWSPRITES__
   p_frm->flags7 = 0;
   p_frm->graphic_no = 0x5a;
   p_frm->pixel_x = (gfx == GFX_ZX ? 184 : 176);
   p_frm->pixel_y = 0;
-  print_sprite (BRIGHT(ATTR_RED), p_frm);
+  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_RED) : ROOM_ATTR(curr_room_attrib)), p_frm);
   p_frm->pixel_x = 208;
   p_frm->graphic_no = 0xba;
-  print_sprite (BRIGHT(ATTR_RED), p_frm);
-  blit_to_screen ((gfx == GFX_ZX ? 184 : 176), 0, 6, 31);
+  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_RED) : ROOM_ATTR(curr_room_attrib)), p_frm);
+  // if CPC==176, wipes scroll
+  blit_to_screen ((gfx == GFX_ZX ? 184 : 184), 0, 6, 31);
 #endif  
   return;
 }
@@ -4267,10 +4271,11 @@ void display_panel (void)
   {
     p = cpc_display_scroll (p, 16, (uint8_t)-8);
     p = cpc_display_scroll (p, 16, 8);
+    // this is the lives icon
     p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
   }
 #else
-  osd_display_panel (ROOM_ATTR(curr_room_attrib));
+  osd_display_panel (gfx == GFX_ZX ? curr_room_attrib : ROOM_ATTR(curr_room_attrib));
 #endif
 }
 

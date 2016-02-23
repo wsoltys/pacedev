@@ -119,9 +119,10 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr,
   
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
 
-  attr &= 7;
   if (IS_ROOM_ATTR(attr))
-    attr += 8;
+    attr = 8+4+(attr&3);
+  else    
+    attr &= 7;
 
   *vram = 0x7000+((FIX_XOFF+x/8)*32)+(FIX_YOFF+(191-y)/8);
   *(vram+2) = 32;
@@ -172,6 +173,8 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   }
   #endif
 
+  uint8_t *psprite = flip_sprite (p_obj);
+
   n = sprite_bank + (unsigned)(p_obj->graphic_no)*4*16;
   if (p_obj->flags7 & (1<<7))
     n += 2*16;
@@ -179,7 +182,10 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
     n += 1*16;
 
   // setup sprite
-  attr &= 7;
+  if (gfx == GFX_ZX)
+    attr &= 7;
+  else
+    attr &= 3;
   
   for (c=0; c<sw; c++)
     for (t=0; t<sh; t++)
@@ -245,17 +251,24 @@ void osd_display_panel (uint8_t attr)
   unsigned c;
   uint8_t a;
 
-  attr &= 7;
   if (IS_ROOM_ATTR(attr))
-    attr += 8;
-  
+    attr = 8+(attr&3);
+  else    
+    attr &= 7;
+
+  wait_vbl ();
+    
   // show the scrolls and the sun/moon frame
   *(vram+2) = 32;
   for (c=0; c<256; c++)
   {
-    // the sun/moon frame is RED
-    // - I don't understand (c/32)>3 but it works...
-    a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
+#if 1
+    if (gfx == GFX_ZX)
+      // the sun/moon frame is RED
+      a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
+    else if (gfx == GFX_CPC)
+      a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? attr : 4+attr);
+#endif
     if ((c%32) == 0)
 	    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
     *(vram+1) = 0x0500 | (a<<12) | c;
@@ -428,14 +441,14 @@ static void init_gfx (GFX_E gfx)
   // *all* graphics modes
   // - map original spectrum palette (bright only)
   //   to palettes 0-7
-  // - 0=transparent, 1=mask (black), 2,3=same colour
+  // - 0=transparent, 1,3=colour, 2=black
   // - for menu etc
 	for (p=0; p<8; p++)
 		for (c=0; c<4; c++)
 		{
 	    uint8_t r, g, b;
 	
-	    if (c < 2)
+	    if (c != 1)
         r = g = b = 0;
       else
         make_zx_colour(8+p, &r, &g, &b);
@@ -453,6 +466,18 @@ static void init_gfx (GFX_E gfx)
     // - for curr_room_attrib
 	  setpalette(8, 8, (const PPALETTE)&pal);
     // set palette banks for SPRITE layer
+  	for (p=0; p<8; p++)
+  		for (c=0; c<4; c++)
+  		{
+  	    uint8_t r, g, b;
+  	
+  	    if (c == 0 || c == 2)
+          r = g = b = 0;
+        else
+          make_zx_colour(8+p, &r, &g, &b);
+        
+  			pal[p].color[c] = make_ng_colour (r, g, b);
+  		}
 	  setpalette(16, 8, (const PPALETTE)&pal);
 	}
   else
@@ -483,15 +508,21 @@ static void init_gfx (GFX_E gfx)
 	    for (c=0; c<4; c++)
 	    {
         uint8_t r, g, b;
-        
-        make_cpc_colour(room_pal[p&3][c], &r, &g, &b);
+        uint8_t i = c;
+
+        if (c == 3)
+          i = 0;
+        else if (p > 3)
+          i = (c == 1 ? 3 : i);
+          
+        make_cpc_colour(room_pal[p&3][i], &r, &g, &b);
     		pal[p].color[c] = make_ng_colour (r, g, b);
 	    }
-	    // this will be colour3 on the sprites
-	    pal[p].color[15] = 0;
 	  }
     // 2nd set of FIX layer
     // - for curr_room_attrib
+    // - 1st 4: black, col1, col2, black
+    // - 2nd 4: black, col3, col2, black
 	  setpalette(8, 8, (const PPALETTE)&pal);
     // set palette banks for SPRITE layer
 	  setpalette(16, 8, (const PPALETTE)&pal);

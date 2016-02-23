@@ -6,8 +6,18 @@
 #PLATFORM = amigaos
 #PLATFORM = genesis
 
+#TARGET = kl
+
 ifeq (,$(PLATFORM))
 	PLATFORM = allegro
+endif
+
+ifeq (allegro,$(PLATFORM))
+  ifeq (,$(TARGET))
+    TARGET = kl
+  endif
+else
+  TARGET = kl
 endif
 
 # compiler, linker and utilities
@@ -29,7 +39,6 @@ ECHO = @echo
 RM = rm
 MD = mkdir
 OBJC = objcopy
-TARGET = kl
 MAKEFILE = makefile
 
 # BUILDOPTS
@@ -172,11 +181,22 @@ KL_OBJS = \
 	$(OBJDIR)/kl_dat.o \
 	$(OBJDIR)/cpc_dat.o \
 	$(OBJDIR)/zx_dat.o
+
+KL2NG_OBJS = \
+	$(OBJDIR)/kl2ng.o	\
+	$(OBJDIR)/cpc_dat.o \
+	$(OBJDIR)/zx_dat.o
 	
 OSD_OBJS = \
 	$(OBJDIR)/main.o
 
-OBJS = $(PLATFORM_OBJS) $(KL_OBJS) $(OSD_OBJS)
+ifeq (kl,$(TARGET))
+  OBJS = $(PLATFORM_OBJS) $(KL_OBJS) $(OSD_OBJS)
+else
+  ifeq (kl2ng,$(TARGET))
+    OBJS = $(PLATFORM_OBJS) $(KL2NG_OBJS)
+  endif
+endif
 
 DEPS = $(OBJS:.o=.d)
 	
@@ -227,6 +247,9 @@ $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.c $(MAKEFILE)
 	$(CC) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
 $(OBJDIR)/%.o: src/osd/$(PLATFORM)/%.cpp
+	$(CPP) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
+
+$(OBJDIR)/%.o: %.cpp
 	$(CPP) $(CFLAGS) $(CDEFS) -Wa,-ahls=$*.lst -c $< -o $@
 
 %.o: %.c
