@@ -75,6 +75,7 @@ RAMMODE			.equ		0xFFDF
 ZEROPAGE				.equ			0x5c00
 codebase				.equ		  0x6010
 stack						.equ		  0x7fff
+coco_vram       .equ      0x0000
 
 ;.define HAS_SOUND
 .ifdef HAS_SOUND
@@ -102,10 +103,20 @@ VIDEOPAGE   .equ        0x30
 
 speccy_pal:
 ;       black, blue, red, magenta, green, cyan, yellow, grey/white
-.ifdef GFX_RGB
-        .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
-        .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
+.ifdef GFX_1BPP
+  .ifdef GFX_RGB
+      .db 0x00<<0, 0x07*9, 0, 0, 0, 0, 0, 0
+      .db 0, 0, 0, 0, 0, 0, 0, 0
+  .else
+      .db 0, 63, 0, 0, 0, 0, 0, 0
+      .db 0, 0, 0, 0, 0, 0, 0, 0
+  .endif
 .else
-        .db 0, 12, 7, 9, 3, 29, 4, 32
-        .db 0, 28, 23, 41, 17, 61, 51, 63
+  .ifdef GFX_RGB
+      .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
+      .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
+  .else
+      .db 0, 12, 7, 9, 3, 29, 4, 32
+      .db 0, 28, 23, 41, 17, 61, 51, 63
+  .endif
 .endif

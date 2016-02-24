@@ -11,6 +11,143 @@
 
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
+        .org    codebase-#0x800
+
+seed_1:                         .ds 1
+                                .ds 1
+seed_2:                         .ds 2
+; bit   3 : directional
+; bit 2-1 : 00=keybd, 01=kempston, 10=cursor, 11=i/f-ii
+user_input_method:              .ds 1
+seed_3:                         .ds 1
+tmp_input_method:               .ds 1
+                                .ds 1
+;
+; variables from here are zeroed each game
+;
+objs_wiped_cnt:                 .ds 1
+tmp_SP:                         .ds 2
+room_size_X:                    .ds 1
+room_size_Y:                    .ds 1
+curr_room_attrib:               .ds 1
+room_size_Z:                    .ds 1
+portcullis_moving:              .ds 1
+portcullis_move_cnt:            .ds 1
+transform_flag_graphic:         .ds 1
+not_1st_screen:                 .ds 1
+pickup_drop_pressed:            .ds 1
+objects_carried_changed:        .ds 1
+; b5=???
+; b4=pickup/drop
+; b3=jump
+; b2=forward
+; b1=right
+; b0=left
+user_input:                     .ds 1
+tmp_attrib:                     .ds 1
+render_status_info:             .ds 1
+suppress_border:                .ds 1
+days:                           .ds 1
+lives:                          .ds 1
+objects_put_in_cauldron:        .ds 1
+fire_seed:                      .ds 1
+ball_bounce_height:             .ds 1
+rendered_objs_cnt:              .ds 1
+is_spike_ball_dropping:         .ds 1
+disable_spike_ball_drop:        .ds 1
+tmp_dZ:                         .ds 1
+tmp_bouncing_ball_dZ:           .ds 1
+all_objs_in_cauldron:           .ds 1
+obj_dropping_into_cauldron:     .ds 1
+rising_blocks_z:                .ds 1
+num_scrns_visited:              .ds 1
+gfxbase_8x8:                    .ds 2
+percent_msw:                    .ds 1
+percent_lsw:                    .ds 1
+tmp_objects_to_draw:            .ds 2
+render_obj_1:                   .ds 2
+render_obj_2:                   .ds 2
+audio_played:                   .ds 1
+directional:                    .ds 1
+cant_drop:                      .ds 1
+                                .ds 4
+inventory:                      .ds 4
+objects_carried:                .ds 7
+unk_5BE3:                       .ds 1
+unk_5BE4:                       .ds 1
+                                .ds 2
+end_of_objects_carried:         .ds 1
+;
+; table of bits (flags) denoting room has been visited
+; - used only in ratings calculations
+;
+scrn_visited:                   .ds 32
+;
+; table of objects (40 max)
+; - 00,01 player sprites (00=bottom, 01=top)
+; - 02,03 special object sprites
+; - 04-39 background, then foreground
+;
+; +0 graphic_no.
+; +1 x (center)
+; +2 y (center)
+; +3 z (bottom)
+; +4 width (X radius)
+; +5 depth (Y radius)
+; +6 height
+; +7 flags
+;    - 7=vflip sprite
+;    - 6=hflip sprite
+;    - 5=wipe
+;    - 4=draw
+;    - 3=auto-adjust near arches (player only)
+;    - 2=moveable
+;    - 1=ignore in 3D calculations
+;    - 0=is near arch (player only)
+; +8 screen
+; +9 dX
+; +10 dY
+; +11 dZ
+; +12 counter and flags
+;     - 7-4=counter when entering screen
+;     - 3=jumping
+;     - 2=Z out-of-bounds
+;     - 1=Y out-of-bounds
+;     - 0=X out-of-bounds
+; +13 per-object info/flags
+;     - direction and counters for looking, turning
+;     - 7=deadly if object hits player
+;     - 6=dead
+;     - 5=deadly if player hits object
+;     - 4=(not used)
+;     - 3=triggered (dropping, collapsing blocks)
+;     - 2=up (bouncing ball), dropping (spiked ball)
+;     - 1=north (NS fire)
+;     - 0=east (WE fire, EW guard), just dropped (spec objs)
+; +14 d_x_adj
+; +15 d_y_adj
+; +16-17 ptr object table entry or tmp player graphic_no
+; +18 pixel X adjustment
+; +19 pixel Y adjustment
+; +20-23 unused
+; +24 sprite data width (bytes)
+; +25 sprite data height (lines)
+; +26 pixel X
+; +27 pixel Y
+; +28 old sprite data width (bytes)
+; +29 old sprite data height (lines)
+; +30 old pixel X
+; +31 old pixel Y
+;
+graphic_objs_tbl:               .ds 32
+                                .ds 32
+special_objs_here:              .ds 32
+byte_5C68:                      .ds 32
+other_objs_here:                .ds 32
+                                .ds 1120
+; end of 'SCRATCH'
+        
+        
 				.org		codebase
 start_coco:
 				orcc		#0x50										; disable interrupts
@@ -120,32 +257,47 @@ inipal:
 				tfr			a,dp
 
 start:
-        bsr     clr_mem
+        ldx     #seed_1
+        ldy     #0x20                   ; *** FIXME
+        lda     0x5c78                  ; random memory location
+        pshs    a
+        lbsr    clr_mem
+        puls    a
+        sta     seed_1
         bra     main
         
 start_menu:        
-        bsr     clr_mem
+        lbsr    clr_mem
         
 main:
-        bsr     build_lookup_tbls
-        bsr     clear_scrn
+        lbsr    build_lookup_tbls
+        clra
+        sta     not_1st_screen
+        sta     flags12_1
+        lda     #5
+        sta     lives
+        ldx     seed_1
+        lda     seed_2
+        adda    ,x
+        sta     seed_1
+        lbsr    clear_scrn
         bsr     do_menu_selection
         bsr     play_audio
         bsr     shuffle_objects_required
-        bsr     init_start_location
-        bsr     init_sun
-        bsr     init_special_objects
+        lbsr    init_start_location
+        lbsr    init_sun
+        lbsr    init_special_objects
         
 player_dies:
-        bsr     lose_life
+        lbsr    lose_life
         
 game_loop:                
-        bsr     build_screen_objects
+        lbsr    build_screen_objects
         
 onscreen_loop:
 
 update_sprite_loop:
-        bsr     save_2d_info
+        lbsr    save_2d_info
 
 jump_to_upd_object:
 
@@ -196,8 +348,8 @@ upd_131_to_133:
         rts
 
 dec_dZ_wipe_and_draw:
-        bsr     dec_dZ_and_update_XYZ
-        bra     set_wipe_and_draw_flags
+        lbsr    dec_dZ_and_update_XYZ
+        lbra    set_wipe_and_draw_flags
 
 ; ball (bouncing around)
 ; - bounces towards wulf
@@ -242,7 +394,7 @@ upd_63:
 
 spiked_ball_drop:
 draw_spiked_ball:
-        bra     set_wipe_and_draw_flags
+        lbra    set_wipe_and_draw_flags
 
 ; spikes
 upd_23:
@@ -257,7 +409,7 @@ upd_176_177:
 
 set_deadly_wipe_and_draw_flags:
         bsr     set_both_deadly_flags
-        bra     set_wipe_and_draw_flags
+        lbra    set_wipe_and_draw_flags
 
 set_both_deadly_flags:
         rts
@@ -342,7 +494,7 @@ print_days:
         rts
                 
 print_lives_gfx:
-        bra     fill_DE
+        lbra    fill_DE
         
 print_lives:
         bra     print_BCD_number
@@ -378,7 +530,7 @@ toggle_selected:
 
 display_menu:
 display_text_list:
-        bra     update_screen
+        lbra    update_screen
         
 multiple_print_sprite:
         rts
@@ -443,7 +595,7 @@ add_obj_to_cauldron:
         bra     upd_111
         
 ret_next_obj_required:
-        bra     add_HL_A
+        lbra    add_HL_A
         
 objects_required:
 
@@ -473,14 +625,14 @@ rand_legs_sprite:
 print_sun_moon:
 display_sun_moon_frame:
 display_frame:               
-        bra     blit_to_screen
+        lbra    blit_to_screen
                 
 toggle_day_night:
 inc_days:
         bra     display_frame
                 
 blit_2x8:
-        bra     blit_to_screen
+        lbra    blit_to_screen
 
 init_sun:
         rts
@@ -509,16 +661,14 @@ upd_128_to_130:
         bra     jp_set_pixel_adj
 
 adj_m4_m12:
-        bra     jp_set_pixel_adj
+
+jp_set_pixel_adj:
+        bra     set_pixel_adj
 
 adj_m6_m12:
         bra     jp_set_pixel_adj
 
 ; rock and block
-
-; =============== S U B R O U T I N E =======================================
-
-
 upd_6_7:
         bra     jp_set_pixel_adj
 
@@ -563,7 +713,7 @@ update_special_objs:
 
 ; ghost
 upd_80_to_83:
-        bra     set_deadly_wipe_and_draw_flags
+        lbra    set_deadly_wipe_and_draw_flags
         
 calc_ghost_sprite:
 set_ghost_hflip:
@@ -665,7 +815,7 @@ clear_dX_dY:
 
 calc_plyr_dXY:
 lookup_plyr_dXY:
-        bra     jump_to_tbl_entry
+        lbra    jump_to_tbl_entry
 
 get_sprite_dir:
         rts
@@ -696,7 +846,7 @@ screen_move_tbl:
 screen_west:
 screen_e_w:
 exit_screen:        
-        bra     game_loop
+        lbra    game_loop
 
 screen_east:
         bra     screen_e_w
@@ -743,7 +893,206 @@ calc_2d_info:
 set_draw_objs_overlapped:
         rts
 
+; player (human top half)
+upd_32_to_47:
+        bsr     adj_m8_m12
+        bra     upd_player_top
 
-                                
+; player (wulf top half)
+upd_64_to_79:
+        bsr     adj_m12_m12
+
+; copies most information from bottom half object
+; handles randomly looking around
+upd_player_top:
+set_top_sprite:
+        rts
+        
+save_2d_info:
+        rts
+        
+list_objects_to_draw:
+        rts
+
+objects_to_draw:
+
+calc_display_order_and_render:
+process_remaining_objs:
+        lbra    jump_to_tbl_entry
+
+off_CF69:
+
+continue_1:
+continue_2:
+d_3467121516:
+        bra     render_obj
+        
+objs_coincide:
+render_obj_no1:
+render_obj:
+render_done:
+        rts
+
+render_list:
+
+check_user_input:
+keyboard:
+finished_input:
+        rts
+        
+lose_life:
+        rts                
+
+plyr_spr_1_scratchpad:
+start_loc_1:
+flags12_1:
+byte_D171:
+plyr_spr_2_scratchpad:
+start_loc_2:
+byte_D191:
+plyr_spr_init_data:
+
+init_start_location:
+        rts
+
+start_locations:
+
+build_screen_objects:
+        rts
+
+flag_room_visited:
+        rts
+
+transfer_sprite:
+        rts
+
+transfer_sprite_and_print:
+        rts
+
+display_panel:
+        bra     transfer_sprite_and_print
+
+panel_data:
+
+print_border:
+        lbra    multiple_print_sprite
+                
+border_data:
+
+colour_panel:
+        bra     fill_window
+
+colour_sun_moon:
+        bra     fill_window
+
+adjust_plyr_xyz_for_room_size:
+        rts                                                        
+
+adjust_plyr_y:
+copy_spr_1_xy_2:
+        rts
+        
+adjust_plyr_x:
+        bra     copy_spr_1_xy_2
+        
+adjust_plyr_Z_for_arch:
+        rts
+
+get_ptr_object:
+        rts
+
+retrieve_screen:
+find_screen:
+zero_end_of_graphic_objs_tbl:
+found_screen:
+next_bg_obj:
+next_bg_obj_sprite:
+find_fg_objs:
+next_fg_obj:                                                    
+next_fg_obj_in_count:
+next_fg_obj_sprite:
+        bra     zero_end_of_graphic_objs_tbl
+
+add_HL_A:
+        rts
+
+HL_equals_DE_x_A:
+        rts
+        
+zero_DE:
+fill_DE:
+        rts
+
+handle_pause:
+debounce_space_press:
+wait_for_space:
+debounce_space_release:
+        rts
+
+clr_mem:
+        clra
+clr_byte:
+        sta     ,x+
+        leay    -1,y
+        bne     clr_byte
+        rts
+
+clr_bitmap_memory:
+        ldx     #coco_vram
+        ldy     #0x1800
+        bra     clr_mem
+        
+clr_attribute_memory:
+        bra     clr_byte
+        
+fill_attr:
+        bra     clr_byte
+
+clear_scrn:
+;       bsr     clr_attribute_memory
+        bra     clr_bitmap_memory
+
+clear_scrn_buffer:        
+        bra     clr_mem
+                                                                                
+update_screen:
+        rts
+
+render_dynamic_objects:
+wipe_next_object:
+        rts
+
+blit_to_screen:
+        rts        
+
+build_lookup_tbls:
+        rts
+
+calc_pixel_XY:
+        rts
+
+flip_sprite:
+        rts
+
+calc_pixel_XY_and_render:
+        rts
+
+print_sprite:
+        bsr     flip_sprite                                
+        rts
+
+calc_screen_buffer_addr:
+        rts
+
+BC_to_attr_addr_in_DE:
+        rts
+
+calc_attrib_addr:
+        rts
+        
+vflip_sprite_data:
+vflip_sprite_line_pair:
+        rts
+                                                                        
 				.end		start_coco
-
+        
