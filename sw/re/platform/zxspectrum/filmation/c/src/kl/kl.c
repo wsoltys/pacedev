@@ -2,6 +2,19 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+//
+//  KNOWN BUGS:
+//
+// * Entering a room from a suspended arch in the previous room
+//   leaves you hanging in the air, unable to move
+//
+// * One of the rooms (yet to be documented) kills you as soon
+//   as you enter it, for the first time only
+//
+// * Randomly, dropping an item will cause it to disappear.
+//   Sometimes you can see sparkles as well
+//
+
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
 //#define UNTESTED        DBGPRINTF ("*** %s(): UNTESTED ***\n", __FUNCTION__)
 #define UNTESTED        
@@ -1971,6 +1984,11 @@ void game_over (void)
   game_complete_msg:
     clear_scrn_buffer ();
     clear_scrn ();
+
+    // added for C port
+    // - set default, ZX palette
+    osd_set_palette (0);
+
     suppress_border = 0;
     display_text_list ((uint8_t *)complete_colours, (uint8_t *)complete_xy, (char **)complete_text, 6);
     play_audio (game_complete_tune);
@@ -2094,6 +2112,9 @@ void do_menu_selection (void)
 {
   uint8_t key;
 
+  // set default, ZX palette
+  osd_set_palette (0);
+  
   clear_scrn_buffer ();
   display_menu ();
   flash_menu ();
@@ -2189,7 +2210,8 @@ void display_text_list (uint8_t *colours, uint8_t *xy, char *text_list[], uint8_
   
   for (i=0; i<n; i++, xy+=2)
   {
-    tmp_attrib = colours[i];
+    // mask off flashing bit, because we use it for ROOM_ATTR
+    tmp_attrib = colours[i] & 0x7f;
     print_text_single_colour (*xy, *(xy+1), text_list[i]);
   }
   if (suppress_border != 0)
@@ -4355,6 +4377,11 @@ void display_panel (void)
 // $D296
 void print_border (void)
 {
+  // note that you won't get the correct border colour
+  // on the CPC graphics because the sprite print routines
+  // only handle 4 colours
+  // - it'll be dark blue or red instead of yellow
+  
 #ifndef __HAS_HWSPRITES__  
   uint8_t *p = (uint8_t *)border_data;
   p = transfer_sprite_and_print (BRIGHT(ATTR_YELLOW), &sprite_scratchpad, p);

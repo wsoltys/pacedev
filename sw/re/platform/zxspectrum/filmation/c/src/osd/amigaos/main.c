@@ -132,12 +132,30 @@ void osd_set_palette (uint8_t attr)
     { 0, 6, 24, 26 }
   };
 
-  attr &= 3;
-  for (c=0; c<4; c++)
+  // nothing to do for ZX version
+  if (gfx == GFX_ZX)
+    return;
+    
+  if (attr == 0)
   {
-    uint8_t r, g, b;
-    make_cpc_colour (room_pal[attr][c], &r, &g, &b);
-    SetRGB4 (&(screen->ViewPort), c, r>>4, g>>4, b>>4);
+    // default ZX palette
+    for (c=0; c<8; c++)
+    {
+      uint8_t r, g, b;
+  
+      make_zx_colour (8+c, &r, &g, &b);
+      SetRGB4 (&(screen->ViewPort), c, r>>4, g>>4, b>>4);
+    }
+  }
+  else
+  {    
+    attr &= 3;
+    for (c=0; c<4; c++)
+    {
+      uint8_t r, g, b;
+      make_cpc_colour (room_pal[attr][c], &r, &g, &b);
+      SetRGB4 (&(screen->ViewPort), c, r>>4, g>>4, b>>4);
+    }
   }
 }
 
@@ -424,7 +442,7 @@ int main (int argc, char *argv[])
     BltClear (myBitMaps[BLANK]->Planes[i], PL_SIZE, 1);
   }
   
-  // palette
+  // palette - ZX colours which don't change
   struct ColorSpec myColours[8+1];
   for (c=0; c<8; c++)
   {
