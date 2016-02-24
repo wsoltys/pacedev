@@ -21,29 +21,36 @@ ECHO = @echo
 RM = rm
 MD = mkdir
 OBJC = objcopy
-LOADER = $(TARGET)_ldr
+LDR = $(TARGET)_ldr
+EXE = $(TARGET)_6809
 MAKEFILE = makefile
 
 ifeq ($(PLATFORM),coco3)
-	FQLN = $(LOADER).bin
+	FQLN = $(LDR).bin
+  FQEN = $(EXE).bin
 endif
 
 ASFLAGS = -l -o -s
 LDFLAGS = -t
 
-OBJS = $(LOADER).rel
+LDR_OBJS = $(LDR).rel
+EXE_OBJS = $(EXE).rel
 	
-all: $(FQLN)
-.PHONY: all
+all: $(FQLN) $(FQEN)
+	file2dsk kl_6809.dsk $(FQLN) $(FQEN)
 
 %.rel: %.asm $(MAKEFILE)
 	$(AS) $(ASFLAGS) $<
 
 # COCO3 BIN format file
-%.bin: $(OBJS)
+$(FQLN): $(LDR_OBJS)
 	$(ECHO) Linking $@...
 	$(LD) $(LDFLAGS) $<
-	file2dsk kl_6809.dsk $(LOADER).bin
+
+# COCO3 BIN format file
+$(FQEN): $(EXE_OBJS)
+	$(ECHO) Linking $@...
+	$(LD) $(LDFLAGS) $<
 
 %.bin: %.ihx
 	$(HEX2BIN) $<
@@ -55,3 +62,4 @@ clean:
 	$(RM) -f *.bin
 	$(ECHO) Deleting executables...
 	$(RM) -f $(FQLN)
+	$(RM) -f $(FQEN)
