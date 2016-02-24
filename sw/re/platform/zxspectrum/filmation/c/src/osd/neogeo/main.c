@@ -114,6 +114,10 @@ int osd_readkey (void)
 	return (0);
 }
 
+void osd_set_palette (uint8_t attr)
+{
+  // nothing to do here
+}
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   // only ever called to print numbers

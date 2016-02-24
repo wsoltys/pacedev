@@ -65,6 +65,12 @@ int osd_keypressed (void)
   return (keypressed ());
 }
 
+void osd_set_palette (uint8_t attr)
+{
+  // could support CPC here
+  fprintf (stderr, "%s(%d)\n", __FUNCTION__, attr);
+}
+
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   unsigned l, b;

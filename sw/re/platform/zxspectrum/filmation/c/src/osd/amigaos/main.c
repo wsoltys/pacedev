@@ -45,7 +45,15 @@ static struct IOStdReq *KeyIO;
 static struct MsgPort *KeyMP;
 static uint8_t *keyMatrix;
   
-const char __ver[40] = "$VER: Knight Lore v0.9a4 (16.02.2016)";
+static void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b);
+static void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b);
+static void make_amiga_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b, struct ColorSpec *cs);
+
+const char __ver[] = "\0$VER: KnightLore 09.5 (24.02.2016)"
+#ifdef __MONO__
+" (mono)"
+#endif
+;
 
 void osd_delay (unsigned ms)
 {
@@ -108,10 +116,38 @@ int osd_readkey (void)
 	return (0);
 }
 
+void osd_set_palette (uint8_t attr)
+{
+  unsigned c;
+  
+  static const uint8_t room_pal[][4] =
+  {    
+    // orange, yellow, white
+    { 0, 15, 24, 26 },
+    // green, cyan, magenta
+    { 0, 18, 20, 8 },
+    // blue, cyan, yellow
+    { 0, 2, 20, 24 },
+    // red, yellow, white
+    { 0, 6, 24, 26 }
+  };
+
+  attr &= 3;
+  for (c=0; c<4; c++)
+  {
+    uint8_t r, g, b;
+    make_cpc_colour (room_pal[attr][c], &r, &g, &b);
+    SetRGB4 (&(screen->ViewPort), c, r>>4, g>>4, b>>4);
+  }
+}
+
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   unsigned n;
 
+  if (gfx == GFX_CPC && IS_ROOM_ATTR(attr))
+    attr = 3;
+    
   for (n=0; n<NPLANES; n++)
   {
     uint8_t *p = (uint8_t *)myBitMaps[VIDBUF]->Planes[n];
@@ -121,13 +157,14 @@ uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr,
     for (l=0; l<8; l++)
     {
       uint8_t d;
-      
+
       #ifdef __COLOUR__
         if ((attr & (1<<n)) == 0)
           *p = 0;
         else
       #endif
           *p = gfxbase_8x8[code*8+l];
+        
       p += BM_WIDTH_BYTES;    
     }  
   }
@@ -197,39 +234,83 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
 
   uint8_t w = *(psprite++) & 0x3f;
   uint8_t h = *(psprite++);
+  uint8_t f;
+  
+  if (gfx == GFX_CPC)
+  {
+    w /= 2;
+    f = *(psprite++);
+  }
 
   unsigned x, y, b;
-  
+
   for (y=0; y<h; y++)
   {
     for (x=0; x<w; x++)
     {
-      uint8_t m = *(psprite++);
-      uint8_t d = *(psprite++);
-
-      for (n=0; n<NPLANES; n++)
-      {      
-        // handle bit-shift
-        uint8_t v = *p[n];
-        #ifdef ENABLE_MASK
-          v &= ~(m>>o);
-        #endif
-        #ifdef __COLOUR__
-          if ((attr & (1<<n)) != 0)
-        #endif
-            v |= (d>>o);
-        *(p[n]++) = v;
-        if (o != 0)
-        {
-          v = *p[n];
+      if (gfx == GFX_ZX)
+      {  
+        uint8_t m = *(psprite++);
+        uint8_t d = *(psprite++);
+  
+        for (n=0; n<NPLANES; n++)
+        {      
+          // handle bit-shift
+          uint8_t v = *p[n];
           #ifdef ENABLE_MASK
-            v &= ~(m<<(8-o));
+            v &= ~(m>>o);
           #endif
           #ifdef __COLOUR__
             if ((attr & (1<<n)) != 0)
           #endif
-              v |= (d<<(8-o));
-          *p[n] = v;
+              v |= (d>>o);
+          *(p[n]++) = v;
+          if (o != 0)
+          {
+            v = *p[n];
+            #ifdef ENABLE_MASK
+              v &= ~(m<<(8-o));
+            #endif
+            #ifdef __COLOUR__
+              if ((attr & (1<<n)) != 0)
+            #endif
+                v |= (d<<(8-o));
+            *p[n] = v;
+          }
+        }
+      }
+      else
+      if (gfx == GFX_CPC)
+      {
+        uint8_t d[2], t, m, c1, c3, v;
+
+        d[0] = *(psprite++);
+        t = *(psprite++);
+        d[1] = (d[0]&0xf0) | (t>>4);
+        d[0] = (d[0]<<4) | (t&0x0f);
+        m = d[1]|d[0];
+        c1 = d[0]&~d[1];
+        c3 = d[1]&d[0];
+        if (f == 0)
+        {
+          d[1] &= ~(c3);
+          d[0] &= ~(c3);
+        }
+        else
+          d[1] |= c1;
+        for (n=0; n<2; n++)
+        {
+          v = *p[n];
+          v &= ~(m>>o);
+          v |= (d[n]>>o);
+          *(p[n]++) = v;
+          if (o != 0)
+          {
+            v = *p[n];
+            v &= ~(m<<(8-o));
+            v |= (d[n]<<(8-o));
+            *p[n] = v;
+          }
         }
       }
     }
@@ -242,10 +323,36 @@ void osd_debug_hook (void *context)
 {
 }
 
+void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  *r = (c&(1<<1) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *g = (c&(1<<2) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *b = (c&(1<<0) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+}
+
+void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  uint8_t lu[] = { 0, 128, 255 };
+  
+  *r = lu[(c/3) % 3];
+  *g = lu[(c/9) % 3];
+  *b = lu[c % 3];
+}
+
+void make_amiga_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b, struct ColorSpec *cs)
+{
+  cs->ColorIndex = c;
+  cs->Red = *r >> 2;
+  cs->Green = *g >> 2;
+  cs->Blue = *b >> 2;
+}
+
 void usage (char *argv0)
 {
   printf ("usage: kl {-cpc|-zx}\n");
+#ifndef __MONO__  
   printf ("  -cpc    use Amstrad CPC graphics\n");
+#endif  
   printf ("  -zx     use ZX Spectrum graphics\n");
   printf ("  -v      print version information\n");
   exit (0);
@@ -254,7 +361,7 @@ void usage (char *argv0)
 int main (int argc, char *argv[])
 {
   GFX_E gfx = GFX_ZX;
-  unsigned i;
+  unsigned c, i;
 
   while (--argc)
   {
@@ -262,15 +369,18 @@ int main (int argc, char *argv[])
     {
       case '-' :
       case '/' :
+      #ifndef __MONO__
         if (!stricmp (&argv[argc][1], "cpc"))
           gfx = GFX_CPC;
-        else if (!stricmp (&argv[argc][1], "zx"))
+        else
+      #endif
+        if (!stricmp (&argv[argc][1], "zx"))
           gfx = GFX_ZX;
         else
         switch (tolower(argv[argc][1]))
         {
           case 'v' :
-            printf ("%s\n", __ver);
+            printf ("%s\n", __ver+1);
             exit (0);
             break;
           default :
@@ -314,23 +424,22 @@ int main (int argc, char *argv[])
     BltClear (myBitMaps[BLANK]->Planes[i], PL_SIZE, 1);
   }
   
-  // now the screen
-  struct ColorSpec myColours[] = 
-  { 
-    {  0, 0x0000, 0x0000, 0x0000 },
-#ifdef __MONO__
-    {  1, 0x003F, 0x003F, 0x003F },
-#else    
-    {  1, 0x0000, 0x0000, 0x003F },
-    {  2, 0x003F, 0x0000, 0x0000 },
-    {  3, 0x003F, 0x0000, 0x003F },
-    {  4, 0x0000, 0x003F, 0x0000 },
-    {  5, 0x0000, 0x003F, 0x003F },
-    {  6, 0x003F, 0x003F, 0x0000 },
-    {  7, 0x003F, 0x003F, 0x003F },
-#endif    
-    { -1, 0x0000, 0x0000, 0x0000 },
-  };
+  // palette
+  struct ColorSpec myColours[8+1];
+  for (c=0; c<8; c++)
+  {
+    uint8_t r, g, b;
+
+    #ifdef __MONO__
+      make_zx_colour (c==1 ? 15 : 0, &r, &g, &b);
+    #else    
+      make_zx_colour (8+c, &r, &g, &b);
+    #endif
+    make_amiga_colour (c, &r, &g, &b, &myColours[c]);
+  }
+  myColours[c].ColorIndex = -1;
+
+  // now the screen  
   screen = OpenScreenTags (NULL, 
               SA_Left, 0,
               SA_Top, 0,

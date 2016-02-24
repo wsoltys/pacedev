@@ -701,6 +701,9 @@ game_loop:
   
   build_screen_objects ();
 
+  // added for C port
+  osd_set_palette (curr_room_attrib);
+
 onscreen_loop:
 
   fire_seed = seed_2;
@@ -4510,7 +4513,7 @@ found_screen:
   
   // get attribute, set BRIGHT  
   curr_room_attrib = (attr & 7) | 0x40;
-
+  
   room_size = (attr >> 3) & 0x1F;
   room_size_X = room_size_tbl[room_size].x;
   room_size_Y = room_size_tbl[room_size].y;
