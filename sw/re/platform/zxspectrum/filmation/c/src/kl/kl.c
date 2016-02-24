@@ -472,6 +472,10 @@ static void dump_hw_sprite_map (void)
   #endif
 }
 
+#define TO_WIPE     (1<<0)
+#define TO_RENDER   (1<<1)
+#define TO_REDRAW   (TO_WIPE|TO_RENDER)
+
 static void render_hw_sprites (void)
 {
   // this function is for systems with HW sprites (Neo Geo)
@@ -510,6 +514,18 @@ static void render_hw_sprites (void)
       // render it
       print_sprite (curr_room_attrib, &graphic_objs_tbl[obj_i]);
     }
+    
+    // allocate hardware sprite(s) for special objects
+    // that may get dropped
+    for (j=0; j<2; j++)
+      if (special_objs_here[j].hw_sprite == 0)
+      {
+        obj[HW_SPRITE(i)] = 2+j;
+        // set sprite number in object
+        special_objs_here[j].hw_sprite = HW_SPRITE(i);
+        i++;
+      }
+
     n_objs = i;
     internal.initial_render = 0;
     return;
@@ -521,12 +537,10 @@ static void render_hw_sprites (void)
     uint8_t obj_i = internal.objs_to_wipe[i];
     POBJ32 p_obj = &graphic_objs_tbl[obj_i];
     
-    dirty[p_obj->hw_sprite] = 1;
+    dirty[p_obj->hw_sprite] |= TO_WIPE;
     
     //textoutf (0, i, 7, 0, "%3d(%3d)=%3d", 
     //          obj_i, p_obj->graphic_no, p_obj->hw_sprite);
-    if (obj_i == 2)
-      wait = 1;
   }
   //textoutf (0, i, 7, 0, "             ");
 
@@ -537,12 +551,10 @@ static void render_hw_sprites (void)
     POBJ32 p_obj = &graphic_objs_tbl[obj_i];
     
     if (dirty[p_obj->hw_sprite])
-      dirty[p_obj->hw_sprite] = 2;
+      dirty[p_obj->hw_sprite] |= TO_RENDER;
 
     //textoutf (16, i, 7, 0, "%3d(%3d)=%3d", 
     //          obj_i, p_obj->graphic_no, p_obj->hw_sprite);
-    if (obj_i == 2)
-      wait += 2;
   }
   //textoutf (16, i, 7, 0, "             ");
 
@@ -554,21 +566,21 @@ static void render_hw_sprites (void)
       uint8_t obj_i = obj[HW_SPRITE(i)];
       POBJ32 p_obj = &graphic_objs_tbl[obj_i];
 
-      if (action == 1)
+      switch (action)
       {
-        textoutf (0, i, 7, 0, "%3d(%3d)=%3d", 
-                  obj_i, p_obj->graphic_no, p_obj->hw_sprite);
+        case TO_WIPE :
+          //textoutf (0, i, 7, 0, "%3d(%3d)=%3d", 
+          //          obj_i, p_obj->graphic_no, p_obj->hw_sprite);
+          osd_wipe_sprite (p_obj);
+          break;
+        case TO_RENDER :
+        case TO_REDRAW :
+        default :
+          print_sprite (curr_room_attrib, p_obj);
+          break;
       }
-      print_sprite (curr_room_attrib, p_obj);
     }
 
-  if (wait == 1 || wait == 3)
-  {
-    while (osd_keypressed ());
-    while (!osd_keypressed ());
-    while (osd_keypressed ());
-  }
-                                  
 #if 0
   DBGPRINTF ("to render:\n");
   for (i=0; i<internal.num_objs_to_render; i++)
@@ -577,7 +589,7 @@ static void render_hw_sprites (void)
                 graphic_objs_tbl[internal.objs_to_render[i]].hw_sprite);
   DBGPRINTF ("\n");
 
-  #endif
+#endif
 }
 #endif
 
@@ -2299,6 +2311,10 @@ void display_objects (void)
     p_obj->pixel_x = x;
     p_obj->pixel_y = 0;
     fill_window (p_obj->pixel_x, p_obj->pixel_y, 3, 24, 0);
+#ifdef __HAS_HWSPRITES__
+    p_obj->hw_sprite = HW_SPRITE(MAX_OBJS+2+i);
+    osd_wipe_sprite (p_obj);
+#endif    
 
     // debug only
     //objects_carried[i].graphic_no = 0x60+i;
@@ -2312,7 +2328,6 @@ void display_objects (void)
       print_sprite (object_attributes[p_obj->graphic_no&7], p_obj);
     }
     blit_to_screen (p_obj->pixel_x, p_obj->pixel_y, 3, 24);
-    // do attributes
   }
 }
 

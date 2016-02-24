@@ -73,6 +73,7 @@ void osd_update_screen (void);
 void osd_blit_to_screen (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines);
 void osd_print_sprite (uint8_t attr, POBJ32 p_obj);
 
+void osd_wipe_sprite (POBJ32 p_obj);
 void osd_print_border (void);
 void osd_display_panel (uint8_t attr);
 
