@@ -1978,16 +1978,16 @@ void game_over (void)
   
   // required for C implementation
   internal.game_over = 1;
+
+  // added for C port
+  // - set default, ZX palette
+  osd_set_palette (0);
   
   if (all_objs_in_cauldron != 0)
   {
   game_complete_msg:
     clear_scrn_buffer ();
     clear_scrn ();
-
-    // added for C port
-    // - set default, ZX palette
-    osd_set_palette (0);
 
     suppress_border = 0;
     display_text_list ((uint8_t *)complete_colours, (uint8_t *)complete_xy, (char **)complete_text, 6);
