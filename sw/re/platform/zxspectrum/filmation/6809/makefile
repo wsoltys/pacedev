@@ -22,7 +22,8 @@ RM = rm
 MD = mkdir
 OBJC = objcopy
 LDR = $(TARGET)_ldr
-EXE = $(TARGET)_6809
+#EXE = $(TARGET)_6809
+EXE = $(TARGET)
 MAKEFILE = makefile
 
 ifeq ($(PLATFORM),coco3)

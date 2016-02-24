@@ -201,6 +201,8 @@ inipal:
         cmpb    #192
         bne     1$
 
+.ifndef GFX_1BPP
+
 ; and now make it colour
 
         ldx     #aram
@@ -253,6 +255,8 @@ inipal:
         puls    b                       ; 192/8 lines
         decb
         bne     19$
+
+.endif
         
 loop:
         bra     loop
