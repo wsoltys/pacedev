@@ -596,14 +596,12 @@ print_text_std_font:
 print_text:
 loc_BE56:
 ;       bsr     calc_attrib_addr
-loc_BE5F:
-        lda     ,x+
-        bita    #(1<<7)
-        bne     loc_BE72
+8$:     lda     ,x+                     ; character
+        bita    #(1<<7)                 ; last one?
+        bne     9$                      ; yes, skip
         bsr     print_8x8
-        bra     loc_BE5F
-loc_BE72:
-        anda    #0x7f
+        bra     8$
+9$:     anda    #0x7f
         bsr     print_8x8
         rts
 
@@ -617,7 +615,7 @@ print_8x8:
         ldb     #8                      ; 8 lines to print
 1$:     lda     ,u+
         sta     ,y
-        leay    32,y                    ; next line down
+        leay    -32,y                   ; next line
         decb
         bne     1$
         puls    y                       ; addr
@@ -1176,14 +1174,21 @@ clear_scrn_buffer:
         bra     clr_mem
                                                                                 
 update_screen:
-        pshs    x,y
-        ldx     #vidbuf
+        pshs    b,x,y
+        ldx     #vidbuf+0x1800-32
         ldy     #coco_vram
-1$:     lda     ,x+
+        ldb     #192
+1$:     pshs    b
+        ldb     #32
+2$:     lda     ,x+
         sta     ,y+
-        cmpx    #vidbuf+0x1800
+        decb
+        bne     2$
+        leax    -64,x
+        puls    b
+        decb
         bne     1$
-        puls    x,y
+        puls    b,x,y
         rts
 
 render_dynamic_objects:
