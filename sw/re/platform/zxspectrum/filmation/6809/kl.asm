@@ -258,7 +258,7 @@ inipal:
 
 start:
         ldx     #seed_1
-        ldy     #0x20                   ; *** FIXME
+        ldy     #start_coco-#seed_1
         lda     0x5c78                  ; random memory location
         pshs    a
         lbsr    clr_mem
@@ -267,6 +267,8 @@ start:
         bra     main
         
 start_menu:        
+        ldx     #objs_wiped_cnt
+        ldy     #start_coco-#objs_wiped_cnt
         lbsr    clr_mem
         
 main:
@@ -422,11 +424,11 @@ ball_up:
         bra     loc_B892
 
 init_cauldron_bubbles:
-        bra     adj_m4_m12
+        lbra    adj_m4_m12
 
 ; even more sparkles (showing next object required)
 upd_160_163:
-        bra     set_wipe_and_draw_flags
+        lbra    set_wipe_and_draw_flags
 
 ; special objs when 1st being put into cauldron
 upd_168_to_175:
@@ -437,7 +439,7 @@ upd_164_to_167:
         rts
 
 upd_111:
-        bra     audio_B467_wipe_and_draw
+        lbra    audio_B467_wipe_and_draw
 
 move_towards_plyr:
 
@@ -449,11 +451,11 @@ save_graphic_no:
 
 ; cauldron (bottom)
 upd_141:
-        bra     upd_88_to_90
+        lbra    upd_88_to_90
 
 ; cauldron (top)
 upd_142: 
-        bra     set_pixel_adj
+        lbra    set_pixel_adj
 
 ; guard and wizard (top half)
 upd_30_31_158_159:
@@ -478,7 +480,7 @@ guard_S:
         bra     next_guard_dir
 
 game_over:
-        bra     start_menu
+        lbra    start_menu
 
 wait_for_key_release:
         rts
@@ -503,12 +505,25 @@ print_BCD_number:
         rts
         
 display_day:
-        bra     print_text
+        lbra    print_text
         
 day_txt:
 day_font:
 
 do_menu_selection:
+        clra
+        sta     suppress_border
+        ldx     #menu_colours
+        ldb     #8
+1$:     lda     ,x
+        anda    #0x7f
+        sta     ,x+
+        decb
+        bne     1$
+        lbsr    clear_scrn_buffer
+        lbsr    display_menu
+        bsr     flash_menu
+        
 menu_loop:
 check_for_start_game:
         bra     menu_loop        
@@ -516,7 +531,44 @@ check_for_start_game:
 flash_menu:
         rts
 
+menu_colours:   
+        .db 0x43, 0xC4, 0x44, 0x44, 0x44, 0x45, 0x47, 0x47
+menu_xy:
+        .db 88, 159, 48, 143, 48, 127, 48, 111, 48, 95, 48, 79
+        .db 48, 63, 80, 39
+menu_text:
+; "KNIGHT LORE"
+        .db 0x14, 0x17, 0x12, 0x10, 0x11, 0x1D, 0x26, 0x15, 0x18
+        .db 0x1B, 0x8E
+; "1 KEYBOARD"
+        .db 1, 0x26, 0x14, 0xE, 0x22, 0xB, 0x18, 0xA, 0x1B, 0x8D
+; "2 KEMPSTON JOYSTICK"
+        .db 2, 0x26, 0x14, 0xE, 0x16, 0x19, 0x1C, 0x1D, 0x18, 0x17
+        .db 0x26, 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
+; "3 CURSOR   JOYSTICK"
+        .db 3, 0x26, 0xC, 0x1E, 0x1B, 0x1C, 0x18, 0x1B, 0x26, 0x26
+        .db 0x26, 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
+; "4 INTERFACE II"
+        .db 4, 0x26, 0x12, 0x17, 0x1D, 0xE, 0x1B, 0xF, 0xA, 0xC
+        .db 0xE, 0x26, 0x12, 0x92
+; "5 DIRECTIONAL CONTROL"
+        .db 5, 0x26, 0xD, 0x12, 0x1B, 0xE, 0xC, 0x1D, 0x12, 0x18
+        .db 0x17, 0xA, 0x15, 0x26, 0xC, 0x18, 0x17, 0x1D, 0x1B
+        .db 0x18, 0x95
+; "0 START GAME"
+        .db 0, 0x26, 0x1C, 0x1D, 0xA, 0x1B, 0x1D, 0x26, 0x10, 0xA
+        .db 0x16, 0x8E
+; "(c) 1984 A.C.G."
+        .db 0x25, 0x26, 1, 9, 8, 4, 0x26, 0xA, 0x24, 0xC, 0x24
+        .db 0x10, 0xA4
+
 print_text_single_colour:
+        pshs    x
+        ldx     #font
+        stx     gfxbase_8x8
+        puls    x
+        pshs    x
+        bsr     calc_screen_buffer_addr
 print_text_std_font:
 print_text:
         bsr     print_8x8
@@ -529,8 +581,22 @@ toggle_selected:
         rts
 
 display_menu:
+;        ldx     #menu_colours
+        ldx     #menu_xy
+        ldy     #menu_text
+        ldb     #8
 display_text_list:
+
+        bsr     print_text_single_colour
+        decb
+        bne     display_text_list
+        lda     suppress_border
+        bne     1$
+        inca
+        sta     suppress_border
+        lbsr    print_border
         lbra    update_screen
+1$:     rts        
         
 multiple_print_sprite:
         rts
@@ -541,7 +607,7 @@ upd_120_to_126:
 
 ; last player appears sparkle
 upd_127:
-        bra     jump_to_upd_object
+        lbra    jump_to_upd_object
 
 init_death_sparkles:                                            ; twinkly transform
 
@@ -592,7 +658,7 @@ audio_B467_wipe_and_draw:
         
 centre_of_room:
 add_obj_to_cauldron:        
-        bra     upd_111
+        lbra    upd_111
         
 ret_next_obj_required:
         lbra    add_HL_A
@@ -643,7 +709,7 @@ init_obj_loop:
 
 ; block
 upd_62:
-        bra     dec_dZ_wipe_and_draw
+        lbra    dec_dZ_wipe_and_draw
 
 ; chest
 upd_85:
@@ -1052,7 +1118,9 @@ clear_scrn:
 ;       bsr     clr_attribute_memory
         bra     clr_bitmap_memory
 
-clear_scrn_buffer:        
+clear_scrn_buffer:
+        ldy     #0x1800
+        ldx     #vidbuf
         bra     clr_mem
                                                                                 
 update_screen:
@@ -1093,6 +1161,9 @@ calc_attrib_addr:
 vflip_sprite_data:
 vflip_sprite_line_pair:
         rts
-                                                                        
+
+vidbuf:
+        .ds     0x1800
+                                                                                
 				.end		start_coco
         
