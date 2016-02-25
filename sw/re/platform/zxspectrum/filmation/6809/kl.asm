@@ -168,7 +168,7 @@ other_objs_here:                .ds 32
         
 				.org		codebase
 				
-.include "kl_data.asm"				
+.include "kl_dat.asm"				
 				
 start_coco:
 				orcc		#0x50										; disable interrupts
