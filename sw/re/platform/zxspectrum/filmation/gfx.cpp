@@ -166,7 +166,7 @@ void dump_sna_hdr (PSNAHDR hdr)
 
 void knight_lore (void)
 {
-	FILE *fp, *fp2;
+	FILE *fp, *fp2, *fp3;
 	struct stat	fs;
 	int					fd;
 	
@@ -194,22 +194,29 @@ void knight_lore (void)
 
 #ifdef DO_C_DATA
   fp2 = fopen ("data.c", "wt");
+  fp3 = fopen ("data.asm", "wt");
   
   // font
   p = 0x6108;
   const char *font = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.© %";
   fprintf (fp2, "uint8_t kl_font[][8] = \n{\n" );
+  fprintf (fp3, "font:\n" );
   for (int c=0; c<40; c++)
   {
     fprintf (fp2, "  { ");
+    fprintf (fp3, "        .db ");
     for (int b=0; b<8; b++)
     {
       fprintf (fp2, "0x%02X, ", ram[p]);
+      fprintf (fp3, "0x%02X", ram[p]);
+      if (b<7) fprintf (fp3, ", ");
       p++;
     }
     fprintf (fp2, "},  // '%c'\n", font[c]);
+    fprintf (fp3, "  ; '%c'\n", font[c]);
   }
   fprintf (fp2, "};\n\n");  
+  fprintf (fp3, "\n");  
 
   // room size table
   p = 0x6248;
@@ -796,6 +803,7 @@ void knight_lore (void)
   fprintf (fp2, "};\n\n");
 
   fclose (fp2);
+  fclose (fp3);
 
   // dump title data to .ASM
   fp = fopen ("c/src/kl/kl.scr", "rb");

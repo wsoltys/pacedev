@@ -557,10 +557,19 @@ print_BCD_number:
         rts
         
 display_day:
+        ldu     #day_font
+        stu     gfxbase_8x8
+        ldx     #day_txt
+        ldd     #0xf70
         lbra    print_text
         
 day_txt:
+        .db 0, 0, 1, 2, 0x83
 day_font:
+        .db 6, 7, 6, 6, 6, 6, 6, 0xF
+        .db 0, 1, 0x82, 0xC6, 0x64, 0x6C, 0x6D, 0xC6
+        .db 0xC8, 0xC6, 0xE1, 0x60, 0x60, 0xE0, 0x64, 0x63
+        .db 0x60, 0x60, 0x60, 0xE0, 0x60, 0x40, 0xC0, 0x80
 
 do_menu_selection:
         clra
@@ -581,7 +590,7 @@ menu_loop:
         
 check_for_start_game:
 				ldb			#~(1<<0)								; 0-7
-				bsr     read_port
+				lbsr    read_port
 				bita		#(1<<4)									; <0>?
 				beq     1$                      ; no, skip
 				rts
@@ -634,6 +643,9 @@ print_text_single_colour:
 print_text_std_font:
 
 print_text:
+        lbsr    calc_screen_buffer_addr
+        tfr     u,y
+        lda     ,x+                     ; attribute
 loc_BE56:
 ;       bsr     calc_attrib_addr
 8$:     lda     ,x+                     ; character
@@ -1114,6 +1126,24 @@ init_start_location:
 start_locations:
 
 build_screen_objects:
+        tst     not_1st_screen
+        beq     1$
+        bsr     update_special_objs
+1$:     bsr     clear_scrn_buffer
+        bsr     retrieve_screen
+        bsr     find_special_objs_here
+        bsr     adjust_plyr_xyz_for_room_size
+        clra
+        sta     portcullis_moving
+        sta     portcullis_move_cnt
+        sta     ball_bounce_height
+        sta     is_spike_ball_dropping
+        lda     #1
+        sta     render_status_info
+        lda     graphic_objs_tbl+8      ; current screen
+        anda    #1
+        sta     disable_spike_ball_drop
+        bsr     flag_room_visited
         rts
 
 flag_room_visited:
@@ -1136,10 +1166,10 @@ print_border:
 border_data:
 
 colour_panel:
-        bra     fill_window
+        lbra    fill_window
 
 colour_sun_moon:
-        bra     fill_window
+        lbra    fill_window
 
 adjust_plyr_xyz_for_room_size:
         rts                                                        
@@ -1167,7 +1197,8 @@ find_fg_objs:
 next_fg_obj:                                                    
 next_fg_obj_in_count:
 next_fg_obj_sprite:
-        bra     zero_end_of_graphic_objs_tbl
+        ;bra     zero_end_of_graphic_objs_tbl
+        rts
 
 add_HL_A:
         rts
