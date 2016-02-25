@@ -205,13 +205,14 @@ start_coco:
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
+.if 0				
 				lda			#(VIDEOPAGE<<2)         ; screen at page $30
 				sta			VOFFMSB
 				lda			#0x00
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
-				
+.endif				
 				ldx			#PALETTE
 				ldy     #speccy_pal
 				ldb     #16
@@ -225,7 +226,7 @@ inipal:
         ;sta     RAMMODE
         
   ; configure video MMU
-
+.if 0
         lda     #VIDEOPAGE
         ldx     #(MMUTSK1)              ; $0000-
         ldb     #3
@@ -234,6 +235,7 @@ inipal:
         inca
         decb
         bne     mmumap                  ; map pages $30-$31
+.endif
 
   .ifdef HAS_SOUND				
 
@@ -304,7 +306,7 @@ main:
         adda    ,x
         sta     seed_1
         lbsr    clear_scrn
-        bsr     do_menu_selection
+        lbsr    do_menu_selection
         bsr     play_audio
         bsr     shuffle_objects_required
         lbsr    init_start_location
@@ -327,15 +329,35 @@ jump_to_upd_object:
 jump_to_tbl_entry:
 
 ret_from_tbl_jp:
-        bra     update_sprite_loop
+        ;bra     update_sprite_loop
         
 loc_B000:
+        lbsr    handle_pause
+        bsr     init_cauldron_bubbles
+        lbsr    list_objects_to_draw
+        lbsr    render_dynamic_objects
+        
 game_delay:
 loc_B038:
-loc_B03F:
-loc_B074:
 
-reset_objs_wiped_flag:
+loc_B03F:
+        lbsr    fill_attr
+        lbsr    display_objects
+        lbsr    colour_panel
+        lbsr    colour_sun_moon
+        lbsr    display_panel
+        lbsr    display_sun_moon_frame
+        bsr     display_day
+        bsr     print_days
+        bsr     print_lives_gfx
+        bsr     print_lives
+        lbsr    update_screen
+        lbsr    reset_objs_wipe_flag
+
+loc_B074:
+        bra     onscreen_loop
+        
+reset_objs_wipe_flag:
         rts
 
 upd_sprite_jmp_tbl:
@@ -374,6 +396,15 @@ dec_dZ_wipe_and_draw:
         lbsr    dec_dZ_and_update_XYZ
         lbra    set_wipe_and_draw_flags
 
+; B=column (active low)
+; returns A=row data (active high)
+read_port:
+				ldx			#PIA0
+				stb			2,x											; column strobe
+				lda			,x											; active low
+				coma                            ; active high
+        rts
+        
 ; ball (bouncing around)
 ; - bounces towards wulf
 ; - bounces away from sabreman
@@ -546,7 +577,16 @@ do_menu_selection:
         bsr     flash_menu
         
 menu_loop:
+        lbsr    display_menu
+        
 check_for_start_game:
+				ldb			#~(1<<0)								; 0-7
+				bsr     read_port
+				bita		#(1<<4)									; <0>?
+				beq     1$                      ; no, skip
+				rts
+1$:     inc     seed_1
+        bsr     flash_menu
         bra     menu_loop        
 
 flash_menu:
@@ -613,12 +653,12 @@ print_8x8:
         ldu     gfxbase_8x8
         leau    d,u                     ; ptr font data
         ldb     #8                      ; 8 lines to print
-1$:     lda     ,u+
-        sta     ,y
+1$:     lda     ,u+                     ; read font data
+        sta     ,y                      ; write to vidbuf
         leay    -32,y                   ; next line
-        decb
-        bne     1$
-        puls    y                       ; addr
+        decb                            ; done all lines?
+        bne     1$                      ; no, loop
+        puls    y                       ; vidbuf addr
         leay    1,y                     ; inc for next char
         rts
 
@@ -638,8 +678,8 @@ display_text_list:
         bsr     print_text_single_colour
         puls    y
         puls    b
-        decb
-        bne     display_text_list
+        decb                            ; done all strings?
+        bne     display_text_list       ; no loop
         lda     suppress_border
         bne     1$
         inca
@@ -1162,7 +1202,8 @@ clr_attribute_memory:
         bra     clr_byte
         
 fill_attr:
-        bra     clr_byte
+; nothing to do on the coco
+        rts
 
 clear_scrn:
 ;       bsr     clr_attribute_memory

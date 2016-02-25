@@ -72,7 +72,7 @@ RAMMODE			.equ		0xFFDF
 ;      -$FE00   $37				6809 System Stack
 ;
 
-codebase				.equ		  0x6000
+codebase				.equ		  0x5000
 stack						.equ		  0x7fff
 coco_vram       .equ      0x0000
 
@@ -119,3 +119,16 @@ speccy_pal:
       .db 0, 28, 23, 41, 17, 61, 51, 63
   .endif
 .endif
+
+; Coco Keyboard
+;    7  6  5  4  3  2  1  0
+;	0: G  F  E  D  C  B  A  @
+; 1: O  N  M  L  K  J  I  H
+; 2: W  V  U  T  S  R  Q  P
+; 3: SP RT LT DN UP Z  Y  X
+; 4: '  &  %  $  #  "  !  0
+; 4: 7  6  5  4  3  2  1  0
+; 5: ?  >  =  <  +  *  )  (
+; 5: /  .  _  ,  ;  :  9  8
+; 6: SH F2 F1 CT AL BK CL CR
+
