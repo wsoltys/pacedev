@@ -116,7 +116,7 @@ inipal:
 												
 .endif	; PLATFORM_COCO3
 			
-				lda			#>ZEROPAGE
+				lda			#>0x5F00
 				tfr			a,dp
 
 ; copy vram data to video page (1BPP)

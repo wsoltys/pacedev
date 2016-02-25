@@ -72,8 +72,7 @@ RAMMODE			.equ		0xFFDF
 ;      -$FE00   $37				6809 System Stack
 ;
 
-ZEROPAGE				.equ			0x5c00
-codebase				.equ		  0x6010
+codebase				.equ		  0x6000
 stack						.equ		  0x7fff
 coco_vram       .equ      0x0000
 

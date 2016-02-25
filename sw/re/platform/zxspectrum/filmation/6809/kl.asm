@@ -12,6 +12,25 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
         .org    codebase-#0x800
+        
+        .bndry  0x100
+dp_base:                        .ds 256        
+af      .equ    0x00
+a       .equ    af
+f       .equ    af+1
+bc      .equ    0x02
+b       .equ    bc
+c       .equ    bc+1
+de      .equ    0x04
+d       .equ    de
+e       .equ    de+1
+hl      .equ    0x06
+h       .equ    hl
+l       .equ    hl+1
+af_     .equ    0x08
+bc_     .equ    0x0a
+de_     .equ    0x0c
+hl_     .equ    0x0e
 
 seed_1:                         .ds 1
                                 .ds 1
@@ -147,8 +166,10 @@ other_objs_here:                .ds 32
                                 .ds 1120
 ; end of 'SCRATCH'
         
-        
 				.org		codebase
+				
+.include "kl_data.asm"				
+				
 start_coco:
 				orcc		#0x50										; disable interrupts
 				lds			#stack
@@ -253,12 +274,12 @@ inipal:
 												
 .endif	; PLATFORM_COCO3
 			
-				lda			#>ZEROPAGE
+				lda			#>dp_base
 				tfr			a,dp
 
 start:
         ldx     #seed_1
-        ldy     #start_coco-#seed_1
+        ldy     #font-#seed_1
         lda     0x5c78                  ; random memory location
         pshs    a
         lbsr    clr_mem
@@ -562,19 +583,45 @@ menu_text:
         .db 0x25, 0x26, 1, 9, 8, 4, 0x26, 0xA, 0x24, 0xC, 0x24
         .db 0x10, 0xA4
 
+; D=x,y X=str
 print_text_single_colour:
-        pshs    x
-        ldx     #font
-        stx     gfxbase_8x8
-        puls    x
-        pshs    x
-        bsr     calc_screen_buffer_addr
+        ldu     #font
+        stu     gfxbase_8x8
+        lbsr    calc_screen_buffer_addr ; in U
+        tfr     u,y
+        bra     loc_BE56
+        
 print_text_std_font:
+
 print_text:
+loc_BE56:
+;       bsr     calc_attrib_addr
+loc_BE5F:
+        lda     ,x+
+        bita    #(1<<7)
+        bne     loc_BE72
+        bsr     print_8x8
+        bra     loc_BE5F
+loc_BE72:
+        anda    #0x7f
         bsr     print_8x8
         rts
-        
+
+; A=chr, Y=addr
 print_8x8:
+        pshs    y
+        ldb     #8
+        mul                             ; offset into font
+        ldu     gfxbase_8x8
+        leau    d,u                     ; ptr font data
+        ldb     #8                      ; 8 lines to print
+1$:     lda     ,u+
+        sta     ,y
+        leay    32,y                    ; next line down
+        decb
+        bne     1$
+        puls    y                       ; addr
+        leay    1,y                     ; inc for next char
         rts
 
 toggle_selected:
@@ -582,12 +629,17 @@ toggle_selected:
 
 display_menu:
 ;        ldx     #menu_colours
-        ldx     #menu_xy
-        ldy     #menu_text
+        ldy     #menu_xy
+        ldx     #menu_text
         ldb     #8
 display_text_list:
-
+        pshs    b
+        ldb     ,y+                     ; x
+        lda     ,y+                     ; y
+        pshs    y
         bsr     print_text_single_colour
+        puls    y
+        puls    b
         decb
         bne     display_text_list
         lda     suppress_border
@@ -1124,6 +1176,14 @@ clear_scrn_buffer:
         bra     clr_mem
                                                                                 
 update_screen:
+        pshs    x,y
+        ldx     #vidbuf
+        ldy     #coco_vram
+1$:     lda     ,x+
+        sta     ,y+
+        cmpx    #vidbuf+0x1800
+        bne     1$
+        puls    x,y
         rts
 
 render_dynamic_objects:
@@ -1149,7 +1209,18 @@ print_sprite:
         bsr     flip_sprite                                
         rts
 
+; A=Y, B=X
+; addr = ((y<<8)>>3)|(x>>3)
+; returns vidbuf address in U
 calc_screen_buffer_addr:
+        lsra
+        rorb
+        lsra
+        rorb
+        lsra
+        rorb                            ; D=offset
+        tfr     d,u
+        leau    vidbuf,u
         rts
 
 BC_to_attr_addr_in_DE:
