@@ -61,14 +61,14 @@ RAMMODE			.equ		0xFFDF
 ;
 ; Memory Map		Page
 ; ------------  ----
-; $0000-$17FF   $30       Video
+; $0000-$17FF   $38       Video
 ; $1800-$1FFF             (empty)
-; $2000-$3FFF   $31				Code
-; $4000-$5FFF   $32       Code?
-; $6000-$7FFF		$33				Code?
-; $8000-$9FFF   $34				Font and graphics data
-; $A000-$BFFF   $35				Font and graphics data
-; $C000-$DFFF   $36				Font and graphics data
+; $2000-$3FFF   $39				Code
+; $4000-$5FFF   $3A       Code?
+; $6000-$7FFF		$3B				Code?
+; $8000-$9FFF   $30				Font and graphics data
+; $A000-$BFFF   $31				Font and graphics data
+; $C000-$DFFF   $32				Font and graphics data
 ; $E000-$FFFF   $37				???
 ;
 
@@ -78,11 +78,11 @@ stack						.equ		  0x7fff
 database        .equ      0x8000
 
 ; MMU page mappings
-VRAM_PG         .equ      0x30
-CODE_PG1        .equ      0x31
+VRAM_PG         .equ      0x38
+CODE_PG1        .equ      0x39
 CODE_PG2        .equ      CODE_PG1+1
 CODE_PG3        .equ      CODE_PG2+1
-DATA_PG1        .equ      0x34
+DATA_PG1        .equ      0x30
 DATA_PG2        .equ      DATA_PG1+1
 DATA_PG3        .equ      DATA_PG2+1
 
