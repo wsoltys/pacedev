@@ -165,10 +165,37 @@ byte_5C68:                      .ds 32
 other_objs_here:                .ds 32
                                 .ds 1120
 ; end of 'SCRATCH'
+
+font    .equ    database
         
 				.org		codebase
+
+; end of data
+eod     .equ    .
 				
-.include "kl_dat.asm"				
+; Spectrum Palette for Coco3
+; - spectrum format : B=1, R=2, G=4
+; -     coco format : RGBRGB
+
+speccy_pal:
+;       black, blue, red, magenta, green, cyan, yellow, grey/white
+.ifdef GFX_1BPP
+  .ifdef GFX_RGB
+      .db 0x00<<0, 0x07*9, 0, 0, 0, 0, 0, 0
+      .db 0, 0, 0, 0, 0, 0, 0, 0
+  .else
+      .db 0, 63, 0, 0, 0, 0, 0, 0
+      .db 0, 0, 0, 0, 0, 0, 0, 0
+  .endif
+.else
+  .ifdef GFX_RGB
+      .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
+      .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
+  .else
+      .db 0, 12, 7, 9, 3, 29, 4, 32
+      .db 0, 28, 23, 41, 17, 61, 51, 63
+  .endif
+.endif
 				
 start_coco:
 				orcc		#0x50										; disable interrupts
@@ -223,19 +250,17 @@ inipal:
 				bne     inipal
 				
 				sta			CPU179									; select fast CPU clock (1.79MHz)
-        ;sta     RAMMODE
+        sta     RAMMODE
         
-  ; configure video MMU
-.if 0
-        lda     #VIDEOPAGE
-        ldx     #(MMUTSK1)              ; $0000-
+  ; configure MMU
+        lda     #DATA_PG1
+        ldx     #(MMUTSK1+4)            ; $8000-
         ldb     #3
   mmumap: 
         sta     ,x+
         inca
         decb
-        bne     mmumap                  ; map pages $30-$31
-.endif
+        bne     mmumap                  ; map pages $34-$36
 
   .ifdef HAS_SOUND				
 
@@ -281,7 +306,7 @@ inipal:
 
 start:
         ldx     #seed_1
-        ldy     #font-#seed_1
+        ldy     #eod-#seed_1
         lda     0x5c78                  ; random memory location
         pshs    a
         lbsr    clr_mem
@@ -291,7 +316,7 @@ start:
         
 start_menu:        
         ldx     #objs_wiped_cnt
-        ldy     #start_coco-#objs_wiped_cnt
+        ldy     #eod-#objs_wiped_cnt
         lbsr    clr_mem
         
 main:

@@ -61,20 +61,30 @@ RAMMODE			.equ		0xFFDF
 ;
 ; Memory Map		Page
 ; ------------  ----
-; $0000-$3BFF   $30-$31		HGR1
-; $3F00-$3FFF   $31				Zero Page
-; $4000-$7BFF   $32-$33		HGR2
-; $7C00-$7FFF		$33				Level Data 1,2
-; $8000-$9AXX   $34				Tile Graphics Data
-; $A000-$BXXX		$35				Title Screen, Game Over Data
-; $C000-$F965   $36-$37		Program Code & ROM Data
-; $FA00-$FCFF   $37       RAM
-;      -$FE00   $37				6809 System Stack
+; $0000-$17FF   $30       Video
+; $1800-$1FFF             (empty)
+; $2000-$3FFF   $31				Code
+; $4000-$5FFF   $32       Code?
+; $6000-$7FFF		$33				Code?
+; $8000-$9FFF   $34				Font and graphics data
+; $A000-$BFFF   $35				Font and graphics data
+; $C000-$DFFF   $36				Font and graphics data
+; $E000-$FFFF   $37				???
 ;
 
-codebase				.equ		  0x5000
-stack						.equ		  0x7fff
 coco_vram       .equ      0x0000
+codebase				.equ		  0x2000
+stack						.equ		  0x7fff
+database        .equ      0x8000
+
+; MMU page mappings
+VRAM_PG         .equ      0x30
+CODE_PG1        .equ      0x31
+CODE_PG2        .equ      CODE_PG1+1
+CODE_PG3        .equ      CODE_PG2+1
+DATA_PG1        .equ      0x34
+DATA_PG2        .equ      DATA_PG1+1
+DATA_PG3        .equ      DATA_PG2+1
 
 ;.define HAS_SOUND
 .ifdef HAS_SOUND
@@ -86,37 +96,6 @@ coco_vram       .equ      0x0000
     .define USE_DAC_SOUND
     SOUND_ADDR  .equ		PIA1
     SOUND_MASK  .equ    0xfc
-  .endif
-.endif
-  
-; MMU page mappings
-VIDEOPAGE   .equ        0x30
-;GFXPAGE			.equ				0x34
-;CODEPAGE		.equ				0x36
-
-; Spectrum Palette for Coco3
-; - spectrum format : B=1, R=2, G=4
-; -     coco format : RGBRGB
-
-                .org      codebase-16
-
-speccy_pal:
-;       black, blue, red, magenta, green, cyan, yellow, grey/white
-.ifdef GFX_1BPP
-  .ifdef GFX_RGB
-      .db 0x00<<0, 0x07*9, 0, 0, 0, 0, 0, 0
-      .db 0, 0, 0, 0, 0, 0, 0, 0
-  .else
-      .db 0, 63, 0, 0, 0, 0, 0, 0
-      .db 0, 0, 0, 0, 0, 0, 0, 0
-  .endif
-.else
-  .ifdef GFX_RGB
-      .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
-      .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
-  .else
-      .db 0, 12, 7, 9, 3, 29, 4, 32
-      .db 0, 28, 23, 41, 17, 61, 51, 63
   .endif
 .endif
 
