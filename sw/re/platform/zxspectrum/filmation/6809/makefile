@@ -18,6 +18,7 @@ AS = as6809
 LD = aslink
 HEX2BIN = hex2bin
 ECHO = @echo
+CP = copy
 RM = rm
 MD = mkdir
 OBJC = objcopy
@@ -38,6 +39,9 @@ LDR_OBJS = $(LDR).rel
 EXE_OBJS = $(EXE).rel
 	
 all: $(FQLN) $(FQEN)
+#	$(CP) $(FQLN) klldr.bin
+#	imgtool create coco_jvc_rsdos kl_6809.dsk
+#	imgtool put coco_jvc_rsdos kl_6809.dsk klldr.bin $(FQEN)
 	file2dsk kl_6809.dsk $(FQLN) $(FQEN) kl.bas
 
 %.rel: %.asm $(MAKEFILE)
