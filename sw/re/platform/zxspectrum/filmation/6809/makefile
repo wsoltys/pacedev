@@ -38,7 +38,7 @@ LDR_OBJS = $(LDR).rel
 EXE_OBJS = $(EXE).rel
 	
 all: $(FQLN) $(FQEN)
-	file2dsk kl_6809.dsk $(FQLN) $(FQEN)
+	file2dsk kl_6809.dsk $(FQLN) $(FQEN) kl.bas
 
 %.rel: %.asm $(MAKEFILE)
 	$(AS) $(ASFLAGS) $<

@@ -71,6 +71,10 @@ RAMMODE			.equ		0xFFDF
 ; $C000-$DFFF   $32				Font and graphics data
 ; $E000-$FFFF   $37				???
 ;
+; most alternate pages are used by Coco3 BASIC
+; eg. page 34 is the HPUT/HGET buffer
+; and is written whilst BASIC is running
+; $30-$33 are the alternate HIRES page, so safe
 
 coco_vram       .equ      0x0000
 codebase				.equ		  0x2000
