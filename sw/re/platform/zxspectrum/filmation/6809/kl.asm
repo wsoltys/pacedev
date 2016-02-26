@@ -11,7 +11,7 @@
 
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
-        .org    codebase-#0x800
+        .org    code_base-#0x800
         
         .bndry  0x100
 dp_base:                        .ds 256        
@@ -166,13 +166,15 @@ other_objs_here:                .ds 32
                                 .ds 1120
 ; end of 'SCRATCH'
 
-font                  .equ    database
-room_size_tbl         .equ    database+0x140
-location_tbl          .equ    database+0x149
-block_type_tbl        .equ    database+0xba0
-background_type_tbl   .equ    database+0xe9d
+font                  .equ    data_base+0x0000
+room_size_tbl         .equ    data_base+0x0140
+location_tbl          .equ    data_base+0x0149
+block_type_tbl        .equ    data_base+0x0ba0
+background_type_tbl   .equ    data_base+0x0eba
+special_objs_tbl      .equ    data_base+0x0eea
+sprite_tbl            .equ    data_base+0x4ce0
 
-				              .org		codebase
+				              .org		code_base
 ; end of data
 eod                   .equ    .
 				

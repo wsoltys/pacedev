@@ -369,7 +369,7 @@ void knight_lore (void)
   {
     fprintf (fp2, "  %s%s\n", blktyp[i].label,
       (i<n-1 ? "," : ""));
-    fprintf (fp3, "        .db #%s\n", blktyp[i].label);
+    fprintf (fp3, "        .dw #%s\n", blktyp[i].label);
   }
   fprintf (fp2, "};\n\n");
   fprintf (fp3, "\n\n");
@@ -446,7 +446,7 @@ void knight_lore (void)
   {
     fprintf (fp2, "  %s%s\n", bgtyp[i].label,
       (i<n-1 ? "," : ""));
-    fprintf (fp3, "        .db #%s\n", bgtyp[i].label);
+    fprintf (fp3, "        .dw #%s\n", bgtyp[i].label);
   }
   fprintf (fp2, "};\n\n");
   fprintf (fp3, "\n\n");
@@ -454,14 +454,21 @@ void knight_lore (void)
   // create object table
   p = 0x6FF2;
   fprintf (fp2, "OBJ9 special_objs_tbl[] = \n{\n");
+  fprintf (fp3, "special_objs_tbl:\n");
   while (p < 0x7112)
   {
     fprintf (fp2, "  { ");
+    fprintf (fp3, "        .db ");
     for (int m=0; m<9; m++)
-      fprintf (fp2, "0x%02X%s ", ram[p++], (m<8 ? ",":""));
+    {
+      fprintf (fp2, "0x%02X%s ", ram[p], (m<8 ? ",":""));
+      fprintf (fp3, "0x%02X%s ", ram[p++], (m<8 ? ",":""));
+    }
     fprintf (fp2, "},\n");
+    fprintf (fp3, "\n");
   }
   fprintf (fp2, "};\n\n");
+  fprintf (fp3, "\n\n");
 
   // create table of sprite addresses
   uint16_t sprite_a[132];
@@ -490,6 +497,7 @@ void knight_lore (void)
 
   // sprite_tbl
   fprintf (fp2, "uint8_t *sprite_tbl[] =\n{\n");
+  fprintf (fp3, "sprite_tbl:\n");
   n = 0;
   for (p=0x7112; p<0x728A; p+=2, n++)
   {
@@ -514,15 +522,24 @@ void knight_lore (void)
         strcpy (label, "(ERROR)");
     }
     if ((n%6) == 0)
+    {
       fprintf (fp2, "  ");
+      fprintf (fp3, "        .dw ");
+    }
     fprintf (fp2, "%s, ", label);
+    fprintf (fp3, "#%s, ", label);
     if ((n%6) == 5)
+    {
       fprintf (fp2, "\n");
+      fprintf (fp3, "\n");
+    }
   }
   fprintf (fp2, "\n};\n\n");
+  fprintf (fp3, "\n\n");
 
   // sprite graphics
   fprintf (fp2, "uint8_t spr_nul[] =\n{\n  0, 0\n};\n\n");
+  fprintf (fp3, "spr_nul:\n        .db 0, 0\n\n");
   p = 0x728C;
   sprite_n = 0;
   while (p < 0xAF6C)
@@ -534,16 +551,23 @@ void knight_lore (void)
     unsigned h = ram[p+1];
     
     fprintf (fp2, "uint8_t spr_%03d[] =\n{\n  %d, %d,\n",
+              sprite_n, w, h);
+    fprintf (fp3, "spr_%03d:\n        .db %d, %d\n",
               sprite_n++, w, h);
     unsigned i;
     p += 2;
     for (unsigned i=0; i<w*h*2; i++, p++)
     {
       if ((i%8)==0) fprintf (fp2, "  ");
+      if ((i%8)==0) fprintf (fp3, "        .db ");
       fprintf (fp2, "0x%02X, ", ram[p]);
+      fprintf (fp3, "0x%02X", ram[p]);
+      if ((i%8)!=7 && i<w*h*2-1) fprintf (fp3,", ");
       if ((i%8)==7) fprintf (fp2, "\n");
+      if ((i%8)==7) fprintf (fp3, "\n");
     }
     fprintf (fp2, "\n};\n\n");
+    fprintf (fp3, "\n\n");
   }
 
   // audio data
