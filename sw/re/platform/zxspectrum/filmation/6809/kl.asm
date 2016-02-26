@@ -166,12 +166,15 @@ other_objs_here:                .ds 32
                                 .ds 1120
 ; end of 'SCRATCH'
 
-font    .equ    database
-        
-				.org		codebase
+font                  .equ    database
+room_size_tbl         .equ    database+0x140
+location_tbl          .equ    database+0x149
+block_type_tbl        .equ    database+0xba0
+background_type_tbl   .equ    database+0xe9d
 
+				              .org		codebase
 ; end of data
-eod     .equ    .
+eod                   .equ    .
 				
 ; Spectrum Palette for Coco3
 ; - spectrum format : B=1, R=2, G=4

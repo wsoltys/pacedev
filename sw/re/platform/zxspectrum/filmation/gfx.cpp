@@ -5,7 +5,11 @@
 #include <sys/stat.h>
 #include <memory.h>
 
+//#define __USE_ALLEGRO__
+
+#ifdef __USE_ALLEGRO__
 #include <allegro.h>
+#endif
 
 #define ALLEGRO_FULL_VERSION  ((ALLEGRO_VERSION << 4)|(ALLEGRO_SUB_VERSION))
 #if ALLEGRO_FULL_VERSION < 0x42
@@ -42,6 +46,8 @@ uint8_t ascii[64*1024];
 unsigned widest = 0;
 unsigned highest = 0;
 FILE *fpdbg;
+
+#ifdef __USE_ALLEGRO__
 
 static void plot_character (unsigned base, unsigned ch, unsigned cx, unsigned cy, unsigned c)
 {
@@ -121,6 +127,8 @@ void plot_sprite (unsigned s, unsigned f, unsigned x, unsigned y, unsigned c, un
   
   plot_sprite_data (s, f, p, x, y, 3, w, h);
 }
+
+#endif //__USE_ALLEGRO__
 
 #pragma pack(1)
 typedef struct
@@ -221,9 +229,12 @@ void knight_lore (void)
   // room size table
   p = 0x6248;
   fprintf (fp2, "ROOM_SIZE_T room_size_tbl[] = \n{\n");
+  fprintf (fp3, "room_size_tbl:\n");
   while (p < 0x6251)
   {
     fprintf (fp2, "  { %02d, %02d, %02d }",
+              ram[p], ram[p+1], ram[p+2]);
+    fprintf (fp3, "        .db %02d, %02d, %02d\n",
               ram[p], ram[p+1], ram[p+2]);
     if (p < 0x6251-3)
       fprintf (fp2, ",");
@@ -231,30 +242,46 @@ void knight_lore (void)
     p += 3;
   }
   fprintf (fp2, "};\n\n");
+  fprintf (fp3, "\n\n");
   
   // location table
   unsigned locations = 0;
   p = 0x6251;
   fprintf (fp2, "uint8_t location_tbl[] = \n{\n");
+  fprintf (fp3, "location_tbl:\n");
   while (p < 0x6BD1)
   {
     uint8_t n = ram[p+1];
     fprintf (fp2, "  %d, %d, %d,\n",
+              ram[p], ram[p+1], ram[p+2]);
+    fprintf (fp3, "        .db %d, %d, %d\n",
               ram[p], ram[p+1], ram[p+2]);
     p += 3;
     locations++;
     for (unsigned i=0; i<n-2; i++)
     {
       if ((i%8)==0)
+      {
         fprintf (fp2, "  ");
-      fprintf (fp2, "0x%02X", ram[p++]);
+        fprintf (fp3, "        .db ");
+      }
+      fprintf (fp2, "0x%02X", ram[p]);
+      fprintf (fp3, "0x%02X", ram[p++]);
       if (p < 0x6BD1)
+      {
         fprintf (fp2, ", ");
+        if ((i%8)!=7 && i<n-3)
+          fprintf (fp3, ", ");
+      }
       if ((i%8)==7 || i==n-3)
+      {
         fprintf (fp2, "\n");
+        fprintf (fp3, "\n");
+      }
     }
   }
   fprintf (fp2, "};\n\n");
+  fprintf (fp3, "\n\n");
   fprintf (stderr, "#locations = %d\n", locations);
 
   // block type table
@@ -319,25 +346,33 @@ void knight_lore (void)
 
     // do table entry
     fprintf (fp2, "uint8_t %s[] = \n{\n", blktyp[i].label);
+    fprintf (fp3, "%s:\n", blktyp[i].label);
     do
     {
       fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X,\n",
+                ram[p], ram[p+1], ram[p+2], ram[p+3], ram[p+4], ram[p+5]);
+      fprintf (fp3, "        .db 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
                 ram[p], ram[p+1], ram[p+2], ram[p+3], ram[p+4], ram[p+5]);
       p += 6;
       
     } while (ram[p] != 0);
     fprintf (fp2, "  0");
+    fprintf (fp3, "        .db 0");
     p++;
     fprintf (fp2,"\n};\n\n");
+    fprintf (fp3,"\n\n");
   }
 
   fprintf (fp2, "uint8_t *block_type_tbl[] = \n{\n");
+  fprintf (fp3, "block_type_tbl:\n");
   for (unsigned i=0; i<n; i++)
   {
     fprintf (fp2, "  %s%s\n", blktyp[i].label,
       (i<n-1 ? "," : ""));
+    fprintf (fp3, "        .db #%s\n", blktyp[i].label);
   }
   fprintf (fp2, "};\n\n");
+  fprintf (fp3, "\n\n");
   
   // background type table
   
@@ -388,25 +423,33 @@ void knight_lore (void)
 
     // do table entry
     fprintf (fp2, "uint8_t %s[] = \n{\n", bgtyp[i].label);
+    fprintf (fp3, "%s:\n", bgtyp[i].label);
     do
     {
       fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X,\n",
+                ram[p], ram[p+1], ram[p+2], ram[p+3], ram[p+4], ram[p+5], ram[p+6], ram[p+7]);
+      fprintf (fp3, "        .db 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
                 ram[p], ram[p+1], ram[p+2], ram[p+3], ram[p+4], ram[p+5], ram[p+6], ram[p+7]);
       p += 8;
       
     } while (ram[p] != 0);
     fprintf (fp2, "  0");
+    fprintf (fp3, "        .db 0");
     p++;
     fprintf (fp2,"\n};\n\n");
+    fprintf (fp3,"\n\n");
   }
 
   fprintf (fp2, "uint8_t *background_type_tbl[] = \n{\n");
+  fprintf (fp3, "background_type_tbl:\n");
   for (unsigned i=0; i<n; i++)
   {
     fprintf (fp2, "  %s%s\n", bgtyp[i].label,
       (i<n-1 ? "," : ""));
+    fprintf (fp3, "        .db #%s\n", bgtyp[i].label);
   }
   fprintf (fp2, "};\n\n");
+  fprintf (fp3, "\n\n");
   
   // create object table
   p = 0x6FF2;
@@ -1385,10 +1428,11 @@ void pentagram (void)
 #endif
 }
 
-void main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   fpdbg = fopen ("debug.txt", "wt");
 
+#ifdef __USE_ALLEGRO__
 	allegro_init ();
 	install_keyboard ();
 
@@ -1403,12 +1447,17 @@ void main (int argc, char *argv[])
     pal[c].b = (c&(1<<0) ? ((c < 8) ? (0xCD>>2) : (0xFF>>2)) : 0x00);
   }
 	set_palette_range (pal, 0, 7, 1);
+#endif
 
   knight_lore ();
   //alien_8 ();
   //pentagram ();
     
+#ifdef __USE_ALLEGRO__
   allegro_exit ();
+#endif
 }
 
+#ifdef __USE_ALLEGRO__
 END_OF_MAIN();
+#endif
