@@ -1192,7 +1192,7 @@ build_screen_objects:
         tst     not_1st_screen
         beq     1$
         bsr     update_special_objs
-1$:     bsr     clear_scrn_buffer
+1$:     lbsr    clear_scrn_buffer
         bsr     retrieve_screen
         bsr     find_special_objs_here
         bsr     adjust_plyr_xyz_for_room_size
@@ -1213,9 +1213,19 @@ flag_room_visited:
         rts
 
 transfer_sprite:
+        lda     ,u+
+        sta     0,x                     ; graphic no
+        lda     ,u+
+        sta     7,x                     ; flags7
+        lda     ,u+
+        sta     26,x                    ; pixel_x
+        lda     ,u+
+        sta     27,x                    ; pixel_y
         rts
 
 transfer_sprite_and_print:
+        bsr     transfer_sprite
+        lbsr    print_sprite
         rts
 
 display_panel:
@@ -1224,9 +1234,24 @@ display_panel:
 panel_data:
 
 print_border:
+        ldx     #sprite_scratchpad
+        ldu     #border_data
+        bsr     transfer_sprite_and_print
+        bsr     transfer_sprite_and_print
+        bsr     transfer_sprite_and_print
+        bsr     transfer_sprite_and_print
+        bsr     transfer_sprite
         lbra    multiple_print_sprite
                 
 border_data:
+        .db 0x89, 0, 0, 0xA0
+        .db 0x89, 0x40, 0xE0, 0xA0
+        .db 0x89, 0xC0, 0xE0, 0
+        .db 0x89, 0x80, 0, 0
+        .db 0x8B, 0, 0x20, 0xA8
+        .db 0x8B, 0, 0x20, 0
+        .db 0x8A, 0, 0, 0x20
+        .db 0x8A, 0, 0xE8, 0x20
 
 colour_panel:
         lbra    fill_window
