@@ -377,7 +377,7 @@ loc_B03F:
         lbsr    colour_sun_moon
         lbsr    display_panel
         lbsr    display_sun_moon_frame
-        bsr     display_day
+        lbsr     display_day
         bsr     print_days
         bsr     print_lives_gfx
         bsr     print_lives
@@ -575,15 +575,42 @@ count_screens:
         bra     print_BCD_number
         
 print_days:
+        ldy     #vidbuf+0xef            ; (120,7)
+        ldx     #days
+        ldb     #1
+        bsr     print_BCD_number
+; attribute        
         rts
                 
 print_lives_gfx:
         lbra    fill_DE
         
 print_lives:
+        ldx     #lives
+        ldb     #1
+        ldy     #vidbuf+0x4e4
         bra     print_BCD_number
         
 print_BCD_number:
+        ldu     #font
+        stu     gfxbase_8x8
+print_BCD_msd:        
+        lda     ,x                      ; get digit pair
+        lsra
+        lsra
+        lsra
+        lsra                            ; shift to low nibble
+        pshs    b
+        lbsr    print_8x8
+        puls    b
+print_BCD_lsd:
+        lda     ,x+                     ; get digit pair
+        anda    #0x0f                   ; low nibble
+        pshs    b
+        lbsr    print_8x8
+        puls    b
+        decb                            ; done all pairs?
+        bne     print_BCD_msd           ; no, loop
         rts
         
 display_day:
@@ -1139,6 +1166,12 @@ finished_input:
         rts
         
 lose_life:
+; more
+        clra
+        sta     transform_flag_graphic
+        dec     lives
+        lbmi    game_over
+; more        
         rts                
 
 plyr_spr_1_scratchpad:
