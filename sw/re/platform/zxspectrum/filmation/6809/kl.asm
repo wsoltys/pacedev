@@ -1671,13 +1671,16 @@ loc_D76F:
         ldb     25,x                    ; height_lines
 2$:     pshs    b
         ldb     24,x                    ; width_bytes
-3$:     lda     ,u+
-        sta     ,y+
+3$:     lda     ,u+                     ; read mask
+        coma
+        anda    ,y                      ; from video
+        ora     ,u+                     ; add sprite byte
+        sta     ,y+                     ; write back to video
         decb
         bne     3$
-        lda     #32
-        adda    24,x
-        leay    -a,y                    ; next line
+        lda     #-32
+        suba    24,x
+        leay    a,y                     ; next line
         puls    b
         decb
         bne     2$
