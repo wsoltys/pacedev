@@ -1376,7 +1376,7 @@ build_screen_objects:
 1$:     pshs    x
         lbsr    clear_scrn_buffer
         puls    x
-        bsr     retrieve_screen
+        lbsr    retrieve_screen
         lbsr    find_special_objs_here
         bsr     adjust_plyr_xyz_for_room_size
         clra
@@ -1408,7 +1408,9 @@ transfer_sprite:
 
 transfer_sprite_and_print:
         bsr     transfer_sprite
+        pshs    u
         lbsr    print_sprite
+        puls    u
         rts
 
 display_panel:
@@ -1622,14 +1624,63 @@ build_lookup_tbls:
 calc_pixel_XY:
         rts
 
+; returns ptr sprite data in U
 flip_sprite:
+        ldb     ,x                      ; graphic no
+        ldu     #sprite_tbl
+        clra
+        aslb
+        rola
+        leau    d,u
+        ldu     ,u                      ; sprite data addr
+        lda     ,u                      ; flip & width
+        bne     vflip_sprite_data       ; not null sprite
+        leas    2,s                     ; exit from caller
         rts
 
 calc_pixel_XY_and_render:
         rts
 
 print_sprite:
-        bsr     flip_sprite                                
+        bsr     flip_sprite             ; U=ptr sprite data
+        lda     26,x                    ; pixel_x
+        anda    #7                      ; bit offset
+        beq     loc_D76F
+
+loc_D76F:
+        lda     ,u+                     ; width
+        anda    #0x0f                   ; mask off flip bits
+        sta     24,x                    ; width_bytes
+        lda     ,u+                     ; height
+        sta     25,x                    ; height_lines
+        adda    27,x                    ; pixel_y
+        suba    #192                    ; off screen?
+        bcs     1$                      ; no, skip
+        coma
+        adda    25,x
+        sta     25,x                    ; adjust height lines
+1$:     ldb     26,x                    ; pixel_x     
+        lda     27,x                    ; pixel_y
+        tfr     u,y
+        bsr     calc_screen_buffer_addr ; U
+        exg     u,y
+; this next bit requires some serious optimisation
+;       X = object
+;       Y = video buffer address
+;       U = sprite data
+        ldb     25,x                    ; height_lines
+2$:     pshs    b
+        ldb     24,x                    ; width_bytes
+3$:     lda     ,u+
+        sta     ,y+
+        decb
+        bne     3$
+        lda     #32
+        adda    24,x
+        leay    -a,y                    ; next line
+        puls    b
+        decb
+        bne     2$
         rts
 
 ; A=Y, B=X
