@@ -13,7 +13,9 @@
         .org    MMUTSK1+1
         .db     DATA_PG1, DATA_PG2, DATA_PG3
 
-        .org    0x2000
+; needs to be at final location
+; run "reloc" to fix the loading addresses
+        .org    0x8000
 .include "kl_dat.asm"
         
         ; $2000,$4000,$6000

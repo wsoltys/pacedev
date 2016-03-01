@@ -1487,7 +1487,7 @@ found_screen:
         ora     #0x40                   ; bright
         sta     curr_room_attrib
         lda     ,u+                     ; attributes
-        pshs    u
+        pshs    u                       ; location data
         rora
         rora
         rora
@@ -1505,30 +1505,34 @@ found_screen:
         sta     room_size_Z
         decb
         decb
-        puls    u
+        puls    u                       ; location data
 next_bg_obj:
         lda     ,u+                     ; background type
         cmpa    #0xff                   ; done all bkgnd?
-        beq     find_fg_objs
+        beq     find_fg_objs            ; yes, go
         pshs    u
         ldu     #background_type_tbl
         asla                            ; word offset
         leau    a,u                     ; ptr entry
         ldu     ,u                      ; get entry
 next_bg_obj_sprite:
-        pshs    b
+        pshs    b                       ; bytes left
         ldb     #8
 1$:     lda     ,u+                     ; byte from object
         sta     ,y+                     ; copy to graphic_objs_tbl
         decb
         bne     1$
+        lda     8,x                     ; current screen
+        sta     ,y+                     ; set object screen
         ldb     #23
-        bra     zero_Y
-        puls    b
+        bsr     zero_Y
+        puls    b                       ; bytes left
         tst     ,u                      ; done object?
         bne     next_bg_obj_sprite      ; no, loop
-        decb
-        bne     next_bg_obj
+        puls    u                       ; location data
+        decb                            ; any bytes left?
+        bne     next_bg_obj             ; yes, loop
+        bra     zero_end_of_graphic_objs_tbl
 
 find_fg_objs:
 next_fg_obj:                                                    
