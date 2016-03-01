@@ -164,20 +164,22 @@ special_objs_here:              .ds 32
 byte_5C68:                      .ds 32
 other_objs_here:                .ds 32
                                 .ds 1120
+; end of data
+eod                   .equ    .
+				
 ; end of 'SCRATCH'
 
 font                  .equ    data_base+0x0000
 room_size_tbl         .equ    data_base+0x0140
 location_tbl          .equ    data_base+0x0149
+eolt                  .equ    data_base+0x0ac9
 block_type_tbl        .equ    data_base+0x0ba0
 background_type_tbl   .equ    data_base+0x0eba
 special_objs_tbl      .equ    data_base+0x0eea
 sprite_tbl            .equ    data_base+0x4ce0
 
 				              .org		code_base
-; end of data
-eod                   .equ    .
-				
+
 ; Spectrum Palette for Coco3
 ; - spectrum format : B=1, R=2, G=4
 ; -     coco format : RGBRGB
@@ -1289,12 +1291,33 @@ finished_input:
         rts
         
 lose_life:
-; more
+        ldu     #plyr_spr_1_scratchpad
+        ldy     #graphic_objs_tbl
+        tfr     u,x
+        ldb     #64
+1$:     lda     ,u+
+        sta     ,y+
+        decb
+        bne     1$
         clra
         sta     transform_flag_graphic
         dec     lives
         lbmi    game_over
-; more        
+        lda     sun_moon_scratchpad
+        rora
+        rora
+        rora
+        anda    #0x20                   ; day/night
+        sta     *c
+        lda     16,x                    ; plyr graphic no
+        anda    #0x1f
+        adda    *c
+        sta     16,x
+        lda     0x30,x
+        anda    #0x0f
+        adda    *c
+        adda    #32
+        sta     0x30,x
         rts                
 
 plyr_spr_1_scratchpad:
@@ -1350,7 +1373,9 @@ build_screen_objects:
         tst     not_1st_screen
         beq     1$
         lbsr    update_special_objs
-1$:     lbsr    clear_scrn_buffer
+1$:     pshs    x
+        lbsr    clear_scrn_buffer
+        puls    x
         bsr     retrieve_screen
         lbsr    find_special_objs_here
         bsr     adjust_plyr_xyz_for_room_size
@@ -1434,11 +1459,77 @@ get_ptr_object:
         rts
 
 retrieve_screen:
+        ldy     #other_objs_here
+        ldu     #location_tbl
+
 find_screen:
+        lda     ,u+                     ; location id
+        cmpa    8,x                     ; same as player?
+        beq     found_screen
+        lda     ,u                      ; #bytes
+        leau    a,u                     ; next location
+        cmpu    #eolt                   ; end of table?
+        bge     zero_end_of_graphic_objs_tbl
+        bra     find_screen
+
 zero_end_of_graphic_objs_tbl:
+        cmpy    #eod
+        beq     9$
+        ldb     #32
+        bsr     zero_Y
+        bra     zero_end_of_graphic_objs_tbl
+9$:     rts
+
 found_screen:
+        ldb     ,u+                     ; #bytes
+        lda     ,u                      ; attributes
+        anda    #7
+        ora     #0x40                   ; bright
+        sta     curr_room_attrib
+        lda     ,u+                     ; attributes
+        pshs    u
+        rora
+        rora
+        rora
+        anda    #0x1f                   ; room size
+        sta     *c
+        adda    *c
+        adda    *c                      ; x3
+        ldu     #room_size_tbl
+        leau    a,u                     ; ptr entry
+        lda     ,u+
+        sta     room_size_X
+        lda     ,u+
+        sta     room_size_Y
+        lda     ,u
+        sta     room_size_Z
+        decb
+        decb
+        puls    u
 next_bg_obj:
+        lda     ,u+                     ; background type
+        cmpa    #0xff                   ; done all bkgnd?
+        beq     find_fg_objs
+        pshs    u
+        ldu     #background_type_tbl
+        asla                            ; word offset
+        leau    a,u                     ; ptr entry
+        ldu     ,u                      ; get entry
 next_bg_obj_sprite:
+        pshs    b
+        ldb     #8
+1$:     lda     ,u+                     ; byte from object
+        sta     ,y+                     ; copy to graphic_objs_tbl
+        decb
+        bne     1$
+        ldb     #23
+        bra     zero_Y
+        puls    b
+        tst     ,u                      ; done object?
+        bne     next_bg_obj_sprite      ; no, loop
+        decb
+        bne     next_bg_obj
+
 find_fg_objs:
 next_fg_obj:                                                    
 next_fg_obj_in_count:
@@ -1452,7 +1543,12 @@ add_HL_A:
 HL_equals_DE_x_A:
         rts
         
-zero_DE:
+zero_Y:
+        clr     ,y+
+        decb
+        bne     zero_Y
+        rts
+
 fill_DE:
         rts
 
