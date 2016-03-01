@@ -1641,6 +1641,9 @@ flip_sprite:
 calc_pixel_XY_and_render:
         rts
 
+; sprites are actually vflipped in memory
+; so render them directly to buffer
+; - buffer is vflipped w.r.t. video
 print_sprite:
         bsr     flip_sprite             ; U=ptr sprite data
         lda     26,x                    ; pixel_x
@@ -1678,7 +1681,7 @@ loc_D76F:
         sta     ,y+                     ; write back to video
         decb
         bne     3$
-        lda     #-32
+        lda     #32
         suba    24,x
         leay    a,y                     ; next line
         puls    b
