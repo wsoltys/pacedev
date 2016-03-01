@@ -362,6 +362,19 @@ ret_from_tbl_jp:
         ;bra     update_sprite_loop
         
 loc_B000:
+        ldu     seed_2
+        leau    1,u
+        stu     seed_2
+        lda     seed_3
+        adda    ,u
+        sta     seed_3
+        tfr     u,d
+        adda    seed_3
+        sta     seed_3
+        addb    seed_3
+        stb     seed_3
+        lda     #1
+        sta     not_1st_screen
         lbsr    handle_pause
         bsr     init_cauldron_bubbles
         lbsr    list_objects_to_draw
@@ -371,20 +384,26 @@ game_delay:
 loc_B038:
 
 loc_B03F:
+        tst     render_status_info
+        beq     1$
         lbsr    fill_attr
         lbsr    display_objects
         lbsr    colour_panel
         lbsr    colour_sun_moon
         lbsr    display_panel
+        ldx     #sun_moon_scratchpad
         lbsr    display_sun_moon_frame
-        lbsr     display_day
-        bsr     print_days
-        bsr     print_lives_gfx
-        bsr     print_lives
+        lbsr    display_day
+        lbsr    print_days
+        lbsr    print_lives_gfx
+        lbsr    print_lives
         lbsr    update_screen
         lbsr    reset_objs_wipe_flag
 
-loc_B074:
+1$:     clra
+        sta     rising_blocks_z
+        ldx     #graphic_objs_tbl
+; check player dies
         bra     onscreen_loop
         
 reset_objs_wipe_flag:
@@ -544,7 +563,7 @@ upd_30_31_158_159:
         bra     set_deadly_wipe_and_draw_flags
 
 move_guard_wizard_NSEW:
-        bra     jump_to_tbl_entry
+        lbra    jump_to_tbl_entry
 
 guard_NSEW_tbl: 
 
@@ -562,12 +581,66 @@ guard_S:
         bra     next_guard_dir
 
 game_over:
+        tst     all_objs_in_cauldron
+        bne     game_complete_msg
+        lbsr    clear_scrn_buffer
+        lbsr    clear_scrn
+        ldy     #gameover_xy
+        ldx     #gameover_text
+        ldb     #6
+        lbsr    display_text_list
+        ldy     #vidbuf+0x0fef
+        ldx     #days
+        ldb     #1
+        lbsr    print_BCD_number
+;
+        lbsr    print_border
+        lbsr    update_screen
+1$:     clra
+        bsr     read_port
+        beq     1$
+;
+        bsr     wait_for_key_release        
         lbra    start_menu
 
 wait_for_key_release:
+        pshs  x
+        ldx   #0
+1$:     clra
+        bsr   read_port
+        beq   9$
+        leax  -1,x
+        bne   1$
+9$:     puls  x
         rts
         
 game_complete_msg:
+
+gameover_colours:
+        .db 0x47, 0x46, 0x45, 0x45, 0x43, 0x44
+gameover_xy:    
+        .db 0x58, 0x9F, 0x50, 0x7F, 0x30, 0x6F
+        .db 0x40, 0x5F, 0x30, 0x4F, 0x48, 0x37
+
+gameover_text:
+          ; "GAME  OVER"
+        .db 0x10, 0xA, 0x16, 0xE, 0x26, 0x26, 0x18, 0x1F, 0xE
+        .db 0x9B
+        ; "TIME    DAYS"
+        .db 0x1D, 0x12, 0x16, 0xE, 0x26, 0x26, 0x26, 0x26, 0xD
+        .db 0xA, 0x22, 0x9C
+        ; "PERCENTAGE OF QUEST"
+        .db 0x19, 0xE, 0x1B, 0xC, 0xE, 0x17, 0x1D, 0xA, 0x10, 0xE
+        .db 0x26, 0x18, 0xF, 0x26, 0x1A, 0x1E, 0xE, 0x1C, 0x9D
+        ; "COMPLETED     %"
+        .db 0xC, 0x18, 0x16, 0x19, 0x15, 0xE, 0x1D, 0xE, 0xD, 0x26
+        .db 0x26, 0x26, 0x26, 0x26, 0xA7
+        ; "CHARMS COLLECTED"
+        .db 0xC, 0x11, 0xA, 0x1B, 0x16, 0x1C, 0x26, 0xC, 0x18
+        .db 0x15, 0x15, 0xE, 0xC, 0x1D, 0xE, 0xD, 0x26, 0x26, 0xA6
+        ; "OVERALL RATING"
+        .db 0x18, 0x1F, 0xE, 0x1B, 0xA, 0x15, 0x15, 0x26, 0x1B
+        .db 0xA, 0x1D, 0x12, 0x17, 0x90
 
 calc_and_display_percent:
 
@@ -762,7 +835,7 @@ multiple_print_sprite:
 
 ; player appear sparkles
 upd_120_to_126:
-        bra     set_wipe_and_draw_flags
+        lbra    set_wipe_and_draw_flags
 
 ; last player appears sparkle
 upd_127:
@@ -772,7 +845,7 @@ init_death_sparkles:                                            ; twinkly transf
 
 ; death sparkles
 upd_112_to_118_184:
-        bra     set_wipe_and_draw_flags
+        lbra    set_wipe_and_draw_flags
 
 ; sparkles (object in cauldron)
 upd_185_187:
@@ -808,12 +881,12 @@ is_obj_moving:
 
 ; extra life
 upd_103:
-        bra     dec_dZ_upd_XYZ_wipe_if_moving
+        lbra    dec_dZ_upd_XYZ_wipe_if_moving
         
 ; special objects being put in cauldron
 upd_104_to_110:
 audio_B467_wipe_and_draw:
-        bra     set_wipe_and_draw_flags
+        lbra    set_wipe_and_draw_flags
         
 centre_of_room:
 add_obj_to_cauldron:        
@@ -845,21 +918,71 @@ upd_92_to_95:
         bra     init_death_sparkles
         
 rand_legs_sprite:
-        bra     set_wipe_and_draw_flags
+        lbra    set_wipe_and_draw_flags
         
 print_sun_moon:
 display_sun_moon_frame:
-display_frame:               
-        lbra    blit_to_screen
-                
+        tst     all_objs_in_cauldron
+        beq     1$
+        rts
+1$:     lda     26,x                  ; pixel_x
+        cmpa    #225
+        beq     toggle_day_night
+        lda     26,x                  ; pixel_x
+        adda    #16
+        ldu     #sun_moon_yoff
+        rora
+        rora
+        anda    #0x0f
+        lda     a,u                   ; get entry
+        sta     27,x                  ; pixel_y
+display_frame:
+;        lbra    blit_to_screen
+        rts
 toggle_day_night:
+        lda     0,x                   ; graphic_no
+        eora    #1                    ; toggle sun/moon
+        sta     0,x
+        lbsr    colour_sun_moon
+        lda     #176
+        sta     26,x                  ; pixel_x
+        lda     #1
+        sta     transform_flag_graphic
+        lda     sun_moon_scratchpad
+        anda    #1
+        beq     inc_days
+        rts
 inc_days:
+        ldu     #days
+        lda     ,u
+        adda    #1                    ; can't use INCA
+        daa
+        sta     ,u
+        cmpa    #64
+        lbeq    game_over
+        lbsr    print_days
+        ldd     #0x0078
+        bsr     blit_2x8
         bra     display_frame
                 
 blit_2x8:
         lbra    blit_to_screen
 
+sun_moon_yoff:  
+        .db 5, 6, 7, 8, 9, 0xA, 0xA, 9, 8, 7, 6, 5, 5
+
+sun_moon_scratchpad:
+        .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
 init_sun:
+        ldx     #sun_moon_scratchpad
+        lda     #0x58
+        sta     0,x                   ; graphic no
+        lda     #176
+        sta     26,x                  ; pixel_x
+        lda     #9
+        sta     27,x                  ; pixel_y
         rts
         
 init_special_objects:
@@ -872,14 +995,14 @@ upd_62:
 
 ; chest
 upd_85:
-        bra     audio_B467_wipe_and_draw
+        lbra    audio_B467_wipe_and_draw
 
 ; table
 upd_84:
         bsr     upd_6_7
 
 dec_dZ_upd_XYZ_wipe_if_moving:
-        bra     audio_B467_wipe_and_draw
+        lbra    audio_B467_wipe_and_draw
 
 ; tree wall
 upd_128_to_130:
@@ -1016,7 +1139,7 @@ upd_48_to_53_56_to_61:
         bsr     adj_m7_m12
 
 upd_player_bottom:                                              ; dead?
-        bra     init_death_sparkles
+        lbra    init_death_sparkles
  
 plyr_not_OOB:
 
@@ -1175,26 +1298,61 @@ lose_life:
         rts                
 
 plyr_spr_1_scratchpad:
+        .db 0, 0, 0, 0, 0, 0, 0, 0
 start_loc_1:
+        .db 0, 0, 0, 0
 flags12_1:
+        .db 0, 0, 0, 0
 byte_D171:
+        .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
 plyr_spr_2_scratchpad:
+        .db 0, 0, 0, 0, 0, 0, 0, 0
 start_loc_2:
+        .db 0, 0, 0, 0, 0, 0, 0, 0
 byte_D191:
+        .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
 plyr_spr_init_data:
+        .db 0x78, 0x80, 0x80, 0x80, 5, 5, 0x17, 0x1C
+        .db 0x78, 0x80, 0x80, 0x8C, 5, 5, 0, 0x1E
 
 init_start_location:
+        ldx     #plyr_spr_init_data
+        ldy     #plyr_spr_1_scratchpad
+        ldb     #8
+1$:     lda     ,x+
+        sta     ,y+
+        decb
+        bne     1$
+        ldy     #plyr_spr_2_scratchpad
+        ldb     #8
+2$:     lda     ,x+
+        sta     ,y+
+        decb
+        bne     2$
+        lda     #18                     ; graphic_no
+        sta     byte_D171
+        lda     #34                     ; graphic_no
+        sta     plyr_spr_2_scratchpad+16
+        lda     seed_1
+        anda    #3
+        ldu     #start_locations
+        lda     a,u                     ; get entry
+        sta     start_loc_1
+        sta     start_loc_2
         rts
 
 start_locations:
+        .db 0x2F, 0x44, 0xB3, 0x8F
 
 build_screen_objects:
         tst     not_1st_screen
         beq     1$
-        bsr     update_special_objs
+        lbsr    update_special_objs
 1$:     lbsr    clear_scrn_buffer
         bsr     retrieve_screen
-        bsr     find_special_objs_here
+        lbsr    find_special_objs_here
         bsr     adjust_plyr_xyz_for_room_size
         clra
         sta     portcullis_moving
