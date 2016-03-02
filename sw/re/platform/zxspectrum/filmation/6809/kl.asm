@@ -168,6 +168,7 @@ block_type_tbl        .equ    data_base+0x0ba0
 background_type_tbl   .equ    data_base+0x0eba
 special_objs_tbl      .equ    data_base+0x0eea
 sprite_tbl            .equ    data_base+0x4ce0
+reverse_tbl           .equ    0xcf00
 
 				              .org		code_base
 
@@ -1635,6 +1636,34 @@ blit_to_screen:
         rts        
 
 build_lookup_tbls:
+; first is table of bit-reversed values
+        ldx     #reverse_tbl+0x80
+        clrb
+        stb     *c                      ; index
+1$:     pshs    b                       ; counter
+        lda     *c                      ; get index
+        rola
+        rorb
+        rola
+        rorb
+        rola
+        rorb
+        rola
+        rorb
+        rola
+        rorb
+        rola
+        rorb
+        rola
+        rorb
+        rola
+        rorb
+        lda     *c
+        inc     *c
+        stb     a,x                     ; reversed
+        puls    b
+        decb                            ; done 256?
+        bne     1$                      ; no loop
         rts
 
 calc_pixel_XY:
@@ -1775,7 +1804,48 @@ hflip_sprite_data:
         beq     flip_done               ; yes, skip
         lda     ,u
         eora    #HFLIP
-        sta     ,u
+        sta     ,u+
+        anda    #0x0f                   ; width_bytes
+        sta     *width
+        ldb     ,u+                     ; height_lines
+        stb     *height
+        pshs    x
+        ldx     #reverse_tbl+0x80
+hflip_line:
+        pshs    b,u                     ; lines
+        ldb     *width
+        lslb                            ; width*2
+        leay    b,u                     ; end of line
+        ldb     *width
+        lsrb                            ; /2=#swaps
+1$:     pshs    b
+        ldd     ,u                      ; mask+data
+        lda     a,x                     ; reverse mask
+        ldb     b,x                     ; reverse data
+        pshs    d
+        ldd     -2,y
+        lda     a,x                     ; reverse mask
+        ldb     b,x                     ; reverse data
+        std     ,u++                    ; store beginning
+        puls    d
+        std     ,--y                    ; store end
+        puls    b
+        decb                            ; done line?
+        bne     1$                      ; no, loop
+        ldb     *width
+        bitb    #1                      ; odd width?
+        beq     2$                      ; no, skip
+        ldd     ,u
+        lda     a,x
+        ldb     b,x
+        std     ,u
+2$:     puls    b,u
+        lda     *width
+        lsla                            ; width*2
+        leau    a,u                     ; next line
+        decb                            ; done all lines?
+        bne     hflip_line
+        puls    x
 flip_done:
         puls    u
         rts
