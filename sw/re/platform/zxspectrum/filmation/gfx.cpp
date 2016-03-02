@@ -549,6 +549,10 @@ void knight_lore (void)
 
     unsigned w = ram[p+0] & 0x3f;
     unsigned h = ram[p+1];
+
+    if (ram[p+0] & 0xc0)
+      fprintf (stderr, "WARNING spr_%03d flip=$%02X\n",
+                sprite_n, ram[p+0]);
     
     fprintf (fp2, "uint8_t spr_%03d[] =\n{\n  %d, %d,\n",
               sprite_n, w, h);
