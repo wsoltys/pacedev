@@ -15,22 +15,9 @@
         
         .bndry  0x100
 dp_base:                        .ds 256        
-af      .equ    0x00
-a       .equ    af
-f       .equ    af+1
-bc      .equ    0x02
-b       .equ    bc
-c       .equ    bc+1
-de      .equ    0x04
-d       .equ    de
-e       .equ    de+1
-hl      .equ    0x06
-h       .equ    hl
-l       .equ    hl+1
-af_     .equ    0x08
-bc_     .equ    0x0a
-de_     .equ    0x0c
-hl_     .equ    0x0e
+c       .equ    0x00
+width   .equ    0x00
+height  .equ    0x01
 
 ; *** KNIGHT-LORE stuff here
 VFLIP   .equ    1<<7
@@ -1717,24 +1704,24 @@ vflip_sprite_data:
         pshs    u
         eora    7,x                     ; flags7
         anda    #VFLIP                  ; same?
-        beq     hflip_sprite_data
+        beq     hflip_sprite_data       ; yes, skip
         lda     ,u
         eora    #VFLIP
-        sta     ,u
-        leau    2,u                     ; ptr data
-        ldb     25,x                    ; height_lines
-        decb
-        lda     24,x                    ; width_bytes
+        sta     ,u+
+        anda    #0x0f                   ; width_bytes
+        sta     *width
         lsla                            ; x2 for mask bytes
+        ldb     ,u+                     ; height_lines
+        stb     *height
+        decb                            ; (h-1)
         mul                             ; w*2*(h-1)=last line
         tfr     u,y
         leay    d,y                     ; y=last line
-        ldb     25,x                    ; height_lines
+        ldb     *height
         lsrb                            ; /2 = #swaps
-        pshs    b
 vflip_sprite_line_pair:
-        pshs    y
-        ldb     24,x                    ; width_bytes
+        pshs    b
+        ldb     *width
 1$:     pshs    b
         ldd     ,u                      ; lo mask+data
         pshs    d
@@ -1745,9 +1732,9 @@ vflip_sprite_line_pair:
         puls    b
         decb
         bne     1$
-        puls    y                       ; hi line
-        lda     24,x                    ; width_bytes
+        lda     *width
         asla                            ; x2 for mask
+        asla                            ; x4 for 2 lines
         nega                            ; subtract
         leay    a,y                     ; next hi line
         puls    b
@@ -1760,7 +1747,7 @@ hflip_sprite_data:
         lda     ,u                      ; flip & width
         eora    7,x                     ; flags7
         anda    #HFLIP                  ; same?
-        beq     flip_done
+        beq     flip_done               ; yes, skip
         lda     ,u
         eora    #HFLIP
         sta     ,u
