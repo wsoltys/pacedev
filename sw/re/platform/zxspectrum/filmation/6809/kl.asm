@@ -32,6 +32,10 @@ bc_     .equ    0x0a
 de_     .equ    0x0c
 hl_     .equ    0x0e
 
+; *** KNIGHT-LORE stuff here
+VFLIP   .equ    1<<7
+HFLIP   .equ    1<<6
+
 seed_1:                         .ds 1
                                 .ds 1
 seed_2:                         .ds 2
@@ -1710,7 +1714,58 @@ calc_attrib_addr:
         rts
         
 vflip_sprite_data:
+        pshs    u
+        eora    7,x                     ; flags7
+        anda    #VFLIP                  ; same?
+        beq     hflip_sprite_data
+        lda     ,u
+        eora    #VFLIP
+        sta     ,u
+        leau    2,u                     ; ptr data
+        ldb     25,x                    ; height_lines
+        decb
+        lda     24,x                    ; width_bytes
+        lsla                            ; x2 for mask bytes
+        mul                             ; w*2*(h-1)=last line
+        tfr     u,y
+        leay    d,y                     ; y=last line
+        ldb     25,x                    ; height_lines
+        lsrb                            ; /2 = #swaps
+        pshs    b
 vflip_sprite_line_pair:
+        pshs    y
+        ldb     24,x                    ; width_bytes
+1$:     pshs    b
+        ldd     ,u                      ; lo mask+data
+        pshs    d
+        ldd     ,y                      ; hi mask+data
+        std     ,u++                    ; lo mask+data
+        puls    d
+        std     ,y++                    ; hi mask+data
+        puls    b
+        decb
+        bne     1$
+        puls    y                       ; hi line
+        lda     24,x                    ; width_bytes
+        asla                            ; x2 for mask
+        nega                            ; subtract
+        leay    a,y                     ; next hi line
+        puls    b
+        decb
+        bne     vflip_sprite_line_pair
+
+hflip_sprite_data:
+        puls    u
+        pshs    u
+        lda     ,u                      ; flip & width
+        eora    7,x                     ; flags7
+        anda    #HFLIP                  ; same?
+        beq     flip_done
+        lda     ,u
+        eora    #HFLIP
+        sta     ,u
+flip_done:
+        puls    u
         rts
 
 vidbuf:
