@@ -169,6 +169,7 @@ background_type_tbl   .equ    data_base+0x0eba
 special_objs_tbl      .equ    data_base+0x0eea
 sprite_tbl            .equ    data_base+0x4ce0
 reverse_tbl           .equ    0xcf00
+shift_tbl             .equ    0xd000
 
 				              .org		code_base
 
@@ -1718,6 +1719,38 @@ build_lookup_tbls:
         puls    b
         decb                            ; done 256?
         bne     1$                      ; no loop
+; 2nd is table of shifted values (2 bytes)
+; - 1st run seeds low values
+        ldb     #0
+        stb     *c
+        ldx     #shift_tbl
+2$:     lda     *c
+        inc     *c
+        sta     ,x+
+        clra
+        sta     255,x
+        decb
+        bne     2$
+; next 7 runs shift the previous entries
+        ldx     #shift_tbl
+        ldb     #7
+3$:     pshs    b
+        ldb     #0
+4$:     pshs    b
+        lda     ,x
+        ldb     0x100,x
+        lsra
+        rorb
+        sta     0x200,x
+        stb     0x300,x
+        leax    1,x
+        puls    b
+        decb
+        bne     4$
+        leax    0x100,x
+        puls    b
+        decb
+        bne     3$
         rts
 
 calc_pixel_XY:
