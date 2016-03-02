@@ -650,7 +650,18 @@ print_days:
         rts
                 
 print_lives_gfx:
-        lbra    fill_DE
+        ldx     #sprite_scratchpad
+        lda     #0x8c
+        sta     0,x                     ; graphic_no
+        lda     #0
+        sta     7,x                     ; flags7
+        lda     #16
+        sta     26,x                    ; pixel_x
+        lda     #32
+        sta     27,x                    ; pixel_y
+        lbsr    print_sprite
+; attribute stuff
+        rts
         
 print_lives:
         ldx     #lives
@@ -928,6 +939,13 @@ rand_legs_sprite:
         lbra    set_wipe_and_draw_flags
         
 print_sun_moon:
+        lda     seed_2
+        anda    #7
+        beq     1$
+        rts
+1$:     ldx     #sun_moon_scratchpad
+        inc     26,x                  ; pixel_x
+
 display_sun_moon_frame:
         tst     all_objs_in_cauldron
         beq     1$
@@ -944,6 +962,23 @@ display_sun_moon_frame:
         lda     a,u                   ; get entry
         sta     27,x                  ; pixel_y
 display_frame:
+        lbsr    print_sprite
+        ldx     #sprite_scratchpad
+        lda     #0
+        sta     7,x                   ; flags7
+        lda     #0x5a
+        sta     0,x                   ; graphic_no
+        lda     #184
+        sta     26,x                  ; pixel_x
+        lda     #0
+        sta     27,x                  ; pixel_y
+        lbsr    print_sprite
+        lda     #208
+        sta     26,x                  ; pixel_x
+        lda     #0xba
+        sta     0,x                   ; graphic_no
+        lbsr    print_sprite
+; needs to blit
 ;        lbra    blit_to_screen
         rts
 toggle_day_night:
@@ -1419,9 +1454,28 @@ transfer_sprite_and_print:
         rts
 
 display_panel:
+        ldx     #sprite_scratchpad
+        ldu     #panel_data
+        bsr     transfer_sprite
+        ldy     #0xf810                 ; x+=16, y-=8
+        ldb     #5
+        lbsr    multiple_print_sprite
+        bsr     transfer_sprite_and_print
+        bsr     transfer_sprite_and_print
+        bsr     transfer_sprite
+        ldy     #0x0810                 ; x+=16, y+=8
+        ldb     #5
+        lbsr    multiple_print_sprite
+        bsr     transfer_sprite_and_print
         bra     transfer_sprite_and_print
 
 panel_data:
+        .db 0x86, 0, 0x10, 0x34
+        .db 0x87, 0, 0xF0, 0
+        .db 0x88, 0, 0x90, 4
+        .db 0x86, 0x40, 0xA0, 0x14
+        .db 0x87, 0x40, 0, 0
+        .db 0x88, 0x40, 0x60, 4
 
 print_border:
         ldx     #sprite_scratchpad
@@ -1441,7 +1495,7 @@ print_border:
         ldy     #0x0100                 ; x+=0, y+=16
         ldb     #128
         lbsr    multiple_print_sprite
-        bsr     transfer_sprite
+        lbsr    transfer_sprite
         ldb     #128
         lbra    multiple_print_sprite
                 
