@@ -822,8 +822,21 @@ display_text_list:
         lbsr    print_border
         lbra    update_screen
 1$:     rts        
-        
+
+; U=dx,dy B=num        
 multiple_print_sprite:
+        pshs    b
+        pshs    y,u
+        lbsr    print_sprite
+        puls    y,u
+        tfr     y,d
+        addb    26,x
+        stb     26,x
+        adda    27,x
+        sta     27,x
+        puls    b
+        decb
+        bne     multiple_print_sprite
         rts
 
 ; player appear sparkles
@@ -1369,7 +1382,7 @@ build_screen_objects:
         puls    x
         lbsr    retrieve_screen
         lbsr    find_special_objs_here
-        bsr     adjust_plyr_xyz_for_room_size
+        lbsr    adjust_plyr_xyz_for_room_size
         clra
         sta     portcullis_moving
         sta     portcullis_move_cnt
@@ -1417,6 +1430,18 @@ print_border:
         bsr     transfer_sprite_and_print
         bsr     transfer_sprite_and_print
         bsr     transfer_sprite
+        ldy     #0x0008                 ; x+=8, y+=0
+        ldb     #24
+        lbsr    multiple_print_sprite
+        bsr     transfer_sprite
+        ldb     #24
+        lbsr    multiple_print_sprite
+        bsr     transfer_sprite
+        ldy     #0x0100                 ; x+=0, y+=16
+        ldb     #128
+        lbsr    multiple_print_sprite
+        bsr     transfer_sprite
+        ldb     #128
         lbra    multiple_print_sprite
                 
 border_data:
