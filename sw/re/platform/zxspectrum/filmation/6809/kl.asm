@@ -311,7 +311,7 @@ start:
         ldy     #eod-#seed_1
         lda     0x5c78                  ; random memory location
         pshs    a
-        lbsr    clr_mem
+        jsr     clr_mem
         puls    a
         sta     seed_1
         bra     main
@@ -319,10 +319,10 @@ start:
 start_menu:        
         ldx     #objs_wiped_cnt
         ldy     #eod-#objs_wiped_cnt
-        lbsr    clr_mem
+        jsr     clr_mem
         
 main:
-        lbsr    build_lookup_tbls
+        jsr     build_lookup_tbls
         clra
         sta     not_1st_screen
         sta     flags12_1
@@ -332,24 +332,24 @@ main:
         lda     seed_2
         adda    ,x
         sta     seed_1
-        lbsr    clear_scrn
-        lbsr    do_menu_selection
-        bsr     play_audio
-        bsr     shuffle_objects_required
-        lbsr    init_start_location
-        lbsr    init_sun
-        lbsr    init_special_objects
+        jsr     clear_scrn
+        jsr     do_menu_selection
+        jsr     play_audio
+        jsr     shuffle_objects_required
+        jsr     init_start_location
+        jsr     init_sun
+        jsr     init_special_objects
         
 player_dies:
-        lbsr    lose_life
+        jsr     lose_life
         
 game_loop:                
-        lbsr    build_screen_objects
+        jsr     build_screen_objects
         
 onscreen_loop:
 
 update_sprite_loop:
-        lbsr    save_2d_info
+        jsr     save_2d_info
 
 jump_to_upd_object:
 
@@ -372,33 +372,38 @@ loc_B000:
         stb     seed_3
         lda     #1
         sta     not_1st_screen
-        lbsr    handle_pause
+        jsr     handle_pause
         bsr     init_cauldron_bubbles
-        lbsr    list_objects_to_draw
-        lbsr    render_dynamic_objects
+        jsr     list_objects_to_draw
+        jsr     render_dynamic_objects
         
+        ldx     #0
 game_delay:
+        leax    1,x
+        cmpx    #1
+        bne     game_delay
+
 loc_B038:
 
 loc_B03F:
         tst     render_status_info
         beq     1$
-        lbsr    fill_attr
-        lbsr    display_objects
-        lbsr    colour_panel
-        lbsr    colour_sun_moon
-        lbsr    display_panel
+        clr     render_status_info
+        jsr     fill_attr
+        jsr     display_objects
+        jsr     colour_panel
+        jsr     colour_sun_moon
+        jsr     display_panel
         ldx     #sun_moon_scratchpad
-        lbsr    display_sun_moon_frame
-        lbsr    display_day
-        lbsr    print_days
-        lbsr    print_lives_gfx
-        lbsr    print_lives
-        lbsr    update_screen
-        lbsr    reset_objs_wipe_flag
+        jsr     display_sun_moon_frame
+        jsr     display_day
+        jsr     print_days
+        jsr     print_lives_gfx
+        jsr     print_lives
+        jsr     update_screen
+        jsr     reset_objs_wipe_flag
 
-1$:     clra
-        sta     rising_blocks_z
+1$:     clr     rising_blocks_z
         ldx     #graphic_objs_tbl
 ; check player dies
         bra     onscreen_loop
@@ -439,8 +444,8 @@ upd_131_to_133:
         rts
 
 dec_dZ_wipe_and_draw:
-        lbsr    dec_dZ_and_update_XYZ
-        lbra    set_wipe_and_draw_flags
+        jsr     dec_dZ_and_update_XYZ
+        jmp     set_wipe_and_draw_flags
 
 ; B=column (active low)
 ; returns A=row data (active high)
@@ -494,7 +499,7 @@ upd_63:
 
 spiked_ball_drop:
 draw_spiked_ball:
-        lbra    set_wipe_and_draw_flags
+        jmp     set_wipe_and_draw_flags
 
 ; spikes
 upd_23:
@@ -509,7 +514,7 @@ upd_176_177:
 
 set_deadly_wipe_and_draw_flags:
         bsr     set_both_deadly_flags
-        lbra    set_wipe_and_draw_flags
+        jmp     set_wipe_and_draw_flags
 
 set_both_deadly_flags:
         rts
@@ -522,11 +527,11 @@ ball_up:
         bra     loc_B892
 
 init_cauldron_bubbles:
-        lbra    adj_m4_m12
+        jmp     adj_m4_m12
 
 ; even more sparkles (showing next object required)
 upd_160_163:
-        lbra    set_wipe_and_draw_flags
+        jmp     set_wipe_and_draw_flags
 
 ; special objs when 1st being put into cauldron
 upd_168_to_175:
@@ -537,7 +542,7 @@ upd_164_to_167:
         rts
 
 upd_111:
-        lbra    audio_B467_wipe_and_draw
+        jmp     audio_B467_wipe_and_draw
 
 move_towards_plyr:
 
@@ -549,18 +554,18 @@ save_graphic_no:
 
 ; cauldron (bottom)
 upd_141:
-        lbra    upd_88_to_90
+        jmp     upd_88_to_90
 
 ; cauldron (top)
 upd_142: 
-        lbra    set_pixel_adj
+        jmp     set_pixel_adj
 
 ; guard and wizard (top half)
 upd_30_31_158_159:
         bra     set_deadly_wipe_and_draw_flags
 
 move_guard_wizard_NSEW:
-        lbra    jump_to_tbl_entry
+        jmp     jump_to_tbl_entry
 
 guard_NSEW_tbl: 
 
@@ -580,25 +585,25 @@ guard_S:
 game_over:
         tst     all_objs_in_cauldron
         bne     game_complete_msg
-        lbsr    clear_scrn_buffer
-        lbsr    clear_scrn
+        jsr     clear_scrn_buffer
+        jsr     clear_scrn
         ldy     #gameover_xy
         ldx     #gameover_text
         ldb     #6
-        lbsr    display_text_list
+        jsr     display_text_list
         ldy     #vidbuf+0x0fef
         ldx     #days
         ldb     #1
-        lbsr    print_BCD_number
+        jsr     print_BCD_number
 ;
-        lbsr    print_border
-        lbsr    update_screen
+        jsr     print_border
+        jsr     update_screen
 1$:     clra
         bsr     read_port
         beq     1$
 ;
         bsr     wait_for_key_release        
-        lbra    start_menu
+        jmp     start_menu
 
 wait_for_key_release:
         pshs  x
@@ -662,7 +667,7 @@ print_lives_gfx:
         sta     26,x                    ; pixel_x
         lda     #32
         sta     27,x                    ; pixel_y
-        lbsr    print_sprite
+        jsr     print_sprite
 ; attribute stuff
         rts
         
@@ -682,13 +687,13 @@ print_BCD_msd:
         lsra
         lsra                            ; shift to low nibble
         pshs    b
-        lbsr    print_8x8
+        jsr     print_8x8
         puls    b
 print_BCD_lsd:
         lda     ,x+                     ; get digit pair
         anda    #0x0f                   ; low nibble
         pshs    b
-        lbsr    print_8x8
+        jsr     print_8x8
         puls    b
         decb                            ; done all pairs?
         bne     print_BCD_msd           ; no, loop
@@ -699,7 +704,7 @@ display_day:
         stu     gfxbase_8x8
         ldx     #day_txt
         ldd     #0xf70
-        lbra    print_text
+        jmp     print_text
         
 day_txt:
         .db 0, 0, 1, 2, 0x83
@@ -710,8 +715,7 @@ day_font:
         .db 0x60, 0x60, 0x60, 0xE0, 0x60, 0x40, 0xC0, 0x80
 
 do_menu_selection:
-        clra
-        sta     suppress_border
+        clr     suppress_border
         ldx     #menu_colours
         ldb     #8
 1$:     lda     ,x
@@ -719,16 +723,16 @@ do_menu_selection:
         sta     ,x+
         decb
         bne     1$
-        lbsr    clear_scrn_buffer
-        lbsr    display_menu
+        jsr     clear_scrn_buffer
+        jsr     display_menu
         bsr     flash_menu
         
 menu_loop:
-        lbsr    display_menu
+        jsr     display_menu
         
 check_for_start_game:
 				ldb			#~(1<<0)								; 0-7
-				lbsr    read_port
+				jsr     read_port
 				bita		#(1<<4)									; <0>?
 				beq     1$                      ; no, skip
 				rts
@@ -774,14 +778,14 @@ menu_text:
 print_text_single_colour:
         ldu     #font
         stu     gfxbase_8x8
-        lbsr    calc_vidbuf_addr ; in U
+        jsr     calc_vidbuf_addr ; in U
         tfr     u,y
         bra     loc_BE56
         
 print_text_std_font:
 
 print_text:
-        lbsr    calc_vidbuf_addr
+        jsr     calc_vidbuf_addr
         tfr     u,y
         lda     ,x+                     ; attribute
 loc_BE56:
@@ -834,15 +838,15 @@ display_text_list:
         bne     1$
         inca
         sta     suppress_border
-        lbsr    print_border
-        lbra    update_screen
+        jsr     print_border
+        jmp     update_screen
 1$:     rts        
 
 ; U=dx,dy B=num        
 multiple_print_sprite:
         pshs    b
         pshs    y,u
-        lbsr    print_sprite
+        jsr     print_sprite
         puls    y,u
         tfr     y,d
         addb    26,x
@@ -856,17 +860,17 @@ multiple_print_sprite:
 
 ; player appear sparkles
 upd_120_to_126:
-        lbra    set_wipe_and_draw_flags
+        jmp     set_wipe_and_draw_flags
 
 ; last player appears sparkle
 upd_127:
-        lbra    jump_to_upd_object
+        jmp     jump_to_upd_object
 
 init_death_sparkles:                                            ; twinkly transform
 
 ; death sparkles
 upd_112_to_118_184:
-        lbra    set_wipe_and_draw_flags
+        jmp     set_wipe_and_draw_flags
 
 ; sparkles (object in cauldron)
 upd_185_187:
@@ -903,19 +907,19 @@ is_obj_moving:
 
 ; extra life
 upd_103:
-        lbra    dec_dZ_upd_XYZ_wipe_if_moving
+        jmp     dec_dZ_upd_XYZ_wipe_if_moving
         
 ; special objects being put in cauldron
 upd_104_to_110:
 audio_B467_wipe_and_draw:
-        lbra    set_wipe_and_draw_flags
+        jmp     set_wipe_and_draw_flags
         
 centre_of_room:
 add_obj_to_cauldron:        
-        lbra    upd_111
+        jmp     upd_111
         
 ret_next_obj_required:
-        lbra    add_HL_A
+        jmp     add_HL_A
         
 objects_required:
 
@@ -940,7 +944,7 @@ upd_92_to_95:
         bra     init_death_sparkles
         
 rand_legs_sprite:
-        lbra    set_wipe_and_draw_flags
+        jmp     set_wipe_and_draw_flags
         
 print_sun_moon:
         lda     seed_2
@@ -971,8 +975,8 @@ display_frame:
         pshs    u
         pshs    y
         clra
-        lbsr    fill_window
-        lbsr    print_sprite
+        jsr     fill_window
+        jsr     print_sprite
         ldx     #sprite_scratchpad
         lda     #0
         sta     7,x                   ; flags7
@@ -982,22 +986,22 @@ display_frame:
         sta     26,x                  ; pixel_x
         lda     #0
         sta     27,x                  ; pixel_y
-        lbsr    print_sprite
+        jsr     print_sprite
         lda     #208
         sta     26,x                  ; pixel_x
         lda     #0xba
         sta     0,x                   ; graphic_no
-        lbsr    print_sprite
+        jsr     print_sprite
         puls    x                     ; vidbuf addr (src)
         puls    u                     ; lines,bytes
         ldy     #coco_vram+0x17F7     ; (184,0) (dest)
-        lbra    blit_to_screen
+        jmp     blit_to_screen
 
 toggle_day_night:
         lda     0,x                   ; graphic_no
         eora    #1                    ; toggle sun/moon
         sta     0,x
-        lbsr    colour_sun_moon
+        jsr     colour_sun_moon
         lda     #176
         sta     26,x                  ; pixel_x
         lda     #1
@@ -1014,18 +1018,20 @@ inc_days:
         sta     ,u
         cmpa    #64
         lbeq    game_over
-        lbsr    print_days
+        jsr     print_days
         ldd     #0x0078                 ; (120,0)
+        pshs    x
         bsr     blit_2x8
+        puls    x
         bra     display_frame
                 
 blit_2x8:
-        lbsr    calc_vram_addr;         ; ->U
+        jsr     calc_vram_addr;         ; ->U
         tfr     u,y
-        lbsr    calc_vidbuf_addr        ; ->U
+        jsr     calc_vidbuf_addr        ; ->U
         tfr     u,x                     ; vidbuf (src)
         ldu     #0x0802                 ; 8 lines, 2 bytes        
-        lbra    blit_to_screen
+        jmp     blit_to_screen
 
 sun_moon_yoff:  
         .db 5, 6, 7, 8, 9, 0xA, 0xA, 9, 8, 7, 6, 5, 5
@@ -1050,18 +1056,18 @@ init_obj_loop:
 
 ; block
 upd_62:
-        lbra    dec_dZ_wipe_and_draw
+        jmp     dec_dZ_wipe_and_draw
 
 ; chest
 upd_85:
-        lbra    audio_B467_wipe_and_draw
+        jmp     audio_B467_wipe_and_draw
 
 ; table
 upd_84:
         bsr     upd_6_7
 
 dec_dZ_upd_XYZ_wipe_if_moving:
-        lbra    audio_B467_wipe_and_draw
+        jmp     audio_B467_wipe_and_draw
 
 ; tree wall
 upd_128_to_130:
@@ -1132,7 +1138,7 @@ update_special_objs:
 
 ; ghost
 upd_80_to_83:
-        lbra    set_deadly_wipe_and_draw_flags
+        jmp     set_deadly_wipe_and_draw_flags
         
 calc_ghost_sprite:
 set_ghost_hflip:
@@ -1210,7 +1216,7 @@ upd_48_to_53_56_to_61:
         bsr     adj_m7_m12
 
 upd_player_bottom:                                              ; dead?
-        lbra    init_death_sparkles
+        jmp     init_death_sparkles
  
 plyr_not_OOB:
 
@@ -1234,7 +1240,7 @@ clear_dX_dY:
 
 calc_plyr_dXY:
 lookup_plyr_dXY:
-        lbra    jump_to_tbl_entry
+        jmp     jump_to_tbl_entry
 
 get_sprite_dir:
         rts
@@ -1265,7 +1271,7 @@ screen_move_tbl:
 screen_west:
 screen_e_w:
 exit_screen:        
-        lbra    game_loop
+        jmp     game_loop
 
 screen_east:
         bra     screen_e_w
@@ -1336,8 +1342,9 @@ list_objects_to_draw:
 objects_to_draw:
 
 calc_display_order_and_render:
+        rts
 process_remaining_objs:
-        lbra    jump_to_tbl_entry
+        jmp     jump_to_tbl_entry
 
 off_CF69:
 
@@ -1368,8 +1375,7 @@ lose_life:
         sta     ,y+
         decb
         bne     1$
-        clra
-        sta     transform_flag_graphic
+        clr     transform_flag_graphic
         dec     lives
         lbmi    game_over
         lda     sun_moon_scratchpad
@@ -1441,13 +1447,13 @@ start_locations:
 build_screen_objects:
         tst     not_1st_screen
         beq     1$
-        lbsr    update_special_objs
+        jsr     update_special_objs
 1$:     pshs    x
-        lbsr    clear_scrn_buffer
+        jsr     clear_scrn_buffer
         puls    x
-        lbsr    retrieve_screen
-        lbsr    find_special_objs_here
-        lbsr    adjust_plyr_xyz_for_room_size
+        jsr     retrieve_screen
+        jsr     find_special_objs_here
+        jsr     adjust_plyr_xyz_for_room_size
         clra
         sta     portcullis_moving
         sta     portcullis_move_cnt
@@ -1478,7 +1484,7 @@ transfer_sprite:
 transfer_sprite_and_print:
         bsr     transfer_sprite
         pshs    u
-        lbsr    print_sprite
+        jsr     print_sprite
         puls    u
         rts
 
@@ -1488,13 +1494,13 @@ display_panel:
         bsr     transfer_sprite
         ldy     #0xf810                 ; x+=16, y-=8
         ldb     #5
-        lbsr    multiple_print_sprite
+        jsr     multiple_print_sprite
         bsr     transfer_sprite_and_print
         bsr     transfer_sprite_and_print
         bsr     transfer_sprite
         ldy     #0x0810                 ; x+=16, y+=8
         ldb     #5
-        lbsr    multiple_print_sprite
+        jsr     multiple_print_sprite
         bsr     transfer_sprite_and_print
         bra     transfer_sprite_and_print
 
@@ -1516,17 +1522,17 @@ print_border:
         bsr     transfer_sprite
         ldy     #0x0008                 ; x+=8, y+=0
         ldb     #24
-        lbsr    multiple_print_sprite
+        jsr     multiple_print_sprite
         bsr     transfer_sprite
         ldb     #24
-        lbsr    multiple_print_sprite
+        jsr     multiple_print_sprite
         bsr     transfer_sprite
         ldy     #0x0100                 ; x+=0, y+=16
         ldb     #128
-        lbsr    multiple_print_sprite
-        lbsr    transfer_sprite
+        jsr     multiple_print_sprite
+        jsr     transfer_sprite
         ldb     #128
-        lbra    multiple_print_sprite
+        jmp     multiple_print_sprite
                 
 border_data:
         .db 0x89, 0, 0, 0xA0
@@ -1539,11 +1545,11 @@ border_data:
         .db 0x8A, 0, 0xE8, 0x20
 
 colour_panel:
-        ;lbra    fill_window
+        ;jmp     fill_window
         rts
 
 colour_sun_moon:
-        ;lbra    fill_window
+        ;jmp     fill_window
         rts
 
 adjust_plyr_xyz_for_room_size:
@@ -1715,6 +1721,9 @@ update_screen:
 
 render_dynamic_objects:
 wipe_next_object:
+        jsr     calc_display_order_and_render
+        jsr     print_sun_moon
+        jsr     display_objects_carried
         rts
 
 ; X=src, y=dst, U=lines,bytes
@@ -1771,8 +1780,7 @@ build_lookup_tbls:
 2$:     lda     *c
         inc     *c
         sta     ,x+
-        clra
-        sta     255,x
+        clr     255,x
         decb
         bne     2$
 ; next 7 runs shift the previous entries
