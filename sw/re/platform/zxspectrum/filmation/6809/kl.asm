@@ -11,6 +11,10 @@
 
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
+; *** BUILD OPTIONS
+.define BUILD_OPT_ALWAYS_RENDER_ALL
+; *** end of BUILD OPTIONS
+
         .org    code_base-#0x800
         
         .bndry  0x100
@@ -22,8 +26,16 @@ lines   .equ    0x02
 bytes   .equ    0x03
 
 ; *** KNIGHT-LORE stuff here
-VFLIP   .equ    1<<7
-HFLIP   .equ    1<<6
+MAX_OBJS          .equ    40
+MAX_DRAW          .equ    48
+CAULDRON_SCREEN   .equ    136
+; standard is 5
+NO_LIVES          .equ    5
+
+; flags
+FLAG_VFLIP        .equ    1<<7
+FLAG_HFLIP        .equ    1<<6
+FLAG_DRAW         .equ    1<<4
 
 seed_1:                         .ds 1
                                 .ds 1
@@ -156,7 +168,7 @@ graphic_objs_tbl:               .ds 32
 special_objs_here:              .ds 32
 byte_5C68:                      .ds 32
 other_objs_here:                .ds 32
-                                .ds 1120
+                                .ds (MAX_OBJS-4)*32
 ; end of data
 eod                   .equ    .
 				
@@ -326,7 +338,7 @@ main:
         clra
         sta     not_1st_screen
         sta     flags12_1
-        lda     #5
+        lda     #NO_LIVES
         sta     lives
         ldx     seed_1
         lda     seed_2
@@ -347,6 +359,9 @@ game_loop:
         jsr     build_screen_objects
         
 onscreen_loop:
+        lda     seed_2
+        sta     fire_seed
+        ldx     #graphic_objs_tbl
 
 update_sprite_loop:
         jsr     save_2d_info
@@ -661,8 +676,7 @@ print_lives_gfx:
         ldx     #sprite_scratchpad
         lda     #0x8c
         sta     0,x                     ; graphic_no
-        lda     #0
-        sta     7,x                     ; flags7
+        clr     7,x                     ; flags7
         lda     #16
         sta     26,x                    ; pixel_x
         lda     #32
@@ -978,14 +992,12 @@ display_frame:
         jsr     fill_window
         jsr     print_sprite
         ldx     #sprite_scratchpad
-        lda     #0
-        sta     7,x                   ; flags7
+        clr     7,x                   ; flags7
         lda     #0x5a
         sta     0,x                   ; graphic_no
         lda     #184
         sta     26,x                  ; pixel_x
-        lda     #0
-        sta     27,x                  ; pixel_y
+        clr     27,x                  ; pixel_y
         jsr     print_sprite
         lda     #208
         sta     26,x                  ; pixel_x
@@ -1337,26 +1349,63 @@ save_2d_info:
         rts
         
 list_objects_to_draw:
+        pshs    x
+        ldb     #MAX_OBJS
+        ldx     #graphic_objs_tbl
+        ldy     #objects_to_draw
+        clr     *c
+1$:     lda     0,x                     ; graphic_no
+        beq     2$                      ; null
+.ifndef BUILD_OPT_ALWAYS_RENDER_ALL      
+        bita    #FLAG_DRAW
+        beq     2$                      ; not set
+.endif
+        lda     *c
+        sta     ,y+                     ; store object index
+2$:     inc     *c
+        leax    32,x                    ; next object
+        decb
+        bne     1$
+        lda     #0xff
+        sta     ,y                      ; end of list
+        puls    x
         rts
 
 objects_to_draw:
+        .ds MAX_DRAW
 
 calc_display_order_and_render:
-        rts
+        clr     rendered_objs_cnt
+        pshs    x,y
 process_remaining_objs:
-        jmp     jump_to_tbl_entry
+        ldu     #objects_to_draw
+1$:     lda     ,u+
+        cmpa    #0xff
+        beq     render_done
+        bita    #(1<<7)                 ; already rendered?
+        bne     1$
+        jsr     get_ptr_object          ; ->X
+        lda     -1,u
+        ora     #(1<<7)
+        sta     -1,u
+        inc     rendered_objs_cnt
+        jsr     calc_pixel_XY_and_render
+        bra     process_remaining_objs
+render_done:
+        puls    x,y
+        rts
 
 off_CF69:
 
 continue_1:
 continue_2:
 d_3467121516:
-        bra     render_obj
+        ;bra     render_obj
         
 objs_coincide:
 render_obj_no1:
-render_obj:
-render_done:
+;render_obj:
+;render_done:
         rts
 
 render_list:
@@ -1565,7 +1614,15 @@ adjust_plyr_x:
 adjust_plyr_Z_for_arch:
         rts
 
+; A=index
+; return in X
+; *** optimise???
 get_ptr_object:
+        anda    #0x7f
+        ldb     #32
+        mul
+        ldx     #graphic_objs_tbl
+        leax    d,x
         rts
 
 retrieve_screen:
@@ -1720,10 +1777,18 @@ update_screen:
         rts
 
 render_dynamic_objects:
+        clr     objs_wiped_cnt
+        pshs    x
+        tst     render_status_info
+        bne     loc_D653
+; do wiping
 wipe_next_object:
+
+loc_D653:
         jsr     calc_display_order_and_render
         jsr     print_sun_moon
         jsr     display_objects_carried
+        puls    x
         rts
 
 ; X=src, y=dst, U=lines,bytes
@@ -1806,6 +1871,20 @@ build_lookup_tbls:
         rts
 
 calc_pixel_XY:
+        lda     1,x                     ; X
+        adda    2,x                     ; +Y
+        suba    #128                    ; -128
+        adda    18,x                    ; pixel_x_adj
+        sta     26,x                    ; pixel_x
+        lda     2,x                     ; Y
+        suba    1,x                     ; -X
+        adda    #128                    ; +128
+        lsra
+        adda    3,x                     ; +Z
+        suba    #104                    ; -104
+        adda    19,x                    ; pixel_y_adj
+        sta     27,x                    ; pixel_y
+        cmpa    #192
         rts
 
 ; returns ptr sprite data in U
@@ -1818,11 +1897,21 @@ flip_sprite:
         leau    d,u
         ldu     ,u                      ; sprite data addr
         lda     ,u                      ; flip & width
-        bne     vflip_sprite_data       ; not null sprite
+        lbne    vflip_sprite_data       ; not null sprite
         leas    2,s                     ; exit from caller
         rts
 
 calc_pixel_XY_and_render:
+        lda     0,x                     ; graphic_no
+        cmpa    #1
+        bne     1$
+        clr     0,x                     ; graphic_no
+        rts
+1$:     lda     7,x                     ; flags7
+        anda    #~FLAG_DRAW
+        sta     7,x                     ; flags7
+        jsr     calc_pixel_XY
+        bcs     print_sprite
         rts
 
 ; sprites are actually vflipped in memory
@@ -1911,10 +2000,10 @@ calc_attrib_addr:
 vflip_sprite_data:
         pshs    u
         eora    7,x                     ; flags7
-        anda    #VFLIP                  ; same?
+        anda    #FLAG_VFLIP             ; same?
         beq     hflip_sprite_data       ; yes, skip
         lda     ,u
-        eora    #VFLIP
+        eora    #FLAG_VFLIP
         sta     ,u+
         anda    #0x0f                   ; width_bytes
         sta     *width
@@ -1954,10 +2043,10 @@ hflip_sprite_data:
         pshs    u
         lda     ,u                      ; flip & width
         eora    7,x                     ; flags7
-        anda    #HFLIP                  ; same?
+        anda    #FLAG_HFLIP             ; same?
         beq     flip_done               ; yes, skip
         lda     ,u
-        eora    #HFLIP
+        eora    #FLAG_HFLIP
         sta     ,u+
         anda    #0x0f                   ; width_bytes
         sta     *width
