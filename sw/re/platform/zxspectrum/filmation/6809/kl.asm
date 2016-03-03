@@ -24,6 +24,7 @@ width   .equ    0x00
 height  .equ    0x01
 lines   .equ    0x02
 bytes   .equ    0x03
+offset  .equ    0x04
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS          .equ    40
@@ -1840,31 +1841,44 @@ build_lookup_tbls:
 ; 2nd is table of shifted values (2 bytes)
 ; - 1st run seeds low values
         ldb     #0
-        stb     *c
-        ldx     #shift_tbl
+        clr     *c
 2$:     lda     *c
+        ldx     #shift_tbl+0x80
+        sta     a,x
+        leax    0x100,x
+        clr     a,x
         inc     *c
-        sta     ,x+
-        clr     255,x
         decb
         bne     2$
 ; next 7 runs shift the previous entries
-        ldx     #shift_tbl
         ldb     #7
+        ldu     #shift_tbl+0x80
 3$:     pshs    b
         ldb     #0
+        clr     *c
 4$:     pshs    b
-        lda     ,x
-        ldb     0x100,x
+        lda     *c
+        tfr     u,x                     ; base for this shift
+        ldb     a,x                     ; byte #1
+        pshs    b
+        leax    0x100,x
+        ldb     a,x                     ; byte #2
+        puls    a
         lsra
         rorb
-        sta     0x200,x
-        stb     0x300,x
-        leax    1,x
+        pshs    d                       ; b then a
+        lda     *c
+        leax    0x100,x
+        puls    b
+        stb     a,x                     ; byte #1 shifted
+        leax    0x100,x
+        puls    b
+        stb     a,x                     ; byte #2 shifted
+        inc     *c
         puls    b
         decb
         bne     4$
-        leax    0x100,x
+        leau    0x200,u                 ; base for next shift
         puls    b
         decb
         bne     3$
@@ -1922,8 +1936,72 @@ print_sprite:
         lda     26,x                    ; pixel_x
         anda    #7                      ; bit offset
         beq     loc_D76F
+; here we have a non-zero offset
+; - for now this is a completely separate routine
+        lsla                            ; x2
+        adda    #>shift_tbl
+        ldb     #0x80
+        std     *offset
+        lda     ,u+                     ; width
+        anda    #0x07
+;        inca
+        sta     24,x                    ; width_bytes
+        lda     ,u+                     ; height
+        sta     25,x                    ; height_lines
+        adda    27,x                    ; pixel_y
+        suba    #192                    ; off screen?
+        bcs     1$                      ; no, skip
+        coma
+        adda    25,x
+        sta     25,x                    ; adjust height lines
+1$:     ldb     26,x                    ; pixel_x     
+        lda     27,x                    ; pixel_y
+        tfr     u,y
+        jsr     calc_vidbuf_addr        ; ->U
+        exg     u,y
+; this next bit requires some serious optimisation
+;       X = object
+;       Y = video buffer address
+;       U = sprite data
+        ldb     25,x                    ; height_lines
+2$:     pshs    b
+        ldb     24,x                    ; width_bytes
+        pshs    x
+3$:     pshs    b
+
+        ldx     *offset
+        lda     0,u                     ; read mask
+        lda     a,x                     ; shifted mask byte 1
+        coma
+        anda    ,y                      ; from video
+        ldb     1,u                     ; read data
+        ora     b,x                     ; add shifted data byte 1
+        sta     ,y+                     ; write back to video
+
+        leax    0x100,x
+        lda     0,u                     ; read mask
+        lda     a,x                     ; shifted mask byte 2
+        coma
+        anda    ,y                      ; from video
+        ldb     1,u                     ; read data
+        ora     b,x                     ; add shifted data byte 2
+        sta     ,y                      ; write back to video
+
+        leau    2,u
+        puls    b
+        decb
+        bne     3$
+        puls    x
+        lda     #32
+        suba    24,x
+        leay    a,y                     ; next line
+        puls    b
+        decb
+        bne     2$
+        rts
 
 loc_D76F:
+print_byte_aligned:
         lda     ,u+                     ; width
         anda    #0x0f                   ; mask off flip bits
         sta     24,x                    ; width_bytes
