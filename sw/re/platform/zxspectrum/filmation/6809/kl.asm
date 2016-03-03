@@ -18,6 +18,8 @@ dp_base:                        .ds 256
 c       .equ    0x00
 width   .equ    0x00
 height  .equ    0x01
+lines   .equ    0x02
+bytes   .equ    0x03
 
 ; *** KNIGHT-LORE stuff here
 VFLIP   .equ    1<<7
@@ -772,14 +774,14 @@ menu_text:
 print_text_single_colour:
         ldu     #font
         stu     gfxbase_8x8
-        lbsr    calc_screen_buffer_addr ; in U
+        lbsr    calc_vidbuf_addr ; in U
         tfr     u,y
         bra     loc_BE56
         
 print_text_std_font:
 
 print_text:
-        lbsr    calc_screen_buffer_addr
+        lbsr    calc_vidbuf_addr
         tfr     u,y
         lda     ,x+                     ; attribute
 loc_BE56:
@@ -879,6 +881,7 @@ display_object:
 
 object_attributes:
 sprite_scratchpad:
+        .ds 32
 
 chk_pickup_drop:
         rts
@@ -963,6 +966,12 @@ display_sun_moon_frame:
         lda     a,u                   ; get entry
         sta     27,x                  ; pixel_y
 display_frame:
+        ldu     #0x1f06               ; 31 lines, 6 bytes
+        ldy     #vidbuf+0x17          ; (184,0)
+        pshs    u
+        pshs    y
+        clra
+        lbsr    fill_window
         lbsr    print_sprite
         ldx     #sprite_scratchpad
         lda     #0
@@ -979,9 +988,11 @@ display_frame:
         lda     #0xba
         sta     0,x                   ; graphic_no
         lbsr    print_sprite
-; needs to blit
-;        lbra    blit_to_screen
-        rts
+        puls    x                     ; vidbuf addr (src)
+        puls    u                     ; lines,bytes
+        ldy     #coco_vram+0x17F7     ; (184,0) (dest)
+        lbra    blit_to_screen
+
 toggle_day_night:
         lda     0,x                   ; graphic_no
         eora    #1                    ; toggle sun/moon
@@ -998,17 +1009,22 @@ toggle_day_night:
 inc_days:
         ldu     #days
         lda     ,u
-        adda    #1                    ; can't use INCA
+        adda    #1                      ; can't use INCA for DAA
         daa
         sta     ,u
         cmpa    #64
         lbeq    game_over
         lbsr    print_days
-        ldd     #0x0078
+        ldd     #0x0078                 ; (120,0)
         bsr     blit_2x8
         bra     display_frame
                 
 blit_2x8:
+        lbsr    calc_vram_addr;         ; ->U
+        tfr     u,y
+        lbsr    calc_vidbuf_addr        ; ->U
+        tfr     u,x                     ; vidbuf (src)
+        ldu     #0x0802                 ; 8 lines, 2 bytes        
         lbra    blit_to_screen
 
 sun_moon_yoff:  
@@ -1093,7 +1109,19 @@ adj_p7_m12:
 adj_p3_m12:
         bra     jp_set_pixel_adj
 
+; U=lines,bytes Y=dest, A=byte
 fill_window:
+        stu     *lines
+        ldb     *lines
+1$:     pshs    b,y
+        ldb     *bytes
+2$:     sta     ,y+
+        decb
+        bne     2$
+        puls    b,y
+        leay    32,y
+        decb
+        bne     1$
         rts
 
 find_special_objs_here:
@@ -1511,10 +1539,12 @@ border_data:
         .db 0x8A, 0, 0xE8, 0x20
 
 colour_panel:
-        lbra    fill_window
+        ;lbra    fill_window
+        rts
 
 colour_sun_moon:
-        lbra    fill_window
+        ;lbra    fill_window
+        rts
 
 adjust_plyr_xyz_for_room_size:
         rts                                                        
@@ -1687,7 +1717,21 @@ render_dynamic_objects:
 wipe_next_object:
         rts
 
+; X=src, y=dst, U=lines,bytes
 blit_to_screen:
+        stu     *lines
+        ldb     *lines
+1$:     pshs    b,x,y
+        ldb     *bytes
+2$:     lda     ,x+
+        sta     ,y+
+        decb
+        bne     2$
+        puls    b,x,y
+        leax    32,x
+        leay    -32,y
+        decb
+        bne     1$
         rts        
 
 build_lookup_tbls:
@@ -1797,7 +1841,7 @@ loc_D76F:
 1$:     ldb     26,x                    ; pixel_x     
         lda     27,x                    ; pixel_y
         tfr     u,y
-        bsr     calc_screen_buffer_addr ; U
+        bsr     calc_vidbuf_addr        ; ->U
         exg     u,y
 ; this next bit requires some serious optimisation
 ;       X = object
@@ -1824,7 +1868,7 @@ loc_D76F:
 ; A=Y, B=X
 ; addr = ((y<<8)>>3)|(x>>3)
 ; returns vidbuf address in U
-calc_screen_buffer_addr:
+calc_vidbuf_addr:
         lsra
         rorb
         lsra
@@ -1835,7 +1879,22 @@ calc_screen_buffer_addr:
         leau    vidbuf,u
         rts
 
-BC_to_attr_addr_in_DE:
+; A=Y, B=X (preserved)
+; addr = (((191-y)<<8)>>3)|(x>>3)
+; returns vidbuf address in U
+calc_vram_addr:
+        pshs    d
+        nega
+        adda    #191
+        lsra
+        rorb
+        lsra
+        rorb
+        lsra
+        rorb                            ; D=offset
+        tfr     d,u
+        leau    coco_vram,u
+        puls    d
         rts
 
 calc_attrib_addr:
