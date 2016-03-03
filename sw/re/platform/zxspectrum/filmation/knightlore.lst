@@ -4807,7 +4807,7 @@ RAM:BE32 21 08 61		     ld	     hl, #font
 RAM:BE35 22 C7 5B		     ld	     (gfxbase_8x8), hl
 RAM:BE38 C1			     pop     bc					     ; BC = Y,X
 RAM:BE39 C5			     push    bc
-RAM:BE3A CD 11 D8		     call    calc_screen_buffer_addr
+RAM:BE3A CD 11 D8		     call    calc_vidbuf_addr
 RAM:BE3D 69			     ld	     l,	c
 RAM:BE3E 60			     ld	     h,	b				     ; HL = bitmap buffer address
 RAM:BE3F 3A B6 5B		     ld	     a,	(tmp_attrib)
@@ -4827,7 +4827,7 @@ RAM:BE4C
 RAM:BE4C	     print_text:
 RAM:BE4C C1			     pop     bc
 RAM:BE4D C5			     push    bc
-RAM:BE4E CD 11 D8		     call    calc_screen_buffer_addr
+RAM:BE4E CD 11 D8		     call    calc_vidbuf_addr
 RAM:BE51 69			     ld	     l,	c
 RAM:BE52 60			     ld	     h,	b				     ; HL = bitmap buffer address
 RAM:BE53 1A			     ld	     a,	(de)				     ; attribute
@@ -5109,7 +5109,7 @@ RAM:BF6F DD 36 1B 00		     ld	     27(ix), #0				     ; pixel Y
 RAM:BF73 DD 4E 1A		     ld	     c,	26(ix)				     ; pixel X
 RAM:BF76 DD 46 1B		     ld	     b,	27(ix)				     ; pixel Y
 RAM:BF79 E5			     push    hl					     ; ptr object
-RAM:BF7A CD 11 D8		     call    calc_screen_buffer_addr
+RAM:BF7A CD 11 D8		     call    calc_vidbuf_addr
 RAM:BF7D 69			     ld	     l,	c
 RAM:BF7E 60			     ld	     h,	b
 RAM:BF7F 01 18 03		     ld	     bc, #0x318				     ; width=3,	height=24
@@ -5125,8 +5125,8 @@ RAM:BF91
 RAM:BF91	     loc_BF91:							     ; pixel X
 RAM:BF91 DD 4E 1A		     ld	     c,	26(ix)
 RAM:BF94 DD 46 1B		     ld	     b,	27(ix)				     ; pixel Y
-RAM:BF97 CD 26 D8		     call    BC_to_attr_addr_in_DE
-RAM:BF9A CD 11 D8		     call    calc_screen_buffer_addr
+RAM:BF97 CD 26 D8		     call    calc_vram_addr
+RAM:BF9A CD 11 D8		     call    calc_vidbuf_addr
 RAM:BF9D 69			     ld	     l,	c
 RAM:BF9E 60			     ld	     h,	b
 RAM:BF9F 01 03 18		     ld	     bc, #0x1803			     ; lines=24, bytes=3
@@ -5824,8 +5824,8 @@ RAM:C432	     ; =============== S U B R O U T I N E ============================
 RAM:C432
 RAM:C432
 RAM:C432	     blit_2x8:
-RAM:C432 CD 26 D8		     call    BC_to_attr_addr_in_DE
-RAM:C435 CD 11 D8		     call    calc_screen_buffer_addr
+RAM:C432 CD 26 D8		     call    calc_vram_addr
+RAM:C435 CD 11 D8		     call    calc_vidbuf_addr
 RAM:C438 69			     ld	     l,	c
 RAM:C439 60			     ld	     h,	b
 RAM:C43A 01 02 08		     ld	     bc, #0x802
@@ -9096,8 +9096,8 @@ RAM:D62A 85			     add     a,	l
 RAM:D62B 6F			     ld	     l,	a
 RAM:D62C
 RAM:D62C	     loc_D62C:
-RAM:D62C CD 26 D8		     call    BC_to_attr_addr_in_DE
-RAM:D62F CD 11 D8		     call    calc_screen_buffer_addr		     ; in BC
+RAM:D62C CD 26 D8		     call    calc_vram_addr
+RAM:D62F CD 11 D8		     call    calc_vidbuf_addr			     ; in BC
 RAM:D632 7D			     ld	     a,	l
 RAM:D633 69			     ld	     l,	c
 RAM:D634 4F			     ld	     c,	a
@@ -9354,7 +9354,7 @@ RAM:D75A
 RAM:D75A	     loc_D75A:							     ; pixel X
 RAM:D75A DD 4E 1A		     ld	     c,	26(ix)
 RAM:D75D DD 46 1B		     ld	     b,	27(ix)				     ; pixel Y
-RAM:D760 CD 11 D8		     call    calc_screen_buffer_addr
+RAM:D760 CD 11 D8		     call    calc_vidbuf_addr
 RAM:D763 ED 73 A9 5B		     ld	     (tmp_SP), sp
 RAM:D767 EB			     ex	     de, hl
 RAM:D768 F9			     ld	     sp, hl
@@ -9527,7 +9527,7 @@ RAM:D811
 RAM:D811	     ; =============== S U B R O U T I N E =======================================
 RAM:D811
 RAM:D811
-RAM:D811	     calc_screen_buffer_addr:
+RAM:D811	     calc_vidbuf_addr:
 RAM:D811 E5			     push    hl
 RAM:D812 CB 38			     srl     b
 RAM:D814 CB 19			     rr	     c
@@ -9541,13 +9541,13 @@ RAM:D822 4D			     ld	     c,	l
 RAM:D823 44			     ld	     b,	h				     ; BC = bitmap memory address
 RAM:D824 E1			     pop     hl
 RAM:D825 C9			     ret
-RAM:D825	     ; End of function calc_screen_buffer_addr
+RAM:D825	     ; End of function calc_vidbuf_addr
 RAM:D825
 RAM:D826
 RAM:D826	     ; =============== S U B R O U T I N E =======================================
 RAM:D826
 RAM:D826
-RAM:D826	     BC_to_attr_addr_in_DE:
+RAM:D826	     calc_vram_addr:
 RAM:D826 79			     ld	     a,	c
 RAM:D827 0F			     rrca
 RAM:D828 0F			     rrca
@@ -9577,7 +9577,7 @@ RAM:D843 B2			     or	     d
 RAM:D844 C6 38			     add     a,	#0x38 ;	'8'
 RAM:D846 57			     ld	     d,	a
 RAM:D847 C9			     ret
-RAM:D847	     ; End of function BC_to_attr_addr_in_DE
+RAM:D847	     ; End of function calc_vram_addr
 RAM:D847
 RAM:D848
 RAM:D848	     ; =============== S U B R O U T I N E =======================================
