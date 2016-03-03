@@ -1935,16 +1935,12 @@ print_sprite:
         bsr     flip_sprite             ; U=ptr sprite data
         lda     26,x                    ; pixel_x
         anda    #7                      ; bit offset
-        beq     loc_D76F
-; here we have a non-zero offset
-; - for now this is a completely separate routine
         lsla                            ; x2
         adda    #>shift_tbl
         ldb     #0x80
         std     *offset
         lda     ,u+                     ; width
         anda    #0x07
-;        inca
         sta     24,x                    ; width_bytes
         lda     ,u+                     ; height
         sta     25,x                    ; height_lines
@@ -1992,46 +1988,6 @@ print_sprite:
         decb
         bne     3$
         puls    x
-        lda     #32
-        suba    24,x
-        leay    a,y                     ; next line
-        puls    b
-        decb
-        bne     2$
-        rts
-
-loc_D76F:
-print_byte_aligned:
-        lda     ,u+                     ; width
-        anda    #0x0f                   ; mask off flip bits
-        sta     24,x                    ; width_bytes
-        lda     ,u+                     ; height
-        sta     25,x                    ; height_lines
-        adda    27,x                    ; pixel_y
-        suba    #192                    ; off screen?
-        bcs     1$                      ; no, skip
-        coma
-        adda    25,x
-        sta     25,x                    ; adjust height lines
-1$:     ldb     26,x                    ; pixel_x     
-        lda     27,x                    ; pixel_y
-        tfr     u,y
-        bsr     calc_vidbuf_addr        ; ->U
-        exg     u,y
-; this next bit requires some serious optimisation
-;       X = object
-;       Y = video buffer address
-;       U = sprite data
-        ldb     25,x                    ; height_lines
-2$:     pshs    b
-        ldb     24,x                    ; width_bytes
-3$:     lda     ,u+                     ; read mask
-        coma
-        anda    ,y                      ; from video
-        ora     ,u+                     ; add sprite byte
-        sta     ,y+                     ; write back to video
-        decb
-        bne     3$
         lda     #32
         suba    24,x
         leay    a,y                     ; next line
