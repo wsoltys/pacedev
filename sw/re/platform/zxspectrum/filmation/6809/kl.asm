@@ -365,14 +365,31 @@ onscreen_loop:
         ldx     #graphic_objs_tbl
 
 update_sprite_loop:
+        lds     #stack
+        inc     fire_seed
+        ldu     #ret_from_tbl_jp
+        pshs    u
         jsr     save_2d_info
 
 jump_to_upd_object:
+        ldb     0,x                     ; graphic_no
+        ldu     #upd_sprite_jmp_tbl
 
+; B=entry index, U=table
 jump_to_tbl_entry:
+        clra
+        aslb
+        rola                            ; word offset
+        jmp     [d,u]                     ; go
 
 ret_from_tbl_jp:
-        ;bra     update_sprite_loop
+; Z80   ld      a,r
+        adda    seed_3
+        sta     seed_3
+        leax    32,x                    ; next object
+        cmpx    #eod                    ; done?
+        bhs     loc_B000
+        bra     update_sprite_loop
         
 loc_B000:
         ldu     seed_2
@@ -389,7 +406,7 @@ loc_B000:
         lda     #1
         sta     not_1st_screen
         jsr     handle_pause
-        bsr     init_cauldron_bubbles
+        jsr     init_cauldron_bubbles
         jsr     list_objects_to_draw
         jsr     render_dynamic_objects
         
@@ -422,12 +439,200 @@ loc_B03F:
 1$:     clr     rising_blocks_z
         ldx     #graphic_objs_tbl
 ; check player dies
-        bra     onscreen_loop
+        jmp     onscreen_loop
         
 reset_objs_wipe_flag:
         rts
 
 upd_sprite_jmp_tbl:
+        .dw no_update
+        .dw no_update                   ; (unused)
+        .dw upd_2_4                     ; stone arch (near side)
+        .dw upd_3_5                     ; stone arch (far side)
+        .dw upd_2_4                     ; tree arch (near side)
+        .dw upd_3_5                     ; tree arch (far side)
+        .dw upd_6_7                     ; rock
+        .dw upd_6_7                     ; block
+        .dw upd_8                       ; portcullis (stationary)
+        .dw upd_9                       ; portcullis (moving)
+        .dw upd_10                      ; bricks
+        .dw upd_11                      ; more bricks
+        .dw upd_12_to_15                ; even more bricks
+        .dw upd_12_to_15                ;   "
+        .dw upd_12_to_15                ;   "
+        .dw upd_12_to_15                ;   "
+        .dw upd_16_to_21_24_to_29       ; human legs
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_22                      ; gargoyle
+        .dw upd_23                      ; spikes
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_16_to_21_24_to_29
+        .dw upd_30_31_158_159           ; guard (moving NSEW) (top half)
+        .dw upd_30_31_158_159           ;   "
+        .dw upd_32_to_47                ; player (top half)
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_32_to_47
+        .dw upd_48_to_53_56_to_61       ;   wulf legs
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_54                      ; block (moving EW)
+        .dw upd_55                      ; block (moving NS)
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_48_to_53_56_to_61
+        .dw upd_62                      ; another block
+        .dw upd_63                      ; spiked ball
+        .dw upd_64_to_79                ; player (wulf top half)
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_64_to_79
+        .dw upd_80_to_83                ; ghost
+        .dw upd_80_to_83                ;   "
+        .dw upd_80_to_83                ;   "
+        .dw upd_80_to_83                ;   "
+        .dw upd_84                      ; table
+        .dw upd_85                      ; chest
+        .dw upd_86_87                   ; fire (EW)
+        .dw upd_86_87                   ; fire (EW)
+        .dw upd_88_to_90                ; sun
+        .dw upd_88_to_90                ; moon
+        .dw upd_88_to_90                ; frame (left)
+        .dw upd_91                      ; block (dropping)
+        .dw upd_92_to_95                ; human/wulf transform
+        .dw upd_92_to_95
+        .dw upd_92_to_95
+        .dw upd_92_to_95
+        .dw upd_96_to_102               ; diamond
+        .dw upd_96_to_102               ; poison
+        .dw upd_96_to_102               ; boot
+        .dw upd_96_to_102               ; chalice
+        .dw upd_96_to_102               ; cup
+        .dw upd_96_to_102               ; bottle
+        .dw upd_96_to_102               ; crystal ball
+        .dw upd_103                     ; extra life
+        .dw upd_104_to_110              ; special object (diamond)
+        .dw upd_104_to_110              ;   " (poison)
+        .dw upd_104_to_110              ;   " (boot)
+        .dw upd_104_to_110              ;   " (chalice)
+        .dw upd_104_to_110              ;   " (cup)
+        .dw upd_104_to_110              ;   " (bottle)
+        .dw upd_104_to_110              ;   " (crytsal ball)
+        .dw upd_111                     ; sparkles
+        .dw upd_112_to_118_184          ; death sparkles
+        .dw upd_112_to_118_184          ;   "
+        .dw upd_112_to_118_184          ;   "
+        .dw upd_112_to_118_184          ;   "
+        .dw upd_112_to_118_184          ;   "
+        .dw upd_112_to_118_184          ;   "
+        .dw upd_112_to_118_184          ;   "
+        .dw upd_119                     ; last death sparkle
+        .dw upd_120_to_126              ; player appears sparkles
+        .dw upd_120_to_126              ;   "
+        .dw upd_120_to_126              ;   "
+        .dw upd_120_to_126              ;   "
+        .dw upd_120_to_126              ;   "
+        .dw upd_120_to_126              ;   "
+        .dw upd_120_to_126              ;   "
+        .dw upd_127                     ; last player appears sparkle
+        .dw upd_128_to_130              ; tree wall
+        .dw upd_128_to_130              ;   "
+        .dw upd_128_to_130              ;   "
+        .dw upd_131_to_133              ; sparkles in the cauldron room at end of game
+        .dw upd_131_to_133              ;   "
+        .dw upd_131_to_133              ;   "
+        .dw no_update
+        .dw no_update
+        .dw no_update
+        .dw no_update
+        .dw no_update
+        .dw no_update
+        .dw no_update
+        .dw upd_141                     ; cauldron (bottom)
+        .dw upd_142                     ; cauldron (top)
+        .dw upd_143                     ; block (collapsing)
+        .dw upd_144_to_149_152_to_157   ; guard & wizard (bottom half)
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_150_151                 ; guard (EW) (top half)
+        .dw upd_150_151                 ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_144_to_149_152_to_157   ;   "
+        .dw upd_30_31_158_159           ; wizard (top half)
+        .dw upd_30_31_158_159           ;   "
+        .dw upd_160_to_163              ; cauldron bubbles
+        .dw upd_160_to_163              ;   "
+        .dw upd_160_to_163              ;   "
+        .dw upd_160_to_163              ;   "
+        .dw upd_164_to_167              ; repel spell
+        .dw upd_164_to_167              ;   "
+        .dw upd_164_to_167              ;   "
+        .dw upd_164_to_167              ;   "
+        .dw upd_168_to_175              ; diamond
+        .dw upd_168_to_175              ; poison
+        .dw upd_168_to_175              ; boot
+        .dw upd_168_to_175              ; chalice
+        .dw upd_168_to_175              ; cup
+        .dw upd_168_to_175              ; bottle
+        .dw upd_168_to_175              ; crystal ball
+        .dw upd_168_to_175              ; extra life
+        .dw upd_176_177                 ; fire (stationary) (not used)
+        .dw upd_176_177                 ; fire (stationary) (not used)
+        .dw upd_178_179                 ; ball up/down
+        .dw upd_178_179                 ; ball up/down
+        .dw upd_180_181                 ; fire (NS)
+        .dw upd_180_181                 ; fire (NS)
+        .dw upd_182_183                 ; ball (bouncing around)
+        .dw upd_182_183                 ;   "
+        .dw upd_112_to_118_184          ; death sparkles
+        .dw upd_185_187                 ; last obj in cauldron sparkle
+        .dw no_update
+        .dw upd_185_187                 ; last obj in cauldron sparkle
 
 start_game_tune:
 game_over_tune:
@@ -525,6 +730,10 @@ upd_23:
 upd_86_87:
         rts
 
+; fire (moving NS)
+upd_180_181:
+        jmp     set_wipe_and_draw_flags
+
 ; fire (stationary) (not used)
 upd_176_177:
 
@@ -546,7 +755,7 @@ init_cauldron_bubbles:
         jmp     adj_m4_m12
 
 ; even more sparkles (showing next object required)
-upd_160_163:
+upd_160_to_163:
         jmp     set_wipe_and_draw_flags
 
 ; special objs when 1st being put into cauldron
@@ -1084,48 +1293,62 @@ dec_dZ_upd_XYZ_wipe_if_moving:
 
 ; tree wall
 upd_128_to_130:
+        ldd     #0xfef8                 ; -2,-8
         bra     jp_set_pixel_adj
 
 adj_m4_m12:
+        ldd     #0xfcf4                 ; -4,-12
+        bra     jp_set_pixel_adj
+
+adj_m6_m12:
+        ldd     #0xfaf4                 ; -6,-12
+        bra     jp_set_pixel_adj
 
 jp_set_pixel_adj:
         bra     set_pixel_adj
 
-adj_m6_m12:
-        bra     jp_set_pixel_adj
-
 ; rock and block
 upd_6_7:
+        ldd     #0xf8f0                 ; -8,-16
         bra     jp_set_pixel_adj
 
 ; bricks
-upd_10:                                                         ; -1, -20
+upd_10:
+        ldd     #0xffec                 ; -1,-20
         bra     jp_set_pixel_adj
 
 ; bricks
 upd_11:
+        ldd     #0xfef4                 ; -2,-12
         bra     jp_set_pixel_adj
 
 ; bricks
 upd_12_to_15:
+        ldd     #0xfcf8                 ; -4,-8
         bra     jp_set_pixel_adj
 
 adj_m8_m12:
+        ldd     #0xf8f4                 ; -8,-12
         bra     jp_set_pixel_adj
 
 adj_m7_m12:
+        ldd     #0xf9f4                 ; -7,12
         bra     jp_set_pixel_adj
 
 adj_m12_m12:
+        ldd     #0xf4f4                 ; -12,-12
         bra     jp_set_pixel_adj
 
-upd_88_to_90:                                                   ; -12, -16
+upd_88_to_90:
+        ldd     #0xf4f0                 ; -12, -16
         bra     jp_set_pixel_adj
 
 adj_p7_m12:
+        ldd     #0x7f4                  ; +7,-12
         bra     jp_set_pixel_adj
 
 adj_p3_m12:
+        ldd     #0x3f4                  ; +3,-12
         bra     jp_set_pixel_adj
 
 ; U=lines,bytes Y=dest, A=byte
@@ -1170,7 +1393,7 @@ upd_8:
 init_portcullis_down:
 
 set_wipe_and_draw_flags:
-        bra     set_draw_objs_overlapped
+        jmp     set_draw_objs_overlapped
         
 set_wipe_and_draw_IY:
         rts
@@ -1190,20 +1413,64 @@ add_dXYZ:
         rts
         
 ; arch (far side)
-upd_3_5:                                                        ; hflip?
+upd_3_5:
+        lda     7,x                     ; flags7
+        bita    #FLAG_HFLIP             ; hflip?
+        bne     adj_3_5_hflip
+        ldd     #0xfdf7                 ; -3,-9
 
+; A=y_adj, B=x_adj
 set_pixel_adj:
+        stb     18,x                    ; x_adj
+        sta     19,x                    ; y_adj
         rts
         
-adj_3_5_hflip:                                                  ; -2, -7
+adj_3_5_hflip:
+        ldd     #0xfef9                 ; -2,-7
         bra     set_pixel_adj
 
-adj_m3_p1:                                                      ; -3, +1
+adj_m3_p1:
+        ldd     #0xfd01                 ; -3,+1
+        bra     loc_C74C
 
 ; arch (near side)
-upd_2_4:                                                        ; hflip?
+upd_2_4:
+        lda     7,x                     ; flags7
+        bita    #FLAG_HFLIP             ; hflip?
+        bne     adj_2_4_hflip
+        lda     0,x                     ; graphic_no
+        cmpa    #4                      ; tree arch?
+        beq     adj_m3_p1               ; yes, go
+        ldd     #0xfdf9                 ; -3,-7
+loc_C74C:
+        bsr     set_pixel_adj
+        lda     2,x                     ; Y
+        adda    #13                     ; Y+13
+        sta     10,x                    ; centre_y
+        lda     1,x                     ; X
+        sta     9,x                     ; centre_x
+        ldu     #0x60f                  ; +6,+15
+loc_C760:
+        lda     3,x                     ; Z
+        sta     11,x                    ; centre_z
+        bsr     chk_plyr_spec_near_arch
+        bra     loc_C785
 
 adj_2_4_hflip:
+        ldd     #0xfeef                 ; -2,-17
+        bsr     set_pixel_adj
+        lda     1,x                     ; X
+        suba    #13                     ; X-13
+        sta     9,x                     ; centre_x
+        lda     2,x                     ; Y
+        sta     10,x                    ; centre_y
+        ldu     #0xf06                  ; +15,+6
+        bra     loc_C760
+loc_C785:
+        ldu     #0xf0f                  ; +15,+15
+        ldy     #graphic_objs_tbl
+        ldb     #4
+; more stuff        
         bra     lookup_plyr_dXY
 
 adj_arch_tbl:
@@ -1221,12 +1488,12 @@ is_near_to:
 
 ; sabreman legs
 upd_16_to_21_24_to_29:
-        bsr     adj_m6_m12
+        jsr     adj_m6_m12
         bra     upd_player_bottom
 
 ; wulf legs
 upd_48_to_53_56_to_61:
-        bsr     adj_m7_m12
+        jsr     adj_m7_m12
 
 upd_player_bottom:                                              ; dead?
         jmp     init_death_sparkles
@@ -1253,7 +1520,8 @@ clear_dX_dY:
 
 calc_plyr_dXY:
 lookup_plyr_dXY:
-        jmp     jump_to_tbl_entry
+        rts
+        ;jmp     jump_to_tbl_entry
 
 get_sprite_dir:
         rts
@@ -1333,12 +1601,12 @@ set_draw_objs_overlapped:
 
 ; player (human top half)
 upd_32_to_47:
-        bsr     adj_m8_m12
+        jsr     adj_m8_m12
         bra     upd_player_top
 
 ; player (wulf top half)
 upd_64_to_79:
-        bsr     adj_m12_m12
+        jsr     adj_m12_m12
 
 ; copies most information from bottom half object
 ; handles randomly looking around
