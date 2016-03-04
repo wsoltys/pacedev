@@ -33,10 +33,12 @@ CAULDRON_SCREEN   .equ    136
 ; standard is 5
 NO_LIVES          .equ    5
 
-; flags
+; flags7
 FLAG_VFLIP        .equ    1<<7
 FLAG_HFLIP        .equ    1<<6
 FLAG_DRAW         .equ    1<<4
+; flags13
+FLAG_DEAD         .equ    1<<6
 
 seed_1:                         .ds 1
                                 .ds 1
@@ -413,7 +415,7 @@ loc_B000:
         ldx     #0
 game_delay:
         leax    1,x
-        cmpx    #1
+        cmpx    #4000
         bne     game_delay
 
 loc_B038:
@@ -648,6 +650,9 @@ play_audio:
         bra     end_audio
         
 end_audio:
+        rts
+
+audio_B419:
         rts
 
 do_any_objs_intersect:
@@ -1084,10 +1089,24 @@ multiple_print_sprite:
 
 ; player appear sparkles
 upd_120_to_126:
+        jsr     adj_m4_m12
+        lda     seed_2
+        coma
+        inca
+        beq     1$
+        rts
+1$:     inc     0,x                     ; graphic_no
+        jsr     audio_B419
         jmp     set_wipe_and_draw_flags
 
 ; last player appears sparkle
 upd_127:
+        jsr     adj_m4_m12
+        lda     13,x                    ; flags13
+        anda    #~FLAG_DEAD
+        sta     13,x
+        lda     16,x                    ; stored graphic_no
+        sta     0,x                     ; graphic_no
         jmp     jump_to_upd_object
 
 init_death_sparkles:                                            ; twinkly transform
@@ -1615,6 +1634,14 @@ set_top_sprite:
         rts
         
 save_2d_info:
+        lda     24,x                    ; data_width_bytes
+        sta     28,x                    ; old_data_width_bytes
+        lda     25,x                    ; data_height_lines
+        sta     29,x                    ; old_data_height_lines
+        lda     26,x                    ; pixel_x
+        sta     30,x                    ; old_pixel_x
+        lda     27,x                    ; pixel_y
+        sta     31,x                    ; old_pixel_y
         rts
         
 list_objects_to_draw:
@@ -2055,6 +2082,9 @@ wipe_next_object:
 
 loc_D653:
         jsr     calc_display_order_and_render
+; *** HACK ***
+        jsr     update_screen
+; *** END OF HACK ***
         jsr     print_sun_moon
         jsr     display_objects_carried
         puls    x
