@@ -18,38 +18,48 @@
         .org    code_base-#0x800
         
         .bndry  0x100
-dp_base:                        .ds 256        
-c       .equ    0x00
-width   .equ    0x00
-height  .equ    0x01
-lines   .equ    0x02
-bytes   .equ    0x03
-offset  .equ    0x04
-inp     .equ    0x05
+dp_base:            .ds     256        
+z80_b               .equ    0x00
+z80_c               .equ    0x01
+z80_d               .equ    0x02
+z80_e               .equ    0x03
+z80_h               .equ    0x04
+z80_l               .equ    0x05
+width               .equ    0x08
+height              .equ    0x09
+lines               .equ    0x0a
+bytes               .equ    0x0b
+offset              .equ    0x0c
 
 ; *** KNIGHT-LORE stuff here
-MAX_OBJS          .equ    40
-MAX_DRAW          .equ    48
-CAULDRON_SCREEN   .equ    136
-; standard is 5
-NO_LIVES          .equ    5
-; inputs
-INP_LEFT          .equ    1<<0
-INP_RIGHT         .equ    1<<1
-INP_FORWARD       .equ    1<<2
-INP_JUMP          .equ    1<<3
-INP_PICKUP_DROP   .equ    1<<4
-; flags7
-FLAG_VFLIP        .equ    1<<7
-FLAG_HFLIP        .equ    1<<6
-FLAG_WIPE         .equ    1<<5
-FLAG_DRAW         .equ    1<<4
-FLAG_AUTO_ADJ     .equ    1<<3          ; for arches
-FLAG_MOVEABLE     .equ    1<<2          ; (sic)
-FLAG_IGNORE_3D    .equ    1<<1          ; ignore for 3D calcs
-FLAG_NEAR_ARCH    .equ    1<<0
-; flags13
-FLAG_DEAD         .equ    1<<6
+MAX_OBJS            .equ    40
+MAX_DRAW            .equ    48
+CAULDRON_SCREEN     .equ    136
+; standard is 5     
+NO_LIVES            .equ    5
+; inputs            
+INP_LEFT            .equ    1<<0
+INP_RIGHT           .equ    1<<1
+INP_FORWARD         .equ    1<<2
+INP_JUMP            .equ    1<<3
+INP_PICKUP_DROP     .equ    1<<4
+; flags7            
+FLAG_VFLIP          .equ    1<<7
+FLAG_HFLIP          .equ    1<<6
+FLAG_WIPE           .equ    1<<5
+FLAG_DRAW           .equ    1<<4
+FLAG_AUTO_ADJ       .equ    1<<3        ; for arches
+FLAG_MOVEABLE       .equ    1<<2        ; (sic)
+FLAG_IGNORE_3D      .equ    1<<1        ; ignore for 3D calcs
+FLAG_NEAR_ARCH      .equ    1<<0
+; flags12
+MASK_ENTERING_SCRN  .equ    0xF0
+FLAG_JUMPING        .equ    1<<3
+FLAG_Z_OOB          .equ    1<<2
+FLAG_Y_OOB          .equ    1<<1
+FLAG_X_OOB          .equ    1<<0
+; flags13           
+FLAG_DEAD           .equ    1<<6
 
 seed_1:                         .ds 1
                                 .ds 1
@@ -393,7 +403,7 @@ jump_to_tbl_entry:
         clra
         aslb
         rola                            ; word offset
-        jmp     [d,u]                     ; go
+        jmp     [d,u]                   ; go
 
 ret_from_tbl_jp:
 ; Z80   ld      a,r
@@ -664,6 +674,12 @@ end_audio:
         rts
 
 audio_B419:
+        rts
+
+audio_B4BB:
+        rts
+
+audio_B4C1:
         rts
 
 do_any_objs_intersect:
@@ -1440,6 +1456,15 @@ move_portcullis_up:
 
 dec_dZ_and_update_XYZ:
 add_dXYZ:
+        lda     1,x                     ; X
+        adda    9,x                     ; X+dX
+        sta     1,x
+        lda     2,x                     ; Y
+        adda    10,x                    ; Y+dY
+        sta     2,x
+        lda     3,x                     ; Z
+        adda    11,x                    ; Z+dZ
+        sta     3,x
         rts
         
 ; arch (far side)
@@ -1501,7 +1526,8 @@ loc_C785:
         ldy     #graphic_objs_tbl
         ldb     #4
 ; more stuff        
-        bra     lookup_plyr_dXY
+        rts
+        jmp     lookup_plyr_dXY
 
 adj_arch_tbl:
 
@@ -1539,15 +1565,15 @@ upd_player_bottom:
         jsr     check_user_input
         jsr     handle_pickup_drop
         bsr     handle_left_right
-        bsr     handle_jump
-        bsr     handle_forward
+        jsr     handle_jump
+        jsr     handle_forward
         bsr     chk_plyr_OOB
         bcc     plyr_not_OOB
 loc_C855:
         lda     0x27,x                  ; flags7 (top half)
         ora     #FLAG_IGNORE_3D
         sta     0x27,x
-        bsr     move_player
+        jsr     move_player
         lda     0x27,x                  ; flags7 (top half)
         anda    #~FLAG_IGNORE_3D
         sta     0x27,x
@@ -1569,48 +1595,225 @@ chk_plyr_OOB:
         rts
          
 handle_left_right:
+; directional stuff
+        bra     left_right_non_directional
         rts
 
 left_right_non_directional:
+        lda     13,x                    ; flags13
+        anda    #7                      ; too soon to turn (again)?
+        beq     1$                      ; no, go
+        dec     13,x                    ; flags13 - dec turn counter
+        rts
+1$:     andb    #3                      ; left/right?
+        beq     9$                      ; no, exit
+        lda     12,x                    ; flags12
+        anda    #MASK_ENTERING_SCRN
+        bne     9$
+        lda     12,x                    ; flags12
+        anda    #FLAG_JUMPING
+        bne     9$
+        bitb    #INP_FORWARD
+        bne     2$
+        pshs    b
+        jsr     audio_B4C1
+        puls    b
+2$:     lda     13,x                    ; flags13
+        ora     #2                      ; init turn delay counter
+        sta     13,x                    ; flags13
+        bitb    #INP_RIGHT
+        bne     5$
+        lda     7,x                     ; flags7
+        bita    #FLAG_HFLIP
+        bne     4$
+3$:     lda     0,x                     ; graphic_no
+        eora    #8
+        sta     0,x                     ; graphic_no
+4$:     lda     7,x                     ; flags7
+        eora    #FLAG_HFLIP
+        sta     7,x                     ; flags7
+        lda     0,x                     ; graphic_no
+        adda    #0x10
+        sta     0x20,x                  ; graphic_no (top half)
+9$:     rts
+
+5$:     lda     7,x                     ; flags7
+        bita    #FLAG_HFLIP
+        bne     3$
+        bra     4$
 
 handle_jump:
         rts
 
 handle_forward:
+        lda     12,x                    ; flags12
+        anda    #MASK_ENTERING_SCRN     ; entering screen?
+        bne     1$                      ; yes, skip
+        bita    #FLAG_JUMPING           ; already jumping?
+        bne     1$
+        bitb    INP_FORWARD
+        beq     loc_C994
+1$:     pshs    b
+        jsr     audio_B4BB
+        puls    b
+
+animate_guard_wizard_legs:
+        lda     0,x                     ; graphic_no
+        sta     *z80_e
+        inca                            ; next sprite
+        anda    #7
+        cmpa    #6                      ; wrap?
+        bne     2$                      ; no, skip
+        clra
+2$:     
+        lda     *z80_e                  ; old graphic
+        anda    #0xf8                   ; get base
+        ora     *z80_d                  ; new graphic
+        sta     0,x                     ; graphic_no
         rts
 
+loc_C994:
+        lda     0,x                     ; graphic_no
+        anda    #7
+        cmpa    #2
+        beq     9$
+        cmpa    #4
+        bne     animate_guard_wizard_legs
+9$:     rts
+        
 move_player:
+        tst     obj_dropping_into_cauldron
+        beq     1$
+        lda     #2
+        sta     11,x                    ; dZ=2
+1$:     lda     12,x                    ; flags12
+        bita    #FLAG_JUMPING           ; already jumping?
+        bne     2$
+        anda    #MASK_ENTERING_SCRN
+        bne     2$
+        bitb    #INP_FORWARD
+        beq     3$
+2$:     pshs    b
+        bsr     calc_plyr_dXY
+        puls    b
+3$:     lda     11,x                    ; dZ
+        bmi     4$
+        bitb    #INP_JUMP
+        bne     5$
+4$:     deca
+5$:     deca
+        sta     11,x                    ; dZ
+        sta     tmp_dZ
+        adda    #2
+;       call M,audio_B451
+        jsr     adj_for_out_of_bounds
+        jsr     handle_exit_screen
+        jsr     add_dXYZ
+        lda     12,x                    ; flags12
+        bita    #FLAG_Z_OOB
+        beq     clear_dX_dY
+        lda     tmp_dZ
+        bpl     clear_dX_dY
+        lda     12,x                    ; flags12
+        anda    #~FLAG_JUMPING
+        sta     12,x                    ; flags12
+
 clear_dX_dY:
+        clra
+        sta     9,x                     ; dX=0
+        sta     10,x                    ; dY=0
         rts
 
 calc_plyr_dXY:
+        lda     9,x                     ; dX
+        adda    14,x                    ; dX_adjust
+        sta     9,x                     ; dX
+        lda     10,x                    ; dY
+        adda    15,x                    ; dY_adjust
+        sta     10,x                    ; dY
+        clra
+        sta     14,x                    ; dX_adjust
+        sta     15,x                    ; dY_adjust
+        ldu     #off_CA32
+
 lookup_plyr_dXY:
-        rts
-        ;jmp     jump_to_tbl_entry
+        bsr     get_sprite_dir          ; ->A
+        tfr     a,b
+        jmp     jump_to_tbl_entry
 
 get_sprite_dir:
+        lda     7,x                     ; flags7
+        rora
+        rora
+        anda    #0x10                   ; hflip
+        sta     *z80_l
+        lda     0,x                     ; graphic_no
+        anda    #8
+        ora     *z80_l
+        rora
+        rora
+        rora
+        anda    #3
         rts
         
 off_CA32:
+        .dw     move_plyr_W             ; dX-=3
+        .dw     move_plyr_E             ; dX+=3
+        .dw     move_plyr_N             ; dY+=3
+        .dw     move_plyr_S             ; dY-=3
 
 move_plyr_W:
+        lda     9,x                     ; dX
+        adda    #-3
+loc_CA3F:
+        sta     9,x                     ; dX
         rts
 
 move_plyr_E:
+        lda     9,x                     ; dX
+        adda    #3
+        bra     loc_CA3F
 
 move_plyr_N:
+        lda     10,x                    ; dY
+        adda    #3
+loc_CA4F:
+        sta     10,x                    ; dY
         rts
 
 move_plyr_S:
+        lda     10,x                    ; dY
+        adda    #-3
+        bra     loc_CA4F
 
 adj_dZ_for_out_of_bounds:
-        rts
+        lda     room_size_Z
+        sta     *z80_d
+1$:     lda     3,x                     ; Z
+        adda    *z80_h                  ; Z+dZ
+        cmpa    *z80_d                  ; >= room height?
+        bcc     9$                      ; yes, exit
+        lda     12,x                    ; flags12
+        ora     #FLAG_Z_OOB
+        sta     12,x                    ; flags12
+        lda     *z80_h                  ; dZ
+        bsr     adj_d_for_out_of_bounds
+        sta     *z80_h                  ; new dZ
+        bne     1$                      ; check again
+9$:     rts
 
 handle_exit_screen:
+        rts
         bra     lookup_plyr_dXY
         
 adj_d_for_out_of_bounds:
-        rts
+        tsta
+        beq     9$
+        bpl     1$
+        inca
+        inca
+1$:     deca
+9$:     rts
         
 screen_move_tbl:
 
@@ -1629,7 +1832,53 @@ screen_south:
         bra     exit_screen
                 
 adj_for_out_of_bounds:
-dZ_ok:
+        lda     7,x                     ; flags7
+        bita    #FLAG_IGNORE_3D
+        beq     1$
+        rts
+1$:     ora     #FLAG_IGNORE_3D
+        sta     7,x                     ; flags7
+        lda     12,x                    ; flags12
+        anda    #0xf8                   ; clear X,Y,Z OOB
+        sta     12,x                    ; flags12
+        clr     *z80_l                  ; new dY
+        clr     *z80_c                  ; new dX
+        lda     11,x                    ; dZ
+        sta     *z80_h                  ; new dZ
+        tsta
+        beq     2$
+        bsr     adj_dZ_for_out_of_bounds
+        lda     *z80_h                  ; new dZ
+        beq     2$
+        bsr     adj_dZ_for_obj_intersect
+2$:
+        lda     9,x                     ; dX
+        sta     *z80_c                  ; new dX
+        tsta
+        beq     3$
+        bsr     adj_dX_for_out_of_bounds
+        lda     *z80_c                  ; new dX
+        beq     3$
+        bsr     adj_dX_for_obj_intersect
+3$:
+        lda     10,x                    ; dY
+        sta     *z80_l                  ; new dY
+        tsta
+        beq     4$
+        bsr     adj_dY_for_out_of_bounds
+        lda     *z80_l                  ; new dY
+        beq     4$
+        bsr     adj_dY_for_obj_intersect
+4$:
+        lda     *z80_c                  ; new dX
+        sta     9,x                     ; dX
+        lda     *z80_l                  ; new dY
+        sta     10,x                    ; dY
+        lda     *z80_h                  ; new dZ
+        sta     11,x                    ; dZ
+        lda     7,x                     ; flags7
+        anda    #~FLAG_IGNORE_3D
+        sta     7,x                     ; flags7
         rts
 
 adj_dX_for_obj_intersect:
@@ -1695,16 +1944,16 @@ list_objects_to_draw:
         ldb     #MAX_OBJS
         ldx     #graphic_objs_tbl
         ldy     #objects_to_draw
-        clr     *c
+        clr     *z80_c
 1$:     lda     0,x                     ; graphic_no
         beq     2$                      ; null
 .ifndef BUILD_OPT_ALWAYS_RENDER_ALL      
         bita    #FLAG_DRAW
         beq     2$                      ; not set
 .endif
-        lda     *c
+        lda     *z80_c
         sta     ,y+                     ; store object index
-2$:     inc     *c
+2$:     inc     *z80_c
         leax    32,x                    ; next object
         decb
         bne     1$
@@ -1754,9 +2003,10 @@ render_list:
 
 ; returns B=input
 check_user_input:
+        pshs    x
+        clrb
         lda     all_objs_in_cauldron
         ora     obj_dropping_into_cauldron
-        clrb
         bne     finished_input
 ; some non-keyboard stuff
 keyboard:
@@ -1783,6 +2033,7 @@ keyboard:
         orb     #INP_PICKUP_DROP
 finished_input:
         stb     user_input
+        puls    x
         rts
         
 lose_life:
@@ -1802,14 +2053,14 @@ lose_life:
         rora
         rora
         anda    #0x20                   ; day/night
-        sta     *c
+        sta     *z80_c
         lda     16,x                    ; plyr graphic no
         anda    #0x1f
-        adda    *c
+        adda    *z80_c
         sta     16,x
         lda     0x30,x
         anda    #0x0f
-        adda    *c
+        adda    *z80_c
         adda    #32
         sta     0x30,x
         rts                
@@ -2029,9 +2280,9 @@ found_screen:
         rora
         rora
         anda    #0x1f                   ; room size
-        sta     *c
-        adda    *c
-        adda    *c                      ; x3
+        sta     *z80_c
+        adda    *z80_c
+        adda    *z80_c                      ; x3
         ldu     #room_size_tbl
         leau    a,u                     ; ptr entry
         lda     ,u+
@@ -2050,8 +2301,7 @@ next_bg_obj:
         pshs    u
         ldu     #background_type_tbl
         asla                            ; word offset
-        leau    a,u                     ; ptr entry
-        ldu     ,u                      ; get entry
+        ldu     a,u
 next_bg_obj_sprite:
         pshs    b                       ; bytes left
         ldb     #8
@@ -2185,9 +2435,9 @@ build_lookup_tbls:
 ; first is table of bit-reversed values
         ldx     #reverse_tbl+0x80
         clrb
-        stb     *c                      ; index
+        stb     *z80_c                  ; index
 1$:     pshs    b                       ; counter
-        lda     *c                      ; get index
+        lda     *z80_c                  ; get index
         rola
         rorb
         rola
@@ -2204,8 +2454,8 @@ build_lookup_tbls:
         rorb
         rola
         rorb
-        lda     *c
-        inc     *c
+        lda     *z80_c
+        inc     *z80_c
         stb     a,x                     ; reversed
         puls    b
         decb                            ; done 256?
@@ -2213,13 +2463,13 @@ build_lookup_tbls:
 ; 2nd is table of shifted values (2 bytes)
 ; - 1st run seeds low values
         ldb     #0
-        clr     *c
-2$:     lda     *c
+        clr     *z80_c
+2$:     lda     *z80_c
         ldx     #shift_tbl+0x80
         sta     a,x
         leax    0x100,x
         clr     a,x
-        inc     *c
+        inc     *z80_c
         decb
         bne     2$
 ; next 7 runs shift the previous entries
@@ -2227,9 +2477,9 @@ build_lookup_tbls:
         ldu     #shift_tbl+0x80
 3$:     pshs    b
         ldb     #0
-        clr     *c
+        clr     *z80_c
 4$:     pshs    b
-        lda     *c
+        lda     *z80_c
         tfr     u,x                     ; base for this shift
         ldb     a,x                     ; byte #1
         pshs    b
@@ -2239,14 +2489,14 @@ build_lookup_tbls:
         lsra
         rorb
         pshs    d                       ; b then a
-        lda     *c
+        lda     *z80_c
         leax    0x100,x
         puls    b
         stb     a,x                     ; byte #1 shifted
         leax    0x100,x
         puls    b
         stb     a,x                     ; byte #2 shifted
-        inc     *c
+        inc     *z80_c
         puls    b
         decb
         bne     4$
@@ -2280,8 +2530,7 @@ flip_sprite:
         clra
         aslb
         rola
-        leau    d,u
-        ldu     ,u                      ; sprite data addr
+        ldu     d,u                     ; sprite data addr
         lda     ,u                      ; flip & width
         lbne    vflip_sprite_data       ; not null sprite
         leas    2,s                     ; exit from caller

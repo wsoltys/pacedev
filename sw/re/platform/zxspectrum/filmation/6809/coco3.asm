@@ -77,7 +77,7 @@ RAMMODE			.equ		0xFFDF
 ; $30-$33 are the alternate HIRES page, so safe
 
 coco_vram       .equ      0x0000
-code_base				.equ		  0x2000
+code_base				.equ		  0x4000
 stack						.equ		  0x7fff
 data_base        .equ     0x8000
 
