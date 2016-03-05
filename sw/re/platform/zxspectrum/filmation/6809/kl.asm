@@ -25,6 +25,7 @@ height  .equ    0x01
 lines   .equ    0x02
 bytes   .equ    0x03
 offset  .equ    0x04
+inp     .equ    0x05
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS          .equ    40
@@ -32,11 +33,21 @@ MAX_DRAW          .equ    48
 CAULDRON_SCREEN   .equ    136
 ; standard is 5
 NO_LIVES          .equ    5
-
+; inputs
+INP_LEFT          .equ    1<<0
+INP_RIGHT         .equ    1<<1
+INP_FORWARD       .equ    1<<2
+INP_JUMP          .equ    1<<3
+INP_PICKUP_DROP   .equ    1<<4
 ; flags7
 FLAG_VFLIP        .equ    1<<7
 FLAG_HFLIP        .equ    1<<6
+FLAG_WIPE         .equ    1<<5
 FLAG_DRAW         .equ    1<<4
+FLAG_AUTO_ADJ     .equ    1<<3          ; for arches
+FLAG_MOVEABLE     .equ    1<<2          ; (sic)
+FLAG_IGNORE_3D    .equ    1<<1          ; ignore for 3D calcs
+FLAG_NEAR_ARCH    .equ    1<<0
 ; flags13
 FLAG_DEAD         .equ    1<<6
 
@@ -415,7 +426,7 @@ loc_B000:
         ldx     #0
 game_delay:
         leax    1,x
-        cmpx    #4000
+        cmpx    #0001
         bne     game_delay
 
 loc_B038:
@@ -673,11 +684,11 @@ dec_dZ_wipe_and_draw:
         jsr     dec_dZ_and_update_XYZ
         jmp     set_wipe_and_draw_flags
 
-; B=column (active low)
+; A=column (active low)
 ; returns A=row data (active high)
 read_port:
 				ldx			#PIA0
-				stb			2,x											; column strobe
+				sta			2,x											; column strobe
 				lda			,x											; active low
 				coma                            ; active high
         rts
@@ -960,7 +971,7 @@ menu_loop:
         jsr     display_menu
         
 check_for_start_game:
-				ldb			#~(1<<0)								; 0-7
+				lda			#~(1<<0)								; 0-7
 				jsr     read_port
 				bita		#(1<<4)									; <0>?
 				beq     1$                      ; no, skip
@@ -1514,12 +1525,47 @@ upd_16_to_21_24_to_29:
 upd_48_to_53_56_to_61:
         jsr     adj_m7_m12
 
-upd_player_bottom:                                              ; dead?
+upd_player_bottom:
+        lda     13,x                    ; flags13
+        bita    #FLAG_DEAD              ; dead?
+        beq     1$                      ; no, skip
+        tst     all_objs_in_cauldron
+        bne     1$
+        lda     0x2d,x                  ; flags13 (top half)
+        ora     #FLAG_DEAD
+        sta     0x2d,x
         jmp     init_death_sparkles
- 
-plyr_not_OOB:
+ 1$:    jsr     chk_and_init_transform
+        jsr     check_user_input
+        jsr     handle_pickup_drop
+        bsr     handle_left_right
+        bsr     handle_jump
+        bsr     handle_forward
+        bsr     chk_plyr_OOB
+        bcc     plyr_not_OOB
+loc_C855:
+        lda     0x27,x                  ; flags7 (top half)
+        ora     #FLAG_IGNORE_3D
+        sta     0x27,x
+        bsr     move_player
+        lda     0x27,x                  ; flags7 (top half)
+        anda    #~FLAG_IGNORE_3D
+        sta     0x27,x
+        lda     12,x                    ; flags12
+        suba    #0x10                   ; entering room?
+        bcs     2$                      ; no, skip
+        sta     12,x                    ; counter dec'd
+2$:     jmp     set_wipe_and_draw_flags
 
-chk_plyr_OOB: 
+plyr_not_OOB:
+        tst     11,x                    ; dZ
+        bmi     loc_C855                ; <0
+        clr     11,x                    ; dZ=0
+        bra     loc_C855
+
+chk_plyr_OOB:
+        ; fudge for now
+        andcc   #0xFE                   ; clear carry
         rts
          
 handle_left_right:
@@ -1706,9 +1752,37 @@ render_obj_no1:
 
 render_list:
 
+; returns B=input
 check_user_input:
+        lda     all_objs_in_cauldron
+        ora     obj_dropping_into_cauldron
+        clrb
+        bne     finished_input
+; some non-keyboard stuff
 keyboard:
+        lda     #~(1<<2)
+        jsr     read_port
+        bita    #(1<<3)                 ; 'Z'?
+        beq     1$                      ; no, skip
+        orb     #INP_LEFT
+1$:     lda     #~(1<<0)
+        jsr     read_port
+        bita    #(1<<3)                 ; 'X'?
+        beq     2$                      ; no, skip
+        orb     #INP_RIGHT
+2$:     lda     #~(1<<1)
+        jsr     read_port
+        bita    #(1<<0)                 ; 'A'?
+        beq     3$                      ; no, skip
+        orb     #INP_FORWARD
+3$:     bita    #(1<<2)                 ; 'Q'?
+        beq     4$                      ; no, skip
+        orb     #INP_JUMP
+4$:     bita    #(1<<4)                 ; '1'?
+        beq     finished_input
+        orb     #INP_PICKUP_DROP
 finished_input:
+        stb     user_input
         rts
         
 lose_life:
