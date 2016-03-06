@@ -59,7 +59,18 @@ FLAG_Z_OOB          .equ    1<<2
 FLAG_Y_OOB          .equ    1<<1
 FLAG_X_OOB          .equ    1<<0
 ; flags13           
-FLAG_DEAD           .equ    1<<6
+FLAG_FATAL_HIT_YOU  .equ    1<<7        ; deadly if it hits you
+FLAG_DEAD           .equ    1<<6        ; player
+FLAG_FATAL_YOU_HIT  .equ    1<<5        ; deadly if you hit it
+FLAG_TRIGGERED      .equ    1<<3        ; dropping, collapsing block
+FLAG_UP             .equ    1<<2        ; bouncing ball
+FLAG_DROPPING       .equ    1<<2        ; spiked ball
+FLAG_NORTH          .equ    1<<1        ; NS fire
+FLAG_EAST           .equ    1<<0        ; EW fire, EW guard
+FLAG_JUST_DROPPED   .equ    1<<0        ; special objects
+MASK_DIR            .equ    0x03        ; NSEW guard & wizard
+MASK_LOOK_CNT       .equ    0x0F        ; player (top, look around cnt)
+MASK_TURN_DELAY     .equ    0x07        ; player (bottom)
 
 seed_1:                         .ds 1
                                 .ds 1
@@ -1351,7 +1362,7 @@ adj_m6_m12:
         bra     jp_set_pixel_adj
 
 jp_set_pixel_adj:
-        bra     set_pixel_adj
+        jmp     set_pixel_adj
 
 ; rock and block
 upd_6_7:
@@ -1439,9 +1450,16 @@ upd_8:
 init_portcullis_down:
 
 set_wipe_and_draw_flags:
+        lda     7,x                     ; flags7
+        ora     #FLAG_WIPE|FLAG_DRAW
+        sta     7,x                     ; flags7
         jmp     set_draw_objs_overlapped
         
 set_wipe_and_draw_IY:
+        pshs    x,y
+        tfr     y,x
+        bsr     set_wipe_and_draw_flags
+        puls    x,y
         rts
 
 init_portcullis_up:
@@ -1908,9 +1926,24 @@ adj_dY_for_out_of_bounds:
         rts
 
 calc_2d_info:
+        jsr     calc_pixel_XY
+        jsr     flip_sprite             ; ->U
+        lda     26,x                    ; pixel_x
+        anda    #7                      ; bit offset
+        ldb     ,u+                     ; sprite width
+        tsta
+        beq     1$
+        incb
+1$:     andb    #0x0f                   ; new width
+        stb     24,x                    ; data_width_bytes
+        ldb     ,u                      ; sprite height
+        stb     25,x                    ; data_height_lines
         rts
 
 set_draw_objs_overlapped:
+        ldy     #graphic_objs_tbl
+        bsr     calc_2d_info
+; more stuff
         rts
 
 ; player (human top half)
@@ -1925,8 +1958,59 @@ upd_64_to_79:
 ; copies most information from bottom half object
 ; handles randomly looking around
 upd_player_top:
+        tst     all_objs_in_cauldron
+        bne     1$
+        lda     13,x                    ; flags13
+        bita    #FLAG_DEAD
+        lbne    init_death_sparkles
+1$:     tfr     x,y
+        leay    -32,y                   ; bottom half
+        ldb     #1
+2$:     lda     b,y
+        sta     b,x
+        incb
+        cmpb    #8
+        bne     2$                      ; copy x,y,z,w,d,h,flags
+        clr     6,x                     ; height
+        lda     7,x                     ; flags7
+        ora     #FLAG_IGNORE_3D
+        sta     7,x                     ; flags7
+        lda     13,x                    ; flags13
+        anda    #MASK_LOOK_CNT
+        beq     3$
+        dec     13,x                    ; dec counter
+        bra     loc_CE27
+3$:     lda     seed_3
+        cmpa    #2
+        bcs     loc_CE33
+        cmpa    #-2
+        bcc     loc_CE40
+        lda     0,y                     ; graphic_no (bottom)
+
 set_top_sprite:
+        adda    #16
+        sta     0,x                     ; graphic_no
+loc_CE27:
+        lda     3,y                     ; Z (bottom)
+        adda    #12
+        sta     3,x                     ; Z (top)
+        jsr     set_draw_objs_overlapped
         rts
+
+loc_CE33:
+        lda     0,y                     ; graphic_no (bottom)
+        anda    #0xf8
+        ora     #6
+loc_CE3A:
+        ldb     #8
+        stb     13,x                    ; look for 8 iterations
+        bra     set_top_sprite
+
+loc_CE40:
+        lda     0,y                     ; grahic_no (bottom)
+        anda    #0xf8
+        ora     #7
+        bra     loc_CE3A
         
 save_2d_info:
         lda     24,x                    ; data_width_bytes
@@ -2400,18 +2484,115 @@ render_dynamic_objects:
         clr     objs_wiped_cnt
         pshs    x
         tst     render_status_info
-        bne     loc_D653
-; do wiping
+        lbne    loc_D653
+        ldu     #objects_to_draw
+        stu     tmp_objects_to_draw
 wipe_next_object:
+        ldu     tmp_objects_to_draw
+        lda     ,u+
+        stu     tmp_objects_to_draw
+        cmpa    #0xff                   ; end of list?
+        lbeq    loc_D653                ; yes, exit
+        jsr     get_ptr_object          ; ->X
+        lda     7,x                     ; flags7
+        bita    #FLAG_WIPE
+        beq     wipe_next_object
+        anda    #~FLAG_WIPE
+        sta     7,x                     ; flags7
+        lda     26,x                    ; pixel_x
+        suba    30,x                    ; old_pixel_x
+        lbcs    loc_D649
+        lda     30,x                    ; old_pixel_x
+        sta     *z80_c                  ; left-most pixel
+loc_D5DB:
+        lda     30,x                    ; old_pixel_x
+        lsra
+        lsra
+        lsra                            ; byte
+        adda    28,x                    ; old_data_width_bytes
+        sta     *z80_e
+        lda     26,x                    ; pixel_x
+        lsra
+        lsra
+        lsra                            ; byte
+        adda    24,x                    ; data_width_bytes
+        cmpa    *z80_e
+        bcs     1$
+        sta     *z80_e
+1$:     lda     *z80_c
+        lsra
+        lsra
+        lsra                            ; old/pixel_x byte offset
+        sta     *z80_b
+        lda     *z80_e
+        suba    *z80_b
+        sta     *z80_h                  ; number of bytes to wipe
+        lda     27,x                    ; pixel_y
+        suba    31,x                    ; < old_pixel_y?
+        bcs     loc_D64E                ; yes
+        lda     31,x                    ; old_pixel_y
+        sta     *z80_b                  ; lowest y
+loc_D60B:
+        lda     31,x                    ; old_pixel_y
+        adda    29,x                    ; data_height_lines
+        sta     *z80_e
+        lda     27,x
+        adda    25,x
+        cmpa    *z80_e
+        bcc     2$
+        lda     *z80_e
+2$:     suba    *z80_b
+        sta     *z80_l
+        lda     *z80_b
+        cmpa    #192                    ; off bottom of screen?
+        lbcc    wipe_next_object        ; yes, skip
+        adda    *z80_l
+        suba    #192
+        bcs     3$
+        nega
+        adda    *z80_l
+        sta     *z80_l                  ; number of lines to wipe
+3$:     lda     *z80_b                  ; Y (lowest)
+        ldb     *z80_c                  ; X (left-most)
+        jsr     calc_vram_addr          ; ->U
+        tfr     u,y
+        jsr     calc_vidbuf_addr        ; ->U
+        inc     objs_wiped_cnt
+        ldb     *z80_h                  ; bytes
+        lda     *z80_l                  ; lines
+        pshs    u,y,d
+        tfr     u,y                     ; dest
+        tfr     d,u                     ; lines/bytes
+        clra
+        jsr     fill_window
+        jmp     wipe_next_object
+
+loc_D649:
+        ldb     26,x                    ; pixel_x
+        stb     *z80_c
+        jmp     loc_D5DB
+
+loc_D64E:
+        ldb     27,x                    ; pixel_y
+        stb     *z80_b
+        bra     loc_D60B
 
 loc_D653:
         jsr     calc_display_order_and_render
-; *** HACK ***
-        jsr     update_screen
-; *** END OF HACK ***
         jsr     print_sun_moon
         jsr     display_objects_carried
-        puls    x
+        lda     objs_wiped_cnt
+        adda    rendered_objs_cnt
+        sta     rendered_objs_cnt
+4$:     tst     objs_wiped_cnt
+        beq     9$
+        dec     objs_wiped_cnt
+        puls    u                       ; lines/bytes
+        puls    y                       ; dest (vram)
+        puls    x                       ; src (vidbuf)
+        bsr     blit_to_screen
+        bra     4$
+9$:     puls    x
         rts
 
 ; X=src, y=dst, U=lines,bytes
