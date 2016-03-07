@@ -1623,7 +1623,7 @@ left_right_non_directional:
         beq     1$                      ; no, go
         dec     13,x                    ; flags13 - dec turn counter
         rts
-1$:     andb    #3                      ; left/right?
+1$:     bitb    #INP_LEFT|INP_RIGHT
         beq     9$                      ; no, exit
         lda     12,x                    ; flags12
         anda    #MASK_ENTERING_SCRN
@@ -1665,11 +1665,11 @@ handle_jump:
 
 handle_forward:
         lda     12,x                    ; flags12
-        anda    #MASK_ENTERING_SCRN     ; entering screen?
+        bita    #MASK_ENTERING_SCRN     ; entering screen?
         bne     1$                      ; yes, skip
         bita    #FLAG_JUMPING           ; already jumping?
         bne     1$
-        bitb    INP_FORWARD
+        bitb    #INP_FORWARD
         beq     loc_C994
 1$:     pshs    b
         jsr     audio_B4BB
@@ -1684,6 +1684,7 @@ animate_guard_wizard_legs:
         bne     2$                      ; no, skip
         clra
 2$:     
+        sta     *z80_d
         lda     *z80_e                  ; old graphic
         anda    #0xf8                   ; get base
         ora     *z80_d                  ; new graphic
