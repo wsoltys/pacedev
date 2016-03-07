@@ -30,6 +30,9 @@ height              .equ    0x09
 lines               .equ    0x0a
 bytes               .equ    0x0b
 offset              .equ    0x0c
+unused1             .equ    0x0d
+y_lim               .equ    0x0e
+x_lim               .equ    0x0f
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
@@ -1557,22 +1560,91 @@ loc_C785:
         ldu     #0xf0f                  ; +15,+15
         ldy     #graphic_objs_tbl
         ldb     #4
-; more stuff        
-        rts
+loc_C791:
+        tst     0,y                     ; graphic_no
+        beq     loc_C7D6
+        lda     7,y                     ; flags7
+        bita    #FLAG_AUTO_ADJ
+        beq     loc_C7D6
+        bsr     is_near_to
+        bcc     loc_C7D6
+        ldu     #adj_arch_tbl
         jmp     lookup_plyr_dXY
 
 adj_arch_tbl:
+        .dw     adj_ew
+        .dw     adj_ew
+        .dw     adj_ns
+        .dw     adj_ns
 
 adj_ew:
-
-adj_ns:
-        rts
+        lda     10,x                    ; dY
+        cmpa    2,y                     ; Y
+        beq     loc_C7D5
+        pshs    cc
+        lda     #1
+        puls    cc
+        bcc     1$
+        nega
+1$:     sta     15,y                    ; dY_adj
+        bra     loc_C7D5        
         
+adj_ns:
+        lda     9,x                     ; dX
+        cmpa    1,y                     ;X
+        beq     loc_C7D5
+        pshs    cc
+        lda     #1
+        puls    cc
+        bcc     1$
+        nega
+1$:     sta     14,y                    ; dX_adj
+loc_C7D5:
+loc_C7D6:
+        leay    32,y
+        decb
+        bne     loc_C791
+        rts
+       
+; U=x,y limits
 chk_plyr_spec_near_arch:
+        ldy     #graphic_objs_tbl
+        ldb     #4
+1$:     tst     0,y                     ; graphic_no
+        beq     2$
+        lda     7,y                     ; flags7
+        bita    #FLAG_AUTO_ADJ
+        beq     2$
+        stu     *y_lim                  ; & x_lim
+        bsr     is_near_to
+        bcc     2$
+        lda     7,y                     ; flags7
+        ora     #FLAG_NEAR_ARCH
+        sta     7,y                     ; flags7
+2$:     leay    32,y
+        decb
+        bne     1$
         rts
 
 is_near_to:
-        rts
+        lda     9,x                     ; dX
+        suba    1,y                     ; -X
+        bcc     1$
+        nega
+1$:     cmpa    *x_lim
+        bcc     9$
+        lda     10,x                    ; dY
+        suba    2,y                     ; -Y
+        bcc     2$
+        nega
+2$:     cmpa    *y_lim
+        bcc     9$
+        lda     11,x                    ; dZ
+        suba    3,y                     ; -Z
+        bcc     3$
+        nega
+3$:     cmpa    #4
+9$:     rts
 
 ; sabreman legs
 upd_16_to_21_24_to_29:
@@ -1600,7 +1672,7 @@ upd_player_bottom:
         jsr     handle_jump
         jsr     handle_forward
         bsr     chk_plyr_OOB
-        bcc     plyr_not_OOB
+        bcc     plyr_OOB
 loc_C855:
         lda     0x27,x                  ; flags7 (top half)
         ora     #FLAG_IGNORE_3D
@@ -1615,7 +1687,8 @@ loc_C855:
         sta     12,x                    ; counter dec'd
 2$:     jmp     set_wipe_and_draw_flags
 
-plyr_not_OOB:
+; when walking through arches
+plyr_OOB:
         tst     11,x                    ; dZ
         bmi     loc_C855                ; <0
         clr     11,x                    ; dZ=0
@@ -1851,8 +1924,17 @@ adj_dZ_for_out_of_bounds:
 9$:     rts
 
 handle_exit_screen:
-        rts
-        bra     lookup_plyr_dXY
+        lda     12,x                    ; flasg12
+        bita    #MASK_ENTERING_SCRN
+        bne     9$
+        lda     7,x                     ; flags7
+        bita    #FLAG_NEAR_ARCH
+        beq     9$
+        anda    #~FLAG_NEAR_ARCH
+        sta     7,x                     ; flags7
+        ldu     #screen_move_tbl
+        jmp     lookup_plyr_dXY
+9$:     rts
         
 adj_d_for_out_of_bounds:
         tsta
@@ -1864,20 +1946,106 @@ adj_d_for_out_of_bounds:
 9$:     rts
         
 screen_move_tbl:
+        .dw     screen_west
+        .dw     screen_east
+        .dw     screen_north
+        .dw     screen_south
 
 screen_west:
+        lda     #128
+        suba    room_size_X
+        sta     *z80_l
+        lda     1,x                     ; X
+        adda    9,x                     ; +dX
+        adda    4,x                     ; +width
+        cmpa    *z80_l
+        bcs     1$
+        rts
+1$:     clr     1,x                     ; X=0
+        lda     8,x                     ; screen
+        sta     *z80_l
+        deca                            ; screen to the west
+
 screen_e_w:
+        anda    #0x0f
+        sta     *z80_h
+        lda     *z80_l
+        anda    #0xf0
+        ora     *z80_h
+
 exit_screen:        
+        sta     8,x                     ; screen
+        lda     12,x                    ; flags12
+        ora     #0x30                   ; init room enter cntr
+        sta     12,x                    ; flags12
+        lda     0,x                     ; graphic_no
+        suba    #0x10
+        cmpa    #0x40                   ; wulf?
+        bcs     1$                      ; wtf?
+        rts
+1$:     leas    4,s
+        ldy     #plyr_spr_1_scratchpad
+        ldb     #64
+2$:     lda     ,x+
+        sta     ,y+
+        decb
+        bne     2$
+        lda     plyr_spr_1_scratchpad
+        sta     byte_D171
+        lda     plyr_spr_1_scratchpad
+        sta     byte_D191
+        lda     #120                    ; sparkles
+        sta     plyr_spr_1_scratchpad
+        sta     plyr_spr_2_scratchpad
         jmp     game_loop
 
 screen_east:
+        lda     *x_lim
+        adda    #128
+        sta     *z80_l
+        lda     1,x                     ; X
+        adda    9,x                     ; +dX
+        suba    4,x                     ; -width
+        cmpa    *z80_l
+        bcc     1$
+        rts
+1$:     lda     #-1
+        sta     1,x                     ; X=-1
+        lda     8,x                     ; screen
+        sta     *z80_l
+        inca
         bra     screen_e_w
         
 screen_north:
+        lda     *y_lim
+        adda    #128
+        sta     *z80_h
+        lda     2,x                     ; Y
+        adda    10,x                    ; +dY
+        suba    5,x                     ; -depth
+        cmpa    *z80_h
+        bcc     1$
+        rts
+1$:     lda     #-1
+        sta     2,x                     ; Y=-1
+        lda     8,x                     ; screen
+        adda    #16
         bra     exit_screen
         
 screen_south:
-        bra     exit_screen
+        lda     #128
+        suba    *y_lim
+        sta     *z80_h
+        lda     2,x                     ; Y
+        adda    10,x                    ; +dY
+        adda    5,x                     ; +depth
+        cmpa    *z80_h
+        bcs     1$
+        rts
+1$:     clr     2,x                     ; Y=0
+        lda     8,x
+        suba    #16
+        jmp     exit_screen
                 
 adj_for_out_of_bounds:
         lda     7,x                     ; flags7
@@ -1895,7 +2063,7 @@ adj_for_out_of_bounds:
         sta     *z80_h                  ; new dZ
         tsta
         beq     2$
-        bsr     adj_dZ_for_out_of_bounds
+        jsr     adj_dZ_for_out_of_bounds
         lda     *z80_h                  ; new dZ
         beq     2$
         bsr     adj_dZ_for_obj_intersect
