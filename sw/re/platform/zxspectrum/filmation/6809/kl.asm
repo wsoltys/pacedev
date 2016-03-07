@@ -30,7 +30,7 @@ height              .equ    0x09
 lines               .equ    0x0a
 bytes               .equ    0x0b
 offset              .equ    0x0c
-unused1             .equ    0x0d
+screen              .equ    0x0d
 y_lim               .equ    0x0e
 x_lim               .equ    0x0f
 
@@ -1227,7 +1227,7 @@ add_obj_to_cauldron:
         jmp     upd_111
         
 ret_next_obj_required:
-        jmp     add_HL_A
+        rts
         
 objects_required:
 
@@ -2656,12 +2656,15 @@ get_ptr_object:
         rts
 
 retrieve_screen:
+        lda     8,x
+        sta     *screen
+        pshs    x
         ldy     #other_objs_here
         ldu     #location_tbl
 
 find_screen:
         lda     ,u+                     ; location id
-        cmpa    8,x                     ; same as player?
+        cmpa    *screen                 ; same as player?
         beq     found_screen
         lda     ,u                      ; #bytes
         leau    a,u                     ; next location
@@ -2673,9 +2676,10 @@ zero_end_of_graphic_objs_tbl:
         cmpy    #eod
         beq     9$
         ldb     #32
-        bsr     zero_Y
+        jsr     zero_Y
         bra     zero_end_of_graphic_objs_tbl
-9$:     rts
+9$:     puls    x
+        rts
 
 found_screen:
         ldb     ,u+                     ; #bytes
@@ -2691,7 +2695,7 @@ found_screen:
         anda    #0x1f                   ; room size
         sta     *z80_c
         adda    *z80_c
-        adda    *z80_c                      ; x3
+        adda    *z80_c                  ; x3
         ldu     #room_size_tbl
         leau    a,u                     ; ptr entry
         lda     ,u+
@@ -2707,41 +2711,124 @@ next_bg_obj:
         lda     ,u+                     ; background type
         cmpa    #0xff                   ; done all bkgnd?
         beq     find_fg_objs            ; yes, go
-        pshs    u
-        ldu     #background_type_tbl
+        ldx     #background_type_tbl
         asla                            ; word offset
-        ldu     a,u
+        ldx     a,x
 next_bg_obj_sprite:
         pshs    b                       ; bytes left
         ldb     #8
-1$:     lda     ,u+                     ; byte from object
+1$:     lda     ,x+                     ; byte from object
         sta     ,y+                     ; copy to graphic_objs_tbl
         decb
         bne     1$
-        lda     8,x                     ; current screen
+        lda     *screen                 ; current screen
         sta     ,y+                     ; set object screen
         ldb     #23
-        bsr     zero_Y
+        jsr     zero_Y
         puls    b                       ; bytes left
-        tst     ,u                      ; done object?
+        tst     ,x                      ; done object?
         bne     next_bg_obj_sprite      ; no, loop
-        puls    u                       ; location data
         decb                            ; any bytes left?
         bne     next_bg_obj             ; yes, loop
         bra     zero_end_of_graphic_objs_tbl
 
 find_fg_objs:
+;        jmp     zero_end_of_graphic_objs_tbl
+        decb                            ; adjust for $FF
 next_fg_obj:                                                    
+        lda     ,u                      ; block/count
+        anda    #7                      ; count-1
+        inca
+        sta     *z80_c                  ; count
+        lda     ,u+                     ; block/count
+        decb                            ; adjust byte count
+        pshs    a
+        lda     ,u+                     ; location (x/y/z)
+        sta     *z80_d
+        puls    a
+        lsra
+        lsra
+        anda    #0x3e                   ; block x2
+        ldx     #block_type_tbl
+        ldx     a,x                     ; ptr object
 next_fg_obj_in_count:
+        pshs    x                       ; ptr block type data
 next_fg_obj_sprite:
-        ;bra     zero_end_of_graphic_objs_tbl
-        rts
+        lda     ,x+
+        sta     0,y                     ; graphic_no
+        lda     ,x+
+        sta     4,y                     ; width
+        lda     ,x+
+        sta     5,y                     ; depth
+        lda     ,x+
+        sta     6,y                     ; height
+        lda     ,x+
+        sta     7,y                     ; flags
+        lda     *screen                 ; screen
+        sta     8,y                     ; screen
+        lda     ,x                      ; offsets
+        lsla
+        lsla
+        lsla
+        anda    #8                      ; x1 in bit3
+        sta     *z80_e
+        lda     *z80_d                  ; location (x/y/z)
+        anda    #0x70                   ; x*16
+        adda    *z80_e                  ; x*16+x1*8
+        adda    #72                     ; x*16+x1*8+72
+        sta     1,y                     ; X
+        lda     ,x                      ; offsets
+        lsla
+        lsla
+        anda    #8                      ; y1 in bit3
+        sta     *z80_e
+        lda     *z80_d                  ; location (x/y/z)
+        lsla
+        anda    #0x70                   ; y*16
+        adda    *z80_e                  ; y*16+y1*8
+        adda    #72                     ; y*16+y1*8+72
+        sta     2,y                     ; Y
+        lda     *z80_d                  ; location (x/y/z)
+; I think we can do better than the Z80 code here
+        lsra
+        lsra
+        lsra
+        anda    #0x18                   ; z*8
+        sta     *z80_e
+        lsra                            ; z*4
+        adda    *z80_e                  ; z*12
+        adda    ,x+                     ; z*12+z1*4+junk
+        anda    #0xfc                   ; z*12+z1*4
+        sta     *z80_e
+        lda     room_size_Z
+        adda    *z80_e
+        sta     3,y                     ; Z
+        leay    9,y                     ; skip to dX
+        pshs    b
+        ldb     #23
+1$:     clr     ,y+
+        decb
+        bne     1$
+        puls    b
+        tst     ,x                      ; next entry
+        bne     next_fg_obj_sprite
+        puls    x                       ; ptr block type data
+        decb                            ; bytes remaining
+        beq     loc_D4EA
+        dec     *z80_c
+        lbeq    next_fg_obj
+        lda     ,u+                     ; next location (x/y/z)
+        sta     *z80_d
+        bra     next_fg_obj_in_count
 
-add_HL_A:
-        rts
+loc_D4EA:
+        jmp     zero_end_of_graphic_objs_tbl
 
-HL_equals_DE_x_A:
-        rts
+;add_HL_A:
+;        rts
+
+;HL_equals_DE_x_A:
+;        rts
         
 zero_Y:
         clr     ,y+
