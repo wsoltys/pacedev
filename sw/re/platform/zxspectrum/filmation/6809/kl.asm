@@ -1608,9 +1608,24 @@ plyr_not_OOB:
         bra     loc_C855
 
 chk_plyr_OOB:
-        ; fudge for now
-        andcc   #0xFE                   ; clear carry
-        rts
+        lda     room_size_X
+        suba    4,x                     ; width
+        sta     *z80_l
+        lda     room_size_Y
+        suba    5,x                     ; depth
+        sta     *z80_h
+        lda     1,x                     ; X
+        suba    #128
+        bpl     1$
+        nega
+1$:     cmpa    *z80_l
+        bcc     9$
+        lda     2,x                     ; Y
+        suba    #128
+        bpl     2$
+        nega
+2$:     cmpa    *z80_h
+9$:     rts
          
 handle_left_right:
 ; directional stuff
@@ -1919,11 +1934,53 @@ do_objs_intersect_on_z:
         rts
 
 adj_dX_for_out_of_bounds:
+        lda     12,x                    ; flags12
+        anda    #MASK_ENTERING_SCRN
+        bne     dX_ok
+        lda     7,x                     ; flags7
+        bita    #FLAG_NEAR_ARCH
+        bne     dX_ok
+1$:     lda     1,x                     ; X
+        adda    *z80_c                  ; +dX
+        suba    #128
+        bcc     2$
+        nega
+2$:     adda    4,x                     ; +width
+        cmpa    room_size_X             ; < room width?
+        bcs     dX_ok
+        lda     12,x                    ; flags12
+        ora     #FLAG_X_OOB
+        sta     12,x                    ; flags12
+        lda     *z80_c
+        jsr     adj_d_for_out_of_bounds
+        sta     *z80_c
+        bne     1$
 dX_ok:
         rts
 
 adj_dY_for_out_of_bounds:
-        dY_ok:
+        lda     12,x                    ; flags12
+        anda    #MASK_ENTERING_SCRN
+        bne     dY_ok
+        lda     7,x                     ; flags7
+        bita    #FLAG_NEAR_ARCH
+        bne     dY_ok
+1$:     lda     2,x                     ; Y
+        adda    *z80_l                  ; +dY
+        suba    #128
+        bcc     2$
+        nega
+2$:     adda    5,x                     ; +height
+        cmpa    room_size_Y             ; < room width?
+        bcs     dY_ok
+        lda     12,x                    ; flags12
+        ora     #FLAG_Y_OOB
+        sta     12,x                    ; flags12
+        lda     *z80_l
+        jsr     adj_d_for_out_of_bounds
+        sta     *z80_l
+        bne     1$
+dY_ok:
         rts
 
 calc_2d_info:
