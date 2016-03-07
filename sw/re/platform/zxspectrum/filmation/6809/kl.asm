@@ -485,10 +485,20 @@ loc_B03F:
 
 1$:     clr     rising_blocks_z
         ldx     #graphic_objs_tbl
-; check player dies
+        lda     0,x                     ; graphic_no (bottom)
+        ora     0x20,x                  ; graphic_no (top)
+        lbeq    player_dies
         jmp     onscreen_loop
         
 reset_objs_wipe_flag:
+        ldb     #40
+        ldu     #graphic_objs_tbl+7
+1$:     lda     ,u
+        anda    #~FLAG_WIPE
+        sta     ,u
+        leau    32,u
+        decb
+        bne     1$
         rts
 
 upd_sprite_jmp_tbl:
@@ -1984,9 +1994,10 @@ exit_screen:
         bcs     1$                      ; wtf?
         rts
 1$:     leas    4,s
+        tfr     x,u
         ldy     #plyr_spr_1_scratchpad
         ldb     #64
-2$:     lda     ,x+
+2$:     lda     ,u+
         sta     ,y+
         decb
         bne     2$
@@ -2547,16 +2558,90 @@ colour_sun_moon:
         rts
 
 adjust_plyr_xyz_for_room_size:
+        lda     room_size_X
+        suba    #2
+        sta     *z80_l
+        lda     room_size_Y
+        suba    #2
+        sta     *z80_h
+        lda     1,x                     ; X
+        beq     enter_arch_e
+        inca
+        beq     enter_arch_w
+        lda     2,x                     ; Y
+        beq     enter_arch_n
+        inca
+        beq     enter_arch_s
         rts                                                        
 
+enter_arch_s:
+        ldb     #200
+        bsr     adjust_plyr_Z_for_arch
+        lda     #128        
+        suba    *z80_h                  ; -(room_size_Y-2)
+        suba    5,x                     ; -depth
 adjust_plyr_y:
+        sta     2,x                     ; Y
 copy_spr_1_xy_2:
+        lda     7,x                     ; flags7
+        ora     #FLAG_DRAW
+        sta     7,x                     ; flags7
+        lda     0x27,x                  ; flags7 (top half)
+        ora     #FLAG_DRAW
+        sta     0x27,x                  ; flags7 (top half)
+        lda     1,x                     ; X
+        sta     0x21,x                  ; X (to half)
+        lda     2,x                     ; Y
+        sta     0x22,x                  ; Y (top half)
         rts
-        
+
+enter_arch_n:
+        ldb     #81
+        bsr     adjust_plyr_Z_for_arch
+        lda     *z80_h                  ; room_size_Y-2
+        adda    #128                    ; +128
+        adda    5,x                     ; +depth
+        bra     adjust_plyr_y
+
+enter_arch_w:
+        ldb     #174
+        bsr     adjust_plyr_Z_for_arch
+        lda     #128
+        suba    *z80_l                  ; -(room_size_X-2)
+        suba    4,x                     ; -width        
 adjust_plyr_x:
+        sta     1,x                     ; X
         bra     copy_spr_1_xy_2
-        
+
+enter_arch_e:
+        ldb     #55
+        bsr     adjust_plyr_Z_for_arch
+        lda     *z80_l                  ; room_size_X-2
+        adda    #128                    ; +128
+        adda    4,x                     ; +width
+        bra     adjust_plyr_x
+
 adjust_plyr_Z_for_arch:
+        stb     *z80_c                  ; offset
+        ldy     #other_objs_here
+        ldb     #4
+1$:     lda     0,y                     ; graphic_no
+        cmpa    #6                      ; arch?
+        bcc     9$                      ; no, return
+        lda     1,y                     ; X
+        adda    2,y                     ; +Y
+        cmpa    *z80_c                  ; offset
+        beq     adj_plyr_Z
+        leay    64,y
+        decb
+        bne     1$
+9$:     rts
+
+adj_plyr_Z:
+        lda     3,y                     ; Z
+        sta     3,x                     ; plyr Z (bottom)
+        adda    #12
+        sta     0x23,x                  ; plyr Z (top)
         rts
 
 ; A=index
