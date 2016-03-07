@@ -39,7 +39,7 @@ RAMMODE			.equ		0xFFDF
 
 ;.define       CARTRIDGE
 .define			GFX_1BPP
-.define     GFX_RGB
+;.define     GFX_RGB
 
 ; *** derived - do no edit
 

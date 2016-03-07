@@ -226,25 +226,31 @@ shift_tbl             .equ    0xd000
 ; - spectrum format : B=1, R=2, G=4
 ; -     coco format : RGBRGB
 
+ATTR_BLACK      .equ  0
+ATTR_BLUE       .equ  1
+ATTR_RED        .equ  2
+ATTR_MAGENTA    .equ  3
+ATTR_GREEN      .equ  4
+ATTR_CYAN       .equ  5
+ATTR_YELLOW     .equ  6
+ATTR_WHITE      .equ  7
+
 speccy_pal:
 ;       black, blue, red, magenta, green, cyan, yellow, grey/white
-.ifdef GFX_1BPP
-  .ifdef GFX_RGB
-      .db 0x00<<0, 0x07*9, 0, 0, 0, 0, 0, 0
-      .db 0, 0, 0, 0, 0, 0, 0, 0
-  .else
-      .db 0, 63, 0, 0, 0, 0, 0, 0
-      .db 0, 0, 0, 0, 0, 0, 0, 0
-  .endif
+.ifdef GFX_RGB
+    .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
+    .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
 .else
-  .ifdef GFX_RGB
-      .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
-      .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
-  .else
-      .db 0, 12, 7, 9, 3, 29, 4, 32
-      .db 0, 28, 23, 41, 17, 61, 51, 63
-  .endif
+    .db 0, 12, 7, 9, 3, 29, 4, 32
+    .db 0, 28, 23, 41, 17, 61, 51, 63
 .endif
+
+osd_set_palette:
+        anda    #7
+        ldu     #speccy_pal+8           ; bright
+        lda     a,u
+        sta     PALETTE+1
+        rts
 				
 start_coco:
 				orcc		#0x50										; disable interrupts
@@ -392,7 +398,7 @@ player_dies:
         
 game_loop:                
         jsr     build_screen_objects
-        
+
 onscreen_loop:
         lda     seed_2
         sta     fire_seed
@@ -467,6 +473,10 @@ loc_B03F:
         jsr     print_days
         jsr     print_lives_gfx
         jsr     print_lives
+; added for Coco3 port
+        lda     curr_room_attrib
+        jsr     osd_set_palette
+;
         jsr     update_screen
         jsr     reset_objs_wipe_flag
 
@@ -1088,6 +1098,10 @@ toggle_selected:
 
 display_menu:
 ;        ldx     #menu_colours
+; added for Coco3 port
+        lda     #ATTR_WHITE
+        jsr     osd_set_palette
+;
         ldy     #menu_xy
         ldx     #menu_text
         ldb     #8
