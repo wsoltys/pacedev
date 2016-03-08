@@ -709,7 +709,13 @@ play_audio:
 end_audio:
         rts
 
+audio_B3E9:
+        rts
+
 audio_B419:
+        rts
+
+audio_B451:
         rts
 
 audio_B4BB:
@@ -751,13 +757,33 @@ read_port:
 upd_182_183:
         rts
 
-; block (high?)
+; block (dropping)
 upd_91:
+        jsr     upd_6_7
+        lda     13,x                    ; flags13
+        bita    #FLAG_TRIGGERED
+        bne     1$
         rts
+1$:     anda    #~FLAG_TRIGGERED
+        sta     13,x                    ; flags13
+        clr     11,x                    ; dZ=0
+        jsr     dec_dZ_and_update_XYZ
+        lda     12,x                    ; flags12
+        bita    #FLAG_Z_OOB
+        bne     1$
+        jsr     audio_B451
+        jmp     set_wipe_and_draw_flags
 
 ; collapsing block
 upd_143:
+        jsr     upd_6_7
+        lda     13,x                    ; flags13
+        bita    #FLAG_TRIGGERED
+        bne     1$
         rts
+1$:     lda     #184                    ; sparkles
+        sta     0,x                     ; graphic_no
+        jsr     upd_112_to_118_184
 
 ; block (moving NS)
 upd_55:
@@ -780,6 +806,8 @@ set_guard_wizard_sprite:
 
 ; gargoyle
 upd_22:
+        bsr     set_both_deadly_flags
+        jmp     adj_m7_m12
         rts
 
 ; spiked ball
@@ -896,7 +924,7 @@ game_over:
         jsr     print_border
         jsr     update_screen
 1$:     clra
-        bsr     read_port
+        jsr     read_port
         beq     1$
 ;
         bsr     wait_for_key_release        
@@ -1368,6 +1396,9 @@ init_obj_loop:
 
 ; block
 upd_62:
+        bsr     upd_6_7
+        jsr     clear_dX_dY
+        jsr     audio_B3E9
         jmp     dec_dZ_wipe_and_draw
 
 ; chest
@@ -2764,6 +2795,28 @@ next_fg_obj_in_count:
         pshs    x                       ; ptr block type data
 next_fg_obj_sprite:
         lda     ,x+
+; start of hack for demo
+        cmpa    #0x06                   ; block
+        beq     7$
+        cmpa    #0x07                   ; rock
+        beq     7$
+        cmpa    #0x16                   ; gargoyle
+        beq     7$
+        cmpa    #0x17                   ; spikes
+        beq     7$
+        cmpa    #0x36                   ; moving block (EW)
+        beq     7$
+        cmpa    #0x37                   ; moving block (NS)
+        beq     7$
+        cmpa    #0x3E                   ; another block 
+        beq     7$
+        cmpa    #0x5B                   ; block (dropping)
+        beq     7$
+        cmpa    #0x8F                   ; block (collapsing)
+        beq     7$
+        bra     hack1
+7$:
+; end of hack for demo
         sta     0,y                     ; graphic_no
         lda     ,x+
         sta     4,y                     ; width
@@ -2823,8 +2876,14 @@ next_fg_obj_sprite:
         decb
         bne     1$
         puls    b
+; start of hack for demo
+        bra     hack2
+hack1:
+        leax    5,x
+hack2:
+; end of hack for demo
         tst     ,x                      ; next entry
-        bne     next_fg_obj_sprite
+        lbne    next_fg_obj_sprite
         puls    x                       ; ptr block type data
         decb                            ; bytes remaining
         beq     loc_D4EA
@@ -2832,7 +2891,7 @@ next_fg_obj_sprite:
         lbeq    next_fg_obj
         lda     ,u+                     ; next location (x/y/z)
         sta     *z80_d
-        bra     next_fg_obj_in_count
+        jmp     next_fg_obj_in_count
 
 loc_D4EA:
         jmp     zero_end_of_graphic_objs_tbl
