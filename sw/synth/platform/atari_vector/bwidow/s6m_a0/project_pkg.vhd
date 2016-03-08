@@ -22,18 +22,15 @@ package project_pkg is
 	
 	constant PACE_JAMMA	                      : PACEJamma_t := PACE_JAMMA_NONE;
   
-	constant PACE_VIDEO_H_SIZE				        : integer := 1024/2;
-	constant PACE_VIDEO_V_SIZE				        : integer := 768/2;
-
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 2;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/2 = 12MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 24;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 25; 	-- 24*25/24 = 25MHz
-	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
-	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
-  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
-  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 2;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;   -- 24*1/2 = 12MHz
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 24;
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 25; 	-- 24*25/24 = 25MHz
+--	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+--	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+--  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
@@ -63,15 +60,15 @@ package project_pkg is
 --  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
 --  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
   
---  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1024x768_60Hz;
---  constant PACE_CLK0_DIVIDE_BY              : natural := 3;
---  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;       -- 24*5/3 = 40MHz
---  constant PACE_CLK1_DIVIDE_BY              : natural := 24;
---  constant PACE_CLK1_MULTIPLY_BY            : natural := 65;  	  -- 24*65/24 = 65MHz
---  constant PACE_VIDEO_H_SCALE       	      : integer := 1;
---  constant PACE_VIDEO_V_SCALE       	      : integer := 1;
---  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
---  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1024x768_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 2;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 1;       -- 24*1/2 = 12MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 24;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 65;  	  -- 24*65/24 = 65MHz
+  constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+  constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
@@ -118,8 +115,13 @@ package project_pkg is
   --
 	-- Black Widow-specific constants
 	--
-	
+  constant BWIDOW_H_BITS                    : integer := 9;
+  constant BWIDOW_V_BITS                    : integer := 9;
+  	
 	-- derived - do not edit
+
+	constant PACE_VIDEO_H_SIZE				        : integer := 2**BWIDOW_H_BITS;
+	constant PACE_VIDEO_V_SIZE				        : integer := 2**BWIDOW_V_BITS;
 
   constant S6M_EMULATE_SRAM                 : boolean := false;
   constant PACE_HAS_FLASH                   : boolean := S6M_EMULATE_FLASH;
