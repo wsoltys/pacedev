@@ -40,6 +40,8 @@ MAX_DRAW            .equ    48
 CAULDRON_SCREEN     .equ    136
 ; standard is 5     
 NO_LIVES            .equ    5
+START_LOC           .equ    47
+
 ; inputs            
 INP_LEFT            .equ    1<<0
 INP_RIGHT           .equ    1<<1
@@ -790,7 +792,8 @@ draw_spiked_ball:
 
 ; spikes
 upd_23:
-        rts
+        bsr     set_both_deadly_flags
+        jmp     upd_6_7
 
 ; fire (moving EW)
 upd_86_87:
@@ -808,6 +811,9 @@ set_deadly_wipe_and_draw_flags:
         jmp     set_wipe_and_draw_flags
 
 set_both_deadly_flags:
+        lda     13,x                    ; flags13
+        ora     #FLAG_FATAL_HIT_YOU|FLAG_FATAL_YOU_HIT
+        sta     13,x                    ; flags13
         rts
 
 ; ball up/down
@@ -900,7 +906,7 @@ wait_for_key_release:
         pshs  x
         ldx   #0
 1$:     clra
-        bsr   read_port
+        jsr   read_port
         beq   9$
         leax  -1,x
         bne   1$
@@ -2442,6 +2448,9 @@ init_start_location:
         anda    #3
         ldu     #start_locations
         lda     a,u                     ; get entry
+.ifdef START_LOC
+        lda     #START_LOC              ; override
+.endif
         sta     start_loc_1
         sta     start_loc_2
         rts
@@ -2773,6 +2782,10 @@ next_fg_obj_sprite:
         anda    #8                      ; x1 in bit3
         sta     *z80_e
         lda     *z80_d                  ; location (x/y/z)
+        lsla
+        lsla
+        lsla
+        lsla
         anda    #0x70                   ; x*16
         adda    *z80_e                  ; x*16+x1*8
         adda    #72                     ; x*16+x1*8+72
