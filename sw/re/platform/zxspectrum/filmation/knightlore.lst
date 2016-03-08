@@ -3742,7 +3742,7 @@ RAM:B67A DD 77 09		     ld	     9(ix), a
 RAM:B67D DD 36 0A 00		     ld	     10(ix), #0				     ; new dY=0
 RAM:B681 18 E5			     jr	     loc_B668
 RAM:B683	     ; ---------------------------------------------------------------------------
-RAM:B683	     ; block (high?)
+RAM:B683	     ; block (dropping)
 RAM:B683
 RAM:B683	     upd_91:
 RAM:B683 CD E3 C4		     call    upd_6_7
@@ -6560,7 +6560,7 @@ RAM:C7FE	     ; =============== S U B R O U T I N E ============================
 RAM:C7FE
 RAM:C7FE
 RAM:C7FE	     is_near_to:
-RAM:C7FE DD 7E 09		     ld	     a,	9(ix)				     ; dX
+RAM:C7FE DD 7E 09		     ld	     a,	9(ix)				     ; centre_x
 RAM:C801 FD 96 01		     sub     1(iy)				     ; sub X
 RAM:C804 30 02			     jr	     NC, loc_C808
 RAM:C806 ED 44			     neg
@@ -6568,7 +6568,7 @@ RAM:C808
 RAM:C808	     loc_C808:
 RAM:C808 BD			     cp	     l
 RAM:C809 D0			     ret     NC
-RAM:C80A DD 7E 0A		     ld	     a,	10(ix)				     ; dY
+RAM:C80A DD 7E 0A		     ld	     a,	10(ix)				     ; centre_y
 RAM:C80D FD 96 02		     sub     2(iy)				     ; sub Y
 RAM:C810 30 02			     jr	     NC, loc_C814
 RAM:C812 ED 44			     neg
@@ -6576,7 +6576,7 @@ RAM:C814
 RAM:C814	     loc_C814:
 RAM:C814 BC			     cp	     h
 RAM:C815 D0			     ret     NC
-RAM:C816 DD 7E 0B		     ld	     a,	11(ix)				     ; dZ
+RAM:C816 DD 7E 0B		     ld	     a,	11(ix)				     ; centre_z
 RAM:C819 FD 96 03		     sub     3(iy)				     ; sub Z
 RAM:C81C 30 02			     jr	     NC, loc_C820
 RAM:C81E ED 44			     neg
@@ -6616,7 +6616,7 @@ RAM:C847 CD 9F C8		     call    handle_left_right
 RAM:C84A CD 48 C9		     call    handle_jump
 RAM:C84D CD 69 C9		     call    handle_forward
 RAM:C850 CD 7A C8		     call    chk_plyr_OOB
-RAM:C853 30 18			     jr	     NC, plyr_not_OOB
+RAM:C853 30 18			     jr	     NC, plyr_OOB
 RAM:C855
 RAM:C855	     loc_C855:							     ; fudge near arch
 RAM:C855 DD CB 27 CE		     set     1,	0x27(ix)
@@ -6630,8 +6630,9 @@ RAM:C86A
 RAM:C86A	     loc_C86A:
 RAM:C86A C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:C86D	     ; ---------------------------------------------------------------------------
+RAM:C86D	     ; when walking through arches
 RAM:C86D
-RAM:C86D	     plyr_not_OOB:						     ; dZ
+RAM:C86D	     plyr_OOB:							     ; dZ
 RAM:C86D DD 7E 0B		     ld	     a,	11(ix)
 RAM:C870 A7			     and     a					     ; <0?
 RAM:C871 FA 55 C8		     jp	     M,	loc_C855			     ; yes, go
@@ -8466,20 +8467,20 @@ RAM:D325 6F			     ld	     l,	a
 RAM:D326 3A AC 5B		     ld	     a,	(room_size_Y)
 RAM:D329 D6 02			     sub     #2
 RAM:D32B 67			     ld	     h,	a
-RAM:D32C DD 7E 01		     ld	     a,	1(ix)				     ; plyr_spr_1 X
+RAM:D32C DD 7E 01		     ld	     a,	1(ix)				     ; X
 RAM:D32F A7			     and     a					     ; 0?
-RAM:D330 28 4D			     jr	     Z,	loc_D37F			     ; yes, go
+RAM:D330 28 4D			     jr	     Z,	enter_arch_e			     ; yes, go
 RAM:D332 3C			     inc     a					     ; -1?
-RAM:D333 28 3A			     jr	     Z,	loc_D36F			     ; yes, go
-RAM:D335 DD 7E 02		     ld	     a,	2(ix)				     ; plyr_spr_2 Y
+RAM:D333 28 3A			     jr	     Z,	enter_arch_w			     ; yes, go
+RAM:D335 DD 7E 02		     ld	     a,	2(ix)				     ; Y
 RAM:D338 A7			     and     a					     ; 0?
-RAM:D339 28 27			     jr	     Z,	loc_D362			     ; yes, go
+RAM:D339 28 27			     jr	     Z,	enter_arch_n			     ; yes, go
 RAM:D33B 3C			     inc     a					     ; -1?
-RAM:D33C 28 01			     jr	     Z,	loc_D33F			     ; yes, go
+RAM:D33C 28 01			     jr	     Z,	enter_arch_s			     ; yes, go
 RAM:D33E C9			     ret
 RAM:D33F	     ; ---------------------------------------------------------------------------
 RAM:D33F
-RAM:D33F	     loc_D33F:
+RAM:D33F	     enter_arch_s:
 RAM:D33F 0E C8			     ld	     c,	#200
 RAM:D341 CD 8C D3		     call    adjust_plyr_Z_for_arch
 RAM:D344 3E 80			     ld	     a,	#128				     ; 128
@@ -8499,7 +8500,7 @@ RAM:D35E DD 77 22		     ld	     0x22(ix), a			     ; set plyr_spr_2 Y
 RAM:D361 C9			     ret
 RAM:D362	     ; ---------------------------------------------------------------------------
 RAM:D362
-RAM:D362	     loc_D362:
+RAM:D362	     enter_arch_n:
 RAM:D362 0E 51			     ld	     c,	#81
 RAM:D364 CD 8C D3		     call    adjust_plyr_Z_for_arch
 RAM:D367 7C			     ld	     a,	h				     ; room_size_Y-2
@@ -8508,7 +8509,7 @@ RAM:D36A DD 86 05		     add     a,	5(ix)				     ; add depth
 RAM:D36D 18 DB			     jr	     adjust_plyr_y
 RAM:D36F	     ; ---------------------------------------------------------------------------
 RAM:D36F
-RAM:D36F	     loc_D36F:
+RAM:D36F	     enter_arch_w:
 RAM:D36F 0E AE			     ld	     c,	#174
 RAM:D371 CD 8C D3		     call    adjust_plyr_Z_for_arch
 RAM:D374 3E 80			     ld	     a,	#128
@@ -8520,7 +8521,7 @@ RAM:D37A DD 77 01		     ld	     1(ix), a
 RAM:D37D 18 CE			     jr	     copy_spr_1_xy_2
 RAM:D37F	     ; ---------------------------------------------------------------------------
 RAM:D37F
-RAM:D37F	     loc_D37F:
+RAM:D37F	     enter_arch_e:
 RAM:D37F 0E 37			     ld	     c,	#55
 RAM:D381 CD 8C D3		     call    adjust_plyr_Z_for_arch
 RAM:D384 7D			     ld	     a,	l				     ; room_size_X-2
@@ -8545,13 +8546,13 @@ RAM:D39A D0			     ret     NC					     ; no, return
 RAM:D39B FD 7E 01		     ld	     a,	1(iy)				     ; X
 RAM:D39E FD 86 02		     add     a,	2(iy)				     ; (X+Y)=pixelY
 RAM:D3A1 B9			     cp	     c					     ; match?
-RAM:D3A2 28 05			     jr	     Z,	loc_D3A9			     ; yes, adjust player
+RAM:D3A2 28 05			     jr	     Z,	adj_plyr_Z			     ; yes, adjust player
 RAM:D3A4 FD 19			     add     iy, de				     ; next object sprite pair
 RAM:D3A6 10 ED			     djnz    loc_D395				     ; loop through all	arches
 RAM:D3A8 C9			     ret
 RAM:D3A9	     ; ---------------------------------------------------------------------------
 RAM:D3A9
-RAM:D3A9	     loc_D3A9:							     ; arch Z
+RAM:D3A9	     adj_plyr_Z:						     ; arch Z
 RAM:D3A9 FD 7E 03		     ld	     a,	3(iy)
 RAM:D3AC DD 77 03		     ld	     3(ix), a				     ; set player_sprite_1 Z
 RAM:D3AF C6 0C			     add     a,	#12
