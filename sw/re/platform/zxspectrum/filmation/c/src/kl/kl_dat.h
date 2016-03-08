@@ -5,7 +5,7 @@
 
 typedef enum
 {
-  GFX_NONE = 0,
+  GFX_NOTDEFINED,
   GFX_CPC,
   GFX_ZX
   

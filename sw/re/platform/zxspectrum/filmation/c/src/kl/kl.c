@@ -108,7 +108,7 @@ INTERNAL internal = { 0, 0, 0 };
   static jmp_buf game_loop_env_buf;
 #endif
 
-GFX_E gfx = GFX_NONE;
+GFX_E gfx = GFX_NOTDEFINED;
 static uint8_t const **background_type_tbl;
 static const uint8_t **sprite_tbl;
 static const uint8_t **border_data;
@@ -393,6 +393,8 @@ static void print_sprite (uint8_t attr, POBJ32 p_obj);
 
 // end of prototypes
 
+#define DUMP_IN_HEX
+
 void dump_graphic_objs_tbl (int start, int end)
 {
   unsigned i = (start == -1 ? 0 : start);
@@ -401,7 +403,11 @@ void dump_graphic_objs_tbl (int start, int end)
   
   for (; i<end && i<MAX_OBJS; i++)
   {
-    DBGPRINTF ("%02d: graphic_no=%03d, s=%d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
+    #ifdef DUMP_IN_HEX
+      DBGPRINTF ("%02d: graphic_no=%02X, s=%d, (%02X,%02X,%02X) %02Xx%02Xx%02X, f=$%02X @(%02X,%02X)\n",
+    #else
+      DBGPRINTF ("%02d: graphic_no=%03d, s=%d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
+    #endif
               i,
               graphic_objs_tbl[i].graphic_no,
               graphic_objs_tbl[i].hw_sprite,

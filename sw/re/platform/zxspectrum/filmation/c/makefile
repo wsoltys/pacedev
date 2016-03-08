@@ -70,7 +70,7 @@ ifeq ($(PLATFORM),allegro)
   #OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
   OSD_INCS = -I $(MINGDIR)/include/allegro
   OSD_LIBDIR = $(MINGDIR)/lib
-  OSD_LIBS = -lalleg
+  OSD_LIBS = -lallegro-4.4.2-md
   
   OSD_CFLAGS = -Wall -Wno-unused-label -g
   ifeq ($(STATIC),1)
