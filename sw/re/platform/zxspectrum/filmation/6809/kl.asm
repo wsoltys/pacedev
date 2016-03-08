@@ -2912,9 +2912,26 @@ fill_DE:
         rts
 
 handle_pause:
+        lda     #~(1<<7)
+        jsr     read_port
+        bita    #(1<<3)
+        bne     debounce_space_press
+        rts
 debounce_space_press:
+        lda     #~(1<<7)
+        jsr     read_port
+        bita    #(1<<3)
+        bne     debounce_space_press
 wait_for_space:
+        lda     #~(1<<7)
+        jsr     read_port
+        bita    #(1<<3)
+        beq     wait_for_space
 debounce_space_release:
+        lda     #~(1<<7)
+        jsr     read_port
+        bita    #(1<<3)
+        bne     debounce_space_release
         rts
 
 clr_mem:
