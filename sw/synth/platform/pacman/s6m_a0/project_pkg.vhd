@@ -80,7 +80,7 @@ package project_pkg is
   constant S6M_DE_CNT                       : std_logic_vector(11 downto 0) := X"000";
   constant S6M_DE_LIN                       : std_logic_vector(11 downto 0) := X"000";
 
-  constant S6M_HAS_PS2                      : boolean := false;
+  constant S6M_HAS_PS2                      : boolean := true;
   
   constant S6M_DOUBLE_VDO_IDCK              : boolean := false;
   
