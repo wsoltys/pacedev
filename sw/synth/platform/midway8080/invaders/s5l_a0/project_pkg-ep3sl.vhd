@@ -26,15 +26,15 @@ package project_pkg is
 	--constant PACE_VIDEO_H_SIZE				        : integer := 224;
 	--constant PACE_VIDEO_V_SIZE				        : integer := 256; -- why not 240?
 
-  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
-  constant PACE_CLK0_DIVIDE_BY              : natural := 6;
-  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/6 = 20MHz
-  constant PACE_CLK1_DIVIDE_BY              : natural := 19;
-  constant PACE_CLK1_MULTIPLY_BY            : natural := 20; 	-- 24*20/19 = 25.263158MHz
-	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
-	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
-  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
-  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_640x480_60Hz;
+--  constant PACE_CLK0_DIVIDE_BY              : natural := 6;
+--  constant PACE_CLK0_MULTIPLY_BY            : natural := 5;   -- 24*5/6 = 20MHz
+--  constant PACE_CLK1_DIVIDE_BY              : natural := 19;
+--  constant PACE_CLK1_MULTIPLY_BY            : natural := 20; 	-- 24*20/19 = 25.263158MHz
+--	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+--	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+--  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_800x600_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
@@ -43,6 +43,8 @@ package project_pkg is
 --  constant PACE_CLK1_MULTIPLY_BY            : natural := 5;  	-- 24*5/3 = 40MHz
 --  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
 --  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_ARCADE_STD_336x240_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 1;
@@ -73,7 +75,7 @@ package project_pkg is
 --  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
 --  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
 --  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
---
+
 --  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1280x1024_60Hz;
 --  constant PACE_CLK0_DIVIDE_BY              : natural := 96;
 --  constant PACE_CLK0_MULTIPLY_BY            : natural := 157;     -- 24.675*157/96 = 40.192MHz
@@ -81,6 +83,18 @@ package project_pkg is
 --  constant PACE_CLK1_MULTIPLY_BY            : natural := 48;  	  -- 24.576*48/11 = 107.24MHz
 --  constant PACE_VIDEO_H_SCALE       	      : integer := 2;
 --  constant PACE_VIDEO_V_SCALE       	      : integer := 2;
+--  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+--  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
+
+  constant PACE_VIDEO_CONTROLLER_TYPE       : PACEVideoController_t := PACE_VIDEO_VGA_1680x1050_60Hz;
+  constant PACE_CLK0_DIVIDE_BY              : natural := 176;
+  constant PACE_CLK0_MULTIPLY_BY            : natural := 147;   -- 24*147/176 = 20.045MHz
+  constant PACE_CLK1_DIVIDE_BY              : natural := 8;
+  constant PACE_CLK1_MULTIPLY_BY            : natural := 49; 	  -- 24*49/8 = 147.0MHz
+	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
+	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
+  constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
+  constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
   --constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLUE;
   constant PACE_VIDEO_BORDER_RGB            : RGB_t := RGB_BLACK;

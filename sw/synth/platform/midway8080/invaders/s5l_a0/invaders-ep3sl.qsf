@@ -803,7 +803,6 @@ set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 
 # Incremental Compilation Assignments
 # ===================================
-set_global_assignment -name RAPID_RECOMPILE_MODE OFF
 
 # Advanced I/O Timing Assignments
 # ===============================
@@ -2267,7 +2266,6 @@ set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/sprom.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/stratixiii/spram.vhd
 set_global_assignment -name VHDL_FILE "project_pkg-ep3sl.vhd"
-set_global_assignment -name QIP_FILE ep3sl_pll.qip
 set_global_assignment -name VHDL_FILE ../../../../../src/component/ps2/ps2kbd.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/midway8080/InputMapper.VHDL
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/Inputs.VHD
@@ -2293,3 +2291,4 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_sp
 set_global_assignment -name VHDL_FILE ../../../../../src/component/io/spi/uni_spi_rx.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/target/s5l_a0/target_top_ep3sl.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name QIP_FILE ep3sl_pll.qip
