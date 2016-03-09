@@ -12,7 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
-.define BUILD_OPT_ALWAYS_RENDER_ALL
+;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ; *** end of BUILD OPTIONS
 
         .org    code_base-#0x800
@@ -493,7 +493,7 @@ loc_B03F:
         jmp     onscreen_loop
         
 reset_objs_wipe_flag:
-        ldb     #40
+        ldb     #MAX_OBJS
         ldu     #graphic_objs_tbl+7
 1$:     lda     ,u
         anda    #~FLAG_WIPE
@@ -2231,8 +2231,81 @@ calc_2d_info:
 set_draw_objs_overlapped:
         ldy     #graphic_objs_tbl
         bsr     calc_2d_info
-; more stuff
+        ldb     #MAX_OBJS
+        lda     26,x                    ; pixel_x
+        lsra
+        lsra
+        lsra
+        sta     *z80_l
+        lda     30,x                    ; old_pixel_x
+        lsra
+        lsra
+        lsra
+        sta     *z80_h
+        cmpa    *z80_l
+        bcs     1$
+        lda     *z80_l
+1$:     sta     *z80_e                  ; left-most byte
+        lda     *z80_l                  ; byte addr
+        adda    24,x                    ; +data_width_bytes
+        sta     *z80_l
+        lda     *z80_h                  ; old byte addr
+        adda    28,x                    ; +old_data_width_bytes
+        cmpa    *z80_l
+        bcc     2$
+        lda     *z80_l
+2$:     suba    *z80_e
+        sta     *z80_d                  ; old & new width
+        lda     27,x                    ; pixel_y
+        cmpa    31,x                    ; old_pixel_y
+        bcs     3$
+        lda     31,x
+3$:     sta     *z80_l                  ; top-most
+        lda     27,x                    ; pixel_y
+        adda    25,x                    ; +data_height_lines
+        sta     *z80_h
+        lda     31,x                    ; old_pixel_y
+        adda    29,x                    ; +old_data_height_lines
+        cmpa    *z80_h
+        bcc     4$
+        lda     *z80_h
+4$:     suba    *z80_l
+        sta     *z80_h                  ; old & new height
+
+test_overlap_obj:
+        tst     0,y                     ; graphic_no
+        beq     3$
+        lda     7,y                     ; flags7
+        bita    #FLAG_DRAW
+        bne     3$
+        lda     26,y                    ; pixel_x
+        lsra
+        lsra
+        lsra
+        suba    *z80_e
+        bcs     4$
+        cmpa    *z80_d
+1$:     bcc     3$
+        lda     27,y                    ; pixel_y
+        suba    *z80_l
+        bcs     5$
+        cmpa    *z80_h
+2$:     bcc     3$
+        lda     7,y                     ; flags7
+        ora     #FLAG_DRAW
+        sta     7,y
+3$:     leay    32,y
+        decb
+        bne     test_overlap_obj
         rts
+
+4$:     nega
+        cmpa    24,y                    ; data_width_bytes
+        bra     1$
+
+5$:     nega
+        cmpa    25,y                    ; data_height_lines
+        bra     2$
 
 ; player (human top half)
 upd_32_to_47:
@@ -2320,6 +2393,7 @@ list_objects_to_draw:
 1$:     lda     0,x                     ; graphic_no
         beq     2$                      ; null
 .ifndef BUILD_OPT_ALWAYS_RENDER_ALL      
+        lda     7,x                     ; flags7
         bita    #FLAG_DRAW
         beq     2$                      ; not set
 .endif
