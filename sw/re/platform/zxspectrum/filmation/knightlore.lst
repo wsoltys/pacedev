@@ -7579,12 +7579,12 @@ RAM:CD99	     loc_CD99:
 RAM:CD99 95			     sub     l
 RAM:CD9A 67			     ld	     h,	a				     ; combined	height (lines)
 RAM:CD9B
-RAM:CD9B	     loc_CD9B:							     ; graphic_no
+RAM:CD9B	     test_overlap_obj:						     ; graphic_no
 RAM:CD9B FD 7E 00		     ld	     a,	0(iy)
 RAM:CD9E A7			     and     a					     ; null?
-RAM:CD9F 28 21			     jr	     Z,	loc_CDC2			     ; yes, skip
+RAM:CD9F 28 21			     jr	     Z,	next_overlap_obj		     ; yes, skip
 RAM:CDA1 FD CB 07 66		     bit     4,	7(iy)				     ; DRAW flag already set?
-RAM:CDA5 20 1B			     jr	     NZ, loc_CDC2			     ; yes, skip
+RAM:CDA5 20 1B			     jr	     NZ, next_overlap_obj		     ; yes, skip
 RAM:CDA7 FD 7E 1A		     ld	     a,	26(iy)				     ; pixel X
 RAM:CDAA 0F			     rrca
 RAM:CDAB 0F			     rrca
@@ -7595,22 +7595,22 @@ RAM:CDB0 38 1A			     jr	     C,	loc_CDCC			     ; yes, go
 RAM:CDB2 BA			     cp	     d					     ; < right extermity (overlapping)?
 RAM:CDB3
 RAM:CDB3	     loc_CDB3:							     ; no, skip
-RAM:CDB3 30 0D			     jr	     NC, loc_CDC2
+RAM:CDB3 30 0D			     jr	     NC, next_overlap_obj
 RAM:CDB5 FD 7E 1B		     ld	     a,	27(iy)				     ; pixel Y
 RAM:CDB8 95			     sub     l					     ; < lowest	Y (below)?
 RAM:CDB9 38 18			     jr	     C,	loc_CDD3			     ; yes, go
 RAM:CDBB BC			     cp	     h					     ; < height	(overlapping)?
 RAM:CDBC
 RAM:CDBC	     loc_CDBC:							     ; no, skip
-RAM:CDBC 30 04			     jr	     NC, loc_CDC2
+RAM:CDBC 30 04			     jr	     NC, next_overlap_obj
 RAM:CDBE FD CB 07 E6		     set     4,	7(iy)				     ; set DRAW	flag
 RAM:CDC2
-RAM:CDC2	     loc_CDC2:
+RAM:CDC2	     next_overlap_obj:
 RAM:CDC2 D9			     exx
 RAM:CDC3 11 20 00		     ld	     de, #32				     ; entry size
 RAM:CDC6 FD 19			     add     iy, de				     ; next entry
 RAM:CDC8 D9			     exx
-RAM:CDC9 10 D0			     djnz    loc_CD9B
+RAM:CDC9 10 D0			     djnz    test_overlap_obj
 RAM:CDCB C9			     ret
 RAM:CDCC	     ; ---------------------------------------------------------------------------
 RAM:CDCC
