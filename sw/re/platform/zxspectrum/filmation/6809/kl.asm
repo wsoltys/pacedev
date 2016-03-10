@@ -13,6 +13,7 @@
 
 ; *** BUILD OPTIONS
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
+;.define BUILD_OPT_NO_Z_ORDER
 ; *** end of BUILD OPTIONS
 
         .org    code_base-#0x800
@@ -33,6 +34,7 @@ offset              .equ    0x0c
 screen              .equ    0x0d
 y_lim               .equ    0x0e
 x_lim               .equ    0x0f
+tmp_word            .equ    0x10
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
@@ -2418,34 +2420,177 @@ process_remaining_objs:
         ldu     #objects_to_draw
 1$:     lda     ,u+
         cmpa    #0xff
-        beq     render_done
+        lbeq    render_done
         bita    #(1<<7)                 ; already rendered?
         bne     1$
         jsr     get_ptr_object          ; ->X
+.ifndef BUILD_OPT_NO_Z_ORDER
+        stu     render_obj_1
+loc_CEDB:
+        lda     ,u+
+        cmpa    #0xff
+        lbeq    render_obj_no1
+        bita    #(1<<7)
+        bne     loc_CEDB
+        tfr     x,y
+        jsr     get_ptr_object          ; ->X
+        stu     render_obj_2
+        exg     x,y                     ; Y=obj2
+        sty     *tmp_word
+        cmpx    *tmp_word               ; same object?
+        beq     loc_CEDB                ; yes, skip
+        pshs    u
+        clrb
+        lda     3,y                     ; z2
+        adda    6,y                     ; +h2
+        sta     *z80_l                  ; (z2+h2)
+        lda     3,x                     ; z1
+        suba    *z80_l                  ; -(z2+h2)
+        bcc     2$
+        lda     3,x                     ; z1
+        adda    6,x                     ; +h1
+        sta     *z80_l                  ; (z1+h1)
+        lda     3,y                     ; z2
+        suba    *z80_l                  ; -(z1+h1)
+        bcs     1$
+        incb
+1$:     incb
+2$:     lda     2,y                     ; y2
+        adda    5,y                     ; +d2
+        sta     *z80_l                  ; (y2+d2)
+        lda     2,x                     ; y1
+        suba    5,x                     ; -d2
+        suba    *z80_l                  ; -(y2+d2)
+        bcc     4$
+        lda     2,x                     ; y1
+        adda    5,x                     ; +d1
+        sta     *z80_l                  ; (y1+d1)
+        lda     2,y                     ; y2
+        suba    5,y                     ; -d2
+        suba    *z80_l                  ; -(y1+d1)
+        bcs     3$
+        addb    #3
+3$:     addb    #3
+4$:     lda     1,y                     ; x2
+        adda    4,y                     ; +w2
+        sta     *z80_l                  ; (x2+w2)
+        lda     1,x                     ; x1
+        suba    4,x                     ; -w1
+        suba    *z80_l                  ; -(x2+w2)
+        bcc     6$
+        lda     1,x                     ; x1
+        adda    4,x                     ; +w1
+        sta     *z80_l                  ; (x1+w1)
+        lda     1,y                     ; x2
+        suba    4,y                     ; -w2
+        suba    *z80_l                  ; -(x1+w1)
+        bcs     5$
+        addb    #9
+5$:     addb    #9
+6$:     ldu     #off_CF69
+        jmp     jump_to_tbl_entry
+
+off_CF69:
+        .dw continue_1
+        .dw continue_1
+        .dw continue_1
+        .dw d_3467121516
+        .dw d_3467121516
+        .dw continue_1
+        .dw d_3467121516
+        .dw d_3467121516
+        .dw continue_1
+        .dw continue_1
+        .dw continue_2
+        .dw continue_2
+        .dw d_3467121516
+        .dw objs_coincide
+        .dw continue_2
+        .dw d_3467121516
+        .dw d_3467121516
+        .dw continue_1
+        .dw continue_1
+        .dw continue_2
+        .dw continue_2
+        .dw continue_1
+        .dw continue_2
+        .dw continue_2
+        .dw continue_1
+        .dw continue_1
+        .dw continue_1
+
+continue_1:
+        puls    u
+        jmp     loc_CEDB
+
+continue_2:
+        puls    u
+        jmp     loc_CEDB
+        
+d_3467121516:
+        puls    u
+        ldy     render_obj_2
+        lda     -1,y
+        sta     *z80_c
+        ldu     #render_list
+1$:     lda     ,u
+        cmpa    #0xff
+        beq     2$
+        cmpa    *z80_c
+        beq     3$
+        leau    1,u
+        bra     1$
+2$:     lda     *z80_c
+        sta     ,u+
+        lda     #0xff
+        sta     ,u
+        tfr     y,x
+        ldu     render_obj_2
+        stu     render_obj_1
+        ldu     #objects_to_draw
+        jmp     loc_CEDB
+3$:     ldu     #objects_to_draw
+4$:     lda     ,u+
+        cmpa    #0xff
+        lbeq    process_remaining_objs
+        cmpa    *z80_c
+        bne     4$
+        tfr     y,x
+        bra     render_obj
+
+objs_coincide:
+        puls    u
+        ldb     #187                    ; sparkles
+        lda     0,x                     ; graphic_no
+        suba    #0x60
+        cmpa    #7
+        bcc     1$
+        stb     0,x                     ; graphic_no (sparkles)
+1$:     lda     0,y                     ; graphic_no
+        suba    #0x60
+        cmpa    #7
+        bcc     2$
+        stb     0,y                     ; graphic_no (sparkles)
+2$:     jmp     loc_CEDB
+
+
+render_obj_no1:
+        ldu     render_obj_1
+.endif ; BUILD_OPT_NO_Z_ORDER
+
+render_obj:
         lda     -1,u
         ora     #(1<<7)
         sta     -1,u
         inc     rendered_objs_cnt
         jsr     calc_pixel_XY_and_render
-        bra     process_remaining_objs
+        jmp     process_remaining_objs
 render_done:
         puls    x,y
         rts
 
-off_CF69:
-
-continue_1:
-continue_2:
-d_3467121516:
-        ;bra     render_obj
-        
-objs_coincide:
-render_obj_no1:
-;render_obj:
-;render_done:
-        rts
-
 render_list:
+        .db     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 
 ; returns B=input
 check_user_input:
