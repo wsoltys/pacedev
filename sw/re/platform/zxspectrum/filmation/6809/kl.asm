@@ -43,6 +43,9 @@ CAULDRON_SCREEN     .equ    136
 ; standard is 5     
 NO_LIVES            .equ    5
 START_LOC           .equ    47
+;START_LOC           .equ    68
+;START_LOC           .equ    179         ; chest to the west
+;START_LOC           .equ    143
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -456,11 +459,22 @@ loc_B000:
         jsr     init_cauldron_bubbles
         jsr     list_objects_to_draw
         jsr     render_dynamic_objects
-        
-        ldx     #0
+        tst     rising_blocks_z
+        beq     1$
+        jsr     audio_B454
+1$:     lda     rendered_objs_cnt
+        nega
+        adda    #6
+        bmi     loc_B03F
+        beq     loc_B03F
+        tfr     a,b
+
 game_delay:
-        leax    1,x
-        cmpx    #0001
+        ldx     #0x0500
+2$:
+        leax    -1,x
+        bne     2$
+        decb
         bne     game_delay
 
 loc_B038:
@@ -718,6 +732,9 @@ audio_B419:
         rts
 
 audio_B451:
+        rts
+
+audio_B454:
         rts
 
 audio_B4BB:
@@ -1247,6 +1264,9 @@ is_on_or_near_obj:
         rts
 
 is_obj_moving:
+        lda     9,x                     ; dX
+        ora     10,x                    ; dY
+        ora     11,x                    ; dZ
         rts
 
 ; extra life
@@ -1405,13 +1425,23 @@ upd_62:
 
 ; chest
 upd_85:
-        jmp     audio_B467_wipe_and_draw
+        bsr     upd_6_7
+        jsr     dec_dZ_and_update_XYZ
+        jsr     is_obj_moving
+        bne     1$
+        rts
+1$:     jmp     audio_B467_wipe_and_draw
 
 ; table
 upd_84:
         bsr     upd_6_7
 
 dec_dZ_upd_XYZ_wipe_if_moving:
+        jsr     dec_dZ_and_update_XYZ
+        jsr     is_obj_moving
+        bne     1$
+        rts
+1$:     jsr     clear_dX_dY
         jmp     audio_B467_wipe_and_draw
 
 ; tree wall
@@ -1539,6 +1569,9 @@ move_portcullis_up:
         bra     stop_portcullis
 
 dec_dZ_and_update_XYZ:
+        dec     11,x                    ; dZ--
+        jsr     adj_for_out_of_bounds
+
 add_dXYZ:
         lda     1,x                     ; X
         adda    9,x                     ; X+dX
@@ -2422,7 +2455,7 @@ process_remaining_objs:
         cmpa    #0xff
         lbeq    render_done
         bita    #(1<<7)                 ; already rendered?
-        bne     1$
+        bne     1$                      ; yes, loop
         jsr     get_ptr_object          ; ->X
 .ifndef BUILD_OPT_NO_Z_ORDER
         stu     render_obj_1
@@ -2430,16 +2463,15 @@ loc_CEDB:
         lda     ,u+
         cmpa    #0xff
         lbeq    render_obj_no1
-        bita    #(1<<7)
-        bne     loc_CEDB
+        bita    #(1<<7)                 ; already rendered?
+        bne     loc_CEDB                ; yes, loop
         tfr     x,y
         jsr     get_ptr_object          ; ->X
         stu     render_obj_2
         exg     x,y                     ; Y=obj2
         sty     *tmp_word
         cmpx    *tmp_word               ; same object?
-        beq     loc_CEDB                ; yes, skip
-        pshs    u
+        beq     loc_CEDB                ; yes, loop
         clrb
         lda     3,y                     ; z2
         adda    6,y                     ; +h2
@@ -2487,7 +2519,8 @@ loc_CEDB:
         bcs     5$
         addb    #9
 5$:     addb    #9
-6$:     ldu     #off_CF69
+6$:     pshs    u
+        ldu     #off_CF69
         jmp     jump_to_tbl_entry
 
 off_CF69:
@@ -2529,33 +2562,33 @@ continue_2:
         
 d_3467121516:
         puls    u
-        ldy     render_obj_2
-        lda     -1,y
+        ldu     render_obj_2
+        lda     -1,u
         sta     *z80_c
         ldu     #render_list
 1$:     lda     ,u
-        cmpa    #0xff
-        beq     2$
-        cmpa    *z80_c
-        beq     3$
-        leau    1,u
-        bra     1$
-2$:     lda     *z80_c
-        sta     ,u+
-        lda     #0xff
+        cmpa    #0xff                   ; empty entry?
+        beq     2$                      ; yes, exit
+        cmpa    *z80_c                  ; already listed?
+        beq     3$                      ; yes, go
+        leau    1,u                     ; next entry
+        bra     1$                      ; loop
+2$:     lda     *z80_c                  ; index
+        sta     ,u+                     ; add to list
+        lda     #0xff                   ; flag next empty
         sta     ,u
-        tfr     y,x
+        tfr     y,x                     ; obj2->obj1
         ldu     render_obj_2
         stu     render_obj_1
         ldu     #objects_to_draw
-        jmp     loc_CEDB
+        jmp     loc_CEDB                ; go again
 3$:     ldu     #objects_to_draw
 4$:     lda     ,u+
-        cmpa    #0xff
-        lbeq    process_remaining_objs
-        cmpa    *z80_c
-        bne     4$
-        tfr     y,x
+        cmpa    #0xff                   ; end of list?
+        lbeq    process_remaining_objs  ; no, loop
+        cmpa    *z80_c                  ; what we're looking for?
+        bne     4$                      ; no, loop
+        tfr     y,x                     ; obj2->obj1
         bra     render_obj
 
 objs_coincide:
@@ -2580,8 +2613,10 @@ render_obj_no1:
 
 render_obj:
         lda     -1,u
-        ora     #(1<<7)
+        ora     #(1<<7)                 ; flag as rendered
         sta     -1,u
+        lda     #0xff
+        sta     render_list
         inc     rendered_objs_cnt
         jsr     calc_pixel_XY_and_render
         jmp     process_remaining_objs
@@ -3028,6 +3063,10 @@ next_fg_obj_sprite:
         cmpa    #0x37                   ; moving block (NS)
         beq     7$
         cmpa    #0x3E                   ; another block 
+        beq     7$
+        cmpa    #0x54                   ; table
+        beq     7$
+        cmpa    #0x55                   ; chest
         beq     7$
         cmpa    #0x5B                   ; block (dropping)
         beq     7$
