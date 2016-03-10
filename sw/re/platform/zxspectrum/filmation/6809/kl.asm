@@ -731,6 +731,9 @@ audio_B3E9:
 audio_B419:
         rts
 
+audio_B441:
+        rts
+
 audio_B451:
         rts
 
@@ -1845,7 +1848,25 @@ left_right_non_directional:
         bra     4$
 
 handle_jump:
-        rts
+        bitb    #INP_JUMP               ; jump pressed?
+        beq     9$                      ; no, exit
+        lda     12,x                    ; flags12
+        bita    #MASK_ENTERING_SCRN     ; entering screen?
+        bne     9$                      ; yes, exit
+        bita    #FLAG_JUMPING           ; already jumping?
+        bne     9$                      ; yes, exit
+        lda     11,x                    ; dZ
+        inca
+        bmi     9$
+        lda     12,x                    ; flags12
+        ora     #FLAG_JUMPING           ; flag as jumping
+        sta     12,x                    ; flags12
+        lda     #8
+        sta     11,x                    ; dZ=8
+        pshs    b
+        jsr     audio_B441
+        puls    b
+9$:     rts
 
 handle_forward:
         lda     12,x                    ; flags12
