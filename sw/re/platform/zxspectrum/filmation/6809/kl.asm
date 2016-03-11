@@ -746,10 +746,42 @@ audio_B4C1:
         rts
 
 do_any_objs_intersect:
+; may need to preserve other registers
+        pshs    y
+        ldy     #graphic_objs_tbl
+        ldb     #MAX_OBJS
+        clr     *z80_c
+        clr     *z80_l
+        clr     *z80_h
+        lda     7,x                     ; flags7
+        ora     #FLAG_IGNORE_3D
+        sta     7,x
+1$:     bsr     is_object_not_ignored
+        beq     3$
+        jsr     do_objs_intersect_on_x
+        bcc     3$
+        jsr     do_objs_intersect_on_y
+        bcc     3$
+        jsr     do_objs_intersect_on_z
+        bcc     3$
+2$:     puls    y
+        lda     7,x                     ; flags7
+        anda    #~FLAG_IGNORE_3D
+        sta     7,x
         rts
+3$:     leay    32,y
+        decb
+        bne     1$
+        andcc   #0xfe                   ; clear carry
+        bra     2$
 
 is_object_not_ignored:
-        rts
+        tst     0,y                     ; graphic no
+        beq     9$
+        lda     7,y                     ; flags7
+        coma
+        anda    #FLAG_IGNORE_3D
+9$:     rts
 
 shuffle_objects_required:
         rts
@@ -1645,6 +1677,7 @@ loc_C785:
         ldy     #graphic_objs_tbl
         ldb     #4
 loc_C791:
+        pshs    b
         tst     0,y                     ; graphic_no
         beq     loc_C7D6
         lda     7,y                     ; flags7
@@ -1686,6 +1719,7 @@ adj_ns:
 loc_C7D5:
 loc_C7D6:
         leay    32,y
+        puls    b
         decb
         bne     loc_C791
         rts
@@ -2169,13 +2203,13 @@ adj_for_out_of_bounds:
         jsr     adj_dZ_for_out_of_bounds
         lda     *z80_h                  ; new dZ
         beq     2$
-        bsr     adj_dZ_for_obj_intersect
+        jsr     adj_dZ_for_obj_intersect
 2$:
         lda     9,x                     ; dX
         sta     *z80_c                  ; new dX
         tsta
         beq     3$
-        bsr     adj_dX_for_out_of_bounds
+        jsr     adj_dX_for_out_of_bounds
         lda     *z80_c                  ; new dX
         beq     3$
         bsr     adj_dX_for_obj_intersect
@@ -2184,7 +2218,7 @@ adj_for_out_of_bounds:
         sta     *z80_l                  ; new dY
         tsta
         beq     4$
-        bsr     adj_dY_for_out_of_bounds
+        jsr     adj_dY_for_out_of_bounds
         lda     *z80_l                  ; new dY
         beq     4$
         bsr     adj_dY_for_obj_intersect
@@ -2201,22 +2235,166 @@ adj_for_out_of_bounds:
         rts
 
 adj_dX_for_obj_intersect:
-        rts
-
+        ldy     #graphic_objs_tbl
+        ldb     #MAX_OBJS
+1$:     jsr     is_object_not_ignored
+        beq     4$
+        jsr     do_objs_intersect_on_y
+        bcc     4$
+        jsr     do_objs_intersect_on_z
+        bcc     4$
+2$:     jsr     do_objs_intersect_on_x
+        bcc     4$
+        lda     12,x                    ; flags12
+        ora     #FLAG_X_OOB
+        sta     12,x                    ; flags12
+        lda     13,x                    ; flags13
+        lsra                            ; 7->6
+        anda    #FLAG_DEAD
+        ora     13,y                    ; flags13
+        sta     13,y                    ; flags13
+        lsla                            ; 5->6
+        anda    #FLAG_DEAD
+        ora     13,x                    ; flags13
+        sta     13,x                    ; flags13
+        lda     7,y                     ; flags7
+        bita    #FLAG_MOVEABLE
+        beq     3$
+        lda     9,x                     ; dX
+        sta     9,y                     ; dX
+3$:     lda     *z80_c                  ; new dX
+        jsr     adj_d_for_out_of_bounds
+        sta     *z80_c                  ; new dX
+        beq     9$
+        bra     2$
+4$:     leay    32,y
+        decb
+        bne     1$
+9$:     rts
+        
 adj_dY_for_obj_intersect:                
-        rts
+        ldy     #graphic_objs_tbl
+        ldb     #MAX_OBJS
+1$:     jsr     is_object_not_ignored
+        beq     4$
+        jsr     do_objs_intersect_on_x
+        bcc     4$
+        jsr     do_objs_intersect_on_z
+        bcc     4$
+2$:     jsr     do_objs_intersect_on_y
+        bcc     4$
+        lda     12,x                    ; flags12
+        ora     #FLAG_Y_OOB
+        sta     12,x                    ; flags12
+        lda     13,x                    ; flags13
+        lsra                            ; 7->6
+        anda    #FLAG_DEAD
+        ora     13,y                    ; flags13
+        sta     13,y                    ; flags13
+        lsla                            ; 5->6
+        anda    #FLAG_DEAD
+        ora     13,x                    ; flags13
+        sta     13,x                    ; flags13
+        lda     7,y                     ; flags7
+        bita    #FLAG_MOVEABLE
+        beq     3$
+        lda     10,x                    ; dY
+        sta     10,y                    ; dY
+3$:     lda     *z80_l                  ; new dY
+        jsr     adj_d_for_out_of_bounds
+        sta     *z80_l                  ; new dY
+        beq     9$
+        bra     2$
+4$:     leay    32,y
+        decb
+        bne     1$
+9$:     rts
 
 adj_dZ_for_obj_intersect:
-        rts
+        ldy     #graphic_objs_tbl
+        ldb     #MAX_OBJS
+1$:     jsr     is_object_not_ignored
+        beq     5$
+        bsr     do_objs_intersect_on_x
+        bcc     5$
+        bsr     do_objs_intersect_on_y
+        bcc     5$
+2$:     bsr     do_objs_intersect_on_z
+        bcc     5$
+        lda     12,x                    ; flags12
+        ora     #FLAG_Z_OOB
+        sta     12,x                    ; flags12
+        lda     13,x                    ; flags13
+        lsra                            ; 7->6
+        anda    #FLAG_DEAD
+        ora     13,y                    ; flags13
+        ora     #FLAG_TRIGGERED
+        sta     13,y                    ; flags13
+        lsla                            ; 5->6
+        anda    #FLAG_DEAD
+        ora     13,x                    ; flags13
+        sta     13,x                    ; flags13
+;       set     3, 13(iy)               ; see 6 lines above
+        lda     7,y                     ; flags7
+        bita    #FLAG_MOVEABLE
+        beq     4$
+        tst     9,x                     ; dX=0?
+        bne     3$
+        lda     9,y                     ; dX2
+        sta     9,x                     ; dX1
+3$:     tst     10,x                    ; dY=0?
+        bne     4$
+        lda     10,y                    ; dY2
+        sta     10,x                    ; dY1
+4$:     lda     *z80_h                  ; new dZ
+        jsr     adj_d_for_out_of_bounds
+        sta     *z80_h                  ; new dZ
+        beq     9$
+        bra     2$
+5$:     leay    32,y
+        decb
+        bne     1$
+9$:     rts
         
 do_objs_intersect_on_x:
+        lda     4,x                     ; w1
+        adda    4,y                     ; +w2
+        sta     *z80_d                  ; (w1+w2)
+        lda     1,x                     ; x1
+        adda    *z80_c                  ; +dX
+        suba    1,y                     ; -x2
+        bpl     1$
+        nega
+1$:     suba  *z80_d
         rts
 
 do_objs_intersect_on_y:
+        lda     5,x                     ; d1
+        adda    5,y                     ; +d2
+        sta     *z80_d                  ; (d1+d2)
+        lda     2,x                     ; d1
+        adda    *z80_l                  ; +dY
+        suba    2,y                     ; -d2
+        bpl     1$
+        nega
+1$:     suba  *z80_d
         rts
                         
 do_objs_intersect_on_z:
+; optimise?
+        pshs    b
+        lda     3,x                     ; z1
+        adda    *z80_h                  ; +dZ
+        suba    3,y                     ; -z2
+        bpl     2$
+        nega
+        ldb     6,x                     ; h1
+1$:     stb     *z80_d
+        suba    *z80_d
+        puls    b
         rts
+2$:     ldb     6,y                     ; h2
+        bra     1$
 
 adj_dX_for_out_of_bounds:
         lda     12,x                    ; flags12
@@ -2983,8 +3161,8 @@ find_screen:
         lda     ,u                      ; #bytes
         leau    a,u                     ; next location
         cmpu    #eolt                   ; end of table?
-        bge     zero_end_of_graphic_objs_tbl
-        bra     find_screen
+        blt     find_screen
+        tfr     u,y
 
 zero_end_of_graphic_objs_tbl:
         cmpy    #eod
