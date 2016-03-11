@@ -727,6 +727,9 @@ end_audio:
 audio_B3E9:
         rts
 
+audio_B403:
+        rts
+
 audio_B419:
         rts
 
@@ -920,6 +923,8 @@ upd_164_to_167:
         rts
 
 upd_111:
+        lda     #1                      ; invalid
+        sta     0,x                     ; graphic_no
         jmp     audio_B467_wipe_and_draw
 
 move_towards_plyr:
@@ -1261,10 +1266,20 @@ upd_127:
         sta     0,x                     ; graphic_no
         jmp     jump_to_upd_object
 
-init_death_sparkles:                                            ; twinkly transform
+init_death_sparkles:
+        lda     #112                    ; sparkles
+        sta     0,x                     ; graphic_no
+        lda     7,x                     ; flags7
+        ora     #FLAG_IGNORE_3D
+        bra     loc_BF31
 
 ; death sparkles
 upd_112_to_118_184:
+        jsr     adj_m4_m12
+        inc     0,x                     ; graphic_no
+
+loc_BF31:
+        jsr     audio_B403
         jmp     set_wipe_and_draw_flags
 
 ; sparkles (object in cauldron)
@@ -1272,6 +1287,8 @@ upd_185_187:
 
 ; last death sparkle
 upd_119:
+        jsr     adj_m4_m12
+        jmp     upd_111
 
 display_objects_carried:
 display_objects:

@@ -3486,9 +3486,9 @@ RAM:B4FF E5			     push    hl
 RAM:B500 FD E5			     push    iy
 RAM:B502 FD 21 08 5C		     ld	     iy, #graphic_objs_tbl
 RAM:B506 06 28			     ld	     b,	#40				     ; max objects
-RAM:B508 0E 00			     ld	     c,	#0
-RAM:B50A 69			     ld	     l,	c
-RAM:B50B 61			     ld	     h,	c
+RAM:B508 0E 00			     ld	     c,	#0				     ; dX=0
+RAM:B50A 69			     ld	     l,	c				     ; dY=0
+RAM:B50B 61			     ld	     h,	c				     ; dZ=0
 RAM:B50C DD CB 07 CE		     set     1,	7(ix)				     ; ignore this object
 RAM:B510
 RAM:B510	     loc_B510:
