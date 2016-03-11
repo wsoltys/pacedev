@@ -465,8 +465,8 @@ loc_B000:
 1$:     lda     rendered_objs_cnt
         nega
         adda    #6
-        bmi     loc_B03F
-        beq     loc_B03F
+        bmi     no_delay
+        beq     no_delay
         tfr     a,b
 
 game_delay:
@@ -477,9 +477,7 @@ game_delay:
         decb
         bne     game_delay
 
-loc_B038:
-
-loc_B03F:
+no_delay:
         tst     render_status_info
         beq     1$
         clr     render_status_info
@@ -494,6 +492,7 @@ loc_B03F:
         jsr     print_days
         jsr     print_lives_gfx
         jsr     print_lives
+;
 ; added for Coco3 port
         lda     curr_room_attrib
         jsr     osd_set_palette

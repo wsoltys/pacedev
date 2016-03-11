@@ -2717,20 +2717,20 @@ RAM:B028 3A BE 5B		     ld	     a,	(rendered_objs_cnt)
 RAM:B02B ED 44			     neg
 RAM:B02D C6 06			     add     a,	#6				     ; calculate delay loop value
 RAM:B02F 47			     ld	     b,	a
-RAM:B030 FA 3F B0		     jp	     M,	loc_B03F
-RAM:B033 28 0A			     jr	     Z,	loc_B03F
+RAM:B030 FA 3F B0		     jp	     M,	no_delay
+RAM:B033 28 0A			     jr	     Z,	no_delay
 RAM:B035
 RAM:B035	     game_delay:
 RAM:B035 21 00 05		     ld	     hl, #0x500
 RAM:B038
-RAM:B038	     loc_B038:
+RAM:B038	     delay_loop:
 RAM:B038 2B			     dec     hl
 RAM:B039 7D			     ld	     a,	l
 RAM:B03A B4			     or	     h
-RAM:B03B 20 FB			     jr	     NZ, loc_B038
+RAM:B03B 20 FB			     jr	     NZ, delay_loop
 RAM:B03D 10 F6			     djnz    game_delay
 RAM:B03F
-RAM:B03F	     loc_B03F:
+RAM:B03F	     no_delay:
 RAM:B03F 3A B7 5B		     ld	     a,	(render_status_info)
 RAM:B042 A7			     and     a					     ; rendered	before?
 RAM:B043 28 2F			     jr	     Z,	loc_B074			     ; yes, skip
