@@ -226,6 +226,7 @@ eolt                  .equ    data_base+0x0ac9
 block_type_tbl        .equ    data_base+0x0ba0
 background_type_tbl   .equ    data_base+0x0eba
 special_objs_tbl      .equ    data_base+0x0eea
+eosot                 .equ    data_base+0x100a
 sprite_tbl            .equ    data_base+0x4ce0
 reverse_tbl           .equ    0xcf00
 shift_tbl             .equ    0xd000
@@ -391,9 +392,9 @@ main:
         sta     flags12_1
         lda     #NO_LIVES
         sta     lives
-        ldx     seed_1
+        ldu     seed_1
         lda     seed_2
-        adda    ,x
+        adda    ,u
         sta     seed_1
         jsr     clear_scrn
         jsr     do_menu_selection
@@ -787,6 +788,22 @@ is_object_not_ignored:
 9$:     rts
 
 shuffle_objects_required:
+        lda     seed_1
+        anda    #3
+        ora     #4
+        sta     *z80_c                  ; rnd(4-7)
+1$:     ldb     #13                     ; 13 swaps
+        ldy     #objects_required
+        lda     0,y
+        sta     *z80_e
+2$:     lda     1,y
+        sta     ,y+
+        decb
+        bne     2$
+        lda     *z80_e
+        sta     0,y
+        dec     *z80_c
+        bne     1$
         rts
 
 ; sparkles from the blocks in the cauldron room
@@ -1334,9 +1351,14 @@ add_obj_to_cauldron:
         jmp     upd_111
         
 ret_next_obj_required:
+        lda     objects_put_in_cauldron
+        ldu     objects_required
+        leau    a,u
         rts
         
 objects_required:
+        .db 0, 1, 2, 3, 4, 5, 6, 3
+        .db 5, 0, 6, 1, 2, 4
 
 ; special objects
 upd_96_to_102:
@@ -1464,7 +1486,26 @@ init_sun:
         rts
         
 init_special_objects:
+        ldu     #special_objs_tbl
+        lda     seed_1
+        sta     *z80_e
+;       ld      a,r
+        adda    *z80_e
+        sta     *z80_e
 init_obj_loop:
+        lda     *z80_e
+        anda    #7
+        ora     #0x60                 ; graphic_no
+        sta     ,u+
+        inc     *z80_e
+        ldb     #4                    ; 4 bytes to copy
+1$:     lda     ,u+                   ; start x/y/z/scrn
+        sta     3,u                   ; curr x/y/z/scrn
+        decb
+        bne     1$
+        leau    4,u                   ; next special obj
+        cmpu    #eosot                ; end of table
+        bne     init_obj_loop
         rts
 
 ; block
@@ -2880,7 +2921,7 @@ finished_input:
 lose_life:
         ldu     #plyr_spr_1_scratchpad
         ldy     #graphic_objs_tbl
-        tfr     u,x
+        tfr     y,x
         ldb     #64
 1$:     lda     ,u+
         sta     ,y+
