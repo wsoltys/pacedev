@@ -62,25 +62,24 @@ architecture SYN of target_top is
 
 
 
-  component user_io
+  component user_io 
     generic ( STRLEN : integer := 0 );
-  
-    port ( SPI_CLK, SPI_SS_IO, SPI_MOSI :in std_logic;
-           SPI_MISO : out std_logic;
-           conf_str : in std_logic_vector(8*STRLEN-1 downto 0);
-           joystick_0 : out std_logic_vector(5 downto 0);
-           joystick_1 : out std_logic_vector(5 downto 0);
-           joystick_analog_0 : out std_logic_vector(15 downto 0);
-           joystick_analog_1 : out std_logic_vector(15 downto 0);
-           status:    out std_logic_vector(7 downto 0);
-           SWITCHES : out std_logic_vector(1 downto 0);
-           BUTTONS : out std_logic_vector(1 downto 0);
-           sd_sdhc : in std_logic;
-           ps2_clk : in std_logic;
-           ps2_kbd_clk : out std_logic;
-           ps2_kbd_data : out std_logic
-         );
-
+     port (
+            SPI_CLK, SPI_SS_IO, SPI_MOSI :in std_logic;
+            SPI_MISO : out std_logic;
+            conf_str : in std_logic_vector(8*STRLEN-1 downto 0);
+            joystick_0 : out std_logic_vector(5 downto 0);
+            joystick_1 : out std_logic_vector(5 downto 0);
+            joystick_analog_0 : out std_logic_vector(15 downto 0);
+            joystick_analog_1 : out std_logic_vector(15 downto 0);
+            status: out std_logic_vector(7 downto 0);
+            switches : out std_logic_vector(1 downto 0);
+            buttons : out std_logic_vector(1 downto 0);
+            sd_sdhc : in std_logic;
+            ps2_clk : in std_logic;
+            ps2_kbd_clk : out std_logic;
+            ps2_kbd_data : out std_logic
+        );
   end component user_io;
    
   component osd
@@ -200,18 +199,18 @@ begin
     end generate GEN_NO_PLL;
     
     -- OSD clock derived from video clock
-    GEN_PLL_OSD : if MIST_OSD_ENABLED generate
---      pllosd : entity work.clk_div
---        generic map (
---          DIVISOR => 2
---        )
---        port map (
---          clk => target_o.clk,
---          reset => '0',
---          clk_en => osd_clk
---      );
-      osd_clk <= target_o.clk;
-    end generate GEN_PLL_OSD;
+--    GEN_PLL_OSD : if MIST_OSD_ENABLED generate
+----      pllosd : entity work.clk_div
+----        generic map (
+----          DIVISOR => 2
+----        )
+----        port map (
+----          clk => target_o.clk,
+----          reset => '0',
+----          clk_en => osd_clk
+----      );
+--      osd_clk <= target_o.clk;
+--    end generate GEN_PLL_OSD;
     
   end block BLK_CLOCKING;
 	
@@ -259,8 +258,8 @@ begin
       SPI_MOSI => SPI_DI,       
       conf_str => to_slv(CONF_STR),
       status => status,   
-      joystick_0 => joystick,   
-      joystick_1 => joystick2,
+      joystick_0 => joystick2,   
+      joystick_1 => joystick,
       SWITCHES => switches,   
       BUTTONS => buttons,
       sd_sdhc => '1',

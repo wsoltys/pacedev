@@ -63,6 +63,9 @@ package project_pkg is
   
   constant PACE_HAS_FLASH                   : boolean := ROCKY_EMULATE_FLASH;
   constant PACE_HAS_SRAM                    : boolean := ROCKY_EMULATE_SRAM;
+  
+  constant MIST_DATA_IO_ENABLED             : boolean := false;
+  constant MIST_OSD_ENABLED                 : boolean := false;
     
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
