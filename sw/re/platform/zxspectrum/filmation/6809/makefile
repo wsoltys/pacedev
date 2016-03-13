@@ -42,7 +42,7 @@ all: $(FQLN) $(FQEN)
 #	$(CP) $(FQLN) klldr.bin
 #	imgtool create coco_jvc_rsdos kl_6809.dsk
 #	imgtool put coco_jvc_rsdos kl_6809.dsk klldr.bin $(FQEN)
-	$(RM) kl_6809.dsk
+	$(RM) -f kl_6809.dsk
 	reloc kl_ldr.bin klldr.bin
 	file2dsk kl_6809.dsk klldr.bin $(FQEN) kl.bas
 
