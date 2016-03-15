@@ -3861,7 +3861,7 @@ calc_attrib_addr:
         rts
         
 vflip_sprite_data:
-        pshs    u
+        pshs    y,u
         eora    7,x                     ; flags7
         anda    #FLAG_VFLIP             ; same?
         beq     hflip_sprite_data       ; yes, skip
@@ -3902,12 +3902,11 @@ vflip_sprite_line_pair:
         bne     vflip_sprite_line_pair
 
 hflip_sprite_data:
-        puls    u
+        puls    y,u
         lda     ,u                      ; flip & width
         eora    7,x                     ; flags7
         anda    #FLAG_HFLIP             ; same?
         beq     flip_done               ; yes, skip
-; *** FIXME - vflip needs to save Y as well!
         pshs    x,y,u
         lda     ,u
         eora    #FLAG_HFLIP
