@@ -42,10 +42,13 @@ MAX_DRAW            .equ    48
 CAULDRON_SCREEN     .equ    136
 ; standard is 5     
 NO_LIVES            .equ    5
+; *** the standard 4 locations
 START_LOC           .equ    47
 ;START_LOC           .equ    68
 ;START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
+; *** extra one for debugging
+;START_LOC           .equ    0x2e
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -2263,7 +2266,6 @@ adj_for_out_of_bounds:
         clr     *z80_c                  ; new dX
         lda     11,x                    ; dZ
         sta     *z80_h                  ; new dZ
-        tsta
         beq     2$
         jsr     adj_dZ_for_out_of_bounds
         lda     *z80_h                  ; new dZ
@@ -3776,7 +3778,7 @@ print_sprite:
         adda    27,x                    ; pixel_y
         suba    #192                    ; off screen?
         bcs     1$                      ; no, skip
-        coma
+        nega
         adda    25,x
         sta     25,x                    ; adjust height lines
 1$:     ldb     26,x                    ; pixel_x     
