@@ -392,7 +392,7 @@ main:
         sta     flags12_1
         lda     #NO_LIVES
         sta     lives
-        ldu     seed_1
+        ldu     #seed_1
         lda     seed_2
         adda    ,u
         sta     seed_1
@@ -443,9 +443,14 @@ ret_from_tbl_jp:
         bra     update_sprite_loop
         
 loc_B000:
-        ldu     seed_2
-        leau    1,u
-        stu     seed_2
+; the original Z80 code does a 16-bit increment:
+;       ld      hl, (seed_2)
+;       inc     hl
+;       ld      (seed_2),hl
+; but the high-order byte is not accessed anywhere else
+; so to get the same behaviour on the 6809, we (need to)
+; do an 8-bit increment at this address
+        inc     seed_2
         lda     seed_3
         adda    ,u
         sta     seed_3
@@ -1266,7 +1271,7 @@ upd_120_to_126:
         jsr     adj_m4_m12
         lda     seed_2
         coma
-        inca
+        anda    #1
         beq     1$
         rts
 1$:     inc     0,x                     ; graphic_no
@@ -1431,6 +1436,7 @@ display_frame:
         puls    u                     ; lines,bytes
         ldy     #coco_vram+0x17F7     ; (184,0) (dest)
         jmp     blit_to_screen
+        ;jmp     update_screen
 
 toggle_day_night:
         lda     0,x                   ; graphic_no
