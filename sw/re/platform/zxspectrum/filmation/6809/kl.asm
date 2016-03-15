@@ -1747,6 +1747,7 @@ loc_C791:
         lda     7,y                     ; flags7
         bita    #FLAG_AUTO_ADJ
         beq     loc_C7D6
+        stu     *y_lim                  ; & x_lim
         bsr     is_near_to
         bcc     loc_C7D6
         ldu     #adj_arch_tbl
@@ -2124,7 +2125,7 @@ adj_dZ_for_out_of_bounds:
 9$:     rts
 
 handle_exit_screen:
-        lda     12,x                    ; flasg12
+        lda     12,x                    ; flags12
         bita    #MASK_ENTERING_SCRN
         bne     9$
         lda     7,x                     ; flags7
@@ -2201,7 +2202,7 @@ exit_screen:
         jmp     game_loop
 
 screen_east:
-        lda     *x_lim
+        lda     room_size_X
         adda    #128
         sta     *z80_l
         lda     1,x                     ; X
@@ -2218,7 +2219,7 @@ screen_east:
         bra     screen_e_w
         
 screen_north:
-        lda     *y_lim
+        lda     room_size_Y
         adda    #128
         sta     *z80_h
         lda     2,x                     ; Y
@@ -2235,7 +2236,7 @@ screen_north:
         
 screen_south:
         lda     #128
-        suba    *y_lim
+        suba    room_size_Y
         sta     *z80_h
         lda     2,x                     ; Y
         adda    10,x                    ; +dY
