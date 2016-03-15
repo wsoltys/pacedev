@@ -3758,13 +3758,18 @@ print_sprite:
         bsr     flip_sprite             ; U=ptr sprite data
         lda     26,x                    ; pixel_x
         anda    #7                      ; bit offset
+        pshs    cc
         lsla                            ; x2
         adda    #>shift_tbl
         ldb     #0x80
         std     *offset
         lda     ,u+                     ; width
         anda    #0x07
-        sta     24,x                    ; width_bytes
+        sta     *width
+        puls    cc                      ; bit offset &7 flags
+        beq     0$
+        inca
+0$:     sta     24,x                    ; width_bytes
         lda     ,u+                     ; height
         sta     25,x                    ; height_lines
         adda    27,x                    ; pixel_y
@@ -3784,7 +3789,7 @@ print_sprite:
 ;       U = sprite data
         ldb     25,x                    ; height_lines
 2$:     pshs    b
-        ldb     24,x                    ; width_bytes
+        ldb     *width                  ; width_bytes
         pshs    x
 3$:     pshs    b
 
@@ -3812,7 +3817,7 @@ print_sprite:
         bne     3$
         puls    x
         lda     #32
-        suba    24,x
+        suba    *width
         leay    a,y                     ; next line
         puls    b
         decb
