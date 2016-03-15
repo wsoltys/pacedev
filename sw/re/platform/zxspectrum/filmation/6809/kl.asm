@@ -3903,11 +3903,12 @@ vflip_sprite_line_pair:
 
 hflip_sprite_data:
         puls    u
-        pshs    u
         lda     ,u                      ; flip & width
         eora    7,x                     ; flags7
         anda    #FLAG_HFLIP             ; same?
         beq     flip_done               ; yes, skip
+; *** FIXME - vflip needs to save Y as well!
+        pshs    x,y,u
         lda     ,u
         eora    #FLAG_HFLIP
         sta     ,u+
@@ -3915,7 +3916,6 @@ hflip_sprite_data:
         sta     *width
         ldb     ,u+                     ; height_lines
         stb     *height
-        pshs    x
         ldx     #reverse_tbl+0x80
 hflip_line:
         pshs    b,u                     ; lines
@@ -3951,9 +3951,8 @@ hflip_line:
         leau    a,u                     ; next line
         decb                            ; done all lines?
         bne     hflip_line
-        puls    x
+        puls    x,y,u
 flip_done:
-        puls    u
         rts
 
 vidbuf:
