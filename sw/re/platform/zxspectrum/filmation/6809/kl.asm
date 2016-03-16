@@ -37,6 +37,7 @@ screen              .equ    0x0d
 y_lim               .equ    0x0e
 x_lim               .equ    0x0f
 tmp_word            .equ    0x10
+depth               .equ    0x12
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
@@ -1340,19 +1341,196 @@ sprite_scratchpad:
         .ds 32
 
 chk_pickup_drop:
+        lda     user_input
+        anda    #INP_PICKUP_DROP
         rts
 
 handle_pickup_drop:
+        tst     pickup_drop_pressed
+        lbne    loc_C0A9
+        bsr     chk_pickup_drop
+        lbeq    ret_pickup_drop
+        jsr     chk_plyr_OOB
+        lbcc    ret_pickup_drop
+        lda     12,x                    ; flags12
+        bita    #FLAG_JUMPING
+        bne     ret_pickup_drop
+        bita    #FLAG_Z_OOB
+        beq     ret_pickup_drop
+        clr     cant_drop
+        lda     3,x                     ; Z
+        sta     *z80_b
+        adda    #12                     ; +12
+        sta     3,x                     ; Z+12
+        jsr     do_any_objs_intersect
+        pshs    cc
+        lda     *z80_b
+        sta     3,x                     ; restore Z
+        puls    cc
+        bcc     1$
+        lda     #1
+        sta     cant_drop
+1$:     ; sound
+        lda     #1
+        sta     pickup_drop_pressed
+        sta     objects_carried_changed
+        ldb     #2
+        lda     4,x                     ; width
+        sta     *width
+        adda    #4
+        sta     4,x                     ; width+4
+        lda     5,x                     ; depth
+        sta     *depth
+        adda    #4
+        sta     5,x                     ; depth+4
+        lda     6,x                     ; height
+        sta     *height
+        adda    #4
+        sta     6,x                     ; height+4
+        ldy     #special_objs_here
+2$:     jsr     can_pickup_spec_obj
+        lbcs    pickup_object
+        leay    32,y
+        decb
+        bne     2$
+        bsr     chk_pickup_drop
+        beq     done_pickup_drop
+        ldb     #2
+        lda     8,x                     ; scrn
+        cmpa    #CAULDRON_SCREEN
+        bne     3$
+        ldb     #1
+3$:     ldy     #special_objs_here
+        tst     0,y                     ; graphic_no
+        beq     loc_C0B2
+        leay    32,y
+        decb
+        bne     3$
+
 done_pickup_drop:
+        ldd     *width
+        sta     5,x                     ; width
+        stb     6,x                     ; height
+        lda     *depth
+        sta     4,x                     ; depth
+ret_pickup_drop:
         rts
+
+loc_C0A9:
+        jsr     chk_pickup_drop
+        bne     9$
+        clr     pickup_drop_pressed
+9$:     rts
+
+loc_C0B2:
+        ldu     #unk_5BE4
+        lda     ,u+
+        beq     adjust_carried
+        tst     cant_drop
+        bne     done_pickup_drop
+        ldb     -1,u
+        stb     0,y                     ; graphic_no
+        lda     8,x                     ; scrn
+        cmpa    #CAULDRON_SCREEN
+        bne     1$
+        lda     3,x                     ; Z
+        cmpa    #152
+        bcs     1$
+        orb     #(1<<3)
+        stb     0,y                     ; graphic_no
+        lda     #1
+        sta     obj_dropping_into_cauldron
+1$:     pshs    x,y
+        leax    1,x
+        leay    1,y
+        ldb     #3
+2$:     lda     ,x+
+        sta     ,y+
+        decb
+        bne     2$
+        puls    x,y
+        lda     3,x                     ; Z
+        adda    #12                     ; +12
+        sta     3,x                     ; Z+=12
+        lda     0x23,x                  ; Z (top half)
+        adda    #12                     ; +12
+        sta     0x23,x                  ; Z+=12 (top half)
+        exg     x,y
+        jsr     calc_pixel_XY
+        tfr     y,x
 
 drop_object:
+        lda     #5
+        sta     4,y                     ; width
+        sta     5,y                     ; depth
+        lda     #12
+        sta     6,y                     ; height
+        lda     ,u+
+        sta     7,y                     ; flags7
+        lda     8,x                     ; scrn
+        sta     8,y                     ; scrn
+        ldd     ,u++
+        std     ,y++                    ; ptr special object
+        lda     13,y                    ; flags13
+        ora     #FLAG_JUST_DROPPED
+        sta     13,y                    ; flags13
+
 adjust_carried:
+        ldu     #unk_5BE4
+        ldb     #12
+1$:     lda     ,-u
+        sta     4,u
+        decb
+        bne     1$        
+        ldy     #inventory
+        ldb     #4
+        jsr     zero_Y
+        jmp     done_pickup_drop
+
 pickup_object:
+        ldu     #inventory
+        clr     disable_spike_ball_drop
+        lda     0,y                     ; graphic_no
+        sta     ,u+
+        lda     7,y                     ; flags7
+        sta     ,u+
+        ldd     16,y
+        clr     [16,y]                  ; zap special_objs_tbl.graphic_no
+        std     ,u++                    ; store ptr
+        jsr     set_wipe_and_draw_Y
+        lda     #1
+        sta     0,y                     ; graphic_no
+        ldu     #unk_5BE4               ; object_carried[2].graphic_no
+        lda     ,u+
+        beq     adjust_carried
+        sta     0,y                     ; graphic_no
+        bra     drop_object
 
 can_pickup_spec_obj:
-is_on_or_near_obj:
+        lda     0,y                     ; graphic_no
+        suba    #0x60
+        cmpa    #7
+        bcs     is_on_or_near_obj
         rts
+
+is_on_or_near_obj:
+        clr     *z80_c
+        clr     *z80_l
+        clr     *z80_h
+        jsr     do_objs_intersect_on_x
+        bcc     1$
+        jsr     do_objs_intersect_on_y
+        bcc     1$
+        lda     3,x                     ; Z
+        suba    #4
+        sta     3,x                     ; Z-=4
+        jsr     do_objs_intersect_on_z
+        pshs    cc
+        lda     3,x                     ; Z
+        adda    #4
+        sta     3,x                     ; Z+=4
+        puls    cc
+1$:     rts
 
 is_obj_moving:
         lda     9,x                     ; dX
@@ -1783,7 +1961,7 @@ set_wipe_and_draw_flags:
         sta     7,x                     ; flags7
         jmp     set_draw_objs_overlapped
         
-set_wipe_and_draw_IY:
+set_wipe_and_draw_Y:
         pshs    x,y
         tfr     y,x
         bsr     set_wipe_and_draw_flags
