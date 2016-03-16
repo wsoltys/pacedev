@@ -751,6 +751,9 @@ audio_B451:
 audio_B454:
         rts
 
+audio_B472:
+        rts
+        
 audio_B4BB:
         rts
 
@@ -1382,15 +1385,75 @@ prepare_final_animation:
         rts
         
 chk_and_init_transform:
+        tst     transform_flag_graphic
+        beq     9$
+        lda     12,x                    ; flags12
+        bita    #MASK_ENTERING_SCRN
+        bne     9$
+        bita    #FLAG_JUMPING
+        bne     9$
+        leas    2,s                     ; return to caller
+        lda     0,x                     ; graphic_no
+        sta     transform_flag_graphic
+        lda     #8
+        sta     16,x                    ; transform count
+        pshs    x
+        leax    32,x
+        lda     #1
+        sta     0,x
+        jsr     set_wipe_and_draw_flags
+        puls    x
+        jsr     upd_11                
         bra     rand_legs_sprite
+9$:     rts
 
 ; human/wulf transform
 upd_92_to_95:
-        bra     init_death_sparkles
+        jsr     upd_11
+        lda     13,x                    ; flags13
+        bita    #FLAG_DEAD
+        beq     1$
+        tst     all_objs_in_cauldron
+        bne     1$
+        jmp     init_death_sparkles
+1$:     lda     seed_2
+        anda    #3
+        beq     2$
+        rts
+2$:     jsr     audio_B472
+        dec     16,x                    ; copy of graphic_no
+        beq     loc_C377        
         
 rand_legs_sprite:
+;       ld      a,r
+        sta     *z80_c
+        lda     seed_3
+        adda    *z80_c
+        anda    #3
+        ora     #92
+        cmpa    0,x                     ; graphic_no
+        bne     3$
+        eora    #1
+3$:     sta     0,x                     ; graphic_no
+        lda     7,x                     ; flags7
+        eora    #FLAG_HFLIP
+        sta     7,x                     ; flags7
         jmp     set_wipe_and_draw_flags
-        
+
+loc_C377:
+        lda     transform_flag_graphic
+        eora    #0x20
+        sta     0,x                     ; graphic_no
+        adda    #0x10
+        sta     0x20,x                  ; graphic_no (top half)
+        clr     transform_flag_graphic
+        jsr     adj_m6_m12
+        lda     0,x                     ; graphic_no
+        bita    #(1<<5)
+        beq     4$
+        dec     19,x                    ; dY_adj
+4$:     jmp     set_wipe_and_draw_flags
+                
 print_sun_moon:
         lda     seed_2
         anda    #7
@@ -2943,6 +3006,7 @@ lose_life:
         rora
         rora
         rora
+        rora                            ; extra ROR for 6809
         anda    #0x20                   ; day/night
         sta     *z80_c
         lda     16,x                    ; plyr graphic no
