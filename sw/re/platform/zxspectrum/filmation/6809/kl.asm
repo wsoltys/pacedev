@@ -15,6 +15,7 @@
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
+.define BUILD_OPT_ALMOST_INVINCIBLE
 ; *** end of BUILD OPTIONS
 
         .org    code_base-#0x800
@@ -332,6 +333,13 @@ inipal:
         decb
         bne     mmumap                  ; map pages $34-$36
 
+  ; configure timer
+  ; free-run, max range, used for RND atm
+        lda     #<4095
+        sta     TMRLSB
+        lda     #>4095
+        sta     TMRMSB
+
   .ifdef HAS_SOUND				
 
 				lda			0xff23
@@ -439,6 +447,7 @@ jump_to_tbl_entry:
 
 ret_from_tbl_jp:
 ; Z80   ld      a,r
+        lda     TMRLSB                  ; temp hack
         adda    seed_3
         sta     seed_3
         leax    32,x                    ; next object
@@ -924,9 +933,11 @@ set_deadly_wipe_and_draw_flags:
         jmp     set_wipe_and_draw_flags
 
 set_both_deadly_flags:
+.ifndef BUILD_OPT_ALMOST_INVINCIBLE
         lda     13,x                    ; flags13
         ora     #FLAG_FATAL_HIT_YOU|FLAG_FATAL_YOU_HIT
         sta     13,x                    ; flags13
+.endif        
         rts
 
 ; ball up/down
@@ -1374,6 +1385,18 @@ objects_required:
 
 ; special objects
 upd_96_to_102:
+        jsr     adj_m4_m12
+        jsr     dec_dZ_and_update_XYZ
+        lda     13,x                    ; flags13
+        bita    #FLAG_JUST_DROPPED
+        bne     1$
+        bsr     is_obj_moving
+        bne     1$
+        rts
+1$:     lda     13,x                    ; flags13
+        anda    #~FLAG_JUST_DROPPED
+        sta     13,x
+        jsr     clear_dX_dY
         bra     audio_B467_wipe_and_draw
         
 cycle_colours_with_sound:
@@ -1429,6 +1452,7 @@ upd_92_to_95:
         
 rand_legs_sprite:
 ;       ld      a,r
+        lda     TMRLSB                  ; temp hack
         sta     *z80_c
         lda     seed_3
         adda    *z80_c
@@ -1565,6 +1589,7 @@ init_special_objects:
         lda     seed_1
         sta     *z80_e
 ;       ld      a,r
+        lda     TMRLSB                ; temp hack
         adda    *z80_e
         sta     *z80_e
 init_obj_loop:
@@ -1687,7 +1712,47 @@ fill_window:
         rts
 
 find_special_objs_here:
-        rts
+        ldy     #special_objs_here
+        ldu     #special_objs_tbl
+1$:     tst     0,u                     ; graphic_no
+        beq     2$
+        lda     8,u                     ; scrn
+        cmpa    8,x                     ; current screen
+        bne     2$
+        pshs    u
+        lda     ,u+                     ; graphic_no
+        sta     ,y+                     ; graphic_no
+        leau    4,u
+        lda     ,u+                     ; curr_x
+        sta     ,y+                     ; X
+        lda     ,u+                     ; curr_y
+        sta     ,y+                     ; Y
+        lda     ,u+                     ; curr_Z
+        sta     ,y+                     ; Z
+        lda     #5
+        sta     ,y+                     ; width
+        sta     ,y+                     ; depth
+        lda     #12
+        sta     ,y+                     ; height
+        lda     #FLAG_DRAW|FLAG_MOVEABLE
+        sta     ,y+                     ; flags7
+        lda     ,u                      ; curr_scrn
+        sta     ,y+                     ; scrn
+        ldb     #7
+        jsr     zero_Y                  ; zero bytes 8-15
+        puls    u                       ; ptr special_objs_tbl
+        stu     ,y++                    ; store in bytes 16-17
+        ldb     #14
+        jsr     zero_Y
+2$:     leau    9,u                     ; next entry
+        cmpu    #eosot
+        blt     1$
+3$:     cmpy    #other_objs_here
+        beq     9$
+        ldb     #32
+        jsr     zero_Y
+        bra     3$
+9$:     rts
 
 update_special_objs:
         rts
@@ -3381,32 +3446,6 @@ next_fg_obj_in_count:
         pshs    x                       ; ptr block type data
 next_fg_obj_sprite:
         lda     ,x+
-; start of hack for demo
-        cmpa    #0x06                   ; block
-        beq     7$
-        cmpa    #0x07                   ; rock
-        beq     7$
-        cmpa    #0x16                   ; gargoyle
-        beq     7$
-        cmpa    #0x17                   ; spikes
-        beq     7$
-        cmpa    #0x36                   ; moving block (EW)
-        beq     7$
-        cmpa    #0x37                   ; moving block (NS)
-        beq     7$
-        cmpa    #0x3E                   ; another block 
-        beq     7$
-        cmpa    #0x54                   ; table
-        beq     7$
-        cmpa    #0x55                   ; chest
-        beq     7$
-        cmpa    #0x5B                   ; block (dropping)
-        beq     7$
-        cmpa    #0x8F                   ; block (collapsing)
-        beq     7$
-        bra     hack1
-7$:
-; end of hack for demo
         sta     0,y                     ; graphic_no
         lda     ,x+
         sta     4,y                     ; width
@@ -3466,12 +3505,6 @@ next_fg_obj_sprite:
         decb
         bne     1$
         puls    b
-; start of hack for demo
-        bra     hack2
-hack1:
-        leax    5,x
-hack2:
-; end of hack for demo
         tst     ,x                      ; next entry
         lbne    next_fg_obj_sprite
         puls    x                       ; ptr block type data
