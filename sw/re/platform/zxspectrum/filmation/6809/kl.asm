@@ -14,6 +14,7 @@
 ; *** BUILD OPTIONS
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ;.define BUILD_OPT_NO_Z_ORDER
+;.define BUILD_OPT_NO_TRANSFORM
 ; *** end of BUILD OPTIONS
 
         .org    code_base-#0x800
@@ -1385,6 +1386,7 @@ prepare_final_animation:
         rts
         
 chk_and_init_transform:
+.ifndef BUILD_OPT_NO_TRANSFORM
         tst     transform_flag_graphic
         beq     9$
         lda     12,x                    ; flags12
@@ -1405,6 +1407,7 @@ chk_and_init_transform:
         puls    x
         jsr     upd_11                
         bra     rand_legs_sprite
+.endif        
 9$:     rts
 
 ; human/wulf transform
