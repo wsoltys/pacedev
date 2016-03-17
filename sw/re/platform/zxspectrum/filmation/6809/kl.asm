@@ -1201,14 +1201,14 @@ menu_text:
 print_text_single_colour:
         ldu     #font
         stu     gfxbase_8x8
-        jsr     calc_vidbuf_addr ; in U
+        jsr     calc_vidbuf_addr        ; ->U
         tfr     u,y
         bra     loc_BE56
         
 print_text_std_font:
 
 print_text:
-        jsr     calc_vidbuf_addr
+        jsr     calc_vidbuf_addr        ; ->U
         tfr     u,y
         lda     ,x+                     ; attribute
 loc_BE56:
@@ -1339,6 +1339,8 @@ display_objects_carried:
 
 ; this routine puts a pixel on the panel!
 display_objects:
+        jsr     update_screen
+        rts
         pshs    x
         ldx     #sprite_scratchpad
         ldb     #3
@@ -1369,9 +1371,7 @@ display_object:
         jsr     print_sprite
 1$:     ldb     26,x                    ; pixel_x
         lda     27,x                    ; pixel_y
-        pshs    d
         jsr     calc_vram_addr          ; ->U
-        puls    d
         tfr     u,y                     ; dest (vram)
         jsr     calc_vidbuf_addr        ; ->U
         tfr     u,x                     ; src (vidbuf)
@@ -1518,7 +1518,7 @@ loc_C0B2:
         sta     0x23,x                  ; Z+=12 (top half)
         exg     x,y
         jsr     calc_pixel_XY
-        tfr     y,x
+        exg     x,y
 
 drop_object:
         lda     #5
@@ -1531,19 +1531,19 @@ drop_object:
         lda     8,x                     ; scrn
         sta     8,y                     ; scrn
         ldd     ,u++
-        std     ,y++                    ; ptr special object
+        std     16,y                    ; ptr special object
         lda     13,y                    ; flags13
         ora     #FLAG_JUST_DROPPED
         sta     13,y                    ; flags13
 
 adjust_carried:
-        ldu     #unk_5BE4
+        ldy     #unk_5BE4
         ldb     #12
-1$:     lda     ,-u
-        sta     4,u
+1$:     lda     ,-y
+        sta     4,y
         decb
         bne     1$        
-        ldy     #inventory
+;        ldy     #inventory
         ldb     #4
         jsr     zero_Y
         jmp     done_pickup_drop
