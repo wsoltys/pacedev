@@ -1332,11 +1332,71 @@ upd_119:
         jmp     upd_111
 
 display_objects_carried:
+        tst     objects_carried_changed
+        bne     1$
+        rts
+1$:     clr     objects_carried_changed
+
 display_objects:
+        pshs    x
+        ldx     #sprite_scratchpad
+        ldb     #3
+        ldu     #objects_carried
+
 display_object:
+        pshs    b,u
+        negb
+        addb    #3
+        aslb
+        aslb
+        aslb
+        stb     *z80_c
+        aslb
+        addb    *z80_c
+        addb    #16                     ; (~b+3)*24+16
+        stb     26,x                    ; pixel_x
+        clr     27,x                    ; pixel_y
+        lda     27,x                    ; pixel_y
+        jsr     calc_vidbuf_addr        ; ->U
+        tfr     u,y                     ; addr
+        ldu     #0x1803                 ; lines, bytes
+        clra
+        jsr     fill_window
+        ldu     1,s                     ; peek on stack
+        lda     ,u
+        beq     1$
+        sta     0,x                     ; graphic_no
+        jsr     print_sprite
+1$:     ldb     26,x                    ; pixel_x
+        lda     27,x                    ; pixel_y
+        pshs    d
+        jsr     calc_vram_addr          ; ->U
+        puls    d
+        tfr     u,y                     ; dest (vram)
+        jsr     calc_vidbuf_addr        ; ->U
+        tfr     u,x                     ; src (vidbuf)
+        ldu     #0x1803                 ; lines/bytes
+        jsr     blit_to_screen
+; code to set attribute of object        
+; - not currently supported
+        ldu     1,s                     ; peek on stack
+        ldb     ,u                      ; graphic_no
+        andb    #0x0f
+        ldu     #object_attributes
+        lda     b,x                     ; attribute
+; - sets attribute here
+        puls    b,u
+        leau    4,u
+        decb
+        bne     display_object
+        puls    x        
         rts
 
 object_attributes:
+        ; diamond, poison, boot, challice, cup, bottle, globe, idol
+        ; red, magenta, green, cyan, yellow, white, red, white
+        .db 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x42, 0x47
+
 sprite_scratchpad:
         .ds 32
 
