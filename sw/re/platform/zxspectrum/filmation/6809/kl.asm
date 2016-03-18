@@ -1461,11 +1461,11 @@ handle_pickup_drop:
         bne     3$
         ldb     #1
 3$:     ldy     #special_objs_here
-        tst     0,y                     ; graphic_no
+4$:     tst     0,y                     ; graphic_no
         beq     loc_C0B2
         leay    32,y
         decb
-        bne     3$
+        bne     4$
 
 done_pickup_drop:
         ldd     *width
