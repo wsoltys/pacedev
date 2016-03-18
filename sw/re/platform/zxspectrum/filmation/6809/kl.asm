@@ -1339,8 +1339,6 @@ display_objects_carried:
 
 ; this routine puts a pixel on the panel!
 display_objects:
-        jsr     update_screen
-        rts
         pshs    x
         ldx     #sprite_scratchpad
         ldb     #3
@@ -1768,7 +1766,6 @@ display_frame:
         puls    u                     ; lines,bytes
         ldy     #coco_vram+0x17F7     ; (184,0) (dest)
         jmp     blit_to_screen
-        ;jmp     update_screen
 
 toggle_day_night:
         lda     0,x                   ; graphic_no
@@ -3832,8 +3829,9 @@ update_screen:
         ldb     #192
 1$:     pshs    b
         ldb     #32
-2$:     lda     ,x+
-        sta     ,y+
+2$:     lda     ,x                      ; source byte (vidbuf)
+        clr     ,x+                     ; clear vidbuf
+        sta     ,y+                     ; destination (vram)
         decb
         bne     2$
         leax    -64,x
