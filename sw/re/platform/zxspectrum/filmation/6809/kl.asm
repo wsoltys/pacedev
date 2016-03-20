@@ -1340,12 +1340,13 @@ display_objects_carried:
 ; this routine puts a pixel on the panel!
 display_objects:
         pshs    x
-        ldx     #sprite_scratchpad
         ldb     #3
         ldu     #objects_carried
 
 display_object:
-        pshs    b,u
+        ldx     #sprite_scratchpad
+        pshs    b
+        pshs    u
         negb
         addb    #3
         aslb
@@ -1363,7 +1364,7 @@ display_object:
         ldu     #0x1803                 ; lines, bytes
         clra
         jsr     fill_window
-        lda     [1,s]                   ; graphic_no (ptr on stack)
+        lda     [,s]                    ; graphic_no (ptr on stack)
         beq     1$
         sta     0,x                     ; graphic_no
         jsr     print_sprite
@@ -1377,12 +1378,13 @@ display_object:
         jsr     blit_to_screen
 ; code to set attribute of object        
 ; - not currently supported
-        ldb     [1,s]                   ; graphic_no (ptr on stack)
+        ldb     [,s]                    ; graphic_no (ptr on stack)
         andb    #0x0f
         ldu     #object_attributes
         lda     b,u                     ; attribute
 ; - sets attribute here
-        puls    b,u
+        puls    u
+        puls    b
         leau    4,u
         decb
         bne     display_object
@@ -1411,7 +1413,7 @@ handle_pickup_drop:
         lbcc    ret_pickup_drop
         lda     12,x                    ; flags12
         bita    #FLAG_JUMPING
-        bne     ret_pickup_drop
+        lbne    ret_pickup_drop
         bita    #FLAG_Z_OOB
         beq     ret_pickup_drop
         pshs    b                       ; user_input
