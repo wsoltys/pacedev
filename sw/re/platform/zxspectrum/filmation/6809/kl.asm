@@ -92,6 +92,7 @@ MASK_TURN_DELAY     .equ    0x07        ; player (bottom)
 seed_1:                         .ds 1
                                 .ds 1
 seed_2:                         .ds 2
+seed_2_6809:                    .ds 2
 ; bit   3 : directional
 ; bit 2-1 : 00=keybd, 01=kempston, 10=cursor, 11=i/f-ii
 user_input_method:              .ds 1
@@ -462,10 +463,12 @@ loc_B000:
 ;       ld      hl, (seed_2)
 ;       inc     hl
 ;       ld      (seed_2),hl
-; but the high-order byte is not accessed anywhere else
 ; so to get the same behaviour on the 6809, we (need to)
 ; do an 8-bit increment at this address
         inc     seed_2
+        ldu     seed_2_6809
+        leau    1,u
+        stu     seed_2_6809
         lda     seed_3
         adda    ,u
         sta     seed_3
@@ -1802,7 +1805,32 @@ is_obj_moving:
 
 ; extra life
 upd_103:
-        jmp     dec_dZ_upd_XYZ_wipe_if_moving
+        jsr     upd_128_to_130
+        tfr     x,y
+        ldx     #graphic_objs_tbl
+        inc     4,x                     ; width
+        inc     5,x                     ; depth
+        bsr     is_on_or_near_obj
+        pshs    cc
+        dec     4,x                     ; width
+        dec     5,x                     ; depth
+        tfr     y,x
+        puls    cc
+        bcc     1$
+        lda     0,x                     ; graphic_no
+        ora     #(1<<3)
+        sta     0,x                     ; graphic_no
+        jsr     adj_m4_m12
+        clr     [16,x]                  ; zap spec_obj_tbl graphic_no
+        inc     lives
+        clr     disable_spike_ball_drop
+; sound
+        jsr     print_lives
+        ldd     #0x2020
+        pshs    x
+        jsr     blit_2x8
+        puls    x
+1$:     jmp     dec_dZ_upd_XYZ_wipe_if_moving
         
 ; special objects being put in cauldron
 upd_104_to_110:
