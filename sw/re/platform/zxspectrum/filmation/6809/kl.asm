@@ -15,7 +15,7 @@
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
-.define BUILD_OPT_ALMOST_INVINCIBLE
+;.define BUILD_OPT_ALMOST_INVINCIBLE
 ; *** end of BUILD OPTIONS
 
         .org    code_base-#0x800
@@ -38,6 +38,7 @@ y_lim               .equ    0x0e
 x_lim               .equ    0x0f
 tmp_word            .equ    0x10
 depth               .equ    0x12
+pc                  .equ    0x14
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
@@ -735,7 +736,7 @@ menu_tune:
 
 play_audio_wait_key:
 
-play_audio_untl_keypress:
+play_audio_until_keypress:
         rts
 
 play_audio:
@@ -1008,9 +1009,15 @@ guard_S:
 
 game_over:
         tst     all_objs_in_cauldron
-        bne     game_complete_msg
+        lbne    game_complete_msg
+loc_BA29:        
         jsr     clear_scrn_buffer
         jsr     clear_scrn
+; added for Coco3 port
+        lda     #ATTR_WHITE
+        jsr     osd_set_palette
+;
+
         ldy     #gameover_xy
         ldx     #gameover_text
         ldb     #6
@@ -1019,13 +1026,40 @@ game_over:
         ldx     #days
         ldb     #1
         jsr     print_BCD_number
-;
+        jsr     calc_and_display_percent
+        lda     num_scrns_visited
+        asla
+        anda    #0xC0
+        sta     *z80_c
+        lda     all_objs_in_cauldron
+        anda    #1
+        ora     *z80_c
+        rola
+        rola
+        rola
+        rola
+        anda    #0x0e                   ; rating
+        ldu     #rating_tbl
+        ldx     a,u                     ; addr rating string
+        ldd     #0x2758
+        jsr     print_text_std_font
+        ldx     #objects_put_in_cauldron
+        lda     ,x
+        suba    #10
+        bcs     1$
+        ora     #0x10                   ; convert to BCD
+        sta     ,x
+1$:     ldy     #vidbuf+0x9f7
+        ldb     #1
+        jsr     print_BCD_number
         jsr     print_border
         jsr     update_screen
-1$:     clra
+2$:     clra
         jsr     read_port
-        beq     1$
-;
+        beq     2$
+        ldu     #game_over_tune
+        jsr     play_audio_until_keypress
+        ldb     #8
         bsr     wait_for_key_release        
         jmp     start_menu
 
@@ -1041,6 +1075,50 @@ wait_for_key_release:
         rts
         
 game_complete_msg:
+        jsr     clear_scrn_buffer
+        jsr     clear_scrn
+; added for Coco3 port
+        lda     #ATTR_WHITE
+        jsr     osd_set_palette
+;
+        ldy     #complete_xy
+        ldx     #complete_text
+        ldb     #6
+        clr     suppress_border
+        jsr     display_text_list
+        ldu     #game_complete_tune
+        jsr     play_audio
+        ldb     #8
+        bsr     wait_for_key_release
+        jmp     loc_BA29
+
+complete_colours:
+        .db 0x47, 0x46, 0x45, 0x44, 0x43, 0x42
+complete_xy:    
+        .db 0x40, 0x87, 0x40, 0x77, 0x30, 0x67, 0x30, 0x57, 0x50
+        .db 0x47, 0x30, 0x37
+complete_text:
+        ; "THE POTION CASTS"
+        .db 0x1D, 0x11, 0xE, 0x26, 0x19, 0x18, 0x1D, 0x12, 0x18
+        .db 0x17, 0x26, 0xC, 0xA, 0x1C, 0x1D, 0x9C
+        ; "ITS MAGIC STRONG"
+        .db 0x12, 0x1D, 0x1C, 0x26, 0x16, 0xA, 0x10, 0x12, 0xC
+        .db 0x26, 0x1C, 0x1D, 0x1B, 0x18, 0x17, 0x90
+        ; "ALL EVIL MUST BEWARE"
+        .db 0xA, 0x15, 0x15, 0x26, 0xE, 0x1F, 0x12, 0x15, 0x26
+        .db 0x16, 0x1E, 0x1C, 0x1D, 0x26, 0xB, 0xE, 0x20, 0xA
+        .db 0x1B, 0x8E
+        ; "THE SPELL HAS BROKEN"
+        .db 0x1D, 0x11, 0xE, 0x26, 0x1C, 0x19, 0xE, 0x15, 0x15
+        .db 0x26, 0x11, 0xA, 0x1C, 0x26, 0xB, 0x1B, 0x18, 0x14
+        .db 0xE, 0x97
+        ; "YOU ARE FREE"
+        .db 0x22, 0x18, 0x1E, 0x26, 0xA, 0x1B, 0xE, 0x26, 0xF
+        .db 0x1B, 0xE, 0x8E
+        ; "GO FORTH TO MIRE MARE"
+        .db 0x10, 0x18, 0x26, 0xF, 0x18, 0x1B, 0x1D, 0x11, 0x26
+        .db 0x1D, 0x18, 0x26, 0x16, 0x12, 0x1B, 0xE, 0x16, 0xA
+        .db 0x1B, 0x8E
 
 gameover_colours:
         .db 0x47, 0x46, 0x45, 0x45, 0x43, 0x44
@@ -1049,7 +1127,7 @@ gameover_xy:
         .db 0x40, 0x5F, 0x30, 0x4F, 0x48, 0x37
 
 gameover_text:
-          ; "GAME  OVER"
+        ; "GAME  OVER"
         .db 0x10, 0xA, 0x16, 0xE, 0x26, 0x26, 0x18, 0x1F, 0xE
         .db 0x9B
         ; "TIME    DAYS"
@@ -1068,9 +1146,88 @@ gameover_text:
         .db 0x18, 0x1F, 0xE, 0x1B, 0xA, 0x15, 0x15, 0x26, 0x1B
         .db 0xA, 0x1D, 0x12, 0x17, 0x90
 
-calc_and_display_percent:
+rating_tbl:     
+        .dw a_POOR
+        .dw a_AVERAGE
+        .dw a_FAIR
+        .dw a_GOOD
+        .dw a_EXCELLENT
+        .dw a_MARVELLOUS
+        .dw a_HERO
+        .dw a_ADVENTURER
+a_POOR:
+        .db 0x42, 0x26, 0x26, 0x26, 0x19, 0x18, 0x18, 0x9B
+a_AVERAGE:
+        .db 0x42, 0x26, 0xA, 0x1F, 0xE, 0x1B, 0xA, 0x10, 0x8E
+a_FAIR:
+        .db 0x42, 0x26, 0x26, 0x26, 0xF, 0xA, 0x12, 0x9B
+a_GOOD:
+        .db 0x42, 0x26, 0x26, 0x26, 0x10, 0x18, 0x18, 0x8D
+a_EXCELLENT:
+        .db 0x42, 0xE, 0x21, 0xC, 0xE, 0x15, 0x15, 0xE, 0x17, 0x9D
+a_MARVELLOUS:
+        .db 0x42, 0x16, 0xA, 0x1B, 0x1F, 0xE, 0x15, 0x15, 0x18
+        .db 0x1E, 0x9C
+a_HERO:
+        .db 0x42, 0x26, 0x26, 0x26, 0x11, 0xE, 0x1B, 0x98
+a_ADVENTURER:
+        .db 0x42, 0xA, 0xD, 0x1F, 0xE, 0x17, 0x1D, 0x1E, 0x1B
+        .db 0xE, 0x9B
 
+calc_and_display_percent:
+        clr     *z80_e                  ; count
+        ldu     #scrn_visited
+        ldb     #32                     ; 256/8 = 32 bytes
 count_screens:
+        lda     ,u+                     ; get entry
+        pshs    b
+        ldb     #8                      ; 8 bits/byte
+1$:     asra
+        bcc     2$                      ; not set, skip
+        inc     *z80_e                  ; inc count
+2$:     decb
+        bne     1$                      ; do 8 bits
+        puls    b
+        decb                            ; do 32 bytes
+        bne     count_screens
+        lda     *z80_e
+        deca                            ; adjust for calcs
+        sta     num_scrns_visited
+        lda     objects_put_in_cauldron
+        asla                            ; x2
+        adda    *z80_e                  
+        sta     *z80_e
+        ldd     #0
+        std     *tmp_word               ; init running total
+        clr     *pc                     ; init %
+3$:     ldd     #0xA410                 ; 0.64102*(128+14*2)=99.999%
+        addd    *tmp_word
+        std     *tmp_word
+        lda     *pc
+        adca    #0
+        daa
+        sta     *pc
+        dec     *z80_e
+        bne     3$                      ; $A410*156=$64FFD8+$28=$640000
+        ldd     #0x28
+        addd    *tmp_word
+        lda     *pc
+        adca    #0
+        daa
+        sta     percent_lsw
+        lda     #0                      ; need to preserve C flag!
+        adca    #0
+        daa
+        sta     percent_msw
+        ldy     #vidbuf+#0xbf3
+        ldx     #percent_msw
+        ldb     #1
+        tst     ,x
+        beq     4$
+        incb
+        bra     print_BCD_lsd
+4$:     leax    1,x
+        leay    1,y
         bra     print_BCD_number
         
 print_days:
@@ -1204,7 +1361,8 @@ print_text_single_colour:
         jsr     calc_vidbuf_addr        ; ->U
         tfr     u,y
         bra     loc_BE56
-        
+
+; D=x,y X=str        
 print_text_std_font:
 
 print_text:
@@ -3421,7 +3579,26 @@ build_screen_objects:
         bsr     flag_room_visited
         rts
 
+; original routine used self-modifying code
+; but there's no reason this needs to be optimal
+; and it means we can (still) run out of ROM
 flag_room_visited:
+        ldu     #scrn_visited
+        lda     graphic_objs_tbl+#8     ; curr_scrn
+        tfr     a,b
+        asra
+        asra
+        asra                            ; byte offset
+        leau    a,u                     ; ptr address
+        andb    #7                      ; bit offset
+        incb
+        clra
+        orcc    #(1<<0)                 ; set carry
+1$:     rola                          
+        decb
+        bne     1$
+        ora     ,u                      ; OR in existing entry
+        sta     ,u                      ; update entry
         rts
 
 transfer_sprite:
