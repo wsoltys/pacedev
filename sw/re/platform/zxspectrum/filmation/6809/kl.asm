@@ -1825,9 +1825,9 @@ upd_103:
         inc     lives
         clr     disable_spike_ball_drop
 ; sound
+        pshs    x
         jsr     print_lives
         ldd     #0x2020
-        pshs    x
         jsr     blit_2x8
         puls    x
 1$:     jmp     dec_dZ_upd_XYZ_wipe_if_moving
@@ -1835,6 +1835,7 @@ upd_103:
 ; special objects being put in cauldron
 upd_104_to_110:
 audio_B467_wipe_and_draw:
+        jsr     audio_B467
         jmp     set_wipe_and_draw_flags
         
 centre_of_room:
