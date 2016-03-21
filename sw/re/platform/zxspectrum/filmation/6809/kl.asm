@@ -1993,6 +1993,26 @@ find_special_objs_here:
 9$:     rts
 
 update_special_objs:
+        ldy     #special_objs_here
+1$:     tst     0,y                     ; graphic_no
+        beq     3$
+        ldu     16,y                    ; ptr spec_obj_tbl
+        lda     0,y                     ; graphic_no
+        sta     0,u                     ; store in spec_obj_tbl
+        leau    5,u                     ; curr_X,Y,Z,scrn
+        pshs    y
+        leay    1,y                     ; X,Y,Z
+        ldb     #3                      ; 3 bytes to copy
+2$:     lda     ,y+
+        sta     ,u+
+        decb
+        bne     2$
+        puls    y
+        lda     8,y                     ; scrn
+        sta     ,u                      ; curr_scrn
+3$:     leay    32,y
+        cmpy    #other_objs_here
+        blt     1$        
         rts
 
 ; ghost
