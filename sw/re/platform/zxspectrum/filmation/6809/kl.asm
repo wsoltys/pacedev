@@ -763,9 +763,15 @@ audio_B451:
 audio_B454:
         rts
 
-audio_B472:
+audio_B467:
         rts
         
+audio_B472:
+        rts
+
+audio_B489:
+        rts
+                
 audio_B4BB:
         rts
 
@@ -2191,7 +2197,35 @@ delta_tbl:
 
 ; portcullis (static)
 upd_8:
+        jsr     adj_m6_m12
+        tst     portcullis_moving
+        beq     1$
+        rts
+1$:     lda     room_size_Z
+        cmpa    3,x                     ; room_height == Z?
+        beq     init_portcullis_up
+        adda    #31
+        cmpa    3,x
+        bcc     init_portcullis_up
+        lda     portcullis_move_cnt
+        cmpa    #4
+        bcs     init_portcullis_down
+        lda     seed_3
+        anda    #0x1f                   ; 1in32 chance?
+        beq     2$
+        rts
+2$:     ora     #0x80
+
 init_portcullis_down:
+        inca
+        sta     portcullis_move_cnt
+        lda     0,x                     ; graphic_no
+        ora     #(1<<0)                 ; =9
+        sta     0,x                     ; graphic_no
+        lda     #0xff                   ; dZ=-1
+        sta     11,x                    ; dZ
+loc_C691:
+        inc     portcullis_moving   
 
 set_wipe_and_draw_flags:
         lda     7,x                     ; flags7
@@ -2207,13 +2241,52 @@ set_wipe_and_draw_Y:
         rts
 
 init_portcullis_up:
+        lda     seed_3
+        anda    #0x1f                   ; 1in32 chance?
+        beq     1$
+        rts
+1$:     lda     0,x                     ; graphic_no
+        ora     #(1<<0)                 ; =9
+        sta     0,x                     ; graphic_no
+        lda     #1                      ; dz=1
+        sta     11,x                    ; dZ
+        bra     loc_C691
 
 ; portcullis (moving)
 upd_9:
+        jsr     adj_m6_m12
+        lda     13,x                    ; flags13
+        ora     #FLAG_FATAL_HIT_YOU
+        sta     13,x                    ; flags13
+        lda     graphic_objs_tbl+#12    ; flags12
+        anda    #MASK_ENTERING_SCRN
+        beq     1$
+        rts
+1$:     lda     11,x                    ; dZ
+        bpl     move_portcullis_up
+        dec     11,x                    ; dz-=1
+        bsr     dec_dZ_and_update_XYZ
+        lda     12,x                    ; flags12
+        bita    #FLAG_Z_OOB
+        beq     set_wipe_and_draw_flags
+        jsr     audio_B489
+        
 stop_portcullis:
+        clr     portcullis_moving
+        lda     0,x                     ; graphic_no
+        anda    #~(1<<0)                ; =8
+        sta     0,x                     ; graphic_no
         bra     set_wipe_and_draw_flags
         
 move_portcullis_up:        
+        lda     #2
+        sta     11,x                    ; dZ=2
+        jsr     audio_B467
+        bsr     dec_dZ_and_update_XYZ
+        lda     room_size_Z
+        adda    #31
+        cmpa    3,x                     ; Z
+        bcc     set_wipe_and_draw_flags
         bra     stop_portcullis
 
 dec_dZ_and_update_XYZ:
