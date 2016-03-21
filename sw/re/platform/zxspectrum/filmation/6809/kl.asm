@@ -754,6 +754,9 @@ audio_B403:
 audio_B419:
         rts
 
+audio_B42E:
+        rts
+
 audio_B441:
         rts
 
@@ -950,9 +953,38 @@ set_both_deadly_flags:
 
 ; ball up/down
 upd_178_179:
-loc_B892:
-        bra     set_deadly_wipe_and_draw_flags                                                                                        
-ball_up:        
+        jsr     upd_12_to_15
+        tst     ball_bounce_height
+        bne     1$
+        lda     3,x                     ; Z
+        adda    #32
+        sta     ball_bounce_height
+1$:     bsr     toggle_next_prev_sprite
+        jsr     audio_B451
+        lda     13,x                    ; flags13
+        bita    #FLAG_UP
+        bne     ball_up
+        jsr     dec_dZ_and_update_XYZ
+        lda     12,x                    ; flags12
+        bita    #FLAG_Z_OOB
+        beq     loc_B892
+        lda     13,x                    ; flags12
+        ora     #FLAG_UP
+        sta     13,x                    ; flags12
+        jsr     audio_B42E
+loc_B892:        
+        bra     set_deadly_wipe_and_draw_flags
+
+ball_up:
+        lda     #3
+        sta     11,x                    ; dZ=3
+        jsr     dec_dZ_and_update_XYZ
+        lda     ball_bounce_height
+        cmpa    3,x                     ; Z
+        bcc     loc_B892
+        lda     13,x                    ; flags13
+        anda    #~FLAG_UP
+        sta     13,x                    ; flags13
         bra     loc_B892
 
 init_cauldron_bubbles:
@@ -978,10 +1010,15 @@ upd_111:
 move_towards_plyr:
 
 toggle_next_prev_sprite:        
+        lda     0,x                     ; graphic_no
+        eora    #1
+        bra     save_graphic_no
 
 next_graphic_no_mod_4:
 
 save_graphic_no:
+        sta     0,x                     ; graphic_no
+        rts
 
 ; cauldron (bottom)
 upd_141:
