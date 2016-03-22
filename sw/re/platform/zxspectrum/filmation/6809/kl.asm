@@ -41,6 +41,7 @@ depth               .equ    0x12
 pc                  .equ    0x14
 dy                  .equ    0x16
 dx                  .equ    0x17
+r                   .equ    0x7f
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
@@ -289,16 +290,16 @@ start_coco:
 ; - initialise GIME
 				lda			IRQENR									; ACK any pending GIME interrupt
 .ifndef CARTRIDGE				
-				lda			#0x60										; enable GIME MMU,IRQ
+				lda			#MMUEN|#FEN             ; enable GIME MMU, FIRQ
 				sta			INIT0     							
 .endif				
 				lda			#0x00										; slow timer, task 1
 				sta			INIT1     							
 				lda			#0x00										; no VBLANK IRQ
 				sta			IRQENR    							
-				lda			#0x00										; no FIRQ enabled
+				lda			#TMR                    ; TMR FIRQ enabled
 				sta			FIRQENR   							
-				lda			#0x80										; graphics mode, 60Hz, 1 line/row
+				lda			#BP										  ; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
 	  .ifdef GFX_1BPP				
 				lda			#0x08										; 192 scanlines, 32 bytes/row, 2 colours (256x192)
@@ -327,7 +328,7 @@ inipal:
 				
 				sta			CPU179									; select fast CPU clock (1.79MHz)
         sta     RAMMODE
-        
+
   ; configure MMU
         lda     #DATA_PG1
         ldx     #(MMUTSK1+4)            ; $8000-
@@ -345,6 +346,13 @@ inipal:
         lda     #>4095
         sta     TMRMSB
 
+  ; install FIRQ handler and enable TMR FIRQ
+        lda     #0x7E                   ; jmp
+        sta     0xFEF4
+				ldx     #fisr                   ; address
+				stx     0xFEF5
+        andcc   #~0x40                  ; enable FIRQ in CPU
+        
   .ifdef HAS_SOUND				
 
 				lda			0xff23
@@ -451,8 +459,7 @@ jump_to_tbl_entry:
         jmp     [d,u]                   ; go
 
 ret_from_tbl_jp:
-; Z80   ld      a,r
-        lda     TMRLSB                  ; temp hack
+        lda     *r
         adda    seed_3
         sta     seed_3
         leax    32,x                    ; next object
@@ -906,8 +913,7 @@ upd_182_183:
         lda     tmp_bouncing_ball_dZ
         bpl     3$
         jsr     audio_B42E
-3$:     ;ld     a,r
-        lda     TMRLSB                  ; temp hack
+3$:     lda     *r
         anda    #2                      ; dX or dY?
         beq     7$
         lda     graphic_objs_tbl+2      ; plyr Y
@@ -2301,8 +2307,7 @@ upd_92_to_95:
         beq     loc_C377        
         
 rand_legs_sprite:
-;       ld      a,r
-        lda     TMRLSB                  ; temp hack
+        lda     *r
         sta     *z80_c
         lda     seed_3
         adda    *z80_c
@@ -2437,8 +2442,7 @@ init_special_objects:
         ldu     #special_objs_tbl
         lda     seed_1
         sta     *z80_e
-;       ld      a,r
-        lda     TMRLSB                ; temp hack
+        lda     *r
         adda    *z80_e
         sta     *z80_e
 init_obj_loop:
@@ -5009,6 +5013,13 @@ hflip_line:
 flip_done:
         rts
 
+fisr:
+; temp hack - should do LFSR or something
+; and also tune frequency
+        tst     FIRQENR        
+        inc     *r
+        rti
+        
 vidbuf:
         .ds     0x1800
                                                                                 
