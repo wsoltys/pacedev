@@ -202,10 +202,10 @@ scrn_visited:                   .ds 32
 ;     - 3=triggered (dropping, collapsing blocks)
 ;     - 2=up (bouncing ball), dropping (spiked ball)
 ;     - 1=north (NS fire)
-;     - 0=east (WE fire, EW guard), just dropped (spec objs)
+;     - 0=east (EW fire, EW guard), just dropped (spec objs)
 ; +14 d_x_adj
 ; +15 d_y_adj
-; +16-17 ptr object table entry or tmp player graphic_no
+; +16-17 ptr spec object table entry or tmp player graphic_no
 ; +18 pixel X adjustment
 ; +19 pixel Y adjustment
 ; +20-23 unused
@@ -796,7 +796,6 @@ audio_B4C1:
         rts
 
 do_any_objs_intersect:
-; may need to preserve other registers
         pshs    y
         ldy     #graphic_objs_tbl
         ldb     #MAX_OBJS
@@ -1028,11 +1027,42 @@ upd_22:
 
 ; spiked ball
 upd_63:
-        rts
+        bsr     set_both_deadly_flags
+        jsr     upd_6_7
+        tst     disable_spike_ball_drop
+        bne     9$
+        lda     13,x                    ; flags13
+        bita    #FLAG_DROPPING
+        bne     spiked_ball_drop
+        ldu     #is_spike_ball_dropping
+        tst     ,u
+        bne     9$
+        lda     seed_3
+        cmpa    #16
+        bcc     9$
+        lda     13,x                    ; flags13
+        ora     #FLAG_DROPPING
+        sta     13,x                    ; flags13
+        lda     #1
+        sta     ,u                      ; flag dropping
+9$:     rts
 
 spiked_ball_drop:
+        jsr     dec_dZ_and_update_XYZ
+        lda     12,x                    ; flags12
+        bita    #FLAG_Z_OOB
+        bne     loc_B7DC
+        jsr     audio_B451
+
 draw_spiked_ball:
         jmp     set_wipe_and_draw_flags
+
+loc_B7DC:
+        lda     13,x                    ; flags13
+        anda    #~FLAG_DROPPING
+        sta     13,x                    ; flags13
+        clr     is_spike_ball_dropping
+        bra     draw_spiked_ball
 
 ; spikes
 upd_23:
@@ -1113,6 +1143,7 @@ upd_168_to_175:
 upd_164_to_167:
         rts
 
+; final sparkles in cauldron
 upd_111:
         lda     #1                      ; invalid
         sta     0,x                     ; graphic_no
