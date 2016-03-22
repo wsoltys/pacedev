@@ -39,6 +39,8 @@ x_lim               .equ    0x0f
 tmp_word            .equ    0x10
 depth               .equ    0x12
 pc                  .equ    0x14
+dy                  .equ    0x16
+dx                  .equ    0x17
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
@@ -777,7 +779,10 @@ audio_B472:
 
 audio_B489:
         rts
-                
+
+audio_guard_wizard:
+        rts
+                        
 audio_B4BB:
         rts
 
@@ -903,14 +908,81 @@ upd_54:
 
 ; guard and wizard (bottom half)
 upd_144_to_149_152_to_157:
+        jsr     adj_m6_m12
+        lda     9,x                     ; dX
+        ora     10,x                    ; dY
+        bne     1$
         rts
+1$:     jsr     audio_guard_wizard
+        lda     9,x                     ; dX
+        cmpa    10,x                    ; dX<dY?
+        bcs     5$                      ; yes, go
+        tsta                            ; dX<0?
+        bmi     4$                      ; yes,go
+        lda     0,x                     ; graphic_no
+        ora     #(1<<3)
+        sta     0,x                     ; graphic_no
+2$:     lda     7,x                     ; flags7
+        anda    #~FLAG_HFLIP
+        sta     7,x
+3$:     jsr     animate_human_legs
+        jmp     set_wipe_and_draw_flags
+4$:     lda     0,x                     ; graphic_no
+        anda    #~(1<<3)
+        sta     0,x                     ; graphic_no
+        bra     2$
+5$:     tst     10,x                    ; dY<0?
+        bpl     7$                      ; no, go
+        lda     0,x                     ; graphic_no
+        ora     #(1<<3)
+        sta     0,x                     ; graphic_no
+6$:     lda     7,x                     ; flags7
+        ora     #FLAG_HFLIP
+        sta     7,x                     ; flags7
+        bra     3$
+7$:     lda     0,x                     ; graphic_no
+        anda    #(1<<3)
+        sta     0,x                     ; graphic_no
+        bra     6$                                
 
 ; guard (EW)
 upd_150_151:
         rts
 
 set_guard_wizard_sprite:
+        lda     9,x                     ; dX
+        ora     10,x                    ; dY
+        bne     1$
         rts
+1$:     lda     9,x                     ; dX
+        cmpa    10,x                    ; dX<dY?
+        bcs     4$                      ; yes, go
+        tsta                            ; dX<0
+        bmi     3$                      ; yes, go
+        lda     0,x                     ; graphic_no
+        ora     #(1<<0)
+        sta     0,x                     ; graphic_no
+2$:     lda     7,x                     ; flags7
+        anda    #~FLAG_HFLIP
+        sta     7,x
+        rts
+3$:     lda     0,x                     ; graphic_no
+        anda    #~(1<<0)
+        sta     0,x
+        bra     2$
+4$:     tst     10,x                    ; dY<0?
+        bpl     6$                      ; no, go
+        lda     0,x                     ; graphic_no
+        ora     #(1<<0)
+        sta     0,x                     ; graphic_no
+5$:     lda     7,x                     ; flags7
+        ora     #FLAG_HFLIP
+        sta     7,x
+        rts
+6$:     lda     0,x                     ; graphic_no
+        anda    #~(1<<0)
+        sta     0,x                     ; graphic_no
+        bra     5$                
 
 ; gargoyle
 upd_22:
@@ -1033,24 +1105,83 @@ upd_142:
 
 ; guard and wizard (top half)
 upd_30_31_158_159:
-        bra     set_deadly_wipe_and_draw_flags
-
+        jsr     adj_p3_m12
+        jsr     dec_dZ_and_update_XYZ
+        bsr     move_guard_wizard_NSEW
+        lda     *dx
+        sta     9,x                     ; dX
+        sta     0x29,x                  ; dX (top half)
+        lda     *dy
+        sta     10,x                    ; dY
+        sta     0x2a,x                  ; dY (top half)
+        lda     1,x                     ; X
+        sta     0x21,x                  ; X (top half)
+        lda     2,x                     ; Y
+        sta     0x22,x                  ; Y (top half)
+        jsr     set_guard_wizard_sprite
+        jmp     set_deadly_wipe_and_draw_flags
+        
 move_guard_wizard_NSEW:
+        ldu     #guard_NSEW_tbl
+        ldb     13,x                    ; flags13
+        andb    #MASK_DIR
         jmp     jump_to_tbl_entry
 
 guard_NSEW_tbl: 
+        .dw guard_W
+        .dw guard_N
+        .dw guard_E
+        .dw guard_S
 
 guard_W:
-
+        ldu     #0x00fe                 ; dY=0, dX=-2
+        lda     12,x                    ; flags12
+        bita    #FLAG_X_OOB
+        bne     1$
+        stu     *dy
+        rts
+1$:     ldu     #0x0200                 ; dY=2, dX=0
+                
 next_guard_dir:
+        stu     *dy
+        lda     13,x                    ; flags13
+        tfr     a,b                     ; copy
+        incb
+        andb    #MASK_DIR
+        stb     *z80_b                  ; inc lowest 2 bits
+        anda    #0xfc
+        ora     *z80_b
+        sta     13,x                    ; flags13
+        rts
 
 guard_N:
+        ldu     #0x0200                 ; dY=2, dX=0
+        lda     12,x                    ; flags12
+        bita    #FLAG_Y_OOB
+        bne     1$
+        stu     *dy
+        rts
+1$:     ldu     #0x0002                 ; dY=0, dX=2
         bra     next_guard_dir
 
 guard_E:
+        ldu     #0x0002                 ; dY=0, dX=2
+        lda     12,x                    ; flags12
+        bita    #FLAG_X_OOB
+        bne     1$
+        stu     *dy
+        rts
+1$:     ldu     #0xfe00                 ; dY=-2, dX=0
         bra     next_guard_dir
 
 guard_S:
+        ldu     #0xfe00                 ; dY=-2, dX=0
+        lda     12,x                    ; flags12
+        bita    #FLAG_Y_OOB
+        bne     1$
+        stu     *dy
+        rts
+1$:     ldu     #0x00fe                 ; dY=0, dX=-2        
         bra     next_guard_dir
 
 game_over:
@@ -2667,7 +2798,7 @@ handle_forward:
         jsr     audio_B4BB
         puls    b
 
-animate_guard_wizard_legs:
+animate_human_legs:
         lda     0,x                     ; graphic_no
         sta     *z80_e
         inca                            ; next sprite
@@ -2675,8 +2806,7 @@ animate_guard_wizard_legs:
         cmpa    #6                      ; wrap?
         bne     2$                      ; no, skip
         clra
-2$:     
-        sta     *z80_d
+2$:     sta     *z80_d
         lda     *z80_e                  ; old graphic
         anda    #0xf8                   ; get base
         ora     *z80_d                  ; new graphic
@@ -2689,7 +2819,7 @@ loc_C994:
         cmpa    #2
         beq     9$
         cmpa    #4
-        bne     animate_guard_wizard_legs
+        bne     animate_human_legs
 9$:     rts
         
 move_player:
