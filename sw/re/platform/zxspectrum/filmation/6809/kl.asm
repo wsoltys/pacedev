@@ -49,12 +49,12 @@ CAULDRON_SCREEN     .equ    136
 ; standard is 5     
 NO_LIVES            .equ    5
 ; *** the standard 4 locations
-START_LOC           .equ    47
+;START_LOC           .equ    47
 ;START_LOC           .equ    68
 ;START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-;START_LOC           .equ    0x2e
+START_LOC           .equ    0x09
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -885,14 +885,14 @@ upd_182_183:
         stb     10,x
         lda     graphic_objs_tbl        ; plyr graphic_no
         suba    #0x10
-        cmpa    #0x20
+        cmpa    #0x20                   ; human/wulf?
         lda     #0x24                   ; BCC
         bcc     1$
         adda    #1                      ; BCS
 1$:     sta     4$                      ; patch BCC/BCS
         sta     8$                      ; patch BCC/BCS
         lda     #4
-        ldb     graphic_objs_tbl+8
+        ldb     graphic_objs_tbl+8      ; scrn
         andb    #1
         beq     2$
         sta     *z80_b
@@ -908,7 +908,7 @@ upd_182_183:
         jsr     audio_B42E
 3$:     ;ld     a,r
         lda     TMRLSB                  ; temp hack
-        anda    #1
+        anda    #2                      ; dX or dY?
         beq     7$
         lda     graphic_objs_tbl+2      ; plyr Y
         cmpa    2,x                     ; obj X

@@ -74,6 +74,13 @@
 #define CAULDRON_SCREEN     136
 // standard is 5            
 #define NO_LIVES            5
+// *** the standard 4 locations
+//#define START_LOC           47
+//#define START_LOC           68
+//#define START_LOC           179
+//#define START_LOC           143
+// *** extra one for debugging
+#define START_LOC           9
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -1398,12 +1405,12 @@ uint8_t read_key (uint8_t row)
 
 // $B5FF
 // ball (bouncing around) (eg. room 8)
-// - bounces towards human
-// - bounces away from wulf
+// - bounces towards wulf
+// - bounces away from human
 void upd_182_183 (POBJ32 p_obj)
 {
   int8_t  d_x, d_y, d_z;
-  uint8_t away = 1;
+  uint8_t away = 0;
   
   UNTESTED;
   
@@ -1420,7 +1427,7 @@ void upd_182_183 (POBJ32 p_obj)
   // in two (2) locations...
   // just use a boolean variable instead
   if ((graphic_objs_tbl[0].graphic_no - 0x10) < 0x20)
-    away = 0;
+    away = 1;
   // bouncing height depends on screen ID
   if ((graphic_objs_tbl[0].scrn & 1) == 0)
     d_z = 4;
@@ -4271,6 +4278,9 @@ void init_start_location (void)
   plyr_spr_1_scratchpad.u.plyr_graphic_no = 18;   // legs
   plyr_spr_2_scratchpad.u.plyr_graphic_no = 34;   // top half
   s = start_locations[seed_1 & 3];
+  #ifdef START_LOC
+    s = START_LOC;
+  #endif
   // start_loc_1
   plyr_spr_1_scratchpad.scrn = s;
   // start_loc_2
