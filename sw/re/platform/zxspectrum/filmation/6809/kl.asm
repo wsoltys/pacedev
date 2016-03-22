@@ -1199,7 +1199,11 @@ upd_160_to_163:
 
 ; special objs when 1st being put into cauldron
 upd_168_to_175:
-        rts
+        jsr     adj_m4_m12
+        lda     #160                    ; sparkles
+        sta     0,x                     ; graphic_no
+        ;bra     loc_B916               ; why another jump?
+        jmp     set_wipe_and_draw_flags
 
 ; repel spell
 upd_164_to_167:
@@ -1275,7 +1279,8 @@ upd_141:
         jmp     upd_88_to_90
 
 ; cauldron (top)
-upd_142: 
+upd_142:
+        ldd     #0x0ce8                 ; +12,-24
         jmp     set_pixel_adj
 
 ; guard and wizard (top half)
@@ -1835,6 +1840,25 @@ loc_BF31:
 
 ; sparkles (object in cauldron)
 upd_185_187:
+        ;
+        ;  BUG: this routine is primarily for special objects
+        ;       when dropped into cauldron etc (disappear)
+        ;  BUT: when the collapsing block disappears, the
+        ;       graphic_no is set to 184, which is then
+        ;       incremented to 185, and we end up here.
+        ;  ONLY: there's no special object entry (HL=0)
+        ;
+        ;  So it zaps [$0000] which is ROM
+        ;  - and harmless on the ZX Spectrum.
+        ;
+        ; BUG VERIFIED! on the Spectrum under MESS
+        ;
+        ; BUG FIXED! on 6809 port
+        ;
+        ldu     16,x                    ; ptr special obj tbl entry
+        cmpu    #0                      ; check for NULL entry
+        beq     upd_119
+        clr     [,u]                    ; zap graphic_no
 
 ; last death sparkle
 upd_119:
