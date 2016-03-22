@@ -2887,7 +2887,7 @@ RAM:B16C F1 C1			     .dw upd_104_to_110				     ;	 " (chalice)
 RAM:B16E F1 C1			     .dw upd_104_to_110				     ;	 " (cup)
 RAM:B170 F1 C1			     .dw upd_104_to_110				     ;	 " (bottle)
 RAM:B172 F1 C1			     .dw upd_104_to_110				     ;	 " (crytsal ball)
-RAM:B174 5E B9			     .dw upd_111				     ; sparkles
+RAM:B174 5E B9			     .dw upd_111				     ; final sparkles in cauldron
 RAM:B176 2B BF			     .dw upd_112_to_118_184			     ; death sparkles
 RAM:B178 2B BF			     .dw upd_112_to_118_184			     ;	 "
 RAM:B17A 2B BF			     .dw upd_112_to_118_184			     ;	 "
@@ -3836,7 +3836,7 @@ RAM:B716	     loc_B716:							     ; clr hflip
 RAM:B716 DD CB 07 B6		     res     6,	7(ix)
 RAM:B71A
 RAM:B71A	     loc_B71A:
-RAM:B71A CD 7F C9		     call    animate_guard_wizard_legs
+RAM:B71A CD 7F C9		     call    animate_human_legs
 RAM:B71D C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B720	     ; ---------------------------------------------------------------------------
 RAM:B720
@@ -4160,8 +4160,8 @@ RAM:B92F DD 7E 08		     ld	     a,	8(ix)				     ; object screen
 RAM:B932 FE 88			     cp	     #136				     ; cauldron	room?
 RAM:B934 28 0C			     jr	     Z,	loc_B942			     ; yes, go
 RAM:B936 3A 0F 5C		     ld	     a,	(graphic_objs_tbl+7)
-RAM:B939 CB 47			     bit     0,	a				     ; plyr_spr_1 (bottom half)	flags
-RAM:B93B 28 05			     jr	     Z,	loc_B942
+RAM:B939 CB 47			     bit     0,	a				     ; near arch?
+RAM:B93B 28 05			     jr	     Z,	loc_B942			     ; no, go
 RAM:B93D 01 01 01		     ld	     bc, #0x101				     ; dX,dY=1
 RAM:B940 18 03			     jr	     loc_B945
 RAM:B942	     ; ---------------------------------------------------------------------------
@@ -4180,6 +4180,8 @@ RAM:B955 3A 08 5C		     ld	     a,	(graphic_objs_tbl)		     ; plyr_spr_1 graphic
 RAM:B958 D6 10			     sub     #0x10
 RAM:B95A FE 40			     cp	     #0x40 ; '@'
 RAM:B95C 38 04			     jr	     C,	loc_B962
+RAM:B95E	     ;
+RAM:B95E	     ; final sparkles in cauldron
 RAM:B95E
 RAM:B95E	     upd_111:							     ; invalid
 RAM:B95E DD 36 00 01		     ld	     0(ix), #1
@@ -6361,8 +6363,8 @@ RAM:C6BD	     upd_9:
 RAM:C6BD CD DD C4		     call    adj_m6_m12
 RAM:C6C0 DD CB 0D FE		     set     7,	13(ix)				     ; fatal if	it hits	player
 RAM:C6C4 3A 14 5C		     ld	     a,	(graphic_objs_tbl+0xC)
-RAM:C6C7 E6 F0			     and     #0xF0 ; 'ð'
-RAM:C6C9 C0			     ret     NZ
+RAM:C6C7 E6 F0			     and     #0xF0 ; 'ð'                             ; entering screen?
+RAM:C6C9 C0			     ret     NZ					     ; yes, exit
 RAM:C6CA DD 7E 0B		     ld	     a,	11(ix)				     ; dZ
 RAM:C6CD A7			     and     a					     ; up?
 RAM:C6CE F2 EA C6		     jp	     P,	move_portcullis_up		     ; yes, go
@@ -6838,7 +6840,7 @@ RAM:C97A C5			     push    bc
 RAM:C97B CD BB B4		     call    audio_B4BB
 RAM:C97E C1			     pop     bc
 RAM:C97F
-RAM:C97F	     animate_guard_wizard_legs:					     ; graphic_no
+RAM:C97F	     animate_human_legs:					     ; graphic_no
 RAM:C97F DD 7E 00		     ld	     a,	0(ix)
 RAM:C982 5F			     ld	     e,	a
 RAM:C983 3C			     inc     a					     ; next sprite
@@ -6863,7 +6865,7 @@ RAM:C999 FE 02			     cp	     #2
 RAM:C99B C8			     ret     Z
 RAM:C99C FE 04			     cp	     #4
 RAM:C99E C8			     ret     Z
-RAM:C99F 18 DE			     jr	     animate_guard_wizard_legs
+RAM:C99F 18 DE			     jr	     animate_human_legs
 RAM:C99F	     ; End of function handle_forward
 RAM:C99F
 RAM:C9A1
