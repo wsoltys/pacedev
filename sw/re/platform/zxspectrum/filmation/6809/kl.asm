@@ -982,7 +982,25 @@ upd_144_to_149_152_to_157:
 
 ; guard (EW)
 upd_150_151:
-        rts
+        jsr     adj_p7_m12
+        lda     #2
+        ldb     13,x                    ; flags13
+        bitb    #FLAG_EAST
+        bne     1$
+        nega
+1$:     sta     9,x                     ; dX=+/-2
+        sta     0x29,x                  ; set bottom half too
+        bsr     set_guard_wizard_sprite
+        jsr     dec_dZ_and_update_XYZ
+        lda     12,x                    ; flags12
+        bita    #FLAG_X_OOB
+        beq     2$
+        lda     13,x                    ; flags13
+        eora    #FLAG_EAST              ; toggle direction
+        sta     13,x                    ; flags13
+2$:     lda     1,x                     ; X
+        sta     0x21,x                  ; copy to bottom half
+        jmp     set_deadly_wipe_and_draw_flags
 
 set_guard_wizard_sprite:
         lda     9,x                     ; dX
@@ -4874,4 +4892,3 @@ vidbuf:
         .ds     0x1800
                                                                                 
 				.end		start_coco
-        
