@@ -771,6 +771,12 @@ audio_B451:
 audio_B454:
         rts
 
+audio_B45D:
+        rts
+
+audio_B462:
+        rts
+                
 audio_B467:
         rts
         
@@ -904,7 +910,31 @@ upd_55:
 
 ; block (moving EW)
 upd_54:
-        rts
+        jsr     audio_B45D
+        jsr     upd_6_7
+        tfr     x,d
+        rorb                            ; lsb
+        andb    #0x10
+        stb     *z80_c
+        lda     seed_2
+        adda    *z80_c
+        bita    #(1<<4)
+        beq     1$
+        coma
+1$:     anda    #0x0f
+        sta     *z80_c
+        lda     1,x                     ; X/Y
+        adda    #8
+        anda    #0x0f
+        cmpa    *z80_c
+        lbeq    set_wipe_and_draw_flags
+        lda     #1                      ; C not affected
+        bcs     2$
+        nega
+2$:     sta     9,x                     ; dX/dY
+        lda     #1
+        sta     11,x                    ; dZ=1                        
+        bra     dec_dZ_wipe_and_draw
 
 ; guard and wizard (bottom half)
 upd_144_to_149_152_to_157:
@@ -2853,8 +2883,9 @@ move_player:
         sta     11,x                    ; dZ
         sta     tmp_dZ
         adda    #2
-;       call M,audio_B451
-        jsr     adj_for_out_of_bounds
+        bpl     6$
+        jsr     audio_B451
+6$:     jsr     adj_for_out_of_bounds
         jsr     handle_exit_screen
         jsr     add_dXYZ
         lda     12,x                    ; flags12
@@ -3218,14 +3249,15 @@ adj_dZ_for_obj_intersect:
         lsra                            ; 7->6
         anda    #FLAG_DEAD
         ora     13,y                    ; flags13
-        ora     #FLAG_TRIGGERED
         sta     13,y                    ; flags13
         lsla                            ; 5->6
         anda    #FLAG_DEAD
         ora     13,x                    ; flags13
         sta     13,x                    ; flags13
-;       set     3, 13(iy)               ; see 6 lines above
-        lda     7,y                     ; flags7
+        lda     13,y                    ; flags13
+        ora     #FLAG_TRIGGERED
+        sta     13,y                    ; flags13        
+        lda     7,x                     ; flags7
         bita    #FLAG_MOVEABLE
         beq     4$
         tst     9,x                     ; dX=0?
