@@ -1039,13 +1039,13 @@ set_guard_wizard_sprite:
 
 ; gargoyle
 upd_22:
-        bsr     set_both_deadly_flags
+        jsr     set_both_deadly_flags
         jmp     adj_m7_m12
         rts
 
 ; spiked ball
 upd_63:
-        bsr     set_both_deadly_flags
+        jsr     set_both_deadly_flags
         jsr     upd_6_7
         tst     disable_spike_ball_drop
         bne     9$
@@ -1089,14 +1089,58 @@ upd_23:
 
 ; fire (moving EW)
 upd_86_87:
-        rts
+        jsr     upd_12_to_15
+        lda     #1
+        sta     11,x                    ; dZ=1
+        lda     #2
+        ldb     13,x                    ; flags13
+        bitb    #FLAG_EAST
+        bne     1$
+        nega
+1$:     sta     9,x                     ; dX
+        jsr     audio_B45D
+        jsr     dec_dZ_and_update_XYZ
+        lda     #FLAG_EAST
+        ldb     12,x                    ; flags12
+        bitb    #FLAG_X_OOB
+        bra     loc_B82F
 
 ; fire (moving NS)
 upd_180_181:
-        jmp     set_wipe_and_draw_flags
+        jsr     upd_12_to_15
+        lda     #1
+        sta     11,x                    ; dZ=1
+        lda     #2
+        ldb     13,x                    ; flags13
+        bitb    #FLAG_NORTH
+        bne     1$
+        nega
+1$:     sta     10,x                    ; dY        
+        jsr     audio_B462
+        jsr     dec_dZ_and_update_XYZ
+        lda     #FLAG_NORTH
+        ldb     12,x                    ; flags12
+        bitb    #FLAG_Y_OOB
+loc_B82F:
+        beq     2$
+        eora    13,x                    ; toggle direction
+        sta     13,x                    ; flags13
+        jsr     audio_B42E
+2$:     jsr     toggle_next_prev_sprite
+        bra     set_deadly_wipe_and_draw_flags
 
 ; fire (stationary) (not used)
 upd_176_177:
+        jsr     upd_12_to_15
+        lda     fire_seed
+        anda    #1
+        bne     1$
+        rts
+1$:     lda     seed_3
+        anda    #FLAG_HFLIP
+        eora    7,x                     ; flags7
+        sta     7,x                     ; flags7
+        jsr     toggle_next_prev_sprite        
 
 set_deadly_wipe_and_draw_flags:
         bsr     set_both_deadly_flags
