@@ -1100,7 +1100,7 @@ upd_178_179:
         lda     3,x                     ; Z
         adda    #32
         sta     ball_bounce_height
-1$:     bsr     toggle_next_prev_sprite
+1$:     jsr     toggle_next_prev_sprite
         jsr     audio_B451
         lda     13,x                    ; flags13
         bita    #FLAG_UP
@@ -1141,15 +1141,54 @@ upd_168_to_175:
 
 ; repel spell
 upd_164_to_167:
-        rts
+        jsr     adj_m4_m12
+        lda     8,x                     ; scrn
+        cmpa    #CAULDRON_SCREEN
+        beq     1$
+        lda     graphic_objs_tbl+#7     ; flags7
+        bita    #FLAG_NEAR_ARCH
+        beq     1$
+        ldd     0x0101                  ; dX,dY=1
+        bra     2$
+1$:     ldd     #0x0404                 ; dX,dY=4
+2$:     std     *dy
+        bsr     move_towards_plyr
+        jsr     dec_dZ_and_update_XYZ
+        bsr     next_graphic_no_mod_4
+        lda     8,x                     ; scrn
+        cmpa    #CAULDRON_SCREEN
+        bne     loc_B962
+        lda     graphic_objs_tbl        ; graphic_no
+        suba    #0x10
+        cmpa    #0x40
+        bcs     loc_B962
 
 ; final sparkles in cauldron
 upd_111:
         lda     #1                      ; invalid
         sta     0,x                     ; graphic_no
+loc_B962:
         jmp     audio_B467_wipe_and_draw
 
 move_towards_plyr:
+        ldu     #graphic_objs_tbl       ; plyr object
+        lda     1,x                     ; X
+        suba    1,u                     ; plyr X
+        pshs    cc
+        lda     *dx
+        puls    cc
+        bmi     1$
+        nega
+1$:     sta     9,x                     ; dX
+        lda     2,x                     ; Y
+        suba    2,u                     ; plyr Y
+        pshs    cc
+        lda     *dy
+        puls    cc
+        bmi     2$
+        nega
+2$:     sta     10,x
+        rts        
 
 toggle_next_prev_sprite:        
         lda     0,x                     ; graphic_no
