@@ -873,7 +873,60 @@ read_port:
 ; - bounces towards wulf
 ; - bounces away from sabreman
 upd_182_183:
-        rts
+        jsr     upd_12_to_15
+        lda     9,x                     ; dX
+        ldb     10,x                    ; dY
+        std     *dy
+        lda     11,x                    ; dZ
+        sta     tmp_bouncing_ball_dZ
+        jsr     dec_dZ_and_update_XYZ
+        ldd     *dy
+        sta     9,x
+        stb     10,x
+        lda     graphic_objs_tbl        ; plyr graphic_no
+        suba    #0x10
+        cmpa    #0x20
+        lda     #0x24                   ; BCC
+        bcc     1$
+        adda    #1                      ; BCS
+1$:     sta     4$                      ; patch BCC/BCS
+        sta     8$                      ; patch BCC/BCS
+        lda     #4
+        ldb     graphic_objs_tbl+8
+        andb    #1
+        beq     2$
+        sta     *z80_b
+        lda     seed_3
+        anda    #3
+        adda    *z80_b
+2$:     ldb     12,x                    ; flags12
+        bitb    #FLAG_Z_OOB
+        beq     6$
+        sta     11,x                    ; dZ
+        lda     tmp_bouncing_ball_dZ
+        bpl     3$
+        jsr     audio_B42E
+3$:     ;ld     a,r
+        lda     TMRLSB                  ; temp hack
+        anda    #1
+        beq     7$
+        lda     graphic_objs_tbl+2      ; plyr Y
+        cmpa    2,x                     ; obj X
+        lda     #2
+4$:     bcc     5$
+        nega
+5$:     sta     10,x                    ; dY
+        clr     9,x                     ; dX=0
+6$:     jsr     toggle_next_prev_sprite
+        jmp     set_deadly_wipe_and_draw_flags
+7$:     lda     graphic_objs_tbl+1      ; plyr X
+        cmpa    1,x                     ; obj X
+        lda     #2
+8$:     bcc     9$
+        nega
+9$:     sta     9,x                     ; dX
+        clr     10,x                    ; dY=0
+        bra     6$
 
 ; block (dropping)
 upd_91:
