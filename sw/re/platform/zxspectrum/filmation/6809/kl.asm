@@ -941,7 +941,7 @@ upd_144_to_149_152_to_157:
         sta     7,x                     ; flags7
         bra     3$
 7$:     lda     0,x                     ; graphic_no
-        anda    #(1<<3)
+        anda    #~(1<<3)
         sta     0,x                     ; graphic_no
         bra     6$                                
 
@@ -1090,6 +1090,13 @@ toggle_next_prev_sprite:
         bra     save_graphic_no
 
 next_graphic_no_mod_4:
+        lda     0,x                     ; graphic_no
+        tfr     a,b
+        andb    #0xfc
+        stb     *z80_b
+        inca
+        anda    #MASK_DIR
+        ora     *z80_b
 
 save_graphic_no:
         sta     0,x                     ; graphic_no
@@ -1110,14 +1117,14 @@ upd_30_31_158_159:
         bsr     move_guard_wizard_NSEW
         lda     *dx
         sta     9,x                     ; dX
-        sta     0x29,x                  ; dX (top half)
+        sta     0x29,x                  ; dX (bottom half)
         lda     *dy
         sta     10,x                    ; dY
-        sta     0x2a,x                  ; dY (top half)
+        sta     0x2a,x                  ; dY (bottom half)
         lda     1,x                     ; X
-        sta     0x21,x                  ; X (top half)
+        sta     0x21,x                  ; X (bottom half)
         lda     2,x                     ; Y
-        sta     0x22,x                  ; Y (top half)
+        sta     0x22,x                  ; Y (bottom half)
         jsr     set_guard_wizard_sprite
         jmp     set_deadly_wipe_and_draw_flags
         
