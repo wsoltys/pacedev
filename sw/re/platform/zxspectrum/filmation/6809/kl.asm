@@ -906,11 +906,17 @@ upd_143:
 
 ; block (moving NS)
 upd_55:
-        rts
+        jsr     audio_B462
+        ldd     #0x020A                 ; offsets for Y,dY
+        bra     loc_B6BF
 
 ; block (moving EW)
 upd_54:
         jsr     audio_B45D
+        ldd     #0x0109                 ; offsets for X,dX
+loc_B6BF:
+        sta     1$+#5                   ; patch X/Y
+        stb     2$+#1                   ; patch dX/dY
         jsr     upd_6_7
         tfr     x,d
         rorb                            ; lsb
@@ -923,7 +929,7 @@ upd_54:
         coma
 1$:     anda    #0x0f
         sta     *z80_c
-        lda     1,x                     ; X/Y
+        lda     1,x                     ; X/Y (patched)
         adda    #8
         anda    #0x0f
         cmpa    *z80_c
@@ -931,10 +937,10 @@ upd_54:
         lda     #1                      ; C not affected
         bcs     2$
         nega
-2$:     sta     9,x                     ; dX/dY
+2$:     sta     9,x                     ; dX/dY (patched)
         lda     #1
         sta     11,x                    ; dZ=1                        
-        bra     dec_dZ_wipe_and_draw
+        jmp     dec_dZ_wipe_and_draw
 
 ; guard and wizard (bottom half)
 upd_144_to_149_152_to_157:
@@ -1795,10 +1801,8 @@ handle_pickup_drop:
         adda    #12                     ; +12
         sta     3,x                     ; Z+12
         jsr     do_any_objs_intersect
-        pshs    cc
         lda     *z80_b
         sta     3,x                     ; restore Z
-        puls    cc
         bcc     1$
         lda     #1
         sta     cant_drop
@@ -2620,9 +2624,7 @@ adj_ew:
         lda     10,x                    ; dY
         cmpa    2,y                     ; Y
         beq     loc_C7D5
-        pshs    cc
         lda     #1
-        puls    cc
         bcc     1$
         nega
 1$:     sta     15,y                    ; dY_adj
@@ -2632,9 +2634,7 @@ adj_ns:
         lda     9,x                     ; dX
         cmpa    1,y                     ;X
         beq     loc_C7D5
-        pshs    cc
         lda     #1
-        puls    cc
         bcc     1$
         nega
 1$:     sta     14,y                    ; dX_adj
