@@ -861,11 +861,90 @@ shuffle_objects_required:
 ; sparkles from the blocks in the cauldron room
 ; at the end of the game
 upd_131_to_133:
-        rts
+        jsr     adj_m4_m12
+        lda     3,x                     ; Z
+        cmpa    #164
+        bcc     loc_B5C4
+        lda     #3
+        sta     11,x                    ; dZ=3
+        lda     1,x                     ; X
+        rola
+        rola
+        anda    #1                      ; X(7)->0
+        sta     *z80_l
+        ldb     2,x                     ; Y
+        andb    #(1<<7)                 ; sign
+        rolb                            ; Y(7)->C
+        orb     *z80_l                  ; Y(7)->C,X(7)->0
+        rolb                            ; X(7)->1,Y(7)->0
+        andb    #3
+        ldu     #dX_dY_tbl
+        jmp     jump_to_tbl_entry
+                
+dX_dY_tbl:
+        .dw p4_m4                       ; +4,-4
+        .dw p4_p4                       ; +4,+4
+        .dw m4_m4                       ; -4,-4
+        .dw m4_p4                       ; -4,+4
+
+p4_m4:
+        ldd     #0x04fc                 ; +4,-4
+
+save_dX_dY:
+        stb     9,x                     ; dX
+        sta     10,x                    ; dY
+        lda     seed_3
+        anda    #3
+        beq     1$
+        inca
+1$:     adda    #130
+        sta     0,x                     ; graphic_no
+        
+loc_B5A9:
+        lda     3,x                     ; Z
+        sta     rising_blocks_z                
 
 dec_dZ_wipe_and_draw:
         jsr     dec_dZ_and_update_XYZ
         jmp     set_wipe_and_draw_flags
+        
+p4_p4:
+        ldd     #0x0404                 ; +4,+4
+        bra     save_dX_dY
+
+m4_m4:
+        ldd     #0xfcfc                 ; -4,-4
+        bra     save_dX_dY
+
+m4_p4:
+        ldd     #0xfc04                 ; -4,+4
+        bra     save_dX_dY
+
+loc_B5C4:
+        lda     graphic_objs_tbl+1      ; plyr X
+        suba    1,x                     ; - obj X
+        bpl     1$
+        nega
+1$:     cmpa    #6
+        bcc     3$
+        lda     graphic_objs_tbl+2      ; plyr Y
+        suba    2,x                     ; - obj Y
+        bpl     2$
+        nega
+2$:     cmpa    #6
+        lbcs    game_over
+3$:     lda     13,x                    ; flags13
+        ora     #FLAG_FATAL_HIT_YOU
+        sta     13,x                    ; flags13
+        lda     7,x                     ; flags7
+        ora     #FLAG_IGNORE_3D
+        sta     7,x                     ; flags7
+        lda     #1
+        sta     11,x                    ; dZ=1
+        ldd     #0x0404                 ; dX,dY=4
+        std     *dy
+        jsr     move_towards_plyr
+        bra     loc_B5A9                                
 
 ; A=column (active low)
 ; returns A=row data (active high)
@@ -2221,12 +2300,65 @@ upd_103:
         
 ; special objects being put in cauldron
 upd_104_to_110:
+        jsr     adj_m4_m12
+        ldb     #1
+        lda     1,x                     ; X
+        suba    #128
+        beq     1$
+        tfr     b,a                     ; CC not affected
+        bmi     1$
+        nega
+1$:     sta     9,x                     ; dX
+        lda     2,x                     ; Y
+        suba    #128
+        beq     2$
+        tfr     b,a                     ; CC not affected
+        bmi     2$
+        nega
+2$:     sta     10,x                    ; dY
+        lda     1,x                     ; X
+        cmpa    #128
+        bne     3$
+        eora    2,x                     ; Y
+        beq     centre_of_room
+3$:     lda     3,x                     ; Z
+        cmpa    #152
+        lda     #1
+        bcc     4$
+        inca
+4$:     sta     11,x                    ; dZ
+
+loc_C22F:
+        jsr     dec_dZ_and_update_XYZ
+
 audio_B467_wipe_and_draw:
         jsr     audio_B467
         jmp     set_wipe_and_draw_flags
         
 centre_of_room:
-add_obj_to_cauldron:        
+        lda     #128
+        cmpa    3,x                     ; Z
+        bcc     add_obj_to_cauldron
+        lda     7,x                     ; flags7
+        ora     #FLAG_IGNORE_3D
+        sta     7,x                     ; flags7
+        bra     loc_C22F
+
+add_obj_to_cauldron:
+        lda     #128
+        sta     3,x                     ; Z
+        bsr     ret_next_obj_required
+        lda     0,x                     ; graphic_no
+        anda    #7                      ; special obj index
+        cmpa    ,u                      ; same as required?
+        bne     1$                      ; no, skip
+        bsr     cycle_colours_with_sound
+        lda     objects_put_in_cauldron
+        cmpa    #14                     ; got all objects?
+        bne     1$                      ; no, skip
+        bsr     prepare_final_animation
+1$:     clr     obj_dropping_into_cauldron
+        clr     [16,x]                  ; zap special obj graphic_no        
         jmp     upd_111
         
 ret_next_obj_required:
@@ -2246,7 +2378,7 @@ upd_96_to_102:
         lda     13,x                    ; flags13
         bita    #FLAG_JUST_DROPPED
         bne     1$
-        bsr     is_obj_moving
+        jsr     is_obj_moving
         bne     1$
         rts
 1$:     lda     13,x                    ; flags13
@@ -2632,19 +2764,84 @@ update_special_objs:
 
 ; ghost
 upd_80_to_83:
+        jsr     adj_m6_m12
+        jsr     dec_dZ_and_update_XYZ
+        lda     9,x                     ; dX
+        ora     10,x                    ; moving?
+        beq     1$                      ; no, skip
+        lda     12,x                    ; flags12
+        anda    #(FLAG_Y_OOB|FLAG_X_OOB)
+        beq     2$
+1$:     lda     seed_3
+        anda    #3
+        adda    #4
+        bsr     get_delta_from_tbl
+        sta     9,x                     ; dX
+        lda     seed_2
+        anda    #3
+        adda    #4
+        bsr     get_delta_from_tbl
+        sta     10,x
+        bsr     calc_ghost_sprite
+        jsr     audio_B467        
+2$:     jsr     toggle_next_prev_sprite
         jmp     set_deadly_wipe_and_draw_flags
         
 calc_ghost_sprite:
+        lda     9,x                     ; dX
+        bpl     1$
+        nega
+1$:     sta     *z80_c
+        lda     10,x                    ; dY
+        bpl     2$
+        nega
+2$:     cmpa    *z80_c
+        bcc     loc_C62F
+        lda     9,x                     ; dX
+        bmi     loc_C629
+        lda     0,x                     ; graphic_no
+        anda    #~(1<<1)                ; =80/81
+        sta     0,x                     ; graphic_no
+
 set_ghost_hflip:
+        lda     7,x                     ; flags7
+        ora     #FLAG_HFLIP
+        sta     7,x                     ; flags7
         rts
+
+loc_C629:
+        lda     0,x                     ; graphic_no
+        ora     #(1<<1)                 ; =82/83
+        sta     0,x                     ; graphic_no
+        bra     set_ghost_hflip
+
+loc_C62F:
+        lda     10,x                    ; dY
+        bmi     loc_C63F
+        lda     0,x                     ; graphic_no
+        ora     #(1<<1)                 ; =82/83
+        sta     0,x                     ; graphic_no
 
 clr_ghost_hflip:        
+        lda     7,x                     ; flags7
+        anda    #~FLAG_HFLIP
+        sta     7,x                     ; flags7
         rts
 
+loc_C63F:
+        lda     0,x                     ; graphic_no
+        anda    #~(1<<1)                ; =80/81
+        sta     0,x                     ; graphic_no
+        bra     clr_ghost_hflip        
+
 get_delta_from_tbl:
+        ldu     #delta_tbl
+        lda     a,u
         rts
 
 delta_tbl:        
+        .db 0xFF, 1, 0xFE, 2, 0xFD, 3, 0xFC, 4, 0xFB, 5, 0xFA
+        .db 6, 0xF9, 7, 0xF8, 8
 
 ; portcullis (static)
 upd_8:
