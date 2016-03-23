@@ -222,7 +222,7 @@ scrn_visited:                   .ds 32
 graphic_objs_tbl:               .ds 32
                                 .ds 32
 special_objs_here:              .ds 32
-byte_5C68:                      .ds 32
+special_objs_here_1:            .ds 32
 other_objs_here:                .ds 32
                                 .ds (MAX_OBJS-4)*32
 ; end of data
@@ -514,7 +514,7 @@ no_delay:
         tst     render_status_info
         beq     1$
         clr     render_status_info
-        jsr     fill_attr
+;       jsr     fill_attr
         jsr     display_objects
         jsr     colour_panel
         jsr     colour_sun_moon
@@ -1329,11 +1329,64 @@ ball_up:
         bra     loc_B892
 
 init_cauldron_bubbles:
+        lda     graphic_objs_tbl+8      ; plyr scrn
+        cmpa    #CAULDRON_SCREEN
+        bne     9$
+1$:     ldy     #special_objs_here_1
+        tst     ,y
+        bne     9$
+        tst     all_objs_in_cauldron
+        bne     9$
+        ldu     #cauldron_bubbles
+        ldb     #18
+        tfr     y,x                     ; new object ptr
+2$:     lda     ,u+
+        sta     ,y+
+        decb
+        bne     2$                      ; copy 18 bytes        
         jmp     adj_m4_m12
+9$:     rts
+
+cauldron_bubbles:
+        .db 0xA0, 0x80, 0x80, 0x80, 5, 5, 0xC, 0x10, 0xB4, 0, 0
+        .db 0, 0, 0xA0, 0, 0, 0, 0
 
 ; even more sparkles (showing next object required)
 upd_160_to_163:
-        jmp     set_wipe_and_draw_flags
+        jsr     adj_m4_m12
+        tst     special_objs_here
+        bne     upd_111
+        lda     7,x                     ; flags7
+        ora     #FLAG_IGNORE_3D
+        sta     7,x
+        jsr     dec_dZ_and_update_XYZ
+        jsr     next_graphic_no_mod_4
+        lda     3,x                     ; Z
+        cmpa    #160
+        lda     #2
+        sta     11,x                    ; dZ=2
+        bcs     1$
+        lda     #1
+        sta     11,x                    ; dZ=1
+        lda     graphic_objs_tbl        ; plyr graphic_no
+        suba    #0x30
+        cmpa    #0x10                   ; wulf?
+        bcs     2$                      ; yes, go (no reveal)
+        lda     0,x                     ; graphic_no
+        anda    #3
+        bne     1$
+        jsr     ret_next_obj_required
+        lda     ,u
+        ora     #168
+        sta     0,x                     ; show next obj required
+1$:     jmp     set_wipe_and_draw_flags
+2$:     lda     0,x                     ; graphic_no
+        ora     #(1<<2)
+        sta     0,x                     ; graphic_no
+        lda     7,x
+        anda    #~FLAG_IGNORE_3D
+        sta     7,x
+        bra     1$
 
 ; special objs when 1st being put into cauldron
 upd_168_to_175:
@@ -1859,6 +1912,8 @@ print_text_single_colour:
 
 ; D=x,y X=str        
 print_text_std_font:
+        ldu     #font
+        stu     gfxbase_8x8
 
 print_text:
         jsr     calc_vidbuf_addr        ; ->U
@@ -2388,12 +2443,45 @@ upd_96_to_102:
         bra     audio_B467_wipe_and_draw
         
 cycle_colours_with_sound:
-cycle_attribute_mem:
+        ldb     #16                     ; cycle 16 times
+        ldu     #speccy_pal+8
+1$:     tfr     b,a
+        anda    #7
+        lda     a,u                     ; get palette entry
+        sta     PALETTE+1               ; set palette
+        jsr     audio_B403
+        ldy     #0x2000
+2$:     leay    -1,y
+        bne     2$
+        decb
+        bne     1$                      ; cycle colours
 
 no_update:
         rts
 
 prepare_final_animation:
+        lda     #1
+        sta     all_objs_in_cauldron
+        pshs    x
+        ldx     #special_objs_here_1
+        ldb     #11                     ; 1 spec, 7 bg, 3 fg
+1$:     pshs    b
+        jsr     set_wipe_and_draw_flags
+        puls    b
+        lda     #1
+        sta     0,x                     ; graphic_no = invalid
+        leax    32,y
+        decb
+        bne     1$
+2$:     lda     0,x                     ; graphic_no        
+        cmpa    #7                      ; block?
+        bne     3$                      ; no, skip
+        lda     #131                    ; sparkle
+        sta     0,x                     ; graphic_no
+3$:     leax    32,x
+        cmpx    #eod                    ; done?
+        blt     2$                      ; no, loop
+        puls    x
         rts
         
 chk_and_init_transform:
@@ -4672,9 +4760,11 @@ next_fg_obj_sprite:
 loc_D4EA:
         jmp     zero_end_of_graphic_objs_tbl
 
+; 6809 scoffs at the need for this routine!
 ;add_HL_A:
 ;        rts
 
+; 6809 scoffs at the need for this routine!
 ;HL_equals_DE_x_A:
 ;        rts
         
@@ -4684,8 +4774,9 @@ zero_Y:
         bne     zero_Y
         rts
 
-fill_DE:
-        rts
+; only called to fill ZX Spectrum attribute RAM
+;fill_DE:
+;        rts
 
 handle_pause:
         lda     #~(1<<7)
@@ -4726,8 +4817,8 @@ clr_bitmap_memory:
 clr_attribute_memory:
         bra     clr_byte
         
-fill_attr:
 ; nothing to do on the coco
+;fill_attr:
         rts
 
 clear_scrn:
@@ -5113,8 +5204,9 @@ calc_vram_addr:
         puls    d
         rts
 
-calc_attrib_addr:
-        rts
+; not used not the Coco
+;calc_attrib_addr:
+;        rts
         
 vflip_sprite_data:
         pshs    y,u
