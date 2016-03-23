@@ -52,10 +52,10 @@ NO_LIVES            .equ    5
 ; *** the standard 4 locations
 ;START_LOC           .equ    47
 ;START_LOC           .equ    68
-;START_LOC           .equ    179         ; chest to the west
+START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-START_LOC           .equ    0x09
+;START_LOC           .equ    0x09
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -454,7 +454,7 @@ jump_to_upd_object:
 ; B=entry index, U=table
 jump_to_tbl_entry:
         clra
-        aslb
+        lslb
         rola                            ; word offset
         jmp     [d,u]                   ; go
 
@@ -1576,7 +1576,7 @@ loc_BA29:
         jsr     print_BCD_number
         jsr     calc_and_display_percent
         lda     num_scrns_visited
-        asla
+        lsla
         anda    #0xC0
         sta     *z80_c
         lda     all_objs_in_cauldron
@@ -1730,7 +1730,7 @@ count_screens:
         lda     ,u+                     ; get entry
         pshs    b
         ldb     #8                      ; 8 bits/byte
-1$:     asra
+1$:     lsra
         bcc     2$                      ; not set, skip
         inc     *z80_e                  ; inc count
 2$:     decb
@@ -1742,7 +1742,7 @@ count_screens:
         deca                            ; adjust for calcs
         sta     num_scrns_visited
         lda     objects_put_in_cauldron
-        asla                            ; x2
+        lsla                            ; x2
         adda    *z80_e                  
         sta     *z80_e
         ldd     #0
@@ -2064,7 +2064,6 @@ display_objects_carried:
         rts
 1$:     clr     objects_carried_changed
 
-; this routine puts a pixel on the panel!
 display_objects:
         pshs    x
         ldb     #3
@@ -2076,11 +2075,11 @@ display_object:
         pshs    u
         negb
         addb    #3
-        aslb
-        aslb
-        aslb
+        lslb
+        lslb
+        lslb
         stb     *z80_c
-        aslb
+        lslb
         addb    *z80_c
         addb    #16                     ; (~b+3)*24+16
         stb     26,x                    ; pixel_x
@@ -4392,9 +4391,9 @@ flag_room_visited:
         ldu     #scrn_visited
         lda     graphic_objs_tbl+#8     ; curr_scrn
         tfr     a,b
-        asra
-        asra
-        asra                            ; byte offset
+        lsra
+        lsra
+        lsra                            ; byte offset
         leau    a,u                     ; ptr address
         andb    #7                      ; bit offset
         incb
@@ -4644,7 +4643,7 @@ next_bg_obj:
         cmpa    #0xff                   ; done all bkgnd?
         beq     find_fg_objs            ; yes, go
         ldx     #background_type_tbl
-        asla                            ; word offset
+        lsla                            ; word offset
         ldx     a,x
 next_bg_obj_sprite:
         pshs    b                       ; bytes left
@@ -5078,7 +5077,7 @@ flip_sprite:
         ldb     ,x                      ; graphic no
         ldu     #sprite_tbl
         clra
-        aslb
+        lslb
         rola
         ldu     d,u                     ; sprite data addr
         lda     ,u                      ; flip & width
@@ -5241,8 +5240,8 @@ vflip_sprite_line_pair:
         decb
         bne     1$
         lda     *width
-        asla                            ; x2 for mask
-        asla                            ; x4 for 2 lines
+        lsla                            ; x2 for mask
+        lsla                            ; x4 for 2 lines
         nega                            ; subtract
         leay    a,y                     ; next hi line
         puls    b
