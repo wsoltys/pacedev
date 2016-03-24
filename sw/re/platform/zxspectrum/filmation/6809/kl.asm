@@ -42,6 +42,7 @@ pc                  .equ    0x14
 dy                  .equ    0x16
 dx                  .equ    0x17
 r                   .equ    0x7f
+line_cnt            .equ    0x80
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
@@ -55,7 +56,7 @@ NO_LIVES            .equ    5
 ;START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-START_LOC           .equ    179+32
+;START_LOC           .equ    179+32
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -257,14 +258,34 @@ ATTR_CYAN       .equ  5
 ATTR_YELLOW     .equ  6
 ATTR_WHITE      .equ  7
 
+RGB_BLACK       .equ  0x00*9
+RGB_BLUE        .equ  0x01*9
+RGB_RED         .equ  0x04*9
+RGB_MAGENTA     .equ  0x05*9
+RGB_GREEN       .equ  0x02*9
+RGB_CYAN        .equ  0x03*9
+RGB_YELLOW      .equ  0x06*9
+RGB_WHITE       .equ  0x07*9
+
+CMP_BLACK       .equ  0
+CMP_BLUE        .equ  28
+CMP_RED         .equ  23
+CMP_MAGENTA     .equ  41
+CMP_GREEN       .equ  17
+CMP_CYAN        .equ  61
+CMP_YELLOW      .equ  51
+CMP_WHITE       .equ  63
+
 speccy_pal:
 ;       black, blue, red, magenta, green, cyan, yellow, grey/white
 .ifdef GFX_RGB
     .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
-    .db 0x00*9, 0x01*9, 0x04*9, 0x05*9, 0x02*9, 0x03*9, 0x06*9, 0x07*9
+    .db RGB_BLACK, RGB_BLUE, RGB_RED, RGB_MAGENTA
+    .db RGB_GREEN, RGB_CYAN, RGB_YELLOW, RGB_WHITE
 .else
     .db 0, 12, 7, 9, 3, 29, 4, 32
-    .db 0, 28, 23, 41, 17, 61, 51, 63
+    .db CMP_BLACK, CMP_BLUE, CMP_RED, CMP_MAGENTA
+    .db CMP_GREEN, CMP_CYAN, CMP_YELLOW, CMP_WHITE
 .endif
 
 osd_set_palette:
@@ -347,9 +368,11 @@ inipal:
         sta     TMRMSB
 
   ; install FIRQ handler and enable TMR FIRQ
+				;lda			#TMR|HBORD|VBORD        ; TMR FIRQ enabled
+				;sta			FIRQENR   							
         lda     #0x7E                   ; jmp
         sta     0xFEF4
-				ldx     #fisr                   ; address
+				ldx     #main_fisr              ; address
 				stx     0xFEF5
         andcc   #~0x40                  ; enable FIRQ in CPU
         
@@ -5301,12 +5324,56 @@ hflip_line:
 flip_done:
         rts
 
-fisr:
+main_fisr:
 ; temp hack - should do LFSR or something
 ; and also tune frequency
-        tst     FIRQENR        
+        tst     FIRQENR                 ; ACK FIRQ
         inc     *r
         rti
+
+menu_fisr:
+        pshs    b
+        ldb     FIRQENR
+        bitb    #TMR
+        beq     1$
+        inc     *r
+1$:     bitb    #VBORD
+        beq     2$
+        clr     *line_cnt
+2$:     bitb    #HBORD
+        beq     9$        
+        inc     *line_cnt
+        ldb     *line_cnt
+        lsrb
+        lsrb
+        lsrb
+        andb    #31
+        pshs    x
+        ldx     #menu_line_colours
+        ldb     b,x
+        stb     PALETTE+1
+        puls    x
+9$:     puls    b
+        rti
+
+menu_line_colours:
+        ; bottom line
+        .db     CMP_YELLOW
+        ; vblank and top lines
+        .db     CMP_BLACK, CMP_BLACK, CMP_BLACK, CMP_BLACK, CMP_BLACK
+        .db     CMP_BLACK, CMP_BLACK, CMP_BLACK
+        ; top of menu border
+        .db     CMP_YELLOW, CMP_YELLOW, CMP_YELLOW, CMP_YELLOW
+        .db     CMP_MAGENTA, CMP_YELLOW
+        .db     CMP_GREEN, CMP_YELLOW
+        .db     CMP_GREEN, CMP_YELLOW
+        .db     CMP_GREEN, CMP_YELLOW
+        .db     CMP_GREEN, CMP_YELLOW
+        .db     CMP_CYAN, CMP_YELLOW
+        .db     CMP_WHITE, CMP_YELLOW, CMP_YELLOW
+        .db     CMP_WHITE
+        ; bottom of menu border
+        .db     CMP_YELLOW, CMP_YELLOW, CMP_YELLOW
         
 vidbuf:
         .ds     0x1800
