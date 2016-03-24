@@ -52,10 +52,10 @@ NO_LIVES            .equ    5
 ; *** the standard 4 locations
 ;START_LOC           .equ    47
 ;START_LOC           .equ    68
-START_LOC           .equ    179         ; chest to the west
+;START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-;START_LOC           .equ    0x09
+START_LOC           .equ    179+32
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -1026,9 +1026,9 @@ upd_91:
         jsr     dec_dZ_and_update_XYZ
         lda     12,x                    ; flags12
         bita    #FLAG_Z_OOB
-        bne     1$
+        bne     2$
         jsr     audio_B451
-        jmp     set_wipe_and_draw_flags
+2$:     jmp     set_wipe_and_draw_flags
 
 ; collapsing block
 upd_143:
