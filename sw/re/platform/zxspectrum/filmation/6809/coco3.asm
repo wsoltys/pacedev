@@ -81,7 +81,10 @@ RAMMODE			.equ		0xFFDF
 ; $4000-$4FFF   $3A       shift_tbl
 ; $5000-$5FFF             (empty)
 ; $6000-$7FFF   $3B       stack & variables
-; $8000-$FFXX   $34-$37   Code+Data
+; $8000-$FFXX   $30-$33   Code+Data
+
+CODE_PG1    .equ    0x30
+VRAM_PG     .equ    0x38
 
 coco_vram   .equ    0x0000
 vidbuf      .equ    0x1800

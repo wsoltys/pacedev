@@ -251,13 +251,13 @@ start_coco:
         lda     #COCO|MMUEN|MC3|MC1|MC0 ; 32KB internal ROM
         sta     INIT0
 ; setup MMU to copy ROM
-        lda     #0x34
+        lda     #CODE_PG1
         ldx     #MMUTSK1                ; $0000-$7FFF
         ldb     #4
 1$:     sta     ,x+
         inca
         decb
-        bne     1$                      ; map pages $34-$37
+        bne     1$                      ; map pages $30-$33
 ; copy ROM into RAM        
         ldx     #0x8000                 ; start of 32KB ROM
         ldy     #0x0000                 ; destination
@@ -266,13 +266,14 @@ start_coco:
         cmpx    #0xff00                 ; done?
         bne     2$                      ; no, loop
 ; setup MMU mapping for game
-        lda     #0x34
+        lda     #CODE_PG1
         ldx     #MMUTSK1+4              ; $8000-$FFFF
         ldb     #4
 4$:     sta     ,x+
         inca
         decb
-        bne     4$                      ; map pages $34-37
+        bne     4$                      ; map pages $30-33
+        lda     #VRAM_PG
         ldx     #MMUTSK1                ; $0000-
         ldb     #4
 5$:     sta     ,x+
@@ -340,7 +341,7 @@ setup_gime_for_game:
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
-				lda			#(0x38<<2)              ; screen at page $38
+				lda			#(VRAM_PG<<2)           ; screen at page $38
 				sta			VOFFMSB
 				lda			#0x00
 				sta			VOFFLSB   							
