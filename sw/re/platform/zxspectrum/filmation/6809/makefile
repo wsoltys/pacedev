@@ -13,6 +13,10 @@ ifeq (,$(PLATFORM))
 	PLATFORM = coco3
 endif
 
+ifeq (,$(OUTPUT))
+  OUTPUT = cart
+endif
+
 # compiler, linker and utilities
 AS = as6809
 LD = aslink
@@ -28,23 +32,35 @@ EXE = $(TARGET)
 MAKEFILE = makefile
 
 ifeq ($(PLATFORM),coco3)
-	FQLN = $(LDR).bin
-  FQEN = $(EXE).bin
+  ifeq ($(OUTPUT),disk)
+	  FQLN = $(LDR).bin
+    FQEN = $(EXE).bin
+    MEDIA = kl_6809.dsk
+	else
+	  FQEN = $(EXE).ihx
+    MEDIA = $(TARGET).rom
+  endif
 endif
 
 ASFLAGS = -l -o -s
-LDFLAGS = -t
+ifeq ($(OUTPUT),disk)
+  LDFLAGS = -t
+else
+  LDFLAGS = -i
+endif
 
 LDR_OBJS = $(LDR).rel
 EXE_OBJS = $(EXE).rel
-	
-all: $(FQLN) $(FQEN)
+
+all: $(MEDIA)
+
+%.dsk: $(FQLN) $(FQEN)
 #	$(CP) $(FQLN) klldr.bin
 #	imgtool create coco_jvc_rsdos kl_6809.dsk
 #	imgtool put coco_jvc_rsdos kl_6809.dsk klldr.bin $(FQEN)
-	$(RM) -f kl_6809.dsk
+	$(RM) -f $(MEDIA)
 	reloc kl_ldr.bin klldr.bin
-	file2dsk kl_6809.dsk klldr.bin $(FQEN) kl.bas
+	file2dsk $(MEDIA) klldr.bin $(FQEN) kl.bas
 
 %.rel: %.asm $(MAKEFILE)
 	$(AS) $(ASFLAGS) $<
@@ -54,12 +70,12 @@ $(FQLN): $(LDR_OBJS)
 	$(ECHO) Linking $@...
 	$(LD) $(LDFLAGS) $<
 
-# COCO3 BIN format file
+# COCO3 BIN format file / IHX
 $(FQEN): $(EXE_OBJS)
 	$(ECHO) Linking $@...
 	$(LD) $(LDFLAGS) $<
 
-%.bin: %.ihx
+%.rom: %.ihx
 	$(HEX2BIN) $<
 
 clean:
@@ -70,3 +86,5 @@ clean:
 	$(ECHO) Deleting executables...
 	$(RM) -f $(FQLN)
 	$(RM) -f $(FQEN)
+	$(RM) -f $(MEDIA)
+  

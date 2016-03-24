@@ -79,17 +79,39 @@ RAMMODE			.equ		0xFFDF
 
 ; *** end of derived
 
+coco_vram       .equ      0x0000
+
+.ifdef CARTRIDGE
+
+; Memory map (cartridge)
+; ------------  ----
+; $0000-$17FF   $38       Video
+; $1800-$1FFF             (empty)
+; $2000-$2EFF   $39				(empty)
+; $2F00-$2FFF             reverse_tbl
+; $3000-$3FFF             shift_tbl
+; $4000-$5FFF   $3A       (empty)
+; $6000-$7FFF   $3B       stack & variables
+; $8000-$FFXX   $3C-$3F   Code+Data
+
+code_base				.equ		  0x8000
+stack						.equ		  0x6fff
+;data_base        .equ     0x8000
+
+.else
 ;
 ; Memory Map		Page
 ; ------------  ----
 ; $0000-$17FF   $38       Video
 ; $1800-$1FFF             (empty)
-; $2000-$3FFF   $39				Code
-; $4000-$5FFF   $3A       Code?
-; $6000-$7FFF		$3B				Code?
+; $2000-$3FFF   $39				variables
+; $4000-$5FFF   $3A       Code
+; $6000-$7FFF		$3B				Code + stack
 ; $8000-$9FFF   $30				Font and graphics data
 ; $A000-$BFFF   $31				Font and graphics data
-; $C000-$DFFF   $32				Font and graphics data
+; $C000-$CEFF   $32				Font and graphics data
+; $CF00-$CFFF             reverse_tbl
+; $D000-$DFFF             shift_tbl
 ; $E000-$FFFF   $37				???
 ;
 ; most alternate pages are used by Coco3 BASIC
@@ -97,7 +119,6 @@ RAMMODE			.equ		0xFFDF
 ; and is written whilst BASIC is running
 ; $30-$33 are the alternate HIRES page, so safe
 
-coco_vram       .equ      0x0000
 code_base				.equ		  0x4000
 stack						.equ		  0x7fff
 data_base        .equ     0x8000
@@ -110,6 +131,8 @@ CODE_PG3        .equ      CODE_PG2+1
 DATA_PG1        .equ      0x30
 DATA_PG2        .equ      DATA_PG1+1
 DATA_PG3        .equ      DATA_PG2+1
+
+.endif
 
 ;.define HAS_SOUND
 .ifdef HAS_SOUND

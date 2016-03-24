@@ -18,6 +18,11 @@
 ;.define BUILD_OPT_ALMOST_INVINCIBLE
 ; *** end of BUILD OPTIONS
 
+.ifdef CARTRIDGE
+  vidbuf            .equ    0x2000
+          
+.endif
+
         .org    code_base-#0x800
         
         .bndry  0x100
@@ -41,6 +46,7 @@ depth               .equ    0x12
 pc                  .equ    0x14
 dy                  .equ    0x16
 dx                  .equ    0x17
+;cmp                 .equ    0x18        ; composite (bit 4)
 r                   .equ    0x7f
 line_cnt            .equ    0x80
 
@@ -231,18 +237,6 @@ eod                   .equ    .
 				
 ; end of 'SCRATCH'
 
-font                  .equ    data_base+0x0000
-room_size_tbl         .equ    data_base+0x0140
-location_tbl          .equ    data_base+0x0149
-eolt                  .equ    data_base+0x0ac9
-block_type_tbl        .equ    data_base+0x0ba0
-background_type_tbl   .equ    data_base+0x0eba
-special_objs_tbl      .equ    data_base+0x0eea
-eosot                 .equ    data_base+0x100a
-sprite_tbl            .equ    data_base+0x4ce0
-reverse_tbl           .equ    0xcf00
-shift_tbl             .equ    0xd000
-
 				              .org		code_base
 
 ; Spectrum Palette for Coco3
@@ -258,48 +252,98 @@ ATTR_CYAN       .equ  5
 ATTR_YELLOW     .equ  6
 ATTR_WHITE      .equ  7
 
-RGB_BLACK       .equ  0x00*9
-RGB_BLUE        .equ  0x01*9
-RGB_RED         .equ  0x04*9
-RGB_MAGENTA     .equ  0x05*9
-RGB_GREEN       .equ  0x02*9
-RGB_CYAN        .equ  0x03*9
-RGB_YELLOW      .equ  0x06*9
-RGB_WHITE       .equ  0x07*9
+RGB_DARK_BLACK    .equ  0x00
+RGB_DARK_BLUE     .equ  0x01
+RGB_DARK_RED      .equ  0x04
+RGB_DARK_MAGENTA  .equ  0x05
+RGB_DARK_GREEN    .equ  0x02
+RGB_DARK_CYAN     .equ  0x03
+RGB_DARK_YELLOW   .equ  0x06
+RGB_GREY          .equ  0x07
 
-CMP_BLACK       .equ  0
-CMP_BLUE        .equ  28
-CMP_RED         .equ  23
-CMP_MAGENTA     .equ  41
-CMP_GREEN       .equ  17
-CMP_CYAN        .equ  61
-CMP_YELLOW      .equ  51
-CMP_WHITE       .equ  63
+RGB_BLACK         .equ  RGB_DARK_BLACK*9
+RGB_BLUE          .equ  RGB_DARK_BLUE*9
+RGB_RED           .equ  RGB_DARK_RED*9
+RGB_MAGENTA       .equ  RGB_DARK_MAGENTA*9
+RGB_GREEN         .equ  RGB_DARK_GREEN*9
+RGB_CYAN          .equ  RGB_DARK_CYAN*9
+RGB_YELLOW        .equ  RGB_DARK_YELLOW*9
+RGB_WHITE         .equ  RGB_GREY*9
+                  
+CMP_BLACK         .equ  0
+CMP_BLUE          .equ  28
+CMP_RED           .equ  23
+CMP_MAGENTA       .equ  41
+CMP_GREEN         .equ  17
+CMP_CYAN          .equ  61
+CMP_YELLOW        .equ  51
+CMP_WHITE         .equ  63
 
-speccy_pal:
-;       black, blue, red, magenta, green, cyan, yellow, grey/white
-.ifdef GFX_RGB
-    .db 0x00<<0, 0x01<<0, 0x04<<0, 0x05<<0, 0x02<<0, 0x03<<0, 0x06<<0, 0x07<<0
+CMP_DARK_BLACK    .equ  0
+CMP_DARK_BLUE     .equ  12
+CMP_DARK_RED      .equ  7
+CMP_DARK_MAGENTA  .equ  9
+CMP_DARK_GREEN    .equ  3
+CMP_DARK_CYAN     .equ  29
+CMP_DARK_YELLOW   .equ  4
+CMP_GREY          .equ  32
+
+rgb_pal:
+    .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
+    .db RGB_DARK_GREEN, RGB_DARK_CYAN, RGB_DARK_YELLOW, RGB_GREY
     .db RGB_BLACK, RGB_BLUE, RGB_RED, RGB_MAGENTA
     .db RGB_GREEN, RGB_CYAN, RGB_YELLOW, RGB_WHITE
-.else
-    .db 0, 12, 7, 9, 3, 29, 4, 32
+cmp_pal:    
+    .db CMP_DARK_BLACK, CMP_DARK_BLUE, CMP_DARK_RED, CMP_DARK_MAGENTA
+    .db CMP_DARK_GREEN, CMP_DARK_CYAN, CMP_DARK_YELLOW, CMP_GREY
     .db CMP_BLACK, CMP_BLUE, CMP_RED, CMP_MAGENTA
     .db CMP_GREEN, CMP_CYAN, CMP_YELLOW, CMP_WHITE
-.endif
 
 osd_set_palette:
         anda    #7
-        ldu     #speccy_pal+8           ; bright
+        ora     #(1<<3)                 ; bright
+        ora     cmp                     ; composite video
+        ldu     #rgb_pal
         lda     a,u
         sta     PALETTE+1
         rts
-				
+
+rgb_composite:
+        .asciz  "hRiGBohCiOMPOSITE"
+
+cmp:    .ds     1
+        				
 start_coco:
 				orcc		#0x50										; disable interrupts
 				lds			#stack
 
 .ifdef PLATFORM_COCO3
+
+        ldx     #0x400
+        lda     #96                     ; green space
+1$:     sta     ,x+
+        cmpx    #0x600
+        bne     1$
+        ldx     #rgb_composite
+        ldy     #0x507
+2$:     lda     ,x+
+        beq     3$
+        sta     ,y+
+        bra     2$
+3$:     ldx			#PIA0
+        ldb     #0                      ; flag rgb
+4$:     lda     #~(1<<2)
+				sta     2,x
+				lda     ,x
+				bita    #(1<<2)                 ; 'R'?
+				beq     5$
+        lda     #~(1<<3)
+				sta			2,x											; column strobe
+				lda			,x											; active low
+				bita    #(1<<0)                 ; 'C'?
+				bne     4$                      ; try again
+				ldb     #(1<<4)                 ; flag component
+5$:     stb     cmp
 
 ; initialise PLATFORM_COCO3 hardware
 ; - disable PIA interrupts
@@ -339,7 +383,7 @@ start_coco:
 				sta			HOFF      							
 .endif				
 				ldx			#PALETTE
-				ldy     #speccy_pal
+				ldy     #rgb_pal
 				ldb     #16
 inipal:
 				lda     ,y+
@@ -2466,7 +2510,7 @@ upd_96_to_102:
         
 cycle_colours_with_sound:
         ldb     #16                     ; cycle 16 times
-        ldu     #speccy_pal+8
+        ldu     #cmp_pal+8              ; bright
 1$:     tfr     b,a
         anda    #7
         lda     a,u                     ; get palette entry
@@ -5374,8 +5418,31 @@ menu_line_colours:
         .db     CMP_WHITE
         ; bottom of menu border
         .db     CMP_YELLOW, CMP_YELLOW, CMP_YELLOW
-        
+
+.ifdef CARTRIDGE
+
+  .include "kl_dat.asm"
+
+  reverse_tbl           .equ    0x2f00
+  shift_tbl             .equ    0x3000
+
+.else        
+
+  font                  .equ    data_base+0x0000
+  room_size_tbl         .equ    data_base+0x0140
+  location_tbl          .equ    data_base+0x0149
+  eolt                  .equ    data_base+0x0ac9
+  block_type_tbl        .equ    data_base+0x0ba0
+  background_type_tbl   .equ    data_base+0x0eba
+  special_objs_tbl      .equ    data_base+0x0eea
+  eosot                 .equ    data_base+0x100a
+  sprite_tbl            .equ    data_base+0x4ce0
+
+  reverse_tbl           .equ    0xcf00
+  shift_tbl             .equ    0xd000
+  
 vidbuf:
         .ds     0x1800
+.endif
                                                                                 
 				.end		start_coco
