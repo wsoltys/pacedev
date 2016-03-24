@@ -90,11 +90,10 @@ depth               .equ    0x12
 pc                  .equ    0x14
 dy                  .equ    0x16
 dx                  .equ    0x17
-;cmp                 .equ    0x18        ; composite (bit 4)
 r                   .equ    0x7f
 line_cnt            .equ    0x80
 
-; rgb/composite video selected
+; rgb/composite video selected (bit 4)
 cmp:                            .ds 1
         				
 
@@ -245,9 +244,11 @@ start_coco:
 				orcc		#0x50										; disable interrupts
 				lds			#stack
 
-.ifdef CARTRIDGE
+.ifdef PLATFORM_COCO3
+
+  .ifdef CARTRIDGE
 ; switch in 32KB cartridge
-        lda     #MMUEN|MC3|MC1|MC0      ; 32KB internal ROM
+        lda     #COCO|MMUEN|MC3|MC1|MC0 ; 32KB internal ROM
         sta     INIT0
 ; setup MMU to copy ROM
         lda     #0x34
@@ -280,17 +281,10 @@ start_coco:
         bne     5$                      ; map pages $38-$3B        
 ; switch to all-RAM mode
         sta     RAMMODE        
-.endif
+  .endif ; CARTRIDGE
 
-fred:
+ask_rgb_or_composite:
 
-.ifdef PLATFORM_COCO3
-
-        lda     #0
-        ;sta     VMODE
-        lda     #0
-        ;sta     VRES
-        
         ldx     #0x400
         lda     #96                     ; green space
 1$:     sta     ,x+
@@ -316,6 +310,8 @@ fred:
 				bne     4$                      ; try again
 				ldb     #(1<<4)                 ; flag component
 5$:     stb     cmp
+
+setup_gime_for_game:
 
 ; initialise PLATFORM_COCO3 hardware
 ; - disable PIA interrupts
