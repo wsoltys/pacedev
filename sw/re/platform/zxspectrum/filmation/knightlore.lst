@@ -180,7 +180,7 @@ SCRATCH:5C08		 ;
 SCRATCH:5C08 ??	?? ?? ??+graphic_objs_tbl:.ds 32
 SCRATCH:5C28 ??	?? ?? ??+		 .ds 32
 SCRATCH:5C48 ??	?? ?? ??+special_objs_here:.ds 32
-SCRATCH:5C68 ??	?? ?? ??+byte_5C68:	 .ds 32
+SCRATCH:5C68 ??	?? ?? ??+special_objs_here_1:.ds 32
 SCRATCH:5C88 ??	?? ?? ??+other_objs_here:.ds 32
 SCRATCH:5CA8 ??	?? ?? ??+		 .ds 1120
 SCRATCH:5CA8 ??	?? ?? ??+; end of 'SCRATCH'
@@ -2609,7 +2609,7 @@ RAM:AF6C
 RAM:AF6C	     START:							     ; location	to clear
 RAM:AF6C 21 A0 5B		     ld	     hl, #seed_1
 RAM:AF6F 01 68 05		     ld	     bc, #0x568				     ; # bytes to clear
-RAM:AF72 3A 78 5C		     ld	     a,	(byte_5C68+0x10)
+RAM:AF72 3A 78 5C		     ld	     a,	(special_objs_here_1+0x10)
 RAM:AF75 F5			     push    af
 RAM:AF76 CD 3A D5		     call    clr_mem
 RAM:AF79 F1			     pop     af
@@ -3578,19 +3578,19 @@ RAM:B580 B5			     or	     l
 RAM:B581 07			     rlca					     ; bit 1 ->	bit 2, bit 7 ->	bit 1
 RAM:B582 E6 03			     and     #3
 RAM:B584 6F			     ld	     l,	a
-RAM:B585 01 8B B5		     ld	     bc, #off_B58B			     ; jump table
+RAM:B585 01 8B B5		     ld	     bc, #dX_dY_tbl			     ; jump table
 RAM:B588 C3 DB AF		     jp	     jump_to_tbl_entry
 RAM:B588	     ; ---------------------------------------------------------------------------
-RAM:B58B 93 B5	     off_B58B:	     .dw loc_B593				     ; +4, -4
-RAM:B58D B5 B5			     .dw loc_B5B5				     ; +4, +4
-RAM:B58F BA B5			     .dw loc_B5BA				     ; -4, -4
-RAM:B591 BF B5			     .dw loc_B5BF				     ; -4, +4
+RAM:B58B 93 B5	     dX_dY_tbl:	     .dw p4_m4					     ; +4, -4
+RAM:B58D B5 B5			     .dw p4_p4					     ; +4, +4
+RAM:B58F BA B5			     .dw m4_m4					     ; -4, -4
+RAM:B591 BF B5			     .dw m4_p4					     ; -4, +4
 RAM:B593	     ; ---------------------------------------------------------------------------
 RAM:B593
-RAM:B593	     loc_B593:							     ; +4, -4
+RAM:B593	     p4_m4:							     ; +4, -4
 RAM:B593 21 FC 04		     ld	     hl, #0x4FC
 RAM:B596
-RAM:B596	     loc_B596:							     ; dX
+RAM:B596	     save_dX_dY:						     ; dX
 RAM:B596 DD 75 09		     ld	     9(ix), l
 RAM:B599 DD 74 0A		     ld	     10(ix), h				     ; dY
 RAM:B59C 3A A5 5B		     ld	     a,	(seed_3)
@@ -3611,19 +3611,19 @@ RAM:B5AF CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B5B2 C3 92 C6		     jp	     set_wipe_and_draw_flags
 RAM:B5B5	     ; ---------------------------------------------------------------------------
 RAM:B5B5
-RAM:B5B5	     loc_B5B5:							     ; +4, +4
+RAM:B5B5	     p4_p4:							     ; +4, +4
 RAM:B5B5 21 04 04		     ld	     hl, #0x404
-RAM:B5B8 18 DC			     jr	     loc_B596
+RAM:B5B8 18 DC			     jr	     save_dX_dY
 RAM:B5BA	     ; ---------------------------------------------------------------------------
 RAM:B5BA
-RAM:B5BA	     loc_B5BA:							     ; -4, -4
+RAM:B5BA	     m4_m4:							     ; -4, -4
 RAM:B5BA 21 FC FC		     ld	     hl, #0xFCFC
-RAM:B5BD 18 D7			     jr	     loc_B596
+RAM:B5BD 18 D7			     jr	     save_dX_dY
 RAM:B5BF	     ; ---------------------------------------------------------------------------
 RAM:B5BF
-RAM:B5BF	     loc_B5BF:							     ; -4, +4
+RAM:B5BF	     m4_p4:							     ; -4, +4
 RAM:B5BF 21 04 FC		     ld	     hl, #0xFC04
-RAM:B5C2 18 D2			     jr	     loc_B596
+RAM:B5C2 18 D2			     jr	     save_dX_dY
 RAM:B5C4	     ; ---------------------------------------------------------------------------
 RAM:B5C4
 RAM:B5C4	     loc_B5C4:							     ; plyr_spr_1 X
@@ -4089,7 +4089,7 @@ RAM:B8A9	     init_cauldron_bubbles:
 RAM:B8A9 3A 10 5C		     ld	     a,	(graphic_objs_tbl+8)		     ; plyr_spr_1 screen
 RAM:B8AC FE 88			     cp	     #136				     ; cauldron	room?
 RAM:B8AE C0			     ret     NZ					     ; no, exit
-RAM:B8AF 11 68 5C		     ld	     de, #byte_5C68			     ; special_objs_here[1]
+RAM:B8AF 11 68 5C		     ld	     de, #special_objs_here_1		     ; special_objs_here[1]
 RAM:B8B2 1A			     ld	     a,	(de)				     ; graphic no.
 RAM:B8B3 A7			     and     a					     ; null?
 RAM:B8B4 C0			     ret     NZ					     ; no, return
@@ -4115,7 +4115,7 @@ RAM:B8DA CD D8 C4		     call    adj_m4_m12
 RAM:B8DD 3A 48 5C		     ld	     a,	(special_objs_here)
 RAM:B8E0 A7			     and     a					     ; null?
 RAM:B8E1 C2 5E B9		     jp	     NZ, upd_111			     ; no, skip
-RAM:B8E4 DD CB 07 CE		     set     1,	7(ix)
+RAM:B8E4 DD CB 07 CE		     set     1,	7(ix)				     ; ignore in 3D calcs
 RAM:B8E8 CD 00 C7		     call    dec_dZ_and_update_XYZ
 RAM:B8EB CD 8C B9		     call    next_graphic_no_mod_4
 RAM:B8EE DD 7E 03		     ld	     a,	3(ix)				     ; Z
@@ -5514,7 +5514,7 @@ RAM:C238	     centre_of_room:
 RAM:C238 3E 80			     ld	     a,	#128
 RAM:C23A DD BE 03		     cp	     3(ix)				     ; Z
 RAM:C23D 30 06			     jr	     NC, add_obj_to_cauldron
-RAM:C23F DD CB 07 CE		     set     1,	7(ix)
+RAM:C23F DD CB 07 CE		     set     1,	7(ix)				     ; ignore in 3D calcs
 RAM:C243 18 EA			     jr	     loc_C22F
 RAM:C245	     ; ---------------------------------------------------------------------------
 RAM:C245
@@ -5616,7 +5616,7 @@ RAM:C2CC	     prepare_final_animation:
 RAM:C2CC 3E 01			     ld	     a,	#1
 RAM:C2CE 32 C3 5B		     ld	     (all_objs_in_cauldron), a
 RAM:C2D1 DD E5			     push    ix
-RAM:C2D3 DD 21 68 5C		     ld	     ix, #byte_5C68			     ; special_objs_here[1]
+RAM:C2D3 DD 21 68 5C		     ld	     ix, #special_objs_here_1		     ; special_objs_here[1]
 RAM:C2D7 11 20 00		     ld	     de, #32				     ; entry size
 RAM:C2DA 06 0B			     ld	     b,	#11				     ; wipe 11 objects in the room
 RAM:C2DA									     ; (1 special, 7 bg, 3 fg)
@@ -5627,7 +5627,7 @@ RAM:C2DD D5			     push    de
 RAM:C2DE CD 92 C6		     call    set_wipe_and_draw_flags
 RAM:C2E1 D1			     pop     de
 RAM:C2E2 C1			     pop     bc
-RAM:C2E3 DD 36 00 01		     ld	     0(ix), #1				     ; set graphic no. = 1 ???
+RAM:C2E3 DD 36 00 01		     ld	     0(ix), #1				     ; set graphic no. = INVALID
 RAM:C2E7 DD 19			     add     ix, de				     ; next entry
 RAM:C2E9 10 F1			     djnz    loc_C2DC
 RAM:C2EB 01 08 61		     ld	     bc, #font
