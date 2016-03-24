@@ -76,7 +76,7 @@ $(FQEN): $(EXE_OBJS)
 	$(LD) $(LDFLAGS) $<
 
 %.rom: %.ihx
-	$(HEX2BIN) $<
+	$(HEX2BIN) -e rom $<
 
 clean:
 	$(ECHO) Deleting intermediate files...

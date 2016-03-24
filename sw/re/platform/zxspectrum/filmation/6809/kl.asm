@@ -18,38 +18,6 @@
 ;.define BUILD_OPT_ALMOST_INVINCIBLE
 ; *** end of BUILD OPTIONS
 
-.ifdef CARTRIDGE
-  vidbuf            .equ    0x2000
-          
-.endif
-
-        .org    code_base-#0x800
-        
-        .bndry  0x100
-dp_base:            .ds     256        
-z80_b               .equ    0x00
-z80_c               .equ    0x01
-z80_d               .equ    0x02
-z80_e               .equ    0x03
-z80_h               .equ    0x04
-z80_l               .equ    0x05
-width               .equ    0x08
-height              .equ    0x09
-lines               .equ    0x0a
-bytes               .equ    0x0b
-offset              .equ    0x0c
-screen              .equ    0x0d
-y_lim               .equ    0x0e
-x_lim               .equ    0x0f
-tmp_word            .equ    0x10
-depth               .equ    0x12
-pc                  .equ    0x14
-dy                  .equ    0x16
-dx                  .equ    0x17
-;cmp                 .equ    0x18        ; composite (bit 4)
-r                   .equ    0x7f
-line_cnt            .equ    0x80
-
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
 MAX_DRAW            .equ    48
@@ -98,6 +66,37 @@ FLAG_JUST_DROPPED   .equ    1<<0        ; special objects
 MASK_DIR            .equ    0x03        ; NSEW guard & wizard
 MASK_LOOK_CNT       .equ    0x0F        ; player (top, look around cnt)
 MASK_TURN_DELAY     .equ    0x07        ; player (bottom)
+
+        .org    var_base
+        
+        .bndry  0x100
+dp_base:            .ds     256        
+z80_b               .equ    0x00
+z80_c               .equ    0x01
+z80_d               .equ    0x02
+z80_e               .equ    0x03
+z80_h               .equ    0x04
+z80_l               .equ    0x05
+width               .equ    0x08
+height              .equ    0x09
+lines               .equ    0x0a
+bytes               .equ    0x0b
+offset              .equ    0x0c
+screen              .equ    0x0d
+y_lim               .equ    0x0e
+x_lim               .equ    0x0f
+tmp_word            .equ    0x10
+depth               .equ    0x12
+pc                  .equ    0x14
+dy                  .equ    0x16
+dx                  .equ    0x17
+;cmp                 .equ    0x18        ; composite (bit 4)
+r                   .equ    0x7f
+line_cnt            .equ    0x80
+
+; rgb/composite video selected
+cmp:                            .ds 1
+        				
 
 seed_1:                         .ds 1
                                 .ds 1
@@ -237,88 +236,61 @@ eod                   .equ    .
 				
 ; end of 'SCRATCH'
 
-				              .org		code_base
+        .org    code_base
+        .include "kl_spr.asm"
+        
+				.org		0xc000
 
-; Spectrum Palette for Coco3
-; - spectrum format : B=1, R=2, G=4
-; -     coco format : RGBRGB
-
-ATTR_BLACK      .equ  0
-ATTR_BLUE       .equ  1
-ATTR_RED        .equ  2
-ATTR_MAGENTA    .equ  3
-ATTR_GREEN      .equ  4
-ATTR_CYAN       .equ  5
-ATTR_YELLOW     .equ  6
-ATTR_WHITE      .equ  7
-
-RGB_DARK_BLACK    .equ  0x00
-RGB_DARK_BLUE     .equ  0x01
-RGB_DARK_RED      .equ  0x04
-RGB_DARK_MAGENTA  .equ  0x05
-RGB_DARK_GREEN    .equ  0x02
-RGB_DARK_CYAN     .equ  0x03
-RGB_DARK_YELLOW   .equ  0x06
-RGB_GREY          .equ  0x07
-
-RGB_BLACK         .equ  RGB_DARK_BLACK*9
-RGB_BLUE          .equ  RGB_DARK_BLUE*9
-RGB_RED           .equ  RGB_DARK_RED*9
-RGB_MAGENTA       .equ  RGB_DARK_MAGENTA*9
-RGB_GREEN         .equ  RGB_DARK_GREEN*9
-RGB_CYAN          .equ  RGB_DARK_CYAN*9
-RGB_YELLOW        .equ  RGB_DARK_YELLOW*9
-RGB_WHITE         .equ  RGB_GREY*9
-                  
-CMP_BLACK         .equ  0
-CMP_BLUE          .equ  28
-CMP_RED           .equ  23
-CMP_MAGENTA       .equ  41
-CMP_GREEN         .equ  17
-CMP_CYAN          .equ  61
-CMP_YELLOW        .equ  51
-CMP_WHITE         .equ  63
-
-CMP_DARK_BLACK    .equ  0
-CMP_DARK_BLUE     .equ  12
-CMP_DARK_RED      .equ  7
-CMP_DARK_MAGENTA  .equ  9
-CMP_DARK_GREEN    .equ  3
-CMP_DARK_CYAN     .equ  29
-CMP_DARK_YELLOW   .equ  4
-CMP_GREY          .equ  32
-
-rgb_pal:
-    .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
-    .db RGB_DARK_GREEN, RGB_DARK_CYAN, RGB_DARK_YELLOW, RGB_GREY
-    .db RGB_BLACK, RGB_BLUE, RGB_RED, RGB_MAGENTA
-    .db RGB_GREEN, RGB_CYAN, RGB_YELLOW, RGB_WHITE
-cmp_pal:    
-    .db CMP_DARK_BLACK, CMP_DARK_BLUE, CMP_DARK_RED, CMP_DARK_MAGENTA
-    .db CMP_DARK_GREEN, CMP_DARK_CYAN, CMP_DARK_YELLOW, CMP_GREY
-    .db CMP_BLACK, CMP_BLUE, CMP_RED, CMP_MAGENTA
-    .db CMP_GREEN, CMP_CYAN, CMP_YELLOW, CMP_WHITE
-
-osd_set_palette:
-        anda    #7
-        ora     #(1<<3)                 ; bright
-        ora     cmp                     ; composite video
-        ldu     #rgb_pal
-        lda     a,u
-        sta     PALETTE+1
-        rts
-
-rgb_composite:
-        .asciz  "hRiGBohCiOMPOSITE"
-
-cmp:    .ds     1
-        				
 start_coco:
 				orcc		#0x50										; disable interrupts
 				lds			#stack
 
+.ifdef CARTRIDGE
+; switch in 32KB cartridge
+        lda     #MMUEN|MC3|MC1|MC0      ; 32KB internal ROM
+        sta     INIT0
+; setup MMU to copy ROM
+        lda     #0x34
+        ldx     #MMUTSK1                ; $0000-$7FFF
+        ldb     #4
+1$:     sta     ,x+
+        inca
+        decb
+        bne     1$                      ; map pages $34-$37
+; copy ROM into RAM        
+        ldx     #0x8000                 ; start of 32KB ROM
+        ldy     #0x0000                 ; destination
+2$:     lda     ,x+
+        sta     ,y+
+        cmpx    #0xff00                 ; done?
+        bne     2$                      ; no, loop
+; setup MMU mapping for game
+        lda     #0x34
+        ldx     #MMUTSK1+4              ; $8000-$FFFF
+        ldb     #4
+4$:     sta     ,x+
+        inca
+        decb
+        bne     4$                      ; map pages $34-37
+        ldx     #MMUTSK1                ; $0000-
+        ldb     #4
+5$:     sta     ,x+
+        inca
+        decb
+        bne     5$                      ; map pages $38-$3B        
+; switch to all-RAM mode
+        sta     RAMMODE        
+.endif
+
+fred:
+
 .ifdef PLATFORM_COCO3
 
+        lda     #0
+        ;sta     VMODE
+        lda     #0
+        ;sta     VRES
+        
         ldx     #0x400
         lda     #96                     ; green space
 1$:     sta     ,x+
@@ -354,10 +326,8 @@ start_coco:
 				sta			PIA1+3									; PIA1, CB1,2 control
 ; - initialise GIME
 				lda			IRQENR									; ACK any pending GIME interrupt
-.ifndef CARTRIDGE				
 				lda			#MMUEN|#FEN             ; enable GIME MMU, FIRQ
 				sta			INIT0     							
-.endif				
 				lda			#0x00										; slow timer, task 1
 				sta			INIT1     							
 				lda			#0x00										; no VBLANK IRQ
@@ -374,14 +344,13 @@ start_coco:
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
-.if 0				
-				lda			#(VIDEOPAGE<<2)         ; screen at page $30
+				lda			#(0x38<<2)              ; screen at page $38
 				sta			VOFFMSB
 				lda			#0x00
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
-.endif				
+
 				ldx			#PALETTE
 				ldy     #rgb_pal
 				ldb     #16
@@ -392,17 +361,6 @@ inipal:
 				bne     inipal
 				
 				sta			CPU179									; select fast CPU clock (1.79MHz)
-        sta     RAMMODE
-
-  ; configure MMU
-        lda     #DATA_PG1
-        ldx     #(MMUTSK1+4)            ; $8000-
-        ldb     #3
-  mmumap: 
-        sta     ,x+
-        inca
-        decb
-        bne     mmumap                  ; map pages $34-$36
 
   ; configure timer
   ; free-run, max range, used for RND atm
@@ -456,11 +414,35 @@ inipal:
     .endif  ; USE_DAC_SOUND
 
   .endif  ; HAS_SOUND
-												
+
 .endif	; PLATFORM_COCO3
 			
 				lda			#>dp_base
 				tfr			a,dp
+        bra     start                   ; knight lore
+        
+rgb_pal:
+    .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
+    .db RGB_DARK_GREEN, RGB_DARK_CYAN, RGB_DARK_YELLOW, RGB_GREY
+    .db RGB_BLACK, RGB_BLUE, RGB_RED, RGB_MAGENTA
+    .db RGB_GREEN, RGB_CYAN, RGB_YELLOW, RGB_WHITE
+cmp_pal:    
+    .db CMP_DARK_BLACK, CMP_DARK_BLUE, CMP_DARK_RED, CMP_DARK_MAGENTA
+    .db CMP_DARK_GREEN, CMP_DARK_CYAN, CMP_DARK_YELLOW, CMP_GREY
+    .db CMP_BLACK, CMP_BLUE, CMP_RED, CMP_MAGENTA
+    .db CMP_GREEN, CMP_CYAN, CMP_YELLOW, CMP_WHITE
+
+rgb_composite:
+        .asciz  "hRiGBohCiOMPOSITE"
+        
+osd_set_palette:
+        anda    #7
+        ora     #(1<<3)                 ; bright
+        ora     cmp                     ; composite video
+        ldu     #rgb_pal
+        lda     a,u
+        sta     PALETTE+1
+        rts
 
 start:
         ldx     #seed_1
@@ -5423,9 +5405,6 @@ menu_line_colours:
 
   .include "kl_dat.asm"
 
-  reverse_tbl           .equ    0x2f00
-  shift_tbl             .equ    0x3000
-
 .else        
 
   font                  .equ    data_base+0x0000
@@ -5438,9 +5417,6 @@ menu_line_colours:
   eosot                 .equ    data_base+0x100a
   sprite_tbl            .equ    data_base+0x4ce0
 
-  reverse_tbl           .equ    0xcf00
-  shift_tbl             .equ    0xd000
-  
 vidbuf:
         .ds     0x1800
 .endif
