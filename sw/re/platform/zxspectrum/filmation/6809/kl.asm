@@ -873,6 +873,9 @@ play_audio:
 end_audio:
         rts
 
+; Coco3 plays 16s tune in 12s
+; - simply adding a NOP to each loop gives perfect timing!
+
 play_note:
         anda    #0x3f                   ; note
         beq     snd_delay
@@ -897,24 +900,28 @@ play_note:
 1$:     clra
 				sta			SOUND_ADDR
         ldb     *z80_c
-2$:     lda     *z80_b
-3$:     deca
-        bne     3$
+        lda     *z80_b
+2$:     deca
+        nop                             ; ballast
+        bne     2$
         decb
         bne     2$
         lda     #SOUND_MASK
         sta     SOUND_ADDR
         ldb     *z80_c
-4$:     lda     *z80_b
-5$:     deca
-        bne     5$
+        lda     *z80_b
+3$:     deca
+        nop                             ; ballast
+        bne     3$
         decb
-        bne     4$
+        bne     3$
         leay    -1,y
         bne     1$
         leau    1,u                     ; next note
         rts
 
+; this routine hasn't been tuned
+; - not sure it's even called at all!?!
 snd_delay:
         lda     ,u+                     ; note, ptr next
         rola
@@ -933,6 +940,7 @@ snd_delay:
         rts                
         
 freq_tbl:
+        ; loop cnd LSB, MSB, duration LSB
         .db 0, 0, 0
         .db 0xF4, 0xA, 8
         .db 0x65, 0xA, 9
