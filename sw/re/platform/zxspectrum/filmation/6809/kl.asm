@@ -1003,8 +1003,18 @@ freq_tbl:
         .db 0x59, 1, 0xE9
         .db 0x54, 1, 0xF7
 
+; block (62)
 audio_B3E9:
+        lda     seed_2
+        anda    #7
+        ldu     #block_snd_data
+        ldb     a,u
+        lda     #4
+        jmp     toggle_audio_hw_xA
         rts
+
+block_snd_data:      
+        .db 0xA0, 0xB0, 0xC0, 0x90, 0xA0, 0xE0, 0x80, 0x60
 
 ; eg. death sparkles
 audio_B403:
@@ -1015,7 +1025,7 @@ audio_B403:
         ldu     #rom_1234
 1$:     ldb     ,u+
         lda     #2
-        bsr     toggle_audio_hw_xA
+        jsr     toggle_audio_hw_xA
         dec     *z80_e
         bne     1$
         rts
@@ -1046,14 +1056,36 @@ audio_B419:
         bne     1$        
         rts
 
+; ball bouncing around
 audio_B42E:
+        ldu     #rom_0000
+        lda     #4
+        sta     *z80_e
+1$:     lda     #3
+        ldb     ,u+
+        orb     #0xc0
+        bsr     toggle_audio_hw_xA
+        dec     *z80_e
+        bne     1$
         rts
 
+rom_0000:
+        .db     0xf3, 0xaf, 0x11, 0xff
+
+; jumping
 audio_B441:
+        lda     #0x20
+        sta     *z80_c
+1$:     ldb     *z80_c
+; RRCA x5
+        bsr     toggle_audio_hw
+        dec     *z80_c
+        bne     1$
         rts
 
+; eg. dropping block, spiked all drop, ball up/down
 audio_B451:
-        rts
+        lda     3,x                     ; Z
 
 audio_B454:
         rts
