@@ -1047,11 +1047,10 @@ audio_B419:
         anda    #0x1f
         ora     #3
         sta     *z80_c
-1$:     ldb     *z80_c
+1$:     ldb     *z80_c                  ; bits 4:0 only
         rolb
-        rolb
-        rolb                            ; extra for 6809
-        bsr     toggle_audio_hw
+        rolb                            ; bits 6:2 only
+        jsr     toggle_audio_hw
         dec     *z80_c
         bne     1$        
         rts
@@ -1064,7 +1063,7 @@ audio_B42E:
 1$:     lda     #3
         ldb     ,u+
         orb     #0xc0
-        bsr     toggle_audio_hw_xA
+        jsr     toggle_audio_hw_xA
         dec     *z80_e
         bne     1$
         rts
@@ -1077,8 +1076,16 @@ audio_B441:
         lda     #0x20
         sta     *z80_c
 1$:     ldb     *z80_c
-; RRCA x5
-        bsr     toggle_audio_hw
+; Z80 was RRCA x5
+; - let's go the other way
+        tfr     b,a
+        lsla    ; b7->C
+        rolb    ; B=6:0,7
+        lsla    ; b6->C
+        rolb    ; B=5:0,7:6
+        lsla    ; b5->C
+        rolb    ; B=4:0,7:5
+        jsr     toggle_audio_hw
         dec     *z80_c
         bne     1$
         rts
@@ -1087,22 +1094,67 @@ audio_B441:
 audio_B451:
         lda     3,x                     ; Z
 
+; eg. rising blocks, 
 audio_B454:
-        rts
+        coma
+        tfr     a,b                     ; make a copy
+; Z80 was RLCA x2
+        lsla                            ; b7->C
+        rolb                            ; B=6:0,7
+        lsla                            ; b6->C
+        rolb                            ; B=5:0,7:6
+        lda     #6        
+        jmp     toggle_audio_hw_xA
 
+; block, fire moving (EW)
 audio_B45D:
-        rts
+        lda     1,x                     ; X
+        bra     audio_B454
 
+; block, fire moving (NS)
 audio_B462:
-        rts
-                
+        lda     2,x                     ; Y
+        bra     audio_B454
+
+; eg. special objects, ghost, portcullis (up)                
 audio_B467:
-        rts
-        
+        lda     1,x
+        adda    2,x
+        adda    3,x
+        bra     audio_B454
+
+; human/wulf transform        
 audio_B472:
+        lda     0,x                     ; graphic_no
+        lsla
+        lsla
+        lsla
+        anda    #0x18
+        adda    #0x10
+        sta     *z80_c
+1$:     ldb     *z80_c
+        eorb    #0x55
+        addb    *z80_c
+        bsr     toggle_audio_hw
+        dec     *z80_c
+        bne     1$
         rts
 
+; portcullis
 audio_B489:
+        ldb     seed_3
+        lda     seed_2
+        anda    #0x1f                   ; in Spectrum ROM
+        ora     #0xC0                   ; map to Knight Lore code
+        tfr     d,u
+        lda     #0x10
+        sta     *z80_e
+1$:     ldb     ,u+
+        andb    #0x7f
+        lda     #2
+        bsr     toggle_audio_hw_xA
+        dec     *z80_e
+        bne     1$
         rts
 
 toggle_audio_hw_x16:
@@ -1113,8 +1165,16 @@ toggle_audio_hw_x24:
         ldd     #0x1805
         bra     toggle_audio_hw_xA
 
+; guard and wizard
 audio_guard_wizard:
+        lda     0,x                     ; graphic_no
+        bita    #(1<<0)
+        beq     1$
         rts
+1$:     ldb     #0x80
+        lda     seed_2
+        coma        
+        bra     loc_B4C6
                         
 ; eg. walking
 audio_B4BB:
@@ -1126,13 +1186,14 @@ audio_B4BB:
 audio_B4C1:
         ldb     #0x60
         lda     seed_2
-1$:     bita    #(1<<1)
-        beq     2$
+loc_B4C6:        
+        bita    #(1<<1)
+        beq     1$
         lda     3,x                     ; Z
         coma
         lsra
         tfr     a,b
-2$:     lda     1,x                     ; X
+1$:     lda     1,x                     ; X
         lsra
         sta     *z80_c
         lda     2,x                     ; Y
