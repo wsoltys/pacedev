@@ -3014,7 +3014,7 @@ RAM:B2C5	     loc_B2C5:							     ; audio data
 RAM:B2C5 1A			     ld	     a,	(de)
 RAM:B2C6 FE FF			     cp	     #0xFF				     ; done?
 RAM:B2C8 28 0F			     jr	     Z,	end_audio			     ; yes, exit
-RAM:B2CA CD DA B2		     call    sub_B2DA
+RAM:B2CA CD DA B2		     call    play_note
 RAM:B2CD 18 EF			     jr	     play_audio_until_keypress
 RAM:B2CD	     ; End of function play_audio_until_keypress
 RAM:B2CD
@@ -3026,7 +3026,7 @@ RAM:B2CF	     play_audio:
 RAM:B2CF 1A			     ld	     a,	(de)				     ; audio data byte
 RAM:B2D0 FE FF			     cp	     #0xFF				     ; done?
 RAM:B2D2 28 05			     jr	     Z,	end_audio			     ; yes, return
-RAM:B2D4 CD DA B2		     call    sub_B2DA
+RAM:B2D4 CD DA B2		     call    play_note
 RAM:B2D7 18 F6			     jr	     play_audio
 RAM:B2D9	     ; ---------------------------------------------------------------------------
 RAM:B2D9
@@ -3038,35 +3038,35 @@ RAM:B2DA
 RAM:B2DA	     ; =============== S U B R O U T I N E =======================================
 RAM:B2DA
 RAM:B2DA
-RAM:B2DA	     sub_B2DA:
-RAM:B2DA E6 3F			     and     #0x3F ; '?'
-RAM:B2DC 28 3E			     jr	     Z,	loc_B31C
+RAM:B2DA	     play_note:
+RAM:B2DA E6 3F			     and     #0x3F ; '?'                             ; note
+RAM:B2DC 28 3E			     jr	     Z,	snd_delay
 RAM:B2DE 6F			     ld	     l,	a
 RAM:B2DF 26 00			     ld	     h,	#0
 RAM:B2E1 29			     add     hl, hl				     ; HL=2A
 RAM:B2E2 CD F2 D4		     call    add_HL_A				     ; HL=3A
-RAM:B2E5 01 32 B3		     ld	     bc, #byte_B332			     ; frequency table
+RAM:B2E5 01 32 B3		     ld	     bc, #freq_tbl			     ; frequency table
 RAM:B2E8 09			     add     hl, bc				     ; ptr to entry
-RAM:B2E9 46			     ld	     b,	(hl)
+RAM:B2E9 46			     ld	     b,	(hl)				     ; loop cnt	LSB
 RAM:B2EA 23			     inc     hl
-RAM:B2EB 4E			     ld	     c,	(hl)
+RAM:B2EB 4E			     ld	     c,	(hl)				     ; loop cnt	MSB
 RAM:B2EC 23			     inc     hl
-RAM:B2ED 6E			     ld	     l,	(hl)
+RAM:B2ED 6E			     ld	     l,	(hl)				     ; duration	LSB
 RAM:B2EE 26 00			     ld	     h,	#0
-RAM:B2F0 1A			     ld	     a,	(de)
+RAM:B2F0 1A			     ld	     a,	(de)				     ; note & duration MSB
 RAM:B2F1 07			     rlca
 RAM:B2F2 07			     rlca
 RAM:B2F3 E6 03			     and     #3
-RAM:B2F5 3C			     inc     a
+RAM:B2F5 3C			     inc     a					     ; duration	MSB
 RAM:B2F6 D5			     push    de
 RAM:B2F7 5D			     ld	     e,	l
-RAM:B2F8 54			     ld	     d,	h
+RAM:B2F8 54			     ld	     d,	h				     ; HL,DE=duration LSB
 RAM:B2F9
-RAM:B2F9	     loc_B2F9:
+RAM:B2F9	     calc_duration:
 RAM:B2F9 3D			     dec     a
 RAM:B2FA 28 03			     jr	     Z,	loc_B2FF
 RAM:B2FC 19			     add     hl, de
-RAM:B2FD 18 FA			     jr	     loc_B2F9
+RAM:B2FD 18 FA			     jr	     calc_duration			     ; calc 16-bit duration (HL)
 RAM:B2FF	     ; ---------------------------------------------------------------------------
 RAM:B2FF
 RAM:B2FF	     loc_B2FF:
@@ -3099,7 +3099,7 @@ RAM:B31A 13			     inc     de
 RAM:B31B C9			     ret
 RAM:B31C	     ; ---------------------------------------------------------------------------
 RAM:B31C
-RAM:B31C	     loc_B31C:
+RAM:B31C	     snd_delay:
 RAM:B31C 1A			     ld	     a,	(de)
 RAM:B31D 13			     inc     de
 RAM:B31E 07			     rlca
@@ -3121,11 +3121,11 @@ RAM:B32D C1			     pop     bc
 RAM:B32E 2D			     dec     l
 RAM:B32F 20 F6			     jr	     NZ, loc_B327
 RAM:B331 C9			     ret
-RAM:B331	     ; End of function sub_B2DA
+RAM:B331	     ; End of function play_note
 RAM:B331
 RAM:B331	     ; ---------------------------------------------------------------------------
 RAM:B332	     ; Frequency Table?
-RAM:B332 00 00 00 F4+byte_B332:	     .db 0, 0, 0
+RAM:B332 00 00 00 F4+freq_tbl:	     .db 0, 0, 0
 RAM:B332 0A 08 65 0A+		     .db 0xF4, 0xA, 8
 RAM:B332 09 DE 09 09+		     .db 0x65, 0xA, 9
 RAM:B332 5E 09 0A E7+		     .db 0xDE, 9, 9
@@ -3199,11 +3199,13 @@ RAM:B3F1 01 FB B3		     ld	     bc, #byte_B3FB			     ; ??? table
 RAM:B3F4 09			     add     hl, bc				     ; ptr entry
 RAM:B3F5 46			     ld	     b,	(hl)
 RAM:B3F6 0E 04			     ld	     c,	#4
-RAM:B3F8 C3 E6 B4		     jp	     toggle_FE_bit4_xC
+RAM:B3F8 C3 E6 B4		     jp	     toggle_audio_hw_xC
 RAM:B3F8	     ; End of function audio_B3E9
 RAM:B3F8
 RAM:B3F8	     ; ---------------------------------------------------------------------------
 RAM:B3FB A0 B0 C0 90+byte_B3FB:	     .db 0xA0, 0xB0, 0xC0, 0x90, 0xA0, 0xE0, 0x80, 0x60
+RAM:B403	     ;
+RAM:B403	     ; eg. death sparkles
 RAM:B403
 RAM:B403	     ; =============== S U B R O U T I N E =======================================
 RAM:B403
@@ -3213,19 +3215,20 @@ RAM:B403 DD 7E 00		     ld	     a,	0(ix)				     ; sprite index
 RAM:B406 2F			     cpl
 RAM:B407 E6 1F			     and     #0x1F
 RAM:B409 5F			     ld	     e,	a
-RAM:B40A 21 34 12		     ld	     hl, #0x1234
+RAM:B40A 21 34 12		     ld	     hl, #0x1234			     ; location	in ROM
 RAM:B40D
 RAM:B40D	     loc_B40D:
 RAM:B40D 7E			     ld	     a,	(hl)
 RAM:B40E 23			     inc     hl
 RAM:B40F 47			     ld	     b,	a
 RAM:B410 0E 02			     ld	     c,	#2
-RAM:B412 CD E6 B4		     call    toggle_FE_bit4_xC
+RAM:B412 CD E6 B4		     call    toggle_audio_hw_xC
 RAM:B415 1D			     dec     e
 RAM:B416 20 F5			     jr	     NZ, loc_B40D
 RAM:B418 C9			     ret
 RAM:B418	     ; End of function audio_B403
 RAM:B418
+RAM:B419	     ; eg. player appears sparkles
 RAM:B419
 RAM:B419	     ; =============== S U B R O U T I N E =======================================
 RAM:B419
@@ -3243,7 +3246,7 @@ RAM:B423 79			     ld	     a,	c
 RAM:B424 07			     rlca
 RAM:B425 07			     rlca
 RAM:B426 47			     ld	     b,	a
-RAM:B427 CD ED B4		     call    toggle_FE_bit4
+RAM:B427 CD ED B4		     call    toggle_audio_hw
 RAM:B42A 0D			     dec     c
 RAM:B42B 20 F6			     jr	     NZ, loc_B423
 RAM:B42D C9			     ret
@@ -3263,7 +3266,7 @@ RAM:B435 7E			     ld	     a,	(hl)
 RAM:B436 23			     inc     hl
 RAM:B437 F6 C0			     or	     #0xC0 ; 'À'
 RAM:B439 47			     ld	     b,	a
-RAM:B43A CD E6 B4		     call    toggle_FE_bit4_xC
+RAM:B43A CD E6 B4		     call    toggle_audio_hw_xC
 RAM:B43D 1D			     dec     e
 RAM:B43E 20 F3			     jr	     NZ, loc_B433
 RAM:B440 C9			     ret
@@ -3284,7 +3287,7 @@ RAM:B446 0F			     rrca
 RAM:B447 0F			     rrca
 RAM:B448 0F			     rrca
 RAM:B449 47			     ld	     b,	a
-RAM:B44A CD ED B4		     call    toggle_FE_bit4
+RAM:B44A CD ED B4		     call    toggle_audio_hw
 RAM:B44D 0D			     dec     c
 RAM:B44E 20 F3			     jr	     NZ, loc_B443
 RAM:B450 C9			     ret
@@ -3308,7 +3311,7 @@ RAM:B455 07			     rlca
 RAM:B456 07			     rlca
 RAM:B457 47			     ld	     b,	a
 RAM:B458 0E 06			     ld	     c,	#6
-RAM:B45A C3 E6 B4		     jp	     toggle_FE_bit4_xC
+RAM:B45A C3 E6 B4		     jp	     toggle_audio_hw_xC
 RAM:B45A	     ; End of function audio_B454
 RAM:B45A
 RAM:B45D
@@ -3358,7 +3361,7 @@ RAM:B47D 79			     ld	     a,	c
 RAM:B47E EE 55			     xor     #0x55 ; 'U'
 RAM:B480 81			     add     a,	c
 RAM:B481 47			     ld	     b,	a
-RAM:B482 CD ED B4		     call    toggle_FE_bit4
+RAM:B482 CD ED B4		     call    toggle_audio_hw
 RAM:B485 0D			     dec     c
 RAM:B486 20 F5			     jr	     NZ, loc_B47D
 RAM:B488 C9			     ret
@@ -3382,7 +3385,7 @@ RAM:B496 23			     inc     hl
 RAM:B497 E6 7F			     and     #0x7F ; ''
 RAM:B499 47			     ld	     b,	a
 RAM:B49A 0E 02			     ld	     c,	#2
-RAM:B49C CD E6 B4		     call    toggle_FE_bit4_xC
+RAM:B49C CD E6 B4		     call    toggle_audio_hw_xC
 RAM:B49F 1D			     dec     e
 RAM:B4A0 20 F3			     jr	     NZ, loc_B495
 RAM:B4A2 C9			     ret
@@ -3392,14 +3395,14 @@ RAM:B4A3
 RAM:B4A3	     ; =============== S U B R O U T I N E =======================================
 RAM:B4A3
 RAM:B4A3
-RAM:B4A3	     toggle_FE_bit4_x16:
+RAM:B4A3	     toggle_audio_hw_x16:
 RAM:B4A3 01 10 80		     ld	     bc, #0x8010
-RAM:B4A6 18 3E			     jr	     toggle_FE_bit4_xC
+RAM:B4A6 18 3E			     jr	     toggle_audio_hw_xC
 RAM:B4A8	     ; ---------------------------------------------------------------------------
 RAM:B4A8
-RAM:B4A8	     toggle_FE_bit4_x24:
+RAM:B4A8	     toggle_audio_hw_x24:
 RAM:B4A8 01 18 50		     ld	     bc, #0x5018
-RAM:B4AB 18 39			     jr	     toggle_FE_bit4_xC
+RAM:B4AB 18 39			     jr	     toggle_audio_hw_xC
 RAM:B4AD	     ; ---------------------------------------------------------------------------
 RAM:B4AD
 RAM:B4AD	     audio_guard_wizard:					     ; graphic_no
@@ -3411,6 +3414,7 @@ RAM:B4B5 3A A2 5B		     ld	     a,	(seed_2)
 RAM:B4B8 2F			     cpl
 RAM:B4B9 18 0B			     jr	     loc_B4C6
 RAM:B4BB	     ; ---------------------------------------------------------------------------
+RAM:B4BB	     ; eg. walking
 RAM:B4BB
 RAM:B4BB	     audio_B4BB:						     ; graphic_no
 RAM:B4BB DD 7E 00		     ld	     a,	0(ix)
@@ -3444,18 +3448,18 @@ RAM:B4E2 0F			     rrca
 RAM:B4E3 E6 0F			     and     #0xF
 RAM:B4E5 4F			     ld	     c,	a
 RAM:B4E6
-RAM:B4E6	     toggle_FE_bit4_xC:
-RAM:B4E6 CD ED B4		     call    toggle_FE_bit4
+RAM:B4E6	     toggle_audio_hw_xC:
+RAM:B4E6 CD ED B4		     call    toggle_audio_hw
 RAM:B4E9 0D			     dec     c
-RAM:B4EA 20 FA			     jr	     NZ, toggle_FE_bit4_xC
+RAM:B4EA 20 FA			     jr	     NZ, toggle_audio_hw_xC
 RAM:B4EC C9			     ret
-RAM:B4EC	     ; End of function toggle_FE_bit4_x16
+RAM:B4EC	     ; End of function toggle_audio_hw_x16
 RAM:B4EC
 RAM:B4ED
 RAM:B4ED	     ; =============== S U B R O U T I N E =======================================
 RAM:B4ED
 RAM:B4ED
-RAM:B4ED	     toggle_FE_bit4:
+RAM:B4ED	     toggle_audio_hw:
 RAM:B4ED 3E 10			     ld	     a,	#0x10				     ; EAR output
 RAM:B4EF D3 FE			     out     (0xFE), a				     ; enable
 RAM:B4F1 78			     ld	     a,	b
@@ -3471,7 +3475,7 @@ RAM:B4F9	     loc_B4F9:
 RAM:B4F9 10 FE			     djnz    loc_B4F9
 RAM:B4FB 47			     ld	     b,	a
 RAM:B4FC C9			     ret
-RAM:B4FC	     ; End of function toggle_FE_bit4
+RAM:B4FC	     ; End of function toggle_audio_hw
 RAM:B4FC
 RAM:B4FD	     ; returns C flag set if any other object
 RAM:B4FD	     ; intersects with this one
@@ -4734,7 +4738,7 @@ RAM:BD6C
 RAM:BD6C	     check_for_start_game:
 RAM:BD6C 21 A6 5B		     ld	     hl, #tmp_input_method
 RAM:BD6F BE			     cp	     (hl)
-RAM:BD70 C4 A3 B4		     call    NZ, toggle_FE_bit4_x16
+RAM:BD70 C4 A3 B4		     call    NZ, toggle_audio_hw_x16
 RAM:BD73 3E EF			     ld	     a,	#0xEF ;	'ï'                          ; 0,9,8,7,6
 RAM:BD75 CD F7 B5		     call    read_port
 RAM:BD78 CB 47			     bit     0,	a				     ; '0' (Start Game)?
@@ -5219,7 +5223,7 @@ RAM:C03C 3E 01			     ld	     a,	#1				     ; we can't drop anything
 RAM:C03E 32 D3 5B		     ld	     (cant_drop), a
 RAM:C041
 RAM:C041	     loc_C041:
-RAM:C041 CD A3 B4		     call    toggle_FE_bit4_x16
+RAM:C041 CD A3 B4		     call    toggle_audio_hw_x16
 RAM:C044 3E 01			     ld	     a,	#1
 RAM:C046 32 B3 5B		     ld	     (pickup_drop_pressed), a
 RAM:C049 32 B4 5B		     ld	     (objects_carried_changed),	a
@@ -5456,7 +5460,7 @@ RAM:C1DA 21 BA 5B		     ld	     hl, #lives
 RAM:C1DD 34			     inc     (hl)				     ; extra life!
 RAM:C1DE AF			     xor     a
 RAM:C1DF 32 C0 5B		     ld	     (disable_spike_ball_drop),	a
-RAM:C1E2 CD A3 B4		     call    toggle_FE_bit4_x16
+RAM:C1E2 CD A3 B4		     call    toggle_audio_hw_x16
 RAM:C1E5 CD A3 BC		     call    print_lives
 RAM:C1E8 01 20 20		     ld	     bc, #0x2020
 RAM:C1EB CD 32 C4		     call    blit_2x8
@@ -8877,7 +8881,7 @@ RAM:D519 3E 7E			     ld	     a,	#0x7E ;	'~'
 RAM:D51B CD F7 B5		     call    read_port
 RAM:D51E CB 47			     bit     0,	a				     ; SPACE?
 RAM:D520 20 F7			     jr	     NZ, debounce_space_press		     ; yes, loop
-RAM:D522 CD A8 B4		     call    toggle_FE_bit4_x24
+RAM:D522 CD A8 B4		     call    toggle_audio_hw_x24
 RAM:D525
 RAM:D525	     wait_for_space:
 RAM:D525 3E 7E			     ld	     a,	#0x7E ;	'~'
@@ -8890,7 +8894,7 @@ RAM:D52E 3E 7E			     ld	     a,	#0x7E ;	'~'
 RAM:D530 CD F7 B5		     call    read_port
 RAM:D533 CB 47			     bit     0,	a				     ; SPACE?
 RAM:D535 20 F7			     jr	     NZ, debounce_space_release		     ; no, loop
-RAM:D537 C3 A8 B4		     jp	     toggle_FE_bit4_x24
+RAM:D537 C3 A8 B4		     jp	     toggle_audio_hw_x24
 RAM:D537	     ; End of function handle_pause
 RAM:D537
 RAM:D53A
