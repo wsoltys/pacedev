@@ -1006,10 +1006,44 @@ freq_tbl:
 audio_B3E9:
         rts
 
+; eg. death sparkles
 audio_B403:
+        lda     0,x                     ; graphic_no
+        coma
+        anda    #0x1f
+        sta     *z80_e
+        ldu     #rom_1234
+1$:     ldb     ,u+
+        lda     #2
+        bsr     toggle_audio_hw_xA
+        dec     *z80_e
+        bne     1$
         rts
 
+; copied from the ZX Spectrum ROM
+; - didn't sound right without it
+rom_1234:
+        .db     0xFB, 0x21, 0xB6, 0x5C, 0x22, 0x4F, 0x5C, 0x11
+        .db     0xAF, 0x15, 0x01, 0x15, 0x00, 0xEB, 0xED, 0xB0
+        .db     0xEB, 0x2B, 0x22, 0x57, 0x5C, 0x23, 0x22, 0x53
+        .db     0x5C, 0x22, 0x4B, 0x5C, 0x36, 0x80, 0x23, 0x22
+
+; eg. player appears sparkles
 audio_B419:
+        lda     0,x                     ; graphic_no
+        rola
+        rola
+        rola                            ; extra for 6809
+        anda    #0x1f
+        ora     #3
+        sta     *z80_c
+1$:     ldb     *z80_c
+        rolb
+        rolb
+        rolb                            ; extra for 6809
+        bsr     toggle_audio_hw
+        dec     *z80_c
+        bne     1$        
         rts
 
 audio_B42E:
@@ -1039,15 +1073,73 @@ audio_B472:
 audio_B489:
         rts
 
+toggle_audio_hw_x16:
+        ldd     #0x1080
+        bra     toggle_audio_hw_xA
+
+toggle_audio_hw_x24:
+        ldd     #0x1805
+        bra     toggle_audio_hw_xA
+
 audio_guard_wizard:
         rts
                         
+; eg. walking
 audio_B4BB:
+        lda     0,x                     ; graphic_no
+        anda    #1
+        beq     audio_B4C1
         rts
 
 audio_B4C1:
+        ldb     #0x60
+        lda     seed_2
+1$:     bita    #(1<<1)
+        beq     2$
+        lda     3,x                     ; Z
+        coma
+        lsra
+        tfr     a,b
+2$:     lda     1,x                     ; X
+        lsra
+        sta     *z80_c
+        lda     2,x                     ; Y
+        nega
+        lsra
+        adda    *z80_c
+        rora
+        rora
+        rora
+        rora
+        anda    #0x0f
+        
+toggle_audio_hw_xA:
+        sta     *z80_c
+1$:     bsr     toggle_audio_hw
+        dec     *z80_c
+        bne     1$
         rts
 
+; B=loop count (preserved)
+; could be more efficient of course
+; but we want the same timing as Z80
+toggle_audio_hw:
+        lda     #SOUND_MASK
+        sta     SOUND_ADDR
+        tfr     b,a                     ; save loop cnt
+1$:     decb
+        nop
+        bne     1$
+        tfr     a,b                     ; restore loop cnt
+        clra
+        sta     SOUND_ADDR
+        tfr     b,a                     ; save loop cnt
+2$:     decb
+        nop
+        bne     2$
+        tfr     a,b                     ; restore loop cnt
+        rts
+        
 do_any_objs_intersect:
         pshs    y
         ldy     #graphic_objs_tbl
