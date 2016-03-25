@@ -284,33 +284,40 @@ start_coco:
         sta     RAMMODE        
   .endif ; CARTRIDGE
 
-ask_rgb_or_composite:
+display_splash:
 
         ldx     #0x400
         lda     #96                     ; green space
 1$:     sta     ,x+
         cmpx    #0x600
         bne     1$
-        ldx     #rgb_composite
-        ldy     #0x507
-2$:     lda     ,x+
-        beq     3$
+        ldx     #splash
+        ldy     #0x400
+2$:     pshs    y
+        lda     ,x                      ; leading null?
+        beq     5$
+3$:     lda     ,x+
+        beq     4$
+;        eora    #0x40
         sta     ,y+
+        bra     3$
+4$:     puls    y
+        leay    64,y
         bra     2$
-3$:     ldx			#PIA0
+5$:     ldx			#PIA0
         ldb     #0                      ; flag rgb
-4$:     lda     #~(1<<2)
+6$:     lda     #~(1<<2)
 				sta     2,x
 				lda     ,x
 				bita    #(1<<2)                 ; 'R'?
-				beq     5$
+				beq     7$
         lda     #~(1<<3)
 				sta			2,x											; column strobe
 				lda			,x											; active low
 				bita    #(1<<0)                 ; 'C'?
-				bne     4$                      ; try again
+				bne     6$                      ; try again
 				ldb     #(1<<4)                 ; flag component
-5$:     stb     cmp
+7$:     stb     cmp
 
 setup_gime_for_game:
 
@@ -416,7 +423,7 @@ inipal:
 			
 				lda			#>dp_base
 				tfr			a,dp
-        bra     start                   ; knight lore
+        jmp     start                   ; knight lore
         
 rgb_pal:
     .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
@@ -429,8 +436,19 @@ cmp_pal:
     .db CMP_BLACK, CMP_BLUE, CMP_RED, CMP_MAGENTA
     .db CMP_GREEN, CMP_CYAN, CMP_YELLOW, CMP_WHITE
 
-rgb_composite:
-        .asciz  "hRiGBohCiOMPOSITE"
+
+splash:
+        .asciz  "`"
+        .asciz  "````ZX`SPECTRUM`KNIGHT`LORE"
+;        .asciz  "FOR`THE`TRSmxp`COLOR`COMPUTER`s"
+        .asciz  "``````FOR`THE`TRSmxp`COCOs"
+        .asciz  "`"
+        .asciz  "```````hRiGBohCiOMPOSITE"
+;        .asciz  "```````(R)GB/(C)OMPOSITE?"
+        .asciz  "`"
+        .asciz  "`"
+        .asciz  "|WWWnRETROPORTSnBLOGSPOTnCOMnAU~"
+        .db     0
         
 osd_set_palette:
         anda    #7
