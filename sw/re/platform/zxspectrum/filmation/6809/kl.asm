@@ -90,7 +90,8 @@ depth               .equ    0x12
 pc                  .equ    0x14
 dy                  .equ    0x16
 dx                  .equ    0x17
-r                   .equ    0x7f
+note                .equ    0x18
+z80_r               .equ    0x7f
 line_cnt            .equ    0x80
 
 ; rgb/composite video selected (bit 4)
@@ -246,7 +247,6 @@ start_coco:
 
 .ifdef PLATFORM_COCO3
 
-  .ifdef CARTRIDGE
 ; switch in 32KB cartridge
         lda     #COCO|MMUEN|MC3|MC1|MC0 ; 32KB internal ROM
         sta     INIT0
@@ -282,7 +282,6 @@ start_coco:
         bne     5$                      ; map pages $38-$3B        
 ; switch to all-RAM mode
         sta     RAMMODE        
-  .endif ; CARTRIDGE
 
 display_splash:
 
@@ -294,11 +293,13 @@ display_splash:
         ldx     #splash
         ldy     #0x400
 2$:     pshs    y
+        ldb     ,x+                     ; read 'attr'
+        stb     attr
         lda     ,x                      ; leading null?
         beq     5$
 3$:     lda     ,x+
         beq     4$
-;        eora    #0x40
+        eora    attr
         sta     ,y+
         bra     3$
 4$:     puls    y
@@ -438,18 +439,27 @@ cmp_pal:
 
 
 splash:
+        .db 0
         .asciz  "`"
+        .db 0
         .asciz  "````ZX`SPECTRUM`KNIGHT`LORE"
-;        .asciz  "FOR`THE`TRSmxp`COLOR`COMPUTER`s"
+        .db 0
         .asciz  "``````FOR`THE`TRSmxp`COCOs"
+        .db 0
+        .asciz  "`````````hDEMO`VERSIONi"
+        .db 0
         .asciz  "`"
+        .db 0
         .asciz  "```````hRiGBohCiOMPOSITE"
-;        .asciz  "```````(R)GB/(C)OMPOSITE?"
+        .db 0
         .asciz  "`"
-        .asciz  "`"
+        .db 0x40
         .asciz  "|WWWnRETROPORTSnBLOGSPOTnCOMnAU~"
-        .db     0
-        
+        .dw     0
+
+attr:
+        .ds     1
+                
 osd_set_palette:
         anda    #7
         ora     #(1<<3)                 ; bright
@@ -487,6 +497,7 @@ main:
         sta     seed_1
         jsr     clear_scrn
         jsr     do_menu_selection
+        ldu     #start_game_tune
         jsr     play_audio
         jsr     shuffle_objects_required
         jsr     init_start_location
@@ -523,7 +534,7 @@ jump_to_tbl_entry:
         jmp     [d,u]                   ; go
 
 ret_from_tbl_jp:
-        lda     *r
+        lda     *z80_r
         adda    seed_3
         sta     seed_3
         leax    32,x                    ; next object
@@ -805,21 +816,184 @@ upd_sprite_jmp_tbl:
         .dw no_update
         .dw upd_185_187                 ; last obj in cauldron sparkle
 
+;
+; Audio Tunes
+;
 start_game_tune:
-game_over_tune:
+        .db 0x59, 0x5C, 0x5B, 0x54, 0x19, 0x17, 0x14, 0x17, 0xD9
+        .db 0xFF
+game_over_tune: 
+        .db 0x2E, 0x17, 0x27, 0x17, 0x2E, 0x17, 0x27, 0x17, 0x2C
+        .db 0x19, 0x27, 0x19, 0x2C, 0x19, 0x27, 0x19, 0x2A, 0x1B
+        .db 0x27, 0x1B, 0x2A, 0x1B, 0x27, 0x1B, 0x2A, 0x1B, 0x27
+        .db 0x1B, 0x2A, 0x1B, 0x27, 0x1B, 0xFF
 game_complete_tune:
-menu_tune:
+        .db 0x1B, 0x1D, 0x1E, 0x1B, 0x1D, 0x1E, 0x20, 0x1D, 0x1E
+        .db 0x20, 0x22, 0x1E, 0x1D, 0x1E, 0x20, 0x1D, 0x1B, 0x1D
+        .db 0x1E, 0x1B, 0x1A, 0x1B, 0x1D, 0x1A, 0x9B, 0xFF
+menu_tune:      
+        .db 0x1B, 0x27, 0x1B, 0x27, 0x1B, 0x2A, 0x2E, 0x1B, 0x27
+        .db 0x1B, 0x27, 0x1B, 0x2A, 0x1B, 0x2E, 0x16, 0x25, 0x16
+        .db 0x24, 0x16, 0x22, 0x16, 0x22, 0x16, 0x25, 0x16, 0x24
+        .db 0x16, 0x22, 0x16, 0x22, 0x16, 0x22, 0x1B, 0x27, 0x1B
+        .db 0x27, 0x1B, 0x2A, 0x2E, 0x1B, 0x27, 0x1B, 0x27, 0x1B
+        .db 0x2A, 0x1B, 0x2E, 0x16, 0x25, 0x16, 0x24, 0x16, 0x22
+        .db 0x16, 0x22, 0x16, 0x25, 0x16, 0x24, 0x16, 0x22, 0x16
+        .db 0x22, 0x16, 0x22, 0x17, 0x2E, 0x17, 0x2E, 0x17, 0x2E
+        .db 0x17, 0x2E, 0x19, 0x2E, 0x19, 0x2E, 0x19, 0x2E, 0x19
+        .db 0x2E, 0x1B, 0x2E, 0x1B, 0x2E, 0x1B, 0x2E, 0x1B, 0x2E
+        .db 0x1B, 0x2E, 0x1B, 0x2E, 0x1B, 0x2E, 0x1B, 0x2E, 0xFF
 
+; U=tune
 play_audio_wait_key:
+        tst     audio_played
+        beq     1$
+        rts
+1$:     lda     #1
+        sta     audio_played        
 
 play_audio_until_keypress:
+        clra                            ; any key
+        jsr     read_port
+        beq     1$
         rts
+1$:     lda     ,u                      ; note
+        cmpa    #0xff
+        beq     end_audio
+        bsr     play_note
+        bra     play_audio_until_keypress
 
 play_audio:
-        bra     end_audio
+        lda     ,u                      ; note
+        cmpa    #0xff
+        beq     end_audio
+        bsr     play_note
+        bra     play_audio
         
 end_audio:
         rts
+
+play_note:
+        anda    #0x3f                   ; note
+        beq     snd_delay
+        ldy     #freq_tbl
+        leay    a,y
+        leay    a,y
+        leay    a,y                     ; note entry
+        lda     ,y+
+        sta     *z80_b                  ; loop cnt LSB
+        lda     ,y+
+        sta     *z80_c                  ; loop cnt MSB
+        ldb     ,y+
+        stb     *z80_l                  ; duration LSB
+        lda     ,u                      ; duration MSB & note
+        rola
+        rola
+        rola                            ; 3rd time for 6809
+        anda    #3
+        inca                            ; duration MSB
+        mul                             ; D=duration
+        tfr     d,y                     ; Y=duration
+1$:     clra
+				sta			SOUND_ADDR
+        ldb     *z80_c
+2$:     lda     *z80_b
+3$:     deca
+        bne     3$
+        decb
+        bne     2$
+        lda     #SOUND_MASK
+        sta     SOUND_ADDR
+        ldb     *z80_c
+4$:     lda     *z80_b
+5$:     deca
+        bne     5$
+        decb
+        bne     4$
+        leay    -1,y
+        bne     1$
+        leau    1,u                     ; next note
+        rts
+
+snd_delay:
+        lda     ,u+                     ; note, ptr next
+        rola
+        rola
+        rola                            ; 3rd time for 6809
+        anda    #3
+        inca
+        sta     *z80_l                  ; duration MSB
+        ldy     #0x430B                 ; duration LSB
+1$:     pshs    y                       ; can save a few bytes if req'd
+2$:     leay    -1,y
+        bne     2$
+        puls    y
+        dec     *z80_l
+        bne     1$
+        rts                
+        
+freq_tbl:
+        .db 0, 0, 0
+        .db 0xF4, 0xA, 8
+        .db 0x65, 0xA, 9
+        .db 0xDE, 9, 9
+        .db 0x5E, 9, 0xA
+        .db 0xE7, 8, 0xA
+        .db 0x75, 8, 0xB
+        .db 0xA, 8, 0xC
+        .db 0xA5, 7, 0xC
+        .db 0x45, 7, 0xD
+        .db 0xEB, 6, 0xE
+        .db 0x96, 6, 0xF
+        .db 0x46, 6, 0xF
+        .db 0xFA, 5, 0x10
+        .db 0xB3, 5, 0x11
+        .db 0x6F, 5, 0x12
+        .db 0x2F, 5, 0x13
+        .db 0xF3, 4, 0x15
+        .db 0xF3, 4, 0x16
+        .db 0x85, 4, 0x17
+        .db 0x52, 4, 0x19
+        .db 0x23, 4, 0x1A
+        .db 0xF6, 3, 0x1C
+        .db 0xCB, 3, 0x1D
+        .db 0xA3, 3, 0x1F
+        .db 0x7D, 3, 0x21
+        .db 0x59, 3, 0x23
+        .db 0x38, 3, 0x25
+        .db 0x18, 3, 0x27
+        .db 0xFA, 2, 0x29
+        .db 0xDD, 2, 0x2C
+        .db 0xC2, 2, 0x2E
+        .db 0xA9, 2, 0x31
+        .db 0x91, 2, 0x34
+        .db 0x7B, 2, 0x37
+        .db 0x66, 2, 0x3A
+        .db 0x51, 2, 0x3E
+        .db 0x3F, 2, 0x41
+        .db 0x2D, 2, 0x45
+        .db 0x1C, 2, 0x49
+        .db 0xC, 2, 0x4E
+        .db 0xFD, 1, 0x52
+        .db 0xEF, 1, 0x57
+        .db 0xE2, 1, 0x5D
+        .db 0xD5, 1, 0x62
+        .db 0xC9, 1, 0x68
+        .db 0xBD, 1, 0x6E
+        .db 0xB3, 1, 0x75
+        .db 0xA9, 1, 0x7B
+        .db 0x9F, 1, 0x83
+        .db 0x96, 1, 0x8B
+        .db 0x8E, 1, 0x93
+        .db 0x86, 1, 0x9C
+        .db 0x7E, 1, 0xA5
+        .db 0x77, 1, 0xAF
+        .db 0x71, 1, 0xB9
+        .db 0x6A, 1, 0xC4
+        .db 0x64, 1, 0xD0
+        .db 0x5F, 1, 0xDC
+        .db 0x59, 1, 0xE9
+        .db 0x54, 1, 0xF7
 
 audio_B3E9:
         rts
@@ -1056,7 +1230,7 @@ upd_182_183:
         lda     tmp_bouncing_ball_dZ
         bpl     3$
         jsr     audio_B42E
-3$:     lda     *r
+3$:     lda     *z80_r
         anda    #2                      ; dX or dY?
         beq     7$
         lda     graphic_objs_tbl+2      ; plyr Y
@@ -1921,6 +2095,8 @@ do_menu_selection:
         
 menu_loop:
         jsr     display_menu
+        ldu     #menu_tune
+        jsr     play_audio_wait_key
         
 check_for_start_game:
 				lda			#~(1<<0)								; 0-7
@@ -2590,7 +2766,7 @@ upd_92_to_95:
         beq     loc_C377        
         
 rand_legs_sprite:
-        lda     *r
+        lda     *z80_r
         sta     *z80_c
         lda     seed_3
         adda    *z80_c
@@ -2725,7 +2901,7 @@ init_special_objects:
         ldu     #special_objs_tbl
         lda     seed_1
         sta     *z80_e
-        lda     *r
+        lda     *z80_r
         adda    *z80_e
         sta     *z80_e
 init_obj_loop:
@@ -5369,15 +5545,16 @@ main_fisr:
 ; temp hack - should do LFSR or something
 ; and also tune frequency
         tst     FIRQENR                 ; ACK FIRQ
-        inc     *r
+        inc     *z80_r
         rti
 
+.if 0
 menu_fisr:
         pshs    b
         ldb     FIRQENR
         bitb    #TMR
         beq     1$
-        inc     *r
+        inc     *z80_r
 1$:     bitb    #VBORD
         beq     2$
         clr     *line_cnt
@@ -5415,25 +5592,8 @@ menu_line_colours:
         .db     CMP_WHITE
         ; bottom of menu border
         .db     CMP_YELLOW, CMP_YELLOW, CMP_YELLOW
-
-.ifdef CARTRIDGE
-
-  .include "kl_dat.asm"
-
-.else        
-
-  font                  .equ    data_base+0x0000
-  room_size_tbl         .equ    data_base+0x0140
-  location_tbl          .equ    data_base+0x0149
-  eolt                  .equ    data_base+0x0ac9
-  block_type_tbl        .equ    data_base+0x0ba0
-  background_type_tbl   .equ    data_base+0x0eba
-  special_objs_tbl      .equ    data_base+0x0eea
-  eosot                 .equ    data_base+0x100a
-  sprite_tbl            .equ    data_base+0x4ce0
-
-vidbuf:
-        .ds     0x1800
 .endif
-                                                                                
+
+        .include "kl_dat.asm"
+
 				.end		start_coco

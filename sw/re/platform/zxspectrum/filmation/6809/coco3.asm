@@ -129,7 +129,7 @@ DATA_PG3        .equ      DATA_PG2+1
 
 .endif
 
-;.define HAS_SOUND
+.define HAS_SOUND
 .ifdef HAS_SOUND
   .define USE_1BIT_SOUND
   .ifdef USE_1BIT_SOUND
