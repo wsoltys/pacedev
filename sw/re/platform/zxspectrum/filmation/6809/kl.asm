@@ -446,7 +446,7 @@ splash:
         .db 0
         .asciz  "``````FOR`THE`TRSmxp`COCOs"
         .db 0
-        .asciz  "`````````hDEMO`VERSIONi"
+        .asciz  "`````hCOCOFEST`DEMO`VERSIONi"
         .db 0
         .asciz  "`"
         .db 0
@@ -2035,7 +2035,7 @@ loc_BA29:
         jsr     update_screen
 2$:     clra
         jsr     read_port
-        beq     2$
+        bne     2$                      ; wait for key release
         ldu     #game_over_tune
         jsr     play_audio_until_keypress
         ldb     #8
