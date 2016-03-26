@@ -58,7 +58,7 @@ SCRATCH:5BA4		 ; bit	 3 : directional
 SCRATCH:5BA4		 ; bit 2-1 : 00=keybd, 01=kempston, 10=cursor, 11=i/f-ii
 SCRATCH:5BA4 ??		 user_input_method:.ds 1
 SCRATCH:5BA5 ??		 seed_3:	 .ds 1
-SCRATCH:5BA6 ??		 tmp_input_method:.ds 1
+SCRATCH:5BA6 ??		 old_input_method:.ds 1
 SCRATCH:5BA7 ??				 .ds 1
 SCRATCH:5BA8		 ;
 SCRATCH:5BA8		 ; variables from here are zeroed each game
@@ -106,7 +106,7 @@ SCRATCH:5BCB ??	??	 tmp_objects_to_draw:.ds 2
 SCRATCH:5BCD ??	??	 render_obj_1:	 .ds 2
 SCRATCH:5BCF ??	??	 render_obj_2:	 .ds 2
 SCRATCH:5BD1 ??		 audio_played:	 .ds 1
-SCRATCH:5BD2 ??		 directional:	 .ds 1
+SCRATCH:5BD2 ??		 debounce_5:	 .ds 1
 SCRATCH:5BD3 ??		 cant_drop:	 .ds 1
 SCRATCH:5BD4 ??	?? ?? ??		 .ds 4
 SCRATCH:5BD8 ??	?? ?? ?? inventory:	 .ds 4
@@ -3186,6 +3186,8 @@ RAM:B332			     .db 0x64, 1, 0xD0
 RAM:B332			     .db 0x5F, 1, 0xDC
 RAM:B332			     .db 0x59, 1, 0xE9
 RAM:B332			     .db 0x54, 1, 0xF7
+RAM:B3E9	     ;
+RAM:B3E9	     ; block (62)
 RAM:B3E9
 RAM:B3E9	     ; =============== S U B R O U T I N E =======================================
 RAM:B3E9
@@ -3252,6 +3254,7 @@ RAM:B42B 20 F6			     jr	     NZ, loc_B423
 RAM:B42D C9			     ret
 RAM:B42D	     ; End of function audio_B419
 RAM:B42D
+RAM:B42E	     ; ball bouncing around
 RAM:B42E
 RAM:B42E	     ; =============== S U B R O U T I N E =======================================
 RAM:B42E
@@ -3272,6 +3275,8 @@ RAM:B43E 20 F3			     jr	     NZ, loc_B433
 RAM:B440 C9			     ret
 RAM:B440	     ; End of function audio_B42E
 RAM:B440
+RAM:B441	     ;
+RAM:B441	     ; jumping
 RAM:B441
 RAM:B441	     ; =============== S U B R O U T I N E =======================================
 RAM:B441
@@ -3293,6 +3298,7 @@ RAM:B44E 20 F3			     jr	     NZ, loc_B443
 RAM:B450 C9			     ret
 RAM:B450	     ; End of function audio_B441
 RAM:B450
+RAM:B451	     ; eg. dropping block, spiked ball drop, ball up/down
 RAM:B451
 RAM:B451	     ; =============== S U B R O U T I N E =======================================
 RAM:B451
@@ -3301,6 +3307,7 @@ RAM:B451	     audio_B451:
 RAM:B451 DD 7E 03		     ld	     a,	3(ix)				     ; Z
 RAM:B451	     ; End of function audio_B451
 RAM:B451
+RAM:B454	     ; eg. rising blocks
 RAM:B454
 RAM:B454	     ; =============== S U B R O U T I N E =======================================
 RAM:B454
@@ -3314,6 +3321,7 @@ RAM:B458 0E 06			     ld	     c,	#6
 RAM:B45A C3 E6 B4		     jp	     toggle_audio_hw_xC
 RAM:B45A	     ; End of function audio_B454
 RAM:B45A
+RAM:B45D	     ; block, fire moving (EW)
 RAM:B45D
 RAM:B45D	     ; =============== S U B R O U T I N E =======================================
 RAM:B45D
@@ -3323,6 +3331,7 @@ RAM:B45D DD 7E 01		     ld	     a,	1(ix)				     ; X
 RAM:B460 18 F2			     jr	     audio_B454
 RAM:B460	     ; End of function audio_B45D
 RAM:B460
+RAM:B462	     ; block, fire moving (NS)
 RAM:B462
 RAM:B462	     ; =============== S U B R O U T I N E =======================================
 RAM:B462
@@ -3332,6 +3341,7 @@ RAM:B462 DD 7E 02		     ld	     a,	2(ix)				     ; Y
 RAM:B465 18 ED			     jr	     audio_B454
 RAM:B465	     ; End of function audio_B462
 RAM:B465
+RAM:B467	     ; eg. special objects, ghost, portcullis (up)
 RAM:B467
 RAM:B467	     ; =============== S U B R O U T I N E =======================================
 RAM:B467
@@ -3343,6 +3353,7 @@ RAM:B46D DD 86 03		     add     a,	3(ix)
 RAM:B470 18 E2			     jr	     audio_B454
 RAM:B470	     ; End of function audio_B467
 RAM:B470
+RAM:B472	     ; human/wulf transform
 RAM:B472
 RAM:B472	     ; =============== S U B R O U T I N E =======================================
 RAM:B472
@@ -3367,6 +3378,7 @@ RAM:B486 20 F5			     jr	     NZ, loc_B47D
 RAM:B488 C9			     ret
 RAM:B488	     ; End of function audio_B472
 RAM:B488
+RAM:B489	     ; portcullis
 RAM:B489
 RAM:B489	     ; =============== S U B R O U T I N E =======================================
 RAM:B489
@@ -4701,7 +4713,7 @@ RAM:BD2C 3E F7			     ld	     a,	#0xF7 ;	'÷'                          ; 1,2,3,4,
 RAM:BD2E CD F7 B5		     call    read_port
 RAM:BD31 5F			     ld	     e,	a				     ; store keybd status
 RAM:BD32 3A A4 5B		     ld	     a,	(user_input_method)
-RAM:BD35 32 A6 5B		     ld	     (tmp_input_method), a
+RAM:BD35 32 A6 5B		     ld	     (old_input_method), a
 RAM:BD38 CB 43			     bit     0,	e				     ; '1' (keyboard)?
 RAM:BD3A 28 02			     jr	     Z,	check_for_kempston_joystick	     ; no, skip
 RAM:BD3C E6 F9			     and     #0xF9 ; 'ù'                             ; mask off (bits 2,1)
@@ -4725,20 +4737,20 @@ RAM:BD52 F6 06			     or	     #6					     ; set bits	1,2
 RAM:BD54
 RAM:BD54	     check_for_directional_control:				     ; store
 RAM:BD54 32 A4 5B		     ld	     (user_input_method), a
-RAM:BD57 21 D2 5B		     ld	     hl, #directional
+RAM:BD57 21 D2 5B		     ld	     hl, #debounce_5
 RAM:BD5A CB 63			     bit     4,	e				     ; '5' (directional control)?
-RAM:BD5C 28 27			     jr	     Z,	unset_directional		     ; no, skip
-RAM:BD5E CB 46			     bit     0,	(hl)				     ; already set?
+RAM:BD5C 28 27			     jr	     Z,	clr_debounce			     ; no, skip
+RAM:BD5E CB 46			     bit     0,	(hl)				     ; was pressed last	time?
 RAM:BD60 20 0A			     jr	     NZ, check_for_start_game		     ; yes, skip
-RAM:BD62 CB C6			     set     0,	(hl)				     ; set directional
+RAM:BD62 CB C6			     set     0,	(hl)				     ; set debounce
 RAM:BD64 3A A4 5B		     ld	     a,	(user_input_method)
 RAM:BD67 EE 08			     xor     #8					     ; toggle directional
 RAM:BD69 32 A4 5B		     ld	     (user_input_method), a
 RAM:BD6C
 RAM:BD6C	     check_for_start_game:
-RAM:BD6C 21 A6 5B		     ld	     hl, #tmp_input_method
-RAM:BD6F BE			     cp	     (hl)
-RAM:BD70 C4 A3 B4		     call    NZ, toggle_audio_hw_x16
+RAM:BD6C 21 A6 5B		     ld	     hl, #old_input_method
+RAM:BD6F BE			     cp	     (hl)				     ; changed input method?
+RAM:BD70 C4 A3 B4		     call    NZ, toggle_audio_hw_x16		     ; yes, audio feedback
 RAM:BD73 3E EF			     ld	     a,	#0xEF ;	'ï'                          ; 0,9,8,7,6
 RAM:BD75 CD F7 B5		     call    read_port
 RAM:BD78 CB 47			     bit     0,	a				     ; '0' (Start Game)?
@@ -4749,7 +4761,7 @@ RAM:BD7F CD 89 BD		     call    flash_menu
 RAM:BD82 C3 23 BD		     jp	     menu_loop
 RAM:BD85	     ; ---------------------------------------------------------------------------
 RAM:BD85
-RAM:BD85	     unset_directional:
+RAM:BD85	     clr_debounce:
 RAM:BD85 CB 86			     res     0,	(hl)
 RAM:BD87 18 E3			     jr	     check_for_start_game		     ; continue
 RAM:BD87	     ; End of function do_menu_selection
