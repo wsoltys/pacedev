@@ -3241,10 +3241,10 @@ RAM:B41E E6 1F			     and     #0x1F
 RAM:B420 F6 03			     or	     #3
 RAM:B422 4F			     ld	     c,	a
 RAM:B423
-RAM:B423	     loc_B423:
+RAM:B423	     loc_B423:							     ; bits 4:0	only
 RAM:B423 79			     ld	     a,	c
 RAM:B424 07			     rlca
-RAM:B425 07			     rlca
+RAM:B425 07			     rlca					     ; bits 6:2	only
 RAM:B426 47			     ld	     b,	a
 RAM:B427 CD ED B4		     call    toggle_audio_hw
 RAM:B42A 0D			     dec     c
