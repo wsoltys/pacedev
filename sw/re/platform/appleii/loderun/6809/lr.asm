@@ -82,9 +82,12 @@ start_coco:
         cmpx    #0xff00                 ; done?
         bne     2$                      ; no, loop
         ldy     #0x7ff0
-; *** fixme!!!
+; map the page before video RAM
+        lda     #VRAM_PG-#1
+        sta     MMUTSK1
+        ldy     #0x0000
 3$:     clr     ,y+
-        cmpy    #0x8000
+        cmpy    #0x2000
         bne     3$                      ; HGR1 rubbish
 ; setup MMU mapping for game
         lda     #CODE_PG1
@@ -114,7 +117,7 @@ display_splash:
         cmpx    #0x600
         bne     1$
         ldx     #splash
-        ldy     #0x400
+        ldy     #0x420
 2$:     pshs    y
         ldb     ,x+                     ; read 'attr'
         stb     attr
@@ -126,7 +129,7 @@ display_splash:
         sta     ,y+
         bra     3$
 4$:     puls    y
-        leay    64,y
+        leay    32,y
         bra     2$
 5$:     ldx			#PIA0
         ldb     #0                      ; flag rgb
@@ -140,7 +143,7 @@ display_splash:
 				lda			,x											; active low
 				bita    #(1<<0)                 ; 'C'?
 				bne     6$                      ; try again
-				ldb     #(1<<4)                 ; flag component
+				ldb     #4                      ; flag component
 7$:     stb     cmp
 
 setup_gime_for_game:
@@ -181,26 +184,23 @@ setup_gime_for_game:
 				lda			#0x02										; normal display, horiz offset 2
   .endif				
 				sta			HOFF      							
-				ldx			#PALETTE
+				ldy			#PALETTE
+				ldx     #rgb_pal
+				ldb     cmp
+				abx
 	.ifdef GFX_1BPP
-				lda			#0x00										; black
-				sta			,x+
-	.else
-				lda			#0x00										; black
-				sta			,x+
-    .iifdef GFX_RGB         lda #37			; orange
-    .iifdef GFX_COMPOSITE   lda	#53			; orange
-				sta			,x+
-    .iifdef GFX_RGB         lda	#45			; blue
-    .iifdef GFX_COMPOSITE   lda	#25			; blue
-				sta			,x+
-	.endif	; GFX_1BPP
-	.ifdef GFX_MONO
-				lda			#18										  ; green
-	.else				
-				lda			#63                     ; white
-	.endif				
-				sta			,x+
+	      lda     ,x                      ; use index 0
+	      sta     ,y+
+	      lda     3,x                     ; use index 3 (white)
+	      sta     ,y+
+  .else
+	      ldb     #4
+1$:     lda     ,x+
+        sta     ,y+
+        decb
+        bne     1$
+  .endif	      
+
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 
   ; configure video MMU
@@ -257,20 +257,56 @@ setup_gime_for_game:
 				lda			#>ZEROPAGE
 				tfr			a,dp
         jmp     bootloader              ; apple code
+
+.ifdef GFX_MONO
+        ; black, green, amber, white
+        ; games uses palette indicies 0,3 only
+  rgb_pal:
+        .db     0, 18, 52, 63
+  cmp_pal:
+        .db     0, 17, 36, 63
+.else
+        ; black, orange, blue, white
+  rgb_pal:
+        .db     0, 53, 25, 63
         
+  cmp_pal:
+        .db     0, 37, 45, 63
+.endif
+
 splash:
-        .db 0
-        .asciz  "`"
         .db 0
         .asciz  "``````APPLE`II`LODE`RUNNER"
         .db 0
+        .asciz  "`"
+        .db 0
         .asciz  "``````FOR`THE`TRSmxp`COCOs"
+        .db 0
+        .asciz  "`"
+        .db 0
+.ifdef GFX_1BPP
+        .asciz  "```````hqBPP`MONOCHROMEi"
+.else
+.ifdef GFX_MONO        
+        .asciz  "```````hrBPP`MONOCHROMEi"
+.else        
+        .asciz  "`````````hrBPP`COLOURi"
+.endif
+.endif
+        .db 0
+        .asciz  "`"
         .db 0
         .asciz  "``````hBETA`s`DEMO`VERSIONi"
         .db 0
         .asciz  "`"
         .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
         .asciz  "```````hRiGBohCiOMPOSITE"
+        .db 0
+        .asciz  "`"
         .db 0
         .asciz  "`"
         .db 0x40
@@ -279,6 +315,7 @@ splash:
 
 attr:   .ds     1
 cmp:    .ds     1
+mono:   .db     3
 
 ; values set in Apple II loader
 bootloader:
@@ -512,6 +549,7 @@ title_wait_for_key: ; $618e
         coma                            ; active high
         anda    #0x7f                   ; any key in col5?
         beq     4$                      ; no, skip
+.if 0        
         bita    #(1<<6)                 ; <F1>?
         beq     4$                      ; no, skip
         ldx     #PALETTE
@@ -523,20 +561,34 @@ title_wait_for_key: ; $618e
         sta     2,x
         jsr     keybd_flush
         bra     9$
+.endif        
 4$:     ldb     #~(1<<6)                ; column 6
         stb     2,x                     ; column strobe
         lda     ,x
         coma                            ; active high
         anda    #0x7f                   ; any key in col6?
         beq     8$                      ; no, skip
+.ifdef GFX_MONO
         bita    #(1<<6)                 ; <F2>?
         beq     8$                      ; no, skip
-        ldx     #PALETTE
-        lda     3,x
-        eora    #(18^63)                ; toggle green/white
-        sta     3,x
+        ldx     #rgb_pal
+        ldb     cmp
+        abx                             ; rgb/cmp palette
+        ldb     mono
+        incb
+        andb    #3
+        bne     5$
+        incb                            ; 1-3 valid
+5$:     stb     mono
+        lda     b,x
+.ifdef GFX_1BPP
+        sta     PALETTE+1
+.else        
+        sta     PALETTE+3
+.endif        
         jsr     keybd_flush
         bra     9$
+.endif        
 8$:			bra     check_start_new_game
 9$:     leay		-1,y
 				bne			2$
@@ -3996,6 +4048,7 @@ cls_and_display_game_status:	; $79AD
 				ldb			#<(176*VIDEO_BPL)				; offset
 				tfr			d,x				
 .ifdef GFX_1BPP
+; *MUST* test this condition first
 				lda			#0xaa
 .else
 	.ifdef GFX_MONO	

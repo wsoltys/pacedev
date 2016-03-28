@@ -71,12 +71,13 @@ HGR2_MSB		.equ		0x40
 ; *** LODE RUNNER SPECIFIC CONFIGURATION HERE
 ;
 
-;.define			GFX_1BPP
-; The MONO build is only used to generate graphics
+.define			GFX_1BPP
 ;.define			GFX_MONO
-.define       GFX_RGB
+;.define       GFX_RGB
 
-.ifndef GFX_1BPP
+.ifdef GFX_1BPP
+  .define   GFX_MONO
+.else
 	.define		GFX_2BPP
 .endif
 .ifndef GFX_MONO
@@ -139,15 +140,15 @@ APPLE_BPL				.equ	VIDEO_BPL-VIDEO_RM
 ;
 ; Memory Map		Page
 ; ------------  ----
-; $0000-$3BFF   $30-$31		HGR1
-; $3F00-$3FFF   $31				Zero Page
-; $4000-$7BFF   $32-$33		HGR2
-; $7C00-$7FFF		$33				Level Data 1,2
-; $8000-$9AXX   $34				Tile Graphics Data
-; $A000-$BXXX		$35				Title Screen, Game Over Data
-; $C000-$F965   $36-$37		Program Code & ROM Data
-; $FA00-$FCFF   $37       RAM
-;      -$FE00   $37				6809 System Stack
+; $0000-$3BFF   $38-$39		HGR1
+; $3F00-$3FFF   $39				Zero Page
+; $4000-$7BFF   $3A-$3B		HGR2
+; $7C00-$7FFF		$3B				Level Data 1,2
+; $8000-$9AXX   $30				Tile Graphics Data
+; $A000-$BXXX		$31				Title Screen, Game Over Data
+; $C000-$F965   $32-$33		Program Code & ROM Data
+; $FA00-$FCFF   $33       RAM
+;      -$FE00   $33				6809 System Stack
 ;
 
 ;RAMBASE			.equ				0x3c00
