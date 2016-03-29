@@ -15,7 +15,7 @@
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
-;.define BUILD_OPT_ALMOST_INVINCIBLE
+.define BUILD_OPT_ALMOST_INVINCIBLE
 ; *** end of BUILD OPTIONS
 
 ; *** KNIGHT-LORE stuff here
@@ -30,7 +30,7 @@ NO_LIVES            .equ    5
 ;START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-;START_LOC           .equ    179+32
+START_LOC           .equ    138
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -457,8 +457,7 @@ splash:
         .asciz  "|WWWnRETROPORTSnBLOGSPOTnCOMnAU~"
         .dw     0
 
-attr:
-        .ds     1
+attr:   .ds     1
                 
 osd_set_palette:
         anda    #7
@@ -1808,7 +1807,7 @@ upd_160_to_163:
         bne     1$
         jsr     ret_next_obj_required
         lda     ,u
-        ora     #168
+        ora     #168                    ; convert to graphic_no
         sta     0,x                     ; show next obj required
 1$:     jmp     set_wipe_and_draw_flags
 2$:     lda     0,x                     ; graphic_no
@@ -2850,7 +2849,7 @@ add_obj_to_cauldron:
         
 ret_next_obj_required:
         lda     objects_put_in_cauldron
-        ldu     objects_required
+        ldu     #objects_required
         leau    a,u
         rts
         
