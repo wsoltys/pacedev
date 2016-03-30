@@ -1,4 +1,15 @@
 ;
+; *** 6809 stuff
+;
+
+  .macro	CLC
+    andcc		#~(1<<0)
+  .endm
+  .macro	SEC
+    orcc		#(1<<0)
+  .endm
+
+;
 ; *** COCO registers
 ;
 

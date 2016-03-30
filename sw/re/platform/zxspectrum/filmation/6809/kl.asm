@@ -1262,7 +1262,7 @@ do_any_objs_intersect:
 3$:     leay    32,y
         decb
         bne     1$
-        andcc   #0xfe                   ; clear carry
+        CLC
         bra     2$
 
 is_object_not_ignored:
@@ -1308,6 +1308,7 @@ upd_131_to_133:
         sta     *z80_l
         ldb     2,x                     ; Y
         andb    #(1<<7)                 ; sign
+        CLC
         rolb                            ; Y(7)->C
         orb     *z80_l                  ; Y(7)->C,X(7)->0
         rolb                            ; X(7)->1,Y(7)->0
@@ -1864,7 +1865,7 @@ loc_B962:
 move_towards_plyr:
         ldu     #graphic_objs_tbl       ; plyr object
         lda     1,x                     ; X
-        suba    1,u                     ; plyr X
+        suba    1,u                     ; -plyr X
         pshs    cc
         lda     *dx
         puls    cc
@@ -1872,7 +1873,7 @@ move_towards_plyr:
         nega
 1$:     sta     9,x                     ; dX
         lda     2,x                     ; Y
-        suba    2,u                     ; plyr Y
+        suba    2,u                     ; -plyr Y
         pshs    cc
         lda     *dy
         puls    cc
@@ -4840,7 +4841,7 @@ flag_room_visited:
         andb    #7                      ; bit offset
         incb
         clra
-        orcc    #(1<<0)                 ; set carry
+        SEC
 1$:     rola                          
         decb
         bne     1$
