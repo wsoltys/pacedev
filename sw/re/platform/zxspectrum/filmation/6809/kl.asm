@@ -16,12 +16,16 @@
 ;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
 .define BUILD_OPT_ALMOST_INVINCIBLE
+.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
 ; *** end of BUILD OPTIONS
 
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
 MAX_DRAW            .equ    48
 CAULDRON_SCREEN     .equ    136
+; standard is 14
+;NO_OBJS_REQD        .equ    14
+NO_OBJS_REQD        .equ    1
 ; standard is 5     
 NO_LIVES            .equ    5
 ; *** the standard 4 locations
@@ -160,7 +164,7 @@ cant_drop:                      .ds 1
 inventory:                      .ds 4
 objects_carried:                .ds 7
 unk_5BE3:                       .ds 1
-unk_5BE4:                       .ds 1
+object_carried_2:               .ds 1
                                 .ds 2
 end_of_objects_carried:         .ds 1
 ;
@@ -1325,7 +1329,7 @@ save_dX_dY:
         sta     10,x                    ; dY
         lda     seed_3
         anda    #3
-        beq     1$
+        bne     1$
         inca
 1$:     adda    #130
         sta     0,x                     ; graphic_no
@@ -2573,7 +2577,7 @@ handle_pickup_drop:
         bita    #FLAG_JUMPING
         lbne    ret_pickup_drop
         bita    #FLAG_Z_OOB
-        beq     ret_pickup_drop
+        lbeq    ret_pickup_drop
         pshs    b                       ; user_input
         clr     cant_drop
         lda     3,x                     ; Z
@@ -2640,13 +2644,13 @@ loc_C0A9:
 9$:     rts
 
 loc_C0B2:
-        ldu     #unk_5BE4
-        lda     ,u+
-        beq     adjust_carried
+        ldu     #object_carried_2       ; 3rd item carried
+        lda     ,u+                     ; graphic_no
+        beq     adjust_carried          ; not carrying anything
         tst     cant_drop
-        bne     done_pickup_drop
+        bne     done_pickup_drop        ; can't drop
         ldb     -1,u
-        stb     0,y                     ; graphic_no
+        stb     0,y                     ; graphic_no (special_objs_here)
         lda     8,x                     ; scrn
         cmpa    #CAULDRON_SCREEN
         bne     1$
@@ -2693,7 +2697,7 @@ drop_object:
         sta     13,y                    ; flags13
 
 adjust_carried:
-        ldy     #unk_5BE4
+        ldy     #object_carried_2       ; 3rd item carried
         ldb     #12
 1$:     lda     ,-y
         sta     4,y
@@ -2717,7 +2721,7 @@ pickup_object:
         jsr     set_wipe_and_draw_Y
         lda     #1
         sta     0,y                     ; graphic_no
-        ldu     #unk_5BE4               ; object_carried[2].graphic_no
+        ldu     #object_carried_2       ; 3rd object carried graphic_no
         lda     ,u+
         beq     adjust_carried
         sta     0,y                     ; graphic_no
@@ -2837,10 +2841,13 @@ add_obj_to_cauldron:
         lda     0,x                     ; graphic_no
         anda    #7                      ; special obj index
         cmpa    ,u                      ; same as required?
+.ifndef BUILD_OPT_ANY_OBJ_IN_CAULDRON        
         bne     1$                      ; no, skip
+.endif        
+        inc     objects_put_in_cauldron
         bsr     cycle_colours_with_sound
         lda     objects_put_in_cauldron
-        cmpa    #14                     ; got all objects?
+        cmpa    #NO_OBJS_REQD           ; got all objects?
         bne     1$                      ; no, skip
         bsr     prepare_final_animation
 1$:     clr     obj_dropping_into_cauldron
@@ -2875,15 +2882,18 @@ upd_96_to_102:
         
 cycle_colours_with_sound:
         ldb     #16                     ; cycle 16 times
-        ldu     #cmp_pal+8              ; bright
-1$:     tfr     b,a
-        anda    #7
-        lda     a,u                     ; get palette entry
-        sta     PALETTE+1               ; set palette
+        ldu     #rgb_pal                ; bright
+1$:     pshs    b
+        andb    #7
+        orb     #(1<<3)                 ; bright
+        orb     cmp                     ; rgb/cmp palette
+        ldb     b,u                     ; get palette entry
+        stb     PALETTE+1               ; set palette
         jsr     audio_B403
         ldy     #0x2000
 2$:     leay    -1,y
         bne     2$
+        puls    b
         decb
         bne     1$                      ; cycle colours
 
@@ -2901,7 +2911,7 @@ prepare_final_animation:
         puls    b
         lda     #1
         sta     0,x                     ; graphic_no = invalid
-        leax    32,y
+        leax    32,x                    ; next obj
         decb
         bne     1$
 2$:     lda     0,x                     ; graphic_no        
