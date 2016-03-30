@@ -15,8 +15,8 @@
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
-.define BUILD_OPT_ALMOST_INVINCIBLE
-.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
+;.define BUILD_OPT_ALMOST_INVINCIBLE
+;.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
 ; *** end of BUILD OPTIONS
 
 ; *** KNIGHT-LORE stuff here
@@ -2175,17 +2175,10 @@ count_screens:
         puls    b
         decb                            ; do 32 bytes
         bne     count_screens
-        
-        lda     #128
-        sta     *z80_e
-                
         lda     *z80_e
         deca                            ; adjust for calcs
         sta     num_scrns_visited
         lda     objects_put_in_cauldron
-        
-        lda     #14
-        
         lsla                            ; x2
         adda    *z80_e                  
         sta     *z80_e
