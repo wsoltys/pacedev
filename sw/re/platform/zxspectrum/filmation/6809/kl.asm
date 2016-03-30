@@ -2043,19 +2043,21 @@ loc_BA29:
         ldu     #game_over_tune
         jsr     play_audio_until_keypress
         ldb     #8
-        bsr     wait_for_key_release        
+        bsr     wait_for_key_press        
         jmp     start_menu
 
-wait_for_key_release:
-        pshs  x
-        ldx   #0
+wait_for_key_press:
+        ldy   #0
 1$:     clra
         jsr   read_port
-        beq   9$
-        leax  -1,x
+        bne   9$
+        nop
+        nop
+        leay  -1,y
         bne   1$
-9$:     puls  x
-        rts
+        decb
+        bne   1$                        ; loop B times
+9$:     rts
         
 game_complete_msg:
         jsr     clear_scrn_buffer
@@ -2072,7 +2074,7 @@ game_complete_msg:
         ldu     #game_complete_tune
         jsr     play_audio
         ldb     #8
-        bsr     wait_for_key_release
+        bsr     wait_for_key_press
         jmp     loc_BA29
 
 complete_colours:
@@ -2173,17 +2175,24 @@ count_screens:
         puls    b
         decb                            ; do 32 bytes
         bne     count_screens
+        
+        lda     #128
+        sta     *z80_e
+                
         lda     *z80_e
         deca                            ; adjust for calcs
         sta     num_scrns_visited
         lda     objects_put_in_cauldron
+        
+        lda     #14
+        
         lsla                            ; x2
         adda    *z80_e                  
         sta     *z80_e
         ldd     #0
         std     *tmp_word               ; init running total
         clr     *pc                     ; init %
-3$:     ldd     #0xA410                 ; 0.64102*(128+14*2)=99.999%
+3$:     ldd     #0xA41A                 ; 0.64102*(128+14*2)=99.999%
         addd    *tmp_word
         std     *tmp_word
         lda     *pc
@@ -2884,17 +2893,22 @@ upd_96_to_102:
 cycle_colours_with_sound:
         ldb     #16                     ; cycle 16 times
         ldu     #rgb_pal                ; bright
-1$:     pshs    b
-        andb    #7
-        orb     #(1<<3)                 ; bright
-        orb     cmp                     ; rgb/cmp palette
-        ldb     b,u                     ; get palette entry
-        stb     PALETTE+1               ; set palette
+1$:     pshs    b,u
+        lda     curr_room_attrib
+        inca
+        anda    #7
+        sta     curr_room_attrib
+        ora     #(1<<3)                 ; bright
+        ora     cmp                     ; rgb/cmp palette
+        lda     a,u                     ; get palette entry
+        sta     PALETTE+1               ; set palette
         jsr     audio_B403
-        ldy     #0x2000
+        ldy     #0x4000
 2$:     leay    -1,y
+        nop
+        nop
         bne     2$
-        puls    b
+        puls    b,u
         decb
         bne     1$                      ; cycle colours
 
