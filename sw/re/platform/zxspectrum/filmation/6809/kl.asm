@@ -3281,6 +3281,7 @@ update_special_objs:
 1$:     tst     0,y                     ; graphic_no
         beq     3$
         ldu     16,y                    ; ptr spec_obj_tbl
+        beq     3$                      ; *** a bug in the original
         lda     0,y                     ; graphic_no
         sta     0,u                     ; store in spec_obj_tbl
         leau    5,u                     ; curr_X,Y,Z,scrn
