@@ -35,12 +35,12 @@ Currently the inputs are restricted to a single key per function, and joystick
 support is not yet implemented. As a result, only rotational (non-directional)
 inputs are supported.
 
+START GAME      <0>
 LEFT            <Z>
 RIGHT           <X>
 FORWARD         <A>
 JUMP            <Q>
 PICK-UP/DROP    <1>
-
 
 Bugs/glitches/notes
 -------------------
@@ -69,6 +69,11 @@ analysis on the performance it's entirely possible that the Coco port is (at
 this point) at its slowest, slower than the ZX Spectrum. Regardless, I expect 
 to be able to improve speed with some code optimisations before the final
 release.
+
+Ignore the contents of the main menu, it has been ported verbatim from the ZX
+Spectrum. Once joystick support has been added (see below) the menu will be
+modified specifically for the Coco3 port. Currently only START GAME has been
+implemented.
 
 Sun/moon frame graphics glitch: under certain circumstances, remnants of the
 sum/moon either side of the frame in the right-hand side of the panel are
