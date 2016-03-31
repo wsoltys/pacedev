@@ -53,6 +53,13 @@ this point) at its slowest, slower than the ZX Spectrum. Regardless, I expect
 to be able to improve speed with some code optimisations before the final
 release.
 
+Sun/moon frame graphics glitch: under certain circumstances, remnants of the
+sum/moon either side of the frame in the right-hand side of the panel are
+visible. This is an artifact of the original code, however on the ZX Spectrum
+these areas were given a black-on-black attribute in order to conceal them.
+The Amstrad CPC, OTOH, extended the width of the frame sprite to cover the
+remnants. I intend to rectify this on the Coco3 port before final release.
+
 Joystick (and hence direction control) support has not been implemented. I plan
 to add that before the final release. The keyboard controls may be modified
 and/or enhanced also.
