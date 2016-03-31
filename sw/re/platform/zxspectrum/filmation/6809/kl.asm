@@ -24,17 +24,16 @@ MAX_OBJS            .equ    40
 MAX_DRAW            .equ    48
 CAULDRON_SCREEN     .equ    136
 ; standard is 14
-;NO_OBJS_REQD        .equ    14
-NO_OBJS_REQD        .equ    1
+;NO_OBJS_REQD        .equ    1
 ; standard is 5     
-NO_LIVES            .equ    5
+;NO_LIVES            .equ    3
 ; *** the standard 4 locations
 ;START_LOC           .equ    47
 ;START_LOC           .equ    68
 ;START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-START_LOC           .equ    138
+;START_LOC           .equ    138
 
 ; inputs            
 INP_LEFT            .equ    1<<0
@@ -492,7 +491,11 @@ main:
         clra
         sta     not_1st_screen
         sta     flags12_1
+.ifdef NO_LIVES        
         lda     #NO_LIVES
+.else
+        lda     #5
+.endif        
         sta     lives
         ldu     #seed_1
         lda     seed_2
@@ -2850,7 +2853,11 @@ add_obj_to_cauldron:
         inc     objects_put_in_cauldron
         bsr     cycle_colours_with_sound
         lda     objects_put_in_cauldron
+.ifdef NO_OBJS_REQD        
         cmpa    #NO_OBJS_REQD           ; got all objects?
+.else
+        cmpa    #14
+.endif
         bne     1$                      ; no, skip
         bsr     prepare_final_animation
 1$:     clr     obj_dropping_into_cauldron
