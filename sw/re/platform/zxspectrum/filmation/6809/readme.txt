@@ -19,7 +19,10 @@ been lifted directly from the Z80 code; it's a pixel-perfect port, they simply
 don't get any more faithful than this.                                          
                                                                                 
 Due to the nature of the hardware, this port is a little less colourful than the
-Z80 spectrum original, but this has no affect at all on the game play.          
+Z80 spectrum original (in the panel display only), but this has no affect at all 
+on the game play. In fact, the official BBC Micro port also had a completely 
+monochrome display.
+
 
 Instructions
 ------------
@@ -37,6 +40,20 @@ RIGHT           <X>
 FORWARD         <A>
 JUMP            <Q>
 PICK-UP/DROP    <1>
+
+
+Bugs/glitches/notes
+-------------------
+
+Panel border pixels glitch: under certain circumstances, a few pixels on the 
+border of the panel are wiped by the player's sprite when exiting to the south
+of the room. This is an artifact of the original game and hence shall remain
+part of the Knight Lore "exprience" on the Coco3.
+
+Slowdown: the original ZX Spectrum game experiences significant slowdown when
+larger numbers of sprites have to be wiped and re-rendered, typically in
+"busy" rooms and especially rooms with moving objects.
+
 
 Release notes
 -------------
