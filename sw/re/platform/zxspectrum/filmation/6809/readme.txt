@@ -1,0 +1,65 @@
+ZX Spectrum Knight Lore for the TRS-80 Color Computer 3
+=======================================================
+
+Introduction
+------------
+                                                                                
+Released in 1984 by Ultimate Play the game, Knight Lore was a seminal title for 
+the ZX Spectrum and would popularise isometric graphics in computer games in the
+years that followed. A smash hit upon release, it was followed up with two      
+spiritual sequels, Alien 8 and Pentagram, with only minor updates to the        
+filmation engine at the core of the game.                                       
+                                                                                
+This project began with a complete reverse-engineering of the original Z80 code.
+I then re-coded the game in C, to facilitate porting of the game to more capable
+platforms such as the Amiga and the Neo Geo. Finally, I translated the original 
+Z80 listing to 6809 in order to replicate the exact behaviour - every nuance and
+even (almost) every bug - of the ZX Spectrum game. The graphics data has    
+been lifted directly from the Z80 code; it's a pixel-perfect port, they simply  
+don't get any more faithful than this.                                          
+                                                                                
+Due to the nature of the hardware, this port is a little less colourful than the
+Z80 spectrum original, but this has no affect at all on the game play.          
+
+Instructions
+------------
+
+Please refer to the original ZX Spectrum documentation for the back story, rules
+and object of the game. The only difference in the Coco version is the mapping
+of the inputs.
+
+Currently the inputs are restricted to a single key per function, and joystick
+support is not yet implemented. As a result, only rotational (non-directional)
+inputs are supported.
+
+LEFT            <Z>
+RIGHT           <X>
+FORWARD         <A>
+JUMP            <Q>
+PICK-UP/DROP    <1>
+
+Release notes
+-------------
+
+CocoFEST Demo Version 1.0
+
+The game is complete but speed control is preliminary and there has been no
+optimisation in any areas of the code. The very noticable slow-downs that occur
+throughout the game are endemic to the original game running on the ZX Spectrum.
+I would argue that it does not appear to the casual observer to be significantly 
+slower on the Coco and although I have not yet done any sort of scientfic 
+analysis on the performance it's entirely possible that the Coco port is (at 
+this point) at its slowest, slower than the ZX Spectrum. Regardless, I expect 
+to be able to improve speed with some code optimisations before the final
+release.
+
+Joystick (and hence direction control) support has not been implemented. I plan
+to add that before the final release. The keyboard controls may be modified
+and/or enhanced also.
+
+The Amstrad CPC version enhanced the graphics with 2BPP and "two-tone" display
+of the rendered rooms. Whilst the size of the graphics data is the same as the
+monochrome ZX Spectrum graphics, there's double the amount of video memory to
+manipulate. I am hoping, however, that with sufficient code optimisations I
+will be able to implement the CPC graphics on the Coco3 with acceptable
+performance.

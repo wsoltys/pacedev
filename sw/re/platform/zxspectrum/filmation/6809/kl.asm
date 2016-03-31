@@ -449,7 +449,7 @@ splash:
         .db 0
         .asciz  "``````FOR`THE`TRSmxp`COCOs"
         .db 0
-        .asciz  "`````hCOCOFEST`DEMO`VERSIONi"
+        .asciz  "``hCOCOFEST`DEMO`VERSION`qnpi"
         .db 0
         .asciz  "`"
         .db 0
