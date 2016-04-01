@@ -1,6 +1,9 @@
 ZX Spectrum Knight Lore for the TRS-80 Color Computer 3
 =======================================================
 
+       <http://www.retroports.blogspot.com.au>
+             <mailto:msmcdoug@gmail.com>
+
 Introduction
 ------------
                                                                                 
@@ -41,6 +44,7 @@ RIGHT           <X>
 FORWARD         <A>
 JUMP            <Q>
 PICK-UP/DROP    <1>
+
 
 Bugs/glitches/notes
 -------------------
