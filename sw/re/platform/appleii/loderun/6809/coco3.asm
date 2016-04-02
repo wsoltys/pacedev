@@ -71,7 +71,7 @@ HGR2_MSB		.equ		0x40
 ; *** LODE RUNNER SPECIFIC CONFIGURATION HERE
 ;
 
-.define			GFX_1BPP
+;.define			GFX_1BPP
 ;.define			GFX_MONO
 ;.define       GFX_RGB
 
