@@ -12,6 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
+;.define BUILD_OPT_MICK_FARROW_GRAPHICS
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
@@ -240,7 +241,11 @@ eod                   .equ    .
 ; end of 'SCRATCH'
 
         .org    code_base
+.ifdef BUILD_OPT_MICK_FARROW_GRAPHICS        
+        .include "mf_spr.asm"
+.else
         .include "kl_spr.asm"
+.endif        
         
 				.org		0xc000
 
@@ -294,7 +299,7 @@ display_splash:
         cmpx    #0x600
         bne     1$
         ldx     #splash
-        ldy     #0x400
+        ldy     #0x420
 2$:     pshs    y
         ldb     ,x+                     ; read 'attr'
         stb     attr
@@ -306,7 +311,7 @@ display_splash:
         sta     ,y+
         bra     3$
 4$:     puls    y
-        leay    64,y
+        leay    32,y
         bra     2$
 5$:     ldx			#PIA0
         ldb     #0                      ; flag rgb
@@ -442,23 +447,45 @@ cmp_pal:
 
 
 splash:
-        .db 0
-        .asciz  "`"
+;       .asciz  "01234567890123456789012345678901"
         .db 0
         .asciz  "````ZX`SPECTRUM`KNIGHT`LORE"
         .db 0
+        .asciz  "`"
+        .db 0
         .asciz  "``````FOR`THE`TRSmxp`COCOs"
         .db 0
-        .asciz  "``hCOCOFEST`DEMO`VERSION`qnpi"
+        .asciz  "`"
+        .db 0
+.ifdef BUILD_OPT_MICK_FARROW_GRAPHICS
+        .asciz  "````j`MICK`FARROW`GRAPHICS`j"
+.else
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        .asciz  "````j'AMSTRAD`CPC`GRAPHICS'j"
+.else        
+        .asciz  "`````j`ORIGINAL`GRAPHICS`j"
+.endif
+.endif
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "``hCOCOFEST`DEMO`VERSION`qnqi"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
         .db 0
         .asciz  "`"
         .db 0
         .asciz  "```````hRiGBohCiOMPOSITE"
         .db 0
         .asciz  "`"
+        .db 0
+        .asciz  "`"
         .db 0x40
         .asciz  "|WWWnRETROPORTSnBLOGSPOTnCOMnAU~"
         .dw     0
+
 
 attr:   .ds     1
                 
