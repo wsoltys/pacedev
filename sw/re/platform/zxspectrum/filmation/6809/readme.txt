@@ -62,6 +62,13 @@ larger numbers of sprites have to be wiped and re-rendered, typically in
 Release notes
 -------------
 
+CocoFEST Demo Version 1.1
+
+Added a build option for Mick Farrow graphics. Back in 2002, Mick Farrow 
+modified the original sprites to add more shading (via dithering) and also
+sharpen the outline of some sprites.
+
+
 CocoFEST Demo Version 1.0
 
 The game is complete but speed control is preliminary and there has been no

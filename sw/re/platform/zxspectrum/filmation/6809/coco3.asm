@@ -65,13 +65,12 @@ CPU179			.equ		0xFFD9
 ROMMODE			.equ		0xFFDE
 RAMMODE			.equ		0xFFDF
 
-.define       CARTRIDGE
 .define			GFX_1BPP
 
 ; *** derived - do no edit
 
 .ifndef GFX_1BPP
-	.define		GFX_4BPP
+	.define		GFX_2BPP
 .endif
 
 ; *** end of derived
@@ -80,8 +79,6 @@ RAMMODE			.equ		0xFFDF
 ; eg. page 34 is the HPUT/HGET buffer
 ; and is written whilst BASIC is running
 ; $30-$33 are the alternate HIRES page, so safe
-
-.ifdef CARTRIDGE
 
 ; Memory Map		Page
 ; ------------  ----
@@ -104,41 +101,6 @@ shift_tbl   .equ    0x4000
 stack       .equ    0x77ff
 var_base    .equ    0x7800
 code_base		.equ		0x8000
-
-.else
-;
-; Memory Map		Page
-; ------------  ----
-; $0000-$17FF   $38       Video
-; $1800-$1FFF             (empty)
-; $2000-$3FFF   $39				variables
-; $4000-$5FFF   $3A       Code
-; $6000-$7FFF		$3B				Code + stack
-; $8000-$9FFF   $30				Font and graphics data
-; $A000-$BFFF   $31				Font and graphics data
-; $C000-$CEFF   $32				Font and graphics data
-; $CF00-$CFFF             reverse_tbl
-; $D000-$DFFF             shift_tbl
-; $E000-$FFFF   $37				???
-
-coco_vram   .equ    0x0000
-code_base		.equ		0x4000
-;vid_buf    .equ    end-of-code
-stack				.equ		0x7fff
-data_base   .equ    0x8000
-reverse_tbl .equ    0xcf00
-shift_tbl   .equ    0xd000
-
-; MMU page mappings
-VRAM_PG         .equ      0x38
-CODE_PG1        .equ      0x39
-CODE_PG2        .equ      CODE_PG1+1
-CODE_PG3        .equ      CODE_PG2+1
-DATA_PG1        .equ      0x30
-DATA_PG2        .equ      DATA_PG1+1
-DATA_PG3        .equ      DATA_PG2+1
-
-.endif
 
 .define HAS_SOUND
 .ifdef HAS_SOUND
