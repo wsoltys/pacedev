@@ -60,6 +60,7 @@ NUM_LEVELS				.equ	50
 				.org		codebase
 start_coco:
 				orcc		#0x50										; disable interrupts
+				lds			#stack
 				
 .ifdef PLATFORM_COCO3
 
@@ -107,8 +108,6 @@ start_coco:
 ; switch to all-RAM mode
         sta     RAMMODE        
 				
-				lds			#stack
-
 display_splash:
 
         ldx     #0x400
@@ -204,7 +203,6 @@ setup_gime_for_game:
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 
   ; configure video MMU
-
         lda     #VRAM_PG
         ldx     #(MMUTSK1)              ; $0000-
         ldb     #4
