@@ -16,7 +16,7 @@
 #endif
 
 //#define DO_SPRITE_GFX
-#define DO_TITLE_GFX
+//#define DO_TITLE_GFX
 
 uint8_t ram_zx[0x10000];
 uint8_t ram_cpc[0x10000];
@@ -257,10 +257,14 @@ int main (int argc, char *argv[])
     s++;
   }
 
-  // now write data out to a C file
+  // now write data out to a C, ASM file
   
   FILE *fp2 = fopen ("data2.c", "wt");
   if (!fp2)
+    exit (0);
+      
+  FILE *fp3 = fopen ("data2.asm", "wt");
+  if (!fp3)
     exit (0);
       
   typedef struct
@@ -320,26 +324,35 @@ int main (int argc, char *argv[])
 
     // do table entry
     fprintf (fp2, "static const uint8_t %s[] = \n{\n", bgtyp[i].label);
+    fprintf (fp3, "%s:\n", bgtyp[i].label);
     do
     {
       fprintf (fp2, "  0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X,\n",
+                ram_cpc[p], ram_cpc[p+1], ram_cpc[p+2], ram_cpc[p+3], 
+                ram_cpc[p+4], ram_cpc[p+5], ram_cpc[p+6], ram_cpc[p+7]);
+      fprintf (fp3, "  .db 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
                 ram_cpc[p], ram_cpc[p+1], ram_cpc[p+2], ram_cpc[p+3], 
                 ram_cpc[p+4], ram_cpc[p+5], ram_cpc[p+6], ram_cpc[p+7]);
       p += 8;
       
     } while (ram_cpc[p] != 0);
     fprintf (fp2, "  0");
+    fprintf (fp3, "  .db 0");
     p++;
     fprintf (fp2,"\n};\n\n");
+    fprintf (fp3,"\n\n");
   }
 
   fprintf (fp2, "uint8_t const *cpc_background_type_tbl[] __FORCE_RODATA__ = \n{\n");
+  fprintf (fp3, "cpc_background_type_tbl:\n");
   for (unsigned i=0; i<n; i++)
   {
     fprintf (fp2, "  %s%s\n", bgtyp[i].label,
       (i<n-1 ? "," : ""));
+    fprintf (fp3, "  .dw #%s\n", bgtyp[i].label);
   }
   fprintf (fp2, "};\n\n");
+  fprintf (fp3, "\n");
 
   // create table of sprite addresses
   uint16_t sprite_a[132];
@@ -365,6 +378,7 @@ int main (int argc, char *argv[])
 
   // sprite_tbl
   fprintf (fp2, "const uint8_t *cpc_sprite_tbl[] __FORCE_RODATA__ =\n{\n");
+  fprintf (fp3, "cpc_sprite_tbl:\n");
   n = 0;
   for (p=0x429e; p<0x4422; p+=2, n++)
   {
@@ -389,15 +403,25 @@ int main (int argc, char *argv[])
         strcpy (label, "(ERROR)");
     }
     if ((n%6) == 0)
+    {
       fprintf (fp2, "  ");
+      fprintf (fp3, "  .dw ");
+    }
     fprintf (fp2, "%s, ", label);
+    fprintf (fp3, "#%s%c ", label,
+              ((n%6)==5 || p==0x4422-2 ? ' ' : ','));
     if ((n%6) == 5)
+    {
       fprintf (fp2, "\n");
+      fprintf (fp3, "\n");
+    }
   }
   fprintf (fp2, "\n};\n\n");
+  fprintf (fp3, "\n\n");
 
   // sprite graphics
   fprintf (fp2, "static uint8_t spr_nul[] __FORCE_RODATA__ =\n{\n  0, 0\n};\n\n");
+  fprintf (fp3, "spr_nul:\n  .db 0, 0\n\n");
   p = 0x4424;
   sprite_n = 0;
   while (p < 0x7ffb)
@@ -410,19 +434,27 @@ int main (int argc, char *argv[])
       fprintf (stderr, "*** WARNING sprite %03d flipped ($%02X)\n",
                 sprite_n, ram_cpc[p+0]);
     fprintf (fp2, "static uint8_t spr_%03d[] __FORCE_RODATA__ =\n{\n  %d, %d, %d,\n",
+              sprite_n, w, h, f);
+    fprintf (fp3, "spr_%03d:\n  .db %d, %d, %d,\n",
               sprite_n++, w, h, f);
     unsigned i;
     p += 3;
     for (unsigned i=0; i<w*h; i++, p++)
     {
       if ((i%8)==0) fprintf (fp2, "  ");
+      if ((i%8)==0) fprintf (fp3, "  .db ");
       fprintf (fp2, "0x%02X, ", ram_cpc[p]);
+      fprintf (fp3, "0x%02X%c ", ram_cpc[p], 
+                ((i%8)==7 || i==w*h-1 ? ' ' : ','));
       if ((i%8)==7) fprintf (fp2, "\n");
+      if ((i%8)==7) fprintf (fp3, "\n");
     }
     fprintf (fp2, "\n};\n\n");
+    fprintf (fp3, "\n\n");
   }
 
   fclose (fp2);  
+  fclose (fp3);  
   fprintf (stderr, "Done!\n");
 
   FILE *fpTitle = fopen ("../../../cpc/title.bin", "rb");
