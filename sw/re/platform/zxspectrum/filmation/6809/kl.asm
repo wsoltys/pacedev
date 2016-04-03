@@ -12,6 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
+;.define BUILD_OPT_CPC_GRAPHICS
 ;.define BUILD_OPT_MICK_FARROW_GRAPHICS
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
 ;.define BUILD_OPT_NO_Z_ORDER
@@ -241,11 +242,15 @@ eod                   .equ    .
 ; end of 'SCRATCH'
 
         .org    code_base
-.ifdef BUILD_OPT_MICK_FARROW_GRAPHICS        
-        .include "mf_spr.asm"
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        .include "cpc_spr.asm"
 .else
+  .ifdef BUILD_OPT_MICK_FARROW_GRAPHICS        
+        .include "mf_spr.asm"
+  .else
         .include "kl_spr.asm"
-.endif        
+  .endif        
+.endif  
         
 				.org		0xc000
 
@@ -457,14 +462,14 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-.ifdef BUILD_OPT_MICK_FARROW_GRAPHICS
-        .asciz  "````j`MICK`FARROW`GRAPHICS`j"
-.else
 .ifdef BUILD_OPT_CPC_GRAPHICS
-        .asciz  "````j'AMSTRAD`CPC`GRAPHICS'j"
+        .asciz  "````j`AMSTRAD`CPC`GRAPHICS`j"
 .else        
+  .ifdef BUILD_OPT_MICK_FARROW_GRAPHICS
+        .asciz  "````j`MICK`FARROW`GRAPHICS`j"
+  .else
         .asciz  "`````j`ORIGINAL`GRAPHICS`j"
-.endif
+  .endif
 .endif
         .db 0
         .asciz  "`"
@@ -5596,6 +5601,9 @@ print_sprite:
         ldb     #0x80
         std     *offset
         lda     ,u+                     ; width
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        lsra                            ; half the width
+.endif        
         anda    #0x07
         sta     *width
         puls    cc                      ; bit offset &7 flags
@@ -5615,6 +5623,11 @@ print_sprite:
         tfr     u,y
         jsr     calc_vidbuf_addr        ; ->U
         exg     u,y
+        
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        leau    1,u                     ; skip 3rd byte
+.endif        
+        
 ; this next bit requires some serious optimisation
 ;       X = object
 ;       Y = video buffer address
@@ -5701,10 +5714,16 @@ vflip_sprite_data:
         eora    #FLAG_VFLIP
         sta     ,u+
         anda    #0x0f                   ; width_bytes
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        lsra                            ; halve it
+.endif        
         sta     *width
         lsla                            ; x2 for mask bytes
         ldb     ,u+                     ; height_lines
         stb     *height
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        leau    1,u                     ; skip 3rd byte
+.endif        
         decb                            ; (h-1)
         mul                             ; w*2*(h-1)=last line
         tfr     u,y
