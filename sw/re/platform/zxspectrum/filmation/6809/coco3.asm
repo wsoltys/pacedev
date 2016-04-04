@@ -65,15 +65,16 @@ CPU179			.equ		0xFFD9
 ROMMODE			.equ		0xFFDE
 RAMMODE			.equ		0xFFDF
 
-.define			GFX_1BPP
+; some graphics/memory calculations
 
-; *** derived - do no edit
-
-.ifndef GFX_1BPP
-	.define		GFX_2BPP
+.define GFX_1BPP
+.ifdef GFX_1BPP
+  VIDEO_BPL     .equ    32
+.else
+  VIDEO_BPL     .equ    64
 .endif
+  VIDEO_SIZ     .equ    VIDEO_BPL*192
 
-; *** end of derived
 
 ; most alternate pages are used by Coco3 BASIC
 ; eg. page 34 is the HPUT/HGET buffer
@@ -94,7 +95,7 @@ CODE_PG1    .equ    0x30
 VRAM_PG     .equ    0x38
 
 coco_vram   .equ    0x0000
-vidbuf      .equ    0x3000
+vidbuf      .equ    VIDEO_SIZ
 shift_tbl   .equ    0x6000
 reverse_tbl .equ    0x7100
 stack       .equ    0x77ff              ; 1792 bytes

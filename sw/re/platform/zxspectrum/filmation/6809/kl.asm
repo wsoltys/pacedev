@@ -21,6 +21,16 @@
 ;.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
 ; *** end of BUILD OPTIONS
 
+; *** derived - do not edit
+
+.ifndef BUILD_OPT_CPC_GRAPHICS
+  .define GFX_1BPP
+.else
+  .define GFX_2BPP
+.endif
+
+; *** end of derived
+
 ; *** KNIGHT-LORE stuff here
 MAX_OBJS            .equ    40
 MAX_DRAW            .equ    48
@@ -357,7 +367,7 @@ setup_gime_for_game:
 	  .ifdef GFX_1BPP				
 				lda			#0x08										; 192 scanlines, 32 bytes/row, 2 colours (256x192)
 	  .else				
-				lda			#0x1A										; 192 scanlines, 128 bytes/row, 4 colours (256x192)
+				lda			#0x11										; 192 scanlines, 64 bytes/row, 4 colours (256x192)
 	  .endif				
 				sta			VRES      							
 				lda			#0x00										; black
@@ -2414,7 +2424,7 @@ print_8x8:
         ldb     #8                      ; 8 lines to print
 1$:     lda     ,u+                     ; read font data
         sta     ,y                      ; write to vidbuf
-        leay    -32,y                   ; next line
+        leay    -VIDEO_BPL,y            ; next line
         decb                            ; done all lines?
         bne     1$                      ; no, loop
         puls    y                       ; vidbuf addr
@@ -3267,7 +3277,7 @@ fill_window:
         decb
         bne     2$
         puls    b,y
-        leay    32,y
+        leay    VIDEO_BPL,y
         decb
         bne     1$
         rts
@@ -5300,7 +5310,7 @@ clr_byte:
 
 clr_bitmap_memory:
         ldx     #coco_vram
-        ldy     #0x1800
+        ldy     #VIDEO_SIZ
         bra     clr_mem
         
 clr_attribute_memory:
@@ -5315,23 +5325,23 @@ clear_scrn:
         bra     clr_bitmap_memory
 
 clear_scrn_buffer:
-        ldy     #0x1800
+        ldy     #VIDEO_SIZ
         ldx     #vidbuf
         bra     clr_mem
                                                                                 
 update_screen:
         pshs    b,x,y
-        ldx     #vidbuf+0x1800-32
+        ldx     #vidbuf+#VIDEO_SIZ-#VIDEO_BPL
         ldy     #coco_vram
         ldb     #192
 1$:     pshs    b
-        ldb     #32
+        ldb     #VIDEO_BPL
 2$:     lda     ,x                      ; source byte (vidbuf)
         clr     ,x+                     ; clear vidbuf
         sta     ,y+                     ; destination (vram)
         decb
         bne     2$
-        leax    -64,x
+        leax    -2*VIDEO_BPL,x
         puls    b
         decb
         bne     1$
@@ -5464,8 +5474,8 @@ blit_to_screen:
         decb
         bne     2$
         puls    b,x,y
-        leax    32,x
-        leay    -32,y
+        leax    VIDEO_BPL,x
+        leay    -VIDEO_BPL,y
         decb
         bne     1$
         rts        
