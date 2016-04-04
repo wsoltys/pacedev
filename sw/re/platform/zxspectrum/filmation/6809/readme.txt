@@ -44,6 +44,7 @@ RIGHT           <X>
 FORWARD         <A>
 JUMP            <Q>
 PICK-UP/DROP    <1>
+PAUSE GAME      <SPACE>
 
 
 Bugs/glitches/notes
@@ -67,6 +68,11 @@ CocoFEST Demo Version 1.1
 Added a build option for Mick Farrow graphics. Back in 2002, Mick Farrow 
 modified the original sprites to add more shading (via dithering) and also
 sharpen the outline of some sprites.
+
+Updated the Main Menu specifically for the Coco3 port. Added the ability to
+select keyboard/joystick and directional controls.
+
+Added support for (non-)directional joystick input.
 
 
 CocoFEST Demo Version 1.0
