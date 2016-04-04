@@ -5763,9 +5763,15 @@ hflip_sprite_data:
         eora    #FLAG_HFLIP
         sta     ,u+
         anda    #0x0f                   ; width_bytes
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        lsra                            ; halve it
+.endif        
         sta     *width
         ldb     ,u+                     ; height_lines
         stb     *height
+.ifdef BUILD_OPT_CPC_GRAPHICS
+        leau    1,u                     ; skip 3rd byte
+.endif        
         ldx     #reverse_tbl+0x80
 hflip_line:
         pshs    b,u                     ; lines

@@ -82,23 +82,22 @@ RAMMODE			.equ		0xFFDF
 
 ; Memory Map		Page
 ; ------------  ----
-; $0000-$17FF   $38       vram
-; $1800-$2FFF   $38/$39   vid_buf
-; $3000-$3EFF   $39				(empty)
-; $3F00-$3FFF             reverse_tbl
-; $4000-$4FFF   $3A       shift_tbl
-; $5000-$5FFF             (empty)
-; $6000-$7FFF   $3B       stack & variables
+; $0000-$2FFF   $38/$39   vram
+; $3000-$5FFF   $39/$3A   vid_buf
+; $6000-$6FFF   $3B       shift_tbl
+; $7000-$70FF    "        reverse_tbl
+; $7100-$77FF    "        stack
+; $7800-$7FFF    "        variables
 ; $8000-$FFXX   $30-$33   Code+Data
 
 CODE_PG1    .equ    0x30
 VRAM_PG     .equ    0x38
 
 coco_vram   .equ    0x0000
-vidbuf      .equ    0x1800
-reverse_tbl .equ    0x3f00
-shift_tbl   .equ    0x4000
-stack       .equ    0x77ff
+vidbuf      .equ    0x3000
+shift_tbl   .equ    0x6000
+reverse_tbl .equ    0x7100
+stack       .equ    0x77ff              ; 1792 bytes
 var_base    .equ    0x7800
 code_base		.equ		0x8000
 
