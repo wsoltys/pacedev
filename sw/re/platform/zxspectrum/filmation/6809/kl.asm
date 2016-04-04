@@ -92,6 +92,8 @@ z80_d               .equ    0x02
 z80_e               .equ    0x03
 z80_h               .equ    0x04
 z80_l               .equ    0x05
+z80_a_              .equ    0x06
+z80_f_              .equ    0x07
 width               .equ    0x08
 height              .equ    0x09
 lines               .equ    0x0a
@@ -106,6 +108,7 @@ pc                  .equ    0x14
 dy                  .equ    0x16
 dx                  .equ    0x17
 note                .equ    0x18
+inverse             .equ    0x19
 z80_r               .equ    0x7f
 line_cnt            .equ    0x80
 
@@ -118,10 +121,10 @@ seed_1:                         .ds 1
 seed_2:                         .ds 2
 seed_2_6809:                    .ds 2
 ; bit   3 : directional
-; bit 2-1 : 00=keybd, 01=kempston, 10=cursor, 11=i/f-ii
+; bit 2-1 : 00=keybd, 01=joystk
 user_input_method:              .ds 1
 seed_3:                         .ds 1
-tmp_input_method:               .ds 1
+old_input_method:               .ds 1
                                 .ds 1
 ;
 ; variables from here are zeroed each game
@@ -169,7 +172,7 @@ tmp_objects_to_draw:            .ds 2
 render_obj_1:                   .ds 2
 render_obj_2:                   .ds 2
 audio_played:                   .ds 1
-directional:                    .ds 1
+debounce_5:                     .ds 1
 cant_drop:                      .ds 1
                                 .ds 4
 inventory:                      .ds 4
@@ -2339,20 +2342,79 @@ do_menu_selection:
         
 menu_loop:
         jsr     display_menu
+
+; added for Coco
+; - update from option 1 to option 5
+        ldb     #48
+        lda     #79-7
+        jsr     calc_vram_addr
+        tfr     u,y
+        jsr     calc_vidbuf_addr
+        tfr     u,x
+        ldu     #0x4816                 ; 72 lines, 22 bytes
+        jsr     blit_to_screen
+                
         ldu     #menu_tune
         jsr     play_audio_wait_key
+        ldb     user_input_method
+        stb     old_input_method
+        lda     #~(1<<1)
+        jsr     read_port
+        bita    #(1<<4)                 ; <1>?
+        beq     check_for_joystick
+        andb    #0xf9                   ; mask off bits 2,1
+check_for_joystick:        
+        lda     #~(1<<2)
+        jsr     read_port
+        bita    #(1<<4)                 ; <2>?
+        beq     check_for_directional_control
+        andb    #0xf9                   ; mask off bits 2,1
+        orb     #(1<<1)                 ; set bit 1
+check_for_directional_control:
+        stb     user_input_method
+        lda     #~(1<<5)
+        jsr     read_port
+        bita    #(1<<4)                 ; <5>?
+        beq     clr_debounce
+        tst     debounce_5              ; was pressed?
+        bne     check_for_start_game
+        lda     #1
+        sta     debounce_5
+        eorb    #(1<<3)                 ; toggle directional
+        stb     user_input_method
         
 check_for_start_game:
-				lda			#~(1<<0)								; 0-7
+        cmpb    old_input_method
+        beq     1$
+        jsr     toggle_audio_hw_x16
+1$:		  lda			#~(1<<0)
 				jsr     read_port
 				bita		#(1<<4)									; <0>?
-				beq     1$                      ; no, skip
+				beq     2$                      ; no, skip
 				rts
-1$:     inc     seed_1
+2$:     inc     seed_1
         bsr     flash_menu
         bra     menu_loop        
 
+clr_debounce:
+        clr     debounce_5
+        bra     check_for_start_game
+        
 flash_menu:
+        ldu     #menu_colours+1
+        lda     user_input_method
+        rora
+        anda    #3                      ; keybd/joystick bits only
+        ldb     #4
+        stb     *z80_b
+        jsr     toggle_selected
+        ldb     ,u                      ; colour for DIRECTIONAL
+        andb    #~(1<<7)
+        lda     user_input_method
+        anda    #(1<<3)                 ; directional?
+        beq     9$
+        orb     #(1<<7)
+9$:     stb     ,u
         rts
 
 menu_colours:   
@@ -2366,6 +2428,7 @@ menu_text:
         .db 0x1B, 0x8E
 ; "1 KEYBOARD"
         .db 1, 0x26, 0x14, 0xE, 0x22, 0xB, 0x18, 0xA, 0x1B, 0x8D
+.if 0        
 ; "2 KEMPSTON JOYSTICK"
         .db 2, 0x26, 0x14, 0xE, 0x16, 0x19, 0x1C, 0x1D, 0x18, 0x17
         .db 0x26, 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
@@ -2375,6 +2438,14 @@ menu_text:
 ; "4 INTERFACE II"
         .db 4, 0x26, 0x12, 0x17, 0x1D, 0xE, 0x1B, 0xF, 0xA, 0xC
         .db 0xE, 0x26, 0x12, 0x92
+.else
+; "2 JOYSTICK"
+        .db 2, 0x26, 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
+; ""
+        .db 0xA6        
+; ""
+        .db 0xA6        
+.endif        
 ; "5 DIRECTIONAL CONTROL"
         .db 5, 0x26, 0xD, 0x12, 0x1B, 0xE, 0xC, 0x1D, 0x12, 0x18
         .db 0x17, 0xA, 0x15, 0x26, 0xC, 0x18, 0x17, 0x1D, 0x1B
@@ -2392,6 +2463,8 @@ print_text_single_colour:
         stu     gfxbase_8x8
         jsr     calc_vidbuf_addr        ; ->U
         tfr     u,y
+        lda     tmp_attrib
+        sta     *z80_a_
         bra     loc_BE56
 
 ; D=x,y X=str        
@@ -2403,6 +2476,7 @@ print_text:
         jsr     calc_vidbuf_addr        ; ->U
         tfr     u,y
         lda     ,x+                     ; attribute
+        sta     *z80_a_
 loc_BE56:
 ;       bsr     calc_attrib_addr
 8$:     lda     ,x+                     ; character
@@ -2421,9 +2495,15 @@ print_8x8:
         mul                             ; offset into font
         ldu     gfxbase_8x8
         leau    d,u                     ; ptr font data
+        lda     *z80_a_
+        anda    #(1<<7)                 ; flash/inverse
+        sta     *inverse
         ldb     #8                      ; 8 lines to print
 1$:     lda     ,u+                     ; read font data
-        sta     ,y                      ; write to vidbuf
+        tst     *inverse
+        beq     2$
+        coma
+2$:     sta     ,y                      ; write to vidbuf
         leay    -VIDEO_BPL,y            ; next line
         decb                            ; done all lines?
         bne     1$                      ; no, loop
@@ -2432,25 +2512,41 @@ print_8x8:
         rts
 
 toggle_selected:
+        tsta
+        bne     3$
+1$:     ldb     ,u
+        orb     #(1<<7)
+        stb     ,u
+        bra     4$
+2$:     deca
+        beq     1$
+3$:     ldb     ,u
+        andb    #~(1<<7)
+        stb     ,u
+4$:     leau    1,u
+        dec     *z80_b
+        bne     2$                        
         rts
 
 display_menu:
-;        ldx     #menu_colours
 ; added for Coco3 port
         lda     #ATTR_WHITE
         jsr     osd_set_palette
 ;
+        ldu     #menu_colours
         ldy     #menu_xy
         ldx     #menu_text
         ldb     #8
 display_text_list:
-        pshs    b
+        lda     ,u+
+        sta     tmp_attrib
+        pshs    b,u
         ldb     ,y+                     ; x
         lda     ,y+                     ; y
         pshs    y
-        bsr     print_text_single_colour
+        jsr     print_text_single_colour
         puls    y
-        puls    b
+        puls    b,u
         decb                            ; done all strings?
         bne     display_text_list       ; no loop
         lda     suppress_border
@@ -4751,7 +4847,40 @@ check_user_input:
         lda     all_objs_in_cauldron
         ora     obj_dropping_into_cauldron
         bne     finished_input
-; some non-keyboard stuff
+        lda     user_input_method
+        rora
+        anda    #3
+        beq     keyboard
+        deca
+        beq     joystick
+        bra     keyboard
+joystick:
+        lda     #~(1<<6)
+        jsr     read_port
+        bita    #(1<<3)                 ; <RIGHT>?
+        beq     1$
+        orb     #INP_RIGHT
+1$:     lda     #~(1<<5)
+        jsr     read_port
+        bita    #(1<<3)                 ; <LEFT>?
+        beq     2$
+        orb     #INP_LEFT
+2$:     lda     #~(1<<4)
+        jsr     read_port
+        bita    #(1<<3)                 ; <DOWN>?
+        beq     3$
+        orb     #INP_PICKUP_DROP
+3$:     lda     #~(1<<3)
+        jsr     read_port
+        bita    #(1<<3)                 ; <UP>?
+        beq     4$
+        orb     #INP_FORWARD
+4$:     lda     #~(1<<2)
+        jsr     read_port
+        bita    #(1<<3)                 ; <Z>?
+        beq     5$
+        orb     #INP_JUMP
+5$:     bra     finished_input                
 keyboard:
         lda     #~(1<<2)
         jsr     read_port
@@ -5680,21 +5809,25 @@ print_sprite:
         rts
 
 ; A=Y, B=X
-; addr = ((y<<8)>>3)|(x>>3)
+; addr = ((y<<8)>>3)|(x>>3) for 1BPP
+;   or = ((y<<8)>>2)|(x>>2) for 2BPP
 ; returns vidbuf address in U
 calc_vidbuf_addr:
         lsra
         rorb
         lsra
         rorb
+.ifdef GFX_1BPP        
         lsra
         rorb                            ; D=offset
+.endif        
         tfr     d,u
         leau    vidbuf,u
         rts
 
 ; A=Y, B=X (preserved)
-; addr = (((191-y)<<8)>>3)|(x>>3)
+; addr = (((191-y)<<8)>>3)|(x>>3) for 1BPP
+;   or = (((191-y)<<8)>>2)|(x>>2) for 2BPP
 ; returns vidbuf address in U
 calc_vram_addr:
         pshs    d
@@ -5704,8 +5837,10 @@ calc_vram_addr:
         rorb
         lsra
         rorb
+.ifdef GFX_1BPP        
         lsra
         rorb                            ; D=offset
+.endif        
         tfr     d,u
         leau    coco_vram,u
         puls    d
