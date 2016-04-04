@@ -112,7 +112,7 @@ SCRATCH:5BD4 ??	?? ?? ??		 .ds 4
 SCRATCH:5BD8 ??	?? ?? ?? inventory:	 .ds 4
 SCRATCH:5BDC ??	?? ?? ??+objects_carried:.ds 7
 SCRATCH:5BE3 ??		 unk_5BE3:	 .ds 1
-SCRATCH:5BE4 ??		 unk_5BE4:	 .ds 1
+SCRATCH:5BE4 ??		 object_carried_2:.ds 1
 SCRATCH:5BE5 ??	??			 .ds 2
 SCRATCH:5BE7 ??		 end_of_objects_carried:.ds 1
 SCRATCH:5BE8		 ;
@@ -3275,7 +3275,6 @@ RAM:B43E 20 F3			     jr	     NZ, loc_B433
 RAM:B440 C9			     ret
 RAM:B440	     ; End of function audio_B42E
 RAM:B440
-RAM:B441	     ;
 RAM:B441	     ; jumping
 RAM:B441
 RAM:B441	     ; =============== S U B R O U T I N E =======================================
@@ -3321,7 +3320,7 @@ RAM:B458 0E 06			     ld	     c,	#6
 RAM:B45A C3 E6 B4		     jp	     toggle_audio_hw_xC
 RAM:B45A	     ; End of function audio_B454
 RAM:B45A
-RAM:B45D	     ; block, fire moving (EW)
+RAM:B45D	     ; block, fire movng (EW)
 RAM:B45D
 RAM:B45D	     ; =============== S U B R O U T I N E =======================================
 RAM:B45D
@@ -3331,7 +3330,7 @@ RAM:B45D DD 7E 01		     ld	     a,	1(ix)				     ; X
 RAM:B460 18 F2			     jr	     audio_B454
 RAM:B460	     ; End of function audio_B45D
 RAM:B460
-RAM:B462	     ; block, fire moving (NS)
+RAM:B462	     fire, block moving	(NS)
 RAM:B462
 RAM:B462	     ; =============== S U B R O U T I N E =======================================
 RAM:B462
@@ -3587,11 +3586,11 @@ RAM:B570 DD 36 0B 03		     ld	     11(ix), #3				     ; dZ=3
 RAM:B574 DD 7E 01		     ld	     a,	1(ix)				     ; X
 RAM:B577 07			     rlca
 RAM:B578 E6 01			     and     #1
-RAM:B57A 6F			     ld	     l,	a				     ; X bit 7 -> bit 1
+RAM:B57A 6F			     ld	     l,	a				     ; X bit7->bit0
 RAM:B57B DD 7E 02		     ld	     a,	2(ix)				     ; Y
-RAM:B57E E6 80			     and     #0x80 ; '€'                             ; Y bit 7
+RAM:B57E E6 80			     and     #0x80 ; '€'                             ; Y bit7
 RAM:B580 B5			     or	     l
-RAM:B581 07			     rlca					     ; bit 1 ->	bit 2, bit 7 ->	bit 1
+RAM:B581 07			     rlca					     ; bit0->bit1, bit7->bit1
 RAM:B582 E6 03			     and     #3
 RAM:B584 6F			     ld	     l,	a
 RAM:B585 01 8B B5		     ld	     bc, #dX_dY_tbl			     ; jump table
@@ -4407,7 +4406,7 @@ RAM:BA8B 20 FA			     jr	     NZ, loc_BA87			     ; wait for	key release
 RAM:BA8D 11 18 B2		     ld	     de, #game_over_tune
 RAM:BA90 CD BE B2		     call    play_audio_until_keypress
 RAM:BA93 06 08			     ld	     b,	#8				     ; how long	to wait
-RAM:BA95 CD 9B BA		     call    wait_for_key_release
+RAM:BA95 CD 9B BA		     call    wait_for_key_press
 RAM:BA98	     ;
 RAM:BA98	     ; the stack has at	least 1	return address on it
 RAM:BA98	     ; but the main game loop re-init's the stack each iteration
@@ -4418,7 +4417,7 @@ RAM:BA9B
 RAM:BA9B	     ; =============== S U B R O U T I N E =======================================
 RAM:BA9B
 RAM:BA9B
-RAM:BA9B	     wait_for_key_release:
+RAM:BA9B	     wait_for_key_press:
 RAM:BA9B 21 00 00		     ld	     hl, #0
 RAM:BA9E
 RAM:BA9E	     loc_BA9E:
@@ -4428,10 +4427,10 @@ RAM:BAA2 C0			     ret     NZ
 RAM:BAA3 2B			     dec     hl
 RAM:BAA4 7C			     ld	     a,	h
 RAM:BAA5 B5			     or	     l
-RAM:BAA6 20 F6			     jr	     NZ, loc_BA9E
+RAM:BAA6 20 F6			     jr	     NZ, loc_BA9E			     ; loop B times
 RAM:BAA8 10 F4			     djnz    loc_BA9E
 RAM:BAAA C9			     ret
-RAM:BAAA	     ; End of function wait_for_key_release
+RAM:BAAA	     ; End of function wait_for_key_press
 RAM:BAAA
 RAM:BAAB	     ; ---------------------------------------------------------------------------
 RAM:BAAB	     ; START OF	FUNCTION CHUNK FOR lose_life
@@ -4450,7 +4449,7 @@ RAM:BAC1 CD BF BE		     call    display_text_list
 RAM:BAC4 11 39 B2		     ld	     de, #game_complete_tune
 RAM:BAC7 CD CF B2		     call    play_audio
 RAM:BACA 06 08			     ld	     b,	#8
-RAM:BACC CD 9B BA		     call    wait_for_key_release
+RAM:BACC CD 9B BA		     call    wait_for_key_press
 RAM:BACF C3 29 BA		     jp	     loc_BA29
 RAM:BACF	     ; END OF FUNCTION CHUNK FOR lose_life
 RAM:BACF	     ; ---------------------------------------------------------------------------
@@ -4742,7 +4741,7 @@ RAM:BD5A CB 63			     bit     4,	e				     ; '5' (directional control)?
 RAM:BD5C 28 27			     jr	     Z,	clr_debounce			     ; no, skip
 RAM:BD5E CB 46			     bit     0,	(hl)				     ; was pressed last	time?
 RAM:BD60 20 0A			     jr	     NZ, check_for_start_game		     ; yes, skip
-RAM:BD62 CB C6			     set     0,	(hl)				     ; set debounce
+RAM:BD62 CB C6			     set     0,	(hl)				     ; set directional
 RAM:BD64 3A A4 5B		     ld	     a,	(user_input_method)
 RAM:BD67 EE 08			     xor     #8					     ; toggle directional
 RAM:BD69 32 A4 5B		     ld	     (user_input_method), a
@@ -4750,7 +4749,7 @@ RAM:BD6C
 RAM:BD6C	     check_for_start_game:
 RAM:BD6C 21 A6 5B		     ld	     hl, #old_input_method
 RAM:BD6F BE			     cp	     (hl)				     ; changed input method?
-RAM:BD70 C4 A3 B4		     call    NZ, toggle_audio_hw_x16		     ; yes, audio feedback
+RAM:BD70 C4 A3 B4		     call    NZ, toggle_audio_hw_x16		     ; yes
 RAM:BD73 3E EF			     ld	     a,	#0xEF ;	'ï'                          ; 0,9,8,7,6
 RAM:BD75 CD F7 B5		     call    read_port
 RAM:BD78 CB 47			     bit     0,	a				     ; '0' (Start Game)?
@@ -5299,7 +5298,7 @@ RAM:C0B1 C9			     ret
 RAM:C0B2	     ; ---------------------------------------------------------------------------
 RAM:C0B2
 RAM:C0B2	     loc_C0B2:
-RAM:C0B2 21 E4 5B		     ld	     hl, #unk_5BE4
+RAM:C0B2 21 E4 5B		     ld	     hl, #object_carried_2
 RAM:C0B5 7E			     ld	     a,	(hl)
 RAM:C0B6 23			     inc     hl
 RAM:C0B7 A7			     and     a
@@ -5390,7 +5389,7 @@ RAM:C15B 23			     inc     hl
 RAM:C15C 72			     ld	     (hl), d				     ; store ptr
 RAM:C15D CD 9D C6		     call    set_wipe_and_draw_IY
 RAM:C160 FD 36 00 01		     ld	     0(iy), #1
-RAM:C164 21 E4 5B		     ld	     hl, #unk_5BE4			     ; object_carried[2].graphic_no
+RAM:C164 21 E4 5B		     ld	     hl, #object_carried_2		     ; object_carried[2].graphic_no
 RAM:C167 7E			     ld	     a,	(hl)
 RAM:C168 23			     inc     hl
 RAM:C169 A7			     and     a					     ; empty slot?
@@ -6169,6 +6168,14 @@ RAM:C58F
 RAM:C591	     ; updates special objects table with current data (coords etc)
 RAM:C591	     ; - traverses special_objs_here table
 RAM:C591	     ; - writes	to special_objs_tbl
+RAM:C591	     ;
+RAM:C591	     ; Another bug related to ptr special_objs_tbl
+RAM:C591	     ; - the cauldron bubbles are inserted in the object table
+RAM:C591	     ;	 dynamically when you enter the	room. This routine checks
+RAM:C591	     ;	 the graphic_no	for null, but (again) not the ptr
+RAM:C591	     ;	 and (again) writes to ROM @$0000
+RAM:C591	     ; * VERIFIED on the ZX Spectrum emulator!
+RAM:C591	     ;
 RAM:C591
 RAM:C591	     ; =============== S U B R O U T I N E =======================================
 RAM:C591
@@ -8079,29 +8086,29 @@ RAM:D077
 RAM:D077	     kempston:
 RAM:D077 DB 1F			     in	     a,	(0x1F)
 RAM:D079 0E 00			     ld	     c,	#0
-RAM:D07B CB 47			     bit     0,	a
+RAM:D07B CB 47			     bit     0,	a				     ; right?
 RAM:D07D 28 02			     jr	     Z,	loc_D081
-RAM:D07F CB C9			     set     1,	c
+RAM:D07F CB C9			     set     1,	c				     ; flag RIGHT
 RAM:D081
-RAM:D081	     loc_D081:
+RAM:D081	     loc_D081:							     ; left?
 RAM:D081 CB 4F			     bit     1,	a
 RAM:D083 28 02			     jr	     Z,	loc_D087
-RAM:D085 CB C1			     set     0,	c
+RAM:D085 CB C1			     set     0,	c				     ; flag LEFT
 RAM:D087
-RAM:D087	     loc_D087:
+RAM:D087	     loc_D087:							     ; down?
 RAM:D087 CB 57			     bit     2,	a
 RAM:D089 28 02			     jr	     Z,	loc_D08D
-RAM:D08B CB E1			     set     4,	c
+RAM:D08B CB E1			     set     4,	c				     ; flag PICKUP/DROP
 RAM:D08D
-RAM:D08D	     loc_D08D:
+RAM:D08D	     loc_D08D:							     ; up?
 RAM:D08D CB 5F			     bit     3,	a
 RAM:D08F 28 02			     jr	     Z,	loc_D093
-RAM:D091 CB D1			     set     2,	c
+RAM:D091 CB D1			     set     2,	c				     ; flag FORWARD
 RAM:D093
-RAM:D093	     loc_D093:
+RAM:D093	     loc_D093:							     ; fire?
 RAM:D093 CB 67			     bit     4,	a
 RAM:D095 28 02			     jr	     Z,	loc_D099
-RAM:D097 CB D9			     set     3,	c
+RAM:D097 CB D9			     set     3,	c				     ; flag JUMP
 RAM:D099
 RAM:D099	     loc_D099:
 RAM:D099 C3 11 D1		     jp	     finished_input
@@ -8154,40 +8161,40 @@ RAM:D0D9 3E 7F			     ld	     a,	#0x7F ;	''                          ; row 7
 RAM:D0DB CD F7 B5		     call    read_port
 RAM:D0DE CB 4F			     bit     1,	a				     ; SYM SHIFT? (right)
 RAM:D0E0 28 02			     jr	     Z,	loc_D0E4			     ; no, skip
-RAM:D0E2 CB C9			     set     1,	c
+RAM:D0E2 CB C9			     set     1,	c				     ; flag RIGHT
 RAM:D0E4
 RAM:D0E4	     loc_D0E4:							     ; 'M'? (left)
 RAM:D0E4 CB 57			     bit     2,	a
 RAM:D0E6 28 02			     jr	     Z,	loc_D0EA			     ; no, skip
-RAM:D0E8 CB C1			     set     0,	c
+RAM:D0E8 CB C1			     set     0,	c				     ; flag LEFT
 RAM:D0EA
 RAM:D0EA	     loc_D0EA:							     ; 'N'? (right)
 RAM:D0EA CB 5F			     bit     3,	a
 RAM:D0EC 28 02			     jr	     Z,	loc_D0F0			     ; no, skip
-RAM:D0EE CB C9			     set     1,	c
+RAM:D0EE CB C9			     set     1,	c				     ; flag RIGHT
 RAM:D0F0
 RAM:D0F0	     loc_D0F0:							     ; 'B'? (left)
 RAM:D0F0 CB 67			     bit     4,	a
 RAM:D0F2 28 02			     jr	     Z,	loc_D0F6
-RAM:D0F4 CB C1			     set     0,	c
+RAM:D0F4 CB C1			     set     0,	c				     ; flag LEFT
 RAM:D0F6
 RAM:D0F6	     loc_D0F6:							     ; row 1,6 (2nd row) A,S,F,G,G,H,J,K,L,ENTER (FORWARD)
 RAM:D0F6 3E BD			     ld	     a,	#0xBD ;	'½'
 RAM:D0F8 CD F7 B5		     call    read_port
 RAM:D0FB 28 02			     jr	     Z,	loc_D0FF
-RAM:D0FD CB D1			     set     2,	c
+RAM:D0FD CB D1			     set     2,	c				     ; flag FORWARD
 RAM:D0FF
 RAM:D0FF	     loc_D0FF:							     ; row 2,5 (1st row) QWERTYUIOP (JUMP)
 RAM:D0FF 3E DB			     ld	     a,	#0xDB ;	'Û'
 RAM:D101 CD F7 B5		     call    read_port
 RAM:D104 28 02			     jr	     Z,	loc_D108
-RAM:D106 CB D9			     set     3,	c
+RAM:D106 CB D9			     set     3,	c				     ; flag JUMP
 RAM:D108
 RAM:D108	     loc_D108:							     ; row 3,4 (0-9) (PICKUP/DROP)
 RAM:D108 3E E7			     ld	     a,	#0xE7 ;	'ç'
 RAM:D10A CD F7 B5		     call    read_port
 RAM:D10D 28 02			     jr	     Z,	finished_input
-RAM:D10F CB E1			     set     4,	c
+RAM:D10F CB E1			     set     4,	c				     ; flag PICKUP/DROP
 RAM:D111
 RAM:D111	     finished_input:						     ; (3rd row) SHIFT,Z,X,C,V,SPACE,SYMSHIFT,M,N,B (LEFT/RIGHT)
 RAM:D111 3E 7E			     ld	     a,	#0x7E ;	'~'
