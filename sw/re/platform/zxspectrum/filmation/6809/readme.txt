@@ -34,16 +34,25 @@ Please refer to the original ZX Spectrum documentation for the back story, rules
 and object of the game. The only difference in the Coco version is the mapping
 of the inputs.
 
-Currently the inputs are restricted to a single key per function, and joystick
-support is not yet implemented. As a result, only rotational (non-directional)
-inputs are supported.
+Currently the inputs are restricted to a single key per function, unlike the
+original which maps the entire keyboard.
 
-START GAME      <0>
-LEFT            <Z>
-RIGHT           <X>
-FORWARD         <A>
-JUMP            <Q>
-PICK-UP/DROP    <1>
+Rotational Controls: (Keyboard, Joystick)
+LEFT            <Z>           <LEFT>
+RIGHT           <X>           <RIGHT>
+FORWARD         <A>           <UP>
+JUMP            <Q>           <Z>
+PICK-UP/DROP    <1>           <DOWN>
+
+Directional Controls: (Joystick only - currently implemented on keyboard)
+NORTH           <UP>
+SOUTH           <DOWN>
+EAST            <RIGHT>
+WEST            <LEFT>
+JUMP            <Z>
+PICK-UP/DROP    <X>
+
+Miscellaneous Controls:
 PAUSE GAME      <SPACE>
 
 
@@ -72,7 +81,7 @@ sharpen the outline of some sprites.
 Updated the Main Menu specifically for the Coco3 port. Added the ability to
 select keyboard/joystick and directional controls.
 
-Added support for (non-)directional joystick input.
+Added support for directional & rotational joystick input.
 
 
 CocoFEST Demo Version 1.0

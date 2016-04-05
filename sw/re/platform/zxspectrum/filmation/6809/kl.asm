@@ -47,12 +47,19 @@ CAULDRON_SCREEN     .equ    136
 ; *** extra one for debugging
 ;START_LOC           .equ    138
 
-; inputs            
+; inputs (rotational)
 INP_LEFT            .equ    1<<0
 INP_RIGHT           .equ    1<<1
 INP_FORWARD         .equ    1<<2
 INP_JUMP            .equ    1<<3
 INP_PICKUP_DROP     .equ    1<<4
+; inputs (directional)
+INP_W               .equ    1<<0
+INP_E               .equ    1<<1
+INP_N               .equ    1<<2
+INP_JUMP            .equ    1<<3
+INP_S               .equ    1<<4
+INP_DIR_PICKUP_DROP .equ    1<<5
 ; flags7            
 FLAG_VFLIP          .equ    1<<7
 FLAG_HFLIP          .equ    1<<6
@@ -2706,8 +2713,21 @@ sprite_scratchpad:
         .ds 32
 
 chk_pickup_drop:
+        ldu     #user_input_method
+        lda     ,u
+        anda    #6                      ; keybd/joystick bits only
+        pshs    cc
         lda     user_input
-        anda    #INP_PICKUP_DROP
+        puls    cc                      ; keyboard?
+        beq     1$                      ; yes, skip
+        lda     ,u
+        bita    #(1<<3)                 ; directional?
+        pshs    cc
+        lda     user_input
+        puls    cc
+        beq     1$                      ; no, skip
+        rora                            ; bit5->bit4 (for comparison purposes only)
+1$:     anda    #INP_PICKUP_DROP
         rts
 
 handle_pickup_drop:
@@ -2757,7 +2777,7 @@ handle_pickup_drop:
         leay    32,y
         decb
         bne     2$
-        bsr     chk_pickup_drop
+        jsr     chk_pickup_drop
         beq     done_pickup_drop
         ldb     #2
         lda     8,x                     ; scrn
@@ -3848,24 +3868,70 @@ chk_plyr_OOB:
 9$:     rts
          
 handle_left_right:
-; directional stuff
-        bra     left_right_non_directional
-        rts
+        lda     user_input_method
+        bita    #6                      ; keybd/joystick bits
+        beq     left_right_rotational   ; keybd, skip
+        bita    #(1<<3)                 ; directional?
+        beq     left_right_rotational   ; no, skip
+        lda     12,x                    ; flags12
+        bita    #MASK_ENTERING_SCRN
+        bne     9$
+        bita    #FLAG_Z_OOB
+        beq     9$
+        bitb    #INP_W
+        bne     1$                      ; W has precedence over N???
+        bitb    #INP_N
+        bne     chk_facing_N
+1$:     bitb    #INP_E
+        bne     chk_facing_E
+        bitb    #INP_S
+        bne     chk_facing_S
+        bitb    #INP_W
+        bne     chk_facing_W
+        andb    #~INP_FORWARD           ; don't move
+9$:     rts
 
-left_right_non_directional:
+chk_facing_N:
+        jsr     get_sprite_dir          ; ->A
+        cmpa    #2                      ; already N?
+loc_C8D2:
+        beq     flag_forward            ; yes, go
+        coma
+loc_C8D5:
+        anda    #1
+        bra     left_right_calc_sprite
+chk_facing_E:
+        jsr     get_sprite_dir          ; ->A
+        cmpa    #1                      ; already E?
+        bra     loc_C8D2
+chk_facing_S:
+        jsr     get_sprite_dir          ; ->A
+        cmpa    #3                      ; already S?
+loc_C8E5:
+        beq     flag_forward            ; yes, go
+        bra     loc_C8D5
+chk_facing_W:
+        jsr     get_sprite_dir          ; ->A
+        tsta                            ; already W?
+        bra     loc_C8E5                ; yes, go
+flag_forward:
+        orb     #INP_FORWARD
+        rts        
+                      
+left_right_rotational:
         lda     13,x                    ; flags13
         anda    #7                      ; too soon to turn (again)?
         beq     1$                      ; no, go
         dec     13,x                    ; flags13 - dec turn counter
-        rts
+0$:     rts
 1$:     bitb    #INP_LEFT|INP_RIGHT
-        beq     9$                      ; no, exit
+        beq     0$                      ; no, exit
         lda     12,x                    ; flags12
         anda    #MASK_ENTERING_SCRN
-        bne     9$
+        bne     0$
         lda     12,x                    ; flags12
         anda    #FLAG_JUMPING
-        bne     9$
+        bne     0$
         bitb    #INP_FORWARD
         bne     2$
         pshs    b
@@ -3875,6 +3941,7 @@ left_right_non_directional:
         ora     #2                      ; init turn delay counter
         sta     13,x                    ; flags13
         bitb    #INP_RIGHT
+left_right_calc_sprite:        
         bne     5$
         lda     7,x                     ; flags7
         bita    #FLAG_HFLIP
@@ -4859,28 +4926,33 @@ joystick:
         jsr     read_port
         bita    #(1<<3)                 ; <RIGHT>?
         beq     1$
-        orb     #INP_RIGHT
+        orb     #INP_RIGHT              ; aka #INP_E
 1$:     lda     #~(1<<5)
         jsr     read_port
         bita    #(1<<3)                 ; <LEFT>?
         beq     2$
-        orb     #INP_LEFT
+        orb     #INP_LEFT               ; aka #INP_W
 2$:     lda     #~(1<<4)
         jsr     read_port
         bita    #(1<<3)                 ; <DOWN>?
         beq     3$
-        orb     #INP_PICKUP_DROP
+        orb     #INP_PICKUP_DROP        ; aka #INP_S
 3$:     lda     #~(1<<3)
         jsr     read_port
         bita    #(1<<3)                 ; <UP>?
         beq     4$
-        orb     #INP_FORWARD
+        orb     #INP_FORWARD            ; aka #INP_N
 4$:     lda     #~(1<<2)
         jsr     read_port
         bita    #(1<<3)                 ; <Z>?
         beq     5$
         orb     #INP_JUMP
-5$:     bra     finished_input                
+5$:     lda     #~(1<<0)
+        jsr     read_port
+        bita    #(1<<3)                 ; <X>?
+        beq     6$                      ; no, skip
+        orb     #INP_DIR_PICKUP_DROP
+6$:     bra     finished_input                
 keyboard:
         lda     #~(1<<2)
         jsr     read_port
