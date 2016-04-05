@@ -4942,15 +4942,13 @@ joystick:
         bita    #(1<<3)                 ; <UP>?
         beq     4$
         orb     #INP_FORWARD            ; aka #INP_N
-4$:     lda     #~(1<<2)
+4$:     lda     #0xff                   ; no keys, only buttons
         jsr     read_port
-        bita    #(1<<3)                 ; <Z>?
+        bita    #(1<<0)                 ; button 1?
         beq     5$
         orb     #INP_JUMP
-5$:     lda     #~(1<<0)
-        jsr     read_port
-        bita    #(1<<3)                 ; <X>?
-        beq     6$                      ; no, skip
+5$:     bita    #(1<<1)                 ; button 2?
+        beq     6$
         orb     #INP_DIR_PICKUP_DROP
 6$:     bra     finished_input                
 keyboard:
