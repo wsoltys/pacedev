@@ -184,6 +184,9 @@ void knight_lore (void)
   unsigned t;
   unsigned w, h;
 
+  fprintf (stderr, "%s()\n", __FUNCTION__);
+  
+#if 0
 	fp = fopen ("knightlore.sna", "rb");
 	if (!fp)
 		exit (0);
@@ -194,6 +197,11 @@ void knight_lore (void)
 	fclose (fp);
 
   dump_sna_hdr ((PSNAHDR)&ram[16384-27]);
+#else
+  fp = fopen ("farrow.bin", "rb");
+  fread (ram, sizeof(uint8_t), 0x10000, fp);
+  fclose (fp);
+#endif
   
 	fp = fopen ("knightlore.bin", "wb");
 	// write the relevant areas
