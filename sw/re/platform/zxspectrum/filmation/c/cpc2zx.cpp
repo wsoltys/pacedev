@@ -435,16 +435,21 @@ int main (int argc, char *argv[])
                 sprite_n, ram_cpc[p+0]);
     fprintf (fp2, "static uint8_t spr_%03d[] __FORCE_RODATA__ =\n{\n  %d, %d, %d,\n",
               sprite_n, w, h, f);
-    fprintf (fp3, "spr_%03d:\n  .db %d, %d, %d,\n",
+    fprintf (fp3, "spr_%03d:\n  .db %d, %d, %d\n",
               sprite_n++, w, h, f);
     unsigned i;
     p += 3;
     for (unsigned i=0; i<w*h; i++, p++)
     {
+      uint8_t d = ram_cpc[p];
+      
       if ((i%8)==0) fprintf (fp2, "  ");
       if ((i%8)==0) fprintf (fp3, "  .db ");
       fprintf (fp2, "0x%02X, ", ram_cpc[p]);
-      fprintf (fp3, "0x%02X%c ", ram_cpc[p], 
+      
+      d = (d&0x80) | ((d&8)<<3) | ((d&0x40)>>1) | ((d&4)<<2) | 
+          ((d&0x20)>>2) | ((d&2)<<1) | ((d&0x10)>>3) | (d&1);
+      fprintf (fp3, "0x%02X%c ", d, 
                 ((i%8)==7 || i==w*h-1 ? ' ' : ','));
       if ((i%8)==7) fprintf (fp2, "\n");
       if ((i%8)==7) fprintf (fp3, "\n");
