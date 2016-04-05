@@ -4741,7 +4741,7 @@ RAM:BD5A CB 63			     bit     4,	e				     ; '5' (directional control)?
 RAM:BD5C 28 27			     jr	     Z,	clr_debounce			     ; no, skip
 RAM:BD5E CB 46			     bit     0,	(hl)				     ; was pressed last	time?
 RAM:BD60 20 0A			     jr	     NZ, check_for_start_game		     ; yes, skip
-RAM:BD62 CB C6			     set     0,	(hl)				     ; set directional
+RAM:BD62 CB C6			     set     0,	(hl)				     ; set debounce
 RAM:BD64 3A A4 5B		     ld	     a,	(user_input_method)
 RAM:BD67 EE 08			     xor     #8					     ; toggle directional
 RAM:BD69 32 A4 5B		     ld	     (user_input_method), a
@@ -6704,70 +6704,70 @@ RAM:C89F	     handle_left_right:
 RAM:C89F 21 A4 5B		     ld	     hl, #user_input_method
 RAM:C8A2 7E			     ld	     a,	(hl)
 RAM:C8A3 E6 06			     and     #6					     ; joystick/keyboard bits only
-RAM:C8A5 28 4B			     jr	     Z,	left_right_non_directional	     ; keybd? yes, skip
+RAM:C8A5 28 4B			     jr	     Z,	left_right_rotational		     ; keybd? yes, skip
 RAM:C8A7 CB 5E			     bit     3,	(hl)				     ; directional?
-RAM:C8A9 28 47			     jr	     Z,	left_right_non_directional
+RAM:C8A9 28 47			     jr	     Z,	left_right_rotational
 RAM:C8AB DD 7E 0C		     ld	     a,	12(ix)				     ; flags12
 RAM:C8AE E6 F0			     and     #0xF0 ; 'ð'                             ; entering screen?
 RAM:C8B0 C0			     ret     NZ					     ; yes, exit
 RAM:C8B1 DD CB 0C 56		     bit     2,	12(ix)				     ; Z OOB?
 RAM:C8B5 C8			     ret     Z					     ; no, exit
-RAM:C8B6 CB 41			     bit     0,	c
-RAM:C8B8 20 04			     jr	     NZ, loc_C8BE
-RAM:C8BA CB 51			     bit     2,	c
-RAM:C8BC 20 0F			     jr	     NZ, loc_C8CD
+RAM:C8B6 CB 41			     bit     0,	c				     ; joystick	left?
+RAM:C8B8 20 04			     jr	     NZ, loc_C8BE			     ; yes, skip
+RAM:C8BA CB 51			     bit     2,	c				     ; joystick	up?
+RAM:C8BC 20 0F			     jr	     NZ, chk_facing_N			     ; yes, skip
 RAM:C8BE
-RAM:C8BE	     loc_C8BE:
+RAM:C8BE	     loc_C8BE:							     ; joystick	right?
 RAM:C8BE CB 49			     bit     1,	c
-RAM:C8C0 20 17			     jr	     NZ, loc_C8D9
-RAM:C8C2 CB 61			     bit     4,	c
-RAM:C8C4 20 1A			     jr	     NZ, loc_C8E0
-RAM:C8C6 CB 41			     bit     0,	c
-RAM:C8C8 20 1F			     jr	     NZ, loc_C8E9
+RAM:C8C0 20 17			     jr	     NZ, chk_facing_E			     ; yes, go
+RAM:C8C2 CB 61			     bit     4,	c				     ; joystick	down?
+RAM:C8C4 20 1A			     jr	     NZ, chk_facing_S			     ; yes, go
+RAM:C8C6 CB 41			     bit     0,	c				     ; joystick	left?
+RAM:C8C8 20 1F			     jr	     NZ, chk_facing_W			     ; yes, go
 RAM:C8CA CB 91			     res     2,	c
 RAM:C8CC C9			     ret
 RAM:C8CD	     ; ---------------------------------------------------------------------------
 RAM:C8CD
-RAM:C8CD	     loc_C8CD:
+RAM:C8CD	     chk_facing_N:
 RAM:C8CD CD 1E CA		     call    get_sprite_dir
-RAM:C8D0 FE 02			     cp	     #2
+RAM:C8D0 FE 02			     cp	     #2					     ; N?
 RAM:C8D2
 RAM:C8D2	     loc_C8D2:
-RAM:C8D2 28 1B			     jr	     Z,	loc_C8EF
+RAM:C8D2 28 1B			     jr	     Z,	flag_forward
 RAM:C8D4 2F			     cpl
 RAM:C8D5
 RAM:C8D5	     loc_C8D5:
 RAM:C8D5 E6 01			     and     #1
-RAM:C8D7 18 46			     jr	     loc_C91F
+RAM:C8D7 18 46			     jr	     left_right_calc_sprite
 RAM:C8D9	     ; ---------------------------------------------------------------------------
 RAM:C8D9
-RAM:C8D9	     loc_C8D9:
+RAM:C8D9	     chk_facing_E:
 RAM:C8D9 CD 1E CA		     call    get_sprite_dir
-RAM:C8DC FE 01			     cp	     #1
+RAM:C8DC FE 01			     cp	     #1					     ; E?
 RAM:C8DE 18 F2			     jr	     loc_C8D2
 RAM:C8E0	     ; ---------------------------------------------------------------------------
 RAM:C8E0
-RAM:C8E0	     loc_C8E0:
+RAM:C8E0	     chk_facing_S:
 RAM:C8E0 CD 1E CA		     call    get_sprite_dir
-RAM:C8E3 FE 03			     cp	     #3
+RAM:C8E3 FE 03			     cp	     #3					     ; S?
 RAM:C8E5
 RAM:C8E5	     loc_C8E5:
-RAM:C8E5 28 08			     jr	     Z,	loc_C8EF
+RAM:C8E5 28 08			     jr	     Z,	flag_forward
 RAM:C8E7 18 EC			     jr	     loc_C8D5
 RAM:C8E9	     ; ---------------------------------------------------------------------------
 RAM:C8E9
-RAM:C8E9	     loc_C8E9:
+RAM:C8E9	     chk_facing_W:
 RAM:C8E9 CD 1E CA		     call    get_sprite_dir
-RAM:C8EC A7			     and     a
+RAM:C8EC A7			     and     a					     ; W?
 RAM:C8ED 18 F6			     jr	     loc_C8E5
 RAM:C8EF	     ; ---------------------------------------------------------------------------
 RAM:C8EF
-RAM:C8EF	     loc_C8EF:
+RAM:C8EF	     flag_forward:
 RAM:C8EF CB D1			     set     2,	c
 RAM:C8F1 C9			     ret
 RAM:C8F2	     ; ---------------------------------------------------------------------------
 RAM:C8F2
-RAM:C8F2	     left_right_non_directional:
+RAM:C8F2	     left_right_rotational:
 RAM:C8F2 DD 7E 0D		     ld	     a,	13(ix)
 RAM:C8F5 E6 07			     and     #7					     ; too soon	to turn	again?
 RAM:C8F7 28 04			     jr	     Z,	loc_C8FD			     ; no, skip
@@ -6796,7 +6796,7 @@ RAM:C918 F6 02			     or	     #2					     ; init turning delay counter
 RAM:C91A DD 77 0D		     ld	     13(ix), a
 RAM:C91D CB 49			     bit     1,	c				     ; right?
 RAM:C91F
-RAM:C91F	     loc_C91F:							     ; yes, skip
+RAM:C91F	     left_right_calc_sprite:					     ; yes, skip
 RAM:C91F 20 1F			     jr	     NZ, loc_C940
 RAM:C921 DD CB 07 76		     bit     6,	7(ix)				     ; hflip?
 RAM:C925 20 08			     jr	     NZ, loc_C92F			     ; yes, skip
@@ -8207,7 +8207,7 @@ RAM:D11C CD F7 B5		     call    read_port
 RAM:D11F B0			     or	     b
 RAM:D120 C1			     pop     bc
 RAM:D121 28 02			     jr	     Z,	loc_D125
-RAM:D123 CB E9			     set     5,	c
+RAM:D123 CB E9			     set     5,	c				     ; flag PICKUP/DROP	(directional)
 RAM:D125
 RAM:D125	     loc_D125:
 RAM:D125 79			     ld	     a,	c
