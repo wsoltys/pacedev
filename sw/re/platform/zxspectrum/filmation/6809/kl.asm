@@ -2345,7 +2345,7 @@ do_menu_selection:
         bne     1$
         jsr     clear_scrn_buffer
         jsr     display_menu
-        bsr     flash_menu
+        jsr     flash_menu
         
 menu_loop:
         jsr     display_menu
@@ -2368,15 +2368,29 @@ menu_loop:
         lda     #~(1<<1)
         jsr     read_port
         bita    #(1<<4)                 ; <1>?
-        beq     check_for_joystick
+        beq     check_for_joystick_1
         andb    #0xf9                   ; mask off bits 2,1
-check_for_joystick:        
+check_for_joystick_1:        
         lda     #~(1<<2)
         jsr     read_port
         bita    #(1<<4)                 ; <2>?
+        beq     check_for_joystick_2
+        andb    #0xf9                   ; mask off bits 2,1
+        orb     #2                      ; set bit 1
+check_for_joystick_2:        
+        lda     #~(1<<3)
+        jsr     read_port
+        bita    #(1<<4)                 ; <3>?
+        beq     check_for_sega_gamepad
+        andb    #0xf9                   ; mask off bits 2,1
+        orb     #4                      ; set bit 2
+check_for_sega_gamepad:        
+        lda     #~(1<<4)
+        jsr     read_port
+        bita    #(1<<4)                 ; <4>?
         beq     check_for_directional_control
         andb    #0xf9                   ; mask off bits 2,1
-        orb     #(1<<1)                 ; set bit 1
+        orb     #6                      ; set bits 2,1
 check_for_directional_control:
         stb     user_input_method
         lda     #~(1<<5)
@@ -2401,7 +2415,7 @@ check_for_start_game:
 				rts
 2$:     inc     seed_1
         bsr     flash_menu
-        bra     menu_loop        
+        jmp     menu_loop        
 
 clr_debounce:
         clr     debounce_5
@@ -2446,11 +2460,15 @@ menu_text:
         .db 4, 0x26, 0x12, 0x17, 0x1D, 0xE, 0x1B, 0xF, 0xA, 0xC
         .db 0xE, 0x26, 0x12, 0x92
 .else
-; "2 JOYSTICK"
-        .db 2, 0x26, 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
-; ""
-        .db 0xA6        
-; ""
+; "2 1 BUTTON JOYSTICK"
+        .db 2, 0x26, 1, 0x26, 0x0B, 0x1E, 0x1D, 0x1D, 0x18, 0x17, 0x26
+        .db 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
+; "3 2 BUTTON JOYSTICK"
+        .db 3, 0x26, 2, 0x26, 0x0B, 0x1E, 0x1D, 0x1D, 0x18, 0x17, 0x26
+        .db 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
+; "4 SEGA GAMEPAD"
+        .db 4, 0x26, 0x1C, 0x0E, 0x10, 0x0A, 0x26
+        .db 0x10, 0x0A, 0x16, 0x0E, 0x19, 0x0A, 0x0D
         .db 0xA6        
 .endif        
 ; "5 DIRECTIONAL CONTROL"
@@ -4918,9 +4936,9 @@ check_user_input:
         rora
         anda    #3
         beq     keyboard
-        deca
+        deca                            ; 1-button joystick?
         beq     joystick
-        bra     keyboard
+        ; for now, all the same - fall thru
 joystick:
         lda     #~(1<<6)
         jsr     read_port
