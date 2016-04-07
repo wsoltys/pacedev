@@ -415,41 +415,55 @@ inipal:
 				ldx     #main_fisr              ; address
 				stx     0xFEF5
         andcc   #~0x40                  ; enable FIRQ in CPU
-        
+
+  ; setup the PIA for joystick
+  ; configure joystick axis selection as outputs
+        lda     PIA0+CRA
+        ldb     PIA0+CRB
+        ora     #(1<<5)|(1<<4)          ; CA2 as output
+        orb     #(1<<5)|(1<<4)          ; CB2 as output
+        sta     PIA0+CRA
+        stb     PIA1+CRB
+  ; configure sound register as outputs
+        lda     PIA1+CRA
+        anda    #~(1<<2)                ; select DDRA
+        sta     PIA1+CRA
+        lda     PIA1+DDRA
+        ora     #0xfc                   ; PA[7..2] as output
+        sta     PIA1+DDRA
+        lda     PIA1+CRA
+        ora     #(1<<2)                 ; select DATAA
+        sta     PIA1+CRA
+  ; configure comparator as input
+  ; we can do all of this by adding 1 line to above...
+        lda     PIA0+CRA
+        anda    #~(1<<2)                ; select DDRA
+        sta     PIA0+CRA
+        lda     PIA0+DDRA
+        anda    #~(1<<7)                ; PA7 as input
+        sta     PIA0+DDRA
+        lda     PIA0+CRA
+        ora     #(1<<2)                 ; select DATAA
+        sta     PIA0+CRA
+          
   .ifdef HAS_SOUND				
 
-				lda			0xff23
+				lda			PIA1+CRB
 				ora			#(1<<5)|(1<<4)					; set CB2 as output
 				ora			#(1<<3)									; enable sound
-				sta			0xff23
+				sta			PIA1+CRB
 
-    .ifdef USE_1BIT_SOUND				
 				; bit2 sets control/data register
-				lda     0xff23                  ; CRB
+				lda     PIA1+CRB                ; CRB
 				anda    #~(1<<2)                ; control register
-				sta     0xff23                  ; CRB
-				lda     0xff22                  ; DDRB
+				sta     PIA1+CRB                ; CRB
+				lda     PIA1+DDRB               ; DDRB
 				ora     #(1<<1)                 ; PB1 output
-				sta     0xff22                  ; DDRB
+				sta     PIA1+DDRB               ; DDRB
         ; setup for data register				
-				lda     0xff23                  ; CRB
+				lda     PIA1+CRB                ; CRB
 				ora     #(1<<2)                 ; data register
-				sta     0xff23                  ; CRB
-    .endif  ; USE_1BIT_SOUND
-
-    .ifdef USE_DAC_SOUND
-				; bit2 sets control/data register
-				lda     0xff21                  ; CRA
-				anda    #~(1<<2)                ; control register
-				sta     0xff21                  ; CRA
-				lda     0xff20                  ; DDRA
-				ora     #0xfc                   ; PA2-7 outputs
-				sta     0xff20                  ; DDRA
-        ; setup for data register				
-				lda     0xff21                  ; CRA
-				ora     #(1<<2)                 ; data register
-				sta     0xff21                  ; CRA
-    .endif  ; USE_DAC_SOUND
+				sta     PIA1+CRB                ; CRB
 
   .endif  ; HAS_SOUND
 
@@ -4931,35 +4945,68 @@ check_user_input:
         clrb
         lda     all_objs_in_cauldron
         ora     obj_dropping_into_cauldron
-        bne     finished_input
+        lbne    finished_input
         lda     user_input_method
         rora
         anda    #3
-        beq     keyboard
+        lbeq    keyboard
         deca                            ; 1-button joystick?
         beq     joystick
         ; for now, all the same - fall thru
 joystick:
-        lda     #~(1<<6)
-        jsr     read_port
-        bita    #(1<<3)                 ; <RIGHT>?
-        beq     1$
-        orb     #INP_RIGHT              ; aka #INP_E
-1$:     lda     #~(1<<5)
-        jsr     read_port
-        bita    #(1<<3)                 ; <LEFT>?
-        beq     2$
+        ; select right joystick, hoizontal axis
+        lda     PIA0+CRA
+        anda    #~(1<<3)                ; CA2=0 (msb)
+        sta     PIA0+CRA
+        lda     PIA0+CRB
+        anda    #~(1<<3)                ; CB2=0 (lsb)
+        sta     PIA0+CRB
+        ; set comparator value to 40%
+        lda     PIA1+DATAA
+        anda    #0x03                   ; clear value
+        ora     #0x64                   ; ~40%
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        bne     1$                      ; yes, skip
         orb     #INP_LEFT               ; aka #INP_W
-2$:     lda     #~(1<<4)
-        jsr     read_port
-        bita    #(1<<3)                 ; <DOWN>?
-        beq     3$
-        orb     #INP_PICKUP_DROP        ; aka #INP_S
-3$:     lda     #~(1<<3)
-        jsr     read_port
-        bita    #(1<<3)                 ; <UP>?
-        beq     4$
+        bra     2$
+        ; set comparator value to 60%
+1$:     lda     PIA1+DATAA
+        anda    #3                      ; clear value
+        ora     #0x98                   ; ~60%
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        beq     2$                      ; no, skip
+        orb     #INP_RIGHT              ; aka #INP_E
+        ; select right joystick, vertical axis
+2$:     lda     PIA0+CRA
+        anda    #~(1<<3)                ; CA2=0 (msb)
+        sta     PIA0+CRA
+        lda     PIA0+CRB
+        ora     #(1<<3)                 ; CB2=1 (lsb)
+        sta     PIA0+CRB
+        ; set comparator value to 40%
+        lda     PIA1+DATAA
+        anda    #0x03                   ; clear value
+        ora     #0x64                   ; ~40%
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        bne     3$                      ; yes, skip
         orb     #INP_FORWARD            ; aka #INP_N
+        bra     4$
+        ; set comparator value to 60%
+3$:     lda     PIA1+DATAA
+        anda    #3                      ; clear value
+        ora     #0x98                   ; ~60%
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        beq     4$                      ; no, skip
+        orb     #INP_PICKUP_DROP        ; aka #INP_S
+        ; read joystick buttons
 4$:     lda     #0xff                   ; no keys, only buttons
         jsr     read_port
         bita    #(1<<0)                 ; button 1?

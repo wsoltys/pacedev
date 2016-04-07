@@ -15,6 +15,12 @@
 
 PIA0				.equ		0xFF00
 PIA1				.equ		0xFF20
+DATAA       .equ    0x00
+DDRA        .equ    DATAA
+CRA         .equ    0x01
+DATAB       .equ    0x02
+DDRB        .equ    DATAB
+CRB         .equ    0x03
 
 KEYCOL			.equ		PIA0+2
 KEYROW			.equ		PIA0
