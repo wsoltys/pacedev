@@ -4982,10 +4982,10 @@ joystick:
         orb     #INP_RIGHT              ; aka #INP_E
         ; select right joystick, vertical axis
 2$:     lda     PIA0+CRA
-        anda    #~(1<<3)                ; CA2=0 (msb)
+        ora     #(1<<3)                 ; CA2=1 (msb)
         sta     PIA0+CRA
         lda     PIA0+CRB
-        ora     #(1<<3)                 ; CB2=1 (lsb)
+        anda    #~(1<<3)                ; CB2=0 (lsb)
         sta     PIA0+CRB
         ; set comparator value to 40%
         lda     PIA1+DATAA
