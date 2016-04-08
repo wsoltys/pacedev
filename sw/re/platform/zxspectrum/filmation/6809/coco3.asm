@@ -108,6 +108,16 @@ stack       .equ    0x77ff              ; 1792 bytes
 var_base    .equ    0x7800
 code_base		.equ		0x8000
 
+.define LEFT_JOYSTICK
+.ifdef LEFT_JOYSTICK
+  JOY_BTN1  .equ    (1<<2)
+  JOY_BTN2  .equ    (1<<3)
+.else
+  .define RIGHT_JOYSTICK
+  JOY_BTN1  .equ    (1<<0)
+  JOY_BTN2  .equ    (1<<1)
+.endif
+
 .define HAS_SOUND
 .ifdef HAS_SOUND
   .define USE_1BIT_SOUND

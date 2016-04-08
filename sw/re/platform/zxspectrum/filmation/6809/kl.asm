@@ -4954,12 +4954,16 @@ check_user_input:
         beq     joystick
         ; for now, all the same - fall thru
 joystick:
-        ; select right joystick, hoizontal axis
+        ; select left joystick, hoizontal axis
         lda     PIA0+CRA
-        anda    #~(1<<3)                ; CA2=0 (msb)
+        anda    #~(1<<3)                ; CA2=0 (lsb) horizontal
         sta     PIA0+CRA
         lda     PIA0+CRB
-        anda    #~(1<<3)                ; CB2=0 (lsb)
+.ifdef LEFT_JOYSTICK
+        ora     #(1<<3)                 ; CB2=1 (msb) left joystick
+.else
+        anda    #~(1<<3)                ; CB2=0 (msb) right joystick
+.endif
         sta     PIA0+CRB
         ; set comparator value to 40%
         lda     PIA1+DATAA
@@ -4980,13 +4984,10 @@ joystick:
         bita    #(1<<7)                 ; joystick greater?
         beq     2$                      ; no, skip
         orb     #INP_RIGHT              ; aka #INP_E
-        ; select right joystick, vertical axis
+        ; select vertical axis
 2$:     lda     PIA0+CRA
-        ora     #(1<<3)                 ; CA2=1 (msb)
+        ora     #(1<<3)                 ; CA2=1 (lsb) vertical
         sta     PIA0+CRA
-        lda     PIA0+CRB
-        anda    #~(1<<3)                ; CB2=0 (lsb)
-        sta     PIA0+CRB
         ; set comparator value to 40%
         lda     PIA1+DATAA
         anda    #0x03                   ; clear value
@@ -5009,10 +5010,10 @@ joystick:
         ; read joystick buttons
 4$:     lda     #0xff                   ; no keys, only buttons
         jsr     read_port
-        bita    #(1<<0)                 ; button 1?
+        bita    #JOY_BTN1
         beq     5$
         orb     #INP_JUMP
-5$:     bita    #(1<<1)                 ; button 2?
+5$:     bita    #JOY_BTN2
         beq     6$
         orb     #INP_DIR_PICKUP_DROP
 6$:     bra     finished_input                
