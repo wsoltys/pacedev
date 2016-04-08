@@ -110,12 +110,12 @@ code_base		.equ		0x8000
 
 .define LEFT_JOYSTICK
 .ifdef LEFT_JOYSTICK
-  JOY_BTN1  .equ    (1<<2)
+  JOY_BTN1  .equ    (1<<1)
   JOY_BTN2  .equ    (1<<3)
 .else
   .define RIGHT_JOYSTICK
   JOY_BTN1  .equ    (1<<0)
-  JOY_BTN2  .equ    (1<<1)
+  JOY_BTN2  .equ    (1<<2)
 .endif
 
 .define HAS_SOUND

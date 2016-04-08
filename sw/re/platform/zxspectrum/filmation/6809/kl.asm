@@ -416,14 +416,31 @@ inipal:
 				stx     0xFEF5
         andcc   #~0x40                  ; enable FIRQ in CPU
 
-  ; setup the PIA for joystick
+  ; setup the PIAS for joystick sampling
+  
   ; configure joystick axis selection as outputs
+  ; and also select left/right joystick
         lda     PIA0+CRA
         ldb     PIA0+CRB
         ora     #(1<<5)|(1<<4)          ; CA2 as output
         orb     #(1<<5)|(1<<4)          ; CB2 as output
+.ifdef LEFT_JOYSTICK
+        orb     #(1<<3)                 ; CB2=1 left joystick
+.else
+        andb    #~(1<<3)                ; CB2=0 right joystick
+.endif
         sta     PIA0+CRA
-        stb     PIA1+CRB
+        stb     PIA0+CRB
+  ; configure comparator as input
+        lda     PIA0+CRA
+        anda    #~(1<<2)                ; select DDRA
+        sta     PIA0+CRA
+        lda     PIA0+DDRA
+        anda    #~(1<<7)                ; PA7 as input
+        sta     PIA0+DDRA
+        lda     PIA0+CRA
+        ora     #(1<<2)                 ; select DATAA
+        sta     PIA0+CRA
   ; configure sound register as outputs
         lda     PIA1+CRA
         anda    #~(1<<2)                ; select DDRA
@@ -434,37 +451,23 @@ inipal:
         lda     PIA1+CRA
         ora     #(1<<2)                 ; select DATAA
         sta     PIA1+CRA
-  ; configure comparator as input
-  ; we can do all of this by adding 1 line to above...
-        lda     PIA0+CRA
-        anda    #~(1<<2)                ; select DDRA
-        sta     PIA0+CRA
-        lda     PIA0+DDRA
-        anda    #~(1<<7)                ; PA7 as input
-        sta     PIA0+DDRA
-        lda     PIA0+CRA
-        ora     #(1<<2)                 ; select DATAA
-        sta     PIA0+CRA
           
   .ifdef HAS_SOUND				
-
 				lda			PIA1+CRB
 				ora			#(1<<5)|(1<<4)					; set CB2 as output
 				ora			#(1<<3)									; enable sound
 				sta			PIA1+CRB
-
 				; bit2 sets control/data register
-				lda     PIA1+CRB                ; CRB
-				anda    #~(1<<2)                ; control register
-				sta     PIA1+CRB                ; CRB
-				lda     PIA1+DDRB               ; DDRB
+				lda     PIA1+CRB
+				anda    #~(1<<2)                ; select DDRB
+				sta     PIA1+CRB
+				lda     PIA1+DDRB
 				ora     #(1<<1)                 ; PB1 output
-				sta     PIA1+DDRB               ; DDRB
+				sta     PIA1+DDRB
         ; setup for data register				
-				lda     PIA1+CRB                ; CRB
-				ora     #(1<<2)                 ; data register
-				sta     PIA1+CRB                ; CRB
-
+				lda     PIA1+CRB
+				ora     #(1<<2)                 ; select DATAB
+				sta     PIA1+CRB
   .endif  ; HAS_SOUND
 
 .endif	; PLATFORM_COCO3
@@ -1453,7 +1456,7 @@ loc_B5C4:
 ; A=column (active low)
 ; returns A=row data (active high)
 read_port:
-				ldx			#PIA0
+				ldx			#KEYROW
 				sta			2,x											; column strobe
 				lda			,x											; active low
 				coma                            ; active high
@@ -4954,17 +4957,10 @@ check_user_input:
         beq     joystick
         ; for now, all the same - fall thru
 joystick:
-        ; select left joystick, hoizontal axis
+        ; select hoizontal axis
         lda     PIA0+CRA
-        anda    #~(1<<3)                ; CA2=0 (lsb) horizontal
+        anda    #~(1<<3)                ; CA2=0 horizontal
         sta     PIA0+CRA
-        lda     PIA0+CRB
-.ifdef LEFT_JOYSTICK
-        ora     #(1<<3)                 ; CB2=1 (msb) left joystick
-.else
-        anda    #~(1<<3)                ; CB2=0 (msb) right joystick
-.endif
-        sta     PIA0+CRB
         ; set comparator value to 40%
         lda     PIA1+DATAA
         anda    #0x03                   ; clear value
@@ -4986,7 +4982,7 @@ joystick:
         orb     #INP_RIGHT              ; aka #INP_E
         ; select vertical axis
 2$:     lda     PIA0+CRA
-        ora     #(1<<3)                 ; CA2=1 (lsb) vertical
+        ora     #(1<<3)                 ; CA2=1 vertical
         sta     PIA0+CRA
         ; set comparator value to 40%
         lda     PIA1+DATAA
