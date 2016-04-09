@@ -108,15 +108,26 @@ stack       .equ    0x77ff              ; 1792 bytes
 var_base    .equ    0x7800
 code_base		.equ		0x8000
 
+; equates to keyboard rows
+; - phantom keys appear accordingly
+RJOY_BTN1   .equ    (1<<0)
+LJOY_BTN1   .equ    (1<<1)
+LJOY_BTN2   .equ    (1<<2)
+RJOY_BTN2   .equ    (1<<3)
+
 .define LEFT_JOYSTICK
 .ifdef LEFT_JOYSTICK
-  JOY_BTN1  .equ    (1<<1)
-  JOY_BTN2  .equ    (1<<2)
+  JOY_BTN1  .equ    LJOY_BTN1
+  JOY_BTN2  .equ    LJOY_BTN2
 .else
   .define RIGHT_JOYSTICK
-  JOY_BTN1  .equ    (1<<0)
-  JOY_BTN2  .equ    (1<<3)
+  JOY_BTN1  .equ    RJOY_BTN1
+  JOY_BTN2  .equ    RJOY_BTN2
 .endif
+; high and low thresholds 
+; for 'digital' operation
+JOY_LO_TH   .equ    0x64                ; ~40%
+JOY_HI_TH   .equ    0x98                ; ~60%
 
 .define HAS_SOUND
 .ifdef HAS_SOUND

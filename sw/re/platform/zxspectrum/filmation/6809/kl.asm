@@ -2477,12 +2477,17 @@ menu_text:
         .db 4, 0x26, 0x12, 0x17, 0x1D, 0xE, 0x1B, 0xF, 0xA, 0xC
         .db 0xE, 0x26, 0x12, 0x92
 .else
-; "2 1 BUTTON JOYSTICK"
-        .db 2, 0x26, 1, 0x26, 0x0B, 0x1E, 0x1D, 0x1D, 0x18, 0x17, 0x26
+.ifdef LEFT_JOYSTICK
+; "2 LEFT JOYSTICK"
+        .db 2, 0x26, 0x15, 0x0E, 0x0F, 0x1D, 0x26
         .db 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
-; "3 2 BUTTON JOYSTICK"
-        .db 3, 0x26, 2, 0x26, 0x0B, 0x1E, 0x1D, 0x1D, 0x18, 0x17, 0x26
+.else
+; "2 RIGHT JOYSTICK"
+        .db 2, 0x26, 0x1B, 0x12, 0x10, 0x11, 0x1D, 0x26
         .db 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
+.endif
+; ""
+        .db 0xA6
 ; "4 SEGA GAMEPAD"
         .db 4, 0x26, 0x1C, 0x0E, 0x10, 0x0A, 0x26
         .db 0x10, 0x0A, 0x16, 0x0E, 0x19, 0x0A, 0x0D
@@ -4964,7 +4969,7 @@ joystick:
         ; set comparator value to 40%
         lda     PIA1+DATAA
         anda    #0x03                   ; clear value
-        ora     #0x64                   ; ~40%
+        ora     #JOY_LO_TH              ; low threshold
         sta     PIA1+DATAA
         lda     PIA0+DATAA              ; comparator
         bita    #(1<<7)                 ; joystick greater?
@@ -4974,7 +4979,7 @@ joystick:
         ; set comparator value to 60%
 1$:     lda     PIA1+DATAA
         anda    #3                      ; clear value
-        ora     #0x98                   ; ~60%
+        ora     #JOY_HI_TH              ; high threshold
         sta     PIA1+DATAA
         lda     PIA0+DATAA              ; comparator
         bita    #(1<<7)                 ; joystick greater?
@@ -4987,7 +4992,7 @@ joystick:
         ; set comparator value to 40%
         lda     PIA1+DATAA
         anda    #0x03                   ; clear value
-        ora     #0x64                   ; ~40%
+        ora     #JOY_LO_TH              ; low threshold
         sta     PIA1+DATAA
         lda     PIA0+DATAA              ; comparator
         bita    #(1<<7)                 ; joystick greater?
@@ -4997,7 +5002,7 @@ joystick:
         ; set comparator value to 60%
 3$:     lda     PIA1+DATAA
         anda    #3                      ; clear value
-        ora     #0x98                   ; ~60%
+        ora     #JOY_HI_TH              ; hi threshold
         sta     PIA1+DATAA
         lda     PIA0+DATAA              ; comparator
         bita    #(1<<7)                 ; joystick greater?
