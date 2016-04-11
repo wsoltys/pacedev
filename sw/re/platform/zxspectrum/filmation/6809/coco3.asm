@@ -112,10 +112,10 @@ code_base		.equ		0x8000
 ; - phantom keys appear accordingly
 RJOY_BTN1   .equ    (1<<0)
 LJOY_BTN1   .equ    (1<<1)
-LJOY_BTN2   .equ    (1<<2)
-RJOY_BTN2   .equ    (1<<3)
+RJOY_BTN2   .equ    (1<<2)
+LJOY_BTN2   .equ    (1<<3)
 
-.define LEFT_JOYSTICK
+;.define LEFT_JOYSTICK
 .ifdef LEFT_JOYSTICK
   JOY_BTN1  .equ    LJOY_BTN1
   JOY_BTN2  .equ    LJOY_BTN2

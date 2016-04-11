@@ -2391,23 +2391,16 @@ check_for_joystick_1:
         lda     #~(1<<2)
         jsr     read_port
         bita    #(1<<4)                 ; <2>?
-        beq     check_for_joystick_2
+        beq     check_for_sega_gamepad
         andb    #0xf9                   ; mask off bits 2,1
         orb     #2                      ; set bit 1
-check_for_joystick_2:        
+check_for_sega_gamepad:        
         lda     #~(1<<3)
         jsr     read_port
         bita    #(1<<4)                 ; <3>?
-        beq     check_for_sega_gamepad
-        andb    #0xf9                   ; mask off bits 2,1
-        orb     #4                      ; set bit 2
-check_for_sega_gamepad:        
-        lda     #~(1<<4)
-        jsr     read_port
-        bita    #(1<<4)                 ; <4>?
         beq     check_for_directional_control
         andb    #0xf9                   ; mask off bits 2,1
-        orb     #6                      ; set bits 2,1
+        orb     #4                      ; set bit 2
 check_for_directional_control:
         stb     user_input_method
         lda     #~(1<<5)
@@ -2486,12 +2479,12 @@ menu_text:
         .db 2, 0x26, 0x1B, 0x12, 0x10, 0x11, 0x1D, 0x26
         .db 0x13, 0x18, 0x22, 0x1C, 0x1D, 0x12, 0xC, 0x94
 .endif
-; ""
-        .db 0xA6
-; "4 SEGA GAMEPAD"
-        .db 4, 0x26, 0x1C, 0x0E, 0x10, 0x0A, 0x26
+; "3 SEGA GAMEPAD"
+        .db 3, 0x26, 0x1C, 0x0E, 0x10, 0x0A, 0x26
         .db 0x10, 0x0A, 0x16, 0x0E, 0x19, 0x0A, 0x0D
         .db 0xA6        
+; ""
+        .db 0xA6
 .endif        
 ; "5 DIRECTIONAL CONTROL"
         .db 5, 0x26, 0xD, 0x12, 0x1B, 0xE, 0xC, 0x1D, 0x12, 0x18
