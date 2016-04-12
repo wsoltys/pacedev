@@ -5,9 +5,6 @@
 //
 //  KNOWN BUGS:
 //
-// * Entering a room from a suspended arch in the previous room
-//   leaves you hanging in the air, unable to move
-//
 // * One of the rooms (yet to be documented) kills you as soon
 //   as you enter it, for the first time only
 //
@@ -26,7 +23,7 @@
 //#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
-//#define BUILD_OPT_ALMOST_INVINCIBLE
+#define BUILD_OPT_ALMOST_INVINCIBLE
 //#define BUILD_OPT_ALWAYS_RENDER_ALL
 
 #pragma pack(1)
@@ -80,7 +77,7 @@
 //#define START_LOC           179
 //#define START_LOC           143
 // *** extra one for debugging
-#define START_LOC           9
+#define START_LOC           119
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -4489,12 +4486,12 @@ void adjust_plyr_Z_for_arch (POBJ32 p_obj, uint8_t xy)
 
   // max 4 arches, must be first 4 objects in room  
   p_other = other_objs_here;
-  for (i=0; i<4; i++, p_other++)
+  for (i=0; i<4; i++, p_other+=2)
   {
     // no more arches?
     if (p_other->graphic_no >= 6)
       return;
-    if ((p_other->x + p_other->y) == xy)
+    if ((uint8_t)(p_other->x + p_other->y) == xy)
     {
       p_obj->z = p_other->z;
       p_next_obj->z = p_other->z + 12;
