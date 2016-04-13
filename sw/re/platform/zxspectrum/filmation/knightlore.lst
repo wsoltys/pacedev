@@ -5276,7 +5276,7 @@ RAM:C093
 RAM:C093	     loc_C093:							     ; graphic no.
 RAM:C093 FD 7E 00		     ld	     a,	0(iy)
 RAM:C096 A7			     and     a					     ; null?
-RAM:C097 28 19			     jr	     Z,	loc_C0B2			     ; yes, skip
+RAM:C097 28 19			     jr	     Z,	room_to_drop			     ; yes, skip
 RAM:C099 FD 19			     add     iy, de				     ; next entry
 RAM:C09B 10 F6			     djnz    loc_C093				     ; loop
 RAM:C09D
@@ -5297,7 +5297,7 @@ RAM:C0AE 32 B3 5B		     ld	     (pickup_drop_pressed), a
 RAM:C0B1 C9			     ret
 RAM:C0B2	     ; ---------------------------------------------------------------------------
 RAM:C0B2
-RAM:C0B2	     loc_C0B2:
+RAM:C0B2	     room_to_drop:
 RAM:C0B2 21 E4 5B		     ld	     hl, #object_carried_2
 RAM:C0B5 7E			     ld	     a,	(hl)
 RAM:C0B6 23			     inc     hl
@@ -5329,7 +5329,7 @@ RAM:C0E4 FD E5			     push    iy
 RAM:C0E6 D1			     pop     de
 RAM:C0E7 13			     inc     de
 RAM:C0E8 23			     inc     hl
-RAM:C0E9 ED B0			     ldir
+RAM:C0E9 ED B0			     ldir					     ; copy x,y,z coordinates of player
 RAM:C0EB DD 7E 03		     ld	     a,	3(ix)				     ; Z
 RAM:C0EE C6 0C			     add     a,	#12
 RAM:C0F0 DD 77 03		     ld	     3(ix), a				     ; update Z
