@@ -5,9 +5,6 @@
 //
 //  KNOWN BUGS:
 //
-// * One of the rooms (yet to be documented) kills you as soon
-//   as you enter it, for the first time only
-//
 // * Randomly, dropping an item will cause it to disappear.
 //   Sometimes you can see sparkles as well
 //
@@ -23,7 +20,7 @@
 //#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
-#define BUILD_OPT_ALMOST_INVINCIBLE
+//#define BUILD_OPT_ALMOST_INVINCIBLE
 //#define BUILD_OPT_ALWAYS_RENDER_ALL
 
 #pragma pack(1)
@@ -77,7 +74,9 @@
 //#define START_LOC           179
 //#define START_LOC           143
 // *** extra one for debugging
-#define START_LOC           119
+//#define START_LOC           138       // near cauldron room
+//#define START_LOC           119       // near suspended arch
+//#define START_LOC           122       // near instant death room
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -408,11 +407,11 @@ void dump_graphic_objs_tbl (int start, int end)
   for (; i<end && i<MAX_OBJS; i++)
   {
     #ifdef DUMP_IN_HEX
-      DBGPRINTF ("%02d: graphic_no=%02X, s=%d, (%02X,%02X,%02X) %02Xx%02Xx%02X, f=$%02X @(%02X,%02X)\n",
+      DBGPRINTF ("%02d: graphic_no=%02X, s=%d, (%02X,%02X,%02X) %02Xx%02Xx%02X, f=$%02X,$%02X,$%02X @(%02X,%02X)\n",
     #else
-      DBGPRINTF ("%02d: graphic_no=%03d, s=%d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X @(%02d,%02d)\n",
+      DBGPRINTF ("%02d: graphic_no=%03d, s=%d, (%3d,%3d,%3d) %02dx%02dx%02d, f=$%02X,$%02X,$%02X @(%02d,%02d)\n",
     #endif
-              i,
+              graphic_objs_tbl[i].index,
               graphic_objs_tbl[i].graphic_no,
               graphic_objs_tbl[i].hw_sprite,
               graphic_objs_tbl[i].x,
@@ -422,6 +421,8 @@ void dump_graphic_objs_tbl (int start, int end)
               graphic_objs_tbl[i].depth,
               graphic_objs_tbl[i].height,
               graphic_objs_tbl[i].flags7,
+              graphic_objs_tbl[i].flags12,
+              graphic_objs_tbl[i].flags13,
               graphic_objs_tbl[i].pixel_x,
               graphic_objs_tbl[i].pixel_y);
   }
@@ -2992,6 +2993,7 @@ void find_special_objs_here (void)
   POBJ32 p_special_obj = special_objs_here;
   uint8_t n_special_objs_here = 0;
   unsigned i;
+  uint8_t index = 2;
    
   DBGPRINTF ("%s(): screen=%d\n", 
             __FUNCTION__,
@@ -3016,8 +3018,10 @@ void find_special_objs_here (void)
     memset (&p_special_obj->d_x, 0, 7);
     p_special_obj->u.ptr_obj_tbl_entry = i;
     memset (&p_special_obj->unused, 0, 32-20);
+    p_special_obj->index = index;
 
     p_special_obj++;
+    index++;
     n_special_objs_here++;
   }
 
@@ -3027,7 +3031,9 @@ void find_special_objs_here (void)
   for (; n_special_objs_here<2; n_special_objs_here++)
   {
     memset (p_special_obj, 0, sizeof(OBJ32));
+    p_special_obj->index = index;
     p_special_obj++;
+    index++;
   }
 }
 
@@ -3698,7 +3704,7 @@ int8_t adj_dX_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_
   unsigned  i;
   
   UNTESTED;
-  
+
   p_other = graphic_objs_tbl;
   for (i=0; i<MAX_OBJS; i++, p_other++)
   {
@@ -3810,12 +3816,10 @@ int8_t adj_dZ_for_obj_intersect (POBJ32 p_obj, int8_t d_x, int8_t d_y, int8_t d_
 // return (state of carry flag)
 uint8_t do_objs_intersect_on_x (POBJ32 p_obj, POBJ32 p_other, int8_t d_x)
 {
-  int8_t d, a;
+  uint8_t   d, a;
   
-  UNTESTED;
-
   d = p_obj->width + p_other->width;
-  a = abs((int8_t)(p_obj->x + d_x - p_other->x));
+  a = abs(p_obj->x + d_x - p_other->x);
     
   return (a < d ? 1 : 0);
 }
@@ -3823,12 +3827,10 @@ uint8_t do_objs_intersect_on_x (POBJ32 p_obj, POBJ32 p_other, int8_t d_x)
 // $CCB2
 uint8_t do_objs_intersect_on_y (POBJ32 p_obj, POBJ32 p_other, int8_t d_y)
 {
-  int8_t d, a;
+  uint8_t   d, a;
 
-  UNTESTED;
-  
   d = p_obj->depth + p_other->depth;
-  a = abs((int8_t)(p_obj->y + d_y - p_other->y));
+  a = abs(p_obj->y + d_y - p_other->y);
   
   return (a < d ? 1 : 0);
 }
@@ -4283,6 +4285,10 @@ void init_start_location (void)
   // start_loc_2
   plyr_spr_2_scratchpad.scrn = s;
   
+  // added for C version
+  plyr_spr_1_scratchpad.index = 0;
+  plyr_spr_2_scratchpad.index = 1;
+  
   DBGPRINTF ("%s(): start_location=%d\n", __FUNCTION__, s);
 }
 
@@ -4508,6 +4514,7 @@ void retrieve_screen (void)
   uint8_t room_size;
   unsigned p = 0;
   unsigned i;
+  uint8_t index = 0;
 
   uint8_t id;
   uint8_t size;
@@ -4566,6 +4573,7 @@ found_screen:
   size -= 2;
   
   // do the background objects
+  index = 4;
   for (; size && location_tbl[p] != 0xFF; size--, p++)
   {
     uint8_t *p_bg_obj;
@@ -4590,8 +4598,10 @@ found_screen:
 
       // bugfix!!!
       p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
+      p_other_objs->index = index;
 
       p_other_objs++;
+      index++;
       n_other_objs++;
     };
   }
@@ -4646,12 +4656,14 @@ found_screen:
 
         // bugfix!!!
         p_other_objs->u.ptr_obj_tbl_entry = (uint16_t)-1;
+        p_other_objs->index = index;
 
         // debug ONLY
         //if (p_other_objs->graphic_no == 182)
         //if (0)
         {
           p_other_objs++;
+          index++;
           n_other_objs++;
         }
       }
