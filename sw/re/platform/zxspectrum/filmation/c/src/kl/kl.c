@@ -5,8 +5,8 @@
 //
 //  KNOWN BUGS:
 //
-// * Randomly, dropping an item will cause it to disappear.
-//   Sometimes you can see sparkles as well
+// * (none)
+//
 //
 
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
@@ -20,7 +20,7 @@
 //#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
-#define BUILD_OPT_ALMOST_INVINCIBLE
+//#define BUILD_OPT_ALMOST_INVINCIBLE
 //#define BUILD_OPT_ALWAYS_RENDER_ALL
 
 #pragma pack(1)
@@ -2414,7 +2414,7 @@ void handle_pickup_drop (POBJ32 p_obj)
   p_obj->z = z;     // restore
 
   // audio - toggles FE directly
-  
+
   pickup_drop_pressed = 1;
   objects_carried_changed = 1;
   width = p_obj->width;
@@ -2430,13 +2430,14 @@ void handle_pickup_drop (POBJ32 p_obj)
     if (can_pickup_spec_obj (p_obj, p_other) != 0)
       goto pickup_object;
   }
+
   if (chk_pickup_drop () != 0)
   {
     uint8_t b = (p_obj->scrn == CAULDRON_SCREEN ? 1 : 2);
     p_other = special_objs_here;
     for (; b; b--)
       if (p_other->graphic_no == 0)
-        goto loc_C0B2;
+        goto room_to_drop;
   }
   
 done_pickup_drop:
@@ -2446,7 +2447,7 @@ done_pickup_drop:
   p_obj->width = width;
   return;
   
-loc_C0B2:
+room_to_drop:
   if (objects_carried[2].graphic_no == 0)
     goto adjust_carried;
   if (cant_drop != 0)
@@ -2500,9 +2501,9 @@ pickup_object:
 uint8_t can_pickup_spec_obj (POBJ32 p_obj, POBJ32 p_other)
 {
   // special object?
-  if ((p_other->graphic_no - 0x60) >= 7)
+  if ((uint8_t)(p_other->graphic_no - 0x60) >= 7)
     return (0);
-  return is_on_or_near_obj (p_obj, p_other);
+  return (is_on_or_near_obj (p_obj, p_other));
 }
 
 // $C17A
