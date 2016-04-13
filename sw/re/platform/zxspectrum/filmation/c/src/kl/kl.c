@@ -20,7 +20,7 @@
 //#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
-//#define BUILD_OPT_ALMOST_INVINCIBLE
+#define BUILD_OPT_ALMOST_INVINCIBLE
 //#define BUILD_OPT_ALWAYS_RENDER_ALL
 
 #pragma pack(1)
@@ -77,6 +77,7 @@
 //#define START_LOC           138       // near cauldron room
 //#define START_LOC           119       // near suspended arch
 //#define START_LOC           122       // near instant death room
+#define START_LOC           111       // in room with object
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -2461,7 +2462,7 @@ loc_C0B2:
   // copy x,y,z
   memcpy (&p_other->x, &p_obj->x, 3);
   p_obj->z += 12;
-  p_next_obj += 12;
+  p_next_obj->z += 12;
   calc_pixel_XY (p_other);
   
 drop_object:
@@ -2487,7 +2488,7 @@ pickup_object:
   special_objs_tbl[p_other->u.ptr_obj_tbl_entry].graphic_no = 0;
   set_wipe_and_draw_flags (p_other);
   p_other->graphic_no = 1;  // invalid
-  // empty slot to pickup, KO
+  // empty slot to pickup, OK
   if (objects_carried[2].graphic_no == 0)
     goto adjust_carried;
   // need to drop 3rd object

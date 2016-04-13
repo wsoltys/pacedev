@@ -45,7 +45,9 @@ CAULDRON_SCREEN     .equ    136
 ;START_LOC           .equ    179         ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-;START_LOC           .equ    138
+;START_LOC           .equ    138           ; near cauldron room
+;START_LOC           .equ    119           ; near suspended arch 
+START_LOC           .equ    122          ; near instant death room
 
 ; inputs (rotational)
 INP_LEFT            .equ    1<<0
