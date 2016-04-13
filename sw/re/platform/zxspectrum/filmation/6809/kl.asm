@@ -42,12 +42,13 @@ CAULDRON_SCREEN     .equ    136
 ; *** the standard 4 locations
 ;START_LOC           .equ    47
 ;START_LOC           .equ    68
-;START_LOC           .equ    179         ; chest to the west
+;START_LOC           .equ    179          ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
-;START_LOC           .equ    138           ; near cauldron room
-;START_LOC           .equ    119           ; near suspended arch 
-START_LOC           .equ    122          ; near instant death room
+;START_LOC           .equ    138          ; near cauldron room
+;START_LOC           .equ    119          ; near suspended arch 
+;START_LOC           .equ    122         ; near instant death room
+;START_LOC           .equ    111         ; in room with object
 
 ; inputs (rotational)
 INP_LEFT            .equ    1<<0
@@ -2821,7 +2822,7 @@ handle_pickup_drop:
         ldb     #1
 3$:     ldy     #special_objs_here
 4$:     tst     0,y                     ; graphic_no
-        beq     loc_C0B2
+        beq     room_to_drop
         leay    32,y
         decb
         bne     4$
@@ -2842,7 +2843,7 @@ loc_C0A9:
         clr     pickup_drop_pressed
 9$:     rts
 
-loc_C0B2:
+room_to_drop:
         ldu     #object_carried_2       ; 3rd item carried
         lda     ,u+                     ; graphic_no
         beq     adjust_carried          ; not carrying anything
