@@ -17,11 +17,14 @@
 #define UNIMPLEMENTED_AUDIO
 
 // build options - all disabled for 'production' build
+//#define BUILD_OPT_CPC_GRAPHICS
+//#define BUILD_OPT_MICK_FARROW_GRAPHICS
 //#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
 //#define BUILD_OPT_ALMOST_INVINCIBLE
 //#define BUILD_OPT_ALWAYS_RENDER_ALL
+//#define BUILD_OPT_ANY_OBJ_IN_CAULDRON
 
 #pragma pack(1)
 
@@ -66,8 +69,16 @@
 #define MAX_OBJS            40                          
 #define MAX_DRAW            48
 #define CAULDRON_SCREEN     136
-// standard is 5            
-#define NO_LIVES            5
+// uncomment for non-standard objects required
+//#define NO_OBJS_REQD        1
+#ifndef NO_OBJS_REQD
+  #define NO_OBJS_REQD      14
+#endif  
+// uncomment for non-standard lives
+//#define NO_LIVES            1
+#ifndef NO_LIVES
+  #define NO_LIVES          5
+#endif  
 // *** the standard 4 locations
 //#define START_LOC           47
 //#define START_LOC           68
@@ -77,7 +88,7 @@
 //#define START_LOC           138       // near cauldron room
 //#define START_LOC           119       // near suspended arch
 //#define START_LOC           122       // near instant death room
-#define START_LOC           111       // in room with object
+//#define START_LOC           111       // in room with object
 
 #include "osd_types.h"
 #include "kl_osd.h"
@@ -259,7 +270,7 @@ static void upd_141 (POBJ32 p_obj);
 static void upd_142 (POBJ32 p_obj);
 static void upd_30_31_158_159 (POBJ32 p_obj);
 static void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy);
-static void wait_for_key_release (uint8_t time);
+static void wait_for_key_press (uint8_t time);
 static void game_over (void);
 static void calc_and_display_percent (void);
 static void print_days (void);
@@ -1145,7 +1156,10 @@ void play_audio_until_keypress (const uint8_t *audio_data)
   while (1)
   {
     if (osd_keypressed ())
+    {
+      osd_readkey ();
       return;
+    }
     // keep playing audio
   }
 }
@@ -1774,7 +1788,7 @@ void init_cauldron_bubbles (void)
   // cauldron room only
   if (graphic_objs_tbl[0].scrn != CAULDRON_SCREEN)
     return;
-  // already initialised?
+  // 2 objects already here?
   if (special_objs_here[1].graphic_no != 0)
     return;
   if (all_objs_in_cauldron != 0)
@@ -1791,7 +1805,7 @@ void upd_160_to_163 (POBJ32 p_obj)
   
   adj_m4_m12 (p_obj);
   
-  if (special_objs_here != 0)
+  if (special_objs_here[0].graphic_no != 0)
     upd_111 (p_obj);
   else
   {
@@ -1803,7 +1817,7 @@ void upd_160_to_163 (POBJ32 p_obj)
     else
     {
       p_obj->d_z = 1;
-      if ((graphic_objs_tbl[0].graphic_no - 48) < 16)
+      if ((uint8_t)(graphic_objs_tbl[0].graphic_no - 48) < 16)
       {
         // wulf - no hint for next object
         p_obj->graphic_no |= (1<<2);
@@ -1975,10 +1989,28 @@ void move_guard_wizard_NSEW (POBJ32 p_obj, int8_t *dx, int8_t *dy)
 }
 
 // $BA9B
-void wait_for_key_release (uint8_t time)
+void wait_for_key_press (uint8_t time)
 {
+  unsigned i;
+  unsigned timeout = 100 * (unsigned)time;
+    
+  while (osd_keypressed())
+    osd_readkey ();
+
   // this should time out after 'time'
-  while (osd_keypressed ());
+  while (time--)
+  {
+    // hack, how to do this platform-independantly?
+    for (i=0; i<timeout; i++)
+    {
+      osd_delay (10);
+      if (osd_keypressed ())
+      {
+        osd_readkey ();
+        return;
+      }
+    }
+  }
 }
 
 // $BA22
@@ -2004,7 +2036,7 @@ void game_over (void)
     suppress_border = 0;
     display_text_list ((uint8_t *)complete_colours, (uint8_t *)complete_xy, (char **)complete_text, 6);
     play_audio (game_complete_tune);
-    wait_for_key_release (8);
+    wait_for_key_press (8);
   }
   clear_scrn_buffer ();
   clear_scrn ();
@@ -2019,9 +2051,10 @@ void game_over (void)
   print_bcd_number (184, 79, gameover_colours[4], &objects_put_in_cauldron, 1);
   print_border ();
   update_screen ();
-  while (osd_keypressed ());
+  while (osd_keypressed ())
+    osd_readkey ();
   play_audio_until_keypress (NULL);
-  wait_for_key_release (8);
+  wait_for_key_press (8);
 
 #ifdef __HAS_SETJMP__  
   longjmp (start_menu_env_buf, 1);
@@ -2595,11 +2628,13 @@ void upd_104_to_110 (POBJ32 p_obj)
     {
     add_obj_to_cauldron:
       p_obj->z = 128;
+    #ifndef BUILD_OPT_ANY_OBJ_IN_CAULDRON      
       if ((p_obj->graphic_no & 7) == ret_next_obj_required ())
+    #endif
       {
         objects_put_in_cauldron++;
         cycle_colours_with_sound (p_obj);
-        if (objects_put_in_cauldron == 14)
+        if (objects_put_in_cauldron == NO_OBJS_REQD)
           prepare_final_animation ();
       }
       obj_dropping_into_cauldron = 0;
@@ -2644,12 +2679,26 @@ void upd_96_to_102 (POBJ32 p_obj)
 }
 
 // $C2A5
-// audio/video effects?
+// this cycles the palette 16 times
+// through the 8 bright colours
+// starts and ends on current (yellow)
 void cycle_colours_with_sound (POBJ32 p_obj)
 {
+  unsigned i;
+  unsigned c = curr_room_attrib & 7;
+  
   UNIMPLEMENTED_AUDIO;
   
-  audio_B403 (p_obj);
+  for (i=0; i<16; i++)
+  {
+    c = (c + 1) & 7;
+    osd_set_entire_palette (c);
+    audio_B403 (p_obj);
+    osd_delay (100);
+  }
+
+  // restore palette
+  osd_init_palette ();  
 }
   
 // $C2CB
@@ -2664,8 +2713,6 @@ void prepare_final_animation (void)
   POBJ32    p_obj;
   unsigned  i;
     
-  UNTESTED;
-  
   all_objs_in_cauldron = 1;
   p_obj = &special_objs_here[1];
   // wipe 11 objects in the room
@@ -2675,7 +2722,7 @@ void prepare_final_animation (void)
     set_wipe_and_draw_flags (p_obj);
     p_obj->graphic_no = 1;  // invalid
   }
-  for (; i<MAX_OBJS-(3+11); i++)
+  for (; i<MAX_OBJS-3; i++, p_obj++)
   {
     // turn blocks to twinkly sprites
     if (p_obj->graphic_no == 7)

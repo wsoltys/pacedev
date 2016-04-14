@@ -35,6 +35,22 @@ extern uint8_t *flip_sprite (POBJ32 p_obj);
 
 static unsigned mask_colour = 0;
 
+static void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  *r = (c&(1<<1) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *g = (c&(1<<2) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+  *b = (c&(1<<0) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
+}
+
+static void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+  uint8_t lu[] = { 0, 128, 255 };
+  
+  *r = lu[(c/3) % 3];
+  *g = lu[(c/9) % 3];
+  *b = lu[c % 3];
+}
+
 void osd_delay (unsigned ms)
 {
   rest (ms);
@@ -69,6 +85,26 @@ void osd_set_palette (uint8_t attr)
 {
   // could support CPC here
   fprintf (stderr, "%s(%d)\n", __FUNCTION__, attr);
+}
+
+void osd_set_entire_palette (uint8_t attr)
+{
+  PALETTE   pal;
+  unsigned  c;
+  
+  for (c=0; c<16; c++)
+  {
+    uint8_t r, g, b;
+    
+    if ((c&7) == 0)
+      make_zx_colour (0, &r, &g, &b);
+    else      
+      make_zx_colour (attr, &r, &g, &b);
+    pal[c].r = r>>2;
+    pal[c].g = g>>2;
+    pal[c].b = b>>2;
+  }
+	set_palette_range (pal, 0, 15, 1);
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
@@ -405,55 +441,10 @@ void usage (char *argv0)
   exit (0);
 }
 
-static void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
+void osd_init_palette (void)
 {
-  *r = (c&(1<<1) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
-  *g = (c&(1<<2) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
-  *b = (c&(1<<0) ? ((c < 8) ? 0xCD : 0xFF) : 0x00);
-}
-
-static void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b)
-{
-  uint8_t lu[] = { 0, 128, 255 };
-  
-  *r = lu[(c/3) % 3];
-  *g = lu[(c/9) % 3];
-  *b = lu[c % 3];
-}
-
-void main (int argc, char *argv[])
-{
-  GFX_E gfx = GFX_ZX;
-  int c;
-
-  while (--argc)
-  {
-    switch (argv[argc][0])
-    {
-      case '-' :
-      case '/' :
-        if (!stricmp (&argv[argc][1], "cpc"))
-          gfx = GFX_CPC;
-        else if (!stricmp (&argv[argc][1], "zx"))
-          gfx = GFX_ZX;
-        else
-          usage (argv[0]);
-        break;
-      default :
-        usage (argv[0]);
-        break;
-    }
-  }
-    
-	allegro_init ();
-	install_keyboard ();
-
-	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
-
-  scrn_buf = create_bitmap (256, 192);
-  
   PALETTE pal;
+  unsigned c;
   
   // spectrum palette
   for (c=0; c<8; c++)
@@ -508,6 +499,41 @@ void main (int argc, char *argv[])
   }
 
   set_palette_range (pal, 0, 8+16-1, 1);
+}
+
+void main (int argc, char *argv[])
+{
+  GFX_E gfx = GFX_ZX;
+  int c;
+
+  while (--argc)
+  {
+    switch (argv[argc][0])
+    {
+      case '-' :
+      case '/' :
+        if (!stricmp (&argv[argc][1], "cpc"))
+          gfx = GFX_CPC;
+        else if (!stricmp (&argv[argc][1], "zx"))
+          gfx = GFX_ZX;
+        else
+          usage (argv[0]);
+        break;
+      default :
+        usage (argv[0]);
+        break;
+    }
+  }
+    
+	allegro_init ();
+	install_keyboard ();
+
+	set_color_depth (8);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
+
+  scrn_buf = create_bitmap (256, 192);
+  
+  osd_init_palette ();
   
 #if 0
 	clear_bitmap (screen);
