@@ -17,8 +17,6 @@
 #define UNIMPLEMENTED_AUDIO
 
 // build options - all disabled for 'production' build
-//#define BUILD_OPT_CPC_GRAPHICS
-//#define BUILD_OPT_MICK_FARROW_GRAPHICS
 //#define BUILD_OPT_DISABLE_WIPE
 //#define BUILD_OPT_DISABLE_Z_ORDER
 //#define BUILD_OPT_ENABLE_TELEPORT
@@ -646,6 +644,13 @@ void knight_lore (GFX_E gfx_)
       sprite_tbl = cpc_sprite_tbl;
       border_data = (const uint8_t **)cpc_border_data;
       panel_data = cpc_panel_data;
+      break;
+
+    case GFX_ZX_MICK_FARROW :
+      background_type_tbl = zx_background_type_tbl;
+      sprite_tbl = mf_sprite_tbl;
+      border_data = (const uint8_t **)zx_border_data;
+      panel_data = zx_panel_data;
       break;
 
     default :
@@ -2091,7 +2096,7 @@ void calc_and_display_percent (void)
 void print_days (void)
 {
   print_bcd_number (120, 7, 
-                    (gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)), 
+                    (IS_ZX(gfx) ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)), 
                     &days, 1);
 }
 
@@ -2109,14 +2114,14 @@ void print_lives_gfx (void)
 #ifdef __HAS_HWSPRITES__
   p_obj->hw_sprite = HW_SPRITE(MAX_OBJS);
 #endif  
-  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)), p_obj);
+  print_sprite ((IS_ZX(gfx) ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)), p_obj);
 }
 
 // $BCA3
 void print_lives (void)
 {
   print_bcd_number (32, 39, 
-                    (gfx == GFX_ZX ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)),
+                    (IS_ZX(gfx) ? BRIGHT(ATTR_WHITE) : ROOM_ATTR(curr_room_attrib)),
                     (uint8_t *)&lives, 1);
 }
 
@@ -2148,7 +2153,7 @@ void display_day (void)
   attr = (~curr_room_attrib+2) & 7;
   gfxbase_8x8 = (uint8_t *)day_font;
   print_text_raw (112, 15, 
-                  (gfx == GFX_ZX ? attr : ROOM_ATTR(curr_room_attrib)), 
+                  (IS_ZX(gfx) ? attr : ROOM_ATTR(curr_room_attrib)), 
                   (char *)(day_txt+1));
 }
 
@@ -2856,7 +2861,7 @@ void display_sun_moon_frame (POBJ32 p_obj)
 #ifdef __HAS_HWSPRITES__
   p_obj->hw_sprite = HW_SPRITE(MAX_OBJS+1);
 #endif  
-  if (gfx == GFX_ZX)
+  if (IS_ZX(gfx))
     print_sprite ((p_obj->graphic_no & 1 ? BRIGHT(ATTR_WHITE) : BRIGHT(ATTR_YELLOW)),
                   p_obj);
   else
@@ -2865,14 +2870,14 @@ void display_sun_moon_frame (POBJ32 p_obj)
 #ifndef __HAS_HWSPRITES__
   p_frm->flags7 = 0;
   p_frm->graphic_no = 0x5a;
-  p_frm->pixel_x = (gfx == GFX_ZX ? 184 : 176);
+  p_frm->pixel_x = (IS_ZX(gfx) ? 184 : 176);
   p_frm->pixel_y = 0;
-  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_RED) : ROOM_ATTR(curr_room_attrib)), p_frm);
+  print_sprite ((IS_ZX(gfx) ? BRIGHT(ATTR_RED) : ROOM_ATTR(curr_room_attrib)), p_frm);
   p_frm->pixel_x = 208;
   p_frm->graphic_no = 0xba;
-  print_sprite ((gfx == GFX_ZX ? BRIGHT(ATTR_RED) : ROOM_ATTR(curr_room_attrib)), p_frm);
+  print_sprite ((IS_ZX(gfx) ? BRIGHT(ATTR_RED) : ROOM_ATTR(curr_room_attrib)), p_frm);
   // if CPC==176, wipes scroll
-  blit_to_screen ((gfx == GFX_ZX ? 184 : 184), 0, 6, 31);
+  blit_to_screen ((IS_ZX(gfx) ? 184 : 184), 0, 6, 31);
 #endif  
   return;
 }
@@ -4419,7 +4424,7 @@ void display_panel (void)
 {
 #ifndef __HAS_HWSPRITES__  
   uint8_t *p = (uint8_t *)panel_data;
-  if (gfx == GFX_ZX)
+  if (IS_ZX(gfx))
   {
     p = transfer_sprite (&sprite_scratchpad, p);
     multiple_print_sprite (curr_room_attrib, &sprite_scratchpad, 16, (uint8_t)-8, 5);
@@ -4438,7 +4443,7 @@ void display_panel (void)
     p = transfer_sprite_and_print (curr_room_attrib, &sprite_scratchpad, p);
   }
 #else
-  osd_display_panel (gfx == GFX_ZX ? curr_room_attrib : ROOM_ATTR(curr_room_attrib));
+  osd_display_panel (IS_ZX(gfx) ? curr_room_attrib : ROOM_ATTR(curr_room_attrib));
 #endif
 }
 
@@ -4889,7 +4894,7 @@ uint8_t *flip_sprite (POBJ32 p_obj)
     
   if (vflip)
   {
-    if (gfx == GFX_ZX)
+    if (IS_ZX(gfx))
       w *= 2;
 
     for (y=0; y<h/2; y++)
@@ -4902,7 +4907,7 @@ uint8_t *flip_sprite (POBJ32 p_obj)
     }
     *psprite ^= FLAG_VFLIP;
 
-    if (gfx == GFX_ZX)
+    if (IS_ZX(gfx))
       w /= 2;
   }
 
@@ -4910,7 +4915,7 @@ uint8_t *flip_sprite (POBJ32 p_obj)
   {
     for (y=0; y<h; y++)
     {
-      if (gfx == GFX_ZX)
+      if (IS_ZX(gfx))
       {
         for (x=0; x<w/2; x++)
         {

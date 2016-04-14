@@ -180,7 +180,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   {
     for (x=0; x<w; x++)
     {
-      if (gfx == GFX_ZX)
+      if (IS_ZX(gfx))
       {
         uint8_t m = *(psprite++);
         uint8_t d = *(psprite++);
@@ -251,7 +251,7 @@ void osd_display_panel (uint8_t attr)
 
 void osd_debug_hook (void *context)
 {
-#if 1
+#if 0
   static unsigned count = 0;
   
   unsigned state = (unsigned)context;
@@ -437,6 +437,7 @@ void usage (char *argv0)
 {
   printf ("usage: kl {-cpc|-zx}\n");
   printf ("  -cpc    use Amstrad CPC graphics\n");
+  printf ("  -mf     use Mick Farrow's modfied ZX Spectrum graphics\n");
   printf ("  -zx     use ZX Spectrum graphics\n");
   exit (0);
 }
@@ -458,7 +459,7 @@ void osd_init_palette (void)
   }
 	//set_palette_range (pal, 0, 0+8-1, 1);
 
-  if (gfx == GFX_ZX)
+  if (IS_ZX(gfx))
   {
     for (c=0; c<8; c++)
     {
@@ -503,8 +504,7 @@ void osd_init_palette (void)
 
 void main (int argc, char *argv[])
 {
-  GFX_E gfx = GFX_ZX;
-  int c;
+  GFX_E gfx_ = GFX_ZX;
 
   while (--argc)
   {
@@ -513,9 +513,11 @@ void main (int argc, char *argv[])
       case '-' :
       case '/' :
         if (!stricmp (&argv[argc][1], "cpc"))
-          gfx = GFX_CPC;
+          gfx_ = GFX_CPC;
         else if (!stricmp (&argv[argc][1], "zx"))
-          gfx = GFX_ZX;
+          gfx_ = GFX_ZX;
+        else if (!stricmp (&argv[argc][1], "mf"))
+          gfx_ = GFX_ZX_MICK_FARROW;
         else
           usage (argv[0]);
         break;
@@ -532,7 +534,8 @@ void main (int argc, char *argv[])
 	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
 
   scrn_buf = create_bitmap (256, 192);
-  
+
+  gfx = gfx_;
   osd_init_palette ();
   
 #if 0

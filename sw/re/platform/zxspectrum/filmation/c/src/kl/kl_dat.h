@@ -7,11 +7,13 @@ typedef enum
 {
   GFX_NOTDEFINED,
   GFX_CPC,
-  GFX_ZX
+  GFX_ZX,
+  GFX_ZX_MICK_FARROW
   
 } GFX_E;
 
 extern GFX_E gfx;
+#define IS_ZX(g)  ((g==GFX_ZX)|(g==GFX_ZX_MICK_FARROW))
 
 // ZX Spectrum attributes
 #define ATTR_BLACK          0
@@ -144,6 +146,7 @@ extern const uint8_t start_locations[];
 //extern const uint8_t border_data[][4];
 
 #include "cpc_dat.h"
+#include "mf_dat.h"
 #include "zx_dat.h"
 
 #endif // __KL_DAT_H__

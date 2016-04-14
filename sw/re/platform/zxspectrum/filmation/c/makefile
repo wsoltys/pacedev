@@ -70,7 +70,8 @@ ifeq ($(PLATFORM),allegro)
   #OSD_LIBS = -lallegro-4.4.2$(ALLEGRO_MONOLITH)$(ALLEGRO_STATIC)-mt$(ALLEGRO_DEBUG)
   OSD_INCS = -I $(MINGDIR)/include/allegro
   OSD_LIBDIR = $(MINGDIR)/lib
-  OSD_LIBS = -lallegro-4.4.2-md
+  #OSD_LIBS = -lallegro-4.4.2-md
+  OSD_LIBS = -lalleg
   
   OSD_CFLAGS = -Wall -Wno-unused-label -g
   ifeq ($(STATIC),1)
@@ -180,11 +181,13 @@ KL_OBJS = \
 	$(OBJDIR)/kl.o	\
 	$(OBJDIR)/kl_dat.o \
 	$(OBJDIR)/cpc_dat.o \
+	$(OBJDIR)/mf_dat.o \
 	$(OBJDIR)/zx_dat.o
 
 KL2NG_OBJS = \
 	$(OBJDIR)/kl2ng.o	\
 	$(OBJDIR)/cpc_dat.o \
+	$(OBJDIR)/mf_dat.o \
 	$(OBJDIR)/zx_dat.o
 	
 OSD_OBJS = \
