@@ -490,6 +490,8 @@ location_tbl:
 
 eolt    .equ  .
 
+; graphic_no, width, depth, height, flags7, loc(zzyyyxxx)
+
 block:
         .db 0x07, 0x08, 0x08, 0x0C, 0x10, 0x00
         .db 0
@@ -638,6 +640,8 @@ block_type_tbl:
         .dw #gate_ud_1
         .dw #gate_ud_2
         .dw #ball_ud_x
+
+; graphic_no, x, y, z, width, depth, height, flags7
 
 arch_n:
         .db 0x02, 0x8D, 0xC4, 0x80, 0x03, 0x05, 0x28, 0x50
