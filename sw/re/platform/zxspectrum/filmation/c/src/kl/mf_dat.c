@@ -1,6 +1,16 @@
 #include "kl_osd.h"
 #include "mf_dat.h"
 
+#ifdef neogeo
+// Without this line, you get:
+// Warning: Setting incorrect section attributes for .rodata
+// and it doesn't produce a usable executable/P1 ROM
+static const uint8_t gcc_bug_workaround[] = 
+{
+  0
+};
+#endif
+
 // sprite data is not const
 
 static uint8_t spr_nul[] __FORCE_RODATA__ =
@@ -397,7 +407,7 @@ static uint8_t spr_013[] __FORCE_RODATA__ =
 
 static uint8_t spr_014[] __FORCE_RODATA__ =
 {
-  4, 32,
+  (1<<7)|4, 32,
 #ifndef __HAS_HWSPRITES__
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -2765,4 +2775,3 @@ const uint8_t *mf_sprite_tbl[] __FORCE_RODATA__ =
   spr_010, spr_011, spr_006, spr_007, spr_030, spr_029, 
   spr_001, spr_030, 
 };
-

@@ -19,8 +19,12 @@
 
 #include "src/kl/kl_dat.c"
 
-#define DRIVER    "legendos"
-#define GUID      "029"
+//#define DRIVER    "legendos"
+//#define GUID      "029"
+//#define DRIVER    "nam1975"
+//#define GUID      "001"
+#define DRIVER    "pspikes2"
+#define GUID      "068"
 
 //#define SHOW_TILES
 
@@ -118,23 +122,26 @@ static uint8_t from_ascii (char ch)
 static uint8_t zeroes[128];
 
 #include "border_font.c"
-#include "panel_font.c"
+#include "panel_font_zx.c"
+#include "panel_font_mf.c"
 #include "title_font.c"
 #include "cpc_title_font.c"
 
 void do_fix (void)
 {
   // bank 3 (70 chars)
-  // $00-$47 - main menu border
+  // - $00-$47 - main menu border
   // bank 4 (char $0x400-$0x4ff)
-  // $00-$03 - "DAYS"
-  // $04-$FF - ascii-based font
+  // - $00-$03 - "DAYS"
+  // - $04-$FF - ascii-based font
   // bank 5 (256 chars)
-  // panel data
-  // bank 6-8 (768 chars)
-  // ZX title screen
-  // bank 9-10 (432 chars)
-  // CPC title screen
+  // - panel (ZX) data
+  // bank 6 (256 chars)
+  // - panel (ZX-MF) data
+  // bank 7-9 (768 chars)
+  // - ZX title screen
+  // bank $A-$B (432 chars)
+  // - CPC title screen
   
   unsigned c;
   unsigned i;
@@ -142,19 +149,20 @@ void do_fix (void)
   // open FIX and copy 1st 3 banks
   // - needs to be patched wth "RETRO PORTS first!!!
   
-  FILE *fpFix = fopen ("orig/" DRIVER "/" GUID "-s1.bin", "rb");
+  FILE *fpFix = fopen ("orig/" DRIVER "/" GUID "-sg1.bin", "rb");
   if (!fpFix) 
   {
-    fprintf (stderr, "unable to open \"%s-s1.bin\" for read!\n", GUID);
+    fprintf (stderr, "unable to open \"%s-sg1.bin\" for read!\n", GUID);
     return;
   }
-  FILE *fp = fopen (GUID "-s1.bin", "wb");
+  FILE *fp = fopen (GUID "-sg1.bin", "wb");
   if (!fp) 
   {
-    fprintf (stderr, "unable to open \"%s-s1.bin\" for write!\n", GUID);
+    fprintf (stderr, "unable to open \"%s-sg1.bin\" for write!\n", GUID);
     return;
   }
-    
+
+  // banks 0-2    
   for (unsigned b=0; b<3; b++)
   {
     for (unsigned c=0; c<256; c++)
@@ -166,6 +174,7 @@ void do_fix (void)
     }
   }
 
+  // bank 3
   for (c=0; c<256; c++)
   {
     const uint8_t *pfont;
@@ -194,11 +203,13 @@ void do_fix (void)
       }
     }
   }
-        
-  for (c=0; c<512; c++)
+
+  // banks 4-6        
+  for (c=0; c<3*256; c++)
   {
     const uint8_t *pfont;
     
+    // bank 4
     if (c < 256)
     {
 #if 0      
@@ -236,7 +247,11 @@ void do_fix (void)
     }
     else
     {
-      pfont = panel_font[(c-256)*8];
+      // banks 5-6
+      if (c < 2*256)
+        pfont = panel_font_zx[(c-256)*8];
+      else
+        pfont = panel_font_mf[(c-512)*8];
 
       // create font data
       for (unsigned col=0; col<4; col++)
@@ -267,7 +282,7 @@ void do_fix (void)
     }
   }
 
-  // ZX title (3 banks)
+  // ZX title (banks 7-9)
   for (c=0; c<768; c++)
   {  
     const uint8_t *pfont;
@@ -296,7 +311,7 @@ void do_fix (void)
     }
   }
 
-  // CPC title (2 banks)
+  // CPC title (banks $A-$B)
   for (c=0; c<512; c++)
   {  
     const uint8_t *pfont;
@@ -326,7 +341,7 @@ void do_fix (void)
   }
 
   // and skip same bytes in original file
-  fseek (fpFix, (256+512+768+432)*32, SEEK_CUR);
+  fseek (fpFix, (256+768+768+432)*32, SEEK_CUR);
   
   // and copy remainder of file
   uint8_t data;
@@ -553,8 +568,110 @@ void do_sprites (void)
   c2 = fopen (GUID "-c4.bin", "wb");
 
   // fill in 256 tiles
-  // - so CPC sprites have same offset as ZX
+  // - so MF sprites have same offset as ZX
   //   from based of ROM file (ie. $0100 vs $4100)
+  for (s=0; s<256; s++)
+  {
+    fwrite (zeroes, sizeof(uint8_t), 64, c1);
+    fwrite (zeroes, sizeof(uint8_t), 64, c2);
+    total_ns++;
+  }
+  
+  for (s=0; s<N_ZX_SPR_ENTRIES; s++)
+  {
+    const uint8_t *psprite = mf_sprite_tbl[s];
+    
+    uint8_t c = *psprite & 0xc0;
+    uint8_t w = *(psprite++) & 0x3f;
+    uint8_t h = *(psprite++);
+
+    if (c)
+      printf ("*** WARNING %d flipped ($%02X)!\n", s, c);
+      
+    // 4 flip orientations
+    for (int f=0; f<4; f++)
+    {
+      uint8_t vflip = (f&2 ? F_VFLIP : 0);
+      uint8_t hflip = (f&1 ? F_HFLIP : 0);
+      
+      // construct 4x4 tile array
+      for (int c=0; c<4; c++)
+      {
+        for (int r=0; r<4; r++)
+        {
+          if (c*2 >= w || r*16 >= h)
+            fwrite (zeroes, 64, sizeof(uint8_t), c1);
+          else
+          {        
+            // we have some sprite data
+            for (unsigned q=0; q<4; q++)
+            {
+              // point to start of data
+              const uint8_t *p = psprite;
+              if ((c & F_VFLIP) ^ vflip)
+                p += ((r*16 + (q&1)*8)) *w*2;
+              else
+                p += (h-1-(r*16 + (q&1)*8)) *w*2;
+              if ((c & F_HFLIP) ^ hflip)
+                p += (2*(w-1))-(c*2*2 + 2-(q&2));
+              else
+                p += c*2*2 + 2-(q&2);
+              for (unsigned l=0; l<8; l++)
+              {
+                // bitplane0 = colour
+                // bitplane1 = mask
+                // gives 4 colours but #1=#3 (mask)
+  
+                if (c*2+1-((q&2)/2) >= w ||
+                    r*16+(q&1)*8+l >= h)
+                  fwrite (zeroes, sizeof(uint8_t), 2, c1);
+                else
+                {
+                  uint8_t m = *(p+0);
+                  uint8_t d = *(p+1);
+                  if (!hflip)
+                  {
+                    m = REV(m);
+                    d = REV(d);
+                  }
+                  fwrite (&d, sizeof(uint8_t), 1, c1);
+                  fwrite (&m, sizeof(uint8_t), 1, c1);
+
+                  if (vflip)
+                    p += w*2;
+                  else                                
+                    p -= w*2;              
+                }
+              }
+            }
+          }
+                
+          // and always bitplanes 2,3
+          fwrite (zeroes, sizeof(uint8_t), 64, c2);
+          total_ns++;
+        }
+      }
+    }
+  }
+
+  printf ("after mf total_ns = %d\n", total_ns);
+
+  // pad out the rest of C1,C2
+  while (total_ns < 2*16384)
+  {
+    //fwrite (zeroes, sizeof(uint8_t), 64, c1);
+    //fwrite (zeroes, sizeof(uint8_t), 64, c2);
+    total_ns++;
+  }
+
+  fclose (c1);
+  fclose (c2);
+  c1 = fopen (GUID "-c5.bin", "wb");
+  c2 = fopen (GUID "-c6.bin", "wb");
+
+  // fill in 256 tiles
+  // - so CPC sprites have same offset as ZX
+  //   from based of ROM file (ie. $0100 vs $8100)
   for (s=0; s<256; s++)
   {
     fwrite (zeroes, sizeof(uint8_t), 64, c1);

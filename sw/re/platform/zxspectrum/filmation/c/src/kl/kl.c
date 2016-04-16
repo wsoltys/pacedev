@@ -410,10 +410,11 @@ static void print_sprite (uint8_t attr, POBJ32 p_obj);
 
 void dump_graphic_objs_tbl (int start, int end)
 {
+#ifndef neogeo
   unsigned i = (start == -1 ? 0 : start);
   
   DBGPRINTF_FN;
-  
+
   for (; i<end && i<MAX_OBJS; i++)
   {
     #ifdef DUMP_IN_HEX
@@ -436,6 +437,7 @@ void dump_graphic_objs_tbl (int start, int end)
               graphic_objs_tbl[i].pixel_x,
               graphic_objs_tbl[i].pixel_y);
   }
+#endif  
 }
 
 void dump_special_objs_tbl (void)
@@ -595,7 +597,7 @@ static void render_hw_sprites (void)
   // and finally do the rendering
   osd_wait_vbl ();
   for (i=0; i<n_objs; i++)
-    if (action = dirty[HW_SPRITE(i)])
+    if ((action = dirty[HW_SPRITE(i)]))
     {
       uint8_t obj_i = obj[HW_SPRITE(i)];
       POBJ32 p_obj = &graphic_objs_tbl[obj_i];
@@ -816,13 +818,13 @@ game_delay:
     colour_panel ();
     colour_sun_moon ();
     
-    //osd_debug_hook ((void *)0);
+    osd_debug_hook ((void *)0);
     display_panel ();
-    //osd_debug_hook ((void *)1);
+    osd_debug_hook ((void *)1);
     display_sun_moon_frame (&sun_moon_scratchpad);
     if (internal.game_over)
         goto START_MENU_AF7F;
-    //osd_debug_hook ((void *)2);
+    osd_debug_hook ((void *)2);
     
     display_day ();
     print_days ();

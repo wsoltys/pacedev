@@ -9,6 +9,8 @@
 #define __HAS_HWSPRITES__
 #define __FORCE_RODATA__        __attribute__ ((section (".rodata")))
 
+//#define __FORCE_RODATA__        __attribute__ ((section(".rodata,\"aw\",@progbits ;")))
+
 // SNK say DON'T USE SPRITE #0
 #define HW_SPRITE(n)    (8+(n))
 
@@ -67,7 +69,9 @@ void osd_clear_scrn_buffer (void);
 int osd_key (int _key);
 int osd_keypressed (void);
 int osd_readkey (void);
+void osd_init_palette (void);
 void osd_set_palette (uint8_t attr);
+void osd_set_entire_palette (uint8_t attr);
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code);
 void osd_fill_window (uint8_t x, uint8_t y, uint8_t width_bytes, uint8_t height_lines, uint8_t c);
 void osd_update_screen (void);

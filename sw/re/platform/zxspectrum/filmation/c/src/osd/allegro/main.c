@@ -251,7 +251,7 @@ void osd_display_panel (uint8_t attr)
 
 void osd_debug_hook (void *context)
 {
-#if 0
+#if 1
   static unsigned count = 0;
   
   unsigned state = (unsigned)context;
@@ -259,7 +259,7 @@ void osd_debug_hook (void *context)
   unsigned c, t, l, b;
   unsigned x, y;
 
-  return;
+  //return;
   
   switch (state)
   {
@@ -288,9 +288,19 @@ void osd_debug_hook (void *context)
 #endif      
       while (!key[KEY_ESC]);
       while (key[KEY_ESC]);
+      DBGPRINTF ("extracting panel font data...\n");
       // now extract data for panel font
-      FILE *fpPanel = fopen ("panel_font.c", "wt");
-      fprintf (fpPanel, "uint8_t panel_font[][8] = \n{\n");
+      FILE *fpPanel;
+      if (gfx == GFX_ZX)
+      {
+        fpPanel = fopen ("panel_font_zx.c", "wt");
+        fprintf (fpPanel, "uint8_t panel_font_zx[][8] = \n{\n");
+      }
+      else
+      {
+        fpPanel = fopen ("panel_font_mf.c", "wt");
+        fprintf (fpPanel, "uint8_t panel_font_mf[][8] = \n{\n");
+      }
       for (c=0; c<256; c++)
       {
         unsigned x = (c%32)*8;
@@ -311,6 +321,7 @@ void osd_debug_hook (void *context)
       }
       fprintf (fpPanel, "};\n\n");
       fclose (fpPanel);
+      DBGPRINTF ("...done!\n");
       break;
 #endif      
 #if 0

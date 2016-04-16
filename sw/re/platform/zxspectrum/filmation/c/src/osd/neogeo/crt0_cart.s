@@ -44,7 +44,7 @@ _sp_config:
     .word     0xffff
     .byte     0xff
     .byte     0xff
-    .byte     0x02                | graphics
+    .byte     0x03                | graphics
     .byte     0x00
     .byte     0x00
     .byte     0x00
@@ -57,6 +57,7 @@ _sp_config:
 * item names are 12 characters    
     .ascii    "GRAPHICS    "      | item 5
     .ascii    "AMSTRAD CPC "
+    .ascii    "MICK FARROW "
     .ascii    "ZX SPECTRUM "
 	
 	.align	4

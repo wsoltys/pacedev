@@ -44,12 +44,13 @@ static struct Screen *screen;
 static struct IOStdReq *KeyIO;
 static struct MsgPort *KeyMP;
 static uint8_t *keyMatrix;
+static struct ColorSpec myColours[8+1];
   
 static void make_zx_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b);
 static void make_cpc_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b);
 static void make_amiga_colour (uint8_t c, uint8_t *r, uint8_t *g, uint8_t *b, struct ColorSpec *cs);
 
-const char __ver[] = "\0$VER: KnightLore 09.5 (24.02.2016)"
+const char __ver[] = "\0$VER: KnightLore 09.6 (15.04.2016)"
 #ifdef __MONO__
 " (mono)"
 #endif
@@ -116,6 +117,25 @@ int osd_readkey (void)
 	return (0);
 }
 
+void osd_init_palette (void)
+{
+  unsigned c;
+  
+  // palette - ZX colours which don't change
+  for (c=0; c<8; c++)
+  {
+    uint8_t r, g, b;
+
+    #ifdef __MONO__
+      make_zx_colour (c==1 ? 15 : 0, &r, &g, &b);
+    #else    
+      make_zx_colour (8+c, &r, &g, &b);
+    #endif
+    make_amiga_colour (c, &r, &g, &b, &myColours[c]);
+  }
+  myColours[c].ColorIndex = -1;
+}
+
 void osd_set_palette (uint8_t attr)
 {
   unsigned c;
@@ -133,7 +153,7 @@ void osd_set_palette (uint8_t attr)
   };
 
   // nothing to do for ZX version
-  if (gfx == GFX_ZX)
+  if (IS_ZX(gfx))
     return;
     
   if (attr == 0)
@@ -157,6 +177,10 @@ void osd_set_palette (uint8_t attr)
       SetRGB4 (&(screen->ViewPort), c, r>>4, g>>4, b>>4);
     }
   }
+}
+
+void osd_set_entire_palette (uint8_t attr)
+{
 }
 
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
@@ -266,7 +290,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
   {
     for (x=0; x<w; x++)
     {
-      if (gfx == GFX_ZX)
+      if (IS_ZX(gfx))
       {  
         uint8_t m = *(psprite++);
         uint8_t d = *(psprite++);
@@ -371,6 +395,7 @@ void usage (char *argv0)
 #ifndef __MONO__  
   printf ("  -cpc    use Amstrad CPC graphics\n");
 #endif  
+  printf ("  -mf     use Mick Farrow's modfied ZX Spectrum graphics\n");
   printf ("  -zx     use ZX Spectrum graphics\n");
   printf ("  -v      print version information\n");
   exit (0);
@@ -392,6 +417,9 @@ int main (int argc, char *argv[])
           gfx = GFX_CPC;
         else
       #endif
+        if (!stricmp (&argv[argc][1], "mf"))
+          gfx = GFX_ZX_MICK_FARROW;
+        else
         if (!stricmp (&argv[argc][1], "zx"))
           gfx = GFX_ZX;
         else
@@ -442,21 +470,8 @@ int main (int argc, char *argv[])
     BltClear (myBitMaps[BLANK]->Planes[i], PL_SIZE, 1);
   }
   
-  // palette - ZX colours which don't change
-  struct ColorSpec myColours[8+1];
-  for (c=0; c<8; c++)
-  {
-    uint8_t r, g, b;
-
-    #ifdef __MONO__
-      make_zx_colour (c==1 ? 15 : 0, &r, &g, &b);
-    #else    
-      make_zx_colour (8+c, &r, &g, &b);
-    #endif
-    make_amiga_colour (c, &r, &g, &b, &myColours[c]);
-  }
-  myColours[c].ColorIndex = -1;
-
+  osd_init_palette ();
+  
   // now the screen  
   screen = OpenScreenTags (NULL, 
               SA_Left, 0,

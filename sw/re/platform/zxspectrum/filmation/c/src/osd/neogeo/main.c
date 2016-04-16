@@ -11,7 +11,7 @@
 //  FIX LAYER
 //  * BANK 3 - main menu border
 //  - $00-$0F - top-left corner (4x4)
-//  - $10-$1F - top-roght corner (4x4)
+//  - $10-$1F - top-right corner (4x4)
 //  - $20-$2F - bottom-left corner (4x4)
 //  - $30-$3F - bottom-righter corner (4x4)
 //  - $40-$42 - top/bottom (1x3)
@@ -19,12 +19,15 @@
 //  * BANK 4 - Knight Lore font and "DAY" font
 //  - $00-$03 - "DAY"
 //  - various - ASCII characters
-//  * BANK 5 - panel
+//  * BANK 5 - panel (ZX)
 //  - $00-$FF - panel characters for bottom 8 lines
 //              in display order
-//  * BANKS 6-8 - ZX title screen
+//  * BANK 6 - panel (ZX-MF)
+//  - $00-$FF - panel characters for bottom 8 lines
+//              in display order
+//  * BANKS 7-9 - ZX title screen
 //  - +672 characters in display order
-//  * BANKS 9-10 - CPC title screen
+//  * BANKS $A-$B - CPC title screen
 //  - +432 (18x24) characters in display order
 //
 //  SPRITES
@@ -33,8 +36,10 @@
 //  -   188*16*4 - 188 graphics sprites
 //  -         - each sprite is 16 tiles
 //  -         - 4 copies of each (h/v-flipped)
-//  -   $3000-$30FF - unused
-//  -   #3100-$XXXX CPC graphics
+//  -   $4000-$40FF - unused
+//  -   $4100-$XXXX Mick Farrow's modified graphics
+//  -   $8000-$80FF - unused
+//  -   $8100-$XXXX CPC graphics
 
 
 #define DIP_COLOUR      0
@@ -114,10 +119,19 @@ int osd_readkey (void)
 	return (0);
 }
 
+void osd_init_palette (void)
+{
+}
+
 void osd_set_palette (uint8_t attr)
 {
   // nothing to do here
 }
+
+void osd_set_entire_palette (uint8_t attr)
+{
+}
+
 uint8_t osd_print_8x8 (uint8_t *gfxbase_8x8, uint8_t x, uint8_t y, uint8_t attr, uint8_t code)
 {
   // only ever called to print numbers
@@ -186,7 +200,7 @@ void osd_print_sprite (uint8_t attr, POBJ32 p_obj)
     n += 1*16;
 
   // setup sprite
-  if (gfx == GFX_ZX)
+  if (IS_ZX(gfx))
     attr &= 7;
   else
     attr &= 3;
@@ -287,7 +301,7 @@ void osd_display_panel (uint8_t attr)
   for (c=0; c<256; c++)
   {
 #if 1
-    if (gfx == GFX_ZX)
+    if (IS_ZX(gfx))
       // the sun/moon frame is RED
       a = ((c/32)>3 && (c%32)>22 && (c%32)<29 ? 2 : attr);
     else if (gfx == GFX_CPC)
@@ -295,7 +309,7 @@ void osd_display_panel (uint8_t attr)
 #endif
     if ((c%32) == 0)
 	    *vram = 0x7000+(FIX_XOFF*32)+(FIX_YOFF+16)+(c/32);
-    *(vram+1) = 0x0500 | (a<<12) | c;
+    *(vram+1) = (0x0600 + (a<<12)) | c;
   }
 }
 
@@ -420,7 +434,7 @@ static void show_zx_title (void)
 {
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
 	PALETTE 	pal[1];
-  uint16_t bank = 0x0600;
+  uint16_t bank = 0x0700;
   unsigned r, c;
   
   // set full spectrum palette
@@ -437,7 +451,7 @@ static void show_zx_title (void)
   {
     *vram = 0x7000 + FIX_XOFF*32 + FIX_YOFF + r;
     *(vram+2) = 32;
-    bank = 0x0600 + ((r/8)<<8);    
+    bank = 0x0700 + ((r/8)<<8);    
     for (c=0; c<32; c++)
       *(vram+1) = bank | (15<<12) | ((r%8)*32 + c);
   }
@@ -447,7 +461,7 @@ static void show_cpc_title (void)
 {
   volatile uint16_t  *vram = (uint16_t *)0x3C0000;
 	PALETTE 	pal[1];
-  uint16_t bank = 0x0900;
+  uint16_t bank = 0x0A00;
   unsigned r, c, t;
   
   // set full spectrum palette
@@ -472,7 +486,7 @@ static void show_cpc_title (void)
     for (c=0; c<18; c++, t++)
     {
       if ((t&0xff) == 0)
-        bank = 0x0900 + t;    
+        bank = 0x0A00 + t;    
       *(vram+1) = bank | (15<<12) | (t&0xff);
     }
   }
@@ -505,7 +519,7 @@ static void init_gfx (GFX_E gfx)
 	
   sprite_bank = 0x0100;
   
-	if (gfx == GFX_ZX)
+	if (IS_ZX(gfx))
   {
     // 2nd set of FIX layer
     // - for curr_room_attrib
@@ -524,6 +538,9 @@ static void init_gfx (GFX_E gfx)
   			pal[p].color[c] = make_ng_colour (r, g, b);
   		}
 	  setpalette(16, 8, (const PPALETTE)&pal);
+	  
+	  if (gfx == GFX_ZX_MICK_FARROW)
+	    sprite_bank += 0x4000;
 	}
   else
   if (gfx == GFX_CPC)
@@ -574,15 +591,28 @@ static void init_gfx (GFX_E gfx)
     // set palette banks for SPRITE layer
 	  setpalette(16, 8, (const PPALETTE)&pal);
 
-    sprite_bank |= 0x4000;
+    sprite_bank += 0x8000;
   }
 }
 
 int main (int argc, char *argv[])
 {
   uint8_t *dips = (uint8_t *)0x10FD84;
-  GFX_E gfx = (*(dips+6) ? GFX_ZX : GFX_CPC);
-
+  GFX_E gfx = GFX_ZX;
+  
+  switch (*(dips+6))
+  {
+    case 0 :
+      gfx = GFX_CPC;
+      break;
+    case 1 :
+      gfx = GFX_ZX_MICK_FARROW;
+      break;
+    case 2 :
+    default:
+      break;
+  }
+  
 	while (1)
 	{
 	  unsigned c;
@@ -592,7 +622,7 @@ int main (int argc, char *argv[])
 		clear_fix();
 		clear_spr();
 
-    if (gfx == GFX_ZX)
+    if (IS_ZX(gfx))
       show_zx_title ();
     else
     if (gfx == GFX_CPC)

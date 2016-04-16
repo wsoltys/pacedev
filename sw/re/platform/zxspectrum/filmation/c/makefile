@@ -112,10 +112,14 @@ ifeq ($(PLATFORM),neogeo)
 	
 	ifeq ($(OUTPUT),cart)
 	  DRIVER = legendos
-	  GUID = 029
-	  #P_SIZE = 1024
-	  P_SIZE = 512
-		PRG = $(GUID)-p1.p1
+	  #GUID = 029
+	  #DRIVER = nam1975
+	  #GUID = 001
+	  DRIVER = pspikes2
+	  GUID = 068
+	  P_SIZE = 1024
+	  #P_SIZE = 512
+		PRG = $(GUID)-pg1.p1
 	endif
 	ifeq ($(OUTPUT),cd)
 		PRG = PB_PROG.PRG
@@ -125,7 +129,7 @@ ifeq ($(PLATFORM),neogeo)
 	OSD_LIBS = $(NEODEV)/m68k/lib
 	
 	OSD_ASFLAGS = -m68000 --register-prefix-optional --defsym __$(OUTPUT)__=1
-	OSD_CFLAGS = -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin
+	OSD_CFLAGS = -save-temps -m68000 -O3 -Wall -fomit-frame-pointer -ffast-math -fno-builtin
 	#OSD_CFLAGS += -Wno-unused-label 
 	OSD_CFLAGS += -D__$(OUTPUT)__
 	OSD_LDFLAGS = -m68000 -nostartfiles -nodefaultlibs -Wl,-Map=$(TARGET).$(OUTPUT).map,-cref,-Tsrc/osd/$(PLATFORM)/neo$(OUTPUT).x -linput -lvideo -lc -lgcc
@@ -216,7 +220,7 @@ out:
 
 ifeq ($(OUTPUT),cart)
 
-$(PRG): $(FQTN) $(GUID)-s1.s1 $(GUID)-c1.c1 $(GUID)-c2.c2 $(GUID)-c3.c3 $(GUID)-c4.c4
+$(PRG): $(FQTN) $(GUID)-sg1.s1 $(GUID)-c1.c1 $(GUID)-c2.c2 $(GUID)-c3.c3 $(GUID)-c4.c4 $(GUID)-c5.c5 $(GUID)-c6.c6
 	$(OBJC) --gap-fill=0x00 --pad-to=0x20000 -R .data -O binary $< $@
 	@romwak /f $@ >nul:
 	@romwak /p $@ $@ $(P_SIZE) 255 >nul:
@@ -225,7 +229,7 @@ $(PRG): $(FQTN) $(GUID)-s1.s1 $(GUID)-c1.c1 $(GUID)-c2.c2 $(GUID)-c3.c3 $(GUID)-
 %.s1 : %.bin
 	@copy $< roms\$(DRIVER)\$@
 
-%.c1 %.c2 %.c3 %.c4 : %.bin
+%.c1 %.c2 %.c3 %.c4 %.c5 %.c6 : %.bin
 	@romwak /p $< $@ 1024 255 > nul:
 	@copy $@ roms\$(DRIVER)
 
