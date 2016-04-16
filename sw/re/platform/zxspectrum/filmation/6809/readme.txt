@@ -44,13 +44,13 @@ FORWARD         <A>           <UP>
 JUMP            <Q>           <Z>
 PICK-UP/DROP    <1>           <DOWN>
 
-Directional Controls: (Joystick only - currently implemented on keyboard)
+Directional Controls (Joystick only):
 NORTH           <UP>
 SOUTH           <DOWN>
 EAST            <RIGHT>
 WEST            <LEFT>
-JUMP            <Z>
-PICK-UP/DROP    <X>
+JUMP            <BUTTON 1>
+PICK-UP/DROP    <BUTTON 2>
 
 Miscellaneous Controls:
 PAUSE GAME      <SPACE>
@@ -82,6 +82,8 @@ Updated the Main Menu specifically for the Coco3 port. Added the ability to
 select keyboard/joystick and directional controls.
 
 Added support for directional & rotational joystick input.
+
+Added 4 missing sounds; pickup/drop, extra life, pause & unpause.
 
 
 CocoFEST Demo Version 1.0

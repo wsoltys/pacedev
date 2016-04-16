@@ -1240,7 +1240,7 @@ toggle_audio_hw_x16:
         bra     toggle_audio_hw_xA
 
 toggle_audio_hw_x24:
-        ldd     #0x1805
+        ldd     #0x1850
         bra     toggle_audio_hw_xA
 
 ; guard and wizard
@@ -2790,7 +2790,7 @@ handle_pickup_drop:
         bcc     1$
         lda     #1
         sta     cant_drop
-1$:     ; sound
+1$:     jsr     toggle_audio_hw_x16
         lda     #1
         sta     pickup_drop_pressed
         sta     objects_carried_changed
@@ -2980,7 +2980,7 @@ upd_103:
         clr     [16,x]                  ; zap spec_obj_tbl graphic_no
         inc     lives
         clr     disable_spike_ball_drop
-; sound
+        jsr     toggle_audio_hw_x16
         pshs    x
         jsr     print_lives
         ldd     #0x2020
@@ -5550,6 +5550,7 @@ debounce_space_press:
         jsr     read_port
         bita    #(1<<3)
         bne     debounce_space_press
+        jsr     toggle_audio_hw_x24
 wait_for_space:
         lda     #~(1<<7)
         jsr     read_port
@@ -5560,6 +5561,7 @@ debounce_space_release:
         jsr     read_port
         bita    #(1<<3)
         bne     debounce_space_release
+        jsr     toggle_audio_hw_x24
         rts
 
 clr_mem:
