@@ -27,10 +27,38 @@
 //          g++ gfx.cpp -o xgf -lalleg
 
 //#define SHOW_ORIGINAL_BITMAP
-#define SHOW_ROTATED_BITMAP
+//#define SHOW_ROTATED_BITMAP
+#define DO_ASM_DATA
 
 uint8_t ram[64*1024];
 FILE *fpdbg;
+
+#define REV(d) \
+ (((d&0x80)>>7)|((d&0x40)>>5)|((d&0x20)>>3)|((d&0x10)>>1)| \
+ ((d&8)<<1)|((d&4)<<3)|((d&2)<<5)|((d&1)<<7))
+
+void do_asm_data (void)
+{
+  FILE  *fp1 = fopen ("si_dat.asm", "wt");
+  static char ascii[] = 
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<> =*Ý      Y     Y ?      -";
+    
+  unsigned a = 0x1e00;
+  for (unsigned c=0; c<0x40; c++)
+  {
+    fprintf (fp1, "        .db ");
+    for (unsigned b=0; b<8; b++)
+    {
+      uint8_t d = ram[a++];
+      d = REV(d);
+      fprintf (fp1, "0x%02X", d);
+      if (b<7) fprintf (fp1, ", ");
+    }
+    fprintf (fp1, "  ; \"%c\"\n", ascii[c]);
+  }
+  
+  fclose (fp1);
+}
 
 #ifdef __USE_ALLEGRO__
 
@@ -205,7 +233,11 @@ int main (int argc, char *argv[])
 		exit (0);
 	fread (ram, sizeof(uint8_t), fs.st_size, fp);
 	fclose (fp);
-  
+
+  #ifdef DO_ASM_DATA
+    do_asm_data ();
+  #endif
+    
 #ifdef __USE_ALLEGRO__
 	allegro_init ();
 	install_keyboard ();

@@ -1,12 +1,12 @@
 # platform options
 
-#TARGET = inv1
+#TARGET = si
 #TARGET = a8
 
 #PLATFORM = coco3
 
 ifeq (,$(TARGET))
-	TARGET = inv1
+	TARGET = si
 endif
 
 ifeq (,$(PLATFORM))
@@ -22,7 +22,7 @@ CP = copy
 RM = rm
 MD = mkdir
 OBJC = objcopy
-LDR = siboot
+LDR = $(TARGET)boot
 EXE = $(TARGET)
 ROMWAK = \devkit\neodev\m68k\bin\romwak
 MAKEFILE = makefile
@@ -30,7 +30,7 @@ MAKEFILE = makefile
 ifeq ($(PLATFORM),coco3)
   FQLN = $(LDR).bin
   FQEN = $(TARGET)rom.bin
-  MEDIA = inv1_6809.dsk
+  MEDIA = si_6809.dsk
 endif
 
 ASFLAGS = -l -o -s
