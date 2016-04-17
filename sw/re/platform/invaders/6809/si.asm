@@ -43,7 +43,57 @@ z80_r               .equ    0x08
 cmp:                            .ds 1
 
         .org    0x6000
-wram:   .ds     1024
+wram    .equ    .                       ; 1KB
+
+; $2000
+wait_on_draw:                   .ds   1
+                                .ds   1
+alien_is_exploding:             .ds   1                
+exp_alien_timer:                .ds   1
+alien_row:                      .ds   1
+alien_frame:                    .ds   1
+alien_cur_index:                .ds   1
+ref_alien_dyr:                  .ds   1
+ref_alien_dxr:                  .ds   1
+ref_alien_yr:                   .ds   1
+ref_alien_xr:                   .ds   1
+alien_pos_lsb:                  .ds   1
+alien_pos_msb:                  .ds   1
+rack_direction:                 .ds   1
+rack_down_delta:                .ds   1
+                                .ds   1
+; $2010
+                                .ds   16
+; $2020
+                                .ds   16
+; $2030
+                                .ds   16
+; $2040
+                                .ds   16
+; $2050
+                                .ds   16
+; $2060
+                                .ds   16
+; $2070
+                                .ds   16
+; $2080
+                                .ds   16
+; $2090
+                                .ds   16
+; $20A0
+                                .ds   16
+; $20B0
+                                .ds   16
+; $20C0
+                                .ds   16
+; $20D0
+                                .ds   16
+; $20E0
+num_coins:                      .ds   1
+; $20F0
+                                .ds   16
+        
+
         
 				.org		0xc000
 
@@ -304,7 +354,7 @@ start:
         lds     #stack
         ldb     #0
         bsr     sub_01E6
-        bsr     draw_status
+        jsr     draw_status
         
 loop:   jmp     loop
 
@@ -315,7 +365,7 @@ copy_ram_mirror:
 sub_01E6:
         ldy     #byte_0_1B00
         ldx     #wram
-        bra     block_copy
+        jmp     block_copy
 
 ; $08F3
 ; Print a message on the screen
@@ -324,7 +374,9 @@ sub_01E6:
 ; C/B = length
 print_message:
         lda     ,y+                     ; get character
+        pshs    b
         bsr     draw_char
+        puls    b
         decb
         bne     print_message
         rts
@@ -340,6 +392,33 @@ draw_char:
         ldb     #8
 ; hit watchdog
         bra     draw_simp_sprite
+
+; $09AD
+; Print 4 digits in Y @X
+print_4_digits:
+        tfr     y,d
+        pshs    b
+        bsr     draw_hex_byte
+        puls    a
+
+; $09B2        
+; Display 2 digits in A to screen at HL/X
+draw_hex_byte:
+        pshs    a
+        lsra
+        lsra
+        lsra
+        lsra                            ; MSN
+        bsr     sub_09C5                ; to screen @X
+        puls    a
+        anda    #0x0f                   ; LSN
+        bsr     sub_09C5                ; to screen @X
+        rts
+
+; $09C5
+sub_09C5:
+        adda    #0x1A                   ; convert to digit char
+        bra     draw_char
 
 ; $1439
 ; Display character to screen
@@ -362,17 +441,53 @@ draw_score_head:
         ldy     #message_score
         bra     print_message
 
+; $1925
+sub_1925:
+        ldu     #wram+0xf8
+        bra     draw_score
+
+sub_192B:        
+; $192B        
+        ldu     #wram+0xfc
+        bra     draw_score
+
+; $1931
+; Print score.
+; HL/U = descriptor
+draw_score:
+        ldy     ,u++                    ; value
+        ldx     ,u++                    ; coordinate
+        bra     print_4_digits
+
+; $193C
+sub_193C:
+        ldb     #7                      ; 7 bytes in message
+        ldx     #(vram+0x1101)
+        ldy     #message_credit
+        bra     print_message
+
+; $1947
+draw_num_credits:
+        lda     num_coins
+        ldx     #0x1801
+        bra     draw_hex_byte
+                
+; $1950
+print_hi_score:
+        ldu     #wram+0xf4
+        bra     draw_score
+                
 ; $1956
 ; Print scores (with header) and credits (with label)
 draw_status:
         bsr     clear_screen
         bsr     draw_score_head
-        ;bsr     sub_1925                ; print player 1 score
-        ;bsr     sub_192B                ; print player 2 score
-        ;bsr     print_hi_score
-        ;bsr     sub_193C                ; print credit table
-        ;bra     draw_num_credits
-
+        bsr     sub_1925                ; print player 1 score
+        bsr     sub_192B                ; print player 2 score
+        bsr     print_hi_score
+        bsr     sub_193C                ; print credit table
+        bra     draw_num_credits
+        
 ; $1A32
 block_copy:
         lda     ,y+
@@ -462,7 +577,18 @@ byte_0_1BC0:
         .db 0x9B, 3, 0, 0, 3, 4, 0x78, 0x14, 0xB, 0x19, 0x3A, 0x6D
         .db 0xFA, 0xFA, 0x6D, 0x3A, 0x19, 0, 0, 0, 0, 0, 0, 0
         .db 0, 0, 0, 1, 0, 0, 1, 0x74, 0x1F, 0, 0x80, 0, 0, 0
-        .db 0, 0, 0x1C, 0x2F, 0, 0, 0x1C, 0x27, 0, 0, 0x1C, 0x39
+; hi score and vram location        
+        .db 0, 0
+        ;.db 0x1C, 0x2F, 
+        .dw vram+0x0b1c
+; p1 score and vram location        
+        .db 0, 0
+        ;.db 0x1C, 0x27, 
+        .dw vram+0x031c
+; p2 score and vram location        
+        .db 0, 0
+        ;.db 0x1C, 0x39
+        .dw vram+0x151c
 
 unk_0_1D64:
 
