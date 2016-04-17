@@ -58,15 +58,22 @@ void show_original_bitmap()
 	while (key[KEY_ESC]);	  
 }
 
-uint8_t get_rotated_pixel(unsigned x, unsigned y)
+uint8_t get_rotated_pixel_ex (unsigned base, unsigned x, unsigned y)
 {
-  uint8_t d = ram[0x2400+x*(256/8)+(255-y)/8];
+  uint8_t d = ram[base+x*(256/8)+(255-y)/8];
   
   return (d&(1<<(7-(y&7))) ? 1 : 0);
 }
 
+uint8_t get_rotated_pixel (unsigned x, unsigned y)
+{
+  return (get_rotated_pixel_ex (0x2400, x, y));
+}
+
 void show_rotated_bitmap()
 {
+  uint8_t coco_vram[320*224/8];
+  
   // $2400-$3FFF ($1C00) / (256/8) = $E0 = 224
 	clear_bitmap (screen);
 
@@ -111,10 +118,36 @@ void show_rotated_bitmap()
           }
   }
 
+  // add some letters
+  uint8_t title[][16] = 
+  { 
+    { " SPACE  " }, 
+    { "INVADERS" }
+  };
+  
+  for (unsigned l=0; l<2; l++)
+    for (unsigned c=0; title[l][c]; c++)
+    {
+      //fprintf (stderr, "%c\n", title[l][c]);
+      unsigned a = 0x1E00 + (title[l][c] - 'A') * 8;
+      
+      if (title[l][c] == ' ')
+        continue;
+        
+      for (unsigned y=0; y<8; y++)
+        for (unsigned b=0; b<8; b++)
+        {
+          uint8_t d = ram[a+b];
+          if (d & (1<<(7-y)))
+            putpixel (screen, 224+16+c*8+b, 48+l*16+y, 15);
+        }
+    }
+
   #define WIDTH 8
   
   // create some data for the Coco3
   FILE *fp2 = fopen ("vram_dat.asm", "wt");
+  unsigned a = 0;
   for (unsigned y=0; y<224; y++)
     for (unsigned x=0; x<320/8; x++)
     {
@@ -122,9 +155,11 @@ void show_rotated_bitmap()
       for (unsigned b=0; b<8; b++)
       {
         d <<= 1;
-        if (getpixel (screen, x*8+b, y))
+        if (getpixel (screen, x*8+b, 32+y))
           d |= (1<<0);
       }
+      coco_vram[a++] = d;
+      
       if ((x%WIDTH)==0)
         fprintf (fp2, "    .db ");
       fprintf (fp2, "0x%02X", d);
@@ -134,6 +169,21 @@ void show_rotated_bitmap()
         fprintf (fp2, ", ");
     }
   fclose (fp2);
+
+  while (!key[KEY_ESC]);	  
+	while (key[KEY_ESC]);	  
+
+	clear_bitmap (screen);
+
+  a = 0;
+  for (unsigned y=0; y<224; y++)
+    for (unsigned x=0; x<320/8; x++)
+    {
+      uint8_t d = coco_vram[a++];
+      for (unsigned b=0; b<8; b++)
+        if (d & (1<<(7-b)))
+          putpixel (screen, x*8+b, y, 15);      
+    }
     
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  

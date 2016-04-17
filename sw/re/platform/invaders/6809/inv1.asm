@@ -145,7 +145,7 @@ setup_gime_for_game:
 				lda			#BP										  ; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
 	  .ifdef GFX_1BPP				
-				lda			#0x08										; 192 scanlines, 32 bytes/row, 2 colours (256x192)
+				lda			#0x6C										; 225 scanlines, 40 bytes/row, 2 colours (225x320)
 	  .else				
 				lda			#0x11										; 192 scanlines, 64 bytes/row, 4 colours (256x192)
 	  .endif				
@@ -247,12 +247,14 @@ inipal:
         jmp     start                   ; knight lore
         
 rgb_pal:
-    .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
+    ;.db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
+    .db RGB_DARK_BLACK, RGB_WHITE, RGB_DARK_RED, RGB_DARK_MAGENTA
     .db RGB_DARK_GREEN, RGB_DARK_CYAN, RGB_DARK_YELLOW, RGB_GREY
     .db RGB_BLACK, RGB_BLUE, RGB_RED, RGB_MAGENTA
     .db RGB_GREEN, RGB_CYAN, RGB_YELLOW, RGB_WHITE
 cmp_pal:    
-    .db CMP_DARK_BLACK, CMP_DARK_BLUE, CMP_DARK_RED, CMP_DARK_MAGENTA
+    ;.db CMP_DARK_BLACK, CMP_DARK_BLUE, CMP_DARK_RED, CMP_DARK_MAGENTA
+    .db CMP_DARK_BLACK, CMP_WHITE, CMP_DARK_RED, CMP_DARK_MAGENTA
     .db CMP_DARK_GREEN, CMP_DARK_CYAN, CMP_DARK_YELLOW, CMP_GREY
     .db CMP_BLACK, CMP_BLUE, CMP_RED, CMP_MAGENTA
     .db CMP_GREEN, CMP_CYAN, CMP_YELLOW, CMP_WHITE
@@ -261,7 +263,7 @@ cmp_pal:
 splash:
 ;       .asciz  "01234567890123456789012345678901"
         .db 0
-        .asciz  "````ZX`SPECTRUM`KNIGHT`LORE"
+        .asciz  "`````ARCADE`SPACE`INVADERS"
         .db 0
         .asciz  "`"
         .db 0
@@ -269,19 +271,11 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-.ifdef BUILD_OPT_CPC_GRAPHICS
-        .asciz  "````j`AMSTRAD`CPC`GRAPHICS`j"
-.else        
-  .ifdef BUILD_OPT_MICK_FARROW_GRAPHICS
-        .asciz  "````j`MICK`FARROW`GRAPHICS`j"
-  .else
-        .asciz  "`````j`ORIGINAL`GRAPHICS`j"
-  .endif
-.endif
+        .asciz  "````j`MONOCHROME`GRAPHICS`j"
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "``hCOCOFEST`DEMO`VERSION`qnqi"
+        .asciz  "`````````hVERSION`pnqi"
         .db 0
         .asciz  "`"
         .db 0
@@ -302,7 +296,24 @@ splash:
 attr:   .ds     1
                 
 start:
-        jmp     start
+        ldx     #vram_dump
+        ldy     #coco_vram
+        ldb     #224
+1$:     pshs    b
+        ldb     #320/8
+2$:     lda     ,x+
+        sta     ,y+
+        decb
+        bne     2$
+        puls    b
+        decb
+        bne     1$
+        ldb     #320/8
+3$:     clr     ,y+
+        decb
+        bne     3$
+        
+loop:   jmp     loop
 
 main_fisr:
 ; temp hack - should do LFSR or something
@@ -311,6 +322,10 @@ main_fisr:
         inc     *z80_r
         rti
 
+vram_dump:
         .include "vram_dat.asm"
 
+        .ds     4096
+        .db     42
+        
 				.end		start_coco

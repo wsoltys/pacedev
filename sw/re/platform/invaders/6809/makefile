@@ -24,6 +24,7 @@ MD = mkdir
 OBJC = objcopy
 LDR = siboot
 EXE = $(TARGET)
+ROMWAK = \devkit\neodev\m68k\bin\romwak
 MAKEFILE = makefile
 
 ifeq ($(PLATFORM),coco3)
@@ -56,7 +57,8 @@ $(FQEN): $(TARGET).rom
 	ldrom -v $(TARGET).rom $(FQEN)
 	
 %.rom: %.ihx
-	$(HEX2BIN) -e rom $<
+	$(HEX2BIN) -e r0m $<
+	$(ROMWAK) /p $*.r0m $@ 16 255
 
 $(TARGET).ihx: $(EXE_OBJS)
 	$(ECHO) Linking $@...
