@@ -85,6 +85,8 @@ Added support for directional & rotational joystick input.
 
 Added 4 missing sounds; pickup/drop, extra life, pause & unpause.
 
+Changed text screens to yellow (colour of original border)
+
 
 CocoFEST Demo Version 1.0
 

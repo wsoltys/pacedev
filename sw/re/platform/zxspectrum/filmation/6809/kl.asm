@@ -2072,7 +2072,7 @@ loc_BA29:
         jsr     clear_scrn_buffer
         jsr     clear_scrn
 ; added for Coco3 port
-        lda     #ATTR_WHITE
+        lda     #ATTR_YELLOW
         jsr     osd_set_palette
 ;
 
@@ -2138,7 +2138,7 @@ game_complete_msg:
         jsr     clear_scrn_buffer
         jsr     clear_scrn
 ; added for Coco3 port
-        lda     #ATTR_WHITE
+        lda     #ATTR_YELLOW
         jsr     osd_set_palette
 ;
         ldy     #complete_xy
@@ -2573,7 +2573,7 @@ toggle_selected:
 
 display_menu:
 ; added for Coco3 port
-        lda     #ATTR_WHITE
+        lda     #ATTR_YELLOW
         jsr     osd_set_palette
 ;
         ldu     #menu_colours
