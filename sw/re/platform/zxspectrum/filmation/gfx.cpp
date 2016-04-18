@@ -562,10 +562,11 @@ void knight_lore (void)
       fprintf (stderr, "WARNING spr_%03d flip=$%02X\n",
                 sprite_n, ram[p+0]);
     
-    fprintf (fp2, "uint8_t spr_%03d[] =\n{\n  %d, %d,\n",
+    fprintf (fp2, "static uint8_t spr_%03d[] __FORCE_RODATA__ =\n{\n  %d, %d,\n",
               sprite_n, w, h);
     fprintf (fp3, "spr_%03d:\n        .db %d, %d\n",
               sprite_n++, w, h);
+    fprintf (fp2, "#ifndef __HAS_HWSPRITES__\n");
     unsigned i;
     p += 2;
     for (unsigned i=0; i<w*h*2; i++, p++)
@@ -578,7 +579,7 @@ void knight_lore (void)
       if ((i%8)==7) fprintf (fp2, "\n");
       if ((i%8)==7) fprintf (fp3, "\n");
     }
-    fprintf (fp2, "\n};\n\n");
+    fprintf (fp2, "\n#endif\n};\n\n");
     fprintf (fp3, "\n\n");
   }
 
