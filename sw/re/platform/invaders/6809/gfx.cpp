@@ -37,13 +37,40 @@ FILE *fpdbg;
  (((d&0x80)>>7)|((d&0x40)>>5)|((d&0x20)>>3)|((d&0x10)>>1)| \
  ((d&8)<<1)|((d&4)<<3)|((d&2)<<5)|((d&1)<<7))
 
+FILE  *fp1;
+
+unsigned do_16_bytes (unsigned a)
+{
+  fprintf (fp1, "; $%04X:\n", a);
+  for (unsigned b=0; b<16; b++)
+  {
+    uint8_t d = ram[a++];
+    if ((b%8) == 0)
+      fprintf (fp1, "        .db ");
+    d = REV(d);
+    fprintf (fp1, "0x%02X", d);
+    if ((b%8)!=7) fprintf (fp1, ", ");
+    else
+      fprintf (fp1, "\n");
+  }
+  return (a);
+}
+
 void do_asm_data (void)
 {
-  FILE  *fp1 = fopen ("si_dat.asm", "wt");
+  fp1 = fopen ("si_dat.asm", "wt");
   static char ascii[] = 
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<> =*İ      Y     Y ?      -";
-    
-  unsigned a = 0x1e00;
+
+  unsigned a = 0x1c00;
+  for (unsigned c=0; c<9; c++)
+    a = do_16_bytes (a);
+  fprintf (fp1, "\n");
+
+  do_16_bytes (0x1d68);
+  fprintf (fp1, "\n");
+        
+  a = 0x1e00;
   for (unsigned c=0; c<0x40; c++)
   {
     fprintf (fp1, "        .db ");
