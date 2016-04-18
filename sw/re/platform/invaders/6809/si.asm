@@ -568,7 +568,90 @@ vbord_isr:
         tst     IRQENR                  ; ACK IRQ
         dec     isr_delay
         rti
+
+; $01E4
+; Block copy ROM mirror 1B00-1BBF to initialize RAM at 2000-20BF.
+copy_ram_mirror:
+        ldb     #0xc0
+sub_01E6:
+        ldy     #byte_0_1B00
+        ldx     #wram
+        jmp     block_copy
+
+; $08D1
+get_ships_per_cred:
+; Get number of ships from DIP settings
+        lda     #3                      ; fixed for now
+        rts
         
+; $08F3
+; Print a message on the screen
+; HL/X = coordinates
+; DE/Y = message buffer
+; C/B = length
+print_message:
+        lda     ,y+                     ; get character
+        pshs    b,y
+        bsr     draw_char
+        puls    b,y
+        decb
+        bne     print_message
+        rts
+
+; $08FF
+; Get pointer to 8 byte sprite number in A and
+; draw sprite on screen at HL/X
+draw_char:
+        ldy     #loc_1E00
+        ldb     #8
+        mul                             ; D=offset
+        leay    d,y                     ; ptr data
+        ldb     #8
+; hit watchdog
+        jmp     draw_simp_sprite
+
+; $09AD
+; Print 4 digits in Y @X
+print_4_digits:
+        tfr     y,d
+        pshs    b
+        bsr     draw_hex_byte
+        puls    a
+
+; $09B2        
+; Display 2 digits in A to screen at HL/X
+draw_hex_byte:
+        pshs    a
+        lsra
+        lsra
+        lsra
+        lsra                            ; MSN
+        bsr     sub_09C5                ; to screen @X
+        puls    a
+        anda    #0x0f                   ; LSN
+        bsr     sub_09C5                ; to screen @X
+        rts
+
+; $09C5
+sub_09C5:
+        adda    #0x1A                   ; convert to digit char
+        bra     draw_char
+
+
+; $09D6
+; Clear center window of screen
+clear_playfield:
+        ldx     #vram+2
+1$:     clr     ,x+
+        tfr     x,d
+        andb    #0x1f
+        cmpb    #0x1c
+        bcs     2$
+        leax    6,x
+2$:     cmpa    #0x40
+        bcs     1$
+        rts
+             
 ; $0A93
 ; Print message from DE/Y to screen at HL/X (length in B) with a
 ; delay between letters.
@@ -639,7 +722,14 @@ loc_0B0B:
 ; Animate small alien replacing upside-down Y with correct Y
 
 ; Play demo
-loc_0B4A:        
+loc_0B4A:  
+        bsr     clear_playfield
+        tst     p1_ships_rem
+        bne     1$
+        jsr     get_ships_per_cred
+        sta     p1_ships_rem
+        ;bsr     remove_ship
+1$:              
 9$:     bra     9$
         
 ; $0BE8
@@ -654,7 +744,7 @@ draw_adv_table:
         ldx     #vram+0x0410            ; 0x410 is 1040 rotCol=32, rotRow=16
         ldy     #message_adv            ; "*SCORE ADVANCE TABLE*"
         ldb     #21                     ; 21 bytes in message
-        bsr     print_message
+        jsr     print_message
         lda     #10                     ; 10 bytes in every "=xx POINTS" string
         sta     temp_206C
         ldu     #word_0_1DBE
@@ -702,7 +792,7 @@ read_pri_struct:
 start:
         lds     #stack
         ldb     #0
-        bsr     sub_01E6
+        jsr     sub_01E6                ; copy ROM to RAM
         jsr     draw_status
 
 ; $18DF
@@ -714,68 +804,6 @@ start:
 sub_1982:
         sta     isr_splash_task
         rts
-
-; $01E4
-; Block copy ROM mirror 1B00-1BBF to initialize RAM at 2000-20BF.
-copy_ram_mirror:
-        ldb     #0xc0
-sub_01E6:
-        ldy     #byte_0_1B00
-        ldx     #wram
-        jmp     block_copy
-
-; $08F3
-; Print a message on the screen
-; HL/X = coordinates
-; DE/Y = message buffer
-; C/B = length
-print_message:
-        lda     ,y+                     ; get character
-        pshs    b,y
-        bsr     draw_char
-        puls    b,y
-        decb
-        bne     print_message
-        rts
-
-; $08FF
-; Get pointer to 8 byte sprite number in A and
-; draw sprite on screen at HL/X
-draw_char:
-        ldy     #loc_1E00
-        ldb     #8
-        mul                             ; D=offset
-        leay    d,y                     ; ptr data
-        ldb     #8
-; hit watchdog
-        bra     draw_simp_sprite
-
-; $09AD
-; Print 4 digits in Y @X
-print_4_digits:
-        tfr     y,d
-        pshs    b
-        bsr     draw_hex_byte
-        puls    a
-
-; $09B2        
-; Display 2 digits in A to screen at HL/X
-draw_hex_byte:
-        pshs    a
-        lsra
-        lsra
-        lsra
-        lsra                            ; MSN
-        bsr     sub_09C5                ; to screen @X
-        puls    a
-        anda    #0x0f                   ; LSN
-        bsr     sub_09C5                ; to screen @X
-        rts
-
-; $09C5
-sub_09C5:
-        adda    #0x1A                   ; convert to digit char
-        bra     draw_char
 
 ; $1439
 ; Display character to screen
@@ -796,7 +824,7 @@ draw_score_head:
         ldb     #0x1c                   ; 28 bytes in message
         ldx     #vram+0x1e
         ldy     #message_score
-        bra     print_message
+        jmp     print_message
 
 ; $1925
 sub_1925:
@@ -814,20 +842,20 @@ sub_192B:
 draw_score:
         ldy     ,x++                    ; value
         ldx     ,x++                    ; coordinate
-        bra     print_4_digits
+        jmp     print_4_digits
 
 ; $193C
 sub_193C:
         ldb     #7                      ; 7 bytes in message
         ldx     #vram+0x1101
         ldy     #message_credit
-        bra     print_message
+        jmp     print_message
 
 ; $1947
 draw_num_credits:
         lda     num_coins
         ldx     #0x1801
-        bra     draw_hex_byte
+        jmp     draw_hex_byte
                 
 ; $1950
 print_hi_score:
