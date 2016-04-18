@@ -25,7 +25,7 @@
 ; *** end of derived
 
 ; *** INVADERS stuff here
-        .org    var_base
+        .org    0x5f00
         
         .bndry  0x100
 dp_base:            .ds     256        
@@ -278,6 +278,7 @@ p2_scor_lo_l:                   .ds   1
 
 ; $2100
 ; Player 1 specific data
+byte_0_2100:
                                 .ds   55    ; Player 1 alien ship indicators (0=dead) 11*5 = 55
                                 .ds   11    ; Unused 11 bytes (room for another row of aliens?)
                                 .ds   0xB0  ; Player 1 shields remembered between rounds 44 bytes * 4 shields ($B0 bytes)
@@ -291,6 +292,7 @@ p1_ships_rem:                   .ds   1     ; Ships remaining after current dies
 
 ; $2200
 ; Player 2 specific data
+byte_0_2200:
                                 .ds   55
                                 .ds   11
                                 .ds   0xB0
@@ -513,7 +515,17 @@ inipal:
 			
 				lda			#>dp_base
 				tfr			a,dp
-        jmp     start                   ; knight lore
+				
+; don't really understand this,
+; but the game pretty much needs RAM to be $00
+; yet there's nowhere that clears it
+; so let's clear it for now
+        ldx     #wram
+1$:     clr     ,x+
+        cmpx    #wram+1024
+        bne     1$
+                				
+        jmp     start                   ; space invaders
         
 rgb_pal:
     ;.db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
@@ -569,6 +581,17 @@ vbord_isr:
         dec     isr_delay
         rti
 
+; $01C0
+init_aliens:
+; Initialize the 55 aliens from last to 1st. 1 means alive.
+        ldx     #byte_0_2100            ; Start of alien structures (this is the last alien)
+        ldb     #55                     ; Count to 55 (that's five rows of 11 aliens)
+        lda     #1
+1$:     sta     ,x+                     ; Bring alien to life. Next alien
+        decb                            ; All done?
+        bne     1$                      ; No ... keep looping
+        rts        
+
 ; $01E4
 ; Block copy ROM mirror 1B00-1BBF to initialize RAM at 2000-20BF.
 copy_ram_mirror:
@@ -578,6 +601,46 @@ sub_01E6:
         ldx     #wram
         jmp     block_copy
 
+; $01EF
+draw_shield_pl1:
+        ldx     #byte_0_2100+0x42
+        bra     loc_01F8
+draw_shield_pl2:
+        ldx     #byte_0_2200+0x42
+loc_01F8:
+        ldb     #4
+        ldy     #shield_image
+1$:     pshs    b,y
+        ldb     #44
+        jsr     block_copy
+        puls    b,y
+        decb
+        bne     1$                
+        rts
+
+; $021A
+restore_shields_1:
+        clra
+        ldy     #byte_0_2100+0x42
+
+copy_shields:
+        sta     tmp_2081
+        ldu     #0x1602
+        ldx     #vram+0x0406
+        ldb     #4
+1$:     pshs    b,u
+        lda     tmp_2081
+        bne     4$
+        bsr     restore_shields
+2$:     puls    b,u
+        decb
+        bne     3$
+        rts
+3$:     leax    0x2e0,x
+        bra     1$        
+4$:     bsr     remember_shields
+        bra     2$
+                
 ; $08D1
 get_ships_per_cred:
 ; Get number of ships from DIP settings
@@ -610,6 +673,16 @@ draw_char:
 ; hit watchdog
         jmp     draw_simp_sprite
 
+; $092E
+; Get number of ships for active player
+sub_092E:
+        jsr     get_player_data_ptr     ; HL/X points to player data
+        tfr     x,d
+        ldb     #0xff                   ; last byte
+        tfr     d,x
+        lda     ,x                      ; Get number of ships
+        rts
+
 ; $09AD
 ; Print 4 digits in Y @X
 print_4_digits:
@@ -636,7 +709,6 @@ draw_hex_byte:
 sub_09C5:
         adda    #0x1A                   ; convert to digit char
         bra     draw_char
-
 
 ; $09D6
 ; Clear center window of screen
@@ -724,11 +796,19 @@ loc_0B0B:
 ; Play demo
 loc_0B4A:  
         bsr     clear_playfield
-        tst     p1_ships_rem
-        bne     1$
-        jsr     get_ships_per_cred
-        sta     p1_ships_rem
-        ;bsr     remove_ship
+        tst     p1_ships_rem            ; Number of ships for player-1. If non zero ...
+        bne     1$                      ; ... keep it (counts down between demos)
+        jsr     get_ships_per_cred      ; Get number of ships from DIP settings
+        sta     p1_ships_rem            ; Reset number of ships for player-1
+        jsr     remove_ship             ; Remove a ship from stash and update indicators
+        
+        jsr     copy_ram_mirror         ; Block copy ROM mirror to initialize RAM
+        jsr     init_aliens             ; Initialize all player 1 aliens
+        bsr     draw_shield_pl1         ; Draw shields for player 1 (to buffer)
+        bsr     restore_shields_1       ; Restore shields for player 1 (to screen)
+        lda     #1                      ; ISR splash-task ...
+        sta     isr_splash_task         ; ... playing demo
+        bsr     draw_bottom_line
 1$:              
 9$:     bra     9$
         
@@ -737,6 +817,23 @@ loc_0BE8:
         ldy     #message_play_Y
         bsr     print_message_del
         bra     loc_0B0B
+
+; $14CB
+clear_small_sprite:
+; Clear a one byte sprite at HL/X. B=number of rows.
+1$:     clr     ,x
+        leax    32,x
+        decb
+        bne     1$
+        rts
+
+; $1611
+get_player_data_ptr:
+; Set HL/X with 2100 if player 1 is active or 2200 if player 2 is active
+        clrb
+        lda     player_data_msb
+        tfr     d,x
+        rts
 
 ; $1815
 ; Draw "SCORE ADVANCE TABLE"
@@ -754,7 +851,7 @@ draw_adv_table:
         bra     1$                      ; Do all in table
         rts
 ; $1834
-        bsr     one_sec_delay
+        jsr     one_sec_delay
 2$:     ldu     #word_0_1DCF
 3$:     bsr     read_pri_struct         ; Get X=coordinate, Y=message
         bcc     4$                      ; continue of not done
@@ -872,7 +969,29 @@ draw_status:
         bsr     print_hi_score
         bsr     sub_193C                ; print credit table
         bra     draw_num_credits
-        
+
+; $19E6
+draw_num_ships:
+; Show ships remaining in hold for the player
+        ldx     #vram+0x0301
+        tsta
+        beq     2$
+; Draw line of ships
+1$:     ldy     #player_sprite
+        ldb     #16
+        sta     *z80_c
+        bsr     draw_simp_sprite
+        lda     *z80_c
+        deca
+        bne     1$
+; Clear remainder of line        
+2$:     ldb     #16
+        jsr     clear_small_sprite
+        tfr     x,d
+        cmpa    #>vram+0x11
+        bne     2$
+        rts
+
 ; $1A32
 block_copy:
         lda     ,y+
@@ -888,6 +1007,42 @@ clear_screen:
         cmpx    #(vram+0x1C00+32)
         bne     1$
         rts
+
+; $1A69
+; Logically OR the player's shields back onto the playfield
+; DE/Y = sprite
+; HL/X = screen
+; C/U = bytes per row
+; B/U = number of rows
+restore_shields:
+        pshs    x
+        ldb     *z80_c
+1$:     lda     ,y+                     ; From sprite
+        ora     ,x                      ; OR with screen
+        sta     ,x+                     ; Back to screen
+        decb
+        bne     1$
+        puls    x
+        leax    32,x
+        dec     *z80_b
+        bne     restore_shields
+        rts
+        
+; $1A7F
+remove_ship:
+; Remove a ship from the players stash and update the
+; hold indicators on the screen.
+        jsr     sub_092E                ; Get last byte from player data
+        bne     1$
+        rts
+1$:     pshs    a                       ; Preserve number remaining
+        deca                            ; Remove a ship from the stash
+        sta     ,x                      ; New number of ships
+        bsr     draw_num_ships
+        puls    a                       ; Restore number
+        ldx     #vram+0x0101
+        anda    #0x0f                   ; Make sure it is a digit
+        jmp     sub_09C5                ; Print number remaining
 
 ; $1AE4
 message_score:
@@ -911,8 +1066,11 @@ byte_0_1B00:    .db 1,0,0,0x10,0,0,0,0
                 .db 0,0x1D,4,0xE2,0x1C,0,0,3
                 .db 0,0,0,0x82,6,0,0,1
                 .db 6,0x1D,4,0xD0,0x1C,0,0,3
-                .db 0xFF,0,0xC0,0x1C,0,0,0x10,0x21
+; $2060
+                .db 0xFF,0,0xC0,0x1C,0,0,0x10
+                .db >byte_0_2100
                 .db 1,0,0x30,0,0x12,0,0,0
+                
 ; These don't need to be copied over to RAM (see 1BA0 below).
 message_p1: 
 ; "PLAY PLAYER<1>"
@@ -1024,6 +1182,14 @@ message_adv:
 ; $1CFA
 message_play_UY:
         .db 0xF, 0xB, 0, 0x29           ; "PLAY" with inverted Y
+
+; $1D20
+shield_image:
+        .db 0xFF, 0xF, 0xFF, 0x1F, 0xFF, 0x3F, 0xFF, 0x7F, 0xFF
+        .db 0xFF, 0xFC, 0xFF, 0xF8, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF
+        .db 0xF0, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF, 0xF0
+        .db 0xFF, 0xF8, 0xFF, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+        .db 0xFF, 0x7F, 0xFF, 0x3F, 0xFF, 0x1F, 0xFF, 0xF
 
 unk_0_1D64:
         .db 0, 0, 0, 0
