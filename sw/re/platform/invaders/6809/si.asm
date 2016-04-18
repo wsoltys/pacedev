@@ -565,9 +565,9 @@ attr:   .ds     1
 ; delay between letters.
 print_message_del:
         lda     ,y+
-        pshs    b
-        bsr     draw_char
-        puls    b
+        pshs    b,y
+        jsr     draw_char
+        puls    b,y
         lda     #7                      ; Delay between letters
         sta     isr_delay
 1$:     lda     isr_delay
@@ -582,8 +582,12 @@ one_sec_delay:
         lda     #0x40
         bra     wait_on_delay
 
-; $0ACF
+; $0AB1
+two_sec_delay:
+        lda     #0x80
+        bra     wait_on_delay
 
+; $0ACF
 ; Message to center of screen.
 ; Only used in one place for "SPACE  INVADERS"
 sub_0ACF:
@@ -596,7 +600,7 @@ sub_0ACF:
 wait_on_delay:
         sta     isr_delay
 1$:     tst     isr_delay
-        bne     1$
+        ;bne     1$
         rts
         
 ; $0AEA
@@ -605,9 +609,9 @@ loc_0AEA:
         clra
 ;       out     (sound1),a
 ;       out     (sound2),a
-        bsr     sub_1982        
+        jsr     sub_1982                ; Turn off ISR splash-task
 ;       ei
-        ;bsr     one_sec_delay        
+        bsr     one_sec_delay        
         ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
         ldb     #4                      ; 4 characters in "PLAY"
         tst     splash_animate          ; Splash screen type
@@ -618,6 +622,15 @@ loc_0AEA:
 loc_0B0B:
         bsr     sub_0ACF                ; Print to middle-ish of screen
         bsr     one_sec_delay
+        bsr     draw_adv_table          ; Draw "SCORE ADVANCE TABLE" with print delay
+        bsr     two_sec_delay
+        tst     splash_animate
+        bne     loc_0B4A                ; Not 0 ... no animations
+; $0B1E        
+; Animate small alien replacing upside-down Y with correct Y
+
+; Play demo
+loc_0B4A:        
 9$:     bra     9$
         
 ; $0BE8
@@ -626,6 +639,56 @@ loc_0BE8:
         bsr     print_message_del
         bra     loc_0B0B
 
+; $1815
+; Draw "SCORE ADVANCE TABLE"
+draw_adv_table:
+        ldx     #vram+0x0410            ; 0x410 is 1040 rotCol=32, rotRow=16
+        ldy     #message_adv            ; "*SCORE ADVANCE TABLE*"
+        ldb     #21                     ; 21 bytes in message
+        bsr     print_message
+        lda     #10                     ; 10 bytes in every "=xx POINTS" string
+        sta     temp_206C
+        ldu     #word_0_1DBE
+1$:     bsr     read_pri_struct         ; Get X=coordinate, Y=message
+        bcs     2$                      ; Move on if done
+        bsr     sub_1844                ; draw 16-byte sprite
+        bra     1$                      ; Do all in table
+        rts
+; $1834
+        bsr     one_sec_delay
+2$:     ldu     #word_0_1DCF
+3$:     bsr     read_pri_struct         ; Get X=coordinate, Y=message
+        bcc     4$                      ; continue of not done
+        rts
+4$:     bsr     sub_184C                ; Print Message
+        bra     3$                      ; Do all in table
+; $1844
+sub_1844:
+        ldb     #16
+        bsr     draw_simp_sprite
+        rts
+
+; $184C
+sub_184C:
+        ldb     temp_206C
+        jsr     print_message_del
+        rts
+        
+; $1856
+read_pri_struct:
+; Read a 4-byte print-structure pointed to by BC/U
+; HL/X=Screen coordiante, DE/Y=pointer to message
+; If the first byte is FF then return with C=1.
+        lda     ,u
+        cmpa    #0xff
+        SCF
+        bne     1$
+        rts
+1$:     ldx     ,u++                    ; screen coordinate
+        ldy     ,u++                    ; message address
+        CCF
+        rts        
+        
 ; $18D4                
 start:
         lds     #stack
@@ -636,10 +699,8 @@ start:
 ; $18DF
         lda     #8
         sta     a_shot_reload_rate
-        bra     loc_0AEA                ; splash animation
+        jmp     loc_0AEA                ; splash animation
                         
-loop:   jmp     loop
-
 ; $1982
 sub_1982:
         sta     isr_splash_task
@@ -661,9 +722,9 @@ sub_01E6:
 ; C/B = length
 print_message:
         lda     ,y+                     ; get character
-        pshs    b
+        pshs    b,y
         bsr     draw_char
-        puls    b
+        puls    b,y
         decb
         bne     print_message
         rts
@@ -672,10 +733,10 @@ print_message:
 ; Get pointer to 8 byte sprite number in A and
 ; draw sprite on screen at HL/X
 draw_char:
-        ldu     #loc_1E00
+        ldy     #loc_1E00
         ldb     #8
         mul                             ; D=offset
-        leau    d,u                     ; ptr data
+        leay    d,y                     ; ptr data
         ldb     #8
 ; hit watchdog
         bra     draw_simp_sprite
@@ -710,10 +771,10 @@ sub_09C5:
 ; $1439
 ; Display character to screen
 ; HL/X = screen coordinates
-; DE/U = character data
+; DE/Y = character data
 ; B = number of rows
 draw_simp_sprite:
-        lda     ,u+
+        lda     ,y+
         sta     ,x
         leax    32,x
         decb
@@ -730,26 +791,26 @@ draw_score_head:
 
 ; $1925
 sub_1925:
-        ldu     #p1_scor_l              ; Player 1 score descriptor
+        ldx     #p1_scor_l              ; Player 1 score descriptor
         bra     draw_score
 
 sub_192B:        
 ; $192B        
-        ldu     #p2_scor_l              ; Player 2 score descriptor
+        ldx     #p2_scor_l              ; Player 2 score descriptor
         bra     draw_score
 
 ; $1931
 ; Print score.
-; HL/U = descriptor
+; HL/X = descriptor
 draw_score:
-        ldy     ,u++                    ; value
-        ldx     ,u++                    ; coordinate
+        ldy     ,x++                    ; value
+        ldx     ,x++                    ; coordinate
         bra     print_4_digits
 
 ; $193C
 sub_193C:
         ldb     #7                      ; 7 bytes in message
-        ldx     #(vram+0x1101)
+        ldx     #vram+0x1101
         ldy     #message_credit
         bra     print_message
 
@@ -761,7 +822,7 @@ draw_num_credits:
                 
 ; $1950
 print_hi_score:
-        ldu     #hi_scor_l              ; Hi Score descriptor
+        ldx     #hi_scor_l              ; Hi Score descriptor
         bra     draw_score
                 
 ; $1956
@@ -877,21 +938,121 @@ byte_0_1BC0:
         ;.db 0x1C, 0x39
         .dw vram+0x151c
 
+; $1C00
+alien_spr_a:    
+        .db 0, 0, 0x39, 0x79, 0x7A, 0x6E, 0xEC, 0xFA, 0xFA, 0xEC ; 10 pt invader #1
+        .db 0x6E, 0x7A, 0x79, 0x39, 0, 0
+        .db 0, 0, 0, 0x78, 0x1D, 0xBE, 0x6C, 0x3C, 0x3C, 0x3C ; 20 pt invader #1
+        .db 0x6C, 0xBE, 0x1D, 0x78, 0, 0
+        .db 0, 0, 0, 0, 0x19, 0x3A, 0x6D, 0xFA, 0xFA, 0x6D, 0x3A ; 30 pt invader #1
+        .db 0x19, 0, 0, 0, 0
+; $1C30        
+alien_spr_b:        
+        .db 0, 0, 0x38, 0x7A, 0x7F, 0x6D, 0xEC, 0xFA, 0xFA, 0xEC ; 10 pt invader #2
+        .db 0x6D, 0x7F, 0x7A, 0x38, 0, 0
+        .db 0, 0, 0, 0xE, 0x18, 0xBE, 0x6D, 0x3D, 0x3C, 0x3D, 0x6D ; 20 pt invader #2
+        .db 0xBE, 0x18, 0xE, 0, 0
+        .db 0, 0, 0, 0, 0x1A, 0x3D, 0x68, 0xFC, 0xFC, 0x68, 0x3D ; 30 pt invader #2
+        .db 0x1A, 0, 0, 0, 0
+; $1C60        
+player_sprite:           
+        .db 0, 0, 0xF, 0x1F, 0x1F, 0x1F, 0x1F, 0x7F, 0xFF, 0x7F ; player ship
+        .db 0x1F, 0x1F, 0x1F, 0x1F, 0xF, 0
+; $1C70        
+plr_blow_up_sprites:    
+        .db 0, 4, 1, 0x13, 3, 7, 0xB3, 0xF, 0x2F, 3, 0x2F, 0x49, 4, 3, 0, 1 ; ship explosion #1
+; $1C80
+        .db 0x40, 8, 5, 0xA3, 0xA, 3, 0x5B, 0xF, 0x27, 0x27, 0xB, 0x4B, 0x40, 0x84, 0x11, 0x48 ; ship explosion #2
+; $1C90
+player_shot_spr:        
+        .db  0xF
+; $1C91
+shot_exploding:        
+        .db 0x99, 0x3C, 0x7E, 0x3D, 0xBC, 0x3E, 0x7C, 0x99
+; $1C99        
+message_10_pts:
+;       "=10 POINTS"
+        .db 0x27, 0x1B, 0x1A, 0x26, 0xF, 0xE, 8, 0xD, 0x13, 0x12
+
+; $1CA3
+; "SCORE ADVANCE TABLE"
+message_adv:
+        .db 0x28 ; (
+        .db 0x12, 2, 0xE, 0x11, 4, 0x26, 0, 3, 0x15, 0, 0xD, 2
+        .db 4, 0x26, 0x13, 0, 1, 0xB, 4
+        .db 0x28 ; (
+
 ; $1CFA
 message_play_UY:
         .db 0xF, 0xB, 0, 0x29           ; "PLAY" with inverted Y
-        
 
 unk_0_1D64:
+        .db 0, 0, 0, 0
+
+; $1D68
+sprite_saucer:
+        .db 4, 0xC, 0x1E, 0x37, 0x3E, 0x7C, 0x74, 0x7E, 0x7E, 0x74
+        .db 0x7C, 0x3E, 0x37, 0x1E, 0xC, 4
+        .db 0, 0, 0, 0
+
+; $1D7C
+sprite_saucer_exp:
+byte_0_1D7C:    
+        .db 0, 0x22, 0, 0xA5, 0x40, 8, 0x98, 0x3D, 0xB6, 0x3C
+        .db 0x36, 0x1D, 0x10, 0x48, 0x62, 0xB6, 0x1D, 0x98, 8
+        .db 0x42, 0x90, 8, 0, 0
 
 ; $1DAB
 message_play_Y:
-        .db 0xF, 0xB, 0, 0x18           ; "PLAY" with normal Y
+;       "PLAY" with normal Y
+        .db 0xF, 0xB, 0, 0x18           
 
 ; $1DAF        
 message_invaders:
-        .db 0x12, 0xF, 0, 2, 4, 0x26, 0x26 ; "SPACE  INVADERS"
+;       "SPACE  INVADERS"
+        .db 0x12, 0xF, 0, 2, 4, 0x26, 0x26 
         .db 8, 0xD, 0x15, 0, 3, 4, 0x11, 0x12
+
+word_0_1DBE:    
+        .dw vram+0x080E                 ; screen loc for ufo on score table
+        .dw sprite_saucer               ; ptr ufo bitmap
+        .dw vram+0x080C                 ; screen loc for 30 pt invader
+        .dw alien_spr_a+0x20            ; ptr 30 pt invader bitmap
+        .dw vram+0x080A                 ; screen loc for 20 pt invader
+        .dw alien_spr_b+0x10            ; ptr 20 pt invader bitmap
+        .dw vram+0x0808                 ; screen loc for 10 pt invader
+        .dw alien_spr_a                 ; ptr 10 pt nvader bitmap
+        .db 0xFF                        ; end of table marker
+
+word_0_1DCF:    
+        .dw vram+0x0A0E                 ; screen loc for following string
+        .dw message_myst                ; "=? MYSTERY"
+        .dw vram+0x0A0C                 ; screen loc for following string
+        .dw message_30_pts              ; "=30 POINTS"
+        .dw vram+0x0A0A                 ; screen loc for following string
+        .dw message_20_pts              ; "=20 POINTS"
+        .dw vram+0x0A08                 ; screen loc for following string
+        .dw message_10_pts              ; "=10 POINTS"
+        .db 0xFF                        ; end of table marker
+
+; $1DE0
+message_myst:
+; "=? MYSTERY"
+        .db 0x27, 0x38, 0x26, 0xC, 0x18, 0x12, 0x13, 4, 0x11, 0x18
+
+; $1DEA
+message_30_pts:
+; "=30 POINTS"
+        .db 0x27, 0x1D, 0x1A, 0x26, 0xF, 0xE, 8, 0xD, 0x13, 0x12
+
+; $1DF4
+message_20_pts:
+; "=20 POINTS"
+        .db 0x27, 0x1C, 0x1A, 0x26, 0xF, 0xE, 8, 0xD, 0x13, 0x12
+
+; Ran out of space here. The "=10" message is up at 1C99. That keeps
+; the font table firmly at 1E00.
+        .db 0, 0                        ; Padding to put font table at 1E00
 
 loc_1E00:   
         .db 0x00, 0xF8, 0x24, 0x22, 0x24, 0xF8, 0x00, 0x00  ; "A"
@@ -965,8 +1126,9 @@ alien_spr_CA:
         .db 0xBC, 0x16, 0x3F, 0x3F, 0x16, 0xBC, 0x58, 0x00  ; " "
 
 ; $1F90        
-message_coin:    
-        .db 8, 0xD, 0x12, 4, 0x11, 0x13, 0x26, 0x26, 2, 0xE, 8 ; "INSERT  COIN"
+message_coin:  
+;       "INSERT  COIN"           
+        .db 8, 0xD, 0x12, 4, 0x11, 0x13, 0x26, 0x26, 2, 0xE, 8
         .db 0xD
 
 ; $1F9C
@@ -981,7 +1143,8 @@ credit_table:
 
 ; $1FA9        
 message_credit:
-        .db 2, 0x11, 4, 3, 8, 0x13, 0x26                ; "CREDIT "
+;       "CREDIT "
+        .db 2, 0x11, 4, 3, 8, 0x13, 0x26
 
 ; $1FB0        
 alien_spr_CB:        
@@ -993,23 +1156,43 @@ alien_spr_CB:
         .db    0
 
 ; $1FC9        
-splash_anim_3:  
-        .db 0, 0, 0xFF, 0xB8, 0xFF, 0x80, 0x1F, 0x10, 0x97, 0 ; inverted-y animation pt.3 data
-        .db 0x80, 0x1F
+byte_0_1FC9:
+; Splash screen animation structure 3
+        .db 0                           ; image form
+        .db 0                           ; delta x
+        .db 0xFF                        ; delta y
+        .db 0xB8                        ; x coordinate
+        .db 0xFF                        ; y starting coordinate
+        .dw alien_spr_CA
+        .db 0x10                        ; size of image
+        .db 0x97                        ; target y coordinate
+        .db 0                           ; reached y flag
+        .dw alien_spr_CA
 
 ; $1FD5                
-splash_anim_4:  
-        .db 0, 0, 1, 0xD0, 0x22, 0x20, 0x1C, 0x10, 0x94, 0, 0x20 ; bomb-c animation data
-        .db 0x1C
+byte_0_1FD5:
+; Splash screen animation structure 4
+        .db 0                           ; image form
+        .db 0                           ; delta x
+        .db 1                           ; delta y
+        .db 0xD0                        ; x coordinate
+        .db 0x22                        ; y starting coordinate
+        .dw alien_spr_a+0x20
+        .db 0x10                        ; size of image
+        .db 0x94                        ; target y coordinate
+        .db 0                           ; reached flag
+        .dw alien_spr_a+0x20
 
 ; $1FE1
 message_2_coins:
-        .db 0x28, 0x1C, 0x26, 0xF, 0xB, 0, 0x18, 4, 0x11, 0x12 ; "*2 PLAYERS 2 COINS"
+;       "*2 PLAYERS 2 COINS"
+        .db 0x28, 0x1C, 0x26, 0xF, 0xB, 0, 0x18, 4, 0x11, 0x12 
         .db 0x26, 0x1C, 0x26, 2, 0xE, 8, 0xD, 0x12
 
 ; $1FF3        
-message_push:          
-        .db 0xF, 0x14, 0x12, 7, 0x26                    ; "PUSH "
+message_push:
+;       "PUSH " (with space on the end)            
+        .db 0xF, 0x14, 0x12, 7, 0x26
 
 ; $1FF8
         .db 0x00, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00, 0x00  ; "-"
