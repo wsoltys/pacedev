@@ -8,6 +8,9 @@
   .macro	SCF
     orcc		#(1<<0)
   .endm
+  .macro  EI
+    andcc   #~(1<<4)                    ; enable IRQ in CPU    
+  .endm
 
 ;
 ; *** COCO registers

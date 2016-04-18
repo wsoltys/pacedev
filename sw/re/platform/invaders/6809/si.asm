@@ -398,11 +398,11 @@ setup_gime_for_game:
 				sta			PIA1+3									; PIA1, CB1,2 control
 ; - initialise GIME
 				lda			IRQENR									; ACK any pending GIME interrupt
-				lda			#MMUEN|#FEN             ; enable GIME MMU, FIRQ
+				lda			#MMUEN|#IEN|#FEN        ; enable GIME MMU, IRQ, FIRQ
 				sta			INIT0     							
 				lda			#0x00										; slow timer, task 1
 				sta			INIT1     							
-				lda			#0x00										; no VBLANK IRQ
+				lda			#VBORD                  ; VBLANK IRQ
 				sta			IRQENR    							
 				lda			#TMR                    ; TMR FIRQ enabled
 				sta			FIRQENR   							
@@ -442,14 +442,18 @@ inipal:
         lda     #>4095
         sta     TMRMSB
 
-  ; install FIRQ handler and enable TMR FIRQ
-				;lda			#TMR|HBORD|VBORD        ; TMR FIRQ enabled
-				;sta			FIRQENR   							
+  ; install FIRQ handler and enable CPU FIRQ
         lda     #0x7E                   ; jmp
         sta     0xFEF4
 				ldx     #main_fisr              ; address
 				stx     0xFEF5
-        andcc   #~0x40                  ; enable FIRQ in CPU
+        andcc   #~(1<<6)                ; enable FIRQ in CPU
+  ; install IRQ handler and enable CPU IRQ
+        lda     #0x7E                   ; jmp
+        sta     0xFEF7
+        ldx     #vbord_isr
+        stx     0xFEF8
+;        andcc   #~(1<<4)                ; enable IRQ in CPU    
 
   ; setup the PIAS for joystick sampling
   
@@ -560,6 +564,11 @@ splash:
 
 attr:   .ds     1
 
+vbord_isr:
+        tst     IRQENR                  ; ACK IRQ
+        dec     isr_delay
+        rti
+        
 ; $0A93
 ; Print message from DE/Y to screen at HL/X (length in B) with a
 ; delay between letters.
@@ -572,7 +581,7 @@ print_message_del:
         sta     isr_delay
 1$:     lda     isr_delay
         deca                            ; Is it 1?
-;        bne     1$        
+        bne     1$        
         decb
         bne     print_message_del
         rts
@@ -600,7 +609,7 @@ sub_0ACF:
 wait_on_delay:
         sta     isr_delay
 1$:     tst     isr_delay
-        ;bne     1$
+        bne     1$
         rts
         
 ; $0AEA
@@ -610,7 +619,7 @@ loc_0AEA:
 ;       out     (sound1),a
 ;       out     (sound2),a
         jsr     sub_1982                ; Turn off ISR splash-task
-;       ei
+        EI
         bsr     one_sec_delay        
         ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
         ldb     #4                      ; 4 characters in "PLAY"
