@@ -63,37 +63,248 @@ rack_direction:                 .ds   1
 rack_down_delta:                .ds   1
                                 .ds   1
 ; $2010
-                                .ds   16
+; '''GameObject0 (Move/draw the player)'''
+obj0_timer_msb:                 .ds   1                                
+obj0_timer_lsb:                 .ds   1                                
+obj0_timer_extra:               .ds   1                                
+obj0_handler_lsb:               .ds   1                                
+obj0_handler_msb:               .ds   1                                
+player_alive:                   .ds   1                                
+exp_animate_timer:              .ds   1                                
+exp_animate_cnt:                .ds   1                                
+plyr_spr_pic_l:                 .ds   1                                
+plyr_spr_pic_m:                 .ds   1                                
+player_yr:                      .ds   1                                
+player_xr:                      .ds   1                                
+plyr_spr_siz:                   .ds   1                                
+next_demo_cmd:                  .ds   1                                
+hid_mess_seq:                   .ds   1                                
+                                .ds   1
 ; $2020
-                                .ds   16
+; '''GameObject1 (Move/draw the player shot)'''
+obj1_timer_msb:                 .ds   1                                
+obj1_timer_lsb:                 .ds   1                                
+obj1_timer_extra:               .ds   1                                
+obj1_handler_lsb:               .ds   1                                
+obj1_handler_msb:               .ds   1                                
+plyr_shot_status:               .ds   1                                
+blow_up_timer:                  .ds   1                                
+obj1_image_lsb:                 .ds   1                                
+obj1_image_msb:                 .ds   1                                
+obj1_coor_yr:                   .ds   1                                
+obj1_coor_xr:                   .ds   1                                
+obj1_image_size:                .ds   1                                
+shot_delta_x:                   .ds   1                                
+fire_bounce:                    .ds   1                                
+                                .ds   2
 ; $2030
-                                .ds   16
+; '''GameObject2 (Alien rolling-shot)'''
+obj2_timer_msb:                 .ds   1                                
+obj2_timer_lsb:                 .ds   1                                
+obj2_timer_extra:               .ds   1                                
+obj2_handler_lsb:               .ds   1                                
+obj2_handler_msb:               .ds   1                                
+rol_shot_status:                .ds   1                                
+rol_shot_step_cnt:              .ds   1                                
+rol_shot_track:                 .ds   1                                
+rol_shot_c_fir_lsb:             .ds   1                                
+rol_shot_c_fir_msb:             .ds   1                                
+rol_shot_blow_cnt:              .ds   1                                
+rol_shot_image_lsb:             .ds   1                                
+rol_shot_image_msb:             .ds   1                                
+rol_shot_yr:                    .ds   1                                
+rol_shot_xr:                    .ds   1                                
+rol_shot_size:                  .ds   1                                
 ; $2040
-                                .ds   16
+; '''GameObject3 (Alien plunger-shot)'''
+obj3_timer_msb:                 .ds   1                                
+obj3_timer_lsb:                 .ds   1                                
+obj3_timer_extra:               .ds   1                                
+obj3_handler_lsb:               .ds   1                                
+obj3_handler_msb:               .ds   1                                
+plu_shot_status:                .ds   1                                
+plu_shot_step_cnt:              .ds   1                                
+plu_shot_track:                 .ds   1                                
+plu_shot_c_fir_lsb:             .ds   1                                
+plu_shot_c_fir_msb:             .ds   1                                
+plu_shot_blow_cnt:              .ds   1                                
+plu_shot_image_lsb:             .ds   1                                
+plu_shot_image_msb:             .ds   1                                
+plu_shot_yr:                    .ds   1                                
+plu_shot_xr:                    .ds   1                                
+plu_shot_size:                  .ds   1                                
 ; $2050
-                                .ds   16
+; '''GameObject4 (Flying saucer OR alien squiggly shot)'''
+obj4_timer_msb:                 .ds   1                                
+obj4_timer_lsb:                 .ds   1                                
+obj4_timer_extra:               .ds   1                                
+obj4_handler_lsb:               .ds   1                                
+obj4_handler_msb:               .ds   1                                
+squ_shot_status:                .ds   1                                
+squ_shot_step_cnt:              .ds   1                                
+squ_shot_track:                 .ds   1                                
+squ_shot_c_fir_lsb:             .ds   1                                
+squ_shot_c_fir_msb:             .ds   1                                
+squ_shot_blow_cnt:              .ds   1                                
+squ_shot_image_lsb:             .ds   1                                
+squ_shot_image_msb:             .ds   1                                
+squ_shot_yr:                    .ds   1                                
+squ_shot_xr:                    .ds   1                                
+squ_shot_size:                  .ds   1                                
 ; $2060
-                                .ds   16
+end_of_tasks:                   .ds   1
+collision:                      .ds   1
+exp_alien_lsb:                  .ds   1
+exp_alien_msb:                  .ds   1
+exp_alien_yr:                   .ds   1
+exp_alien_xr:                   .ds   1
+exp_alien_size:                 .ds   1
+player_data_msb:                .ds   1
+player_ok:                      .ds   1
+enable_alien_fire:              .ds   1
+alien_fire_delay:               .ds   1
+one_alien:                      .ds   1
+temp_206C:                      .ds   1
+invaded:                        .ds   1
+skip_plunger:                   .ds   1
+                                .ds   1
 ; $2070
-                                .ds   16
+other_shot_1:                   .ds   1
+other_shot_2:                   .ds   1
+vblank_status:                  .ds   1
+a_shot_status:                  .ds   1
+a_shot_step_cnt:                .ds   1
+a_shot_track:                   .ds   1
+a_shot_c_fir_lsb:               .ds   1
+a_shot_c_fir_msb:               .ds   1
+a_shot_blow_cnt:                .ds   1
+a_shot_image_lsb:               .ds   1
+a_shot_image_msb:               .ds   1
+alien_shot_yr:                  .ds   1
+alien_shot_xr:                  .ds   1
+alien_shot_size:                .ds   1
+alien_shot_delta:               .ds   1
+shot_pic_end:                   .ds   1
 ; $2080
-                                .ds   16
+shot_sync:                      .ds   1
+tmp_2081:                       .ds   1
+num_aliens:                     .ds   1
+saucer_start:                   .ds   1
+saucer_active:                  .ds   1
+saucer_hit:                     .ds   1
+saucer_hit_time:                .ds   1
+saucer_pri_loc_lsb:             .ds   1
+saucer_pri_loc_msb:             .ds   1
+saucer_pri_pic_lsb:             .ds   1
+saucer_pri_pic_msb:             .ds   1
+saucer_pri_size:                .ds   1
+saucer_delta_y:                 .ds   1
+sau_score_lsb:                  .ds   1
+sau_score_msb:                  .ds   1
+shot_count_lsb:                 .ds   1
 ; $2090
-                                .ds   16
+shot_count_msb:                 .ds   1
+till_saucer_lsb:                .ds   1
+till_saucer_msb:                .ds   1
+wait_start_loop:                .ds   1
+sound_port_3:                   .ds   1
+change_fleet_snd:               .ds   1
+fleet_snd_cnt:                  .ds   1
+fleet_snd_reload:               .ds   1
+sound_port_5:                   .ds   1
+extra_hold:                     .ds   1
+tilt:                           .ds   1
+fleet_snd_hold:                 .ds   1
+                                .ds   4
 ; $20A0
+; '''In the ROM mirror copied to RAM this is the image of the alien sprite pulling the upside down Y. The code expects it to be 
+; 0030 below the second animation picture at 1BD0. This RAM area must be unused. The copy is wasted. '''
                                 .ds   16
 ; $20B0
                                 .ds   16
+; ''' End of inialization copy from ROM mirror'''
 ; $20C0
-                                .ds   16
+; ''' Splash screen animation structure '''
+isr_delay:                      .ds   1
+isr_splash_task:                .ds   1
+splash_an_form:                 .ds   1
+splash_delta_x:                 .ds   1
+splash_delta_y:                 .ds   1
+splash_yr:                      .ds   1
+splash_xr:                      .ds   1
+splash_image_lsb:               .ds   1
+splash_image_msb:               .ds   1
+splash_image_size:              .ds   1
+splash_target_y:                .ds   1
+splash_reached:                 .ds   1
+splash_image_rest_lsb:          .ds   1
+splash_image_rest_msb:          .ds   1
+two_players:                    .ds   1
+a_shot_reload_rate:             .ds   1
 ; $20D0
+; This is where the alien-sprite-carying-the-Y ...
+; ... lives in ROM
                                 .ds   16
 ; $20E0
+                                .ds   5
+player1_ex:                     .ds   1
+player2_ex:                     .ds   1
+player1_alive:                  .ds   1
+player2_alive:                  .ds   1
+suspend_play:                   .ds   1
+coin_switch:                    .ds   1
 num_coins:                      .ds   1
+splash_animate:                 .ds   1
+demo_cmd_ptr_lsb:               .ds   1
+demo_cmd_ptr_msb:               .ds   1
+game_mode:                      .ds   1
 ; $20F0
-                                .ds   16
-        
+                                .ds   1
+adjust_score:                   .ds   1
+score_delta_lsb:                .ds   1
+score_delta_msb:                .ds   1
+hi_scor_l:                      .ds   1
+hi_scor_m:                      .ds   1
+hi_scor_lo_m:                   .ds   1     ; switched for 6809
+hi_scor_lo_l:                   .ds   1
+p1_scor_l:                      .ds   1
+p1_scor_m:                      .ds   1
+p1_scor_lo_m:                   .ds   1     ; switched for 6809
+p1_scor_lo_l:                   .ds   1
+p2_scor_l:                      .ds   1
+p2_scor_m:                      .ds   1
+p2_scor_lo_m:                   .ds   1     ; switched for 6809
+p2_scor_lo_l:                   .ds   1
 
+; $2100
+; Player 1 specific data
+                                .ds   55    ; Player 1 alien ship indicators (0=dead) 11*5 = 55
+                                .ds   11    ; Unused 11 bytes (room for another row of aliens?)
+                                .ds   0xB0  ; Player 1 shields remembered between rounds 44 bytes * 4 shields ($B0 bytes)
+                                .ds   9     ; Unused 9 bytes
+; $21FB                                
+p1_ref_alien_dx:                .ds   1     ; Player 1 reference-alien delta X
+p1_ref_alien_y:                 .ds   1     ; Player 1 reference-alien Y coordinate
+p1_ref_alien_x:                 .ds   1     ; Player 1 reference-alien X coordiante
+p1_rack_cnt:                    .ds   1     ; Player 1 rack-count (starts at 0 but get incremented to 1-8)
+p1_ships_rem:                   .ds   1     ; Ships remaining after current dies
+
+; $2200
+; Player 2 specific data
+                                .ds   55
+                                .ds   11
+                                .ds   0xB0
+                                .ds   9
+; $22FB                                
+p2_ref_alien_dx:                .ds   1
+p2_ref_alien_y:                 .ds   1
+p2_ref_alien_x:                 .ds   1
+p2_rack_cnt:                    .ds   1
+p2_ships_rem:                   .ds   1
+
+; $2300
+; stack on the original game goes here
+; low water-mark around $23DE
         
 				.org		0xc000
 
@@ -349,14 +560,90 @@ splash:
 
 attr:   .ds     1
 
+; $0A93
+; Print message from DE/Y to screen at HL/X (length in B) with a
+; delay between letters.
+print_message_del:
+        lda     ,y+
+        pshs    b
+        bsr     draw_char
+        puls    b
+        lda     #7                      ; Delay between letters
+        sta     isr_delay
+1$:     lda     isr_delay
+        deca                            ; Is it 1?
+;        bne     1$        
+        decb
+        bne     print_message_del
+        rts
+
+; $0AB1
+one_sec_delay:
+        lda     #0x40
+        bra     wait_on_delay
+
+; $0ACF
+
+; Message to center of screen.
+; Only used in one place for "SPACE  INVADERS"
+sub_0ACF:
+        ldx     #vram+0x714             ; Near center of screen
+        ldb     #15                     ; 15 bytes in message
+        bra     print_message_del
+
+; $0AD7
+; Wait on ISR counter to reach 0
+wait_on_delay:
+        sta     isr_delay
+1$:     tst     isr_delay
+        bne     1$
+        rts
+        
+; $0AEA
+; After initialization ... splash screens
+loc_0AEA:
+        clra
+;       out     (sound1),a
+;       out     (sound2),a
+        bsr     sub_1982        
+;       ei
+        ;bsr     one_sec_delay        
+        ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
+        ldb     #4                      ; 4 characters in "PLAY"
+        tst     splash_animate          ; Splash screen type
+        bne     loc_0BE8                ; Not 0 ... do "normal" PLAY
+        ldy     #message_play_UY        ; "PLAy" with an upside down 'Y' for splash screen
+        bsr     print_message_del
+        ldy     #message_invaders       ; "SPACE  INVADERS"
+loc_0B0B:
+        bsr     sub_0ACF                ; Print to middle-ish of screen
+        bsr     one_sec_delay
+9$:     bra     9$
+        
+; $0BE8
+loc_0BE8:
+        ldy     #message_play_Y
+        bsr     print_message_del
+        bra     loc_0B0B
+
 ; $18D4                
 start:
         lds     #stack
         ldb     #0
         bsr     sub_01E6
         jsr     draw_status
-        
+
+; $18DF
+        lda     #8
+        sta     a_shot_reload_rate
+        bra     loc_0AEA                ; splash animation
+                        
 loop:   jmp     loop
+
+; $1982
+sub_1982:
+        sta     isr_splash_task
+        rts
 
 ; $01E4
 ; Block copy ROM mirror 1B00-1BBF to initialize RAM at 2000-20BF.
@@ -443,12 +730,12 @@ draw_score_head:
 
 ; $1925
 sub_1925:
-        ldu     #wram+0xf8
+        ldu     #p1_scor_l              ; Player 1 score descriptor
         bra     draw_score
 
 sub_192B:        
 ; $192B        
-        ldu     #wram+0xfc
+        ldu     #p2_scor_l              ; Player 2 score descriptor
         bra     draw_score
 
 ; $1931
@@ -474,7 +761,7 @@ draw_num_credits:
                 
 ; $1950
 print_hi_score:
-        ldu     #wram+0xf4
+        ldu     #hi_scor_l              ; Hi Score descriptor
         bra     draw_score
                 
 ; $1956
@@ -590,7 +877,21 @@ byte_0_1BC0:
         ;.db 0x1C, 0x39
         .dw vram+0x151c
 
+; $1CFA
+message_play_UY:
+        .db 0xF, 0xB, 0, 0x29           ; "PLAY" with inverted Y
+        
+
 unk_0_1D64:
+
+; $1DAB
+message_play_Y:
+        .db 0xF, 0xB, 0, 0x18           ; "PLAY" with normal Y
+
+; $1DAF        
+message_invaders:
+        .db 0x12, 0xF, 0, 2, 4, 0x26, 0x26 ; "SPACE  INVADERS"
+        .db 8, 0xD, 0x15, 0, 3, 4, 0x11, 0x12
 
 loc_1E00:   
         .db 0x00, 0xF8, 0x24, 0x22, 0x24, 0xF8, 0x00, 0x00  ; "A"
