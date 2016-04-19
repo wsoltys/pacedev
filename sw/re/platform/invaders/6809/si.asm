@@ -603,43 +603,49 @@ sub_01E6:
 
 ; $01EF
 draw_shield_pl1:
-        ldx     #byte_0_2100+0x42
-        bra     loc_01F8
+        ldx     #byte_0_2100+0x42       ; Player 1 shield buffer (remember between games in multi-player)
+        bra     loc_01F8                ; Common draw point
 draw_shield_pl2:
-        ldx     #byte_0_2200+0x42
+        ldx     #byte_0_2200+0x42       ; Player 2 shield buffer (remember between games in multi-player)
 loc_01F8:
-        ldb     #4
-        ldy     #shield_image
-1$:     pshs    b,y
-        ldb     #44
-        jsr     block_copy
-        puls    b,y
-        decb
-        bne     1$                
+        ldb     #4                      ; Going to draw 4 shields
+        ldy     #shield_image           ; Shield pixel pattern
+1$:     pshs    b,y                     ; Hold the start for the next shield
+        ldb     #44                     ; 44 bytes to copy
+        jsr     block_copy              ; Block copy DE/Y to HL/X (B bytes)
+        puls    b,y                     ; Restore start of shield pattern
+        decb                            ; Drawn all shields?
+        bne     1$                      ; No ... go draw them all
         rts
 
 ; $021A
+; Copy shields from player 1's data area to screen.
 restore_shields_1:
-        clra
-        ldy     #byte_0_2100+0x42
+        clra                            ; Zero means restore
+        ldy     #byte_0_2100+0x42       ; Player 1 shield buffer (remember between games in multi-player)
 
+; $021E
+; A is 1 for screen-to-buffer, 0 for to buffer-to-screen
+; HL/X is screen coordinates of first shield. There are 23 rows between shields.
+; DE/Y is sprite buffer in memory.
 copy_shields:
-        sta     tmp_2081
-        ldu     #0x1602
-        ldx     #vram+0x0406
-        ldb     #4
-1$:     pshs    b,u
-        lda     tmp_2081
-        bne     4$
-        bsr     restore_shields
-2$:     puls    b,u
-        decb
+        sta     tmp_2081                ; Remember copy/restore flag
+        ldu     #0x1602                 ; 22 rows, 2 bytes/row (for 1 shield pattern)
+        ldx     #vram+0x0406            ; Screen coordinates
+        ldb     #4                      ; Four shields to move
+1$:     pshs    b                       ; Hold shield count
+        stu     *z80_b                  ; B=rows, C=bytes
+        lda     tmp_2081                ; Get back copy/restore flag
+        bne     4$                      ; Not zero means remember shields
+        jsr     restore_shields         ; Restore player's shields
+2$:     puls    b
+        decb                            ; Have we moved all shields?
         bne     3$
         rts
-3$:     leax    0x2e0,x
+3$:     leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
         bra     1$        
-4$:     bsr     remember_shields
-        bra     2$
+4$:     jsr     remember_shields        ; Remember player's shields
+        bra     2$                      ; Continue with next shield
                 
 ; $08D1
 get_ships_per_cred:
@@ -804,19 +810,38 @@ loc_0B4A:
         
         jsr     copy_ram_mirror         ; Block copy ROM mirror to initialize RAM
         jsr     init_aliens             ; Initialize all player 1 aliens
-        bsr     draw_shield_pl1         ; Draw shields for player 1 (to buffer)
-        bsr     restore_shields_1       ; Restore shields for player 1 (to screen)
+        jsr     draw_shield_pl1         ; Draw shields for player 1 (to buffer)
+        jsr     restore_shields_1       ; Restore shields for player 1 (to screen)
         lda     #1                      ; ISR splash-task ...
         sta     isr_splash_task         ; ... playing demo
-        bsr     draw_bottom_line
+        ;bsr     draw_bottom_line
 1$:              
 9$:     bra     9$
         
 ; $0BE8
 loc_0BE8:
         ldy     #message_play_Y
-        bsr     print_message_del
+        jsr     print_message_del
         bra     loc_0B0B
+
+; $147C
+; In a multi-player game the player's shields are block-copied to and from RAM between turns.
+; HL/X = screen pointer
+; DE/Y = memory buffer
+; B = number of rows
+; C = number of columns
+remember_shields:
+        pshs    x
+1$:     ldb     *z80_c
+2$:     lda     ,x+                     ; From screen
+        sta     ,y+                     ; To buffer
+        decb
+        bne     2$
+        puls    x                       ; Original start
+        leax    32,x                    ; Bump X by one screen row
+        dec     *z80_b                  ; Row counter
+        bne     1$
+        rts
 
 ; $14CB
 clear_small_sprite:
@@ -1012,20 +1037,20 @@ clear_screen:
 ; Logically OR the player's shields back onto the playfield
 ; DE/Y = sprite
 ; HL/X = screen
-; C/U = bytes per row
-; B/U = number of rows
+; C = bytes per row
+; B = number of rows
 restore_shields:
-        pshs    x
+1$:     pshs    x
         ldb     *z80_c
-1$:     lda     ,y+                     ; From sprite
+2$:     lda     ,y+                     ; From sprite
         ora     ,x                      ; OR with screen
         sta     ,x+                     ; Back to screen
         decb
+        bne     2$
+        puls    x                       ; Original start
+        leax    32,x                    ; Bump X by one screen row
+        dec     *z80_b                  ; Row counter
         bne     1$
-        puls    x
-        leax    32,x
-        dec     *z80_b
-        bne     restore_shields
         rts
         
 ; $1A7F
@@ -1185,11 +1210,12 @@ message_play_UY:
 
 ; $1D20
 shield_image:
-        .db 0xFF, 0xF, 0xFF, 0x1F, 0xFF, 0x3F, 0xFF, 0x7F, 0xFF
-        .db 0xFF, 0xFC, 0xFF, 0xF8, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF
-        .db 0xF0, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF, 0xF0
-        .db 0xFF, 0xF8, 0xFF, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-        .db 0xFF, 0x7F, 0xFF, 0x3F, 0xFF, 0x1F, 0xFF, 0xF
+        .db 0xFF, 0xF0, 0xFF, 0xF8, 0xFF, 0xFC, 0xFF, 0xFE
+        .db 0xFF, 0xFF, 0x3F, 0xFF, 0x1F, 0xFF, 0x0F, 0xFF
+        .db 0x0F, 0xFF, 0x0F, 0xFF, 0x0F, 0xFF, 0x0F, 0xFF
+        .db 0x0F, 0xFF, 0x0F, 0xFF, 0x1F, 0xFF, 0x3F, 0xFF
+        .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFC
+        .db 0xFF, 0xF8, 0xFF, 0xF0
 
 unk_0_1D64:
         .db 0, 0, 0, 0

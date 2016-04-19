@@ -39,20 +39,21 @@ FILE *fpdbg;
 
 FILE  *fp1;
 
-unsigned do_16_bytes (unsigned a)
+unsigned do_n_bytes (unsigned a, unsigned n)
 {
   fprintf (fp1, "; $%04X:\n", a);
-  for (unsigned b=0; b<16; b++)
+  for (unsigned b=0; b<n; b++)
   {
     uint8_t d = ram[a++];
     if ((b%8) == 0)
       fprintf (fp1, "        .db ");
     d = REV(d);
     fprintf (fp1, "0x%02X", d);
-    if ((b%8)!=7) fprintf (fp1, ", ");
+    if ((b%8)!=7 && b<(n-1)) fprintf (fp1, ", ");
     else
       fprintf (fp1, "\n");
   }
+  fprintf (fp1, "\n");
   return (a);
 }
 
@@ -64,10 +65,12 @@ void do_asm_data (void)
 
   unsigned a = 0x1c00;
   for (unsigned c=0; c<9; c++)
-    a = do_16_bytes (a);
+    a = do_n_bytes (a, 16);
   fprintf (fp1, "\n");
 
-  do_16_bytes (0x1d68);
+  do_n_bytes (0x1d20, 44);
+
+  do_n_bytes (0x1d68, 16);
   fprintf (fp1, "\n");
         
   a = 0x1e00;
