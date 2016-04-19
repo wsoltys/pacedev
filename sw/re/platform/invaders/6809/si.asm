@@ -255,8 +255,8 @@ suspend_play:                   .ds   1
 coin_switch:                    .ds   1
 num_coins:                      .ds   1
 splash_animate:                 .ds   1
-demo_cmd_ptr_lsb:               .ds   1
-demo_cmd_ptr_msb:               .ds   1
+demo_cmd_ptr_msb:               .ds   1     ; switched for 6809
+demo_cmd_ptr_lsb:               .ds   1     ; switched for 6809
 game_mode:                      .ds   1
 ; $20F0
                                 .ds   1
@@ -266,15 +266,15 @@ score_delta_msb:                .ds   1
 hi_scor_l:                      .ds   1
 hi_scor_m:                      .ds   1
 hi_scor_lo_m:                   .ds   1     ; switched for 6809
-hi_scor_lo_l:                   .ds   1
+hi_scor_lo_l:                   .ds   1     ; switched for 6809
 p1_scor_l:                      .ds   1
 p1_scor_m:                      .ds   1
 p1_scor_lo_m:                   .ds   1     ; switched for 6809
-p1_scor_lo_l:                   .ds   1
+p1_scor_lo_l:                   .ds   1     ; switched for 6809
 p2_scor_l:                      .ds   1
 p2_scor_m:                      .ds   1
 p2_scor_lo_m:                   .ds   1     ; switched for 6809
-p2_scor_lo_l:                   .ds   1
+p2_scor_lo_l:                   .ds   1     ; switched for 6809
 
 ; $2100
 ; Player 1 specific data
@@ -592,6 +592,14 @@ init_aliens:
         bne     1$                      ; No ... keep looping
         rts        
 
+; $01CF
+; Draw a 1px line across the player's stash at the bottom of the screen.
+draw_bottom_line:
+        lda     #1                      ; Bit 1 set ... going to draw a 1-pixel stripe down left side
+        ldb     #0xe0                   ; All the way down the screen
+        ldx     #vram+2                 ; Screen coordinates (3rd byte from upper left)
+        jmp     sub_14CC                ; Draw line down left side 
+
 ; $01E4
 ; Block copy ROM mirror 1B00-1BBF to initialize RAM at 2000-20BF.
 copy_ram_mirror:
@@ -730,6 +738,13 @@ clear_playfield:
         bcs     1$
         rts
              
+; $0A59
+; Check to see if player is hit
+sub_0A59:
+        lda     player_alive
+        cmpa    #0xff
+        rts
+
 ; $0A93
 ; Print message from DE/Y to screen at HL/X (length in B) with a
 ; delay between letters.
@@ -785,14 +800,14 @@ loc_0AEA:
         ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
         ldb     #4                      ; 4 characters in "PLAY"
         tst     splash_animate          ; Splash screen type
-        bne     loc_0BE8                ; Not 0 ... do "normal" PLAY
+        lbne    loc_0BE8                ; Not 0 ... do "normal" PLAY
         ldy     #message_play_UY        ; "PLAy" with an upside down 'Y' for splash screen
         bsr     print_message_del
         ldy     #message_invaders       ; "SPACE  INVADERS"
 loc_0B0B:
         bsr     sub_0ACF                ; Print to middle-ish of screen
         bsr     one_sec_delay
-        bsr     draw_adv_table          ; Draw "SCORE ADVANCE TABLE" with print delay
+        jsr     draw_adv_table          ; Draw "SCORE ADVANCE TABLE" with print delay
         bsr     two_sec_delay
         tst     splash_animate
         bne     loc_0B4A                ; Not 0 ... no animations
@@ -808,21 +823,86 @@ loc_0B4A:
         sta     p1_ships_rem            ; Reset number of ships for player-1
         jsr     remove_ship             ; Remove a ship from stash and update indicators
         
-        jsr     copy_ram_mirror         ; Block copy ROM mirror to initialize RAM
+1$:     jsr     copy_ram_mirror         ; Block copy ROM mirror to initialize RAM
         jsr     init_aliens             ; Initialize all player 1 aliens
         jsr     draw_shield_pl1         ; Draw shields for player 1 (to buffer)
         jsr     restore_shields_1       ; Restore shields for player 1 (to screen)
         lda     #1                      ; ISR splash-task ...
         sta     isr_splash_task         ; ... playing demo
-        ;bsr     draw_bottom_line
-1$:              
-9$:     bra     9$
+        jsr     draw_bottom_line
+
+.if 0        
+2$:     bsr     plr_fire_or_demo        ; In demo ... process demo movement and always fire
+        ;bsr     loc_0BF1                ; Check player shot and aliens bumping edges of screen and hidden message
+; watchdog
+        jsr     sub_0A59                ; Has demo player been hit?
+        beq     2$                      ; No ... continue game
+        clr     plyr_shot_status        ; Remove player shot from activity
+3$:     jsr     sub_0A59                ; Wait for demo player ...
+        bne     3$                      ; ... to stop exploding
+.endif
+
+; Credit information
+        clr     isr_splash_task         ; Turn off splash animation
+        bsr     one_sec_delay
+        jsr     sub_1988                ; Jump straight to clear-play-field
+        ldb     #12                     ; Message size
+        ldx     #vram+0x0811            ; Screen coordinates
+        ldy     #message_coin           ; "INSERT  COIN"
+        jsr     print_message           ; Print message
+        lda     splash_animate          ; Do splash animations?
+        bne     4$                      ; Not 0 ... not on this screen
+        ldx     #vram+0x0f11            ; Screen coordinates
+        lda     #2                      ; Character "C"
+        jsr     draw_char               ; Put an extra "C" for "CCOIN" on the screen
+4$:     ldu     #credit_table           ; "<1 OR 2 PLAYERS>  "
+        jsr     read_pri_struct         ; Load the screen,pointer
+        jsr     sub_184C                ; Print the message
+; display coin info on demo screen is a dipswitch option
+;       in      a,(inp2)
+;       rlca
+;       jp      c,$0BC3
+        leau    0,u                     ; "*1 PLAYER  1 COIN "
+        jsr     loc_183A                ; Load the descriptor
+; $0BC3        
+        jsr     two_sec_delay           ; Print TWO descriptors worth ???
+        lda     splash_animate          ; Doing splash animation?
+        
+        
+        ;bsr     animate
+        ;bsr     sub_189E
+        lda     splash_animate
+        eora    #1                      ; Toggle the splash screen animation for next time
+        sta     splash_animate
+        jsr     clear_playfield         ; Clear play field
+        jmp     loc_18DF                ; Keep splashing
         
 ; $0BE8
 loc_0BE8:
-        ldy     #message_play_Y
-        jsr     print_message_del
-        bra     loc_0B0B
+        ldy     #message_play_Y         ; "PLAY" with normal 'Y'
+        jsr     print_message_del       ; Print it
+        bra     loc_0B0B                ; Continue with splash (HL/X will be pointing to next message)
+
+loc_0BF1:
+;        bsr     plyr_shot_and_bump      ; Check if player is shot and aliens bumping the edge of screen
+;        bra     check_hidden_mes        ; Check for hidden-message display sequence
+
+message_corp:
+;       "TAITO COP"
+        .db 0x13, 0, 8, 0x13, 0xE, 0x26, 2, 0xE, 0xF    
+
+; $1439
+; Display character to screen
+; HL/X = screen coordinates
+; DE/Y = character data
+; B = number of rows
+draw_simp_sprite:
+        lda     ,y+
+        sta     ,x
+        leax    32,x
+        decb
+        bne     draw_simp_sprite
+        rts
 
 ; $147C
 ; In a multi-player game the player's shields are block-copied to and from RAM between turns.
@@ -846,7 +926,9 @@ remember_shields:
 ; $14CB
 clear_small_sprite:
 ; Clear a one byte sprite at HL/X. B=number of rows.
-1$:     clr     ,x
+        clra
+sub_14CC:
+1$:     sta     ,x
         leax    32,x
         decb
         bne     1$
@@ -858,6 +940,67 @@ get_player_data_ptr:
         clrb
         lda     player_data_msb
         tfr     d,x
+        rts
+
+; $1618
+plr_fire_or_demo:
+; Initiate player fire if button is pressed.
+; Demo commands are parsed here if in demo mode
+        lda     player_alive            ; Is there an active player?
+        cmpa    #0xff                   ; FF = alive
+        bne     9$                      ; Player has been shot - no firing
+1$:     ldd     obj0_timer_msb          ; Player task timer active?
+        bne     9$                      ; No ... no firing till player object starts <<---???
+        tst     plyr_shot_status        ; Does the player have a shot on the screen?
+        bne     9$                      ; Yes ... ignore
+        tst     game_mode               ; Are we in game mode?
+        bne     loc_1652                ; No ... in demo mode ... constant firing in demo
+        tst     fire_bounce             ; Is fire button being held down?
+        bne     loc_1648                ; Yes ... wait for bounce
+        bsr     read_inputs             ; Read active player controls
+        anda    #0x10                   ; Fire-button pressed?
+        beq     9$                      ; No ... out
+        lda     #1                      ; Flag
+        sta     plyr_shot_status        ; Flag shot active
+        sta     fire_bounce             ; Flag that fire button is down
+9$:     rts        
+
+loc_1648:
+        bsr     read_inputs             ; Read active player controls
+        anda    #0x10                   ; Fire-button pressed?
+        bne     9$                      ; Yes ... ignore
+        sta     fire_bounce             ; Else ... clear flag
+9$:     rts
+
+; Handle demo (constant fire, parse demo commands)        
+loc_1652:
+        lda     #1                      ; Demo fires ...
+        sta     plyr_shot_status        ; ... constantly
+        ldx     demo_cmd_ptr_msb        ; Demo command buffer
+        leax    1,x                     ; Next position
+        cmpx    #demo_commands+10       ; Buffer from 1F74 to 1F7E (was CP $7E)
+        bne     1$
+        ldx     #demo_commands          ; ... overflow
+1$:     stx     demo_cmd_ptr_msb        ; Next demo command
+        lda     ,x                      ; Get next command
+        sta     next_demo_cmd           ; Set command for movement
+        rts        
+
+; $17C0
+; Read control inputs for active player
+read_inputs:
+        lda     player_data_msb         ; Get active player
+; this is only going to work if the offsets within memory
+; are preserved on this port
+; original $2100,$220 -> 6809 $6100,$6200        
+        rora                            ; Test player
+        bcc     1$
+; read player 1 inputs
+        clra
+        rts
+1$:
+; read player 2 inputs                
+        clra
         rts
 
 ; $1815
@@ -878,15 +1021,16 @@ draw_adv_table:
 ; $1834
         jsr     one_sec_delay
 2$:     ldu     #word_0_1DCF
-3$:     bsr     read_pri_struct         ; Get X=coordinate, Y=message
-        bcc     4$                      ; continue of not done
+loc_183A:
+1$:     bsr     read_pri_struct         ; Get X=coordinate, Y=message
+        bcc     2$                      ; continue of not done
         rts
-4$:     bsr     sub_184C                ; Print Message
-        bra     3$                      ; Do all in table
+2$:     bsr     sub_184C                ; Print Message
+        bra     1$                      ; Do all in table
 ; $1844
 sub_1844:
         ldb     #16
-        bsr     draw_simp_sprite
+        jsr     draw_simp_sprite
         rts
 
 ; $184C
@@ -918,6 +1062,7 @@ start:
         jsr     draw_status
 
 ; $18DF
+loc_18DF:
         lda     #8
         sta     a_shot_reload_rate
         jmp     loc_0AEA                ; splash animation
@@ -925,19 +1070,6 @@ start:
 ; $1982
 sub_1982:
         sta     isr_splash_task
-        rts
-
-; $1439
-; Display character to screen
-; HL/X = screen coordinates
-; DE/Y = character data
-; B = number of rows
-draw_simp_sprite:
-        lda     ,y+
-        sta     ,x
-        leax    32,x
-        decb
-        bne     draw_simp_sprite
         rts
 
 ; $191A
@@ -995,6 +1127,10 @@ draw_status:
         bsr     sub_193C                ; print credit table
         bra     draw_num_credits
 
+; $1988
+sub_1988:
+        jmp     clear_playfield         ; Clear playfield and out
+        
 ; $19E6
 draw_num_ships:
 ; Show ships remaining in hold for the player
@@ -1005,7 +1141,7 @@ draw_num_ships:
 1$:     ldy     #player_sprite
         ldb     #16
         sta     *z80_c
-        bsr     draw_simp_sprite
+        jsr     draw_simp_sprite
         lda     *z80_c
         deca
         bne     1$
