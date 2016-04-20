@@ -775,7 +775,19 @@ score_for_alien:
         sta     -1,x
 1$:     ldx     #exp_alien_msb
         rts
-        
+
+; $0A80
+; Start the ISR moving the sprite. Return when done.
+animate:
+        lda     #2                      ; Start simple linear ...
+        sta     isr_splash_task         ; ... sprite animation (splash)
+1$:        
+;       out     (watchdog),a
+        tst     splash_reached          ; Has the sprite reached target?
+        beq     1$                      ; No ... wait
+        clr     isr_splash_task         ; Stop ISR animation
+        rts
+                
 ; $0A93
 ; Print message from DE/Y to screen at HL/X (length in B) with a
 ; delay between letters.
@@ -818,6 +830,13 @@ wait_on_delay:
 1$:     tst     isr_delay
         bne     1$
         rts
+
+; $0AE2
+; Init the splash-animation block
+ini_splash_ani:
+        ldx     #splash_an_form         ; The splash-animation descriptor
+        ldb     #12                     ; 12 bytes
+        jmp     block_copy              ; Block copy DE to descriptor
         
 ; $0AEA
 ; After initialization ... splash screens
@@ -862,7 +881,6 @@ loc_0B4A:
         sta     isr_splash_task         ; ... playing demo
         jsr     draw_bottom_line
 
-.if 1     
 2$:     jsr     plr_fire_or_demo        ; In demo ... process demo movement and always fire
         jsr     loc_0BF1                ; Check player shot and aliens bumping edges of screen and hidden message
 ; watchdog
@@ -871,7 +889,6 @@ loc_0B4A:
         clr     plyr_shot_status        ; Remove player shot from activity
 3$:     jsr     sub_0A59                ; Wait for demo player ...
         bne     3$                      ; ... to stop exploding
-.endif
 
 ; Credit information
         clr     isr_splash_task         ; Turn off splash animation
@@ -897,12 +914,13 @@ loc_0B4A:
         jsr     loc_183A                ; Load the descriptor
 ; $0BC3        
         jsr     two_sec_delay           ; Print TWO descriptors worth ???
-        lda     splash_animate          ; Doing splash animation?
-        
-        
-        ;bsr     animate
-        ;bsr     sub_189E
-        lda     splash_animate
+        tst     splash_animate          ; Doing splash animation?
+        bne     5$                      ; Not 0 ... not on this screen
+        ldy     #byte_0_1FD5            ; Animation for small alien to line up with extra "C"
+        jsr     ini_splash_ani          ; Copy the animation block
+        jsr     animate                 ; Wait for the animation to complete
+        jsr     sub_189E                ; Animate alien shot to extra "C"
+5$:     lda     splash_animate
         eora    #1                      ; Toggle the splash screen animation for next time
         sta     splash_animate
         jsr     clear_playfield         ; Clear play field
@@ -1055,7 +1073,7 @@ code_bug_1:
         clr     ,x                      ; Make alien invader dead
         jsr     score_for_alien         ; Makes alien explosion sound and adjust score
         jsr     read_desc               ; Load 5 byte sprite descriptor
-        bsr     draw_sprite             ; Draw explosion sprite on screen
+        jsr     draw_sprite             ; Draw explosion sprite on screen
         lda     #0x10                   ; Initiate alien-explosion
         sta     exp_alien_timer         ; ... timer to 16
         rts
@@ -1163,10 +1181,41 @@ wrap_ref:
         rts
 
 ; $1597
+; When rack bumps the edge of the screen then the direction flips and the rack
+; drops 8 pixels. The deltaX and deltaY values are changed here. Interestingly
+; if there is only one alien left then the right value is 3 instead of the 
+; usual 2. The left direction is always -2.
 rack_bump:
-        ERROR
+        tst     rack_direction          ; Get rack direction, Moving right?
+        bne     3$                      ; No ... handle moving left
+        ldx     #vram+0x1AA4            ; Line down the right edge of playfield
+        bsr     sub_15C5                ; Check line down the edge
+        bcc     2$                      ; Nothing is there ... return
+        ldb     #-2                     ; Delta X of -2
+        lda     #1                      ; Rack now moving right
+1$:     sta     rack_direction          ; Set new rack direction
+        stb     ref_alien_dxr           ; Set new delta X
+        lda     rack_down_delta         ; Set delta Y ...
+        sta     ref_alien_dyr           ; ... to drop rack by 8
+2$:     rts
+; $15B7
+3$:     ldx     #vram+0x0124            ; Line down the left edge of playfield
+        bsr     sub_15C5                ; Check line down the edge
+        bcc     2$                      ; Nothing is there ... return
+        jsr     sub_18F1                ; Get moving-right delta X value of 2 (3 if just one alien left)
+        clra                            ; Rack now moving left
+        bra     1$                      ; Set rack direction
+
+; $15C5
+sub_15C5:
+        ldb     #23                     ; Checking 23 bytes in a line up the screen from near the bottom
+1$:     tst     ,x                      ; Is screen memory empty?
+        bne     loc_166B                ; No ... set carry flag and out
+        leax    1,x                     ; Next byte on screen
+        decb                            ; All column done?
+        bne     1$                      ; No ... keep looking
         rts
-        
+                
 ; $15D3
 ; Draw sprite at [DE/Y] to screen at pixel position in HL/X
 ; The hardware shift register is used in converting pixel positions
@@ -1242,6 +1291,11 @@ loc_1652:
         sta     next_demo_cmd           ; Set command for movement
         rts        
 
+; $166B
+loc_166B:
+        SCF
+        rts
+
 ; $17C0
 ; Read control inputs for active player
 read_inputs:
@@ -1309,6 +1363,30 @@ read_pri_struct:
         ldy     ,u++                    ; message address
         CCF
         rts        
+
+; $189E
+;Animate alien shot to extra "C" in splash
+sub_189E:
+        ldx     #obj4_timer_msb
+        ldy     #byte_0_1BC0
+        ldb     #16
+        jsr     block_copy
+        lda     #2
+        sta     shot_sync
+        lda     #0xff
+        sta     alien_shot_delta
+        lda     #4
+        sta     isr_splash_task
+1$:     lda     squ_shot_status
+        anda    #1
+        beq     1$
+2$:     lda     squ_shot_status
+        anda    #1
+        bne     1$
+        ldx     #vram+0x0f11
+        lda     #0x26
+        jsr     draw_char
+        jmp     two_sec_delay
         
 ; $18D4                
 start:
@@ -1323,10 +1401,28 @@ loc_18DF:
         sta     a_shot_reload_rate
         jmp     loc_0AEA                ; splash animation
 
+; $18E7
+; Get player-alive flag for OTHER player
+sub_18E7:
+        lda     player_data_msb
+        ldx     #player1_alive
+; this only works if msb is odd for p1, even for p2
+        lsra
+        bcc     9$
+        leax    1,x
+9$:     rts        
+
 ; $18F1
 ; If there is one alien left then the right motion is 3 instead of 2. That's
 ; why the timing is hard to hit after the change.
-
+sub_18F1:
+        ldb     #2
+        lda     num_aliens
+        deca
+        bne     9$
+        incb
+9$:     rts
+        
 ; $18FA
 sound_bits_3_on:
 ;       ld      a,(soundport3)
@@ -1416,7 +1512,7 @@ check_hidden_mes:
         tst     hid_mess_seq            ; Has the 1st "hidden-message" sequence been registered?
         bne     2$                      ; Yes ... go look for the 2nd sequence
 ;       in      a,(inp1)                ; Get player inputs
-        lda     #0x72                   ; *** fudge
+;        lda     #0x72                   ; *** fudge
         anda    #0x76                   ; 0111_0110 Keep 2Pstart, 1Pstart, 1Pshot, 1Pleft, 1Pright
         suba    #0x72                   ; 0111_0010 1st sequence: 2Pstart, 1Pshot, 1Pleft, 1Pright
         beq     1$                      
@@ -1425,7 +1521,7 @@ check_hidden_mes:
         sta     hid_mess_seq            ; ... has been entered
 2$:
 ;       in      a,(inp1)                ; Check inputs for 2nd sequence
-        lda     #0x34                   ; *** fudge
+;        lda     #0x34                   ; *** fudge
         anda    #0x76                   ; 0111_0110 Keep 2Pstart, 1Pstart, 1Pshot, 1Pleft, 1Pright
         cmpa    #0x34                   ; 0011_0100 2nd sequence: 1Pstart, 1Pshot, 1Pleft 
         beq     3$
@@ -1572,7 +1668,7 @@ byte_0_1B00:    .db 1,0,0,0x10,0,0,0,0
                 .db 0,0x1D,4,0xE2,0x1C,0,0,3
                 .db 0,0,0,0x82,6,0,0,1
                 .db 6,0x1D,4,0xD0,0x1C,0,0,3
-; $2060
+; $1B60->$2060
                 .db 0xFF,0,0xC0,0x1C,0,0,0x10
                 .db >byte_0_2100
                 .db 1,0,0x30,0,0x12,0,0,0
@@ -1623,7 +1719,10 @@ byte_0_1BB0:
         .db    0
 byte_0_1BC0:    
         .db 0, 0x10, 0, 0xE, 5, 0, 0, 0, 0, 0, 7, 0xD0, 0x1C, 0xC8 ; initialised only at startup
-        .db 0x9B, 3, 0, 0, 3, 4, 0x78, 0x14, 0xB, 0x19, 0x3A, 0x6D
+        .db 0x9B, 3
+; $1BD0
+alien_spr_CYB:
+        .db 0, 0, 3, 4, 0x78, 0x14, 0xB, 0x19, 0x3A, 0x6D
         .db 0xFA, 0xFA, 0x6D, 0x3A, 0x19, 0, 0, 0, 0, 0, 0, 0
         .db 0, 0, 0, 1, 0, 0, 1, 0x74, 0x1F, 0, 0x80, 0, 0, 0
 ; hi score and vram location        
