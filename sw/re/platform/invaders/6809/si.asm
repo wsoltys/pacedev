@@ -453,7 +453,7 @@ inipal:
   ; install IRQ handler and enable CPU IRQ
         lda     #0x7E                   ; jmp
         sta     0xFEF7
-        ldx     #vbord_isr
+        ldx     #scan_line_224
         stx     0xFEF8
 ;        andcc   #~(1<<4)                ; enable IRQ in CPU    
 
@@ -576,10 +576,69 @@ splash:
 
 attr:   .ds     1
 
-vbord_isr:
+; $0010
+scan_line_224:
         tst     IRQENR                  ; ACK IRQ
-        dec     isr_delay
-        rti
+
+; do I need to disable interrupts here? the 8080 does...
+
+        lda     #0x80                   ; Flag that tells objects ...
+        sta     vblank_status           ; ... on the lower half of the screen to draw/move
+        dec     isr_delay               ; Decrement the general countdown (used for pauses)
+        
+        ;bsr     check_handle_tilt       ; Check and handle TILT
+;       in      a,(INP1)
+;       rrca
+;       jp      c,loc_0067              ; coin switch
+        ldx     #KEYROW
+        lda     #~(1<<5)
+        sta     2,x
+        lda     ,x                      ; Read coin switch
+        bita    #(1<<4)                 ; Has a coin been deposited (keybd '5')?
+        beq     5$                      ; Yes ... note that switch is closed and continue at 3F with A=1
+        tst     coin_switch             ; Switch is now open. Was it closed last time?
+        beq     3$                      ;  No ... skip registering the credit
+; $002D
+; Handle bumping credit count        
+        lda     num_coins               ; Number of credits in BCD
+        cmpa    #0x99                   ; 99 credits already?
+        beq     1$                      ; Yes ... ignore this (better than rolling over to 00)
+        adda    #1                      ; Bump number of credits
+        daa                             ; Make it binary coded decimal
+        sta     num_coins               ; New number of credits
+        jsr     draw_num_credits        ; Draw credits on screen
+1$:     clra                            ; Credit switch ...
+2$:     sta     coin_switch             ; ... has opened
+; $0042
+3$:     tst     suspend_play            ; Are we moving game objects?
+        beq     7$                      ; No ... out
+        tst     game_mode               ; Are we in game mode?
+        bne     6$                      ; Yes ... go process game-play things and out
+        tst     num_coins               ; Are there any credits (player standing there)?
+        bne     4$                      ; Yes ... skip any ISR animations for the splash screens
+        ;bsr     isr_spl_tasks           ; Process ISR tasks for splash screens
+        bra     7$                      ; out
+; $005D
+; At this point no game is going and there are credits
+4$:     tst     wait_start_loop         ; Are we in the "press start" loop?
+        bne     7$                      ; Yes ... out
+        ;bra     wait_for_start          ; Start the "press start" loop
+; $0067        
+; Mark credit as needing registering
+5$:     lda     #1                      ; Remember switch ...
+        sta     coin_switch             ; ... state for debounce
+        bra     2$                      ; Continue
+; $006F
+; Main game-play timing loop
+6$:     ;bsr     time_fleet_sound        ; Time down fleet sound and sets flag if needs new delay value
+        lda     obj2_timer_extra        ; Use rolling shot's timer to sync ...
+        sta     shot_sync               ; ... other two shots
+        ;bsr     draw_alien              ; Draw the current alien (or exploding alien)
+        ;bsr     run_game_objs           ; Process game objects (including player object)
+        ;bsr     time_to_saucer          ; Count down time to saucer
+
+; do I need to re-enable interrutps here? the 8080 does...
+7$:     rti
 
 ; $01C0
 init_aliens:
