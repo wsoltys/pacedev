@@ -57,8 +57,8 @@ ref_alien_dyr:                  .ds   1
 ref_alien_dxr:                  .ds   1
 ref_alien_yr:                   .ds   1
 ref_alien_xr:                   .ds   1
-alien_pos_lsb:                  .ds   1
-alien_pos_msb:                  .ds   1
+alien_pos_msb:                  .ds   1     ; switched for 6809
+alien_pos_lsb:                  .ds   1     ; switched for 6809
 rack_direction:                 .ds   1
 rack_down_delta:                .ds   1
                                 .ds   1
@@ -67,13 +67,13 @@ rack_down_delta:                .ds   1
 obj0_timer_msb:                 .ds   1                                
 obj0_timer_lsb:                 .ds   1                                
 obj0_timer_extra:               .ds   1                                
-obj0_handler_lsb:               .ds   1                                
-obj0_handler_msb:               .ds   1                                
+obj0_handler_msb:               .ds   1     ; switched for 6809        
+obj0_handler_lsb:               .ds   1     ; switched for 6809        
 player_alive:                   .ds   1                                
 exp_animate_timer:              .ds   1                                
 exp_animate_cnt:                .ds   1                                
-plyr_spr_pic_l:                 .ds   1                                
-plyr_spr_pic_m:                 .ds   1                                
+plyr_spr_pic_m:                 .ds   1     ; switched for 6809
+plyr_spr_pic_l:                 .ds   1     ; switched for 6809        
 player_yr:                      .ds   1                                
 player_xr:                      .ds   1                                
 plyr_spr_siz:                   .ds   1                                
@@ -85,12 +85,12 @@ hid_mess_seq:                   .ds   1
 obj1_timer_msb:                 .ds   1                                
 obj1_timer_lsb:                 .ds   1                                
 obj1_timer_extra:               .ds   1                                
-obj1_handler_lsb:               .ds   1                                
-obj1_handler_msb:               .ds   1                                
+obj1_handler_msb:               .ds   1     ; switched for 6809        
+obj1_handler_lsb:               .ds   1     ; switched for 6809        
 plyr_shot_status:               .ds   1                                
 blow_up_timer:                  .ds   1                                
-obj1_image_lsb:                 .ds   1                                
-obj1_image_msb:                 .ds   1                                
+obj1_image_msb:                 .ds   1     ; switched for 6809        
+obj1_image_lsb:                 .ds   1     ; switched for 6809        
 obj1_coor_yr:                   .ds   1                                
 obj1_coor_xr:                   .ds   1                                
 obj1_image_size:                .ds   1                                
@@ -102,34 +102,34 @@ fire_bounce:                    .ds   1
 obj2_timer_msb:                 .ds   1                                
 obj2_timer_lsb:                 .ds   1                                
 obj2_timer_extra:               .ds   1                                
-obj2_handler_lsb:               .ds   1                                
-obj2_handler_msb:               .ds   1                                
+obj2_handler_msb:               .ds   1     ; switched for 6809        
+obj2_handler_lsb:               .ds   1     ; switched for 6809        
 rol_shot_status:                .ds   1                                
 rol_shot_step_cnt:              .ds   1                                
 rol_shot_track:                 .ds   1                                
-rol_shot_c_fir_lsb:             .ds   1                                
-rol_shot_c_fir_msb:             .ds   1                                
+rol_shot_c_fir_msb:             .ds   1     ; switched for 6809        
+rol_shot_c_fir_lsb:             .ds   1     ; switched for 6809        
 rol_shot_blow_cnt:              .ds   1                                
-rol_shot_image_lsb:             .ds   1                                
-rol_shot_image_msb:             .ds   1                                
+rol_shot_image_msb:             .ds   1     ; switched for 6809        
+rol_shot_image_lsb:             .ds   1     ; switched for 6809        
 rol_shot_yr:                    .ds   1                                
 rol_shot_xr:                    .ds   1                                
 rol_shot_size:                  .ds   1                                
 ; $2040
 ; '''GameObject3 (Alien plunger-shot)'''
-obj3_timer_msb:                 .ds   1                                
-obj3_timer_lsb:                 .ds   1                                
+obj3_timer_msb:                 .ds   1     ; switched for 6809        
+obj3_timer_lsb:                 .ds   1     ; switched for 6809        
 obj3_timer_extra:               .ds   1                                
-obj3_handler_lsb:               .ds   1                                
-obj3_handler_msb:               .ds   1                                
+obj3_handler_msb:               .ds   1     ; switched for 6809        
+obj3_handler_lsb:               .ds   1     ; switched for 6809        
 plu_shot_status:                .ds   1                                
 plu_shot_step_cnt:              .ds   1                                
 plu_shot_track:                 .ds   1                                
-plu_shot_c_fir_lsb:             .ds   1                                
-plu_shot_c_fir_msb:             .ds   1                                
+plu_shot_c_fir_msb:             .ds   1     ; switched for 6809        
+plu_shot_c_fir_lsb:             .ds   1     ; switched for 6809        
 plu_shot_blow_cnt:              .ds   1                                
-plu_shot_image_lsb:             .ds   1                                
-plu_shot_image_msb:             .ds   1                                
+plu_shot_image_msb:             .ds   1     ; switched for 6809        
+plu_shot_image_lsb:             .ds   1     ; switched for 6809        
 plu_shot_yr:                    .ds   1                                
 plu_shot_xr:                    .ds   1                                
 plu_shot_size:                  .ds   1                                
@@ -138,24 +138,24 @@ plu_shot_size:                  .ds   1
 obj4_timer_msb:                 .ds   1                                
 obj4_timer_lsb:                 .ds   1                                
 obj4_timer_extra:               .ds   1                                
-obj4_handler_lsb:               .ds   1                                
-obj4_handler_msb:               .ds   1                                
+obj4_handler_msb:               .ds   1     ; switched for 6809        
+obj4_handler_lsb:               .ds   1     ; switched for 6809        
 squ_shot_status:                .ds   1                                
 squ_shot_step_cnt:              .ds   1                                
 squ_shot_track:                 .ds   1                                
-squ_shot_c_fir_lsb:             .ds   1                                
-squ_shot_c_fir_msb:             .ds   1                                
+squ_shot_c_fir_msb:             .ds   1     ; switched for 6809
+squ_shot_c_fir_lsb:             .ds   1     ; switched for 6809        
 squ_shot_blow_cnt:              .ds   1                                
-squ_shot_image_lsb:             .ds   1                                
-squ_shot_image_msb:             .ds   1                                
+squ_shot_image_msb:             .ds   1     ; switched for 6809        
+squ_shot_image_lsb:             .ds   1     ; switched for 6809        
 squ_shot_yr:                    .ds   1                                
 squ_shot_xr:                    .ds   1                                
 squ_shot_size:                  .ds   1                                
 ; $2060
 end_of_tasks:                   .ds   1
 collision:                      .ds   1
-exp_alien_lsb:                  .ds   1
-exp_alien_msb:                  .ds   1
+exp_alien_msb:                  .ds   1     ; switched for 6809
+exp_alien_lsb:                  .ds   1     ; switched for 6809
 exp_alien_yr:                   .ds   1
 exp_alien_xr:                   .ds   1
 exp_alien_size:                 .ds   1
@@ -175,11 +175,11 @@ vblank_status:                  .ds   1
 a_shot_status:                  .ds   1
 a_shot_step_cnt:                .ds   1
 a_shot_track:                   .ds   1
-a_shot_c_fir_lsb:               .ds   1
-a_shot_c_fir_msb:               .ds   1
+a_shot_c_fir_msb:               .ds   1     ; switched for 6809
+a_shot_c_fir_lsb:               .ds   1     ; switched for 6809
 a_shot_blow_cnt:                .ds   1
-a_shot_image_lsb:               .ds   1
-a_shot_image_msb:               .ds   1
+a_shot_image_msb:               .ds   1     ; switched for 6809
+a_shot_image_lsb:               .ds   1     ; switched for 6809
 alien_shot_yr:                  .ds   1
 alien_shot_xr:                  .ds   1
 alien_shot_size:                .ds   1
@@ -193,19 +193,19 @@ saucer_start:                   .ds   1
 saucer_active:                  .ds   1
 saucer_hit:                     .ds   1
 saucer_hit_time:                .ds   1
-saucer_pri_loc_lsb:             .ds   1
-saucer_pri_loc_msb:             .ds   1
-saucer_pri_pic_lsb:             .ds   1
-saucer_pri_pic_msb:             .ds   1
+saucer_pri_loc_msb:             .ds   1     ; switched for 6809
+saucer_pri_loc_lsb:             .ds   1     ; switched for 6809
+saucer_pri_pic_msb:             .ds   1     ; switched for 6809
+saucer_pri_pic_lsb:             .ds   1     ; switched for 6809
 saucer_pri_size:                .ds   1
 saucer_delta_y:                 .ds   1
-sau_score_lsb:                  .ds   1
-sau_score_msb:                  .ds   1
-shot_count_lsb:                 .ds   1
+sau_score_msb:                  .ds   1     ; switched for 6809
+sau_score_lsb:                  .ds   1     ; switched for 6809
+shot_count_msb:                 .ds   1     ; switched for 6809
 ; $2090
-shot_count_msb:                 .ds   1
-till_saucer_lsb:                .ds   1
-till_saucer_msb:                .ds   1
+shot_count_lsb:                 .ds   1     ; switched for 6809
+till_saucer_msb:                .ds   1     ; switched for 6809
+till_saucer_lsb:                .ds   1     ; switched for 6809
 wait_start_loop:                .ds   1
 sound_port_3:                   .ds   1
 change_fleet_snd:               .ds   1
@@ -232,13 +232,13 @@ splash_delta_x:                 .ds   1
 splash_delta_y:                 .ds   1
 splash_yr:                      .ds   1
 splash_xr:                      .ds   1
-splash_image_lsb:               .ds   1
-splash_image_msb:               .ds   1
+splash_image_msb:               .ds   1     ; switched for 6809
+splash_image_lsb:               .ds   1     ; switched for 6809
 splash_image_size:              .ds   1
 splash_target_y:                .ds   1
 splash_reached:                 .ds   1
-splash_image_rest_lsb:          .ds   1
-splash_image_rest_msb:          .ds   1
+splash_image_rest_msb:          .ds   1     ; switched for 6809
+splash_image_rest_lsb:          .ds   1     ; switched for 6809
 two_players:                    .ds   1
 a_shot_reload_rate:             .ds   1
 ; $20D0
@@ -261,8 +261,8 @@ game_mode:                      .ds   1
 ; $20F0
                                 .ds   1
 adjust_score:                   .ds   1
-score_delta_lsb:                .ds   1
-score_delta_msb:                .ds   1
+score_delta_msb:                .ds   1     ; switched for 6809
+score_delta_lsb:                .ds   1     ; switched for 6809
 hi_scor_l:                      .ds   1
 hi_scor_m:                      .ds   1
 hi_scor_lo_m:                   .ds   1     ; switched for 6809
@@ -697,6 +697,17 @@ sub_092E:
         lda     ,x                      ; Get number of ships
         rts
 
+; $097C
+alien_score_value:
+        ldx     #alien_scores           ; Table for scores for hitting alien
+        cmpa    #2                      ; 0 or 1 (lower two rows) ...
+        bcs     9$                      ; ... return HL points to value 10
+        leax    1,x                     ; next value
+        cmpa    #4                      ; 2 or 3 (middle two rows) ...
+        bcs     9$                      ; ... return HL points to value 20
+        leax    1,x                     ; Top row return HL points to value 30
+9$:     rts        
+
 ; $09AD
 ; Print 4 digits in Y @X
 print_4_digits:
@@ -745,6 +756,26 @@ sub_0A59:
         cmpa    #0xff
         rts
 
+; $0A5F
+; Start the hit-alien sound and flag the adjustment for the score.
+; B contains the row, which determines the score value.
+score_for_alien:
+        tst     game_mode
+        beq     1$
+        stb     *z80_c
+        ldb     #8
+        jsr     sound_bits_3_on
+        ldb     *z80_c
+        tfr     b,a
+        bsr     alien_score_value
+        lda     ,x
+        clr     score_delta_msb
+        sta     score_delta_lsb
+        lda     #1
+        sta     -1,x
+1$:     ldx     #exp_alien_msb
+        rts
+        
 ; $0A93
 ; Print message from DE/Y to screen at HL/X (length in B) with a
 ; delay between letters.
@@ -816,7 +847,7 @@ loc_0B0B:
 
 ; Play demo
 loc_0B4A:  
-        bsr     clear_playfield
+        jsr     clear_playfield
         tst     p1_ships_rem            ; Number of ships for player-1. If non zero ...
         bne     1$                      ; ... keep it (counts down between demos)
         jsr     get_ships_per_cred      ; Get number of ships from DIP settings
@@ -831,9 +862,9 @@ loc_0B4A:
         sta     isr_splash_task         ; ... playing demo
         jsr     draw_bottom_line
 
-.if 0        
-2$:     bsr     plr_fire_or_demo        ; In demo ... process demo movement and always fire
-        ;bsr     loc_0BF1                ; Check player shot and aliens bumping edges of screen and hidden message
+.if 1     
+2$:     jsr     plr_fire_or_demo        ; In demo ... process demo movement and always fire
+        jsr     loc_0BF1                ; Check player shot and aliens bumping edges of screen and hidden message
 ; watchdog
         jsr     sub_0A59                ; Has demo player been hit?
         beq     2$                      ; No ... continue game
@@ -844,7 +875,7 @@ loc_0B4A:
 
 ; Credit information
         clr     isr_splash_task         ; Turn off splash animation
-        bsr     one_sec_delay
+        jsr     one_sec_delay
         jsr     sub_1988                ; Jump straight to clear-play-field
         ldb     #12                     ; Message size
         ldx     #vram+0x0811            ; Screen coordinates
@@ -881,15 +912,29 @@ loc_0B4A:
 loc_0BE8:
         ldy     #message_play_Y         ; "PLAY" with normal 'Y'
         jsr     print_message_del       ; Print it
-        bra     loc_0B0B                ; Continue with splash (HL/X will be pointing to next message)
+        jmp     loc_0B0B                ; Continue with splash (HL/X will be pointing to next message)
 
 loc_0BF1:
-;        bsr     plyr_shot_and_bump      ; Check if player is shot and aliens bumping the edge of screen
-;        bra     check_hidden_mes        ; Check for hidden-message display sequence
+        jsr     plyr_shot_and_bump      ; Check if player is shot and aliens bumping the edge of screen
+        jmp     check_hidden_mes        ; Check for hidden-message display sequence
 
 message_corp:
 ;       "TAITO COP"
         .db 0x13, 0, 8, 0x13, 0xE, 0x26, 2, 0xE, 0xF    
+
+; $1424
+; Clear a sprite from the screen (standard pixel number descriptor).
+; ** We clear 2 bytes even though the draw-simple only draws one.
+erase_simple_sprite:
+        bsr     cnvt_pix_number
+1$:     pshs    x
+        clr     ,x+
+        clr     ,x+
+        puls    x
+        leax    32,x
+        decb
+        bne     1$
+        rts
 
 ; $1439
 ; Display character to screen
@@ -903,6 +948,16 @@ draw_simp_sprite:
         decb
         bne     draw_simp_sprite
         rts
+
+; $1474
+; Convert pixel number in HL to screen coordinate and shift amount.
+; HL gets screen coordinate.
+; Hardware shift-register gets amount.
+cnvt_pix_number:
+        lda     *z80_l
+        anda    #7
+;       out     (shftamt),a
+        jmp     conv_to_scr        
 
 ; $147C
 ; In a multi-player game the player's shields are block-copied to and from RAM between turns.
@@ -934,6 +989,207 @@ sub_14CC:
         bne     1$
         rts
 
+; $14D8
+; The player's shot hit something (or is being removed from play) 
+player_shot_hit:
+        lda     plyr_shot_status        ; Player shot flag
+        cmpa    #5                      ; Alien explosion in progress?
+        beq     9$                      ; Yes ... ignore this function
+        cmpa    #2                      ; Normal movement?
+        bne     9$                      ; No ... out
+        ldb     obj1_coor_yr            ; Get Yr coordinate of player shot
+        cmpb    #0xd8                   ; Compare to 216 (40 from Top-rotated)
+        bcc     loc_1530                ; Yr is within 40 from top initiate miss-explosion (shot flag 3)
+        tst     alien_is_exploding      ; Is an alien blowing up?
+        bne     1$
+9$:     rts                             ; No ... out
+1$:     cmpb    #0xce                   ; Compare to 206 (50 from rotated top)
+        lbcc    loc_1579                ; Yr is within 50 from top? Yes ... saucer must be hit
+        addb    #6                      ; Offset to coordinate for wider "explosion" picture
+        stb     *z80_b
+        lda     ref_alien_yr            ; Ref alien Y coordinate
+; If the lower 4 rows are all empty then the reference alien's Y coordinate will wrap around from 0 to F8.
+; At this point the top row of aliens is in the shields and we will assume that everything is within
+; the rack.
+        cmpa    #0x90                   ; This is true if ...
+        bcc     code_bug_1              ; ... aliens are down in the shields
+        cmpa    *z80_b                  ; Compare to shot's coordinate
+        bcc     loc_1530                ; Outside the rack-square ... do miss explosion
+
+; $1504
+; We get here if the player's shot hit something within the rack area (a shot or an alien).
+; Find the alien that is (or would be) where the shot hit. If there is no alien alive at the row/column
+; then the player hit an alien missile. If there is an alien then explode the alien.
+;
+; There is a code bug here, but it is extremely subtle. The algorithm for finding the row/column in the
+; rack works by adding 16 to the reference coordinates (X for column, Y for row) until it passes or equals
+; the target coordinates. This works great as long as the target point is within the alien's rack area.
+; If the reference point is far to the right, the column number will be greater than 11, which messes
+; up the column/row-to-pointer math.
+;
+; The entire rack of aliens is based on the lower left alien. Imagine all aliens are dead except the
+; upper left. It wiggles down the screen and enters the players shields on the lower left where it begins
+; to eat them. Imagine the player is under his own shields on the right side of the screen and fires a
+; shot into his own shield.
+;
+; The alien is in the rack on row 4 (rows are numbered from bottom up starting with 0). The shot hits
+; the shields below the alien's Y coordinate and gets correctly assigned to row 3. The alien is in the rack
+; at column 0 (columns are numbered from left to right starting with 0). The shot hits the shields far to
+; the right of the alien's X coordinate. The algorithm says it is in column 11. But 0-10 are the only
+; correct values.
+;
+; The column/row-to-pointer math works by multiplying the row by 11 and adding the column. For the alien 
+; that is 11*4 + 0 = 44. For the shot that is 11*3 +11 = 44. The game thinks the shot hit the alien.
+code_bug_1:        
+        stb     *z80_l                  ; L now holds the shot coordinate (adjusted)
+        bsr     find_row                ; Look up row number to B
+        lda     obj1_coor_xr            ; Player's shot's Xr coordinate ...
+        sta     *z80_h                  ; ... to H
+        bsr     find_column             ; Get alien's coordinate
+        stx     exp_alien_yr            ; Put it in the exploding-alien descriptor
+        lda     #5                      ; Flag alien explosion ...
+        sta     plyr_shot_status        ; ... in progress
+        bsr     get_alien_stat_ptr      ; Get descriptor for alien
+        tst     ,x                      ; Is alien alive
+        beq     loc_1530                ; No ... must have been an alien shot
+        clr     ,x                      ; Make alien invader dead
+        jsr     score_for_alien         ; Makes alien explosion sound and adjust score
+        jsr     read_desc               ; Load 5 byte sprite descriptor
+        bsr     draw_sprite             ; Draw explosion sprite on screen
+        lda     #0x10                   ; Initiate alien-explosion
+        sta     exp_alien_timer         ; ... timer to 16
+        rts
+
+; $1530
+; Player shot leaving playfield, hitting shield, or hitting an alien shot
+loc_1530:
+        lda     #3                      ; Mark ...
+        sta     plyr_shot_status        ; ... player shot hit something other than alien
+        bra     loc_154A                ; Finish up
+
+; $1538
+; Time down the alien explosion. Remove when done.
+a_explode_time:
+        dec     exp_alien_timer         ; Decrement alien explosion timer
+        beq     1$
+        rts                             ; Not done  ... out
+1$:     ldx     exp_alien_yr            ; Pixel pointer for exploding alien
+        ldb     #0x10                   ; 16 row pixel
+        jsr     erase_simple_sprite     ; Clear the explosion sprite from the screen
+
+loc_1545:        
+        lda     #4                      ; 4 means that ...
+        sta     plyr_shot_status        ; ... alien has exploded (remove from active duty)
+
+loc_154A:
+        clr     alien_is_exploding      ; Turn off alien-is-blowing-up flag
+        ldb     #0xf7                   ; Turn off ...
+        jmp     sound_bits_3_off        ; ... alien exploding sound
+
+; $1554
+; Count number of 16s needed to bring reference (in A) up to target (in H).
+; If the reference starts out beyond the target then we add 16s as long as
+; the reference has a signed bit. But these aren't signed quantities. This
+; doesn't make any sense. This counting algorithm produces questionable 
+; results if the reference is beyond the target.
+cnt_16s:
+        clr     *z80_c
+        cmpa    *z80_h
+        bcs     1$
+        bsr     wrap_ref
+1$:     cmpa    *z80_h
+        bcs     2$
+        rts
+2$:     adda    #16
+        inc     *z80_c
+        bra     1$                
+
+; $1562
+find_row:
+; L contains a Yr coordinate. Find the row number within the rack that corresponds
+; to the Yr coordinate. Return the row coordinate in L and the row number in C.
+        lda     ref_alien_yr
+        ldb     *z80_l
+        stb     *z80_h
+        bsr     cnt_16s
+        ldb     *z80_c
+        decb
+        sbca    #16
+        sta     *z80_l
+        rts
+
+; $1562
+; H contains a Xr coordinate. Find the column number within the rack that corresponds
+; to the Xr coordinate. Return the column coordinate in H and the column number in C.
+find_column:
+        lda     ref_alien_xr
+        bsr     cnt_16s
+        sbca    #16
+        sta     *z80_h
+        rts
+
+loc_1579:
+        lda     #1
+        sta     saucer_hit
+        bra     loc_1545
+
+; $1581
+; B is row number. C is column number (starts at 1). 
+; Return pointer to alien-status flag for current player.
+get_alien_stat_ptr:
+        lda     #11                     ; 
+        mul                             ; row*11
+        addb    *z80_c                  ; Add row offset to column offset
+        decb                            ; -1
+        lda     player_data_msb         ; Set MSB of HL/D with active player indicator
+        tfr     d,x                     ; ->X
+        rts
+
+; $1590
+; This is called if the reference point is greater than the target point. I believe the goal is to
+; wrap the reference back around until it is lower than the target point. But the algorithm simply adds
+; until the sign bit of the the reference is 0. If the target is 2 and the reference is 238 then this
+; algorithm moves the reference 238+16=244 then 244+16=4. Then the algorithm stops. But the reference is
+; STILL greater than the target.
+;
+; Also imagine that the target is 20 and the reference is 40. The algorithm adds 40+16=56, which is not
+; negative, so it stops there.
+;
+; I think the intended code is "JP NC" instead of "JP M", but even that doesn't make sense.
+wrap_ref:
+        inc     *z80_c
+        adda    #16
+        bmi     wrap_ref
+        rts
+
+; $1597
+rack_bump:
+        ERROR
+        rts
+        
+; $15D3
+; Draw sprite at [DE/Y] to screen at pixel position in HL/X
+; The hardware shift register is used in converting pixel positions
+; to screen coordinates.
+draw_sprite:
+        jsr     cnvt_pix_number
+        pshs    x
+1$:     pshs    x
+        lda     ,y+
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        sta     ,x+
+        clra
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        sta     ,x
+        puls    x
+        leax    32,x
+        decb
+        bne     1$                        
+        puls    x
+        rts
+        
 ; $1611
 get_player_data_ptr:
 ; Set HL/X with 2100 if player 1 is active or 2200 if player 2 is active
@@ -1066,7 +1322,24 @@ loc_18DF:
         lda     #8
         sta     a_shot_reload_rate
         jmp     loc_0AEA                ; splash animation
-                        
+
+; $18F1
+; If there is one alien left then the right motion is 3 instead of 2. That's
+; why the timing is hard to hit after the change.
+
+; $18FA
+sound_bits_3_on:
+;       ld      a,(soundport3)
+;       or      b
+;       ld      (soundport3),a
+;       out     (sound),a
+        rts
+
+; $190A
+plyr_shot_and_bump:
+        jsr     player_shot_hit         ; Player's shot collision detection
+        jmp     rack_bump               ; Change alien deltaX and deltaY when rack bumps edges
+                                
 ; $1982
 sub_1982:
         sta     isr_splash_task
@@ -1127,10 +1400,54 @@ draw_status:
         bsr     sub_193C                ; print credit table
         bra     draw_num_credits
 
+; $199A
+; There is a hidden message "TAITO COP" (with no "R") in the game. It can only be 
+; displayed in the demonstration game during the splash screens. You must enter
+; 2 seqences of buttons. Timing is not critical. As long as you eventually get all
+; the buttons up/down in the correct pattern then the game will register the
+; sequence.
+;
+; 1st: 2start(down) 1start(up)   1fire(down) 1left(down) 1right(down)
+; 2nd: 2start(up)   1start(down) 1fire(down) 1left(down) 1right(up)
+;
+; Unfortunately MAME does not deliver the simultaneous button presses correctly. You can see the message in
+; MAME by changing 19A6 to 02 and 19B1 to 02. Then the 2start(down) is the only sequence. 
+check_hidden_mes:
+        tst     hid_mess_seq            ; Has the 1st "hidden-message" sequence been registered?
+        bne     2$                      ; Yes ... go look for the 2nd sequence
+;       in      a,(inp1)                ; Get player inputs
+        lda     #0x72                   ; *** fudge
+        anda    #0x76                   ; 0111_0110 Keep 2Pstart, 1Pstart, 1Pshot, 1Pleft, 1Pright
+        suba    #0x72                   ; 0111_0010 1st sequence: 2Pstart, 1Pshot, 1Pleft, 1Pright
+        beq     1$                      
+        rts                             ; Not first sequence ... out
+1$:     inca                            ; Flag that 1st sequence ...
+        sta     hid_mess_seq            ; ... has been entered
+2$:
+;       in      a,(inp1)                ; Check inputs for 2nd sequence
+        lda     #0x34                   ; *** fudge
+        anda    #0x76                   ; 0111_0110 Keep 2Pstart, 1Pstart, 1Pshot, 1Pleft, 1Pright
+        cmpa    #0x34                   ; 0011_0100 2nd sequence: 1Pstart, 1Pshot, 1Pleft 
+        beq     3$
+        rts                             ; If not second sequence ignore
+3$:     ldx     #vram+0x0A1B            ; Screen coordinates
+        ldy     #message_corp           ; Message = "TAITO COP" (no R)
+        ldb     #9                      ; Message length
+        jmp     print_message           ; Print message and out
+                
 ; $1988
 sub_1988:
         jmp     clear_playfield         ; Clear playfield and out
-        
+
+; $19DC
+sound_bits_3_off:
+; Turn off bit in sound port
+;       ld      a,(soundport3)
+;       and     b
+;       ld      (soundport3),a
+;       out     (sound1),a
+        rts
+
 ; $19E6
 draw_num_ships:
 ; Show ships remaining in hold for the player
@@ -1161,6 +1478,34 @@ block_copy:
         bne     block_copy
         rts
 
+; $1A3B
+; Load 5 bytes sprite descriptor from [HL]
+read_desc:
+        ldy     ,x++                    ; Sprite picture
+        ldu     ,x++                    ; Screen location
+        ldb     ,x                      ; Number of bytes in sprite
+        tfr     u,x
+        rts
+
+; $1A47
+; The screen is organized as one-bit-per-pixel.
+; In: HL/X contains pixel number (bbbbbbbbbbbbbppp)
+; Convert from pixel number to screen coordinates (without shift)
+; Shift HL right 3 bits (clearing the top 2 bits)
+; and set the third bit from the left.
+conv_to_scr:
+        pshs    b
+        tfr     x,d
+        lsra
+        rorb
+        lsra
+        rorb
+        lsra
+        rorb                            ; D/=8
+        tfr     d,x                     ; Back to HL/X
+        puls    b
+        rts
+        
 ; $1A5C
 clear_screen:
         ldx     #vram
@@ -1368,6 +1713,12 @@ byte_0_1D7C:
         .db 0, 0x22, 0, 0xA5, 0x40, 8, 0x98, 0x3D, 0xB6, 0x3C
         .db 0x36, 0x1D, 0x10, 0x48, 0x62, 0xB6, 0x1D, 0x98, 8
         .db 0x42, 0x90, 8, 0, 0
+
+alien_scores:
+;       Score table for hitting alien type
+        .db 0x10                        ; Bottom 2 rows     
+        .db 0x20                        ; Middle row
+        .db 0x30                        ; Highest row
 
 ; $1DAB
 message_play_Y:
