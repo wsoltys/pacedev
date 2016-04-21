@@ -578,9 +578,8 @@ attr:   .ds     1
 
 ; $0010
 scan_line_224:
-        tst     IRQENR                  ; ACK IRQ
-
-; do I need to disable interrupts here? the 8080 does...
+        DI                              ; interrupts disabled in the 8080 ISR
+        tst     IRQENR                  ; ACK GIME IRQ on the Coco3
 
         lda     #0x80                   ; Flag that tells objects ...
         sta     vblank_status           ; ... on the lower half of the screen to draw/move
@@ -622,7 +621,7 @@ scan_line_224:
 ; At this point no game is going and there are credits
 4$:     tst     wait_start_loop         ; Are we in the "press start" loop?
         bne     7$                      ; Yes ... out
-        ;bra     wait_for_start          ; Start the "press start" loop
+        bra     wait_for_start          ; Start the "press start" loop
 ; $0067        
 ; Mark credit as needing registering
 5$:     lda     #1                      ; Remember switch ...
@@ -637,8 +636,8 @@ scan_line_224:
         ;bsr     run_game_objs           ; Process game objects (including player object)
         ;bsr     time_to_saucer          ; Count down time to saucer
 
-; do I need to re-enable interrutps here? the 8080 does...
-7$:     rti
+7$:     EI
+        rti
 
 ; $01C0
 init_aliens:
@@ -728,16 +727,22 @@ wait_for_start:
         ldb     #4                      ; Message length
         jsr     print_message           ; Print it
 loc_077F:        
-        lda     num_coins               ; Number of credits
-        deca                            ; Set flags
         ldx     #vram+0x0410            ; Screen coordinates
         ldb     #20                     ; Message length
+        lda     num_coins               ; Number of credits
+        deca                            ; Set flags
         lbne    loc_0857                ; Take 1 or 2 player start
         ldy     #message_1_only         ; "ONLY 1PLAYER BUTTON "
         jsr     print_message           ; Print message
 ;       in      a,(inp1)
 ;       and     $04
 ;       jp      z,$077f
+        ldx     #KEYROW                 ; assuming HL/X is 'free'
+        lda     #~(1<<1)
+        sta     2,x
+        lda     ,x                      ; Read coin switch
+        bita    #(1<<4)                 ; 1Player start button? (keybd '1')
+        bne     loc_077F                ; No ... wait for button or credit
 
 ; $0798
 ; START NEW GAME
@@ -833,10 +838,22 @@ loc_0857:
 ;       jp      c,$086D                 ; 2 player button pressed ... do it
 ;       rrca
 ;       jp      c,new_game              ; One player start ... do it
+        ldx     #KEYROW                 ; assuming HL/X is 'free'
+        lda     #~(1<<2)                ; Column 2 ('2')
+        sta     2,x
+        lda     ,x                      ; Read player controls
+        bita    #(1<<4)                 ; 2 player button pressed? (keybd '2')
+        beq     loc_086D                ; Yes ... do it
+        lda     #~(1<<1)                ; Column 1 ('1')
+        sta     2,x
+        lda     ,x                      ; Read player controls
+        bita    #(1<<4)                 ; One player start? (keybd '1')
+        lbeq    new_game                ; Yes ... do it
         jmp     loc_077F                ; Keep waiting on credit or button
 
 ; $086D
 ; 2 PLAYER START
+loc_086D:
         lda     #1                      ; Flag 2 player game
         jmp     loc_079B                ; Continue normal startup
 
