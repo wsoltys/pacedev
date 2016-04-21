@@ -12,6 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
+.define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
 
 ; *** derived - do not edit
@@ -230,15 +231,15 @@ isr_splash_task:                .ds   1
 splash_an_form:                 .ds   1
 splash_delta_x:                 .ds   1
 splash_delta_y:                 .ds   1
-splash_yr:                      .ds   1
-splash_xr:                      .ds   1
+splash_xr:                      .ds   1     ; switched for 6809
+splash_yr:                      .ds   1     ; switched for 6809
 splash_image_msb:               .ds   1     ; switched for 6809
 splash_image_lsb:               .ds   1     ; switched for 6809
 splash_image_size:              .ds   1
 splash_target_y:                .ds   1
 splash_reached:                 .ds   1
-splash_image_rest_msb:          .ds   1     ; switched for 6809
-splash_image_rest_lsb:          .ds   1     ; switched for 6809
+splash_im_rest_msb:             .ds   1     ; switched for 6809
+splash_im_rest_lsb:             .ds   1     ; switched for 6809
 two_players:                    .ds   1
 a_shot_reload_rate:             .ds   1
 ; $20D0
@@ -590,7 +591,7 @@ scan_line_224:
 ;       rrca
 ;       jp      c,loc_0067              ; coin switch
         ldx     #KEYROW
-        lda     #~(1<<5)
+        lda     #~(1<<5)                ; Column 5 (keybd '5')
         sta     2,x
         lda     ,x                      ; Read coin switch
         bita    #(1<<4)                 ; Has a coin been deposited (keybd '5')?
@@ -610,18 +611,18 @@ scan_line_224:
 2$:     sta     coin_switch             ; ... has opened
 ; $0042
 3$:     tst     suspend_play            ; Are we moving game objects?
-        beq     7$                      ; No ... out
+        beq     loc_0086                ; No ... out
         tst     game_mode               ; Are we in game mode?
         bne     6$                      ; Yes ... go process game-play things and out
         tst     num_coins               ; Are there any credits (player standing there)?
         bne     4$                      ; Yes ... skip any ISR animations for the splash screens
-        ;bsr     isr_spl_tasks           ; Process ISR tasks for splash screens
-        bra     7$                      ; out
+        jsr     isr_spl_tasks           ; Process ISR tasks for splash screens
+        bra     loc_0086                ; out
 ; $005D
 ; At this point no game is going and there are credits
 4$:     tst     wait_start_loop         ; Are we in the "press start" loop?
-        bne     7$                      ; Yes ... out
-        bra     wait_for_start          ; Start the "press start" loop
+        bne     loc_0086                ; Yes ... out
+        jmp     wait_for_start          ; Start the "press start" loop
 ; $0067        
 ; Mark credit as needing registering
 5$:     lda     #1                      ; Remember switch ...
@@ -630,13 +631,15 @@ scan_line_224:
 ; $006F
 ; Main game-play timing loop
 6$:     ;bsr     time_fleet_sound        ; Time down fleet sound and sets flag if needs new delay value
+loc_0072:
         lda     obj2_timer_extra        ; Use rolling shot's timer to sync ...
         sta     shot_sync               ; ... other two shots
         ;bsr     draw_alien              ; Draw the current alien (or exploding alien)
         ;bsr     run_game_objs           ; Process game objects (including player object)
         ;bsr     time_to_saucer          ; Count down time to saucer
 
-7$:     EI
+loc_0086:
+        EI
         rti
 
 ; $01C0
@@ -657,6 +660,20 @@ draw_bottom_line:
         ldb     #0xe0                   ; All the way down the screen
         ldx     #vram+2                 ; Screen coordinates (3rd byte from upper left)
         jmp     sub_14CC                ; Draw line down left side 
+
+; $01D9
+; HL/X points to descriptor: DX DY XX YY except DX is already loaded in C
+; ** Why the "already loaded" part? Why not just load it here?
+add_delta:
+        leax    1,x                     ; We loaded delta-x already ... skip over it
+        ldb     ,x+                     ; Get delta-y
+        lda     *z80_c                  ; Add delta-x ...
+; note that X,Y are swapped on 6809        
+        adda    1,x                     ; ... to x
+        sta     1,x                     ; Store new x
+        addb    0,x                     ; Add delta-y to y
+        stb     0,x                     ; Store new y
+        rts
 
 ; $01E4
 ; Block copy ROM mirror 1B00-1BBF to initialize RAM at 2000-20BF.
@@ -720,7 +737,7 @@ wait_for_start:
         sta     wait_start_loop         ; ... have started to wait
         lds     #stack                  ; Reset stack
         EI
-        ;bsr     loc_1979                ; Suspend game tasks
+        jsr     loc_1979                ; Suspend game tasks
         jsr     clear_playfield         ; Clear center window
         ldx     #vram+0x0C13            ; Screen coordinates
         ldy     #message_push           ; "PRESS"
@@ -1030,7 +1047,7 @@ score_for_alien:
 ; $0A80
 ; Start the ISR moving the sprite. Return when done.
 animate:
-        lda     #2                      ; Start simple linear ...
+        lda     #(1<<1)                 ; Start simple linear ...
         sta     isr_splash_task         ; ... sprite animation (splash)
 1$:        
 ;       out     (watchdog),a
@@ -1061,10 +1078,29 @@ one_sec_delay:
         lda     #0x40
         bra     wait_on_delay
 
-; $0AB1
+; $0AB6
 two_sec_delay:
         lda     #0x80
         bra     wait_on_delay
+
+; $0ABB
+splash_demo:
+        puls    x                       ; Drop the call to ABF and ...
+        jmp     loc_0072                ; ... do a demo game loop without sound
+
+; $0ABF
+; Different types of splash tasks managed by ISR in splash screens. The ISR
+; calls this if in splash-mode. These may have been bit flags to allow all 3 
+; at the same time. Maybe it is just easier to do a switch with a rotate-to-carry.
+isr_spl_tasks:
+        lda     isr_splash_task         ; Get the ISR task number
+        rora                            ; In demo play mode?
+        bcs     splash_demo             ; 1: Yes ... go do game play (without sound)
+        rora                            ; Moving little alien from point A to B?
+        lbcs    splash_sprite           ; 2: Yes ... go move little alien from point A to B
+        rora                            ; Shooting extra "C" with squiggly shot?
+;        bcs     splash_squiggly         ; 4: Yes ... go shoot extra "C" in splash
+        rts
 
 ; $0ACF
 ; Message to center of screen.
@@ -1072,14 +1108,14 @@ two_sec_delay:
 sub_0ACF:
         ldx     #vram+0x714             ; Near center of screen
         ldb     #15                     ; 15 bytes in message
-        bra     print_message_del
+        bra     print_message_del       ; Print and out
 
 ; $0AD7
 ; Wait on ISR counter to reach 0
 wait_on_delay:
-        sta     isr_delay
-1$:     tst     isr_delay
-        bne     1$
+        sta     isr_delay               ; Delay counter
+1$:     tst     isr_delay               ; Get current delay. Zero yet?
+        bne     1$                      ; No ... wait on it
         rts
 
 ; $0AE2
@@ -1114,6 +1150,21 @@ loc_0B0B:
         bne     loc_0B4A                ; Not 0 ... no animations
 ; $0B1E        
 ; Animate small alien replacing upside-down Y with correct Y
+        ldy     #byte_0_1A95            ; Animate sprite from Y=FE to Y=9E step -1
+        bsr     ini_splash_ani          ; Copy to splash-animate structure
+        jsr     animate                 ; Wait for ISR to move sprite (small alien)
+        ldy     #byte_0_1BB0            ; Animate sprite from Y=98 to Y=FF step 1
+        bsr     ini_splash_ani          ; Copy to splash-animate structure
+        jsr     animate                 ; Wait for ISR to move sprite (alien pulling upside down Y)
+        bsr     one_sec_delay           ; One second delay
+        ldy     #byte_0_1FC9            ; Animate sprite from Y=FF to Y=97 step 1
+        bsr     ini_splash_ani          ; Copy to splash-animate structure
+        jsr     animate                 ; Wait for ISR to move sprite (alien pushing Y)
+        bsr     one_sec_delay           ; One second delay
+        ldx     #vram+0x0fb7            ; Where the splash alien ends up
+        ldb     #10                     ; 10 rows
+        jsr     clear_small_sprite      ; Clear a one byte sprite at HL
+        jsr     two_sec_delay           ; Two second delay
 
 ; Play demo
 loc_0B4A:  
@@ -1128,10 +1179,11 @@ loc_0B4A:
         jsr     init_aliens             ; Initialize all player 1 aliens
         jsr     draw_shield_pl1         ; Draw shields for player 1 (to buffer)
         jsr     restore_shields_1       ; Restore shields for player 1 (to screen)
-        lda     #1                      ; ISR splash-task ...
+        lda     #(1<<0)                 ; ISR splash-task ...
         sta     isr_splash_task         ; ... playing demo
         jsr     draw_bottom_line
 
+.ifndef BUILD_OPT_DISABLE_DEMO
 2$:     jsr     plr_fire_or_demo        ; In demo ... process demo movement and always fire
         jsr     loc_0BF1                ; Check player shot and aliens bumping edges of screen and hidden message
 ; watchdog
@@ -1140,6 +1192,7 @@ loc_0B4A:
         clr     plyr_shot_status        ; Remove player shot from activity
 3$:     jsr     sub_0A59                ; Wait for demo player ...
         bne     3$                      ; ... to stop exploding
+.endif
 
 ; Credit information
         clr     isr_splash_task         ; Turn off splash animation
@@ -1615,6 +1668,36 @@ read_pri_struct:
         CCF
         rts        
 
+; $1868
+; Moves a sprite up or down in splash mode. Interrupt moves the sprite. When it reaches
+; Y value in 20CA the flag at 20CB is raised. The image flips between two pictures every
+; 4 movements.      
+splash_sprite:
+        ldx     #splash_an_form         ; Descriptor
+        inc     ,x+                     ; Change image, Point to delta-x
+        lda     ,x                      ; Get delta-x
+        sta     *z80_c
+        jsr     add_delta               ; Add delta-X and delta-Y to X and Y
+        stb     *z80_b                  ; Current y coordinate
+        lda     splash_target_y         ; Has sprite reached ...
+        cmpa    *z80_b                  ; ... target coordinate?
+        beq     2$                      ; Yes ... flag and out
+        lda     splash_an_form          ; Image number
+        ldx     splash_im_rest_msb      ; Image
+        anda    #(1<<3)                 ; Watching bit 3 for flip delay
+        bne     1$                      ; Did bit 3 go to 0? No ... keep current image
+        leax    48,x                    ; 16*3 ... use other image form
+1$:     stx     splash_image_msb        ; Image to descriptor structure
+        ldx     #splash_xr              ; X,Y,Image descriptor (x,y swapped for 6809)
+        jsr     read_desc               ; Read sprite descriptor
+        exg     x,y                     ; Image to DE/Y, position to HL/X
+        jmp      draw_sprite            ; Draw the sprite
+
+; $1898
+2$:     lda     #1
+        sta     splash_reached
+        rts
+
 ; $189E
 ;Animate alien shot to extra "C" in splash
 sub_189E:
@@ -1626,7 +1709,7 @@ sub_189E:
         sta     shot_sync
         lda     #0xff
         sta     alien_shot_delta
-        lda     #4
+        lda     #(1<<2)
         sta     isr_splash_task
 1$:     lda     squ_shot_status
         anda    #1
@@ -1719,34 +1802,42 @@ draw_score:
         jmp     print_4_digits
 
 ; $193C
+; Print message "CREDIT "
 sub_193C:
         ldb     #7                      ; 7 bytes in message
-        ldx     #vram+0x1101
-        ldy     #message_credit
-        jmp     print_message
+        ldx     #vram+0x1101            ; Screen coordinates
+        ldy     #message_credit         ; Message = "CREDIT "
+        jmp     print_message           ; Print message
 
 ; $1947
 draw_num_credits:
-        lda     num_coins
-        ldx     #0x1801
-        jmp     draw_hex_byte
+; Display number of credits on screen
+        lda     num_coins               ; Number of credits
+        ldx     #vram+0x1801            ; Screen coordinates
+        jmp     draw_hex_byte           ; Character to screen
                 
 ; $1950
 print_hi_score:
         ldx     #hi_scor_l              ; Hi Score descriptor
-        bra     draw_score
+        bra     draw_score              ; Print Hi-Score
                 
 ; $1956
 ; Print scores (with header) and credits (with label)
 draw_status:
-        bsr     clear_screen
-        bsr     draw_score_head
-        bsr     sub_1925                ; print player 1 score
-        bsr     sub_192B                ; print player 2 score
-        bsr     print_hi_score
-        bsr     sub_193C                ; print credit table
-        bra     draw_num_credits
+        jsr     clear_screen            ; Clear the screen
+        bsr     draw_score_head         ; Print score header
+        bsr     sub_1925                ; Print player 1 score
+        bsr     sub_192B                ; Print player 2 score
+        bsr     print_hi_score          ; Print hi score
+        bsr     sub_193C                ; Print credit table
+        bra     draw_num_credits        ; Number of credits
 
+; $1979
+loc_1979:
+        bsr     disable_game_tasks      ; Disable ISR game tasks
+        bsr     draw_num_credits        ; Display number of credits on screen
+        bra     sub_193C                ; Print message "CREDIT"
+        
 ; $199A
 ; There is a hidden message "TAITO COP" (with no "R") in the game. It can only be 
 ; displayed in the demonstration game during the splash screens. You must enter
@@ -1785,6 +1876,21 @@ check_hidden_mes:
 ; $1988
 sub_1988:
         jmp     clear_playfield         ; Clear playfield and out
+
+; $19D1
+; Enable ISR game tasks 
+enable_game_tasks:
+        lda     #1                      ; Set ISR ...
+loc_19D3:        
+        sta     suspend_play            ; ... game tasks enabled
+        rts
+        
+; $19D7
+; Disable ISR game tasks
+; Clear 20E9 flag
+disable_game_tasks:
+        clra                            ; Clear ISR game tasks flag
+        bra     loc_19D3                ; Save a byte (the RET)
 
 ; $19DC
 sound_bits_3_off:
@@ -1881,6 +1987,19 @@ restore_shields:
         bne     1$
         rts
 
+; $1A95
+byte_0_1A95:
+        .db 0                           ; Image form (increments each draw)
+        .db 0                           ; Delta X
+        .db 0xFF                        ; Delta Y is -1
+        .db 0xFE                        ; Y starting coordinate (swapped for 6809)
+        .db 0xB8                        ; X coordinate (swapped for 6809)
+        .dw alien_spr_a+0x20            ; Base image (small alien)
+        .db 0x10                        ; Size of image (16 bytes)
+        .db 0x9E                        ; Target Y coordinate
+        .db 0                           ; Reached Y flag
+        .dw alien_spr_a+0x20            ; Base image (small alien)
+
 ; $1AA6
 message_g_over:
 ; "GAME OVER PLAYER< >"
@@ -1923,6 +2042,9 @@ message_score:
         .db 0x26,0x12,2,0xE,0x11,4,0x24,0x1B,0x25,0x26,7,8,0x3F
         .db 0x12,2,0xE,0x11,4,0x26,0x12,2,0xE,0x11,4,0x24,0x1C
         .db 0x25,0x26
+
+; this is mainly for debugging
+        .bndry  0x100
         
 ;-------------------------- RAM initialization -----------------------------
 ; Copied to RAM (2000) C0 bytes as initialization.
@@ -1982,16 +2104,28 @@ ufo_init_data:
         .db    0
         .db 0x20
         .db 0x1C
+
+; $1BA0
+alien_spr_CYA:
+; Alien sprite type C pulling upside down Y
         .db 0,3,4,0x78,0x14,0x13,8,0x1A
         .db 0x3D,0x68,0xFC,0xFC,0x68,0x3D,0x1A,0
+
 byte_0_1BB0:    
-        .db 0, 0, 1, 0xB8, 0x98, 0xA0, 0x1B, 0x10, 0xFF, 0, 0xA0 ; inverted-y animation pt.2 data
-        .db 0x1B
-        .db    0
-        .db    0
-        .db    0
-        .db    0
-byte_0_1BC0:    
+        .db 0                           ; image form            
+        .db 0                           ; delta x               
+        .db 1                           ; delta y               
+        .db 0x98                        ; y starting coordinate (swapped for 6809)
+        .db 0xB8                        ; x coordinate (swapped for 6809)
+        .dw alien_spr_CYA               ; Base image
+        .db 0x10                        ; size of image         
+        .db 0xFF                        ; target y coordinate   
+        .db 0                           ; reached flag          
+        .dw alien_spr_CYA               ; Base image
+
+        .db    0, 0, 0, 0
+
+byte_0_1BC0:
         .db 0, 0x10, 0, 0xE, 5, 0, 0, 0, 0, 0, 7, 0xD0, 0x1C, 0xC8 ; initialised only at startup
         .db 0x9B, 3
 ; $1BD0
@@ -2246,7 +2380,7 @@ alien_spr_CB:
         
 ; $1FC0        
         .db 0x00, 0x04, 0x02, 0xB2, 0x0A, 0x04, 0x00, 0x00  ; "?"
-        .db    0
+        .db 0
 
 ; $1FC9        
 byte_0_1FC9:
@@ -2254,8 +2388,8 @@ byte_0_1FC9:
         .db 0                           ; image form
         .db 0                           ; delta x
         .db 0xFF                        ; delta y
-        .db 0xB8                        ; x coordinate
-        .db 0xFF                        ; y starting coordinate
+        .db 0xFF                        ; y starting coordinate (swapped for 6809)
+        .db 0xB8                        ; x coordinate (swapped or 6809)
         .dw alien_spr_CA
         .db 0x10                        ; size of image
         .db 0x97                        ; target y coordinate
@@ -2268,8 +2402,8 @@ byte_0_1FD5:
         .db 0                           ; image form
         .db 0                           ; delta x
         .db 1                           ; delta y
-        .db 0xD0                        ; x coordinate
-        .db 0x22                        ; y starting coordinate
+        .db 0x22                        ; y starting coordinate (swapped for 6809)
+        .db 0xD0                        ; x coordinate (swapped for 6809)
         .dw alien_spr_a+0x20
         .db 0x10                        ; size of image
         .db 0x94                        ; target y coordinate
