@@ -299,8 +299,8 @@ byte_0_2200:
                                 .ds   9
 ; $22FB                                
 p2_ref_alien_dx:                .ds   1
-p2_ref_alien_y:                 .ds   1
-p2_ref_alien_x:                 .ds   1
+p2_ref_alien_yr:                .ds   1
+p2_ref_alien_xr:                .ds   1
 p2_rack_cnt:                    .ds   1
 p2_ships_rem:                   .ds   1
 
@@ -597,7 +597,7 @@ scan_line_224:
         bita    #(1<<4)                 ; Has a coin been deposited (keybd '5')?
         beq     5$                      ; Yes ... note that switch is closed and continue at 3F with A=1
         tst     coin_switch             ; Switch is now open. Was it closed last time?
-        beq     3$                      ;  No ... skip registering the credit
+        beq     3$                      ; No ... skip registering the credit
 ; $002D
 ; Handle bumping credit count        
         lda     num_coins               ; Number of credits in BCD
@@ -713,6 +713,181 @@ copy_shields:
         bra     1$        
 4$:     jsr     remember_shields        ; Remember player's shields
         bra     2$                      ; Continue with next shield
+
+; $0765
+; Wait for player 1 start button press
+wait_for_start:
+        lda     #1                      ; Tell ISR that we ...
+        sta     wait_start_loop         ; ... have started to wait
+        lds     #stack                  ; Reset stack
+        EI
+        ;bsr     loc_1979                ; Suspend game tasks
+        jsr     clear_playfield         ; Clear center window
+        ldx     #vram+0x0C13            ; Screen coordinates
+        ldy     #message_push           ; "PRESS"
+        ldb     #4                      ; Message length
+        jsr     print_message           ; Print it
+loc_077F:        
+        lda     num_coins               ; Number of credits
+        deca                            ; Set flags
+        ldx     #vram+0x0410            ; Screen coordinates
+        ldb     #20                     ; Message length
+        lbne    loc_0857                ; Take 1 or 2 player start
+        ldy     #message_1_only         ; "ONLY 1PLAYER BUTTON "
+        jsr     print_message           ; Print message
+;       in      a,(inp1)
+;       and     $04
+;       jp      z,$077f
+
+; $0798
+; START NEW GAME
+new_game:
+; 1 Player start
+        ldb     #0x99                   ; Essentially a -1 for DAA
+        clra                            ; Clear two player flag
+; $079B
+; 2 player start sequence enters here with a=1 and B=98 (-2)
+loc_079B:
+        sta     two_players             ; Set flag for 1 or 2 players
+        lda     num_coins               ; Number of credits
+        stb     *z80_b
+        adda    *z80_b                  ; Take away credits
+        daa                             ; Convert back to DAA
+        sta     num_coins               ; New credit count
+        jsr     draw_num_credits        ; Display number of credits
+        ldx     #0                      ; Score of 0000
+        stx     p1_scor_l               ; Clear player-1 score
+        stx     p2_scor_l               ; Clear player-2 score
+        jsr     sub_1925                ; Print player-1 score
+        jsr     sub_192B                ; Print player-2 score
+        ;bsr     disable_game_tasks      ; Disable game tasks
+        ldd     #0x0101                 ; Two bytes 1, 1
+        sta     game_mode               ; 20EF=1 ... game mode
+        std     player1_alive           ; 20E7 and 20E8 both one ... players 1 and 2 are alive
+        std     player1_ex              ; Extra-ship is available for player-1 and player-2
+        jsr     draw_status             ; Print scores and credits
+        jsr     draw_shield_pl1         ; Draw shields for player-1
+        jsr     draw_shield_pl2         ; Draw shields for player-2
+        jsr     get_ships_per_cred      ; Get number of ships from DIP settings
+        sta     p1_ships_rem            ; Player-1 ships
+        sta     p2_ships_rem            ; Player-2 ships
+        ;bsr     sub_00D7                ; Set player-1 and player-2 alien racks going right
+        clra
+        sta     p1_rack_cnt             ; Player 1 is on first rack of aliens
+        sta     p2_rack_cnt             ; Player 2 is on first rack of aliens
+        jsr     init_aliens             ; Initialize 55 aliens for player 1
+        ;bsr     init_aliens_p2          ; Initialize 55 aliens for player 2
+        ldx     #vram+0x1478            ; Screen coordinates for lower-left alien
+        stx     p1_ref_alien_y          ; Initialize reference alien for player 1
+        stx     p2_ref_alien_yr         ; Initialize reference alien for player 2
+        jsr     copy_ram_mirror         ; Copy ROM mirror to RAM (2000 - 20C0)
+        jsr     remove_ship             ; Initialize ship hold indicator
+; $07F9
+        bsr     prompt_player           ; Prompt with "PLAY PLAYER "
+        jsr     clear_playfield         ; Clear the playfield
+        clra
+        sta     isr_splash_task         ; Disable isr splash-task animation
+        jsr     draw_bottom_line        ; Draw line across screen under player
+        lda     player_data_msb         ; Current player
+        rora                            ; Right bit tells all
+        bcs     loc_0872                ; Go do player 1
+; $080E
+        ;bsr     restore_shields_2       ; Restore shields for player 2
+        jsr     draw_bottom_line        ; Draw line across screen under player
+loc_0814:        
+        ;bsr     init_rack               ; Initialize alien rack for current player
+        ;bsr     enable_game_tasks       ; Enable game tasks in ISR
+        ldb     #0x20                   ; Enable ...
+        jsr     sound_bits_3_on         ; ... sound amplifier
+
+; $081F
+; GAME LOOP
+1$:     jsr     plr_fire_or_demo        ; Initiate player shot if button pressed
+        jsr     plyr_shot_and_bump      ; Collision detect player's shot and rack-bump
+        ;bsr     count_aliens            ; Count aliens (count to 2082)
+        jsr     adjust_score            ; Adjust score (and print) if there is an adjustment
+        tst     num_aliens              ; Number of live aliens. All aliens gone?
+        ;beq     loc_09EF                ; Yes ... end of turn
+        jsr     a_shot_reload_rate      ; Update alien-shot-rate based on player's score
+        ;bsr     sub_0935                ; Check (and handle) extra ship award
+        ;bsr     speed_shots             ; Adjust alien shot speed
+        ;bsr     shot_sound              ; Shot sound on or off with 2025
+        jsr     sub_0A59                ; Check if player is hit
+        beq     2$                      ; No hit ... jump handler
+        ldb     #0x04                   ; Player hit sound
+        jsr     sound_bits_3_on         ; Make explosion sound
+2$:     ;bsr     fleet_delay_ex_ship     ; Extra-ship sound timer, set fleet-delay, play fleet movement sound
+;       out     (watchdog),a
+        ;bsr     ctrl_saucer_sound       ; Control saucer sound
+        bra     1$                      ; Continue game loop
+
+; $0857
+; Test for 1 or 2 player start button press
+loc_0857:
+        ldy     #message_b_1_or_2       ; "1 OR 2PLAYERS BUTTON"
+        bsr     print_message           ; Print message
+        ldb     #0x98                   ; -2 (take away 2 credits)
+;       in      a,(inp1)
+;       rrca
+;       rrca
+;       jp      c,$086D                 ; 2 player button pressed ... do it
+;       rrca
+;       jp      c,new_game              ; One player start ... do it
+        jmp     loc_077F                ; Keep waiting on credit or button
+
+; $086D
+; 2 PLAYER START
+        lda     #1                      ; Flag 2 player game
+        jmp     loc_079B                ; Continue normal startup
+
+; $0872
+loc_0872:
+        jsr     restore_shields_1       ; Restore shields for player 1
+        bra     loc_0814                ; Continue in game loop
+
+; $0878
+        ldb     ref_alien_dxr           ; Alien deltaY
+        ldy     ref_alien_yr            ; Alien coordinates
+        bra     get_al_ref_ptr          ; HL/X is 21FC or 22FC and out
+
+; $0886     
+get_al_ref_ptr:
+        lda     player_data_msb         ; Player data MSB (21 or 22)
+        ldb     #0xfc                   ; 21FC or 22FC ... alien coordinates
+        tfr     d,x
+        rts
+
+; $088D
+; Print "PLAY PLAYER " and blink score for 2 seconds.
+prompt_player:
+        ldx     #vram+0x0711            ; Screen coordinates
+        ldy     #message_p1             ; Message "PLAY PLAYER<1>"
+        ldb     #14                     ; 14 bytes in message
+        bsr     print_message           ; Print the message
+        lda     player_data_msb         ; Get the player number
+        rora                            ; C will be set for player 1
+        lda     #0x1c                   ; The "2" character
+        ldx     #vram+0x1311            ; Replace the "<1>" with "<2">
+        bcs     1$
+        bsr     draw_char               ; If player 2 ... change the message
+1$:     lda     #176                    ; Delay of 176 (roughly 2 seconds)
+        sta     isr_delay               ; Set the ISR delay value
+2$:     lda     isr_delay               ; Get the ISR delay value
+        bne     3$
+        rts                             ; Has the 2 second delay expired? Yes ... done
+3$:     anda    #4                      ; Every 4 ISRs ...
+        bne     4$                      ; ... flash the player's score
+        ;bsr     sub_09CA                ; Get the score descriptor for the active player
+        jsr     draw_score              ; Draw the score
+        bra     2$                      ; Back to the top of the wait loop
+4$:     ldb     #32                     ; 32 rows (4 characters * 8 bytes each)
+        ldx     #vram+0x031c            ; Player-1 score on the screen
+        lda     player_data_msb         ; Get the player number
+        rora                            ; C will be set for player 1
+        bcs     5$                      ; We have the right score coordinates
+        ldx     #vram+0x151c            ; Use coordinates for player-2's score
+5$:     jsr     clear_small_sprite      ; Clear a one byte sprite at HL/X
+        bra     2$                      ; Back to the top of the wait loop
                 
 ; $08D1
 get_ships_per_cred:
@@ -1688,7 +1863,27 @@ restore_shields:
         dec     *z80_b                  ; Row counter
         bne     1$
         rts
-        
+
+; $1AA6
+message_g_over:
+; "GAME OVER PLAYER< >"
+        .db 6, 0, 0xC, 4, 0x26, 0xE, 0x15, 4, 0x11, 0x26, 0x26
+        .db 0xF, 0xB, 0, 0x18, 4, 0x11, 0x24, 0x26, 0x25
+
+; $1ABA
+message_b_1_or_2:
+; "1 OR 2PLAYERS BUTTON"
+        .db 0x1B, 0x26, 0xE, 0x11, 0x26, 0x1C, 0xF, 0xB, 0, 0x18
+        .db 4, 0x11, 0x12, 0x26, 1, 0x14, 0x13, 0x13, 0xE, 0xD
+        .db 0x26
+
+; $1ACF
+message_1_only:
+;       "ONLY 1PLAYER BUTTON"
+        .db 0xE,0xD,0xB,0x18,0x26,0x1B,0xF,0xB
+        .db 0,0x18,4,0x11,0x26,0x26,1,0x14
+        .db 0x13,0x13,0xE,0xD,0x26
+
 ; $1A7F
 remove_ship:
 ; Remove a ship from the players stash and update the
@@ -1699,7 +1894,7 @@ remove_ship:
 1$:     pshs    a                       ; Preserve number remaining
         deca                            ; Remove a ship from the stash
         sta     ,x                      ; New number of ships
-        bsr     draw_num_ships
+        jsr     draw_num_ships
         puls    a                       ; Restore number
         ldx     #vram+0x0101
         anda    #0x0f                   ; Make sure it is a digit
@@ -1733,10 +1928,13 @@ byte_0_1B00:    .db 1,0,0,0x10,0,0,0,0
                 .db 1,0,0x30,0,0x12,0,0,0
                 
 ; These don't need to be copied over to RAM (see 1BA0 below).
+; $1B70
 message_p1: 
 ; "PLAY PLAYER<1>"
         .db 0xF,0xB,0,0x18,0x26,0xF,0xB,0
-        .db 0x18,4,0x11,0x24,0x1B,0x25,0xFC,0
+        .db 0x18,4,0x11,0x24,0x1B,0x25,0xFC
+        .db 0
+
         .db    1
         .db 0xFF
         .db 0xFF
