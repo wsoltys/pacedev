@@ -75,8 +75,8 @@ exp_animate_timer:              .ds   1
 exp_animate_cnt:                .ds   1                                
 plyr_spr_pic_m:                 .ds   1     ; switched for 6809
 plyr_spr_pic_l:                 .ds   1     ; switched for 6809        
-player_yr:                      .ds   1                                
-player_xr:                      .ds   1                                
+player_xr:                      .ds   1     ; switched for 6809        
+player_yr:                      .ds   1     ; switched for 6809        
 plyr_spr_siz:                   .ds   1                                
 next_demo_cmd:                  .ds   1                                
 hid_mess_seq:                   .ds   1                                
@@ -92,8 +92,8 @@ plyr_shot_status:               .ds   1
 blow_up_timer:                  .ds   1                                
 obj1_image_msb:                 .ds   1     ; switched for 6809        
 obj1_image_lsb:                 .ds   1     ; switched for 6809        
-obj1_coor_yr:                   .ds   1                                
-obj1_coor_xr:                   .ds   1                                
+obj1_coor_xr:                   .ds   1     ; switched for 6809        
+obj1_coor_yr:                   .ds   1     ; switched for 6809        
 obj1_image_size:                .ds   1                                
 shot_delta_x:                   .ds   1                                
 fire_bounce:                    .ds   1                                
@@ -113,13 +113,13 @@ rol_shot_c_fir_lsb:             .ds   1     ; switched for 6809
 rol_shot_blow_cnt:              .ds   1                                
 rol_shot_image_msb:             .ds   1     ; switched for 6809        
 rol_shot_image_lsb:             .ds   1     ; switched for 6809        
-rol_shot_yr:                    .ds   1                                
-rol_shot_xr:                    .ds   1                                
+rol_shot_xr:                    .ds   1     ; switched for 6809        
+rol_shot_yr:                    .ds   1     ; switched for 6809        
 rol_shot_size:                  .ds   1                                
 ; $2040
 ; '''GameObject3 (Alien plunger-shot)'''
-obj3_timer_msb:                 .ds   1     ; switched for 6809        
-obj3_timer_lsb:                 .ds   1     ; switched for 6809        
+obj3_timer_msb:                 .ds   1
+obj3_timer_lsb:                 .ds   1
 obj3_timer_extra:               .ds   1                                
 obj3_handler_msb:               .ds   1     ; switched for 6809        
 obj3_handler_lsb:               .ds   1     ; switched for 6809        
@@ -131,8 +131,8 @@ plu_shot_c_fir_lsb:             .ds   1     ; switched for 6809
 plu_shot_blow_cnt:              .ds   1                                
 plu_shot_image_msb:             .ds   1     ; switched for 6809        
 plu_shot_image_lsb:             .ds   1     ; switched for 6809        
-plu_shot_yr:                    .ds   1                                
-plu_shot_xr:                    .ds   1                                
+plu_shot_xr:                    .ds   1     ; switched for 6809        
+plu_shot_yr:                    .ds   1     ; switched for 6809        
 plu_shot_size:                  .ds   1                                
 ; $2050
 ; '''GameObject4 (Flying saucer OR alien squiggly shot)'''
@@ -149,16 +149,16 @@ squ_shot_c_fir_lsb:             .ds   1     ; switched for 6809
 squ_shot_blow_cnt:              .ds   1                                
 squ_shot_image_msb:             .ds   1     ; switched for 6809        
 squ_shot_image_lsb:             .ds   1     ; switched for 6809        
-squ_shot_yr:                    .ds   1                                
-squ_shot_xr:                    .ds   1                                
+squ_shot_xr:                    .ds   1     ; switched for 6809        
+squ_shot_yr:                    .ds   1     ; switched for 6809        
 squ_shot_size:                  .ds   1                                
 ; $2060
 end_of_tasks:                   .ds   1
 collision:                      .ds   1
 exp_alien_msb:                  .ds   1     ; switched for 6809
 exp_alien_lsb:                  .ds   1     ; switched for 6809
-exp_alien_yr:                   .ds   1
-exp_alien_xr:                   .ds   1
+exp_alien_xr:                   .ds   1     ; switched for 6809
+exp_alien_yr:                   .ds   1     ; switched for 6809
 exp_alien_size:                 .ds   1
 player_data_msb:                .ds   1
 player_ok:                      .ds   1
@@ -181,8 +181,8 @@ a_shot_c_fir_lsb:               .ds   1     ; switched for 6809
 a_shot_blow_cnt:                .ds   1
 a_shot_image_msb:               .ds   1     ; switched for 6809
 a_shot_image_lsb:               .ds   1     ; switched for 6809
-alien_shot_yr:                  .ds   1
-alien_shot_xr:                  .ds   1
+alien_shot_xr:                  .ds   1     ; switched for 6809
+alien_shot_yr:                  .ds   1     ; switched for 6809
 alien_shot_size:                .ds   1
 alien_shot_delta:               .ds   1
 shot_pic_end:                   .ds   1
@@ -816,7 +816,7 @@ loc_025C:
         tst     ,x                      ; Get byte counter. Is it 0?
         bne     loc_0288                ; No ... decrement byte counter at xx02
         leax    1,x                     ; xx03
-        ldy     ,x+                     ; Get handler address.
+        ldy     ,x+                     ; Get handler address. xx04
         pshs    x                       ; Remember pointer to MSB XXX LSB on 6809!?!
         exg     x,y                     ; Handler address to HL/X
 ; this was a dog's breakfast on the 8080
@@ -856,7 +856,7 @@ loc_050E:
 ; GameObject 4 comes here if processing a squiggly shot
 loc_050F:
         ldy     #squ_shot_status        ; Squiggly shot data structure
-        lda     #0xdb                   ; *** FIXME
+        lda     #<squiggly_shot_last
         bsr     to_shot_struct          ; Copy squiggly shot to
         lda     plu_shot_step_cnt       ; Get plunger ...
         sta     other_shot_1            ; ... step count
@@ -951,7 +951,7 @@ loc_05A5:
         adda    #7                      ; ... Y by 7
         ldb     *z80_l                  ; Offset ...
         subb    #10                     ; ... X down 10
-        std     alien_shot_yr           ; Set shot coordinates below alien
+        std     alien_shot_xr           ; Set shot coordinates below alien
 ; $05B7        
 loc_05B7:
         ldx     #a_shot_status          ; Alien shot status
@@ -1701,7 +1701,8 @@ draw_spr_collision:
         lda     ,y+                     ; Get byte. Next in pixel pattern
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
-        anda    ,x                      ; Any bits from pixel collide with bits on screen?
+        tfr     a,b                     ; B is destructive copy
+        andb    ,x                      ; Any bits from pixel collide with bits on screen?
         beq     2$                      ; No ... leave flag alone
         ldb     #1                      ; Yes ... set ...
         stb     collision               ; ... collision flag
@@ -1710,8 +1711,10 @@ draw_spr_collision:
         clra                            ; Write zero ...
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
-        anda    ,x                      ; Any bits from pixel collide with bits on screen?
+        tfr     a,b                     ; B is destructive copy
+        andb    ,x                      ; Any bits from pixel collide with bits on screen?
         beq     3$                      ; No ... leave flag alone
+        ldb     #1                      ; Yes ... set ...
         stb     collision               ; Yes ... set collision flag
 3$:     ora     ,x                      ; OR it onto the screen
         sta     ,x                      ; Store new screen pattern
@@ -1789,7 +1792,7 @@ code_bug_1:
         lda     obj1_coor_xr            ; Player's shot's Xr coordinate ...
         sta     *z80_h                  ; ... to H
         bsr     find_column             ; Get alien's coordinate
-        stx     exp_alien_yr            ; Put it in the exploding-alien descriptor
+        stx     exp_alien_xr            ; Put it in the exploding-alien descriptor
         lda     #5                      ; Flag alien explosion ...
         sta     plyr_shot_status        ; ... in progress
         bsr     get_alien_stat_ptr      ; Get descriptor for alien
@@ -1816,7 +1819,7 @@ a_explode_time:
         dec     exp_alien_timer         ; Decrement alien explosion timer
         beq     1$
         rts                             ; Not done  ... out
-1$:     ldx     exp_alien_yr            ; Pixel pointer for exploding alien
+1$:     ldx     exp_alien_xr            ; Pixel pointer for exploding alien
         ldb     #0x10                   ; 16 row pixel
         jsr     erase_simple_sprite     ; Clear the explosion sprite from the screen
 
@@ -2523,8 +2526,8 @@ byte_0_1B00:    .db 1,0,0,0x10,0,0,0,0
                 .dw col_fire_table+6    ; squShotCFir
                 .db 4                   ; squShotBlowCnt
                 .dw squiggly_shot       ; squShotImage
-                .db 0                   ; squShotYr
-                .db 0                   ; squShotXr
+                .db 0                   ; squShotXr (swapped for 6809)
+                .db 0                   ; squShotYr (swapped for 6809)
                 .db 3                   ; squShotSize
 
 ; $1B60->$2060
@@ -2604,8 +2607,8 @@ byte_0_1BC0:
         .dw 0x0000                      ; squShotCFir     
         .db 7                           ; squShotBlowCnt  
         .dw squiggly_shot               ; squShotImage    
-        .db 0xC8                        ; squShotYr       
-        .db 0x9B                        ; squShotXr       
+        .db 0x9B                        ; squShotXr (swapped for 6809)
+        .db 0xC8                        ; squShotYr (swapped for 6809)      
         .db 3                           ; squShotSize     
 
 ; $1BD0
@@ -2685,6 +2688,7 @@ squiggly_shot:
         .db 0x22, 0x55, 0x08
         .db 0x11, 0x2A, 0x44
         .db 0x08, 0x55, 0x22
+squiggly_shot_last:
         .db 0x44, 0x2A, 0x11
 
 ; $1CDC
