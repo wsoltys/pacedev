@@ -2511,7 +2511,9 @@ byte_0_1B00:    .db 1,0,0,0x10,0,0,0,0
                 .db 0,0x1D,4,0xE2,0x1C,0,0,3
 
 ; $1B50->$2050
-; GameObject4 (Flying saucer OR alien squiggly shot)                
+; GameObject4 (Flying saucer OR alien squiggly shot)     
+; - this possibly isn't used, because it gets overwritten
+; - with data from $1BC0 (see below)           
                 .dw 0x0000              ; obj4Timer
                 .db 0                   ; obj4TimerExtra
                 .dw game_obj_4          ; obj4TimerHandler
@@ -2589,9 +2591,22 @@ byte_0_1BB0:
 
         .db    0, 0, 0, 0
 
+; sqiggly shot descriptor
+; gets copied to $2050 ($6050) overwriting value from init
 byte_0_1BC0:
-        .db 0, 0x10, 0, 0xE, 5, 0, 0, 0, 0, 0, 7, 0xD0, 0x1C, 0xC8 ; initialised only at startup
-        .db 0x9B, 3
+; *** DO WE NEED TO REVERSE BYTES HERE???
+        .db 0x00, 0x10                  ; obj4Timer
+        .db 0                           ; obj4TimerExtra  
+        .dw game_obj_4                  ; obj4TimerHandler
+        .db 0                           ; squShotStatus   
+        .db 0                           ; squShotStepCnt  
+        .db 0                           ; squShotTrack    
+        .dw 0x0000                      ; squShotCFir     
+        .db 7                           ; squShotBlowCnt  
+        .dw squiggly_shot               ; squShotImage    
+        .db 0xC8                        ; squShotYr       
+        .db 0x9B                        ; squShotXr       
+        .db 3                           ; squShotSize     
 
 ; $1BD0
 alien_spr_CYB:
