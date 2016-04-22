@@ -12,6 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
+.define BUILD_OPT_ALWAYS_COMPOSITE				
 .define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
 
@@ -386,7 +387,9 @@ display_splash:
 				sta			2,x											; column strobe
 				lda			,x											; active low
 				bita    #(1<<0)                 ; 'C'?
+.ifndef BUILD_OPT_ALWAYS_COMPOSITE				
 				bne     6$                      ; try again
+.endif				
 				ldb     #(1<<4)                 ; flag component
 7$:     stb     cmp
 
@@ -875,7 +878,7 @@ loc_050F:
 ; $053E
 ; Shot explosion is over. Remove the shot.
         ldy     #byte_0_1B00+0x50       ; Reload
-        ldx     #squ_shot_status        ; ... object ...
+        ldx     #obj4_timer_msb         ; ... object ...
         ldb     #0x10                   ; ... structure ...
         jsr     block_copy              ; ... from mirror
         ldx     a_shot_c_fir_msb        ; Copy pointer to column-firing table ...
@@ -1048,7 +1051,7 @@ shot_blowing_up:
         bsr     sub_0675                ; Erase the shot
         ldx     #a_shot_explo           ; Alien shot ...
         stx     a_shot_image_msb        ; ... explosion sprite
-        ldx     #alien_shot_xr          ; Alien shot Y
+        ldx     #alien_shot_yr          ; Alien shot Y
         dec     ,x                      ; Left two for ...
         dec     ,x                      ; ... explosion
         leax    -1,x                    ; Point alien shot X
@@ -2603,7 +2606,7 @@ byte_0_1BC0:
         .dw game_obj_4                  ; obj4TimerHandler
         .db 0                           ; squShotStatus   
         .db 0                           ; squShotStepCnt  
-        .db 0                           ; squShotTrack    
+        .db 0                           ; squShotTrack
         .dw 0x0000                      ; squShotCFir     
         .db 7                           ; squShotBlowCnt  
         .dw squiggly_shot               ; squShotImage    
