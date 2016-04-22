@@ -63,6 +63,9 @@ void do_asm_data (void)
   static char ascii[] = 
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<> =*Ý      Y     Y ?      -";
 
+  do_n_bytes (0x1ba0, 16);
+  do_n_bytes (0x1bd0, 16);
+    
   unsigned a = 0x1c00;
   for (unsigned c=0; c<9; c++)
     a = do_n_bytes (a, 16);
@@ -86,7 +89,7 @@ void do_asm_data (void)
     }
     fprintf (fp1, "  ; \"%c\"\n", ascii[c]);
   }
-  
+
   fclose (fp1);
 }
 

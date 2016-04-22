@@ -669,10 +669,10 @@ add_delta:
         ldb     ,x+                     ; Get delta-y
         lda     *z80_c                  ; Add delta-x ...
 ; note that X,Y are swapped on 6809        
-        adda    1,x                     ; ... to x
-        sta     1,x                     ; Store new x
-        addb    0,x                     ; Add delta-y to y
-        stb     0,x                     ; Store new y
+        addb    ,x                      ; Add delta-y to y
+        stb     ,x+                     ; Store new y
+        adda    ,x                      ; ... to x
+        sta     ,x                      ; Store new x
         rts
 
 ; $01E4
@@ -1276,9 +1276,11 @@ draw_simp_sprite:
 ; HL gets screen coordinate.
 ; Hardware shift-register gets amount.
 cnvt_pix_number:
-        lda     *z80_l
-        anda    #7
+        pshs    b
+        tfr     x,d
+        andb    #7                      ; *** FIX ME
 ;       out     (shftamt),a
+        puls    b
         jmp     conv_to_scr        
 
 ; $147C
@@ -1684,14 +1686,14 @@ splash_sprite:
         beq     2$                      ; Yes ... flag and out
         lda     splash_an_form          ; Image number
         ldx     splash_im_rest_msb      ; Image
-        anda    #(1<<3)                 ; Watching bit 3 for flip delay
+        anda    #4                      ; Watching bit 3 for flip delay
         bne     1$                      ; Did bit 3 go to 0? No ... keep current image
         leax    48,x                    ; 16*3 ... use other image form
 1$:     stx     splash_image_msb        ; Image to descriptor structure
         ldx     #splash_xr              ; X,Y,Image descriptor (x,y swapped for 6809)
         jsr     read_desc               ; Read sprite descriptor
         exg     x,y                     ; Image to DE/Y, position to HL/X
-        jmp      draw_sprite            ; Draw the sprite
+        jmp     draw_sprite             ; Draw the sprite
 
 ; $1898
 2$:     lda     #1
@@ -1954,7 +1956,10 @@ conv_to_scr:
         lsra
         rorb
         lsra
+; the original code OR'd H with $20, effectively setting the base @$2000
+; but the screen starts at $2400, so we need to subtract the difference
         rorb                            ; D/=8
+        suba    #0x04
         tfr     d,x                     ; Back to HL/X
         puls    b
         rts
@@ -2108,8 +2113,8 @@ ufo_init_data:
 ; $1BA0
 alien_spr_CYA:
 ; Alien sprite type C pulling upside down Y
-        .db 0,3,4,0x78,0x14,0x13,8,0x1A
-        .db 0x3D,0x68,0xFC,0xFC,0x68,0x3D,0x1A,0
+        .db 0x00, 0xC0, 0x20, 0x1E, 0x28, 0xC8, 0x10, 0x58
+        .db 0xBC, 0x16, 0x3F, 0x3F, 0x16, 0xBC, 0x58, 0x00
 
 byte_0_1BB0:    
         .db 0                           ; image form            
@@ -2128,11 +2133,20 @@ byte_0_1BB0:
 byte_0_1BC0:
         .db 0, 0x10, 0, 0xE, 5, 0, 0, 0, 0, 0, 7, 0xD0, 0x1C, 0xC8 ; initialised only at startup
         .db 0x9B, 3
+
 ; $1BD0
 alien_spr_CYB:
-        .db 0, 0, 3, 4, 0x78, 0x14, 0xB, 0x19, 0x3A, 0x6D
-        .db 0xFA, 0xFA, 0x6D, 0x3A, 0x19, 0, 0, 0, 0, 0, 0, 0
+; Alien sprite C pulling upside down Y. Note the difference between this and the first picture
+; above. The Y is closer to the ship. This gives the effect of the Y kind of "sticking" in the
+; animation.
+        .db 0x00, 0x00, 0xC0, 0x20, 0x1E, 0x28, 0xD0, 0x98
+        .db 0x5C, 0xB6, 0x5F, 0x5F, 0xB6, 0x5C, 0x98, 0x00
+
+; $1BE0
+; More RAM initialization copied by 18D9
+        .db 0, 0, 0, 0, 0, 0
         .db 0, 0, 0, 1, 0, 0, 1, 0x74, 0x1F, 0, 0x80, 0, 0, 0
+
 ; hi score and vram location        
         .db 0, 0
         ;.db 0x1C, 0x2F, 
