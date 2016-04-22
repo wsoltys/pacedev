@@ -71,6 +71,12 @@ void do_asm_data (void)
     a = do_n_bytes (a, 16);
   fprintf (fp1, "\n");
 
+  a = 0x1cd0;
+  for (unsigned i=0; i<4; i++)
+    a = do_n_bytes (a, 3);
+
+  do_n_bytes (0x1cdc, 6);
+
   do_n_bytes (0x1d20, 44);
 
   do_n_bytes (0x1d68, 16);

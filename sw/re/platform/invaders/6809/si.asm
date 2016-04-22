@@ -642,6 +642,41 @@ loc_0086:
         EI
         rti
 
+; $017A
+get_alien_coords:
+; Convert alien index in L to screen bit position in C,L.
+; Return alien row index (converts to type) in D.
+        clr     *z80_d                  ; Row 0
+        tfr     x,d
+        tfr     b,a
+        ldx     #ref_alien_yr
+        ldb     ,x+                     ; Get alien X ...
+        stb     *z80_b                  ; ... to B
+        ldb     ,x                      ; Get alien y ...
+        stb     *z80_c                  ; ... to C
+1$:     cmpa    #11                     ; Can we take a full row off of index?
+        bmi     2$                      ; No ... we have the row
+        sbca    #11                     ; Subtract off 11 (one whole row)
+        sta     *z80_e                  ; Hold the new index
+        lda     *z80_b                  ; Add ...
+        adda    #0x10                   ; ... 16 to bit ...
+        sta     *z80_b                  ; ... position Y (1 row in rack)
+        lda     *z80_e                  ; Restore tallied index
+        inc     *z80_d                  ; Next row
+        bra     1$                      ; Keep skipping whole rows
+2$:     ldb     *z80_b                  ; We have the LSB (the row)
+        stb     *z80_l
+3$:     tsta                            ; Are we in the right column?
+        bne     4$
+        rts                             ; Yes ... X and Y are right
+4$:     sta     *z80_e                  ; Hold index
+        lda     *z80_c                  ; Add ...
+        adda    #0x10                   ; ... 16 to bit ...
+        sta     *z80_c                  ; ... position X (1 column in rack)
+        lda     *z80_e                  ; Restore index
+        deca                            ; We adjusted for 1 column
+        bra     3$                      ; Keep moving over column
+
 ; $01C0
 init_aliens:
 ; Initialize the 55 aliens from last to 1st. 1 means alive.
@@ -729,6 +764,334 @@ copy_shields:
         bra     1$        
 4$:     jsr     remember_shields        ; Remember player's shields
         bra     2$                      ; Continue with next shield
+
+; $0248
+; Process game objects. Each game object has a 16 byte structure. The handler routine for the object
+; is at xx03 and xx04 of the structure. The pointer to xx04 is pushed onto the stack before calling
+; the handler.
+;
+; All game objects (except task 0 ... the player) are called at the mid-screen and end-screen renderings.
+; Each object decides when to run based on its Y (not rotated) coordinate. If an object is on the lower
+; half of the screen then it does its work when the beam is at the top of the screen. If an object is
+; on the top of the screen then it does its work when the beam is at the bottom. This keeps the
+; object from updating while it is being drawn which would result in an ugly flicker.
+;
+;
+; The player is only processed at the mid-screen interrupt. I am not sure why.
+;
+; The first three bytes of the structure are used for status and timers.
+; 
+; If the first byte is FF then the end of the game-task list has been reached.
+; If the first byte is FE then the object is skipped.
+;
+; If the first-two bytes are non-zero then they are treated like a two-byte counter
+; and decremented as such. The 2nd byte is the LSB (moves the fastest).
+;
+; If the first-two bytes are zero then the third byte is treated as an additional counter. It
+; is decremented as such.
+;
+; When all three bytes reach zero the task is executed.
+;
+; The third-byte-counter was used as a speed-governor for the player's object, but evidently even the slowest
+; setting was too slow. It got changed to 0 (fastest possible).
+run_game_objs:
+        ldx     #obj0_timer_msb         ; First game object (active player)
+loc_024B:
+        lda     ,x                      ; Have we reached the ...
+        cmpa    #0xff                   ; ... end of the object list?
+        bne     1$
+        rts                             ; Yes ... done
+1$:     cmpa    #0xfe                   ; Is object active?
+        beq     loc_0281                ; No ... skip it
+        leax    1,x
+        ldb     ,x                      ; First byte to B
+        sta     *z80_c                  ; Hold 1st byte
+        ora     ,x                      ; OR 1st and 2nd byte
+        pshs    cc
+        lda     *z80_c                  ; Restore 1st byte
+        puls    cc
+        bne     loc_0277                ; If word at xx00,xx02 is non zero then decrement it
+loc_025C:
+        leax    1,x                     ; xx02
+        tst     ,x                      ; Get byte counter. Is it 0?
+        bne     loc_0288                ; No ... decrement byte counter at xx02
+        leax    1,x                     ; xx03
+        ldy     ,x+                     ; Get handler address.
+        pshs    x                       ; Remember pointer to MSB XXX LSB on 6809!?!
+        exg     x,y                     ; Handler address to HL/X
+; this was a dog's breakfast on the 8080
+; using PUSH HL, LD HL,$026F, EX (SP),HL        
+        ldu     #loc_026F               ; Return address to 026F
+        pshs    u                       ; Return address (026F) now on stack. Handler (still) in HL/X.
+        pshs    y                       ; Push pointer to data struct (xx04) for handler to use
+        jmp     ,x                      ; Run object's code (will return to next line)
+loc_026F:        
+        puls    x                       ; Restore pointer to xx04
+        leax    12,x                    ; Offset to next game task (12+4=16)
+        bra     loc_024B                ; Do next game task
+
+; Word at xx00 and xx01 is non-zero. Decrement it and move to next task. 
+loc_0277:
+        decb
+        incb
+        bne     1$
+        deca
+1$:     decb
+        stb     ,x
+        leax    -1,x
+        sta     ,x
+        
+loc_0281:
+        leax    0x10,x                  ; Next object descriptor
+        bra     loc_024B                ; Keep processing game objects
+
+loc_0288:
+        dec     ,x                      ; Decrement the xx02 counter
+        leax    -2,x                    ; Back up to start of game task
+        bra     loc_0281                ; Next game task
+
+; Game task 4 when splash screen alien is shooting extra "C" with a squiggly shot
+loc_050E:
+        puls    x                       ; Ignore the task data pointer passed on stack
+; GameObject 4 comes here if processing a squiggly shot
+loc_050F:
+        ldy     #squ_shot_status        ; Squiggly shot data structure
+        lda     #0xdb                   ; *** FIXME
+        bsr     to_shot_struct          ; Copy squiggly shot to
+        lda     plu_shot_step_cnt       ; Get plunger ...
+        sta     other_shot_1            ; ... step count
+        lda     rol_shot_step_cnt       ; Get rolling ...
+        sta     other_shot_2            ; ... step count
+        bsr     handle_alien_shot       ; Handle active shot structure
+        lda     a_shot_c_fir_lsb        ; LSB of column-firing table pointer
+        cmpa    #0x15                   ; Have we processed all entries?
+        bcs     1$                      ; No ... don't reset it
+        lda     squ_shot_c_fir_lsb      ; Reset the pointer ...
+        sta     a_shot_c_fir_lsb        ; ... back to the start of the table
+1$:     ldx     #squ_shot_status        ; Squiggly shot data structure
+        tst     a_shot_blow_cnt         ; Check to see if squiggly shot is done. 0 means blow-up timer expired
+        bne     from_shot_struct        ; If shot is still running, go copy the updated data and out
+        
+; $053E
+; Shot explosion is over. Remove the shot.
+        ldy     #byte_0_1B00+0x50       ; Reload
+        ldx     #squ_shot_status        ; ... object ...
+        ldb     #0x10                   ; ... structure ...
+        jsr     block_copy              ; ... from mirror
+        ldx     a_shot_c_fir_msb        ; Copy pointer to column-firing table ...
+        stx     squ_shot_c_fir_msb      ; ... back to data structure (for next shot)
+        rts
+
+; $0550
+to_shot_struct:
+        sta     shot_pic_end            ; LSB of last byte of last picture in sprite
+        ldx     #a_shot_status          ; Destination is the shot-structure
+        ldb     #11                     ; 11 bytes
+        jmp     block_copy              ; Block copy and out
+
+; $055B
+from_shot_struct:
+        ldy     #a_shot_status          ; Source is the shot-structure
+        ldb     #11                     ; 11 bytes
+        jmp     block_copy              ; Block copy and out
+
+; $0563
+; Each of the 3 shots copy their data to the 2073 structure (0B bytes) and call this.
+; Then they copy back if the shot is still active. Otherwise they copy from the mirror.
+;
+; The alien "fire rate" is based on the number of steps the other two shots on the screen 
+; have made. The smallest number-of-steps is compared to the reload-rate. If it is too
+; soon then no shot is made. The reload-rate is based on the player's score. The MSB
+; is looked up in a table to get the reload-rate. The smaller the rate the faster the
+; aliens fire. Setting rate this way keeps shots from walking on each other.
+handle_alien_shot:
+        ldx     #a_shot_status          ; Start of active shot structure
+        lda     ,x                      ; Get the shot status
+        anda    #0x80                   ; Is the shot active?
+        bne     loc_05C1                ; Yes ... go move it
+        lda     isr_splash_task         ; ISR splash task
+        cmpa    #4                      ; Shooting the "C" ?
+        pshs    cc
+        lda     enable_alien_fire       ; Alien fire enabled flag
+        puls    cc
+        beq     loc_05B7                ; We are shooting the extra "C" ... just flag it active and out
+        tsta                            ; Is alien fire enabled?
+        beq     9$                      ; No ... don't start a new shot
+        leax    1,x                     ; 2074 step count of current shot
+        clr     ,x                      ; clear the step count
+; Make sure it isn't too soon to fire another shot
+        lda     other_shot_1            ; Get the step count of the 1st "other shot"
+        beq     1$                      ; Any steps made? No ... ignore this count
+        sta     *z80_b                  ; Shuffle off step count
+        lda     a_shot_reload_rate      ; Get the reload rate (based on MSB of score)
+        cmpa    *z80_b                  ; Too soon to fire again?
+        bcc     9$                      ; Yes ... don't fire
+; $0589        
+1$:     lda     other_shot_2            ; Get the step count of the 2nd "other shot"
+        beq     2$                      ; Any steps made? No steps on any shot ... we are clear to fire
+        sta     *z80_b                  ; Shuffle off step count
+        lda     a_shot_reload_rate      ; Get the reload rate (based on MSB of score)
+        cmpa    *z80_b                  ; Too soon to fire again?
+        bcs     2$
+9$:     rts                             ; Yes ... don't fire
+; $0596
+2$:     leax    1,x                     ; 2075
+        tst     ,x                      ; Get tracking flag. Does this shot track the player?
+        lbeq    loc_061B                ; Yes ... go make a tracking shot
+        ldx     a_shot_c_fir_msb        ; Column-firing table
+        ldb     ,x+                     ; Get next column to fire from. Bump the ...
+        stb     *z80_c
+        stx     a_shot_c_fir_msb        ; ... pointer into column table
+loc_05A5:        
+        jsr     find_in_column          ; Find alien in target column
+        bcs     1$
+        rts                             ; No alien is alive in target column ... out
+1$:     jsr     get_alien_coords        ; Get coordinates of alien (lowest alien in firing column)
+        lda     *z80_c                  ; Offset ...
+        adda    #7                      ; ... Y by 7
+        ldb     *z80_l                  ; Offset ...
+        subb    #10                     ; ... X down 10
+        std     alien_shot_yr           ; Set shot coordinates below alien
+; $05B7        
+loc_05B7:
+        ldx     #a_shot_status          ; Alien shot status
+        lda     ,x                      ; Get the status
+        ora     #0x80                   ; Mark this shot ...
+        sta     ,x+                     ; ... as actively running. 2074 step count
+        inc     ,x                      ; Give this shot 1 step (it just started)
+        rts
+
+; $05C1
+; Move the alien shot
+loc_05C1:
+        ldy     #alien_shot_xr          ; Alien-shot Y coordinate
+        jsr     comp_y_to_beam          ; Compare to beam position
+        bcs     1$
+        rts                             ; Not the right ISR for this shot
+1$:     leax    1,x                     ; 2073 status
+        lda     ,x                      ; Get shot status
+        anda    #1                      ; Bit 0 is 1 if blowing up
+        bne     shot_blowing_up         ; Go do shot-is-blowing-up sequence
+        leax    1,x                     ; 2074 step count
+        inc     ,x                      ; Count the steps (used for fire rate)
+        jsr     sub_0675                ; Erase shot
+        lda     a_shot_image_lsb        ; Get LSB of the image pointer
+        adda    #3                      ; Next set of images
+        ldx     #shot_pic_end           ; End of image
+        cmpa    ,x                      ; Have we reached the end of the set?
+        bcs     2$                      ; No ... keep it
+        suba    #12                     ; Back up to the 1st image in the set
+2$:     sta     a_shot_image_lsb        ; New LSB image pointer
+        lda     alien_shot_yr           ; Get shot's Y coordinate
+        adda    alien_shot_delta        ; Add delta to shot's coordinate
+        sta     alien_shot_yr           ; New shot Y coordinate
+        jsr     sub_066C                ; Draw the alien shot
+        lda     alien_shot_yr           ; Shot's Y coordinate
+        cmpa    #0x15                   ; Still in the active playfield?
+        bcs     3$                      ; No ... end it
+        tst     collision               ; Did shot collide with something?
+        beq     9$                      ; No ... we are done here
+        lda     alien_shot_yr           ; Shot's Y coordinate
+        cmpa    #0x1e                   ; Is it below player's area?
+        bcs     3$                      ; Yes ... end it
+        cmpa    #0x27                   ; Is it above player's area?
+        bcc     3$                      ; Yes ... end it
+        clr     player_alive            ; Flag that player has been struck
+; $0612        
+3$:     lda     a_shot_status           ; Flag to ...
+        ora     #1                      ; ... start shot ...
+        sta     a_shot_status           ; ... blowing up
+9$:     rts                
+
+; $061B
+; Start a shot right over the player
+loc_061B:
+        lda     player_xr               ; Player's X coordinate
+        adda    #8                      ; Center of player
+        tfr     d,x
+        bsr     find_in_column          ; Find the column
+        lda     *z80_c                  ; Get the column right over player
+        cmpa    #12                     ; Is it a valid column?
+        lbcs    loc_05A5                ; Yes ... use what we found
+        lda     #11                     ; Else use ...
+        sta     *z80_c                  ; ... as far over as we can
+        jmp     loc_05A5
+
+; $062F        
+; C contains the target column. Look for a live alien in the column starting with
+; the lowest position. Return C=1 if found ... HL/X points to found slot.
+find_in_column:
+        dec     *z80_c                  ; Column that is firing
+        lda     player_data_msb         ; Player's MSB (21xx or 22xx)
+        ldb     *z80_c
+        tfr     d,x
+        lda     #5                      ; 5 rows of aliens
+        sta     *z80_d
+1$:     tst     ,x                      ; Get alien's status
+        SCF                             ; In case not 0
+        bne     9$                      ; Alien is alive? Yes ... return
+        tfr     x,d                     ; Get the flag pointer LSB
+        addb    #11                     ; Jump to same column on next row of rack (+11 aliens per row)
+        tfr     d,x                     ; New alien index
+        dec     *z80_d                  ; Tested all rows?
+        bne     1$                      ; No ... keep looking for a live alien up the rack
+9$:     rts                             ; Didn't find a live alien. Return with C=0.
+
+; $0644
+; Alien shot is blowing up
+shot_blowing_up:
+        ldx     #a_shot_blow_cnt        ; Blow up timer
+        dec     ,x                      ; Decrement the value
+        lda     ,x                      ; Get the value
+        cmpa    #3                      ; First tick, 4, we draw the explosion
+        bne     1$                      ; After that just wait
+        bsr     sub_0675                ; Erase the shot
+        ldx     #a_shot_explo           ; Alien shot ...
+        stx     a_shot_image_msb        ; ... explosion sprite
+        ldx     #alien_shot_xr          ; Alien shot Y
+        dec     ,x                      ; Left two for ...
+        dec     ,x                      ; ... explosion
+        leax    -1,x                    ; Point alien shot X
+        dec     ,x                      ; Up two for ...
+        dec     ,x                      ; ... explosion
+        lda     #6                      ; Alien shot descriptor ...
+        sta     alien_shot_size         ; ... size 6
+        bra     sub_066C                ; Draw alien shot explosion
+; $0667
+1$:     tsta                            ; Have we reached 0?
+        beq     sub_0675                ; Erase the explosion and out
+        rts                             ; No ... keep waiting
+; $066C
+sub_066C:
+        ldx     #a_shot_image_msb       ; Alien shot descriptor
+        jsr     read_desc               ; Read 5 byte structure
+        jmp     draw_spr_collision      ; Draw shot and out
+; $0675
+sub_0675:
+        ldx     #a_shot_image_msb       ; Alien shot descriptor
+        jsr     read_desc               ; Read 5 byte structure
+        jmp     erase_shifted           ; Erase the shot and out
+
+loc_067E:
+        stx     plu_shot_c_fir_msb      ; From 50B, update ...
+        rts                             ; ... column-firing table pointer and out
+                        
+; $0682
+game_obj_4:
+; Game object 4: Flying Saucer OR squiggly shot
+;
+; This task is shared by the squiggly-shot and the flying saucer. The saucer waits until the 
+; squiggly-shot is over before it begins.
+        puls    x                       ; Pull data pointer from the stack (not going to use it)
+        lda     shot_sync               ; Sync flag (copied from GO-2's timer value)
+        cmpa    #2                      ; Are GO-2 and GO-3 idle?
+        beq     1$
+        rts                             ; No ... only one at a time
+1$:     ldx     #saucer_start           ; Time-till-saucer flag
+        tst     ,x                      ; Is it time for a saucer?
+        lbeq    loc_050F                ; No ... go process squiggly shot
+; lots more code *** FIXME
+        rts        
 
 ; $0765
 ; Wait for player 1 start button press
@@ -1073,15 +1436,20 @@ print_message_del:
         bne     print_message_del
         rts
 
+; $0AAB
+splash_squiggly:
+        ldx     #obj4_timer_msb         ; Pointer to game-object 4 timer
+        jmp     loc_024B                ; Process squiggly-shot in demo mode
+        
 ; $0AB1
 one_sec_delay:
-        lda     #0x40
-        bra     wait_on_delay
+        lda     #0x40                   ; Delay of 64 (tad over 1 sec)
+        bra     wait_on_delay           ; Do delay
 
 ; $0AB6
 two_sec_delay:
-        lda     #0x80
-        bra     wait_on_delay
+        lda     #0x80                   ; Delay of 128 (tad over 2 sec)
+        bra     wait_on_delay           ; Do delay
 
 ; $0ABB
 splash_demo:
@@ -1099,7 +1467,7 @@ isr_spl_tasks:
         rora                            ; Moving little alien from point A to B?
         lbcs    splash_sprite           ; 2: Yes ... go move little alien from point A to B
         rora                            ; Shooting extra "C" with squiggly shot?
-;        bcs     splash_squiggly         ; 4: Yes ... go shoot extra "C" in splash
+        bcs     splash_squiggly         ; 4: Yes ... go shoot extra "C" in splash
         rts
 
 ; $0ACF
@@ -1271,6 +1639,29 @@ draw_simp_sprite:
         bne     draw_simp_sprite
         rts
 
+; $1452
+; Erases a shifted sprite from screen (like for player's explosion)
+erase_shifted:
+        bsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
+1$:     pshs    x   
+        lda     ,y+                     ; Get picture value. Next in image
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        coma                            ; Reverse it (erasing bits)
+        anda    ,x                      ; Erase the bits from the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+        clra                            ; Shift register over ...
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        coma                            ; Reverse it (erasing bits)
+        anda    ,x                      ; Erase the bits from the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+        puls    x
+        leax    32,x                    ; Add 32 to next row
+        decb                            ; All rows done?
+        bne     1$                      ; No ... erase all
+        rts                
+
 ; $1474
 ; Convert pixel number in HL to screen coordinate and shift amount.
 ; HL gets screen coordinate.
@@ -1301,6 +1692,34 @@ remember_shields:
         dec     *z80_b                  ; Row counter
         bne     1$
         rts
+
+; $1491
+draw_spr_collision:
+        bsr     cnvt_pix_number         ; Convert pixel number to coord and shift
+        clr     collision               ; Clear the collision-detection flag
+1$:     pshs    b,x   
+        lda     ,y+                     ; Get byte. Next in pixel pattern
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        anda    ,x                      ; Any bits from pixel collide with bits on screen?
+        beq     2$                      ; No ... leave flag alone
+        ldb     #1                      ; Yes ... set ...
+        stb     collision               ; ... collision flag
+2$:     ora     ,x                      ; OR it onto the screen
+        sta     ,x+                     ; Store new screen value. Next byte on screen
+        clra                            ; Write zero ...
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        anda    ,x                      ; Any bits from pixel collide with bits on screen?
+        beq     3$                      ; No ... leave flag alone
+        stb     collision               ; Yes ... set collision flag
+3$:     ora     ,x                      ; OR it onto the screen
+        sta     ,x                      ; Store new screen pattern
+        puls    b,x
+        leax    32,x                    ; Add 32 to get to next row
+        decb                            ; All done?
+        bne     1$                      ; No ... do all rows
+        rts                
 
 ; $14CB
 clear_small_sprite:
@@ -1925,6 +2344,28 @@ draw_num_ships:
         bne     2$
         rts
 
+; $1A06
+; The ISRs set the upper bit of 2072 based on where the beam is. This is compared to the
+; upper bit of an object's Y coordinate to decide whic ISR should handle it. When the
+; beam passes the halfway point (or near it ... at scanline 96), the upper bit is cleared.
+; When the beam reaches the end of the screen the upper bit is set.
+;
+; The task then runs in the ISR if the Y coordiante bit matches the 2072 flag. Objects that
+; are at the top of the screen (upper bit of Y clear) run in the mid-screen ISR when
+; the beam has moved to the bottom of the screen. Objects that are at the bottom of the screen
+; (upper bit of Y set) run in the end-screen ISR when the beam is moving back to the top.
+;
+; The pointer to the object's Y coordinate is passed in DE. CF is set if the upper bits are
+; the same (the calling ISR should execute the task).
+comp_y_to_beam:
+        ldx     #vblank_status          ; Get the beam position status
+        lda     ,y                      ; Get the task structure flag
+        anda    #0x80                   ; Only upper bits count
+        eora    ,x                      ; XOR them together
+        bne     9$                      ; Not the same (CF cleared)
+        SCF                             ; Set the CF if the same
+9$:     rts
+        
 ; $1A32
 block_copy:
         lda     ,y+
@@ -2056,16 +2497,34 @@ message_score:
 ; See the description of RAM at the top of this file for the details on this data.
 byte_0_1B00:    .db 1,0,0,0x10,0,0,0,0
                 .db 2,0x78,0x38,0x78,0x38,0,0xF8,0
+                
                 .db 0,0x80,0,0x8E,2,0xFF,5,0xC
                 .db 0x60,0x1C,0x20,0x30,0x10,1,0,0
+                
                 .db 0,0,0,0xBB,3,0,0x10,0x90
                 .db 0x1C,0x28,0x30,1,4,0,0xFF,0xFF
+                
                 .db 0,0,2,0x76,4,0,0,0
                 .db 0,0,4,0xEE,0x1C,0,0,3
+                
                 .db 0,0,0,0xB6,4,0,0,1
                 .db 0,0x1D,4,0xE2,0x1C,0,0,3
-                .db 0,0,0,0x82,6,0,0,1
-                .db 6,0x1D,4,0xD0,0x1C,0,0,3
+
+; $1B50->$2050
+; GameObject4 (Flying saucer OR alien squiggly shot)                
+                .dw 0x0000              ; obj4Timer
+                .db 0                   ; obj4TimerExtra
+                .dw game_obj_4          ; obj4TimerHandler
+                .db 0                   ; squShotStatus
+                .db 0                   ; squShotStepCnt
+                .db 1                   ; squShotTrack
+                .dw col_fire_table+6    ; squShotCFir
+                .db 4                   ; squShotBlowCnt
+                .dw squiggly_shot       ; squShotImage
+                .db 0                   ; squShotYr
+                .db 0                   ; squShotXr
+                .db 3                   ; squShotSize
+
 ; $1B60->$2060
                 .db 0xFF,0,0xC0,0x1C,0,0,0x10
                 .db >byte_0_2100
@@ -2206,9 +2665,34 @@ message_adv:
         .db 4, 0x26, 0x13, 0, 1, 0xB, 4
         .db 0x28 ; (
 
+; $1CD0
+squiggly_shot:
+        .db 0x22, 0x55, 0x08
+        .db 0x11, 0x2A, 0x44
+        .db 0x08, 0x55, 0x22
+        .db 0x44, 0x2A, 0x11
+
+; $1CDC
+a_shot_explo:
+        .db 0x52, 0xA8, 0x7D, 0xFC, 0x7A, 0xA4
+
 ; $1CFA
 message_play_UY:
         .db 0xF, 0xB, 0, 0x29           ; "PLAY" with inverted Y
+
+; $1D00
+; This table decides which column a shot will fall from. The column number is read from the
+; table (1-11) and the pointer increases for the shot type. For instance, the "squiggly" shot
+; will fall from columns in this order: 0B, 01, 06, 03. If you play the game you'll see that
+; order.
+;
+; The "plunger" shot uses index 00-0F (inclusive)
+; The "squiggly" shot uses index 06-14 (inclusive)
+; The "rolling" shot targets the player
+col_fire_table:
+        .db 1, 7, 1, 1, 1, 4, 0xB, 1
+        .db 6, 3, 1, 1, 0xB, 9, 2, 8
+        .db 2, 0xB, 4, 7, 0xA
 
 ; $1D20
 shield_image:
