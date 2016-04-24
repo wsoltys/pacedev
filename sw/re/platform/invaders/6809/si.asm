@@ -913,7 +913,7 @@ handle_alien_shot:
         anda    #0x80                   ; Is the shot active?
         bne     loc_05C1                ; Yes ... go move it
         lda     isr_splash_task         ; ISR splash task
-        cmpa    #4                      ; Shooting the "C" ?
+        cmpa    #(1<<2)                 ; Shooting the "C" ?
         pshs    cc
         lda     enable_alien_fire       ; Alien fire enabled flag
         puls    cc
@@ -2128,26 +2128,26 @@ splash_sprite:
 ; $189E
 ;Animate alien shot to extra "C" in splash
 sub_189E:
-        ldx     #obj4_timer_msb
-        ldy     #byte_0_1BC0
-        ldb     #16
-        jsr     block_copy
-        lda     #2
-        sta     shot_sync
-        lda     #0xff
-        sta     alien_shot_delta
-        lda     #(1<<2)
-        sta     isr_splash_task
-1$:     lda     squ_shot_status
-        anda    #1
-        beq     1$
-2$:     lda     squ_shot_status
-        anda    #1
-        bne     1$
-        ldx     #vram+0x0f11
-        lda     #0x26
-        jsr     draw_char
-        jmp     two_sec_delay
+        ldx     #obj4_timer_msb         ; Task descriptor for game object 4 (squiggly shot)
+        ldy     #byte_0_1BC0            ; Task info for animate-shot-to-extra-C
+        ldb     #16                     ; Block copy ...
+        jsr     block_copy              ; ... 16 bytes
+        lda     #2                      ; Set shot sync ...
+        sta     shot_sync               ; ... to run the squiggly shot
+        lda     #0xff                   ; Shot direction (-1)
+        sta     alien_shot_delta        ; Alien shot delta
+        lda     #(1<<2)                 ; Animate ...
+        sta     isr_splash_task         ; ... shot
+1$:     lda     squ_shot_status         ; Has shot ...
+        anda    #1                      ; ... collided?
+        beq     1$                      ; No ... keep waiting
+2$:     lda     squ_shot_status         ; Wait ...
+        anda    #1                      ; ... for explosion ...
+        bne     2$                      ; ... to finish
+        ldx     #vram+0x0f11            ; Here is where the extra C is
+        lda     #0x26                   ; Space character
+        jsr     draw_char               ; Draw character
+        jmp     two_sec_delay           ; Two second delay and out
         
 ; $18D4                
 start:
