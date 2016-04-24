@@ -98,10 +98,10 @@ RAMMODE			.equ		0xFFDF
 ; $0000-$2FFF   $38/$39   vram
 ; $3000-$5FFF   $39/$3A   vid_buf
 ; $6000-$6FFF   $3B       shift_tbl
-; $7000-$70FF    "        reverse_tbl
-; $7100-$77FF    "        stack
-; $7800-$7FFF    "        variables
-; $8000-$FFXX   $30-$33   Code+Data
+; $7000-$73FF    "        wram
+; $7400-$7FFF    "        stack
+; $8000-$BFXX   $30-$31   (unused)
+; $C000-$FFXX   $32-$33   Code+Data
 
 CODE_PG1    .equ    0x30
 VRAM_PG     .equ    0x38
@@ -109,10 +109,9 @@ VRAM_PG     .equ    0x38
 vram        .equ    0x0000
 vidbuf      .equ    VIDEO_SIZ
 shift_tbl   .equ    0x6000
-reverse_tbl .equ    0x7100
-stack       .equ    0x77ff              ; 1792 bytes
-var_base    .equ    0x7800
-code_base		.equ		0x8000
+WRAM        .equ    0x7000
+stack       .equ    0x7fff
+code_base		.equ		0xC000
 
 ; equates to keyboard rows
 ; - phantom keys appear accordingly

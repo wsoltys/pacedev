@@ -27,24 +27,7 @@
 ; *** end of derived
 
 ; *** INVADERS stuff here
-        .org    0x5f00
-        
-        .bndry  0x100
-dp_base:            .ds     256        
-z80_b               .equ    0x00
-z80_c               .equ    0x01
-z80_d               .equ    0x02
-z80_e               .equ    0x03
-z80_h               .equ    0x04
-z80_l               .equ    0x05
-z80_a_              .equ    0x06
-z80_f_              .equ    0x07
-z80_r               .equ    0x08
-
-; rgb/composite video selected (bit 4)
-cmp:                            .ds 1
-
-        .org    0x6000
+        .org    WRAM
 wram    .equ    .                       ; 1KB
 
 ; $2000
@@ -309,8 +292,29 @@ p2_ships_rem:                   .ds   1
 ; $2300
 ; stack on the original game goes here
 ; low water-mark around $23DE
+
+; guard buffer just in case
+        .ds     256
         
-				.org		0xc000
+        .bndry  0x100
+dp_base:            .ds     256        
+z80_b               .equ    0x00
+z80_c               .equ    0x01
+z80_d               .equ    0x02
+z80_e               .equ    0x03
+z80_h               .equ    0x04
+z80_l               .equ    0x05
+z80_a_              .equ    0x06
+z80_f_              .equ    0x07
+z80_r               .equ    0x08
+shft_base           .equ    0x10        ; 2 bytes
+
+; rgb/composite video selected (bit 4)
+cmp:                .ds 1
+
+; stack is here on Coco port
+        
+				.org		code_base
 
 start_coco:
 				orcc		#0x50										; disable interrupts
@@ -519,6 +523,52 @@ inipal:
 			
 				lda			#>dp_base
 				tfr			a,dp
+
+; Build the shift tables to emulate 
+; the hardware shift register
+; - 1st run seeds low values
+        ldb     #0
+        clr     *z80_c
+2$:     lda     *z80_c
+        ldx     #shift_tbl+0x80
+        sta     a,x
+        leax    0x100,x
+        clr     a,x
+        inc     *z80_c
+        decb
+        bne     2$
+; next 7 runs shift the previous entries
+        ldb     #7
+        ldu     #shift_tbl+0x80
+3$:     pshs    b
+        ldb     #0
+        clr     *z80_c
+4$:     pshs    b
+        lda     *z80_c
+        tfr     u,x                     ; base for this shift
+        ldb     a,x                     ; byte #1
+        pshs    b
+        leax    0x100,x
+        ldb     a,x                     ; byte #2
+        puls    a
+        lsra
+        rorb
+        pshs    d                       ; b then a
+        lda     *z80_c
+        leax    0x100,x
+        puls    b
+        stb     a,x                     ; byte #1 shifted
+        leax    0x100,x
+        puls    b
+        stb     a,x                     ; byte #2 shifted
+        inc     *z80_c
+        puls    b
+        decb
+        bne     4$
+        leau    0x200,u                 ; base for next shift
+        puls    b
+        decb
+        bne     3$
 				
 ; don't really understand this,
 ; but the game pretty much needs RAM to be $00
@@ -1650,12 +1700,16 @@ erase_shifted:
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
+        ldu     *shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
         coma                            ; Reverse it (erasing bits)
         anda    ,x                      ; Erase the bits from the screen
         sta     ,x+                     ; Store the erased pattern back. Next column on screen
-        clra                            ; Shift register over ...
+;       clra                            ; Shift register over ...
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
         coma                            ; Reverse it (erasing bits)
         anda    ,x                      ; Erase the bits from the screen
         sta     ,x+                     ; Store the erased pattern back. Next column on screen
@@ -1666,14 +1720,19 @@ erase_shifted:
         rts                
 
 ; $1474
-; Convert pixel number in HL to screen coordinate and shift amount.
-; HL gets screen coordinate.
+; Convert pixel number in HL/X to screen coordinate and shift amount.
+; HL/X gets screen coordinate.
 ; Hardware shift-register gets amount.
 cnvt_pix_number:
         pshs    b
         tfr     x,d
-        andb    #7                      ; *** FIX ME
-;       out     (shftamt),a
+;       out     (shft_amt),a
+        exg     a,b                     ; shft_amnt to MSB
+        anda    #7                      ; bit offset only
+        lsla                            ; x2 for table offset
+        ora     #>shift_tbl             ; add table base address
+        ldb     #0x80
+        std     *shft_base              ; store for later use
         puls    b
         jmp     conv_to_scr        
 
