@@ -13,7 +13,7 @@
 
 ; *** BUILD OPTIONS
 .define BUILD_OPT_ALWAYS_COMPOSITE				
-.define BUILD_OPT_DISABLE_DEMO
+;.define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
 
 ; *** derived - do not edit
@@ -40,8 +40,8 @@ alien_frame:                    .ds   1
 alien_cur_index:                .ds   1
 ref_alien_dyr:                  .ds   1
 ref_alien_dxr:                  .ds   1
-ref_alien_yr:                   .ds   1
-ref_alien_xr:                   .ds   1
+ref_alien_xr:                   .ds   1     ; switched for 6809
+ref_alien_yr:                   .ds   1     ; switched for 6809
 alien_pos_msb:                  .ds   1     ; switched for 6809
 alien_pos_lsb:                  .ds   1     ; switched for 6809
 rack_direction:                 .ds   1
@@ -695,6 +695,36 @@ loc_0086:
         EI
         rti
 
+; $00B1
+; Initialize the player's rack of aliens. Copy the reference-location and deltas from the
+; player's data bank.
+init_rack:
+        jsr     get_al_ref_ptr          ; 2xFC Get current player's ref-alien position pointer
+        pshs    x                       ; Hold pointer
+        ldx     ,x                      ; Get player's ref-alien coordinates
+        stx     ref_alien_xr            ; Set game's reference alien's X,Y
+        stx     alien_pos_msb           ; Set game's alien cursor bit position
+        puls    x                       ; Restore pointer
+        leax    -1,x                    ; 21FB or 22FB ref alien's delta (left or right)
+        lda     ,x                      ; Get ref alien's delta X
+        cmpa    #3                      ; If there is one alien it will move right at 3
+        bne     1$                      ; Not 3 ... keep it
+        deca                            ; If it is 3, back it down to 2 until it switches again
+1$:     sta     ref_alien_dxr           ; Store alien deltaY
+        clrb                            ; Value of 0 for rack-moving-right
+        cmpa    #0xfe                   ; Moving left?
+        bne     2$                      ; Not FE ... keep the value 0 for right
+        incb                            ; It IS FE ... use 1 for left
+2$:     stb     rack_direction          ; Store rack direction
+        rts
+
+; $00D7
+sub_00D7:
+        lda     #2                      ; Set ...
+        sta     p1_ref_alien_dx         ; ... player 1 and 2 ...
+        sta     p2_ref_alien_dx        ; ... alien delta to 2 (right 2 pixels)
+        jmp     loc_08E4
+
 ; $017A
 get_alien_coords:
 ; Convert alien index in L to screen bit position in C,L.
@@ -734,6 +764,7 @@ get_alien_coords:
 init_aliens:
 ; Initialize the 55 aliens from last to 1st. 1 means alive.
         ldx     #byte_0_2100            ; Start of alien structures (this is the last alien)
+loc_01C3:
         ldb     #55                     ; Count to 55 (that's five rows of 11 aliens)
         lda     #1
 1$:     sta     ,x+                     ; Bring alien to life. Next alien
@@ -788,6 +819,13 @@ loc_01F8:
         decb                            ; Drawn all shields?
         bne     1$                      ; No ... go draw them all
         rts
+
+; $0213
+; Copy shields from player 2's data area to screen.
+restore_shields_2:
+        clra
+        ldy     #byte_0_2200+0x42
+        bra     copy_shields
 
 ; $021A
 ; Copy shields from player 1's data area to screen.
@@ -1198,7 +1236,7 @@ loc_079B:
         stx     p2_scor_l               ; Clear player-2 score
         jsr     sub_1925                ; Print player-1 score
         jsr     sub_192B                ; Print player-2 score
-        ;bsr     disable_game_tasks      ; Disable game tasks
+        jsr     disable_game_tasks      ; Disable game tasks
         ldd     #0x0101                 ; Two bytes 1, 1
         sta     game_mode               ; 20EF=1 ... game mode
         std     player1_alive           ; 20E7 and 20E8 both one ... players 1 and 2 are alive
@@ -1209,12 +1247,12 @@ loc_079B:
         jsr     get_ships_per_cred      ; Get number of ships from DIP settings
         sta     p1_ships_rem            ; Player-1 ships
         sta     p2_ships_rem            ; Player-2 ships
-        ;bsr     sub_00D7                ; Set player-1 and player-2 alien racks going right
+        jsr     sub_00D7                ; Set player-1 and player-2 alien racks going right
         clra
         sta     p1_rack_cnt             ; Player 1 is on first rack of aliens
         sta     p2_rack_cnt             ; Player 2 is on first rack of aliens
         jsr     init_aliens             ; Initialize 55 aliens for player 1
-        ;bsr     init_aliens_p2          ; Initialize 55 aliens for player 2
+        jsr     init_aliens_p2          ; Initialize 55 aliens for player 2
         ldx     #vram+0x1478            ; Screen coordinates for lower-left alien
         stx     p1_ref_alien_y          ; Initialize reference alien for player 1
         stx     p2_ref_alien_yr         ; Initialize reference alien for player 2
@@ -1230,10 +1268,10 @@ loc_079B:
         rora                            ; Right bit tells all
         bcs     loc_0872                ; Go do player 1
 ; $080E
-        ;bsr     restore_shields_2       ; Restore shields for player 2
+        jsr     restore_shields_2       ; Restore shields for player 2
         jsr     draw_bottom_line        ; Draw line across screen under player
 loc_0814:        
-        ;bsr     init_rack               ; Initialize alien rack for current player
+        jsr     init_rack               ; Initialize alien rack for current player
         ;bsr     enable_game_tasks       ; Enable game tasks in ISR
         ldb     #0x20                   ; Enable ...
         jsr     sound_bits_3_on         ; ... sound amplifier
@@ -1263,7 +1301,7 @@ loc_0814:
 ; Test for 1 or 2 player start button press
 loc_0857:
         ldy     #message_b_1_or_2       ; "1 OR 2PLAYERS BUTTON"
-        bsr     print_message           ; Print message
+        jsr     print_message           ; Print message
         ldb     #0x98                   ; -2 (take away 2 credits)
 ;       in      a,(inp1)
 ;       rrca
@@ -1344,7 +1382,19 @@ get_ships_per_cred:
 ; Get number of ships from DIP settings
         lda     #3                      ; fixed for now
         rts
-        
+
+; $08E4
+loc_08E4:
+        tst     two_players             ; Number of players
+        beq     1$
+        rts                             ; Skip if two player
+1$:     ldx     #vram+0x151c            ; Player 2's score
+        ldb     #32                     ; 32 rows is 4 digits * 8 rows each
+        jmp     clear_small_sprite      ; Clear a one byte sprite (32 rows long) at HL/X
+
+; $08F1
+        ldb     #3                      ; Length of saucer-score message ... fall into print
+       
 ; $08F3
 ; Print a message on the screen
 ; HL/X = coordinates
@@ -1706,7 +1756,7 @@ erase_shifted:
         coma                            ; Reverse it (erasing bits)
         anda    ,x                      ; Erase the bits from the screen
         sta     ,x+                     ; Store the erased pattern back. Next column on screen
-;       clra                            ; Shift register over ...
+;       xor     a                       ; Shift register over ...
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
         lda     256,u                   ; get 2nd byte
@@ -1773,7 +1823,7 @@ draw_spr_collision:
         stb     collision               ; ... collision flag
 2$:     ora     ,x                      ; OR it onto the screen
         sta     ,x+                     ; Store new screen value. Next byte on screen
-;        clra                            ; Write zero ...
+;       xor     a                       ; Write zero ...
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
         lda     256,u                   ; get 2nd byte
@@ -2025,7 +2075,7 @@ draw_sprite:
         leau    a,u                     ; pointer to shift table entry (1st byte)
         lda     ,u                      ; get shifted value
         sta     ,x+
-;        clra
+;       xor     a
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
         lda     256,u                   ; get 2nd byte
@@ -2258,6 +2308,11 @@ sound_bits_3_on:
 ;       ld      (soundport3),a
 ;       out     (sound),a
         rts
+
+; $1904
+init_aliens_p2:
+        ldx     #byte_0_2200            ; Player 2 data area
+        jmp     loc_01C3                ; Initialize player 2 aliens
 
 ; $190A
 plyr_shot_and_bump:
