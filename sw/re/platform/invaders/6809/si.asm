@@ -1763,6 +1763,9 @@ draw_spr_collision:
         lda     ,y+                     ; Get byte. Next in pixel pattern
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
+        ldu     *shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
         tfr     a,b                     ; B is destructive copy
         andb    ,x                      ; Any bits from pixel collide with bits on screen?
         beq     2$                      ; No ... leave flag alone
@@ -1770,9 +1773,10 @@ draw_spr_collision:
         stb     collision               ; ... collision flag
 2$:     ora     ,x                      ; OR it onto the screen
         sta     ,x+                     ; Store new screen value. Next byte on screen
-        clra                            ; Write zero ...
+;        clra                            ; Write zero ...
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
         tfr     a,b                     ; B is destructive copy
         andb    ,x                      ; Any bits from pixel collide with bits on screen?
         beq     3$                      ; No ... leave flag alone
@@ -2017,10 +2021,14 @@ draw_sprite:
         lda     ,y+
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
+        ldu     *shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
         sta     ,x+
-        clra
+;        clra
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
         sta     ,x
         puls    x
         leax    32,x
@@ -2657,7 +2665,7 @@ byte_0_1BB0:
         .db    0, 0, 0, 0
 
 ; sqiggly shot descriptor
-; gets copied to $2050 ($6050) overwriting value from init
+; gets copied to $2050 ($7050) overwriting value from init
 byte_0_1BC0:
 ; *** DO WE NEED TO REVERSE BYTES HERE???
         .db 0x00, 0x10                  ; obj4Timer
