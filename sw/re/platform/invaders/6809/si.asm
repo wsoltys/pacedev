@@ -1272,7 +1272,7 @@ loc_079B:
         jsr     draw_bottom_line        ; Draw line across screen under player
 loc_0814:        
         jsr     init_rack               ; Initialize alien rack for current player
-        ;bsr     enable_game_tasks       ; Enable game tasks in ISR
+        jsr     enable_game_tasks       ; Enable game tasks in ISR
         ldb     #0x20                   ; Enable ...
         jsr     sound_bits_3_on         ; ... sound amplifier
 
@@ -1280,7 +1280,7 @@ loc_0814:
 ; GAME LOOP
 1$:     jsr     plr_fire_or_demo        ; Initiate player shot if button pressed
         jsr     plyr_shot_and_bump      ; Collision detect player's shot and rack-bump
-        ;bsr     count_aliens            ; Count aliens (count to 2082)
+        jsr     count_aliens            ; Count aliens (count to 2082)
         jsr     adjust_score            ; Adjust score (and print) if there is an adjustment
         tst     num_aliens              ; Number of live aliens. All aliens gone?
         ;beq     loc_09EF                ; Yes ... end of turn
@@ -2054,7 +2054,7 @@ rack_bump:
 sub_15C5:
         ldb     #23                     ; Checking 23 bytes in a line up the screen from near the bottom
 1$:     tst     ,x                      ; Is screen memory empty?
-        bne     loc_166B                ; No ... set carry flag and out
+        lbne    loc_166B                ; No ... set carry flag and out
         leax    1,x                     ; Next byte on screen
         decb                            ; All column done?
         bne     1$                      ; No ... keep looking
@@ -2086,7 +2086,27 @@ draw_sprite:
         bne     1$                        
         puls    x
         rts
-        
+
+; $15F3
+; Count number of aliens remaining in active game and return count 2082 holds the current count.
+; If only 1, 206B gets a flag of 1 ** but ever nobody checks this
+count_aliens:
+        bsr     get_player_data_ptr     ; Get active player descriptor
+        ldb     #55                     ; B=55 aliens to check?
+        clr     *z80_c                  ; zero count
+1$:     tst     ,x+                     ; Get byte. Is it a zero?
+        beq     2$                      ; Yes ... don't count it
+        inc     *z80_c                  ; Count the live aliens
+2$:     decb                            ; Count ...
+        bne     1$                      ; ... all alien indicators
+        lda     *z80_c                  ; Get the count
+        sta     num_aliens              ; Hold it
+        cmpa    #1                      ; Just one?
+        bne     9$                      ; No keep going
+        ldx     #one_alien              ; Set flag if ...
+        sta     ,x                      ; ... only one alien left
+9$:     rts        
+
 ; $1611
 get_player_data_ptr:
 ; Set HL/X with 2100 if player 1 is active or 2200 if player 2 is active
