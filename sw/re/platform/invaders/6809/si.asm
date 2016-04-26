@@ -683,11 +683,11 @@ scan_line_224:
         bra     2$                      ; Continue
 ; $006F
 ; Main game-play timing loop
-6$:     ;bsr     time_fleet_sound        ; Time down fleet sound and sets flag if needs new delay value
+6$:     jsr     time_fleet_sound        ; Time down fleet sound and sets flag if needs new delay value
 loc_0072:
         lda     obj2_timer_extra        ; Use rolling shot's timer to sync ...
         sta     shot_sync               ; ... other two shots
-        ;bsr     draw_alien              ; Draw the current alien (or exploding alien)
+        bsr     draw_alien              ; Draw the current alien (or exploding alien)
         ;bsr     run_game_objs           ; Process game objects (including player object)
         ;bsr     time_to_saucer          ; Count down time to saucer
 
@@ -725,6 +725,46 @@ sub_00D7:
         sta     p2_ref_alien_dx        ; ... alien delta to 2 (right 2 pixels)
         jmp     loc_08E4
 
+; $0100
+; 2006 holds the index into the alien flag data grid. 2067 holds the MSB of the pointer (21xx or 22xx).
+; If there is an alien exploding time it down. Otherwise draw the alien if it alive (or skip if
+; it isn't). If an alien is drawn (or blank) then the 2000 alien-drawing flag is cleared.
+draw_alien:
+        ldx     #alien_is_exploding     ; Is there an ...
+        tst     ,x                      ; ... alien exploding?
+        lbne    a_explode_time          ; Yes ... go time it down and out
+        pshs    x
+        ldb     alien_cur_index         ; Get alien index for the 21xx or 22xx pointer
+        lda     player_data_msb         ; Get MSB of data area (21xx or 22xx)
+        tfr     d,x
+        tst     ,x                      ; Get alien status flag. Is the alien alive?
+        puls    x
+        beq     sub_0136                ; No alien ... skip drawing alien sprite (but flag done)
+        leax    2,x                     ; HL=2004 Point to alien's row
+        lda     ,x                      ; Get alien type
+        leax    1,x                     ; HL=2005 Bump descriptor
+        ldb     ,x                      ; Get animation number
+        anda    #0xfe                   ; Translate row to type offset as follows: ...
+        lsla                            ; ... 0,1 -> 32 (type 1) ...
+        lsla                            ; ... 2,3 -> 16 (type 2) ...
+        lsla                            ; ...   4 -> 32 (type 3) on top row
+        ldy     #alien_spr_a            ; Position 0 alien sprites
+        leay    a,y                     ; Offset to sprite type
+        tstb                            ; Animation frame number. Is it position 0?
+        beq     1$
+        bsr     sub_013B                ; No ... add 30 and use position 1 alien sprites
+1$:     ldx     alien_pos_msb           ; Pixel position
+        ldb     #16                     ; 16 rows in alien sprites
+        jsr     draw_sprite             ; Draw shifted sprite
+; $0136        
+sub_0136:
+        clr     wait_on_draw            ; Let the ISR routine advance the cursor to the next alien
+        rts
+; $013B
+sub_013B:
+        leay    0x30,y                  ; Offset sprite pointer to animation frame 1 sprites
+        rts        
+        
 ; $017A
 get_alien_coords:
 ; Convert alien index in L to screen bit position in C,L.
@@ -2162,6 +2202,39 @@ loc_1652:
 ; $166B
 loc_166B:
         SCF
+        rts
+
+; $1740
+; This called from the ISR times down the fleet and sets the flag at 2095 if 
+; the fleet needs a change in sound handling (new delay, new sound)
+time_fleet_sound:
+        ldx     #fleet_snd_hold         ; Pointer to hold time for fleet
+        dec     ,x                      ; Decrement hold time
+        bne     1$
+        bsr     sub_176D                ; If 0 turn fleet movement sound off
+1$:     tst     player_ok               ; Is player OK? 1  means OK
+        beq     sub_176D                ; Player not OK ... fleet movement sound off and out
+        ldx     #fleet_snd_cnt          ; Current time on fleet sound
+        dec     ,x                      ; Count down
+        bne     9$                      ; Not time to change sound ... out
+        ldx     #sound_port_5           ; Current sound port 3?? value
+        lda     ,x                      ; Get value
+;       out     (sound2),a              ; Set sounds
+        tst     num_aliens              ; Number of aliens on active screen
+        beq     sub_176D                ; Is it zero? Yes ... turn off fleet movement sound and out
+        lda     -1,x                    ; Get fleet delay value
+        sta     -2,x                    ; Reload the timer
+        lda     #1
+        sta     -3,x                    ; (2095) time to change sound
+        lda     #4                      ; Set hold ...
+        sta     fleet_snd_hold          ; ... time for fleet sound
+9$:     rts
+        
+; $176D
+sub_176D:
+        lda     sound_port_5            ; Current sound port 3?? value
+        anda    #0x30                   ; Mask off fleet movement sounds
+;       out     (sound2),a              ; Set sounds
         rts
 
 ; $17C0
