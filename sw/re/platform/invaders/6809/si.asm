@@ -270,8 +270,8 @@ byte_0_2100:
                                 .ds   9     ; Unused 9 bytes
 ; $21FB                                
 p1_ref_alien_dx:                .ds   1     ; Player 1 reference-alien delta X
-p1_ref_alien_y:                 .ds   1     ; Player 1 reference-alien Y coordinate
-p1_ref_alien_x:                 .ds   1     ; Player 1 reference-alien X coordiante
+p1_ref_alien_x:                 .ds   1     ; Player 1 reference-alien X coordiante (swapped for 6809)
+p1_ref_alien_y:                 .ds   1     ; Player 1 reference-alien Y coordinate (swapped for 6809)
 p1_rack_cnt:                    .ds   1     ; Player 1 rack-count (starts at 0 but get incremented to 1-8)
 p1_ships_rem:                   .ds   1     ; Ships remaining after current dies
 
@@ -284,8 +284,8 @@ byte_0_2200:
                                 .ds   9
 ; $22FB                                
 p2_ref_alien_dx:                .ds   1
-p2_ref_alien_yr:                .ds   1
-p2_ref_alien_xr:                .ds   1
+p2_ref_alien_xr:                .ds   1     ; (swapped for 6809)
+p2_ref_alien_yr:                .ds   1     ; (swapped for 6809)
 p2_rack_cnt:                    .ds   1
 p2_ships_rem:                   .ds   1
 
@@ -655,7 +655,7 @@ scan_line_96:
         asra                            ; If we are in demo-mode then we'll process the tasks anyway
         bcc     9$                      ; Not in demo mode ... done
 1$:     ldx     #obj0_timer_msb         ; Game object table (skip player-object at 2010)
-        jsr     run_game_objs           ; Process all game objects (except player object)
+        ;jsr     run_game_objs           ; Process all game objects (except player object)
         jsr     cursor_next_alien       ; Advance cursor to next alien (move the alien if it is last one)
 9$:     EI
         rti
@@ -722,7 +722,7 @@ loc_0072:
         lda     obj2_timer_extra        ; Use rolling shot's timer to sync ...
         sta     shot_sync               ; ... other two shots
         bsr     draw_alien              ; Draw the current alien (or exploding alien)
-        ;bsr     run_game_objs           ; Process game objects (including player object)
+        ;jsr     run_game_objs           ; Process game objects (including player object)
         ;bsr     time_to_saucer          ; Count down time to saucer
 
 loc_0086:
@@ -808,34 +808,35 @@ sub_013B:
 ; When the cursor is moved here then the flag at 2000 is set to 1. This routine will not change 
 ; the cursor until the alien-draw routine at 100 clears the flag. Thus no alien is skipped.
 cursor_next_alien:
-        tst     player_ok
-        beq     9$
-        tst     wait_on_draw
-        bne     9$
-        lda     player_data_msb
+        tst     player_ok               ; Is the player blowing up?
+        beq     9$                      ; Yes ... ignore the aliens
+        tst     wait_on_draw            ; Still waiting on this alien to be drawn?
+        bne     9$                      ; Yes ... leave cursor in place
+        lda     player_data_msb         ; Load alien-data ...
+        sta     *z80_h                  ; ... MSB (either 21xx or 22xx)
+        lda     alien_cur_index         ; Load the xx part of the alien flag pointer
         ldb     #2
-        stb     *z80_d
-        ldb     alien_cur_index
-1$:     incb                            ; *** FIXME!!!
-        cmpb    #55
+        stb     *z80_d                  ; When all are gone this triggers 1A1 to return from this stack frame
+1$:     inca                            ; Have we drawn all aliens ...
+        cmpb    #55                     ; ... at last position?
         bne     2$
-        bsr     move_ref_alien
-2$:     tfr     d,x
-        ldb     ,x
-        decb
-        bne     1$     
-        sta     alien_cur_index
-        bsr     get_alien_coords
-        lda     *z80_c
+        bsr     move_ref_alien          ; Yes ... move the bottom/right alien and reset index to 0
+2$:     sta     *z80_l                  ; HL now points to alien flag
+        ldx     *z80_h
+        ldb     ,x                      ; Is alien ...
+        decb                            ; ... alive?
+        bne     1$                      ; No ... skip to next alien
+        sta     alien_cur_index         ; New alien index
+        bsr     get_alien_coords        ; Calculate bit position and type for index
+        lda     *z80_c                  ; The calculation returns the MSB in C
         ldb     *z80_l
-        tfr     d,x
-        stx     alien_pos_msb
-        cmpb    #0x28
-        lbcs    loc_1971
-        lda     *z80_d
-        sta     alien_row
-        lda     #1
-        sta     wait_on_draw
+        std     alien_pos_msb           ; Store new bit position
+        cmpb    #0x28                   ; Has this alien reached the end of screen?
+        lbcs    loc_1971                ; Yes ... kill the player
+        lda     *z80_d                  ; This alien's ...
+        sta     alien_row               ; ... row index
+        lda     #1                      ; Set the wait-flag for the ...
+        sta     wait_on_draw            ; ... draw-alien routine to clear
 9$:     rts
 
 ; $017A
@@ -845,11 +846,11 @@ get_alien_coords:
         clr     *z80_d                  ; Row 0
         tfr     x,d
         tfr     b,a
-        ldx     #ref_alien_yr
-        ldb     ,x+                     ; Get alien X ...
-        stb     *z80_b                  ; ... to B
-        ldb     ,x                      ; Get alien y ...
+        ldx     #ref_alien_xr
+        ldb     ,x+                     ; Get alien Y ...
         stb     *z80_c                  ; ... to C
+        ldb     ,x                      ; Get alien X ...
+        stb     *z80_b                  ; ... to B
 1$:     cmpa    #11                     ; Can we take a full row off of index?
         bmi     2$                      ; No ... we have the row
         sbca    #11                     ; Subtract off 11 (one whole row)
@@ -1394,9 +1395,9 @@ loc_079B:
         sta     p2_rack_cnt             ; Player 2 is on first rack of aliens
         jsr     init_aliens             ; Initialize 55 aliens for player 1
         jsr     init_aliens_p2          ; Initialize 55 aliens for player 2
-        ldx     #vram+0x1478            ; Screen coordinates for lower-left alien
-        stx     p1_ref_alien_y          ; Initialize reference alien for player 1
-        stx     p2_ref_alien_yr         ; Initialize reference alien for player 2
+        ldx     #0x3878                 ; Screen coordinates for lower-left alien
+        stx     p1_ref_alien_x          ; Initialize reference alien for player 1
+        stx     p2_ref_alien_xr         ; Initialize reference alien for player 2
         jsr     copy_ram_mirror         ; Copy ROM mirror to RAM (2000 - 20C0)
         jsr     remove_ship             ; Initialize ship hold indicator
 ; $07F9
@@ -1476,7 +1477,7 @@ loc_0872:
 
 ; $0878
         ldb     ref_alien_dxr           ; Alien deltaY
-        ldy     ref_alien_yr            ; Alien coordinates
+        ldy     ref_alien_xr            ; Alien coordinates
         bra     get_al_ref_ptr          ; HL/X is 21FC or 22FC and out
 
 ; $0886     
@@ -1506,7 +1507,7 @@ prompt_player:
         rts                             ; Has the 2 second delay expired? Yes ... done
 3$:     anda    #4                      ; Every 4 ISRs ...
         bne     4$                      ; ... flash the player's score
-        ;bsr     sub_09CA                ; Get the score descriptor for the active player
+        bsr     sub_09CA                ; Get the score descriptor for the active player
         jsr     draw_score              ; Draw the score
         bra     2$                      ; Back to the top of the wait loop
 4$:     ldb     #32                     ; 32 rows (4 characters * 8 bytes each)
@@ -2318,80 +2319,80 @@ loc_166B:
 
 ; $166D
         clra
-        jsr     loc_1A8B
+        jsr     loc_1A8B                ; Print ZERO ships remain
 loc_1671:        
-        jsr     cur_ply_alive
-        sta     ,x
-        jsr     sub_09CA
-        leax    1,x
-        ldy     #hi_scor_m
-        lda     ,y
-        cmpa    ,x
+        jsr     cur_ply_alive           ; Get active-flag ptr for current player
+        sta     ,x                      ; Flag player is dead
+        jsr     sub_09CA                ; Get score descriptor for current player
+        leax    1,x                     ; Point to high two digits
+        ldy     #hi_scor_m              ; Current high score upper two digits
+        lda     ,y                      ; Is player score greater ...
+        cmpa    ,x                      ; ... than high score?
         pshs    cc
-        leay    -1,y
-        leax    -1,x
-        lda     ,y
+        leay    -1,y                    ; Point to LSB
+        leax    -1,x                    ; Point to LSB
+        lda     ,y                      ; Go ahead and fetch high score lower two digits
         puls    cc
-        beq     1$
-        bcc     3$
-        bra     2$
+        beq     1$                      ; Upper two are the same ... have to check lower two
+        bcc     3$                      ; Player score is lower than high ... nothing to do
+        bra     2$                      ; Player socre is higher ... go copy the new high score
 ; $168B
-1$:     cmpa    ,x
-        bcc     3$
-2$:     lda     ,x+
-        sta     ,y+       
-        lda     ,x
-        sta     ,y
-        jsr     print_hi_score
+1$:     cmpa    ,x                      ; Is lower digit higher? (upper was the same)
+        bcc     3$                      ; No ... high score is still greater than player's score
+2$:     lda     ,x+                     ; Copy the new ...
+        sta     ,y+                     ; ... high score lower two digits
+        lda     ,x                      ; Copy the new ...
+        sta     ,y                      ; ... high score upper two digits
+        jsr     print_hi_score          ; Draw the new high score
 ; $1698        
-3$:     tst     two_players
-        beq     5$
-        ldx     #vram+0x0403
-        ldy     #message_g_over
-        ldb     #20
-        jsr     print_message_del
-        leax    -512,x
-        ldb     #0x1b
-        lda     player_data_msb
-        asra
-        bcs     4$
-        ldb     #0x1c
-4$:     tfr     b,a
-        jsr     draw_char
-        jsr     one_sec_delay
-        jsr     sub_18E7
-        tst     ,x
-        beq     5$
-        ;jmp     loc_02ED
-; $16C9
-5$:     ldx     #vram+0x0918
-        ldy     #message_g_over
-        ldb     #10
-        jsr     print_message_del
-        jsr     two_sec_delay
-        jsr     clear_playfield
-        clr     game_mode
-;       out     (sound2),a
-        jsr     enable_game_tasks
-        jmp     loc_0B89        
+3$:     tst     two_players             ; Number of players. Is this a single player game?
+        beq     5$                      ; Yes ... short message
+        ldx     #vram+0x0403            ; Screen coordinates
+        ldy     #message_g_over         ; "GAME OVER PLAYER< >"
+        ldb     #20                     ; 20 characters
+        jsr     print_message_del       ; Print message
+        leax    -512,x                  ; Back up to player indicator
+        ldb     #0x1b                   ; "1"
+        lda     player_data_msb         ; Player number
+        asra                            ; Is this player 1?
+        bcs     4$                      ; Yes ... keep the digit
+        ldb     #0x1c                   ; Else ... set digit 2
+4$:     tfr     b,a                     ; To A
+        jsr     draw_char               ; Print player number
+        jsr     one_sec_delay           ; Short delay
+        jsr     sub_18E7                ; Get current player "alive" flag
+        tst     ,x                      ; Is player alive?
+        beq     5$                      ; No ... skip to "GAME OVER" sequence
+        ;jmp     loc_02ED                ; Switch players and game loop
+; $16C9 
+5$:     ldx     #vram+0x0918            ; Screen coordinates
+        ldy     #message_g_over         ; "GAME OVER PLAYER< >"
+        ldb     #10                     ; Just the "GAME OVER" part
+        jsr     print_message_del       ; Print message
+        jsr     two_sec_delay           ; Long delay
+        jsr     clear_playfield         ; Clear center window
+        clr     game_mode               ; Now in demo mode
+;       out     (sound2),a              ; All sound off
+        jsr     enable_game_tasks       ; Enable ISR game tasks
+        jmp     loc_0B89                ; Print credit information and do splash
 
 ; $16E6
 loc_16E6:
-        lds     #stack
-        EI
-        clr     player_alive
-1$:     jsr     player_shot_hit
-        ldb     #4
-        jsr     sound_bits_3_on
-        jsr     sub_0A59
-        bne     1$
-        jsr     disable_game_tasks
-        ldx     #vram+0x0301
-        jsr     loc_19FA
-        clra
-        jsr     loc_1A8B
-        ldb     #0xfb
-        jmp     loc_196B
+        lds     #stack                  ; Reset stack
+        EI                              ; Enable interrupts
+        clr     player_alive            ; Flag player is shot
+1$:     jsr     player_shot_hit         ; Player's shot collision detection
+        ldb     #4                      ; Player has been hit ...
+        jsr     sound_bits_3_on         ; ... sound
+        jsr     sub_0A59                ; Has flag been set?
+        bne     1$                      ; No ... wait for the flag
+        jsr     disable_game_tasks      ; Disable ISR game tasks
+        ldx     #vram+0x0301            ; Player's stash of ships
+        jsr     loc_19FA                ; Erase the stash of ships
+        clra                            ; Print ...
+        jsr     loc_1A8B                ; ... a zero (number of ships)
+        ldb     #0xfb                   ; Turn off ...
+        jmp     loc_196B                ; ... player shot sound
 
 ; $1740
 ; This called from the ISR times down the fleet and sets the flag at 2095 if 
@@ -2928,8 +2929,20 @@ message_score:
 ;-------------------------- RAM initialization -----------------------------
 ; Copied to RAM (2000) C0 bytes as initialization.
 ; See the description of RAM at the top of this file for the details on this data.
-byte_0_1B00:    .db 1,0,0,0x10,0,0,0,0
-                .db 2,0x78,0x38,0x78,0x38,0,0xF8,0
+byte_0_1B00:    .db 1                   ; wait_on_draw
+                .db 0                   ; (unused)
+                .db 0                   ; alien_is_exploding
+                .db 0x10                ; exp_alien_timer
+                .db 0                   ; alien_row
+                .db 0                   ; alien_frame
+                .db 0                   ; alien_cur_index
+                .db 0                   ; ref_alien_dyr
+                .db 2                   ; ref_alien_dxr
+                .dw 0x3878              ; ref_alien (xr,yr)
+                .dw 0x3878              ; alien_pos (msb,lsb)
+                .db 0                   ; rack_direction
+                .db 0xF8                ; rack_down_delta
+                .db 0                   ; (unused)
                 
                 .db 0,0x80,0,0x8E,2,0xFF,5,0xC
                 .db 0x60,0x1C,0x20,0x30,0x10,1,0,0
