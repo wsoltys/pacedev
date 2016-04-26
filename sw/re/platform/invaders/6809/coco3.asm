@@ -113,6 +113,10 @@ WRAM        .equ    0x7000
 stack       .equ    0x7fff
 code_base		.equ		0xC000
 
+; values for 63.5us tick
+; 60Hz/2 / 63.695us = ~130.8
+TMR_8ms     .equ    131
+
 ; equates to keyboard rows
 ; - phantom keys appear accordingly
 RJOY_BTN1   .equ    (1<<0)

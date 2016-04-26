@@ -412,9 +412,9 @@ setup_gime_for_game:
 				sta			INIT0     							
 				lda			#0x00										; slow timer, task 1
 				sta			INIT1     							
-				lda			#VBORD                  ; VBLANK IRQ
+				lda			#TMR|VBORD              ; Timer, VBLANK IRQs
 				sta			IRQENR    							
-				lda			#TMR                    ; TMR FIRQ enabled
+				lda			#0                      ; no FIRQ enabled
 				sta			FIRQENR   							
 				lda			#BP										  ; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
@@ -445,23 +445,21 @@ inipal:
 				
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 
-  ; configure timer
-  ; free-run, max range, used for RND atm
-        lda     #<4095
+  ; stop the timer
+        clra
         sta     TMRLSB
-        lda     #>4095
         sta     TMRMSB
 
   ; install FIRQ handler and enable CPU FIRQ
-        lda     #0x7E                   ; jmp
-        sta     0xFEF4
-				ldx     #main_fisr              ; address
-				stx     0xFEF5
-        andcc   #~(1<<6)                ; enable FIRQ in CPU
+;        lda     #0x7E                   ; jmp
+;        sta     0xFEF4
+;				ldx     #main_fisr              ; address
+;				stx     0xFEF5
+;        andcc   #~(1<<6)                ; enable FIRQ in CPU
   ; install IRQ handler and enable CPU IRQ
         lda     #0x7E                   ; jmp
         sta     0xFEF7
-        ldx     #scan_line_224
+        ldx     #cpu_isr
         stx     0xFEF8
 ;        andcc   #~(1<<4)                ; enable IRQ in CPU    
 
@@ -630,10 +628,46 @@ splash:
 
 attr:   .ds     1
 
+; Coco3 interrupt service routine
+cpu_isr:
+        DI                              ; interrupts disabled in the 8080 ISR
+        lda     IRQENR                  ; ACK GIME IRQ on the Coco3
+        bita    #TMR
+        bne     scan_line_96
+        bita    #VBORD
+        bne     scan_line_224
+        EI                              ; should never get here
+        rti
+
+; $0008
+scan_line_96:
+; stop the timer
+        clra
+        sta     TMRLSB
+        sta     TMRMSB
+; $008C
+        clr     vblank_status           ; Flag that tells objects on the upper half of screen to draw/move
+        tst     suspend_play            ; Are we moving game objects?
+        beq     9$                      ; No ... restore and return
+        tst     game_mode               ; Are we in game mode?
+        bne     1$                      ; Yes .... process game objects and out
+        lda     isr_splash_task         ; Splash-animation tasks
+        asra                            ; If we are in demo-mode then we'll process the tasks anyway
+        bcc     9$                      ; Not in demo mode ... done
+1$:     ldx     #obj0_timer_msb         ; Game object table (skip player-object at 2010)
+        jsr     run_game_objs           ; Process all game objects (except player object)
+        jsr     cursor_next_alien       ; Advance cursor to next alien (move the alien if it is last one)
+9$:     EI
+        rti
+
 ; $0010
 scan_line_224:
-        DI                              ; interrupts disabled in the 8080 ISR
-        tst     IRQENR                  ; ACK GIME IRQ on the Coco3
+
+; start the timer to simulate the scan line 96 interrupt
+        lda     #<TMR_8ms
+        sta     TMRLSB
+        lda     #>TMR_8ms
+        sta     TMRMSB                  ; and start the timer
 
         lda     #0x80                   ; Flag that tells objects ...
         sta     vblank_status           ; ... on the lower half of the screen to draw/move
@@ -745,9 +779,9 @@ draw_alien:
         leax    1,x                     ; HL=2005 Bump descriptor
         ldb     ,x                      ; Get animation number
         anda    #0xfe                   ; Translate row to type offset as follows: ...
-        lsla                            ; ... 0,1 -> 32 (type 1) ...
-        lsla                            ; ... 2,3 -> 16 (type 2) ...
-        lsla                            ; ...   4 -> 32 (type 3) on top row
+        asla                            ; ... 0,1 -> 32 (type 1) ...
+        asla                            ; ... 2,3 -> 16 (type 2) ...
+        asla                            ; ...   4 -> 32 (type 3) on top row
         ldy     #alien_spr_a            ; Position 0 alien sprites
         leay    a,y                     ; Offset to sprite type
         tstb                            ; Animation frame number. Is it position 0?
@@ -764,7 +798,46 @@ sub_0136:
 sub_013B:
         leay    0x30,y                  ; Offset sprite pointer to animation frame 1 sprites
         rts        
-        
+
+; $0141
+; This is called from the mid-screen ISR to set the cursor for the next alien to draw. 
+; When the cursor moves over all aliens then it is reset to the beginning and the reference 
+; alien is moved to its next position.
+;
+; The flag at 2000 keeps this in sync with the alien-draw routine called from the end-screen ISR. 
+; When the cursor is moved here then the flag at 2000 is set to 1. This routine will not change 
+; the cursor until the alien-draw routine at 100 clears the flag. Thus no alien is skipped.
+cursor_next_alien:
+        tst     player_ok
+        beq     9$
+        tst     wait_on_draw
+        bne     9$
+        lda     player_data_msb
+        ldb     #2
+        stb     *z80_d
+        ldb     alien_cur_index
+1$:     incb                            ; *** FIXME!!!
+        cmpb    #55
+        bne     2$
+        bsr     move_ref_alien
+2$:     tfr     d,x
+        ldb     ,x
+        decb
+        bne     1$     
+        sta     alien_cur_index
+        bsr     get_alien_coords
+        lda     *z80_c
+        ldb     *z80_l
+        tfr     d,x
+        stx     alien_pos_msb
+        cmpb    #0x28
+        lbcs    loc_1971
+        lda     *z80_d
+        sta     alien_row
+        lda     #1
+        sta     wait_on_draw
+9$:     rts
+
 ; $017A
 get_alien_coords:
 ; Convert alien index in L to screen bit position in C,L.
@@ -800,6 +873,29 @@ get_alien_coords:
         deca                            ; We adjusted for 1 column
         bra     3$                      ; Keep moving over column
 
+; $01A1
+; The "reference alien" is the bottom left. All other aliens are drawn relative to this
+; reference. This routine moves the reference alien (the delta is set elsewhere) and toggles
+; the animation frame number between 0 and 1.
+move_ref_alien:
+        dec     *z80_d                  ; This decrements with each call to move
+        beq     return_two              ; Return out of TWO call frames (only used if no aliens left)
+        ldx     #alien_cur_index        ; Set current alien ...
+        clr     ,x+                     ; ... index to 0. Point to DeltaX
+        lda     ,x
+        sta     *z80_c                  ; Load DX into C
+        clr     ,x                      ; Set DX to 0
+        bsr     add_delta               ; Move alien
+        ldx     #alien_frame            ; Alien animation frame number
+        lda     ,x                      ; Toggle ...
+        inca                            ; ... animation ...
+        anda    #1                      ; ... number between ...
+        sta     ,x                      ; ... 0 and 1
+        clra                            ; Alien index in A is now 0
+        lda     player_data_msb         ; Restore H ...
+        tfr     d,x                     ; ... to player data MSB (21 or 22)
+        rts
+
 ; $01C0
 init_aliens:
 ; Initialize the 55 aliens from last to 1st. 1 means alive.
@@ -811,6 +907,11 @@ loc_01C3:
         decb                            ; All done?
         bne     1$                      ; No ... keep looping
         rts        
+
+; $01CD
+return_two:
+        puls    x                       ; Drop return to caller
+        rts                             ; Return to caller's caller
 
 ; $01CF
 ; Draw a 1px line across the player's stash at the bottom of the screen.
@@ -1509,6 +1610,16 @@ sub_09C5:
         adda    #0x1A                   ; convert to digit char
         bra     draw_char
 
+; $09CA
+; Get score descriptor for active player
+sub_09CA:
+        lda     player_data_msb
+        asra
+        ldx     #p1_scor_l
+        bcs     9$
+        ldx     #p2_scor_l
+9$:     rts        
+
 ; $09D6
 ; Clear center window of screen
 clear_playfield:
@@ -1706,6 +1817,7 @@ loc_0B4A:
 .endif
 
 ; Credit information
+loc_0B89:
         clr     isr_splash_task         ; Turn off splash animation
         jsr     one_sec_delay
         jsr     sub_1988                ; Jump straight to clear-play-field
@@ -2170,7 +2282,7 @@ plr_fire_or_demo:
         bne     loc_1652                ; No ... in demo mode ... constant firing in demo
         tst     fire_bounce             ; Is fire button being held down?
         bne     loc_1648                ; Yes ... wait for bounce
-        bsr     read_inputs             ; Read active player controls
+        jsr     read_inputs             ; Read active player controls
         anda    #0x10                   ; Fire-button pressed?
         beq     9$                      ; No ... out
         lda     #1                      ; Flag
@@ -2179,7 +2291,7 @@ plr_fire_or_demo:
 9$:     rts        
 
 loc_1648:
-        bsr     read_inputs             ; Read active player controls
+        jsr     read_inputs             ; Read active player controls
         anda    #0x10                   ; Fire-button pressed?
         bne     9$                      ; Yes ... ignore
         sta     fire_bounce             ; Else ... clear flag
@@ -2203,6 +2315,83 @@ loc_1652:
 loc_166B:
         SCF
         rts
+
+; $166D
+        clra
+        jsr     loc_1A8B
+loc_1671:        
+        jsr     cur_ply_alive
+        sta     ,x
+        jsr     sub_09CA
+        leax    1,x
+        ldy     #hi_scor_m
+        lda     ,y
+        cmpa    ,x
+        pshs    cc
+        leay    -1,y
+        leax    -1,x
+        lda     ,y
+        puls    cc
+        beq     1$
+        bcc     3$
+        bra     2$
+; $168B
+1$:     cmpa    ,x
+        bcc     3$
+2$:     lda     ,x+
+        sta     ,y+       
+        lda     ,x
+        sta     ,y
+        jsr     print_hi_score
+; $1698        
+3$:     tst     two_players
+        beq     5$
+        ldx     #vram+0x0403
+        ldy     #message_g_over
+        ldb     #20
+        jsr     print_message_del
+        leax    -512,x
+        ldb     #0x1b
+        lda     player_data_msb
+        asra
+        bcs     4$
+        ldb     #0x1c
+4$:     tfr     b,a
+        jsr     draw_char
+        jsr     one_sec_delay
+        jsr     sub_18E7
+        tst     ,x
+        beq     5$
+        ;jmp     loc_02ED
+; $16C9
+5$:     ldx     #vram+0x0918
+        ldy     #message_g_over
+        ldb     #10
+        jsr     print_message_del
+        jsr     two_sec_delay
+        jsr     clear_playfield
+        clr     game_mode
+;       out     (sound2),a
+        jsr     enable_game_tasks
+        jmp     loc_0B89        
+
+; $16E6
+loc_16E6:
+        lds     #stack
+        EI
+        clr     player_alive
+1$:     jsr     player_shot_hit
+        ldb     #4
+        jsr     sound_bits_3_on
+        jsr     sub_0A59
+        bne     1$
+        jsr     disable_game_tasks
+        ldx     #vram+0x0301
+        jsr     loc_19FA
+        clra
+        jsr     loc_1A8B
+        ldb     #0xfb
+        jmp     loc_196B
 
 ; $1740
 ; This called from the ISR times down the fleet and sets the flag at 2095 if 
@@ -2411,12 +2600,17 @@ init_aliens_p2:
 plyr_shot_and_bump:
         jsr     player_shot_hit         ; Player's shot collision detection
         jmp     rack_bump               ; Change alien deltaX and deltaY when rack bumps edges
-                                
-; $1982
-sub_1982:
-        sta     isr_splash_task
-        rts
 
+; $1910
+; Get the current player's alive status
+cur_ply_alive:
+        ldx     #player1_alive          ; Alive flags
+        lda     player_data_msb         ; Player 1 or 2
+        asra                            ; Will be 1 if player 1
+        bcs     9$                      ; Return if player 1
+        leax    1,x                     ; Bump to player 2
+9$:     rts        
+                                
 ; $191A
 ; Print score header " SCORE<1> HI-SCORE SCORE<2> "
 draw_score_head:
@@ -2474,11 +2668,27 @@ draw_status:
         bsr     sub_193C                ; Print credit table
         bra     draw_num_credits        ; Number of credits
 
+; $196B
+loc_196B:
+        bsr     sound_bits_3_off        ; From 170B with B=FB. Turn off player shot sound
+        jmp     loc_1671                ; Update high-score if player's score is greater
+        
+; $1971
+loc_1971:
+        lda     #1
+        sta     invaded
+        jmp     loc_16E6
+        
 ; $1979
 loc_1979:
         bsr     disable_game_tasks      ; Disable ISR game tasks
         bsr     draw_num_credits        ; Display number of credits on screen
         bra     sub_193C                ; Print message "CREDIT"
+
+; $1982
+sub_1982:
+        sta     isr_splash_task
+        rts
         
 ; $199A
 ; There is a hidden message "TAITO COP" (with no "R") in the game. It can only be 
@@ -2548,7 +2758,7 @@ draw_num_ships:
 ; Show ships remaining in hold for the player
         ldx     #vram+0x0301
         tsta
-        beq     2$
+        beq     loc_19FA
 ; Draw line of ships
 1$:     ldy     #player_sprite
         ldb     #16
@@ -2558,11 +2768,12 @@ draw_num_ships:
         deca
         bne     1$
 ; Clear remainder of line        
-2$:     ldb     #16
+loc_19FA:
+        ldb     #16
         jsr     clear_small_sprite
         tfr     x,d
         cmpa    #>vram+0x11
-        bne     2$
+        bne     loc_19FA
         rts
 
 ; $1A06
@@ -2654,6 +2865,23 @@ restore_shields:
         bne     1$
         rts
 
+; $1A7F
+remove_ship:
+; Remove a ship from the players stash and update the
+; hold indicators on the screen.
+        jsr     sub_092E                ; Get last byte from player data
+        bne     1$
+        rts
+1$:     pshs    a                       ; Preserve number remaining
+        deca                            ; Remove a ship from the stash
+        sta     ,x                      ; New number of ships
+        jsr     draw_num_ships
+        puls    a                       ; Restore number
+loc_1A8B:        
+        ldx     #vram+0x0101
+        anda    #0x0f                   ; Make sure it is a digit
+        jmp     sub_09C5                ; Print number remaining
+
 ; $1A95
 byte_0_1A95:
         .db 0                           ; Image form (increments each draw)
@@ -2686,22 +2914,6 @@ message_1_only:
         .db 0xE,0xD,0xB,0x18,0x26,0x1B,0xF,0xB
         .db 0,0x18,4,0x11,0x26,0x26,1,0x14
         .db 0x13,0x13,0xE,0xD,0x26
-
-; $1A7F
-remove_ship:
-; Remove a ship from the players stash and update the
-; hold indicators on the screen.
-        jsr     sub_092E                ; Get last byte from player data
-        bne     1$
-        rts
-1$:     pshs    a                       ; Preserve number remaining
-        deca                            ; Remove a ship from the stash
-        sta     ,x                      ; New number of ships
-        jsr     draw_num_ships
-        puls    a                       ; Restore number
-        ldx     #vram+0x0101
-        anda    #0x0f                   ; Make sure it is a digit
-        jmp     sub_09C5                ; Print number remaining
 
 ; $1AE4
 message_score:
@@ -3159,13 +3371,13 @@ message_push:
 ; $1FF8
         .db 0x00, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00, 0x00  ; "-"
 
+.if 0
 main_fisr:
 ; temp hack - should do LFSR or something
 ; and also tune frequency
         tst     FIRQENR                 ; ACK FIRQ
         inc     *z80_r
         rti
+.endif
 
-vram_dump:
-        
 				.end		start_coco
