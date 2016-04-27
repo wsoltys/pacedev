@@ -818,7 +818,7 @@ cursor_next_alien:
         ldb     #2
         stb     *z80_d                  ; When all are gone this triggers 1A1 to return from this stack frame
 1$:     inca                            ; Have we drawn all aliens ...
-        cmpb    #55                     ; ... at last position?
+        cmpa    #55                     ; ... at last position?
         bne     2$
         bsr     move_ref_alien          ; Yes ... move the bottom/right alien and reset index to 0
 2$:     sta     *z80_l                  ; HL now points to alien flag
@@ -893,7 +893,7 @@ move_ref_alien:
         anda    #1                      ; ... number between ...
         sta     ,x                      ; ... 0 and 1
         clra                            ; Alien index in A is now 0
-        lda     player_data_msb         ; Restore H ...
+        lda     player_data_msb         ; Restore H ... (L doesn't matter)
         tfr     d,x                     ; ... to player data MSB (21 or 22)
         rts
 
@@ -2206,6 +2206,7 @@ rack_bump:
 ; $15C5
 sub_15C5:
         ldb     #23                     ; Checking 23 bytes in a line up the screen from near the bottom
+        clra                            ; 6809 - clear the carry flag!
 1$:     tst     ,x                      ; Is screen memory empty?
         lbne    loc_166B                ; No ... set carry flag and out
         leax    1,x                     ; Next byte on screen
