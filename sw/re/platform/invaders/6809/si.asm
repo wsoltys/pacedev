@@ -1401,7 +1401,7 @@ loc_079B:
         jsr     copy_ram_mirror         ; Copy ROM mirror to RAM (2000 - 20C0)
         jsr     remove_ship             ; Initialize ship hold indicator
 ; $07F9
-        bsr     prompt_player           ; Prompt with "PLAY PLAYER "
+        jsr     prompt_player           ; Prompt with "PLAY PLAYER "
         jsr     clear_playfield         ; Clear the playfield
         clra
         sta     isr_splash_task         ; Disable isr splash-task animation
@@ -1423,10 +1423,10 @@ loc_0814:
 1$:     jsr     plr_fire_or_demo        ; Initiate player shot if button pressed
         jsr     plyr_shot_and_bump      ; Collision detect player's shot and rack-bump
         jsr     count_aliens            ; Count aliens (count to 2082)
-        jsr     adjust_score            ; Adjust score (and print) if there is an adjustment
+        jsr     adjust_score_fn         ; Adjust score (and print) if there is an adjustment
         tst     num_aliens              ; Number of live aliens. All aliens gone?
         ;beq     loc_09EF                ; Yes ... end of turn
-        jsr     a_shot_reload_rate      ; Update alien-shot-rate based on player's score
+        jsr     a_shot_reload_rate_fn   ; Update alien-shot-rate based on player's score
         ;bsr     sub_0935                ; Check (and handle) extra ship award
         ;bsr     speed_shots             ; Adjust alien shot speed
         ;bsr     shot_sound              ; Shot sound on or off with 2025
@@ -1507,7 +1507,7 @@ prompt_player:
         rts                             ; Has the 2 second delay expired? Yes ... done
 3$:     anda    #4                      ; Every 4 ISRs ...
         bne     4$                      ; ... flash the player's score
-        bsr     sub_09CA                ; Get the score descriptor for the active player
+        jsr     sub_09CA                ; Get the score descriptor for the active player
         jsr     draw_score              ; Draw the score
         bra     2$                      ; Back to the top of the wait loop
 4$:     ldb     #32                     ; 32 rows (4 characters * 8 bytes each)
@@ -1584,6 +1584,31 @@ alien_score_value:
         leax    1,x                     ; Top row return HL points to value 30
 9$:     rts        
 
+; $0988
+; Adjust the score for the active player. 20F1 is 1 if there is a new value to add.
+; The adjustment is in 20F2,20F3. Then print the score.
+adjust_score_fn:
+        bsr     sub_09CA
+        tst     adjust_score
+        bne     1$
+        rts
+1$:     clr     adjust_score
+        ldy     score_delta_msb
+        sty     *z80_d
+        lda     ,x
+        adda    *z80_e
+        daa
+        sta     ,x+
+        sta     *z80_e
+        lda     ,x
+        adca    *z80_d
+        daa
+        sta     ,x+
+        sta     *z80_d
+        ldx     ,x
+        ldy     *z80_d
+        bra     print_4_digits
+
 ; $09AD
 ; Print 4 digits in Y @X
 print_4_digits:
@@ -1653,7 +1678,7 @@ score_for_alien:
         jsr     sound_bits_3_on
         ldb     *z80_c
         tfr     b,a
-        bsr     alien_score_value
+        jsr     alien_score_value
         lda     ,x
         clr     score_delta_msb
         sta     score_delta_lsb
@@ -2395,6 +2420,28 @@ loc_16E6:
         ldb     #0xfb                   ; Turn off ...
         jmp     loc_196B                ; ... player shot sound
 
+; $170E
+; Use the player's MSB to determine how fast the aliens reload their
+; shots for another fire.
+a_shot_reload_rate_fn:
+        jsr     sub_09CA
+        leax    1,x
+        lda     ,x
+        ldy     #a_reload_score_tab
+        ldx     #shot_reload_rate
+        ldb     #4
+        sta     *z80_b
+1$:     lda     ,y
+        cmpa    *z80_b
+        bcc     2$
+        leax    1,x
+        leay    1,y
+        decb
+        bne     1$
+2$:     lda     ,x
+        sta     a_shot_reload_rate
+        rts        
+
 ; $1740
 ; This called from the ISR times down the fleet and sets the flag at 2095 if 
 ; the fleet needs a change in sound handling (new delay, new sound)
@@ -2897,6 +2944,17 @@ byte_0_1A95:
         .db 0                           ; Reached Y flag
         .dw alien_spr_a+0x20            ; Base image (small alien)
 
+; $1AA1
+; The tables at 1CB8 and 1AA1 control how fast shots are created. The speed is based
+; on the upper byte of the player's score. For a score of less than or equal 0200 then 
+; the fire speed is 30. For a score less than or equal 1000 the shot speed is 10. Less 
+; than or equal 2000 the speed is 0B. Less than or equal 3000 is 08. And anything 
+; above 3000 is 07.
+;
+; 1CB8: 02 10 20 30
+shot_reload_rate:
+        .db 48, 16, 11, 8, 7
+
 ; $1AA6
 message_g_over:
 ; "GAME OVER PLAYER< >"
@@ -3126,6 +3184,18 @@ message_adv:
         .db 0x12, 2, 0xE, 0x11, 4, 0x26, 0, 3, 0x15, 0, 0xD, 2
         .db 4, 0x26, 0x13, 0, 1, 0xB, 4
         .db 0x28 ; (
+
+a_reload_score_tab:    
+; The tables at 1CB8 and 1AA1 control how fast shots are created. The speed is based
+; on the upper byte of the player's score. For a score of less than or equal 0200 then 
+; the fire speed is 30. For a score less than or equal 1000 the shot speed is 10. Less 
+; than or equal 2000 the speed is 0B. Less than or equal 3000 is 08. And anything 
+; above 3000 is 07.
+;
+; 1AA1: 30 10 0B 08                           
+; 1AA5: 07           ; Fastest shot firing speed
+;
+        .db 2, 0x10, 0x20, 0x30
 
 ; $1CD0
 squiggly_shot:
