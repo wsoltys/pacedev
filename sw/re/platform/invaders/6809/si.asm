@@ -1178,61 +1178,61 @@ loc_03B0:
 ; This task executes at either mid-screen ISR (if it is on the top half of the non-rotated screen) or
 ; at the end-screen ISR (if it is on the bottom half of the screen).
 game_obj_1:
-        ldy     #obj1_coor_xr
-        jsr     comp_y_to_beam
-        puls    x
-        bcs     1$
+        ldy     #obj1_coor_xr           ; Object's Yn coordiante
+        jsr     comp_y_to_beam          ; Compare to screen-update location
+        puls    x                       ; Pointer to task data
+        bcs     1$                      ; Make sure we are in the right ISR
 0$:     rts
-1$:     leax    1,x
-        lda     ,x
-        beq     0$
-        cmpa    #1
-        beq     init_ply_shot
-        cmpa    #2
-        beq     move_ply_shot
-        leax    1,x
-        cmpa    #3
-        bne     loc_042A
+1$:     leax    1,x                     ; Point to 2025 ... the shot status
+        lda     ,x                      ; Get shot status
+        beq     0$                      ; Return if no shot is active
+        cmpa    #1                      ; Shot just starting (requested elsewhere)?
+        beq     init_ply_shot           ; Yes ... go initiate shot
+        cmpa    #2                      ; Progressing normally?
+        beq     move_ply_shot           ; Yes ... go move it
+        leax    1,x                     ; 2026
+        cmpa    #3                      ; Shot blowing up (not because of alien)?
+        bne     loc_042A                ; No ... try other options
 
 ; $03FA
 init_ply_shot:
-        inca
-        sta     ,x
-        lda     player_xr
-        adda    #8
-        sta     obj1_coor_xr
-        bsr     read_ply_shot
-        jmp     draw_shifted_sprite
+        inca                            ; Type is now ...
+        sta     ,x                      ; ... 2 (in progress)
+        lda     player_xr               ; Players Y coordinate
+        adda    #8                      ; To center of player
+        sta     obj1_coor_xr            ; Shot's Y coordinate
+        bsr     read_ply_shot           ; Read 5 byte structure
+        jmp     draw_shifted_sprite     ; Draw sprite and out
 
 ; $040A
 move_ply_shot:
-        bsr     read_ply_shot
-        pshs    b
-        pshs    x,y
-        jsr     erase_shifted
-        puls    x,y
-        ldb     shot_delta_x
-        abx
-        stb     obj1_coor_yr
+        bsr     read_ply_shot           ; Read the shot structure
+        pshs    b                       ; Hold sprite size (in B)
+        pshs    x,y                     ; Hold sprite coordinates, pointer to sprite image
+        jsr     erase_shifted           ; Erase the sprite from the screen
+        puls    d,y                     ; Restore coords, pointer to sprite image
+        addb    shot_delta_x            ; DeltaX for shot
+        tfr     d,x
+        stb     obj1_coor_yr            ; Store shot's new X coordinate
         puls    b
-        jsr     draw_spr_collision
-        tst     collision
-        beq     9$
+        jsr     draw_spr_collision      ; Draw sprite with collision detection
+        tst     collision               ; Test for collision
+        beq     9$                      ; No collision ... out
 ; Collision with alien detected
-1$:     sta     alien_is_exploding
+1$:     sta     alien_is_exploding      ; Set to not-0 indicating an alien is blowing up
 9$:     rts
         
 ; $042A
 ; Other shot-status options
 loc_042A:
-        cmpa    #5
-        bne     end_of_blowup
+        cmpa    #5                      ; Alien explosion in progress?
+        bne     end_of_blowup           ; No, erase the shot and remove it from duty
         rts        
 
 ; $0430
 read_ply_shot:
-        ldx     #obj1_image_msb
-        jmp     read_desc
+        ldx     #obj1_image_msb         ; Read 5 byte sprite structure for ...
+        jmp     read_desc               ; ... player shot
 
 ; $0436
 end_of_blowup:
@@ -2514,7 +2514,7 @@ plr_fire_or_demo:
         tst     plyr_shot_status        ; Does the player have a shot on the screen?
         bne     9$                      ; Yes ... ignore
         tst     game_mode               ; Are we in game mode?
-        bne     loc_1652                ; No ... in demo mode ... constant firing in demo
+        beq     loc_1652                ; No ... in demo mode ... constant firing in demo
         tst     fire_bounce             ; Is fire button being held down?
         bne     loc_1648                ; Yes ... wait for bounce
         jsr     read_inputs             ; Read active player controls
@@ -2718,7 +2718,7 @@ read_inputs:
         bita    #(1<<3)                 ; RIGHT?
         bne     2$                      ; no, skip
         orb     #INP_RIGHT
-2$:     lda     #~(1<<6)                ; Column 7 (SPACE)
+2$:     lda     #~(1<<7)                ; Column 7 (SPACE)
         sta     2,u
         lda     ,u                      ; Read keyboard row
         bita    #(1<<3)                 ; SPACE?
