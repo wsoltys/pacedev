@@ -1178,10 +1178,67 @@ loc_03B0:
 ; This task executes at either mid-screen ISR (if it is on the top half of the non-rotated screen) or
 ; at the end-screen ISR (if it is on the bottom half of the screen).
 game_obj_1:
-; *** FIXME
+        ldy     #obj1_coor_xr
+        jsr     comp_y_to_beam
         puls    x
-        rts
+        bcs     1$
+0$:     rts
+1$:     leax    1,x
+        lda     ,x
+        beq     0$
+        cmpa    #1
+        beq     init_ply_shot
+        cmpa    #2
+        beq     move_ply_shot
+        leax    1,x
+        cmpa    #3
+        bne     loc_042A
 
+; $03FA
+init_ply_shot:
+        inca
+        sta     ,x
+        lda     player_xr
+        adda    #8
+        sta     obj1_coor_xr
+        bsr     read_ply_shot
+        jmp     draw_shifted_sprite
+
+; $040A
+move_ply_shot:
+        bsr     read_ply_shot
+        pshs    b
+        pshs    x,y
+        jsr     erase_shifted
+        puls    x,y
+        ldb     shot_delta_x
+        abx
+        stb     obj1_coor_yr
+        puls    b
+        jsr     draw_spr_collision
+        tst     collision
+        beq     9$
+; Collision with alien detected
+1$:     sta     alien_is_exploding
+9$:     rts
+        
+; $042A
+; Other shot-status options
+loc_042A:
+        cmpa    #5
+        bne     end_of_blowup
+        rts        
+
+; $0430
+read_ply_shot:
+        ldx     #obj1_image_msb
+        jmp     read_desc
+
+; $0436
+end_of_blowup:
+; *** FIXME
+        rts
+        
 ; $0476
 game_obj_2:
 ; *** FIXME
@@ -2015,6 +2072,35 @@ message_corp:
 ;       "TAITO COP"
         .db 0x13, 0, 8, 0x13, 0xE, 0x26, 2, 0xE, 0xF    
 
+; $1400
+; The only differences between this and EraseShiftedSprite is two CPL instructions in the latter and
+; the use of AND instead of OR. NOP takes the same amount of time/space as CPL. So the two NOPs
+; here make these two parallel routines the same size and speed.
+draw_shifted_sprite:
+        nop
+        bsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
+        nop
+1$:     pshs    x   
+        lda     ,y+                     ; Get picture value. Next in image
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        ldu     *shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
+        ora     ,x                      ; OR them onto the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+;       xor     a                       ; Shift register over ...
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
+        ora     ,x                      ; OR them onto the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+        puls    x
+        leax    32,x                    ; Add 32 to next row
+        decb                            ; All rows done?
+        bne     1$                      ; No ... erase all
+        rts                
+
 ; $1424
 ; Clear a sprite from the screen (standard pixel number descriptor).
 ; ** We clear 2 bytes even though the draw-simple only draws one.
@@ -2632,7 +2718,13 @@ read_inputs:
         bita    #(1<<3)                 ; RIGHT?
         bne     2$                      ; no, skip
         orb     #INP_RIGHT
-2$:     tfr     b,a
+2$:     lda     #~(1<<6)                ; Column 7 (SPACE)
+        sta     2,u
+        lda     ,u                      ; Read keyboard row
+        bita    #(1<<3)                 ; SPACE?
+        bne     3$                      ; no, skip
+        orb     #INP_FIRE
+3$:     tfr     b,a
         rts
 5$:
 ; read player 2 inputs                
