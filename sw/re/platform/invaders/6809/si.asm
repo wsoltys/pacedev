@@ -1193,7 +1193,28 @@ game_obj_1:
         leax    1,x                     ; 2026
         cmpa    #3                      ; Shot blowing up (not because of alien)?
         bne     loc_042A                ; No ... try other options
-
+; Shot blowing up because it left the playfield, hit a shield, or hit another bullet
+        dec     ,x                      ; Decrement the timer
+        beq     end_of_blowup           ; If done then
+        lda     ,x                      ; Get timer value
+        cmpa    #0x0f                   ; Starts at 10 ... first decrement brings us here
+        bne     0$                      ; Not the first time ... explosion has been drawn
+; Draw explosion first pass through timer loop
+        pshs    x                       ; Hold pointer to data
+        bsr     read_ply_shot           ; Read shot descriptor
+        jsr     erase_shifted           ; Erase the sprite
+        puls    x                       ; 2026 (timer flag)
+        inc     2,x                     ; point to sprite LSB. Change 1C90 to 1C91
+        dec     4,x                     ; Drop X coordinate ...
+        dec     4,x                     ; ... by 2
+        dec     3,x                     ; Drop Y ...
+        dec     3,x                     ; ... coordinate ...
+        dec     3,x                     ; ... by 3
+        lda     #8
+        sta     5,x                     ; 202B 8 bytes in size of sprite
+        bsr     read_ply_shot           ; Read player shot structure
+        jmp     draw_shifted_sprite     ; Draw sprite and out
+        
 ; $03FA
 init_ply_shot:
         inca                            ; Type is now ...
@@ -1236,7 +1257,14 @@ read_ply_shot:
 
 ; $0436
 end_of_blowup:
-; *** FIXME
+        bsr     read_ply_shot
+        jsr     erase_shifted
+        ldx     #plyr_shot_status
+        ldy     #byte_0_1B00+0x25
+        ldb     #7
+        jsr     block_copy
+        ldx     sau_score_msb
+; *** FIXME        
         rts
         
 ; $0476
