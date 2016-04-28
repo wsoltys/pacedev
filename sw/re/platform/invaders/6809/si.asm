@@ -27,6 +27,10 @@
 ; *** end of derived
 
 ; *** INVADERS stuff here
+INP_RIGHT   .equ      (1<<6)
+INP_LEFT    .equ      (1<<5)
+INP_FIRE    .equ      (1<<4)
+
         .org    WRAM
 wram    .equ    .                       ; 1KB
 
@@ -1084,12 +1088,89 @@ loc_0288:
         bra     loc_0281                ; Next game task
 
 ; $028E
+; Game object 0: Move/draw the player
+;
 ; This task is only called at the mid-screen ISR. It ALWAYS does its work here, even though
 ; the player can be on the top or bottom of the screen (not rotated).
 game_obj_0:
+        puls    x                       ; Get player object structure 2014
+        leax    1,x                     ; Point to blow-up status
+        lda     ,x                      ; Get player blow-up status
+        cmpa    #0xff                   ; Player is blowing up?
+        beq     loc_033B                ; No ... go do normal movement
+; Handle blowing up player
 ; *** FIXME
-        puls    x
-        rts
+
+; $033B
+; Player not blowing up ... handle inputs
+loc_033B:
+        ldx     #player_ok              ; Player OK flag
+        lda     #1                      ; Flag 1 ... 
+        sta     ,x+                     ; ... player is OK. 2069
+        tst     ,x                      ; Alien shots enabled? Set flags
+        bra     loc_03B0                ; Continue
+; $0346
+loc_0346:
+        leax    -1,x                    ; 2069
+        lda     #1
+        sta     ,x                      ; Enable alien fire
+; $034A
+loc_034A:
+        lda     player_xr               ; Current player coordinates
+        sta     *z80_b                  ; Hold it
+        tst     game_mode               ; Are we in game mode?
+        bne     1$                      ; Yes ... use switches as player controls
+        lda     next_demo_cmd           ; Get demo command
+        rora                            ; Is it right?
+        bcs     move_player_right       ; Yes ... do right
+        rora                            ; Is it left?
+        bcs     move_player_left        ; Yes ... do left
+        bra     loc_036F                ; Skip over movement (draw player and out)
+; $0363
+; Player is in control
+; original code used ROLA/JP C to test bits
+1$:     jsr     read_inputs             ; Read active player controls
+        bita    #INP_RIGHT              ; Test for right button
+        bne     move_player_right       ; Yes ... handle move right
+        bita    #INP_LEFT               ; Test for left button
+        bne     move_player_left        ; Yes ... handle move left
+; $036F
+loc_036F:
+; Draw player sprite
+        ldx     #plyr_spr_pic_m         ; Active player descriptor
+        jsr     read_desc               ; Load 5 byte sprite descriptor in order: EDLHB
+        jsr     conv_to_scr             ; Convert HL to screen coordinates
+        jsr     draw_simp_sprite        ; Draw player
+        clr     obj0_timer_extra        ; Clear the task timer. Nobody changes this but it could have ...
+        rts                             ; ... been speed set for the player with a value other than 0 (not XORA)
+
+; $0381
+; Handle player moving right
+move_player_right:
+        lda     *z80_b                  ; Player coordinate
+        cmpa    #0xd9                   ; At right edge?
+        beq     loc_036F                ; Yes ... ignore this
+        inca                            ; Bump X coordinate
+        sta     player_xr               ; New X coordinate
+        bra     loc_036F                ; Draw player and out
+
+; $038E
+; Handle player moving left
+move_player_left:
+        lda     *z80_b                  ; Player coordinate
+        cmpa    #0x30                   ; At left edge
+        beq     loc_036F                ; Yes ... ignore this
+        deca                            ; Bump X coordinate
+        sta     player_xr               ; New X coordinate
+        bra     loc_036F                ; Draw player and out
+
+; $03B0
+loc_03B0:
+        bne     loc_034A                ; Alien shots enabled ... move player's ship, draw it, and out
+        leax    1,x                     ; To 206A
+        dec     ,x                      ; Time until aliens can fire
+        bne     loc_034A                ; Not time to enable ... move player's ship, draw it, and out
+        bra     loc_0346                ; Enable alien fire ... move player's ship, draw it, and out
 
 ; $03BB
 ; Game object 1: Move/draw the player shot
@@ -2351,7 +2432,7 @@ plr_fire_or_demo:
         tst     fire_bounce             ; Is fire button being held down?
         bne     loc_1648                ; Yes ... wait for bounce
         jsr     read_inputs             ; Read active player controls
-        anda    #0x10                   ; Fire-button pressed?
+        anda    #INP_FIRE               ; Fire-button pressed?
         beq     9$                      ; No ... out
         lda     #1                      ; Flag
         sta     plyr_shot_status        ; Flag shot active
@@ -2360,7 +2441,7 @@ plr_fire_or_demo:
 
 loc_1648:
         jsr     read_inputs             ; Read active player controls
-        anda    #0x10                   ; Fire-button pressed?
+        anda    #INP_FIRE               ; Fire-button pressed?
         bne     9$                      ; Yes ... ignore
         sta     fire_bounce             ; Else ... clear flag
 9$:     rts
@@ -2530,18 +2611,32 @@ sub_176D:
 ; $17C0
 ; Read control inputs for active player
 read_inputs:
+        clrb
         lda     player_data_msb         ; Get active player
 ; this is only going to work if the offsets within memory
 ; are preserved on this port
 ; original $2100,$220 -> 6809 $6100,$6200        
         rora                            ; Test player
-        bcc     1$
+        bcc     5$
 ; read player 1 inputs
-        clra
+0$:     ldu     #KEYROW
+        lda     #~(1<<5)                ; Column 5 (LEFT)
+        sta     2,u
+        lda     ,u                      ; Read keyboard row
+        bita    #(1<<3)                 ; LEFT?
+        bne     1$                      ; no, skip
+        orb     #INP_LEFT
+1$:     lda     #~(1<<6)                ; Column 6 (RIGHT)
+        sta     2,u
+        lda     ,u                      ; Read keyboard row
+        bita    #(1<<3)                 ; RIGHT?
+        bne     2$                      ; no, skip
+        orb     #INP_RIGHT
+2$:     tfr     b,a
         rts
-1$:
+5$:
 ; read player 2 inputs                
-        clra
+        bra     0$                      ; same keys for now
         rts
 
 ; $1815
