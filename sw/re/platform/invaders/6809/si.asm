@@ -654,8 +654,8 @@ scan_line_96:
         lda     isr_splash_task         ; Splash-animation tasks
         asra                            ; If we are in demo-mode then we'll process the tasks anyway
         bcc     9$                      ; Not in demo mode ... done
-1$:     ldx     #obj0_timer_msb         ; Game object table (skip player-object at 2010)
-        ;jsr     run_game_objs           ; Process all game objects (except player object)
+1$:     ldx     #obj1_timer_msb         ; Game object table (skip player-object at 2010)
+        ;jsr     loc_024B                ; Process all game objects (except player object)
         jsr     cursor_next_alien       ; Advance cursor to next alien (move the alien if it is last one)
 9$:     EI
         rti
@@ -722,7 +722,7 @@ loc_0072:
         lda     obj2_timer_extra        ; Use rolling shot's timer to sync ...
         sta     shot_sync               ; ... other two shots
         bsr     draw_alien              ; Draw the current alien (or exploding alien)
-        ;jsr     run_game_objs           ; Process game objects (including player object)
+        jsr     run_game_objs           ; Process game objects (including player object)
         ;bsr     time_to_saucer          ; Count down time to saucer
 
 loc_0086:
@@ -1083,6 +1083,36 @@ loc_0288:
         leax    -2,x                    ; Back up to start of game task
         bra     loc_0281                ; Next game task
 
+; $028E
+; This task is only called at the mid-screen ISR. It ALWAYS does its work here, even though
+; the player can be on the top or bottom of the screen (not rotated).
+game_obj_0:
+; *** FIXME
+        puls    x
+        rts
+
+; $03BB
+; Game object 1: Move/draw the player shot
+;
+; This task executes at either mid-screen ISR (if it is on the top half of the non-rotated screen) or
+; at the end-screen ISR (if it is on the bottom half of the screen).
+game_obj_1:
+; *** FIXME
+        puls    x
+        rts
+
+; $0476
+game_obj_2:
+; *** FIXME
+        puls    x
+        rts
+
+; $04B6
+game_obj_3:
+; *** FIXME
+        puls    x
+        rts
+                
 ; Game task 4 when splash screen alien is shooting extra "C" with a squiggly shot
 loc_050E:
         puls    x                       ; Ignore the task data pointer passed on stack
@@ -1428,8 +1458,8 @@ loc_0814:
         ;beq     loc_09EF                ; Yes ... end of turn
         jsr     a_shot_reload_rate_fn   ; Update alien-shot-rate based on player's score
         ;bsr     sub_0935                ; Check (and handle) extra ship award
-        ;bsr     speed_shots             ; Adjust alien shot speed
-        ;bsr     shot_sound              ; Shot sound on or off with 2025
+        jsr     speed_shots             ; Adjust alien shot speed
+        jsr     shot_sound              ; Shot sound on or off with 2025
         jsr     sub_0A59                ; Check if player is hit
         beq     2$                      ; No hit ... jump handler
         ldb     #0x04                   ; Player hit sound
@@ -1524,6 +1554,17 @@ get_ships_per_cred:
 ; Get number of ships from DIP settings
         lda     #3                      ; fixed for now
         rts
+
+; $08D8
+; With less than 9 aliens on the screen the alien shots get a tad bit faster. Probably
+; because the advancing rack can catch them.
+speed_shots:
+        lda     num_aliens
+        cmpa    #9
+        bcc     9$
+        lda     #-4
+        sta     alien_shot_delta
+9$:     rts        
 
 ; $08E4
 loc_08E4:
@@ -2442,6 +2483,17 @@ a_shot_reload_rate_fn:
         sta     a_shot_reload_rate
         rts        
 
+; $172C
+; Shot sound on or off depending on 2025
+shot_sound:
+        lda     plyr_shot_status
+        cmpa    #0
+        bne     1$
+        ldb     #0xfd
+        jmp     sound_bits_3_off
+1$:     ldb     #2
+        jmp     sound_bits_3_on        
+
 ; $1740
 ; This called from the ISR times down the fleet and sets the flag at 2095 if 
 ; the fleet needs a change in sound handling (new delay, new sound)
@@ -3003,17 +3055,45 @@ byte_0_1B00:    .db 1                   ; wait_on_draw
                 .db 0xF8                ; rack_down_delta
                 .db 0                   ; (unused)
                 
-                .db 0,0x80,0,0x8E,2,0xFF,5,0xC
-                .db 0x60,0x1C,0x20,0x30,0x10,1,0,0
+                .db 0, 0x80, 0          ; obj0_timer_msb/lsb/extra
+                .dw game_obj_0          ; obj0_handler_msb/lsb
+                .db 0xFF                ; player_alive
+                .db 5, 0xC              ; exp_animate_timer/cnt
+                .dw player_sprite       ; plyr_spr_pic_m/l
+                .dw 0x3020              ; player_xr/yr
+                .db 0x10                ; plyr_spr_size
+                .db 1                   ; next_demo_cmd
+                .db 0                   ; hid_mess_seq
+                .db 0                   ; (unused)
                 
-                .db 0,0,0,0xBB,3,0,0x10,0x90
-                .db 0x1C,0x28,0x30,1,4,0,0xFF,0xFF
+                .db 0,0,0               ; obj1_timer_msb/lsb/extra
+                .dw game_obj_1          ; obj1_hamdler_msb/lsb
+                .db 0                   ; plyr_shot_status
+                .db 0x10                ; blow_up_timer
+                .dw player_shot_spr     ; obj1_image_msb/lsb
+                .dw 0x3028              ; obj1_coor_xr/yr
+                .db 1                   ; obj1_image_size
+                .db 4                   ; shot_delta_x
+                .db 0                   ; fire_bounce
+                .db 0xFF, 0xFF          ; (unused)
                 
-                .db 0,0,2,0x76,4,0,0,0
-                .db 0,0,4,0xEE,0x1C,0,0,3
+                .db 0,0,2               ; obj2_timer_msb/lsb/extra
+                .dw game_obj_2          ; obj2_handler_msb/lsb
+                .db 0,0,0               ; rol_shot_status/set_cnt/track
+                .dw 0x0000              ; rol_shot_x_fir_msb/lsb
+                .db 4                   ; rol_shot_blow_cnt
+                .dw roll_shot           ; rol_shot_image_msb/lsb
+                .dw 0x0000              ; rol_shot_xr/yr
+                .db 3                   ; rol_shot_size
                 
-                .db 0,0,0,0xB6,4,0,0,1
-                .db 0,0x1D,4,0xE2,0x1C,0,0,3
+                .db 0,0,0               ; obj3_timer_msb/lsb/extra
+                .dw game_obj_3          ; obj3_handler_msb/lsb
+                .db 0,0,1               ; plu_shot_status/step_cnt/track
+                .dw col_fire_table      ; plu_shot_c_fir_msb/lsb
+                .db 4                   ; plu_shot_blow_cnt
+                .dw plunger_shot        ; plu_shot_image_msb/lsb
+                .dw 0x0000              ; plu_shot_xr/yr
+                .db 3                   ; plu_shot_size
 
 ; $1B50->$2050
 ; GameObject4 (Flying saucer OR alien squiggly shot)     
@@ -3208,6 +3288,20 @@ squiggly_shot_last:
 ; $1CDC
 a_shot_explo:
         .db 0x52, 0xA8, 0x7D, 0xFC, 0x7A, 0xA4
+
+; $1CE2
+plunger_shot:
+        .db 0x20, 0x3F, 0x20
+        .db 0x08, 0x3F, 0x08
+        .db 0x04, 0x3F, 0x04
+        .db 0x01, 0x3F, 0x01
+
+; $1CEE
+roll_shot:
+        .db 0x00, 0x7F, 0x00
+        .db 0x24, 0x7F, 0x48
+        .db 0x00, 0x7F, 0x00
+        .db 0x12, 0x7F, 0x09
 
 ; $1CFA
 message_play_UY:
