@@ -655,7 +655,7 @@ scan_line_96:
         asra                            ; If we are in demo-mode then we'll process the tasks anyway
         bcc     9$                      ; Not in demo mode ... done
 1$:     ldx     #obj1_timer_msb         ; Game object table (skip player-object at 2010)
-        ;jsr     loc_024B                ; Process all game objects (except player object)
+        jsr     loc_024B                ; Process all game objects (except player object)
         jsr     cursor_next_alien       ; Advance cursor to next alien (move the alien if it is last one)
 9$:     EI
         rti
