@@ -39,9 +39,11 @@ FILE *fpdbg;
 
 FILE  *fp1;
 
-unsigned do_n_bytes (unsigned a, unsigned n)
+unsigned do_n_bytes (char *label, unsigned a, unsigned n)
 {
-  fprintf (fp1, "; $%04X:\n", a);
+  fprintf (fp1, "; $%04X\n", a);
+  if (label)
+    fprintf (fp1, "%s:\n", label);
   for (unsigned b=0; b<n; b++)
   {
     uint8_t d = ram[a++];
@@ -63,31 +65,33 @@ void do_asm_data (void)
   static char ascii[] = 
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<> =*Ý      Y     Y ?      -";
 
-  do_n_bytes (0x1ba0, 16);
-  do_n_bytes (0x1bd0, 16);
+  do_n_bytes (NULL, 0x1ba0, 16);
+  do_n_bytes (NULL, 0x1bd0, 16);
     
   unsigned a = 0x1c00;
   for (unsigned c=0; c<9; c++)
-    a = do_n_bytes (a, 16);
+    a = do_n_bytes (NULL, a, 16);
   fprintf (fp1, "\n");
+
+  do_n_bytes ("alien_explode", 0x1cc0, 16);
 
   a = 0x1cd0;
   for (unsigned i=0; i<4; i++)
-    a = do_n_bytes (a, 3);
+    a = do_n_bytes (NULL, a, 3);
 
-  do_n_bytes (0x1cdc, 6);
+  do_n_bytes (NULL, 0x1cdc, 6);
 
   a = 0x1ce2;
   for (unsigned i=0; i<4; i++)
-    a = do_n_bytes (a, 3);
+    a = do_n_bytes (NULL, a, 3);
 
   a = 0x1cee;
   for (unsigned i=0; i<4; i++)
-    a = do_n_bytes (a, 3);
+    a = do_n_bytes (NULL, a, 3);
 
-  do_n_bytes (0x1d20, 44);
+  do_n_bytes (NULL, 0x1d20, 44);
 
-  do_n_bytes (0x1d68, 16);
+  do_n_bytes (NULL, 0x1d68, 16);
   fprintf (fp1, "\n");
         
   a = 0x1e00;

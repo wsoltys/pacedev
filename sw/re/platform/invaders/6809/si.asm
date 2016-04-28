@@ -1477,10 +1477,10 @@ shot_blowing_up:
         bsr     sub_0675                ; Erase the shot
         ldx     #a_shot_explo           ; Alien shot ...
         stx     a_shot_image_msb        ; ... explosion sprite
-        ldx     #alien_shot_yr          ; Alien shot Y
+        ldx     #alien_shot_xr          ; Alien shot Y
         dec     ,x                      ; Left two for ...
         dec     ,x                      ; ... explosion
-        leax    -1,x                    ; Point alien shot X
+        leax    1,x                     ; Point alien shot X
         dec     ,x                      ; Up two for ...
         dec     ,x                      ; ... explosion
         lda     #6                      ; Alien shot descriptor ...
@@ -2322,6 +2322,7 @@ code_bug_1:
         lda     obj1_coor_xr            ; Player's shot's Xr coordinate ...
         sta     *z80_h                  ; ... to H
         bsr     find_column             ; Get alien's coordinate
+        ldx     *z80_h
         stx     exp_alien_xr            ; Put it in the exploding-alien descriptor
         lda     #5                      ; Flag alien explosion ...
         sta     plyr_shot_status        ; ... in progress
@@ -3328,9 +3329,20 @@ byte_0_1B00:    .db 1                   ; wait_on_draw
                 .db 3                   ; squShotSize
 
 ; $1B60->$2060
-                .db 0xFF,0,0xC0,0x1C,0,0,0x10
-                .db >byte_0_2100
-                .db 1,0,0x30,0,0x12,0,0,0
+                .db 0xFF                ; end_of_tasks
+                .db 0                   ; collision
+                .dw alien_explode       ; exp_alien_msb/lsb
+                .dw 0x0000              ; exp_alien_xr/yr
+                .db 0x10                ; exp_aline_size
+                .db >byte_0_2100        ; player_data_msb
+                .db 1                   ; player_ok
+                .db 0                   ; enable_alien_fire
+                .db 0x30                ; alien_fire_delay
+                .db 0                   ; one_alien
+                .db 0x12                ; temp_206C
+                .db 0                   ; invaded
+                .db 0                   ; skip_plunger
+                .db 0                   ; (unused)
                 
 ; These don't need to be copied over to RAM (see 1BA0 below).
 ; $1B70
@@ -3480,6 +3492,7 @@ message_adv:
         .db 4, 0x26, 0x13, 0, 1, 0xB, 4
         .db 0x28 ; (
 
+; $1CB8
 a_reload_score_tab:    
 ; The tables at 1CB8 and 1AA1 control how fast shots are created. The speed is based
 ; on the upper byte of the player's score. For a score of less than or equal 0200 then 
@@ -3491,6 +3504,11 @@ a_reload_score_tab:
 ; 1AA5: 07           ; Fastest shot firing speed
 ;
         .db 2, 0x10, 0x20, 0x30
+
+; $1CC0
+alien_explode:
+        .db 0x00, 0x10, 0x92, 0x44, 0x28, 0x81, 0x42, 0x00
+        .db 0x42, 0x81, 0x28, 0x44, 0x92, 0x10, 0x00, 0x00
 
 ; $1CD0
 squiggly_shot:
