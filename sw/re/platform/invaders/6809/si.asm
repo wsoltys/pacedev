@@ -1211,10 +1211,10 @@ move_ply_shot:
         pshs    x,y                     ; Hold sprite coordinates, pointer to sprite image
         jsr     erase_shifted           ; Erase the sprite from the screen
         puls    d,y                     ; Restore coords, pointer to sprite image
-        addb    shot_delta_x            ; DeltaX for shot
-        tfr     d,x
+        addb    shot_delta_x            ;  Move the shot ...
+        tfr     d,x                     ; ... up the screen
         stb     obj1_coor_yr            ; Store shot's new X coordinate
-        puls    b
+        puls    b                       ; Restore size
         jsr     draw_spr_collision      ; Draw sprite with collision detection
         tst     collision               ; Test for collision
         beq     9$                      ; No collision ... out
