@@ -3108,6 +3108,7 @@ loc_19FA:
 ; the same (the calling ISR should execute the task).
 comp_y_to_beam:
         ldx     #vblank_status          ; Get the beam position status
+        clra                            ; 6809 - clear carry flag
         lda     ,y                      ; Get the task structure flag
         anda    #0x80                   ; Only upper bits count
         eora    ,x                      ; XOR them together
