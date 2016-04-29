@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <memory.h>
 
-#define __USE_ALLEGRO__
+//#define __USE_ALLEGRO__
 
 #ifdef __USE_ALLEGRO__
 #include <allegro.h>
@@ -74,6 +74,11 @@ void do_asm_data (void)
   fprintf (fp1, "\n");
 
   do_n_bytes ("alien_explode", 0x1cc0, 16);
+
+
+  a = 0x1c90;
+  a = do_n_bytes ("player_shot_spr", a, 1);
+  a = do_n_bytes ("shot_exploding", a, 8);
 
   a = 0x1cd0;
   for (unsigned i=0; i<4; i++)
