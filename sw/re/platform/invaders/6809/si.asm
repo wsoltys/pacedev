@@ -1878,20 +1878,21 @@ sub_0A59:
 ; Start the hit-alien sound and flag the adjustment for the score.
 ; B contains the row, which determines the score value.
 score_for_alien:
-        tst     game_mode
-        beq     1$
-        stb     *z80_c
-        ldb     #8
-        jsr     sound_bits_3_on
-        ldb     *z80_c
-        tfr     b,a
-        jsr     alien_score_value
-        lda     ,x
-        clr     score_delta_msb
-        sta     score_delta_lsb
+        tst     game_mode               ; Are we in game mode?
+        beq     1$                      ; No ... skip scoring in demo
+        stb     *z80_c                  ; Hold row number
+        ldb     #8                      ; Alien hit sound
+        jsr     sound_bits_3_on         ; Enable sound
+        ldb     *z80_c                  ; Restore row number
+        tfr     b,a                     ; Into A
+        jsr     alien_score_value       ; Look up the score for the alien
+        lda     ,x                      ; Get the score value
+        ldx     #score_delta_msb        ; Pointer to score delta
+        clr     ,x                      ; Upper byte of score delta is "00"
+        sta     1,x                     ; Point to score delta LSB. Set score for hitting alien
         lda     #1
-        sta     -1,x
-1$:     ldx     #exp_alien_msb
+        sta     -1,x                    ; The score will get changed elsewhere
+1$:     ldx     #exp_alien_msb          ; Return exploding-alien descriptor
         rts
 
 ; $0A80
