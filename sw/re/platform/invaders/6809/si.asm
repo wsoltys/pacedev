@@ -1237,7 +1237,7 @@ move_ply_shot:
         stb     obj1_coor_yr            ; Store shot's new X coordinate
         puls    b                       ; Restore size
         jsr     draw_spr_collision      ; Draw sprite with collision detection
-        tst     collision               ; Test for collision
+        lda     collision               ; Test for collision
         beq     9$                      ; No collision ... out
 ; Collision with alien detected
 1$:     sta     alien_is_exploding      ; Set to not-0 indicating an alien is blowing up
