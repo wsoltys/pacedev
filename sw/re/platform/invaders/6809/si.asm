@@ -2415,12 +2415,14 @@ loc_1579:
 ; B is row number. C is column number (starts at 1). 
 ; Return pointer to alien-status flag for current player.
 get_alien_stat_ptr:
+        pshs    b
         lda     #11                     ; 
         mul                             ; row*11
         addb    *z80_c                  ; Add row offset to column offset
         decb                            ; -1
         lda     player_data_msb         ; Set MSB of HL/D with active player indicator
         tfr     d,x                     ; ->X
+        puls    b
         rts
 
 ; $1590
