@@ -1268,17 +1268,87 @@ end_of_blowup:
         rts
         
 ; $0476
+; Game object 2: Allien rolling-shot (targets player specifically)
+;
+; The 2-byte value at 2038 is where the firing-column-table-pointer would be (see other
+; shots ... next game objects). This shot doesn't use that table. It targets the player
+; specifically. Instead the value is used as a flag to have the shot skip its first
+; attempt at firing every time it is reinitialized (when it blows up).
+;
+; The task-timer at 2032 is copied to 2080 in the game loop. The flag is used as a
+; synchronization flag to keep all the shots processed on separate interrupt ticks. This
+; has the main effect of slowing the shots down.
+;
+; When the timer is 2 the squiggly-shot/saucer (object 4 ) runs.
+; When the timer is 1 the plunger-shot (object 3) runs.
+; When the timer is 0 this object, the rolling-shot, runs.
 game_obj_2:
-; *** FIXME
-        puls    x
+        puls    x                       ; Game object data
+        lda     byte_0_1B00+0x32        ; Restore delay from ... 
+        sta     obj2_timer_extra        ; ... ROM mirror (value 2)
+        ldx     rol_shot_c_fir_msb      ; Get pointer to column-firing table. All zeros?
+        bne     1$                      ; No ... must be a valid column. Go fire.
+        leax    -1,x                    ; Decrement the counter
+        stx     rol_shot_c_fir_msb      ; Store new counter value (run the shot next time)
         rts
+1$:     ldy     #rol_shot_status        ; Rolling-shot data structure
+        lda     #0xf9                   ; Last picture of "rolling" alien shot
+        jsr     to_shot_struct          ; Set code to handle rolling-shot
+        lda     plu_shot_step_cnt       ; Get the plunger-shot step count
+        sta     other_shot_1            ; Hold it
+        lda     squ_shot_step_cnt       ; Get the squiggly-shot step count
+        sta     other_shot_2            ; Hold it
+        jsr     handle_alien_shot       ; Handle active shot structure
+        ldx     #rol_shot_status        ; Rolling-shot data structure
+        lda     a_shot_blow_cnt         ; Blow up counter. Test if shot has cycled through blowing up
+        lbne    from_shot_struct        ; If shot is still running, copy the updated data and out
+
+; $04AB
+reset_shot:
+        ldy     #byte_0_1B00+0x30       ; Reload ...
+        ldx     #obj2_timer_msb         ; ... object ...
+        ldb     #0x10                   ; ... structure ...
+        jmp     block_copy              ; ... from ROM mirror and out
 
 ; $04B6
+; Game object 3: Alien plunger-shot
+; This is skipped if there is only one alien left on the screen.
 game_obj_3:
-; *** FIXME
-        puls    x
-        rts
-                
+        puls    x                       ; Game object data
+        tst     skip_plunger            ; One alien left? Skip plunger shot?
+        beq     1$                      
+0$:     rts                             ; Yes. Only one alien. Skip this shot.
+1$:     lda     shot_sync               ; Sync flag (copied from GO-2's timer value)
+        cmpa    #1                      ; GO-2 and GO-4 are idle?
+        bne     0$                      ; No ... only one shot at a time
+        ldy     #plu_shot_status        ; Plunger alien shot data structure
+        lda     #0xed                   ; Last picture of "plunger" alien shot
+        jsr     to_shot_struct          ; Copy the plunger alien to the active structure
+        lda     rol_shot_step_cnt       ; Step count from rolling-shot
+        sta     other_shot_1            ; Hold it
+        lda     squ_shot_step_cnt       ; Step count from squiggly shot
+        sta     other_shot_2            ; Hold it
+        jsr     handle_alien_shot       ; Handle active shot structure
+        lda     a_shot_c_fir_lsb        ; LSB of column-firing table
+        cmpa    #0x10                   ; Been through all entries in the table?
+        bcs     2$                      ; Not yet ... table is OK
+        lda     byte_0_1B00+0x49        ; Been through all ..
+        sta     a_shot_c_fir_lsb        ; ... so reset pointer into firing-column table
+        ldx     #plu_shot_status        ; Plunger shot data
+2$:     lda     a_shot_blow_cnt         ; Get the blow up timer. ; Zero means shot is done
+        bne     from_shot_struct        ; If shot is still running, go copy the updated data and out
+        ldy     #byte_0_1B00+0x40       ; Reload ...
+        ldx     #obj3_timer_msb         ; ... object ...
+        ldb     #0x10                   ; ... structure ...
+        jsr     block_copy              ; ... from mirror
+        lda     num_aliens              ; Number of aliens on screen
+        deca                            ; Is there only one left?
+        bne     3$                      ; No ... move on
+        lda     #1                      ; Disable plunger shot ...
+        sta     skip_plunger            ; ... when only one alien remains
+3$:     ldx     a_shot_c_fir_msb        ; Set the plunger shot's ...
+        jmp     loc_067E                ; ... column-firing pointer data
+
 ; Game task 4 when splash screen alien is shooting extra "C" with a squiggly shot
 loc_050E:
         puls    x                       ; Ignore the task data pointer passed on stack
