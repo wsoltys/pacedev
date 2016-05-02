@@ -27,9 +27,14 @@
 ; *** end of derived
 
 ; *** INVADERS stuff here
-INP_RIGHT   .equ      (1<<6)
-INP_LEFT    .equ      (1<<5)
-INP_FIRE    .equ      (1<<4)
+INP_RIGHT     .equ    (1<<6)
+INP_LEFT      .equ    (1<<5)
+INP_FIRE      .equ    (1<<4)
+
+;NUM_ALIENS    .equ    5
+.ifndef NUM_ALIENS
+  NUM_ALIENS  .equ    55
+.endif  
 
         .org    WRAM
 wram    .equ    .                       ; 1KB
@@ -299,9 +304,10 @@ p2_ships_rem:                   .ds   1
 
 ; guard buffer just in case
         .ds     256
-        
+
         .bndry  0x100
 dp_base:            .ds     256        
+dp_base_isr:        .ds     256        
 z80_b               .equ    0x00
 z80_c               .equ    0x01
 z80_d               .equ    0x02
@@ -311,10 +317,10 @@ z80_l               .equ    0x05
 z80_a_              .equ    0x06
 z80_f_              .equ    0x07
 z80_r               .equ    0x08
-shft_base           .equ    0x10        ; 2 bytes
 
 ; rgb/composite video selected (bit 4)
 cmp:                .ds 1
+shft_base:          .ds 2
 
 ; stack is here on Coco port
         
@@ -649,6 +655,8 @@ scan_line_96:
         clra
         sta     TMRLSB
         sta     TMRMSB
+				lda			#>dp_base_isr
+				tfr			a,dp
 ; $008C
         clr     vblank_status           ; Flag that tells objects on the upper half of screen to draw/move
         tst     suspend_play            ; Are we moving game objects?
@@ -672,6 +680,8 @@ scan_line_224:
         sta     TMRLSB
         lda     #>TMR_8ms
         sta     TMRMSB                  ; and start the timer
+				lda			#>dp_base_isr
+				tfr			a,dp
 
         lda     #0x80                   ; Flag that tells objects ...
         sta     vblank_status           ; ... on the lower half of the screen to draw/move
@@ -822,7 +832,7 @@ cursor_next_alien:
         ldb     #2
         stb     *z80_d                  ; When all are gone this triggers 1A1 to return from this stack frame
 1$:     inca                            ; Have we drawn all aliens ...
-        cmpa    #55                     ; ... at last position?
+        cmpa    #NUM_ALIENS             ; ... at last position?
         bne     2$
         bsr     move_ref_alien          ; Yes ... move the bottom/right alien and reset index to 0
 2$:     sta     *z80_l                  ; HL now points to alien flag
@@ -906,7 +916,7 @@ init_aliens:
 ; Initialize the 55 aliens from last to 1st. 1 means alive.
         ldx     #byte_0_2100            ; Start of alien structures (this is the last alien)
 loc_01C3:
-        ldb     #55                     ; Count to 55 (that's five rows of 11 aliens)
+        ldb     #NUM_ALIENS             ; Count to 55 (that's five rows of 11 aliens)
         lda     #1
 1$:     sta     ,x+                     ; Bring alien to life. Next alien
         decb                            ; All done?
@@ -1598,6 +1608,8 @@ wait_for_start:
         lda     #1                      ; Tell ISR that we ...
         sta     wait_start_loop         ; ... have started to wait
         lds     #stack                  ; Reset stack
+				lda			#>dp_base
+				tfr			a,dp
         EI
         jsr     loc_1979                ; Suspend game tasks
         jsr     clear_playfield         ; Clear center window
@@ -1671,6 +1683,8 @@ loc_079B:
         jsr     clear_playfield         ; Clear the playfield
         clra
         sta     isr_splash_task         ; Disable isr splash-task animation
+; $0804
+loc_0804:        
         jsr     draw_bottom_line        ; Draw line across screen under player
         lda     player_data_msb         ; Current player
         rora                            ; Right bit tells all
@@ -1691,7 +1705,7 @@ loc_0814:
         jsr     count_aliens            ; Count aliens (count to 2082)
         jsr     adjust_score_fn         ; Adjust score (and print) if there is an adjustment
         tst     num_aliens              ; Number of live aliens. All aliens gone?
-        ;beq     loc_09EF                ; Yes ... end of turn
+        lbeq    loc_09EF                ; Yes ... end of turn
         jsr     a_shot_reload_rate_fn   ; Update alien-shot-rate based on player's score
         ;bsr     sub_0935                ; Check (and handle) extra ship award
         jsr     speed_shots             ; Adjust alien shot speed
@@ -1936,6 +1950,62 @@ clear_playfield:
 2$:     cmpa    #0x40
         bcs     1$
         rts
+
+; $09EF
+loc_09EF:
+        bsr     sub_0A3C
+        clr     suspend_play
+        bsr     clear_playfield
+        lda     player_data_msb
+        pshs    a
+        jsr     copy_ram_mirror
+        puls    a
+        sta     player_data_msb
+        lda     player_data_msb
+        pshs    d
+        ldb     #0xfe
+        tfr     d,x
+        lda     ,x
+        anda    #7
+        inca
+        sta     ,x
+        ldu     #alien_start_table-1
+1$:     leau    1,u
+        deca
+        bne     1$
+        puls    d
+        ldb     #0xfc
+        tfr     d,x
+        lda     ,u
+        sta     ,x
+        leax    1,x
+        lda     #0x38
+        sta     ,x
+        tfr     x,d
+        rora
+        bcs     2$
+        lda     #0x21
+;       ld      (soundPort5),a
+        jsr     draw_shield_pl2
+        jsr     init_aliens_p2
+        jmp     loc_0804
+2$:     jsr     draw_shield_pl1
+        jsr     init_aliens
+        jmp     loc_0804                
+
+; $0A3C
+sub_0A3C:
+        bsr     sub_0A59                ; Check player collision
+        bne     2$                      ; Player is not alive ... skip delay
+        lda     #0x30                   ; Half second delay
+        sta     isr_delay               ; Set ISR timer
+1$:     lda     isr_delay               ; Has timer expired?
+        beq     9$                      ; Out if done
+        bsr     sub_0A59                ; Check player collision
+        bne     1$                      ; No collision ... wait on timer
+2$:     bsr     sub_0A59                ; Wait for ...
+        bne     2$                      ; ... collision to end
+9$:     rts                
              
 ; $0A59
 ; Check to see if player is hit
@@ -2058,6 +2128,8 @@ loc_0AEA:
 ;       out     (sound1),a
 ;       out     (sound2),a
         jsr     sub_1982                ; Turn off ISR splash-task
+				lda			#>dp_base
+				tfr			a,dp
         EI
         bsr     one_sec_delay        
         ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
@@ -2086,7 +2158,7 @@ loc_0B0B:
         ldy     #byte_0_1FC9            ; Animate sprite from Y=FF to Y=97 step 1
         bsr     ini_splash_ani          ; Copy to splash-animate structure
         jsr     animate                 ; Wait for ISR to move sprite (alien pushing Y)
-        bsr     one_sec_delay           ; One second delay
+        jsr     one_sec_delay           ; One second delay
         ldx     #vram+0x0fb7            ; Where the splash alien ends up
         ldb     #10                     ; 10 rows
         jsr     clear_small_sprite      ; Clear a one byte sprite at HL
@@ -2183,7 +2255,7 @@ draw_shifted_sprite:
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
-        ldu     *shft_base
+        ldu     shft_base
         leau    a,u                     ; pointer to shift table entry (1st byte)
         lda     ,u                      ; get shifted value
         ora     ,x                      ; OR them onto the screen
@@ -2235,7 +2307,7 @@ erase_shifted:
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
-        ldu     *shft_base
+        ldu     shft_base
         leau    a,u                     ; pointer to shift table entry (1st byte)
         lda     ,u                      ; get shifted value
         coma                            ; Reverse it (erasing bits)
@@ -2267,7 +2339,7 @@ cnvt_pix_number:
         lsla                            ; x2 for table offset
         ora     #>shift_tbl             ; add table base address
         ldb     #0x80
-        std     *shft_base              ; store for later use
+        std     shft_base               ; store for later use
         puls    b
         jmp     conv_to_scr        
 
@@ -2298,7 +2370,7 @@ draw_spr_collision:
         lda     ,y+                     ; Get byte. Next in pixel pattern
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
-        ldu     *shft_base
+        ldu     shft_base
         leau    a,u                     ; pointer to shift table entry (1st byte)
         lda     ,u                      ; get shifted value
         tfr     a,b                     ; B is destructive copy
@@ -2560,7 +2632,7 @@ draw_sprite:
         lda     ,y+
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
-        ldu     *shft_base
+        ldu     shft_base
         leau    a,u                     ; pointer to shift table entry (1st byte)
         lda     ,u                      ; get shifted value
         sta     ,x+
@@ -2581,7 +2653,7 @@ draw_sprite:
 ; If only 1, 206B gets a flag of 1 ** but ever nobody checks this
 count_aliens:
         bsr     get_player_data_ptr     ; Get active player descriptor
-        ldb     #55                     ; B=55 aliens to check?
+        ldb     #NUM_ALIENS             ; B=55 aliens to check?
         clr     *z80_c                  ; zero count
 1$:     tst     ,x+                     ; Get byte. Is it a zero?
         beq     2$                      ; Yes ... don't count it
@@ -2715,6 +2787,8 @@ loc_1671:
 ; $16E6
 loc_16E6:
         lds     #stack                  ; Reset stack
+				lda			#>dp_base
+				tfr			a,dp
         EI                              ; Enable interrupts
         clr     player_alive            ; Flag player is shot
 1$:     jsr     player_shot_hit         ; Player's shot collision detection
@@ -3653,11 +3727,20 @@ byte_0_1D7C:
         .db 0x36, 0x1D, 0x10, 0x48, 0x62, 0xB6, 0x1D, 0x98, 8
         .db 0x42, 0x90, 8, 0, 0
 
+
+; $1DA0
 alien_scores:
 ;       Score table for hitting alien type
         .db 0x10                        ; Bottom 2 rows     
         .db 0x20                        ; Middle row
         .db 0x30                        ; Highest row
+
+; $1DA3
+; Starting Y coordinates for aliens at beginning of rounds. The first round is initialized to $78 at 07EA.
+; After that this table is used for 2nd, 3rd, 4th, 5th, 6th, 7th, 8th, and 9th. The 10th starts over at
+; 1DA3 (60).
+alien_start_table:
+        .db 96, 80, 72, 72, 72, 64, 64, 64
 
 ; $1DAB
 message_play_Y:
