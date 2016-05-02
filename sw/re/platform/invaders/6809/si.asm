@@ -976,17 +976,31 @@ loc_01F8:
         bne     1$                      ; No ... go draw them all
         rts
 
+; $0209
+; Copy shields on the screen to player 1's data area.
+remember_shields_1:
+        lda     #1                      ; Not zero means remember
+        bra     loc_021B                ; Shuffle-shields player 1
+        
+; $020E
+; Copy shields on the screen to player 2's data area.
+remember_shields_2:
+        lda     #1                      ; Not zero means remember
+        bra     loc_0214                ; Shuffle-shields player 2
+        
 ; $0213
 ; Copy shields from player 2's data area to screen.
 restore_shields_2:
-        clra
-        ldy     #byte_0_2200+0x42
-        bra     copy_shields
+        clra                            ; Zero means restore
+loc_0214:        
+        ldy     #byte_0_2200+0x42       ; Player 2 shield buffer (remember between games in multi-player)
+        bra     copy_shields            ; Shuffle-shields player 2
 
 ; $021A
 ; Copy shields from player 1's data area to screen.
 restore_shields_1:
         clra                            ; Zero means restore
+loc_021B:        
         ldy     #byte_0_2100+0x42       ; Player 1 shield buffer (remember between games in multi-player)
 
 ; $021E
@@ -1107,9 +1121,86 @@ game_obj_0:
         leax    1,x                     ; Point to blow-up status
         lda     ,x                      ; Get player blow-up status
         cmpa    #0xff                   ; Player is blowing up?
-        beq     loc_033B                ; No ... go do normal movement
+        lbeq    loc_033B                ; No ... go do normal movement
 ; Handle blowing up player
-; *** FIXME
+        leax    1,x                     ; Point to blow-up delay count
+        dec     ,x                      ; Decrement the blow-up delay
+        beq     1$
+0$:     rts                             ; Not time for a new blow-up sprite ... out
+1$:     tfr     a,b                     ; Hold sprite image number
+        clra
+        sta     player_ok               ; Player is NOT OK ... player is blowing up
+        sta     enable_alien_fire       ; Alien fire is disabled
+        lda     #0x30                   ; Reset count ...
+        sta     alien_fire_delay        ; ... till alien shots are enabled
+        tfr     b,a                     ; Restore sprite image number (used if we go to 39B)
+        ldb     #5
+        stb     ,x+                     ; Reload time between blow-up changes. Point to number of blow-up changes
+        dec     ,x                      ; Count down blow-up changes
+        lbne    draw_player_die         ; Still blowing up ... go draw next sprite
+; $02AE
+; Blow up finished
+        ldx     player_xr               ; Player's coordinates
+        ldb     #16                     ; 16 Bytes
+        jsr     erase_simple_sprite     ; Erase simple sprite (the player)
+        ldx     #obj0_timer_msb         ; Restore player ...
+        ldy     #byte_0_1B00+0x10       ; ... structure ...
+        ldb     #0x10                   ; ... from ...
+        jsr     block_copy              ; ... ROM mirror
+        ldb     #0                      ; Turn off ...
+        jsr     sound_bits_3_off        ; ... all sounds
+        tst     invaded                 ; Has rack reached the bottom of the screen?
+        bne     0$                      ; Yes ... done here
+        tst     game_mode               ; Are we in game mode?
+        beq     0$                      ; No ... return to splash screens
+        lds     #stack                  ; We aren't going to return
+				lda			#>dp_base
+				tfr			a,dp
+        EI                              ; Enable interrupts (we just dropped the ISR context)
+        jsr     disable_game_tasks      ; Disable game tasks
+        jsr     sub_092E                ; Get number of ships for active player
+        lbeq    loc_166D                ; Any left? No ... handle game over for player
+        jsr     sub_18E7                ; Get player-alive status pointer
+        lda     ,x                      ; Is player alive?
+        beq     4$                      ; Yes ... remove a ship from player's stash and reenter game loop
+        tst     two_players             ; Multi-player game. ; Only one player?
+        beq     4$                      ; Yes ... remove a ship from player's stash and reenter game loop
+        lda     player_data_msb         ; Player data MSB
+        pshs    a                       ; Hold the MSB
+        rora                            ; Player 1 is active player?
+        bcs     5$                      ; Yes ... go store player 1 shields and come back to 02F8
+        jsr     remember_shields_2      ; No ... go store player 2 shields
+2$:     jsr     sub_0878                ; Get ref-alien info and pointer to storage
+        lda     *z80_e                  ; Hold the ...
+        sta     ,x                      ; ... ref-alien ...
+        lda     *z80_d                  
+        sta     1,x                     ; ... screen coordinates
+        lda     *z80_b
+        sta     -1,x                    ; Store ref-alien's delta (direction)
+        jsr     copy_ram_mirror         ; Copy RAM mirror (getting ready to switch players)
+        puls    a                       ; Restore active player MSB
+        rora                            ; Player 1?
+        lda     #>byte_0_2100           ; Player 1 data pointer
+        ldb     #0                      ; Cocktail bit=0 (player 1)
+        bcc     3$                      ; It was player one ... keep data for player 2
+        ldb     #(1<<5)                 ; Cocktail bit=1 (player 2)
+        lda     #>byte_0_2200           ; Player 2 data pointer
+3$:     sta     player_data_msb         ; Change players 
+        jsr     two_sec_delay           ; Two second delay
+        clr     obj0_timer_lsb          ; Clear the player-object timer (player can move instantly after switching players)
+;       ld      a,b
+;       out     (sound2),a
+        inca                            ; Fleet sound 1 (first tone)
+;       ld      (soundport5),a
+        jsr     clear_playfield         ; Clear center window
+        jsr     remove_ship             ; Remove a ship and update indicators
+        jmp     loc_07F9                ; Tell the players that the switch has been made
+; $032C
+4$:     jsr     remove_ship             ; Remove a ship and update indicators
+        jmp     loc_0817                ; Continue into game loop
+; $0332
+5$:     jsr     remember_shields_1      ; Remember the shields for player 1
+        bra     2$                      ; Back to switching-players above
 
 ; $033B
 ; Player not blowing up ... handle inputs
@@ -1174,6 +1265,22 @@ move_player_left:
         sta     player_xr               ; New X coordinate
         bra     loc_036F                ; Draw player and out
 
+; $039B
+; Toggle the player's blowing-up sprite between two pictures and draw it
+draw_player_die:
+        inca
+        anda    #1
+        sta     player_alive
+        rola
+        rola
+        rola
+        rola
+        ldx     #plr_blow_up_sprites
+        tfr     a,b
+        abx
+        stx     plyr_spr_pic_m
+        bra     loc_036F
+        
 ; $03B0
 loc_03B0:
         bne     loc_034A                ; Alien shots enabled ... move player's ship, draw it, and out
@@ -1679,6 +1786,7 @@ loc_079B:
         jsr     copy_ram_mirror         ; Copy ROM mirror to RAM (2000 - 20C0)
         jsr     remove_ship             ; Initialize ship hold indicator
 ; $07F9
+loc_07F9:
         jsr     prompt_player           ; Prompt with "PLAY PLAYER "
         jsr     clear_playfield         ; Clear the playfield
         clra
@@ -1694,6 +1802,7 @@ loc_0804:
         jsr     draw_bottom_line        ; Draw line across screen under player
 loc_0814:        
         jsr     init_rack               ; Initialize alien rack for current player
+loc_0817:        
         jsr     enable_game_tasks       ; Enable game tasks in ISR
         ldb     #0x20                   ; Enable ...
         jsr     sound_bits_3_on         ; ... sound amplifier
@@ -1756,6 +1865,7 @@ loc_0872:
         bra     loc_0814                ; Continue in game loop
 
 ; $0878
+sub_0878:
         ldb     ref_alien_dxr           ; Alien deltaY
         ldy     ref_alien_xr            ; Alien coordinates
         bra     get_al_ref_ptr          ; HL/X is 21FC or 22FC and out
@@ -2726,6 +2836,7 @@ loc_166B:
         rts
 
 ; $166D
+loc_166D:
         clra
         jsr     loc_1A8B                ; Print ZERO ships remain
 loc_1671:        
