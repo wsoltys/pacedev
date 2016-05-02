@@ -31,7 +31,7 @@ INP_RIGHT     .equ    (1<<6)
 INP_LEFT      .equ    (1<<5)
 INP_FIRE      .equ    (1<<4)
 
-;NUM_ALIENS    .equ    5
+;NUM_ALIENS    .equ    3
 .ifndef NUM_ALIENS
   NUM_ALIENS  .equ    55
 .endif  
@@ -1278,7 +1278,7 @@ end_of_blowup:
         rts
         
 ; $0476
-; Game object 2: Allien rolling-shot (targets player specifically)
+; Game object 2: Alien rolling-shot (targets player specifically)
 ;
 ; The 2-byte value at 2038 is where the firing-column-table-pointer would be (see other
 ; shots ... next game objects). This shot doesn't use that table. It targets the player
@@ -1517,8 +1517,8 @@ loc_05C1:
 loc_061B:
         lda     player_xr               ; Player's X coordinate
         adda    #8                      ; Center of player
-        tfr     d,x
-        bsr     find_in_column          ; Find the column
+        sta     *z80_h
+        jsr     find_column             ; Find the column
         lda     *z80_c                  ; Get the column right over player
         cmpa    #12                     ; Is it a valid column?
         lbcs    loc_05A5                ; Yes ... use what we found
@@ -1539,11 +1539,11 @@ find_in_column:
 1$:     tst     ,x                      ; Get alien's status
         SCF                             ; In case not 0
         bne     9$                      ; Alien is alive? Yes ... return
-        tfr     x,d                     ; Get the flag pointer LSB
-        addb    #11                     ; Jump to same column on next row of rack (+11 aliens per row)
-        tfr     d,x                     ; New alien index
+        ldb     #11                     ; Jump to same column on next row of rack (+11 aliens per row)
+        abx                             ; New alien index
         dec     *z80_d                  ; Tested all rows?
         bne     1$                      ; No ... keep looking for a live alien up the rack
+        CCF
 9$:     rts                             ; Didn't find a live alien. Return with C=0.
 
 ; $0644
