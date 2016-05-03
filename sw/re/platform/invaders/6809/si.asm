@@ -269,16 +269,16 @@ game_mode:                      .ds   1
 adjust_score:                   .ds   1
 score_delta_msb:                .ds   1     ; switched for 6809
 score_delta_lsb:                .ds   1     ; switched for 6809
-hi_scor_l:                      .ds   1
-hi_scor_m:                      .ds   1
+hi_scor_m:                      .ds   1     ; switched for 6809
+hi_scor_l:                      .ds   1     ; switched for 6809
 hi_scor_lo_m:                   .ds   1     ; switched for 6809
 hi_scor_lo_l:                   .ds   1     ; switched for 6809
-p1_scor_l:                      .ds   1
-p1_scor_m:                      .ds   1
+p1_scor_m:                      .ds   1     ; switched for 6809
+p1_scor_l:                      .ds   1     ; switched for 6809
 p1_scor_lo_m:                   .ds   1     ; switched for 6809
 p1_scor_lo_l:                   .ds   1     ; switched for 6809
-p2_scor_l:                      .ds   1
-p2_scor_m:                      .ds   1
+p2_scor_m:                      .ds   1     ; switched for 6809
+p2_scor_l:                      .ds   1     ; switched for 6809
 p2_scor_lo_m:                   .ds   1     ; switched for 6809
 p2_scor_lo_l:                   .ds   1     ; switched for 6809
 
@@ -1916,8 +1916,8 @@ loc_079B:
         sta     num_coins               ; New credit count
         jsr     draw_num_credits        ; Display number of credits
         ldx     #0                      ; Score of 0000
-        stx     p1_scor_l               ; Clear player-1 score
-        stx     p2_scor_l               ; Clear player-2 score
+        stx     p1_scor_m               ; Clear player-1 score
+        stx     p2_scor_m               ; Clear player-2 score
         jsr     sub_1925                ; Print player-1 score
         jsr     sub_192B                ; Print player-2 score
         jsr     disable_game_tasks      ; Disable game tasks
@@ -2164,8 +2164,7 @@ sub_0935:
         ldb     #0x10                   ; Awarded at 1000
 2$:     stb     *z80_b
         jsr     sub_09CA                ; Get score descriptor for active player
-        leax    1,x                     ; MSB of score ...
-        lda     ,x                      ; ... to accumulator
+        lda     ,x                      ; MSB of score to accumulator
         cmpa    *z80_b                  ; Time for an extra ship?
         bcs     0$                      ; No ... out
         bsr     sub_092E                ; Get pointer to number of ships
@@ -2212,17 +2211,17 @@ adjust_score_fn:
 1$:     clr     adjust_score            ; Mark score as adjusted
         ldy     score_delta_msb         ; Get requested adjustment
         sty     *z80_d
-        lda     ,x                      ; Add adjustment ...
+        lda     1,x                     ; Add adjustment ...
         adda    *z80_e                  ; ... first byte
         daa                             ; Adjust it for BCD
-        sta     ,x+                     ; Store new LSB
+        sta     1,x                     ; Store new LSB
         sta     *z80_e                  ; Add adjustment ...
         lda     ,x                      ; ... to second ...
         adca    *z80_d                  ; ... byte
         daa                             ; Adjust for BCD (cary gets dropped)
-        sta     ,x+                     ; Store second byte
+        sta     ,x                      ; Store second byte
         sta     *z80_d                  ; Second byte to D (first byte still in E)
-        ldx     ,x                      ; Load the screen coordinates
+        ldx     2,x                     ; Load the screen coordinates
         ldy     *z80_d
         bra     print_4_digits          ; ** Usually a good idea, but wasted here
 
@@ -2258,9 +2257,9 @@ sub_09C5:
 sub_09CA:
         lda     player_data_msb         ; Get active player
         asra                            ; Test for player
-        ldx     #p1_scor_l              ; Player 1 score descriptor
+        ldx     #p1_scor_m              ; Player 1 score descriptor
         bcs     9$                      ; Keep it if player 1 is active
-        ldx     #p2_scor_l              ; Else get player 2 descriptor
+        ldx     #p2_scor_m              ; Else get player 2 descriptor
 9$:     rts        
 
 ; $09D6
@@ -3062,25 +3061,22 @@ loc_1671:
         jsr     cur_ply_alive           ; Get active-flag ptr for current player
         sta     ,x                      ; Flag player is dead
         jsr     sub_09CA                ; Get score descriptor for current player
-        leax    1,x                     ; Point to high two digits
         ldy     #hi_scor_m              ; Current high score upper two digits
         lda     ,y                      ; Is player score greater ...
         cmpa    ,x                      ; ... than high score?
         pshs    cc
-        leay    -1,y                    ; Point to LSB
-        leax    -1,x                    ; Point to LSB
-        lda     ,y                      ; Go ahead and fetch high score lower two digits
+        lda     1,y                     ; Go ahead and fetch high score lower two digits
         puls    cc
         beq     1$                      ; Upper two are the same ... have to check lower two
         bcc     3$                      ; Player score is lower than high ... nothing to do
         bra     2$                      ; Player socre is higher ... go copy the new high score
 ; $168B
-1$:     cmpa    ,x                      ; Is lower digit higher? (upper was the same)
+1$:     cmpa    1,x                     ; Is lower digit higher? (upper was the same)
         bcc     3$                      ; No ... high score is still greater than player's score
 2$:     lda     ,x+                     ; Copy the new ...
-        sta     ,y+                     ; ... high score lower two digits
+        sta     ,y+                     ; ... high score upper two digits
         lda     ,x                      ; Copy the new ...
-        sta     ,y                      ; ... high score upper two digits
+        sta     ,y                      ; ... high score lower two digits
         jsr     print_hi_score          ; Draw the new high score
 ; $1698        
 3$:     tst     two_players             ; Number of players. Is this a single player game?
@@ -3515,12 +3511,12 @@ draw_score_head:
 
 ; $1925
 sub_1925:
-        ldx     #p1_scor_l              ; Player 1 score descriptor
+        ldx     #p1_scor_m              ; Player 1 score descriptor
         bra     draw_score              ; Print score
     
 sub_192B:        
 ; $192B        
-        ldx     #p2_scor_l              ; Player 2 score descriptor
+        ldx     #p2_scor_m              ; Player 2 score descriptor
         bra     draw_score              ; Print score
 
 ; $1931
@@ -3548,7 +3544,7 @@ draw_num_credits:
                 
 ; $1950
 print_hi_score:
-        ldx     #hi_scor_l              ; Hi Score descriptor
+        ldx     #hi_scor_m              ; Hi Score descriptor
         bra     draw_score              ; Print Hi-Score
                 
 ; $1956
