@@ -143,7 +143,7 @@ ROM:0094 CA 82 00		     jp	     Z,	exit_intr			     ; no, exit
 ROM:0097 3A EF 20		     ld	     a,	(game_in_progress)
 ROM:009A A7			     and     a					     ; game already started?
 ROM:009B C2 A5 00		     jp	     NZ, dispatch_vector_table@$2020	     ; yes, skip
-ROM:009E 3A C1 20		     ld	     a,	(animation_type)
+ROM:009E 3A C1 20		     ld	     a,	(isr_splash_task)
 ROM:00A1 0F			     rrca					     ; is there	an animation in	progress?
 ROM:00A2 D2 82 00		     jp	     NC, exit_intr			     ; no, exit
 ROM:00A5
@@ -429,7 +429,7 @@ ROM:01E6
 ROM:01E6	     init_vars_b_:
 ROM:01E6 11 00 1B		     ld	     de, #byte_0_1B00
 ROM:01E9 21 00 20		     ld	     hl, #curr_invader_needs_drawing	     ; work ram
-ROM:01EC C3 32 1A		     jp	     memcpy_hl_de_b_			     ; init variables
+ROM:01EC C3 32 1A		     jp	     block_copy				     ; init variables
 ROM:01EC	     ; End of function init_vars_b_
 ROM:01EC
 ROM:01EF
@@ -451,7 +451,7 @@ ROM:01FD
 ROM:01FD	     init_1_shield:
 ROM:01FD D5			     push    de
 ROM:01FE 06 2C			     ld	     b,	#44				     ; copy 44 bytes
-ROM:0200 CD 32 1A		     call    memcpy_hl_de_b_
+ROM:0200 CD 32 1A		     call    block_copy
 ROM:0203 D1			     pop     de
 ROM:0204 0D			     dec     c
 ROM:0205 C2 FD 01		     jp	     NZ, init_1_shield			     ; done? - no, loop
@@ -618,7 +618,7 @@ ROM:02B3 CD 24 14		     call    clear_shifted_bitmap		     ; wipe player ship
 ROM:02B6 21 10 20		     ld	     hl, #obj0_timer_msb
 ROM:02B9 11 10 1B		     ld	     de, # byte_0_1B00+0x10
 ROM:02BC 06 10			     ld	     b,	#16
-ROM:02BE CD 32 1A		     call    memcpy_hl_de_b_			     ; re-init vars (16	bytes)
+ROM:02BE CD 32 1A		     call    block_copy				     ; re-init vars (16	bytes)
 ROM:02C1 06 00			     ld	     b,	#0				     ; stop all	port 3 sounds
 ROM:02C3 CD DC 19		     call    stop_port3_sound
 ROM:02C6 3A 6D 20		     ld	     a,	(invaded)			     ; ptr invaded flag
@@ -760,7 +760,7 @@ ROM:039B
 ROM:039B	     handle_ship_explosion:					     ; next explosion #
 ROM:039B 3C			     inc     a
 ROM:039C E6 01			     and     #1					     ; only 2 of them
-ROM:039E 32 15 20		     ld	     (gameplay_ticker),	a		     ; get explosion #
+ROM:039E 32 15 20		     ld	     (player_alive), a			     ; get explosion #
 ROM:03A1 07			     rlca
 ROM:03A2 07			     rlca
 ROM:03A3 07			     rlca
@@ -781,7 +781,7 @@ ROM:03B8 C3 46 03		     jp	     loc_0_346
 ROM:03BB	     ; ---------------------------------------------------------------------------
 ROM:03BB 11 2A 20		     ld	     de, #player_shot_x_coord		     ; called by jump vector #2
 ROM:03BB									     ; player shot x coord
-ROM:03BE CD 06 1A		     call    sub_0_1A06
+ROM:03BE CD 06 1A		     call    comp_y_to_beam
 ROM:03C1 E1			     pop     hl
 ROM:03C2 D0			     ret     NC
 ROM:03C3 23			     inc     hl
@@ -844,7 +844,7 @@ ROM:0419 85			     add     a,	l				     ; calc new	screen bullet loc
 ROM:041A 6F			     ld	     l,	a
 ROM:041B 32 29 20		     ld	     (player_shot_y_coord), a		     ; save new	bullet coord
 ROM:041E CD 91 14		     call    draw_and_detect_collision		     ; draw player bullet and see if anything was hit
-ROM:0421 3A 61 20		     ld	     a,	(something_hit)
+ROM:0421 3A 61 20		     ld	     a,	(collision)
 ROM:0424 A7			     and     a					     ; was something hit?
 ROM:0425 C8			     ret     Z					     ; no, exit
 ROM:0426 32 02 20		     ld	     (player_shot_something), a		     ; flag player having shot something (anything)
@@ -872,7 +872,7 @@ ROM:0439 CD 52 14		     call    wipe_shifted_bitmap_pixels		     ; clear bullet/
 ROM:043C 21 25 20		     ld	     hl, #fire_progress_state		     ; fire progress state
 ROM:043F 11 25 1B		     ld	     de, # byte_0_1B00+0x25		     ; initialised values
 ROM:0442 06 07			     ld	     b,	#7				     ; (re)init	player bullet params
-ROM:0444 CD 32 1A		     call    memcpy_hl_de_b_			     ; init 7 bytes
+ROM:0444 CD 32 1A		     call    block_copy				     ; init 7 bytes
 ROM:0447 2A 8D 20		     ld	     hl, (???_counter)			     ; shot counter
 ROM:044A 2C			     inc     l					     ; inc
 ROM:044B 7D			     ld	     a,	l
@@ -918,12 +918,12 @@ ROM:048A
 ROM:048A	     loc_0_48A:							     ; ptr alien bomb 1	data
 ROM:048A 11 35 20		     ld	     de, #alien_bomb_1_data
 ROM:048D 3E F9			     ld	     a,	#0xF9 ;	'ù'                          ; lsb of last bomb bitmap in table
-ROM:048F CD 50 05		     call    copy_alien_bomb_data_2_curr	     ; copy to current
+ROM:048F CD 50 05		     call    to_shot_struct			     ; copy to current
 ROM:0492 3A 46 20		     ld	     a,	(plu_shot_step_cnt)		     ; byte 1 of bomb 2
 ROM:0495 32 70 20		     ld	     (other_shot_1), a
 ROM:0498 3A 56 20		     ld	     a,	(squ_shot_step_cnt)		     ; byte 1 of bomb 3
 ROM:049B 32 71 20		     ld	     (other_shot_2), a
-ROM:049E CD 63 05		     call    handle_alien_bombing
+ROM:049E CD 63 05		     call    handle_alien_shot
 ROM:04A1 3A 78 20		     ld	     a,	(a_shot_blow_cnt)		     ; alien bomb explosion timer
 ROM:04A4 A7			     and     a
 ROM:04A5 21 35 20		     ld	     hl, #alien_bomb_1_data		     ; alien bomb 1 data
@@ -931,7 +931,7 @@ ROM:04A8 C2 5B 05		     jp	     NZ, save_curr_alien_bomb_data
 ROM:04AB 11 30 1B		     ld	     de, # byte_0_1B00+0x30
 ROM:04AE 21 30 20		     ld	     hl, #obj2_timer_msb
 ROM:04B1 06 10			     ld	     b,	#0x10				     ; re-init data
-ROM:04B3 C3 32 1A		     jp	     memcpy_hl_de_b_
+ROM:04B3 C3 32 1A		     jp	     block_copy
 ROM:04B6	     ; ---------------------------------------------------------------------------
 ROM:04B6 E1			     pop     hl					     ; called by jump vector #4
 ROM:04B6									     ; update alien bomb #2
@@ -943,17 +943,17 @@ ROM:04BF FE 01			     cp	     #1
 ROM:04C1 C0			     ret     NZ
 ROM:04C2 11 45 20		     ld	     de, #alien_bomb_2_data		     ; ptr alien bomb 2	data
 ROM:04C5 3E ED			     ld	     a,	#0xED ;	'í'                          ; lsb of last bomb bitmap in table
-ROM:04C7 CD 50 05		     call    copy_alien_bomb_data_2_curr	     ; copy to current
+ROM:04C7 CD 50 05		     call    to_shot_struct			     ; copy to current
 ROM:04CA 3A 36 20		     ld	     a,	(rol_shot_set_cnt)		     ; byte 1 of bomb 1
 ROM:04CD 32 70 20		     ld	     (other_shot_1), a
 ROM:04D0 3A 56 20		     ld	     a,	(squ_shot_step_cnt)		     ; byte 1 of bomb 3
 ROM:04D3 32 71 20		     ld	     (other_shot_2), a
-ROM:04D6 CD 63 05		     call    handle_alien_bombing
-ROM:04D9 3A 76 20		     ld	     a,	(ptr_bomb_random_table)
+ROM:04D6 CD 63 05		     call    handle_alien_shot
+ROM:04D9 3A 76 20		     ld	     a,	(a_shot_c_fir_lsb)
 ROM:04DC FE 10			     cp	     #16
 ROM:04DE DA E7 04		     jp	     C,	loc_0_4E7
 ROM:04E1 3A 48 1B		     ld	     a,	(byte_0_1B00+0x48)		     ; (0) re-init ptr bomb random table
-ROM:04E4 32 76 20		     ld	     (ptr_bomb_random_table), a
+ROM:04E4 32 76 20		     ld	     (a_shot_c_fir_lsb), a
 ROM:04E7
 ROM:04E7	     loc_0_4E7:							     ; alien bomb explosion timer
 ROM:04E7 3A 78 20		     ld	     a,	(a_shot_blow_cnt)
@@ -963,7 +963,7 @@ ROM:04EE C2 5B 05		     jp	     NZ, save_curr_alien_bomb_data	     ; save curren
 ROM:04F1 11 40 1B		     ld	     de, # byte_0_1B00+0x40
 ROM:04F4 21 40 20		     ld	     hl, # rol_shot_blow_cnt+6
 ROM:04F7 06 10			     ld	     b,	#0x10				     ; re-init 16 bytes
-ROM:04F9 CD 32 1A		     call    memcpy_hl_de_b_
+ROM:04F9 CD 32 1A		     call    block_copy
 ROM:04FC 3A 82 20		     ld	     a,	(num_invaders_left)
 ROM:04FF 3D			     dec     a					     ; any invaders left?
 ROM:0500 C2 08 05		     jp	     NZ, loc_0_508			     ; yes, skip
@@ -971,7 +971,7 @@ ROM:0503 3E 01			     ld	     a,	#1
 ROM:0505 32 6E 20		     ld	     (skip_plunger), a
 ROM:0508
 ROM:0508	     loc_0_508:
-ROM:0508 2A 76 20		     ld	     hl, (ptr_bomb_random_table)
+ROM:0508 2A 76 20		     ld	     hl, (a_shot_c_fir_lsb)
 ROM:050B C3 7E 06		     jp	     loc_0_67E
 ROM:050E	     ; ---------------------------------------------------------------------------
 ROM:050E
@@ -979,59 +979,59 @@ ROM:050E	     game_obj_4:
 ROM:050E E1			     pop     hl
 ROM:050F
 ROM:050F	     handle_alien_bomb_3:					     ; ptr alien bomb 3	data
-ROM:050F 11 55 20		     ld	     de, #alien_bomb_3_data
+ROM:050F 11 55 20		     ld	     de, #squ_shot_status
 ROM:0512 3E DB			     ld	     a,	#0xDB ;	'Û'                          ; lsb of last bomb bitmap in table
-ROM:0514 CD 50 05		     call    copy_alien_bomb_data_2_curr	     ; copy to current
+ROM:0514 CD 50 05		     call    to_shot_struct			     ; copy to current
 ROM:0517 3A 46 20		     ld	     a,	(plu_shot_step_cnt)		     ; byte 1 of bomb 2
 ROM:051A 32 70 20		     ld	     (other_shot_1), a
 ROM:051D 3A 36 20		     ld	     a,	(rol_shot_set_cnt)		     ; byte 1 of bomb 1
 ROM:0520 32 71 20		     ld	     (other_shot_2), a
-ROM:0523 CD 63 05		     call    handle_alien_bombing
-ROM:0526 3A 76 20		     ld	     a,	(ptr_bomb_random_table)		     ; lsb of random bomb table	ptr
+ROM:0523 CD 63 05		     call    handle_alien_shot
+ROM:0526 3A 76 20		     ld	     a,	(a_shot_c_fir_lsb)		     ; lsb of random bomb table	ptr
 ROM:0529 FE 15			     cp	     #0x15
 ROM:052B DA 34 05		     jp	     C,	loc_0_534
 ROM:052E 3A 58 1B		     ld	     a,	(byte_0_1B00+0x58)		     ; $06 - re-init bomb random table ptr
-ROM:0531 32 76 20		     ld	     (ptr_bomb_random_table), a
+ROM:0531 32 76 20		     ld	     (a_shot_c_fir_lsb), a
 ROM:0534
 ROM:0534	     loc_0_534:							     ; alien bomb explosion timer
 ROM:0534 3A 78 20		     ld	     a,	(a_shot_blow_cnt)
 ROM:0537 A7			     and     a
-ROM:0538 21 55 20		     ld	     hl, #alien_bomb_3_data		     ; ptr alien bomb 3	data
+ROM:0538 21 55 20		     ld	     hl, #squ_shot_status		     ; ptr alien bomb 3	data
 ROM:053B C2 5B 05		     jp	     NZ, save_curr_alien_bomb_data	     ; save curr here
 ROM:053E 11 50 1B		     ld	     de, # byte_0_1B00+0x50
 ROM:0541 21 50 20		     ld	     hl, # plu_shot_blow_cnt+6
 ROM:0544 06 10			     ld	     b,	#0x10				     ; re-init 16 bytes
-ROM:0546 CD 32 1A		     call    memcpy_hl_de_b_
-ROM:0549 2A 76 20		     ld	     hl, (ptr_bomb_random_table)
+ROM:0546 CD 32 1A		     call    block_copy
+ROM:0549 2A 76 20		     ld	     hl, (a_shot_c_fir_lsb)
 ROM:054C 22 58 20		     ld	     (squ_shot_col_fire_tbl), hl
 ROM:054F C9			     ret
 ROM:0550
 ROM:0550	     ; =============== S U B R O U T I N E =======================================
 ROM:0550
 ROM:0550
-ROM:0550	     copy_alien_bomb_data_2_curr:
+ROM:0550	     to_shot_struct:
 ROM:0550 32 7F 20		     ld	     (alien_pic_end), a			     ; save lsb	of last	bomb bitmap in table
-ROM:0553 21 73 20		     ld	     hl, #curr_alien_bomb_data		     ; ptr curr	alien bomb data	block
+ROM:0553 21 73 20		     ld	     hl, #a_shot_status			     ; ptr curr	alien bomb data	block
 ROM:0556 06 0B			     ld	     b,	#0xB				     ; 11 bytes
-ROM:0558 C3 32 1A		     jp	     memcpy_hl_de_b_			     ; copy alien bomb data to current
-ROM:0558	     ; End of function copy_alien_bomb_data_2_curr
+ROM:0558 C3 32 1A		     jp	     block_copy				     ; copy alien bomb data to current
+ROM:0558	     ; End of function to_shot_struct
 ROM:0558
 ROM:055B	     ; ---------------------------------------------------------------------------
 ROM:055B
 ROM:055B	     save_curr_alien_bomb_data:					     ; ptr curr	alien bomb data
-ROM:055B 11 73 20		     ld	     de, #curr_alien_bomb_data
+ROM:055B 11 73 20		     ld	     de, #a_shot_status
 ROM:055E 06 0B			     ld	     b,	#0xB				     ; 11 bytes
-ROM:0560 C3 32 1A		     jp	     memcpy_hl_de_b_			     ; save curr bomb data
+ROM:0560 C3 32 1A		     jp	     block_copy				     ; save curr bomb data
 ROM:0563
 ROM:0563	     ; =============== S U B R O U T I N E =======================================
 ROM:0563
 ROM:0563
-ROM:0563	     handle_alien_bombing:
-ROM:0563 21 73 20		     ld	     hl, #curr_alien_bomb_data		     ; ptr curr	alien bomb data
+ROM:0563	     handle_alien_shot:
+ROM:0563 21 73 20		     ld	     hl, #a_shot_status			     ; ptr curr	alien bomb data
 ROM:0566 7E			     ld	     a,	(hl)
 ROM:0567 E6 80			     and     #0x80 ; '€'                             ; needs updating?
 ROM:0569 C2 C1 05		     jp	     NZ, update_alien_bomb		     ; yes, skip
-ROM:056C 3A C1 20		     ld	     a,	(animation_type)
+ROM:056C 3A C1 20		     ld	     a,	(isr_splash_task)
 ROM:056F FE 04			     cp	     #4					     ; bomb-c animation?
 ROM:0571 3A 69 20		     ld	     a,	(enable_alien_fire)		     ; ??? some	sort of	randomizer?
 ROM:0574 CA B7 05		     jp	     Z,	flag_bomb_needs_update		     ; yes, handle
@@ -1061,11 +1061,11 @@ ROM:0596 23			     inc     hl
 ROM:0597 7E			     ld	     a,	(hl)
 ROM:0598 A7			     and     a
 ROM:0599 CA 1B 06		     jp	     Z,	decide_invader_to_bomb
-ROM:059C 2A 76 20		     ld	     hl, (ptr_bomb_random_table)	     ; ptr into	random table for bomb dropping
+ROM:059C 2A 76 20		     ld	     hl, (a_shot_c_fir_lsb)		     ; ptr into	random table for bomb dropping
 ROM:059F 4E			     ld	     c,	(hl)				     ; get invader column to drop bomb
 ROM:05A0 23			     inc     hl					     ; next entry
 ROM:05A1 00			     nop
-ROM:05A2 22 76 20		     ld	     (ptr_bomb_random_table), hl	     ; save it
+ROM:05A2 22 76 20		     ld	     (a_shot_c_fir_lsb), hl		     ; save it
 ROM:05A5
 ROM:05A5	     loc_0_5A5:							     ; is there	an invader left	in this	column?
 ROM:05A5 CD 2F 06		     call    is_invader_left_in_column_c_
@@ -1080,7 +1080,7 @@ ROM:05B3 6F			     ld	     l,	a
 ROM:05B4 22 7B 20		     ld	     (alien_bomb_screen_loc), hl	     ; init alien bomb screen loc
 ROM:05B7
 ROM:05B7	     flag_bomb_needs_update:					     ; ptr curr	alien bomb info
-ROM:05B7 21 73 20		     ld	     hl, #curr_alien_bomb_data
+ROM:05B7 21 73 20		     ld	     hl, #a_shot_status
 ROM:05BA 7E			     ld	     a,	(hl)
 ROM:05BB F6 80			     or	     #0x80 ; '€'                             ; flag bomb requires updating
 ROM:05BD 77			     ld	     (hl), a
@@ -1091,16 +1091,16 @@ ROM:05C1	     ; ----------------------------------------------------------------
 ROM:05C1
 ROM:05C1	     update_alien_bomb:						     ; msb of alien bomb vram addr
 ROM:05C1 11 7C 20		     ld	     de, # alien_bomb_screen_loc+1
-ROM:05C4 CD 06 1A		     call    sub_0_1A06
+ROM:05C4 CD 06 1A		     call    comp_y_to_beam
 ROM:05C7 D0			     ret     NC
 ROM:05C8 23			     inc     hl					     ; $2073 - ptr curr	alien bomb data
 ROM:05C9 7E			     ld	     a,	(hl)
 ROM:05CA E6 01			     and     #1					     ; aliens already hit something?
-ROM:05CC C2 44 06		     jp	     NZ, explode_alien_bomb		     ; yes, skip
+ROM:05CC C2 44 06		     jp	     NZ, shot_blowing_up		     ; yes, skip
 ROM:05CF 23			     inc     hl					     ; $2074
 ROM:05D0 34			     inc     (hl)				     ; ??? bomb	life counter?
 ROM:05D1 CD 75 06		     call    wipe_alien_bomb
-ROM:05D4 3A 79 20		     ld	     a,	(alien_bomb_bitmap_addr)	     ; bitmap address lsb
+ROM:05D4 3A 79 20		     ld	     a,	(a_shot_image_lsb)		     ; bitmap address lsb
 ROM:05D7 C6 03			     add     a,	#3				     ; next bomb bitmap
 ROM:05D9 21 7F 20		     ld	     hl, #alien_pic_end			     ; lsb of last bitmap address in table
 ROM:05DC BE			     cp	     (hl)				     ; past end	of table?
@@ -1108,7 +1108,7 @@ ROM:05DD DA E2 05		     jp	     C,	loc_0_5E2			     ; no, skip
 ROM:05E0 D6 0C			     sub     #0xC				     ; reset bitmap to start of	table
 ROM:05E2
 ROM:05E2	     loc_0_5E2:							     ; save bitmap lsb address
-ROM:05E2 32 79 20		     ld	     (alien_bomb_bitmap_addr), a
+ROM:05E2 32 79 20		     ld	     (a_shot_image_lsb), a
 ROM:05E5 3A 7B 20		     ld	     a,	(alien_bomb_screen_loc)		     ; bomb y coordinate
 ROM:05E8 47			     ld	     b,	a
 ROM:05E9 3A 7E 20		     ld	     a,	(alien_bomb_y_inc)		     ; get number y coord offset
@@ -1118,7 +1118,7 @@ ROM:05F0 CD 6C 06		     call    draw_and_test_alien_bomb		     ; draw invader bo
 ROM:05F3 3A 7B 20		     ld	     a,	(alien_bomb_screen_loc)		     ; bomb y coord
 ROM:05F6 FE 15			     cp	     #0x15				     ; too low to hit player?
 ROM:05F8 DA 12 06		     jp	     C,	loc_0_612			     ; yes, exit
-ROM:05FB 3A 61 20		     ld	     a,	(something_hit)
+ROM:05FB 3A 61 20		     ld	     a,	(collision)
 ROM:05FE A7			     and     a					     ; was something hit?
 ROM:05FF C8			     ret     Z					     ; no, exit
 ROM:0600 3A 7B 20		     ld	     a,	(alien_bomb_screen_loc)		     ; bomb y coord
@@ -1128,12 +1128,12 @@ ROM:0608 FE 27			     cp	     #0x27 ; '''                             ; hit a ba
 ROM:060A 00			     nop
 ROM:060B D2 12 06		     jp	     NC, loc_0_612			     ; yes, exit
 ROM:060E 97			     sub     a					     ; player ship has been hit
-ROM:060F 32 15 20		     ld	     (gameplay_ticker),	a
+ROM:060F 32 15 20		     ld	     (player_alive), a
 ROM:0612
 ROM:0612	     loc_0_612:
-ROM:0612 3A 73 20		     ld	     a,	(curr_alien_bomb_data)
+ROM:0612 3A 73 20		     ld	     a,	(a_shot_status)
 ROM:0615 F6 01			     or	     #1					     ; flag aliens hit something
-ROM:0617 32 73 20		     ld	     (curr_alien_bomb_data), a
+ROM:0617 32 73 20		     ld	     (a_shot_status), a
 ROM:061A C9			     ret
 ROM:061B	     ; ---------------------------------------------------------------------------
 ROM:061B
@@ -1141,13 +1141,13 @@ ROM:061B	     decide_invader_to_bomb:					     ; get coord of player ship
 ROM:061B 3A 1B 20		     ld	     a,	(player_ship_coord_lsb_)
 ROM:061E C6 08			     add     a,	#8				     ; get coord of middle
 ROM:0620 67			     ld	     h,	a				     ; save
-ROM:0621 CD 6F 15		     call    find_hit_invader_column		     ; ??? some	sort of	randomiser based on ship coord
+ROM:0621 CD 6F 15		     call    find_in_column			     ; ??? some	sort of	randomiser based on ship coord
 ROM:0624 79			     ld	     a,	c				     ; get chosen column
 ROM:0625 FE 0C			     cp	     #12				     ; valid range (column 1-11)?
 ROM:0627 DA A5 05		     jp	     C,	loc_0_5A5			     ; yes, skip
 ROM:062A 0E 0B			     ld	     c,	#11				     ; column 11 to drop bomb
 ROM:062C C3 A5 05		     jp	     loc_0_5A5				     ; return
-ROM:062C	     ; End of function handle_alien_bombing
+ROM:062C	     ; End of function handle_alien_shot
 ROM:062C
 ROM:062F
 ROM:062F	     ; =============== S U B R O U T I N E =======================================
@@ -1177,7 +1177,7 @@ ROM:0643	     ; End of function is_invader_left_in_column_c_
 ROM:0643
 ROM:0644	     ; ---------------------------------------------------------------------------
 ROM:0644
-ROM:0644	     explode_alien_bomb:					     ; alien bomb explosion timer
+ROM:0644	     shot_blowing_up:						     ; alien bomb explosion timer
 ROM:0644 21 78 20		     ld	     hl, #a_shot_blow_cnt
 ROM:0647 35			     dec     (hl)				     ; tick down
 ROM:0648 7E			     ld	     a,	(hl)
@@ -1185,7 +1185,7 @@ ROM:0649 FE 03			     cp	     #3					     ; only starting to	explode?
 ROM:064B C2 67 06		     jp	     NZ, test_end_alien_bomb_explosion	     ; no, skip
 ROM:064E CD 75 06		     call    wipe_alien_bomb
 ROM:0651 21 DC 1C		     ld	     hl, #0x1CDC			     ; ptr bitmap for explosion
-ROM:0654 22 79 20		     ld	     (alien_bomb_bitmap_addr), hl	     ; save it as bomb bitmap
+ROM:0654 22 79 20		     ld	     (a_shot_image_lsb), hl		     ; save it as bomb bitmap
 ROM:0657 21 7C 20		     ld	     hl, # alien_bomb_screen_loc+1	     ; bomb x coord
 ROM:065A 35			     dec     (hl)
 ROM:065B 35			     dec     (hl)				     ; move left 2 pixels (for wider bitmap)
@@ -1206,7 +1206,7 @@ ROM:066C	     ; =============== S U B R O U T I N E ============================
 ROM:066C
 ROM:066C
 ROM:066C	     draw_and_test_alien_bomb:
-ROM:066C 21 79 20		     ld	     hl, #alien_bomb_bitmap_addr	     ; ptr alien bomb object
+ROM:066C 21 79 20		     ld	     hl, #a_shot_image_lsb		     ; ptr alien bomb object
 ROM:066F CD 3B 1A		     call    extract_DE_HL_B			     ; extract bomb object parameters
 ROM:0672 C3 91 14		     jp	     draw_and_detect_collision
 ROM:0672	     ; End of function draw_and_test_alien_bomb
@@ -1216,7 +1216,7 @@ ROM:0675	     ; =============== S U B R O U T I N E ============================
 ROM:0675
 ROM:0675
 ROM:0675	     wipe_alien_bomb:
-ROM:0675 21 79 20		     ld	     hl, #alien_bomb_bitmap_addr	     ; ptr alien bomb object
+ROM:0675 21 79 20		     ld	     hl, #a_shot_image_lsb		     ; ptr alien bomb object
 ROM:0678 CD 3B 1A		     call    extract_DE_HL_B			     ; extract bomb object parameters
 ROM:067B C3 52 14		     jp	     wipe_shifted_bitmap_pixels
 ROM:067B	     ; End of function wipe_alien_bomb
@@ -1250,7 +1250,7 @@ ROM:06A8 CD 3C 07		     call    draw_ufo				     ; draw UFO
 ROM:06AB
 ROM:06AB	     loc_0_6AB:							     ; ufo x coordinate
 ROM:06AB 11 8A 20		     ld	     de, #ufo_x
-ROM:06AE CD 06 1A		     call    sub_0_1A06
+ROM:06AE CD 06 1A		     call    comp_y_to_beam
 ROM:06B1 D0			     ret     NC
 ROM:06B2 21 85 20		     ld	     hl, #ufo_hit			     ; ptr ufo hit flag
 ROM:06B5 7E			     ld	     a,	(hl)
@@ -1374,7 +1374,7 @@ ROM:075F
 ROM:075F
 ROM:075F	     re_init_ufo_data:
 ROM:075F 11 83 1B		     ld	     de, #ufo_init_data			     ; ptr ufo data
-ROM:0762 C3 32 1A		     jp	     memcpy_hl_de_b_
+ROM:0762 C3 32 1A		     jp	     block_copy
 ROM:0762	     ; End of function re_init_ufo_data
 ROM:0762
 ROM:0765	     ; ---------------------------------------------------------------------------
@@ -1448,7 +1448,7 @@ ROM:07F9 CD 8D 08		     call    show_PLAY_PLAYER
 ROM:07FC CD D6 09		     call    clear_visible_display
 ROM:07FF 00			     nop
 ROM:0800 AF			     xor     a					     ; reset animation
-ROM:0801 32 C1 20		     ld	     (animation_type), a
+ROM:0801 32 C1 20		     ld	     (isr_splash_task),	a
 ROM:0804
 ROM:0804	     start_player_new_ship_2:
 ROM:0804 CD CF 01		     call    draw_base_line
@@ -1931,7 +1931,7 @@ ROM:0A59	     ; =============== S U B R O U T I N E ============================
 ROM:0A59
 ROM:0A59
 ROM:0A59	     check_player_hit:
-ROM:0A59 3A 15 20		     ld	     a,	(gameplay_ticker)
+ROM:0A59 3A 15 20		     ld	     a,	(player_alive)
 ROM:0A5C FE FF			     cp	     #0xFF				     ; $FF = player OK (zero flag set)
 ROM:0A5E C9			     ret
 ROM:0A5E	     ; End of function check_player_hit
@@ -1969,7 +1969,7 @@ ROM:0A80
 ROM:0A80
 ROM:0A80	     animate:
 ROM:0A80 3E 02			     ld	     a,	#2				     ; invader animation
-ROM:0A82 32 C1 20		     ld	     (animation_type), a
+ROM:0A82 32 C1 20		     ld	     (isr_splash_task),	a
 ROM:0A85
 ROM:0A85	     wait_for_animation_loop:
 ROM:0A85 D3 06			     out     (6), a
@@ -1977,7 +1977,7 @@ ROM:0A87 3A CB 20		     ld	     a,	(animation_finished)
 ROM:0A8A A7			     and     a					     ; has the animation finished?
 ROM:0A8B CA 85 0A		     jp	     Z,	wait_for_animation_loop		     ; no, loop
 ROM:0A8E AF			     xor     a					     ; reset animation
-ROM:0A8F 32 C1 20		     ld	     (animation_type), a
+ROM:0A8F 32 C1 20		     ld	     (isr_splash_task),	a
 ROM:0A92 C9			     ret
 ROM:0A92	     ; End of function animate
 ROM:0A92
@@ -2036,7 +2036,7 @@ ROM:0ABF	     ; =============== S U B R O U T I N E ============================
 ROM:0ABF
 ROM:0ABF
 ROM:0ABF	     update_attract_animations:
-ROM:0ABF 3A C1 20		     ld	     a,	(animation_type)
+ROM:0ABF 3A C1 20		     ld	     a,	(isr_splash_task)
 ROM:0AC2 0F			     rrca					     ; demo animation?
 ROM:0AC3 DA BB 0A		     jp	     C,	update_demo			     ; yes, handle
 ROM:0AC6 0F			     rrca					     ; invader animation?
@@ -2073,7 +2073,7 @@ ROM:0AE2
 ROM:0AE2	     init_splash_ani:
 ROM:0AE2 21 C2 20		     ld	     hl, #animation_frame_count		     ; invader animation data
 ROM:0AE5 06 0C			     ld	     b,	#0xC				     ; 12 bytes	of data
-ROM:0AE7 C3 32 1A		     jp	     memcpy_hl_de_b_			     ; init
+ROM:0AE7 C3 32 1A		     jp	     block_copy				     ; init
 ROM:0AE7	     ; End of function init_splash_ani
 ROM:0AE7
 ROM:0AEA	     ; ---------------------------------------------------------------------------
@@ -2133,7 +2133,7 @@ ROM:0B60 CD C0 01		     call    init_p1_invader_map		     ; initialise map of in
 ROM:0B63 CD EF 01		     call    init_p1_shields			     ; initialise shields in memory
 ROM:0B66 CD 1A 02		     call    draw_p1_shields			     ; draw them
 ROM:0B69 3E 01			     ld	     a,	#1				     ; demo animation
-ROM:0B6B 32 C1 20		     ld	     (animation_type), a
+ROM:0B6B 32 C1 20		     ld	     (isr_splash_task),	a
 ROM:0B6E CD CF 01		     call    draw_base_line			     ; draw pristine base line
 ROM:0B71
 ROM:0B71	     attract_tick_loop_1:					     ; also controls demo logic	inputs
@@ -2151,7 +2151,7 @@ ROM:0B86 C2 83 0B		     jp	     NZ, attract_tick_loop_2
 ROM:0B89
 ROM:0B89	     attract_tick_loop_3:					     ; reset animation
 ROM:0B89 AF			     xor     a
-ROM:0B8A 32 C1 20		     ld	     (animation_type), a
+ROM:0B8A 32 C1 20		     ld	     (isr_splash_task),	a
 ROM:0B8D CD B1 0A		     call    one_sec_delay
 ROM:0B90 CD 88 19		     call    j_clear_visible_display		     ; clear visible display
 ROM:0B93 0E 0C			     ld	     c,	#0xC				     ; length
@@ -2442,7 +2442,7 @@ ROM:1491
 ROM:1491	     draw_and_detect_collision:
 ROM:1491 CD 74 14		     call    set_shifter_and_calc_vram_addr
 ROM:1494 AF			     xor     a
-ROM:1495 32 61 20		     ld	     (something_hit), a			     ; flag nothing hit
+ROM:1495 32 61 20		     ld	     (collision), a			     ; flag nothing hit
 ROM:1498
 ROM:1498	     loc_0_1498:
 ROM:1498 C5			     push    bc
@@ -2454,7 +2454,7 @@ ROM:149F F5			     push    af
 ROM:14A0 A6			     and     (hl)				     ; hit something?
 ROM:14A1 CA A9 14		     jp	     Z,	loc_0_14A9			     ; no, continue
 ROM:14A4 3E 01			     ld	     a,	#1
-ROM:14A6 32 61 20		     ld	     (something_hit), a			     ; flag that something was hit
+ROM:14A6 32 61 20		     ld	     (collision), a			     ; flag that something was hit
 ROM:14A9
 ROM:14A9	     loc_0_14A9:						     ; shifted data
 ROM:14A9 F1			     pop     af
@@ -2469,7 +2469,7 @@ ROM:14B3 F5			     push    af
 ROM:14B4 A6			     and     (hl)				     ; hit something?
 ROM:14B5 CA BD 14		     jp	     Z,	loc_0_14BD			     ; no, continue
 ROM:14B8 3E 01			     ld	     a,	#1
-ROM:14BA 32 61 20		     ld	     (something_hit), a			     ; flag that something was hit
+ROM:14BA 32 61 20		     ld	     (collision), a			     ; flag that something was hit
 ROM:14BD
 ROM:14BD	     loc_0_14BD:						     ; shifted data
 ROM:14BD F1			     pop     af
@@ -2535,7 +2535,7 @@ ROM:1504 68			     ld	     l,	b
 ROM:1505 CD 62 15		     call    find_hit_invader_row		     ; b=row, l=y coord
 ROM:1508 3A 2A 20		     ld	     a,	(player_shot_x_coord)		     ; get player shot coord
 ROM:150B 67			     ld	     h,	a
-ROM:150C CD 6F 15		     call    find_hit_invader_column		     ; h=x coord
+ROM:150C CD 6F 15		     call    find_in_column			     ; h=x coord
 ROM:150F 22 64 20		     ld	     (invader_screen_loc), hl		     ; save ptr	invader	screen loc
 ROM:1512 3E 05			     ld	     a,	#5				     ; flag that shot is finished
 ROM:1514 32 25 20		     ld	     (fire_progress_state), a
@@ -2616,13 +2616,13 @@ ROM:156F
 ROM:156F	     ; =============== S U B R O U T I N E =======================================
 ROM:156F
 ROM:156F
-ROM:156F	     find_hit_invader_column:
+ROM:156F	     find_in_column:
 ROM:156F 3A 0A 20		     ld	     a,	(bottom_left_invader_x)
 ROM:1572 CD 54 15		     call    collision_detect_1_axis
 ROM:1575 DE 10			     sbc     a,	#0x10
 ROM:1577 67			     ld	     h,	a				     ; object x	coord
 ROM:1578 C9			     ret
-ROM:1578	     ; End of function find_hit_invader_column
+ROM:1578	     ; End of function find_in_column
 ROM:1578
 ROM:1579	     ; ---------------------------------------------------------------------------
 ROM:1579
@@ -2784,7 +2784,7 @@ ROM:1618	     ; =============== S U B R O U T I N E ============================
 ROM:1618
 ROM:1618
 ROM:1618	     poll_fire_button:
-ROM:1618 3A 15 20		     ld	     a,	(gameplay_ticker)
+ROM:1618 3A 15 20		     ld	     a,	(player_alive)
 ROM:161B FE FF			     cp	     #0xFF				     ; ready to	poll player controls?
 ROM:161D C0			     ret     NZ					     ; no, exit
 ROM:161E 21 10 20		     ld	     hl, #obj0_timer_msb
@@ -2922,7 +2922,7 @@ ROM:16E6	     kill_player_and_end_game:					     ; reset context
 ROM:16E6 31 00 24		     ld	     sp, #vram
 ROM:16E9 FB			     ei
 ROM:16EA AF			     xor     a
-ROM:16EB 32 15 20		     ld	     (gameplay_ticker),	a		     ; init player control poll	counter
+ROM:16EB 32 15 20		     ld	     (player_alive), a			     ; init player control poll	counter
 ROM:16EE
 ROM:16EE	     wait_for_ship_stop_exploding:
 ROM:16EE CD D8 14		     call    update_player_bullet
@@ -3284,21 +3284,21 @@ ROM:189E	     animate_bomb_c_dropping:
 ROM:189E 21 50 20		     ld	     hl, # plu_shot_blow_cnt+6		     ; ptr alien bomb 3	data
 ROM:18A1 11 C0 1B		     ld	     de, #word_0_1BC0
 ROM:18A4 06 10			     ld	     b,	#0x10
-ROM:18A6 CD 32 1A		     call    memcpy_hl_de_b_			     ; re-init alien bomb 3
+ROM:18A6 CD 32 1A		     call    block_copy				     ; re-init alien bomb 3
 ROM:18A9 3E 02			     ld	     a,	#2
 ROM:18AB 32 80 20		     ld	     (shot_sync), a
 ROM:18AE 3E FF			     ld	     a,	#0xFF
 ROM:18B0 32 7E 20		     ld	     (alien_bomb_y_inc), a		     ; init alien bomb y inc
 ROM:18B3 3E 04			     ld	     a,	#4				     ; set bomb-c animation
-ROM:18B5 32 C1 20		     ld	     (animation_type), a
+ROM:18B5 32 C1 20		     ld	     (isr_splash_task),	a
 ROM:18B8
 ROM:18B8	     loc_0_18B8:
-ROM:18B8 3A 55 20		     ld	     a,	(alien_bomb_3_data)
+ROM:18B8 3A 55 20		     ld	     a,	(squ_shot_status)
 ROM:18BB E6 01			     and     #1					     ; has bomb	animation started?
 ROM:18BD CA B8 18		     jp	     Z,	loc_0_18B8			     ; no, loop
 ROM:18C0
 ROM:18C0	     loc_0_18C0:
-ROM:18C0 3A 55 20		     ld	     a,	(alien_bomb_3_data)
+ROM:18C0 3A 55 20		     ld	     a,	(squ_shot_status)
 ROM:18C3 E6 01			     and     #1					     ; has bomb	animation finished?
 ROM:18C5 C2 C0 18		     jp	     NZ, loc_0_18C0			     ; no, loop
 ROM:18C8 21 11 33		     ld	     hl, # vram+0xF11			     ; screen loc
@@ -3499,7 +3499,7 @@ ROM:1982	     ; =============== S U B R O U T I N E ============================
 ROM:1982
 ROM:1982
 ROM:1982	     set_animation_type:
-ROM:1982 32 C1 20		     ld	     (animation_type), a
+ROM:1982 32 C1 20		     ld	     (isr_splash_task),	a
 ROM:1985 C9			     ret
 ROM:1985	     ; End of function set_animation_type
 ROM:1985
@@ -3614,7 +3614,7 @@ ROM:1A06
 ROM:1A06	     ; =============== S U B R O U T I N E =======================================
 ROM:1A06
 ROM:1A06
-ROM:1A06	     sub_0_1A06:
+ROM:1A06	     comp_y_to_beam:
 ROM:1A06 21 72 20		     ld	     hl, #which_intr			     ; which interrupt?
 ROM:1A09 46			     ld	     b,	(hl)				     ; b = RST8/10
 ROM:1A0A 1A			     ld	     a,	(de)				     ; msb of vram addr
@@ -3623,7 +3623,7 @@ ROM:1A0D A8			     xor     b
 ROM:1A0E C0			     ret     NZ
 ROM:1A0F 37			     scf
 ROM:1A10 C9			     ret
-ROM:1A10	     ; End of function sub_0_1A06
+ROM:1A10	     ; End of function comp_y_to_beam
 ROM:1A10
 ROM:1A10	     ; ---------------------------------------------------------------------------
 ROM:1A11	     ; table of	number of invaders left
@@ -3633,13 +3633,12 @@ ROM:1A11 16 11 0D 0A+		     .db 1
 ROM:1A21	     ; table of	entries	corresponding to above
 ROM:1A21 34 2E 27 22+byte_0_1A21:    .db 52, 46, 39, 34, 28, 24, 21, 19, 16, 14, 13, 12, 11
 ROM:1A21 1C 18 15 13+		     .db 9, 7, 5
-ROM:1A31	     ; ---------------------------------------------------------------------------
-ROM:1A31 FF			     rst     sub_0_38
+ROM:1A31 FF			     .db 0xFF
 ROM:1A32
 ROM:1A32	     ; =============== S U B R O U T I N E =======================================
 ROM:1A32
 ROM:1A32
-ROM:1A32	     memcpy_hl_de_b_:
+ROM:1A32	     block_copy:
 ROM:1A32 1A			     ld	     a,	(de)
 ROM:1A33 77			     ld	     (hl), a
 ROM:1A34 23			     inc     hl
@@ -3647,9 +3646,9 @@ ROM:1A35 13			     inc     de
 ROM:1A36 05			     dec     b
 ROM:1A37
 ROM:1A37	     loc_0_1A37:
-ROM:1A37 C2 32 1A		     jp	     NZ, memcpy_hl_de_b_
+ROM:1A37 C2 32 1A		     jp	     NZ, block_copy
 ROM:1A3A C9			     ret
-ROM:1A3A	     ; End of function memcpy_hl_de_b_
+ROM:1A3A	     ; End of function block_copy
 ROM:1A3A
 ROM:1A3B
 ROM:1A3B	     ; =============== S U B R O U T I N E =======================================
@@ -3813,11 +3812,10 @@ ROM:1B87 64 1D			     .dw unk_0_1D64				     ; ufo bitmap address
 ROM:1B89 D0 29			     .dw vram+0x5D0				     ; ufo screen loc
 ROM:1B8B 18			     .db 24					     ; ufo bitmap size
 ROM:1B8C 02			     .db    2
-ROM:1B8D 54			     .db 0x54 ;	T
-ROM:1B8E 1D			     .db 0x1D
-ROM:1B8F 00 08			     .dw 0x800					     ; ptr to code - of	which b0 determines which side ufo appears
-ROM:1B91 00			     .db    0
-ROM:1B92 06			     .db    6
+ROM:1B8D 54 1D			     .dw sau_score_msb
+ROM:1B8F 00			     .db    0					     ; ptr to code - of	which b0 determines which side ufo appears
+ROM:1B90 08			     .db    8
+ROM:1B91 00 06			     .dw 0x600
 ROM:1B93 00			     .db    0
 ROM:1B94 00			     .db    0
 ROM:1B95 01			     .db    1
@@ -3827,10 +3825,7 @@ ROM:1B98 01			     .db    1
 ROM:1B99 00			     .db    0
 ROM:1B9A 00			     .db    0
 ROM:1B9B 10			     .db 0x10
-ROM:1B9C 9E			     .db 0x9E ;	ž
-ROM:1B9D 00			     .db    0
-ROM:1B9E 20			     .db 0x20
-ROM:1B9F 1C			     .db 0x1C
+ROM:1B9C 9E 00 20 1C		     .db 0x9E, 0, 0x20,	0x1C
 ROM:1BA0	     ; Alien sprite type C pulling upside down Y
 ROM:1BA0 00 03 04 78+alien_spr_CYA:  .db 0,3,4,0x78,0x14,0x13,8,0x1A
 ROM:1BA0 14 13 08 1A+		     .db 0x3D,0x68,0xFC,0xFC,0x68,0x3D,0x1A,0
@@ -3975,17 +3970,8 @@ ROM:1CFF 00			     .db    0
 ROM:1D00 01 07 01 01+col_fire_table: .db 1, 7, 1, 1, 1,	4, 0xB,	1		     ; table of	columns	to drop	bomb
 ROM:1D00 01 04 0B 01+		     .db 6, 3, 1, 1, 0xB, 9, 2,	8		     ; - (pseudo-random	series)
 ROM:1D00 06 03 01 01+		     .db 2, 0xB, 4, 7, 0xA
-ROM:1D15 05			     .db    5
-ROM:1D16 02			     .db    2
-ROM:1D17 05			     .db    5
-ROM:1D18 04			     .db    4
-ROM:1D19 06			     .db    6
-ROM:1D1A 07			     .db    7
-ROM:1D1B 08			     .db    8
-ROM:1D1C 0A			     .db  0xA
-ROM:1D1D 06			     .db    6
-ROM:1D1E 0A			     .db  0xA
-ROM:1D1F 03			     .db    3
+ROM:1D15 05 02 05 04+		     .db 5, 2, 5, 4, 6,	7, 8, 0xA
+ROM:1D15 06 07 08 0A+		     .db 6, 0xA, 3
 ROM:1D20 FF 0F FF 1F+shield_gfx_data:.db 0xFF, 0xF, 0xFF, 0x1F,	0xFF, 0x3F, 0xFF, 0x7F,	0xFF ; shield data
 ROM:1D20 FF 3F FF 7F+		     .db 0xFF, 0xFC, 0xFF, 0xF8, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF
 ROM:1D20 FF FF FC FF+		     .db 0xF0, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF, 0xF0, 0xFF, 0xF0
@@ -3993,22 +3979,8 @@ ROM:1D20 F8 FF F0 FF+		     .db 0xFF, 0xF8, 0xFF, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 
 ROM:1D20 F0 FF F0 FF+		     .db 0xFF, 0x7F, 0xFF, 0x3F, 0xFF, 0x1F, 0xFF, 0xF
 ROM:1D4C 05 10 15 30 ufo_score_tbl:  .db 5, 0x10, 0x15,	0x30			     ; table of	UFO points (/100)
 ROM:1D50 94 97 9A 9D byte_0_1D50:    .db 0x94, 0x97, 0x9A, 0x9D			     ; table of	corresponding bitmap addresses (lsb)
-ROM:1D54 10			     .db 0x10
-ROM:1D55 05			     .db    5
-ROM:1D56 05			     .db    5
-ROM:1D57 10			     .db 0x10
-ROM:1D58 15			     .db 0x15
-ROM:1D59 10			     .db 0x10
-ROM:1D5A 10			     .db 0x10
-ROM:1D5B 05			     .db    5
-ROM:1D5C 30			     .db 0x30 ;	0
-ROM:1D5D 10			     .db 0x10
-ROM:1D5E 10			     .db 0x10
-ROM:1D5F 10			     .db 0x10
-ROM:1D60 05			     .db    5
-ROM:1D61 15			     .db 0x15
-ROM:1D62 10			     .db 0x10
-ROM:1D63 05			     .db    5
+ROM:1D54 10 05 05 10+sau_score_msb:  .db 0x10, 5, 5, 0x10, 0x15, 0x10, 0x10, 5
+ROM:1D54 15 10 10 05+		     .db 0x30, 0x10, 0x10, 0x10, 5, 0x15, 0x10,	5
 ROM:1D64 00	     unk_0_1D64:     .db    0
 ROM:1D65 00			     .db    0
 ROM:1D66 00			     .db    0
@@ -4160,7 +4132,7 @@ RAM:2010 ??	     obj0_timer_msb: .ds 1
 RAM:2011 ??	     obj0_timer_lsb: .ds 1
 RAM:2012 ??	     obj0_timer_extra:.ds 1
 RAM:2013 ?? ??	     obj0_handler:   .ds 2
-RAM:2015 ??	     gameplay_ticker:.ds 1
+RAM:2015 ??	     player_alive:   .ds 1
 RAM:2016 ??			     .ds 1					     ; player explosion	counter
 RAM:2017 ??			     .ds 1
 RAM:2018 ?? ??	     player_ship_info:.ds 2					     ; ptr player ship gfx bitmap
@@ -4200,7 +4172,7 @@ RAM:2047 ??			     .ds 1
 RAM:2048 ?? ??	     plu_shot_col_fire_tbl:.ds 2
 RAM:204A ?? ?? ?? ??+plu_shot_blow_cnt:.ds 9					     ; (unused?)
 RAM:2053 ?? ??	     obj4_handler:   .ds 2					     ; jump vector
-RAM:2055 ??	     alien_bomb_3_data:.ds 1
+RAM:2055 ??	     squ_shot_status:.ds 1
 RAM:2056 ??	     squ_shot_step_cnt:.ds 1
 RAM:2057 ??			     .ds 1
 RAM:2058 ?? ??	     squ_shot_col_fire_tbl:.ds 2
@@ -4211,7 +4183,7 @@ RAM:205D ??			     .ds 1
 RAM:205E ??			     .ds 1
 RAM:205F ??			     .ds 1
 RAM:2060 ??			     .ds 1
-RAM:2061 ??	     something_hit:  .ds 1
+RAM:2061 ??	     collision:	     .ds 1
 RAM:2062 ?? ??	     exp_alien:	     .ds 2					     ; ptr invader object bitmap
 RAM:2064 ?? ??	     invader_screen_loc:.ds 2					     ; invader object screen loc
 RAM:2066 ??			     .ds 1					     ; invader object bitmap length
@@ -4227,12 +4199,12 @@ RAM:206F ??			     .ds 1
 RAM:2070 ??	     other_shot_1:   .ds 1
 RAM:2071 ??	     other_shot_2:   .ds 1
 RAM:2072 ??	     which_intr:     .ds 1
-RAM:2073 ??	     curr_alien_bomb_data:.ds 1					     ; 11 bytes	of bomb	data
+RAM:2073 ??	     a_shot_status:  .ds 1					     ; 11 bytes	of bomb	data
 RAM:2074 ??			     .ds 1
 RAM:2075 ??			     .ds 1
-RAM:2076 ?? ??	     ptr_bomb_random_table:.ds 2
+RAM:2076 ?? ??	     a_shot_c_fir_lsb:.ds 2
 RAM:2078 ??	     a_shot_blow_cnt:.ds 1
-RAM:2079 ?? ??	     alien_bomb_bitmap_addr:.ds	2				     ; object bitmap location
+RAM:2079 ?? ??	     a_shot_image_lsb:.ds 2					     ; object bitmap location
 RAM:207B ?? ??	     alien_bomb_screen_loc:.ds 2				     ; object screen location
 RAM:207D ??	     alien_bomb_bitmap_length:.ds 1				     ; object bitmap length
 RAM:207E ??	     alien_bomb_y_inc:.ds 1
@@ -4267,7 +4239,7 @@ RAM:209A ??	     tilted:	     .ds 1
 RAM:209B ??	     invader_sound_counter:.ds 1
 RAM:209C ?? ?? ?? ??+		     .ds 0x24					     ; (unused?)
 RAM:20C0 ??	     isr_delay:	     .ds 1
-RAM:20C1 ??	     animation_type: .ds 1					     ; 0 = none,
+RAM:20C1 ??	     isr_splash_task:.ds 1					     ; 0 = none,
 RAM:20C1									     ; 1 = demo,
 RAM:20C1									     ; 2 = invader,
 RAM:20C1									     ; 4 = bomb-c
