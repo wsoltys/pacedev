@@ -737,7 +737,7 @@ loc_0072:
         sta     shot_sync               ; ... other two shots
         bsr     draw_alien              ; Draw the current alien (or exploding alien)
         jsr     run_game_objs           ; Process game objects (including player object)
-        ;bsr     time_to_saucer          ; Count down time to saucer
+        jsr     time_to_saucer          ; Count down time to saucer
 
 loc_0086:
         EI
@@ -1374,15 +1374,37 @@ read_ply_shot:
 
 ; $0436
 end_of_blowup:
-        bsr     read_ply_shot
-        jsr     erase_shifted
-        ldx     #plyr_shot_status
-        ldy     #byte_0_1B00+0x25
-        ldb     #7
-        jsr     block_copy
-        ldx     sau_score_msb
-; *** FIXME        
-        rts
+        bsr     read_ply_shot           ; Read the shot structure
+        jsr     erase_shifted           ; Erase the player's shot
+        ldx     #plyr_shot_status       ; Reinit ...
+        ldy     #byte_0_1B00+0x25       ; ... shot structure ...
+        ldb     #7                      ; ... from ...
+        jsr     block_copy              ; ... ROM mirror
+        ldx     sau_score_msb           ; Get pointer to saucer-score table
+        leax    1,x                     ; Every shot explosion advances it one
+        tfr     x,d                     ; Have we passed ...
+        cmpb    #0x63                   ; ... the end at 1D63 (bug! this should be $64 to cover all 16 values)
+        bcs     1$                      ; No .... keep it
+        ldb     #0x54                   ; Wrap back around to 1D54
+1$:     tfr     d,x
+        stx     sau_score_msb           ; New score pointer
+        ldd     shot_count_msb          ; Increments with every shot ...
+        incb                            ; ... but only LSB ** ...
+        std     shot_count_msb          ; ... used for saucer direction
+        tst     saucer_active           ; Is saucer on screen?
+        bne     9$                      ; Yes ... don't reset it
+; Setup saucer direction for next trip
+        lda     ,x                      ; Shot counter
+        ldu     #0x0229                 ; Xr delta of 2 starting at Xr=29
+        anda    #1                      ; Lowest bit set?
+        bne     2$                      ; Yes ... use 2/29
+        ldu     #0xfee0                 ; No ... Xr delta of -2 starting at Xr=E0
+2$:     tfr     u,d
+        ldx     #saucer_pri_pic_lsb     ; Saucer descriptor ??? RIGHT????
+        stb     ,x                      ; Store Xr coordinate
+        leax    2,x                     ; Point to delta Xr
+        sta     ,x                      ; Store delta Xr
+9$:     rts
         
 ; $0476
 ; Game object 2: Alien rolling-shot (targets player specifically)
@@ -1707,6 +1729,8 @@ game_obj_4:
         tst     ,x                      ; Is it time for a saucer?
         lbeq    loc_050F                ; No ... go process squiggly shot
 ; lots more code *** FIXME
+
+loc_0707:
         rts        
 
 ; $0765
@@ -1816,16 +1840,16 @@ loc_0817:
         tst     num_aliens              ; Number of live aliens. All aliens gone?
         lbeq    loc_09EF                ; Yes ... end of turn
         jsr     a_shot_reload_rate_fn   ; Update alien-shot-rate based on player's score
-        ;bsr     sub_0935                ; Check (and handle) extra ship award
+        jsr     sub_0935                ; Check (and handle) extra ship award
         jsr     speed_shots             ; Adjust alien shot speed
         jsr     shot_sound              ; Shot sound on or off with 2025
         jsr     sub_0A59                ; Check if player is hit
         beq     2$                      ; No hit ... jump handler
         ldb     #0x04                   ; Player hit sound
         jsr     sound_bits_3_on         ; Make explosion sound
-2$:     ;bsr     fleet_delay_ex_ship     ; Extra-ship sound timer, set fleet-delay, play fleet movement sound
+2$:     jsr     fleet_delay_ex_ship     ; Extra-ship sound timer, set fleet-delay, play fleet movement sound
 ;       out     (watchdog),a
-        ;bsr     ctrl_saucer_sound       ; Control saucer sound
+        jsr     ctrl_saucer_sound       ; Control saucer sound
         bra     1$                      ; Continue game loop
 
 ; $0857
@@ -1964,6 +1988,20 @@ draw_char:
 ; hit watchdog
         jmp     draw_simp_sprite
 
+; $0913
+time_to_saucer:
+        lda     ref_alien_yr            ; Reference alien's X coordinate
+        cmpa    #0x78                   ; Don't process saucer timer ... ($78 is 1st rack Yr)
+        bcc     9$                      ; ... unless aliens are closer to bottom
+        ldx     till_saucer_msb         ; Time to saucer
+        bne     1$                      ; Is it time for a saucer? No ... skip flagging
+        ldx     #0x600                  ; Reset timer to 600 game loops
+        lda     #1                      ; Flag a ...
+        sta     saucer_start            ; ... saucer sequence
+1$:     leax    -1,x                    ; Decrement the ...
+        stx     till_saucer_msb         ; ... time-to-saucer
+9$:     rts
+        
 ; $092E
 ; Get number of ships for active player
 sub_092E:
@@ -1973,6 +2011,48 @@ sub_092E:
         tfr     d,x
         lda     ,x                      ; Get number of ships
         rts
+
+; $0935
+; Award extra ship if score has reached ceiling
+sub_0935:
+        jsr     cur_ply_alive           ; Get descriptor of sorts
+        leax    -2,x                    ; Back up two bytes
+        tst     ,x                      ; Has extra ship already been awarded?
+        bne     1$                      
+0$:     rts                             ; Yes ... ignore
+1$:     ldb     #0x15                   ; Default 1500
+;       in      a,(inp2)
+        lda     #0                      ; HARD-CODE DIPSWITCH VALUE
+        anda    #8                      ; Extra ship at 1000 or 1500
+        beq     2$                      ; 0=1500
+        ldb     #0x10                   ; Awarded at 1000
+2$:     stb     *z80_b
+        jsr     sub_09CA                ; Get score descriptor for active player
+        leax    1,x                     ; MSB of score ...
+        lda     ,x                      ; ... to accumulator
+        cmpa    *z80_b                  ; Time for an extra ship?
+        bcs     0$                      ; No ... out
+        bsr     sub_092E                ; Get pointer to number of ships
+        inc     ,x                      ; Bump number of ships
+        lda     ,x                      ; Get the new total
+        pshs    a                       ; Hang onto it for a bit
+        ldx     #vram+0x2501            ; Screen coords for ship hold
+3$:     leax    512,x                   ; Bump to next
+        deca                            ; ... spot
+        bne     3$                      ; Find spot for new ship
+        ldb     #16                     ; 16 byte sprite
+        ldy     #player_sprite          ; Player sprite
+        jsr     draw_simp_sprite        ; Draw the sprite
+        puls    a                       ; Restore the count
+        inca                            ; +1
+        jsr     loc_1A8B                ; Print the number of ships
+        jsr     cur_ply_alive           ; Get descriptor for active player of some sort
+        leax    -2,x                    ; Back up two bytes
+        clr     ,x                      ; Flag extra ship has been awarded
+        lda     #0xff                   ; Set timer ...
+        sta     extra_hold              ; ... for extra-ship sound
+        ldb     #0x10                   ; Make sound ...
+        jmp     sound_bits_3_on         ; ... for extra man
 
 ; $097C
 alien_score_value:
@@ -2035,7 +2115,7 @@ draw_hex_byte:
 ; $09C5
 sub_09C5:
         adda    #0x1A                   ; convert to digit char
-        bra     draw_char
+        jmp     draw_char
 
 ; $09CA
 ; Get score descriptor for active player
@@ -2981,6 +3061,51 @@ sub_176D:
 ;       out     (sound2),a              ; Set sounds
         rts
 
+; $1775
+fleet_delay_ex_ship:
+        tst     change_fleet_snd        ; Time for new fleet movement sound?
+        beq     4$                      ; No ... skip to extra-man timing
+        ldx     #byte_0_1A11            ; Number of aliens list coupled ...
+        ldy     #byte_0_1A21            ; ... with delay list
+        lda     num_aliens              ; Get the number of aliens on the screen
+1$:     cmpa    ,x                      ; Compare it to the first list value
+        bcc     2$                      ; Number of live aliens is higher than value ... use the delay
+        leax    1,x                     ; Move to ...
+        leay    1,y                     ; ... next list value
+        bra     1$                      ; Find the right delay
+2$:     lda     ,y                      ; Get the delay from the second list
+        sta     fleet_snd_reload        ; Store the new alien sound delay
+        ldx     #sound_port_5           ; Get current state ...
+        lda     ,x                      ; ... of sound port
+        anda    #0x30                   ; Mask off all fleet movement sounds
+        sta     *z80_b                  ; Hold the value
+        lda     ,x                      ; Get current state
+        anda    #0x0f                   ; This time ONLY the fleet movement sounds
+        rola                            ; Shift next to next sound
+        cmpa    #0x10                   ; Overflow?
+        bne     3$                      ; No ... keep it
+        lda     #1                      ; Reset back to first sound
+3$:     ora     *z80_b                  ; Add fleet sounds to current sound value
+        sta     ,x                      ; Store new sound value
+        clr     change_fleet_snd        ; Restart waiting on fleet time
+;
+4$:     ldx     #extra_hold             ; Sound timer for award extra ship
+        dec     ,x                      ; Time expired?
+        beq     5$
+        rts                             ; No ... leave sound playing
+5$:     ldb     #~(1<<4)                ; Turn off bit set with #$10 (award extra ship)
+        jmp     sound_bits_3_off        ; Stop sound and out
+
+; $17B4
+snd_off_ext_ply:
+        ldb     #~(1<<4)                ; Mask off sound bit 4 (Extended play)
+        ldx     #sound_port_5           ; Current sound content
+        lda     ,x                      ; Get current sound bits
+        anda    *z80_b                  ; Turn off extended play
+        sta     ,x                      ; Remember settings
+;       out     (sound2),a
+        rts
+
 ; $17C0
 ; Read control inputs for active player
 read_inputs:
@@ -3017,6 +3142,18 @@ read_inputs:
 ; read player 2 inputs                
         bra     0$                      ; same keys for now
         rts
+
+; $1804
+ctrl_saucer_sound:
+        ldx     #saucer_active          ; Saucer on screen flag
+        tst     ,x                      ; Is the saucer on the screen?
+        lbeq    loc_0707                ; No ... UFO sound off
+        leax    1,x                     ; Saucer hit flag
+        tst     ,x                      ; (2085) Get saucer hit flag. Is saucer in "hit" sequence?
+        beq     1$
+        rts                             ; Yes ... out
+1$:     ldb     #1                      ; Retrigger saucer ...
+        jmp     sound_bits_3_on         ; ... sound (retrigger makes it warble?)
 
 ; $1815
 ; Draw "SCORE ADVANCE TABLE"
@@ -3373,6 +3510,22 @@ comp_y_to_beam:
         bne     9$                      ; Not the same (CF cleared)
         SCF                             ; Set the CF if the same
 9$:     rts
+
+; $1A11
+; Alien delay lists. First list is the number of aliens. The second list is the corresponding delay.
+; This delay is only for the rate of change in the fleet's sound.
+; The check takes the first num-aliens-value that is lower or the same as the actual num-aliens on screen.
+;
+; The game starts with 55 aliens. The aliens are move/drawn one per interrupt which means it
+; takes 55 interrupts. The first delay value is 52 ... which is almost in sync with the number
+; of aliens. It is a tad faster and you can observe the sound and steps getting out of sync.
+byte_0_1A11:
+        .db 50, 43, 36, 28, 22, 17, 13, 10, 8, 7, 6, 5, 4, 3, 2
+        .db 1
+byte_0_1A21:
+        .db 52, 46, 39, 34, 28, 24, 21, 19, 16, 14, 13, 12, 11
+        .db 9, 7, 5
+        .db 0xFF
         
 ; $1A32
 block_copy:
