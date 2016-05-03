@@ -953,11 +953,11 @@ add_delta:
 ; $01E4
 ; Block copy ROM mirror 1B00-1BBF to initialize RAM at 2000-20BF.
 copy_ram_mirror:
-        ldb     #0xc0
+        ldb     #0xc0                   ; Number of bytes
 sub_01E6:
-        ldy     #byte_0_1B00
-        ldx     #wram
-        jmp     block_copy
+        ldy     #byte_0_1B00            ; RAM mirror in ROM
+        ldx     #wram                   ; Start of RAM
+        jmp     block_copy              ; Copy [DE/Y]->[HL/X] and return
 
 ; $01EF
 draw_shield_pl1:
@@ -1093,14 +1093,14 @@ loc_026F:
 
 ; Word at xx00 and xx01 is non-zero. Decrement it and move to next task. 
 loc_0277:
-        decb
-        incb
-        bne     1$
-        deca
-1$:     decb
-        stb     ,x
-        leax    -1,x
-        sta     ,x
+        decb                            ; Decrement ...
+        incb                            ; ... two ...
+        bne     1$                      ; ... byte ...
+        deca                            ; ... value ...
+1$:     decb                            ; ... at ...
+        stb     ,x                      ; ... xx00 ...
+        leax    -1,x                    ; ... and ...
+        sta     ,x                      ; ... xx01
         
 loc_0281:
         leax    0x10,x                  ; Next object descriptor
@@ -1268,18 +1268,18 @@ move_player_left:
 ; $039B
 ; Toggle the player's blowing-up sprite between two pictures and draw it
 draw_player_die:
-        inca
-        anda    #1
-        sta     player_alive
-        rola
-        rola
-        rola
-        rola
-        ldx     #plr_blow_up_sprites
-        tfr     a,b
-        abx
-        stx     plyr_spr_pic_m
-        bra     loc_036F
+        inca                            ; Toggle blowing-up ...
+        anda    #1                      ; ... player sprite (0,1,0,1)
+        sta     player_alive            ; Hold current state
+        rola                            ; *2
+        rola                            ; *4
+        rola                            ; *8
+        rola                            ; *16
+        ldx     #plr_blow_up_sprites    ; Base blow-up sprite location
+        tfr     a,b                     ; Offset sprite ...
+        abx                             ; ... pointer
+        stx     plyr_spr_pic_m          ; New blow-up sprite picture
+        bra     loc_036F                ; Draw new blow-up sprite and out
         
 ; $03B0
 loc_03B0:
@@ -1724,15 +1724,126 @@ game_obj_4:
         lda     shot_sync               ; Sync flag (copied from GO-2's timer value)
         cmpa    #2                      ; Are GO-2 and GO-3 idle?
         beq     1$
-        rts                             ; No ... only one at a time
+0$:     rts                             ; No ... only one at a time
 1$:     ldx     #saucer_start           ; Time-till-saucer flag
         tst     ,x                      ; Is it time for a saucer?
         lbeq    loc_050F                ; No ... go process squiggly shot
-; lots more code *** FIXME
-
-loc_0707:
+        tst     squ_shot_step_cnt       ; Is there a squiggly shot going?
+        lbne    loc_050F                ; Yes ... go handle squiggly shot
+; $0698
+        leax    1,x                     ; Saucer on screen flag
+        tst     ,x                      ; (2084) Is the saucer already on the screen?
+        bne     2$                      ; Yes ... go handle it
+        lda     num_aliens              ; Number of aliens remaining
+        cmpa    #8                      ; Less than ...
+        lbcs    loc_050F                ; ... 8 ... no saucer
+        lda     #1                      
+        sta     ,x                      ; (2084) The saucer is on the screen
+        lbsr    sub_073C                ; Draw the flying saucer
+; $06AB
+2$:     ldy     #saucer_pri_pic_msb     ; Saucer's Y coordinate
+        jsr     comp_y_to_beam          ; Compare to beam position
+        bcc     0$                      ; Not the right ISR for moving saucer
+; $06B2
+        ldx     #saucer_hit             ; Saucer hit flag
+        tst     ,x                      ; Has saucer been hit?
+        bne     3$                      ; Yes ... don't move it
+; $06BA
+        ldx     #saucer_pri_pic_msb     ; Saucer's structure
+        lda     ,x                      ; Get saucer's Y coordinate
+        leax    2,x                     ; Bump to delta Y
+        adda    ,x                      ; Move saucer
+        sta     saucer_pri_pic_msb      ; New coordinate
+        bsr     sub_073C                ; Draw the flying saucer
+        ldx     #saucer_pri_pic_msb     ; Saucer's structure
+        lda     ,x                      ; Y coordinate
+        cmpa    #0x28                   ; Too low? End of screen?
+        bcs     4$                      ; Yes ... remove from play
+        cmpa    #0xe1                   ; Too high? End of screen?
+        bcc     4$                      ; Yes ... remove from play
         rts        
+; $06D6        
+3$:     ldb     #0xfe                   ; Turn off ...
+        jsr     sound_bits_3_off        ; ... flying saucer sound
+        leax    1,x                     ; (2086) show-hit timer
+        dec     ,x                      ; Count down show-hit timer
+        lda     ,x                      ; Get current value
+        cmpa    #0x1f                   ; Starts at 20 ... is this the first tick of show-hit timer?
+        beq     loc_074B                ; Yes ... go show the explosion
+        cmpa    #0x18                   ; A little later ...
+        beq     loc_070C                ; ... show the score besides the saucer and add it
+        tsta                            ; Has timer expired?
+        bne     0$                      ; No ... let it run
+        ldb     #0xef                   ; 1110_1111 (mask off saucer hit sound)
+        stb     *z80_b
+        ldx     #sound_port_5           ; Get current ...
+        lda     ,x                      ; ... value of port 5 sound
+        anda    *z80_b                  ; Mask off the saucer-hit sound
+        sta     ,x                      ; Set the new value
+        anda    #0x20                   ; All sound off but cocktail cabinet bit
+;       out     (sound2),a
+; $06F9
+4$:     bsr     sub_0742                ; Convert pixel pos from descriptor to HL screen and shift
+        jsr     clear_small_sprite      ; Clear a one byte sprite at HL
+        ldx     #saucer_start           ; Saucer structure
+        ldb     #10                     ; 10 bytes in saucer structure
+        bsr     sub_075F                ; Re-initialize saucer structure
+; $0707
+loc_0707:
+        ldb     #0xfe                   ; Turn off UFO ...
+        jmp     sound_bits_3_off        ; ... sound and out
+; $070C
+loc_070C:
+        lda     #1                      ; Flag the score ...
+        sta     adjust_score            ; ... needs updating
+        ldx     sau_score_msb           ; Saucer score table
+        ldb     ,x                      ; Get score for this saucer
+        lda     #4                      ; There are only 4 possibilities
+        sta     *z80_c
+        ldx     #byte_0_1D50            ; Possible scores table
+        ldy     #byte_0_1D4C            ; Print strings for each score
+1$:     lda     ,y                      ; Find ...
+        cmpa    *z80_b                  ; ... the ...
+        beq     2$                      ; ... print ...
+        leax    1,x                     ; ... string ...
+        leay    1,y                     ; ... for ...
+        dec     *z80_c                  ; ... the ...
+        bne     1$                      ; ... score
+2$:     lda     ,x                      ; Get LSB of message (MSB is 2088 which is 1D)
+        sta     saucer_pri_loc_lsb      ; Message's LSB (_50=1D94 100=1D97 150=1D9A 300=1D9D)
+        lda     #16
+        ldb     *z80_b
+        mul
+        std     score_delta_msb         ; Add score for hitting saucer (015 becomes 150 in BCD).
+        bsr     sub_0742                ; Get the flying saucer score descriptor
+        jmp     loc_08F1                ; Print the three-byte score and out
+; $073C
+sub_073C:
+        bsr     sub_0742                ; Draw the ...
+        jmp     draw_simp_sprite        ; ... flying saucer
 
+; $0742
+sub_0742:
+        ldx     #saucer_pri_loc_msb     ; Read flying saucer ...
+        jsr     read_desc               ; ... structure
+        jmp     conv_to_scr             ; Convert pixel number to screen and shift and out
+        
+; $074B
+loc_074B:
+        ldb     #0x10                   ; Saucer hit sound bit
+        ldx     #sound_port_5           ; Current state of sounds
+        lda     ,x                      ; OR ...
+        ora     *z80_b                  ; ... in ...
+        sta     ,x                      ; ... saucer-hit sound
+        jsr     sub_1770                ; Turn off fleet sound and start saucer-hit
+        ldx     #sprite_saucer_exp      ; Sprite for saucer blowing up
+        stx     saucer_pri_loc_msb      ; Store it in structure
+        bra     sub_073C                ; Draw the flying saucer
+; $075F
+sub_075F:
+        ldy     #byte_0_1B83            ; Data for saucer (702 sets count to 0A)
+        jmp     block_copy              ; Reset saucer object data
+        
 ; $0765
 ; Wait for player 1 start button press
 wait_for_start:
@@ -1943,11 +2054,11 @@ get_ships_per_cred:
 ; With less than 9 aliens on the screen the alien shots get a tad bit faster. Probably
 ; because the advancing rack can catch them.
 speed_shots:
-        lda     num_aliens
-        cmpa    #9
-        bcc     9$
-        lda     #-4
-        sta     alien_shot_delta
+        lda     num_aliens              ; Number of aliens on screen
+        cmpa    #9                      ; More than 8?
+        bcc     9$                      ; Yes ... leave shot speed alone
+        lda     #-4                     ; Normally FF (-1) ... now FB (-4)
+        sta     alien_shot_delta        ; Speed up alien shots
 9$:     rts        
 
 ; $08E4
@@ -1960,6 +2071,7 @@ loc_08E4:
         jmp     clear_small_sprite      ; Clear a one byte sprite (32 rows long) at HL/X
 
 ; $08F1
+loc_08F1:
         ldb     #3                      ; Length of saucer-score message ... fall into print
        
 ; $08F3
@@ -1969,24 +2081,24 @@ loc_08E4:
 ; C/B = length
 print_message:
         lda     ,y+                     ; get character
-        pshs    b,y
-        bsr     draw_char
-        puls    b,y
-        decb
-        bne     print_message
+        pshs    b,y                     ; Preserve
+        bsr     draw_char               ; Print character
+        puls    b,y                     ; Restore
+        decb                            ; All done?
+        bne     print_message           ; Print all of message
         rts
 
 ; $08FF
 ; Get pointer to 8 byte sprite number in A and
 ; draw sprite on screen at HL/X
 draw_char:
-        ldy     #loc_1E00
+        ldy     #loc_1E00               ; Character set
         ldb     #8
         mul                             ; D=offset
-        leay    d,y                     ; ptr data
-        ldb     #8
+        leay    d,y                     ; Get pointer to sprite
+        ldb     #8                      ; 8 bytes each
 ; hit watchdog
-        jmp     draw_simp_sprite
+        jmp     draw_simp_sprite        ; To screen
 
 ; $0913
 time_to_saucer:
@@ -2069,33 +2181,33 @@ alien_score_value:
 ; Adjust the score for the active player. 20F1 is 1 if there is a new value to add.
 ; The adjustment is in 20F2,20F3. Then print the score.
 adjust_score_fn:
-        bsr     sub_09CA
-        tst     adjust_score
+        bsr     sub_09CA                ; Get score structure for active player
+        tst     adjust_score            ; Does the score need increasing?
         bne     1$
-        rts
-1$:     clr     adjust_score
-        ldy     score_delta_msb
+        rts                             ; No ... done
+1$:     clr     adjust_score            ; Mark score as adjusted
+        ldy     score_delta_msb         ; Get requested adjustment
         sty     *z80_d
-        lda     ,x
-        adda    *z80_e
-        daa
-        sta     ,x+
-        sta     *z80_e
-        lda     ,x
-        adca    *z80_d
-        daa
-        sta     ,x+
-        sta     *z80_d
-        ldx     ,x
+        lda     ,x                      ; Add adjustment ...
+        adda    *z80_e                  ; ... first byte
+        daa                             ; Adjust it for BCD
+        sta     ,x+                     ; Store new LSB
+        sta     *z80_e                  ; Add adjustment ...
+        lda     ,x                      ; ... to second ...
+        adca    *z80_d                  ; ... byte
+        daa                             ; Adjust for BCD (cary gets dropped)
+        sta     ,x+                     ; Store second byte
+        sta     *z80_d                  ; Second byte to D (first byte still in E)
+        ldx     ,x                      ; Load the screen coordinates
         ldy     *z80_d
-        bra     print_4_digits
+        bra     print_4_digits          ; ** Usually a good idea, but wasted here
 
 ; $09AD
 ; Print 4 digits in Y @X
 print_4_digits:
-        tfr     y,d
+        tfr     y,d                     ; Get first 2 digits of BCD or hex
         pshs    b
-        bsr     draw_hex_byte
+        bsr     draw_hex_byte           ; Print them
         puls    a
 
 ; $09B2        
@@ -2120,68 +2232,68 @@ sub_09C5:
 ; $09CA
 ; Get score descriptor for active player
 sub_09CA:
-        lda     player_data_msb
-        asra
-        ldx     #p1_scor_l
-        bcs     9$
-        ldx     #p2_scor_l
+        lda     player_data_msb         ; Get active player
+        asra                            ; Test for player
+        ldx     #p1_scor_l              ; Player 1 score descriptor
+        bcs     9$                      ; Keep it if player 1 is active
+        ldx     #p2_scor_l              ; Else get player 2 descriptor
 9$:     rts        
 
 ; $09D6
 ; Clear center window of screen
 clear_playfield:
-        ldx     #vram+2
-1$:     clr     ,x+
-        tfr     x,d
-        andb    #0x1f
-        cmpb    #0x1c
-        bcs     2$
-        leax    6,x
-2$:     cmpa    #0x40
-        bcs     1$
+        ldx     #vram+2                 ; Third from left, top of screen
+1$:     clr     ,x+                     ; Clear screen byte. Next in row
+        tfr     x,d                     ; Get X ...
+        andb    #0x1f                   ; ... coordinate
+        cmpb    #0x1c                   ; Edge minus a buffer?
+        bcs     2$                      ; No ... keep going
+        leax    6,x                     ; Else ... bump to next edge + buffer
+2$:     cmpa    #0x40                   ; Get Y coordinate. Reached bottom?
+        bcs     1$                      ; No ... keep going
         rts
 
 ; $09EF
 loc_09EF:
         bsr     sub_0A3C
-        clr     suspend_play
-        bsr     clear_playfield
+        clr     suspend_play            ; Suspend ISR game tasks
+        bsr     clear_playfield         ; Clear playfield
+        lda     player_data_msb         ; Hold current player number ...
+        pshs    a                       ; ... on stack
+        jsr     copy_ram_mirror         ; Block copy RAM mirror from ROM
+        puls    a                       ; Restore ...
+        sta     player_data_msb         ; ... current player number
         lda     player_data_msb
-        pshs    a
-        jsr     copy_ram_mirror
-        puls    a
-        sta     player_data_msb
-        lda     player_data_msb
-        pshs    d
-        ldb     #0xfe
+        pshs    d                       ; Hold player-data pointer
+        ldb     #0xfe                   ; 2xFE ... rack count
         tfr     d,x
-        lda     ,x
-        anda    #7
-        inca
-        sta     ,x
-        ldu     #alien_start_table-1
-1$:     leau    1,u
-        deca
-        bne     1$
-        puls    d
-        ldb     #0xfc
+        lda     ,x                      ; Get the number of racks the player has beaten
+        anda    #7                      ; 0-7
+        inca                            ; Now 1-8
+        sta     ,x                      ; Update count since player just beat a rack
+        ldu     #alien_start_table-1    ; Starting coordinate of alien table
+1$:     leau    1,u                     ; Find the ...
+        deca                            ; ... right entry ...
+        bne     1$                      ; ... in the table
+        puls    d                       ; Restore player's pointer  
+        ldb     #0xfc                   ; 2xFC ... 
         tfr     d,x
-        lda     ,u
-        sta     ,x
-        leax    1,x
+        lda     ,u                      ; Get the starting Y coordinate
+        sta     ,x                      ; Set rack's starting Y coordinate
+        leax    1,x                     ; Point to X
         lda     #0x38
-        sta     ,x
-        tfr     x,d
-        rora
-        bcs     2$
-        lda     #0x21
+        sta     ,x                      ; Set rack's starting X coordinate to 38
+        tfr     x,d                     ; Player ...
+        rora                            ; ... number to carry
+        bcs     2$                      ; 2nd player stuff
+        lda     #0x21                   ; Start fleet with first sound
 ;       ld      (soundPort5),a
-        jsr     draw_shield_pl2
-        jsr     init_aliens_p2
-        jmp     loc_0804
-2$:     jsr     draw_shield_pl1
-        jsr     init_aliens
-        jmp     loc_0804                
+        jsr     draw_shield_pl2         ; Draw shields for player 2
+        jsr     init_aliens_p2          ; Initalize aliens for player 2
+        jmp     loc_0804                ; Continue at top of game loop
+2$:     jsr     draw_shield_pl1         ; Draw shields for player 1
+        jsr     init_aliens             ; Initialize aliens for player 1
+        jmp     loc_0804                ; Continue at top of game loop
 
 ; $0A3C
 sub_0A3C:
@@ -2200,8 +2312,8 @@ sub_0A3C:
 ; $0A59
 ; Check to see if player is hit
 sub_0A59:
-        lda     player_alive
-        cmpa    #0xff
+        lda     player_alive            ; Active player hit flag
+        cmpa    #0xff                   ; All FFs means player is OK
         rts
 
 ; $0A5F
@@ -2241,17 +2353,17 @@ animate:
 ; Print message from DE/Y to screen at HL/X (length in B) with a
 ; delay between letters.
 print_message_del:
-        lda     ,y+
+        lda     ,y+                     ; Get character. Next in message
         pshs    b,y
-        jsr     draw_char
+        jsr     draw_char               ; Draw character on screen
         puls    b,y
         lda     #7                      ; Delay between letters
-        sta     isr_delay
-1$:     lda     isr_delay
+        sta     isr_delay               ; Set counter
+1$:     lda     isr_delay               ; Get counter
         deca                            ; Is it 1?
-        bne     1$        
-        decb
-        bne     print_message_del
+        bne     1$                      ; No ... wait on it
+        decb                            ; All done?
+        bne     print_message_del       ; No ... do all
         rts
 
 ; $0AAB
@@ -2466,14 +2578,14 @@ draw_shifted_sprite:
 ; Clear a sprite from the screen (standard pixel number descriptor).
 ; ** We clear 2 bytes even though the draw-simple only draws one.
 erase_simple_sprite:
-        bsr     cnvt_pix_number
+        bsr     cnvt_pix_number         ; Convert pixel number in HL
 1$:     pshs    x
-        clr     ,x+
-        clr     ,x+
-        puls    x
-        leax    32,x
-        decb
-        bne     1$
+        clr     ,x+                     ; Clear screen byte. Next byte
+        clr     ,x+                     ; Clear byte
+        puls    x                       ; Restore screen coordinate
+        leax    32,x                    ; Add 1 row to screen coordinate
+        decb                            ; All rows done?
+        bne     1$                      ; Do all rows
         rts
 
 ; $1439
@@ -2482,11 +2594,11 @@ erase_simple_sprite:
 ; DE/Y = character data
 ; B = number of rows
 draw_simp_sprite:
-        lda     ,y+
-        sta     ,x
-        leax    32,x
-        decb
-        bne     draw_simp_sprite
+        lda     ,y+                     ; From character set ...
+        sta     ,x                      ; ... to screen
+        leax    32,x                    ; Next row on screen
+        decb                            ; Decrement counter
+        bne     draw_simp_sprite        ; Do all
         rts
 
 ; $1452
@@ -2592,10 +2704,10 @@ clear_small_sprite:
 ; Clear a one byte sprite at HL/X. B=number of rows.
         clra
 sub_14CC:
-1$:     sta     ,x
-        leax    32,x
-        decb
-        bne     1$
+1$:     sta     ,x                      ; Clear screen byte
+        leax    32,x                    ; Bump HL/X one screen row
+        decb                            ; All done?
+        bne     1$                      ; No ... clear all
         rts
 
 ; $14D8
@@ -2703,45 +2815,45 @@ loc_154A:
 ; doesn't make any sense. This counting algorithm produces questionable 
 ; results if the reference is beyond the target.
 cnt_16s:
-        clr     *z80_c
-        cmpa    *z80_h
-        bcs     1$
-        bsr     wrap_ref
-1$:     cmpa    *z80_h
+        clr     *z80_c                  ; Count of 16s
+        cmpa    *z80_h                  ; Compare reference coordinate to target
+        bcs     1$                      
+        bsr     wrap_ref                ; If reference is greater or equal then do something questionable ... see below
+1$:     cmpa    *z80_h                  ; Compare reference coordinate to target
         bcs     2$
-        rts
-2$:     adda    #16
-        inc     *z80_c
-        bra     1$                
+        rts                             ; If reference is greater or equal then done
+2$:     adda    #16                     ; Add 16 to reference
+        inc     *z80_c                  ; Bump 16s count
+        bra     1$                      ; Keep testing  
 
 ; $1562
 find_row:
 ; L contains a Yr coordinate. Find the row number within the rack that corresponds
 ; to the Yr coordinate. Return the row coordinate in L and the row number in C.
-        lda     ref_alien_yr
+        lda     ref_alien_yr            ; Reference alien Yr coordinate  
         ldb     *z80_l
-        stb     *z80_h
-        bsr     cnt_16s
-        ldb     *z80_c
-        decb
-        sbca    #16
-        sta     *z80_l
+        stb     *z80_h                  ; Target Yr coordinate to H
+        bsr     cnt_16s                 ; Count 16s needed to bring ref alien to target
+        ldb     *z80_c                  ; Count to B
+        decb                            ; Base 0
+        sbca    #16                     ; The counting also adds 16 no matter what
+        sta     *z80_l                  ; To coordinate
         rts
 
 ; $1562
 ; H contains a Xr coordinate. Find the column number within the rack that corresponds
 ; to the Xr coordinate. Return the column coordinate in H and the column number in C.
 find_column:
-        lda     ref_alien_xr
-        bsr     cnt_16s
-        sbca    #16
-        sta     *z80_h
+        lda     ref_alien_xr            ; Reference alien Yn coordinate
+        bsr     cnt_16s                 ; Count 16s to bring Y to target Y
+        sbca    #16                     ; Subtract off extra 16
+        sta     *z80_h                  ; To H
         rts
 
 loc_1579:
-        lda     #1
-        sta     saucer_hit
-        bra     loc_1545
+        lda     #1                      ; Mark flying ...
+        sta     saucer_hit              ; ... saucer has been hit
+        bra     loc_1545                ; Remove player shot
 
 ; $1581
 ; B is row number. C is column number (starts at 1). 
@@ -2769,9 +2881,9 @@ get_alien_stat_ptr:
 ;
 ; I think the intended code is "JP NC" instead of "JP M", but even that doesn't make sense.
 wrap_ref:
-        inc     *z80_c
-        adda    #16
-        bmi     wrap_ref
+        inc     *z80_c                  ; Increase 16s count 
+        adda    #16                     ; Add 16 to ref
+        bmi     wrap_ref                ; Keep going till result is positive
         rts
 
 ; $1597
@@ -2816,26 +2928,26 @@ sub_15C5:
 ; The hardware shift register is used in converting pixel positions
 ; to screen coordinates.
 draw_sprite:
-        jsr     cnvt_pix_number
-        pshs    x
+        jsr     cnvt_pix_number         ; Convert pixel number to screen/shift
+        pshs    x                       ; Preserve screen coordinate
 1$:     pshs    x
-        lda     ,y+
+        lda     ,y+                     ; From sprite data
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
         ldu     shft_base
         leau    a,u                     ; pointer to shift table entry (1st byte)
         lda     ,u                      ; get shifted value
-        sta     ,x+
+        sta     ,x+                     ; Shifted sprite to screen
 ;       xor     a
 ;       out     (shft_data),a
 ;       in      a,(shft_in)
         lda     256,u                   ; get 2nd byte
-        sta     ,x
-        puls    x
-        leax    32,x
-        decb
-        bne     1$                        
-        puls    x
+        sta     ,x                      ; Write remainder to adjacent
+        puls    x                       ; Old screen coordinate
+        leax    32,x                    ; Offset screen to next row
+        decb                            ; All done?
+        bne     1$                      ; No ... do all
+        puls    x                       ; Restore HL/X
         rts
 
 ; $15F3
@@ -2861,9 +2973,9 @@ count_aliens:
 ; $1611
 get_player_data_ptr:
 ; Set HL/X with 2100 if player 1 is active or 2200 if player 2 is active
-        clrb
-        lda     player_data_msb
-        tfr     d,x
+        clrb                            ; Byte boundary
+        lda     player_data_msb         ; Active player number
+        tfr     d,x                     ; Set HL to data
         rts
 
 ; $1618
@@ -2999,34 +3111,34 @@ loc_16E6:
 ; Use the player's MSB to determine how fast the aliens reload their
 ; shots for another fire.
 a_shot_reload_rate_fn:
-        jsr     sub_09CA
-        leax    1,x
-        lda     ,x
-        ldy     #a_reload_score_tab
-        ldx     #shot_reload_rate
-        ldb     #4
-        sta     *z80_b
-1$:     lda     ,y
-        cmpa    *z80_b
-        bcc     2$
-        leax    1,x
-        leay    1,y
-        decb
-        bne     1$
-2$:     lda     ,x
-        sta     a_shot_reload_rate
+        jsr     sub_09CA                ; Get score descriptor for active player
+        leax    1,x                     ; MSB value
+        lda     ,x                      ; Get the MSB value
+        ldy     #a_reload_score_tab     ; Score MSB table
+        ldx     #shot_reload_rate       ; Corresponding fire reload rate table
+        ldb     #4                      ; Only 4 entries (a 5th value of 7 is used after that)
+        sta     *z80_b                  ; Hold the score value
+1$:     lda     ,y                      ; Get lookup from table
+        cmpa    *z80_b                  ; Compare them
+        bcc     2$                      ; Equal or below ... use this table entry
+        leax    1,x                     ; Next ...
+        leay    1,y                     ; ... entry in table
+        decb                            ; Do all ...
+        bne     1$                      ; ... 4 entries in the tables
+2$:     lda     ,x                      ; Load the shot reload value
+        sta     a_shot_reload_rate      ; Save the value for use in shot routine
         rts        
 
 ; $172C
 ; Shot sound on or off depending on 2025
 shot_sound:
-        lda     plyr_shot_status
-        cmpa    #0
-        bne     1$
-        ldb     #0xfd
-        jmp     sound_bits_3_off
-1$:     ldb     #2
-        jmp     sound_bits_3_on        
+        lda     plyr_shot_status        ; Player shot flag
+        cmpa    #0                      ; Active shot?
+        bne     1$                      ; Yes ... go
+        ldb     #0xfd                   ; Sound mask
+        jmp     sound_bits_3_off        ; Mask off sound
+1$:     ldb     #2                      ; Sound bit
+        jmp     sound_bits_3_on         ; OR on sound
 
 ; $1740
 ; This called from the ISR times down the fleet and sets the flag at 2095 if 
@@ -3057,6 +3169,7 @@ time_fleet_sound:
 ; $176D
 sub_176D:
         lda     sound_port_5            ; Current sound port 3?? value
+sub_1770:        
         anda    #0x30                   ; Mask off fleet movement sounds
 ;       out     (sound2),a              ; Set sounds
         rts
@@ -3143,6 +3256,10 @@ read_inputs:
         bra     0$                      ; same keys for now
         rts
 
+; $17CD
+;check_handle_tilt:
+; *** FIXME
+
 ; $1804
 ctrl_saucer_sound:
         ldx     #saucer_active          ; Saucer on screen flag
@@ -3181,14 +3298,14 @@ loc_183A:
         bra     1$                      ; Do all in table
 ; $1844
 sub_1844:
-        ldb     #16
-        jsr     draw_simp_sprite
+        ldb     #16                     ; 16 bytes
+        jsr     draw_simp_sprite        ; Draw simple
         rts
 
 ; $184C
 sub_184C:
-        ldb     temp_206C
-        jsr     print_message_del
+        ldb     temp_206C               ; Count of 10 to C/B
+        jsr     print_message_del       ; Print the message with delay between letters
         rts
         
 ; $1856
@@ -3196,15 +3313,14 @@ read_pri_struct:
 ; Read a 4-byte print-structure pointed to by BC/U
 ; HL/X=Screen coordiante, DE/Y=pointer to message
 ; If the first byte is FF then return with C=1.
-        lda     ,u
-        cmpa    #0xff
-        SCF
-        bne     1$
-        rts
-1$:     ldx     ,u++                    ; screen coordinate
+        lda     ,u                      ; Get the screen LSB
+        cmpa    #0xff                   ; Valid?
+        SCF                             ; If not C will be 1
+        beq     9$                      ; Return if 255
+        ldx     ,u++                    ; screen coordinate
         ldy     ,u++                    ; message address
         CCF
-        rts        
+9$:     rts        
 
 ; $1868
 ; Moves a sprite up or down in splash mode. Interrupt moves the sprite. When it reaches
@@ -3232,8 +3348,8 @@ splash_sprite:
         jmp     draw_sprite             ; Draw the sprite
 
 ; $1898
-2$:     lda     #1
-        sta     splash_reached
+2$:     lda     #1                      ; Flag that sprite ...
+        sta     splash_reached          ; ... reached location
         rts
 
 ; $189E
@@ -3261,38 +3377,39 @@ sub_189E:
         jmp     two_sec_delay           ; Two second delay and out
         
 ; $18D4                
+; Initializiation comes here
 start:
         lds     #stack
-        ldb     #0
+        ldb     #0                      ; Count 256 bytes
         jsr     sub_01E6                ; copy ROM to RAM
-        jsr     draw_status
+        jsr     draw_status             ; Print scores and credits
 
 ; $18DF
 loc_18DF:
-        lda     #8
-        sta     a_shot_reload_rate
-        jmp     loc_0AEA                ; splash animation
+        lda     #8                      ; Set alien ...
+        sta     a_shot_reload_rate      ; ... shot reload rate
+        jmp     loc_0AEA                ; Top of splash screen loop
 
 ; $18E7
 ; Get player-alive flag for OTHER player
 sub_18E7:
-        lda     player_data_msb
-        ldx     #player1_alive
+        lda     player_data_msb         ; Player data MSB
+        ldx     #player1_alive          ; Alive flags (player 1 and 2)
 ; this only works if msb is odd for p1, even for p2
-        lsra
-        bcc     9$
-        leax    1,x
+        lsra                            ; Bit 1=1 for player 1
+        bcc     9$                      ; Player 2 ... we have it ... out
+        leax    1,x                     ; Player 1's flag
 9$:     rts        
 
 ; $18F1
 ; If there is one alien left then the right motion is 3 instead of 2. That's
 ; why the timing is hard to hit after the change.
 sub_18F1:
-        ldb     #2
-        lda     num_aliens
-        deca
-        bne     9$
-        incb
+        ldb     #2                      ; Rack moving right delta X 
+        lda     num_aliens              ; Number of aliens on screen
+        deca                            ; Just one left?
+        bne     9$                      ; No ... use right delta X of 2
+        incb                            ; Just one alien ... move right at 3 instead of 2
 9$:     rts
         
 ; $18FA
@@ -3327,27 +3444,27 @@ cur_ply_alive:
 ; Print score header " SCORE<1> HI-SCORE SCORE<2> "
 draw_score_head:
         ldb     #0x1c                   ; 28 bytes in message
-        ldx     #vram+0x1e
-        ldy     #message_score
-        jmp     print_message
+        ldx     #vram+0x1e              ; Screen coordinates
+        ldy     #message_score          ; Score header message
+        jmp     print_message           ; Print score header
 
 ; $1925
 sub_1925:
         ldx     #p1_scor_l              ; Player 1 score descriptor
-        bra     draw_score
-
+        bra     draw_score              ; Print score
+    
 sub_192B:        
 ; $192B        
         ldx     #p2_scor_l              ; Player 2 score descriptor
-        bra     draw_score
+        bra     draw_score              ; Print score
 
 ; $1931
 ; Print score.
 ; HL/X = descriptor
 draw_score:
-        ldy     ,x++                    ; value
-        ldx     ,x++                    ; coordinate
-        jmp     print_4_digits
+        ldy     ,x++                    ; score
+        ldx     ,x++                    ; coordinates
+        jmp     print_4_digits          ; Print 4 digits in DE/Y
 
 ; $193C
 ; Print message "CREDIT "
@@ -3387,9 +3504,9 @@ loc_196B:
         
 ; $1971
 loc_1971:
-        lda     #1
-        sta     invaded
-        jmp     loc_16E6
+        lda     #1                      ; Set flag that ...
+        sta     invaded                 ; ... aliens reached bottom of screen
+        jmp     loc_16E6                ; End of round
         
 ; $1979
 loc_1979:
@@ -3399,7 +3516,7 @@ loc_1979:
 
 ; $1982
 sub_1982:
-        sta     isr_splash_task
+        sta     isr_splash_task         ; Set ISR splash task
         rts
         
 ; $199A
@@ -3468,24 +3585,24 @@ sound_bits_3_off:
 ; $19E6
 draw_num_ships:
 ; Show ships remaining in hold for the player
-        ldx     #vram+0x0301
-        tsta
-        beq     loc_19FA
+        ldx     #vram+0x0301            ; Screen coordinates
+        tsta                            ; None in reserve ... 
+        beq     loc_19FA                ; ... skip display
 ; Draw line of ships
-1$:     ldy     #player_sprite
-        ldb     #16
-        sta     *z80_c
-        jsr     draw_simp_sprite
-        lda     *z80_c
-        deca
+1$:     ldy     #player_sprite          ; Player sprite
+        ldb     #16                     ; 16 rows
+        sta     *z80_c                  ; Hold count
+        jsr     draw_simp_sprite        ; Display 1-byte sprite to screen
+        lda     *z80_c                  ; Restore remaining
+        deca                            ; All done?
         bne     1$
 ; Clear remainder of line        
 loc_19FA:
-        ldb     #16
-        jsr     clear_small_sprite
-        tfr     x,d
-        cmpa    #>vram+0x11
-        bne     loc_19FA
+        ldb     #16                     ; 16 rows
+        jsr     clear_small_sprite      ; Clear 1-byte sprite at HL/X
+        tfr     x,d                     ; Get Y coordinate
+        cmpa    #>vram+0x11             ; At edge?
+        bne     loc_19FA                ; No ... do all
         rts
 
 ; $1A06
@@ -3611,6 +3728,10 @@ loc_1A8B:
         anda    #0x0f                   ; Make sure it is a digit
         jmp     sub_09C5                ; Print number remaining
 
+; this will align the data with the original
+; used in debugging to check we ave every byte of data
+        .org    code_base+0x1A95
+        
 ; $1A95
 byte_0_1A95:
         .db 0                           ; Image form (increments each draw)
@@ -3663,7 +3784,7 @@ message_score:
         .db 0x25,0x26
 
 ; this is mainly for debugging
-        .bndry  0x100
+;        .bndry  0x100
         
 ;-------------------------- RAM initialization -----------------------------
 ; Copied to RAM (2000) C0 bytes as initialization.
@@ -3767,7 +3888,9 @@ message_p1:
         .db    1
         .db 0xFF
         .db 0xFF
-ufo_init_data:
+
+; $1B83
+byte_0_1B83:
         .db 0                                           ; ufo visible flag
         .db    0
         .db    0
@@ -3917,6 +4040,10 @@ a_reload_score_tab:
 ;
         .db 2, 0x10, 0x20, 0x30
 
+; $1CBC
+message_tilt:
+        .db 0x13, 8, 0xB, 0x13          ; "TILT"
+
 ; $1CC0
 alien_explode:
         .db 0x00, 0x10, 0x92, 0x44, 0x28, 0x81, 0x42, 0x00
@@ -3952,6 +4079,9 @@ roll_shot:
 message_play_UY:
         .db 0xF, 0xB, 0, 0x29           ; "PLAY" with inverted Y
 
+; $1CFE
+        .db 0, 0
+        
 ; $1D00
 ; This table decides which column a shot will fall from. The column number is read from the
 ; table (1-11) and the pointer increases for the shot type. For instance, the "squiggly" shot
@@ -3966,6 +4096,13 @@ col_fire_table:
         .db 6, 3, 1, 1, 0xB, 9, 2, 8
         .db 2, 0xB, 4, 7, 0xA
 
+; $1D15
+; This appears to be part of the column-firing table, but it is never used.
+; Perhaps this was originally intended for the "rolling" shot but then the
+; "rolling" was change to target the player specifically.
+        .db 5, 2, 5, 4, 6, 7, 8, 0xA
+        .db 6, 0xA, 3
+
 ; $1D20
 shield_image:
         .db 0xFF, 0xF0, 0xFF, 0xF8, 0xFF, 0xFC, 0xFF, 0xFE
@@ -3974,6 +4111,23 @@ shield_image:
         .db 0x0F, 0xFF, 0x0F, 0xFF, 0x1F, 0xFF, 0x3F, 0xFF
         .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFC
         .db 0xFF, 0xF8, 0xFF, 0xF0
+
+; $1D4C
+byte_0_1D4C:
+        .db 5, 0x10, 0x15, 0x30         ; Table of possible saucer scores
+byte_0_1D50:
+        .db 0x94, 0x97, 0x9A, 0x9D      ; Table of corresponding string prints for each possible score
+
+; $1D54
+; 208D points here to the score given when the saucer is shot. It advances 
+; every time the player-shot is removed. The code wraps after 15, but there
+; are 16 values in this table. This is a bug in the code at 044E (thanks to
+; Colin Dooley for finding this).
+;
+; Thus the one and only 300 comes up every 15 shots (after an initial 8).
+saucer_scr_tab: 
+        .db 0x10, 5, 5, 0x10, 0x15, 0x10, 0x10, 5
+        .db 0x30, 0x10, 0x10, 0x10, 5, 0x15, 0x10, 5
 
 unk_0_1D64:
         .db 0, 0, 0, 0
@@ -3986,11 +4140,15 @@ sprite_saucer:
 
 ; $1D7C
 sprite_saucer_exp:
-byte_0_1D7C:    
         .db 0, 0x22, 0, 0xA5, 0x40, 8, 0x98, 0x3D, 0xB6, 0x3C
         .db 0x36, 0x1D, 0x10, 0x48, 0x62, 0xB6, 0x1D, 0x98, 8
         .db 0x42, 0x90, 8, 0, 0
 
+sauc_score_str:                          
+        .db 0x26, 0x1F, 0x1A            ; _50
+        .db 0x1B, 0x1A, 0x1A            ; 100
+        .db 0x1B, 0x1F, 0x1A            ; 150
+        .db 0x1D, 0x1A, 0x1A            ; 300
 
 ; $1DA0
 alien_scores:
