@@ -12,8 +12,8 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
-.define BUILD_OPT_ALWAYS_COMPOSITE				
-;.define BUILD_OPT_DISABLE_DEMO
+.define BUILD_OPT_SKIP_COCO_SPLASH
+.define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
 
 ; *** derived - do not edit
@@ -27,9 +27,21 @@
 ; *** end of derived
 
 ; *** INVADERS stuff here
-INP_RIGHT     .equ    (1<<6)
-INP_LEFT      .equ    (1<<5)
-INP_FIRE      .equ    (1<<4)
+;
+DIP_DISPLAY_COINAGEn  .equ    (1<<7)
+DIP_BONUS_LIFE        .equ    (1<<3)
+DIP_TILT              .equ    (1<<2)
+DIP_LIVES_MASK        .equ    0x03
+DIP_LIVES_3           .equ    (0<<0)
+DIP_LIVES_4           .equ    (1<<0)
+DIP_LIVES_5           .equ    (2<<0)
+DIP_LIVES_6           .equ    (3<<0)
+;
+INP_RIGHT             .equ    (1<<6)
+INP_LEFT              .equ    (1<<5)
+INP_FIRE              .equ    (1<<4)
+
+DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3
 
 ;NUM_ALIENS    .equ    3
 .ifndef NUM_ALIENS
@@ -319,8 +331,9 @@ z80_f_              .equ    0x07
 z80_r               .equ    0x08
 
 ; rgb/composite video selected (bit 4)
-cmp:                .ds 1
-shft_base:          .ds 2
+dips:               .ds     1
+cmp:                .ds     1
+shft_base:          .ds     2
 
 ; stack is here on Coco port
         
@@ -368,6 +381,10 @@ start_coco:
 ; switch to all-RAM mode
         sta     RAMMODE        
 
+; set default DIPSWITCH VALUES
+        lda     #DEFAULT_DIP_SETTING
+        sta     dips
+        
 display_splash:
 
         ldx     #0x400
@@ -401,7 +418,7 @@ display_splash:
 				sta			2,x											; column strobe
 				lda			,x											; active low
 				bita    #(1<<0)                 ; 'C'?
-.ifndef BUILD_OPT_ALWAYS_COMPOSITE				
+.ifndef BUILD_OPT_SKIP_COCO_SPLASH				
 				bne     6$                      ; try again
 .endif				
 				ldb     #(1<<4)                 ; flag component
@@ -670,7 +687,7 @@ scan_line_96:
         jsr     loc_024B                ; Process all game objects (except player object)
         jsr     cursor_next_alien       ; Advance cursor to next alien (move the alien if it is last one)
 9$:     EI
-        rti
+        rti                             ; restores DP
 
 ; $0010
 scan_line_224:
@@ -687,7 +704,7 @@ scan_line_224:
         sta     vblank_status           ; ... on the lower half of the screen to draw/move
         dec     isr_delay               ; Decrement the general countdown (used for pauses)
         
-        ;bsr     check_handle_tilt       ; Check and handle TILT
+        jsr     check_handle_tilt       ; Check and handle TILT
 ;       in      a,(INP1)
 ;       rrca
 ;       jp      c,loc_0067              ; coin switch
@@ -741,7 +758,7 @@ loc_0072:
 
 loc_0086:
         EI
-        rti
+        rti                             ; restores DP
 
 ; $00B1
 ; Initialize the player's rack of aliens. Copy the reference-location and deltas from the
@@ -1162,15 +1179,18 @@ game_obj_0:
         lbeq    loc_166D                ; Any left? No ... handle game over for player
         jsr     sub_18E7                ; Get player-alive status pointer
         lda     ,x                      ; Is player alive?
-        beq     4$                      ; Yes ... remove a ship from player's stash and reenter game loop
+        beq     loc_032C                ; Yes ... remove a ship from player's stash and reenter game loop
         tst     two_players             ; Multi-player game. ; Only one player?
-        beq     4$                      ; Yes ... remove a ship from player's stash and reenter game loop
+        beq     loc_032C                ; Yes ... remove a ship from player's stash and reenter game loop
+loc_02ED:
         lda     player_data_msb         ; Player data MSB
         pshs    a                       ; Hold the MSB
         rora                            ; Player 1 is active player?
-        bcs     5$                      ; Yes ... go store player 1 shields and come back to 02F8
+        bcs     loc_0332                ; Yes ... go store player 1 shields and come back to 02F8
         jsr     remember_shields_2      ; No ... go store player 2 shields
-2$:     jsr     sub_0878                ; Get ref-alien info and pointer to storage
+; $02F8
+loc_02F8:        
+        jsr     sub_0878                ; Get ref-alien info and pointer to storage
         lda     *z80_e                  ; Hold the ...
         sta     ,x                      ; ... ref-alien ...
         lda     *z80_d                  
@@ -1182,10 +1202,10 @@ game_obj_0:
         rora                            ; Player 1?
         lda     #>byte_0_2100           ; Player 1 data pointer
         ldb     #0                      ; Cocktail bit=0 (player 1)
-        bcc     3$                      ; It was player one ... keep data for player 2
+        bcc     1$                      ; It was player one ... keep data for player 2
         ldb     #(1<<5)                 ; Cocktail bit=1 (player 2)
         lda     #>byte_0_2200           ; Player 2 data pointer
-3$:     sta     player_data_msb         ; Change players 
+1$:     sta     player_data_msb         ; Change players 
         jsr     two_sec_delay           ; Two second delay
         clr     obj0_timer_lsb          ; Clear the player-object timer (player can move instantly after switching players)
 ;       ld      a,b
@@ -1196,11 +1216,13 @@ game_obj_0:
         jsr     remove_ship             ; Remove a ship and update indicators
         jmp     loc_07F9                ; Tell the players that the switch has been made
 ; $032C
-4$:     jsr     remove_ship             ; Remove a ship and update indicators
+loc_032C:
+        jsr     remove_ship             ; Remove a ship and update indicators
         jmp     loc_0817                ; Continue into game loop
 ; $0332
-5$:     jsr     remember_shields_1      ; Remember the shields for player 1
-        bra     2$                      ; Back to switching-players above
+loc_0332:
+        jsr     remember_shields_1      ; Remember the shields for player 1
+        bra     loc_02F8                ; Back to switching-players above
 
 ; $033B
 ; Player not blowing up ... handle inputs
@@ -2047,7 +2069,9 @@ prompt_player:
 ; $08D1
 get_ships_per_cred:
 ; Get number of ships from DIP settings
-        lda     #3                      ; fixed for now
+        lda     dips                    ; DIP settings
+        anda    #DIP_LIVES_MASK         ; Get number of ships
+        adda    #3                      ; From 3-6
         rts
 
 ; $08D8
@@ -2134,8 +2158,8 @@ sub_0935:
 0$:     rts                             ; Yes ... ignore
 1$:     ldb     #0x15                   ; Default 1500
 ;       in      a,(inp2)
-        lda     #0                      ; HARD-CODE DIPSWITCH VALUE
-        anda    #8                      ; Extra ship at 1000 or 1500
+        lda     dips
+        anda    #DIP_BONUS_LIFE         ; Extra ship at 1000 or 1500
         beq     2$                      ; 0=1500
         ldb     #0x10                   ; Awarded at 1000
 2$:     stb     *z80_b
@@ -2515,17 +2539,20 @@ loc_0B89:
 ;       in      a,(inp2)
 ;       rlca
 ;       jp      c,$0BC3
+        lda     dips
+        bita    #DIP_DISPLAY_COINAGEn
+        bne     5$
         leau    0,u                     ; "*1 PLAYER  1 COIN "
         jsr     loc_183A                ; Load the descriptor
 ; $0BC3        
-        jsr     two_sec_delay           ; Print TWO descriptors worth ???
+5$:     jsr     two_sec_delay           ; Print TWO descriptors worth ???
         tst     splash_animate          ; Doing splash animation?
-        bne     5$                      ; Not 0 ... not on this screen
+        bne     6$                      ; Not 0 ... not on this screen
         ldy     #byte_0_1FD5            ; Animation for small alien to line up with extra "C"
         jsr     ini_splash_ani          ; Copy the animation block
         jsr     animate                 ; Wait for the animation to complete
         jsr     sub_189E                ; Animate alien shot to extra "C"
-5$:     lda     splash_animate
+6$:     lda     splash_animate
         eora    #1                      ; Toggle the splash screen animation for next time
         sta     splash_animate
         jsr     clear_playfield         ; Clear play field
@@ -3057,7 +3084,7 @@ loc_1671:
         jsr     print_hi_score          ; Draw the new high score
 ; $1698        
 3$:     tst     two_players             ; Number of players. Is this a single player game?
-        beq     5$                      ; Yes ... short message
+        beq     loc_16C9                ; Yes ... short message
         ldx     #vram+0x0403            ; Screen coordinates
         ldy     #message_g_over         ; "GAME OVER PLAYER< >"
         ldb     #20                     ; 20 characters
@@ -3073,10 +3100,11 @@ loc_1671:
         jsr     one_sec_delay           ; Short delay
         jsr     sub_18E7                ; Get current player "alive" flag
         tst     ,x                      ; Is player alive?
-        beq     5$                      ; No ... skip to "GAME OVER" sequence
-        ;jmp     loc_02ED                ; Switch players and game loop
-; $16C9 
-5$:     ldx     #vram+0x0918            ; Screen coordinates
+        beq     loc_16C9                ; No ... skip to "GAME OVER" sequence
+        jmp     loc_02ED                ; Switch players and game loop
+; $16C9
+loc_16C9: 
+        ldx     #vram+0x0918            ; Screen coordinates
         ldy     #message_g_over         ; "GAME OVER PLAYER< >"
         ldb     #10                     ; Just the "GAME OVER" part
         jsr     print_message_del       ; Print message
@@ -3257,9 +3285,46 @@ read_inputs:
         rts
 
 ; $17CD
-;check_handle_tilt:
-; *** FIXME
-
+check_handle_tilt:
+;       in      a,(inp2)
+;       and     $04
+        ldu     #KEYROW
+        lda     #~(1<<4)                ; Column 4 (CTRL)
+        sta     2,u
+        lda     ,u                      ; read keyboard row
+        bita    #(1<<6)                 ; CTRL?
+        bne     0$                      ; no, exit
+        lda     #~(1<<2)                ; Column 2 (BRK)
+        sta     2,u
+        lda     ,u                      ; read keyboard row
+        bita    #(1<<6)                 ; BREAK?
+        beq     1$                      ; yes, skip
+0$:     rts
+1$:     tst     tilt                    ; Already in TILT handle?
+        bne     0$                      ; Yes ... ignore it now
+        lds     #stack                  ; Reset stack
+        ldb     #4                      ; Do this 4 times
+2$:     pshs    b
+        jsr     clear_playfield         ; Clear center window
+        puls    b
+        decb                            ; All done?
+        bne     2$                      ; No ... do again
+        lda     #1                      ; Flag ...
+        sta     tilt                    ; ... handling TILT
+        jsr     disable_game_tasks      ; Disable game tasks
+				lda			#>dp_base
+				tfr			a,dp
+        EI                              ; Re-enable interrupts
+        ldy     #message_tilt           ; Message "TILT"
+        ldx     #vram+0x0C16            ; Center of screen
+        ldb     #4                      ; Four letters
+        jsr     print_message_del       ; Print "TILT"
+        jsr     one_sec_delay           ; Short delay
+        clra                            ; Zero
+        sta     tilt                    ; TILT handle over
+        sta     wait_start_loop         ; Back into splash screens
+        jmp     loc_16C9                ; Handle game over for player
+                
 ; $1804
 ctrl_saucer_sound:
         ldx     #saucer_active          ; Saucer on screen flag
