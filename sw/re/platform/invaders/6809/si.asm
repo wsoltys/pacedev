@@ -1495,8 +1495,8 @@ game_obj_3:
         bcs     2$                      ; Not yet ... table is OK
         lda     byte_0_1B00+0x49        ; Been through all ..
         sta     a_shot_c_fir_lsb        ; ... so reset pointer into firing-column table
-        ldx     #plu_shot_status        ; Plunger shot data
-2$:     lda     a_shot_blow_cnt         ; Get the blow up timer. ; Zero means shot is done
+2$:     ldx     #plu_shot_status        ; Plunger shot data
+        lda     a_shot_blow_cnt         ; Get the blow up timer. ; Zero means shot is done
         bne     from_shot_struct        ; If shot is still running, go copy the updated data and out
         ldy     #byte_0_1B00+0x40       ; Reload ...
         ldx     #obj3_timer_msb         ; ... object ...
@@ -3950,38 +3950,35 @@ message_p1:
         .db 0x18,4,0x11,0x24,0x1B,0x25,0xFC
         .db 0
 
-        .db    1
-        .db 0xFF
-        .db 0xFF
-
+; $1B80
+        .db 1                           ; shot_sync
+        .db 0xFF                        ; tmp_2081
+        .db 0xFF                        ; num_aliens
 ; $1B83
 byte_0_1B83:
-        .db 0                                           ; ufo visible flag
-        .db    0
-        .db    0
-        .db 32                                          ; countdown after ufo hit
-        .dw unk_0_1D64                                  ; ufo bitmap address
-        .dw vram+0x5D0                                  ; ufo screen loc
-        .db 24                                          ; ufo bitmap size
-        .db    2
-        .db 0x54 ; T
-        .db 0x1D
-        .dw 0x800                                       ; ptr to code - of which b0 determines which side ufo appears
-        .db    0
-        .db    6
-        .db    0
-        .db    0
-        .db    1
-        .db 0x40 ; @
-        .db    0
-        .db    1
-        .db    0
-        .db    0
-        .db 0x10
-        .db 0x9E ; ×
-        .db    0
-        .db 0x20
-        .db 0x1C
+        .db 0                           ; saucer_start
+        .db 0                           ; saucer_active
+        .db 0                           ; saucer_hit
+        .db 32                          ; saucer hit time
+        .dw unk_0_1D64                  ; saucer_pri_loc_msb/lsb (bug-swap)
+        .dw vram+0x5D0                  ; saucer_pri_pic_msb/lsb (bug-swap)
+        .db 24                          ; saucer_pri_size
+        .db 2                           ; saucer_delta_y
+        .dw saucer_scr_tab              ; sau_score_msb/lsb
+        .db 0                           ; shot_count_msb
+; $1B90        
+        .db 8                           ; shot_count_lsb
+        .dw 0x600                       ; till_saucer_msb/lsb
+        .db 0                           ; wait_start_loop
+        .db 0                           ; sound_port_3
+        .db 1                           ; change_fleet_snd
+        .db 0x40                        ; fleet_snd_cnt
+        .db 0                           ; fleet_snd_reload
+        .db 1                           ; sound_port_5
+        .db 0                           ; extra_hold
+        .db 0                           ; tilt
+        .db 0x10                        ; fleet_snd_hold
+        .db 0x9E, 0, 0x20, 0x1C         ; (unused)
 
 ; $1BA0
 alien_spr_CYA:
