@@ -1422,9 +1422,9 @@ end_of_blowup:
         bne     2$                      ; Yes ... use 2/29
         ldu     #0xfee0                 ; No ... Xr delta of -2 starting at Xr=E0
 2$:     tfr     u,d
-        ldx     #saucer_pri_pic_lsb     ; Saucer descriptor ??? RIGHT????
+        ldx     #saucer_pri_pic_msb     ; Saucer descriptor ??? RIGHT????
         stb     ,x                      ; Store Xr coordinate
-        leax    2,x                     ; Point to delta Xr
+        leax    3,x                     ; Point to delta Xr
         sta     ,x                      ; Store delta Xr
 9$:     rts
         
@@ -1773,7 +1773,7 @@ game_obj_4:
 ; $06BA
         ldx     #saucer_pri_pic_msb     ; Saucer's structure
         lda     ,x                      ; Get saucer's Y coordinate
-        leax    2,x                     ; Bump to delta Y
+        leax    3,x                     ; Bump to delta Y
         adda    ,x                      ; Move saucer
         sta     saucer_pri_pic_msb      ; New coordinate
         bsr     sub_073C                ; Draw the flying saucer
@@ -1820,6 +1820,7 @@ loc_070C:
         sta     adjust_score            ; ... needs updating
         ldx     sau_score_msb           ; Saucer score table
         ldb     ,x                      ; Get score for this saucer
+        stb     *z80_b                  ; for 6809 CMPA
         lda     #4                      ; There are only 4 possibilities
         sta     *z80_c
         ldx     #byte_0_1D50            ; Possible scores table
@@ -3957,7 +3958,7 @@ byte_0_1B83:
         .db 0                           ; saucer_hit
         .db 32                          ; saucer hit time
         .dw unk_0_1D64                  ; saucer_pri_loc_msb/lsb (bug-swap)
-        .dw vram+0x5D0                  ; saucer_pri_pic_msb/lsb (bug-swap)
+        .dw 0x29D0                      ; saucer_pri_pic_msb/lsb (bug-swap)
         .db 24                          ; saucer_pri_size
         .db 2                           ; saucer_delta_y
         .dw saucer_scr_tab              ; sau_score_msb/lsb
@@ -4202,6 +4203,7 @@ sprite_saucer_exp:
         .db 0x36, 0x1D, 0x10, 0x48, 0x62, 0xB6, 0x1D, 0x98, 8
         .db 0x42, 0x90, 8, 0, 0
 
+; $1D94
 sauc_score_str:                          
         .db 0x26, 0x1F, 0x1A            ; _50
         .db 0x1B, 0x1A, 0x1A            ; 100
