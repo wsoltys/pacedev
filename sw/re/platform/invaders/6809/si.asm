@@ -2288,7 +2288,7 @@ loc_09EF:
         puls    a                       ; Restore ...
         sta     player_data_msb         ; ... current player number
         lda     player_data_msb
-        pshs    d                       ; Hold player-data pointer
+        pshs    a                       ; Hold player-data pointer
         ldb     #0xfe                   ; 2xFE ... rack count
         tfr     d,x
         lda     ,x                      ; Get the number of racks the player has beaten
@@ -2299,12 +2299,12 @@ loc_09EF:
 1$:     leau    1,u                     ; Find the ...
         deca                            ; ... right entry ...
         bne     1$                      ; ... in the table
-        puls    d                       ; Restore player's pointer  
-        ldb     #0xfc                   ; 2xFC ... 
+        puls    a                       ; Restore player's pointer  
+        ldb     #0xfd                   ; 2xFD ... 
         tfr     d,x
         lda     ,u                      ; Get the starting Y coordinate
         sta     ,x                      ; Set rack's starting Y coordinate
-        leax    1,x                     ; Point to X
+        leax    -1,x                    ; Point to X
         lda     #0x38
         sta     ,x                      ; Set rack's starting X coordinate to 38
         tfr     x,d                     ; Player ...
