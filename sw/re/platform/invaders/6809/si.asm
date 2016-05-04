@@ -41,7 +41,10 @@ INP_RIGHT             .equ    (1<<6)
 INP_LEFT              .equ    (1<<5)
 INP_FIRE              .equ    (1<<4)
 
-DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3
+; 3 lives and bonus at 1,500
+;DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3
+; 3 lives and bonus at 1,000
+DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3|DIP_BONUS_LIFE
 
 ;NUM_ALIENS    .equ    3
 .ifndef NUM_ALIENS
@@ -923,9 +926,9 @@ move_ref_alien:
         inca                            ; ... animation ...
         anda    #1                      ; ... number between ...
         sta     ,x                      ; ... 0 and 1
-        clra                            ; Alien index in A is now 0
         lda     player_data_msb         ; Restore H ... (L doesn't matter)
         tfr     d,x                     ; ... to player data MSB (21 or 22)
+        clra                            ; Alien index in A is now 0
         rts
 
 ; $01C0
@@ -2172,7 +2175,7 @@ sub_0935:
         inc     ,x                      ; Bump number of ships
         lda     ,x                      ; Get the new total
         pshs    a                       ; Hang onto it for a bit
-        ldx     #vram+0x2501            ; Screen coords for ship hold
+        ldx     #vram+0x0101            ; Screen coords for ship hold
 3$:     leax    512,x                   ; Bump to next
         deca                            ; ... spot
         bne     3$                      ; Find spot for new ship
