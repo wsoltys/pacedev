@@ -1183,7 +1183,7 @@ game_obj_0:
         jsr     sub_18E7                ; Get player-alive status pointer
         lda     ,x                      ; Is player alive?
         beq     loc_032C                ; Yes ... remove a ship from player's stash and reenter game loop
-        tst     two_players             ; Multi-player game. ; Only one player?
+        tst     two_players             ; Multi-player game. Only one player?
         beq     loc_032C                ; Yes ... remove a ship from player's stash and reenter game loop
 loc_02ED:
         lda     player_data_msb         ; Player data MSB
@@ -2682,8 +2682,8 @@ cnvt_pix_number:
 ; B = number of rows
 ; C = number of columns
 remember_shields:
-        pshs    x
-1$:     ldb     *z80_c
+1$:     pshs    x
+        ldb     *z80_c
 2$:     lda     ,x+                     ; From screen
         sta     ,y+                     ; To buffer
         decb
