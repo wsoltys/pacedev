@@ -951,7 +951,7 @@ return_two:
 ; $01CF
 ; Draw a 1px line across the player's stash at the bottom of the screen.
 draw_bottom_line:
-        lda     #1                      ; Bit 1 set ... going to draw a 1-pixel stripe down left side
+        lda     #(1<<7)                 ; Bit 7 set ... going to draw a 1-pixel stripe down left side
         ldb     #0xe0                   ; All the way down the screen
         ldx     #vram+2                 ; Screen coordinates (3rd byte from upper left)
         jmp     sub_14CC                ; Draw line down left side 
@@ -1194,12 +1194,8 @@ loc_02ED:
 ; $02F8
 loc_02F8:        
         jsr     sub_0878                ; Get ref-alien info and pointer to storage
-        lda     *z80_e                  ; Hold the ...
-        sta     ,x                      ; ... ref-alien ...
-        lda     *z80_d                  
-        sta     1,x                     ; ... screen coordinates
-        lda     *z80_b
-        sta     -1,x                    ; Store ref-alien's delta (direction)
+        sty     ,x                      ; Hold the ref-alien screen coordinates
+        stb     -1,x                    ; Store ref-alien's delta (direction)
         jsr     copy_ram_mirror         ; Copy RAM mirror (getting ready to switch players)
         puls    a                       ; Restore active player MSB
         rora                            ; Player 1?
