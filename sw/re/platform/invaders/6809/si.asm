@@ -3136,7 +3136,6 @@ loc_16E6:
 ; shots for another fire.
 a_shot_reload_rate_fn:
         jsr     sub_09CA                ; Get score descriptor for active player
-        leax    1,x                     ; MSB value
         lda     ,x                      ; Get the MSB value
         ldy     #a_reload_score_tab     ; Score MSB table
         ldx     #shot_reload_rate       ; Corresponding fire reload rate table
