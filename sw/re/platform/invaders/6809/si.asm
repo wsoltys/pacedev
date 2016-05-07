@@ -3059,7 +3059,7 @@ loc_166D:
         jsr     loc_1A8B                ; Print ZERO ships remain
 loc_1671:        
         jsr     cur_ply_alive           ; Get active-flag ptr for current player
-        sta     ,x                      ; Flag player is dead
+        clr     ,x                      ; Flag player is dead
         jsr     sub_09CA                ; Get score descriptor for current player
         ldy     #hi_scor_m              ; Current high score upper two digits
         lda     ,y                      ; Is player score greater ...
