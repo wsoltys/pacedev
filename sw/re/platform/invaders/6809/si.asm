@@ -2029,9 +2029,11 @@ sub_0878:
 
 ; $0886     
 get_al_ref_ptr:
+        pshs    b
         lda     player_data_msb         ; Player data MSB (21 or 22)
         ldb     #0xfc                   ; 21FC or 22FC ... alien coordinates
         tfr     d,x
+        puls    b
         rts
 
 ; $088D
