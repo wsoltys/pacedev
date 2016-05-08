@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
 		exit (0);
 
   uint32_t remaining = fs.st_size;
-  uint8_t bank = 0x30;
+  uint8_t bank = ((remaining > 16*1024) ? 0x30 : 0x32);
   uint16_t addr = ((remaining > 16*1024) ? 0x8000 : 0xC000);
       
   while (remaining)

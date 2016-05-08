@@ -27,6 +27,9 @@ EXE = $(TARGET)
 ROMWAK = \devkit\neodev\m68k\bin\romwak
 MAKEFILE = makefile
 
+# TO EXTRACT BASIC FILE
+#imgtool get coco_jvc_rsdos LODERUN_6809.DSK lr.bas
+
 ifeq ($(PLATFORM),coco3)
   FQLN = $(LDR).bin
   FQEN = $(TARGET)rom.bin
