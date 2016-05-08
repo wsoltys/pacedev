@@ -13,7 +13,7 @@
 
 ; *** BUILD OPTIONS
 .define BUILD_OPT_SKIP_COCO_SPLASH
-.define BUILD_OPT_DISABLE_DEMO
+;.define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
 
 ; *** derived - do not edit
@@ -4022,8 +4022,23 @@ alien_spr_CYB:
 
 ; $1BE0
 ; More RAM initialization copied by 18D9
-        .db 0, 0, 0, 0, 0, 0
-        .db 0, 0, 0, 1, 0, 0, 1, 0x74, 0x1F, 0, 0x80, 0, 0, 0
+        .db 0, 0, 0, 0, 0               ; (not used)
+        .db 0                           ; player1_ex
+        .db 0                           ; player2_ex
+        .db 0                           ; player1_alive
+        .db 0                           ; player2_alive
+        .db 1                           ; suspend_play
+        .db 0                           ; coin_switch
+        .db 0                           ; num_coins
+        .db 1                           ; splash_animate
+        .dw demo_commands               ; demo_cmd_ptr_msb/lsb
+        .db 0                           ; game_mode
+
+; $1BF0
+        .db 0x80                        ; (not used)
+        .db 0                           ; adjust_score
+        .db 0                           ; score_delta_msb
+        .db 0                           ; score_delta_lsb
 
 ; hi score and vram location        
         .db 0, 0
