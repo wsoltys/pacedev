@@ -202,10 +202,10 @@ saucer_start:                   .ds   1
 saucer_active:                  .ds   1
 saucer_hit:                     .ds   1
 saucer_hit_time:                .ds   1
-saucer_pri_loc_msb:             .ds   1     ; switched for 6809
-saucer_pri_loc_lsb:             .ds   1     ; switched for 6809
 saucer_pri_pic_msb:             .ds   1     ; switched for 6809
 saucer_pri_pic_lsb:             .ds   1     ; switched for 6809
+saucer_pri_loc_msb:             .ds   1     ; switched for 6809
+saucer_pri_loc_lsb:             .ds   1     ; switched for 6809
 saucer_pri_size:                .ds   1
 saucer_delta_y:                 .ds   1
 sau_score_msb:                  .ds   1     ; switched for 6809
@@ -598,10 +598,9 @@ inipal:
         decb
         bne     3$
 				
-; don't really understand this,
-; but the game pretty much needs RAM to be $00
-; yet there's nowhere that clears it
-; so let's clear it for now
+; This is only necessary so that in demo mode
+; the game shows 3 bases left
+; otherwise it shows no bases left
         ldx     #wram
 1$:     clr     ,x+
         cmpx    #wram+1024
@@ -1421,7 +1420,7 @@ end_of_blowup:
         bne     2$                      ; Yes ... use 2/29
         ldu     #0xfee0                 ; No ... Xr delta of -2 starting at Xr=E0
 2$:     tfr     u,d
-        ldx     #saucer_pri_pic_msb     ; Saucer descriptor ??? RIGHT????
+        ldx     #saucer_pri_loc_msb     ; Saucer descriptor ??? RIGHT????
         stb     ,x                      ; Store Xr coordinate
         leax    3,x                     ; Point to delta Xr
         sta     ,x                      ; Store delta Xr
@@ -1762,7 +1761,7 @@ game_obj_4:
         sta     ,x                      ; (2084) The saucer is on the screen
         lbsr    sub_073C                ; Draw the flying saucer
 ; $06AB
-2$:     ldy     #saucer_pri_pic_msb     ; Saucer's Y coordinate
+2$:     ldy     #saucer_pri_loc_msb     ; Saucer's Y coordinate
         jsr     comp_y_to_beam          ; Compare to beam position
         bcc     0$                      ; Not the right ISR for moving saucer
 ; $06B2
@@ -1770,13 +1769,13 @@ game_obj_4:
         tst     ,x                      ; Has saucer been hit?
         bne     3$                      ; Yes ... don't move it
 ; $06BA
-        ldx     #saucer_pri_pic_msb     ; Saucer's structure
+        ldx     #saucer_pri_loc_msb     ; Saucer's structure
         lda     ,x                      ; Get saucer's Y coordinate
         leax    3,x                     ; Bump to delta Y
         adda    ,x                      ; Move saucer
-        sta     saucer_pri_pic_msb      ; New coordinate
+        sta     saucer_pri_loc_msb      ; New coordinate
         bsr     sub_073C                ; Draw the flying saucer
-        ldx     #saucer_pri_pic_msb     ; Saucer's structure
+        ldx     #saucer_pri_loc_msb     ; Saucer's structure
         lda     ,x                      ; Y coordinate
         cmpa    #0x28                   ; Too low? End of screen?
         bcs     4$                      ; Yes ... remove from play
@@ -1832,7 +1831,7 @@ loc_070C:
         dec     *z80_c                  ; ... the ...
         bne     1$                      ; ... score
 2$:     lda     ,x                      ; Get LSB of message (MSB is 2088 which is 1D)
-        sta     saucer_pri_loc_lsb      ; Message's LSB (_50=1D94 100=1D97 150=1D9A 300=1D9D)
+        sta     saucer_pri_pic_lsb      ; Message's LSB (_50=1D94 100=1D97 150=1D9A 300=1D9D)
         lda     #16
         ldb     *z80_b
         mul
@@ -1846,7 +1845,7 @@ sub_073C:
 
 ; $0742
 sub_0742:
-        ldx     #saucer_pri_loc_msb     ; Read flying saucer ...
+        ldx     #saucer_pri_pic_msb     ; Read flying saucer ...
         jsr     read_desc               ; ... structure
         jmp     conv_to_scr             ; Convert pixel number to screen and shift and out
         
@@ -1859,7 +1858,7 @@ loc_074B:
         sta     ,x                      ; ... saucer-hit sound
         jsr     sub_1770                ; Turn off fleet sound and start saucer-hit
         ldx     #sprite_saucer_exp      ; Sprite for saucer blowing up
-        stx     saucer_pri_loc_msb      ; Store it in structure
+        stx     saucer_pri_pic_msb      ; Store it in structure
         bra     sub_073C                ; Draw the flying saucer
 ; $075F
 sub_075F:
@@ -3957,8 +3956,8 @@ byte_0_1B83:
         .db 0                           ; saucer_active
         .db 0                           ; saucer_hit
         .db 32                          ; saucer hit time
-        .dw unk_0_1D64                  ; saucer_pri_loc_msb/lsb (bug-swap)
-        .dw 0x29D0                      ; saucer_pri_pic_msb/lsb (bug-swap)
+        .dw unk_0_1D64                  ; saucer_pri_pic_msb/lsb (bug-swap)
+        .dw 0x29D0                      ; saucer_pri_loc_msb/lsb (bug-swap)
         .db 24                          ; saucer_pri_size
         .db 2                           ; saucer_delta_y
         .dw saucer_scr_tab              ; sau_score_msb/lsb
