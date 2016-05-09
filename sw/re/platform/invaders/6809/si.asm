@@ -12,7 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
-.define BUILD_OPT_ENABLE_PROFILING
+;.define BUILD_OPT_ENABLE_PROFILING
 .define BUILD_OPT_SKIP_COCO_SPLASH
 ;.define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
@@ -344,7 +344,7 @@ shft_base:          .ds     2
 				.org		code_base
 
 start_coco:
-				orcc		#0x50										; disable interrupts
+				orcc		#(1<<6)|(1<<4)          ; disable interrupts
 				lds			#stack
 
 .ifdef PLATFORM_COCO3
@@ -438,7 +438,6 @@ setup_gime_for_game:
 				sta			PIA1+1									; PIA1, CA1,2 control
 				sta			PIA1+3									; PIA1, CB1,2 control
 ; - initialise GIME
-				lda			IRQENR									; ACK any pending GIME interrupt
 				lda			#MMUEN|#IEN|#FEN        ; enable GIME MMU, IRQ, FIRQ
 				sta			INIT0     							
 				lda			#0x00										; slow timer, task 1
@@ -482,12 +481,14 @@ inipal:
         sta     TMRMSB
 
   ; install FIRQ handler and enable CPU FIRQ
+				lda			FIRQENR									; ACK any pending FIRQ in the GIME
 ;        lda     #0x7E                   ; jmp
 ;        sta     0xFEF4
 ;				ldx     #main_fisr              ; address
 ;				stx     0xFEF5
 ;        andcc   #~(1<<6)                ; enable FIRQ in CPU
   ; install IRQ handler and enable CPU IRQ
+				lda			IRQENR									; ACK any pending IRQ in the GIME
         lda     #0x7E                   ; jmp
         sta     0xFEF7
         ldx     #cpu_isr
@@ -1467,6 +1468,11 @@ end_of_blowup:
 ; When the timer is 0 this object, the rolling-shot, runs.
 game_obj_2:
         puls    x                       ; Game object data
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_GREEN
+        sta     PALETTE+1
+.endif
+        
         lda     byte_0_1B00+0x32        ; Restore delay from ... 
         sta     obj2_timer_extra        ; ... ROM mirror (value 2)
         ldx     rol_shot_c_fir_msb      ; Get pointer to column-firing table. All zeros?
