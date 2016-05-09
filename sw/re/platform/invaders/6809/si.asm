@@ -12,6 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
+.define BUILD_OPT_ENABLE_PROFILING
 .define BUILD_OPT_SKIP_COCO_SPLASH
 ;.define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
@@ -670,6 +671,12 @@ cpu_isr:
 
 ; $0008
 scan_line_96:
+
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_BLUE
+        sta     PALETTE+1
+.endif
+
 ; stop the timer
         clra
         sta     TMRLSB
@@ -688,16 +695,25 @@ scan_line_96:
 1$:     ldx     #obj1_timer_msb         ; Game object table (skip player-object at 2010)
         jsr     loc_024B                ; Process all game objects (except player object)
         jsr     cursor_next_alien       ; Advance cursor to next alien (move the alien if it is last one)
-9$:     EI
+9$:     
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_WHITE
+        sta     PALETTE+1
+.endif
+        EI
         rti                             ; restores DP
 
 ; $0010
 scan_line_224:
 
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_RED
+        sta     PALETTE+1
+.endif
 ; start the timer to simulate the scan line 96 interrupt
-        lda     #<TMR_8ms
+        lda     #<TMR_9m5s
         sta     TMRLSB
-        lda     #>TMR_8ms
+        lda     #>TMR_9m5s
         sta     TMRMSB                  ; and start the timer
 				lda			#>dp_base_isr
 				tfr			a,dp
@@ -759,6 +775,10 @@ loc_0072:
         jsr     time_to_saucer          ; Count down time to saucer
 
 loc_0086:
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_WHITE
+        sta     PALETTE+1
+.endif
         EI
         rti                             ; restores DP
 
@@ -1175,6 +1195,10 @@ game_obj_0:
         lds     #stack                  ; We aren't going to return
 				lda			#>dp_base
 				tfr			a,dp
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_WHITE
+        sta     PALETTE+1
+.endif
         EI                              ; Enable interrupts (we just dropped the ISR context)
         jsr     disable_game_tasks      ; Disable game tasks
         jsr     sub_092E                ; Get number of ships for active player
@@ -1873,6 +1897,10 @@ wait_for_start:
         lds     #stack                  ; Reset stack
 				lda			#>dp_base
 				tfr			a,dp
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_WHITE
+        sta     PALETTE+1
+.endif
         EI
         jsr     loc_1979                ; Suspend game tasks
         jsr     clear_playfield         ; Clear center window
@@ -2456,6 +2484,10 @@ loc_0AEA:
         jsr     sub_1982                ; Turn off ISR splash-task
 				lda			#>dp_base
 				tfr			a,dp
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_WHITE
+        sta     PALETTE+1
+.endif
         EI
         bsr     one_sec_delay        
         ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
@@ -3117,6 +3149,10 @@ loc_16E6:
         lds     #stack                  ; Reset stack
 				lda			#>dp_base
 				tfr			a,dp
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_WHITE
+        sta     PALETTE+1
+.endif
         EI                              ; Enable interrupts
         clr     player_alive            ; Flag player is shot
 1$:     jsr     player_shot_hit         ; Player's shot collision detection
@@ -3310,6 +3346,10 @@ check_handle_tilt:
         jsr     disable_game_tasks      ; Disable game tasks
 				lda			#>dp_base
 				tfr			a,dp
+.ifdef BUILD_OPT_ENABLE_PROFILING
+        lda     #CMP_WHITE
+        sta     PALETTE+1
+.endif
         EI                              ; Re-enable interrupts
         ldy     #message_tilt           ; Message "TILT"
         ldx     #vram+0x0C16            ; Center of screen

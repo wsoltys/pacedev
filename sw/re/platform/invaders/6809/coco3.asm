@@ -116,6 +116,9 @@ code_base		.equ		0xC000
 ; values for 63.5us tick
 ; 60Hz/2 / 63.695us = ~130.8
 TMR_8ms     .equ    131
+TMR_9ms     .equ    141
+TMR_9m5s    .equ    149
+TMR_10ms    .equ    157
 
 ; equates to keyboard rows
 ; - phantom keys appear accordingly
