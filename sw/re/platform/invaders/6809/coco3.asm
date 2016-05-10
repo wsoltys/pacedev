@@ -119,6 +119,7 @@ TMR_8ms     .equ    131
 TMR_9ms     .equ    141
 TMR_9m5s    .equ    149
 TMR_10ms    .equ    157
+TMR_260ms   .equ    0x0fff
 
 ; equates to keyboard rows
 ; - phantom keys appear accordingly

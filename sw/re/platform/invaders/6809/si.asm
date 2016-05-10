@@ -13,7 +13,7 @@
 
 ; *** BUILD OPTIONS
 ;.define BUILD_OPT_ENABLE_PROFILING
-.define BUILD_OPT_SKIP_COCO_SPLASH
+;.define BUILD_OPT_SKIP_COCO_SPLASH
 ;.define BUILD_OPT_DISABLE_DEMO
 ; *** end of BUILD OPTIONS
 
@@ -43,9 +43,9 @@ INP_LEFT              .equ    (1<<5)
 INP_FIRE              .equ    (1<<4)
 
 ; 3 lives and bonus at 1,500
-;DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3
+DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3
 ; 3 lives and bonus at 1,000
-DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3|DIP_BONUS_LIFE
+;DEFAULT_DIP_SETTING   .equ    DIP_LIVES_3|DIP_BONUS_LIFE
 
 ;NUM_ALIENS    .equ    3
 .ifndef NUM_ALIENS
@@ -391,6 +391,9 @@ start_coco:
         
 display_splash:
 
+        lda     #0x00                   ; 32 chars/line
+        sta     VRES
+
         ldx     #0x400
         lda     #96                     ; green space
 1$:     sta     ,x+
@@ -629,21 +632,22 @@ splash:
         .db 0
         .asciz  "`````ARCADE`SPACE`INVADERS"
         .db 0
-        .asciz  "`"
-        .db 0
         .asciz  "``````FOR`THE`TRSmxp`COCOs"
         .db 0
         .asciz  "`"
         .db 0
         .asciz  "````j`MONOCHROME`GRAPHICS`j"
         .db 0
-        .asciz  "`"
-        .db 0
-        .asciz  "`````````hVERSION`pnqi"
+        .asciz  "`````````hVERSION`pnyi"
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "`"
+;       .asciz  "01234567890123456789012345678901"
+        .asciz  "``````````DIPSWITCHES"
+        .db 0
+        .asciz  "````````````LIVESz`s"
+        .db 0
+        .asciz  "````````BONUS`LIFEz`qupp"
         .db 0
         .asciz  "`"
         .db 0
@@ -678,9 +682,12 @@ scan_line_96:
         sta     PALETTE+1
 .endif
 
-; stop the timer
-        clra
+; stopping the timer by setting registers to zero
+; holds IRQ asserted on real hardware
+; - so set the timer to expire well after the next VBORD
+        lda     #<TMR_260ms
         sta     TMRLSB
+        lda     #>TMR_260ms
         sta     TMRMSB
 				lda			#>dp_base_isr
 				tfr			a,dp
