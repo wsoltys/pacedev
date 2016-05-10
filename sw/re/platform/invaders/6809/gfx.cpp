@@ -39,12 +39,17 @@ FILE *fpdbg;
 
 FILE  *fp1;
 
-unsigned do_n_bytes (char *label, unsigned a, unsigned n)
+#define BUILD_OPT_ROTATED
+
+unsigned do_n_bytes (char *label, char *comment, unsigned a, unsigned n)
 {
+  unsigned b=0;
+  
   fprintf (fp1, "; $%04X\n", a);
   if (label)
     fprintf (fp1, "%s:\n", label);
-  for (unsigned b=0; b<n; b++)
+#ifndef BUILD_OPT_ROTATED
+  for (b=0; b<n; b++)
   {
     uint8_t d = ram[a++];
     if ((b%8) == 0)
@@ -55,52 +60,90 @@ unsigned do_n_bytes (char *label, unsigned a, unsigned n)
     else
       fprintf (fp1, "\n");
   }
+#else
+  while (b < n)
+  {
+    static uint8_t block[8];
+    
+    unsigned l=((n-b)<8?(n-b):8);
+    memset (block, 0, 8);
+    for (unsigned i=0; i<l; i++)
+      block[i] = REV(ram[a+i]);
+
+    fprintf (fp1, "        .db ");
+
+    uint8_t d = 0;
+    for (unsigned s=0; s<8; s++)
+    {
+      for (unsigned t=0; t<8; t++)
+      {
+        d = (d<<1)|(block[t]&1);
+        block[t]>>=1;
+      }
+      fprintf (fp1, "0x%02X", d);
+      if (s<(l-1)) 
+        fprintf (fp1, ", ");
+      else
+        if (comment)
+          fprintf (fp1, "    ; %s\n", comment);
+        else
+          fprintf (fp1, "\n");
+    }
+
+    b += l;
+    a += l;
+  }
+#endif
   fprintf (fp1, "\n");
   return (a);
 }
 
 void do_asm_data (void)
 {
-  fp1 = fopen ("si_dat.asm", "wt");
+  fp1 = fopen ("si_tmp.asm", "wt");
   static char ascii[] = 
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<> =*Ý      Y     Y ?      -";
 
-  do_n_bytes (NULL, 0x1ba0, 16);
-  do_n_bytes (NULL, 0x1bd0, 16);
+  do_n_bytes (NULL, NULL, 0x1ba0, 16);
+  do_n_bytes (NULL, NULL, 0x1bd0, 16);
     
   unsigned a = 0x1c00;
   for (unsigned c=0; c<9; c++)
-    a = do_n_bytes (NULL, a, 16);
+    a = do_n_bytes (NULL, NULL, a, 16);
   fprintf (fp1, "\n");
 
-  do_n_bytes ("alien_explode", 0x1cc0, 16);
-
+  do_n_bytes ("alien_explode", NULL, 0x1cc0, 16);
 
   a = 0x1c90;
-  a = do_n_bytes ("player_shot_spr", a, 1);
-  a = do_n_bytes ("shot_exploding", a, 8);
+  a = do_n_bytes ("player_shot_spr", NULL, a, 1);
+  a = do_n_bytes ("shot_exploding", NULL, a, 8);
 
   a = 0x1cd0;
   for (unsigned i=0; i<4; i++)
-    a = do_n_bytes (NULL, a, 3);
+    a = do_n_bytes (NULL, NULL, a, 3);
 
-  do_n_bytes (NULL, 0x1cdc, 6);
+  do_n_bytes (NULL, NULL, 0x1cdc, 6);
 
   a = 0x1ce2;
   for (unsigned i=0; i<4; i++)
-    a = do_n_bytes (NULL, a, 3);
+    a = do_n_bytes (NULL, NULL, a, 3);
 
   a = 0x1cee;
   for (unsigned i=0; i<4; i++)
-    a = do_n_bytes (NULL, a, 3);
+    a = do_n_bytes (NULL, NULL, a, 3);
 
-  do_n_bytes (NULL, 0x1d20, 44);
+  do_n_bytes (NULL, NULL, 0x1d20, 44);
 
-  do_n_bytes (NULL, 0x1d68, 16);
+  do_n_bytes (NULL, NULL, 0x1d68, 16);
   fprintf (fp1, "\n");
-        
+
   a = 0x1e00;
   for (unsigned c=0; c<0x40; c++)
+  {
+    char comment[128];
+    sprintf (comment, "\"%c\"", ascii[c]);
+    a = do_n_bytes (NULL, comment, a, 8);
+#if 0    
   {
     fprintf (fp1, "        .db ");
     for (unsigned b=0; b<8; b++)
@@ -111,6 +154,7 @@ void do_asm_data (void)
       if (b<7) fprintf (fp1, ", ");
     }
     fprintf (fp1, "  ; \"%c\"\n", ascii[c]);
+#endif
   }
 
   fclose (fp1);
