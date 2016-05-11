@@ -895,7 +895,7 @@ draw_alien:
         beq     1$
         bsr     sub_013B                ; No ... add 30 and use position 1 alien sprites
 1$:     ldx     alien_pos_msb           ; Pixel position
-        ldb     #16                     ; 16 rows in alien sprites
+        LDB_SPRW  16                    ; 16 rows in alien sprites
         jsr     draw_sprite             ; Draw shifted sprite
 ; $0136        
 sub_0136:
@@ -1249,7 +1249,7 @@ game_obj_0:
 ; $02AE
 ; Blow up finished
         ldx     player_xr               ; Player's coordinates
-        ldb     #16                     ; 16 Bytes
+        LDB_SPRW  16                    ; 16 Bytes
         jsr     erase_simple_sprite     ; Erase simple sprite (the player)
         ldx     #obj0_timer_msb         ; Restore player ...
         ldy     #byte_0_1B00+0x10       ; ... structure ...
@@ -2194,7 +2194,7 @@ loc_08E4:
         beq     1$
         rts                             ; Skip if two player
 1$:     LDX_VRAM  0x151c                ; Player 2's score
-        ldb     #32                     ; 32 rows is 4 digits * 8 rows each
+        LDB_SPRW  32                    ; 32 rows is 4 digits * 8 rows each
         jmp     clear_small_sprite      ; Clear a one byte sprite (32 rows long) at HL/X
 
 ; $08F1
@@ -2599,7 +2599,7 @@ loc_0B0B:
         jsr     animate                 ; Wait for ISR to move sprite (alien pushing Y)
         jsr     one_sec_delay           ; One second delay
         LDX_VRAM  0x0fb7                ; Where the splash alien ends up
-        ldb     #10                     ; 10 rows
+        LDB_SPRW  10                    ; 10 rows
         jsr     clear_small_sprite      ; Clear a one byte sprite at HL
         jsr     two_sec_delay           ; Two second delay
 
@@ -2691,8 +2691,9 @@ message_corp:
 ; here make these two parallel routines the same size and speed.
 draw_shifted_sprite:
         nop
-        bsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
+        jsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
         nop
+.ifndef BUILD_OPT_ROTATED
 1$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
@@ -2712,6 +2713,33 @@ draw_shifted_sprite:
         leax    32,x                    ; Add 32 to next row
         decb                            ; All rows done?
         bne     1$                      ; No ... erase all
+.else
+1$:     pshs    b,x
+2$:     pshs    x
+        ldb     #8
+        lda     ,y+                     ; Get picture value. Next in image
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        ldu     shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
+        ora     ,x                      ; OR them onto the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+;       xor     a                       ; Shift register over ...
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
+        ora     ,x                      ; OR them onto the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+        puls    x
+        leax    32,x                    ; Add 32 to next row
+        decb                            ; All rows done?
+        bne     2$                      ; No ... erase all
+        puls    b,x
+        leax    1,x
+        decb
+        bne     1$
+.endif        
         rts                
 
 ; $1424
@@ -2719,6 +2747,7 @@ draw_shifted_sprite:
 ; ** We clear 2 bytes even though the draw-simple only draws one.
 erase_simple_sprite:
         bsr     cnvt_pix_number         ; Convert pixel number in HL
+.ifndef BUILD_OPT_ROTATED        
 1$:     pshs    x
         clr     ,x+                     ; Clear screen byte. Next byte
         clr     ,x+                     ; Clear byte
@@ -2726,6 +2755,19 @@ erase_simple_sprite:
         leax    32,x                    ; Add 1 row to screen coordinate
         decb                            ; All rows done?
         bne     1$                      ; Do all rows
+.else
+1$:     pshs    x,b
+        ldb     #8
+2$:     clr     ,x                      ; Clear screen byte.
+        clr     8*32,x                  ; Clear next byte
+        leax    32,x                    ; Add 1 row to screen coordinate
+        decb                            ; All rows done?
+        bne     1$                      ; Do all rows
+        puls    x,b
+        leax    1,x
+        decb
+        bne     2$
+.endif        
         rts
 
 ; $1439
@@ -2759,6 +2801,7 @@ draw_simp_sprite:
 ; Erases a shifted sprite from screen (like for player's explosion)
 erase_shifted:
         bsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
+.ifndef BUILD_OPT_ROTATED        
 1$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
@@ -2780,6 +2823,35 @@ erase_shifted:
         leax    32,x                    ; Add 32 to next row
         decb                            ; All rows done?
         bne     1$                      ; No ... erase all
+.else
+1$:     pshs    b,x
+        ldb     #8
+2$:     pshs    x   
+        lda     ,y+                     ; Get picture value. Next in image
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        ldu     shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
+        coma                            ; Reverse it (erasing bits)
+        anda    ,x                      ; Erase the bits from the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+;       xor     a                       ; Shift register over ...
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
+        coma                            ; Reverse it (erasing bits)
+        anda    ,x                      ; Erase the bits from the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+        puls    x
+        leax    32,x                    ; Add 32 to next row
+        decb                            ; All rows done?
+        bne     2$                      ; No ... erase all
+        puls    b,x
+        leax    1,x
+        decb
+        bne     1$
+.endif        
         rts                
 
 ; $1474
@@ -2963,7 +3035,7 @@ a_explode_time:
         beq     1$
         rts                             ; Not done  ... out
 1$:     ldx     exp_alien_xr            ; Pixel pointer for exploding alien
-        ldb     #0x10                   ; 16 row pixel
+        LDB_SPRW  16                    ; 16 row pixel
         jsr     erase_simple_sprite     ; Clear the explosion sprite from the screen
 
 loc_1545:        
@@ -3097,6 +3169,7 @@ sub_15C5:
 draw_sprite:
         jsr     cnvt_pix_number         ; Convert pixel number to screen/shift
         pshs    x                       ; Preserve screen coordinate
+.ifndef BUILD_OPT_ROTATED        
 1$:     pshs    x
         lda     ,y+                     ; From sprite data
 ;       out     (shft_data),a
@@ -3114,6 +3187,31 @@ draw_sprite:
         leax    32,x                    ; Offset screen to next row
         decb                            ; All done?
         bne     1$                      ; No ... do all
+.else
+1$:     pshs    x,b
+        ldb     #8
+2$:     pshs    x
+        lda     ,y+                     ; From sprite data
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        ldu     shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
+        sta     ,x+                     ; Shifted sprite to screen
+;       xor     a
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
+        sta     ,x                      ; Write remainder to adjacent
+        puls    x                       ; Old screen coordinate
+        leax    32,x                    ; Offset screen to next row
+        decb                            ; All done?
+        bne     2$                      ; No ... do all
+        puls    x,b
+        leax    1,x
+        decb
+        bne     1$
+.endif        
         puls    x                       ; Restore HL/X
         rts
 
@@ -3893,6 +3991,11 @@ conv_to_scr:
 ; but the screen starts at $2400, so we need to subtract the difference
         rorb                            ; D/=8
         suba    #0x04
+.ifdef BUILD_OPT_ROTATED
+        exg     a,b
+        nega
+        adda    #31
+.endif        
         tfr     d,x                     ; Back to HL/X
         puls    b
         rts
