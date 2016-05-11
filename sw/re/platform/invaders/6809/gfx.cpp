@@ -134,7 +134,9 @@ void do_asm_data (void)
 
   do_n_bytes (NULL, NULL, 0x1d20, 44);
 
-  do_n_bytes (NULL, NULL, 0x1d68, 16);
+  do_n_bytes ("unk_0_1D64", NULL, 0x1d64, 24);
+
+  do_n_bytes ("sprite_saucer", NULL, 0x1d68, 16);
   fprintf (fp1, "\n");
 
   a = 0x1e00;

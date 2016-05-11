@@ -10,7 +10,7 @@ byte_0_1A95:
         .db 0xFE                        ; Y starting coordinate (swapped for 6809)
         .db 0xB8                        ; X coordinate (swapped for 6809)
         .dw alien_spr_a+0x20            ; Base image (small alien)
-        .db 0x10                        ; Size of image (16 bytes)
+        DEF_SPRW 16                     ; Size of image (16 bytes)
         .db 0x9E                        ; Target Y coordinate
         .db 0                           ; Reached Y flag
         .dw alien_spr_a+0x20            ; Base image (small alien)
@@ -129,7 +129,7 @@ byte_0_1B00:    .db 1                   ; wait_on_draw
                 .dw squiggly_shot       ; squShotImage
                 .db 0                   ; squShotXr (swapped for 6809)
                 .db 0                   ; squShotYr (swapped for 6809)
-                .db 3                   ; squShotSize
+                DEF_SPRW 3              ; squShotSize
 
 ; $1B60->$2060
                 .db 0xFF                ; end_of_tasks
@@ -167,7 +167,7 @@ byte_0_1B83:
         .db 32                          ; saucer hit time
         .dw unk_0_1D64                  ; saucer_pri_pic_msb/lsb (bug-swap)
         .dw 0x29D0                      ; saucer_pri_loc_msb/lsb (bug-swap)
-        .db 24                          ; saucer_pri_size
+        DEF_SPRW 24                     ; saucer_pri_size
         .db 2                           ; saucer_delta_y
         .dw saucer_scr_tab              ; sau_score_msb/lsb
         .db 0                           ; shot_count_msb
@@ -198,7 +198,7 @@ byte_0_1BB0:
         .db 0x98                        ; y starting coordinate (swapped for 6809)
         .db 0xB8                        ; x coordinate (swapped for 6809)
         .dw alien_spr_CYA               ; Base image
-        .db 0x10                        ; size of image         
+        DEF_SPRW 16                     ; size of image         
         .db 0xFF                        ; target y coordinate   
         .db 0                           ; reached flag          
         .dw alien_spr_CYA               ; Base image
@@ -220,7 +220,7 @@ byte_0_1BC0:
         .dw squiggly_shot               ; squShotImage    
         .db 0x9B                        ; squShotXr (swapped for 6809)
         .db 0xC8                        ; squShotYr (swapped for 6809)      
-        .db 3                           ; squShotSize     
+        DEF_SPRW 3                      ; squShotSize     
 
 ; $1BD0 (rotated)
 alien_spr_CYB:
@@ -253,15 +253,15 @@ alien_spr_CYB:
 ; hi score and vram location        
         .db 0, 0
         ;.db 0x1C, 0x2F, 
-        .dw vram+0x0b1c
+        DEF_VRAM  0x0b1c
 ; p1 score and vram location        
         .db 0, 0
         ;.db 0x1C, 0x27, 
-        .dw vram+0x031c
+        DEF_VRAM  0x031c
 ; p2 score and vram location        
         .db 0, 0
         ;.db 0x1C, 0x39
-        .dw vram+0x151c
+        DEF_VRAM  0x151c
 
 ; $1C00 (rotated)
 alien_spr_a:    
@@ -411,14 +411,14 @@ saucer_scr_tab:
         .db 0x10, 5, 5, 0x10, 0x15, 0x10, 0x10, 5
         .db 0x30, 0x10, 0x10, 0x10, 5, 0x15, 0x10, 5
 
+; $1D64 (rotated - fixme)
 unk_0_1D64:
-        .db 0, 0, 0, 0
-
-; $1D68
+        .db 0x00, 0x00, 0x01, 0x03
+; $1D68 (rotated - fixme)
 sprite_saucer:
-        .db 0x20, 0x30, 0x78, 0xEC, 0x7C, 0x3E, 0x2E, 0x7E
-        .db 0x7E, 0x2E, 0x3E, 0x7C, 0xEC, 0x78, 0x30, 0x20
-        .db 0, 0, 0, 0
+        .db                         0x06, 0x0F, 0x03, 0x01
+        .db 0x00, 0x7E, 0xFF, 0xFF, 0xDB, 0xFF, 0x99, 0x00
+        .db 0x00, 0x00, 0x80, 0xC0, 0x60, 0xF0, 0xC0, 0x80
 
 ; $1D7C
 sprite_saucer_exp:
@@ -460,25 +460,25 @@ message_invaders:
 
 ; score table graphics info
 word_0_1DBE:    
-        .dw vram+0x080E
+        DEF_VRAM  0x080E
         .dw sprite_saucer               ; ptr ufo bitmap
-        .dw vram+0x080C
+        DEF_VRAM  0x080C
         .dw alien_spr_a+0x20            ; ptr 30 pt invader bitmap
-        .dw vram+0x080A
+        DEF_VRAM  0x080A
         .dw alien_spr_b+0x10            ; ptr 20 pt invader bitmap
-        .dw vram+0x0808
+        DEF_VRAM  0x0808
         .dw alien_spr_a                 ; ptr 10 pt invader bitmap
         .db 0xFF
 
 ; score table text info
 word_0_1DCF:    
-        .dw vram+0x0A0E
+        DEF_VRAM  0x0A0E
         .dw message_myst                ; "=? MYSTERY"
-        .dw vram+0x0A0C
+        DEF_VRAM  0x0A0C
         .dw message_30_pts              ; "=30 POINTS"
-        .dw vram+0x0A0A
+        DEF_VRAM  0x0A0A
         .dw message_20_pts              ; "=20 POINTS"
-        .dw vram+0x0A08
+        DEF_VRAM  0x0A08
         .dw message_10_pts              ; "=10 POINTS"
         .db 0xFF
 
@@ -580,11 +580,11 @@ message_coin:
 
 ; $1F9C
 credit_table:     
-        .dw vram+0x60D                  ; screen loc
+        DEF_VRAM  0x60D                 ; screen loc
         .dw message_p1_or_2             ; "<1 OR 2 PLAYERS>
-        .dw vram+0x60A                  ; screen loc
+        DEF_VRAM  0x60A                 ; screen loc
         .dw message_1_coin              ; "*1 PLAYER 1  COIN"
-        .dw vram+0x607                  ; screen loc
+        DEF_VRAM  0x607                 ; screen loc
         .dw message_2_coins             ; "*2 PLAYERS 2 COINS"
         .db 0xFF
 
@@ -611,7 +611,7 @@ byte_0_1FC9:
         .db 0xFF                        ; y starting coordinate (swapped for 6809)
         .db 0xB8                        ; x coordinate (swapped or 6809)
         .dw alien_spr_CA
-        .db 0x10                        ; size of image
+        DEF_SPRW 16                     ; size of image
         .db 0x97                        ; target y coordinate
         .db 0                           ; reached y flag
         .dw alien_spr_CA
@@ -625,7 +625,7 @@ byte_0_1FD5:
         .db 0x22                        ; y starting coordinate (swapped for 6809)
         .db 0xD0                        ; x coordinate (swapped for 6809)
         .dw alien_spr_a+0x20
-        .db 0x10                        ; size of image
+        DEF_SPRW 16                     ; size of image
         .db 0x94                        ; target y coordinate
         .db 0                           ; reached flag
         .dw alien_spr_a+0x20

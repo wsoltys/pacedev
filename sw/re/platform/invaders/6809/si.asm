@@ -30,6 +30,38 @@
 
 ; *** INVADERS stuff here
 ;
+    .macro LDX_VRAM addr
+      .ifndef BUILD_OPT_ROTATED
+        ldx     #vram+addr
+      .else
+        ldx     #vram+(31-<addr)*256+>addr
+      .endif
+    .endm
+    
+    .macro DEF_VRAM addr
+      .ifndef BUILD_OPT_ROTATED
+        .dw     #vram+addr
+      .else
+        .dw     #vram+(31-<addr)*256+>addr
+      .endif
+    .endm
+
+    .macro LDB_SPRW w
+      .ifndef BUILD_OPT_ROTATED
+        ldb     #w
+      .else
+        ldb     #(w+7)/8
+      .endif
+    .endm
+
+    .macro DEF_SPRW w
+      .ifndef BUILD_OPT_ROTATED
+        .db     #w
+      .else
+        .db     #(w+7)/8
+      .endif
+    .endm
+        
 DIP_DISPLAY_COINAGEn  .equ    (1<<7)
 DIP_BONUS_LIFE        .equ    (1<<3)
 DIP_TILT              .equ    (1<<2)
@@ -1068,7 +1100,7 @@ loc_021B:
 copy_shields:
         sta     tmp_2081                ; Remember copy/restore flag
         ldu     #0x1602                 ; 22 rows, 2 bytes/row (for 1 shield pattern)
-        ldx     #vram+0x0406            ; Screen coordinates
+        LDX_VRAM  0x0406                ; Screen coordinates
         ldb     #4                      ; Four shields to move
 1$:     pshs    b                       ; Hold shield count
         stu     *z80_b                  ; B=rows, C=bytes
@@ -1928,12 +1960,12 @@ wait_for_start:
         EI
         jsr     loc_1979                ; Suspend game tasks
         jsr     clear_playfield         ; Clear center window
-        ldx     #vram+0x0C13            ; Screen coordinates
+        LDX_VRAM  0xC13
         ldy     #message_push           ; "PRESS"
         ldb     #4                      ; Message length
         jsr     print_message           ; Print it
 loc_077F:        
-        ldx     #vram+0x0410            ; Screen coordinates
+        LDX_VRAM  0x0410                ; Screen coordinates
         ldb     #20                     ; Message length
         lda     num_coins               ; Number of credits
         deca                            ; Set flags
@@ -2090,14 +2122,14 @@ get_al_ref_ptr:
 ; $088D
 ; Print "PLAY PLAYER " and blink score for 2 seconds.
 prompt_player:
-        ldx     #vram+0x0711            ; Screen coordinates
+        LDX_VRAM  0x0711                ; Screen coordinates
         ldy     #message_p1             ; Message "PLAY PLAYER<1>"
         ldb     #14                     ; 14 bytes in message
         bsr     print_message           ; Print the message
         lda     player_data_msb         ; Get the player number
         rora                            ; C will be set for player 1
         lda     #0x1c                   ; The "2" character
-        ldx     #vram+0x1311            ; Replace the "<1>" with "<2">
+        LDX_VRAM  0x1311                ; Replace the "<1>" with "<2">
         bcs     1$
         bsr     draw_char               ; If player 2 ... change the message
 1$:     lda     #176                    ; Delay of 176 (roughly 2 seconds)
@@ -2111,11 +2143,11 @@ prompt_player:
         jsr     draw_score              ; Draw the score
         bra     2$                      ; Back to the top of the wait loop
 4$:     ldb     #32                     ; 32 rows (4 characters * 8 bytes each)
-        ldx     #vram+0x031c            ; Player-1 score on the screen
+        LDX_VRAM  0x031c                ; Player-1 score on the screen
         lda     player_data_msb         ; Get the player number
         rora                            ; C will be set for player 1
         bcs     5$                      ; We have the right score coordinates
-        ldx     #vram+0x151c            ; Use coordinates for player-2's score
+        LDX_VRAM  0x151c                ; Use coordinates for player-2's score
 5$:     jsr     clear_small_sprite      ; Clear a one byte sprite at HL/X
         bra     2$                      ; Back to the top of the wait loop
                 
@@ -2143,7 +2175,7 @@ loc_08E4:
         tst     two_players             ; Number of players
         beq     1$
         rts                             ; Skip if two player
-1$:     ldx     #vram+0x151c            ; Player 2's score
+1$:     LDX_VRAM  0x151c                ; Player 2's score
         ldb     #32                     ; 32 rows is 4 digits * 8 rows each
         jmp     clear_small_sprite      ; Clear a one byte sprite (32 rows long) at HL/X
 
@@ -2173,7 +2205,7 @@ draw_char:
         ldb     #8
         mul                             ; D=offset
         leay    d,y                     ; Get pointer to sprite
-        ldb     #8                      ; 8 bytes each
+        LDB_SPRW  8                     ; 8 bytes each
 ; hit watchdog
         jmp     draw_simp_sprite        ; To screen
 
@@ -2224,11 +2256,11 @@ sub_0935:
         inc     ,x                      ; Bump number of ships
         lda     ,x                      ; Get the new total
         pshs    a                       ; Hang onto it for a bit
-        ldx     #vram+0x0101            ; Screen coords for ship hold
+        LDX_VRAM  0x0101                ; Screen coords for ship hold
 3$:     leax    512,x                   ; Bump to next
         deca                            ; ... spot
         bne     3$                      ; Find spot for new ship
-        ldb     #16                     ; 16 byte sprite
+        LDB_SPRW  16                    ; 16 byte sprite
         ldy     #player_sprite          ; Player sprite
         jsr     draw_simp_sprite        ; Draw the sprite
         puls    a                       ; Restore the count
@@ -2318,6 +2350,7 @@ sub_09CA:
 ; $09D6
 ; Clear center window of screen
 clear_playfield:
+.ifndef BUILD_OPT_ROTATED        
         ldx     #vram+2                 ; Third from left, top of screen
 1$:     clr     ,x+                     ; Clear screen byte. Next in row
         tfr     x,d                     ; Get X ...
@@ -2325,8 +2358,14 @@ clear_playfield:
         cmpb    #0x1c                   ; Edge minus a buffer?
         bcs     2$                      ; No ... keep going
         leax    6,x                     ; Else ... bump to next edge + buffer
-2$:     cmpa    #0x40                   ; Get Y coordinate. Reached bottom?
+2$:     cmpa    #0x1C                   ; Get Y coordinate. Reached bottom?
         bcs     1$                      ; No ... keep going
+.else
+        ldx     #vram+32*0x20           ; start 32 pixels from the top
+1$:     clr     ,x+
+        cmpx    #vram+(32+208)*0x20     ; clear 256-32-16=208 lines
+        bne     1$
+.endif        
         rts
 
 ; $09EF
@@ -2480,7 +2519,7 @@ isr_spl_tasks:
 ; Message to center of screen.
 ; Only used in one place for "SPACE  INVADERS"
 sub_0ACF:
-        ldx     #vram+0x714             ; Near center of screen
+        LDX_VRAM  0x714                 ; Near center of screen
         ldb     #15                     ; 15 bytes in message
         bra     print_message_del       ; Print and out
 
@@ -2514,7 +2553,7 @@ loc_0AEA:
 .endif
         EI
         bsr     one_sec_delay        
-        ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
+        LDX_VRAM  0x0C17                ; Screen coordinates (middle near top)
         ldb     #4                      ; 4 characters in "PLAY"
         tst     splash_animate          ; Splash screen type
         lbne    loc_0BE8                ; Not 0 ... do "normal" PLAY
@@ -2541,7 +2580,7 @@ loc_0B0B:
         bsr     ini_splash_ani          ; Copy to splash-animate structure
         jsr     animate                 ; Wait for ISR to move sprite (alien pushing Y)
         jsr     one_sec_delay           ; One second delay
-        ldx     #vram+0x0fb7            ; Where the splash alien ends up
+        LDX_VRAM  0x0fb7                ; Where the splash alien ends up
         ldb     #10                     ; 10 rows
         jsr     clear_small_sprite      ; Clear a one byte sprite at HL
         jsr     two_sec_delay           ; Two second delay
@@ -2580,12 +2619,12 @@ loc_0B89:
         jsr     one_sec_delay
         jsr     sub_1988                ; Jump straight to clear-play-field
         ldb     #12                     ; Message size
-        ldx     #vram+0x0811            ; Screen coordinates
+        LDX_VRAM  0x0811                ; Screen coordinates
         ldy     #message_coin           ; "INSERT  COIN"
         jsr     print_message           ; Print message
         lda     splash_animate          ; Do splash animations?
         bne     4$                      ; Not 0 ... not on this screen
-        ldx     #vram+0x0f11            ; Screen coordinates
+        LDX_VRAM  0x0f11                ; Screen coordinates
         lda     #2                      ; Character "C"
         jsr     draw_char               ; Put an extra "C" for "CCOIN" on the screen
 4$:     ldu     #credit_table           ; "<1 OR 2 PLAYERS>  "
@@ -2677,11 +2716,25 @@ erase_simple_sprite:
 ; DE/Y = character data
 ; B = number of rows
 draw_simp_sprite:
+.ifndef BUILD_OPT_ROTATED
         lda     ,y+                     ; From character set ...
         sta     ,x                      ; ... to screen
         leax    32,x                    ; Next row on screen
         decb                            ; Decrement counter
         bne     draw_simp_sprite        ; Do all
+.else
+1$:     pshs    b,x
+        ldb     #8
+2$:     lda     ,y+
+        sta     ,x
+        leax    32,x
+        decb
+        bne     2$
+        puls    b,x
+        leax    1,x
+        decb
+        bne     1$
+.endif
         rts
 
 ; $1452
@@ -3138,7 +3191,7 @@ loc_1671:
 ; $1698        
 3$:     tst     two_players             ; Number of players. Is this a single player game?
         beq     loc_16C9                ; Yes ... short message
-        ldx     #vram+0x0403            ; Screen coordinates
+        LDX_VRAM  0x0403                ; Screen coordinates
         ldy     #message_g_over         ; "GAME OVER PLAYER< >"
         ldb     #20                     ; 20 characters
         jsr     print_message_del       ; Print message
@@ -3157,7 +3210,7 @@ loc_1671:
         jmp     loc_02ED                ; Switch players and game loop
 ; $16C9
 loc_16C9: 
-        ldx     #vram+0x0918            ; Screen coordinates
+        LDX_VRAM  0x0918                ; Screen coordinates
         ldy     #message_g_over         ; "GAME OVER PLAYER< >"
         ldb     #10                     ; Just the "GAME OVER" part
         jsr     print_message_del       ; Print message
@@ -3185,7 +3238,7 @@ loc_16E6:
         jsr     sub_0A59                ; Has flag been set?
         bne     1$                      ; No ... wait for the flag
         jsr     disable_game_tasks      ; Disable ISR game tasks
-        ldx     #vram+0x0301            ; Player's stash of ships
+        LDX_VRAM  0x0301                ; Player's stash of ships
         jsr     loc_19FA                ; Erase the stash of ships
         clra                            ; Print ...
         jsr     loc_1A8B                ; ... a zero (number of ships)
@@ -3376,7 +3429,7 @@ check_handle_tilt:
 .endif
         EI                              ; Re-enable interrupts
         ldy     #message_tilt           ; Message "TILT"
-        ldx     #vram+0x0C16            ; Center of screen
+        LDX_VRAM  0x0C16                ; Center of screen
         ldb     #4                      ; Four letters
         jsr     print_message_del       ; Print "TILT"
         jsr     one_sec_delay           ; Short delay
@@ -3400,7 +3453,7 @@ ctrl_saucer_sound:
 ; $1815
 ; Draw "SCORE ADVANCE TABLE"
 draw_adv_table:
-        ldx     #vram+0x0410            ; 0x410 is 1040 rotCol=32, rotRow=16
+        LDX_VRAM  0x0410                ; 0x410 is 1040 rotCol=32, rotRow=16
         ldy     #message_adv            ; "*SCORE ADVANCE TABLE*"
         ldb     #21                     ; 21 bytes in message
         jsr     print_message
@@ -3423,7 +3476,7 @@ loc_183A:
         bra     1$                      ; Do all in table
 ; $1844
 sub_1844:
-        ldb     #16                     ; 16 bytes
+        LDB_SPRW  16                    ; 16 bytes
         jsr     draw_simp_sprite        ; Draw simple
         rts
 
@@ -3496,7 +3549,7 @@ sub_189E:
 2$:     lda     squ_shot_status         ; Wait ...
         anda    #1                      ; ... for explosion ...
         bne     2$                      ; ... to finish
-        ldx     #vram+0x0f11            ; Here is where the extra C is
+        LDX_VRAM  0x0f11                ; Here is where the extra C is
         lda     #0x26                   ; Space character
         jsr     draw_char               ; Draw character
         jmp     two_sec_delay           ; Two second delay and out
@@ -3569,7 +3622,7 @@ cur_ply_alive:
 ; Print score header " SCORE<1> HI-SCORE SCORE<2> "
 draw_score_head:
         ldb     #0x1c                   ; 28 bytes in message
-        ldx     #vram+0x1e              ; Screen coordinates
+        LDX_VRAM  0x1e                  ; Screen coordinates
         ldy     #message_score          ; Score header message
         jmp     print_message           ; Print score header
 
@@ -3595,7 +3648,7 @@ draw_score:
 ; Print message "CREDIT "
 sub_193C:
         ldb     #7                      ; 7 bytes in message
-        ldx     #vram+0x1101            ; Screen coordinates
+        LDX_VRAM  0x1101                ; Screen coordinates
         ldy     #message_credit         ; Message = "CREDIT "
         jmp     print_message           ; Print message
 
@@ -3603,7 +3656,7 @@ sub_193C:
 draw_num_credits:
 ; Display number of credits on screen
         lda     num_coins               ; Number of credits
-        ldx     #vram+0x1801            ; Screen coordinates
+        LDX_VRAM  0x1801                ; Screen coordinates
         jmp     draw_hex_byte           ; Character to screen
                 
 ; $1950
@@ -3674,7 +3727,7 @@ check_hidden_mes:
         cmpa    #0x34                   ; 0011_0100 2nd sequence: 1Pstart, 1Pshot, 1Pleft 
         beq     3$
         rts                             ; If not second sequence ignore
-3$:     ldx     #vram+0x0A1B            ; Screen coordinates
+3$:     LDX_VRAM  0x0A1B                ; Screen coordinates
         ldy     #message_corp           ; Message = "TAITO COP" (no R)
         ldb     #9                      ; Message length
         jmp     print_message           ; Print message and out
@@ -3710,12 +3763,12 @@ sound_bits_3_off:
 ; $19E6
 draw_num_ships:
 ; Show ships remaining in hold for the player
-        ldx     #vram+0x0301            ; Screen coordinates
+        LDX_VRAM  0x0301                ; Screen coordinates
         tsta                            ; None in reserve ... 
         beq     loc_19FA                ; ... skip display
 ; Draw line of ships
 1$:     ldy     #player_sprite          ; Player sprite
-        ldb     #16                     ; 16 rows
+        LDB_SPRW  16                    ; 16 rows
         sta     *z80_c                  ; Hold count
         jsr     draw_simp_sprite        ; Display 1-byte sprite to screen
         lda     *z80_c                  ; Restore remaining
@@ -3849,7 +3902,7 @@ remove_ship:
         jsr     draw_num_ships
         puls    a                       ; Restore number
 loc_1A8B:        
-        ldx     #vram+0x0101
+        LDX_VRAM  0x0101
         anda    #0x0f                   ; Make sure it is a digit
         jmp     sub_09C5                ; Print number remaining
 
