@@ -22,8 +22,10 @@
 
 .ifndef BUILD_OPT_INVALID
   .define GFX_1BPP
+  VIDEO_BPL   .equ    0x20
 .else
   .define GFX_2BPP
+  VIDEO_BPL   .equ    0x40
 .endif
 
 ; *** end of derived
@@ -495,7 +497,8 @@ setup_gime_for_game:
 				sta			BRDR      							
 				lda			#(VRAM_PG<<2)           ; screen at page $38
 				sta			VOFFMSB
-				lda			#0x00
+;				lda     #0
+				lda			#32*(VIDEO_BPL/8)
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
@@ -1021,10 +1024,20 @@ return_two:
 ; $01CF
 ; Draw a 1px line across the player's stash at the bottom of the screen.
 draw_bottom_line:
+.ifndef BUILD_OPT_ROTATED
         lda     #(1<<7)                 ; Bit 7 set ... going to draw a 1-pixel stripe down left side
         ldb     #0xe0                   ; All the way down the screen
         ldx     #vram+2                 ; Screen coordinates (3rd byte from upper left)
         jmp     sub_14CC                ; Draw line down left side 
+.else
+        ldb     #VIDEO_BPL              ; screen width in bytes
+        ldx     #vram+(32+207)*VIDEO_BPL  ; location
+        lda     #0xff
+1$:     sta     ,x+
+        decb
+        bne     1$
+        rts
+.endif
 
 ; $01D9
 ; HL/X points to descriptor: DX DY XX YY except DX is already loaded in C
@@ -1111,7 +1124,12 @@ copy_shields:
         decb                            ; Have we moved all shields?
         bne     3$
         rts
-3$:     leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
+3$:     
+.ifndef BUILD_OPT_ROTATED
+        leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
+.else
+        leax    2,x
+.endif        
         bra     1$        
 4$:     jsr     remember_shields        ; Remember player's shields
         bra     2$                      ; Continue with next shield
@@ -2361,9 +2379,9 @@ clear_playfield:
 2$:     cmpa    #0x1C                   ; Get Y coordinate. Reached bottom?
         bcs     1$                      ; No ... keep going
 .else
-        ldx     #vram+32*0x20           ; start 32 pixels from the top
+        ldx     #vram+32*VIDEO_BPL      ; start 32 pixels from the top
 1$:     clr     ,x+
-        cmpx    #vram+(32+208)*0x20     ; clear 256-32-16=208 lines
+        cmpx    #vram+(32+208)*VIDEO_BPL  ; clear 256-32-16=208 lines
         bne     1$
 .endif        
         rts
@@ -2727,7 +2745,7 @@ draw_simp_sprite:
         ldb     #8
 2$:     lda     ,y+
         sta     ,x
-        leax    32,x
+        leax    VIDEO_BPL,x
         decb
         bne     2$
         puls    b,x
@@ -2840,10 +2858,23 @@ clear_small_sprite:
 ; Clear a one byte sprite at HL/X. B=number of rows.
         clra
 sub_14CC:
+.ifndef BUILD_OPT_ROTATED
 1$:     sta     ,x                      ; Clear screen byte
         leax    32,x                    ; Bump HL/X one screen row
         decb                            ; All done?
         bne     1$                      ; No ... clear all
+.else
+1$:     pshs    b,x
+        ldb     #8
+2$:     clr     ,x
+        leax    VIDEO_BPL,x
+        decb
+        bne     2$
+        puls    b,x
+        leax    1,x
+        decb
+        bne     1$        
+.endif        
         rts
 
 ; $14D8
@@ -3776,10 +3807,15 @@ draw_num_ships:
         bne     1$
 ; Clear remainder of line        
 loc_19FA:
-        ldb     #16                     ; 16 rows
+        LDB_SPRW  16                    ; 16 rows
         jsr     clear_small_sprite      ; Clear 1-byte sprite at HL/X
         tfr     x,d                     ; Get Y coordinate
+.ifndef BUILD_OPT_ROTATED        
         cmpa    #>vram+0x11             ; At edge?
+.else
+        andb    #0x1f
+        cmpb    #0x1f
+.endif        
         bne     loc_19FA                ; No ... do all
         rts
 
@@ -3865,7 +3901,11 @@ conv_to_scr:
 clear_screen:
         ldx     #vram
 1$:     clr     ,x+
+.ifndef BUILD_OPT_ROTATED
         cmpx    #(vram+0x1C00+32)
+.else
+        cmpx    #(vram+(32+225)*VIDEO_BPL)
+.endif        
         bne     1$
         rts
 
