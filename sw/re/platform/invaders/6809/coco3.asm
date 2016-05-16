@@ -104,10 +104,12 @@ RAMMODE			.equ		0xFFDF
 ; $C000-$FFXX   $32-$33   Code+Data
 
 CODE_PG1    .equ    0x30
-VRAM_PG     .equ    0x39
-VRAM_MSB    .equ    (VRAM_PG<<2)|0x02
+VRAM_PG     .equ    0x38
+; these are Coco VRAM, not SI VRAM
+VRAM_MSB    .equ    (0x39<<2)
+VRAM_LSB    .equ    0x00
 
-vram        .equ    0x3000
+vram        .equ    0x0000
 vidbuf      .equ    VIDEO_SIZ
 shift_tbl   .equ    0x6000
 WRAM        .equ    0x7000
