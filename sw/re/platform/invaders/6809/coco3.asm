@@ -107,9 +107,11 @@ CODE_PG1    .equ    0x30
 VRAM_PG     .equ    0x38
 ; these are Coco VRAM, not SI VRAM
 VRAM_MSB    .equ    (0x39<<2)
-VRAM_LSB    .equ    0x00
+;VRAM_LSB    .equ    0x00
+VRAM_LSB    .equ    32*(32/8)
 
 vram        .equ    0x0000
+cocovram    .equ    0x2000
 vidbuf      .equ    VIDEO_SIZ
 shift_tbl   .equ    0x6000
 WRAM        .equ    0x7000

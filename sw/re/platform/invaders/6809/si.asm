@@ -12,7 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
-;.define BUILD_OPT_ENABLE_PROFILING
+.define BUILD_OPT_ENABLE_PROFILING
 .define BUILD_OPT_SKIP_COCO_SPLASH
 ;.define BUILD_OPT_DISABLE_DEMO
 .define BUILD_OPT_ROTATED
@@ -28,6 +28,15 @@
 
 ; *** end of derived
 
+      .macro PUL_ROT_X
+        puls    d                       ; X
+        exg     a,b
+        nega
+        adda    #31
+        ora     #>cocovram
+        tfr     d,x                     ; fix addressing
+      .endm
+  
 ; *** INVADERS stuff here
 ;
 DIP_DISPLAY_COINAGEn  .equ    (1<<7)
@@ -979,10 +988,20 @@ return_two:
 ; $01CF
 ; Draw a 1px line across the player's stash at the bottom of the screen.
 draw_bottom_line:
+.ifndef BUILD_OPT_ROTATED
         lda     #(1<<7)                 ; Bit 7 set ... going to draw a 1-pixel stripe down left side
         ldb     #0xe0                   ; All the way down the screen
         ldx     #vram+2                 ; Screen coordinates (3rd byte from upper left)
         jmp     sub_14CC                ; Draw line down left side 
+.else
+        ldx     #cocovram+(32+208)*VIDEO_BPL
+        ldb     #VIDEO_BPL
+        lda     #0xff
+1$:     sta     ,x+
+        decb
+        bne     1$
+        rts
+.endif        
 
 ; $01D9
 ; HL/X points to descriptor: DX DY XX YY except DX is already loaded in C
@@ -1069,7 +1088,11 @@ copy_shields:
         decb                            ; Have we moved all shields?
         bne     3$
         rts
-3$:     leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
+3$:     
+.ifndef BUILD_OPT_ROTATED
+        leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
+.else
+.endif        
         bra     1$        
 4$:     jsr     remember_shields        ; Remember player's shields
         bra     2$                      ; Continue with next shield
@@ -2318,14 +2341,9 @@ clear_playfield:
 2$:     cmpa    #>vram+0x1c             ; Get Y coordinate. Reached bottom?
         bcs     1$                      ; No ... keep going
 .ifdef BUILD_OPT_ROTATED
-        ldx     #0x2000+vram+2          ; Third from left, top of screen
+        ldx     #cocovram+32*VIDEO_BPL
 3$:     clr     ,x+                     ; Clear screen byte. Next in row
-        tfr     x,d                     ; Get X ...
-        andb    #0x1f                   ; ... coordinate
-        cmpb    #0x1c                   ; Edge minus a buffer?
-        bcs     4$                      ; No ... keep going
-        leax    6,x                     ; Else ... bump to next edge + buffer
-4$:     cmpa    #0x20+>vram+0x1c        ; Get Y coordinate. Reached bottom?
+        cmpx    #cocovram+(32+208)*VIDEO_BPL
         bcs     3$                      ; No ... keep going
 .endif        
         rts
@@ -2639,7 +2657,8 @@ draw_shifted_sprite:
         nop
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,x,y
+        pshs    b,y
+        pshs    x
 .endif        
 1$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
@@ -2662,8 +2681,8 @@ draw_shifted_sprite:
         bne     1$                      ; No ... erase all
 .ifdef BUILD_OPT_ROTATED
         stx     5,s
-        puls    b,x,y
-        leax    0x2000,x
+        PUL_ROT_X
+        puls    b,y
 2$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
@@ -2694,7 +2713,8 @@ erase_simple_sprite:
         jsr     cnvt_pix_number         ; Convert pixel number in HL
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,x
+        pshs    b
+        pshs    x
 .endif
 1$:     pshs    x
         clr     ,x+                     ; Clear screen byte. Next byte
@@ -2705,8 +2725,8 @@ erase_simple_sprite:
         bne     1$                      ; Do all rows
 .ifdef BUILD_OPT_ROTATED
         stx     3,x
-        puls    b,x
-        leax    0x2000,x
+        PUL_ROT_X
+        puls    b
 2$:     pshs    x
         clr     ,x+                     ; Clear screen byte. Next byte
         clr     ,x+                     ; Clear byte
@@ -2726,7 +2746,8 @@ erase_simple_sprite:
 draw_simp_sprite:
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,x,y
+        pshs    b,y
+        pshs    x
 .endif
 1$:     lda     ,y+                     ; From character set ...
         sta     ,x                      ; ... to screen
@@ -2735,8 +2756,8 @@ draw_simp_sprite:
         bne     1$
 .ifdef BUILD_OPT_ROTATED
         stx     5,s
-        puls    b,x,y
-        leax    0x2000,x
+        PUL_ROT_X
+        puls    b,y
 2$:     lda     ,y+
         sta     ,x
         leax    32,x
@@ -2752,7 +2773,8 @@ erase_shifted:
         bsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,x,y
+        pshs    b,y
+        pshs    x
 .endif
 1$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
@@ -2777,8 +2799,8 @@ erase_shifted:
         bne     1$                      ; No ... erase all
 .ifdef BUILD_OPT_ROTATED
         stx     5,s
-        puls    b,x,y
-        leax    0x2000,x
+        PUL_ROT_X
+        puls    b,y
 2$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
@@ -2846,7 +2868,8 @@ draw_spr_collision:
         clr     collision               ; Clear the collision-detection flag
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,x,y   
+        pshs    b,y   
+        pshs    x
 .endif             
 1$:     pshs    b,x   
         lda     ,y+                     ; Get byte. Next in pixel pattern
@@ -2879,8 +2902,8 @@ draw_spr_collision:
         bne     1$                      ; No ... do all rows
 .ifdef BUILD_OPT_ROTATED
         stx     5,s
-        puls    b,x,y
-        leax    0x2000,x
+        PUL_ROT_X
+        puls    b,y
 4$:     pshs    b,x   
         lda     ,y+                     ; Get byte. Next in pixel pattern
 ;       out     (shft_data),a
@@ -2911,7 +2934,8 @@ clear_small_sprite:
 sub_14CC:
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,x
+        pshs    b
+        pshs    x
 .endif        
 1$:     sta     ,x                      ; Clear screen byte
         leax    32,x                    ; Bump HL/X one screen row
@@ -2919,8 +2943,8 @@ sub_14CC:
         bne     1$                      ; No ... clear all
 .ifdef BUILD_OPT_ROTATED
         stx     3,s
-        puls    b,x
-        leax    0x2000,x
+        PUL_ROT_X
+        puls    b
 2$:     sta     ,x                      ; Clear screen byte
         leax    32,x                    ; Bump HL/X one screen row
         decb                            ; All done?
@@ -3150,7 +3174,8 @@ draw_sprite:
         jsr     cnvt_pix_number         ; Convert pixel number to screen/shift
         pshs    x                       ; Preserve screen coordinate
 .ifdef BUILD_OPT_ROTATED
-        pshs    b,x,y
+        pshs    b,y
+        pshs    x
 .endif
 1$:     pshs    x
         lda     ,y+                     ; From sprite data
@@ -3170,8 +3195,8 @@ draw_sprite:
         decb                            ; All done?
         bne     1$                      ; No ... do all
 .ifdef BUILD_OPT_ROTATED
-        puls    b,x,y
-        leax    0x2000,x
+        PUL_ROT_X
+        puls    b,y
 2$:     pshs    x
         lda     ,y+                     ; From sprite data
 ;       out     (shft_data),a
@@ -3976,9 +4001,9 @@ clear_screen:
         cmpx    #(vram+0x1C00+32)
         bne     1$
 .ifdef BUILD_OPT_ROTATED
-        ldx     #0x2000+vram
+        ldx     #cocovram
 2$:     clr     ,x+
-        cmpx    #(0x2000+vram+0x1C00+32)
+        cmpx    #(cocovram+257*VIDEO_BPL)
         bne     2$
 .endif        
         rts
@@ -3993,7 +4018,8 @@ restore_shields:
 .ifdef BUILD_OPT_ROTATED
         ldd     *z80_b
         leas    -2,s
-        pshs    d,x,y
+        pshs    d,y
+        pshs    x
 .endif
 1$:     pshs    x
         ldb     *z80_c
@@ -4008,9 +4034,9 @@ restore_shields:
         bne     1$
 .ifdef BUILD_OPT_ROTATED
         stx     6,s
-        puls    d,x,y
+        PUL_ROT_X
+        puls    d,y
         std     *z80_b
-        leax    0x2000,x
 3$:     pshs    x
         ldb     *z80_c
 4$:     lda     ,y+                     ; From sprite
