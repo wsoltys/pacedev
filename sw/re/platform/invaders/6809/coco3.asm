@@ -95,28 +95,32 @@ RAMMODE			.equ		0xFFDF
 
 ; Memory Map		Page
 ; ------------  ----
-; $0000-$2FFF   $38/$39   vram
-; $3000-$5FFF   $39/$3A   vid_buf
+; $0000-$1FFF   $38       (si) vram
+; $2000-$5EFF   $39/$3A   coco vram
+; $5F00-$5FFF   $3A       rot_tbl
 ; $6000-$6FFF   $3B       shift_tbl
 ; $7000-$73FF    "        wram
 ; $7400-$7FFF    "        stack
-; $8000-$BFXX   $30-$31   (unused)
+; $8000-$BFXX   $30-$31   code+data
 ; $C000-$FFXX   $32-$33   Code+Data
 
 CODE_PG1    .equ    0x30
 VRAM_PG     .equ    0x38
 ; these are Coco VRAM, not SI VRAM
+;VRAM_MSB    .equ    (0x38<<2)
+;VRAM_LSB    .equ    0
 VRAM_MSB    .equ    (0x39<<2)
-;VRAM_LSB    .equ    0x00
 VRAM_LSB    .equ    32*(32/8)
 
 vram        .equ    0x0000
 cocovram    .equ    0x2000
 vidbuf      .equ    VIDEO_SIZ
+rot_tbl     .equ    0x5f00
 shift_tbl   .equ    0x6000
 WRAM        .equ    0x7000
 stack       .equ    0x7fff
-code_base		.equ		0xC000
+cart_base   .equ    0x8000
+code_base		.equ		0xc000
 
 ; values for 63.5us tick
 ; 60Hz/2 / 63.695us = ~130.8

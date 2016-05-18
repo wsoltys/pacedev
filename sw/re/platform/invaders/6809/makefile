@@ -61,7 +61,7 @@ $(FQEN): $(TARGET).rom
 	
 %.rom: %.ihx
 	$(HEX2BIN) -e r0m $<
-	$(ROMWAK) /p $*.r0m $@ 16 255
+	$(ROMWAK) /p $*.r0m $@ 30 255
 
 $(TARGET).ihx: $(EXE_OBJS)
 	$(ECHO) Linking $@...

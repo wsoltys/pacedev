@@ -28,15 +28,6 @@
 
 ; *** end of derived
 
-      .macro PUL_ROT_X
-        puls    d                       ; X
-        exg     a,b
-        nega
-        adda    #31
-        ora     #>cocovram
-        tfr     d,x                     ; fix addressing
-      .endm
-  
 ; *** INVADERS stuff here
 ;
 DIP_DISPLAY_COINAGEn  .equ    (1<<7)
@@ -350,7 +341,88 @@ cmp:                .ds     1
 shft_base:          .ds     2
 
 ; stack is here on Coco port
-        
+
+        .org    cart_base
+
+      .macro PUL_ROT_X
+        puls    d                       ; X
+        exg     a,b
+        anda    #31
+        nega
+        adda    #31
+        ora     #>cocovram
+        tfr     d,x                     ; fix addressing
+      .endm
+  
+      .macro ROT1 bit
+        ldb     bit*32,y
+        rorb
+        pshs    cc
+        rola
+        puls    cc
+        ror     bit*32,y
+      .endm
+
+      .macro ROT8
+        ROT1    0
+        ROT1    1
+        ROT1    2
+        ROT1    3
+        ROT1    4
+        ROT1    5
+        ROT1    6
+        ROT1    7
+        sta     ,x
+        leax    VIDEO_BPL,x
+      .endm
+
+      .macro ROT8x8
+        ROT8
+        ROT8
+        ROT8
+        ROT8
+        ROT8
+        ROT8
+        ROT8
+        ROT8
+      .endm
+
+; rotates a number of 8x8-pixel blocks to Coco video memory
+; X = destination (Coco3) address
+; Y = source (SI) address
+; B = #of rows (bits) to copy
+rotate_and_copy_bits:
+        lsrb
+        lsrb
+        lsrb                            ; bit count -> byte count
+        incb                            ; +1 for alignment
+1$:     pshs    b,x                     ; byte count
+        ROT8x8                          ; 8x8 bits
+        puls    b,x        
+        leax    1,x                     ; next column
+        leay    8*32,y                  ; next source column
+        decb                            ; done all columns?
+        lbne    1$                      ; no, loop
+        rts
+                
+; rotates a number of 8x8-pixel blocks to Coco video memory
+; X = destination (Coco3) address
+; Y = source (SI) address
+; B = #of rows (bits) to copy
+rotate_and_copy_shifted_bits:
+        lsrb
+        lsrb
+        lsrb                            ; bit count -> byte count
+        incb
+1$:     pshs    b,x                     ; byte count
+        ROT8x8                          ; 8x8 bits
+        puls    b,x        
+        leax    1,x                     ; next column
+        leay    8*32,y                  ; next source column
+        decb                            ; done all columns?
+        lbne    1$                      ; no, loop
+        rts
+                
 				.org		code_base
 
 start_coco:
@@ -568,6 +640,21 @@ inipal:
 				tfr			a,dp
 
 ; Build the shift tables to emulate 
+; 8-bit rotation table
+        clr     *z80_c
+        ldx     #rot_tbl+0x80
+        ldb     #0
+1$:     pshs    b
+        lda     *z80_c
+        tfr     a,b
+        rora
+        rorb
+        lda     *z80_c
+        stb     a,x
+        inc     *z80_c
+        puls    b
+        decb
+        bne     1$
 ; the hardware shift register
 ; - 1st run seeds low values
         ldb     #0
@@ -617,9 +704,9 @@ inipal:
 ; the game shows 3 bases left
 ; otherwise it shows no bases left
         ldx     #wram
-1$:     clr     ,x+
+5$:     clr     ,x+
         cmpx    #wram+1024
-        bne     1$
+        bne     5$
                 				
         jmp     start                   ; space invaders
         
@@ -988,20 +1075,10 @@ return_two:
 ; $01CF
 ; Draw a 1px line across the player's stash at the bottom of the screen.
 draw_bottom_line:
-.ifndef BUILD_OPT_ROTATED
         lda     #(1<<7)                 ; Bit 7 set ... going to draw a 1-pixel stripe down left side
         ldb     #0xe0                   ; All the way down the screen
         ldx     #vram+2                 ; Screen coordinates (3rd byte from upper left)
         jmp     sub_14CC                ; Draw line down left side 
-.else
-        ldx     #cocovram+(32+208)*VIDEO_BPL
-        ldb     #VIDEO_BPL
-        lda     #0xff
-1$:     sta     ,x+
-        decb
-        bne     1$
-        rts
-.endif        
 
 ; $01D9
 ; HL/X points to descriptor: DX DY XX YY except DX is already loaded in C
@@ -1088,11 +1165,7 @@ copy_shields:
         decb                            ; Have we moved all shields?
         bne     3$
         rts
-3$:     
-.ifndef BUILD_OPT_ROTATED
-        leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
-.else
-.endif        
+3$:     leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
         bra     1$        
 4$:     jsr     remember_shields        ; Remember player's shields
         bra     2$                      ; Continue with next shield
@@ -2657,7 +2730,7 @@ draw_shifted_sprite:
         nop
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,y
+        pshs    b
         pshs    x
 .endif        
 1$:     pshs    x   
@@ -2680,28 +2753,18 @@ draw_shifted_sprite:
         decb                            ; All rows done?
         bne     1$                      ; No ... erase all
 .ifdef BUILD_OPT_ROTATED
-        stx     5,s
+        stx     3,s
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
-        puls    b,y
-2$:     pshs    x   
-        lda     ,y+                     ; Get picture value. Next in image
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        ldu     shft_base
-        leau    a,u                     ; pointer to shift table entry (1st byte)
-        lda     ,u                      ; get shifted value
-        ora     ,x                      ; OR them onto the screen
-        sta     ,x+                     ; Store the erased pattern back. Next column on screen
-;       xor     a                       ; Shift register over ...
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        lda     256,u                   ; get 2nd byte
-        ora     ,x                      ; OR them onto the screen
-        sta     ,x+                     ; Store the erased pattern back. Next column on screen
-        puls    x
-        leax    32,x                    ; Add 32 to next row
-        decb                            ; All rows done?
-        bne     2$                      ; No ... erase all
+        puls    b
+        pshs    b,x,y
+        jsr     rotate_and_copy_shifted_bits
+        puls    b,x,y
+        leay    1,y
+        leax    -8*VIDEO_BPL,x
+        jsr     rotate_and_copy_shifted_bits
         puls    x
 .endif        
         rts                
@@ -2724,16 +2787,18 @@ erase_simple_sprite:
         decb                            ; All rows done?
         bne     1$                      ; Do all rows
 .ifdef BUILD_OPT_ROTATED
-        stx     3,x
+        stx     3,s
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
         puls    b
-2$:     pshs    x
-        clr     ,x+                     ; Clear screen byte. Next byte
-        clr     ,x+                     ; Clear byte
-        puls    x                       ; Restore screen coordinate
-        leax    32,x                    ; Add 1 row to screen coordinate
-        decb                            ; All rows done?
-        bne     2$                      ; Do all rows
+        pshs    b,x,y
+        jsr     rotate_and_copy_bits
+        puls    b,x,y
+        leay    1,y
+        leax    -8*VIDEO_BPL,x
+        jsr     rotate_and_copy_bits
         puls    x
 .endif
         rts
@@ -2746,7 +2811,7 @@ erase_simple_sprite:
 draw_simp_sprite:
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,y
+        pshs    b
         pshs    x
 .endif
 1$:     lda     ,y+                     ; From character set ...
@@ -2755,14 +2820,13 @@ draw_simp_sprite:
         decb                            ; Decrement counter
         bne     1$
 .ifdef BUILD_OPT_ROTATED
-        stx     5,s
+        stx     3,s
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
-        puls    b,y
-2$:     lda     ,y+
-        sta     ,x
-        leax    32,x
-        decb
-        bne     2$
+        puls    b
+        jsr     rotate_and_copy_bits
         puls    x
 .endif
         rts
@@ -2770,10 +2834,10 @@ draw_simp_sprite:
 ; $1452
 ; Erases a shifted sprite from screen (like for player's explosion)
 erase_shifted:
-        bsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
+        jsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,y
+        pshs    b
         pshs    x
 .endif
 1$:     pshs    x   
@@ -2798,30 +2862,13 @@ erase_shifted:
         decb                            ; All rows done?
         bne     1$                      ; No ... erase all
 .ifdef BUILD_OPT_ROTATED
-        stx     5,s
+        stx     3,s
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
-        puls    b,y
-2$:     pshs    x   
-        lda     ,y+                     ; Get picture value. Next in image
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        ldu     shft_base
-        leau    a,u                     ; pointer to shift table entry (1st byte)
-        lda     ,u                      ; get shifted value
-        coma                            ; Reverse it (erasing bits)
-        anda    ,x                      ; Erase the bits from the screen
-        sta     ,x+                     ; Store the erased pattern back. Next column on screen
-;       xor     a                       ; Shift register over ...
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        lda     256,u                   ; get 2nd byte
-        coma                            ; Reverse it (erasing bits)
-        anda    ,x                      ; Erase the bits from the screen
-        sta     ,x+                     ; Store the erased pattern back. Next column on screen
-        puls    x
-        leax    32,x                    ; Add 32 to next row
-        decb                            ; All rows done?
-        bne     2$                      ; No ... erase all
+        puls    b
+        jsr     rotate_and_copy_shifted_bits
         puls    x
 .endif
         rts                
@@ -2868,7 +2915,7 @@ draw_spr_collision:
         clr     collision               ; Clear the collision-detection flag
 .ifdef BUILD_OPT_ROTATED
         leas    -2,s
-        pshs    b,y   
+        pshs    b
         pshs    x
 .endif             
 1$:     pshs    b,x   
@@ -2901,28 +2948,13 @@ draw_spr_collision:
         decb                            ; All done?
         bne     1$                      ; No ... do all rows
 .ifdef BUILD_OPT_ROTATED
-        stx     5,s
+        stx     3,s
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
-        puls    b,y
-4$:     pshs    b,x   
-        lda     ,y+                     ; Get byte. Next in pixel pattern
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        ldu     shft_base
-        leau    a,u                     ; pointer to shift table entry (1st byte)
-        lda     ,u                      ; get shifted value
-        ora     ,x                      ; OR it onto the screen
-        sta     ,x+                     ; Store new screen value. Next byte on screen
-;       xor     a                       ; Write zero ...
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        lda     256,u                   ; get 2nd byte
-        ora     ,x                      ; OR it onto the screen
-        sta     ,x                      ; Store new screen pattern
-        puls    b,x
-        leax    32,x                    ; Add 32 to get to next row
-        decb                            ; All done?
-        bne     4$                      ; No ... do all rows
+        puls    b
+        jsr     rotate_and_copy_shifted_bits
         puls    x
 .endif        
         rts                
@@ -2943,12 +2975,12 @@ sub_14CC:
         bne     1$                      ; No ... clear all
 .ifdef BUILD_OPT_ROTATED
         stx     3,s
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
         puls    b
-2$:     sta     ,x                      ; Clear screen byte
-        leax    32,x                    ; Bump HL/X one screen row
-        decb                            ; All done?
-        bne     2$                      ; No ... clear all
+        jsr     rotate_and_copy_bits
         puls    x
 .endif        
         rts
@@ -3039,7 +3071,7 @@ a_explode_time:
         beq     1$
         rts                             ; Not done  ... out
 1$:     ldx     exp_alien_xr            ; Pixel pointer for exploding alien
-        ldb     #0x10                   ; 16 row pixel
+        ldb     #16                     ; 16 row pixel
         jsr     erase_simple_sprite     ; Clear the explosion sprite from the screen
 
 loc_1545:        
@@ -3174,7 +3206,7 @@ draw_sprite:
         jsr     cnvt_pix_number         ; Convert pixel number to screen/shift
         pshs    x                       ; Preserve screen coordinate
 .ifdef BUILD_OPT_ROTATED
-        pshs    b,y
+        pshs    b
         pshs    x
 .endif
 1$:     pshs    x
@@ -3195,25 +3227,17 @@ draw_sprite:
         decb                            ; All done?
         bne     1$                      ; No ... do all
 .ifdef BUILD_OPT_ROTATED
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
-        puls    b,y
-2$:     pshs    x
-        lda     ,y+                     ; From sprite data
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        ldu     shft_base
-        leau    a,u                     ; pointer to shift table entry (1st byte)
-        lda     ,u                      ; get shifted value
-        sta     ,x+                     ; Shifted sprite to screen
-;       xor     a
-;       out     (shft_data),a
-;       in      a,(shft_in)
-        lda     256,u                   ; get 2nd byte
-        sta     ,x                      ; Write remainder to adjacent
-        puls    x                       ; Old screen coordinate
-        leax    32,x                    ; Offset screen to next row
-        decb                            ; All done?
-        bne     2$                      ; No ... do all
+        puls    b
+        pshs    b,x,y
+        jsr     rotate_and_copy_shifted_bits
+        puls    b,x,y
+        leay    1,y
+        leax    -8*VIDEO_BPL,x
+        jsr     rotate_and_copy_shifted_bits
 .endif        
         puls    x                       ; Restore HL/X
         rts
@@ -4003,7 +4027,7 @@ clear_screen:
 .ifdef BUILD_OPT_ROTATED
         ldx     #cocovram
 2$:     clr     ,x+
-        cmpx    #(cocovram+257*VIDEO_BPL)
+        cmpx    #(cocovram+(32+225)*VIDEO_BPL)
         bne     2$
 .endif        
         rts
@@ -4017,8 +4041,8 @@ clear_screen:
 restore_shields:
 .ifdef BUILD_OPT_ROTATED
         ldd     *z80_b
-        leas    -2,s
-        pshs    d,y
+        leas    -4,s
+        pshs    d
         pshs    x
 .endif
 1$:     pshs    x
@@ -4033,22 +4057,14 @@ restore_shields:
         dec     *z80_b                  ; Row counter
         bne     1$
 .ifdef BUILD_OPT_ROTATED
-        stx     6,s
+        stx     4,s
+        sty     6,s
+        ldy     ,s                      ; original screen destination
         PUL_ROT_X
-        puls    d,y
-        std     *z80_b
-3$:     pshs    x
-        ldb     *z80_c
-4$:     lda     ,y+                     ; From sprite
-        ora     ,x                      ; OR with screen
-        sta     ,x+                     ; Back to screen
-        decb
-        bne     4$
-        puls    x                       ; Original start
-        leax    32,x                    ; Bump X by one screen row
-        dec     *z80_b                  ; Row counter
-        bne     3$
+        puls    d
+; do copy here        
         puls    x
+        puls    y
 .endif        
         rts
 
@@ -4070,8 +4086,8 @@ loc_1A8B:
         jmp     sub_09C5                ; Print number remaining
 
 ; this will align the data with the original
-; used in debugging to check we ave every byte of data
-        .org    code_base+0x1A95
+; used in debugging to check we have every byte of data
+        .org    0xBA95
         
 ; $1A95
 byte_0_1A95:
