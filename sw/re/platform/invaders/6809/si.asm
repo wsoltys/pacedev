@@ -12,7 +12,7 @@
 .iifdef PLATFORM_COCO3	.include "coco3.asm"
 
 ; *** BUILD OPTIONS
-.define BUILD_OPT_ENABLE_PROFILING
+;.define BUILD_OPT_ENABLE_PROFILING
 .define BUILD_OPT_SKIP_COCO_SPLASH
 ;.define BUILD_OPT_DISABLE_DEMO
 .define BUILD_OPT_ROTATED
@@ -353,14 +353,13 @@ shft_base:          .ds     2
         ora     #>cocovram
         tfr     d,x                     ; fix addressing
       .endm
-  
+
+; thanks JMK for the optimisation!  
       .macro ROT1 bit
         ldb     bit*32,y
         rorb
-        pshs    cc
-        rola
-        puls    cc
         ror     bit*32,y
+        rola
       .endm
 
       .macro ROT8
@@ -396,24 +395,6 @@ rotate_and_copy_bits:
         lsrb
         lsrb                            ; bit count -> byte count
         incb                            ; +1 for alignment
-1$:     pshs    b,x                     ; byte count
-        ROT8x8                          ; 8x8 bits
-        puls    b,x        
-        leax    1,x                     ; next column
-        leay    8*32,y                  ; next source column
-        decb                            ; done all columns?
-        lbne    1$                      ; no, loop
-        rts
-                
-; rotates a number of 8x8-pixel blocks to Coco video memory
-; X = destination (Coco3) address
-; Y = source (SI) address
-; B = #of rows (bits) to copy
-rotate_and_copy_shifted_bits:
-        lsrb
-        lsrb
-        lsrb                            ; bit count -> byte count
-        incb
 1$:     pshs    b,x                     ; byte count
         ROT8x8                          ; 8x8 bits
         puls    b,x        
@@ -2760,11 +2741,11 @@ draw_shifted_sprite:
         PUL_ROT_X
         puls    b
         pshs    b,x,y
-        jsr     rotate_and_copy_shifted_bits
+        jsr     rotate_and_copy_bits
         puls    b,x,y
         leay    1,y
         leax    -8*VIDEO_BPL,x
-        jsr     rotate_and_copy_shifted_bits
+        jsr     rotate_and_copy_bits
         puls    x
 .endif        
         rts                
@@ -2868,7 +2849,7 @@ erase_shifted:
         tfr     d,y
         PUL_ROT_X
         puls    b
-        jsr     rotate_and_copy_shifted_bits
+        jsr     rotate_and_copy_bits
         puls    x
 .endif
         rts                
@@ -2954,7 +2935,7 @@ draw_spr_collision:
         tfr     d,y
         PUL_ROT_X
         puls    b
-        jsr     rotate_and_copy_shifted_bits
+        jsr     rotate_and_copy_bits
         puls    x
 .endif        
         rts                
@@ -3233,11 +3214,11 @@ draw_sprite:
         PUL_ROT_X
         puls    b
         pshs    b,x,y
-        jsr     rotate_and_copy_shifted_bits
+        jsr     rotate_and_copy_bits
         puls    b,x,y
         leay    1,y
         leax    -8*VIDEO_BPL,x
-        jsr     rotate_and_copy_shifted_bits
+        jsr     rotate_and_copy_bits
 .endif        
         puls    x                       ; Restore HL/X
         rts
@@ -4022,7 +4003,8 @@ conv_to_scr:
 clear_screen:
         ldx     #vram
 1$:     clr     ,x+
-        cmpx    #(vram+0x1C00+32)
+        ;cmpx    #(vram+0x1C00+32)
+        cmpx    #(vram+0x2000)          ; extra for rotation
         bne     1$
 .ifdef BUILD_OPT_ROTATED
         ldx     #cocovram
@@ -4059,10 +4041,23 @@ restore_shields:
 .ifdef BUILD_OPT_ROTATED
         stx     4,s
         sty     6,s
-        ldy     ,s                      ; original screen destination
+        ldd     ,s                      ; original screen destination
+        andb    #31
+        tfr     d,y
         PUL_ROT_X
-        puls    d
-; do copy here        
+        puls    b
+        puls    a
+        addb    #7
+        sta     *z80_c
+        stb     *z80_b
+3$:     pshs    x,y
+        ldb     *z80_b
+        jsr     rotate_and_copy_bits
+        puls    x,y
+        leay    1,y
+        leax    -8*VIDEO_BPL,x
+        dec     *z80_c
+        bne     3$
         puls    x
         puls    y
 .endif        
