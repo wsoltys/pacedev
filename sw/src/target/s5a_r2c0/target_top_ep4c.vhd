@@ -236,6 +236,8 @@ architecture SYN of target_top_ep4c is
   signal clk_120M           : std_logic := '0';
   signal clk_108M           : std_logic := '0';
 
+  signal vid_address_s      : std_logic_vector (10 downto 0);
+  
   -- CYCLONE<->STRATIX SPI signals
   signal audio_pio_i        : std_logic_vector(31 downto 0);
   signal jamma_pio_o        : std_logic_vector(31 downto 0);
@@ -297,10 +299,10 @@ begin
 
   BLK_PS2 : block
   
-    alias ps2_kdat  : std_logic is vid_address(3);
-    alias ps2_mdat  : std_logic is vid_address(2);
-    alias ps2_kclk  : std_logic is vid_address(1);
-    alias ps2_mclk  : std_logic is vid_address(0);
+    alias ps2_kdat  : std_logic is vid_address_s(3);
+    alias ps2_mdat  : std_logic is vid_address_s(2);
+    alias ps2_kclk  : std_logic is vid_address_s(1);
+    alias ps2_mclk  : std_logic is vid_address_s(0);
     
   begin
     GEN_PS2 : if S5AR2_HAS_PS2 generate
@@ -515,6 +517,14 @@ begin
         mem_we_n_from_the_altmemddr_0														=> ddr16_we_n,
         reset_phy_clk_n_from_the_altmemddr_0										=> open,
 
+        -- the_faster_interface_0
+        access_n_from_the_faster_interface_0                    => vid_write_n,
+        address_from_the_faster_interface_0                     => vid_address,
+        data_to_and_from_the_faster_interface_0                 => vid_data,
+        irq_n_to_the_faster_interface_0                         => vid_irq_n,
+        read_n_from_the_faster_interface_0                      => vid_read_n,
+        waitrequest_n_to_the_faster_interface_0                 => vid_waitrequest,
+
         -- the_audio_pio
         in_port_to_the_audio_pio                                => audio_pio_i,
 
@@ -636,9 +646,9 @@ begin
         clk           => clk_24M,
         rst           => reset,
         
-        spi_en        => vid_address(4),
-        spi_clk       => vid_address(5),
-        spi_d         => vid_address(6),
+        spi_en        => vid_address_s(4),
+        spi_clk       => vid_address_s(5),
+        spi_d         => vid_address_s(6),
         
         go            => spi_pio_o(0),
         data          => jamma_pio_o
@@ -655,9 +665,9 @@ begin
         clk           => clk_nios,
         rst           => rst_nios,
         
-        spi_en        => vid_data(8),
-        spi_clk       => vid_data(9),
-        spi_d         => vid_data(10),
+        spi_en        => '0', --vid_data(8),
+        spi_clk       => '0', --vid_data(9),
+        spi_d         => '0', --vid_data(10),
         
         irq           => spi_pio_i(0),
         data          => audio_pio_i
@@ -688,8 +698,8 @@ begin
   BLK_LEDS : block
     signal leds_o : std_logic_vector(7 downto 0);
   begin
-    vid_data <= (others => 'Z');
-    leds_o <= vid_data(7 downto 0);
+    --vid_data <= (others => 'Z');
+    --leds_o <= vid_data(7 downto 0);
   end block BLK_LEDS;
   
 	BLK_CHASER : block
@@ -742,7 +752,7 @@ begin
     -- passthru on TS serial lines
     -- ser_ts_rx is an INPUT to this device
     -- ser_ts_tx is an output from this device
-    vid_address(8) <= ser_ts_rx;
+    vid_address_s(8) <= ser_ts_rx;
     ser_ts_tx <= vid_waitrequest;
   end block BLK_UART;
 

@@ -174,6 +174,17 @@ begin
           v_back_porch_r <= 36; --18;
           v_border_r <= (768-VIDEO_V_SIZE)/2;
 
+        when PACE_VIDEO_VGA_1280x800_60Hz =>
+          -- Sentinel Mode 36, clk=103.2MHz
+          h_front_porch_r <= 64;
+          h_sync_r <= 32;
+          h_back_porch_r <= 362-32-64;
+          h_border_r <= (1280-VIDEO_H_SIZE)/2;
+          v_front_porch_r <= 3;
+          v_sync_r <= 4;
+          v_back_porch_r <= 38-4-3;
+          v_border_r <= (800-VIDEO_V_SIZE)/2;
+
         when PACE_VIDEO_VGA_1280x1024_60Hz =>
           -- SXGA, clk=108MHz
           h_front_porch_r <= 48;

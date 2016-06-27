@@ -13,8 +13,8 @@ package platform_pkg is
 	--
 
   -- native orientation
-  constant INVADERS_VIDEO_H_SIZE				: integer := 256;
-	constant INVADERS_VIDEO_V_SIZE				: integer := 224;
+  constant INVADERS_VIDEO_H_SIZE				: integer := 224;
+	constant INVADERS_VIDEO_V_SIZE				: integer := 256;
 
 	constant PACE_VIDEO_NUM_BITMAPS		    : natural := 1;
 	constant PACE_VIDEO_NUM_TILEMAPS 	    : natural := 0;

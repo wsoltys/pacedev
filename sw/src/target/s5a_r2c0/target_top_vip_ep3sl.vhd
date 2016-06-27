@@ -140,6 +140,8 @@ architecture SYN of target_top_vip_ep3sl is
   signal clk_65M        : std_logic;
   signal clk_120M       : std_logic;
 
+  signal system_interrupts		: std_logic_vector(15 downto 0) := (others => '0');
+
   signal vdo_idck_s     : std_logic;
   signal vdo_red_s      : std_logic_vector(7 downto 0);
   signal vdo_green_s    : std_logic_vector(7 downto 0);
@@ -242,15 +244,15 @@ begin
   		vao_m2			        => vao_m2,			  
   
       -- Connection to video FPGA
-  		vid_address			    => vid_address,
-  		vid_data				    => vid_data,				   
-  		vid_write_n			    => vid_write_n,			 
-  		vid_read_n			    => vid_read_n,			   
-  		vid_waitrequest_n	  => vid_waitrequest_n, 
-  		vid_irq_n				    => vid_irq_n,				 
-  		vid_clk					    => vid_clk,					 
-      vid_reset_core_n    => vid_reset_core_n,  
-      vid_reset_n         => vid_reset_n,       
+  		vid_address			    => (others => '0'),
+  		vid_data				    => open,				   
+  		vid_write_n			    => vid_write_n,
+  		vid_read_n			    => vid_read_n,
+  		vid_waitrequest_n	  => open, 
+  		vid_irq_n				    => open,
+  		vid_clk					    => vid_clk,
+      vid_reset_core_n    => vid_reset_core_n,
+      vid_reset_n         => vid_reset_n,
                                                
   		vid_spare		        => vid_spare,		     
                                                
@@ -295,6 +297,7 @@ begin
     port map
     (
       clk_24M                                         => clk24_c,
+      clk_slave_if                                    => vid_clk,
       vip_clk                                         => clk_120M,
       reset_n                                         => reset_n,
 
@@ -302,6 +305,16 @@ begin
       altmemddr_0_aux_half_rate_clk_out               => open,
       altmemddr_0_phy_clk_out                         => open,
 
+      -- the_flave_interface_0
+      access_n_to_the_flave_interface_0               => vid_write_n,
+      address_to_the_flave_interface_0                => vid_address,
+      data_to_and_from_the_flave_interface_0          => vid_data,
+      interrupts_from_the_flave_interface_0				    => system_interrupts,
+      irq_n_from_the_flave_interface_0                => vid_irq_n,
+      read_n_to_the_flave_interface_0                 => vid_read_n,
+      reset_n_to_the_flave_interface_0                => '1',
+      waitrequest_n_from_the_flave_interface_0        => vid_waitrequest_n,
+		
       vid_clk_to_the_alt_vip_cti_0                    => vdo_idck_s,
       vid_data_to_the_alt_vip_cti_0(23 downto 16)     => vdo_red_s,
       vid_data_to_the_alt_vip_cti_0(15 downto 8)      => vdo_green_s,
