@@ -452,13 +452,17 @@ begin
     else generate
       vdo_idck <= vdo_clk_x2;
     end generate GEN_VDO_IDCK;
-    vdo_red <= video_o.rgb.r(9 downto 2);
-    vdo_green <= video_o.rgb.g(9 downto 2);
-    vdo_blue <= video_o.rgb.b(9 downto 2);
-    vdo_hsync <= video_o.hsync;
-    vdo_vsync <= video_o.vsync;
-    vdo_de <= not (video_o.hblank or video_o.vblank);
-
+    
+    -- VIP core might be here
+    GEN_NO_VIP_CORE : if false generate
+      vdo_red <= video_o.rgb.r(9 downto 2);
+      vdo_green <= video_o.rgb.g(9 downto 2);
+      vdo_blue <= video_o.rgb.b(9 downto 2);
+      vdo_hsync <= video_o.hsync;
+      vdo_vsync <= video_o.vsync;
+      vdo_de <= not (video_o.hblank or video_o.vblank);
+    end generate GEN_NO_VIP_CORE;
+    
     -- VGA (analogue) output
 		vao_clk <= video_o.clk;
 		vao_red <= video_o.rgb.r(9 downto 2);
@@ -600,79 +604,67 @@ begin
     sram_i.d(sram_i.d'left downto S6M_EMULATED_SRAM_WIDTH) <= (others => '0');
   end generate GEN_SRAM;
 
-  BLK_PS2 : block
-  
+  BLK_VIP_CORE : block
+    component vip_1024x768_1024x768 is
+      port 
+      (
+        alt_vip_cti_0_clocked_video_vid_clk       : in  std_logic                     := '0';             --    alt_vip_cti_0_clocked_video.vid_clk
+        alt_vip_cti_0_clocked_video_vid_data      : in  std_logic_vector(23 downto 0) := (others => '0'); --                               .vid_data
+        alt_vip_cti_0_clocked_video_overflow      : out std_logic;                                        --                               .overflow
+        alt_vip_cti_0_clocked_video_vid_datavalid : in  std_logic                     := '0';             --                               .vid_datavalid
+        alt_vip_cti_0_clocked_video_vid_locked    : in  std_logic                     := '0';             --                               .vid_locked
+        alt_vip_cti_0_clocked_video_vid_v_sync    : in  std_logic                     := '0';             --                               .vid_v_sync
+        alt_vip_cti_0_clocked_video_vid_h_sync    : in  std_logic                     := '0';             --                               .vid_h_sync
+        alt_vip_cti_0_clocked_video_vid_f         : in  std_logic                     := '0';             --                               .vid_f
+        alt_vip_cti_0_clocked_video_vid_de        : in  std_logic                     := '0';             --                               .vid_de
+        alt_vip_itc_0_clocked_video_vid_clk       : in  std_logic                     := '0';             --    alt_vip_itc_0_clocked_video.vid_clk
+        alt_vip_itc_0_clocked_video_vid_data      : out std_logic_vector(23 downto 0);                    --                               .vid_data
+        alt_vip_itc_0_clocked_video_underflow     : out std_logic;                                        --                               .underflow
+        alt_vip_itc_0_clocked_video_vid_datavalid : out std_logic;                                        --                               .vid_datavalid
+        alt_vip_itc_0_clocked_video_vid_v_sync    : out std_logic;                                        --                               .vid_v_sync
+        alt_vip_itc_0_clocked_video_vid_h_sync    : out std_logic;                                        --                               .vid_h_sync
+        alt_vip_itc_0_clocked_video_vid_f         : out std_logic;                                        --                               .vid_f
+        alt_vip_itc_0_clocked_video_vid_h         : out std_logic;                                        --                               .vid_h
+        alt_vip_itc_0_clocked_video_vid_v         : out std_logic;                                        --                               .vid_v
+        clk_clk                                   : in  std_logic                     := '0';             --                            clk.clk
+        reset_reset_n                             : in  std_logic                     := '0'              --                          reset.reset_n
+      );
+    end component vip_1024x768_1024x768;
   begin
---    GEN_PS2 : if S6M_HAS_PS2 generate
---    
---      signal ps2_ps2_kclk : std_logic;
---      signal ps2_ps2_kdat : std_logic;
---      signal usb_ps2_kclk : std_logic;
---      signal usb_ps2_kdat : std_logic;
---      
---      alias ps2_fifo_data   : std_logic_vector(15 downto 0) is keybd_pio_o(15 downto 0);
---      alias ps2_use_usb     : std_logic is keybd_pio_o(31);
---      alias ps2_fifo_wren   : std_logic is keybd_pio_o(30);
---      signal ps2_fifo_wrreq : std_logic;
---      
---    begin
---    
---      ps2_kclk <= ps2_ps2_kclk when ps2_use_usb = '0' else
---                  usb_ps2_kclk;
---      ps2_kdat <= ps2_ps2_kdat when ps2_use_usb = '0' else
---                  usb_ps2_kdat;
---                  
---      -- this is the VEB Button Board (MCE-as-S5D@1)
---      -- - configured as PS/2 input
---      ps2_ps2_kdat <= dbgio(5);
---      ps2_mdat <= dbgio(4);
---      ps2_ps2_kclk <= dbgio(7);
---      ps2_mclk <= dbgio(6);
---      dbgio(7 downto 4) <= (others => 'Z');
---
---      process (clk_24M, reset)
---        variable wren_r : std_logic_vector(3 downto 0);
---        alias wren_prev : std_logic is wren_r(wren_r'left);
---        alias wren_um   : std_logic is wren_r(wren_r'left-1);
---      begin
---        if reset = '1' then
---        elsif rising_edge(clk_24M) then
---          ps2_fifo_wrreq <= '0';
---          if wren_prev = '0' and wren_um = '1' then
---            ps2_fifo_wrreq <= '1';
---          end if;
---          wren_r := wren_r(wren_r'left-1 downto 0) & ps2_fifo_wren;
---        end if;
---      end process;
---      
---      ps2_host_inst : entity work.usb_ps2_host
---        generic map
---        (
---          CLK_HZ          => 24000000
---        )
---        port map
---        (
---          clk             => clk_24M,
---          reset           => reset,
---      
---          -- FIFO interface
---          fifo_data       => ps2_fifo_data,
---          fifo_wrreq      => ps2_fifo_wrreq,
---          fifo_full       => open,
---              
---          -- PS/2 lines
---          ps2_kclk        => usb_ps2_kclk,
---          ps2_kdat        => usb_ps2_kdat
---        );
---    else generate
-      ps2_kdat <= dbgio(5);
-      ps2_mdat <= dbgio(4);
-      ps2_kclk <= dbgio(7);
-      ps2_mclk <= dbgio(6);
---      vid_reset_n <= '1';
---    end generate GEN_PS2;
---
-  end block BLK_PS2;
+    GEN_VIP_CORE : if true generate
+      signal cti_de : std_logic;
+    begin
+      vip_inst : vip_1024x768_1024x768
+        port map
+        (
+          alt_vip_cti_0_clocked_video_vid_clk       => clkrst_i.clk(1),
+          alt_vip_cti_0_clocked_video_vid_data(23 downto 16) => video_o.rgb.r(9 downto 2),
+          alt_vip_cti_0_clocked_video_vid_data(15 downto 8) => video_o.rgb.g(9 downto 2),
+          alt_vip_cti_0_clocked_video_vid_data(7 downto 0) => video_o.rgb.b(9 downto 2),
+          alt_vip_cti_0_clocked_video_overflow      => open,
+          alt_vip_cti_0_clocked_video_vid_datavalid => cti_de,
+          alt_vip_cti_0_clocked_video_vid_locked    => '1',
+          alt_vip_cti_0_clocked_video_vid_v_sync    => video_o.vsync,
+          alt_vip_cti_0_clocked_video_vid_h_sync    => video_o.hsync,
+          alt_vip_cti_0_clocked_video_vid_f         => '0',
+          alt_vip_cti_0_clocked_video_vid_de        => cti_de,
+          alt_vip_itc_0_clocked_video_vid_clk       => clkrst_i.clk(1),
+          alt_vip_itc_0_clocked_video_vid_data(23 downto 16) => vdo_red,
+          alt_vip_itc_0_clocked_video_vid_data(15 downto 8) => vdo_green,
+          alt_vip_itc_0_clocked_video_vid_data(7 downto 0) => vdo_blue,
+          alt_vip_itc_0_clocked_video_underflow     => open,
+          alt_vip_itc_0_clocked_video_vid_datavalid => vdo_de,
+          alt_vip_itc_0_clocked_video_vid_v_sync    => vdo_vsync,
+          alt_vip_itc_0_clocked_video_vid_h_sync    => vdo_hsync,
+          alt_vip_itc_0_clocked_video_vid_f         => open,
+          alt_vip_itc_0_clocked_video_vid_h         => open,
+          alt_vip_itc_0_clocked_video_vid_v         => open,
+          clk_clk                                   => clkrst_i.clk(2),
+          reset_reset_n                             => not clkrst_i.rst(2)
+        );
+        cti_de <= not (video_o.hblank or video_o.vblank);
+    end generate GEN_VIP_CORE;
+  end block BLK_VIP_CORE;
   
   BLK_DVO_INIT : block
 
