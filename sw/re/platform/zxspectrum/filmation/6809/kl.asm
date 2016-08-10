@@ -19,6 +19,7 @@
 ;.define BUILD_OPT_NO_TRANSFORM
 ;.define BUILD_OPT_ALMOST_INVINCIBLE
 ;.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
+.define BUILD_OPT_PROFILE
 ; *** end of BUILD OPTIONS
 
 ; *** derived - do not edit
@@ -121,6 +122,8 @@ note                .equ    0x18
 inverse             .equ    0x19
 z80_r               .equ    0x7f
 line_cnt            .equ    0x80
+vbl_cnt							.equ		0x81
+frame_cnt						.equ		0x82
 
 ; rgb/composite video selected (bit 4)
 cmp:                            .ds 1
@@ -367,11 +370,20 @@ setup_gime_for_game:
 				sta			PIA1+3									; PIA1, CB1,2 control
 ; - initialise GIME
 				lda			IRQENR									; ACK any pending GIME interrupt
+				lda			FIRQENR									; ACK any pending GIME fast interrupt
+		.ifdef BUILD_OPT_PROFILE
+				lda			#MMUEN|#IEN|#FEN        ; enable GIME MMU, IRQ, FIRQ
+		.else				
 				lda			#MMUEN|#FEN             ; enable GIME MMU, FIRQ
+		.endif
 				sta			INIT0     							
 				lda			#0x00										; slow timer, task 1
 				sta			INIT1     							
+		.ifdef BUILD_OPT_PROFILE
+				lda			#VBORD
+		.else				
 				lda			#0x00										; no VBLANK IRQ
+		.endif
 				sta			IRQENR    							
 				lda			#TMR                    ; TMR FIRQ enabled
 				sta			FIRQENR   							
@@ -410,14 +422,26 @@ inipal:
         lda     #>4095
         sta     TMRMSB
 
+.ifdef BUILD_OPT_PROFILE
+  ; install IRQ handler and enable CPU IRQ
+				lda			IRQENR									; ACK any pending IRQ in the GIME
+        lda     #0x7E                   ; jmp
+        sta     0xFEF7
+        ldx     #main_isr
+        stx     0xFEF8
+        clr			*vbl_cnt
+        andcc   #~(1<<4)                ; enable IRQ in CPU    
+.endif
+
   ; install FIRQ handler and enable TMR FIRQ
 				;lda			#TMR|HBORD|VBORD        ; TMR FIRQ enabled
 				;sta			FIRQENR   							
+				lda			FIRQENR									; ACK any pending FIRQ in the GIME
         lda     #0x7E                   ; jmp
         sta     0xFEF4
 				ldx     #main_fisr              ; address
 				stx     0xFEF5
-        andcc   #~0x40                  ; enable FIRQ in CPU
+        andcc   #~(1<<6)                ; enable FIRQ in CPU
 
   ; setup the PIAS for joystick sampling
   
@@ -648,7 +672,11 @@ loc_B000:
         tst     rising_blocks_z
         beq     1$
         jsr     audio_B454
-1$:     lda     rendered_objs_cnt
+1$:     
+			.ifdef BUID_OPT_PROFILE
+				bra			no_delay
+			.endif
+				lda     rendered_objs_cnt
         nega
         adda    #6
         bmi     no_delay
@@ -691,6 +719,16 @@ no_delay:
         lda     0,x                     ; graphic_no (bottom)
         ora     0x20,x                  ; graphic_no (top)
         lbeq    player_dies
+
+      .ifdef BUILD_OPT_PROFILE
+        orcc   	#(1<<4)                	; disable IRQ in CPU    
+      	lda			#1
+      	adda		*frame_cnt
+      	daa
+      	sta			*frame_cnt
+        andcc   #~(1<<4)                ; enable IRQ in CPU    
+      .endif
+
         jmp     onscreen_loop
         
 reset_objs_wipe_flag:
@@ -6090,6 +6128,32 @@ hflip_line:
         puls    x,y,u
 flip_done:
         rts
+
+.ifdef BUILD_OPT_PROFILE
+main_isr:
+				tst			IRQENR									; ACk IRQ
+				tst			*vbl_cnt								; 60 frames?
+				bne			8$											; no, skip
+				lda			#60-1										; reset VBLANK count
+				sta			*vbl_cnt
+				tfr			dp,a
+				ldb			#frame_cnt
+				tfr			d,x											; address of value
+				ldy			#vidbuf+224/8+39*32			; (224,39)
+				ldb			#1
+				jsr			print_BCD_number
+				ldd			#0x20E0									; (224,32)
+				jsr			calc_vram_addr					; ->U
+				tfr			u,y
+				jsr			calc_vidbuf_addr				; ->U
+				tfr			u,x
+				ldu			#0x0802									; 8 lines, 2 bytes
+				jsr			blit_to_screen
+				clr			*frame_cnt
+				bra			9$
+8$:			dec			*vbl_cnt
+9$:     rti
+.endif
 
 main_fisr:
 ; temp hack - should do LFSR or something
