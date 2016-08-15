@@ -110,16 +110,20 @@ height              .equ    0x09
 lines               .equ    0x0a
 bytes               .equ    0x0b
 offset              .equ    0x0c
-screen              .equ    0x0d
-y_lim               .equ    0x0e
-x_lim               .equ    0x0f
-tmp_word            .equ    0x10
-depth               .equ    0x12
-pc                  .equ    0x14
-dy                  .equ    0x16
-dx                  .equ    0x17
-note                .equ    0x18
-inverse             .equ    0x19
+offset2             .equ    0x0e
+screen              .equ    0x10
+y_lim               .equ    0x11
+x_lim               .equ    0x12
+tmp_word            .equ    0x14
+depth               .equ    0x16
+pc                  .equ    0x18
+dy                  .equ    0x1a
+dx                  .equ    0x1b
+note                .equ    0x1c
+inverse             .equ    0x1d
+height_cnt          .equ    0x1e
+width_cnt           .equ    0x1f
+
 z80_r               .equ    0x7f
 line_cnt            .equ    0x80
 vbl_cnt							.equ		0x81
@@ -5912,6 +5916,8 @@ print_sprite:
         adda    #>shift_tbl
         ldb     #0x80
         std     *offset
+        inca
+        std     *offset2
         lda     ,u+                     ; width
 .ifdef BUILD_OPT_CPC_GRAPHICS
         lsra                            ; half the width
@@ -5945,40 +5951,39 @@ print_sprite:
 ;       Y = video buffer address
 ;       U = sprite data
         ldb     25,x                    ; height_lines
-2$:     pshs    b
-        ldb     *width                  ; width_bytes
         pshs    x
-3$:     pshs    b
+2$:     stb     *height_cnt
+        ldb     *width                  ; width_bytes
+3$:     stb     *width_cnt
 
         ldx     *offset
-        lda     0,u                     ; read mask
+        lda     ,u+                     ; read mask
         lda     a,x                     ; shifted mask byte 1
         coma
         anda    ,y                      ; from video
-        ldb     1,u                     ; read data
+        ldb     ,u+                     ; read data
         ora     b,x                     ; add shifted data byte 1
         sta     ,y+                     ; write back to video
 
-        leax    0x100,x
-        lda     0,u                     ; read mask
+        ldx     *offset2
+        lda     -2,u                    ; read mask
         lda     a,x                     ; shifted mask byte 2
         coma
         anda    ,y                      ; from video
-        ldb     1,u                     ; read data
+        ldb     -1,u                    ; read data
         ora     b,x                     ; add shifted data byte 2
         sta     ,y                      ; write back to video
 
-        leau    2,u
-        puls    b
+        ldb     *width_cnt
         decb
         bne     3$
-        puls    x
         lda     #32
         suba    *width
         leay    a,y                     ; next line
-        puls    b
+        ldb     *height_cnt
         decb
         bne     2$
+        puls    x
         rts
 
 ; A=Y, B=X
