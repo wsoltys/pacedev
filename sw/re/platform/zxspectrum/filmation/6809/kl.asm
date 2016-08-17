@@ -4237,7 +4237,8 @@ adj_d_for_out_of_bounds:
         beq     9$
         bpl     1$
         inca
-        inca
+;        inca                           ; original Z80 code 
+        rts                             ; optimise by returning
 1$:     deca
 9$:     rts
         
@@ -6008,7 +6009,7 @@ calc_vidbuf_addr:
 ;   or = (((191-y)<<8)>>2)|(x>>2) for 2BPP
 ; returns vidbuf address in U
 calc_vram_addr:
-        pshs    d
+        std     *tmp_word
         nega
         adda    #191
         lsra
@@ -6021,7 +6022,7 @@ calc_vram_addr:
 .endif        
         tfr     d,u
         leau    coco_vram,u
-        puls    d
+        ldd     *tmp_word
         rts
 
 ; not used not the Coco
