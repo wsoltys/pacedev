@@ -15,7 +15,7 @@
 ;.define BUILD_OPT_CPC_GRAPHICS
 ;.define BUILD_OPT_MICK_FARROW_GRAPHICS
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
-;.define BUILD_OPT_NO_Z_ORDER
+.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
 ;.define BUILD_OPT_ALMOST_INVINCIBLE
 ;.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
@@ -677,7 +677,7 @@ loc_B000:
         beq     1$
         jsr     audio_B454
 1$:     
-			.ifdef BUID_OPT_PROFILE
+			.ifdef BUILD_OPT_PROFILE
 				bra			no_delay
 			.endif
 				lda     rendered_objs_cnt
