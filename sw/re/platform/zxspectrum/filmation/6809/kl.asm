@@ -123,7 +123,7 @@ note                .equ    0x1c
 inverse             .equ    0x1d
 height_cnt          .equ    0x1e
 width_cnt           .equ    0x1f
-bytes_eol						.equ		0x20
+bytes_nl						.equ		0x20
 
 z80_r               .equ    0x7f
 line_cnt            .equ    0x80
@@ -5931,12 +5931,14 @@ print_sprite:
 0$:     sta     24,x                    ; width_bytes
         lda     ,u+                     ; height
         sta     25,x                    ; height_lines
+        sta			*height_cnt
         adda    27,x                    ; pixel_y
         suba    #192                    ; off screen?
         bcs     1$                      ; no, skip
         nega
         adda    25,x
         sta     25,x                    ; adjust height lines
+        sta			*height_cnt
 1$:     ldb     26,x                    ; pixel_x     
         lda     27,x                    ; pixel_y
         tfr     u,y
@@ -5951,13 +5953,11 @@ print_sprite:
 ;       X = object
 ;       Y = video buffer address
 ;       U = sprite data
-        ldb     25,x                    ; height_lines
-				stb     *height_cnt
         pshs    x
 
 				lda			#32
 				suba		*width
-				sta			*bytes_eol        
+				sta			*bytes_nl        
         lda			26,x										; pixel_x
         anda		#7
 				beq			print_sprite_aligned		; 0 offset        
@@ -5985,8 +5985,8 @@ print_sprite:
 
         dec			*width_cnt
         bne     3$
-        lda     *bytes_eol
-        leay    a,y                     ; next line
+        lda			*bytes_nl
+        leay    a,y             				; next line
         dec			*height_cnt
         bne     2$
         puls    x
@@ -6032,8 +6032,8 @@ print_sprite_aligned:
         ora			,u+                     ; read data
         sta     ,y+                     ; write back to video
         
-        lda     *bytes_eol
-        leay    a,y                     ; next line
+        lda			*bytes_nl
+        leay    a,y            					; next line
         decb														; height count
 5$:     bne     5$											; *patched* above
         puls    x
