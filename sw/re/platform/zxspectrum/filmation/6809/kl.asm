@@ -6020,7 +6020,7 @@ calc_vram_addr:
         rorb                            ; D=offset
 .endif        
         tfr     d,y
-        leau    coco_vram,y
+        leay    coco_vram,y
         ldd     *tmp_word
         rts
 
