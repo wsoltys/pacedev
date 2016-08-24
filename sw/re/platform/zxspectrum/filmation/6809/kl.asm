@@ -5960,8 +5960,8 @@ print_sprite:
 				sta			*bytes_eol        
         lda			26,x										; pixel_x
         anda		#7
-				beq			print_sprite_0					; 0 offset        
-        
+				beq			print_sprite_aligned		; 0 offset        
+				
 2$:     ldb     *width                  ; width_bytes
      		stb     *width_cnt
 
@@ -5992,15 +5992,17 @@ print_sprite:
         puls    x
         rts
 
-print_sprite_0:
+; sprite is byte-aligned (offset=0)
+; loop unrolled for speed
+print_sprite_aligned:
 				lda			*width
 				asla
 				asla
 				asla
 				adda		*width									; width x9
 				adda		#7
-				nega
-				sta			5$+#1										; patch BNE
+				nega														; calculate BNE offset
+				sta			5$+#1										; patch BNE offset
 				ldb			*height_cnt								
 				bra			5$
 				
@@ -6033,7 +6035,7 @@ print_sprite_0:
         lda     *bytes_eol
         leay    a,y                     ; next line
         decb														; height count
-5$:     bne     5$											; *patched*
+5$:     bne     5$											; *patched* above
         puls    x
         rts
 
