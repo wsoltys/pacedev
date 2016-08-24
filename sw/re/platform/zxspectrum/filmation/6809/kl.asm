@@ -3401,62 +3401,63 @@ dec_dZ_upd_XYZ_wipe_if_moving:
 ; tree wall
 upd_128_to_130:
         ldd     #0xfef8                 ; -2,-8
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 adj_m4_m12:
         ldd     #0xfcf4                 ; -4,-12
-        bra     jp_set_pixel_adj
+        jmp			jp_set_pixel_adj
 
 adj_m6_m12:
         ldd     #0xfaf4                 ; -6,-12
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
-jp_set_pixel_adj:
-        jmp     set_pixel_adj
+; *** remove for sake of optimisation
+;jp_set_pixel_adj:
+;        jmp     set_pixel_adj
 
 ; rock and block
 upd_6_7:
         ldd     #0xf8f0                 ; -8,-16
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 ; bricks
 upd_10:
         ldd     #0xffec                 ; -1,-20
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 ; bricks
 upd_11:
         ldd     #0xfef4                 ; -2,-12
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 ; bricks
 upd_12_to_15:
         ldd     #0xfcf8                 ; -4,-8
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 adj_m8_m12:
         ldd     #0xf8f4                 ; -8,-12
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 adj_m7_m12:
         ldd     #0xf9f4                 ; -7,12
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 adj_m12_m12:
         ldd     #0xf4f4                 ; -12,-12
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 upd_88_to_90:
         ldd     #0xf4f0                 ; -12, -16
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 adj_p7_m12:
         ldd     #0x7f4                  ; +7,-12
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 adj_p3_m12:
         ldd     #0x3f4                  ; +3,-12
-        bra     jp_set_pixel_adj
+        jmp     jp_set_pixel_adj
 
 ; U=lines,bytes Y=dest, A=byte
 fill_window:
@@ -3739,6 +3740,8 @@ upd_3_5:
         ldd     #0xfdf7                 ; -3,-9
 
 ; A=y_adj, B=x_adj
+; *** duplicate label for optimisation
+jp_set_pixel_adj:
 set_pixel_adj:
         stb     18,x                    ; x_adj
         sta     19,x                    ; y_adj
