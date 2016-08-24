@@ -15,7 +15,7 @@
 ;.define BUILD_OPT_CPC_GRAPHICS
 ;.define BUILD_OPT_MICK_FARROW_GRAPHICS
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
-.define BUILD_OPT_NO_Z_ORDER
+;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
 ;.define BUILD_OPT_ALMOST_INVINCIBLE
 ;.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
@@ -2416,8 +2416,7 @@ menu_loop:
 ; - update from option 1 to option 5
         ldb     #48
         lda     #79-7
-        jsr     calc_vram_addr
-        tfr     u,y
+        jsr     calc_vram_addr					; ->Y
         jsr     calc_vidbuf_addr
         tfr     u,x
         ldu     #0x4816                 ; 72 lines, 22 bytes
@@ -2761,10 +2760,9 @@ display_object:
         jsr     print_sprite
 1$:     ldb     26,x                    ; pixel_x
         lda     27,x                    ; pixel_y
-        jsr     calc_vram_addr          ; ->U
-        tfr     u,y                     ; dest (vram)
+        jsr     calc_vram_addr          ; ->Y dest (vram)
         jsr     calc_vidbuf_addr        ; ->U
-        tfr     u,x                     ; src (vidbuf)
+        tfr     u,x                     ; ->X src (vidbuf)
         ldu     #0x1803                 ; lines/bytes
         jsr     blit_to_screen
 ; code to set attribute of object        
@@ -3326,10 +3324,9 @@ inc_days:
         bra     display_frame
                 
 blit_2x8:
-        jsr     calc_vram_addr;         ; ->U
-        tfr     u,y
+        jsr     calc_vram_addr					; ->Y vram (dest)
         jsr     calc_vidbuf_addr        ; ->U
-        tfr     u,x                     ; vidbuf (src)
+        tfr     u,x                     ; ->X vidbuf (src)
         ldu     #0x0802                 ; 8 lines, 2 bytes        
         jmp     blit_to_screen
 
@@ -5729,8 +5726,7 @@ loc_D60B:
         sta     *z80_l                  ; number of lines to wipe
 3$:     lda     *z80_b                  ; Y (lowest)
         ldb     *z80_c                  ; X (left-most)
-        jsr     calc_vram_addr          ; ->U
-        tfr     u,y
+        jsr     calc_vram_addr          ; ->Y
         jsr     calc_vidbuf_addr        ; ->U
         inc     objs_wiped_cnt
         ldb     *z80_h                  ; bytes
@@ -6007,7 +6003,7 @@ calc_vidbuf_addr:
 ; A=Y, B=X (preserved)
 ; addr = (((191-y)<<8)>>3)|(x>>3) for 1BPP
 ;   or = (((191-y)<<8)>>2)|(x>>2) for 2BPP
-; returns vidbuf address in U
+; returns vidbuf address in Y
 calc_vram_addr:
         std     *tmp_word
         nega
@@ -6020,8 +6016,8 @@ calc_vram_addr:
         lsra
         rorb                            ; D=offset
 .endif        
-        tfr     d,u
-        leau    coco_vram,u
+        tfr     d,y
+        leau    coco_vram,y
         ldd     *tmp_word
         rts
 
@@ -6149,8 +6145,7 @@ main_isr:
 				ldb			#1
 				jsr			print_BCD_number
 				ldd			#0x20E0									; (224,32)
-				jsr			calc_vram_addr					; ->U
-				tfr			u,y
+				jsr			calc_vram_addr					; ->Y
 				jsr			calc_vidbuf_addr				; ->U
 				tfr			u,x
 				ldu			#0x0802									; 8 lines, 2 bytes
