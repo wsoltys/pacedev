@@ -123,6 +123,7 @@ note                .equ    0x1c
 inverse             .equ    0x1d
 height_cnt          .equ    0x1e
 width_cnt           .equ    0x1f
+bytes_eol						.equ		0x20
 
 z80_r               .equ    0x7f
 line_cnt            .equ    0x80
@@ -5951,12 +5952,20 @@ print_sprite:
 ;       Y = video buffer address
 ;       U = sprite data
         ldb     25,x                    ; height_lines
+				stb     *height_cnt
         pshs    x
-2$:     stb     *height_cnt
-        ldb     *width                  ; width_bytes
-3$:     stb     *width_cnt
 
-        ldx     *offset
+				lda			#32
+				suba		*width
+				sta			*bytes_eol        
+        lda			26,x										; pixel_x
+        anda		#7
+				beq			print_sprite_0					; 0 offset        
+        
+2$:     ldb     *width                  ; width_bytes
+     		stb     *width_cnt
+
+3$:     ldx     *offset
         lda     ,u+                     ; read mask
         lda     a,x                     ; shifted mask byte 1
         coma
@@ -5974,15 +5983,57 @@ print_sprite:
         ora     b,x                     ; add shifted data byte 2
         sta     ,y                      ; write back to video
 
-        ldb     *width_cnt
-        decb
+        dec			*width_cnt
         bne     3$
-        lda     #32
-        suba    *width
+        lda     *bytes_eol
         leay    a,y                     ; next line
-        ldb     *height_cnt
-        decb
+        dec			*height_cnt
         bne     2$
+        puls    x
+        rts
+
+print_sprite_0:
+				lda			*width
+				asla
+				asla
+				asla
+				adda		*width									; width x9
+				adda		#7
+				nega
+				sta			5$+#1										; patch BNE
+				ldb			*height_cnt								
+				bra			5$
+				
+41$:    lda     ,u+                     ; read mask
+        coma
+        anda    ,y                      ; from video
+        ora			,u+                     ; read data
+        sta     ,y+                     ; write back to video
+42$:    lda     ,u+                     ; read mask
+        coma
+        anda    ,y                      ; from video
+        ora			,u+                     ; read data
+        sta     ,y+                     ; write back to video
+43$:    lda     ,u+                     ; read mask
+        coma
+        anda    ,y                      ; from video
+        ora			,u+                     ; read data
+        sta     ,y+                     ; write back to video
+44$:    lda     ,u+                     ; read mask
+        coma
+        anda    ,y                      ; from video
+        ora			,u+                     ; read data
+        sta     ,y+                     ; write back to video
+45$:    lda     ,u+                     ; read mask
+        coma
+        anda    ,y                      ; from video
+        ora			,u+                     ; read data
+        sta     ,y+                     ; write back to video
+        
+        lda     *bytes_eol
+        leay    a,y                     ; next line
+        decb														; height count
+5$:     bne     5$											; *patched*
         puls    x
         rts
 
