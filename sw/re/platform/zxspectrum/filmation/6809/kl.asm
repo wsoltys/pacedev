@@ -5960,35 +5960,62 @@ print_sprite:
 				sta			*bytes_nl        
         lda			26,x										; pixel_x
         anda		#7
-				beq			print_sprite_aligned		; 0 offset        
+				lbeq		print_sprite_aligned		; 0 offset        
 				
-2$:     ldb     *width                  ; width_bytes
-     		stb     *width_cnt
+2$:     lda			#5
+				suba		*width                  ; width_bytes
+				ldb			#29											; instruction bytes/rendered byte
+				mul
+				stb			300$+#1
+				
+30$:		ldx			*offset
+				lda			,u											; read mask
+				lda			a,x											; shifted mask byte 1
+				coma
+				anda		,y											; mask off video bits
+				ldb			1,u											; read data
+				ora			b,x											; OR-in shifted data byte 1
+				sta			,y+											; write back to video
 
-3$:     ldx     *offset
-        lda     ,u+                     ; read mask
-        lda     a,x                     ; shifted mask byte 1
-        coma
-        anda    ,y                      ; from video
-        ldb     ,u+                     ; read data
-        ora     b,x                     ; add shifted data byte 1
-        sta     ,y+                     ; write back to video
+300$:		bra			34$											; *patched*
 
-        ldx     *offset2
-        lda     -2,u                    ; read mask
-        lda     a,x                     ; shifted mask byte 2
-        coma
-        anda    ,y                      ; from video
-        ldb     -1,u                    ; read data
-        ora     b,x                     ; add shifted data byte 2
-        sta     ,y                      ; write back to video
+	.macro RENDER_SHIFTED_BYTE
+				; 29 bytes in total
+				ldx			*offset2
+				lda			,u+											; read mask (again)
+				lda			a,x											; shifted mask byte 2
+				ldb			,u+											; read data (again)
+				ldb			b,x											; shifted data byte 2
+				stb			,-s
+				ldx			*offset
+				ldb			,u											; read mask (byte 1)
+				ora			b,x											; OR-inshifted mask byte 1
+				coma
+				anda		,y											; mask off video bits
+				ora			,s+
+				ldb			1,u											; read data (byte 1)
+				ora			b,x											; OR-in shifted data byte 1
+				sta			,y+											; write back to video
+	.endm
 
-        dec			*width_cnt
-        bne     3$
+31$:		RENDER_SHIFTED_BYTE							; bytes 1&2
+32$:		RENDER_SHIFTED_BYTE							; bytes 2&3
+33$:		RENDER_SHIFTED_BYTE							; bytes 3&4
+34$:		RENDER_SHIFTED_BYTE							; bytes 4&5
+				
+39$:		ldx			*offset2
+				lda			,u+											; read mask (again)
+				lda			a,x											; shifted mask byte 2
+				coma
+				anda		,y											; mask off video bits
+				ldb			,u+											; read mask (again)
+				ora			b,x											; OR-in shifted data byte 2
+				sta			,y											; write back to video
+				
         lda			*bytes_nl
         leay    a,y             				; next line
         dec			*height_cnt
-        bne     2$
+4$:     lbne		30$
         puls    x
         rts
 
@@ -6005,32 +6032,21 @@ print_sprite_aligned:
 				sta			5$+#1										; patch BNE offset
 				ldb			*height_cnt								
 				bra			5$
-				
-41$:    lda     ,u+                     ; read mask
+
+	.macro RENDER_ALIGNED_BYTE
+				; 9 bytes in total
+    		lda     ,u+                     ; read mask
         coma
         anda    ,y                      ; from video
         ora			,u+                     ; read data
         sta     ,y+                     ; write back to video
-42$:    lda     ,u+                     ; read mask
-        coma
-        anda    ,y                      ; from video
-        ora			,u+                     ; read data
-        sta     ,y+                     ; write back to video
-43$:    lda     ,u+                     ; read mask
-        coma
-        anda    ,y                      ; from video
-        ora			,u+                     ; read data
-        sta     ,y+                     ; write back to video
-44$:    lda     ,u+                     ; read mask
-        coma
-        anda    ,y                      ; from video
-        ora			,u+                     ; read data
-        sta     ,y+                     ; write back to video
-45$:    lda     ,u+                     ; read mask
-        coma
-        anda    ,y                      ; from video
-        ora			,u+                     ; read data
-        sta     ,y+                     ; write back to video
+	.endm
+
+41$:		RENDER_ALIGNED_BYTE
+42$:		RENDER_ALIGNED_BYTE
+43$:		RENDER_ALIGNED_BYTE
+44$:		RENDER_ALIGNED_BYTE
+45$:		RENDER_ALIGNED_BYTE
         
         lda			*bytes_nl
         leay    a,y            					; next line
