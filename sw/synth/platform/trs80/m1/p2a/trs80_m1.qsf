@@ -28,7 +28,7 @@
 set_global_assignment -name SMART_RECOMPILE OFF
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 5.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:48:13  DECEMBER 01, 2005"
-set_global_assignment -name LAST_QUARTUS_VERSION "10.1 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
 
 # Pin & Location Assignments
 # ==========================
@@ -755,6 +755,12 @@ set_instance_assignment -name TPD_REQUIREMENT "7 ns" -from * -to nuub_s
 set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
 
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/pace_pkg_body.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/stubs/sdram_pkg.vhd
@@ -769,6 +775,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/platf
 set_global_assignment -name VHDL_FILE ../../../../../src/target/p2a/target_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/pll.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/sprom.vhd
+set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/spram.vhd
 set_global_assignment -name VHDL_FILE ../../../../device/cycloneii/dpram.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/clk_div.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/cpu/t80/T80_Pack.vhd
@@ -788,6 +795,7 @@ set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_wb_slave.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/component/diskio/ocidec1/atahost_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/wd179x.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/m1/platform.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/platform/trs80/sound.vhd
 set_global_assignment -name VHDL_FILE ../../../../../src/pace/video/video_controller.vhd

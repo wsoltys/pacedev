@@ -28,7 +28,6 @@ package project_pkg is
   constant PACE_CLK1_MULTIPLY_BY            : natural := 25; 	-- 24*25/24 = 25MHz
 	constant PACE_VIDEO_H_SCALE       	      : integer := 1;
 	constant PACE_VIDEO_V_SCALE       	      : integer := 1;
-  constant PACE_ENABLE_ADV724					      : std_logic := '0';
   constant PACE_VIDEO_H_SYNC_POLARITY       : std_logic := '1';
   constant PACE_VIDEO_V_SYNC_POLARITY       : std_logic := '1';
 
@@ -56,8 +55,10 @@ package project_pkg is
   constant PACE_OSD_XPOS                    : natural := 128;
   constant PACE_OSD_YPOS                    : natural := 176;
 
-	constant PACE_ADV724_STD						      : std_logic := ADV724_STD_PAL;
-
+  -- P2A-specific constants
+  constant P2A_ENABLE_ADV724					      : std_logic := '0';
+	constant P2A_ADV724_STD						        : std_logic := ADV724_STD_PAL;
+  
 	-- TRS-80-specific constants
 
   --constant TRS80_M1_ROM                     : string := "level1.hex";
@@ -85,6 +86,8 @@ package project_pkg is
   constant TRS80_M1_HAS_80GRAFIX            : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_HAS_LE18                : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_LE18_WIDTHAD            : natural := 14;    -- 16KiB
+  constant TRS80_M1_FDC_SUPPORT             : boolean := true;
+  constant TRS80_M1_HAS_MIKROKOLOR          : boolean := (not TRS80_M1_IS_LNW80) and false;
   constant TRS80_M1_HAS_HDD                 : boolean := true;
   
   type from_PROJECT_IO_t is record
