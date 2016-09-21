@@ -131,6 +131,8 @@ line_cnt            .equ    0x80
 vbl_cnt							.equ		0x81
 frame_cnt						.equ		0x82
 
+isr_dp_base:        .ds     256        
+
 ; rgb/composite video selected (bit 4)
 cmp:                            .ds 1
         				
@@ -3458,15 +3460,14 @@ adj_p3_m12:
 ; U=lines,bytes Y=dest, A=byte
 fill_window:
         stu     *lines
-        ldb     *lines
-1$:     pshs    b,y
+1$:     pshs    y
         ldb     *bytes
 2$:     sta     ,y+
         decb
         bne     2$
-        puls    b,y
+        puls    y
         leay    VIDEO_BPL,y
-        decb
+        dec     *lines
         bne     1$
         rts
 
@@ -5768,17 +5769,16 @@ loc_D653:
 ; X=src, y=dst, U=lines,bytes
 blit_to_screen:
         stu     *lines
-        ldb     *lines
-1$:     pshs    b,x,y
+1$:     pshs    x,y
         ldb     *bytes
 2$:     lda     ,x+
         sta     ,y+
         decb
         bne     2$
-        puls    b,x,y
+        puls    x,y
         leax    VIDEO_BPL,x
         leay    -VIDEO_BPL,y
-        decb
+        dec     *lines
         bne     1$
         rts        
 
@@ -6251,7 +6251,11 @@ main_isr:
 				jsr			calc_vram_addr					; ->Y
 				jsr			calc_vidbuf_addr_x
 				ldu			#0x0802									; 8 lines, 2 bytes
+				lda			#>isr_dp_base           ; blit_to_screen is not reentrant
+				tfr			a,dp
 				jsr			blit_to_screen
+				lda			#>dp_base
+				tfr			a,dp
 				clr			*frame_cnt
 				bra			9$
 8$:			dec			*vbl_cnt
