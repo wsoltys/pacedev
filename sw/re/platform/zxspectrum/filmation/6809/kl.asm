@@ -15,6 +15,7 @@
 ;.define BUILD_OPT_CPC_GRAPHICS
 ;.define BUILD_OPT_MICK_FARROW_GRAPHICS
 ;.define BUILD_OPT_ALWAYS_RENDER_ALL
+;.define BUILD_OPT_NO_MASKING
 ;.define BUILD_OPT_NO_Z_ORDER
 ;.define BUILD_OPT_NO_TRANSFORM
 ;.define BUILD_OPT_ALMOST_INVINCIBLE
@@ -42,7 +43,7 @@ CAULDRON_SCREEN     .equ    136
 ;NO_LIVES            .equ    3
 ; *** the standard 4 locations
 ;START_LOC           .equ    47
-;START_LOC           .equ    68
+START_LOC           .equ    68           ; 'slow' room to the north
 ;START_LOC           .equ    179          ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
@@ -5941,7 +5942,6 @@ print_sprite:
         leau    1,u                     ; skip 3rd byte
 .endif        
         
-; this next bit requires some serious optimisation
 ;       X = object
 ;       Y = video buffer address
 ;       U = sprite data
@@ -5956,15 +5956,23 @@ print_sprite:
 				
 2$:     lda			#5
 				suba		*width                  ; width_bytes
+.ifndef BUILD_OPT_NO_MASKING
 				ldb			#29											; instruction bytes/rendered byte
+.else
+				ldb			#22											; instruction bytes/rendered byte
+.endif
 				mul
 				stb			300$+#1
 				
 30$:		ldx			*offset
+.ifndef BUILD_OPT_NO_MASKING
 				lda			,u											; read mask
 				lda			a,x											; shifted mask byte 1
 				coma
 				anda		,y											; mask off video bits
+.else
+        lda     ,y
+.endif				
 				ldb			1,u											; read data
 				ora			b,x											; OR-in shifted data byte 1
 				sta			,y+											; write back to video
@@ -5972,18 +5980,26 @@ print_sprite:
 300$:		bra			34$											; *patched*
 
 	.macro RENDER_SHIFTED_BYTE
-				; 29 bytes in total
+				; 22/29 bytes in total
 				ldx			*offset2
+.ifndef BUILD_OPT_NO_MASKING
 				lda			,u+											; read mask (again)
 				lda			a,x											; shifted mask byte 2
+.else
+        leau    1,u
+.endif				
 				ldb			,u+											; read data (again)
 				ldb			b,x											; shifted data byte 2
 				stb			,-s
 				ldx			*offset
+.ifndef BUILD_OPT_NO_MASKING
 				ldb			,u											; read mask (byte 1)
-				ora			b,x											; OR-inshifted mask byte 1
+				ora			b,x											; OR-in shifted mask byte 1
 				coma
 				anda		,y											; mask off video bits
+.else
+        lda     ,y
+.endif				
 				ora			,s+
 				ldb			1,u											; read data (byte 1)
 				ora			b,x											; OR-in shifted data byte 1
@@ -5996,11 +6012,16 @@ print_sprite:
 34$:		RENDER_SHIFTED_BYTE							; bytes 4&5
 				
 39$:		ldx			*offset2
+.ifndef BUILD_OPT_NO_MASKING
 				lda			,u+											; read mask (again)
 				lda			a,x											; shifted mask byte 2
 				coma
 				anda		,y											; mask off video bits
-				ldb			,u+											; read mask (again)
+.else
+        leau    1,u
+        lda     ,y
+.endif				
+				ldb			,u+											; read data byte 2
 				ora			b,x											; OR-in shifted data byte 2
 				sta			,y											; write back to video
 				
@@ -6018,7 +6039,9 @@ print_sprite_aligned:
 				asla
 				asla
 				asla
+.ifndef BUILD_OPT_NO_MASKING
 				adda		*width									; width x9
+.endif				
 				adda		#7
 				nega														; calculate BNE offset
 				sta			5$+#1										; patch BNE offset
@@ -6026,10 +6049,15 @@ print_sprite_aligned:
 				bra			5$
 
 	.macro RENDER_ALIGNED_BYTE
-				; 9 bytes in total
+				; 8/9 bytes in total
+.ifndef BUILD_OPT_NO_MASKING
     		lda     ,u+                     ; read mask
         coma
         anda    ,y                      ; from video
+.else
+        leau    1,u
+        lda     ,y
+.endif        
         ora			,u+                     ; read data
         sta     ,y+                     ; write back to video
 	.endm
