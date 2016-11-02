@@ -35,7 +35,6 @@ OBJDIR = obj
 ifeq ($(OUTPUT),)
 	OUTPUT = cart
 endif
-OUTDIR = output\$(OUTPUT)
 
 ############################
 # Settings for cart output #
@@ -64,14 +63,18 @@ ARFLAGS = cr
 
 DEBUG = -g
 
+DRIVER = puzzledp
 ifeq ($(OUTPUT),cart)
-  DRIVER = puzzledp
   GUID = 202
   P_SIZE = 1024
 	PRG = $(GUID)-p1.p1
+	SPRITES = $(GUID)-c?.*
+	OUTDIR = roms/$(DRIVER)
 endif
 ifeq ($(OUTPUT),cd)
 	PRG = PB_PROG.PRG
+	SPRITES = *.SPR
+	OUTDIR = cds/$(DRIVER)
 endif
 
 ##############
@@ -112,8 +115,8 @@ $(PRG): $(FQTN) PB_CHR.SPR
 	$(OBJC) -O binary $< $@
 	@copy $@ cds\$(DRIVER)
 	@copy PB_CHR.SPR cds\$(DRIVER)
-	$(RM) -f $(TARGET).iso
-	mkisofs -iso-level 1 -o $(TARGET).iso -pad -N -V "$(TARGET)" cds\$(DRIVER)
+	$(RM) -f cds\$(TARGET).iso
+	mkisofs -iso-level 1 -o cds\$(TARGET).iso -pad -N -V "$(TARGET)" cds\$(DRIVER)
 
 endif
 
@@ -123,34 +126,10 @@ $(FQTN) : $(OBJS) neo$(OUTPUT).x makefile
 $(OBJDIR)/%.o : %.68k makefile
 	$(AS) -a=$*.lst $(ASFLAGS) $< -o $@
 
-ifeq ($(OUTPUT),cart)
-install: $(TARGET).$(EXT)
-	@copy $(TARGET).$(EXT) $(OUTDIR)\$(DESTNAME)
-	@copy $(TARGET).$(EXT) ..\..\MameUI32\roms\puzzledp\$(DESTNAME)
-	@copy 202-c1.c1 ..\..\MameUI32\roms\puzzledp
-	@copy 202-c2.c2 ..\..\MameUI32\roms\puzzledp
-else
-install: $(TARGET).$(EXT)
-	@copy $(TARGET).$(EXT) $(OUTDIR)\$(DESTNAME)
-	@copy PB_CHR.SPR $(OUTDIR)
-	rm -f $(TARGET).iso
-#	mkisofs -iso-level 1 -graft-points -o $(TARGET).iso -pad -N -V "$(TARGET)" \
-#	  $(DESTNAME)=$(OUTDIR)\$(DESTNAME) \
-#	  PUZZLE.Z80=$(OUTDIR)\PUZZLE.Z80 \
-#	  PB_CHR.SPR=$(OUTDIR)\PB_CHR.SPR \
-#	  PB_FIX.FEX=$(OUTDIR)\PB_FIX.FIX \
-#	  PUZZLE.PCM=$(OUTDIR)\PUZZLE.PCM \
-#	  IPL.TXT=$(OUTDIR)\IPL.TXT \
-#	  ABS.TXT=$(OUTDIR)\ABS.TXT \
-#	  BIB.TXT=$(OUTDIR)\BIB.TXT \
-#	  CPY.TXT=$(OUTDIR)\CPY.TXT
-	mkisofs -iso-level 1 -o $(TARGET).iso -pad -N -V "$(TARGET)" $(OUTDIR)
-endif
-
 clean:
 	rm -f $(OBJDIR)/*.*
 	rm -f $(FQTN)
 	rm -f $(PRG)
-	rm -f roms/$(DRIVER)/$(GUID)-c?.*
-	rm -f roms/$(DRIVER)/$(GUID)-p1.p1
+	rm -f $(OUTDIR)/$(PRG)
+	rm -f $(OUTDIR)/$(SPRITES)
 	
