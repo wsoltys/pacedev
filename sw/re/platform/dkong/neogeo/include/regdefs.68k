@@ -1,0 +1,185 @@
+
+* addresses
+    
+.equ SCB1,                0x0000      |  VRAM, Sprite tilemaps
+.equ FIXMAP,              0x7000      |  VRAM, Fix map
+.equ SCB2,                0x8000      |  VRAM, Sprite shrink ratios
+.equ SCB3,                0x8200      |  VRAM, Sprite Y positions and sizes
+.equ SCB4,                0x8400      |  VRAM, Sprite X positions
+                          
+.equ BLACK,               0x8000
+.equ MIDBLUE,             0x1007
+.equ BLUE,                0x100F
+.equ MIDGREEN,            0x2070
+.equ GREEN,               0x20F0
+.equ MIDCYAN,             0x3077
+.equ CYAN,                0x30FF
+.equ MIDRED,              0x4700
+.equ RED,                 0x4F00
+.equ MIDMAGENTA,          0x5707
+.equ MAGENTA,             0x5F0F
+.equ ORANGE,              0x6F70
+.equ MIDYELLOW,           0x6770
+.equ YELLOW,              0x6FF0
+.equ MIDGREY,             0x7777
+.equ WHITE,               0x7FFF
+                          
+.equ RAMSTART,            0x100000    | User RAM start
+.equ PALETTES,            0x400000    | Palette RAM start
+.equ BACKDROPCOLOR,       PALETTES+(16*2*256)-2
+                          
+.equ REG_P1CNT,           0x300000    | Joystick port 1
+.equ REG_DIPSW,           0x300001    | Dipswitches/Watchdog
+.equ REG_SOUND,           0x320000    | In/Out Z80
+.equ REG_STATUS_A,        0x320001
+.equ REG_P2CNT,           0x340000    | Joystick port 2
+.equ REG_STATUS_B,        0x380000
+.equ REG_POUTPUT,         0x380001    | Joypad port outputs 	 
+.equ REG_SLOT,            0x380021    | Slot selection
+                          
+.equ REG_DISPENABL,       0x3A0001    | Video output ON
+.equ REG_DISPDSABL,       0x3A0011    | Video output OFF
+.equ REG_SWPROM,          0x3A0013    | Use ROM vector table
+.equ REG_CRDUNLOCK1,      0x3A0005    | Allow /WE to pass through to memory card when low
+.equ REG_CRDLOCK1,        0x3A0015    | Don't allow /WE to pass through to memory card
+.equ REG_CRDLOCK2,        0x3A0007    | Don't allow /WE to pass through to memory card
+.equ REG_CRDUNLOCK2,      0x3A0017    | Allow /WE to pass through to memory card when high
+.equ REG_CRDREGSEL,       0x3A0009
+.equ REG_CRDNORMAL,       0x3A0019
+.equ REG_BRDFIX,          0x3A000B    | Use board fix tileset
+.equ REG_CRTFIX,          0x3A001B    | Use ROM fix tileset
+.equ REG_SRAMLOCK,        0x3A000D    | Write-protect SRAM
+.equ REG_SRAMUNLOCK,      0x3A001D    | Write-unprotect SRAM
+.equ REG_PALBANK1,        0x3A000F    | Use palette bank 1
+.equ REG_PALBANK0,        0x3A001F    | Use palette bank 0 (default)
+                          
+.equ VRAM_ADDR,           0x3C0000
+.equ VRAM_RW,             0x3C0002
+.equ VRAM_MOD,            0x3C0004
+.equ REG_LSPCMODE,        0x3C0006
+.equ REG_TIMERHIGH,       0x3C0008
+.equ REG_TIMERLOW,        0x3C000A
+.equ REG_IRQACK,          0x3C000C
+.equ REG_TIMERSTOP,       0x3C000E
+
+*  BIOS calls
+
+.equ BIOSF_SYSTEM_INT1,   0xC00438
+.equ BIOSF_SYSTEM_RETURN, 0xC00444
+.equ BIOSF_SYSTEM_IO,     0xC0044A    | Sets RAM values from I/O ports
+.equ BIOSF_CREDIT_CHECK,  0xC00450    
+.equ BIOSF_CREDIT_DOWN,   0xC00456    
+.equ BIOSF_READ_CALENDAR, 0xC0045C    | Set calendar addresses (10FDD2+), MVS only
+.equ BIOSF_CARD,          0xC00468    | Perform memory card operations
+.equ BIOSF_CARD_ERROR,    0xC0046E    | In case a memory card error occurred, prompt user for action
+.equ BIOSF_VIDEOEN,       0xC00470    | Enable/disable video layers, CD only
+.equ BIOSF_HOWTOPLAY,     0xC00474    | Show how-to-play presentation, MVS only
+.equ BIOSF_FIX_CLEAR,     0xC004C2    | Clear fix layer
+.equ BIOSF_LSP_1ST,       0xC004C8    | Clear sprites
+.equ BIOSF_MESS_OUT,      0xC004CE    
+.equ BIOSF_UPLOAD,        0xC00546    | Upload data to DRAM, CD only 
+.equ BIOSF_CDDACMD,       0xC0056A    | Issue CDDA command, CD only
+
+* DMA related
+
+.equ REG_DMACPYSRC,       0xFF0064    | longword: Copy source address ?
+.equ REG_DMAFILDEST,      0xFF0064    | longword: Fill destination address ?
+.equ REG_DMACPYDEST,      0xFF0068    | longword: Copy destination address ?
+.equ REG_DMAFILVAL,       0xFF006C    | word: Fill value (word) ?
+.equ REG_DMASIZE,         0xFF0070    | longword?: Size (in 16 bit words)
+.equ REG_DMASTART,        0xFF0060    | byte: Start transfer (0x40 ?)
+                                      
+.equ REG_DISBLSPR,        0xFF0111    | byte: 0/1 disable sprites
+.equ REG_DISBLFIX,        0xFF0115    | byte: 0/1 disable fix layer
+.equ REG_ENVIDEO,         0xFF0119    | byte: 0/1 enable video output
+.equ REG_CDCONFIG,        0xFF011C    | word: jumper and lid switch input
+                                      
+.equ REG_UPMAPSPR,        0xFF0121    | bytes (0 or 1)
+.equ REG_UPMAPPCM,        0xFF0123
+.equ REG_UPMAPZ80,        0xFF0127
+.equ REG_UPMAPFIX,        0xFF0129
+.equ REG_UPUNMAPSPR,      0xFF0141
+.equ REG_UPUNMAPPCM,      0xFF0143
+.equ REG_UPUNMAPZ80,      0xFF0147
+.equ REG_UPUNMAPFIX,      0xFF0149
+.equ REG_DISBLIRQ,        0xFF016F
+.equ REG_ENZ80,           0xFF0183
+    
+.equ REG_CDDALEFTL,       0xFF0188    | CD audio levels
+.equ REG_CDDARIGHTL,      0xFF018A
+
+.equ BIOS_SYSTEM_MODE,    0x10FD80    | Game/system mode (bit 7)
+.equ BIOS_MVS_FLAG,       0x10FD82
+.equ BIOS_COUNTRY_CODE,   0x10FD83
+.equ BIOS_GAME_DIP,       0x10FD84    | start of soft DIPs settings (up to 0x10FD93)
+
+*  Set by BIOSF_SYSTEM_IO
+
+.equ BIOS_P1STATUS,       0x10FD94
+.equ BIOS_P1CURRENT,      0x10FD95    | joystick 1 state
+.equ BIOS_P1PREVIOUS,     0x10FD96    | previous joystick 1 state
+.equ BIOS_P1CHANGE,       0x10FD97    | joystick 1 state change
+.equ BIOS_P1REPEAT,       0x10FD98    | joystick 1 repeat
+.equ BIOS_P1TIMER,        0x10FD99    
+                                      
+.equ BIOS_P2STATUS,       0x10FD9A    
+.equ BIOS_P2CURRENT,      0x10FD9B    | joystick 2 state
+.equ BIOS_P2PREVIOUS,     0x10FD9C    | previous joystick 2 state
+.equ BIOS_P2CHANGE,       0x10FD9D    | joystick 2 state change
+.equ BIOS_P2REPEAT,       0x10FD9E    | joystick 2 repeat
+.equ BIOS_P2TIMER,        0x10FD99
+
+* button definitions
+
+.equ CNT_UP,              0
+.equ CNT_DN,              1
+.equ CNT_LE,              2
+.equ CNT_RI,              3
+.equ CNT_A,               4
+.equ CNT_B,               5
+.equ CNT_C,               6
+.equ CNT_D,               7
+
+.equ BIOS_STATCURNT,      0x10FDAC    | joystick 1/2 start/select
+.equ BIOS_STATCHANGE,     0x10FDAD    | previous joystick 1/2 start/select
+.equ BIOS_USER_REQUEST,   0x10FDAE
+.equ BIOS_USER_MODE,      0x10FDAF
+.equ BIOS_START_FLAG,     0x10FDB4
+.equ BIOS_MESS_POINT,     0x10FDBE
+.equ BIOS_MESS_BUSY,      0x10FDC2
+
+*  Memory card related:
+
+.equ BIOS_CRDF,           0x10FDC4    | byte: function to perform when calling BIOSF_CRDACCESS, see below table
+.equ BIOS_CRDRESULT,      0x10FDC6    | byte: 00 on success, else 80+ and encodes the error, see below table
+.equ BIOS_CRDPTR,         0x10FDC8    | longword: pointer to read from/write to
+.equ BIOS_CRDSIZE,        0x10FDCC    | word: how much data to read/write from/to card
+.equ BIOS_CRDNGH,         0x10FDCE    | word: usually game NGH. Unique identifier for the game that 'owns' the save file
+.equ BIOS_CRDFILE,        0x10FDD0    | word: each NGH has up to 16 save 'files' associated with
+
+*  Calendar, only on MVS (in BCD)
+
+.equ BIOS_YEAR,           0x10FDD2    | last 2 digits of year
+.equ BIOS_MONTH,          0x10FDD3    
+.equ BIOS_DAY,            0x10FDD4    
+.equ BIOS_WEEKDAY,        0x10FDD5    | Sunday = 00, Monday = 01 ... Saturday = 06
+.equ BIOS_HOUR,           0x10FDD6    | 24 hour time
+.equ BIOS_MINUTE,         0x10FDD7    
+.equ BIOS_SECOND,         0x10FDD8    
+                                     
+.equ BIOS_SELECT_TIMER,   0x10FDDA    | Byte: game start countdown
+.equ BIOS_DEVMODE,        0x10FE80    | Byte: non-zero for developer mode
+                                     
+*  Upload to DRAM                    
+                                     
+.equ BIOS_UPDEST,         0x10FEF4    | longword: destination address (!)
+.equ BIOS_UPSRC,          0x10FEF8    | longword: source address
+.equ BIOS_UPSIZE,         0x10FEFC    | longword: size
+.equ BIOS_UPZONE,         0x10FEDA    | byte: zone (0=PRG, 1=FIX, 2=SPR, 3=Z80, 4=PCM, 5=PAT)
+.equ BIOS_UPBANK,         0x10FEDB    | byte: bank
+                                     
+.equ SOUND_STOP,          0xD00046    | byte
+
+.macro	KICK_WDOG
+    move.b  d0,REG_DIPSW
+.endm

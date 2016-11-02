@@ -1,0 +1,4520 @@
+*
+* NEO GEO port of Donkey Kong
+*
+
+* Neo Geo hardware definitions
+.nolist
+.include "regdefs.68k"
+.list
+
+		.text
+
+TRAP00=TRAP
+TRAP01=TRAP
+TRAP02=TRAP
+TRAP03=TRAP
+TRAP04=TRAP
+TRAP05=TRAP
+TRAP06=TRAP
+TRAP07=TRAP
+TRAP08=TRAP
+TRAP09=TRAP
+TRAP10=TRAP
+TRAP11=TRAP
+TRAP12=TRAP
+TRAP13=TRAP
+TRAP14=TRAP
+TRAP15=TRAP
+
+* Cartridge/CD header
+.nolist
+.include "header.68k"
+.list
+
+.org 0x00000200
+
+* exports
+		.global IRQ1
+		.global _vblank
+	  .global nmi
+	  .global init
+	  .global main_loop
+    .global _end_of_dk_rom
+		.global	_vram
+    .global _flipscreen
+    .global _palette_bank
+		.global	_dipsw
+		.global	_rotate
+		.global _tilemap_set
+		.global _sprite_set
+    .global _render_palette_bank
+		.global	_ram_start
+		.global	_soft_sprite_ram
+		
+* debugging only
+		.global debug1
+		.global debug2
+		.global display_score_or_high_score
+    .global display_lives_and_level
+    .global draw_how_high_can_you_get
+    
+* BUILD OPTIONS
+OPT_ALTERNATE_TITLE=1
+OPT_ATTRACT_LEVEL_TYPE=1
+OPT_DEBUG_1ST_LEVEL_TYPE=1
+OPT_LEVEL1_ONLY=1
+
+.macro RETURN_IF_ATTRACT_MODE
+    btst.b    #0,(_attract_mode_flag)
+    bne       9f
+.endm
+
+.macro RETURN_IF_MARIO_NOT_ALIVE
+    btst.b    #0,(_mario_alive_flag)
+    beq       9f
+.endm
+
+.macro WAIT_8_BIT_COUNTDOWN
+    lea       _eight_bit_countdown,a0
+    sub.b     #1,(a0)
+    bne       9f
+.endm
+
+.macro WAIT_16_BIT_COUNTDOWN
+    lea       _sixteen_bit_countdown_msb,a0
+    sub.b     #1,(a0)
+    bne       9f
+  	WAIT_8_BIT_COUNTDOWN
+.endm
+
+.macro RETURN_IF_NOT_LEVEL
+		move.b		(_level_type),d1
+		roxr.b		d1,d0
+		bcc				9f
+.endm
+
+.include "neogeo_gfx.68k"
+        
+_vblank:
+    btst    #7,BIOS_SYSTEM_MODE
+    bne     .gamemode
+    jmp     BIOSF_SYSTEM_INT1
+.gamemode:
+    movem.l d0-d7/a0-a6,-(a7)
+    KICK_WDOG
+    jsr     BIOSF_SYSTEM_IO
+    tst.b		(_nmi_mask)
+    beq			1f
+    jsr     nmi
+1:	jsr     render_tilemap
+		jsr			render_sprites
+.nothing:
+    movem.l (a7)+,d0-d7/a0-a6
+    move.w  #4,REG_IRQACK
+    rte
+
+pop_hl_ret:
+    move.l  (a7)+,a0
+    rts
+    
+add_c_sprite_register_x10: | 0038
+		moveq   #4,d4
+		moveq		#10-1,d1
+add_c_sprite_register_xB: | 003D
+1:	add.b		d2,(a0)
+		adda.w  d4,a0
+		dbf		d1,1b
+		rts
+		
+copy_kong_sprite_data: | 004e
+		LEA_SPR_A 2,a1                              | kong
+		moveq		#10*4-1,d7									        | 40 bytes to copy
+1:	move.b	(a0)+,(a1)+
+		dbf			d7,1b		
+		rts
+
+rand: | 0057
+		lea				_random_no,a0
+		move.b		(a0)+,d0
+		add.b			(_gen_purpose_timer),d0
+		add.b			(a0),d0
+		move.b		d0,(_random_no)
+		rts
+		
+nmi: | 0066
+		clr.b			(_nmi_mask)
+*   ignore bit0 of IN2 test
+    tst.b     (_attract_mode_flag)              | in attract mode?
+    bne       3f                                | yes, skip reading inputs
+    tst.b     (_upright)                        | only 1 set of controls?
+    bne       1f                                | yes, skip
+    move.b    BIOS_P2CURRENT,d0                 | read IN2
+    tst.b     (_current_player_E)               | player 2?
+    bne       2f                                | yes, skip
+1:  move.b    BIOS_P1CURRENT,d0                 | read IN1
+2:  
+* re-map from neo geo
+* - dk       4=jump, 3=down,  2=up,   1=left, 0=right
+* - neogeo   4=jump, 3=right, 2=left, 1=down, 0=up
+    move.b    d0,d5
+    move.b    d0,d6
+    and.b     #0x10,d0                          | 4=jump
+    and.b     #0x03,d5                          | 1=down, 0=up
+    lsl.b     #2,d5                             | 3=down, 2=up
+    or.b      d5,d0                             | 4=jump, 3=down, 2=up
+    move.b    d6,d5
+    and.b     #4,d5                             | 2=left
+    lsr.b     #1,d5                             | 1=left        
+    or.b      d5,d0                             | 4=jump, 3=down, 2=up, 1=left
+    move.b    d6,d5
+    and.b     #8,d5                             | 3=right
+    lsr.b     #3,d5                             | 0=right
+    or.b      d5,d0                             | 4=jump, 3=down, 2=up, 1=left, 0=right
+*
+    move.b    d0,d1                             | d1=raw
+    and.b     #0x0f,d0                          | joystick only
+    move.b    d0,d2                             | d2=joystick only
+    move.b    (_last_raw_in),d0                 
+    neg.b     d0                                | negate
+    and.b     d1,d0                             | rising-edge detect
+    and.b     #0x10,d0                          | button only
+    lsl       #3,d0                             | shift to bit 7
+    or.b      d2,d0                             | add joystick bits
+    move.b    d1,(_last_raw_in)
+    move.b    d0,(_controller_in)
+*   ignore reset input
+3:  sub.b     #1,(_gen_purpose_timer)
+   	jsr				rand
+   	jsr				check_coin_inserted
+		jsr				update_sounds
+		lea				nmi_exit,a0
+		move.l		a0,-(a7)													| push return address
+    moveq     #0,d0
+    move.b    (_nmi_sequencer),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp     	(a0)
+   	.align 4
+1:	.long			init_machine_settings    
+		.long			chk_credits_and_vector_on_attrac
+		.long			vector_on_credit_sequencer
+		.long			vector_on_ingame_sequencer
+nmi_exit:
+		move.b		#1,(_nmi_mask)
+		rts
+		
+update_sounds: | 00E0
+*   TBD: everything
+		rts
+		
+stop_sound: | 011C
+*   TBD: everything
+    rts
+
+check_coin_inserted: | 017B
+    tst.b     (BIOS_MVS_FLAG)
+    beq       home_use
+*   The NEO GEO BIOS handles credits and coins for you
+*   so we always use 1C1C here and let DK handle the
+*   actual credits itself
+		lea				0x10fdb0.l,a0
+		move.w		#0x0100,(a0)
+		jsr				BIOSF_CREDIT_CHECK
+		lea				0x10fdb0.l,a0
+		move.w		(a0),d0
+		cmpi.w		#0x0100,d0
+		bne       9f
+		jsr				BIOSF_CREDIT_DOWN
+		bra				coin_inserted
+home_use:		
+*   Use the SELECT button to coin-up the machine
+    move.b    (BIOS_STATCHANGE),d1
+    and.b     #2,d1                             | <SELECT> changed state?
+    beq       9f                                | no, skip
+    move.b    (BIOS_STATCURNT),d0
+    and.b     #2,d0                             | <SELECT> pressed?
+    bne       coin_inserted                     | yes, go
+9:	move.b		#1,(_coin_state)
+		rts
+coin_inserted:
+		cmpi.b		#3,(_nmi_sequencer)				        | in credit sequence?
+		beq				1f												        | yes, skip
+		jsr				stop_sound		
+		move.b		#3,(digital_snd_tmr_coin_spring)
+1:	move.b		#0,(_coin_state)
+		add.b			#1,(_uncredited_coins)		        | inc
+		lea				_coinage+2,a1                     
+		move.b		(a1)+,d0									        | number of coins/credit
+		sub.b			(_uncredited_coins),d0		        | enough for a credit?
+		bne				9f												        | no, skip
+		move.b		d0,(_uncredited_coins)		        | update coins not credited
+		move.b		(_no_of_credits),d0               
+		cmpi.b		#0x90,d0									        | max?
+		bcc				9f												        | yes, skip (and take coins)
+		move.b		(a1),d1										        | number of credits/coin
+		abcd			d1,d0											        | add credits
+		move.b		d0,(_no_of_credits)				        | update
+		move.w		#0x0400,d3								        | display credits if attract mode
+		jsr				queue_fg_vector_fn
+9:	rts
+		    
+inital_scores_and_high_score: | 01BA
+		.byte			0x00, 0x37, 0x00
+		.byte			0xAA, 0xAA, 0xAA
+		.byte			0x50, 0x76, 0x00
+
+byte_0_1BD: | 01BD 
+		.byte 0xAA, 0xAA, 0xAA
+		.byte 0x50, 0x76, 0
+		.align		2
+		
+init_machine_settings: | 01C3
+		jsr				clear_visible_area_and_sprites
+		lea				inital_scores_and_high_score,a0
+		lea				_p1_score,a1
+		moveq			#9-1,d7
+1:	move.b		(a0)+,(a1)+
+		dbf				d7,1b
+		move.b		#1,d0
+		move.b		d0,_attract_mode_flag			
+		move.b		d0,(_level)
+		move.b		d0,(_lives_left)
+		jsr				display_lives_and_level
+		jsr				read_dips_and_high_score_tbl
+		moveq     #1,d0
+		move.b    d0,(_flipscreen)
+		move.b    d0,(_nmi_sequencer)               | next sequence
+		move.b    d0,(_level_type)                  
+		moveq     #0,d0                             
+		move.b    d0,(_main_sequencer)              | game screen sequencer
+		jsr       display_1UP                       
+		move.w		#0x0304,d3								        | print_message_4 "HIGH SCORE"
+		jsr				queue_fg_vector_fn                
+		move.w		#0x0202,d3								        | display_score_or_high_score (high)
+		jsr				queue_fg_vector_fn                
+		move.w		#0x0200,d3								        | display_score_or_high_score (P1)
+		jsr				queue_fg_vector_fn
+		rts
+
+read_dips_and_high_score_tbl: | 0207
+		move.b		(_dipsw),d0
+		move.b		d0,d2											        | save
+		and.b			#3,d0											        | lives
+		addq.b	  #3,d0											        | no. of lives
+		move.b		d0,(_lives_per_game)              
+		move.b		d2,d0											        | dipsw
+		lsr.b			#2,d0                             
+		and.b			#3,d0											        | bonus life setting
+		moveq			#0,d1
+		move.b		d0,d1											        | save
+		move.b		#7,d0                             | 7,000?
+		tst.b			d1												        | check flags
+		beq       2f                                | yes, skip
+		move.b    #5,d0                             | 5,000?
+		sub.b     #1,d1                             | for 68K DBF
+		move.b    #5,d6                             | for 68K ABCD
+1:  abcd      d6,d0                             
+    dbf       d1,1b                             | calculate 10/15/20K points
+2:  move.b    d0,(_bonus_setting)               
+		move.b    d2,d0                             | dipsw
+		move.b    #0x01,d1                          
+		move.b    #0x01,d2                          | 1C P1
+		move.b    #0x01,d3                          
+		move.b    #0x02,d4                          | 1C P2
+		and.b     #0x70,d0                          | coinage
+		lsr.b     #4,d0                             | low nibble
+    beq       4f                                | 1C1C
+    bcs       3f                                | 2-5 coins
+    add.b     #1,d0                             | no. credits
+    move.b    d0,d2                             | d2=credits
+    move.b    d3,d4                             | d4=coins
+    bra       4f                                
+3:  add.b     #2,d0                             | no. coins
+    move.b    d0,d1                             | d1=coins
+    move.b    d0,d3                             | d3=coins
+    add.b     d0,d0                             
+    move.b    d0,d4                             | d4=coinsx2
+4:  lea       _coinage,a0                       
+    move.b    d3,(a0)+                          
+    move.b    d4,(a0)+                          
+    move.b    d1,(a0)+                          
+    move.b    d2,(a0)+                          | store coinage
+		move.b		(_dipsw),d0                       
+		move.b    #1,(_upright)                     
+    lsl.b     #1,d0                             | upright?
+    bcs       5f
+    move.b    #0,(_upright)
+5:  lea       high_score_tbl,a0
+    lea       _high_score_tbl_ram,a1
+    moveq			#0,d7
+    move.w 		#0xAA-1,d7
+6:  move.b    (a0)+,(a1)+
+    dbf       d7,6b
+		rts
+		
+init: | 0266
+		clr.b			(_nmi_mask)
+    lea       _ram_start,a0
+    moveq			#0,d7
+    move.w    #16*256-1,d7                      | this is how it was done
+1:  move.b    #0,(a0)+                          
+    dbf       d7,1b											        | clear 4KB work RAM
+    moveq			#0,d7
+		move.w		#4*256-1,d7								        | this is how it was done
+		LEA_SRAM_A 0,a0                             
+2:	move.b		#0x00,(a0)+                       
+		dbf				d7,2b											        | clear 1KB sprite ram
+		LEA_VRAM_A 0,a0                             
+		moveq			#0,d7
+		move.w		#4*256-1,d7								        | this is how it was done
+3:	move.b		#0x10,(a0)+								        | space character
+		dbf				d7,3b											        | clear 1KB vram
+		lea				_fg_vector_fn_params,a0           
+		moveq			#64-1,d7                          
+4:	move.b		#0xff,(a0)+								        | mark as empty
+		dbf				d7,4b                             
+		move.b		#0,d0											        | (was #0xC0)
+		move.b		d0,_fg_fn_queue_tail              
+		move.b		d0,_fg_fn_queue_head			        | init fg fn queue
+		moveq     #0,d0                             
+    move.b    d0,(_sprite_bank)                 
+		move.b		d0,(_palette_bank)                
+    addq.b    #1,d0                             
+    move.b    d0,(_flipscreen)                  
+		jsr       stop_sound                        
+    KICK_WDOG                                   
+   	move.w    #4,REG_IRQACK                     
+		move			#0x2000,sr						            | enable interrupts
+		move.b		#1,(_nmi_mask)
+		
+main_loop: | 02BD
+    KICK_WDOG
+		lea				_fg_vector_fn_params,a2
+		move.b		(_fg_fn_queue_head),d1
+		and.w			#0xff,d1
+		move.b		0(a2,d1.w),d0							        | get queue entry
+		add.b			d0,d0											        | empty?
+		bcc				process_fg_fn_queue				        | no, skip
+		jsr				flash_1UP_or_2UP
+		jsr				check_and_award_bonus
+		lea				_random_no,a0
+		add.b			#1,1(a0)
+		lea				_unk_0_6383,a0
+		move.b		(_gen_purpose_timer),d0
+		cmp.b			(a0),d0
+		beq				main_loop
+		move.b		d0,(a0)
+    jsr       difficulty_timer_tick
+*   TBD: call sub_0_3a2                         | fireball release
+		bra				main_loop
+
+process_fg_fn_queue:
+		and.b			#0x1f,d0									        | d0=param1 (vector entry)
+		add.b			d0,d0											        | addresses are longs
+		move.b		1(a2,d1.w),d2							        | d2=param2 (vector fn param)
+		move.w		#0xffff,0(a2,d1.w)				        | wipe entry
+		addq.b		#2,d1											        | next entry
+		cmpi.b		#64,d1										        | wrap?
+		bcs				1f                                
+		move.b		#0,d1											        | (was #0xC0)
+1:	move.b		d1,(_fg_fn_queue_head)            
+		pea				main_loop									        | return address
+    movea.l   2f(pc,d0.w),a0                    
+    move.b    d2,d0                             | d0=vector fn param
+    jmp       (a0)
+   	.align 4
+2:	.long 		add_bonus_and_update_high_score
+		.long 		zero_score_or_high_score
+		.long 		display_score_or_high_score
+		.long 		print_message_A
+		.long 		display_credits_if_attract_mode
+		.long 		update_bonus_timer
+		.long 		display_lives_and_level
+		
+flash_1UP_or_2UP: | 0315
+		move.b		_gen_purpose_timer, d0
+		move.b    d0,d1
+		and.b	    #0x0f,d0
+		bne				9f
+    RETURN_IF_ATTRACT_MODE
+		move.b		_current_player_D,d0
+		jsr				get_1UP_or_2UP_screen_location
+		btst			#4,d1								              | unhide?
+		beq				1f									              | yes, skip
+		move.b    #0x10,(a0)                        | wipe "1" or "2"
+		suba      #32,a0                            
+    move.b    #0x10,(a0)                        | wipe "U"
+    suba      #32,a0                            
+    move.b    #0x10,(a0)                        | wipe "P"
+		move.b		_two_players,d0			              | 1 player?
+		beq				9f									              | yes, return
+		move.b	  _current_player_D,d0
+		eori.b		#1,d0
+		jsr				get_1UP_or_2UP_screen_location
+1:	add.b			#1,d0
+		move.b    d0,(a0)                           | "1" or "2"
+		suba      #32,a0                            
+    move.b    #0x25,(a0)                        | "U"
+    suba      #32,a0                            
+    move.b    #0x20,(a0)                        | "P"
+9:	rts
+
+get_1UP_or_2UP_screen_location: | 0347
+    LEA_VRAM_A 0x340,a0
+    tst.b     d0
+    beq       9f
+    LEA_VRAM_A 0x0E0,a0
+9:	rts
+		
+check_and_award_bonus: | 0350
+		tst.b			(_awarded_bonus_life)
+		bne				9f									              | already got bonus life
+		lea				_p1_score+1,a0                    
+		tst.b			(_current_player_D)	              | P1?
+		beq				1f                                
+		lea				_p2_score+1,a0                    
+1:	move.b		(a0)+,d1						              | get hundreds
+		and.b			#0xf0,d1						              | only thousands
+		move.b		(a0),d0							              | get tens of thousands
+		and.b			#0x0f,d0						              | only tens
+		or.b			d1,d0								              | thousands and tens of
+		ror.b			#4,d0								              | swap nibbles
+		cmp.b			(_bonus_setting),d0	              | reached bonus score?
+		bcs				9f									              | no, exit
+		move.b		#1,(_awarded_bonus_life)
+		move.b		(_lives_left),d0
+		add.b			#1,d0
+		move.b		d0,(_lives_left)		              | need this in d0
+    bra				display_lives_and_level
+9:	rts
+
+difficulty_timer_tick: | 037F
+    lea       _unk_0_6384,a0                    | timer LSB
+    move.b    (a0),d0                           | get LSB
+    add.b     #1,(a0)                           | tick
+    tst.b     d0                                | LSB overflow?
+    bne       9f                                | no, return
+    lea       _unk_0_6381,a0                    | timer MSB
+    move.b    (a0),d0                           | get MSB
+    move.b    d0,d1
+    add.b     #1,(a0)                           | tick
+    and.b     #7,d0                             | MSB overflow?
+    bne       9f                                | no, return
+    ror.b     #3,d1
+    add.b     (_level),d1                       | adjust for level
+    cmpi.b    #5,d1                             | max?
+    bcs       1f                                | no, skip
+    moveq     #5,d1                             | set to max
+1:  move.b    d1,(_unk_0_6380)                  | store difficulty
+9:  rts
+
+display_3_tiles_HL: | 0514
+    moveq     #3-1,d1
+1:  move.b    d0,(a0)                           | display tile
+    adda      d3,a0                             | next address
+    sub.b     #1,d0                             | next tile
+    dbf       d1,1b
+    rts
+        
+add_bonus_and_update_high_score: | 051C
+		rts
+    move.b    d0,d2                             | copy parameter
+    RETURN_IF_ATTRACT_MODE
+    jsr       current_player_score_DE           | (a2)
+    move.b    d2,d0                             | parameter
+    add.b     d0,d2                             
+    add.b     d0,d2                             | x3
+    lea       bonus_points_tbl,a3               
+    adda      d2,a3                             | ptr entry in table
+    moveq     #3-1,d1                           | 3 bytes of score
+    andi      #0xef,ccr                         | clear X flag
+1:  move.b    (a2),d0                           | get score BCD pair
+    move.b    (a3)+,d2                          | get bonus BCD pair
+    abcd      d2,d0                             | add bonus BCD pair
+    move.b    d0,(a2)+                          | update score
+    dbf       d1,1b                             | loop through score
+    move.l    a2,-(a7)
+    suba      #1,a2
+    move.b    (_current_player_D),d0
+    jsr       display_player_A_score
+    move.l    (a7)+,a2
+    suba      #1,a2
+    lea       _high_score+2,a3                  | MSB
+    moveq     #3-1,d1                           | 3 bytes to compare
+2:  move.b    (a2),d0                           | score byte
+    cmp.b     (a3),d0                           | score less than high score?
+    bcs       9f                                | yes, return
+    bne       new_high_score                    | greater, new high score
+    suba      #1,a2                             
+    suba      #1,a3                             
+    dbf       d1,2b                             | lopp through 3 bytes
+9:	rts
+
+new_high_score: | 0550
+    jsr       current_player_score_DE           | (a2)
+    lea       _high_score,a3
+update_high_score:
+    move.b    (a2)+,(a3)+
+    dbf       d1,update_high_score
+    bra       display_high_score
+
+current_player_score_DE: | 055f
+    lea       _p1_score,a2
+    move.b    (_current_player_D),d0
+    beq       9f
+    lea       _p2_score,a2
+9:  rts
+
+display_player_A_score: | 056B
+    LEA_VRAM_A 0x381,a4
+    tst.b     d0
+    beq       display_score_HL_at_IX
+    LEA_VRAM_A 0x121,a4
+    bra       display_score_HL_at_IX
+
+display_score_at_hs_location: | 0578
+    LEA_VRAM_A 0x241,a4
+
+display_score_HL_at_IX: | 057C
+* ptr score+2 is in a0
+* display location is in a4
+    moveq     #3-1,d1                           | 3=6 digits
+display_B_bcd_digit_pairs:                      
+    move.b    (a0),d0                           | digit pair
+    lsr.b     #4,d0                             | high nibble to low
+    jsr       display_score_digit               
+    move.b    (a0),d0                           | digit pair (again)
+    jsr       display_score_digit               
+    suba      #1,a0                             | next digits
+    dbf       d1,display_B_bcd_digit_pairs
+    rts
+
+display_score_digit: | 0593
+    and.b     #0x0f,d0                          | low nibble only
+    move.b    d0,(a4)                           | display digit
+    suba      #32,a4                            | *** FIXME
+    rts                                         
+                                                
+zero_score_or_high_score: | 059B                
+    cmpi.b    #3,d0                             | zero all scores?
+    bcc       3f                                | yes, skip
+    move.w    d0,-(a7)                          
+    lea       _p1_score, a0                     
+    tst.b     d0                                | P1?
+    beq       1f                                | yes, skip
+    lea       _p2_score, a0                     
+1:  cmpi.b    #2,d0                             | high score?
+    bne       2f                                | no, skip
+    lea       _high_score,a0
+2:  move.b    #0,(a0)+
+    move.b    #0,(a0)+        
+    move.b    #0,(a0)+        
+    move.w    (a7)+,d0
+    bra       display_score_or_high_score
+3:  subq      #1,d0
+    move.w    d0,-(a7)
+    jsr       zero_score_or_high_score
+    move.w    (a7)+,d0
+    bne       3b
+		rts
+
+display_score_or_high_score: | 05C6
+    cmpi.b    #3,d0
+    beq       2f
+    lea       _p1_score+2,a0
+    tst.b     d0                                | 1P?
+    beq       1f                                | yes, skip
+    lea       _p2_score+2,a0                    
+1:  cmpi.b    #2,d0                             | high score?
+    bne       display_player_A_score
+display_high_score:
+    lea       _high_score+2,a0
+    bra       display_score_at_hs_location
+2:  sub.b     #1,d0
+    move.w    d0,-(a7)
+    jsr       display_score_or_high_score
+    move.w    (a7)+,d0
+    tst.b     d0                                | done?
+    bne       2b
+		rts
+
+print_message_A: | 05E9
+    lea       message_table,a0
+    move.b    d0,d2                             | copy message no.
+    and.w     #0x007f,d0                        | mask off 'wipe' bit
+    lsl.w     #2,d0                             | entries are long
+    move.l    0(a0,d0.w),a1                     | message address
+    move.w    (a1)+,d3                          | vram offset
+    lea       _vram,a0                          | start of vram
+1:  move.b    (a1)+,d0                          | get msg character
+    cmpi.b    #0x3f,d0                          | end of message?
+    beq       9f                                | yes, exit
+    move.b    d0,0(a0,d3.w)                     | display character
+    btst      #7,d2                             | wiping?
+    beq       2f                                | no, skip
+    move.b    #0x10,0(a0,d3.w)                  | space
+2:  sub.w     #32,d3                            | next position
+    bra       1b
+9:	rts
+
+display_credits_if_attract_mode: | 0611
+    btst.b    #0,(_attract_mode_flag)
+    beq       9f                                | this wasn't RST8!
+display_credits:                                
+    moveq     #5,d0                             
+    jsr       print_message_A                   
+    lea       _no_of_credits,a0                 | a0=digits
+    LEA_VRAM_A 0x0BF,a4                         | a1=sceen location
+    moveq     #1-1,d1                           | 1=2 digits
+    bra       display_B_bcd_digit_pairs        
+9:	rts
+
+update_bonus_timer: | 062A
+		tst.b			d0                                | add bonus to score?
+		beq				loc_0_691                         | yes, skip
+		move.b		(_bonus_timer),d0                 | timer=0?
+		bne				bonus_timer_tick                  | no, skip
+		move.b		(_bonus_timer_expired),d0         | expired?
+		bne				9f                                | yes, exit
+		move.b		(_bonus_timer_init_value),d0      | init bonus timer
+		moveq			#0,d1
+		moveq			#0x0a,d2
+1:	add.b			#1,d1
+		sub.b			d2,d0
+		bne				1b
+		roxl.b		#4,d1
+		move.b		d1,(_bonus_timer)									| set initial bonus timer value
+		lea				bonus_graphic_tiles,a0
+		LEA_VRAM_A 0x65,a1													| screen position for bonus
+		moveq			#6-1,d6														| 6 columns of tiles to display
+2:	moveq			#0x1D,d4													| column inc
+		moveq			#3-1,d1														| 3 tiles to display
+3:	move.b		(a0)+,(a1)+												| display tiles
+		dbf				d1,3b
+		adda			d4,a1															| next column
+		dbf				d6,2b															| loop through all columns
+		move.b		(_bonus_timer),d0
+display_bonus_timer:		
+		move.b		d0,d1
+		and.b			#0x0f,d1													| d1=low nibble
+		roxr.b		#4,d0
+		and.b			#0x0f,d0													| d0=high nibble
+		bne				display_bonus_timer_digits				| skip of more than 9's left
+		move.b		#3,(_bg_music)
+		move.b		#0x70,d0													| purple '0'
+		MOV_VRAM_A d0,0x86													| '0'
+		MOV_VRAM_A d0,0xA6													| '0'
+		add.b			d0,d1															| 2nd digit to 'ascii'
+		move.b		#0x10,d0													| space
+display_bonus_timer_digits:
+		MOV_VRAM_A d0,0xE6													| 1st digit
+		MOV_VRAM_A d1,0xC6													| 2nd digit
+9:	rts
+
+loc_0_691: | 0691
+		move.b		(_bonus_timer),d0
+		move.b		d0,d6
+		and.b			#0x0f,d0													| low nibble
+		jsr				add_bonus_and_update_high_score
+		move.b		d6,d0
+		roxl.b		#4,d0															| high nibble
+		and.b			#0x0f,d0
+		add.b			#0x0a,d0
+		bra				add_bonus_and_update_high_score
+		rts
+
+bonus_timer_tick: | 06A8
+		move.b		#1,d6
+		sbcd			d6,d0
+		bne				1f
+		move.b		#1,(_bonus_timer_expired)
+1:	move.b		d0,(_bonus_timer)
+		bra				display_bonus_timer		
+																
+display_lives_and_level: | 06B8
+		move.b		d0,d2                             | store alive flag
+    RETURN_IF_ATTRACT_MODE                      
+		moveq			#6-1,d7							              | max icons
+		LEA_VRAM_A 0x383,a0                         
+1:	move.b		#0x10,(a0)					              | space
+		suba			#32,a0							              | next column
+		dbf				d7,1b								              | wipe 6 icons
+		move.b		(_lives_left),d0                  
+		sub.b			d2,d0								              | decrement if mario alive
+		beq				3f                                | skip if none to display
+		moveq			#0,d1
+		move.b		d0,d1                             
+		sub.b			#1,d1								              | adjust for 68K DBF
+		LEA_VRAM_A 0x383,a0                         
+2:	move.b		#0xff,(a0)					              | mario icon
+		suba			#32,a0							              | next column
+		dbf				d1,2b		                          
+3:	MOV_VRAM_A #0x1C,0x103		                  | 'L'
+		MOV_VRAM_A #0x34,0x0E3		                  | '='
+		move.b		(_level),d0                       
+		cmp.b			#100,d0                           | too high?
+		bcs				4f                                | no, skip
+		move.b		#99,d0                            | max out at 99
+		move.b		d0,(_level)                       | adjust
+4:	move.b		#0xff,d1                          
+		move.b		#0x0a,d2                          
+5:	add.b			#1,d1                             
+		sub.b			d2,d0                             
+		bcc				5b                                
+		add.b			d2,d0                             
+		MOV_VRAM_A d0,0x0A3                         | level tens digit
+		MOV_VRAM_A d1,0x0C3                         | level units digit
+9:	rts
+	
+vector_on_ingame_sequencer: | 06FE
+    moveq     #0,d0
+    move.b    (_main_sequencer),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp       (a0)
+   	.align 4
+1:	.long     cls_and_set_screen_flip
+		.long			init_P1_ingame_data
+		.long			display_player_I_and_2P_score
+		.long			init_P2_ingame_data
+		.long			display_player_II_2UP_and_2P_score
+		.long			display_1UP_and_high_score
+		.long			wait_cls_and_check_seen_intro
+		.long			vector_on_intro_sequence
+		.long			draw_how_high_can_you_get
+		.long			0
+		.long			wait_init_and_draw_level
+		.long			init_mario
+		.long			gameplay
+		.long			died_in_gameplay
+		.long			save_P1_ingame_data
+		.long			save_P2_ingame_data
+		.long			P1_game_over
+		.long			P2_game_over
+		.long			set_flip_and_current_P2
+		.long			set_flip_and_current_P1
+		.long			draw_name_registered
+		.long			do_initials_entry
+		.long			mario_pauline_reunion
+		.long			cls_and_set_seq_for_current_player
+
+chk_credits_and_vector_on_attrac: | 073C
+    lea       _main_sequencer,a0
+    move.b    _no_of_credits,d0
+    bne       inc_nmi_sequencer
+    move.b    (a0),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp       (a0)
+   	.align 4
+1:	.long     insert_coin_screen
+    .long     init_attract_mode_and_draw_level
+    .long     init_mario
+    .long     attract_mode_gameplay
+    .long     died_in_gameplay
+    .long     cls_and_next_sequence
+    .long     title_screen_flash
+    .long     title_screen_no_flash
+    .align    2
+
+inc_nmi_sequencer: | 075C
+    move.b    #0,(a0)                           | reset main sequencer
+    addq.b    #1,(_nmi_sequencer)               | inc
+    rts                                         
+                                                
+init_attract_mode_and_draw_level:               | 0763
+    WAIT_16_BIT_COUNTDOWN
+    move.b    #0,d0
+    move.b    d0,(_unk_0_6392)
+    move.b    d0,(_unk_0_63A0)
+    move.b    #1,d0
+    move.b    #OPT_ATTRACT_LEVEL_TYPE,(_level_type)
+    move.b    d0,(_level)
+    move.b    d0,(_lives_left)
+    jmp       init_and_draw_level
+9:  rts
+
+insert_coin_screen: | 0779
+		move.b		#0,(_palette_bank)
+		move.w    #0x31B,d3                         | print_message_1B "insert coin"
+		jsr       queue_fg_vector_fn                
+		addq      #1,d3                             | print_message_1C "player coin"
+		jsr       queue_fg_vector_fn
+    jsr       queue_hs_table_for_display
+    move.b    #2,(_eight_bit_countdown)
+    addq.b    #1,(_main_sequencer)  | next sequence(1)
+    jsr       clear_visible_area_and_sprites
+    bsr       display_1UP
+    cmpi.b    #1,(_two_players)
+    bne       1f
+    bsr       display_2UP
+1:  move.b    (_coinage),d4
+    move.b    (_coinage+1),d3
+    LEA_VRAM_A 0x16C,a0
+    bsr       display_coinage
+display_coinage:
+    move.b    d4,(a0)
+    ADD_VRAM_A #2,a0
+    move.b    d3,(a0)
+    move.b    d3,d0
+    sub.b     #0x0A,d0
+    bne       2f
+    move.b    d0,(a0)
+    addq.b    #1,d0
+    MOV_VRAM_A d0,0x18E
+2:  move.b    #02,d3
+    move.b    #01,d4
+    LEA_VRAM_A 0x28C,a0
+    rts
+
+cls_and_next_sequence: | 07C3
+		jsr clear_visible_area_and_sprites
+		add.b			#1,(_main_sequencer)
+		rts
+
+title_screen_flash: | 07CB
+		tst.b			(_title_flash_tmr_1)
+		bne				7f
+		move.b		#0x60,d0
+		move.b		d0,(_title_flash_tmr_1)
+		move.b		#0x5F,d2
+1:	tst.b			d0
+		beq				8f										            | finished flashing
+		bclr.b		#0,(_palette_bank)
+		move.b		d2,d0
+		rol.b			#1,d0
+		bcc				2f
+		bset.b		#0,(_palette_bank)
+2:	bclr.b		#1,(_palette_bank)
+		rol.b			#1,d0
+		bcc				3f
+		bset.b		#1,(_palette_bank)
+3:	move.b		d0,(_title_flash_tmr_2)
+		lea				title_screen,a1
+display_donkey_kong_title:
+		move.b		#0xB0,d0							            | girder tile
+		moveq			#0,d1
+		move.w		(a1)+,d1							            | number of tiles
+		subq			#1,d1                             
+		move.w		(a1)+,d3							            | VRAM offset
+		LEA_VRAM_A 0x000,a0                         
+4:	move.b		d0,0(a0,d3.w)					            | display tile
+		ADD_VRAM_A #1,a0								            | next tile
+		dbf				d1,4b                             
+		tst.w			(a1)									            | next entry
+		bne				display_donkey_kong_title
+		move.w		#0x031E,d3						            | print_message "(C) 1981"
+		jsr				queue_fg_vector_fn                
+		addq			#1,d3									            | print_message "NINTENDO OF AMERICA INC."
+		jsr				queue_fg_vector_fn
+		lea				dk_thrash_right_spr,a0
+		jsr				copy_kong_sprite_data
+		jsr				display_tm
+		LEA_SPR_Y 2,a0                              | kong (Y)
+		move.w		#68,d2
+		jsr       add_c_sprite_register_x10
+		LEA_SPR_X	2,a0                              | kong (X)
+		move.w		#120,d2
+    jsr       add_c_sprite_register_x10
+		rts
+7:	move.b		(_title_flash_tmr_2),d2
+		move.b		(_title_flash_tmr_1),d0
+		subq			#1,d0
+		move.b		d0,(_title_flash_tmr_1)
+		bra				1b
+8:	move.b		#2,(_eight_bit_countdown)
+		add.b			#1,(_main_sequencer)	            | next sequence
+		lea				_title_flash_tmr_1,a0	            | reset flash timer
+		move.b		#0,(a0)+
+		move.b		#0,(a0)+
+		rts
+
+title_screen_no_flash: | 084B
+    WAIT_16_BIT_COUNTDOWN
+		move.b		#0,(_main_sequencer)
+9:	rts
+
+clear_tiles_and_sprites: | 0852
+		LEA_VRAM_A 0,a0
+		moveq			#0,d2
+		move.w		#4*256-1,d2
+1:	move.b		#0x10,(a0)+					              | space
+		dbf				d2,1b
+		LEA_SRAM_A 0,a0
+		moveq			#0,d2
+		move.w		#2*192-1,d2
+2:	move.b		#0,(a0)+						              | zero
+		dbf				d2,2b				
+		rts
+							
+clear_visible_area_and_sprites: | 0874
+    LEA_VRAM_A 4,a0
+    moveq    	#32-1,d2                          | 32 columns
+1:  moveq     #28-1,d1                          | 28 rows
+    move.b    #0x10,d0                          | <space>
+2:  move.b    d0,(a0)                           | display space character
+    ADD_VRAM_A #1,a0                            | next line
+    dbf       d1,2b                             | loop screen height
+    ADD_VRAM_A #4,a0                            | next column
+    dbf       d2,1b                             | loop through screen
+    LEA_VRAM_A 0x122,a0                         
+    moveq     #2-1,d2                           
+    move.b    #0x10,d0                          | <space>
+3:  moveq     #14-1,d1                          | 14 columns
+4:  move.b    d0,(a0)                           | display space character
+    ADD_VRAM_A #32,a0                           
+    dbf       d1,4b                             
+    LEA_VRAM_A 123,a0                           
+    dbf       d2,3b                             | repeat interleaved columns
+    LEA_SRAM_A 0,a0                             
+    moveq			#0,d7
+    move.w    #256+128-1,d7                     | clear 384 bytes
+5:  move.b    #0,(a0)+
+    dbf       d7,5b
+    rts
+        
+vector_on_credit_sequencer: | 08B2
+    moveq     #0,d0
+    move.b    (_main_sequencer),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp     	(a0)
+   	.align 4
+1:	.long			display_1P_2P_start_screen    
+		.long			process_1P_2P_start
+
+display_1P_2P_start_screen: | 08BA
+    jsr       clear_visible_area_and_sprites
+    move.b    #0,(_attract_mode_flag)
+    move.w    #0x030c,d3                        | print_message_0C "PUSH"
+    jsr       queue_fg_vector_fn
+    add.b     #1,(_main_sequencer)              | next sequence
+    jsr       queue_hs_table_for_display
+    move.b    #0,(_palette_bank)                | select palette #0
+display_start_1P_2P_get_selection:
+    moveq     #0x04,d6                          | mask for 1P start
+    move.b    #0x09,d4                          | message_09 "ONLY 1 PLAYER BUTTON"
+    cmpi.b    #1,(_no_of_credits)
+    beq       1f
+    move.b    #0x0c,d6                          | mask for 1P/2P start
+    add.b     #1,d4                             | message_0A "1 or 2 PLAYERS"
+1:  move.b    (_gen_purpose_timer),d0
+    and.b     #0x07,d0
+    bne       2f
+    move.b    d4,d0                             | message number
+    jsr       print_message_A
+    jsr       display_credits
+2:  move.b    BIOS_STATCURNT,d0                 | read start buttons
+    lsl.b     #1,d0                             | P2START 2->3, P1START 0->1
+    move.b    d0,d7
+    and.b     #0x08,d7                          | P2START
+    lsl.b     #1,d0                             | P1START 1->2
+    and.b     #0x04,d0                          | P1START
+    or.b      d7,d0                             | P2START|P1START
+    and.b     d6,d0                             | start buttons only
+    rts
+
+process_1P_2P_start: | 08F8
+    jsr       display_start_1P_2P_get_selection
+    cmp.b     #4,d0                             | START1?
+    beq       start_1_selected
+    cmp.b     #8,d0                             | START2?
+    beq       start_2_selected
+    rts
+
+start_1_selected: | 0906
+    jsr       dec_credits_and_display
+    lea       _p2_ingame_data,a0
+    moveq     #8-1,d1                           | 8 bytes to clear
+1:  move.b    #0,(a0)+
+    dbf       d1,1b                             | clear P2 data
+    clr.l     (_p2_ingame_seq)
+    move.w    #0,d5                             | players=1,current_player=1
+    bra       start_game
+
+start_2_selected: | 0919
+    jsr       dec_credits_and_display
+    jsr       dec_credits_and_display
+    lea       _p2_ingame_data,a1
+    move.b    (_lives_per_game),d0
+    move.b    d0,(a1)+                          | init lives left
+    lea       game_init_data,a0
+    moveq     #7-1,d1                           | 7 bytes to copy
+1:  move.b    (a0)+,(a1)+
+    dbf       d1,1b                             | init P2 data
+    move.l    (game_init_seq_data),(_p2_ingame_seq)
+    move.w		#0x0101,d3												| zero_score_or_high_score (P2)
+    jsr       queue_fg_vector_fn
+		move.w    #0x0100,d5                        | players=2,current_player=1
+start_game:
+    move.b    d5,(_current_player_E)
+    lsr.w     #8,d5
+    move.b    d5,(_two_players)                 | init number of players
+    jsr       clear_visible_area_and_sprites
+    lea       _p1_ingame_data,a1
+    move.b    (_lives_per_game),d0
+    move.b    d0,(a1)+                          | init lives left
+    lea       game_init_data,a0
+    moveq     #7-1,d1                           | 7 bytes to copy
+2:  move.b    (a0)+,(a1)+
+    dbf       d1,2b                             | init P1 data
+    move.l    (game_init_seq_data),(_p1_ingame_seq)
+    move.w    #0x0100,d3                        | zero score or high score (P1)
+    jsr       queue_fg_vector_fn
+    move.b    #0,(_main_sequencer)
+    move.b    #3,(_nmi_sequencer)
+    rts
+
+game_init_data: | 095E
+    .byte 1
+    .word 0x0000                                | (unused)
+    .byte 1, 0, 0, 0
+    .align 4
+game_init_seq_data:                           	| for 68K only
+    .long level_seq_1
+    .align 2
+    
+queue_hs_table_for_display: | 0965
+    move.w    #0x0400,d3          							| display_credits_if_attract_mode
+    jsr       queue_fg_vector_fn  							  
+    move.w    #0x0314,d3          							| print_message_14 (1st high score)
+    moveq     #6-1,d1             							| 1-5 and "RANK SCORE NAME"
+1:  jsr       queue_fg_vector_fn  							
+    addq      #1,d3               							| next msg
+    dbf       d1,1b               							| loop through messages
+    rts
+
+dec_credits_and_display: | 0977
+    lea       _no_of_credits,a0
+    move.b    (a0),d0
+    move.b    #1,d6
+    andi      #0xef,ccr                         | clear X flag
+    sbcd      d6,d0                             | decrement
+    move.b    d0,(a0)                           | save credits
+    move.w    #0x0400,d3                        | display_credits_if_attract_mode
+    jsr       queue_fg_vector_fn  							  
+    rts
+    
+cls_and_set_screen_flip: | 0986
+		jsr				clear_tiles_and_sprites
+		jsr				stop_sound
+		move.b		#1,(_flipscreen)									| default
+		lea				_main_sequencer,a0
+		move.b		(_current_player_E),d0						| player 2?
+		bne				1f																| yes, skip
+		move.b		#1,(a0)														| next sequence = 1
+		rts
+1:	move.b		(_upright),d0											| cabinet type
+		subq.b		#1,d0															| upright?
+		beq				2f																| yes, skip
+		move.b		#0,(_flipscreen)									| flip screen
+2:	move.b		#3,(a0)														| next sequence = 3				
+    rts
+
+init_P1_ingame_data: | 09AB
+    lea       _p1_ingame_data,a0
+    lea       _lives_left,a1
+    moveq     #8-1,d1                           | 8 bytes to copy
+1:  move.b    (a0)+,(a1)+
+    dbf       d1,1b    
+    move.l    (_p1_ingame_seq),(_seq_data)
+    move.l    (_seq_data),a0
+    move.b    (a0),(_level_type)
+		lea				_eight_bit_countdown,a0
+		lea				_main_sequencer,a1
+		tst.b			(_two_players)										| 2 players?
+		beq				2f																| no, skip
+		move.b		#0x78,(a0)												| 8-bit countdown
+		move.b		#2,(a1)														| next sequence (2)
+		rts
+2:	move.b		#1,(a0)														| 8-bit countdown
+		move.b		#5,(a1)														| next sequence (5)
+		rts
+
+display_player_I_and_2P_score: | 09D6
+		move.b		#0,(_palette_bank)
+		move.w		#0x0302,d3												| display_message_0x02 "PLAYER"
+		jsr				queue_fg_vector_fn
+		move.w		#0x0201,d3												| display score or high score
+		jsr				queue_fg_vector_fn
+		move.b		#5,(_main_sequencer)							| next sequence (5)
+display_2UP: | 09EE
+    MOV_VRAM_A #0x02,0x0E0        							| '2'
+    MOV_VRAM_A #0x25,0x0C0        							| 'U'
+    MOV_VRAM_A #0x20,0x0A0        							| 'P'
+    rts                           							
+
+init_P2_ingame_data: | 09FE
+		lea				_p2_ingame_data,a0
+		lea				_lives_left,a1
+		moveq			#8-1,d1														| 8 bytes to copy
+1:	move.b		(a0)+,(a1)+
+		dbf				d1,1b															| init ingame data for P2
+		move.l    (_p2_ingame_seq),(_seq_data)      | 68K only
+    move.l    (_seq_data),a0
+    move.b    (a0),(_level_type)
+		move.b		#0x78,(_eight_bit_countdown)
+		move.b		#4,(_main_sequencer)							| next sequence (4)				
+		rts
+
+display_player_II_2UP_and_2P_score: | 0A1B
+		move.b		#0,(_palette_bank)
+		move.w		#0x0303,d3												| display_message_04 "PLAYER"
+		jsr				queue_fg_vector_fn
+		move.w		#0x0201,d3												| display_score_or_high_score
+		jsr				queue_fg_vector_fn
+		jsr				display_2UP
+		move.b		#5,(_main_sequencer)							| next sequence (5)
+		rts
+		
+display_1UP_and_high_score: | 0A37
+		move.w		#0x0304,d3												| display_message_04 "HIGH SCORE"
+		jsr				queue_fg_vector_fn
+		move.w		#0x0202,d3												| display_score_or_high_score
+		jsr				queue_fg_vector_fn
+		move.w		#0x0200,d3												| display_score_or_high_score
+		jsr				queue_fg_vector_fn
+		move.w		#0x0600,d3												| display_lives_and_level
+		jsr				queue_fg_vector_fn
+		addq.b		#1,(_main_sequencer)							| next sequence (6)
+display_1UP: | 0A53               							
+    MOV_VRAM_A #0x01,0x340        							| '1'
+    MOV_VRAM_A #0x25,0x320        							| 'U'
+    MOV_VRAM_A #0x20,0x300        							| 'P'
+    rts
+
+wait_cls_and_check_seen_intro: | 0A63
+		WAIT_8_BIT_COUNTDOWN
+    bsr       clear_visible_area_and_sprites
+    lea				_eight_bit_countdown,a0
+    move.b		#1,(a0)+
+    add.b			#1,(_main_sequencer)							| next sequence (7)
+    tst.b			(_seen_intro)											| already seen intro?
+    bne				9f																| yes, skip
+    add.b			#1,(_main_sequencer)							| next sequence (8)
+9:	rts
+
+vector_on_intro_sequence: | 0A76
+    moveq     #0,d0
+		move.b		(_intro_sequencer),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp     	(a0)
+   	.align 4
+1:	.long			draw_climb_screen    
+		.long			draw_climbing_kong
+		.long			animate_kong_climbing_ladder
+		.long			wait_and_inc_sequence
+		.long			draw_1st_girder_deformation
+		.long			wait_and_inc_sequence
+		.long			draw_rest_of_deformations
+		.long			growl		
+		rts
+
+draw_climb_screen: | 0A8A
+		move.b		#2,(_palette_bank)
+		lea				draw_data_climb,a1
+		jsr				draw_level_background
+		MOV_VRAM_A #0x10, 0x2A3											| space
+		MOV_VRAM_A #0x10, 0x263											| space
+		MOV_VRAM_A #0xD4,0x1AA											| half ladder, half girder
+		move.b		#0,(_unk_0_62AF)
+		lea				dk_intro_jump_up_data,a0
+		move.l		a0,(_ptr_current_jump_up_data)
+		lea				dk_intro_jump_left_data,a0
+		move.l		a0,(_ptr_current_jump_left_data)
+		move.b		#0x40,(_eight_bit_countdown)
+		add.b			#1,(_intro_sequencer)							| next sequence (1)
+		rts
+
+draw_climbing_kong: | 0ABF
+		WAIT_8_BIT_COUNTDOWN
+		lea				dk_climbing_spr,a0
+		jsr				copy_kong_sprite_data
+		LEA_SPR_Y 2,a0                              | kong (Y)
+		move.b		#48,d2
+		jsr				add_c_sprite_register_x10
+		LEA_SPR_X 2,a0                              | kong (X)
+		move.b		#153,d2
+		jsr				add_c_sprite_register_x10
+		move.b		#0x1f,(_unk_0_638E)
+		LEA_SPR_Y 3,a0                              | kong
+		move.b		#0,(a0)
+		lea				_unk_0_608A,a0
+		move.b		#1,(a0)+
+		move.b		#3,(a0)
+		add.b			#1,(_intro_sequencer)						  | next sequence (2)
+9:	rts
+		
+animate_kong_climbing_ladder: | 0AE8
+		jsr				animate_kong_climbing
+		move.b		(_unk_0_62AF),d0
+		and.b			#0x0f,d0
+		bne				1f
+		jsr				wipe_ladder_as_kong_climbs
+1:	LEA_SPR_X 2,a0                              | kong (X)
+		move.b		(a0),d0
+		cmpi.b		#0x5d,d0												  | finished?
+		bcc				9f															  | yes, return
+		move.b		#0x20,(_eight_bit_countdown)
+		lea				_intro_sequencer,a0
+		add.b			#1,(a0)													  | next sequence (3)
+		move.l		a0,(_ptr_current_sequence)
+9:	rts
+
+draw_1st_girder_deformation: | 0B06
+		btst.b		#0,(_gen_purpose_timer)					| time to animate?
+		bne				9f															| no, return
+		move.l		(_ptr_current_jump_up_data),a0
+		move.b		(a0),d0
+		cmpi.b		#0x7f,d0												| done jumping up?
+		beq				draw_pauline_and_kong						| yes, skip
+		adda			#1,a0														| next entry
+		move.l		a0,(_ptr_current_jump_up_data)	| store ptr
+		move.b		d0,d2														| get current entry
+		LEA_SPR_X 2,a0                            | kong (X)
+		jsr				add_c_sprite_register_x10
+9:	rts
+draw_pauline_and_kong:
+		lea				dk_normal_spr,a0								| normal kong
+		jsr				copy_kong_sprite_data
+		LEA_SPR_A 0,a1                            | Pauline
+		moveq			#8-1,d1													| 8 bytes to copy
+1:	move.b		(a0)+,(a1)+
+		dbf				d1,1b														| draw pauline on top girder
+		LEA_SPR_Y	2,a0                            | kong
+		moveq			#0x50,d2
+		jsr				add_c_sprite_register_x10
+		LEA_SPR_X 2,a0                            | kong
+		move.b		#0xfb,d2
+		jsr				add_c_sprite_register_x10				| move kong
+2:	jsr				wipe_ladder_as_kong_climbs
+		move.b		(_unk_0_638E),d0
+		cmpi.b		#0x0a,d0												| done wiping ladders?
+		bne				2b															| no, loop
+		move.b		#3,(digital_snd_tmr_thump)
+		lea				draw_data_bend_girders_1,a1
+		jsr				draw_level_background
+		moveq			#0x10,d0												| space
+		MOV_VRAM_A d0,0xAA
+		MOV_VRAM_A d0,0x8A
+		move.b		#5,(_next_girder_to_deform)
+		move.b		#0x20,(_eight_bit_countdown)
+		lea				_intro_sequencer,a0
+		add.b			#1,(a0)													| next sequence (5)
+		move.l		a0,(_ptr_current_sequence)
+		rts						
+		
+draw_rest_of_deformations: | 0B68
+		btst.b		#0,(_gen_purpose_timer)					| time to animate?
+		bne				9f															| no, exit
+		move.l		(_ptr_current_jump_left_data),a0
+		move.b		(a0),d0
+		cmpi.b		#0x7f,d0												| done jumping?
+		beq				1f															| yes, skip
+		adda			#1,a0
+		move.l		a0,(_ptr_current_jump_left_data)
+		LEA_SPR_X 2,a0                            | kong (X)
+		move.b		d0,d2
+		jsr				add_c_sprite_register_x10
+		LEA_SPR_Y 2,a0                            | kong (Y)
+		move.b		#0xff,d2
+		jsr				add_c_sprite_register_x10				| move kong
+9:	rts
+1:	lea				dk_intro_jump_left_data,a0
+		move.l		a0,(_ptr_current_jump_left_data)
+		move.b		#3,(digital_snd_tmr_thump)
+		lea				draw_data_bend_girders_2,a1
+		moveq			#0,d0
+		move.b		(_next_girder_to_deform),d0
+		subq.b		#1,d0
+		rol.b			#4,d0
+		adda.w		d0,a1
+		jsr				draw_level_background
+		subq.b		#1,(_next_girder_to_deform)
+		bne				9f
+		move.b		#0xB0,(_eight_bit_countdown)
+		add.b			#1,(_intro_sequencer)						| next sequence (7)		
+9:	rts		
+
+growl: | 0BB3
+		lea				_unk_0_608A,a0
+		move.b		(_eight_bit_countdown),d0
+		cmpi.b		#0x90,d0												| time to animate?
+		bne				1f															| no, skip
+		move.b		#0x0f,(a0)+
+		move.b		#0x03,(a0)
+		LEA_SPR_FY_CODE 6,a0                      | kong
+		addq.b		#1,(a0)
+		bra				2f
+1:	cmpi.b		#0x18,d0
+		bne				2f
+		LEA_SPR_FY_CODE 6,a0                      | kong
+		subq.b		#1,(a0)
+2:	WAIT_8_BIT_COUNTDOWN
+		move.b		#0,(_intro_sequencer)
+		addq.b		#1,(a0)+												| adjust tile
+		addq.b		#1,(a0)													| adjust tile
+9:	rts
+
+draw_how_high_can_you_get: | 0BDA
+		jsr				stop_sound
+		WAIT_8_BIT_COUNTDOWN
+		jsr				clear_visible_area_and_sprites
+		move.w		#0x0600,d3											  | display lives and level
+		and.b			(_mario_alive_flag),d3
+		jsr				queue_fg_vector_fn
+		move.b		#1,(_palette_bank)
+		lea				_unk_0_608A,a0
+		move.b		#2,(a0)+
+		move.b		#3,(a0)
+		move.b		#0,(_height_counter)
+		move.w		#0x2dc,(_disp_loc_for_height_string)
+		move.b		(_height),d0
+		cmpi.b		#6,d0                             | max height?
+		bcs				1f                                | no, skip
+		move.b		#5,(_height)                      | set max
+1:	move.b		(_last_seq_lsb),d1
+		move.b		(_seq_data+3),d0                  | lsb of current sequence ptr
+		cmp.b			d1,d0                             | same as last time?
+		beq				2f                                | yes, skip
+		add.b			#1,(_height)                      | inc height
+2:	move.b		d0,(_last_seq_lsb)                | update lsb
+		move.b		(_height),d1
+		LEA_VRAM_A 0x1BC,a0													| display location for kong
+3:	move.b		#0x50,d2													| 1st tile for kong
+4:	move.b		d2,(a0)														| display
+		addq.b		#1,d2															| next tile
+		move.b		d2,-(a0)													| display
+		addq.b		#1,d2															| next tile
+		move.b		d2,-(a0)													| display
+		addq.b		#1,d2															| display
+		move.b		d2,-(a0)													| display
+		cmpi.b		#0x67,d2													| last tile?
+		beq				5f																| yes, skip (exit)
+		addq.b		#1,d2															| next tile
+		adda			#0x23,a0													| next column
+		bra				4b																| loop another column
+5:	move.b		(_height_counter),d0
+		addq.b		#1,d0
+		move.b		d0,(_height_counter)
+		subq.b		#1,d0                             | 0-based
+		lsl.b			#2,d0                             | x4 for table entry
+		move.l		a0,-(a7)
+		lea				how_high_strings,a0
+		move.w		d1,-(a7)
+		LEA_VRAM_A 0,a4
+		addw		  (_disp_loc_for_height_string),a4
+		adda.w		d0,a0                             | get ptr how how string
+		move.b		(a0)+,d0                          | 1st byte
+		move.b		d0,0x60(a4)                       | display
+		move.b		(a0)+,d0                          | 2nd byte
+		move.b		d0,0x40(a4)                       | display
+		move.b		(a0),d0                           | 3rd byte
+		move.b		d0,0x20(a4)                       | display
+		move.b		#0x8B,-0x20(a4)                   | display 'm'
+		move.w		(a7)+,d1
+		move.w    (_disp_loc_for_height_string),a4
+		suba.w		#4,a4
+		move.w    a4,(_disp_loc_for_height_string)  | next string location
+		move.l		(a7)+,a0
+		adda.w		#0xff5f,a0
+		subq.b    #1,d1
+		bne       3b
+		move.w		#0x0307,d3												| display_message_07 "HOW HIGH CAN YOU GET"
+		jsr				queue_fg_vector_fn
+		lea				_eight_bit_countdown,a0
+		move.b		#0xA0,(a0)+
+		addq.b		#2,(a0)														| next sequence (9)
+		rts
+
+wait_init_and_draw_level: | 0C91
+		WAIT_8_BIT_COUNTDOWN
+init_and_draw_level: | 0C92
+    bsr       clear_visible_area_and_sprites
+    move.b    #0,(_bonus_timer)				          | init bonus timer
+    move.w		#0x501,d3								          | update_bonus_timer
+    jsr				queue_fg_vector_fn                
+		move.b		#2,(_palette_bank)			          | select palette bank #2
+    move.b    (_level_type),d0                  
+    sub.b     #1,d0										          | barrel level?
+    beq       draw_barrel_level				          | yes, go
+    sub.b     #1,d0										          | cement pie level?
+    beq       draw_cement_pie_level		          | yes, go
+    sub.b     #1,d0										          | elevator level?
+    beq       draw_elevator_level			          | yes, go
+    jsr       draw_rivet_level_top_support
+		bset.b		#0,(_palette_bank)			          | select palette bank #3
+    move.b    #0x0b,(_bg_music)                 | rivet level tune
+    lea       rivet_level_tilemap_data,a1
+draw_level_tilemap:
+    jsr       draw_level_background
+    move.b    (_level_type),d0
+    cmpi.b    #4,d0                             | rivet level?
+    bne       1f                                | no, skip
+    jsr       draw_8_rivets
+1:  jmp       init_level_data_tmrs_spr
+
+draw_barrel_level: | 0CD4
+    lea       barrel_level_tilemap_data,a1
+    move.b    #0x08,(_bg_music)                 | barrel level tune
+    bra       draw_level_tilemap
+    
+draw_cement_pie_level: | 0CDF
+    lea       cement_pie_level_tilemap_data,a1
+		move.b		#1,(_palette_bank)
+    move.b    #0x09,(_bg_music)                 | cement pie level tune
+    bra       draw_level_tilemap
+    
+draw_elevator_level: | 0CF2
+    jsr       draw_2_elevator_cables
+    move.b    #0x0a,(_bg_music)                 | elevator level tune
+    lea       elevator_level_tilemap_data,a1
+    bra       draw_level_tilemap
+
+draw_8_rivets: | 0D00
+    moveq     #8-1,d1                           | 8 rivets
+    lea       rivet_loc_tbl,a1
+    LEA_VRAM_A 0,a0
+draw_rivet:    
+    move.b    #0xb8,d0                          | rivet top tile
+    moveq     #2-1,d2                           | 2 tiles/rivet
+    move.w    (a1)+,d3                          | location entry
+1:  move.b    d0,0(a0,d3.w)                     | display tile
+    subq      #1,d0                             | rivet bottom tile
+    add.w     #1,d3                             | next row (fix me)
+    dbf       d2,1b                             | loop 2 tiles
+    dbf       d1,draw_rivet                     | loop 8 rivets    
+9:	rts
+
+    .align 2
+rivet_loc_tbl:  | 0D17
+    VRAM_O 0x2CA
+    VRAM_O 0x2CF
+    VRAM_O 0x2D4
+    VRAM_O 0x2D9
+    VRAM_O 0x12A
+    VRAM_O 0x12F
+    VRAM_O 0x134
+    VRAM_O 0x139
+
+draw_2_elevator_cables:
+    LEA_VRAM_A 0x30d,a0
+    jsr       draw_elevator_cable
+    LEA_VRAM_A 0x20d,a0
+draw_elevator_cable:
+    moveq     #17-1,d1                          | cable height 17 tiles
+1:  move.b    #0xfd,(a0)                        | vertical bar tile left edge
+    ADD_VRAM_A #1,a0                            | next row
+    dbf       d1,1b                             | loop cable height
+    ADD_VRAM_A #0x0f,a0                         | next column
+    moveq     #17-1,d1                          | cable height 17 tiles
+2:  move.b    #0xfc,(a0)                        | vertical bar tile right edge
+    ADD_VRAM_A #1,a0                            | next row
+    dbf       d1,2b                             | loop cable height
+    rts
+    
+draw_rivet_level_top_support: | 0D43
+    LEA_VRAM_A 0x287,a0
+    jsr       draw_support_bars
+    LEA_VRAM_A 0x147,a0
+draw_support_bars:
+    moveq     #4-1,d1                           | 4 rows to draw
+1:  move.b    #0xfd,(a0)                        | vertical bar tile left edge
+    ADD_VRAM_A #1,a0                            | next row
+    dbf       d1,1b
+    ADD_VRAM_A #0x1c,a0                         | next column
+    moveq     #4-1,d1                           | 4 rows to draw
+2:  move.b    #0xfc,(a0)                        | vertical bar tile right edge
+    ADD_VRAM_A #1,a0                            | next row
+    dbf       d1,2b    
+    rts
+
+init_level_data_tmrs_spr_cont:
+		jsr				initialise_level_data_and_timers
+		jsr				extract_ladder_data
+		move.b		#0x40,(_eight_bit_countdown)
+		add.b			#1,(_main_sequencer)							| next sequence (2)
+		lea				dk_normal_spr,a0
+		jsr				copy_kong_sprite_data
+		LEA_SPR_A 0,a1															| sprite 0
+		moveq			#8-1,d7														| init Kong sprites
+1:	move.b		(a0)+,(a1)+
+		dbf				d7,1b															| init Pauline sprites
+		move.b		(_level_type),d0
+		cmpi.b		#4,d0															| rivets?
+		beq				adj_pauline_kong_for_rivets       | yes, skip
+		lsr.b			#2,d0															| level 2/3?
+		bcs				9f																| yes, return
+		LEA_SPR_X 2,a0															| Kong sprite
+		move.b		#0xfc,d2													| -4
+		jsr				add_c_sprite_register_x10					| shift by 4 pixels
+9:	rts
+
+adj_pauline_kong_for_rivets:
+    LEA_SPR_Y 2,a0                              | Kong sprite
+    move.b    #68,d2
+		jsr				add_c_sprite_register_x10					| add 68 to Y
+    moveq     #4,d4                             | address inc
+    moveq     #2-1,d1                           | 2 sprites
+    moveq     #0x10,d2                          | add 0x10 to Y
+    LEA_SPR_Y 0,a0                              | Pauline
+    jsr       add_c_sprite_register_xB
+    moveq     #2-1,d1                           | 2 sprites
+    move.b    #0xF8,d2                          | subtract 8 from X
+    LEA_SPR_X 0,a0                              | Pauline
+    jsr       add_c_sprite_register_xB
+    rts
+		
+draw_level_background: | 0DA7
+    LEA_VRAM_A  0,a2
+    move.b    (a1),d0
+    move.b    d0,(_segment_type)
+    cmpi.b    #0xAA,d0
+    bne       1f
+    rts
+1:  adda      #1,a1                             | ptr Y1
+    move.b    (a1)+,d5                          | d5=Y1
+    move.b    d5,d1                             | d1=Y1
+    move.b    (a1)+,d6                          | d6=X1
+    move.b    d6,d2                             | d2=X1
+    jsr       get_tilemap_addr_from_coords        
+    move.w    d5,(_segment_addr_1)              | only an offset!
+    move.b		d1,d0
+    and.b     #7,d0                             | tile1 only
+    move.b    d0,(_tile_byte_1)                 
+    move.b		d2,d0
+    and.b     #7,d0                             | tile2 only
+    move.b    d0,(_start_tile_index)                 
+    move.b    (a1)+,d0                          | Y2
+    move.b    d0,d5                             | d5=Y2
+    sub.b     d1,d0                             | calc dY
+    bcc       2f                                
+    neg.b     d0                                
+2:  move.b    d0,(_dY)                          
+    move.b    (a1),d0                           | X2
+    move.b    d0,d6                             | d6=X2
+    sub.b     d2,d0                             | calc dX
+    move.b    d0,(_dX)                          
+    move.b    (a1),d0                           | X2 (again)
+    and.b     #7,d0                             | tile3 only
+    move.b    d0,(_end_tile_index)
+    jsr       get_tilemap_addr_from_coords
+    move.w    d5,(_segment_addr_2)
+    move.b    (_segment_type),d0
+    cmpi.b    #2,d0
+    bge       draw_girder_segment
+
+draw_ladder_segment:    
+    sub.b     #0x10,(_dX)												| calc starting tile adjustment
+    move.b    (_start_tile_index),d0
+    add.b     d0,(_dX)													| adjust
+    add.b     #0xf0,d0                          | girder top, no ladder above
+    move.w    (_segment_addr_1),d3
+    move.b    d0,0(a2,d3.w)											| display tile
+    addq      #1,d3															| next row
+    sub.b     #0x30,d0													| matching ladder tile
+    move.b    d0,0(a2,d3.w)											| display it
+    move.b    (_segment_type),d0
+    cmpi.b    #1,d0															| broken ladder?
+    bne       1f																| no, skip
+    clr.b     (_dX)															| flag end-of-ladder
+next_tile_in_ladder_segment:
+1:  sub.b     #8,(_dX)													| finished ladder?
+    bcs       2f																| yes, skip
+    addq      #1,d3															| next row
+    move.b    #0xC0,0(a2,d3.w)									| full ladder tile
+    bra       1b																| loop through ladder
+2:  move.b    (_end_tile_index),d0
+    add.b     #0xD0,d0													| girder top, bottom of ladder
+    move.w    (_segment_addr_2),d3
+    move.b    d0,0(a2,d3.w)											| display tile
+    move.b		(_segment_type),d0
+    cmpi.b		#1,d0															| broken ladder?
+    bne				3f																| no, skip
+    move.b		#0xC0,-1(a2,d3.w)									| full ladder tile, previous row
+3:	move.b		(_end_tile_index),d0
+		tst.b			d0																| 2nd tile below req'd?
+		beq				4f																| no, skip
+		add.b			#0xE0,d0													| bottom of girder, no ladder below
+		addq			#1,d3															| next row
+		move.b		d0,0(a2,d3.w)											| display tile
+4:	adda			#1,a1															| next entry
+    bra				draw_level_background							| loop
+
+draw_girder_segment: | 0E4F
+    cmpi.b    #2,(_segment_type)                | girder?
+    bne       draw_conveyor_segment             | no, skip
+    move.b    (_start_tile_index),d0
+    add.b     #0xf0,d0                          | girder top (no ladder above)
+    move.b    d0,(_current_tile_in_segment)     | init current tile
+    move.w    (_segment_addr_1),d3              | 'from' location
+1:  move.b    (_current_tile_in_segment),d0
+    move.b    d0,0(a2,d3.w)                     | display it
+    addq      #1,d3                             | next row
+    move.b    d3,d1                             
+    and.b     #0x1f,d1                          | bottom of screen?
+    beq       2f                                | yes, skip
+    cmpi.b    #0xf0,d0                          | full girder?
+    beq       2f                                | yes, skip
+    sub.b     #0x10,d0                          | matching bottom piece of girder
+    move.b    d0,0(a2,d3.w)                     | display it
+* 0E78                                          
+2:  add.w     #0x001f,d3                        | next column
+    move.b    (_dY),d1                          
+    sub.b     #8,d1                             | finished? (ignore [2:0])
+    bcs       next_segment                      | yes, exit
+    move.b    d1,(_dY)                          
+    move.b    (_dX),d1                          
+    cmpi.b    #0,d1                             | angled?
+    beq       1b                                | no, loop
+    move.b		(_current_tile_in_segment),d0
+    move.b    d0,(a2,d3.w)                      | display tile
+    addq      #1,d3                             | next row
+    move.b    d3,d1                             
+    and.b     #0x1f,d1                          | bottom of screen?
+    beq       3f                                | yes, skip
+    move.b    (_current_tile_in_segment),d0
+    sub.b     #0x10,d0                          | matching bottom piece of girder
+    move.b    d0,(a2,d3.w)                      | display tile
+* 0EA0                                          
+3:  add.w     #0x001f,d3                        | next column
+    move.b    (_dY),d1                          
+    sub.b     #8,d1                             | finished? (ignore [2:0])
+    bcs       next_segment                      | yes, skip
+    move.b    d1,(_dY)
+    btst.b    #7,(_dX)													| sloping up?
+    bne       6f																| no, skip
+    move.b    (_current_tile_in_segment),d0
+    addq      #1,d0															| next tile
+    move.b    d0,(_current_tile_in_segment)
+    cmpi.b    #0xf8,d0													| time to wrap tile?
+    bne       4f  															| no, skip
+    addq      #1,d3															| next row
+    move.b    #0xf0,(_current_tile_in_segment)	| init current tile
+4:  move.b    d3,d1
+    and.b     #0x1f,d1													| bottom of screen?
+    bne       1b																| no, loop
+next_segment:    
+    adda      #1,a1                             | next entry
+    bra       draw_level_background
+girder_sloping_down:
+6:  move.b    (_current_tile_in_segment),d0
+    sub.b     #1,d0															| next tile in sequence is -1
+    move.b    d0,(_current_tile_in_segment)
+    cmpi.b    #0xf0,d0													| time to wrap tile?
+    bge       7f																| no, skip
+    sub.w     #1,d3															| next row
+    move.b    #0xf7,d0													| init current tile
+    move.b    d0,(_current_tile_in_segment)
+7:  bra       1b																| loop
+
+draw_conveyor_segment: | 0EE8
+    cmpi.b    #3,(_segment_type)                | conveyor?
+    bne       draw_other_segments
+    move.w    (_segment_addr_1),d3
+    move.b    #0xb3,(a2,d3.w)                   | display empty tile
+    add.w     #0x20,d3                          | next column
+    move.b    (_dY),d0
+    subi.b    #0x10,d0                          | 2nd last tile?
+next_tile_on_conveyor_segment:
+    bcs       end_of_conveyor_segment           | yes, skip
+    move.b    d0,(_dY)
+    move.b    #0xb1,(a2,d3.w)                   | display conveyor tile
+    add.w     #0x20,d3                          | next column
+    move.b    (_dY),d0
+    subq.b    #8,d0
+    bra       next_tile_on_conveyor_segment
+end_of_conveyor_segment:
+    move.b    #0xb2,(a2,d3.w)
+9:  adda      #1,a1
+    bra       draw_level_background
+
+draw_other_segments: | 0F1B
+    move.b    (_segment_type),d0
+    cmpi.b    #7,d0                             | valid?
+    bge       next_segment                      | no, continue
+    cmpi.b    #4,d0                             | blank?
+    beq       draw_blank_segment                | yes, skip
+    cmpi.b    #5,d0                             | rivet level girder?
+    beq       draw_rivet_level_girder           | yes, skip
+    move.b    #0xfe,d0                          | oil barrel stand (conveyor level)
+1:  move.b    d0,(_current_tile_in_segment)
+    move.w    (_segment_addr_1),d3
+next_other_segment_tile:
+    move.b    (_current_tile_in_segment),d0
+    move.b    d0,(a2,d3.w)                      | display tile
+    add.w     #0x20,d3                          | next column
+    subq.b    #8,(_dY)                          | done?
+    bcc       next_other_segment_tile           | no, loop
+    adda      #1,a1                             | next entry
+    bra       draw_level_background    
+draw_blank_segment:
+    move.b    #0xe0,d0                          | blank tile
+    bra       1b
+draw_rivet_level_girder:
+    move.b    #0xb0,d0                          | rivet level girder
+    bra       1b
+
+initialise_level_data_and_timers: | 0F56
+		moveq			#39-1,d1													| 39 bytes to clear
+		lea				_mario_alive_flag, a0							| player dynamic data
+1:	move.b		#0,(a0)+
+		dbf				d1,1b															| clear it
+		moveq			#0,d1
+		move.w		#17*128-1,d1											| 0x880 bytes to clear
+		lea				_unk_0_6280,a0										| in-game data
+2:	move.b		#0,(a0)+
+		dbf				d1,2b															| clear it
+		lea				level_init_data,a0
+		lea				_unk_0_6280,a1
+		moveq			#64-1,d1													| 64 bytes to copy
+3:	move.b		(a0)+,(a1)+
+		dbf				d1,3b		
+		move.b		(_level),d0
+		and.w			#0x00ff,d0
+		moveq			#10,d1
+		mulu			d1,d0															| level*10
+		add.b			#40,d0														| level*10+40
+		cmpi.b		#81,d0														| max?
+		bcs				4f																| no, skip
+		moveq			#0x50,d0													| 50(00) (BCD)
+4:	lea				_bonus_timer_init_value,a0				| timers
+		moveq			#3-1,d1														| 3 to initialise
+5:	move.b		d0,(a0)+													| init timer
+		dbf				d1,5b															| init 3 timers
+		lsl.b			#1,d0															| level*20+80
+		move.b		#220,d1
+		sub.b			d1,d0															| 140-level*20
+		cmpi.b		#40,d0														| min?
+		bcc				6f																| no, skip
+		moveq			#40,d0														| set to min
+6:	move.b		d0,(a0)+													| init timer #4
+		move.b		d0,(a0)														| init timer #5
+		lea				_unk_0_6209,a0
+		move.b		#0x04,(a0)+
+		move.b		#0x08,(a0)
+		move.b		(_level_type),d0
+		move.b		d0,d2															| save a copy
+		btst.b		#2,d0															| rivets level?
+		bne				7f																| yes, skip
+		LEA_SPR_A 64,a0															| blanks covering ladders
+		moveq			#0x4F,d0													| Y coord
+		moveq			#3-1,d1														| 3 sprites to draw
+erase_top_of_kong_ladder:
+		move.b		d0,(a0)+													| sprite Y
+		move.b		#0x3a,(a0)+												| tile (blank)
+		move.b		#0x0f,(a0)+												| colour=15
+		move.b		#0x18,(a0)+												| sprite X
+		add.b			#0x10,d0													| next Y
+		dbf				d1,erase_top_of_kong_ladder
+7:	move.b		d2,d0															| _level_type
+		and.w			#0x00ff,d0
+		lsl.w			#2,d0
+		movea.l		8f(pc,d0.w),a0
+		jmp				(a0)
+		.align 4
+8: 	.long 0
+		.long init_l1_girder
+		.long init_l2_cement
+		.long init_l3_elevator
+		.long init_l4_rivets
+
+init_l1_girder: | 0FD7
+		lea				top_barrel_spr,a0
+		LEA_SPR_A 42,a1															| barrel sprites
+		moveq			#0x10-1,d7												| 4 sprites to copy
+1:	move.b		(a0)+,(a1)+
+		dbf				d7,1b		
+    lea       fireball_spr,a0
+    lea       _unk_0_6400+7,a1
+    moveq     #0x1c,d2                          | sprite offset 0x20
+    moveq     #5-1,d1                           | 5 sprites to init
+    jsr       init_data_for_B_sprites
+		lea				girders_fireball_spr,a0
+		jsr				init_fireball_sprite
+		lea				girder_oil_barrel_spr,a0
+		LEA_SPR_A 63,a1															| oil barrel
+		moveq			#0x04-1,d7												| 1 sprite to copy
+1:	move.b		(a0)+,(a1)+
+		dbf				d7,1b
+		lea				girder_hammer_locs,a0
+		jsr				init_hammer_sprites
+		lea       barrel_init_data,a0
+		lea       _unk_0_6700+7,a1
+		moveq     #8-1,d1                           | 8 sprites to init
+		moveq     #0x1c,d2                          | sprite offset 0x20
+		jsr       init_data_for_B_sprites
+		lea       _unk_0_6800+7,a1
+		moveq     #2-1,d1                           | 2 more barrels?
+		jsr       init_data_for_B_sprites
+		rts
+
+barrel_init_data: | 101B
+    .byte     0, 0, 2, 2
+    .align 2
+    
+init_l2_cement: | 101F
+    lea       fireball_spr,a0
+    lea       _unk_0_6400+7,a1
+    moveq     #5,d1
+    moveq     #0x1c,d2													| sprite offset 0x20
+    jsr       init_data_for_B_sprites
+*   jsr       init_spring_sprites               | REALLY? bug???
+    lea       cement_pie_spr,a0
+    lea       _unk_0_65a0+7,a1
+    moveq     #6-1,d1                           | 6 sprites
+    moveq     #0x0c,d2                          | sprite offset 0x10
+    jsr       init_data_for_B_sprites
+    lea       _unk_0_65a0,a4
+    LEA_SPR_A 46,a0                             | cement pie sprites
+    move.w    #0x10,d3
+    moveq     #6-1,d1                           | 6 sprites
+    jsr       set_B_sprites_data
+    lea       cement_fireball_spr,a0
+    jsr       init_fireball_sprite
+    lea       cement_oil_barrel_spr,a0
+    LEA_SPR_A 63,a1                             | oil barrel sprite
+    moveq     #4-1,d7
+1:  move.b    (a0)+,(a1)+
+    dbf       d7,1b                             | init oil barrel
+    lea       cement_ladder_spr,a0
+    LEA_SPR_A 17,a1                             | ladder sprites
+    moveq     #8-1,d7                           | 8 bytes = 2 sprites
+2:  move.b    (a0)+,(a1)+
+    dbf       d7,2b
+    lea       cement_conveyor_spr,a0
+    LEA_SPR_A 57,a1                             | conveyors
+    moveq     #0x18-1,d7                        | 0x18 bytes = 6 sprites
+3:  move.b    (a0)+,(a1)+
+    dbf       d7,3b
+    lea       cement_hammer_locs,a0
+    jsr       init_hammer_sprites
+    lea       cement_obj_spr,a0                 | hat, purse & umbrella
+    LEA_SPR_A 67,a1                             | hat, purse, umbrella sprites
+    moveq     #0x0c-1,d7                        | 0x0c bytes = 3 sprites
+4:  move.b    (a0)+,(a1)+
+    dbf       d7,4b    
+    move.b    #1,(_unk_0_62B9)
+		rts
+
+init_l3_elevator: | 1087
+		lea				fireball_spr,a0
+		lea				_unk_0_6400+7,a1
+		moveq			#5-1,d1														| 5 sprites
+		moveq			#0x1c,d2													| offset 0x20
+		jsr				init_data_for_B_sprites
+		jsr				init_spring_sprites
+		lea				_unk_0_6600,a0
+		moveq			#6-1,d1
+1:	move.b		#1,(a0)
+		adda.w		#0x10,a0
+		dbf				d1,1b
+		moveq			#2-1,d2
+2:	moveq			#3-1,d1
+*** this looks like a bug to me!!!!
+		lea				_unk_0_6600+0x0d,a0
+3:	move.b		#8,(a0)
+		add.w			#0x10,a0
+		dbf				d1,3b		
+		dbf				d2,2b
+		lea				elevator_sprite_locs,a0
+		lea				_unk_0_6600+3,a1
+		moveq			#6-1,d1														| 6 elevators
+		moveq			#0x0e,d2													| offset 0x10
+		jsr				init_objects_locations
+		lea				elevator_spr,a0
+		lea				_unk_0_6600+7,a1
+		moveq			#6-1,d1														| 6 sprites
+		moveq			#0x0c,d2													| offset 0x10
+		jsr				init_data_for_B_sprites
+		lea				_unk_0_6600,a4
+		LEA_SPR_A 22,a0															| elevator sprites
+		moveq			#6-1,d1														| 6 sprites
+		move.w		#0x10,d3													| offset 0x10
+		jsr				set_B_sprites_data
+		lea				elevator_obj_spr,a0								| hat, purse & umbrella
+		LEA_SPR_A 67,a1															| hat, purse, umbrella sprites
+		moveq			#0x0c-1,d7												| 0x0c bytes = 3 sprites
+4:  move.b    (a0)+,(a1)+
+    dbf       d7,4b    
+    lea				_unk_0_6400,a4
+    move.b		#1,0x00(a4)
+    move.b		#0x58,0x03(a4)
+    move.b		#0x58,0x0e(a4)
+    move.b		#0x80,0x05(a4)
+    move.b		#0x80,0x0f(a4)
+    move.b		#1,0x20(a4)
+    move.b		#0xeb,0x23(a4)
+    move.b		#0xeb,0x2e(a4)
+    move.b		#0x60,0x25(a4)
+    move.b		#0x60,0x0f(a4)
+    LEA_SPR_A 28,a1															| elevator cap sprites
+    lea				elevator_cap_spr,a0
+    moveq 		#0x10-1,d7
+5:	move.b		(a0)+,(a1)+
+		dbf				d7,5b    
+		rts
+
+* elevator caps are DK sprites 28-31
+elevator_cap_spr: | 1121
+		.byte 0x37, 0x45, 0x0F, 0x60
+		.byte 0x37, 0x45, 0x8F, 0xF7
+		.byte 0x77, 0x45, 0x0F, 0x60
+		.byte 0x77, 0x45, 0x8F, 0xF7
+    .align 2
+
+init_l4_rivets: | 1131
+    lea       rivet_fireball_spr,a0
+    lea       _unk_0_6400+7,a1
+    moveq     #5-1,d1                           | 5 sprites
+    moveq     #0x1c,d2                          | offset 0x20
+    jsr       init_data_for_B_sprites
+    lea       rivet_hammer_locs,a0
+    jsr       init_hammer_sprites
+    lea       rivet_obj_spr,a0
+    LEA_SPR_A 67,a1                             | hat, purse, umbrella sprites
+    moveq     #0x0c-1,d7                        | 12 bytes = 3 sprites
+1:  move.b    (a0)+,(a1)+
+    dbf       d7,1b    
+    lea       rivet_unk_obj_locs,a0
+    lea       _unk_0_64A0+3,a1
+    moveq     #2-1,d1                           | 2 sprites
+    moveq     #0x1e,d2                          | offset 0x20
+    jsr       init_objects_locations
+    lea       rivet_unk_sprites,a0
+    lea       _unk_0_64A0+7,a1
+    moveq     #2-1,d1                           | 2 sprites
+    moveq     #0x1c,d2                          | offset 0x20
+    jsr       init_data_for_B_sprites
+    lea       _unk_0_64A0,a4
+    move.b    #1,0(a4)
+    move.b    #1,0x20(a4)
+    LEA_SPR_A 20,a0                             | kong's legs
+    moveq     #2-1,d1                           | 2 sprites
+    move.w    #0x20,d3                          | offset 0x20
+    jsr       set_B_sprites_data
+		rts
+
+* these transparent sprites cover kong's legs
+rivet_unk_sprites: | 117E
+    .byte 0x3F, 0xC, 8, 8
+rivet_unk_obj_locs: | 1182
+    .byte 0x73, 0x50
+    .byte 0x8D, 0x50
+    .align 2
+    
+init_spring_sprites: | 1186
+		lea				elevator_bouncing_sprites,a0
+		lea				_unk_0_6500+7,a1
+		moveq			#0x0a-1,d1												| 10 sprites
+		moveq			#0x0c,d2													| offset 0x10
+		jsr				init_data_for_B_sprites
+		lea				_unk_0_6500,a4
+		LEA_SPR_A 32,a0															| sprint sprites
+		moveq			#0x0a-1,d1												| 10 sprites
+		moveq			#0x10,d3													| offset 0x10
+		jsr				set_B_sprites_data
+		rts
+		
+elevator_bouncing_sprites: | 11A2
+		.byte	0x3B, 0, 2, 2
+    .align 2
+
+init_hammer_sprites: | 11A6
+		lea 			_unk_0_6680+3,a1
+		moveq			#2-1,d1														| 2 objects
+		moveq			#0x0e,d2                          | offset 0x10
+		jsr				init_objects_locations
+		lea				hammer_pickup_spr,a0
+		lea				_unk_0_6680+7,a1
+		moveq			#2-1,d1														| 2 sprites
+		moveq			#0x0c,d2													| sprite offset 0x10
+		jsr				init_data_for_B_sprites
+		lea				_unk_0_6680,a4		
+		move.b		#1,0(a4)
+		move.b		#1,0x10(a4)
+		LEA_SPR_A 70,a0															| hammer sprites
+		moveq			#2-1,d1														| 2 sprites to copy
+		move.w		#0x10,d3													| offset increment
+		jsr				set_B_sprites_data
+		rts
+
+set_B_sprites_data: || 11D3
+		move.b		3(a4),d0													| YPOS
+		move.b		d0,(a0)+													| sprite Y
+		move.b		7(a4),d0													| flipy,tile
+		move.b		d0,(a0)+													| sprite flipy,tile
+		move.b		8(a4),d0													| flipx,colour
+		move.b		d0,(a0)+													| sprite flipx,colour
+		move.b		5(a4),d0													| XPOS
+		move.b		d0,(a0)+													| sprite X
+		adda.w		d3,a4															| next source
+		dbf				d1,set_B_sprites_data							| loop through all sprites
+		rts
+				
+init_objects_locations: | 11EC
+		move.b		(a0)+,(a1)
+		adda			#2,a1
+		move.b		(a0)+,(a1)
+		adda.w		d2,a1
+		dbf				d1,init_objects_locations
+		rts
+				
+* call to init 1st fireball on barrel, cement pie levels (have oil barrels)
+init_fireball_sprite: | 11FA
+		lea				_unk_0_66A0,a4
+		LEA_SPR_A 74,a1																| 1st fireball sprite
+		move.b		#1,0(a4)
+		move.b		(a0)+,d0														| YPOS
+		move.b		d0,3(a4)
+		move.b		d0,(a1)+														| sprite YPOS
+		move.b		(a0)+,d0														| flipy,tile
+		move.b		d0,7(a4)
+		move.b		d0,(a1)+														| sprite flipy,tile
+		move.b		(a0)+,d0														| flipx,colour
+		move.b		d0,8(a4)
+		move.b		d0,(a1)+														| sprite flipx,colour
+		move.b		(a0)+,d0														| XPOS
+		move.b		d0,5(a4)
+		move.b		d0,(a1)															| sprite XPOS
+		move.b		(a0)+,d0
+		move.b		d0,9(a4)
+		move.b		(a0),d0
+		move.b		d0,10(a4)
+		rts
+				    
+init_data_for_B_sprites: | 122A
+		move.l		a0,-(a7)													| save source
+		moveq			#4-1,d7														| 4 bytes/sprite
+1:	move.b		(a0)+,(a1)+
+		dbf				d7,1b															| loop through 4 bytes
+		move.l		(a7)+,a0													| restore source
+		adda.w		d2,a1															| next destination
+		dbf				d1,init_data_for_B_sprites
+		rts
+
+init_mario: | 123C
+		WAIT_8_BIT_COUNTDOWN		
+		move.b		(_level_type),d0
+		move.w		#0xe016,d1													| mario coords (elevator level)
+		cmpi.b		#3,d0																| elevator level?
+		beq				1f																	| yes, skip
+		move.w		#0xf03f,d1													| mario coords (other levels)
+1:	lea				_mario_alive_flag,a4
+		LEA_SPR_A 19,a0
+		move.b		#1,0(a4)														| flag mario is alive
+		move.b		d1,3(a4)														| shadow mario X
+		move.b		d1,(a0)+														| mario X = sprite Y
+		move.b		#0x80,7(a4)													| mario flipy,tile=0
+		move.b		#0x80,(a0)+													| sprite flipy,tile
+		move.b		#0x02,8(a4)													| no flipx,colour=2
+		move.b		#0x02,(a0)+													| sprite flipx,colour
+		lsr.w			#8,d1
+		move.b		d1,5(a4)														| shadow mario Y
+		move.b		d1,(a0)															| mario Y = sprite X
+		move.b		#1,15(a4)														| ???
+		add.b			#1,(_main_sequencer)								| next sequence (3)
+		move.w		#0x601,d3														| display lives and level
+		jsr				queue_fg_vector_fn
+9:	rts
+
+died_in_gameplay: | 127C
+		jsr				check_and_handle_bonus
+    moveq     #0,d0
+		move.b		(_mario_death_state),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp     	(a0)
+   	.align 4
+1:	.long			delay_before_spin
+		.long			mario_death_spin
+		.long			dead_mario_lying_down
+		
+delay_before_spin: | 128B
+		WAIT_8_BIT_COUNTDOWN
+		LEA_SPR_FY_CODE 19,a0
+		move.b		(a0),d6
+		move.b		#0xf0,d0													| tile<<1
+		rol.b			#1,d6															| flipy bit to C
+		ror.b			#1,d0															| copy flipy bit
+		move.b		d0,(a0)														| display	
+		add.b			#1,(_mario_death_state)
+		move.b		#0x0d,(_death_spin_counter)
+		move.b		#8,(_eight_bit_countdown)
+		jsr				hide_object_sprites
+*		move.b		#3,(_music_something)
+9:	rts
+
+mario_death_spin: | 12AC
+    WAIT_8_BIT_COUNTDOWN
+    move.b    #8,(_eight_bit_countdown)
+    sub.b     #1,(_death_spin_counter)
+    beq       finish_death_spin
+    LEA_SPR_FY_CODE 19,a0                       | mario sprite
+    move.b    (a0),d0
+    roxr.b    #1,d0                             | lsb to C
+    move.b    #2,d0                             | sprite #1 << 2
+    roxr.b    #1,d0                             | lsb to flipy
+    move.b    d0,d1
+    eor.b     d0,(a0)+                          | invert flipy
+    and.b     #0x80,d1                          | flipy only
+    eor.b     d1,(a0)                           | invert flipx based on flipy
+9:	rts
+
+finish_death_spin:
+    LEA_SPR_FY_CODE 19,a0                       | mario sprite
+    move.b    #0xf4,d0                          | mario dead sprite <<1
+    move.b    (a0),d6
+    rol.b     #1,d6                             | flipy to C
+    ror.b     #1,d0                             | restore flipy
+    move.b    d0,(a0)                           | update sprite
+    add.b     #1,(_mario_death_state)           | next state
+    move.b    #0x80,(_eight_bit_countdown)
+    rts
+    
+dead_mario_lying_down: | 12DE
+    WAIT_8_BIT_COUNTDOWN
+    jsr       hide_mario_and_elevators
+    tst.b     (_current_player_E)               | player 1?
+    beq       1f                                | yes, skip
+    add.b     #1,(_main_sequencer)
+1:  add.b     #1,(_main_sequencer)
+    move.b    #1,(_eight_bit_countdown)    
+		rts
+
+save_P1_ingame_data: | 12F2
+		jsr				stop_sound
+		moveb			#0,(_seen_intro)
+		lea				_lives_left,a0
+		subq.b		#1,(a0)
+		move.b		(a0),d0
+		lea				_p1_ingame_data,a1
+		moveq			#8-1,d1														| 8 bytes to copy
+1:	move.b		(a0)+,(a1)+
+		dbf				d1,1b
+		move.l    (_seq_data),(_p1_ingame_seq)
+		tst.b			d0
+		bne				3f
+		moveq			#1,d0
+		lea				_p1_score,a0
+*		jsr				sub_0_13CA
+		LEA_VRAM_A 0x2D4,a0
+		tst.b			(_two_players)
+		beq				2f
+		move.w		#0x0302,d3												| display_message_2 "PLAYER (I)"
+		jsr				queue_fg_vector_fn
+		suba			#1,a0
+2:	jsr				clear_14x5_HL										
+		move.w		#0x0300,d3												| display_message_0 "GAME OVER"
+		jsr				queue_fg_vector_fn
+		lea				(_eight_bit_countdown),a0
+		move.b		#0xC0,(a0)+
+		move.b		#0x10,(a0)												| main_sequencer (16)
+		rts
+3:	move.b		#8,d2															| next sequence (8)
+		tst.b			(_two_players)
+		beq				4f
+		move.b		#0x17,d2													| next sequence (23)
+4:	move.b		d2,(_main_sequencer)		
+		rts
+		
+save_P2_ingame_data: | 1344
+		jsr				stop_sound
+		moveb			#0,(_seen_intro)
+		lea				_lives_left,a0
+		subq.b		#1,(a0)
+		move.b		(a0),d0
+		lea				_p2_ingame_data,a1
+		moveq			#8-1,d1														| 8 bytes to copy
+1:	move.b		(a0)+,(a1)+
+		dbf				d1,1b
+		move.l    (_seq_data),(_p2_ingame_seq)
+		tst.b			d0																| mario alive?
+		bne				2f																| yes, skip
+		moveq			#3,d0
+		lea				_p2_score,a0
+*		jsr				sub_0_13CA												| flag P2 score
+		move.w		#0x0303,d3												| display_message_3 "PLAYER (II)"
+		jsr				queue_fg_vector_fn
+		move.w		#0x0300,d3												| display_message_0 "GAME OVER"
+		jsr				queue_fg_vector_fn
+		LEA_VRAM_A 0x2D3,a0
+		jsr				clear_14x5_HL										
+		lea				(_eight_bit_countdown),a0
+		move.b		#0xC0,(a0)+
+		move.b		#0x11,(a0)												| main_sequencer (17)
+		rts
+2:	move.b		#0x17,d2													| next sequence (23)
+		tst.b			(_p1_ingame_data)									| mario alive P1?
+		bne				3f
+		move.b		#8,d2															| next sequence (8)
+3:	move.b		d2,(_main_sequencer)		
+		rts
+
+P1_game_over: | 138F
+		WAIT_8_BIT_COUNTDOWN
+		move.b		#0x17,d2													| set to switch players
+		move.b		(_p2_ingame_data),d0
+check_other_player_still_alive:		
+		add.b			#1,(a0)														| adjust countdown
+		tst.b			d0																| mario alive P2?
+		bne				1f																| yes, skip
+		move.b		#0x14,d2													| next sequence (20)
+1:	move.b		d2,(_main_sequencer)
+		rts
+
+P2_game_over: | 13A1
+		WAIT_8_BIT_COUNTDOWN
+		move.b		#0x17,d2													| set to switch players
+		move.b		(_p1_ingame_data),d0
+		bra				check_other_player_still_alive
+
+set_flip_and_current_P2: | 13AA
+		move.b		(_upright),d0
+		move.b		d0,(_flipscreen)
+		move.b		#0,(_main_sequencer)
+		move.b		#1,(_current_player_D)
+		move.b		#1,(_current_player_E)		
+		rts
+
+set_flip_and_current_P1: | 13BB
+		move.b		#0,(_current_player_D)
+		move.b		#0,(_current_player_E)		
+		move.b		#0,(_main_sequencer)
+		move.b		#1,(_flipscreen)
+		rts
+
+draw_name_registered: | 141E
+		jsr				display_credits
+		WAIT_8_BIT_COUNTDOWN
+		jsr				clear_visible_area_and_sprites
+		moveq			#0,d0
+		move.b		d0,(_current_player_D)
+		move.b		d0,(_current_player_E)
+		lea				_high_score_tbl_ram+0x1c,a0
+		move.w		#0x22,d3
+		moveq			#5-1,d1														| 5 scores to check
+		moveq			#1,d0															| flag for P1 high score
+1:	cmp.b			(a0),d0														| high score?
+		beq				display_name_registration_msgs		| yes, skip
+		adda.w		d3,a0															| next score
+		dbf				d1,1b
+		lea				_high_score_tbl_ram+0x1c,a0
+		moveq			#5-1,d1														| 5 scores to check
+		moveq			#3,d0															| flag for P2 high score
+2:	cmp.b			(a0),d0														| high score?
+		beq				registration_set_P2								| yes, skip
+		add.w			d3,a0															| next score
+		dbf				d1,2b
+    bra       exit_name_entry										| no high scores, exit
+registration_set_P2:
+		moveq			#1,d0
+		move.b		d0,(_current_player_E)						
+		move.b		d0,(_current_player_D)						
+		moveq			#0,d0
+display_name_registration_msgs:		
+		or.b			(_upright),d0
+		move.b		d0,(_flipscreen)
+		move.b		#0,(_eight_bit_countdown)
+		add.b			#1,(_main_sequencer)
+		move.w		#0x030D,d3												| display_message_0D "NAME REGISTRATION"
+		moveq			#0x0c-1,d1
+3:	jsr				queue_fg_vector_fn
+		addw			#1,d3															| next message
+		dbf				d1,3b
+		rts
+
+exit_name_entry: | 1475
+    moveq     #1,d0
+    move.b    d0,(_flipscreen)
+    move.b    d0,(_nmi_sequencer)
+    move.b    d0,(_attract_mode_flag)
+    move.b    #0,(_main_sequencer)
+    rts
+    
+do_initials_entry: | 1486
+		jsr				display_credits
+		move.b		(_eight_bit_countdown),d0
+		bne				3f
+		move.b		#0,(_palette_bank)
+		move.b		#1,(_eight_bit_countdown)
+		lea				_unk_0_6030,a0
+		move.b		#0x0a,(a0)+                       | (not used)???
+		move.b		#0,(a0)+
+		move.b		#0x10,(a0)+
+		move.b		#30,(a0)+                         | regi_seconds_cntr
+		move.b		#62,(a0)+                         | regi_vblank_cntr
+		move.b		#0,(a0)                           | regi_current_char
+		move.w		#0x01e8,(_regi_entry_cursor_loc)  | init cursor loc for 1st character
+		lea				_high_score_tbl_ram+0x1c,a0       | ptr to hs 1P/2P flag
+		move.b		(_current_player_E),d2
+		lsl.b			#1,d2															| 0/2
+		add.b			#1,d2															| 1/3 (high score P1/P2 flag)
+		move.w		#0x022,d3													| score offset
+		moveq			#4-1,d1														| 4 scores to check (else 5th)
+1:	cmp.b			(a0),d2														| high score?
+		beq				2f																| yes, skip		
+		adda.w		d3,a0															| next score
+		dbf				d1,1b
+2:	move.l		a0,(_regi_ptr_hs_entry_flag)
+		suba			#0x0d,a0                          | offset to name
+		move.l		a0,(_regi_ptr_hs_entry_name)
+		moveq			#0,d1
+		move.b		(_regi_current_char),d2
+		jsr				outline_letter
+3:	lea				_regi_vblank_cntr,a0
+		sub.b			#1,(a0)                           | done another second?
+		bne				regi_read_controller_input        | no, skip
+		move.b		#62,(a0)                          | reset to roughly 1s
+		sub.b			#1,-(a0)                          | out of time?
+		beq				regi_save_hs_name                 | yes,skip
+		move.b		(a0),d0                           | seconds left
+		move.b		#0xff,d1
+regi_show_seconds_left:
+    addq      #1,d1
+		sub.b			#0x0a,d0
+		bcc				regi_show_seconds_left            | divide by 10
+		add.b			#0x0a,d0                          | fix last subtraction (units)
+		MOV_VRAM_A d0,0x152                         | units digit (time left)
+		MOV_VRAM_A d1,0x172                         | tens digit (time left)
+regi_read_controller_input:		
+    lea				_unk_0_6030,a0                    | (not used)???
+		move.b		(a0),d1
+		move.b		#0x0a,(a0)
+		move.b		(_controller_in),d0
+		btst.b		#7,d0
+		bne				regi_jump_pressed
+		andi.b		#0x0c,d0													| was #0x03
+		bne				regi_left_right_pressed
+		addq			#1,d0
+		move.b		d0,(a0)
+		bra				loc_0_158A
+
+regi_left_right_pressed:
+		sub.b			#1,d1
+		beq				1f
+		move.b		d1,(a0)
+		bra				loc_0_158A
+1:	btst.b		#2,d0															| (left?) was #1
+		bne				regi_previous_character						| yes, skip
+		move.b		(_regi_current_char),d0
+		addq			#1,d0															| next character
+		cmpi.b		#0x1e,d0													| last character?
+		bne				2f																| no, skip
+		moveq			#0,d0															| set to 1st character
+2:	move.b		d0,(_regi_current_char)				    | store new character
+		move.b		d0,d2															| prepare to display
+		moveq			#0,d1
+		jsr				outline_letter
+		bra				loc_0_158A
+regi_previous_character:		
+		move.b		(_regi_current_char),d0
+		sub.b			#1,d0															| previous character
+		bpl				2b																| not 0, skip
+		moveq			#0x1d,d0													| last character
+		bra				2b																| continue
+					
+regi_jump_pressed:
+    move.b    (_regi_current_char),d0
+    cmpi.b    #0x1c,d0                          | RUB?
+    beq       regi_rub													| yes, skip
+    cmpi.b    #0x1d,d0                          | END?
+    beq       regi_save_hs_name                 | yes, skip
+    move.w    (_regi_entry_cursor_loc),d4
+    sub.w     #0x188,d4                         | full?
+    beq       loc_0_158A                        | yes, skip
+    add.w     #0x188,d4                         | restore
+    LEA_VRAM_A 0,a0
+    add.w     #0x11,d0                          | convert to 'ascii'
+    move.b    d0,(d4.w,a0)                      | display
+    sub.w     #0x20,d4                          | next cursor location
+regi_update_cursor: | 1567
+    move.w    d4,(_regi_entry_cursor_loc)
+		bra				loc_0_158A
+
+regi_rub: | 156D
+		move.w		(_regi_entry_cursor_loc),d4
+		add.w			#0x20,d4													| previous column
+		sub.w			#0x208,d4													| 1st char?
+		bne				1f																| no, skip
+		move.w		#0x1e8,d4
+regi_erase_char:
+		LEA_VRAM_A 0,a0
+		move.b		#0x10,(d4.w,a0)										| display space
+		bra				regi_update_cursor
+1:	add.w			#0x208,d4
+		bra				regi_erase_char				
+    rts
+    		
+loc_0_158A: | 158A
+		sub.b			#1,(_unk_0_6032)
+		bne				locret_0_15F9
+		tst.b			(_unk_0_6031)
+		bne				2f
+		move.b		#1,(_unk_0_6031)
+		lea				byte_0_1BD+2,a1
+regi_show_new_high_score:		
+    move.l		(_regi_ptr_hs_entry_flag),a5			| ptr high score entry
+    moveq     #0,d0
+    move.b    4(a5),d0                          | msb VRAM offset
+    lsl.w     #8,d0
+    or.b      5(a5),d0                          | lsb VRAM offset
+    LEA_VRAM_A 0,a4
+		adda.w    d0,a4                             | ptr VRAM location
+		jsr				display_score_HL_at_IX            | display new high score in table
+		move.b		#0x10,(_unk_0_6032)
+		bra				locret_0_15F9
+2:	move.b		#0,(_unk_0_6031)
+		move.l		(_regi_ptr_hs_entry_flag),a1
+		adda			#3,a1
+		bra				regi_show_new_high_score
+
+regi_save_hs_name: | 15C6
+		move.l		(_regi_ptr_hs_entry_flag),a1			| ptr high score
+		move.b		#0,(a1)                           | unflag as P1/P2 high score
+		move.b		#0x80,(_eight_bit_countdown)
+		sub.b			#1,(_main_sequencer)
+		moveq			#0x0c-1,d1                        | 12 chars to copy
+		LEA_VRAM_A 0x1E8,a0                         | position of name on screen
+		move.l		(_regi_ptr_hs_entry_name),a5
+1:	move.b		(a0),(a5)                         | copy char from screen to entry
+		adda			#1,a5                             | next char in name
+		suba			#0x20,a0													| next column
+		dbf				d1,1b                             | loop through 12 chars
+		moveq			#0x05-1,d1												| 5 messages to display
+		move.w		#0x0314,d3												| display_message_14 "REGI TIME"
+2:	jsr				queue_fg_vector_fn
+		addq			#1,d3															| next message
+		dbf				d1,2b															| display high score table
+		move.w		#0x031A,d3												| display_message_1A "YOUR NAME WAS REGISTERED"
+		jsr				queue_fg_vector_fn
+locret_0_15F9:		
+9:	rts
+
+outline_letter: | 15FA
+		move.l		a0,-(a7)
+		lsl.b			#1,d2
+		lea				letter_coords,a1
+		and.w			#0x00ff,d2
+		adda.w		d2,a1
+		LEA_SPR_A	29,a0
+		move.b		(a1)+,(a0)+												| Y
+		move.b		#0x72,(a0)+												| tile
+		move.b		#0x0c,(a0)+												| colour
+		move.b		(a1)+,(a0)												| X
+		move.l		(a7)+,a0
+		rts
+		
+mario_pauline_reunion: | 1615
+    jsr       hide_object_sprites
+    move.b    (_level_type),d0
+    ror.b     #1,d0                             | level 1/3?
+    bcc       loc_0_162F                        | no, skip
+    moveq     #0,d0
+    move.b    (_reunion_sequencer),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp     	(a0)
+    .align 4
+1:  .long     display_heart_and_adjust_kong
+    .long     turn_kong_to_mario_and_pauline
+    .long     start_kong_climbing_for_reunion
+    .long     kong_climb_and_grab_pauline
+    .long     kong_climb_offscreen
+    .long     get_next_level_and_exit_reunion
+
+loc_0_162F: | 162F
+    rts
+
+display_heart_and_adjust_kong:
+    jsr       display_heart
+    lea       dk_normal_spr,a0
+    jsr       copy_kong_sprite_data
+    move.b    #0x20,(_eight_bit_countdown)
+adjust_kong_for_reunion:    
+    add.b     #1,(_reunion_sequencer)
+    moveq     #1,d0
+    RETURN_IF_NOT_LEVEL
+    LEA_SPR_X 2,a0
+    move.b    #0xfc,d2                          | -4
+    jsr       add_c_sprite_register_x10         | move kong  
+    rts
+    
+turn_kong_to_mario_and_pauline:
+    WAIT_8_BIT_COUNTDOWN
+    lea       dk_throw_barrel_spr,a0
+    jsr       copy_kong_sprite_data
+    move.b    #0x20,(_eight_bit_countdown)
+    add.b     #1,(_reunion_sequencer)
+    moveq     #4,d0
+    RETURN_IF_NOT_LEVEL
+    LEA_SPR_X 2,a0
+    moveq     #4,d2                             | +4
+    jsr       add_c_sprite_register_x10         | move kong  
+    rts
+    
+start_kong_climbing_for_reunion:
+    WAIT_8_BIT_COUNTDOWN
+    lea       dk_climbing_spr,a0
+    jsr       copy_kong_sprite_data
+    WR_SPR_Y  3,#0x66                           | part of kong
+    WR_SPR_Y  9,#0                              | part of kong
+    WR_SPR_Y  11,#0                             | part of kong
+    move.b    #0,(_unk_0_62AF)
+    bra       adjust_kong_for_reunion
+    
+display_heart:
+    jsr       stop_sound
+    LEA_SPR_A 72,a0
+    move.b    #0x80,(a0)+
+    move.b    #0x76,(a0)+                       | heart sprite
+    move.b    #0x09,(a0)+
+    move.b    #0x20,(a0)
+    WR_SPR_FY_CODE 1,#0x13                      | pauline, front-on
+    LEA_VRAM_A 0x1c4,a0
+    move.w    #0x20,d3                          | column offset
+    moveq     #0x10,d0                          | space
+    jsr       display_3_tiles_HL                | clear spaces
+    lea       _unk_0_608A,a0
+    move.b    #7,(a0)+
+    move.b    #3,(a0)+
+    rts
+        
+kong_climb_and_grab_pauline:
+    jsr       animate_kong_climbing
+    RD_SPR_X  4,d0                              | kong X
+    cmpi.b    #0x2c,d0                          | time to grab Pauline?
+    bcc       9f                                | no, exit
+    moveq     #0,d0
+    WR_SPR_Y  0,d0                              | pauline
+    WR_SPR_Y  1,d0                              | pauline
+    WR_SPR_Y  3,d0                              | part of kong
+    move.b    #0x6b,d0
+    WR_SPR_Y  9,d0                              | part of kong
+    sub.b     #1,d0
+    WR_SPR_Y  11,d0                             | part of kong
+    LEA_SPR_FY_CODE 72,a0                       | heart
+    add.b     #1,(a0)                           | broken heart
+    add.b     #1,(_reunion_sequencer)           | next sequence
+9:  rts
+
+kong_climb_offscreen:
+    jsr       animate_kong_climbing
+    jsr       wipe_kong_as_climbs_offscreen    
+    adda      #1,a0                             | 1st kong sprite Y
+    jsr       check_if_kong_offscreen
+    move.b    #0x40,(_eight_bit_countdown)
+    add.b     #1,(_reunion_sequencer)
+    rts
+
+check_if_kong_offscreen:
+    moveq     #10-1,d1                          | 10 sprites to check
+1:  move.b    (a0),d0
+    bne       pop_hl_ret
+    adda      #4,a0                             | next sprite
+    dbf       d1,1b    
+    rts
+        
+get_next_level_and_exit_reunion:
+    WAIT_8_BIT_COUNTDOWN
+    move.l    (_seq_data),a0
+.ifeq OPT_LEVEL1_ONLY    
+    adda      #1,a0                             | next level in sequence
+.endif    
+    move.b    (a0),d0                           | get next level type
+    cmpi.b    #0x7f,d0                          | start repeating levels?
+    bne       1f
+    lea       level_seq_2,a0                    | repeating levels
+    move.b    (a0),d0                           | get next level type
+1:  move.l    a0,(_seq_data)
+    move.b    d0,(_level_type)
+    move.w    #0x500,d3                         | updte_bonus_timer (add to score)
+    jsr       queue_fg_vector_fn
+    move.b    #0,(_reunion_sequencer)           | done with reunion
+    lea       _eight_bit_countdown,a0
+    move.b    #0x30,(a0)+
+    move.b    #8,(a0)                           | sequencer = how high screen    
+    rts
+
+wipe_kong_as_climbs_offscreen: | 176C
+    LEA_SPR_X 11,a0
+    moveq     #10-1,d1                          | 10 sprites to check
+1:  move.b    (a0),d0                           | X
+    suba      #3,a0                             | Y
+    cmpi.b    #0x19,d0                          | off-screen?
+    bcc       2f                                | no, skip
+    move.b    #0,(a0)                           | Y=0 (clear sprite)
+2:  suba      #1,a0                             | previous sprite X
+    dbf       d1,1b
+    rts
+        
+clear_14x5_HL: | 1826
+    moveq     #0x0e-1,d2                        | 14 row
+1:  moveq     #5-1,d1                           | 5 columns
+2:  move.b    #0x10,(a0)+                       | space
+    dbf       d1,2b
+    suba      #0x0025,a0
+    dbf       d2,1b
+    rts
+    
+cls_and_set_seq_for_current_player: | 196B
+		jsr				clear_tiles_and_sprites
+		move.b		(_current_player_E),d0
+		add.b			#18,d0
+		move.b		d0,(_main_sequencer)
+		rts
+				            
+attract_mode_gameplay: | 1977
+    jsr				next_attract_action
+gameplay: | 197A
+		jsr				check_and_handle_bonus
+		jsr       handle_mario_movement
+		jsr       sub_0_2C8F
+*		jsr				check_for_mario_falling
+		jsr				handle_mario_falling
+		jsr       check_end_of_level                | exits gameplay loop
+		jsr				sub_0_2FCB
+*** TBD lots
+		tst.b			(_mario_alive_flag)
+		bne				9f
+		jsr				stop_sound
+		move.b		#3,(digital_snd_tmr_thump)
+exit_gameplay_loop:		
+		lea				_main_sequencer,a0
+		addq.b		#1,(a0)
+		suba			#1,a0															| 8-bit countdown
+		move.b		#64,(a0)													| set counter
+9:	rts
+
+handle_mario_movement: | 1AC3
+    move.b    (_mario_jumping),d0
+    sub.b     #1,d0
+    beq       mario_is_jumping
+    move.b    (_unk_0_621E),d0
+    bne       loc_0_1B55
+    move.b    (_hammer_active),d0
+    sub.b     #1,d0
+    beq       check_left_right_inputs
+    move.b    (_mario_climbing),d0
+    sub.b     #1,d0
+    beq       check_up_down_inputs
+    move.b    (_controller_in),d0
+    btst.b    #7,d0                             | jump pressed?
+    bne       mario_jump    
+check_left_right_inputs:    
+    jsr       check_screen_edges
+    move.b    (_controller_in),d0
+    sub.b     #1,d4                             | OK to move right?
+    beq       2f                                | no, skip
+    btst.b    #0,d0                             | right?
+    bne       mario_right                       | yes, skip
+2:  sub.b     #1,d3                             | OK to move left?
+    beq       3f                                | no, skip
+    btst.b    #1,d0                             | left?
+    bne       mario_left                        | yes,skip
+3:  move.b    (_hammer_active),d0
+    sub.b     #1,d0                             | hammer active?
+    beq       9f                                | yes, skip
+    move.b    (_mario_x),d3
+    add.b     #8,d3                             | middle of sprite
+    move.b    (_mario_y),d0
+    ori.b     #3,d0
+    bclr.b    #2,d0                             | middle of tile
+    moveq     #0x15,d1                          | max number of ladders to check
+    jsr       check_if_on_ladder								| returns if not on ladder
+    move.w    d0,-(a7)
+    lea       _mario_flipy_tile,a0
+    move.b    (a0),d0
+    andi.b    #0x80,d0													| preserve flipy
+    ori.b     #6,d0															| mario climbing sprite
+    move.b    d0,(a0)
+    lea       _on_broken_ladder,a0
+    moveq     #4,d0
+    move.b    #1,(a0)														| default to broken ladder
+    cmp.b     d2,d0															| broken ladder?
+    bcc       4f																| yes, skip
+    sub.b     #1,(a0)														| flag as normal ladder
+4:  move.w    (a7)+,d0
+    beq       loc_0_1B4E												| skip if bottom of ladder
+    move.b    (a0),d0														| broken ladder?
+    bne       9f																| yes exit (can't climb down)
+    adda      #1,a0
+    move.b    d3,(a0)+													| top coord of ladder
+    move.b    d1,(a0)														| bottom coord of ladder
+    bra       check_up_down_inputs
+9:  rts    
+
+check_up_down_inputs: | 1B38
+    move.b    (_controller_in),d0
+    btst.b    #3,d0                             | down?
+    bne       mario_down
+    move.b    (_mario_climbing),d0
+    beq       9f
+check_up_input: | 1B45    
+    move.b    (_controller_in),d0
+    btst.b    #2,d0                             | up?
+    bne       mario_up
+9:  rts
+
+loc_0_1B4E: | 1B4E
+    adda      #1,a0
+    move.b    d1,(a0)+
+    move.b    d3,(a0)
+    bra       check_up_input
+    
+loc_0_1B55: | 1B55
+    lea       _unk_0_621E,a0
+    sub.b     #1,(a0)
+    bne       9f
+    move.b    (_unk_0_6218),d0
+    move.b    d0,(_hammer_active)
+    lea       _mario_flipy_tile,a0
+    move.b    (a0),d0
+    andi.b    #0x80,d0
+    move.b    d0,(a0)
+    move.b    #0,(_mario_animation_cell)
+    bra       update_mario_sprite_registers
+9:  rts    
+    
+mario_jump: | 1B6E
+    move.b    #1,(_mario_jumping)
+    lea       _unk_0_6210,a0
+    move.b    (_controller_in),d0
+    move.b    #0x00,d1
+    move.b    #0x80,d2
+    ror.b     #1,d0                             | right?
+    bcs       1f                                | yes, skip
+    move.b    #0xff,d1
+    ror.b     #1,d0                             | left?
+    bcs       1f                                | yes, skip
+    moveq     #0,d1
+    moveq     #0,d2
+1:  moveq     #0,d0
+    move.b    d1,(a0)+
+    move.b    d2,(a0)+
+    move.b    #1,(a0)+
+    move.b    #0x48,(a0)+
+    move.b    d0,(a0)
+    move.b    d0,(_unk_0_6204)
+    move.b    d0,(_unk_0_6206)
+    move.b    (_mario_flipy_tile),d0
+    andi.b    #0x80,d0                          | preserve yflip
+    ori.b     #0x0e,d0                          | mario jumping sprite
+    move.b    d0,(_mario_flipy_tile)
+    move.b    (_mario_x),d0
+    move.b    d0,(_unk_0_620E)
+    move.b    #3,(digital_snd_tmr_jump)
+    rts
+
+mario_is_jumping:
+    lea       _mario_alive_flag,a4
+    move.b    (_mario_y),d0
+    move.b    d0,0x0b(a4)                       | Y before a jump
+    move.b    (_mario_x),d0
+    move.b    d0,0x0c(a4)                       | X before a jump
+    jsr       sub_0_239C
+    jsr       check_screen_edges
+    sub.b     #1,d3
+    bne       3f
+    move.b    #0,0x10(a4)
+    move.b    #0x80,0x11(a4)
+    bset.b    #7,7(a4)                          | mario_flipy_tile
+1:  move.b    (_unk_0_6220),d0
+    sub.b     #1,d0
+    beq       2f
+    jsr       sub_0_2407
+    move.b    d5,0x12(a4)
+    move.b    d6,0x13(a4)
+    move.b    #0,0x14(a4)
+2:  jsr       sub_0_239C
+    bra       4f
+3:  sub.b     #1,d4
+    bne       4f
+    move.b    #0xff,0x10(a4)
+    move.b    #0x80,0x11(a4)
+    bclr.b    #7,7(a4)                          | mario_flipy_tile
+    bra       1b
+4:  jsr       sub_0_2B1C
+    sub.b     #1,d0
+    beq       loc_0_1C3A
+    move.b    (_unk_0_621F),d0
+    sub.b     #1,d0
+    beq       loc_0_1C76
+    move.b    (_unk_0_6214),d0
+    sub.b     #0x14,d0
+    bne       5f
+    move.b    #1,(_unk_0_621F)
+    jsr       sub_0_2853                        | to do with hammers
+    tst.b     d0
+    beq       update_mario_sprite_registers
+    move.b    d0,(_unk_0_6342)
+    move.b    #1,(_show_bonus_state)
+    move.b    #1,(_bonus_sound_flag)
+5:  add.b     #1,d0
+    bne       6f
+    jsr       sub_0_2954                        | to do with hammers
+6:  bra       update_mario_sprite_registers
+
+loc_0_1C3A: | 1C3A
+    sub.b     #1,d1
+    beq       2f
+    add.b     #1,d0
+    move.b    d0,(_unk_0_621F)
+    moveq     #0,d0
+    lea       _unk_0_6210,a0
+    moveq     #5-1,d1
+1:  move.b    d0,(a0)+
+    dbf       d1,1b    
+    bra       update_mario_sprite_registers
+2:  move.b    d0,(_mario_jumping)
+    move.b    (_unk_0_6220),d0
+    eori.b    #1,d0
+    move.b    d0,(_mario_alive_flag)
+    lea       _mario_flipy_tile,a0
+    move.b    (a0),d0
+    andi.b    #0x80,d0                          | preserve flipy
+    ori.b     #0xf,d0                           | Mario landing sprite
+    move.b    d0,(a0)
+    move.b    #4,(_unk_0_621E)
+    move.b    #0,(_unk_0_621F)
+    move.b    (_bonus_sound_flag),d0
+    sub.b     #1,d0                             | time to play bonus sound?
+    bne       3f                                | no, skip
+    jsr       play_bonus_sound
+3:  bra       update_mario_sprite_registers    
+
+loc_0_1C76: | 1C76
+    move.b    (_mario_x),d0
+    lea       _unk_0_620E,a0
+    subi.b    #0xf,d0
+    cmp.b     (a0),d0
+    bcc       1f
+    bra       update_mario_sprite_registers    
+1:  move.b    #1,(_unk_0_6220)
+    move.b    #3,(digital_snd_tmr_kong_fall)
+    bra       update_mario_sprite_registers    
+            
+mario_right: | 1C8F
+		move.b		#1,d1															| dY
+		tst.b			(_mario_cell_animate_cntr)				| time for next sprite?
+		bne				move_mario_left_right							| no, skip
+		move.b		(_mario_animation_cell),d1
+    move.b    #5,d0															| sprite type = mario running right
+    jsr       animate_mario_or_barrel_sprite
+    move.b    d0,(_mario_animation_cell)				| update current cell #
+    and.b     #3,d0
+    or.b      #0x80,d0                          | set flipy
+    bra       update_mario_lr_sprite_data
+    
+mario_left: | 1CAB
+		move.b		#0xff,d1													| dY
+		tst.b			(_mario_cell_animate_cntr)				| time for next sprite?
+		bne				move_mario_left_right							| no, skip
+		move.b		(_mario_animation_cell),d1
+    move.b    #1,d0															| sprite type = mario running left
+    jsr       animate_mario_or_barrel_sprite
+    move.b    d0,(_mario_animation_cell)				| update current cell #
+    and.b     #3,d0
+update_mario_lr_sprite_data:
+		move.b		d0,(_mario_flipy_tile)						| set mario sprite
+    btst.b    #0,d0															| time to play walking sound?
+    bcc       1f																| no, skip
+    jsr       play_walking_sound
+1:  move.b    #2,(_mario_cell_animate_cntr)			| same sprite for 2 frames
+    bra       update_mario_sprite_registers
+
+move_mario_left_right: | 1CD2
+		lea				_mario_y,a0
+		add.b			d1,(a0)														| add delta value
+		move.b		(_level_type),d0
+		sub.b			#1,d0															| girders?
+		bne				1f																| no, skip
+		move.b		(a0),d5														| Y
+		move.b		(_mario_x),d6											| X
+		jsr				adjust_height_on_girders
+		move.b		d6,(_mario_x)											| adjusted X
+1:	lea				_mario_cell_animate_cntr,a0
+		sub.b			#1,(a0)
+		jsr				update_mario_sprite_registers		
+		rts
+
+mario_down: | 1CF2
+    move.b    (_mario_cell_animate_cntr),d0			| next sprite cell?
+    bne       dec_climbing_animate_cntr												| no, skip
+    move.b    #3,(_mario_cell_animate_cntr)
+    moveq     #2,d0                             | dX = 2 pixels
+    bra       move_mario_up_down
+
+mario_up: | 1D03
+    move.b    (_mario_cell_animate_cntr),d0			| next sprite cell?
+    bne       check_climbing_broken_ladder												| no, skip
+    move.b    #4,(_mario_cell_animate_cntr)
+    move.b    #0xfe,d0                          | dX = -2 pixels
+    
+move_mario_up_down: | 1D11
+    lea       _mario_x,a0
+    add.b     (a0),d0                           | add dX
+    move.b    d0,(a0)
+    move.b    d0,d1															| _mario_x
+    move.b    (_unk_0_6222),d0
+    eori.b    #1,d0
+    move.b    d0,(_unk_0_6222)
+    bne       centre_on_ladder_and_play_sound
+    move.b    d1,d0															| mario_x
+    add.b     #8,d0															| centre of sprite
+    lea       _ladder_bottom_coord,a0
+    cmp.b     (a0),d0														| on ladder bottom?
+    beq       stop_climbing											| yes, skip
+    suba      #1,a0
+    sub.b     (a0),d0														| on ladder top?
+    beq       stop_climbing											| yes, skip
+    moveq     #5,d1															| climbing sprite #1
+    sub.b     #8,d0															| offset=8?
+    beq       set_climbing_sprite_data					| yes, skip
+    sub.b     #1,d1															| climbing sprite #2
+    sub.b     #4,d0															| offset=12?
+    beq       set_climbing_sprite_data					| yes, skip
+    sub.b     #1,d1															| climbing sprite #3
+set_climbing_sprite_data:
+		move.b    #0x80,d0
+    lea       _mario_flipy_tile,a0
+    and.b     (a0),d0														| preserve flipy
+    eori.b    #0x80,d0													| invert flipy
+    or.b      d1,d0															| climbing sprite
+    move.b    d0,(a0)
+set_mario_climbing:
+    move.b    #1,(_mario_climbing)
+    bra       update_mario_sprite_registers    
+
+centre_on_ladder_and_play_sound: | 1D51
+    suba      #2,a0
+    move.b    (a0),d0														| mario_y
+    ori.b     #3,d0
+    bclr      #2,d0
+    move.b    d0,(a0)														| centre on ladder
+    move.b    (_climb_sound_cntr),d0
+    eori.b    #1,d0
+    move.b    d0,(_climb_sound_cntr)						| time to play walking sound?
+    bne       2f																| no, skip
+    jsr       play_walking_sound
+2:  bra       set_mario_climbing    
+    
+stop_climbing: | 1D67
+    move.b    #6,(_mario_flipy_tile)
+    move.b    #0,(_unk_0_6219)
+    move.b    #0,(_mario_climbing)
+    bra       update_mario_sprite_registers
+
+check_climbing_broken_ladder: | 1D76
+    move.b    (_on_broken_ladder),d0
+    beq       dec_climbing_animate_cntr
+    move.b    d0,(_unk_0_6219)
+    move.b    (_ladder_bottom_coord),d0
+    sub.b     #0x13,d0
+    lea       _mario_x,a0
+    cmp.b     (a0),d0
+    bcc       9f
+dec_climbing_animate_cntr:    
+    lea       _mario_cell_animate_cntr,a0
+    sub.b     #1,(a0)    
+9:  rts
+        
+play_walking_sound: | 1D8F
+		move.b		#3,(digital_snd_tmr_walk)
+		rts
+
+play_bonus_sound: | 1D95
+    move.b    d0,(_bonus_sound_flag)                  | flag bonus sound off
+    move.b    (_level_type),d0
+    sub.b     #1,d0
+    beq       9f
+    lea       _unk_0_608A,a0
+    move.b    #0x0d,(a0)+
+    move.b    #0x03,(a0)
+9:  rts
+    				    
+update_mario_sprite_registers: | 1DA6
+    LEA_SPR_A 19,a0
+    move.b    (_mario_y),(a0)+
+    move.b    (_mario_flipy_tile),(a0)+
+    move.b    (_mario_flipx_colour),(a0)+
+    move.b    (_mario_x),(a0)
+    rts
+                
+check_and_handle_bonus: | 1DBD
+    moveq     #0,d0
+		move.b		(_show_bonus_state),d0
+		lsl.w			#2,d0
+    movea.l   1f(pc,d0.w),a0
+    jmp     	(a0)
+   	.align 4
+1:	.long			no_bonus
+		.long			show_bonus
+		.long			remove_bonus
+		rts
+
+show_bonus: | 1DC9
+		move.b		#0x40,(_show_bonus_timer)
+		move.b		#2,(_show_bonus_state)
+		move.b		(_unk_0_6342),d0
+		ror.b			#1,d0
+		bcs				loc_0_3E70													| hammer hit???
+		ror.b			#1,d0
+		bcs				award_300_pts
+		ror.b			#1,d0
+		bcs				award_random_bonus
+		move.b		#3,(digital_snd_tmr_barrel_jump_prize)
+		move.b		(_level),d0
+		sub.b			#1,d0
+		beq				award_300_pts
+		sub.b			#1,d0
+		beq				award_500_pts
+		bra				award_800_pts
+award_random_bonus:
+		move.b		(_random_no),d0
+		ror.b			#1,d0
+		bcs				award_500_pts											| 50% chance for 500 points
+		ror.b			#1,d0
+		bcs				award_800_pts											| 25% chance for 800 points
+award_300_pts:		
+		move.b		#0x7d,d1													| '300' sprite tile
+		move.w		#0x0003,d3												| 300 points
+		bra				award_points
+award_500_pts:
+		move.b		#0x7e,d1													| '500' sprite tile
+		move.w		#0x0005,d3												| 500 points
+		bra				award_points
+award_800_pts:
+		move.b		#0x7f,d1													| '800' sprite tile
+		move.w		#0x0008,d3												| 800 points
+award_points:
+		jsr				queue_fg_vector_fn								| schedule award points
+		move.w		(_unk_0_6343),a0									| ptr XPOS
+		move.b		(a0),d0														| prize XPOS
+		move.b		#0,(a0)														| erase prize
+		adda			#3,a0															| ptr YPOS
+		bra				1f
+		move.w		#0x0001,d3												| can't get here!?!
+		jsr				queue_fg_vector_fn
+		move.b		(_mario_x),d2
+		add.b			#0x14,d2
+		move.b		(_mario_y),d0
+1:	LEA_SPR_A 76,a0															| bonus points
+		move.b		d0,(a0)+													| Y
+		move.b		d1,(a0)+													| tile
+		move.b		#7,(a0)+													| colour
+		move.b		d2,(a0)														| X					
+		move.b		#5,d0                             | only levels 1,3
+		RETURN_IF_NOT_LEVEL					
+		move.b		#3,(digital_snd_tmr_barrel_jump_prize)
+no_bonus:
+9:	rts
+
+remove_bonus: | 1E4A
+		lea				_show_bonus_timer,a0
+		sub.b			#1,(a0)
+		bne				9f
+		LEA_SPR_A	76,a0															| bonus points sprite
+		move.b		#0,(a0)														| zero Y (hide)
+		move.b		#0,(_show_bonus_state)
+9:	rts
+
+check_end_of_level: | 1E57
+    move.b    (_level_type),d6
+    btst.b    #2,d6                             | rivet level?
+    bne       check_end_of_rivet_level          | yes, skip
+    move.b    (_mario_x),d0
+    ror.b     #1,d6                             | level 1,3?
+    bcs       check_end_of_girder_or_elevator   | yes, skip
+    cmpi.b    #0x51,d0                          | top of screen?
+    bcc       9f                                | no, exit
+    move.b    (_mario_y),d6
+face_mario_to_pauline:
+    moveq     #0,d0                             | mario sprite
+    rol.b     #1,d6                             | which side of screen?
+    bcs       1f
+    move.b    #0x80,d0                          | set mario flipy
+1:  LEA_SPR_FY_CODE 19,a5
+    move.b    d0,(a5)
+    bra       exit_game_loop
+check_end_of_girder_or_elevator:
+    cmpi.b    #0x31,d0                          | top of screen?
+    bcc       9f                                | no, exit
+* hack for 68K code, cause mario to face left
+    bset.b    #7,d6
+    bra       face_mario_to_pauline
+check_end_of_rivet_level:
+    tst.b     (_rivets_remaining)
+    bne       9f
+exit_game_loop:
+    move.b    #0x16,(_main_sequencer)           | next sequence
+    move.l    (a7)+,a0                          | discard return address        
+9:  rts
+
+handle_mario_falling: | 1F46
+		tst.b			(_mario_falling)
+		beq				9f
+		moveq			#0,d0
+		move.b		d0,(_unk_0_6204)
+		move.b		d0,(_unk_0_6206)
+		move.b		d0,(_mario_falling)
+		move.b		d0,(_unk_0_6210)
+		move.b		d0,(_unk_0_6211)
+		move.b		d0,(_unk_0_6212)
+		move.b		d0,(_unk_0_6213)
+		move.b		d0,(_unk_0_6214)
+		moveq			#1,d0
+		move.b		d0,(_mario_jumping)
+		move.b		d0,(_unk_0_621F)
+		move.b		(_mario_x),d0
+		move.b		d0,(_unk_0_620E)
+9:	rts
+		    
+attract_mario_inputs:
+    .byte 0x80, 0xFE
+    .byte 1, 0xC0
+    .byte 4, 0x50
+    .byte 2, 0x10
+    .byte 0x82, 0x60
+    .byte 2, 0x10
+    .byte 0x82, 0xCA
+    .byte 1, 0x10
+    .byte 0x81, 0xFF
+    .byte 2, 0x38
+    .byte 1, 0x80
+    .byte 2, 0xFF
+    .byte 4, 0x80
+    .byte 4, 0x60
+    .byte 0x80
+    .align 2
+    
+next_attract_action: | 21EE
+    lea       attract_mario_inputs,a1
+    lea       _attract_movement_entry,a0
+    moveq     #0,d5
+    move.b    (a0)+,d5                          | get entry index
+    lsl.b     #1,d5                             | word offset
+    move.b    0(d5.w,a1),d0                     | get entry
+    move.b    d0,(_controller_in)               | store as input
+    move.b    (a0),d0                           | get movement timer
+    sub.b     #1,(a0)                           | dec
+    tst.b     d0                                | done?
+    bne       9f                                | no, exit
+    adda      #1,a1                             | ptr timer byte
+    move.b    (a1),d0                           | get timer byte
+    move.b    d0,(a0)                           | init timer
+    suba      #1,a0                             | ptr entry index
+    add.b     #1,(a0)                           | next entry
+9:  rts
+    
+adjust_height_on_girders: | 2333
+		moveq			#0x0f,d0
+		and.b			d5,d0
+		sub.b			#1,d1
+		beq				1f
+		cmpi.b		#0x0f,d0
+		bcs				9f
+		move.b		#0xff,d1
+		bra				2f
+1:	cmpi.b		#1,d0
+		bcc				9f
+		moveq			#1,d1
+2:	move.b		#0xf0,d0
+		cmp.b			d6,d0
+		beq				6f
+		move.b		#0x4c,d0
+		cmp.b			d6,d0
+		beq				7f
+		move.b		d6,d0
+		btst.b		#5,d0
+		beq				5f
+3:	sub.b			d1,d0
+4:	move.b		d0,d6
+		rts
+5:	add.b			d1,d0
+		bra				4b
+6:	btst.b		#7,d5
+		bne				3b
+		rts
+7:	move.b		d5,d0
+		cmp.b			#0x98,d0
+		bcs				9f
+		move.b		d6,d0
+		bra				5b
+9:	rts
+
+check_if_on_ladder: | 236E
+    lea       _ladder_data,a0
+    sub.w     #1,d1                             | for 68K
+1:  cmp.b     (a0)+,d0                          | find ladder on Y coord
+    beq       2f                                | found, skip
+    dbf       d1,1b
+    move.l    (a7)+,a0                          | if no match, return to higher function
+    rts        
+2:  cmp.b     0x14(a0),d3                       | X1, d3=X
+    beq       3f
+    cmp.b     0x29(a0),d3                       | X2, d3=X
+    beq       4f
+    bra       1b                                | continue the search
+3:  adda      #0x29,a0                          | X2
+    moveq     #1,d0
+    bra       5f
+4:  moveq     #0,d0
+    adda      #0x14,a0                          | X1
+5:  sub.b			#1,d1															| adjust for CPIR behaviour
+		move.b    d1,d2                             | matched entry #
+    move.b    (a0),d1                           | other end of ladder
+    rts
+
+sub_0_239C: | 239C
+    move.b    4(a4),d0
+    add.b     0x11(a4),d0
+    move.b    d0,4(a4)
+    move.b    3(a4),d0
+    move.b    0x10(a4),d6
+    addx.b    d6,d0
+    move.b    d0,3(a4)
+    move.b    6(a4),d0
+    sub.b     0x13(a4),d0
+    moveq     #0,d6
+    move.b    d0,d6                             | store LSB
+    moveq     #0,d0
+    move.b    5(a4),d0
+    move.b    0x12(a4),d6
+    subx.b    d6,d0
+    lsl.w     #8,d0                             | shift to MSB
+    or.w      d0,d5                             | add LSB
+    moveq     #0,d0
+    move.b    0x14(a4),d0
+    lsl.b     #1,d0                             | *2
+    add.b     #1,d0                             | *2+1
+    lsl.w     #3,d0                             | (*2+1)*8
+    add.w     d0,d5
+    move.b    d5,6(a4)
+    lsr.w     #8,d5
+    move.b    d5,5(a4)    
+    add.b     #1,0x14(a4)
+    rts
+
+sub_0_2407: | 2407
+    moveq     #0,d5
+    move.b    0x14(a4),d5
+    lsl.w     #4,d5                             | d5 = 0x14(a4) * 16
+    move.b    0x12(a4),d1
+    lsl.w     #8,d1
+    or.b      0x13(a4),d1
+    sub.w     d1,d5
+    rts
+            
+check_screen_edges: | 241F
+    moveq     #1,d3                             | flag left=NO
+    moveq     #0,d4                             | flag right=OK
+    move.b    (_mario_y),d0
+    cmpi.b    #0x16,d0                          | left edge?
+    bcs       9f                                | yes, exit
+    sub.b     #1,d3                             | flag left=OK
+    add.b     #1,d4                             | flag right=NO
+    cmpi.b    #0xea,d0                          | right edge?
+    bcc       9f                                | yes, exit
+    sub.b     #1,d4                             | flag right=OK
+    btst.b    #0,(_level_type)                  | level type 1/3?
+    beq       9f                                | no, exit
+    move.b    (_mario_x),d0
+    cmpi.b    #0x58,d0
+    bcc       9f
+    move.b    (_mario_y),d0
+    cmpi.b    #0x6c,d0
+    bcc       9f
+    add.b     #1,d3                             | flag left=NO
+9:  rts
+
+extract_ladder_data: | 2441
+*   the tamper check stuffs up the ladder data if it fails
+*   no reason to do it in the port
+    lea       _broken_ladder_data,a5
+    move.b    (_level_type),d0
+    sub.b     #1,d0
+    lea       barrel_level_tilemap_data,a0
+    beq       1f
+    sub.b     #1,d0
+    lea       cement_pie_level_tilemap_data,a0
+    beq       1f
+    sub.b     #1,d0
+    lea       elevator_level_tilemap_data,a0
+    beq       1f
+    lea       rivet_level_tilemap_data,a0
+1:  lea       _ladder_data,a4
+    move.w    #0x0005,d3                        | each entry is 5 bytes
+next_ladder_or_broken:    
+    move.b    (a0),d0
+    beq       add_ladder_data                   | 0=ladder
+    sub.b     #1,d0
+    beq       add_broken_ladder_data            | 1=broken ladder
+    cmpi.b    #0xa9,d0                          | end of level data?
+    beq       9f                                | yes, return
+    adda.w    d3,a0                             | next entry
+    bra       next_ladder_or_broken
+add_ladder_data:    
+    adda      #1,a0
+    move.b    (a0)+,0(a4)
+    move.b    (a0)+,0x15(a4)
+    adda      #1,a0
+    move.b    (a0)+,0x2a(a4)
+    adda      #1,a4
+    bra       next_ladder_or_broken
+add_broken_ladder_data:    
+    adda      #1,a0
+    move.b    (a0)+,0(a5)
+    move.b    (a0)+,0x15(a5)
+    adda      #1,a0
+    move.b    (a0)+,0x2a(a5)
+    adda      #1,a5
+    bra       next_ladder_or_broken    
+9:  rts
+
+sub_0_2853: | 2853
+* TBD: to do with hammer hits
+    rts
+
+sub_0_2954: | 2954
+* TBD: to do with hammer hits
+    rts
+
+sub_0_29AF: | 29AF
+    moveq     #4,d0
+		RETURN_IF_NOT_LEVEL
+* TBD: elevators etc		
+    rts
+
+check_for_mario_falling:
+		tst.b			(_mario_climbing)
+		bne				9f
+		tst.b			(_mario_jumping)
+		bne				9f
+		tst.b			(_mario_on_elevator)
+		bne				9f
+		move.b		(_mario_y),d5
+		subi.b		#3,d5
+		move.b		(_mario_x),d6
+		addi.b		#0x0c,d6
+		move.w		d5,-(a7)
+		move.w		d6,-(a7)
+		jsr				get_tilemap_addr_from_coords
+    move.w		(a7)+,d4
+    move.w		(a7)+,d3
+    LEA_VRAM_A 0,a0
+    adda.w		d5,a0
+debug2:		
+		cmpi.b		#0xb0,d0
+		bcs				1f
+		andi.b		#0xf,d0
+		cmpi.b		#8,d0
+		bcc				1f
+		rts
+1:	move.b		d3,d0
+		andi.b		#7,d0
+		beq				2f
+		suba			#0x20,a0
+		move.b		(a0),d0
+		cmpi.b		#0xb0,d0
+		bcs				2f
+		andi.b		#0xf,d0
+		cmpi.b		#8,d0
+		bcc				2f
+		rts
+2:	move.b		#1,(_mario_falling)
+9:	rts
+		            
+sub_0_2B1C: | 2B1C
+    lea       _mario_alive_flag,a4
+    jsr       sub_0_2B29
+    jsr       sub_0_29AF
+    moveq     #0,d0
+    moveq     #0,d1
+    rts
+
+sub_0_2B29: | 2B29
+    move.b    (_level_type),d0
+    sub.b     #1,d0
+    bne       loc_0_2B53
+    move.b    (_mario_y),d5
+    move.b    (_mario_x),d6
+    addi.b    #7,d6
+    jsr       sub_0_2B9B
+    tst.b     d0
+    beq       1f
+    move.b    d4,d0
+    sub.b     d2,d0
+    cmpi.b    #4,d0
+    bcc       loc_0_2B74
+    subi.b    #7,d2
+    move.b    d2,(_mario_x)
+    moveq     #1,d0
+    moveq     #1,d1
+1:  move.l    (a7)+,a0                          | discard return address
+    rts
+
+loc_0_2B53: | 2B53
+    move.b    (_mario_x),d5
+    subi.b    #3,d5
+    move.b    (_mario_y),d6
+    addi.b    #7,d6
+    jsr       sub_0_2B9B
+    cmpi.b    #2,d0
+    beq       loc_0_2B7A
+    move.b    d3,d5
+    addi.b    #7,d5
+    move.b    d4,d6
+    jsr       sub_0_2B9B
+    tst.b     d0
+    beq       9f
+    bra       loc_0_2B7A
+9:  rts    
+
+loc_0_2B74: | 2B74
+    moveq     #0,d0
+    moveq     #0,d1
+    move.l    (a7)+,a0                          | discard return address
+    rts
+    
+loc_0_2B7A: | 2B7A
+    move.b    (_mario_y),d0
+    tst.b     (_unk_0_6210)
+    beq       1f
+    ori.b     #7,d0
+    subi.b    #4,d0
+    bra       2f
+1:  subi.b    #8,d0
+    ori.b     #7,d0
+    addi.b    #4,d0
+2:  move.b    (_mario_y),d0
+    WR_SPR_Y  19,d0
+    moveq     #1,d0
+    move.l    (a7)+,a0
+    rts
+    
+sub_0_2B9B: | 2B9B
+    move.w    d5,-(a7)
+    move.w    d6,-(a7)
+    jsr       get_tilemap_addr_from_coords
+    move.w		(a7)+,d4
+    move.w		(a7)+,d3
+    LEA_VRAM_A 0,a0
+    adda.w		d5,a0
+    move.b    (a0),d0
+    cmpi.b    #0xb0,d0
+    bcs       4f
+    andi.b    #0xf,d0
+    cmpi.b    #8,d0
+    bcc       4f
+    move.b    (a0),d0
+    cmpi.b    #0xc0,d0
+    beq       4f
+    bcs       loc_0_2BDC
+    cmpi.b    #0xd0,d0
+    bcs       2f
+    cmpi.b    #0xe0,d0
+    bcs       1f
+    cmpi.b    #0xf0,d0
+    bcs       2f
+1:  andi.b    #0xf,d0
+    subi.b    #1,d0
+    bra       3f
+2:  andi.b    #0xf,d0
+    subi.b    #9,d0
+3:  move.b    d0,d2
+    move.b    d4,d0
+    andi.b    #0xf8,d0
+    add.b     d0,d2
+    cmp.b     d4,d2
+    bcs       5f
+4:  moveq     #0,d0
+    moveq     #0,d1    
+    rts
+    
+loc_0_2BDC: | 2BDC
+    move.b    d4,d0
+    andi.b    #0xf8,d0
+    sub.b     #1,d0
+    move.b    d0,d2
+5:  move.b    (_mario_x_before_jump),d0
+    sub.b     5(a4),d0
+    add.b     d4,d0
+    cmp.b     d2,d0
+    beq       6f
+    bcc       7f
+6:  move.b    d2,d0
+    subi.b    #7,d0
+    move.b    d0,(_mario_x)
+    bra       8f
+7:  moveq     #2,d0
+    moveq     #0,d1
+    rts
+8:  moveq     #1,d0
+    moveq     #1,d1
+    move.l    (a7)+,a0            
+    move.l    (a7)+,a0            
+    rts
+                        		
+sub_0_2C8F: | 2C8F
+    moveq     #0x01,d0                          | only level 1
+		RETURN_IF_NOT_LEVEL
+		RETURN_IF_MARIO_NOT_ALIVE
+* TBD: stuffs!  
+		move.w		#0x0501,d3												| update_bonus_timer
+		jsr				queue_fg_vector_fn
+* TBD: stuffs!  
+9:  rts
+    
+sub_0_2FCB: | 2FCB
+		moveq			#0x0e,d0                          | only levels 2,3,4
+		RETURN_IF_NOT_LEVEL
+		sub.b			#1,(_unk_0_62B4)									| conveyor timer?
+		bne				9f
+		move.b		#3,(_unk_0_62B9)									| flag fire release lvl 1/2
+		move.b		#3,(_unk_0_6396)									| flag spring release
+		move.w		#0x0501,d3												| update_bonus_timer
+		jsr				queue_fg_vector_fn
+		move.b		(_unk_0_62B3),(a0)
+		sub.b			#1,(_unk_0_62B1)
+		bne				9f
+		move.b		#1,(_bonus_timer_expired_state)
+9:	rts
+								
+get_tilemap_addr_from_coords: | 2FF0
+    lsr.b     #3,d6                             | YPOS to [4:0]
+    and.w     #0x001f,d6                          
+    not.b			d5                                  
+    lsl.w     #2,d5                             | XPOS to [9:5]
+    and.w     #0x03e0,d5                          
+    or.w      d6,d5                             | combine
+    rts
+
+animate_mario_or_barrel_sprite: | 3009
+		move.b		d0,d3															| sprite type
+		ror.b			#1,d0
+		bcs				2f
+		move.b		#0x93,d2													| sequence 3,0,1,2
+		ror.b			#2,d0
+		bcc				1f
+		move.b		#0x6c,d2													| sequence 0,3,2,1
+1:	rol.b			#1,d0
+		bcs				4f
+		and.b			#0xf0,d2
+		bra				4f
+2:	move.b		#0xb4,d2													| sequence 0,1,3,2 (mario left)
+		ror.b			#2,d0															| moving sprite left?
+		bcc				3f																| yes, skip
+		move.b		#0x1e,d2													| sequence 2,3,1,0 (mario right)
+3:	btst.b		#2,d1															| special animation cell #?
+		beq				4f																| no, skip
+		sub.b			#1,d1															| 4->3
+4:	ror.b			#2,d2
+		move.b		d2,d0
+		and.b			#3,d0															| get animation animation cell
+		cmp.b			d1,d0															| same as current?
+		bne				4b																| no, loop
+		move.b		d2,d0
+		ror.b			#2,d0
+		and.b			#3,d0															| get next animation cell #
+		cmpi.b		#3,d0															| special case?
+		bne				9f																| no, return
+		bclr.b		#2,d3
+		sub.b			#1,d3
+		bne				9f
+		moveq			#4,d0															| special case animation cell #
+9:  rts
+    
+wipe_ladder_as_kong_climbs: | 304A
+		move.w		#0xffe0,d3												| column offset
+		moveq			#0,d1
+		move.b		(_unk_0_638E),d1
+		LEA_VRAM_A 0x200,a0
+		jsr				copy_tile_from_next_column
+		LEA_VRAM_A 0x1c0,a0
+		jsr				copy_tile_from_next_column
+		sub.b			#1,(_unk_0_638E)
+		rts
+
+copy_tile_from_next_column:
+		adda.w		d1,a0
+		move.b		(a0),d0
+		adda.w		d3,a0
+		move.b		d0,(a0)
+		rts
+				
+wait_and_inc_sequence: | 3069
+		WAIT_8_BIT_COUNTDOWN
+		move.l		(_ptr_current_sequence),a0
+		add.b			#1,(a0)															| next sequence
+9:	rts
+
+animate_kong_climbing: | 306F
+		add.b			#1,(_unk_0_62AF)
+		move.b		(_unk_0_62AF),d0
+		and.b			#7,d0																| time to animate?
+		bne				9f																	| no, skip
+		LEA_SPR_X	2,a0                                | kong
+		move.b		#0xfc,d2
+		jsr				add_c_sprite_register_x10
+		move.b		#0x81,d2
+		LEA_SPR_FY_CODE 2,a0                          | kong
+		jsr				sub_3096
+		LEA_SPR_FY_CODE 7,a0                          | kong
+		jsr				sub_3096
+		jsr				rand
+		and.b			#0x80,d0
+		LEA_SPR_FY_CODE 11,a0                         | kong
+		eor.b			d0,(a0)							
+9:	rts
+
+sub_3096: | 3096
+		moveq			#2-1,d1
+1:	eor.b			d2,(a0)
+		adda			#4,a0
+		dbf				d1,1b		
+		rts
+						            
+queue_fg_vector_fn: | 309F
+* preserve HL/a0
+		lea				_fg_vector_fn_params,a2
+		move.b		_fg_fn_queue_tail,d7								| ptr tail
+		and.w			#0xff,d7                						
+		move.b		0(a2,d7.w),d0												| 1st byte
+		btst			#7,d0																| empty entry?
+		beq				9f																	| no, exit
+		move.w		d3,0(a2,d7.w)												| queue entry
+		addq.b		#2,d7																| new tail
+		cmpi.b		#64,d7															| wrap? (was #0xC0)
+		bcs				1f																	| no, skip
+		moveq			#0,d7																| (was #0xC0)
+1:	move.b		d7,(_fg_fn_queue_tail)							| store tail
+9:	rts
+
+hide_object_sprites: | 30BD
+    LEA_SPR_A 20,a0                               | (kong's legs)
+    moveq     #2-1,d1                             | 2 sprites to hide
+    jsr       zero_sprite_y_xB
+    LEA_SPR_A 32,a0                               | (springs)
+    moveq     #10-1,d1                            | 10 sprites to hide
+    jsr       zero_sprite_y_xB
+    LEA_SPR_A 46,a0                               | (cement pies & ???)
+    moveq     #11-1,d1                            | 11 sprites to hide
+    jsr       zero_sprite_y_xB
+    LEA_SPR_A 67,a0                               | (hat, purse, umbrella, hammersx2)
+    moveq     #5-1,d1                             | 5 sprites to hide
+    bra       zero_sprite_y_xB
+    rts
+
+hide_mario_and_elevators: | 30DB
+    LEA_SPR_Y 19,a0                               | mario
+    move.b    #0,(a0)                             | hide
+    LEA_SPR_Y 22,a0                               | elevators
+    moveq     #6-1,d1                             | 6 sprite to hide
+zero_sprite_y_xB: | 30E4
+    move.b    #0,(a0)                             | Y (hide sprite)
+    adda      #4,a0
+    dbf       d1,zero_sprite_y_xB
+    rts
+        	    
+bonus_points_tbl: | 3529
+    .byte 0, 0, 0                         | 0 pts
+    .byte 0, 1, 0                         | 100 pts
+    .byte 0, 2, 0                         | 200 pts
+    .byte 0, 3, 0                         | 300 pts
+    .byte 0, 4, 0                         | 400 pts
+    .byte 0, 5, 0                         | 500 pts
+    .byte 0, 6, 0                         | 600 pts
+    .byte 0, 7, 0                         | 700 pts
+    .byte 0, 8, 0                         | 800 pts
+    .byte 0, 9, 0                         | 900 pts
+    .byte 0, 0, 0                         | 0 pts
+    .byte 0, 0x10, 0                      | 1000 pts
+    .byte 0, 0x20, 0                      | 2000 pts
+    .byte 0, 0x30, 0                      | 3000 pts
+    .byte 0, 0x40, 0                      | 4000 pts
+    .byte 0, 0x50, 0                      | 5000 pts
+    .byte 0, 0x60, 0                      | 6000 pts
+    .byte 0, 0x70, 0                      | 7000 pts
+    .byte 0, 0x80, 0                      | 8000 pts
+    .byte 0, 0x90, 0                      | 9000 pts
+    .align 2
+
+    .align 2
+high_score_tbl: | 3565
+    VRAM_O 0x394
+    .byte 0x01, 0x23, 0x24, 0x10, 0x10, 0x00, 0x00, 0x07, 0x06, 0x05, 0x00, 0x10, 0x10
+    .byte 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+    .byte 0x10, 0x3F, 0x00, 0x50, 0x76, 0x00
+    .align 2
+    VRAM_O 0x2F4
+    VRAM_O 0x396
+    .byte 0x02, 0x1E, 0x14, 0x10, 0x10, 0x00, 0x00, 0x06, 0x01, 0x00, 0x00, 0x10, 0x10
+    .byte 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+    .byte 0x10, 0x3F, 0x00, 0x00, 0x61, 0x00
+    .align 2
+    VRAM_O 0x2F6
+    VRAM_O 0x398
+    .byte 0x03, 0x22, 0x14, 0x10, 0x10, 0x00, 0x00, 0x05, 0x09, 0x05, 0x00, 0x10, 0x10
+    .byte 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+    .byte 0x10, 0x3F, 0x00, 0x50, 0x59, 0x00
+    .align 2
+    VRAM_O 0x2F8
+    VRAM_O 0x39A
+    .byte 0x04, 0x24, 0x18, 0x10, 0x10, 0x00, 0x00, 0x05, 0x00, 0x05, 0x00, 0x10, 0x10
+    .byte 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+    .byte 0x10, 0x3F, 0x00, 0x50, 0x50, 0x00
+    .align 2
+    VRAM_O 0x2FA
+    VRAM_O 0x39C
+    .byte 0x05, 0x24, 0x18, 0x10, 0x10, 0x00, 0x00, 0x04, 0x03, 0x00, 0x00, 0x10, 0x10
+    .byte 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+    .byte 0x10, 0x3F, 0x00, 0x00, 0x43, 0x00
+    .align 2
+    VRAM_O 0x2FC
+
+letter_coords: | 360F
+		.byte 0x3B, 0x5C, 0x4B, 0x5C, 0x5B, 0x5C, 0x6B, 0x5C, 0x7B
+		.byte 0x5C, 0x8B, 0x5C, 0x9B, 0x5C, 0xAB, 0x5C, 0xBB, 0x5C
+		.byte 0xCB, 0x5C, 0x3B, 0x6C, 0x4B, 0x6C, 0x5B, 0x6C, 0x6B
+		.byte 0x6C, 0x7B, 0x6C, 0x8B, 0x6C, 0x9B, 0x6C, 0xAB, 0x6C
+		.byte 0xBB, 0x6C, 0xCB, 0x6C, 0x3B, 0x7C, 0x4B, 0x7C, 0x5B
+		.byte 0x7C, 0x6B, 0x7C, 0x7B, 0x7C, 0x8B, 0x7C, 0x9B, 0x7C
+		.byte 0xAB, 0x7C, 0xBB, 0x7C, 0xCB, 0x7C
+
+    .align 4
+message_table: | 364B
+    .long aGAME_OVER
+    .long 1
+    .long aPLAYER_I
+    .long aPLAYER_II
+    .long aHIGH_SCORE
+    .long aCREDIT
+    .long 6
+    .long aHOW_HIGH_CAN_YOU_GET
+    .long 8
+    .long aONLY_1_PLAYER_BUTTON
+    .long a1_OR_2_PLAYERS
+    .long 0xB
+    .long aPUSH
+    .long aNAME_REGISTRATION
+    .long aNAME
+    .long aDASHDASHDASH
+    .long aA_B_C_D_E_F_G_H_I_J
+    .long aK_L_M_N_O_P_Q_R_S_T
+    .long aU_V_W_X_Y_Z_rub_end
+    .long aREGI_TIME
+    .long _high_score_tbl_ram
+    .long _hs_tbl_2nd
+    .long _hs_tbl_3rd
+    .long _hs_tbl_4th
+    .long _hs_tbl_5th
+    .long aRANK_SCORE_NAME
+    .long aYOUR_NAME_WAS_REGISTERED
+    .long aINSERT_COIN
+    .long aPLAYER_COIN
+    .long 0x1D
+    .long aCOPYRIGHT_1981
+    .long aNINTENDO_OF_AMERICA_INC
+
+    .align 2
+aGAME_OVER: | 368B
+    VRAM_O 0x296
+    .byte 0x17, 0x11, 0x1D, 0x15, 0x10, 0x10, 0x1F, 0x26, 0x15
+    .byte 0x22, 0x3F
+    .align 2
+aPLAYER_I:        
+    VRAM_O 0x294
+    .byte 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10, 0x30, 0x32
+    .byte 0x31, 0x3F
+    .align 2
+aPLAYER_II:       
+    VRAM_O 0x294
+    .byte 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10, 0x30, 0x33
+    .byte 0x31, 0x3F
+    .align 2
+    .align 2
+aHIGH_SCORE:    
+    VRAM_O 0x280
+    .byte 0x18, 0x19, 0x17, 0x18, 0x10, 0x23, 0x13, 0x1F, 0x22
+    .byte 0x15, 0x3F
+    .align 2
+aCREDIT:        
+    VRAM_O 0x19F
+    .byte 0x13, 0x22, 0x15, 0x14, 0x19, 0x24, 0x10, 0x10, 0x10
+    .byte 0x10, 0x3F
+    .align 2
+aHOW_HIGH_CAN_YOU_GET:
+    VRAM_O 0x35E
+    .byte 0x18, 0x1F, 0x27, 0x10, 0x18, 0x19, 0x17, 0x18, 0x10
+    .byte 0x13, 0x11, 0x1E, 0x10, 0x29, 0x1F, 0x25, 0x10, 0x17
+    .byte 0x15, 0x24, 0x10, 0xFB, 0x10, 0x3F
+    .align 2
+aONLY_1_PLAYER_BUTTON:
+    VRAM_O 0x329
+    .byte 0x1F, 0x1E, 0x1C, 0x29, 0x10, 1, 0x10, 0x20, 0x1C
+    .byte 0x11, 0x29, 0x15, 0x22, 0x10, 0x12, 0x25, 0x24, 0x24
+    .byte 0x1F, 0x1E, 0x3F
+    .align 2
+a1_OR_2_PLAYERS:
+    VRAM_O 0x329
+    .byte 1, 0x10, 0x1F, 0x22, 0x10, 2, 0x10, 0x20, 0x1C, 0x11
+    .byte 0x29, 0x15, 0x22, 0x23, 0x10, 0x12, 0x25, 0x24, 0x24
+    .byte 0x1F, 0x1E, 0x3F
+    .align 2
+aPUSH:          
+    VRAM_O 0x227
+    .byte 0x20, 0x25, 0x23, 0x18, 0x3F
+    .align 2
+aNAME_REGISTRATION:
+    VRAM_O 0x306
+    .byte 0x1E, 0x11, 0x1D, 0x15, 0x10, 0x22, 0x15, 0x17, 0x19
+    .byte 0x23, 0x24, 0x22, 0x11, 0x24, 0x19, 0x1F, 0x1E, 0x3F
+    .align 2
+aNAME:          
+    VRAM_O 0x288
+    .byte 0x1E, 0x11, 0x1D, 0x15, 0x2E, 0x3F
+    .align 2
+aDASHDASHDASH:  
+    VRAM_O 0x1E9
+    .byte 0x2D, 0x2D, 0x2D, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+    .byte 0x10, 0x10, 0x10, 0x3F
+    .align 2
+aA_B_C_D_E_F_G_H_I_J:
+    VRAM_O 0x30B
+    .byte 0x11, 0x10, 0x12, 0x10, 0x13, 0x10, 0x14, 0x10, 0x15
+    .byte 0x10, 0x16, 0x10, 0x17, 0x10, 0x18, 0x10, 0x19, 0x10
+    .byte 0x1A, 0x3F
+    .align 2
+aK_L_M_N_O_P_Q_R_S_T:
+    VRAM_O 0x30D
+    .byte 0x1B, 0x10, 0x1C, 0x10, 0x1D, 0x10, 0x1E, 0x10, 0x1F
+    .byte 0x10, 0x20, 0x10, 0x21, 0x10, 0x22, 0x10, 0x23, 0x10
+    .byte 0x24, 0x3F
+    .align 2
+aU_V_W_X_Y_Z_rub_end:
+    VRAM_O 0x30F
+    .byte 0x25, 0x10, 0x26, 0x10, 0x27, 0x10, 0x28, 0x10, 0x29
+    .byte 0x10, 0x2A, 0x10, 0x2B, 0x10, 0x2C, 0x44, 0x45, 0x46
+    .byte 0x47, 0x48, 0x10, 0x3F
+    .align 2
+aREGI_TIME:     
+    VRAM_O 0x2F2
+    .byte 0x22, 0x15, 0x17, 0x19, 0x10, 0x24, 0x19, 0x1D, 0x15
+    .byte 0x10, 0x10, 0x30, 3, 0, 0x31, 0x10, 0x3F
+    .align 2
+aRANK_SCORE_NAME:
+    VRAM_O 0x392
+    .byte 0x22, 0x11, 0x1E, 0x1B, 0x10, 0x10, 0x23, 0x13, 0x1F
+    .byte 0x22, 0x15, 0x10, 0x10, 0x1E, 0x11, 0x1D, 0x15, 0x10
+    .byte 0x10, 0x10, 0x10, 0x3F
+    .align 2
+aYOUR_NAME_WAS_REGISTERED:
+    VRAM_O 0x372
+    .byte 0x29, 0x1F, 0x25, 0x22, 0x10, 0x1E, 0x11, 0x1D, 0x15
+    .byte 0x10, 0x27, 0x11, 0x23, 0x10, 0x22, 0x15, 0x17, 0x19
+    .byte 0x23, 0x24, 0x15, 0x22, 0x15, 0x14, 0x42, 0x3F
+    .align 2
+aINSERT_COIN:   
+    VRAM_O 0x2A7
+    .byte 0x19, 0x1E, 0x23, 0x15, 0x22, 0x24, 0x10, 0x13, 0x1F
+    .byte 0x19, 0x1E, 0x10, 0x3F
+    .align 2
+aPLAYER_COIN:   
+    VRAM_O 0x30A
+    .byte 0x10, 0x10, 0x20, 0x1C, 0x11, 0x29, 0x15, 0x22, 0x10
+    .byte 0x10, 0x10, 0x10, 0x13, 0x1F, 0x19, 0x1E, 0x3F
+    .align 2
+    VRAM_O 0x2FC
+a_NINTENDO:     
+    .byte 0x49, 0x4A, 0x10, 0x1E, 0x19, 0x1E, 0x24, 0x15, 0x1E
+    .byte 0x14, 0x1F, 0x10, 0x10, 0x10, 0x10, 0x3F
+    .align 2
+    VRAM_O 0x17C
+    .byte 1, 9, 8, 1, 0x3F
+
+draw_data_climb: | 380D
+		.byte 2, 0x97, 0x38, 0x68, 0x38, 2, 0xDF, 0x54, 0x10, 0x54
+		.byte 2, 0xEF, 0x6D, 0x20, 0x6D, 2, 0xDF, 0x8E, 0x10, 0x8E
+		.byte 2, 0xEF, 0xAF, 0x20, 0xAF, 2, 0xDF, 0xD0, 0x10, 0xD0
+		.byte 2, 0xEF, 0xF1, 0x10, 0xF1, 0, 0x53, 0x18, 0x53, 0x54
+		.byte 0, 0x63, 0x18, 0x63, 0x54, 0, 0x93, 0x38, 0x93, 0x54
+		.byte 0, 0x83, 0x54, 0x83, 0xF1, 0, 0x93, 0x54, 0x93, 0xF1
+		.byte 0xAA
+
+bonus_graphic_tiles: | 384A
+		.byte 0x8D, 0x7D, 0x8C
+		.byte 0x6F, 0, 0x7C
+		.byte 0x6E, 0, 0x7C
+		.byte 0x6D, 0, 0x7C
+		.byte 0x6C, 0, 0x7C
+		.byte 0x8F, 0x7F, 0x8E
+
+dk_normal_spr:  | 385C
+		.byte 0x47, 0x27, 0x08, 0x50
+		.byte 0x2F, 0xA7, 0x08, 0x50
+		.byte 0x3B, 0x25, 0x08, 0x50
+		.byte 0x00, 0x70, 0x08, 0x48
+		.byte 0x3B, 0x23, 0x07, 0x40
+		.byte 0x46, 0xA9, 0x08, 0x44
+		.byte 0x00, 0x70, 0x08, 0x48
+		.byte 0x30, 0x29, 0x08, 0x44
+		.byte 0x00, 0x70, 0x08, 0x48
+		.byte 0x00, 0x70, 0x0A, 0x48
+
+pauline_spr: | 3884
+		.byte 0x6F, 0x10, 0x09, 0x23
+		.byte 0x6F, 0x11, 0x0A, 0x33
+
+dk_climbing_spr: | 388C
+		.byte 0x50, 0x34, 8, 0x3C
+		.byte 0, 0x35, 8, 0x3C
+		.byte 0x53, 0x32, 8, 0x40
+		.byte 0x63, 0x33, 8, 0x40
+		.byte 0, 0x70, 8, 0x48
+		.byte 0x53, 0x36, 8, 0x50
+		.byte 0x63, 0x37, 8, 0x50
+		.byte 0x6B, 0x31, 8, 0x41
+		.byte 0, 0x70, 8, 0x48
+		.byte 0x6A, 0x14, 0xA, 0x48
+
+dk_intro_jump_up_data: | 38B4
+		.byte 0xFD, 0xFD, 0xFD, 0xFD, 0xFD, 0xFD, 0xFD, 0xFE, 0xFE
+		.byte 0xFE, 0xFE, 0xFE, 0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0
+		.byte 0, 1, 1, 1, 0x7F
+dk_intro_jump_left_data: | 38CB
+		.byte 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 1, 0
+		.byte 1, 1, 1, 1, 1, 0x7F
+
+draw_data_bend_girders_2: | 38DC
+		.byte 4, 0x7F, 0xF0, 0x10, 0xF0, 2, 0xDF, 0xF2, 0x70, 0xF8
+		.byte 2, 0x6F, 0xF8, 0x10, 0xF8, 0xAA, 4, 0xDF, 0xD0, 0x90
+		.byte 0xD0, 2, 0xDF, 0xDC, 0x20, 0xD1, 0xAA, 0xFF, 0xFF
+		.byte 0xFF, 0xFF, 0xFF, 4, 0xDF, 0xA8, 0x20, 0xA8, 4, 0x5F
+		.byte 0xB0, 0x20, 0xB0, 2, 0xDF, 0xB0, 0x20, 0xBB, 0xAA
+		.byte 4, 0xDF, 0x88, 0x30, 0x88, 4, 0xDF, 0x90, 0xB0, 0x90
+		.byte 2, 0xDF, 0x9A, 0x20, 0x8F, 0xAA, 4, 0xBF, 0x68, 0x20
+		.byte 0x68, 4, 0x3F, 0x70, 0x20, 0x70, 2, 0xDF, 0x6E, 0x20
+		.byte 0x79, 0xAA
+
+draw_data_bend_girders_1: | 392C
+		.byte 2, 0xDF, 0x58, 0xA0, 0x55, 0xAA
+
+dk_throw_barrel_spr: | 3932
+    .byte 0, 0x70, 8, 0x44
+    .byte 0x2B, 0xAC, 8, 0x4C
+    .byte 0x3B, 0xAE, 8, 0x4C
+    .byte 0x3B, 0xAF, 8, 0x3C
+    .byte 0x4B, 0xB0, 7, 0x3C
+    .byte 0x4B, 0xAD, 8, 0x4C
+    .byte 0, 0x70, 8, 0x44
+    .byte 0, 0x70, 8, 0x44
+    .byte 0, 0x70, 8, 0x44
+    .byte 0, 0x70, 0xA, 0x44
+    .byte 0x47, 0x27, 8, 0x4C
+    .byte 0x2F, 0xA7, 8, 0x4C
+    .byte 0x3B, 0x25, 8, 0x4C
+    .byte 0, 0x70, 8, 0x44
+    .byte 0x3B, 0x23, 7, 0x3C
+    .byte 0x4B, 0x2A, 8, 0x3C
+    .byte 0x4B, 0x2B, 8, 0x4C
+    .byte 0x2B, 0xAA, 8, 0x3C
+    .byte 0x2B, 0xAB, 8, 0x4C
+    .byte 0, 0x70, 0xA, 0x44
+    .byte 0, 0x70, 8, 0x44
+    .byte 0x4B, 0x2C, 8, 0x4C
+    .byte 0x3B, 0x2E, 8, 0x4C
+    .byte 0x3B, 0x2F, 8, 0x3C
+    .byte 0x2B, 0x30, 7, 0x3C
+    .byte 0x2B, 0x2D, 8, 0x4C
+    .byte 0, 0x70, 8, 0x44
+    .byte 0, 0x70, 8, 0x44
+    .byte 0, 0x70, 8, 0x44
+    .byte 0, 0x70, 0xA, 0x44
+
+dk_thrash_right_spr:	| 39CF
+		.byte 0x47, 0x27, 0x08, 0x50
+		.byte 0x2D, 0x26, 0x08, 0x50
+		.byte 0x3B, 0x25, 0x08, 0x50
+		.byte 0x00, 0x70, 0x08, 0x48
+		.byte 0x3B, 0x24, 0x07, 0x40
+		.byte 0x4B, 0x28, 0x08, 0x40
+		.byte 0x00, 0x70, 0x08, 0x48
+		.byte 0x30, 0x29, 0x08, 0x44
+		.byte 0x00, 0x70, 0x08, 0x48
+		.byte 0x00, 0x70, 0x0A, 0x48
+
+level_seq_1: | 3A65
+    .byte OPT_DEBUG_1ST_LEVEL_TYPE, 4, 1, 3, 4, 1, 2, 3, 4, 1, 2, 1, 3, 4
+level_seq_2: | 3A73
+    .byte 1, 2, 1, 3, 1, 4, 0x7F
+
+barrel_level_tilemap_data: | 3AE4
+    .byte 2, 0x97, 0x38, 0x68, 0x38, 2, 0x9F, 0x54, 0x10, 0x54
+    .byte 2, 0xDF, 0x58, 0xA0, 0x55, 2, 0xEF, 0x6D, 0x20, 0x79
+    .byte 2, 0xDF, 0x9A, 0x10, 0x8E, 2, 0xEF, 0xAF, 0x20, 0xBB
+    .byte 2, 0xDF, 0xDC, 0x10, 0xD0, 2, 0xFF, 0xF0, 0x80, 0xF7
+    .byte 2, 0x7F, 0xF8, 0x00, 0xF8, 0, 0xCB, 0x57, 0xCB, 0x6F
+    .byte 0, 0xCB, 0x99, 0xCB, 0xB1, 0, 0xCB, 0xDB, 0xCB, 0xF3
+    .byte 0, 0x63, 0x18, 0x63, 0x54, 1, 0x63, 0xD5, 0x63, 0xF8
+    .byte 0, 0x33, 0x78, 0x33, 0x90, 0, 0x33, 0xBA, 0x33, 0xD2
+    .byte 0, 0x53, 0x18, 0x53, 0x54, 1, 0x53, 0x92, 0x53, 0xB8
+    .byte 0, 0x5B, 0x76, 0x5B, 0x92, 0, 0x73, 0xB6, 0x73, 0xD6
+    .byte 0, 0x83, 0x95, 0x83, 0xB5, 0, 0x93, 0x38, 0x93, 0x54
+    .byte 1, 0xBB, 0x70, 0xBB, 0x98, 1, 0x6B, 0x54, 0x6B, 0x75
+    .byte 0xAA
+    
+cement_pie_level_tilemap_data: | 3B5D
+    .byte 6, 0x8F, 0x90, 0x70, 0x90, 6, 0x8F, 0x98, 0x70, 0x98
+    .byte 6, 0x8F, 0xA0, 0x70, 0xA0, 0, 0x63, 0x18, 0x63, 0x58
+    .byte 0, 0x63, 0x80, 0x63, 0xA8, 0, 0x63, 0xD0, 0x63, 0xF8
+    .byte 0, 0x53, 0x18, 0x53, 0x58, 0, 0x53, 0xA8, 0x53, 0xD0
+    .byte 0, 0x9B, 0x80, 0x9B, 0xA8, 0, 0x9B, 0xD0, 0x9B, 0xF8
+    .byte 1, 0x23, 0x58, 0x23, 0x80, 1, 0xDB, 0x58, 0xDB, 0x80
+    .byte 0, 0x2B, 0x80, 0x2B, 0xA8, 0, 0xD3, 0x80, 0xD3, 0xA8
+    .byte 0, 0xA3, 0xA8, 0xA3, 0xD0, 0, 0x2B, 0xD0, 0x2B, 0xF8
+    .byte 0, 0xD3, 0xD0, 0xD3, 0xF8, 0, 0x93, 0x38, 0x93, 0x58
+    .byte 2, 0x97, 0x38, 0x68, 0x38, 3, 0xEF, 0x58, 0x10, 0x58
+    .byte 3, 0xF7, 0x80, 0x88, 0x80, 3, 0x77, 0x80, 0x08, 0x80
+    .byte 2, 0xA7, 0xA8, 0x50, 0xA8, 2, 0xE7, 0xA8, 0xB8, 0xA8
+    .byte 2, 0x3F, 0xA8, 0x18, 0xA8, 3, 0xEF, 0xD0, 0x10, 0xD0
+    .byte 2, 0xEF, 0xF8, 0x10, 0xF8
+    .byte 0xAA
+    
+elevator_level_tilemap_data: | 3BE5
+    .byte 0, 0x63, 0x18, 0x63, 0x58, 0, 0x63, 0x88, 0x63, 0xD0
+    .byte 0, 0x53, 0x18, 0x53, 0x58, 0, 0x53, 0x88, 0x53, 0xD0
+    .byte 0, 0xE3, 0x68, 0xE3, 0x90, 0, 0xE3, 0xB8, 0xE3, 0xD0
+    .byte 0, 0xCB, 0x90, 0xCB, 0xB0, 0, 0xB3, 0x58, 0xB3, 0x78
+    .byte 0, 0x9B, 0x80, 0x9B, 0xA0, 0, 0x93, 0x38, 0x93, 0x58
+    .byte 0, 0x23, 0x88, 0x23, 0xC0, 0, 0x1B, 0xC0, 0x1B, 0xE8
+    .byte 2, 0x97, 0x38, 0x68, 0x38, 2, 0xB7, 0x58, 0x10, 0x58
+    .byte 2, 0xEF, 0x68, 0xE0, 0x68, 2, 0xD7, 0x70, 0xC8, 0x70
+    .byte 2, 0xBF, 0x78, 0xB0, 0x78, 2, 0xA7, 0x80, 0x90, 0x80
+    .byte 2, 0x67, 0x88, 0x48, 0x88, 2, 0x27, 0x88, 0x10, 0x88
+    .byte 2, 0xEF, 0x90, 0xC8, 0x90, 2, 0xA7, 0xA0, 0x98, 0xA0
+    .byte 2, 0xBF, 0xA8, 0xB0, 0xA8, 2, 0xD7, 0xB0, 0xC8, 0xB0
+    .byte 2, 0xEF, 0xB8, 0xE0, 0xB8, 2, 0x27, 0xC0, 0x10, 0xC0
+    .byte 2, 0xEF, 0xD0, 0xD8, 0xD0, 2, 0x67, 0xD0, 0x50, 0xD0
+    .byte 2, 0xCF, 0xD8, 0xC0, 0xD8, 2, 0xB7, 0xE0, 0xA8, 0xE0
+    .byte 2, 0x9F, 0xE8, 0x88, 0xE8, 2, 0x27, 0xE8, 0x10, 0xE8
+    .byte 2, 0xEF, 0xF8, 0x10, 0xF8
+    .byte 0xAA
+    
+rivet_level_tilemap_data: | 3C8B
+    .byte 0, 0x7B, 0x80, 0x7B, 0xA8, 0, 0x7B, 0xD0, 0x7B, 0xF8
+    .byte 0, 0x33, 0x58, 0x33, 0x80, 0, 0x53, 0x58, 0x53, 0x80
+    .byte 0, 0xAB, 0x58, 0xAB, 0x80, 0, 0xCB, 0x58, 0xCB, 0x80
+    .byte 0, 0x2B, 0x80, 0x2B, 0xA8, 0, 0xD3, 0x80, 0xD3, 0xA8
+    .byte 0, 0x23, 0xA8, 0x23, 0xD0, 0, 0x5B, 0xA8, 0x5B, 0xD0
+    .byte 0, 0xA3, 0xA8, 0xA3, 0xD0, 0, 0xDB, 0xA8, 0xDB, 0xD0
+    .byte 0, 0x1B, 0xD0, 0x1B, 0xF8, 0, 0xE3, 0xD0, 0xE3, 0xF8
+    .byte 5, 0xB7, 0x30, 0x48, 0x30, 5, 0xCF, 0x58, 0x30, 0x58
+    .byte 5, 0xD7, 0x80, 0x28, 0x80, 5, 0xDF, 0xA8, 0x20, 0xA8
+    .byte 5, 0xE7, 0xD0, 0x18, 0xD0, 5, 0xEF, 0xF8, 0x10, 0xF8
+    .byte 0xAA
+
+how_high_strings: | 3CF0
+		.byte 0x10, 0x82, 0x85, 0x8B                              | " 25m"
+		.byte 0x10, 0x85, 0x80, 0x8B                              | " 50m"
+		.byte 0x10, 0x87, 0x85, 0x8B                              | " 75m"
+		.byte 0x81, 0x80, 0x80, 0x8B                              | "100m"
+		.byte 0x81, 0x82, 0x85, 0x8B                              | "125m"
+		.byte 0x81, 0x85, 0x80, 0x8B                              | "150m"
+
+		.align 2
+title_screen:    | 3D08
+.ifeq OPT_ALTERNATE_TITLE
+		.word 5, 0x388, 1, 0x368, 1, 0x36C, 3, 0x349              | "D"
+		.word 5, 0x308, 1, 0x2E8, 1, 0x2EC, 5, 0x2C8              | "O"
+		.word 5, 0x288, 2, 0x269, 2, 0x24A, 5, 0x228              | "N"
+		.word 5, 0x1E8, 1, 0x1CA, 3, 0x1A9, 1, 0x188, 1, 0x18C    | "K"
+		.word 5, 0x148, 1, 0x128, 1, 0x12A, 1, 0x12C, 1, 0x108
+		.word 1, 0x10A, 1, 0x10C                                  | "E"
+		.word 3, 0x0C8, 3, 0x0AA, 3, 0x088                        | "Y"
+.else
+    NO=0x20
+    EO=NO+0xA0
+    OO=NO-0x1A0
+		.word 5, 0x288+NO, 2, 0x269+NO, 2, 0x24A+NO, 5, 0x228+NO  | "N"
+		.word 5, 0x148+EO, 1, 0x128+EO, 1, 0x12A+EO, 1, 0x12C+EO
+		.word 1, 0x108+EO, 1, 0x10A+EO, 1, 0x10C+EO               | "E"
+		.word 5, 0x308+OO, 1, 0x2E8+OO, 1, 0x2EC+OO, 5, 0x2C8+OO  | "O"
+.endif		
+		.word 5, 0x32F, 5, 0x30F, 2, 0x2F0, 2, 0x2CF, 2, 0x2D2    | "K"
+		.word 5, 0x28F, 5, 0x26F, 1, 0x24F, 1, 0x253, 5, 0x22F    | "O"
+		.word 5, 0x1EF, 2, 0x1D0, 2, 0x1B1, 5, 0x18F              | "N"
+		.word 3, 0x150, 5, 0x12F, 1, 0x10F, 1, 0x113, 1, 0x0EF 
+		.word 1, 0x0F1, 1, 0x0F3, 2, 0x0D1                        | "G"
+		.word 0
+
+level_init_data: | 3D9C
+		.byte 0, 0, 0x23, 0x68, 1, 0x11, 0, 0, 0, 0x10, 0xDB, 0x68
+		.byte 1, 0x40, 0, 0, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0
+		.byte 0, 0, 0, 0, 0x80, 1, 0xC0, 0xFF, 1, 0xFF, 0xFF, 0x34
+		.byte 0xC3, 0x39, 0, 0x67, 0x80, 0x69, 0x1A, 1, 0, 0, 0
+		.byte 0, 0, 0, 0, 0, 4, 0, 0x10, 0, 0, 0, 0, 0
+
+top_barrel_spr: | 3DDC
+		.byte 0x1E, 0x18, 0xB, 0x4B 
+		.byte 0x14, 0x18, 0xB, 0x4B 
+		.byte 0x1E, 0x18, 0xB, 0x3B
+		.byte 0x14, 0x18, 0xB, 0x3B
+
+fireball_spr: | 3DEC
+    .byte 0x3D, 1, 3, 2
+
+rivet_fireball_spr: | 3DF0
+    .byte 0x4D, 1, 4, 1
+
+girders_fireball_spr: | 3DF4
+		.byte 0x27, 0x70, 1, 0xE0, 0, 0
+
+cement_fireball_spr: | 3DFA
+    .byte 0x7F, 0x40, 1, 0x78, 2, 0
+
+* oil barrels are DK sprite #63
+girder_oil_barrel_spr: | 3E00
+		.byte 0x27, 0x49, 0xC, 0xF0
+cement_oil_barrel_spr: | 3E04
+    .byte 0x7F, 0x49, 0xC, 0x88
+
+hammer_pickup_spr: | 3E08
+		.byte 0x1E, 7, 3, 9
+
+* coordinates for hammers
+girder_hammer_locs: | 3E0C
+		.byte 0x24, 0x64
+		.byte 0xBB, 0xC0
+cement_hammer_locs: | 3E10
+    .byte 0x23, 0x8D
+    .byte 0x7B, 0xB4
+rivet_hammer_locs: | 3E14
+    .byte 0x1B, 0x8C, 0x7C, 0x64
+
+cement_pie_spr: | 3E18
+    .byte 0x4B, 0xE, 4, 2
+
+* cement ladders are DK sprites 17-18
+cement_ladder_spr: | 3E1C
+    .byte 0x23, 0x46, 3, 0x68
+    .byte 0xDB, 0x46, 3, 0x68
+
+* cement conveyors are DK sprites 57-62
+cement_conveyor_spr: | 3E24
+    .byte 0x17, 0x50, 0, 0x5C 
+    .byte 0xE7, 0xD0, 0, 0x5C 
+    .byte 0x8C, 0x50, 0, 0x84 
+    .byte 0x73, 0xD0, 0, 0x84 
+    .byte 0x17, 0x50, 0, 0xD4
+    .byte 0xE7, 0xD0, 0, 0xD4
+
+cement_obj_spr: | 3E3C
+    .byte 0x53, 0x73, 0xA, 0xA0     | hat
+    .byte 0x8B, 0x74, 0xA, 0xF0     | purse
+    .byte 0xDB, 0x75, 0xA, 0xA0     | umbrella
+
+elevator_obj_spr: | 3E48
+		.byte 0x5B, 0x73, 0xA, 0xC8			| hat
+		.byte 0xE3, 0x74, 0xA, 0x60			| purse
+		.byte 0x1B, 0x75, 0xA, 0x80			| umbrella
+
+rivet_obj_spr: | 3E54
+    .byte 0xDB, 0x73, 0xA, 0xC8     | hat
+    .byte 0x93, 0x74, 0xA, 0xF0     | purse
+    .byte 0x33, 0x75, 0xA, 0x50     | umbrella
+
+* elevators are DK sprites 22-27
+elevator_spr: | 3E60
+		.byte 0x44, 3, 8, 4
+
+elevator_sprite_locs: | 3E64
+		.byte 0x37, 0xF4
+		.byte 0x37, 0xC0
+		.byte 0x37, 0x8C
+		.byte 0x77, 0x70
+		.byte 0x77, 0xA4
+		.byte 0x77, 0xD8
+
+		.align 2
+loc_0_3E70: | 3E70
+		rts
+				
+		.align 2
+aCOPYRIGHT_1981: | 3F00
+		VRAM_O 0x25C
+    .ifeq OPT_ALTERNATE_TITLE
+        .byte 0x49, 0x4A, 1, 9, 8, 1, 0x3F
+    .else
+        .byte 0x49, 0x4A, 2, 0, 1, 3, 0x3F
+    .endif
+    .align 2
+aNINTENDO_OF_AMERICA_INC:
+		VRAM_O 0x37D
+aNINTENDO:
+    .ifeq OPT_ALTERNATE_TITLE
+    		.byte 0x1E, 0x19, 0x1E, 0x24, 0x15, 0x1E, 0x14, 0x1F, 0x10
+        .byte 0x1F, 0x16, 0x10, 0x11, 0x1D, 0x15, 0x22, 0x19, 0x13
+        .byte 0x11, 0x10, 0x19, 0x1E, 0x13, 0x2B, 0x3F
+    .else
+*        .byte 'T'-0x30, 'C'-0x30, 'D'-0x30, 'E'-0x30, 'V'-0x30, 0x42
+				.byte 0x10
+        .byte 'N'-0x30, 'G'-0x30, 'P'-0x30, 'A'-0x30, 'C'-0x30, 'E'-0x30, 0x42
+        .byte 'B'-0x30, 'L'-0x30, 'O'-0x30, 'G'-0x30, 'S'-0x30, 'P'-0x30, 'O'-0x30, 'T'-0x30, 0x42
+        .byte 'C'-0x30, 'O'-0x30, 'M'-0x30, 0x42, 'A'-0x30, 'U'-0x30
+        .byte 0x3F
+    .endif
+
+		.align 2
+
+display_tm: | 3F24
+    LEA_VRAM_A 0xaf,a0
+    move.w    #0xffe0,d3
+    move.b    #0x9f,(a0)
+    adda.w    d3,a0
+    move.b    #0x9e,(a0)
+    rts
+    
+init_level_data_tmrs_spr: | 3FA0
+		jsr		    fix_retractable_ladders
+		jmp		    init_level_data_tmrs_spr_cont
+
+fix_retractable_ladders: | 3FA6
+		moveq			#2,d0                             | only level 2
+		RETURN_IF_NOT_LEVEL
+		moveq			#2-1,d1
+		LEA_VRAM_A 0x36c,a0
+1:	move.b		#0x10,(a0)
+		adda			#2,a0
+		move.b		#0xc0,(a0)
+		LEA_VRAM_A 0x8c,a0
+		dbf				d1,1b		
+9:	rts
+
+_end_of_dk_rom:
+
+		.bss
+		
+* RAM and variables
+
+_vram:												.space 32*32
+
+* hardware
+
+_nmi_mask:										ds.b	1
+_flipscreen:                  ds.b  1
+_sprite_bank:                 ds.b  1
+_palette_bank:								ds.b	1
+_dipsw:												ds.b	1
+
+* just for now...
+_rotate:											ds.b	1
+  .align 2
+_tilemap_set:                 ds.w  1
+_sprite_set:                  ds.w  1
+_render_palette_bank:         ds.w  1
+
+_ram_start:
+_no_of_credits:               ds.b  1
+_uncredited_coins:						ds.b	1
+_coin_state:                  ds.b  1
+_nmi_sequencer:               ds.b  1
+_attract_mode_flag:           ds.b  1
+_sixteen_bit_countdown_msb:   ds.b  1
+_eight_bit_countdown:         ds.b  1
+_main_sequencer:              ds.b  1
+_current_player_D:			      ds.b	1
+_current_player_E:			      ds.b	1
+_two_players:						      ds.b	1
+_controller_in:               ds.b  1
+_last_raw_in:                 ds.b  1
+_random_no:                   ds.w  1
+_gen_purpose_timer:	          ds.b	1
+_lives_per_game:              ds.b  1
+_bonus_setting:               ds.b  1
+_coinage:                     ds.b  4
+_upright:                     ds.b  1
+_unk_0_6030:                  ds.b  1
+_unk_0_6031:                  ds.b  1
+_unk_0_6032:                  ds.b  1
+_regi_seconds_cntr:           ds.b  1
+_regi_vblank_cntr:            ds.b  1
+_regi_current_char:           ds.b  1
+	.align 2
+_regi_entry_cursor_loc:       ds.w  1						| offset only
+	.align 4
+_regi_ptr_hs_entry_flag:      ds.l  1
+_regi_ptr_hs_entry_name:      ds.l  1
+_p1_ingame_data:              ds.b  8           | 0=livesleft
+_p2_ingame_data:              ds.b  8           | 0=livesleft
+  .align 4
+_p1_ingame_seq:               ds.l  1           | 68K only
+_p2_ingame_seq:               ds.l  1           | 68K only
+digital_snd_tmr_walk:         ds.b  1
+digital_snd_tmr_jump:         ds.b  1
+digital_snd_tmr_thump:        ds.b  1
+digital_snd_tmr_coin_spring:  ds.b  1
+digital_snd_tmr_kong_fall:    ds.b  1
+digital_snd_tmr_barrel_jump_prize:    ds.b  1
+digital_snd_tmr_6:            ds.b  1
+digital_snd_tmr_7:            ds.b  1
+_music_something:             ds.b  1
+_bg_music:                    ds.b  1
+_unk_0_608A:                  ds.b  1
+_unk_0_608B:                  ds.b  1
+_fg_fn_queue_tail:						ds.b	1
+_fg_fn_queue_head:						ds.b	1
+_p1_score:                    ds.b  3
+_p2_score:                    ds.b  3
+_high_score:                  ds.b  3
+.align 2
+_fg_vector_fn_params:					ds.b  64
+_high_score_tbl_ram:          ds.b  0x22
+_hs_tbl_2nd:                  ds.b  0x22
+_hs_tbl_3rd:                  ds.b  0x22
+_hs_tbl_4th:                  ds.b  0x22
+_hs_tbl_5th:                  ds.b  0x22
+_mario_data:                  ds.b  39          | 0x6200
+  .equ _mario_alive_flag,_mario_data+0x00
+	.equ _mario_animation_cell,_mario_data+0x02
+	.equ _mario_y,_mario_data+0x03
+	.equ _unk_0_6204,_mario_data+0x04
+	.equ _mario_x,_mario_data+0x05
+	.equ _unk_0_6206,_mario_data+0x06
+	.equ _mario_flipy_tile,_mario_data+0x07
+	.equ _mario_flipx_colour,_mario_data+0x08
+	.equ _unk_0_6209,_mario_data+0x09
+	.equ _mario_y_before_jump,_mario_data+0x0b
+	.equ _mario_x_before_jump,_mario_data+0x0c
+	.equ _unk_0_620E,_mario_data+0x0e
+	.equ _mario_cell_animate_cntr,_mario_data+0x0f
+	.equ _unk_0_6210,_mario_data+0x10
+	.equ _unk_0_6211,_mario_data+0x11
+	.equ _unk_0_6212,_mario_data+0x12
+	.equ _unk_0_6213,_mario_data+0x13
+	.equ _unk_0_6214,_mario_data+0x14
+	.equ _mario_climbing,_mario_data+0x15
+	.equ _mario_jumping,_mario_data+0x16
+	.equ _hammer_active,_mario_data+0x17
+	.equ _unk_0_6218,_mario_data+0x18
+	.equ _unk_0_6219,_mario_data+0x19
+	.equ _on_broken_ladder,_mario_data+0x1a
+	.equ _ladder_top_coord,_mario_data+0x1b
+	.equ _ladder_bottom_coord,_mario_data+0x1c
+	.equ _unk_0_621E,_mario_data+0x1e
+	.equ _unk_0_621F,_mario_data+0x1f
+	.equ _unk_0_6220,_mario_data+0x20
+	.equ _mario_falling,_mario_data+0x21
+	.equ _unk_0_6222,_mario_data+0x22
+	.equ _climb_sound_cntr,_mario_data+0x24
+	.equ _bonus_sound_flag,_mario_data+0x25
+_level_type:                  ds.b  1
+* these next 8 bytes are block-copied
+_lives_left:                  ds.b  1
+_level:                       ds.b  1
+_seq_data_unused:             ds.b  2           | need aligned 4 bytes
+_seen_intro:                  ds.b  1
+_awarded_bonus_life:					ds.b	1
+_height:                      ds.b  1
+_last_seq_lsb:                ds.b  1
+  .align 4
+_seq_data:                    ds.l  1
+
+* everything from here to 0x6B00 is cleared together
+* the 1st 64 bytes are init'd from ROM
+_unk_0_6280:									ds.b	1
+  .equ _rivets_remaining, _unk_0_6280+0x10
+															ds.b	0x2e
+_unk_0_62AF:									ds.b	1
+_bonus_timer_init_value:			ds.b	1						| there's 5 timers here!
+_unk_0_62B1:									ds.b	1
+_unk_0_62B2:									ds.b	1
+_unk_0_62B3:									ds.b	1
+_unk_0_62B4:									ds.b	1
+															ds.b	4
+_unk_0_62B9:									ds.b	1           | fire release???
+															ds.b 	6
+_ladder_data:                 ds.b  0x10
+_broken_ladder_data:          ds.b  0x30
+_show_bonus_state:            ds.b  1
+_show_bonus_timer:            ds.b  1
+_unk_0_6342:                  ds.b  1
+	.align 2
+_unk_0_6343:                  ds.w  1
+_unk_0_6380:                  ds.b  1
+_unk_0_6381:                  ds.b  1
+_unk_0_6382:                  ds.b  1
+_unk_0_6383:                  ds.b  1
+_unk_0_6384:                  ds.b  1
+_intro_sequencer:             ds.b  1
+_reunion_sequencer:           ds.b  1
+_bonus_timer_expired_state:		ds.b	1
+_title_flash_tmr_1:						ds.b	1
+_title_flash_tmr_2:						ds.b	1
+_bonus_timer:                 ds.b  1
+_next_girder_to_deform:       ds.b  1
+_unk_0_638E:                  ds.b  1
+_unk_0_6392:                  ds.b  1
+_unk_0_6396:                  ds.b  1
+_mario_on_elevator:						ds.b  1
+_mario_death_state:           ds.b  1						| 0=alive, 1=dying, 2=dead
+_death_spin_counter:          ds.b  1
+_unk_0_63A0:                  ds.b  1
+_height_counter:              ds.b  1
+	.align 2
+_disp_loc_for_height_string:  ds.w  1           | VRAM offset
+  .align 2
+_segment_addr_1:            	ds.w  1
+_segment_addr_2:            	ds.w  1
+_start_tile_index:            ds.b  1
+_end_tile_index:              ds.b  1
+_dY:                          ds.b  1
+_dX:                          ds.b  1
+_segment_type:                ds.b  1
+_tile_byte_1:                 ds.b  1
+_current_tile_in_segment:     ds.b  1
+_bonus_timer_expired:     		ds.b  1
+.align 4
+_ptr_current_sequence:				ds.l	1
+_ptr_current_jump_up_data:		ds.l	1
+_ptr_current_jump_left_data:	ds.l	1
+_attract_movement_entry:			ds.b	1
+_attract_movement_timer:			ds.b	1
+_unk_0_6400:                  ds.b  5*0x20      | 5 fireballs
+_unk_0_64A0:                  ds.b  2*0x20      | 2x transparent sprites over Kong's legs
+_unk_0_6500:									ds.b  10*0x10			| 10 springs
+_unk_0_6600:									ds.b	6*0x10			| 6 elevators
+_unk_0_65a0:                  ds.b  6*0x10			| 6 cement pies
+_unk_0_6680:									ds.b	2*0x10			| 2 hammers
+_unk_0_66A0:									ds.b	1*0x20			| 1st fireball
+_unk_0_6700:                  ds.b  8*0x20      | 8 barrels
+_unk_0_6800:                  ds.b  2*0x20			| 2 more barrels?
+		.align 4
+_soft_sprite_ram:             ds.b  384
+
+/*
+		Sprite allocation
+			DK			
+			0-1			Pauline
+			2-11		Kong
+			15-16   ???
+			17-18   cement ladders (x2)
+			19			Mario
+			20-21   kong's legs rivet level
+			22-27		elevators (x6)
+			28-31		elevator caps (x4) 29=initials entry
+			32-41		springs (x10)
+			42-45		Girder level barrels @top
+			46-51   cement pies (x6)
+			52-56   ???
+			57-62   cement conveyors (x6)
+			63			Barrel/cement level oil barrel
+			64-66		blanks covering ladder
+			67-69   hat, purse & umbrella (3)
+			70-71		hammers (x2)
+			72-73   ???
+			74			1st fireball sprite
+			75      ???
+			76			prize bonus score
+*/

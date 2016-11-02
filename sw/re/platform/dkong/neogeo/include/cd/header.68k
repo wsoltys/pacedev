@@ -1,0 +1,48 @@
+
+* Neo Geo CD Header file
+
+    .org 0x0
+		.long	0x10F300, 0xC00402, 0xC00408, 0xC0040E
+		.long	0xC00414, 0xC00426, 0xC00426, 0xC00426
+		.long	0xC0041A, 0xC00420, 0xC00426, 0xC00426
+		.long	0xC00426, 0xC00426, 0xC00426, 0xC0042C
+		.long	0xC00522, 0xC00528, 0xC0052E, 0xC00534
+		.long	0xC0053A, 0xC004F2, 0xC004EC, 0xC004E6
+		.long	0xC004E0, IRQ1,     _vblank,  IRQ3
+		.long	DUMMY,	  DUMMY,    DUMMY,    DUMMY
+		.long	TRAP00,	  TRAP01,		TRAP02,	  TRAP03
+		.long	TRAP04,	  TRAP05,   TRAP06,   TRAP07
+		.long TRAP08,   TRAP09,   TRAP10,   TRAP11
+		.long	TRAP12,   TRAP13,   TRAP14,   TRAP15
+		.long	0xC00426, 0xC00426, 0xC00426, 0xC00426
+		.long	0xC00426, 0xC00426, 0xC00426, 0xC00426
+		.long	0xC00426, 0xC00426, 0xC00426, 0xC00426
+		.long	0xC00426, 0xC00426, 0xC00426, 0xC00426
+
+    .org 0x0100
+    .ascii "NEO-GEO" 
+    .byte 0x00
+
+    .org 0x0108
+    .word 0x0052        | NGH
+    .long 0x00080000		| P-ROM size
+    .long 0x00100000		| debug DIPs pointer
+		.word	0x0001				| size of DIP data
+		    
+    .org 0x0114
+    .byte 0             | eye-catcher
+
+    .org 0x0116         | DIPSWITCHES
+  	.long	_jp_config
+  	.long	_us_config
+  	.long	_sp_config
+    
+    .org 0x0122
+    jmp _user
+    jmp _player_start
+		jmp _demo_end
+		jmp _coin_sound
+
+		.org 0x013A
+		.word 0x0000				| Z80 addr for CDDA commands
+		

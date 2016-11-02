@@ -1,0 +1,82 @@
+*
+*		Graphics macros for NEO GEO
+*
+
+*
+*		DK Tiles
+*
+
+.macro VRAM_O offset
+    .word \offset
+.endm
+
+.macro LEA_VRAM_A offset,an
+    lea     _vram+\offset,\an
+.endm
+
+.macro MOV_VRAM_A data,offset
+		move.b	\data,_vram+\offset
+.endm
+
+.macro ADD_VRAM_A offset,an
+		adda		\offset,\an
+.endm
+
+*
+*		DK Sprites
+*
+
+* load address of sprite ram + <offset>
+.macro LEA_SRAM_A offset,an
+    lea     _soft_sprite_ram+\offset,\an
+.endm
+
+* load address of sprite <n>
+.macro LEA_SPR_A n,an
+		lea			_soft_sprite_ram+\n*4,\an
+.endm
+
+* load address of sprite <n> Y coordinate
+.macro LEA_SPR_Y n,an
+		lea			_soft_sprite_ram+\n*4+0,\an
+.endm
+
+* load address of sprite <n> flipy & code
+.macro LEA_SPR_FY_CODE n,an
+		lea			_soft_sprite_ram+\n*4+1,\an
+.endm
+
+* load address of sprite <n> X coordinate
+.macro LEA_SPR_X n,an
+		lea			_soft_sprite_ram+\n*4+3,\an
+.endm
+
+* read sprite <n> Y coordinate
+.macro RD_SPR_Y n,reg
+		move.b  (_soft_sprite_ram+\n*4+0),\reg
+.endm
+
+* read sprite <n> flipy & code
+.macro RD_SPR_FY_CODE n,reg
+		move.b  (_soft_sprite_ram+\n*4+1),\reg
+.endm
+
+* read sprite <n> X coordinate
+.macro RD_SPR_X n,reg
+		move.b  (_soft_sprite_ram+\n*4+3),\reg
+.endm
+
+* write sprite <n> Y coordinate
+.macro WR_SPR_Y n,data
+		move.b  \data,(_soft_sprite_ram+\n*4+0)
+.endm
+
+* write sprite <n> flipy & code
+.macro WR_SPR_FY_CODE n,data
+		move.b  \data,(_soft_sprite_ram+\n*4+1)
+.endm
+
+* write sprite <n> X coordinate
+.macro WR_SPR_X n,data
+		move.b  \data,(_soft_sprite_ram+\n*4+3)
+.endm

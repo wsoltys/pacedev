@@ -1,0 +1,44 @@
+
+* Neo Geo Cartridge Header file
+
+    .org 0x0
+    .long 0x0010F300		| SP
+    .long 0x00C00402		| PC
+
+    .org 0x0064
+    .long _vblank
+
+    .org 0x0100
+    .ascii "NEO-GEO" 
+    .byte 0x00
+
+    .org 0x0108
+    .word 0x0052        | NGH
+    
+    .org 0x0114
+    .byte 0             | eye-catcher
+
+    .org 0x0116         | DIPSWITCHES
+  	.long	_jp_config
+  	.long	_us_config
+  	.long	_sp_config
+    
+    .org 0x0122
+    jmp _user
+    jmp _player_start
+		jmp _demo_end
+		jmp _coin_sound
+		
+    .org 0x0182
+    .long CODE
+    
+CODE:
+    .long 0x76004A6D,0x0A146600,0x003C206D,0x0A043E2D
+    .long 0x0A0813C0,0x00300001,0x32100C01,0x00FF671A
+    .long 0x30280002,0xB02D0ACE,0x66103028,0x0004B02D
+    .long 0x0ACF6606,0xB22D0AD0,0x67085088,0x51CFFFD4
+    .long 0x36074E75,0x206D0A04,0x3E2D0A08,0x3210E049
+    .long 0x0C0100FF,0x671A3010,0xB02D0ACE,0x66123028
+    .long 0x0002E048,0xB02D0ACF,0x6606B22D,0x0AD06708
+    .long 0x588851CF,0xFFD83607
+    .word 0x4e75
