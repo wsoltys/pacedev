@@ -36,12 +36,6 @@ ifeq ($(OUTPUT),)
 	OUTPUT = cart
 endif
 
-############################
-# Settings for cart output #
-############################
-ROMSIZE = 0x20000
-PADBYTE = 0x00
-
 ##############################
 # Object Files and Libraries #
 ##############################
@@ -130,6 +124,7 @@ clean:
 	rm -f $(OBJDIR)/*.*
 	rm -f $(FQTN)
 	rm -f $(PRG)
+	rm -f $(GUID)-c?.c?
 	rm -f $(OUTDIR)/$(PRG)
 	rm -f $(OUTDIR)/$(SPRITES)
 	
