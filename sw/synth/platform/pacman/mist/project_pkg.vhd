@@ -47,6 +47,10 @@ package project_pkg is
         -- derived
   constant PACE_HAS_SRAM                    : boolean := PACMAN_ROM_IN_SRAM or 
                                                  not PACMAN_USE_INTERNAL_WRAM;
+                                                 
+  -- MiST-specific constants
+  constant MIST_DATA_IO_ENABLED             : boolean := false;
+  constant MIST_OSD_ENABLED                 : boolean := false;
 
   type from_PROJECT_IO_t is record
     not_used  : std_logic;
