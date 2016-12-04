@@ -110,6 +110,8 @@ start_coco:
 				
 display_splash:
 
+				lda			#0x01										; 32 CPL
+				sta			VRES
         ldx     #0x400
         lda     #96                     ; green space
 1$:     sta     ,x+
