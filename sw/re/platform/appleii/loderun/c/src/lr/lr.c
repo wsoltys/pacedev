@@ -43,8 +43,18 @@ typedef enum
   #define KILL_PLAYER  
 #endif
 
+// comment out for default values
 #define START_LEVEL_0_BASED 0
-#define NO_LIVES						1
+//#define NO_LIVES						1
+
+// derived - do not edit
+// sets default values
+#ifndef START_LEVEL_0_BASED
+	#define START_LEVEL_0_BASED 	0
+#endif
+#ifndef NO_LIVES
+	#define NO_LIVES							3
+#endif
 
 //#define CHAMPIONSHIP
 
