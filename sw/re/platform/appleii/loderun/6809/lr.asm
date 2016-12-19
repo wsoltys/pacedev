@@ -296,7 +296,7 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "``````hBETA`s`DEMO`VERSIONi"
+        .asciz  "``````hBETA`t`DEMO`VERSIONi"
         .db 0
         .asciz  "`"
         .db 0

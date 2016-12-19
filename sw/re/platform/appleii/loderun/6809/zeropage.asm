@@ -58,6 +58,8 @@ byte_61										.equ		0x61
 byte_62										.equ		0x62
 byte_63										.equ		0x63
 byte_64										.equ		0x64
+joy_x											.equ		0x65
+joy_y											.equ		0x66
 byte_69										.equ		0x69
 byte_6d                   .equ    0x6d
 col_pixel_shift						.equ		0x71
