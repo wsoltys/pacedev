@@ -10,7 +10,7 @@ zeropg:0000		; Input	MD5    : 8B92D90C0F5E109321D37C5E468F3C89
 zeropg:0000		; Input	CRC32  : 69DB7B1A
 zeropg:0000
 zeropg:0000		; +-------------------------------------------------------------------------+
-zeropg:0000		; |		    Apple II Lode Runner Disassembly v1.01		    |
+zeropg:0000		; |		    Apple II Lode Runner Disassembly v1.02		    |
 zeropg:0000		; |			- by tcdev (msmcdoug@gmail.com)			    |
 zeropg:0000		; +-------------------------------------------------------------------------+
 zeropg:0000		;
@@ -856,7 +856,7 @@ ROM:6000				     ;.segment ROM
 ROM:6000				     .org 6000h
 ROM:6000
 ROM:6000	     START:
-ROM:6000 20 A2 87			     JSR     read_paddles
+ROM:6000 20 A2 87			     JSR     detect_paddles
 ROM:6003 A9 01				     LDA     #1
 ROM:6005 20 59 63			     JSR     read_disk_and_chk_sig
 ROM:6008	     ; START OF	FUNCTION CHUNK FOR read_disk_and_chk_sig
@@ -2455,9 +2455,9 @@ ROM:6A1E 86 1E				     STX     msg_char		     ; store key
 ROM:6A20 30 09				     BMI     key_pressed	     ; key pressed, skip
 ROM:6A22 A5 95				     LDA     paddles_detected
 ROM:6A24 C9 CB				     CMP     #0CBh ; 'Ë'             ; detected?
-ROM:6A26 F0 2D				     BEQ     locret_6A55	     ; no, skip
+ROM:6A26 F0 2D				     BEQ     key_ret		     ; no, skip
 ROM:6A28
-ROM:6A28	     loc_6A28:
+ROM:6A28	     jmp_read_joystick_btns:
 ROM:6A28 4C D0 6A			     JMP     decode_joystick
 ROM:6A2B	     ; ---------------------------------------------------------------------------
 ROM:6A2B
@@ -2486,12 +2486,12 @@ ROM:6A49
 ROM:6A49	     loc_6A49:
 ROM:6A49 A5 95				     LDA     paddles_detected
 ROM:6A4B C9 CA				     CMP     #0CAh ; 'Ê'             ; detected?
-ROM:6A4D F0 D9				     BEQ     loc_6A28		     ; no, skip
+ROM:6A4D F0 D9				     BEQ     jmp_read_joystick_btns  ; yes, go
 ROM:6A4F A6 1E				     LDX     msg_char
 ROM:6A51 86 9E				     STX     key_1
 ROM:6A53 86 9F				     STX     key_2
 ROM:6A55
-ROM:6A55	     locret_6A55:
+ROM:6A55	     key_ret:
 ROM:6A55 60				     RTS
 ROM:6A56	     ; ---------------------------------------------------------------------------
 ROM:6A56
@@ -2705,7 +2705,7 @@ ROM:6B58
 ROM:6B58	     ; ---------------------------------------------------------------------------
 ROM:6B59 9E 80 9B 92+ctl_keys:		     .db 9Eh, 80h, 9Bh,	92h, 81h, 93h, 8Ah, 8Bh, 88h, 95h, 98h ; CTRL-^	(next level)
 ROM:6B59 81 93 8A 8B+			     .db 99h, 8Dh, 0
-ROM:6B67 55 6A	     ctl_key_vector_fn:	     .dw locret_6A55		     ; CTRL-^ (next level)
+ROM:6B67 55 6A	     ctl_key_vector_fn:	     .dw key_ret		     ; CTRL-^ (next level)
 ROM:6B69 60 6A				     .dw locret_6A60		     ; CTRl-@ (extra life)
 ROM:6B6B 75 6A				     .dw locret_6A75		     ; ESC (freeze toggle)
 ROM:6B6D 7F 6A				     .dw loc_6A7D+2		     ; CTRL-R (terminate game)
@@ -6993,7 +6993,7 @@ ROM:87A2
 ROM:87A2	     ; =============== S U B R O U T I N E =======================================
 ROM:87A2
 ROM:87A2
-ROM:87A2	     read_paddles:
+ROM:87A2	     detect_paddles:
 ROM:87A2 AD 70 C0			     LDA     0C070h		     ; trigger paddles
 ROM:87A5 A2 10				     LDX     #10h
 ROM:87A7
@@ -7010,7 +7010,7 @@ ROM:87B7 85 95				     STA     paddles_detected
 ROM:87B9
 ROM:87B9	     locret_87B9:
 ROM:87B9 60				     RTS
-ROM:87B9	     ; End of function read_paddles
+ROM:87B9	     ; End of function detect_paddles
 ROM:87B9
 ROM:87BA
 ROM:87BA	     ; =============== S U B R O U T I N E =======================================

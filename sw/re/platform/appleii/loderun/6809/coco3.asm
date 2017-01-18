@@ -4,9 +4,61 @@
 
 PIA0				.equ		0xFF00
 PIA1				.equ		0xFF20
+DATAA       .equ    0x00
+DDRA        .equ    DATAA
+CRA         .equ    0x01
+DATAB       .equ    0x02
+DDRB        .equ    DATAB
+CRB         .equ    0x03
 
 KEYCOL			.equ		PIA0+2
 KEYROW			.equ		PIA0
+
+; Coco Keyboard
+;    7  6  5  4  3  2  1  0
+;	0: G  F  E  D  C  B  A  @
+; 1: O  N  M  L  K  J  I  H
+; 2: W  V  U  T  S  R  Q  P
+; 3: SP RT LT DN UP Z  Y  X
+; 4: '  &  %  $  #  "  !  0
+; 4: 7  6  5  4  3  2  1  0
+; 5: ?  >  =  <  +  *  )  (
+; 5: /  .  _  ,  ;  :  9  8
+; 6: SH F2 F1 CT AL BK CL CR
+
+; equates to keyboard rows
+; - phantom keys appear accordingly
+RJOY_BTN1   .equ    (1<<0)
+LJOY_BTN1   .equ    (1<<1)
+RJOY_BTN2   .equ    (1<<2)
+LJOY_BTN2   .equ    (1<<3)
+
+;.define LEFT_JOYSTICK
+.ifdef LEFT_JOYSTICK
+  JOY_BTN1  .equ    LJOY_BTN1
+  JOY_BTN2  .equ    LJOY_BTN2
+.else
+  .define RIGHT_JOYSTICK
+  JOY_BTN1  .equ    RJOY_BTN1
+  JOY_BTN2  .equ    RJOY_BTN2
+.endif
+; high and low thresholds 
+; for 'digital' operation
+JOY_LO_TH   .equ    0x64                ; ~40%
+JOY_HI_TH   .equ    0x98                ; ~60%
+
+.define HAS_SOUND
+.ifdef HAS_SOUND
+  .define USE_1BIT_SOUND
+  .ifdef USE_1BIT_SOUND
+    SOUND_ADDR  .equ		PIA1+2
+    SOUND_MASK  .equ    (1<<1)
+  .else
+    .define USE_DAC_SOUND
+    SOUND_ADDR  .equ		PIA1
+    SOUND_MASK  .equ    0xfc
+  .endif
+.endif
 
 ;
 ; *** GIME registers  	
@@ -186,19 +238,6 @@ stack						.equ		  0xfe00
  .endif
 .endif
 
-.define HAS_SOUND
-.ifdef HAS_SOUND
-  .define USE_1BIT_SOUND
-  .ifdef USE_1BIT_SOUND
-    SOUND_ADDR  .equ		PIA1+2
-    SOUND_MASK  .equ    (1<<1)
-  .else
-    .define USE_DAC_SOUND
-    SOUND_ADDR  .equ		PIA1
-    SOUND_MASK  .equ    0xfc
-  .endif
-.endif
-  
 ; MMU page mappings
 CODE_PG1    .equ    0x30
 VRAM_PG     .equ    0x38
