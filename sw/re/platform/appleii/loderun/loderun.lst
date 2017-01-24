@@ -2457,7 +2457,7 @@ ROM:6A22 A5 95				     LDA     paddles_detected
 ROM:6A24 C9 CB				     CMP     #0CBh ; 'Ë'             ; detected?
 ROM:6A26 F0 2D				     BEQ     key_ret		     ; no, skip
 ROM:6A28
-ROM:6A28	     jmp_read_joystick_btns:
+ROM:6A28	     jmp_decode_joystick:
 ROM:6A28 4C D0 6A			     JMP     decode_joystick
 ROM:6A2B	     ; ---------------------------------------------------------------------------
 ROM:6A2B
@@ -2486,7 +2486,7 @@ ROM:6A49
 ROM:6A49	     loc_6A49:
 ROM:6A49 A5 95				     LDA     paddles_detected
 ROM:6A4B C9 CA				     CMP     #0CAh ; 'Ê'             ; detected?
-ROM:6A4D F0 D9				     BEQ     jmp_read_joystick_btns  ; yes, go
+ROM:6A4D F0 D9				     BEQ     jmp_decode_joystick     ; yes, go
 ROM:6A4F A6 1E				     LDX     msg_char
 ROM:6A51 86 9E				     STX     key_1
 ROM:6A53 86 9F				     STX     key_2

@@ -33,7 +33,7 @@ SCORE_LEVEL_MULT	.equ	15
 SCORE_TRAP				.equ	0x0075
 SCORE_KILL				.equ	0x0075
 ;NUM_LEVELS				.equ	150
-NUM_LEVELS				.equ	10
+NUM_LEVELS				.equ	9
 .else
 SCORE_GOLD				.equ	0x0500
 SCORE_LEVEL				.equ	0x0100
@@ -795,7 +795,7 @@ read_level_data:	; $6264
 				lda			*level_0_based
 ; nothing like original code from here-on in			
 
-	; hack - 5 levels only atm
+	; hack - limited levels only atm
 1$:			cmpa		#NUM_LEVELS
 				bcs			2$
 				suba		#NUM_LEVELS
@@ -1941,7 +1941,7 @@ key_pressed:	; $6A2B
 				rts
 2$:			lda			*paddles_detected
 				cmpa		#0xca										; detected?
-				beq			jmp_decode_joystick	; yes, go
+				beq			jmp_decode_joystick			; yes, go
 				ldb			*msg_char				
 				stb			*key_1
 				stb			*key_2
