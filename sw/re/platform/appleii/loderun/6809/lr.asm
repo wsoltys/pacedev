@@ -1918,7 +1918,12 @@ got_key:
 				bne			key_pressed
 				lda			*paddles_detected
 				cmpa		#0xcb										; detected?
-				beq			key_ret									; no, skip
+; this is the original apple II code
+; - but this results in player moving without key held down				
+;				beq			key_ret									; no, skip
+; this is how I've done it since day#1
+; - player stops when no key pressed
+				beq			key_pressed							; no, skip
 jmp_decode_joystick:				
 				jmp			decode_joystick
 
@@ -2061,7 +2066,7 @@ read_joystick_x:
         bita    #(1<<7)                 ; joystick greater?
         beq     3$											; no, skip
         lda			#APL_L
-2$:			sta			key_2
+2$:			sta			*key_2
 3$:
 
 read_joystick_y:
@@ -2088,7 +2093,7 @@ read_joystick_y:
         bita    #(1<<7)                 ; joystick greater?
         beq     3$                      ; no, skip
         lda			#APL_K
-2$:			sta			key_1
+2$:			sta			*key_1
 3$:
 				rts
 																
