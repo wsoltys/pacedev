@@ -107,9 +107,17 @@ start_coco:
         bne     5$                      ; map pages $38-$3B        
 ; switch to all-RAM mode
         sta     RAMMODE        
+
+; check for PAL/NTSC GIME
+				lda			#0x3f										; ECB ROM $E000-
+				ldx			#MMUTSK1
+				sta			,x
+				ldb			0x0033									; read BASIC video register mirror
+				lda			#VRAM_PG
+				sta			,x											; restore page
+				stb			pal_detected
 				
 display_splash:
-
 				lda			#0x01										; 32 CPL
 				sta			VRES
         ldx     #0x400
@@ -119,34 +127,59 @@ display_splash:
         bne     1$
         ldx     #splash
         ldy     #0x420
-2$:     pshs    y
-        ldb     ,x+                     ; read 'attr'
-        stb     attr
-        lda     ,x                      ; leading null?
-        beq     5$
-3$:     lda     ,x+
-        beq     4$
-        eora    attr
-        sta     ,y+
-        bra     3$
-4$:     puls    y
-        leay    32,y
-        bra     2$
-5$:     ldx			#PIA0
-        ldb     #0                      ; flag rgb
-6$:     lda     #~(1<<2)
-				sta     2,x
+				jsr			display_lines
+				lda			pal_detected
+				ldx			#ntsc_splash
+				bita		#8											; pal?
+				beq			2$											; no, skip
+				ldx			#pal_splash
+2$:			ldy			#0x560
+   			jsr			display_lines
+				ldx			#PIA0
+
+slash_get_key:
+				clr			cmp											; flag RGB
+				ldb			pal_detected
+1$:			lda			#~(1<<2)								; col=2
+				bitb		#8											; PAL?
+				beq			2$											; no, skip
+				clra														; all columns
+2$:			sta     2,x											; column strobe
 				lda     ,x
-				bita    #(1<<2)                 ; 'R'?
-				beq     7$
-        lda     #~(1<<3)
+				coma														; active high
+				bitb		#8											; pal?
+				beq			3$											; no, skip
+				tsta														; any key hit?
+				beq			1$											; no, loop
+				bra			setup_gime_for_game
+				
+3$:			bita    #(1<<2)                 ; 'R'?
+				bne     4$											; yes, default, exit
+        lda     #~(1<<3)								; col=3
 				sta			2,x											; column strobe
 				lda			,x											; active low
 				bita    #(1<<0)                 ; 'C'?
-				bne     6$                      ; try again
+				bne     1$                      ; try again
 				ldb     #4                      ; flag component
-7$:     stb     cmp
-
+				stb     cmp
+4$:     bra			setup_gime_for_game
+        
+display_lines:        
+1$:     ldb     ,x+                     ; read 'attr'
+        stb     attr
+        lda     ,x                      ; leading null?
+        beq     9$
+				pshs    y
+2$:     lda     ,x+
+        beq     3$
+        eora    attr
+        sta     ,y+
+        bra     2$
+3$:     puls    y
+        leay    32,y
+        bra     1$
+9$:			rts
+				
 setup_gime_for_game:
 ; initialise PLATFORM_COCO3 hardware
 ; - disable PIA interrupts
@@ -321,7 +354,7 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "```````hRiGBohCiOMPOSITE"
+        .asciz  "`"
         .db 0
         .asciz  "`"
         .db 0
@@ -330,6 +363,22 @@ splash:
         .asciz  "|WWWnRETROPORTSnBLOGSPOTnCOMnAU~"
         .dw     0
 
+ntsc_splash:
+        .db 0
+        .asciz  "`````NTSC`MACHINE`DETECTED"
+        .db 0
+        .asciz  "```````hRiGBohCiOMPOSITE"
+        .dw     0
+
+pal_splash:
+        .db 0
+        .asciz  "``````PAL`MACHINE`DETECTED"
+        .db 0
+        .asciz  "`````````PRESS`ANY`KEY"
+        .dw     0
+
+pal_detected:
+				.ds			1
 attr:   .ds     1
 cmp:    .ds     1
 mono:   .db     3
@@ -1750,12 +1799,13 @@ APL_CTL_U				.equ	0x95						; CTRL_U
 APL_ESC					.equ	0x9b						; ESC
 APL_CTL_HAT			.equ	0x9e						; CTRL-^
 APL_SPACE				.equ	0xa0						; <SPACE>
-APL_I						.equ	0xc9
-APL_J						.equ	0xca
-APL_K						.equ	0xcb
-APL_L						.equ	0xcc
-APL_O						.equ	0xcf
-APL_U						.equ	0xd5
+APL_AT					.equ	0xc0						; @
+APL_I						.equ	0xc9						; I
+APL_J						.equ	0xca						; J
+APL_K						.equ	0xcb						; K
+APL_L						.equ	0xcc						; L
+APL_O						.equ	0xcf						; O
+APL_U						.equ	0xd5						; U
 
 demo_inp_remap_tbl:	; $6A0B
 				.db			APL_I, APL_J, APL_K, APL_L, APL_O, APL_U, APL_SPACE
@@ -2040,61 +2090,25 @@ decode_joystick:
 2$:			sta			*key_1
 				sta			*key_2
 				rts
-3$:			jsr			read_joystick_axes			; doesn't actually read them
-
-read_joystick_x:
-        ; select hoizontal axis
-        lda     PIA0+CRA
-        anda    #~(1<<3)                ; CA2=0 horizontal
-        sta     PIA0+CRA
-        ; set comparator value to 40%
-        lda     PIA1+DATAA
-        anda    #0x03                   ; clear value
-        ora     #JOY_LO_TH              ; low threshold
-        sta     PIA1+DATAA
-        lda     PIA0+DATAA              ; comparator
-        bita    #(1<<7)                 ; joystick greater?
-        bne     1$                      ; yes, skip
-        lda			#APL_J
-        bra     2$
-        ; set comparator value to 60%
-1$:     lda     PIA1+DATAA
-        anda    #3                      ; clear value
-        ora     #JOY_HI_TH              ; high threshold
-        sta     PIA1+DATAA
-        lda     PIA0+DATAA              ; comparator
-        bita    #(1<<7)                 ; joystick greater?
-        beq     3$											; no, skip
-        lda			#APL_L
-2$:			sta			*key_2
-3$:
-
-read_joystick_y:
-        ; select vertical axis
-				lda     PIA0+CRA
-        ora     #(1<<3)                 ; CA2=1 vertical
-        sta     PIA0+CRA
-        ; set comparator value to 40%
-        lda     PIA1+DATAA
-        anda    #0x03                   ; clear value
-        ora     #JOY_LO_TH              ; low threshold
-        sta     PIA1+DATAA
-        lda     PIA0+DATAA              ; comparator
-        bita    #(1<<7)                 ; joystick greater?
-        bne     1$                      ; yes, skip
-        lda			#APL_I
-        bra     2$
-        ; set comparator value to 60%
-1$:     lda     PIA1+DATAA
-        anda    #3                      ; clear value
-        ora     #JOY_HI_TH              ; hi threshold
-        sta     PIA1+DATAA
-        lda     PIA0+DATAA              ; comparator
-        bita    #(1<<7)                 ; joystick greater?
-        beq     3$                      ; no, skip
-        lda			#APL_K
-2$:			sta			*key_1
-3$:
+3$:			jsr			read_joystick_axes
+				lda			*joy_x
+				ldb			#APL_J
+				cmpa		#0x2e										; left?
+				ble			4$											; yes, go
+				ldb			#APL_L
+				cmpa		#0xcc										; right?
+				bhs			4$											; yes, go
+				ldb			#APL_AT									; do-nothing key
+4$:			stb			*key_2
+				lda			*joy_x
+				ldb			#APL_I
+				cmpa		#0x2e										; up?
+				ble			5$											; yes, go
+				ldb			#APL_K
+				cmpa		#0xcc										; down?
+				bhs			5$											; yes, go
+				ldb			#APL_AT									; do-nothing key
+5$:			sta			*key_1
 				rts
 																
 ctl_keys:	; $6B59
@@ -4825,6 +4839,7 @@ blink_char_cursor_wait_key:
 2$:     jsr     display_char_pg2
 3$:     jsr     read_ascii_key          ; 6809 only
         bne     5$                      ; key_pressed, go
+        jsr			joystick_active					; benign - for timing?
         dec     *timer
         bne     3$
         lda     #0
@@ -4833,6 +4848,7 @@ blink_char_cursor_wait_key:
         sta     *timer
 4$:     jsr     read_ascii_key          ; 6809 only
         bne     5$                      ; key_pressed, go
+        jsr			joystick_active					; benign - for timing?
         dec     *timer
         bne     4$
         bra     1$        
@@ -5032,8 +5048,9 @@ display_message:	; $86E0
 blink_char_and_wait_for_key:	; $8700
 ; apple was much slower because
 ; it also sampled the joysticks
+; - snd now we do too!
 				sta			*blink_char
-1$:			lda			#0											; was 104
+1$:			lda			#104
 				sta			*timer
 				lda			#0											; space
 				ldb			*blink_char
@@ -5047,6 +5064,8 @@ blink_char_and_wait_for_key:	; $8700
 				coma														; any key pressed?
 				anda    #0x7f
 				bne			blink_got_key						; yes, exit
+				jsr			joystick_active
+				bcs			blink_got_key
 				dec			*timer									; timeout?
 				bne			3$											; no, loop
 				lda			*blink_char
@@ -5060,6 +5079,8 @@ blink_char_and_wait_for_key:	; $8700
 				coma														; any key pressed?
 				anda    #0x7f
 				bne			blink_got_key						; yes, exit
+				jsr			joystick_active
+				bcs			blink_got_key
 				dec			*timer									; timeout?
 				bne			4$											; no, loop
 				bra			1$											; loop waiting for key
@@ -5079,13 +5100,99 @@ read_joystick_axes:
 				clra
 				sta			*joy_x
 				sta			*joy_y
-; the apple version read the value into joy_x, joy_y here
-; but that's not how the coco3 works
-; - so just clear the values and return
+
+read_joystick_x:
+        ; select hoizontal axis
+        lda     PIA0+CRA
+        anda    #~(1<<3)                ; CA2=0 horizontal
+        sta     PIA0+CRA
+        ; set comparator value to 40%
+        lda     PIA1+DATAA
+        anda    #0x03                   ; clear value
+        ora     #JOY_LO_TH              ; low threshold
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        bne     1$                      ; yes, skip
+        lda			#0x12										; apple left threshold
+        bra     2$
+        ; set comparator value to 60%
+1$:     lda     PIA1+DATAA
+        anda    #3                      ; clear value
+        ora     #JOY_HI_TH              ; high threshold
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        beq     3$											; no, skip
+        lda			#0x2e										; apple right threshold
+2$:			sta			*joy_x
+3$:
+
+read_joystick_y:
+        ; select vertical axis
+				lda     PIA0+CRA
+        ora     #(1<<3)                 ; CA2=1 vertical
+        sta     PIA0+CRA
+        ; set comparator value to 40%
+        lda     PIA1+DATAA
+        anda    #0x03                   ; clear value
+        ora     #JOY_LO_TH              ; low threshold
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        bne     1$                      ; yes, skip
+        lda			#0x12										; apple up threshold
+        bra     2$
+        ; set comparator value to 60%
+1$:     lda     PIA1+DATAA
+        anda    #3                      ; clear value
+        ora     #JOY_HI_TH              ; hi threshold
+        sta     PIA1+DATAA
+        lda     PIA0+DATAA              ; comparator
+        bita    #(1<<7)                 ; joystick greater?
+        beq     3$                      ; no, skip
+        lda			#0x2e										; apple down threshold
+2$:			sta			*joy_y
+3$:
 				rts
-				
+
+joystick_active:
+				lda			*paddles_detected
+				cmpa		#0xcb										; detected?
+				beq			9$											; no, skip
+				jsr			read_joystick_axes
+				lda			*joy_x
+				cmpa		#0x12										; apple left threshold
+				ble			8$
+				cmpa		#0x2e										; apple right threshold (was $3e)
+				bhs			8$
+				lda			*joy_y
+				cmpa		#0x12										; apple up threshold
+				ble			8$
+				cmpa		#0x2e										; apple down threshold (was $3e)
+				bhs			8$
+				ldx			#PIA0
+				ldb			#0xff										; no keys, buttons only
+				stb			2,x
+				lda			,x											; read buttons
+				coma														; active high
+				bita		#JOY_BTN1
+				bne			8$
+				bita		#JOY_BTN2
+				bne			8$
+				CLC															; flag not active
+				rts
+8$:			SEC															; flag active
+				rts				
+9$:			; delay for reading paddles
+				; TBD
+				CLC				
+				rts
+								
 detect_paddles: ; $87A2
-				lda			#0xcb										; no paddles detected?
+; we can't detect a Coco3 joystick
+; - so always flag not present
+				lda			#0xcb										; no paddles detected
 				sta			*paddles_detected
 				rts
 
