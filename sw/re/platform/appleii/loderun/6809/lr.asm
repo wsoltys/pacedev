@@ -33,7 +33,7 @@ SCORE_LEVEL_MULT	.equ	15
 SCORE_TRAP				.equ	0x0075
 SCORE_KILL				.equ	0x0075
 ;NUM_LEVELS				.equ	150
-NUM_LEVELS				.equ	9
+NUM_LEVELS				.equ	8
 .else
 SCORE_GOLD				.equ	0x0500
 SCORE_LEVEL				.equ	0x0100
@@ -133,11 +133,11 @@ display_splash:
 				bita		#8											; pal?
 				beq			2$											; no, skip
 				ldx			#pal_splash
-2$:			ldy			#0x560
+2$:			ldy			#0x540
    			jsr			display_lines
 				ldx			#PIA0
 
-slash_get_key:
+splash_get_key:
 				clr			cmp											; flag RGB
 				ldb			pal_detected
 1$:			lda			#~(1<<2)								; col=2
@@ -152,7 +152,6 @@ slash_get_key:
 				tsta														; any key hit?
 				beq			1$											; no, loop
 				bra			setup_gime_for_game
-				
 3$:			bita    #(1<<2)                 ; 'R'?
 				bne     4$											; yes, default, exit
         lda     #~(1<<3)								; col=3
@@ -365,16 +364,22 @@ splash:
 
 ntsc_splash:
         .db 0
-        .asciz  "`````NTSC`MACHINE`DETECTED"
+;        .asciz  "`````````NTSC`DETECTED"
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
         .db 0
         .asciz  "```````hRiGBohCiOMPOSITE"
         .dw     0
 
 pal_splash:
         .db 0
-        .asciz  "``````PAL`MACHINE`DETECTED"
+;        .asciz  "``````PAL`MACHINE`DETECTED"
+        .asciz  "`"
         .db 0
-        .asciz  "`````````PRESS`ANY`KEY"
+        .asciz  "`"
+        .db 0
+        .asciz  "```````m`PRESS`ANY`KEY`m"
         .dw     0
 
 pal_detected:
