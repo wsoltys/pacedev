@@ -612,9 +612,9 @@ title_wait_for_key: ; $618e
 				lda			,x											; read buttons
 				coma														; active high
 				bita		#JOY_BTN1
-				bne			start_new_game
+				lbne		start_new_game
 				bita		#JOY_BTN2
-				bne			start_new_game
+				lbne		start_new_game
 3$:			ldx			#PIA0
 				ldb			#0											; all columns
 				stb			2,x											; column strobe
