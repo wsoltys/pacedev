@@ -2098,22 +2098,22 @@ decode_joystick:
 3$:			jsr			read_joystick_axes
 				lda			*joy_x
 				ldb			#APL_J
-				cmpa		#0x2e										; left?
-				ble			4$											; yes, go
+				cmpa		#0x12										; left?
+				beq			4$											; yes, go
 				ldb			#APL_L
-				cmpa		#0xcc										; right?
+				cmpa		#0x2e										; right?
 				bhs			4$											; yes, go
 				ldb			#APL_AT									; do-nothing key
 4$:			stb			*key_2
-				lda			*joy_x
+				lda			*joy_y
 				ldb			#APL_I
-				cmpa		#0x2e										; up?
-				ble			5$											; yes, go
+				cmpa		#0x12										; up?
+				beq			5$											; yes, go
 				ldb			#APL_K
-				cmpa		#0xcc										; down?
+				cmpa		#0x2e										; down?
 				bhs			5$											; yes, go
 				ldb			#APL_AT									; do-nothing key
-5$:			sta			*key_1
+5$:			stb			*key_1
 				rts
 																
 ctl_keys:	; $6B59
@@ -5168,12 +5168,12 @@ joystick_active:
 				jsr			read_joystick_axes
 				lda			*joy_x
 				cmpa		#0x12										; apple left threshold
-				ble			8$
+				beq			8$
 				cmpa		#0x2e										; apple right threshold (was $3e)
 				bhs			8$
 				lda			*joy_y
 				cmpa		#0x12										; apple up threshold
-				ble			8$
+				beq			8$
 				cmpa		#0x2e										; apple down threshold (was $3e)
 				bhs			8$
 				ldx			#PIA0
