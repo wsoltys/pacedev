@@ -41,9 +41,9 @@ Keys
 <ESC>         Freeze
 <CTRL><R>     Abort game
 <CTRL><A>     Abort life
-<CTRL><J>			Enable joystick (disable keyboard)
-<CTRL><K>			Enable keyboard (disable joystick)
-<CTRL><S>			Toggle sound
+<CTRL><J>     Enable joystick (disable keyboard)
+<CTRL><K>     Enable keyboard (disable joystick)
+<CTRL><S>     Toggle sound
 <CTRL><H>     Speed up game (not tested)
 <CTRL><U>     Slow down game (not tested)
 <ENTER>       Display High Scores
@@ -66,17 +66,17 @@ Comments/Suggestions/Bugs
 
 Release History
 ---------------
-v0.4				Playable Demo Release (Beta 4)
-						Fixed 32CPL splash screen on floppy version
-						Added joystick support
-						Detect PAL/NTSC for palette prompt
-						Playable levels now back to 8 because of code space issues
-						
-v0.3				Playable Demo Release (Beta 3)
-						Fixed GAME OVER animation for MONOCHROME mode
-						Removed RGB/Composite toggle in-game
-						Added Amber mode for monochrome builds
-						1BPP, Mono 2BPP & Colour 2BPP separate builds
+v0.4        Playable Demo Release (Beta 4)
+            Fixed 32CPL splash screen on floppy version
+            Added joystick support
+            Detect PAL/NTSC for palette prompt
+            Playable levels now back to 8 because of code space issues
+            
+v0.3        Playable Demo Release (Beta 3)
+            Fixed GAME OVER animation for MONOCHROME mode
+            Removed RGB/Composite toggle in-game
+            Added Amber mode for monochrome builds
+            1BPP, Mono 2BPP & Colour 2BPP separate builds
 
 v0.2        Playable Demo Release (Beta 2)
             Added Game Over animation

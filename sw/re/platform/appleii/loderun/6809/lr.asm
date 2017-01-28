@@ -121,7 +121,8 @@ display_splash:
 				lda			#0x01										; 32 CPL
 				sta			VRES
         ldx     #0x400
-        lda     #96                     ; green space
+        lda     #0x60                   ; green space
+        eora		#0x40										; inverse (black space)
 1$:     sta     ,x+
         cmpx    #0x600
         bne     1$
@@ -172,6 +173,7 @@ display_lines:
 2$:     lda     ,x+
         beq     3$
         eora    attr
+        eora		#0x40										; invert
         sta     ,y+
         bra     2$
 3$:     puls    y
