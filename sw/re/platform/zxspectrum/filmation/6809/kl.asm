@@ -43,7 +43,7 @@ CAULDRON_SCREEN     .equ    136
 ;NO_LIVES            .equ    3
 ; *** the standard 4 locations
 ;START_LOC           .equ    47
-START_LOC           .equ    68           ; 'slow' room to the north
+;START_LOC           .equ    68           ; 'slow' room to the north
 ;START_LOC           .equ    179          ; chest to the west
 ;START_LOC           .equ    143
 ; *** extra one for debugging
@@ -340,7 +340,7 @@ start_coco:
 				lda			#VRAM_PG
 				sta			,x											; restore page
 				stb			pal_detected
-				
+
 display_splash:
 				lda			#0x01										; 32 CPL
 				sta			VRES
@@ -407,6 +407,7 @@ display_lines:
 				
 setup_gime_for_game:
 
+; need DP for the FISR				
 				lda			#>dp_base
 				tfr			a,dp
 
@@ -482,13 +483,13 @@ inipal:
         andcc   #~(1<<4)                ; enable IRQ in CPU    
 .endif
 
-  ; install FIRQ handler and enable TMR FIRQ
+; install FIRQ handler and enable TMR FIRQ
 				;lda			#TMR|HBORD|VBORD        ; TMR FIRQ enabled
 				;sta			FIRQENR   							
 				lda			FIRQENR									; ACK any pending FIRQ in the GIME
         lda     #0x7E                   ; jmp
         sta     0xFEF4
-				ldx     #main_fisr              ; address
+				ldx     #prng_fisr              ; address
 				stx     0xFEF5
 				ldd			#0x0042
 				std			*lfsr										; seed with non-zero before enabling
@@ -640,7 +641,7 @@ osd_set_palette:
 start:
         ldx     #seed_1
         ldy     #eod-#seed_1
-        lda     0x5c78                  ; random memory location
+        lda     0x5c78                  ; FRAMES (frame counter lsb)
         pshs    a
         jsr     clr_mem
         puls    a
@@ -6324,7 +6325,7 @@ main_isr:
 9$:     rti
 .endif
 
-main_fisr:
+prng_fisr:
         tst     FIRQENR                 ; ACK FIRQ
 ; provide PRN to emulate Z80 R
 ; - Z80 R updated once/twice every instruction fetch
