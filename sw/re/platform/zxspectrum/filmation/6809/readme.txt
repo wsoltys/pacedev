@@ -66,26 +66,39 @@ part of the Knight Lore "exprience" on the Coco3.
 
 Slowdown: the original ZX Spectrum game experiences significant slowdown when
 larger numbers of sprites have to be wiped and re-rendered, typically in
-"busy" rooms and especially rooms with moving objects.
+"busy" rooms and especially rooms with moving objects. Limited testing suggests
+that the Coco3 port is no slower - and usually faster - than the original.
 
 
 Release notes
 -------------
 
+Pre-Release Demo Version 1.2
+
+* Some optimisation to speed. Compares well with Spectrum version on limited
+screens that have been tested. Needs throttling.
+
+* Added PAL/NTSC detection so that PAL machines don't require selection of
+RGB/Composite video type.
+
+* Enhanced simplistic Z80 R emulation with 16-bit maximal-length Galois LFSR
+updated every 1/20s.
+
+
 CocoFEST Demo Version 1.1
 
-Added a build option for Mick Farrow graphics. Back in 2002, Mick Farrow 
+* Added a build option for Mick Farrow graphics. Back in 2002, Mick Farrow 
 modified the original sprites to add more shading (via dithering) and also
 sharpen the outline of some sprites.
 
-Updated the Main Menu specifically for the Coco3 port. Added the ability to
+* Updated the Main Menu specifically for the Coco3 port. Added the ability to
 select keyboard/joystick and directional controls.
 
-Added support for directional & rotational joystick input.
+* Added support for directional & rotational joystick input.
 
-Added 4 missing sounds; pickup/drop, extra life, pause & unpause.
+* Added 4 missing sounds; pickup/drop, extra life, pause & unpause.
 
-Changed text screens to yellow (colour of original border)
+* Changed text screens to yellow (colour of original border)
 
 
 CocoFEST Demo Version 1.0

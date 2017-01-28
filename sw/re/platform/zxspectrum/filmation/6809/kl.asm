@@ -20,7 +20,7 @@
 ;.define BUILD_OPT_NO_TRANSFORM
 ;.define BUILD_OPT_ALMOST_INVINCIBLE
 ;.define BUILD_OPT_ANY_OBJ_IN_CAULDRON
-.define BUILD_OPT_PROFILE
+;.define BUILD_OPT_PROFILE
 ; *** end of BUILD OPTIONS
 
 ; *** derived - do not edit
@@ -126,6 +126,8 @@ height_cnt          .equ    0x1e
 width_cnt           .equ    0x1f
 bytes_nl						.equ		0x20
 
+; note lfsr=2 bytes, overlaps z80_r
+lfsr								.equ		0x7e
 z80_r               .equ    0x7f
 line_cnt            .equ    0x80
 vbl_cnt							.equ		0x81
@@ -405,6 +407,9 @@ display_lines:
 				
 setup_gime_for_game:
 
+				lda			#>dp_base
+				tfr			a,dp
+
 ; initialise PLATFORM_COCO3 hardware
 ; - disable PIA interrupts
 				lda			#0x34
@@ -460,10 +465,10 @@ inipal:
 				sta			CPU179									; select fast CPU clock (1.79MHz)
 
   ; configure timer
-  ; free-run, max range, used for RND atm
-        lda     #<4095
+  ; free-run, ~1/20s, used for RND (LFSR) atm
+        lda     #<785
         sta     TMRLSB
-        lda     #>4095
+        lda     #>785
         sta     TMRMSB
 
 .ifdef BUILD_OPT_PROFILE
@@ -485,6 +490,8 @@ inipal:
         sta     0xFEF4
 				ldx     #main_fisr              ; address
 				stx     0xFEF5
+				ldd			#0x0042
+				std			*lfsr										; seed with non-zero before enabling
         andcc   #~(1<<6)                ; enable FIRQ in CPU
 
   ; setup the PIAS for joystick sampling
@@ -543,8 +550,6 @@ inipal:
 
 .endif	; PLATFORM_COCO3
 			
-				lda			#>dp_base
-				tfr			a,dp
         jmp     start                   ; knight lore
         
 rgb_pal:
@@ -6320,10 +6325,20 @@ main_isr:
 .endif
 
 main_fisr:
-; temp hack - should do LFSR or something
-; and also tune frequency
         tst     FIRQENR                 ; ACK FIRQ
-        inc     *z80_r
+; provide PRN to emulate Z80 R
+; - Z80 R updated once/twice every instruction fetch
+; use 16-bit maximal-period Galois LFSR
+; - called every 1/20s
+				pshs		d
+				ldd			*lfsr
+				lsrb
+				rora														; lfsr >>= 1								        
+				bcc			1$											; lsb=0, skip
+				eorb		#0xb4
+				eora		#0x00										; lfsr ^= 0xB400
+1$:			std			*lfsr
+				puls		d
         rti
 
 .if 0
