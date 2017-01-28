@@ -330,43 +330,79 @@ start_coco:
 ; switch to all-RAM mode
         sta     RAMMODE        
 
+; check for PAL/NTSC GIME
+				lda			#0x3f										; ECB ROM $E000-
+				ldx			#MMUTSK1
+				sta			,x
+				ldb			0x0033									; read BASIC video register mirror
+				lda			#VRAM_PG
+				sta			,x											; restore page
+				stb			pal_detected
+				
 display_splash:
-
+				lda			#0x01										; 32 CPL
+				sta			VRES
         ldx     #0x400
-        lda     #96                     ; green space
+        lda     #0x60                   ; green space
+        eora		#0x40										; inverse (black space)
 1$:     sta     ,x+
         cmpx    #0x600
         bne     1$
         ldx     #splash
         ldy     #0x420
-2$:     pshs    y
-        ldb     ,x+                     ; read 'attr'
-        stb     attr
-        lda     ,x                      ; leading null?
-        beq     5$
-3$:     lda     ,x+
-        beq     4$
-        eora    attr
-        sta     ,y+
-        bra     3$
-4$:     puls    y
-        leay    32,y
-        bra     2$
-5$:     ldx			#PIA0
-        ldb     #0                      ; flag rgb
-6$:     lda     #~(1<<2)
-				sta     2,x
+				jsr			display_lines
+				lda			pal_detected
+				ldx			#ntsc_splash
+				bita		#8											; pal?
+				beq			2$											; no, skip
+				ldx			#pal_splash
+2$:			ldy			#0x540
+   			jsr			display_lines
+				ldx			#PIA0
+
+splash_get_key:
+				clr			cmp											; flag RGB
+				ldb			pal_detected
+1$:			lda			#~(1<<2)								; col=2
+				bitb		#8											; PAL?
+				beq			2$											; no, skip
+				clra														; all columns
+2$:			sta     2,x											; column strobe
 				lda     ,x
-				bita    #(1<<2)                 ; 'R'?
-				beq     7$
-        lda     #~(1<<3)
+				coma														; active high
+				bitb		#8											; pal?
+				beq			3$											; no, skip
+				tsta														; any key hit?
+				beq			1$											; no, loop
+				bra			setup_gime_for_game
+3$:			bita    #(1<<2)                 ; 'R'?
+				bne     4$											; yes, default, exit
+        lda     #~(1<<3)								; col=3
 				sta			2,x											; column strobe
 				lda			,x											; active low
 				bita    #(1<<0)                 ; 'C'?
-				bne     6$                      ; try again
-				ldb     #(1<<4)                 ; flag component
-7$:     stb     cmp
-
+				bne     1$                      ; try again
+				ldb     #4                      ; flag component
+				stb     cmp
+4$:     bra			setup_gime_for_game
+        
+display_lines:        
+1$:     ldb     ,x+                     ; read 'attr'
+        stb     attr
+        lda     ,x                      ; leading null?
+        beq     9$
+				pshs    y
+2$:     lda     ,x+
+        beq     3$
+        eora    attr
+        eora		#0x40										; invert
+        sta     ,y+
+        bra     2$
+3$:     puls    y
+        leay    32,y
+        bra     1$
+9$:			rts
+				
 setup_gime_for_game:
 
 ; initialise PLATFORM_COCO3 hardware
@@ -546,7 +582,7 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "``hCOCOFEST`DEMO`VERSION`qnqi"
+        .asciz  "```hPREmRELEASE`VERSION`qnri"
         .db 0
         .asciz  "`"
         .db 0
@@ -554,7 +590,7 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "```````hRiGBohCiOMPOSITE"
+        .asciz  "`"
         .db 0
         .asciz  "`"
         .db 0
@@ -563,7 +599,28 @@ splash:
         .asciz  "|WWWnRETROPORTSnBLOGSPOTnCOMnAU~"
         .dw     0
 
+ntsc_splash:
+        .db 0
+;        .asciz  "`````````NTSC`DETECTED"
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "```````hRiGBohCiOMPOSITE"
+        .dw     0
 
+pal_splash:
+        .db 0
+;        .asciz  "``````PAL`MACHINE`DETECTED"
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "```````m`PRESS`ANY`KEY`m"
+        .dw     0
+
+pal_detected:
+				.ds			1
 attr:   .ds     1
                 
 osd_set_palette:
