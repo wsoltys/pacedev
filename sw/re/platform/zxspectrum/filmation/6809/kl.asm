@@ -3349,16 +3349,16 @@ display_frame:
         pshs    y
         clra
         jsr     fill_window
-        jsr     print_sprite
+        jsr     print_sprite					; display sun/moon
         ldx     #sprite_scratchpad
         clr     7,x                   ; flags7
-        lda     #0x5a
+        lda     #0x5a									; frame(left)
         sta     0,x                   ; graphic_no
-        lda     #184
+        lda     #184-8								; adjustment for Coco
         sta     26,x                  ; pixel_x
         clr     27,x                  ; pixel_y
         jsr     print_sprite
-        lda     #208
+        lda     #208									; frame (right)
         sta     26,x                  ; pixel_x
         lda     #0xba
         sta     0,x                   ; graphic_no
