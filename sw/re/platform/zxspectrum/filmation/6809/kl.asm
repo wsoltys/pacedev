@@ -766,7 +766,7 @@ loc_B000:
         tfr     a,b
 
 game_delay:
-        ldx     #0x0500
+        ldx     #0x1000									; original value 0x0500
 2$:
         leax    -1,x
         bne     2$

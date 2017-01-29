@@ -5797,7 +5797,7 @@ Hexidecimal [16-Bits]
    C3CA 1F 89         [ 6]  766         tfr     a,b
                             767 
    C3CC                     768 game_delay:
-   C3CC 8E 05 00      [ 3]  769         ldx     #0x0500
+   C3CC 8E 10 00      [ 3]  769         ldx     #0x1000									; original value 0x0500
    C3CF                     770 2$:
    C3CF 30 1F         [ 5]  771         leax    -1,x
    C3D1 26 FC         [ 3]  772         bne     2$
