@@ -6,11 +6,11 @@ ZX_VRAM:4000		 ; |			  License info:	48-B437-7294-77			     |
 ZX_VRAM:4000		 ; |			    Chris Nott,	Virtual	Logic			     |
 ZX_VRAM:4000		 ; +-------------------------------------------------------------------------+
 ZX_VRAM:4000		 ;
-ZX_VRAM:4000		 ; Input MD5   : 9EB6957C285769A5AA2774B23353AE37
-ZX_VRAM:4000		 ; Input CRC32 : 57F860FA
+ZX_VRAM:4000		 ; Input MD5	: 9EB6957C285769A5AA2774B23353AE37
+ZX_VRAM:4000		 ; Input CRC32	: 57F860FA
 ZX_VRAM:4000
 ZX_VRAM:4000		 ; +--------------------------------------------------+
-ZX_VRAM:4000		 ; | ZX	Spectrum Knight	Lore Disassembly v1.00rc6     |
+ZX_VRAM:4000		 ; | ZX	Spectrum Knight	Lore Disassembly v1.00rc7     |
 ZX_VRAM:4000		 ; |	- by tcdev (msmcdoug@gmail.com)		      |
 ZX_VRAM:4000		 ; +--------------------------------------------------+
 ZX_VRAM:4000		 ;
@@ -2609,7 +2609,7 @@ RAM:AF6C
 RAM:AF6C	     START:							     ; location	to clear
 RAM:AF6C 21 A0 5B		     ld	     hl, #seed_1
 RAM:AF6F 01 68 05		     ld	     bc, #0x568				     ; # bytes to clear
-RAM:AF72 3A 78 5C		     ld	     a,	(special_objs_here_1+0x10)
+RAM:AF72 3A 78 5C		     ld	     a,	(0x5C78)			     ; FRAMES system variable (LSB)
 RAM:AF75 F5			     push    af
 RAM:AF76 CD 3A D5		     call    clr_mem
 RAM:AF79 F1			     pop     af
@@ -5794,7 +5794,7 @@ RAM:C3CC 48			     ld	     c,	b
 RAM:C3CD 47			     ld	     b,	a
 RAM:C3CE AF			     xor     a
 RAM:C3CF CD 15 C5		     call    fill_window
-RAM:C3D2 CD 18 D7		     call    print_sprite
+RAM:C3D2 CD 18 D7		     call    print_sprite			     ; display sun/moon
 RAM:C3D5 DD 21 DB BF		     ld	     ix, #sprite_scratchpad
 RAM:C3D9 DD 36 07 00		     ld	     7(ix), #0				     ; clear flags
 RAM:C3DD DD 36 00 5A		     ld	     0(ix), #0x5A ; 'Z'                      ; sun/moon frame left
