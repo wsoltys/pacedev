@@ -364,21 +364,29 @@ display_splash:
 
 splash_get_key:
 				clr			cmp											; flag RGB
+				ldd			#0x0042									; lfsr seed
+				std			frames									; zx spectrum system variable
+1$:			ldd			frames
+				lsra
+				rorb														; lfsr >>= 1								        
+				bcc			2$											; lsb=0, skip
+				eora		#0xb4										; lfsr ^= 0xB400
+2$:			std			frames
 				ldb			pal_detected
-1$:			lda			#~(1<<2)								; col=2
+				lda			#~(1<<2)								; col=2
 				bitb		#8											; PAL?
-				beq			2$											; no, skip
+				beq			3$											; no, skip
 				clra														; all columns
-2$:			sta     2,x											; column strobe
+3$:			sta     2,x											; column strobe
 				lda     ,x
 				coma														; active high
 				bitb		#8											; pal?
-				beq			3$											; no, skip
+				beq			4$											; no, skip
 				tsta														; any key hit?
 				beq			1$											; no, loop
 				bra			setup_gime_for_game
-3$:			bita    #(1<<2)                 ; 'R'?
-				bne     4$											; yes, default, exit
+4$:			bita    #(1<<2)                 ; 'R'?
+				bne     5$											; yes, default, exit
         lda     #~(1<<3)								; col=3
 				sta			2,x											; column strobe
 				lda			,x											; active low
@@ -386,7 +394,7 @@ splash_get_key:
 				bne     1$                      ; try again
 				ldb     #4                      ; flag component
 				stb     cmp
-4$:     bra			setup_gime_for_game
+5$:     bra			setup_gime_for_game
         
 display_lines:        
 1$:     ldb     ,x+                     ; read 'attr'
@@ -491,8 +499,8 @@ inipal:
         sta     0xFEF4
 				ldx     #prng_fisr              ; address
 				stx     0xFEF5
-				ldd			#0x0042
-				std			*lfsr										; seed with non-zero before enabling
+				ldd			frames
+				std			*lfsr										; seed before enabling
         andcc   #~(1<<6)                ; enable FIRQ in CPU
 
   ; setup the PIAS for joystick sampling
@@ -625,6 +633,9 @@ pal_splash:
         .asciz  "```````m`PRESS`ANY`KEY`m"
         .dw     0
 
+; emulation of zx spectrum FRAMES system variable (0x5C78)
+; - used for seed_1
+frames:	.ds			2
 pal_detected:
 				.ds			1
 attr:   .ds     1
@@ -641,7 +652,7 @@ osd_set_palette:
 start:
         ldx     #seed_1
         ldy     #eod-#seed_1
-        lda     0x5c78                  ; FRAMES (frame counter lsb)
+        lda     frames									; FRAMES (any byte, doesn't matter)
         pshs    a
         jsr     clr_mem
         puls    a
@@ -6333,11 +6344,10 @@ prng_fisr:
 ; - called every 1/20s
 				pshs		d
 				ldd			*lfsr
-				lsrb
-				rora														; lfsr >>= 1								        
+				lsra
+				rorb														; lfsr >>= 1								        
 				bcc			1$											; lsb=0, skip
-				eorb		#0xb4
-				eora		#0x00										; lfsr ^= 0xB400
+				eora		#0xb4										; lfsr ^= 0xB400
 1$:			std			*lfsr
 				puls		d
         rti
