@@ -5354,7 +5354,7 @@ Hexidecimal [16-Bits]
    C0BF A6 84         [ 4]  392 				lda			,x											; active low
    C0C1 85 01         [ 2]  393 				bita    #(1<<0)                 ; 'C'?
    C0C3 26 CE         [ 3]  394 				bne     1$                      ; try again
-   C0C5 C6 04         [ 2]  395 				ldb     #4                      ; flag component
+   C0C5 C6 10         [ 2]  395 				ldb     #(1<<4)                 ; flag component
    C0C7 F7 7A 00      [ 5]  396 				stb     cmp
    C0CA 20 20         [ 3]  397 5$:     bra			setup_gime_for_game
 ASxxxx Assembler V05.05  (Motorola 6809), page 92.

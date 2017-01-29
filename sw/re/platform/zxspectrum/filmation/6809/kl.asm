@@ -392,7 +392,7 @@ splash_get_key:
 				lda			,x											; active low
 				bita    #(1<<0)                 ; 'C'?
 				bne     1$                      ; try again
-				ldb     #4                      ; flag component
+				ldb     #(1<<4)                 ; flag component
 				stb     cmp
 5$:     bra			setup_gime_for_game
         

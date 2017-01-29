@@ -82,7 +82,9 @@ screens that have been tested. Needs throttling.
 RGB/Composite video type.
 
 * Enhanced simplistic Z80 R emulation with 16-bit maximal-length Galois LFSR
-updated every 1/20s.
+updated every 1/20s. Also fixed RNG for start-up location (amongst other random events).
+
+* Fixed sun/moon graphics glitch (left/right of frame) for Coco3 port.
 
 
 CocoFEST Demo Version 1.1
@@ -119,7 +121,7 @@ modified specifically for the Coco3 port. Currently only START GAME has been
 implemented.
 
 Sun/moon frame graphics glitch: under certain circumstances, remnants of the
-sum/moon either side of the frame in the right-hand side of the panel are
+sun/moon either side of the frame in the right-hand side of the panel are
 visible. This is an artifact of the original code, however on the ZX Spectrum
 these areas were given a black-on-black attribute in order to conceal them.
 The Amstrad CPC, OTOH, extended the width of the frame sprite to cover the
