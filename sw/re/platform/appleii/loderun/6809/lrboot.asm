@@ -97,7 +97,7 @@ WHITE_ON_BLACK    .equ    (1<<7)|WHITE_TEXT|BLACK_BG
 splash:
 ;       .ascii  "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
         .db     WHITE_ON_BLACK
-        .ascii  "              Apple II Lode Runner for the TRS-80 Color Computer 3    (Beta4.0) "
+        .ascii  "              Apple II Lode Runner for the TRS-80 Color Computer 3    (Beta4.1) "
         .db     BLACK_ON_GREEN
         .ascii  "                                                                                "
         .ascii  "The game Lode Runner itself should need no introduction, having received        "

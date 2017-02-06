@@ -288,7 +288,11 @@ setup_gime_for_game:
   .ifdef HAS_SOUND				
 				lda			PIA1+CRB
 				ora			#(1<<5)|(1<<4)					; set CB2 as output
-				ora			#(1<<3)									; enable sound
+		.ifdef USE_1BIT_SOUND
+				anda		~#(1<<3)								; mute (other) sound
+		.else
+				ora			#(1<<3)									; enable (DAC) sound
+		.endif
 				sta			PIA1+CRB
 				; bit2 sets control/data register
 				lda     PIA1+CRB
@@ -347,7 +351,7 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "``````hBETA`t`DEMO`VERSIONi"
+        .asciz  "`````hBETA`tnq`DEMO`VERSIONi"
         .db 0
         .asciz  "`"
         .db 0

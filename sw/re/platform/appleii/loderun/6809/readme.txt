@@ -66,6 +66,10 @@ Comments/Suggestions/Bugs
 
 Release History
 ---------------
+
+v0.5				Playable Demo Release (Beta 4.1)
+						Fixed sound when enabling joystick
+						
 v0.4        Playable Demo Release (Beta 4)
             Fixed 32CPL splash screen on floppy version
             Added joystick support
