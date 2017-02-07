@@ -73,6 +73,11 @@ that the Coco3 port is no slower - and usually faster - than the original.
 Release notes
 -------------
 
+Pre-Release Demo Version 1.3
+
+* Fixed sound when joystick enabled
+
+
 Pre-Release Demo Version 1.2
 
 * Some optimisation to speed. Compares well with Spectrum version on limited
