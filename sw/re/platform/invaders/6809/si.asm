@@ -22,14 +22,48 @@
 
 .ifndef BUILD_OPT_INVALID
   .define GFX_1BPP
+  VIDEO_BPL   .equ    0x20
 .else
   .define GFX_2BPP
+  VIDEO_BPL   .equ    0x40
 .endif
 
 ; *** end of derived
 
 ; *** INVADERS stuff here
 ;
+    .macro LDX_VRAM addr
+      .ifndef BUILD_OPT_ROTATED
+        ldx     #vram+addr
+      .else
+        ldx     #vram+(31-<addr)*256+>addr
+      .endif
+    .endm
+    
+    .macro DEF_VRAM addr
+      .ifndef BUILD_OPT_ROTATED
+        .dw     #vram+addr
+      .else
+        .dw     #vram+(31-<addr)*256+>addr
+      .endif
+    .endm
+
+    .macro LDB_SPRW w
+      .ifndef BUILD_OPT_ROTATED
+        ldb     #w
+      .else
+        ldb     #(w+7)/8
+      .endif
+    .endm
+
+    .macro DEF_SPRW w
+      .ifndef BUILD_OPT_ROTATED
+        .db     #w
+      .else
+        .db     #(w+7)/8
+      .endif
+    .endm
+        
 DIP_DISPLAY_COINAGEn  .equ    (1<<7)
 DIP_BONUS_LIFE        .equ    (1<<3)
 DIP_TILT              .equ    (1<<2)
@@ -341,69 +375,7 @@ cmp:                .ds     1
 shft_base:          .ds     2
 
 ; stack is here on Coco port
-
-        .org    cart_base
-
-      .macro PUL_ROT_X
-        puls    d                       ; X
-        exg     a,b
-        anda    #31
-        nega
-        adda    #31
-        ora     #>cocovram
-        tfr     d,x                     ; fix addressing
-      .endm
-
-; thanks JMK for the optimisation!  
-      .macro ROT1 bit
-        ldb     bit*32,y
-        rorb
-        ror     bit*32,y
-        rola
-      .endm
-
-      .macro ROT8
-        ROT1    0
-        ROT1    1
-        ROT1    2
-        ROT1    3
-        ROT1    4
-        ROT1    5
-        ROT1    6
-        ROT1    7
-        sta     ,x
-        leax    VIDEO_BPL,x
-      .endm
-
-      .macro ROT8x8
-        ROT8
-        ROT8
-        ROT8
-        ROT8
-        ROT8
-        ROT8
-        ROT8
-        ROT8
-      .endm
-
-; rotates a number of 8x8-pixel blocks to Coco video memory
-; X = destination (Coco3) address
-; Y = source (SI) address
-; B = #of rows (bits) to copy
-rotate_and_copy_bits:
-        lsrb
-        lsrb
-        lsrb                            ; bit count -> byte count
-        incb                            ; +1 for alignment
-1$:     pshs    b,x                     ; byte count
-        ROT8x8                          ; 8x8 bits
-        puls    b,x        
-        leax    1,x                     ; next column
-        leay    8*32,y                  ; next source column
-        decb                            ; done all columns?
-        lbne    1$                      ; no, loop
-        rts
-                
+        
 				.org		code_base
 
 start_coco:
@@ -438,7 +410,7 @@ start_coco:
         inca
         decb
         bne     4$                      ; map pages $30-33
-        lda     #0x38
+        lda     #VRAM_PG
         ldx     #MMUTSK1                ; $0000-
         ldb     #4
 5$:     sta     ,x+
@@ -523,9 +495,10 @@ setup_gime_for_game:
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
-				lda			#VRAM_MSB
+				lda			#(VRAM_PG<<2)           ; screen at page $38
 				sta			VOFFMSB
-				lda			#VRAM_LSB
+;				lda     #0
+				lda			#32*(VIDEO_BPL/8)
 				sta			VOFFLSB   							
 				lda			#0x00										; normal display, horiz offset 0
 				sta			HOFF      							
@@ -550,7 +523,7 @@ inipal:
 				lda			FIRQENR									; ACK any pending FIRQ in the GIME
 ;        lda     #0x7E                   ; jmp
 ;        sta     0xFEF4
-;				ldx     #main_fisr              ; address
+;				ldx     #cpu_fisr              ; address
 ;				stx     0xFEF5
 ;        andcc   #~(1<<6)                ; enable FIRQ in CPU
   ; install IRQ handler and enable CPU IRQ
@@ -621,21 +594,6 @@ inipal:
 				tfr			a,dp
 
 ; Build the shift tables to emulate 
-; 8-bit rotation table
-        clr     *z80_c
-        ldx     #rot_tbl+0x80
-        ldb     #0
-1$:     pshs    b
-        lda     *z80_c
-        tfr     a,b
-        rora
-        rorb
-        lda     *z80_c
-        stb     a,x
-        inc     *z80_c
-        puls    b
-        decb
-        bne     1$
 ; the hardware shift register
 ; - 1st run seeds low values
         ldb     #0
@@ -685,9 +643,9 @@ inipal:
 ; the game shows 3 bases left
 ; otherwise it shows no bases left
         ldx     #wram
-5$:     clr     ,x+
+1$:     clr     ,x+
         cmpx    #wram+1024
-        bne     5$
+        bne     1$
                 				
         jmp     start                   ; space invaders
         
@@ -741,7 +699,17 @@ splash:
 
 attr:   .ds     1
 
-; Coco3 interrupt service routine
+; Coco3 interrupt service routines
+
+.if 0
+cpu_fisr:
+; temp hack - should do LFSR or something
+; and also tune frequency
+        tst     FIRQENR                 ; ACK FIRQ
+        inc     *z80_r
+        rti
+.endif
+
 cpu_isr:
         DI                              ; interrupts disabled in the 8080 ISR
         lda     IRQENR                  ; ACK GIME IRQ on the Coco3
@@ -927,7 +895,7 @@ draw_alien:
         beq     1$
         bsr     sub_013B                ; No ... add 30 and use position 1 alien sprites
 1$:     ldx     alien_pos_msb           ; Pixel position
-        ldb     #16                     ; 16 rows in alien sprites
+        LDB_SPRW  16                    ; 16 rows in alien sprites
         jsr     draw_sprite             ; Draw shifted sprite
 ; $0136        
 sub_0136:
@@ -1056,10 +1024,20 @@ return_two:
 ; $01CF
 ; Draw a 1px line across the player's stash at the bottom of the screen.
 draw_bottom_line:
+.ifndef BUILD_OPT_ROTATED
         lda     #(1<<7)                 ; Bit 7 set ... going to draw a 1-pixel stripe down left side
         ldb     #0xe0                   ; All the way down the screen
         ldx     #vram+2                 ; Screen coordinates (3rd byte from upper left)
         jmp     sub_14CC                ; Draw line down left side 
+.else
+        ldb     #VIDEO_BPL              ; screen width in bytes
+        ldx     #vram+(32+207)*VIDEO_BPL  ; location
+        lda     #0xff
+1$:     sta     ,x+
+        decb
+        bne     1$
+        rts
+.endif
 
 ; $01D9
 ; HL/X points to descriptor: DX DY XX YY except DX is already loaded in C
@@ -1135,7 +1113,7 @@ loc_021B:
 copy_shields:
         sta     tmp_2081                ; Remember copy/restore flag
         ldu     #0x1602                 ; 22 rows, 2 bytes/row (for 1 shield pattern)
-        ldx     #vram+0x0406            ; Screen coordinates
+        LDX_VRAM  0x0406                ; Screen coordinates
         ldb     #4                      ; Four shields to move
 1$:     pshs    b                       ; Hold shield count
         stu     *z80_b                  ; B=rows, C=bytes
@@ -1146,7 +1124,12 @@ copy_shields:
         decb                            ; Have we moved all shields?
         bne     3$
         rts
-3$:     leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
+3$:     
+.ifndef BUILD_OPT_ROTATED
+        leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
+.else
+        leax    2,x
+.endif        
         bra     1$        
 4$:     jsr     remember_shields        ; Remember player's shields
         bra     2$                      ; Continue with next shield
@@ -1266,7 +1249,7 @@ game_obj_0:
 ; $02AE
 ; Blow up finished
         ldx     player_xr               ; Player's coordinates
-        ldb     #16                     ; 16 Bytes
+        LDB_SPRW  16                    ; 16 Bytes
         jsr     erase_simple_sprite     ; Erase simple sprite (the player)
         ldx     #obj0_timer_msb         ; Restore player ...
         ldy     #byte_0_1B00+0x10       ; ... structure ...
@@ -1995,12 +1978,12 @@ wait_for_start:
         EI
         jsr     loc_1979                ; Suspend game tasks
         jsr     clear_playfield         ; Clear center window
-        ldx     #vram+0x0C13            ; Screen coordinates
+        LDX_VRAM  0xC13
         ldy     #message_push           ; "PRESS"
         ldb     #4                      ; Message length
         jsr     print_message           ; Print it
 loc_077F:        
-        ldx     #vram+0x0410            ; Screen coordinates
+        LDX_VRAM  0x0410                ; Screen coordinates
         ldb     #20                     ; Message length
         lda     num_coins               ; Number of credits
         deca                            ; Set flags
@@ -2157,14 +2140,14 @@ get_al_ref_ptr:
 ; $088D
 ; Print "PLAY PLAYER " and blink score for 2 seconds.
 prompt_player:
-        ldx     #vram+0x0711            ; Screen coordinates
+        LDX_VRAM  0x0711                ; Screen coordinates
         ldy     #message_p1             ; Message "PLAY PLAYER<1>"
         ldb     #14                     ; 14 bytes in message
         bsr     print_message           ; Print the message
         lda     player_data_msb         ; Get the player number
         rora                            ; C will be set for player 1
         lda     #0x1c                   ; The "2" character
-        ldx     #vram+0x1311            ; Replace the "<1>" with "<2">
+        LDX_VRAM  0x1311                ; Replace the "<1>" with "<2">
         bcs     1$
         bsr     draw_char               ; If player 2 ... change the message
 1$:     lda     #176                    ; Delay of 176 (roughly 2 seconds)
@@ -2178,11 +2161,11 @@ prompt_player:
         jsr     draw_score              ; Draw the score
         bra     2$                      ; Back to the top of the wait loop
 4$:     ldb     #32                     ; 32 rows (4 characters * 8 bytes each)
-        ldx     #vram+0x031c            ; Player-1 score on the screen
+        LDX_VRAM  0x031c                ; Player-1 score on the screen
         lda     player_data_msb         ; Get the player number
         rora                            ; C will be set for player 1
         bcs     5$                      ; We have the right score coordinates
-        ldx     #vram+0x151c            ; Use coordinates for player-2's score
+        LDX_VRAM  0x151c                ; Use coordinates for player-2's score
 5$:     jsr     clear_small_sprite      ; Clear a one byte sprite at HL/X
         bra     2$                      ; Back to the top of the wait loop
                 
@@ -2210,8 +2193,8 @@ loc_08E4:
         tst     two_players             ; Number of players
         beq     1$
         rts                             ; Skip if two player
-1$:     ldx     #vram+0x151c            ; Player 2's score
-        ldb     #32                     ; 32 rows is 4 digits * 8 rows each
+1$:     LDX_VRAM  0x151c                ; Player 2's score
+        LDB_SPRW  32                    ; 32 rows is 4 digits * 8 rows each
         jmp     clear_small_sprite      ; Clear a one byte sprite (32 rows long) at HL/X
 
 ; $08F1
@@ -2240,7 +2223,7 @@ draw_char:
         ldb     #8
         mul                             ; D=offset
         leay    d,y                     ; Get pointer to sprite
-        ldb     #8                      ; 8 bytes each
+        LDB_SPRW  8                     ; 8 bytes each
 ; hit watchdog
         jmp     draw_simp_sprite        ; To screen
 
@@ -2291,11 +2274,11 @@ sub_0935:
         inc     ,x                      ; Bump number of ships
         lda     ,x                      ; Get the new total
         pshs    a                       ; Hang onto it for a bit
-        ldx     #vram+0x0101            ; Screen coords for ship hold
+        LDX_VRAM  0x0101                ; Screen coords for ship hold
 3$:     leax    512,x                   ; Bump to next
         deca                            ; ... spot
         bne     3$                      ; Find spot for new ship
-        ldb     #16                     ; 16 byte sprite
+        LDB_SPRW  16                    ; 16 byte sprite
         ldy     #player_sprite          ; Player sprite
         jsr     draw_simp_sprite        ; Draw the sprite
         puls    a                       ; Restore the count
@@ -2385,6 +2368,7 @@ sub_09CA:
 ; $09D6
 ; Clear center window of screen
 clear_playfield:
+.ifndef BUILD_OPT_ROTATED        
         ldx     #vram+2                 ; Third from left, top of screen
 1$:     clr     ,x+                     ; Clear screen byte. Next in row
         tfr     x,d                     ; Get X ...
@@ -2392,13 +2376,13 @@ clear_playfield:
         cmpb    #0x1c                   ; Edge minus a buffer?
         bcs     2$                      ; No ... keep going
         leax    6,x                     ; Else ... bump to next edge + buffer
-2$:     cmpa    #>vram+0x1c             ; Get Y coordinate. Reached bottom?
+2$:     cmpa    #0x1C                   ; Get Y coordinate. Reached bottom?
         bcs     1$                      ; No ... keep going
-.ifdef BUILD_OPT_ROTATED
-        ldx     #cocovram+32*VIDEO_BPL
-3$:     clr     ,x+                     ; Clear screen byte. Next in row
-        cmpx    #cocovram+(32+208)*VIDEO_BPL
-        bcs     3$                      ; No ... keep going
+.else
+        ldx     #vram+32*VIDEO_BPL      ; start 32 pixels from the top
+1$:     clr     ,x+
+        cmpx    #vram+(32+208)*VIDEO_BPL  ; clear 256-32-16=208 lines
+        bne     1$
 .endif        
         rts
 
@@ -2553,7 +2537,7 @@ isr_spl_tasks:
 ; Message to center of screen.
 ; Only used in one place for "SPACE  INVADERS"
 sub_0ACF:
-        ldx     #vram+0x714             ; Near center of screen
+        LDX_VRAM  0x714                 ; Near center of screen
         ldb     #15                     ; 15 bytes in message
         bra     print_message_del       ; Print and out
 
@@ -2587,7 +2571,7 @@ loc_0AEA:
 .endif
         EI
         bsr     one_sec_delay        
-        ldx     #vram+0x0C17            ; Screen coordinates (middle near top)
+        LDX_VRAM  0x0C17                ; Screen coordinates (middle near top)
         ldb     #4                      ; 4 characters in "PLAY"
         tst     splash_animate          ; Splash screen type
         lbne    loc_0BE8                ; Not 0 ... do "normal" PLAY
@@ -2614,8 +2598,8 @@ loc_0B0B:
         bsr     ini_splash_ani          ; Copy to splash-animate structure
         jsr     animate                 ; Wait for ISR to move sprite (alien pushing Y)
         jsr     one_sec_delay           ; One second delay
-        ldx     #vram+0x0fb7            ; Where the splash alien ends up
-        ldb     #10                     ; 10 rows
+        LDX_VRAM  0x0fb7                ; Where the splash alien ends up
+        LDB_SPRW  10                    ; 10 rows
         jsr     clear_small_sprite      ; Clear a one byte sprite at HL
         jsr     two_sec_delay           ; Two second delay
 
@@ -2653,12 +2637,12 @@ loc_0B89:
         jsr     one_sec_delay
         jsr     sub_1988                ; Jump straight to clear-play-field
         ldb     #12                     ; Message size
-        ldx     #vram+0x0811            ; Screen coordinates
+        LDX_VRAM  0x0811                ; Screen coordinates
         ldy     #message_coin           ; "INSERT  COIN"
         jsr     print_message           ; Print message
         lda     splash_animate          ; Do splash animations?
         bne     4$                      ; Not 0 ... not on this screen
-        ldx     #vram+0x0f11            ; Screen coordinates
+        LDX_VRAM  0x0f11                ; Screen coordinates
         lda     #2                      ; Character "C"
         jsr     draw_char               ; Put an extra "C" for "CCOIN" on the screen
 4$:     ldu     #credit_table           ; "<1 OR 2 PLAYERS>  "
@@ -2709,11 +2693,7 @@ draw_shifted_sprite:
         nop
         jsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
         nop
-.ifdef BUILD_OPT_ROTATED
-        leas    -2,s
-        pshs    b
-        pshs    x
-.endif        
+.ifndef BUILD_OPT_ROTATED
 1$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
@@ -2733,20 +2713,32 @@ draw_shifted_sprite:
         leax    32,x                    ; Add 32 to next row
         decb                            ; All rows done?
         bne     1$                      ; No ... erase all
-.ifdef BUILD_OPT_ROTATED
-        stx     3,s
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        pshs    b,x,y
-        jsr     rotate_and_copy_bits
-        puls    b,x,y
-        leay    1,y
-        leax    -8*VIDEO_BPL,x
-        jsr     rotate_and_copy_bits
+.else
+1$:     pshs    b,x
+2$:     pshs    x
+        ldb     #8
+        lda     ,y+                     ; Get picture value. Next in image
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        ldu     shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
+        ora     ,x                      ; OR them onto the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+;       xor     a                       ; Shift register over ...
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
+        ora     ,x                      ; OR them onto the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
         puls    x
+        leax    32,x                    ; Add 32 to next row
+        decb                            ; All rows done?
+        bne     2$                      ; No ... erase all
+        puls    b,x
+        leax    1,x
+        decb
+        bne     1$
 .endif        
         rts                
 
@@ -2754,12 +2746,8 @@ draw_shifted_sprite:
 ; Clear a sprite from the screen (standard pixel number descriptor).
 ; ** We clear 2 bytes even though the draw-simple only draws one.
 erase_simple_sprite:
-        jsr     cnvt_pix_number         ; Convert pixel number in HL
-.ifdef BUILD_OPT_ROTATED
-        leas    -2,s
-        pshs    b
-        pshs    x
-.endif
+        bsr     cnvt_pix_number         ; Convert pixel number in HL
+.ifndef BUILD_OPT_ROTATED        
 1$:     pshs    x
         clr     ,x+                     ; Clear screen byte. Next byte
         clr     ,x+                     ; Clear byte
@@ -2767,21 +2755,19 @@ erase_simple_sprite:
         leax    32,x                    ; Add 1 row to screen coordinate
         decb                            ; All rows done?
         bne     1$                      ; Do all rows
-.ifdef BUILD_OPT_ROTATED
-        stx     3,s
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        pshs    b,x,y
-        jsr     rotate_and_copy_bits
-        puls    b,x,y
-        leay    1,y
-        leax    -8*VIDEO_BPL,x
-        jsr     rotate_and_copy_bits
-        puls    x
-.endif
+.else
+1$:     pshs    x,b
+        ldb     #8
+2$:     clr     ,x                      ; Clear screen byte.
+        clr     8*32,x                  ; Clear next byte
+        leax    32,x                    ; Add 1 row to screen coordinate
+        decb                            ; All rows done?
+        bne     1$                      ; Do all rows
+        puls    x,b
+        leax    1,x
+        decb
+        bne     2$
+.endif        
         rts
 
 ; $1439
@@ -2790,37 +2776,32 @@ erase_simple_sprite:
 ; DE/Y = character data
 ; B = number of rows
 draw_simp_sprite:
-.ifdef BUILD_OPT_ROTATED
-        leas    -2,s
-        pshs    b
-        pshs    x
-.endif
-1$:     lda     ,y+                     ; From character set ...
+.ifndef BUILD_OPT_ROTATED
+        lda     ,y+                     ; From character set ...
         sta     ,x                      ; ... to screen
         leax    32,x                    ; Next row on screen
         decb                            ; Decrement counter
+        bne     draw_simp_sprite        ; Do all
+.else
+1$:     pshs    b,x
+        ldb     #8
+2$:     lda     ,y+
+        sta     ,x
+        leax    VIDEO_BPL,x
+        decb
+        bne     2$
+        puls    b,x
+        leax    1,x
+        decb
         bne     1$
-.ifdef BUILD_OPT_ROTATED
-        stx     3,s
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        jsr     rotate_and_copy_bits
-        puls    x
 .endif
         rts
 
 ; $1452
 ; Erases a shifted sprite from screen (like for player's explosion)
 erase_shifted:
-        jsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
-.ifdef BUILD_OPT_ROTATED
-        leas    -2,s
-        pshs    b
-        pshs    x
-.endif
+        bsr     cnvt_pix_number         ; Convert pixel number in HL to coorinates with shift
+.ifndef BUILD_OPT_ROTATED        
 1$:     pshs    x   
         lda     ,y+                     ; Get picture value. Next in image
 ;       out     (shft_data),a
@@ -2842,16 +2823,35 @@ erase_shifted:
         leax    32,x                    ; Add 32 to next row
         decb                            ; All rows done?
         bne     1$                      ; No ... erase all
-.ifdef BUILD_OPT_ROTATED
-        stx     3,s
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        jsr     rotate_and_copy_bits
+.else
+1$:     pshs    b,x
+        ldb     #8
+2$:     pshs    x   
+        lda     ,y+                     ; Get picture value. Next in image
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        ldu     shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
+        coma                            ; Reverse it (erasing bits)
+        anda    ,x                      ; Erase the bits from the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
+;       xor     a                       ; Shift register over ...
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
+        coma                            ; Reverse it (erasing bits)
+        anda    ,x                      ; Erase the bits from the screen
+        sta     ,x+                     ; Store the erased pattern back. Next column on screen
         puls    x
-.endif
+        leax    32,x                    ; Add 32 to next row
+        decb                            ; All rows done?
+        bne     2$                      ; No ... erase all
+        puls    b,x
+        leax    1,x
+        decb
+        bne     1$
+.endif        
         rts                
 
 ; $1474
@@ -2894,11 +2894,6 @@ remember_shields:
 draw_spr_collision:
         bsr     cnvt_pix_number         ; Convert pixel number to coord and shift
         clr     collision               ; Clear the collision-detection flag
-.ifdef BUILD_OPT_ROTATED
-        leas    -2,s
-        pshs    b
-        pshs    x
-.endif             
 1$:     pshs    b,x   
         lda     ,y+                     ; Get byte. Next in pixel pattern
 ;       out     (shft_data),a
@@ -2928,16 +2923,6 @@ draw_spr_collision:
         leax    32,x                    ; Add 32 to get to next row
         decb                            ; All done?
         bne     1$                      ; No ... do all rows
-.ifdef BUILD_OPT_ROTATED
-        stx     3,s
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        jsr     rotate_and_copy_bits
-        puls    x
-.endif        
         rts                
 
 ; $14CB
@@ -2945,24 +2930,22 @@ clear_small_sprite:
 ; Clear a one byte sprite at HL/X. B=number of rows.
         clra
 sub_14CC:
-.ifdef BUILD_OPT_ROTATED
-        leas    -2,s
-        pshs    b
-        pshs    x
-.endif        
+.ifndef BUILD_OPT_ROTATED
 1$:     sta     ,x                      ; Clear screen byte
         leax    32,x                    ; Bump HL/X one screen row
         decb                            ; All done?
         bne     1$                      ; No ... clear all
-.ifdef BUILD_OPT_ROTATED
-        stx     3,s
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        jsr     rotate_and_copy_bits
-        puls    x
+.else
+1$:     pshs    b,x
+        ldb     #8
+2$:     clr     ,x
+        leax    VIDEO_BPL,x
+        decb
+        bne     2$
+        puls    b,x
+        leax    1,x
+        decb
+        bne     1$        
 .endif        
         rts
 
@@ -3052,7 +3035,7 @@ a_explode_time:
         beq     1$
         rts                             ; Not done  ... out
 1$:     ldx     exp_alien_xr            ; Pixel pointer for exploding alien
-        ldb     #16                     ; 16 row pixel
+        LDB_SPRW  16                    ; 16 row pixel
         jsr     erase_simple_sprite     ; Clear the explosion sprite from the screen
 
 loc_1545:        
@@ -3186,10 +3169,7 @@ sub_15C5:
 draw_sprite:
         jsr     cnvt_pix_number         ; Convert pixel number to screen/shift
         pshs    x                       ; Preserve screen coordinate
-.ifdef BUILD_OPT_ROTATED
-        pshs    b
-        pshs    x
-.endif
+.ifndef BUILD_OPT_ROTATED        
 1$:     pshs    x
         lda     ,y+                     ; From sprite data
 ;       out     (shft_data),a
@@ -3207,18 +3187,30 @@ draw_sprite:
         leax    32,x                    ; Offset screen to next row
         decb                            ; All done?
         bne     1$                      ; No ... do all
-.ifdef BUILD_OPT_ROTATED
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        pshs    b,x,y
-        jsr     rotate_and_copy_bits
-        puls    b,x,y
-        leay    1,y
-        leax    -8*VIDEO_BPL,x
-        jsr     rotate_and_copy_bits
+.else
+1$:     pshs    x,b
+        ldb     #8
+2$:     pshs    x
+        lda     ,y+                     ; From sprite data
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        ldu     shft_base
+        leau    a,u                     ; pointer to shift table entry (1st byte)
+        lda     ,u                      ; get shifted value
+        sta     ,x+                     ; Shifted sprite to screen
+;       xor     a
+;       out     (shft_data),a
+;       in      a,(shft_in)
+        lda     256,u                   ; get 2nd byte
+        sta     ,x                      ; Write remainder to adjacent
+        puls    x                       ; Old screen coordinate
+        leax    32,x                    ; Offset screen to next row
+        decb                            ; All done?
+        bne     2$                      ; No ... do all
+        puls    x,b
+        leax    1,x
+        decb
+        bne     1$
 .endif        
         puls    x                       ; Restore HL/X
         rts
@@ -3328,7 +3320,7 @@ loc_1671:
 ; $1698        
 3$:     tst     two_players             ; Number of players. Is this a single player game?
         beq     loc_16C9                ; Yes ... short message
-        ldx     #vram+0x0403            ; Screen coordinates
+        LDX_VRAM  0x0403                ; Screen coordinates
         ldy     #message_g_over         ; "GAME OVER PLAYER< >"
         ldb     #20                     ; 20 characters
         jsr     print_message_del       ; Print message
@@ -3347,7 +3339,7 @@ loc_1671:
         jmp     loc_02ED                ; Switch players and game loop
 ; $16C9
 loc_16C9: 
-        ldx     #vram+0x0918            ; Screen coordinates
+        LDX_VRAM  0x0918                ; Screen coordinates
         ldy     #message_g_over         ; "GAME OVER PLAYER< >"
         ldb     #10                     ; Just the "GAME OVER" part
         jsr     print_message_del       ; Print message
@@ -3375,7 +3367,7 @@ loc_16E6:
         jsr     sub_0A59                ; Has flag been set?
         bne     1$                      ; No ... wait for the flag
         jsr     disable_game_tasks      ; Disable ISR game tasks
-        ldx     #vram+0x0301            ; Player's stash of ships
+        LDX_VRAM  0x0301                ; Player's stash of ships
         jsr     loc_19FA                ; Erase the stash of ships
         clra                            ; Print ...
         jsr     loc_1A8B                ; ... a zero (number of ships)
@@ -3566,7 +3558,7 @@ check_handle_tilt:
 .endif
         EI                              ; Re-enable interrupts
         ldy     #message_tilt           ; Message "TILT"
-        ldx     #vram+0x0C16            ; Center of screen
+        LDX_VRAM  0x0C16                ; Center of screen
         ldb     #4                      ; Four letters
         jsr     print_message_del       ; Print "TILT"
         jsr     one_sec_delay           ; Short delay
@@ -3590,7 +3582,7 @@ ctrl_saucer_sound:
 ; $1815
 ; Draw "SCORE ADVANCE TABLE"
 draw_adv_table:
-        ldx     #vram+0x0410            ; 0x410 is 1040 rotCol=32, rotRow=16
+        LDX_VRAM  0x0410                ; 0x410 is 1040 rotCol=32, rotRow=16
         ldy     #message_adv            ; "*SCORE ADVANCE TABLE*"
         ldb     #21                     ; 21 bytes in message
         jsr     print_message
@@ -3613,7 +3605,7 @@ loc_183A:
         bra     1$                      ; Do all in table
 ; $1844
 sub_1844:
-        ldb     #16                     ; 16 bytes
+        LDB_SPRW  16                    ; 16 bytes
         jsr     draw_simp_sprite        ; Draw simple
         rts
 
@@ -3686,7 +3678,7 @@ sub_189E:
 2$:     lda     squ_shot_status         ; Wait ...
         anda    #1                      ; ... for explosion ...
         bne     2$                      ; ... to finish
-        ldx     #vram+0x0f11            ; Here is where the extra C is
+        LDX_VRAM  0x0f11                ; Here is where the extra C is
         lda     #0x26                   ; Space character
         jsr     draw_char               ; Draw character
         jmp     two_sec_delay           ; Two second delay and out
@@ -3759,7 +3751,7 @@ cur_ply_alive:
 ; Print score header " SCORE<1> HI-SCORE SCORE<2> "
 draw_score_head:
         ldb     #0x1c                   ; 28 bytes in message
-        ldx     #vram+0x1e              ; Screen coordinates
+        LDX_VRAM  0x1e                  ; Screen coordinates
         ldy     #message_score          ; Score header message
         jmp     print_message           ; Print score header
 
@@ -3785,7 +3777,7 @@ draw_score:
 ; Print message "CREDIT "
 sub_193C:
         ldb     #7                      ; 7 bytes in message
-        ldx     #vram+0x1101            ; Screen coordinates
+        LDX_VRAM  0x1101                ; Screen coordinates
         ldy     #message_credit         ; Message = "CREDIT "
         jmp     print_message           ; Print message
 
@@ -3793,7 +3785,7 @@ sub_193C:
 draw_num_credits:
 ; Display number of credits on screen
         lda     num_coins               ; Number of credits
-        ldx     #vram+0x1801            ; Screen coordinates
+        LDX_VRAM  0x1801                ; Screen coordinates
         jmp     draw_hex_byte           ; Character to screen
                 
 ; $1950
@@ -3864,7 +3856,7 @@ check_hidden_mes:
         cmpa    #0x34                   ; 0011_0100 2nd sequence: 1Pstart, 1Pshot, 1Pleft 
         beq     3$
         rts                             ; If not second sequence ignore
-3$:     ldx     #vram+0x0A1B            ; Screen coordinates
+3$:     LDX_VRAM  0x0A1B                ; Screen coordinates
         ldy     #message_corp           ; Message = "TAITO COP" (no R)
         ldb     #9                      ; Message length
         jmp     print_message           ; Print message and out
@@ -3900,12 +3892,12 @@ sound_bits_3_off:
 ; $19E6
 draw_num_ships:
 ; Show ships remaining in hold for the player
-        ldx     #vram+0x0301            ; Screen coordinates
+        LDX_VRAM  0x0301                ; Screen coordinates
         tsta                            ; None in reserve ... 
         beq     loc_19FA                ; ... skip display
 ; Draw line of ships
 1$:     ldy     #player_sprite          ; Player sprite
-        ldb     #16                     ; 16 rows
+        LDB_SPRW  16                    ; 16 rows
         sta     *z80_c                  ; Hold count
         jsr     draw_simp_sprite        ; Display 1-byte sprite to screen
         lda     *z80_c                  ; Restore remaining
@@ -3913,10 +3905,15 @@ draw_num_ships:
         bne     1$
 ; Clear remainder of line        
 loc_19FA:
-        ldb     #16                     ; 16 rows
+        LDB_SPRW  16                    ; 16 rows
         jsr     clear_small_sprite      ; Clear 1-byte sprite at HL/X
         tfr     x,d                     ; Get Y coordinate
+.ifndef BUILD_OPT_ROTATED        
         cmpa    #>vram+0x11             ; At edge?
+.else
+        andb    #0x1f
+        cmpb    #0x1f
+.endif        
         bne     loc_19FA                ; No ... do all
         rts
 
@@ -3993,8 +3990,12 @@ conv_to_scr:
 ; the original code OR'd H with $20, effectively setting the base @$2000
 ; but the screen starts at $2400, so we need to subtract the difference
         rorb                            ; D/=8
-        ora     #>vram                  ; for coco offset
         suba    #0x04
+.ifdef BUILD_OPT_ROTATED
+        exg     a,b
+        nega
+        adda    #31
+.endif        
         tfr     d,x                     ; Back to HL/X
         puls    b
         rts
@@ -4003,15 +4004,12 @@ conv_to_scr:
 clear_screen:
         ldx     #vram
 1$:     clr     ,x+
-        ;cmpx    #(vram+0x1C00+32)
-        cmpx    #(vram+0x2000)          ; extra for rotation
-        bne     1$
-.ifdef BUILD_OPT_ROTATED
-        ldx     #cocovram
-2$:     clr     ,x+
-        cmpx    #(cocovram+(32+225)*VIDEO_BPL)
-        bne     2$
+.ifndef BUILD_OPT_ROTATED
+        cmpx    #(vram+0x1C00+32)
+.else
+        cmpx    #(vram+(32+225)*VIDEO_BPL)
 .endif        
+        bne     1$
         rts
 
 ; $1A69
@@ -4021,12 +4019,6 @@ clear_screen:
 ; C = bytes per row
 ; B = number of rows
 restore_shields:
-.ifdef BUILD_OPT_ROTATED
-        ldd     *z80_b
-        leas    -4,s
-        pshs    d
-        pshs    x
-.endif
 1$:     pshs    x
         ldb     *z80_c
 2$:     lda     ,y+                     ; From sprite
@@ -4038,29 +4030,6 @@ restore_shields:
         leax    32,x                    ; Bump X by one screen row
         dec     *z80_b                  ; Row counter
         bne     1$
-.ifdef BUILD_OPT_ROTATED
-        stx     4,s
-        sty     6,s
-        ldd     ,s                      ; original screen destination
-        andb    #31
-        tfr     d,y
-        PUL_ROT_X
-        puls    b
-        puls    a
-        addb    #7
-        sta     *z80_c
-        stb     *z80_b
-3$:     pshs    x,y
-        ldb     *z80_b
-        jsr     rotate_and_copy_bits
-        puls    x,y
-        leay    1,y
-        leax    -8*VIDEO_BPL,x
-        dec     *z80_c
-        bne     3$
-        puls    x
-        puls    y
-.endif        
         rts
 
 ; $1A7F
@@ -4076,663 +4045,18 @@ remove_ship:
         jsr     draw_num_ships
         puls    a                       ; Restore number
 loc_1A8B:        
-        ldx     #vram+0x0101
+        LDX_VRAM  0x0101
         anda    #0x0f                   ; Make sure it is a digit
         jmp     sub_09C5                ; Print number remaining
 
 ; this will align the data with the original
-; used in debugging to check we have every byte of data
-        .org    0xBA95
-        
-; $1A95
-byte_0_1A95:
-        .db 0                           ; Image form (increments each draw)
-        .db 0                           ; Delta X
-        .db 0xFF                        ; Delta Y is -1
-        .db 0xFE                        ; Y starting coordinate (swapped for 6809)
-        .db 0xB8                        ; X coordinate (swapped for 6809)
-        .dw alien_spr_a+0x20            ; Base image (small alien)
-        .db 0x10                        ; Size of image (16 bytes)
-        .db 0x9E                        ; Target Y coordinate
-        .db 0                           ; Reached Y flag
-        .dw alien_spr_a+0x20            ; Base image (small alien)
+; used in debugging to check we ave every byte of data
+        .org    code_base+0x1A95
 
-; $1AA1
-; The tables at 1CB8 and 1AA1 control how fast shots are created. The speed is based
-; on the upper byte of the player's score. For a score of less than or equal 0200 then 
-; the fire speed is 30. For a score less than or equal 1000 the shot speed is 10. Less 
-; than or equal 2000 the speed is 0B. Less than or equal 3000 is 08. And anything 
-; above 3000 is 07.
-;
-; 1CB8: 02 10 20 30
-shot_reload_rate:
-        .db 48, 16, 11, 8, 7
-
-; $1AA6
-message_g_over:
-; "GAME OVER PLAYER< >"
-        .db 6, 0, 0xC, 4, 0x26, 0xE, 0x15, 4, 0x11, 0x26, 0x26
-        .db 0xF, 0xB, 0, 0x18, 4, 0x11, 0x24, 0x26, 0x25
-
-; $1ABA
-message_b_1_or_2:
-; "1 OR 2PLAYERS BUTTON"
-        .db 0x1B, 0x26, 0xE, 0x11, 0x26, 0x1C, 0xF, 0xB, 0, 0x18
-        .db 4, 0x11, 0x12, 0x26, 1, 0x14, 0x13, 0x13, 0xE, 0xD
-        .db 0x26
-
-; $1ACF
-message_1_only:
-;       "ONLY 1PLAYER BUTTON"
-        .db 0xE,0xD,0xB,0x18,0x26,0x1B,0xF,0xB
-        .db 0,0x18,4,0x11,0x26,0x26,1,0x14
-        .db 0x13,0x13,0xE,0xD,0x26
-
-; $1AE4
-message_score:
-;       " SCORE<1> HI-SCORE SCORE<2>"
-        .db 0x26,0x12,2,0xE,0x11,4,0x24,0x1B,0x25,0x26,7,8,0x3F
-        .db 0x12,2,0xE,0x11,4,0x26,0x12,2,0xE,0x11,4,0x24,0x1C
-        .db 0x25,0x26
-
-; this is mainly for debugging
-;        .bndry  0x100
-        
-;-------------------------- RAM initialization -----------------------------
-; Copied to RAM (2000) C0 bytes as initialization.
-; See the description of RAM at the top of this file for the details on this data.
-byte_0_1B00:    .db 1                   ; wait_on_draw
-                .db 0                   ; (unused)
-                .db 0                   ; alien_is_exploding
-                .db 0x10                ; exp_alien_timer
-                .db 0                   ; alien_row
-                .db 0                   ; alien_frame
-                .db 0                   ; alien_cur_index
-                .db 0                   ; ref_alien_dyr
-                .db 2                   ; ref_alien_dxr
-                .dw 0x3878              ; ref_alien (xr,yr)
-                .dw 0x3878              ; alien_pos (msb,lsb)
-                .db 0                   ; rack_direction
-                .db 0xF8                ; rack_down_delta
-                .db 0                   ; (unused)
-                
-                .db 0, 0x80, 0          ; obj0_timer_msb/lsb/extra
-                .dw game_obj_0          ; obj0_handler_msb/lsb
-                .db 0xFF                ; player_alive
-                .db 5, 0xC              ; exp_animate_timer/cnt
-                .dw player_sprite       ; plyr_spr_pic_m/l
-                .dw 0x3020              ; player_xr/yr
-                .db 0x10                ; plyr_spr_size
-                .db 1                   ; next_demo_cmd
-                .db 0                   ; hid_mess_seq
-                .db 0                   ; (unused)
-                
-                .db 0,0,0               ; obj1_timer_msb/lsb/extra
-                .dw game_obj_1          ; obj1_hamdler_msb/lsb
-                .db 0                   ; plyr_shot_status
-                .db 0x10                ; blow_up_timer
-                .dw player_shot_spr     ; obj1_image_msb/lsb
-                .dw 0x3028              ; obj1_coor_xr/yr
-                .db 1                   ; obj1_image_size
-                .db 4                   ; shot_delta_x
-                .db 0                   ; fire_bounce
-                .db 0xFF, 0xFF          ; (unused)
-                
-                .db 0,0,2               ; obj2_timer_msb/lsb/extra
-                .dw game_obj_2          ; obj2_handler_msb/lsb
-                .db 0,0,0               ; rol_shot_status/set_cnt/track
-                .dw 0x0000              ; rol_shot_x_fir_msb/lsb
-                .db 4                   ; rol_shot_blow_cnt
-                .dw roll_shot           ; rol_shot_image_msb/lsb
-                .dw 0x0000              ; rol_shot_xr/yr
-                .db 3                   ; rol_shot_size
-                
-                .db 0,0,0               ; obj3_timer_msb/lsb/extra
-                .dw game_obj_3          ; obj3_handler_msb/lsb
-                .db 0,0,1               ; plu_shot_status/step_cnt/track
-                .dw col_fire_table      ; plu_shot_c_fir_msb/lsb
-                .db 4                   ; plu_shot_blow_cnt
-                .dw plunger_shot        ; plu_shot_image_msb/lsb
-                .dw 0x0000              ; plu_shot_xr/yr
-                .db 3                   ; plu_shot_size
-
-; $1B50->$2050
-; GameObject4 (Flying saucer OR alien squiggly shot)     
-; - this possibly isn't used, because it gets overwritten
-; - with data from $1BC0 (see below)           
-                .dw 0x0000              ; obj4Timer
-                .db 0                   ; obj4TimerExtra
-                .dw game_obj_4          ; obj4TimerHandler
-                .db 0                   ; squShotStatus
-                .db 0                   ; squShotStepCnt
-                .db 1                   ; squShotTrack
-                .dw col_fire_table+6    ; squShotCFir
-                .db 4                   ; squShotBlowCnt
-                .dw squiggly_shot       ; squShotImage
-                .db 0                   ; squShotXr (swapped for 6809)
-                .db 0                   ; squShotYr (swapped for 6809)
-                .db 3                   ; squShotSize
-
-; $1B60->$2060
-                .db 0xFF                ; end_of_tasks
-                .db 0                   ; collision
-                .dw alien_explode       ; exp_alien_msb/lsb
-                .dw 0x0000              ; exp_alien_xr/yr
-                .db 0x10                ; exp_aline_size
-                .db >byte_0_2100        ; player_data_msb
-                .db 1                   ; player_ok
-                .db 0                   ; enable_alien_fire
-                .db 0x30                ; alien_fire_delay
-                .db 0                   ; one_alien
-                .db 0x12                ; temp_206C
-                .db 0                   ; invaded
-                .db 0                   ; skip_plunger
-                .db 0                   ; (unused)
-                
-; These don't need to be copied over to RAM (see 1BA0 below).
-; $1B70
-message_p1: 
-; "PLAY PLAYER<1>"
-        .db 0xF,0xB,0,0x18,0x26,0xF,0xB,0
-        .db 0x18,4,0x11,0x24,0x1B,0x25,0xFC
-        .db 0
-
-; $1B80
-        .db 1                           ; shot_sync
-        .db 0xFF                        ; tmp_2081
-        .db 0xFF                        ; num_aliens
-; $1B83
-byte_0_1B83:
-        .db 0                           ; saucer_start
-        .db 0                           ; saucer_active
-        .db 0                           ; saucer_hit
-        .db 32                          ; saucer hit time
-        .dw unk_0_1D64                  ; saucer_pri_pic_msb/lsb (bug-swap)
-        .dw 0x29D0                      ; saucer_pri_loc_msb/lsb (bug-swap)
-        .db 24                          ; saucer_pri_size
-        .db 2                           ; saucer_delta_y
-        .dw saucer_scr_tab              ; sau_score_msb/lsb
-        .db 0                           ; shot_count_msb
-; $1B90        
-        .db 8                           ; shot_count_lsb
-        .dw 0x600                       ; till_saucer_msb/lsb
-        .db 0                           ; wait_start_loop
-        .db 0                           ; sound_port_3
-        .db 1                           ; change_fleet_snd
-        .db 0x40                        ; fleet_snd_cnt
-        .db 0                           ; fleet_snd_reload
-        .db 1                           ; sound_port_5
-        .db 0                           ; extra_hold
-        .db 0                           ; tilt
-        .db 0x10                        ; fleet_snd_hold
-        .db 0x9E, 0, 0x20, 0x1C         ; (unused)
-
-; $1BA0
-alien_spr_CYA:
-; Alien sprite type C pulling upside down Y
-        .db 0x00, 0xC0, 0x20, 0x1E, 0x28, 0xC8, 0x10, 0x58
-        .db 0xBC, 0x16, 0x3F, 0x3F, 0x16, 0xBC, 0x58, 0x00
-
-byte_0_1BB0:    
-        .db 0                           ; image form            
-        .db 0                           ; delta x               
-        .db 1                           ; delta y               
-        .db 0x98                        ; y starting coordinate (swapped for 6809)
-        .db 0xB8                        ; x coordinate (swapped for 6809)
-        .dw alien_spr_CYA               ; Base image
-        .db 0x10                        ; size of image         
-        .db 0xFF                        ; target y coordinate   
-        .db 0                           ; reached flag          
-        .dw alien_spr_CYA               ; Base image
-
-        .db    0, 0, 0, 0
-
-; sqiggly shot descriptor
-; gets copied to $2050 ($7050) overwriting value from init
-byte_0_1BC0:
-; *** DO WE NEED TO REVERSE BYTES HERE???
-        .db 0x00, 0x10                  ; obj4Timer
-        .db 0                           ; obj4TimerExtra  
-        .dw game_obj_4                  ; obj4TimerHandler
-        .db 0                           ; squShotStatus   
-        .db 0                           ; squShotStepCnt  
-        .db 0                           ; squShotTrack
-        .dw 0x0000                      ; squShotCFir     
-        .db 7                           ; squShotBlowCnt  
-        .dw squiggly_shot               ; squShotImage    
-        .db 0x9B                        ; squShotXr (swapped for 6809)
-        .db 0xC8                        ; squShotYr (swapped for 6809)      
-        .db 3                           ; squShotSize     
-
-; $1BD0
-alien_spr_CYB:
-; Alien sprite C pulling upside down Y. Note the difference between this and the first picture
-; above. The Y is closer to the ship. This gives the effect of the Y kind of "sticking" in the
-; animation.
-        .db 0x00, 0x00, 0xC0, 0x20, 0x1E, 0x28, 0xD0, 0x98
-        .db 0x5C, 0xB6, 0x5F, 0x5F, 0xB6, 0x5C, 0x98, 0x00
-
-; $1BE0
-; More RAM initialization copied by 18D9
-        .db 0, 0, 0, 0, 0               ; (not used)
-        .db 0                           ; player1_ex
-        .db 0                           ; player2_ex
-        .db 0                           ; player1_alive
-        .db 0                           ; player2_alive
-        .db 1                           ; suspend_play
-        .db 0                           ; coin_switch
-        .db 0                           ; num_coins
-        .db 1                           ; splash_animate
-        .dw demo_commands               ; demo_cmd_ptr_msb/lsb
-        .db 0                           ; game_mode
-
-; $1BF0
-        .db 0x80                        ; (not used)
-        .db 0                           ; adjust_score
-        .db 0                           ; score_delta_msb
-        .db 0                           ; score_delta_lsb
-
-; hi score and vram location        
-        .db 0, 0
-        ;.db 0x1C, 0x2F, 
-        .dw vram+0x0b1c
-; p1 score and vram location        
-        .db 0, 0
-        ;.db 0x1C, 0x27, 
-        .dw vram+0x031c
-; p2 score and vram location        
-        .db 0, 0
-        ;.db 0x1C, 0x39
-        .dw vram+0x151c
-
-; $1C00
-alien_spr_a:    
-        .db 0x00, 0x00, 0x9C, 0x9E, 0x5E, 0x76, 0x37, 0x5F
-        .db 0x5F, 0x37, 0x76, 0x5E, 0x9E, 0x9C, 0x00, 0x00
-        .db 0x00, 0x00, 0x00, 0x1E, 0xB8, 0x7D, 0x36, 0x3C
-        .db 0x3C, 0x3C, 0x36, 0x7D, 0xB8, 0x1E, 0x00, 0x00
-        .db 0x00, 0x00, 0x00, 0x00, 0x98, 0x5C, 0xB6, 0x5F
-        .db 0x5F, 0xB6, 0x5C, 0x98, 0x00, 0x00, 0x00, 0x00
-; $1C30        
-alien_spr_b:        
-        .db 0x00, 0x00, 0x1C, 0x5E, 0xFE, 0xB6, 0x37, 0x5F
-        .db 0x5F, 0x37, 0xB6, 0xFE, 0x5E, 0x1C, 0x00, 0x00
-        .db 0x00, 0x00, 0x00, 0x70, 0x18, 0x7D, 0xB6, 0xBC
-        .db 0x3C, 0xBC, 0xB6, 0x7D, 0x18, 0x70, 0x00, 0x00
-        .db 0x00, 0x00, 0x00, 0x00, 0x58, 0xBC, 0x16, 0x3F
-        .db 0x3F, 0x16, 0xBC, 0x58, 0x00, 0x00, 0x00, 0x00
-; $1C60        
-player_sprite:           
-        .db 0x00, 0x00, 0xF0, 0xF8, 0xF8, 0xF8, 0xF8, 0xFE
-        .db 0xFF, 0xFE, 0xF8, 0xF8, 0xF8, 0xF8, 0xF0, 0x00
-; $1C70        
-plr_blow_up_sprites:    
-        .db 0x00, 0x20, 0x80, 0xC8, 0xC0, 0xE0, 0xCD, 0xF0
-        .db 0xF4, 0xC0, 0xF4, 0x92, 0x20, 0xC0, 0x00, 0x80
-; $1C80
-        .db 0x02, 0x10, 0xA0, 0xC5, 0x50, 0xC0, 0xDA, 0xF0
-        .db 0xE4, 0xE4, 0xD0, 0xD2, 0x02, 0x21, 0x88, 0x12
-; $1C90
-player_shot_spr:
-        .db 0xF0
-; $1C91
-shot_exploding:
-        .db 0x99, 0x3C, 0x7E, 0xBC, 0x3D, 0x7C, 0x3E, 0x99
-; $1C99        
-message_10_pts:
-;       "=10 POINTS"
-        .db 0x27, 0x1B, 0x1A, 0x26, 0xF, 0xE, 8, 0xD, 0x13, 0x12
-
-; $1CA3
-; "SCORE ADVANCE TABLE"
-message_adv:
-        .db 0x28 ; (
-        .db 0x12, 2, 0xE, 0x11, 4, 0x26, 0, 3, 0x15, 0, 0xD, 2
-        .db 4, 0x26, 0x13, 0, 1, 0xB, 4
-        .db 0x28 ; (
-
-; $1CB8
-a_reload_score_tab:    
-; The tables at 1CB8 and 1AA1 control how fast shots are created. The speed is based
-; on the upper byte of the player's score. For a score of less than or equal 0200 then 
-; the fire speed is 30. For a score less than or equal 1000 the shot speed is 10. Less 
-; than or equal 2000 the speed is 0B. Less than or equal 3000 is 08. And anything 
-; above 3000 is 07.
-;
-; 1AA1: 30 10 0B 08                           
-; 1AA5: 07           ; Fastest shot firing speed
-;
-        .db 2, 0x10, 0x20, 0x30
-
-; $1CBC
-message_tilt:
-        .db 0x13, 8, 0xB, 0x13          ; "TILT"
-
-; $1CC0
-alien_explode:
-        .db 0x00, 0x10, 0x92, 0x44, 0x28, 0x81, 0x42, 0x00
-        .db 0x42, 0x81, 0x28, 0x44, 0x92, 0x10, 0x00, 0x00
-
-; $1CD0
-squiggly_shot:
-        .db 0x22, 0x55, 0x08
-        .db 0x11, 0x2A, 0x44
-        .db 0x08, 0x55, 0x22
-squiggly_shot_last:
-        .db 0x44, 0x2A, 0x11
-
-; $1CDC
-a_shot_explo:
-        .db 0x52, 0xA8, 0x7D, 0xFC, 0x7A, 0xA4
-
-; $1CE2
-plunger_shot:
-        .db 0x20, 0x3F, 0x20
-        .db 0x08, 0x3F, 0x08
-        .db 0x04, 0x3F, 0x04
-        .db 0x01, 0x3F, 0x01
-
-; $1CEE
-roll_shot:
-        .db 0x00, 0x7F, 0x00
-        .db 0x24, 0x7F, 0x48
-        .db 0x00, 0x7F, 0x00
-        .db 0x12, 0x7F, 0x09
-
-; $1CFA
-message_play_UY:
-        .db 0xF, 0xB, 0, 0x29           ; "PLAY" with inverted Y
-
-; $1CFE
-        .db 0, 0
-        
-; $1D00
-; This table decides which column a shot will fall from. The column number is read from the
-; table (1-11) and the pointer increases for the shot type. For instance, the "squiggly" shot
-; will fall from columns in this order: 0B, 01, 06, 03. If you play the game you'll see that
-; order.
-;
-; The "plunger" shot uses index 00-0F (inclusive)
-; The "squiggly" shot uses index 06-14 (inclusive)
-; The "rolling" shot targets the player
-col_fire_table:
-        .db 1, 7, 1, 1, 1, 4, 0xB, 1
-        .db 6, 3, 1, 1, 0xB, 9, 2, 8
-        .db 2, 0xB, 4, 7, 0xA
-
-; $1D15
-; This appears to be part of the column-firing table, but it is never used.
-; Perhaps this was originally intended for the "rolling" shot but then the
-; "rolling" was change to target the player specifically.
-        .db 5, 2, 5, 4, 6, 7, 8, 0xA
-        .db 6, 0xA, 3
-
-; $1D20
-shield_image:
-        .db 0xFF, 0xF0, 0xFF, 0xF8, 0xFF, 0xFC, 0xFF, 0xFE
-        .db 0xFF, 0xFF, 0x3F, 0xFF, 0x1F, 0xFF, 0x0F, 0xFF
-        .db 0x0F, 0xFF, 0x0F, 0xFF, 0x0F, 0xFF, 0x0F, 0xFF
-        .db 0x0F, 0xFF, 0x0F, 0xFF, 0x1F, 0xFF, 0x3F, 0xFF
-        .db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFC
-        .db 0xFF, 0xF8, 0xFF, 0xF0
-
-; $1D4C
-byte_0_1D4C:
-        .db 5, 0x10, 0x15, 0x30         ; Table of possible saucer scores
-byte_0_1D50:
-        .db 0x94, 0x97, 0x9A, 0x9D      ; Table of corresponding string prints for each possible score
-
-; $1D54
-; 208D points here to the score given when the saucer is shot. It advances 
-; every time the player-shot is removed. The code wraps after 15, but there
-; are 16 values in this table. This is a bug in the code at 044E (thanks to
-; Colin Dooley for finding this).
-;
-; Thus the one and only 300 comes up every 15 shots (after an initial 8).
-saucer_scr_tab: 
-        .db 0x10, 5, 5, 0x10, 0x15, 0x10, 0x10, 5
-        .db 0x30, 0x10, 0x10, 0x10, 5, 0x15, 0x10, 5
-
-unk_0_1D64:
-        .db 0, 0, 0, 0
-
-; $1D68
-sprite_saucer:
-        .db 0x20, 0x30, 0x78, 0xEC, 0x7C, 0x3E, 0x2E, 0x7E
-        .db 0x7E, 0x2E, 0x3E, 0x7C, 0xEC, 0x78, 0x30, 0x20
-        .db 0, 0, 0, 0
-
-; $1D7C
-sprite_saucer_exp:
-        .db 0, 0x22, 0, 0xA5, 0x40, 8, 0x98, 0x3D, 0xB6, 0x3C
-        .db 0x36, 0x1D, 0x10, 0x48, 0x62, 0xB6, 0x1D, 0x98, 8
-        .db 0x42, 0x90, 8, 0, 0
-
-; $1D94
-sauc_score_str:                          
-        .db 0x26, 0x1F, 0x1A            ; _50
-        .db 0x1B, 0x1A, 0x1A            ; 100
-        .db 0x1B, 0x1F, 0x1A            ; 150
-        .db 0x1D, 0x1A, 0x1A            ; 300
-
-; $1DA0
-alien_scores:
-;       Score table for hitting alien type
-        .db 0x10                        ; Bottom 2 rows     
-        .db 0x20                        ; Middle row
-        .db 0x30                        ; Highest row
-
-; $1DA3
-; Starting Y coordinates for aliens at beginning of rounds. The first round is initialized to $78 at 07EA.
-; After that this table is used for 2nd, 3rd, 4th, 5th, 6th, 7th, 8th, and 9th. The 10th starts over at
-; 1DA3 (60).
-alien_start_table:
-        .db 96, 80, 72, 72, 72, 64, 64, 64
-
-; $1DAB
-message_play_Y:
-;       "PLAY" with normal Y
-        .db 0xF, 0xB, 0, 0x18           
-
-; $1DAF        
-message_invaders:
-;       "SPACE  INVADERS"
-        .db 0x12, 0xF, 0, 2, 4, 0x26, 0x26 
-        .db 8, 0xD, 0x15, 0, 3, 4, 0x11, 0x12
-
-; score table graphics info
-word_0_1DBE:    
-        .dw vram+0x080E
-        .dw sprite_saucer               ; ptr ufo bitmap
-        .dw vram+0x080C
-        .dw alien_spr_a+0x20            ; ptr 30 pt invader bitmap
-        .dw vram+0x080A
-        .dw alien_spr_b+0x10            ; ptr 20 pt invader bitmap
-        .dw vram+0x0808
-        .dw alien_spr_a                 ; ptr 10 pt invader bitmap
-        .db 0xFF
-
-; score table text info
-word_0_1DCF:    
-        .dw vram+0x0A0E
-        .dw message_myst                ; "=? MYSTERY"
-        .dw vram+0x0A0C
-        .dw message_30_pts              ; "=30 POINTS"
-        .dw vram+0x0A0A
-        .dw message_20_pts              ; "=20 POINTS"
-        .dw vram+0x0A08
-        .dw message_10_pts              ; "=10 POINTS"
-        .db 0xFF
-
-; $1DE0
-message_myst:
-; "=? MYSTERY"
-        .db 0x27, 0x38, 0x26, 0xC, 0x18, 0x12, 0x13, 4, 0x11, 0x18
-
-; $1DEA
-message_30_pts:
-; "=30 POINTS"
-        .db 0x27, 0x1D, 0x1A, 0x26, 0xF, 0xE, 8, 0xD, 0x13, 0x12
-
-; $1DF4
-message_20_pts:
-; "=20 POINTS"
-        .db 0x27, 0x1C, 0x1A, 0x26, 0xF, 0xE, 8, 0xD, 0x13, 0x12
-
-; Ran out of space here. The "=10" message is up at 1C99. That keeps
-; the font table firmly at 1E00.
-        .db 0, 0                        ; Padding to put font table at 1E00
-
-loc_1E00:   
-        .db 0x00, 0xF8, 0x24, 0x22, 0x24, 0xF8, 0x00, 0x00  ; "A"
-        .db 0x00, 0xFE, 0x92, 0x92, 0x92, 0x6C, 0x00, 0x00  ; "B"
-        .db 0x00, 0x7C, 0x82, 0x82, 0x82, 0x44, 0x00, 0x00  ; "C"
-        .db 0x00, 0xFE, 0x82, 0x82, 0x82, 0x7C, 0x00, 0x00  ; "D"
-        .db 0x00, 0xFE, 0x92, 0x92, 0x92, 0x82, 0x00, 0x00  ; "E"
-        .db 0x00, 0xFE, 0x12, 0x12, 0x12, 0x02, 0x00, 0x00  ; "F"
-        .db 0x00, 0x7C, 0x82, 0x82, 0xA2, 0xE2, 0x00, 0x00  ; "G"
-        .db 0x00, 0xFE, 0x10, 0x10, 0x10, 0xFE, 0x00, 0x00  ; "H"
-        .db 0x00, 0x00, 0x82, 0xFE, 0x82, 0x00, 0x00, 0x00  ; "I"
-        .db 0x00, 0x40, 0x80, 0x80, 0x80, 0x7E, 0x00, 0x00  ; "J"
-        .db 0x00, 0xFE, 0x10, 0x28, 0x44, 0x82, 0x00, 0x00  ; "K"
-        .db 0x00, 0xFE, 0x80, 0x80, 0x80, 0x80, 0x00, 0x00  ; "L"
-        .db 0x00, 0xFE, 0x04, 0x18, 0x04, 0xFE, 0x00, 0x00  ; "M"
-        .db 0x00, 0xFE, 0x08, 0x10, 0x20, 0xFE, 0x00, 0x00  ; "N"
-        .db 0x00, 0x7C, 0x82, 0x82, 0x82, 0x7C, 0x00, 0x00  ; "O"
-        .db 0x00, 0xFE, 0x12, 0x12, 0x12, 0x0C, 0x00, 0x00  ; "P"
-        .db 0x00, 0x7C, 0x82, 0xA2, 0x42, 0xBC, 0x00, 0x00  ; "Q"
-        .db 0x00, 0xFE, 0x12, 0x32, 0x52, 0x8C, 0x00, 0x00  ; "R"
-        .db 0x00, 0x4C, 0x92, 0x92, 0x92, 0x64, 0x00, 0x00  ; "S"
-        .db 0x00, 0x02, 0x02, 0xFE, 0x02, 0x02, 0x00, 0x00  ; "T"
-        .db 0x00, 0x7E, 0x80, 0x80, 0x80, 0x7E, 0x00, 0x00  ; "U"
-        .db 0x00, 0x3E, 0x40, 0x80, 0x40, 0x3E, 0x00, 0x00  ; "V"
-        .db 0x00, 0xFE, 0x40, 0x30, 0x40, 0xFE, 0x00, 0x00  ; "W"
-        .db 0x00, 0xC6, 0x28, 0x10, 0x28, 0xC6, 0x00, 0x00  ; "X"
-        .db 0x00, 0x06, 0x08, 0xF0, 0x08, 0x06, 0x00, 0x00  ; "Y"
-        .db 0x00, 0xC2, 0xA2, 0x92, 0x8A, 0x86, 0x00, 0x00  ; "Z"
-        .db 0x00, 0x7C, 0xA2, 0x92, 0x8A, 0x7C, 0x00, 0x00  ; "0"
-        .db 0x00, 0x00, 0x84, 0xFE, 0x80, 0x00, 0x00, 0x00  ; "1"
-        .db 0x00, 0xC4, 0xA2, 0x92, 0x92, 0x8C, 0x00, 0x00  ; "2"
-        .db 0x00, 0x42, 0x82, 0x92, 0x9A, 0x66, 0x00, 0x00  ; "3"
-        .db 0x00, 0x30, 0x28, 0x24, 0xFE, 0x20, 0x00, 0x00  ; "4"
-        .db 0x00, 0x4E, 0x8A, 0x8A, 0x8A, 0x72, 0x00, 0x00  ; "5"
-        .db 0x00, 0x78, 0x94, 0x92, 0x92, 0x62, 0x00, 0x00  ; "6"
-        .db 0x00, 0x02, 0xE2, 0x12, 0x0A, 0x06, 0x00, 0x00  ; "7"
-        .db 0x00, 0x6C, 0x92, 0x92, 0x92, 0x6C, 0x00, 0x00  ; "8"
-        .db 0x00, 0x8C, 0x92, 0x92, 0x52, 0x3C, 0x00, 0x00  ; "9"
-        .db 0x00, 0x10, 0x28, 0x44, 0x82, 0x00, 0x00, 0x00  ; "<"
-        .db 0x00, 0x00, 0x82, 0x44, 0x28, 0x10, 0x00, 0x00  ; ">"
-        .db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ; " "
-        .db 0x00, 0x28, 0x28, 0x28, 0x28, 0x28, 0x00, 0x00  ; "="
-        .db 0x00, 0x44, 0x28, 0xFE, 0x28, 0x44, 0x00, 0x00  ; "*"
-        .db 0x00, 0xC0, 0x20, 0x1E, 0x20, 0xC0, 0x00, 0x00  ; "Ý"
-
-; $1F50        
-message_p1_or_2:   
-;       "<1 OR 2 PLAYERS>"
-        .db 0x24 ; $
-        .db 0x1B, 0x26, 0xE, 0x11, 0x26, 0x1C, 0x26, 0xF, 0xB
-        .db 0, 0x18, 4, 0x11, 0x12
-        .db 0x25 ; %
-        .db 0x26 ; &
-        .db 0x26 ; &
-
-; $1F62        
-message_1_coin:
-;       "1 PLAYER  1 COIN"
-        .db 0x28 ; (
-        .db 0x1B, 0x26, 0xF, 0xB, 0, 0x18, 4, 0x11, 0x26, 0x26 
-        .db 0x1B, 0x26, 2, 0xE, 8, 0xD, 0x26
-
-; $1F74
-demo_commands:
-;       (1=Right, 2=Left)
-        .db 1, 1, 0, 0, 1, 0, 2, 1, 0, 2, 1, 0         ; simulated controller reads
-        
-; $1F80
-alien_spr_CA:        
-        .db 0x06, 0x08, 0xF0, 0x08, 0x06, 0x0C, 0x18, 0x58  ; "Y"
-        .db 0xBC, 0x16, 0x3F, 0x3F, 0x16, 0xBC, 0x58, 0x00  ; " "
-
-; $1F90        
-message_coin:  
-;       "INSERT  COIN"           
-        .db 8, 0xD, 0x12, 4, 0x11, 0x13, 0x26, 0x26, 2, 0xE, 8
-        .db 0xD
-
-; $1F9C
-credit_table:     
-        .dw vram+0x60D                  ; screen loc
-        .dw message_p1_or_2             ; "<1 OR 2 PLAYERS>
-        .dw vram+0x60A                  ; screen loc
-        .dw message_1_coin              ; "*1 PLAYER 1  COIN"
-        .dw vram+0x607                  ; screen loc
-        .dw message_2_coins             ; "*2 PLAYERS 2 COINS"
-        .db 0xFF
-
-; $1FA9        
-message_credit:
-;       "CREDIT "
-        .db 2, 0x11, 4, 3, 8, 0x13, 0x26
-
-; $1FB0        
-alien_spr_CB:        
-        .db 0x00, 0x06, 0x08, 0xF0, 0x08, 0x06, 0x1C, 0x98  ; "Y"
-        .db 0x5C, 0xB6, 0x5F, 0x5F, 0xB6, 0x5C, 0x98, 0x00  ; " "
-        
-; $1FC0        
-        .db 0x00, 0x04, 0x02, 0xB2, 0x0A, 0x04, 0x00, 0x00  ; "?"
-        .db 0
-
-; $1FC9        
-byte_0_1FC9:
-; Splash screen animation structure 3
-        .db 0                           ; image form
-        .db 0                           ; delta x
-        .db 0xFF                        ; delta y
-        .db 0xFF                        ; y starting coordinate (swapped for 6809)
-        .db 0xB8                        ; x coordinate (swapped or 6809)
-        .dw alien_spr_CA
-        .db 0x10                        ; size of image
-        .db 0x97                        ; target y coordinate
-        .db 0                           ; reached y flag
-        .dw alien_spr_CA
-
-; $1FD5                
-byte_0_1FD5:
-; Splash screen animation structure 4
-        .db 0                           ; image form
-        .db 0                           ; delta x
-        .db 1                           ; delta y
-        .db 0x22                        ; y starting coordinate (swapped for 6809)
-        .db 0xD0                        ; x coordinate (swapped for 6809)
-        .dw alien_spr_a+0x20
-        .db 0x10                        ; size of image
-        .db 0x94                        ; target y coordinate
-        .db 0                           ; reached flag
-        .dw alien_spr_a+0x20
-
-; $1FE1
-message_2_coins:
-;       "*2 PLAYERS 2 COINS"
-        .db 0x28, 0x1C, 0x26, 0xF, 0xB, 0, 0x18, 4, 0x11, 0x12 
-        .db 0x26, 0x1C, 0x26, 2, 0xE, 8, 0xD, 0x12
-
-; $1FF3        
-message_push:
-;       "PUSH " (with space on the end)            
-        .db 0xF, 0x14, 0x12, 7, 0x26
-
-; $1FF8
-        .db 0x00, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00, 0x00  ; "-"
-
-.if 0
-main_fisr:
-; temp hack - should do LFSR or something
-; and also tune frequency
-        tst     FIRQENR                 ; ACK FIRQ
-        inc     *z80_r
-        rti
+.ifndef BUILD_OPT_ROTATED
+  .include "si_org_dat.asm"
+.else
+  .include "si_rot_dat.asm"
 .endif
 
 				.end		start_coco
