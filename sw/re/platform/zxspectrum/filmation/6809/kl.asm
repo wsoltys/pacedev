@@ -600,7 +600,7 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "```hPREmRELEASE`VERSION`qnsi"
+        .asciz  "```hPREmRELEASE`VERSION`qnti"
         .db 0
         .asciz  "`"
         .db 0
@@ -1057,6 +1057,7 @@ play_audio_wait_key:
 play_audio_until_keypress:
         clra                            ; any key
         jsr     read_port
+        anda		#0x7f										; valid rows
         beq     1$
         rts
 1$:     lda     ,u                      ; note
@@ -2238,6 +2239,7 @@ loc_BA29:
         jsr     update_screen
 2$:     clra
         jsr     read_port
+        anda		#0x7f										; valid rows
         bne     2$                      ; wait for key release
         ldu     #game_over_tune
         jsr     play_audio_until_keypress
@@ -2248,6 +2250,7 @@ loc_BA29:
 wait_for_key_press:
         ldy   #0
 1$:     clra
+        anda		#0x7f										; valid rows
         jsr   read_port
         bne   9$
         nop
