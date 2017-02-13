@@ -600,7 +600,7 @@ splash:
         .db 0
         .asciz  "`"
         .db 0
-        .asciz  "```hPREmRELEASE`VERSION`qnti"
+        .asciz  "```hPREmRELEASE`VERSION`qnui"
         .db 0
         .asciz  "`"
         .db 0
@@ -2248,17 +2248,17 @@ loc_BA29:
         jmp     start_menu
 
 wait_for_key_press:
-        ldy   #0
+        ldy   	#0
 1$:     clra
+        jsr   	read_port
         anda		#0x7f										; valid rows
-        jsr   read_port
-        bne   9$
+        bne   	9$
         nop
         nop
-        leay  -1,y
-        bne   1$
+        leay  	-1,y
+        bne   	1$
         decb
-        bne   1$                        ; loop B times
+        bne   	1$                     	; loop B times
 9$:     rts
         
 game_complete_msg:
