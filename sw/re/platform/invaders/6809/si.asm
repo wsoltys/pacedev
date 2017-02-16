@@ -1128,7 +1128,7 @@ copy_shields:
 .ifndef BUILD_OPT_ROTATED
         leax    0x02e0,x                ; Add 2E0 (23 rows) to get to next shield on screen
 .else
-        leax    2,x
+        leax    -0x02e0+6,x							; will need to rotate and shift shield graphics
 .endif        
         bra     1$        
 4$:     jsr     remember_shields        ; Remember player's shields
