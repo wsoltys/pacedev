@@ -30,8 +30,8 @@ RAM:0000	     ; Segment type: Regular
 RAM:0000					     ;.segment RAM
 RAM:0000 ??	     globalScale:		     .block 1
 RAM:0001 ??	     byte_1:			     .block 1
-RAM:0002 ??	     avg_curr_addr_lsb:		     .block 1
-RAM:0003 ??	     avg_curr_addr_msb:		     .block 1
+RAM:0002 ??	     dvg_curr_addr_lsb:		     .block 1
+RAM:0003 ??	     dvg_curr_addr_msb:		     .block 1
 RAM:0004 ??	     byte_4:			     .block 1			     ; tmp store coord conversion
 RAM:0005 ??	     byte_5:			     .block 1			     ; tmp store coord conversion
 RAM:0006 ??	     byte_6:			     .block 1			     ; tmp store coord conversion
@@ -97,7 +97,7 @@ RAM:0059	     ;	 0x80 =	unsuccessful (death)
 RAM:0059	     ;	 0x00 =	not active
 RAM:0059 ??	     hyperspaceFlag:		     .block 1
 RAM:005A ??	     timerStartGame:		     .block 1
-RAM:005B ??	     byte_5B:			     .block 1
+RAM:005B ??	     nmi_triggered:		     .block 1
 RAM:005C ??	     fastTimer:			     .block 1
 RAM:005D ??	     slowTimer:			     .block 1
 RAM:005E ??	     byte_5E:			     .block 1
@@ -119,7 +119,8 @@ RAM:006D ??	     timerThumpSoundOn:		     .block 1
 RAM:006E ??	     timerThumpSoundOff:	     .block 1
 RAM:006F ??	     io3200ShadowRegister:	     .block 1
 RAM:0070 ??	     CurrNumCredits:		     .block 1
-RAM:0071 ??	     BitmapDIP4_8:		     .block 1
+RAM:0071	     ; 4=center_mult, 3..2=right_mult, 1..0=coinage
+RAM:0071 ??	     coinMultCredits:		     .block 1
 RAM:0072 ??	     slamSwitchFlag:		     .block 1
 RAM:0073 ??	     totalCoinsForCredits:	     .block 1
 RAM:0074 ??	     byte_74:			     .block 1
@@ -600,26 +601,26 @@ ROM:6800					     .org 6800h
 ROM:6800 4C F3 7C				     JMP     RESET		     ; Debugger? Off in	the weeds? Do Reset.
 ROM:6803	     ; ---------------------------------------------------------------------------
 ROM:6803
-ROM:6803	     MAIN:							     ; Reset Sound, Zero Out Sound Timers
-ROM:6803 20 FA 6E				     JSR     sound_off_reset_timers
-ROM:6806 20 D8 6E				     JSR     initPlayers	     ; init ships and scores
+ROM:6803	     START:							     ; Reset Sound, Zero Out Sound Timers
+ROM:6803 20 FA 6E				     JSR     init_sound
+ROM:6806 20 D8 6E				     JSR     init_players	     ; init ships and scores
 ROM:6809
-ROM:6809	     loc_6809:							     ; Start of	main game loop???
-ROM:6809 20 68 71				     JSR     sub_7168
+ROM:6809	     main_outer_loop:
+ROM:6809 20 68 71				     JSR     calc_rnd_stuff
 ROM:680C
-ROM:680C	     loc_680C:							     ; Self test switch
+ROM:680C	     main_inner_loop:						     ; self test switch	on?
 ROM:680C AD 07 20				     LDA     selfTest
 ROM:680F
-ROM:680F	     loc_680F:							     ; Branch If Switch	Is On
-ROM:680F 30 FE					     BMI     loc_680F
-ROM:6811 46 5B					     LSR     byte_5B		     ; Code check. This	value is increment by one each
-ROM:6813 90 F7					     BCC     loc_680C
+ROM:680F	     spin:							     ; yes, spin
+ROM:680F 30 FE					     BMI     spin
+ROM:6811 46 5B					     LSR     nmi_triggered	     ; NMI happened?
+ROM:6813 90 F7					     BCC     main_inner_loop	     ; no, busy	wait
 ROM:6815
 ROM:6815	     loc_6815:							     ; HALT
 ROM:6815 AD 02 20				     LDA     halt
-ROM:6818 30 FB					     BMI     loc_6815		     ; Wait for	State Machine To Finish
+ROM:6818 30 FB					     BMI     loc_6815		     ; wait for	DVG
 ROM:681A AD 01 40				     LDA     DVGRAM+1
-ROM:681D 49 02					     EOR     #2			     ; patch jump address
+ROM:681D 49 02					     EOR     #2			     ; JMP $0402<->$0002
 ROM:681F 8D 01 40				     STA     DVGRAM+1
 ROM:6822 8D 00 30				     STA     3000h		     ; Start DVG
 ROM:6825 8D 00 34				     STA     3400h		     ; Reset Watchdog
@@ -627,7 +628,7 @@ ROM:6828 E6 5C					     INC     fastTimer		     ; Update Fast Timer
 ROM:682A D0 02					     BNE     loc_682E
 ROM:682C E6 5D					     INC     slowTimer		     ; Update Slow Timer
 ROM:682E
-ROM:682E	     loc_682E:
+ROM:682E	     loc_682E:							     ; ping-pong DVG RAM $4000/$4400
 ROM:682E A2 40					     LDX     #40h ; '@'
 ROM:6830 29 02					     AND     #2
 ROM:6832 D0 02					     BNE     loc_6836
@@ -635,110 +636,110 @@ ROM:6834 A2 44					     LDX     #44h ; 'D'
 ROM:6836
 ROM:6836	     loc_6836:
 ROM:6836 A9 02					     LDA     #2
-ROM:6838 85 02					     STA     avg_curr_addr_lsb	     ; 0x02 (after JMP instruction)
-ROM:683A 86 03					     STX     avg_curr_addr_msb	     ; 0x40/0x44 depending on???
-ROM:683C 20 85 68				     JSR     sub_6885
-ROM:683F B0 C2					     BCS     MAIN
+ROM:6838 85 02					     STA     dvg_curr_addr_lsb	     ; 0x02 (after JMP instruction)
+ROM:683A 86 03					     STX     dvg_curr_addr_msb	     ; 0x40/0x44 (ping pong)
+ROM:683C 20 85 68				     JSR     handle_start_end_turn_or_game
+ROM:683F B0 C2					     BCS     START		     ; *** never set?!?	***
 ROM:6841 20 5C 76				     JSR     check_high_score
 ROM:6844 20 90 6D				     JSR     handle_high_score_entry
 ROM:6847 10 1B					     BPL     loc_6864		     ; go if new high score
-ROM:6849 20 C4 73				     JSR     sub_73C4
+ROM:6849 20 C4 73				     JSR     display_high_score_table
 ROM:684C B0 16					     BCS     loc_6864		     ; game not	active,	skip
-ROM:684E A5 5A					     LDA     timerStartGame
-ROM:6850 D0 0C					     BNE     loc_685E
-ROM:6852 20 D7 6C				     JSR     sub_6CD7
-ROM:6855 20 74 6E				     JSR     sub_6E74
-ROM:6858 20 3F 70				     JSR     sub_703F
-ROM:685B 20 93 6B				     JSR     sub_6B93
+ROM:684E A5 5A					     LDA     timerStartGame	     ; waiting to start	game?
+ROM:6850 D0 0C					     BNE     loc_685E		     ; yes, skip
+ROM:6852 20 D7 6C				     JSR     handle_fire
+ROM:6855 20 74 6E				     JSR     handle_hyperspace
+ROM:6858 20 3F 70				     JSR     handle_left_right
+ROM:685B 20 93 6B				     JSR     handle_saucer
 ROM:685E
 ROM:685E	     loc_685E:
-ROM:685E 20 57 6F				     JSR     sub_6F57
+ROM:685E 20 57 6F				     JSR     handle_shots
 ROM:6861 20 F0 69				     JSR     sub_69F0
 ROM:6864
 ROM:6864	     loc_6864:
 ROM:6864 20 4F 72				     JSR     sub_724F
-ROM:6867 20 55 75				     JSR     update_sounds_if_playing
+ROM:6867 20 55 75				     JSR     handle_sounds
 ROM:686A A9 7F					     LDA     #7Fh ; ''              ; X=0x7F
 ROM:686C AA					     TAX			     ; Y=0x7F
 ROM:686D 20 03 7C				     JSR     write_CUR_cmd
 ROM:6870 20 B5 77				     JSR     update_prng
-ROM:6873 20 C0 7B				     JSR     halt_dvg
+ROM:6873 20 C0 7B				     JSR     halt_dvg		     ; finished	rendering
 ROM:6876 AD FB 02				     LDA     byte_2FB
 ROM:6879 F0 03					     BEQ     loc_687E
 ROM:687B CE FB 02				     DEC     byte_2FB
 ROM:687E
 ROM:687E	     loc_687E:
 ROM:687E 0D F6 02				     ORA     byte_2F6
-ROM:6881 D0 89					     BNE     loc_680C
-ROM:6883 F0 84					     BEQ     loc_6809
+ROM:6881 D0 89					     BNE     main_inner_loop
+ROM:6883 F0 84					     BEQ     main_outer_loop
 ROM:6885
 ROM:6885	     ; =============== S U B R O U T I N E =======================================
 ROM:6885
 ROM:6885
-ROM:6885	     sub_6885:
-ROM:6885 A5 1C					     LDA     numPlayers		     ; Numer Of	Players	In Current Game
-ROM:6887 F0 14					     BEQ     loc_689D		     ; None, Branch
+ROM:6885	     handle_start_end_turn_or_game:
+ROM:6885 A5 1C					     LDA     numPlayers		     ; game active?
+ROM:6887 F0 14					     BEQ     check_freeplay	     ; no, skip
 ROM:6889 A5 5A					     LDA     timerStartGame	     ; Time before next	player starts
-ROM:688B D0 03					     BNE     loc_6890		     ; Not time	yet, branch
-ROM:688D 4C 60 69				     JMP     loc_6960
+ROM:688B D0 03					     BNE     display_current_player  ; timer running, go
+ROM:688D 4C 60 69				     JMP     handle_end_turn_or_game ; game active (playing)
 ROM:6890	     ; ---------------------------------------------------------------------------
 ROM:6890
-ROM:6890	     loc_6890:							     ; Decrease	time before next player	starts
+ROM:6890	     display_current_player:					     ; update timer
 ROM:6890 C6 5A					     DEC     timerStartGame
-ROM:6892 20 E2 69				     JSR     print_PLAYER_N
+ROM:6892 20 E2 69				     JSR     print_PLAYER_N	     ; show current player
 ROM:6895
 ROM:6895	     loc_6895:
 ROM:6895 18					     CLC
 ROM:6896 60					     RTS
 ROM:6897	     ; ---------------------------------------------------------------------------
 ROM:6897
-ROM:6897	     loc_6897:							     ; Free Credits!
+ROM:6897	     freeplay:							     ; Free Credits!
 ROM:6897 A9 02					     LDA     #2
 ROM:6899 85 70					     STA     CurrNumCredits	     ; Can Only	Play A 2 Player	Game, So Only Need To Add 2
-ROM:689B D0 13					     BNE     loc_68B0		     ; Will always branch
+ROM:689B D0 13					     BNE     check_start	     ; go
 ROM:689D
-ROM:689D	     loc_689D:							     ; DIP Switch Settings Bitmap
-ROM:689D A5 71					     LDA     BitmapDIP4_8
-ROM:689F 29 03					     AND     #3			     ; Mask Off	Settings For Switches 8	& 7
-ROM:68A1 F0 F4					     BEQ     loc_6897		     ; Check For Free Play, Branch If Yes
+ROM:689D	     check_freeplay:						     ; DIP Switch Settings Bitmap
+ROM:689D A5 71					     LDA     coinMultCredits
+ROM:689F 29 03					     AND     #3			     ; coinage only. freeplay?
+ROM:68A1 F0 F4					     BEQ     freeplay		     ; yes, go
 ROM:68A3 18					     CLC
-ROM:68A4 69 07					     ADC     #7			     ; Determine which message to display based	on DIP settings
+ROM:68A4 69 07					     ADC     #7			     ; calc coinage message
 ROM:68A6 A8					     TAY			     ; Into Y for the offset
 ROM:68A7 A5 32					     LDA     placeP1HighScore
 ROM:68A9 25 33					     AND     placeP2HighScore
-ROM:68AB 10 03					     BPL     loc_68B0
-ROM:68AD 20 F6 77				     JSR     PrintPackedMsg
+ROM:68AB 10 03					     BPL     check_start
+ROM:68AD 20 F6 77				     JSR     PrintPackedMsg	     ; display coinage
 ROM:68B0
-ROM:68B0	     loc_68B0:
+ROM:68B0	     check_start:						     ; credits?
 ROM:68B0 A4 70					     LDY     CurrNumCredits
-ROM:68B2 F0 E1					     BEQ     loc_6895
-ROM:68B4 A2 01					     LDX     #1
-ROM:68B6 AD 03 24				     LDA     p1StartSwitch
-ROM:68B9 30 23					     BMI     loc_68DE
-ROM:68BB C0 02					     CPY     #2
-ROM:68BD 90 7C					     BCC     loc_693B
-ROM:68BF AD 04 24				     LDA     p2StartSwitch
-ROM:68C2 10 77					     BPL     loc_693B
+ROM:68B2 F0 E1					     BEQ     loc_6895		     ; no, return
+ROM:68B4 A2 01					     LDX     #1			     ; 1 player
+ROM:68B6 AD 03 24				     LDA     p1StartSwitch	     ; P1 start	pressed?
+ROM:68B9 30 23					     BMI     start_game		     ; yes, go
+ROM:68BB C0 02					     CPY     #2			     ; >=2 credits available?
+ROM:68BD 90 7C					     BCC     display_push_start	     ; no, exit
+ROM:68BF AD 04 24				     LDA     p2StartSwitch	     ; P2 start	pressed?
+ROM:68C2 10 77					     BPL     display_push_start	     ; no, exit
 ROM:68C4 A5 6F					     LDA     io3200ShadowRegister
-ROM:68C6 09 04					     ORA     #4			     ; RAMSEL
+ROM:68C6 09 04					     ORA     #4			     ; RAMSEL=1	(P2)
 ROM:68C8 85 6F					     STA     io3200ShadowRegister
 ROM:68CA 8D 00 32				     STA     3200h		     ; output
-ROM:68CD 20 D8 6E				     JSR     initPlayers
-ROM:68D0 20 68 71				     JSR     sub_7168
+ROM:68CD 20 D8 6E				     JSR     init_players
+ROM:68D0 20 68 71				     JSR     calc_rnd_stuff
 ROM:68D3 20 E8 71				     JSR     sub_71E8
 ROM:68D6 A5 56					     LDA     numStartingShipsPerGame
 ROM:68D8 85 58					     STA     numShipsP2
-ROM:68DA A2 02					     LDX     #2
+ROM:68DA A2 02					     LDX     #2			     ; 2 players
 ROM:68DC C6 70					     DEC     CurrNumCredits
 ROM:68DE
-ROM:68DE	     loc_68DE:
+ROM:68DE	     start_game:
 ROM:68DE 86 1C					     STX     numPlayers
 ROM:68E0 C6 70					     DEC     CurrNumCredits
 ROM:68E2 A5 6F					     LDA     io3200ShadowRegister
-ROM:68E4 29 F8					     AND     #0F8h ; 'ø'             ; mask off RAMSEL, lamps
+ROM:68E4 29 F8					     AND     #0F8h ; 'ø'             ; RAMSEL=0 (P1), lamps OFF
 ROM:68E6 45 1C					     EOR     numPlayers		     ; player lamp ON
 ROM:68E8 85 6F					     STA     io3200ShadowRegister
-ROM:68EA 8D 00 32				     STA     3200h
+ROM:68EA 8D 00 32				     STA     3200h		     ; output
 ROM:68ED 20 E8 71				     JSR     sub_71E8
 ROM:68F0 A9 01					     LDA     #1
 ROM:68F2 8D FA 02				     STA     byte_2FA
@@ -755,32 +756,32 @@ ROM:690E A9 05					     LDA     #5
 ROM:6910 8D FD 02				     STA     byte_2FD
 ROM:6913 8D FD 03				     STA     P2RAM+0FDh
 ROM:6916 A9 FF					     LDA     #0FFh
-ROM:6918 85 32					     STA     placeP1HighScore
-ROM:691A 85 33					     STA     placeP2HighScore
+ROM:6918 85 32					     STA     placeP1HighScore	     ; flag no high score
+ROM:691A 85 33					     STA     placeP2HighScore	     ; flag no high score
 ROM:691C A9 80					     LDA     #80h ; '€'
-ROM:691E 85 5A					     STA     timerStartGame
-ROM:6920 0A					     ASL     A
-ROM:6921 85 18					     STA     curPlayer
+ROM:691E 85 5A					     STA     timerStartGame	     ; init timer
+ROM:6920 0A					     ASL     A			     ; A=0
+ROM:6921 85 18					     STA     curPlayer		     ; init current player
 ROM:6923 85 19					     STA     byte_19
 ROM:6925 A5 56					     LDA     numStartingShipsPerGame
-ROM:6927 85 57					     STA     numShipsP1
+ROM:6927 85 57					     STA     numShipsP1		     ; init number of ships
 ROM:6929 A9 04					     LDA     #4
 ROM:692B 85 6C					     STA     volFreqThumpSound
-ROM:692D 85 6E					     STA     timerThumpSoundOff
+ROM:692D 85 6E					     STA     timerThumpSoundOff	     ; init thump sound
 ROM:692F A9 30					     LDA     #30h ; '0'
 ROM:6931 8D FC 02				     STA     byte_2FC
 ROM:6934 8D FC 03				     STA     P2RAM+0FCh
-ROM:6937 8D 00 3E				     STA     3E00h
+ROM:6937 8D 00 3E				     STA     3E00h		     ; sound (noise reset)
 ROM:693A 60					     RTS
 ROM:693B	     ; ---------------------------------------------------------------------------
 ROM:693B
-ROM:693B	     loc_693B:
+ROM:693B	     display_push_start:
 ROM:693B A5 32					     LDA     placeP1HighScore
 ROM:693D 25 32					     AND     placeP1HighScore
 ROM:693F 10 0B					     BPL     loc_694C
 ROM:6941 A5 5C					     LDA     fastTimer
-ROM:6943 29 20					     AND     #20h ; ' '
-ROM:6945 D0 05					     BNE     loc_694C
+ROM:6943 29 20					     AND     #20h ; ' '              ; display phase?
+ROM:6945 D0 05					     BNE     loc_694C		     ; no, skip
 ROM:6947 A0 06					     LDY     #6			     ; "PUSH START"
 ROM:6949 20 F6 77				     JSR     PrintPackedMsg
 ROM:694C
@@ -800,7 +801,7 @@ ROM:695E 18					     CLC
 ROM:695F 60					     RTS
 ROM:6960	     ; ---------------------------------------------------------------------------
 ROM:6960
-ROM:6960	     loc_6960:
+ROM:6960	     handle_end_turn_or_game:
 ROM:6960 A5 5C					     LDA     fastTimer
 ROM:6962 29 3F					     AND     #3Fh ; '?'
 ROM:6964 D0 0A					     BNE     loc_6970
@@ -811,23 +812,23 @@ ROM:696D CE FC 02				     DEC     byte_2FC
 ROM:6970
 ROM:6970	     loc_6970:
 ROM:6970 A6 18					     LDX     curPlayer
-ROM:6972 B5 57					     LDA     numShipsP1,X	     ; Number of ships for current player
-ROM:6974 D0 1C					     BNE     loc_6992		     ; Any ships left? Branch if yes
+ROM:6972 B5 57					     LDA     numShipsP1,X	     ; any ships left?
+ROM:6974 D0 1C					     BNE     toggle_player	     ; yes, skip
 ROM:6976 AD 1F 02				     LDA     p1TimerShot0
 ROM:6979 0D 20 02				     ORA     p1TimerShot1
 ROM:697C 0D 21 02				     ORA     p1TimerShot2
-ROM:697F 0D 22 02				     ORA     p1TimerShot3
-ROM:6982 D0 0E					     BNE     loc_6992
+ROM:697F 0D 22 02				     ORA     p1TimerShot3	     ; shot(s) still active?
+ROM:6982 D0 0E					     BNE     toggle_player	     ; yes, skip
 ROM:6984 A0 07					     LDY     #7			     ; "GAME OVER"
 ROM:6986 20 F6 77				     JSR     PrintPackedMsg
 ROM:6989 A5 1C					     LDA     numPlayers
 ROM:698B C9 02					     CMP     #2			     ; 2 player	game?
-ROM:698D 90 03					     BCC     loc_6992		     ; No, branch
-ROM:698F 20 E2 69				     JSR     print_PLAYER_N	     ; Display on screen which player's game is over
+ROM:698D 90 03					     BCC     toggle_player	     ; no, skip
+ROM:698F 20 E2 69				     JSR     print_PLAYER_N	     ; display player
 ROM:6992
-ROM:6992	     loc_6992:
+ROM:6992	     toggle_player:						     ; player alive?
 ROM:6992 AD 1B 02				     LDA     p1PlayerFlag
-ROM:6995 D0 36					     BNE     loc_69CD
+ROM:6995 D0 36					     BNE     loc_69CD		     ; yes, skip
 ROM:6997 AD FA 02				     LDA     byte_2FA
 ROM:699A C9 80					     CMP     #80h ; '€'
 ROM:699C D0 2F					     BNE     loc_69CD
@@ -835,25 +836,25 @@ ROM:699E A9 10					     LDA     #10h
 ROM:69A0 8D FA 02				     STA     byte_2FA
 ROM:69A3 A6 1C					     LDX     numPlayers
 ROM:69A5 A5 57					     LDA     numShipsP1
-ROM:69A7 05 58					     ORA     numShipsP2
-ROM:69A9 F0 24					     BEQ     loc_69CF
+ROM:69A7 05 58					     ORA     numShipsP2		     ; either play have	ships left?
+ROM:69A9 F0 24					     BEQ     loc_69CF		     ; no, exit
 ROM:69AB 20 2D 70				     JSR     sub_702D
-ROM:69AE CA					     DEX
-ROM:69AF F0 1C					     BEQ     loc_69CD
+ROM:69AE CA					     DEX			     ; 1 player	game?
+ROM:69AF F0 1C					     BEQ     loc_69CD		     ; yes, exit
 ROM:69B1 A9 80					     LDA     #80h ; '€'
 ROM:69B3 85 5A					     STA     timerStartGame
 ROM:69B5 A5 18					     LDA     curPlayer
-ROM:69B7 49 01					     EOR     #1
+ROM:69B7 49 01					     EOR     #1			     ; toggler player
 ROM:69B9 AA					     TAX
-ROM:69BA B5 57					     LDA     57h,X
-ROM:69BC F0 0F					     BEQ     loc_69CD
-ROM:69BE 86 18					     STX     curPlayer
+ROM:69BA B5 57					     LDA     numShipsP1,X	     ; other player have any ships left?
+ROM:69BC F0 0F					     BEQ     loc_69CD		     ; no, exit
+ROM:69BE 86 18					     STX     curPlayer		     ; update current player
 ROM:69C0 A9 04					     LDA     #4			     ; RAMSEL
 ROM:69C2 45 6F					     EOR     io3200ShadowRegister    ; toggle
 ROM:69C4 85 6F					     STA     io3200ShadowRegister
-ROM:69C6 8D 00 32				     STA     3200h
+ROM:69C6 8D 00 32				     STA     3200h		     ; output
 ROM:69C9 8A					     TXA
-ROM:69CA 0A					     ASL     A
+ROM:69CA 0A					     ASL     A			     ; current player *	2
 ROM:69CB 85 19					     STA     byte_19
 ROM:69CD
 ROM:69CD	     loc_69CD:
@@ -865,14 +866,14 @@ ROM:69CF	     loc_69CF:
 ROM:69CF 86 1A					     STX     numPlayersPreviousGame
 ROM:69D1 A9 FF					     LDA     #0FFh
 ROM:69D3 85 1C					     STA     numPlayers		     ; invalidate
-ROM:69D5 20 FA 6E				     JSR     sound_off_reset_timers
+ROM:69D5 20 FA 6E				     JSR     init_sound
 ROM:69D8 A5 6F					     LDA     io3200ShadowRegister
-ROM:69DA 29 F8					     AND     #0F8h ; 'ø'
-ROM:69DC 09 03					     ORA     #3
+ROM:69DA 29 F8					     AND     #0F8h ; 'ø'             ; RAMSEL=0, lamps OFF
+ROM:69DC 09 03					     ORA     #3			     ; lamps ON
 ROM:69DE 85 6F					     STA     io3200ShadowRegister
 ROM:69E0 18					     CLC
 ROM:69E1 60					     RTS
-ROM:69E1	     ; End of function sub_6885
+ROM:69E1	     ; End of function handle_start_end_turn_or_game
 ROM:69E1
 ROM:69E2
 ROM:69E2	     ; =============== S U B R O U T I N E =======================================
@@ -898,7 +899,7 @@ ROM:69F0	     sub_69F0:
 ROM:69F0 A2 07					     LDX     #7
 ROM:69F2
 ROM:69F2	     loc_69F2:
-ROM:69F2 BD 1B 02				     LDA     21Bh,X
+ROM:69F2 BD 1B 02				     LDA     p1PlayerFlag,X
 ROM:69F5 F0 02					     BEQ     loc_69F9
 ROM:69F7 10 04					     BPL     loc_69FD
 ROM:69F9
@@ -921,16 +922,16 @@ ROM:6A07 88					     DEY
 ROM:6A08 30 EF					     BMI     loc_69F9
 ROM:6A0A
 ROM:6A0A	     loc_6A0A:
-ROM:6A0A B9 00 02				     LDA     200h,Y
+ROM:6A0A B9 00 02				     LDA     P1RAM,Y
 ROM:6A0D F0 F8					     BEQ     loc_6A07
 ROM:6A0F 30 F6					     BMI     loc_6A07
 ROM:6A11 85 0B					     STA     byte_B
-ROM:6A13 B9 AF 02				     LDA     2AFh,Y
+ROM:6A13 B9 AF 02				     LDA     unk_2AF,Y
 ROM:6A16 38					     SEC
-ROM:6A17 FD CA 02				     SBC     2CAh,X
+ROM:6A17 FD CA 02				     SBC     byte_2CA,X
 ROM:6A1A 85 08					     STA     byte_8
-ROM:6A1C B9 69 02				     LDA     269h,Y
-ROM:6A1F FD 84 02				     SBC     284h,X
+ROM:6A1C B9 69 02				     LDA     unk_269,Y
+ROM:6A1F FD 84 02				     SBC     byte_284,X
 ROM:6A22 4A					     LSR     A
 ROM:6A23 66 08					     ROR     byte_8
 ROM:6A25 0A					     ASL     A
@@ -943,12 +944,12 @@ ROM:6A30 49 FF					     EOR     #0FFh
 ROM:6A32 85 08					     STA     byte_8
 ROM:6A34
 ROM:6A34	     loc_6A34:
-ROM:6A34 B9 D2 02				     LDA     2D2h,Y
+ROM:6A34 B9 D2 02				     LDA     unk_2D2,Y
 ROM:6A37 38					     SEC
-ROM:6A38 FD ED 02				     SBC     2EDh,X
+ROM:6A38 FD ED 02				     SBC     byte_2ED,X
 ROM:6A3B 85 09					     STA     byte_9
-ROM:6A3D B9 8C 02				     LDA     28Ch,Y
-ROM:6A40 FD A7 02				     SBC     2A7h,X
+ROM:6A3D B9 8C 02				     LDA     unk_28C,Y
+ROM:6A40 FD A7 02				     SBC     byte_2A7,X
 ROM:6A43 4A					     LSR     A
 ROM:6A44 66 09					     ROR     byte_9
 ROM:6A46 0A					     ASL     A
@@ -1186,7 +1187,7 @@ ROM:6B93
 ROM:6B93	     ; =============== S U B R O U T I N E =======================================
 ROM:6B93
 ROM:6B93
-ROM:6B93	     sub_6B93:
+ROM:6B93	     handle_saucer:
 ROM:6B93 A5 5C					     LDA     fastTimer
 ROM:6B95 29 03					     AND     #3
 ROM:6B97 F0 01					     BEQ     loc_6B9A
@@ -1291,7 +1292,7 @@ ROM:6C37 D0 0C					     BNE     loc_6C45
 ROM:6C39 20 B5 77				     JSR     update_prng
 ROM:6C3C 29 03					     AND     #3
 ROM:6C3E AA					     TAX
-ROM:6C3F BD D3 6C				     LDA     6CD3h,X
+ROM:6C3F BD D3 6C				     LDA     unk_6CD3,X
 ROM:6C42 8D 62 02				     STA     byte_262
 ROM:6C45
 ROM:6C45	     loc_6C45:
@@ -1377,14 +1378,14 @@ ROM:6CC6 A0 03					     LDY     #3
 ROM:6CC8 A2 01					     LDX     #1
 ROM:6CCA 86 0E					     STX     byte_E
 ROM:6CCC 4C F2 6C				     JMP     loc_6CF2
-ROM:6CCC	     ; End of function sub_6B93
+ROM:6CCC	     ; End of function handle_saucer
 ROM:6CCC
 ROM:6CCC	     ; ---------------------------------------------------------------------------
 ROM:6CCF 8F					     .db  8Fh ;	
 ROM:6CD0 87					     .db  87h ;	‡
 ROM:6CD1 70					     .db  70h ;	p
 ROM:6CD2 78					     .db  78h ;	x
-ROM:6CD3 F0					     .db 0F0h ;	ð
+ROM:6CD3 F0	     unk_6CD3:			     .db 0F0h ;	ð
 ROM:6CD4 00					     .db    0
 ROM:6CD5 00					     .db    0
 ROM:6CD6 10					     .db  10h
@@ -1392,7 +1393,7 @@ ROM:6CD7
 ROM:6CD7	     ; =============== S U B R O U T I N E =======================================
 ROM:6CD7
 ROM:6CD7
-ROM:6CD7	     sub_6CD7:
+ROM:6CD7	     handle_fire:
 ROM:6CD7 A5 1C					     LDA     numPlayers
 ROM:6CD9 F0 21					     BEQ     locret_6CFC
 ROM:6CDB 0E 04 20				     ASL     FireSwitch
@@ -1503,7 +1504,7 @@ ROM:6D87 99 A7 02				     STA     2A7h,Y
 ROM:6D8A A9 80					     LDA     #80h ; '€'
 ROM:6D8C 95 66					     STA     66h,X
 ROM:6D8E 60					     RTS
-ROM:6D8E	     ; End of function sub_6CD7
+ROM:6D8E	     ; End of function handle_fire
 ROM:6D8E
 ROM:6D8E	     ; ---------------------------------------------------------------------------
 ROM:6D8F D8					     .db 0D8h ;	Ø
@@ -1660,7 +1661,7 @@ ROM:6E74
 ROM:6E74	     ; =============== S U B R O U T I N E =======================================
 ROM:6E74
 ROM:6E74
-ROM:6E74	     sub_6E74:
+ROM:6E74	     handle_hyperspace:
 ROM:6E74 A5 1C					     LDA     numPlayers
 ROM:6E76 F0 5F					     BEQ     locret_6ED7
 ROM:6E78 AD 1B 02				     LDA     p1PlayerFlag
@@ -1721,13 +1722,13 @@ ROM:6ED5 86 59					     STX     hyperspaceFlag
 ROM:6ED7
 ROM:6ED7	     locret_6ED7:
 ROM:6ED7 60					     RTS
-ROM:6ED7	     ; End of function sub_6E74
+ROM:6ED7	     ; End of function handle_hyperspace
 ROM:6ED7
 ROM:6ED8
 ROM:6ED8	     ; =============== S U B R O U T I N E =======================================
 ROM:6ED8
 ROM:6ED8
-ROM:6ED8	     initPlayers:
+ROM:6ED8	     init_players:
 ROM:6ED8 A9 02					     LDA     #2
 ROM:6EDA 8D F5 02				     STA     byte_2F5
 ROM:6EDD A2 03					     LDX     #3
@@ -1748,13 +1749,13 @@ ROM:6EF3 CA					     DEX			     ; next byte
 ROM:6EF4 10 F5					     BPL     loc_6EEB		     ; loop until done
 ROM:6EF6 8D F6 02				     STA     byte_2F6		     ; ???
 ROM:6EF9 60					     RTS
-ROM:6EF9	     ; End of function initPlayers
+ROM:6EF9	     ; End of function init_players
 ROM:6EF9
 ROM:6EFA
 ROM:6EFA	     ; =============== S U B R O U T I N E =======================================
 ROM:6EFA
 ROM:6EFA
-ROM:6EFA	     sound_off_reset_timers:
+ROM:6EFA	     init_sound:
 ROM:6EFA A9 00					     LDA     #0			     ; turn off	sound
 ROM:6EFC 8D 00 36				     STA     3600h		     ; sound (explosion)
 ROM:6EFF 8D 00 3A				     STA     3A00h		     ; sound (thump)
@@ -1768,7 +1769,7 @@ ROM:6F13 85 66					     STA     timerPlayerFireSound
 ROM:6F15 85 67					     STA     timerSaucerFireSound
 ROM:6F17 85 68					     STA     timerBonusShipSound
 ROM:6F19 60					     RTS
-ROM:6F19	     ; End of function sound_off_reset_timers
+ROM:6F19	     ; End of function init_sound
 ROM:6F19
 ROM:6F1A
 ROM:6F1A	     ; =============== S U B R O U T I N E =======================================
@@ -1815,7 +1816,7 @@ ROM:6F4B
 ROM:6F4B	     loc_6F4B:
 ROM:6F4B A2 DA					     LDX     #0DAh ; 'Ú'
 ROM:6F4D A9 54					     LDA     #54h ; 'T'              ; addr=0x54DA
-ROM:6F4F 20 FC 7B				     JSR     write_JSR_cmd
+ROM:6F4F 20 FC 7B				     JSR     write_JSR_cmd	     ; display extra ships?
 ROM:6F52 C6 08					     DEC     byte_8
 ROM:6F54 D0 F5					     BNE     loc_6F4B
 ROM:6F56
@@ -1827,7 +1828,7 @@ ROM:6F57
 ROM:6F57	     ; =============== S U B R O U T I N E =======================================
 ROM:6F57
 ROM:6F57
-ROM:6F57	     sub_6F57:
+ROM:6F57	     handle_shots:
 ROM:6F57 A2 22					     LDX     #22h ; '"'
 ROM:6F59
 ROM:6F59	     loc_6F59:
@@ -1966,7 +1967,7 @@ ROM:7027
 ROM:7027	     loc_7027:
 ROM:7027 20 FE 72				     JSR     sub_72FE
 ROM:702A 4C 5E 6F				     JMP     loc_6F5E
-ROM:702A	     ; End of function sub_6F57
+ROM:702A	     ; End of function handle_shots
 ROM:702A
 ROM:702D
 ROM:702D	     ; =============== S U B R O U T I N E =======================================
@@ -1986,7 +1987,7 @@ ROM:703F
 ROM:703F	     ; =============== S U B R O U T I N E =======================================
 ROM:703F
 ROM:703F
-ROM:703F	     sub_703F:
+ROM:703F	     handle_left_right:
 ROM:703F A5 1C					     LDA     numPlayers
 ROM:7041 F0 42					     BEQ     locret_7085
 ROM:7043 AD 1B 02				     LDA     p1PlayerFlag
@@ -2133,7 +2134,7 @@ ROM:7121 8D 61 02				     STA     byte_261
 ROM:7124
 ROM:7124	     locret_7124:
 ROM:7124 60					     RTS
-ROM:7124	     ; End of function sub_703F
+ROM:7124	     ; End of function handle_left_right
 ROM:7124
 ROM:7125
 ROM:7125	     ; =============== S U B R O U T I N E =======================================
@@ -2203,12 +2204,12 @@ ROM:7168
 ROM:7168	     ; =============== S U B R O U T I N E =======================================
 ROM:7168
 ROM:7168
-ROM:7168	     sub_7168:
+ROM:7168	     calc_rnd_stuff:
 ROM:7168 A2 1A					     LDX     #1Ah
 ROM:716A AD FB 02				     LDA     byte_2FB
 ROM:716D D0 70					     BNE     loc_71DF
-ROM:716F AD 1C 02				     LDA     p1SaucerFlag
-ROM:7172 D0 73					     BNE     locret_71E7
+ROM:716F AD 1C 02				     LDA     p1SaucerFlag	     ; saucer active?
+ROM:7172 D0 73					     BNE     locret_71E7	     ; yes, go
 ROM:7174 8D 3F 02				     STA     byte_23F
 ROM:7177 8D 62 02				     STA     byte_262
 ROM:717A EE FD 02				     INC     byte_2FD
@@ -2277,7 +2278,7 @@ ROM:71E5 10 FA					     BPL     loc_71E1
 ROM:71E7
 ROM:71E7	     locret_71E7:
 ROM:71E7 60					     RTS
-ROM:71E7	     ; End of function sub_7168
+ROM:71E7	     ; End of function calc_rnd_stuff
 ROM:71E7
 ROM:71E8
 ROM:71E8	     ; =============== S U B R O U T I N E =======================================
@@ -2368,7 +2369,7 @@ ROM:724F A9 10					     LDA     #10h
 ROM:7251 85 00					     STA     globalScale
 ROM:7253 A9 50					     LDA     #50h ; 'P'
 ROM:7255 A2 A4					     LDX     #0A4h ; '¤'             ; addr = 0x50A4
-ROM:7257 20 FC 7B				     JSR     write_JSR_cmd
+ROM:7257 20 FC 7B				     JSR     write_JSR_cmd	     ; "(C)1979 ATARI INC"
 ROM:725A A9 19					     LDA     #19h
 ROM:725C A2 DB					     LDX     #0DBh ; 'Û'
 ROM:725E 20 03 7C				     JSR     write_CUR_cmd
@@ -2424,8 +2425,8 @@ ROM:72C2 A9 50					     LDA     #50h ; 'P'
 ROM:72C4 20 DE 7C				     JSR     sub_7CDE
 ROM:72C7 A2 00					     LDX     #0
 ROM:72C9 A5 1C					     LDA     numPlayers
-ROM:72CB C9 01					     CMP     #1
-ROM:72CD F0 2E					     BEQ     locret_72FD
+ROM:72CB C9 01					     CMP     #1			     ; 1 player	only?
+ROM:72CD F0 2E					     BEQ     locret_72FD	     ; yes, exit
 ROM:72CF 90 18					     BCC     loc_72E9
 ROM:72D1 A5 18					     LDA     curPlayer
 ROM:72D3 F0 14					     BEQ     loc_72E9
@@ -2609,7 +2610,7 @@ ROM:73C4
 ROM:73C4	     ; =============== S U B R O U T I N E =======================================
 ROM:73C4
 ROM:73C4
-ROM:73C4	     sub_73C4:
+ROM:73C4	     display_high_score_table:
 ROM:73C4 A5 1C					     LDA     numPlayers		     ; game active?
 ROM:73C6 F0 02					     BEQ     loc_73CA		     ; no, skip
 ROM:73C8
@@ -2695,7 +2696,7 @@ ROM:7458
 ROM:7458	     loc_7458:
 ROM:7458 38					     SEC
 ROM:7459 60					     RTS
-ROM:7459	     ; End of function sub_73C4
+ROM:7459	     ; End of function display_high_score_table
 ROM:7459
 ROM:745A
 ROM:745A	     ; =============== S U B R O U T I N E =======================================
@@ -2791,9 +2792,9 @@ ROM:74BF 75 8A					     ADC     8Ah,X
 ROM:74C1 95 8A					     STA     8Ah,X
 ROM:74C3 85 06					     STA     byte_6
 ROM:74C5 84 07					     STY     byte_7
-ROM:74C7 A5 02					     LDA     avg_curr_addr_lsb
+ROM:74C7 A5 02					     LDA     dvg_curr_addr_lsb
 ROM:74C9 85 0B					     STA     byte_B
-ROM:74CB A5 03					     LDA     avg_curr_addr_msb
+ROM:74CB A5 03					     LDA     dvg_curr_addr_msb
 ROM:74CD 85 0C					     STA     byte_C
 ROM:74CF 20 49 7C				     JSR     sub_7C49
 ROM:74D2 A4 09					     LDY     byte_9
@@ -2889,7 +2890,7 @@ ROM:7555
 ROM:7555	     ; =============== S U B R O U T I N E =======================================
 ROM:7555
 ROM:7555
-ROM:7555	     update_sounds_if_playing:
+ROM:7555	     handle_sounds:
 ROM:7555 A5 1C					     LDA     numPlayers		     ; game active?
 ROM:7557 D0 01					     BNE     update_sounds	     ; yes, update all sounds
 ROM:7559 60					     RTS
@@ -2962,7 +2963,7 @@ ROM:75C7	     loc_75C7:
 ROM:75C7 86 69					     STX     timerExplosionSound
 ROM:75C9 8E 00 36				     STX     3600h		     ; sound (explosion)
 ROM:75CC 60					     RTS
-ROM:75CC	     ; End of function update_sounds_if_playing
+ROM:75CC	     ; End of function handle_sounds
 ROM:75CC
 ROM:75CD
 ROM:75CD	     ; =============== S U B R O U T I N E =======================================
@@ -3656,7 +3657,7 @@ ROM:7AF4 A9 00					     LDA     #0
 ROM:7AF6 E0 01					     CPX     #1
 ROM:7AF8 90 16					     BCC     loc_7B10
 ROM:7AFA F0 0C					     BEQ     loc_7B08
-ROM:7AFC A5 71					     LDA     BitmapDIP4_8
+ROM:7AFC A5 71					     LDA     coinMultCredits
 ROM:7AFE 29 0C					     AND     #0Ch
 ROM:7B00 4A					     LSR     A
 ROM:7B01 4A					     LSR     A
@@ -3665,7 +3666,7 @@ ROM:7B04 69 02					     ADC     #2
 ROM:7B06 D0 08					     BNE     loc_7B10
 ROM:7B08
 ROM:7B08	     loc_7B08:
-ROM:7B08 A5 71					     LDA     BitmapDIP4_8
+ROM:7B08 A5 71					     LDA     coinMultCredits
 ROM:7B0A 29 10					     AND     #10h
 ROM:7B0C F0 02					     BEQ     loc_7B10
 ROM:7B0E A9 01					     LDA     #1
@@ -3683,7 +3684,7 @@ ROM:7B1A 4C 95 7A				     JMP     loc_7A95		     ; next coin switch
 ROM:7B1D	     ; ---------------------------------------------------------------------------
 ROM:7B1D
 ROM:7B1D	     loc_7B1D:
-ROM:7B1D A5 71					     LDA     BitmapDIP4_8
+ROM:7B1D A5 71					     LDA     coinMultCredits
 ROM:7B1F 29 03					     AND     #3
 ROM:7B21 A8					     TAY
 ROM:7B22 F0 12					     BEQ     loc_7B36
@@ -3761,11 +3762,11 @@ ROM:7B73 E6 5E					     INC     byte_5E
 ROM:7B75 A5 5E					     LDA     byte_5E
 ROM:7B77 29 03					     AND     #3
 ROM:7B79 D0 08					     BNE     loc_7B83
-ROM:7B7B E6 5B					     INC     byte_5B
-ROM:7B7D A5 5B					     LDA     byte_5B
-ROM:7B7F C9 04					     CMP     #4
+ROM:7B7B E6 5B					     INC     nmi_triggered
+ROM:7B7D A5 5B					     LDA     nmi_triggered
+ROM:7B7F C9 04					     CMP     #4			     ; reached 4?
 ROM:7B81
-ROM:7B81	     loc_7B81:
+ROM:7B81	     loc_7B81:							     ; yes, spin (hang)
 ROM:7B81 B0 FE					     BCS     loc_7B81
 ROM:7B83
 ROM:7B83	     loc_7B83:
@@ -3942,10 +3943,10 @@ ROM:7C39
 ROM:7C39	     update_avg_curr_addr:
 ROM:7C39 98					     TYA			     ; #bytes this operation
 ROM:7C3A 38					     SEC
-ROM:7C3B 65 02					     ADC     avg_curr_addr_lsb
-ROM:7C3D 85 02					     STA     avg_curr_addr_lsb
+ROM:7C3B 65 02					     ADC     dvg_curr_addr_lsb
+ROM:7C3D 85 02					     STA     dvg_curr_addr_lsb
 ROM:7C3F 90 02					     BCC     locret_7C43	     ; no overflow, skip
-ROM:7C41 E6 03					     INC     avg_curr_addr_msb
+ROM:7C41 E6 03					     INC     dvg_curr_addr_msb
 ROM:7C43
 ROM:7C43	     locret_7C43:
 ROM:7C43 60					     RTS
@@ -4112,7 +4113,7 @@ ROM:7D08 AC 07 20				     LDY     selfTest		     ; Read IN1
 ROM:7D0B 30 43					     BMI     ServiceMode	     ; Upper bit set...	go handle service mode
 ROM:7D0D E8					     INX			     ; X=1
 ROM:7D0E 8E 00 40				     STX     DVGRAM
-ROM:7D11 A9 E2					     LDA     #0E2h ; 'â'             ; JMP
+ROM:7D11 A9 E2					     LDA     #0E2h ; 'â'             ; JMP $0402
 ROM:7D13 8D 01 40				     STA     DVGRAM+1
 ROM:7D16 A9 B0					     LDA     #0B0h ; '°'             ; HALT
 ROM:7D18 8D 03 40				     STA     DVGRAM+3
@@ -4121,22 +4122,22 @@ ROM:7D1D 85 33					     STA     placeP2HighScore
 ROM:7D1F A9 03					     LDA     #3
 ROM:7D21 85 6F					     STA     io3200ShadowRegister
 ROM:7D23 8D 00 32				     STA     3200h		     ; Turn on player 1	& 2 start lamps
-ROM:7D26 2D 00 28				     AND     coinage
-ROM:7D29 85 71					     STA     BitmapDIP4_8
+ROM:7D26 2D 00 28				     AND     coinage		     ; coinage only
+ROM:7D29 85 71					     STA     coinMultCredits
 ROM:7D2B AD 01 28				     LDA     rightCoinMultiplier
-ROM:7D2E 29 03					     AND     #3
+ROM:7D2E 29 03					     AND     #3			     ; multiplier bits only
 ROM:7D30 0A					     ASL     A
-ROM:7D31 0A					     ASL     A
-ROM:7D32 05 71					     ORA     BitmapDIP4_8
-ROM:7D34 85 71					     STA     BitmapDIP4_8
+ROM:7D31 0A					     ASL     A			     ; -> bits 3..2
+ROM:7D32 05 71					     ORA     coinMultCredits
+ROM:7D34 85 71					     STA     coinMultCredits
 ROM:7D36 AD 02 28				     LDA     centerCoinMultiplierAndLives
-ROM:7D39 29 02					     AND     #2
+ROM:7D39 29 02					     AND     #2			     ; multiplier bit only
 ROM:7D3B 0A					     ASL     A
 ROM:7D3C 0A					     ASL     A
-ROM:7D3D 0A					     ASL     A
-ROM:7D3E 05 71					     ORA     BitmapDIP4_8
-ROM:7D40 85 71					     STA     BitmapDIP4_8
-ROM:7D42 4C 03 68				     JMP     MAIN
+ROM:7D3D 0A					     ASL     A			     ; -> bit 4
+ROM:7D3E 05 71					     ORA     coinMultCredits
+ROM:7D40 85 71					     STA     coinMultCredits
+ROM:7D42 4C 03 68				     JMP     START
 ROM:7D45
 ROM:7D45	     ; =============== S U B R O U T I N E =======================================
 ROM:7D45
@@ -4366,9 +4367,9 @@ ROM:7E82 2C 02 20				     BIT     halt
 ROM:7E85 30 FB					     BMI     loc_7E82
 ROM:7E87 8D 00 34				     STA     3400h		     ; Kick watchdog
 ROM:7E8A A9 00					     LDA     #0
-ROM:7E8C 85 02					     STA     avg_curr_addr_lsb
+ROM:7E8C 85 02					     STA     dvg_curr_addr_lsb
 ROM:7E8E A9 40					     LDA     #40h ; '@'
-ROM:7E90 85 03					     STA     avg_curr_addr_msb
+ROM:7E90 85 03					     STA     dvg_curr_addr_msb
 ROM:7E92 AD 05 20				     LDA     diagStep
 ROM:7E95 10 5B					     BPL     loc_7EF2
 ROM:7E97 A6 15					     LDX     byte_15
@@ -4455,7 +4456,7 @@ ROM:7EF2
 ROM:7EF2	     loc_7EF2:
 ROM:7EF2 A9 50					     LDA     #50h ; 'P'
 ROM:7EF4 A2 00					     LDX     #0			     ; addr = 0x5000
-ROM:7EF6 20 FC 7B				     JSR     write_JSR_cmd
+ROM:7EF6 20 FC 7B				     JSR     write_JSR_cmd	     ; draw test pattern
 ROM:7EF9 A9 69					     LDA     #69h ; 'i'
 ROM:7EFB A2 93					     LDX     #93h ; '“'
 ROM:7EFD 20 03 7C				     JSR     write_CUR_cmd
@@ -4495,7 +4496,7 @@ ROM:7F44 A5 16					     LDA     byte_16
 ROM:7F46 F0 07					     BEQ     loc_7F4F
 ROM:7F48 A2 88					     LDX     #88h ; 'ˆ'
 ROM:7F4A A9 50					     LDA     #50h ; 'P'              ; addr = 0x5088
-ROM:7F4C 20 FC 7B				     JSR     write_JSR_cmd
+ROM:7F4C 20 FC 7B				     JSR     write_JSR_cmd	     ; more test pattern?
 ROM:7F4F
 ROM:7F4F	     loc_7F4F:
 ROM:7F4F A2 96					     LDX     #96h ; '–'
