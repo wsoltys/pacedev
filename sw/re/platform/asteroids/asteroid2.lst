@@ -44,7 +44,7 @@ RAM:000C ??	     byte_C:			     .block 1
 RAM:000D ??	     byte_D:			     .block 1
 RAM:000E ??	     byte_E:			     .block 1
 RAM:000F ??	     byte_F:			     .block 1
-RAM:0010 ??	     byte_10:			     .block 1
+RAM:0010 ??	     initial_offset:		     .block 1
 RAM:0011 ??					     .block 1
 RAM:0012 ??					     .block 1
 RAM:0013 ??					     .block 1
@@ -885,7 +885,7 @@ ROM:69E4 20 F6 77				     JSR     PrintPackedMsg
 ROM:69E7 A4 18					     LDY     curPlayer
 ROM:69E9 C8					     INY
 ROM:69EA 98					     TYA
-ROM:69EB 20 D1 7B				     JSR     display_digit
+ROM:69EB 20 D1 7B				     JSR     display_digit_A
 ROM:69EE 60					     RTS
 ROM:69EE	     ; End of function print_PLAYER_N
 ROM:69EE
@@ -1536,7 +1536,7 @@ ROM:6DAA A5 5C					     LDA     fastTimer
 ROM:6DAC 29 10					     AND     #10h
 ROM:6DAE D0 04					     BNE     loc_6DB4
 ROM:6DB0 98					     TYA
-ROM:6DB1 20 D1 7B				     JSR     display_digit
+ROM:6DB1 20 D1 7B				     JSR     display_digit_A
 ROM:6DB4
 ROM:6DB4	     loc_6DB4:
 ROM:6DB4 46 18					     LSR     curPlayer
@@ -1555,7 +1555,7 @@ ROM:6DD1 A9 64					     LDA     #64h ; 'd'
 ROM:6DD3 A2 39					     LDX     #39h ; '9'
 ROM:6DD5 20 03 7C				     JSR     write_CUR_cmd
 ROM:6DD8 A9 70					     LDA     #70h ; 'p'
-ROM:6DDA 20 DE 7C				     JSR     sub_7CDE
+ROM:6DDA 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:6DDD A6 18					     LDX     curPlayer
 ROM:6DDF B4 32					     LDY     32h,X
 ROM:6DE1 84 0B					     STY     byte_B
@@ -1563,14 +1563,14 @@ ROM:6DE3 98					     TYA
 ROM:6DE4 18					     CLC
 ROM:6DE5 65 31					     ADC     letterHighScoreEntry
 ROM:6DE7 85 0C					     STA     byte_C
-ROM:6DE9 20 1A 6F				     JSR     sub_6F1A
+ROM:6DE9 20 1A 6F				     JSR     display_initial
 ROM:6DEC A4 0B					     LDY     byte_B
 ROM:6DEE C8					     INY
-ROM:6DEF 20 1A 6F				     JSR     sub_6F1A
+ROM:6DEF 20 1A 6F				     JSR     display_initial
 ROM:6DF2 A4 0B					     LDY     byte_B
 ROM:6DF4 C8					     INY
 ROM:6DF5 C8					     INY
-ROM:6DF6 20 1A 6F				     JSR     sub_6F1A
+ROM:6DF6 20 1A 6F				     JSR     display_initial
 ROM:6DF9 AD 03 20				     LDA     hyperspaceSwitch
 ROM:6DFC 2A					     ROL     A
 ROM:6DFD 26 63					     ROL     photonInputLimit
@@ -1775,31 +1775,31 @@ ROM:6F1A
 ROM:6F1A	     ; =============== S U B R O U T I N E =======================================
 ROM:6F1A
 ROM:6F1A
-ROM:6F1A	     sub_6F1A:
-ROM:6F1A B9 34 00				     LDA     34h,Y
-ROM:6F1D 0A					     ASL     A
-ROM:6F1E A8					     TAY
-ROM:6F1F D0 14					     BNE     sub_6F35
+ROM:6F1A	     display_initial:
+ROM:6F1A B9 34 00				     LDA     highScoreInitials,Y     ; get initial
+ROM:6F1D 0A					     ASL     A			     ; convert to char code
+ROM:6F1E A8					     TAY			     ; space?
+ROM:6F1F D0 14					     BNE     display_char_code_Y     ; no, display
 ROM:6F21 A5 32					     LDA     placeP1HighScore
-ROM:6F23 25 33					     AND     placeP2HighScore
-ROM:6F25 30 0E					     BMI     sub_6F35
-ROM:6F27 A9 72					     LDA     #72h ; 'r'
-ROM:6F29 A2 F8					     LDX     #0F8h ; '¯'
+ROM:6F23 25 33					     AND     placeP2HighScore	     ; entered as <space>?
+ROM:6F25 30 0E					     BMI     display_char_code_Y     ; yes, display
+ROM:6F27 A9 72					     LDA     #72h ; 'r'              ; brightness=7, S=0, X=2
+ROM:6F29 A2 F8					     LDX     #0F8h ; '¯'             ; cmd=SVEC, s=-ve, Y=0
 ROM:6F2B 20 45 7D				     JSR     store_AX_in_avg_ram
-ROM:6F2E A9 01					     LDA     #1
-ROM:6F30 A2 F8					     LDX     #0F8h ; '¯'
+ROM:6F2E A9 01					     LDA     #1			     ; brightness=0, S=0, X=0
+ROM:6F30 A2 F8					     LDX     #0F8h ; '¯'             ; cmd=SVEC, s=-ve, Y=0
 ROM:6F32 4C 45 7D				     JMP     store_AX_in_avg_ram
-ROM:6F32	     ; End of function sub_6F1A
+ROM:6F32	     ; End of function display_initial
 ROM:6F32
 ROM:6F35
 ROM:6F35	     ; =============== S U B R O U T I N E =======================================
 ROM:6F35
 ROM:6F35
-ROM:6F35	     sub_6F35:
-ROM:6F35 BE D5 56				     LDX     56D5h,Y		     ; chr fn
-ROM:6F38 B9 D4 56				     LDA     56D4h,Y		     ; chr fn
+ROM:6F35	     display_char_code_Y:
+ROM:6F35 BE D5 56				     LDX     (DVGROM+6D5h),Y	     ; chr fn
+ROM:6F38 B9 D4 56				     LDA     (DVGROM+6D4h),Y	     ; chr fn
 ROM:6F3B 4C 45 7D				     JMP     store_AX_in_avg_ram
-ROM:6F3B	     ; End of function sub_6F35
+ROM:6F3B	     ; End of function display_char_code_Y
 ROM:6F3B
 ROM:6F3E
 ROM:6F3E	     ; =============== S U B R O U T I N E =======================================
@@ -2374,7 +2374,7 @@ ROM:725A A9 19					     LDA     #19h
 ROM:725C A2 DB					     LDX     #0DBh ; '€'
 ROM:725E 20 03 7C				     JSR     write_CUR_cmd
 ROM:7261 A9 70					     LDA     #70h ; 'p'
-ROM:7263 20 DE 7C				     JSR     sub_7CDE
+ROM:7263 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:7266 A2 00					     LDX     #0
 ROM:7268 A5 1C					     LDA     numPlayers
 ROM:726A C9 02					     CMP     #2
@@ -2409,20 +2409,20 @@ ROM:729E A9 78					     LDA     #78h ; 'x'
 ROM:72A0 A2 DB					     LDX     #0DBh ; '€'
 ROM:72A2 20 03 7C				     JSR     write_CUR_cmd
 ROM:72A5 A9 50					     LDA     #50h ; 'P'
-ROM:72A7 20 DE 7C				     JSR     sub_7CDE
+ROM:72A7 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:72AA A9 1D					     LDA     #1Dh
 ROM:72AC A0 02					     LDY     #2
 ROM:72AE 38					     SEC
 ROM:72AF 20 3F 77				     JSR     sub_773F
 ROM:72B2 A9 00					     LDA     #0
-ROM:72B4 20 D1 7B				     JSR     display_digit
+ROM:72B4 20 D1 7B				     JSR     display_digit_A
 ROM:72B7 A9 10					     LDA     #10h
 ROM:72B9 85 00					     STA     globalScale
 ROM:72BB A9 C0					     LDA     #0C0h ; '¿'
 ROM:72BD A2 DB					     LDX     #0DBh ; '€'
 ROM:72BF 20 03 7C				     JSR     write_CUR_cmd
 ROM:72C2 A9 50					     LDA     #50h ; 'P'
-ROM:72C4 20 DE 7C				     JSR     sub_7CDE
+ROM:72C4 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:72C7 A2 00					     LDX     #0
 ROM:72C9 A5 1C					     LDA     numPlayers
 ROM:72CB C9 01					     CMP     #1			     ; 1 player	only?
@@ -2494,7 +2494,7 @@ ROM:732D
 ROM:732D	     loc_732D:
 ROM:732D 48					     PHA
 ROM:732E A9 90					     LDA     #90h ; 'ê'
-ROM:7330 20 DE 7C				     JSR     sub_7CDE
+ROM:7330 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:7333 68					     PLA
 ROM:7334 38					     SEC
 ROM:7335 E9 10					     SBC     #10h
@@ -2502,7 +2502,7 @@ ROM:7337 C9 A0					     CMP     #0A0h ; '†'
 ROM:7339 B0 F2					     BCS     loc_732D
 ROM:733B
 ROM:733B	     loc_733B:
-ROM:733B 20 DE 7C				     JSR     sub_7CDE
+ROM:733B 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:733E A6 0D					     LDX     byte_D
 ROM:7340 BD 00 02				     LDA     200h,X
 ROM:7343 10 16					     BPL     loc_735B
@@ -2554,7 +2554,7 @@ ROM:7384
 ROM:7384	     loc_7384:
 ROM:7384 A9 70					     LDA     #70h ; 'p'
 ROM:7386 A2 F0					     LDX     #0F0h ; ''
-ROM:7388 20 E0 7C				     JSR     sub_7CE0
+ROM:7388 20 E0 7C				     JSR     draw_black_vector_AX
 ROM:738B A6 0D					     LDX     byte_D
 ROM:738D A5 5C					     LDA     fastTimer
 ROM:738F 29 03					     AND     #3
@@ -2629,26 +2629,26 @@ ROM:73D4 F0 F2					     BEQ     loc_73C8
 ROM:73D6 A0 00					     LDY     #0			     ; "HIGH SCORES"
 ROM:73D8 20 F6 77				     JSR     PrintPackedMsg
 ROM:73DB A2 00					     LDX     #0
-ROM:73DD 86 10					     STX     byte_10
+ROM:73DD 86 10					     STX     initial_offset	     ; offset into initials
 ROM:73DF A9 01					     LDA     #1
 ROM:73E1 85 00					     STA     globalScale
-ROM:73E3 A9 A7					     LDA     #0A7h ; 'ß'
+ROM:73E3 A9 A7					     LDA     #0A7h ; 'ß'             ; starting Y coord
 ROM:73E5 85 0E					     STA     byte_E
 ROM:73E7 A9 10					     LDA     #10h
 ROM:73E9 85 00					     STA     globalScale
 ROM:73EB
-ROM:73EB	     loc_73EB:
-ROM:73EB B5 1D					     LDA     1Dh,X
-ROM:73ED 15 1E					     ORA     1Eh,X
-ROM:73EF F0 67					     BEQ     loc_7458
-ROM:73F1 86 0F					     STX     byte_F
-ROM:73F3 A9 5F					     LDA     #5Fh ; '_'
-ROM:73F5 A6 0E					     LDX     byte_E
+ROM:73EB	     display_hs_entry:
+ROM:73EB B5 1D					     LDA     highScoreTable,X
+ROM:73ED 15 1E					     ORA     (highScoreTable+1),X    ; end of table?
+ROM:73EF F0 67					     BEQ     loc_7458		     ; yes, exit
+ROM:73F1 86 0F					     STX     byte_F		     ; entry counter (x2)
+ROM:73F3 A9 5F					     LDA     #5Fh ; '_'              ; x coord
+ROM:73F5 A6 0E					     LDX     byte_E		     ; y coord
 ROM:73F7 20 03 7C				     JSR     write_CUR_cmd
-ROM:73FA A9 40					     LDA     #40h ; '@'
-ROM:73FC 20 DE 7C				     JSR     sub_7CDE
-ROM:73FF A5 0F					     LDA     byte_F
-ROM:7401 4A					     LSR     A
+ROM:73FA A9 40					     LDA     #64		     ; X=64
+ROM:73FC 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:73FF A5 0F					     LDA     byte_F		     ; entry counter (x2)
+ROM:7401 4A					     LSR     A			     ; x1
 ROM:7402 F8					     SED
 ROM:7403 69 01					     ADC     #1
 ROM:7405 D8					     CLD
@@ -2658,40 +2658,40 @@ ROM:740A 38					     SEC
 ROM:740B A0 01					     LDY     #1
 ROM:740D A2 00					     LDX     #0
 ROM:740F 20 3F 77				     JSR     sub_773F
-ROM:7412 A9 40					     LDA     #40h ; '@'
-ROM:7414 AA					     TAX
-ROM:7415 20 E0 7C				     JSR     sub_7CE0
-ROM:7418 A0 00					     LDY     #0
-ROM:741A 20 35 6F				     JSR     sub_6F35
-ROM:741D A5 0F					     LDA     byte_F
+ROM:7412 A9 40					     LDA     #64		     ; X=64
+ROM:7414 AA					     TAX			     ; Y=64
+ROM:7415 20 E0 7C				     JSR     draw_black_vector_AX    ; X=64,Y=64
+ROM:7418 A0 00					     LDY     #0			     ; <space>
+ROM:741A 20 35 6F				     JSR     display_char_code_Y
+ROM:741D A5 0F					     LDA     byte_F		     ; entry counter (x2)
 ROM:741F 18					     CLC
-ROM:7420 69 1D					     ADC     #1Dh
+ROM:7420 69 1D					     ADC     #29
 ROM:7422 A0 02					     LDY     #2
 ROM:7424 38					     SEC
 ROM:7425 A2 00					     LDX     #0
 ROM:7427 20 3F 77				     JSR     sub_773F
 ROM:742A A9 00					     LDA     #0
-ROM:742C 20 D1 7B				     JSR     display_digit
-ROM:742F A0 00					     LDY     #0
-ROM:7431 20 35 6F				     JSR     sub_6F35
-ROM:7434 A4 10					     LDY     byte_10
-ROM:7436 20 1A 6F				     JSR     sub_6F1A
-ROM:7439 E6 10					     INC     byte_10
-ROM:743B A4 10					     LDY     byte_10
-ROM:743D 20 1A 6F				     JSR     sub_6F1A
-ROM:7440 E6 10					     INC     byte_10
-ROM:7442 A4 10					     LDY     byte_10
-ROM:7444 20 1A 6F				     JSR     sub_6F1A
-ROM:7447 E6 10					     INC     byte_10
-ROM:7449 A5 0E					     LDA     byte_E
+ROM:742C 20 D1 7B				     JSR     display_digit_A
+ROM:742F A0 00					     LDY     #0			     ; <space>
+ROM:7431 20 35 6F				     JSR     display_char_code_Y
+ROM:7434 A4 10					     LDY     initial_offset	     ; get 1st initial
+ROM:7436 20 1A 6F				     JSR     display_initial
+ROM:7439 E6 10					     INC     initial_offset
+ROM:743B A4 10					     LDY     initial_offset	     ; get 2nd initial
+ROM:743D 20 1A 6F				     JSR     display_initial
+ROM:7440 E6 10					     INC     initial_offset
+ROM:7442 A4 10					     LDY     initial_offset	     ; get 3rd initial
+ROM:7444 20 1A 6F				     JSR     display_initial
+ROM:7447 E6 10					     INC     initial_offset
+ROM:7449 A5 0E					     LDA     byte_E		     ; y coord
 ROM:744B 38					     SEC
-ROM:744C E9 08					     SBC     #8
-ROM:744E 85 0E					     STA     byte_E
-ROM:7450 A6 0F					     LDX     byte_F
+ROM:744C E9 08					     SBC     #8			     ; adjust for next line
+ROM:744E 85 0E					     STA     byte_E		     ; update
+ROM:7450 A6 0F					     LDX     byte_F		     ; entry counter (x2)
 ROM:7452 E8					     INX
-ROM:7453 E8					     INX
-ROM:7454 E0 14					     CPX     #14h
-ROM:7456 90 93					     BCC     loc_73EB
+ROM:7453 E8					     INX			     ; +2
+ROM:7454 E0 14					     CPX     #20		     ; done all	10 entries?
+ROM:7456 90 93					     BCC     display_hs_entry	     ; no, loop
 ROM:7458
 ROM:7458	     loc_7458:
 ROM:7458 38					     SEC
@@ -3329,10 +3329,10 @@ ROM:7792 69 01					     ADC     #1
 ROM:7794 08					     PHP
 ROM:7795 0A					     ASL     A
 ROM:7796 A8					     TAY
-ROM:7797 B9 D4 56				     LDA     (DVGROM+6D4h),Y
+ROM:7797 B9 D4 56				     LDA     (DVGROM+6D4h),Y	     ; chr fn
 ROM:779A 0A					     ASL     A
 ROM:779B 85 0B					     STA     byte_B
-ROM:779D B9 D5 56				     LDA     (DVGROM+6D5h),Y
+ROM:779D B9 D5 56				     LDA     (DVGROM+6D5h),Y	     ; chr fn
 ROM:77A0 2A					     ROL     A
 ROM:77A1 29 1F					     AND     #1Fh
 ROM:77A3 09 40					     ORA     #40h ; '@'
@@ -3456,7 +3456,7 @@ ROM:7816 B9 71 78				     LDA     msgCoords,Y	     ; X
 ROM:7819 BE 72 78				     LDX     (msgCoords+1),Y	     ; Y
 ROM:781C 20 03 7C				     JSR     write_CUR_cmd
 ROM:781F A9 70					     LDA     #70h ; 'p'
-ROM:7821 20 DE 7C				     JSR     sub_7CDE
+ROM:7821 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:7824 A0 00					     LDY     #0
 ROM:7826 A2 00					     LDX     #0
 ROM:7828
@@ -3829,7 +3829,7 @@ ROM:7BC7 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:7BC9 D0 6E					     BNE     update_avg_curr_addr
 ROM:7BCB
 ROM:7BCB	     loc_7BCB:
-ROM:7BCB 90 04					     BCC     display_digit
+ROM:7BCB 90 04					     BCC     display_digit_A
 ROM:7BCD 29 0F					     AND     #0Fh		     ; numeric only
 ROM:7BCF F0 05					     BEQ     loc_7BD6		     ; space, skip
 ROM:7BCF	     ; End of function halt_dvg
@@ -3839,7 +3839,7 @@ ROM:7BD1
 ROM:7BD1	     ; =============== S U B R O U T I N E =======================================
 ROM:7BD1
 ROM:7BD1
-ROM:7BD1	     display_digit:
+ROM:7BD1	     display_digit_A:
 ROM:7BD1 29 0F					     AND     #0Fh		     ; numeric only
 ROM:7BD3 18					     CLC
 ROM:7BD4 69 01					     ADC     #1			     ; convert to char code
@@ -3857,7 +3857,7 @@ ROM:7BE4 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:7BE6 20 39 7C				     JSR     update_avg_curr_addr
 ROM:7BE9 28					     PLP
 ROM:7BEA 60					     RTS
-ROM:7BEA	     ; End of function display_digit
+ROM:7BEA	     ; End of function display_digit_A
 ROM:7BEA
 ROM:7BEB	     ; ---------------------------------------------------------------------------
 ROM:7BEB 4A					     LSR     A			     ; adjust address
@@ -4070,28 +4070,28 @@ ROM:7CDE
 ROM:7CDE	     ; =============== S U B R O U T I N E =======================================
 ROM:7CDE
 ROM:7CDE
-ROM:7CDE	     sub_7CDE:
-ROM:7CDE A2 00					     LDX     #0
-ROM:7CDE	     ; End of function sub_7CDE
+ROM:7CDE	     draw_black_vector_A0:
+ROM:7CDE A2 00					     LDX     #0			     ; Y=0
+ROM:7CDE	     ; End of function draw_black_vector_A0
 ROM:7CDE
 ROM:7CE0
 ROM:7CE0	     ; =============== S U B R O U T I N E =======================================
 ROM:7CE0
 ROM:7CE0
-ROM:7CE0	     sub_7CE0:
+ROM:7CE0	     draw_black_vector_AX:
 ROM:7CE0 A0 01					     LDY     #1
-ROM:7CE2 91 02					     STA     (2),Y		     ; store in	avg ram
+ROM:7CE2 91 02					     STA     (2),Y		     ; store (XXXX XXXX)=A in avg ram
 ROM:7CE4 88					     DEY
 ROM:7CE5 98					     TYA
-ROM:7CE6 91 02					     STA     (2),Y		     ; store in	avg ram
+ROM:7CE6 91 02					     STA     (2),Y		     ; store (BBBB -mXX)=0 in avg ram
 ROM:7CE8 C8					     INY
 ROM:7CE9 C8					     INY
-ROM:7CEA 91 02					     STA     (2),Y		     ; store in	avg ram
+ROM:7CEA 91 02					     STA     (2),Y		     ; store (SSSS 0mYY)=0 in avg ram
 ROM:7CEC C8					     INY
 ROM:7CED 8A					     TXA
-ROM:7CEE 91 02					     STA     (2),Y		     ; store in	avg ram
+ROM:7CEE 91 02					     STA     (2),Y		     ; store (YYYY YYYY)=X in avg ram
 ROM:7CF0 4C 39 7C				     JMP     update_avg_curr_addr
-ROM:7CF0	     ; End of function sub_7CE0
+ROM:7CF0	     ; End of function draw_black_vector_AX
 ROM:7CF0
 ROM:7CF3	     ; ---------------------------------------------------------------------------
 ROM:7CF3
@@ -4461,19 +4461,19 @@ ROM:7EF9 A9 69					     LDA     #69h ; 'i'
 ROM:7EFB A2 93					     LDX     #93h ; 'ì'
 ROM:7EFD 20 03 7C				     JSR     write_CUR_cmd
 ROM:7F00 A9 30					     LDA     #30h ; '0'
-ROM:7F02 20 DE 7C				     JSR     sub_7CDE
+ROM:7F02 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:7F05 A2 03					     LDX     #3			     ; 4 dipswitches to	read
 ROM:7F07
 ROM:7F07	     read_dsw1:							     ; read next dipswitch
 ROM:7F07 BD 00 28				     LDA     2800h,X
 ROM:7F0A 29 01					     AND     #1			     ; bit0 only
 ROM:7F0C 86 0B					     STX     byte_B
-ROM:7F0E 20 D1 7B				     JSR     display_digit
+ROM:7F0E 20 D1 7B				     JSR     display_digit_A
 ROM:7F11 A6 0B					     LDX     byte_B
 ROM:7F13 BD 00 28				     LDA     2800h,X		     ; read dipswitch again
 ROM:7F16 29 02					     AND     #2			     ; bit1 only
 ROM:7F18 4A					     LSR     A			     ; ->bit0
-ROM:7F19 20 D1 7B				     JSR     display_digit
+ROM:7F19 20 D1 7B				     JSR     display_digit_A
 ROM:7F1C A6 0B					     LDX     byte_B
 ROM:7F1E CA					     DEX			     ; done all	dipswitches?
 ROM:7F1F 10 E6					     BPL     read_dsw1		     ; no, loop
@@ -4481,17 +4481,17 @@ ROM:7F21 A9 7A					     LDA     #7Ah ; 'z'
 ROM:7F23 A2 9D					     LDX     #9Dh ; 'ù'
 ROM:7F25 20 03 7C				     JSR     write_CUR_cmd
 ROM:7F28 A9 10					     LDA     #10h
-ROM:7F2A 20 DE 7C				     JSR     sub_7CDE
+ROM:7F2A 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:7F2D AD 02 28				     LDA     centerCoinMultiplierAndLives
 ROM:7F30 29 02					     AND     #2			     ; Coin Multiplier
 ROM:7F32 4A					     LSR     A
 ROM:7F33 69 01					     ADC     #1
-ROM:7F35 20 D1 7B				     JSR     display_digit
+ROM:7F35 20 D1 7B				     JSR     display_digit_A
 ROM:7F38 AD 01 28				     LDA     rightCoinMultiplier
 ROM:7F3B 29 03					     AND     #3			     ; mask off	invalid	bits
 ROM:7F3D AA					     TAX
 ROM:7F3E BD F5 7F				     LDA     rightCoinMultiplierTable,X
-ROM:7F41 20 D1 7B				     JSR     display_digit
+ROM:7F41 20 D1 7B				     JSR     display_digit_A
 ROM:7F44 A5 16					     LDA     byte_16
 ROM:7F46 F0 07					     BEQ     loc_7F4F
 ROM:7F48 A2 88					     LDX     #88h ; 'à'
@@ -4516,9 +4516,9 @@ ROM:7F65 8D 0C 00				     STA     byte_C
 ROM:7F68 A9 20					     LDA     #20h ; ' '
 ROM:7F6A 20 03 7C				     JSR     write_CUR_cmd
 ROM:7F6D A9 70					     LDA     #70h ; 'p'
-ROM:7F6F 20 DE 7C				     JSR     sub_7CDE
+ROM:7F6F 20 DE 7C				     JSR     draw_black_vector_A0
 ROM:7F72 AD 0B 00				     LDA     byte_B
-ROM:7F75 20 D1 7B				     JSR     display_digit
+ROM:7F75 20 D1 7B				     JSR     display_digit_A
 ROM:7F78 AD D4 56				     LDA     DVGROM+6D4h
 ROM:7F7B AE D5 56				     LDX     DVGROM+6D5h
 ROM:7F7E 20 45 7D				     JSR     store_AX_in_avg_ram
@@ -4528,9 +4528,9 @@ ROM:7F83 4A					     LSR     A
 ROM:7F84 4A					     LSR     A
 ROM:7F85 4A					     LSR     A
 ROM:7F86 4A					     LSR     A
-ROM:7F87 20 D1 7B				     JSR     display_digit
+ROM:7F87 20 D1 7B				     JSR     display_digit_A
 ROM:7F8A 68					     PLA
-ROM:7F8B 20 D1 7B				     JSR     display_digit
+ROM:7F8B 20 D1 7B				     JSR     display_digit_A
 ROM:7F8E AE 0B 00				     LDX     byte_B
 ROM:7F91
 ROM:7F91	     loc_7F91:
