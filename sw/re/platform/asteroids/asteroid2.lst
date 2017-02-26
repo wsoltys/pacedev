@@ -66,7 +66,7 @@ RAM:001F ?? ??					     .block 2
 RAM:0021 ?? ??					     .block 2
 RAM:0023 ?? ??					     .block 2
 RAM:0025 ?? ??					     .block 2
-RAM:0027 ?? ??					     .block 2
+RAM:0027 ?? ??	     word_27:			     .block 2
 RAM:0029 ?? ??					     .block 2
 RAM:002B ?? ??					     .block 2
 RAM:002D ?? ??					     .block 2
@@ -652,12 +652,12 @@ ROM:6855 20 74 6E				     JSR     handle_hyperspace
 ROM:6858 20 3F 70				     JSR     handle_left_right
 ROM:685B 20 93 6B				     JSR     handle_saucer
 ROM:685E
-ROM:685E	     loc_685E:
-ROM:685E 20 57 6F				     JSR     handle_shots
-ROM:6861 20 F0 69				     JSR     sub_69F0
+ROM:685E	     loc_685E:							     ; ???
+ROM:685E 20 57 6F				     JSR     handle_shots_1
+ROM:6861 20 F0 69				     JSR     handle_shots_2	     ; ???
 ROM:6864
-ROM:6864	     loc_6864:
-ROM:6864 20 4F 72				     JSR     sub_724F
+ROM:6864	     loc_6864:							     ; display (C), scores, extra ships
+ROM:6864 20 4F 72				     JSR     display_C_scores_ships
 ROM:6867 20 55 75				     JSR     handle_sounds
 ROM:686A A9 7F					     LDA     #7Fh ; ''              ; X=0x7F
 ROM:686C AA					     TAX			     ; Y=0x7F
@@ -895,15 +895,15 @@ ROM:69F0
 ROM:69F0	     ; =============== S U B R O U T I N E =======================================
 ROM:69F0
 ROM:69F0
-ROM:69F0	     sub_69F0:
+ROM:69F0	     handle_shots_2:
 ROM:69F0 A2 07					     LDX     #7
 ROM:69F2
-ROM:69F2	     loc_69F2:
+ROM:69F2	     loc_69F2:							     ; shot timer
 ROM:69F2 BD 1B 02				     LDA     p1PlayerFlag,X
-ROM:69F5 F0 02					     BEQ     loc_69F9
-ROM:69F7 10 04					     BPL     loc_69FD
+ROM:69F5 F0 02					     BEQ     loc_69F9		     ; not active, skip
+ROM:69F7 10 04					     BPL     loc_69FD		     ; active, go
 ROM:69F9
-ROM:69F9	     loc_69F9:
+ROM:69F9	     loc_69F9:							     ; next timer
 ROM:69F9 CA					     DEX
 ROM:69FA 10 F6					     BPL     loc_69F2
 ROM:69FC 60					     RTS
@@ -1011,7 +1011,7 @@ ROM:6A97	     loc_6A97:
 ROM:6A97 88					     DEY
 ROM:6A98 30 FA					     BMI     loc_6A94
 ROM:6A9A 4C 0A 6A				     JMP     loc_6A0A
-ROM:6A9A	     ; End of function sub_69F0
+ROM:6A9A	     ; End of function handle_shots_2
 ROM:6A9A
 ROM:6A9D
 ROM:6A9D	     ; =============== S U B R O U T I N E =======================================
@@ -1555,7 +1555,7 @@ ROM:6DD1 A9 64					     LDA     #64h ; 'd'
 ROM:6DD3 A2 39					     LDX     #39h ; '9'
 ROM:6DD5 20 03 7C				     JSR     write_CUR_cmd
 ROM:6DD8 A9 70					     LDA     #70h ; 'p'
-ROM:6DDA 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:6DDA 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:6DDD A6 18					     LDX     curPlayer
 ROM:6DDF B4 32					     LDY     32h,X
 ROM:6DE1 84 0B					     STY     byte_B
@@ -1805,10 +1805,10 @@ ROM:6F3E
 ROM:6F3E	     ; =============== S U B R O U T I N E =======================================
 ROM:6F3E
 ROM:6F3E
-ROM:6F3E	     sub_6F3E:
+ROM:6F3E	     display_extra_ships:
 ROM:6F3E F0 16					     BEQ     locret_6F56
 ROM:6F40 84 08					     STY     byte_8
-ROM:6F42 A2 D5					     LDX     #0D5h ; '’'
+ROM:6F42 A2 D5					     LDX     #213		     ; Y coord (x4=852)
 ROM:6F44 A0 E0					     LDY     #0E0h ; '‡'
 ROM:6F46 84 00					     STY     globalScale
 ROM:6F48 20 03 7C				     JSR     write_CUR_cmd
@@ -1822,13 +1822,13 @@ ROM:6F54 D0 F5					     BNE     loc_6F4B
 ROM:6F56
 ROM:6F56	     locret_6F56:
 ROM:6F56 60					     RTS
-ROM:6F56	     ; End of function sub_6F3E
+ROM:6F56	     ; End of function display_extra_ships
 ROM:6F56
 ROM:6F57
 ROM:6F57	     ; =============== S U B R O U T I N E =======================================
 ROM:6F57
 ROM:6F57
-ROM:6F57	     handle_shots:
+ROM:6F57	     handle_shots_1:
 ROM:6F57 A2 22					     LDX     #22h ; '"'
 ROM:6F59
 ROM:6F59	     loc_6F59:
@@ -1967,7 +1967,7 @@ ROM:7027
 ROM:7027	     loc_7027:
 ROM:7027 20 FE 72				     JSR     sub_72FE
 ROM:702A 4C 5E 6F				     JMP     loc_6F5E
-ROM:702A	     ; End of function handle_shots
+ROM:702A	     ; End of function handle_shots_1
 ROM:702A
 ROM:702D
 ROM:702D	     ; =============== S U B R O U T I N E =======================================
@@ -2364,23 +2364,23 @@ ROM:724F
 ROM:724F	     ; =============== S U B R O U T I N E =======================================
 ROM:724F
 ROM:724F
-ROM:724F	     sub_724F:
+ROM:724F	     display_C_scores_ships:
 ROM:724F A9 10					     LDA     #10h
 ROM:7251 85 00					     STA     globalScale
 ROM:7253 A9 50					     LDA     #50h ; 'P'
 ROM:7255 A2 A4					     LDX     #0A4h ; '§'             ; addr = 0x50A4
 ROM:7257 20 FC 7B				     JSR     write_JSR_cmd	     ; "(C)1979 ATARI INC"
-ROM:725A A9 19					     LDA     #19h
-ROM:725C A2 DB					     LDX     #0DBh ; '€'
+ROM:725A A9 19					     LDA     #25		     ; X coord (x4=100)
+ROM:725C A2 DB					     LDX     #219		     ; Y coord (x4=876)
 ROM:725E 20 03 7C				     JSR     write_CUR_cmd
-ROM:7261 A9 70					     LDA     #70h ; 'p'
-ROM:7263 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:7261 A9 70					     LDA     #70h ; 'p'              ; scale = 7
+ROM:7263 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7266 A2 00					     LDX     #0
 ROM:7268 A5 1C					     LDA     numPlayers
-ROM:726A C9 02					     CMP     #2
-ROM:726C D0 18					     BNE     loc_7286
-ROM:726E A5 18					     LDA     curPlayer
-ROM:7270 D0 14					     BNE     loc_7286
+ROM:726A C9 02					     CMP     #2			     ; 2 players?
+ROM:726C D0 18					     BNE     loc_7286		     ; no, skip
+ROM:726E A5 18					     LDA     curPlayer		     ; player 1?
+ROM:7270 D0 14					     BNE     loc_7286		     ; yes, skip
 ROM:7272 A2 20					     LDX     #20h ; ' '
 ROM:7274 AD 1B 02				     LDA     p1PlayerFlag
 ROM:7277 05 59					     ORA     hyperspaceFlag
@@ -2389,40 +2389,40 @@ ROM:727B AD FA 02				     LDA     byte_2FA
 ROM:727E 30 06					     BMI     loc_7286
 ROM:7280 A5 5C					     LDA     fastTimer
 ROM:7282 29 10					     AND     #10h
-ROM:7284 F0 0D					     BEQ     loc_7293
+ROM:7284 F0 0D					     BEQ     loc_7293		     ; not every frame
 ROM:7286
 ROM:7286	     loc_7286:
-ROM:7286 A9 52					     LDA     #52h ; 'R'
-ROM:7288 A0 02					     LDY     #2
-ROM:728A 38					     SEC
-ROM:728B 20 3F 77				     JSR     sub_773F
+ROM:7286 A9 52					     LDA     #p1ScoreTens
+ROM:7288 A0 02					     LDY     #2			     ; 2 bytes to display
+ROM:728A 38					     SEC			     ; flag no zero padding
+ROM:728B 20 3F 77				     JSR     display_numeric	     ; display P1 score
 ROM:728E A9 00					     LDA     #0
-ROM:7290 20 8B 77				     JSR     sub_778B
+ROM:7290 20 8B 77				     JSR     display_pad_digit	     ; display score units (=0)
 ROM:7293
-ROM:7293	     loc_7293:
-ROM:7293 A9 28					     LDA     #28h ; '('
+ROM:7293	     loc_7293:							     ; X coord (x4=160)
+ROM:7293 A9 28					     LDA     #40
 ROM:7295 A4 57					     LDY     numShipsP1
-ROM:7297 20 3E 6F				     JSR     sub_6F3E
+ROM:7297 20 3E 6F				     JSR     display_extra_ships
 ROM:729A A9 00					     LDA     #0
 ROM:729C 85 00					     STA     globalScale
-ROM:729E A9 78					     LDA     #78h ; 'x'
-ROM:72A0 A2 DB					     LDX     #0DBh ; '€'
+ROM:729E A9 78					     LDA     #120		     ; X coord (x4=480)
+ROM:72A0 A2 DB					     LDX     #219		     ; y coord (x4=876)
 ROM:72A2 20 03 7C				     JSR     write_CUR_cmd
-ROM:72A5 A9 50					     LDA     #50h ; 'P'
-ROM:72A7 20 DE 7C				     JSR     draw_black_vector_A0
-ROM:72AA A9 1D					     LDA     #1Dh
-ROM:72AC A0 02					     LDY     #2
-ROM:72AE 38					     SEC
-ROM:72AF 20 3F 77				     JSR     sub_773F
+ROM:72A5 A9 50					     LDA     #50h ; 'P'              ; scale = 5
+ROM:72A7 20 DE 7C				     JSR     set_scale_A_bright_0
+ROM:72AA A9 1D					     LDA     #highScoreTable
+ROM:72AC A0 02					     LDY     #2			     ; 2 bytes to display
+ROM:72AE 38					     SEC			     ; flag no zero padding
+ROM:72AF 20 3F 77				     JSR     display_numeric	     ; display high score
 ROM:72B2 A9 00					     LDA     #0
-ROM:72B4 20 D1 7B				     JSR     display_digit_A
+ROM:72B4 20 D1 7B				     JSR     display_digit_A	     ; display high score units	(=0)
 ROM:72B7 A9 10					     LDA     #10h
 ROM:72B9 85 00					     STA     globalScale
-ROM:72BB A9 C0					     LDA     #0C0h ; '¿'
-ROM:72BD A2 DB					     LDX     #0DBh ; '€'
+ROM:72BB A9 C0					     LDA     #192		     ; X coord (x4=768)
+ROM:72BD A2 DB					     LDX     #219		     ; Y coord (x4=876)
 ROM:72BF 20 03 7C				     JSR     write_CUR_cmd
-ROM:72C2 A9 50					     LDA     #50h ; 'P'
-ROM:72C4 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:72C2 A9 50					     LDA     #50h ; 'P'              ; scale = 5
+ROM:72C4 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:72C7 A2 00					     LDX     #0
 ROM:72C9 A5 1C					     LDA     numPlayers
 ROM:72CB C9 01					     CMP     #1			     ; 1 player	only?
@@ -2438,25 +2438,25 @@ ROM:72DE AD FA 02				     LDA     byte_2FA
 ROM:72E1 30 06					     BMI     loc_72E9
 ROM:72E3 A5 5C					     LDA     fastTimer
 ROM:72E5 29 10					     AND     #10h
-ROM:72E7 F0 0D					     BEQ     loc_72F6
+ROM:72E7 F0 0D					     BEQ     loc_72F6		     ; not every frame
 ROM:72E9
 ROM:72E9	     loc_72E9:
-ROM:72E9 A9 54					     LDA     #54h ; 'T'
-ROM:72EB A0 02					     LDY     #2
-ROM:72ED 38					     SEC
-ROM:72EE 20 3F 77				     JSR     sub_773F
+ROM:72E9 A9 54					     LDA     #p2ScoreTens
+ROM:72EB A0 02					     LDY     #2			     ; 2 bytes to display
+ROM:72ED 38					     SEC			     ; flag no zero padding
+ROM:72EE 20 3F 77				     JSR     display_numeric	     ; display P2 score
 ROM:72F1 A9 00					     LDA     #0
-ROM:72F3 20 8B 77				     JSR     sub_778B
+ROM:72F3 20 8B 77				     JSR     display_pad_digit	     ; display score units (=0)
 ROM:72F6
-ROM:72F6	     loc_72F6:
-ROM:72F6 A9 CF					     LDA     #0CFh ; 'œ'
+ROM:72F6	     loc_72F6:							     ; X coord (x4=828)
+ROM:72F6 A9 CF					     LDA     #207
 ROM:72F8 A4 58					     LDY     numShipsP2
-ROM:72FA 4C 3E 6F				     JMP     sub_6F3E
+ROM:72FA 4C 3E 6F				     JMP     display_extra_ships
 ROM:72FD	     ; ---------------------------------------------------------------------------
 ROM:72FD
 ROM:72FD	     locret_72FD:
 ROM:72FD 60					     RTS
-ROM:72FD	     ; End of function sub_724F
+ROM:72FD	     ; End of function display_C_scores_ships
 ROM:72FD
 ROM:72FE
 ROM:72FE	     ; =============== S U B R O U T I N E =======================================
@@ -2494,7 +2494,7 @@ ROM:732D
 ROM:732D	     loc_732D:
 ROM:732D 48					     PHA
 ROM:732E A9 90					     LDA     #90h ; 'ê'
-ROM:7330 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:7330 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7333 68					     PLA
 ROM:7334 38					     SEC
 ROM:7335 E9 10					     SBC     #10h
@@ -2502,7 +2502,7 @@ ROM:7337 C9 A0					     CMP     #0A0h ; '†'
 ROM:7339 B0 F2					     BCS     loc_732D
 ROM:733B
 ROM:733B	     loc_733B:
-ROM:733B 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:733B 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:733E A6 0D					     LDX     byte_D
 ROM:7340 BD 00 02				     LDA     200h,X
 ROM:7343 10 16					     BPL     loc_735B
@@ -2554,7 +2554,7 @@ ROM:7384
 ROM:7384	     loc_7384:
 ROM:7384 A9 70					     LDA     #70h ; 'p'
 ROM:7386 A2 F0					     LDX     #0F0h ; ''
-ROM:7388 20 E0 7C				     JSR     draw_black_vector_AX
+ROM:7388 20 E0 7C				     JSR     set_scale_A_bright_X
 ROM:738B A6 0D					     LDX     byte_D
 ROM:738D A5 5C					     LDA     fastTimer
 ROM:738F 29 03					     AND     #3
@@ -2632,9 +2632,9 @@ ROM:73DB A2 00					     LDX     #0
 ROM:73DD 86 10					     STX     initial_offset	     ; offset into initials
 ROM:73DF A9 01					     LDA     #1
 ROM:73E1 85 00					     STA     globalScale
-ROM:73E3 A9 A7					     LDA     #0A7h ; 'ß'             ; starting Y coord
+ROM:73E3 A9 A7					     LDA     #167		     ; starting	Y coord	(x4=668)
 ROM:73E5 85 0E					     STA     byte_E
-ROM:73E7 A9 10					     LDA     #10h
+ROM:73E7 A9 10					     LDA     #16
 ROM:73E9 85 00					     STA     globalScale
 ROM:73EB
 ROM:73EB	     display_hs_entry:
@@ -2642,34 +2642,34 @@ ROM:73EB B5 1D					     LDA     highScoreTable,X
 ROM:73ED 15 1E					     ORA     (highScoreTable+1),X    ; end of table?
 ROM:73EF F0 67					     BEQ     loc_7458		     ; yes, exit
 ROM:73F1 86 0F					     STX     byte_F		     ; entry counter (x2)
-ROM:73F3 A9 5F					     LDA     #5Fh ; '_'              ; x coord
+ROM:73F3 A9 5F					     LDA     #95		     ; x coord (x4=380)
 ROM:73F5 A6 0E					     LDX     byte_E		     ; y coord
 ROM:73F7 20 03 7C				     JSR     write_CUR_cmd
-ROM:73FA A9 40					     LDA     #64		     ; X=64
-ROM:73FC 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:73FA A9 40					     LDA     #40h ; '@'              ; S=4
+ROM:73FC 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:73FF A5 0F					     LDA     byte_F		     ; entry counter (x2)
 ROM:7401 4A					     LSR     A			     ; x1
 ROM:7402 F8					     SED
 ROM:7403 69 01					     ADC     #1
 ROM:7405 D8					     CLD
-ROM:7406 85 0D					     STA     byte_D
-ROM:7408 A9 0D					     LDA     #0Dh
-ROM:740A 38					     SEC
-ROM:740B A0 01					     LDY     #1
-ROM:740D A2 00					     LDX     #0
-ROM:740F 20 3F 77				     JSR     sub_773F
-ROM:7412 A9 40					     LDA     #64		     ; X=64
-ROM:7414 AA					     TAX			     ; Y=64
-ROM:7415 20 E0 7C				     JSR     draw_black_vector_AX    ; X=64,Y=64
+ROM:7406 85 0D					     STA     byte_D		     ; number buffer for printing
+ROM:7408 A9 0D					     LDA     #byte_D		     ; ptr number buffer
+ROM:740A 38					     SEC			     ; flag no zero padding
+ROM:740B A0 01					     LDY     #1			     ; 1 byte to print
+ROM:740D A2 00					     LDX     #0			     ; pad digit
+ROM:740F 20 3F 77				     JSR     display_numeric	     ; display entry no.
+ROM:7412 A9 40					     LDA     #40h ; '@'              ; S=4
+ROM:7414 AA					     TAX			     ; Brightness=4
+ROM:7415 20 E0 7C				     JSR     set_scale_A_bright_X    ; displays	a dot???
 ROM:7418 A0 00					     LDY     #0			     ; <space>
 ROM:741A 20 35 6F				     JSR     display_char_code_Y
 ROM:741D A5 0F					     LDA     byte_F		     ; entry counter (x2)
 ROM:741F 18					     CLC
-ROM:7420 69 1D					     ADC     #29
-ROM:7422 A0 02					     LDY     #2
-ROM:7424 38					     SEC
-ROM:7425 A2 00					     LDX     #0
-ROM:7427 20 3F 77				     JSR     sub_773F
+ROM:7420 69 1D					     ADC     #highScoreTable	     ; get ptr entry (score)
+ROM:7422 A0 02					     LDY     #2			     ; 2 bytes to print
+ROM:7424 38					     SEC			     ; flag no zero padding
+ROM:7425 A2 00					     LDX     #0			     ; pad digit
+ROM:7427 20 3F 77				     JSR     display_numeric	     ; display score
 ROM:742A A9 00					     LDA     #0
 ROM:742C 20 D1 7B				     JSR     display_digit_A
 ROM:742F A0 00					     LDY     #0			     ; <space>
@@ -2862,8 +2862,8 @@ ROM:752C 84 09					     STY     byte_9
 ROM:752E 4A					     LSR     A
 ROM:752F 29 FE					     AND     #0FEh ; '˛'
 ROM:7531 A8					     TAY
-ROM:7532 B9 6E 52				     LDA     526Eh,Y
-ROM:7535 BE 6F 52				     LDX     526Fh,Y
+ROM:7532 B9 6E 52				     LDA     (DVGROM+26Eh),Y
+ROM:7535 BE 6F 52				     LDX     (DVGROM+26Fh),Y
 ROM:7538 20 D3 6A				     JSR     sub_6AD3
 ROM:753B AD 05 24				     LDA     thrustSwitch
 ROM:753E 10 14					     BPL     locret_7554
@@ -3241,44 +3241,45 @@ ROM:773B 1A					     .db  1Ah
 ROM:773C 1C					     .db  1Ch
 ROM:773D 1D					     .db  1Dh
 ROM:773E 1F					     .db  1Fh
+ROM:773F	     A=buffer, Y=#bytes, X=pad digit
 ROM:773F
 ROM:773F	     ; =============== S U B R O U T I N E =======================================
 ROM:773F
 ROM:773F
-ROM:773F	     sub_773F:
+ROM:773F	     display_numeric:
 ROM:773F 08					     PHP
-ROM:7740 86 17					     STX     byte_17
-ROM:7742 88					     DEY
-ROM:7743 84 16					     STY     byte_16
+ROM:7740 86 17					     STX     byte_17		     ; store pad digit
+ROM:7742 88					     DEY			     ; #bytes-1
+ROM:7743 84 16					     STY     byte_16		     ; offset to last byte
 ROM:7745 18					     CLC
-ROM:7746 65 16					     ADC     byte_16
-ROM:7748 85 15					     STA     byte_15
+ROM:7746 65 16					     ADC     byte_16		     ; bytes remaining
+ROM:7748 85 15					     STA     byte_15		     ; ptr current byte
 ROM:774A 28					     PLP
-ROM:774B AA					     TAX
+ROM:774B AA					     TAX			     ; X=buffer
 ROM:774C
 ROM:774C	     loc_774C:
 ROM:774C 08					     PHP
-ROM:774D B5 00					     LDA     0,X
+ROM:774D B5 00					     LDA     0,X		     ; get next	byte
 ROM:774F 4A					     LSR     A
 ROM:7750 4A					     LSR     A
 ROM:7751 4A					     LSR     A
-ROM:7752 4A					     LSR     A
+ROM:7752 4A					     LSR     A			     ; high nibble -> low
 ROM:7753 28					     PLP
-ROM:7754 20 85 77				     JSR     sub_7785
-ROM:7757 A5 16					     LDA     byte_16
-ROM:7759 D0 01					     BNE     loc_775C
-ROM:775B 18					     CLC
+ROM:7754 20 85 77				     JSR     display_digit
+ROM:7757 A5 16					     LDA     byte_16		     ; bytes remaining?
+ROM:7759 D0 01					     BNE     loc_775C		     ; no, skip
+ROM:775B 18					     CLC			     ; flag padding
 ROM:775C
-ROM:775C	     loc_775C:
+ROM:775C	     loc_775C:							     ; ptr current byte
 ROM:775C A6 15					     LDX     byte_15
-ROM:775E B5 00					     LDA     0,X
-ROM:7760 20 85 77				     JSR     sub_7785
-ROM:7763 C6 15					     DEC     byte_15
+ROM:775E B5 00					     LDA     0,X		     ; get byte	(low nibble)
+ROM:7760 20 85 77				     JSR     display_digit
+ROM:7763 C6 15					     DEC     byte_15		     ; ptr current byte
 ROM:7765 A6 15					     LDX     byte_15
-ROM:7767 C6 16					     DEC     byte_16
-ROM:7769 10 E1					     BPL     loc_774C
+ROM:7767 C6 16					     DEC     byte_16		     ; done?
+ROM:7769 10 E1					     BPL     loc_774C		     ; no, loop
 ROM:776B 60					     RTS
-ROM:776B	     ; End of function sub_773F
+ROM:776B	     ; End of function display_numeric
 ROM:776B
 ROM:776C
 ROM:776C	     ; =============== S U B R O U T I N E =======================================
@@ -3310,25 +3311,25 @@ ROM:7785
 ROM:7785	     ; =============== S U B R O U T I N E =======================================
 ROM:7785
 ROM:7785
-ROM:7785	     sub_7785:
-ROM:7785 90 04					     BCC     sub_778B
-ROM:7787 29 0F					     AND     #0Fh
-ROM:7789 F0 27					     BEQ     loc_77B2
-ROM:7789	     ; End of function sub_7785
+ROM:7785	     display_digit:
+ROM:7785 90 04					     BCC     display_pad_digit	     ; skip if no pad flagged?
+ROM:7787 29 0F					     AND     #0Fh		     ; any pad digit?
+ROM:7789 F0 27					     BEQ     loc_77B2		     ; no, skip
+ROM:7789	     ; End of function display_digit
 ROM:7789
 ROM:778B
 ROM:778B	     ; =============== S U B R O U T I N E =======================================
 ROM:778B
 ROM:778B
-ROM:778B	     sub_778B:
-ROM:778B A6 17					     LDX     byte_17
-ROM:778D F0 23					     BEQ     loc_77B2
+ROM:778B	     display_pad_digit:
+ROM:778B A6 17					     LDX     byte_17		     ; any pad digit?
+ROM:778D F0 23					     BEQ     loc_77B2		     ; none, exit
 ROM:778F 29 0F					     AND     #0Fh
 ROM:7791 18					     CLC
 ROM:7792 69 01					     ADC     #1
 ROM:7794 08					     PHP
-ROM:7795 0A					     ASL     A
-ROM:7796 A8					     TAY
+ROM:7795 0A					     ASL     A			     ; x2
+ROM:7796 A8					     TAY			     ; word offset
 ROM:7797 B9 D4 56				     LDA     (DVGROM+6D4h),Y	     ; chr fn
 ROM:779A 0A					     ASL     A
 ROM:779B 85 0B					     STA     byte_B
@@ -3347,7 +3348,7 @@ ROM:77B2	     ; ----------------------------------------------------------------
 ROM:77B2
 ROM:77B2	     loc_77B2:
 ROM:77B2 4C CB 7B				     JMP     loc_7BCB
-ROM:77B2	     ; End of function sub_778B
+ROM:77B2	     ; End of function display_pad_digit
 ROM:77B2
 ROM:77B5
 ROM:77B5	     ; =============== S U B R O U T I N E =======================================
@@ -3456,7 +3457,7 @@ ROM:7816 B9 71 78				     LDA     msgCoords,Y	     ; X
 ROM:7819 BE 72 78				     LDX     (msgCoords+1),Y	     ; Y
 ROM:781C 20 03 7C				     JSR     write_CUR_cmd
 ROM:781F A9 70					     LDA     #70h ; 'p'
-ROM:7821 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:7821 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7824 A0 00					     LDY     #0
 ROM:7826 A2 00					     LDX     #0
 ROM:7828
@@ -3513,10 +3514,10 @@ ROM:785F 69 0D					     ADC     #0Dh
 ROM:7861
 ROM:7861	     loc_7861:							     ; X = chr*2 (chr fn offset)
 ROM:7861 AA					     TAX
-ROM:7862 BD D2 56				     LDA     56D2h,X		     ; chr fn msb
+ROM:7862 BD D2 56				     LDA     (DVGROM+6D2h),X	     ; chr fn msb
 ROM:7865 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:7867 C8					     INY
-ROM:7868 BD D3 56				     LDA     56D3h,X		     ; chr fn lsb
+ROM:7868 BD D3 56				     LDA     (DVGROM+6D3h),X	     ; chr fn lsb
 ROM:786B 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:786D C8					     INY
 ROM:786E A2 00					     LDX     #0
@@ -3524,7 +3525,6 @@ ROM:7870 60					     RTS
 ROM:7870	     ; End of function add_chr_fn
 ROM:7870
 ROM:7870	     ; ---------------------------------------------------------------------------
-ROM:7871	     ; these look like display coordinates?
 ROM:7871 64 B6	     msgCoords:			     .db 64h, 0B6h		     ; "HIGH SCORES"
 ROM:7873 64 B6					     .db 64h, 0B6h		     ; "PLAYER"
 ROM:7875 0C AA					     .db 0Ch, 0AAh		     ; "YOUR SCORE...TEN BEST"
@@ -4070,28 +4070,28 @@ ROM:7CDE
 ROM:7CDE	     ; =============== S U B R O U T I N E =======================================
 ROM:7CDE
 ROM:7CDE
-ROM:7CDE	     draw_black_vector_A0:
+ROM:7CDE	     set_scale_A_bright_0:
 ROM:7CDE A2 00					     LDX     #0			     ; Y=0
-ROM:7CDE	     ; End of function draw_black_vector_A0
+ROM:7CDE	     ; End of function set_scale_A_bright_0
 ROM:7CDE
 ROM:7CE0
 ROM:7CE0	     ; =============== S U B R O U T I N E =======================================
 ROM:7CE0
 ROM:7CE0
-ROM:7CE0	     draw_black_vector_AX:
+ROM:7CE0	     set_scale_A_bright_X:
 ROM:7CE0 A0 01					     LDY     #1
-ROM:7CE2 91 02					     STA     (2),Y		     ; store (XXXX XXXX)=A in avg ram
+ROM:7CE2 91 02					     STA     (2),Y		     ; store (SSSS -mYY)=A in avg ram
 ROM:7CE4 88					     DEY
 ROM:7CE5 98					     TYA
-ROM:7CE6 91 02					     STA     (2),Y		     ; store (BBBB -mXX)=0 in avg ram
+ROM:7CE6 91 02					     STA     (2),Y		     ; store (YYYY YYYY)=0 in avg ram
 ROM:7CE8 C8					     INY
 ROM:7CE9 C8					     INY
-ROM:7CEA 91 02					     STA     (2),Y		     ; store (SSSS 0mYY)=0 in avg ram
+ROM:7CEA 91 02					     STA     (2),Y		     ; store (XXXX XXXX)=0 in avg ram
 ROM:7CEC C8					     INY
 ROM:7CED 8A					     TXA
-ROM:7CEE 91 02					     STA     (2),Y		     ; store (YYYY YYYY)=X in avg ram
+ROM:7CEE 91 02					     STA     (2),Y		     ; store (BBBB -mXX)=X in avg ram
 ROM:7CF0 4C 39 7C				     JMP     update_avg_curr_addr
-ROM:7CF0	     ; End of function draw_black_vector_AX
+ROM:7CF0	     ; End of function set_scale_A_bright_X
 ROM:7CF0
 ROM:7CF3	     ; ---------------------------------------------------------------------------
 ROM:7CF3
@@ -4461,7 +4461,7 @@ ROM:7EF9 A9 69					     LDA     #69h ; 'i'
 ROM:7EFB A2 93					     LDX     #93h ; 'ì'
 ROM:7EFD 20 03 7C				     JSR     write_CUR_cmd
 ROM:7F00 A9 30					     LDA     #30h ; '0'
-ROM:7F02 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:7F02 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F05 A2 03					     LDX     #3			     ; 4 dipswitches to	read
 ROM:7F07
 ROM:7F07	     read_dsw1:							     ; read next dipswitch
@@ -4481,7 +4481,7 @@ ROM:7F21 A9 7A					     LDA     #7Ah ; 'z'
 ROM:7F23 A2 9D					     LDX     #9Dh ; 'ù'
 ROM:7F25 20 03 7C				     JSR     write_CUR_cmd
 ROM:7F28 A9 10					     LDA     #10h
-ROM:7F2A 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:7F2A 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F2D AD 02 28				     LDA     centerCoinMultiplierAndLives
 ROM:7F30 29 02					     AND     #2			     ; Coin Multiplier
 ROM:7F32 4A					     LSR     A
@@ -4516,7 +4516,7 @@ ROM:7F65 8D 0C 00				     STA     byte_C
 ROM:7F68 A9 20					     LDA     #20h ; ' '
 ROM:7F6A 20 03 7C				     JSR     write_CUR_cmd
 ROM:7F6D A9 70					     LDA     #70h ; 'p'
-ROM:7F6F 20 DE 7C				     JSR     draw_black_vector_A0
+ROM:7F6F 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F72 AD 0B 00				     LDA     byte_B
 ROM:7F75 20 D1 7B				     JSR     display_digit_A
 ROM:7F78 AD D4 56				     LDA     DVGROM+6D4h
