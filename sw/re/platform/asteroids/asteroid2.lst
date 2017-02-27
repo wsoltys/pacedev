@@ -53,7 +53,7 @@ RAM:0015 ??	     byte_15:			     .block 1
 RAM:0016 ??	     byte_16:			     .block 1
 RAM:0017 ??	     byte_17:			     .block 1
 RAM:0018 ??	     curPlayer:			     .block 1
-RAM:0019 ??	     byte_19:			     .block 1
+RAM:0019 ??	     curPlayer_x2:		     .block 1
 RAM:001A ??	     numPlayersPreviousGame:	     .block 1
 RAM:001B ??	     unk_1B:			     .block 1
 RAM:001C ??	     numPlayers:		     .block 1
@@ -105,7 +105,7 @@ RAM:005F ??	     rnd1:			     .block 1
 RAM:0060 ??	     rnd2:			     .block 1
 RAM:0061 ??	     direction:			     .block 1
 RAM:0062 ??	     saucerShotDirection:	     .block 1
-RAM:0063 ??	     photonInputLimit:		     .block 1
+RAM:0063 ??	     btn_edge_debounce:		     .block 1
 RAM:0064 ??	     shipHorizontalVelocityLow:	     .block 1
 RAM:0065 ??	     shipVerticalVelocityLow:	     .block 1
 RAM:0066 ??	     timerPlayerFireSound:	     .block 1
@@ -762,7 +762,7 @@ ROM:691C A9 80					     LDA     #80h ; 'Ä'
 ROM:691E 85 5A					     STA     timerStartGame	     ; init timer
 ROM:6920 0A					     ASL     A			     ; A=0
 ROM:6921 85 18					     STA     curPlayer		     ; init current player
-ROM:6923 85 19					     STA     byte_19
+ROM:6923 85 19					     STA     curPlayer_x2
 ROM:6925 A5 56					     LDA     numStartingShipsPerGame
 ROM:6927 85 57					     STA     numShipsP1		     ; init number of ships
 ROM:6929 A9 04					     LDA     #4
@@ -855,7 +855,7 @@ ROM:69C4 85 6F					     STA     io3200ShadowRegister
 ROM:69C6 8D 00 32				     STA     3200h		     ; output
 ROM:69C9 8A					     TXA
 ROM:69CA 0A					     ASL     A			     ; current player *	2
-ROM:69CB 85 19					     STA     byte_19
+ROM:69CB 85 19					     STA     curPlayer_x2
 ROM:69CD
 ROM:69CD	     loc_69CD:
 ROM:69CD 18					     CLC
@@ -1170,7 +1170,7 @@ ROM:6B76 8D F7 02				     STA     byte_2F7
 ROM:6B79 A5 1C					     LDA     numPlayers
 ROM:6B7B F0 CD					     BEQ     loc_6B4A
 ROM:6B7D 86 0D					     STX     byte_D
-ROM:6B7F A6 19					     LDX     byte_19
+ROM:6B7F A6 19					     LDX     curPlayer_x2
 ROM:6B81 AD 1C 02				     LDA     p1SaucerFlag
 ROM:6B84 4A					     LSR     A
 ROM:6B85 A9 99					     LDA     #99h ; 'ô'
@@ -1189,8 +1189,8 @@ ROM:6B93
 ROM:6B93
 ROM:6B93	     handle_saucer:
 ROM:6B93 A5 5C					     LDA     fastTimer
-ROM:6B95 29 03					     AND     #3
-ROM:6B97 F0 01					     BEQ     loc_6B9A
+ROM:6B95 29 03					     AND     #3			     ; time to update?
+ROM:6B97 F0 01					     BEQ     loc_6B9A		     ; yes, go
 ROM:6B99
 ROM:6B99	     locret_6B99:
 ROM:6B99 60					     RTS
@@ -1198,17 +1198,17 @@ ROM:6B9A	     ; ----------------------------------------------------------------
 ROM:6B9A
 ROM:6B9A	     loc_6B9A:
 ROM:6B9A AD 1C 02				     LDA     p1SaucerFlag
-ROM:6B9D 30 FA					     BMI     locret_6B99
-ROM:6B9F F0 03					     BEQ     loc_6BA4
-ROM:6BA1 4C 34 6C				     JMP     loc_6C34
+ROM:6B9D 30 FA					     BMI     locret_6B99	     ; exploding? yes, exit
+ROM:6B9F F0 03					     BEQ     handle_new_saucer	     ; no saucer? yes, go
+ROM:6BA1 4C 34 6C				     JMP     handle_existing_saucer  ; small/large saucer
 ROM:6BA4	     ; ---------------------------------------------------------------------------
 ROM:6BA4
-ROM:6BA4	     loc_6BA4:
+ROM:6BA4	     handle_new_saucer:						     ; game active?
 ROM:6BA4 A5 1C					     LDA     numPlayers
-ROM:6BA6 F0 07					     BEQ     loc_6BAF
-ROM:6BA8 AD 1B 02				     LDA     p1PlayerFlag
-ROM:6BAB F0 EC					     BEQ     locret_6B99
-ROM:6BAD 30 EA					     BMI     locret_6B99
+ROM:6BA6 F0 07					     BEQ     loc_6BAF		     ; no, go
+ROM:6BA8 AD 1B 02				     LDA     p1PlayerFlag	     ; player active?
+ROM:6BAB F0 EC					     BEQ     locret_6B99	     ; no, return
+ROM:6BAD 30 EA					     BMI     locret_6B99	     ; exploding? yes, return
 ROM:6BAF
 ROM:6BAF	     loc_6BAF:
 ROM:6BAF AD F9 02				     LDA     byte_2F9
@@ -1218,7 +1218,7 @@ ROM:6BB7
 ROM:6BB7	     loc_6BB7:
 ROM:6BB7 CE F7 02				     DEC     byte_2F7
 ROM:6BBA D0 DD					     BNE     locret_6B99
-ROM:6BBC A9 12					     LDA     #12h
+ROM:6BBC A9 12					     LDA     #18
 ROM:6BBE 8D F7 02				     STA     byte_2F7
 ROM:6BC1 AD F9 02				     LDA     byte_2F9
 ROM:6BC4 F0 0A					     BEQ     loc_6BD0
@@ -1263,13 +1263,13 @@ ROM:6C0D A2 F0					     LDX     #0F0h ; ''
 ROM:6C0F
 ROM:6C0F	     loc_6C0F:
 ROM:6C0F 8E 3F 02				     STX     byte_23F
-ROM:6C12 A2 02					     LDX     #2
+ROM:6C12 A2 02					     LDX     #2			     ; large saucer
 ROM:6C14 AD F8 02				     LDA     byte_2F8
 ROM:6C17 30 17					     BMI     loc_6C30
-ROM:6C19 A4 19					     LDY     byte_19
-ROM:6C1B B9 53 00				     LDA     53h,Y
-ROM:6C1E C9 30					     CMP     #30h ; '0'
-ROM:6C20 B0 0D					     BCS     loc_6C2F
+ROM:6C19 A4 19					     LDY     curPlayer_x2	     ; p1/p2 score
+ROM:6C1B B9 53 00				     LDA     p1ScoreThousands,Y
+ROM:6C1E C9 30					     CMP     #30h ; '0'              ; score over 30,000?
+ROM:6C20 B0 0D					     BCS     loc_6C2F		     ; yes, skip (always small saucer)
 ROM:6C22 20 B5 77				     JSR     update_prng
 ROM:6C25 85 08					     STA     byte_8
 ROM:6C27 AD F8 02				     LDA     byte_2F8
@@ -1277,7 +1277,7 @@ ROM:6C2A 4A					     LSR     A
 ROM:6C2B C5 08					     CMP     byte_8
 ROM:6C2D B0 01					     BCS     loc_6C30
 ROM:6C2F
-ROM:6C2F	     loc_6C2F:
+ROM:6C2F	     loc_6C2F:							     ; small saucer
 ROM:6C2F CA					     DEX
 ROM:6C30
 ROM:6C30	     loc_6C30:
@@ -1285,7 +1285,7 @@ ROM:6C30 8E 1C 02				     STX     p1SaucerFlag
 ROM:6C33 60					     RTS
 ROM:6C34	     ; ---------------------------------------------------------------------------
 ROM:6C34
-ROM:6C34	     loc_6C34:
+ROM:6C34	     handle_existing_saucer:
 ROM:6C34 A5 5C					     LDA     fastTimer
 ROM:6C36 0A					     ASL     A
 ROM:6C37 D0 0C					     BNE     loc_6C45
@@ -1295,9 +1295,9 @@ ROM:6C3E AA					     TAX
 ROM:6C3F BD D3 6C				     LDA     unk_6CD3,X
 ROM:6C42 8D 62 02				     STA     byte_262
 ROM:6C45
-ROM:6C45	     loc_6C45:
+ROM:6C45	     loc_6C45:							     ; game active?
 ROM:6C45 A5 1C					     LDA     numPlayers
-ROM:6C47 F0 05					     BEQ     loc_6C4E
+ROM:6C47 F0 05					     BEQ     loc_6C4E		     ; no, skip
 ROM:6C49 AD FA 02				     LDA     byte_2FA
 ROM:6C4C D0 05					     BNE     locret_6C53
 ROM:6C4E
@@ -1310,16 +1310,16 @@ ROM:6C53 60					     RTS
 ROM:6C54	     ; ---------------------------------------------------------------------------
 ROM:6C54
 ROM:6C54	     loc_6C54:
-ROM:6C54 A9 0A					     LDA     #0Ah
+ROM:6C54 A9 0A					     LDA     #10
 ROM:6C56 8D F7 02				     STA     byte_2F7
 ROM:6C59 AD 1C 02				     LDA     p1SaucerFlag
-ROM:6C5C 4A					     LSR     A
-ROM:6C5D F0 06					     BEQ     loc_6C65
-ROM:6C5F 20 B5 77				     JSR     update_prng
-ROM:6C62 4C C4 6C				     JMP     loc_6CC4
+ROM:6C5C 4A					     LSR     A			     ; small saucer?
+ROM:6C5D F0 06					     BEQ     handle_small_saucer     ; yes, go
+ROM:6C5F 20 B5 77				     JSR     update_prng	     ; random shot direction
+ROM:6C62 4C C4 6C				     JMP     update_shot_direction
 ROM:6C65	     ; ---------------------------------------------------------------------------
 ROM:6C65
-ROM:6C65	     loc_6C65:
+ROM:6C65	     handle_small_saucer:
 ROM:6C65 AD 3F 02				     LDA     byte_23F
 ROM:6C68 C9 80					     CMP     #80h ; 'Ä'
 ROM:6C6A 6A					     ROR     A
@@ -1357,22 +1357,22 @@ ROM:6CA6 A8					     TAY
 ROM:6CA7 20 F0 76				     JSR     loc_76EF+1
 ROM:6CAA 85 62					     STA     saucerShotDirection
 ROM:6CAC 20 B5 77				     JSR     update_prng
-ROM:6CAF A6 19					     LDX     byte_19
-ROM:6CB1 B4 53					     LDY     53h,X
-ROM:6CB3 C0 35					     CPY     #35h ; '5'
+ROM:6CAF A6 19					     LDX     curPlayer_x2
+ROM:6CB1 B4 53					     LDY     p1ScoreThousands,X
+ROM:6CB3 C0 35					     CPY     #35h ; '5'              ; score over 35,000?
 ROM:6CB5 A2 00					     LDX     #0
-ROM:6CB7 90 01					     BCC     loc_6CBA
+ROM:6CB7 90 01					     BCC     loc_6CBA		     ; no, skip
 ROM:6CB9 E8					     INX
 ROM:6CBA
 ROM:6CBA	     loc_6CBA:
-ROM:6CBA 3D CF 6C				     AND     6CCFh,X
+ROM:6CBA 3D CF 6C				     AND     unk_6CCF,X
 ROM:6CBD 10 03					     BPL     loc_6CC2
-ROM:6CBF 1D D1 6C				     ORA     6CD1h,X
+ROM:6CBF 1D D1 6C				     ORA     unk_6CD1,X
 ROM:6CC2
 ROM:6CC2	     loc_6CC2:
 ROM:6CC2 65 62					     ADC     saucerShotDirection
 ROM:6CC4
-ROM:6CC4	     loc_6CC4:
+ROM:6CC4	     update_shot_direction:
 ROM:6CC4 85 62					     STA     saucerShotDirection
 ROM:6CC6 A0 03					     LDY     #3
 ROM:6CC8 A2 01					     LDX     #1
@@ -1381,56 +1381,57 @@ ROM:6CCC 4C F2 6C				     JMP     loc_6CF2
 ROM:6CCC	     ; End of function handle_saucer
 ROM:6CCC
 ROM:6CCC	     ; ---------------------------------------------------------------------------
-ROM:6CCF 8F					     .db  8Fh ;	è
+ROM:6CCF 8F	     unk_6CCF:			     .db  8Fh ;	è
 ROM:6CD0 87					     .db  87h ;	á
-ROM:6CD1 70					     .db  70h ;	p
+ROM:6CD1 70	     unk_6CD1:			     .db  70h ;	p
 ROM:6CD2 78					     .db  78h ;	x
 ROM:6CD3 F0	     unk_6CD3:			     .db 0F0h ;	
 ROM:6CD4 00					     .db    0
 ROM:6CD5 00					     .db    0
 ROM:6CD6 10					     .db  10h
+ROM:6CD7	     ; detects leading edge of fire button press
 ROM:6CD7
 ROM:6CD7	     ; =============== S U B R O U T I N E =======================================
 ROM:6CD7
 ROM:6CD7
 ROM:6CD7	     handle_fire:
-ROM:6CD7 A5 1C					     LDA     numPlayers
-ROM:6CD9 F0 21					     BEQ     locret_6CFC
-ROM:6CDB 0E 04 20				     ASL     FireSwitch
-ROM:6CDE 66 63					     ROR     photonInputLimit
-ROM:6CE0 24 63					     BIT     photonInputLimit
-ROM:6CE2 10 18					     BPL     locret_6CFC
-ROM:6CE4 70 16					     BVS     locret_6CFC
+ROM:6CD7 A5 1C					     LDA     numPlayers		     ; game active?
+ROM:6CD9 F0 21					     BEQ     locret_6CFC	     ; no, exit
+ROM:6CDB 0E 04 20				     ASL     FireSwitch		     ; fire button to C
+ROM:6CDE 66 63					     ROR     btn_edge_debounce	     ; shift into bit 7
+ROM:6CE0 24 63					     BIT     btn_edge_debounce	     ; test
+ROM:6CE2 10 18					     BPL     locret_6CFC	     ; b7=0, not pressed, exit
+ROM:6CE4 70 16					     BVS     locret_6CFC	     ; b6=1, was pressed, exit
 ROM:6CE6 AD FA 02				     LDA     byte_2FA
 ROM:6CE9 D0 11					     BNE     locret_6CFC
 ROM:6CEB AA					     TAX
-ROM:6CEC A9 03					     LDA     #3
+ROM:6CEC A9 03					     LDA     #3			     ; offset shot0 timer - 1
 ROM:6CEE 85 0E					     STA     byte_E
-ROM:6CF0 A0 07					     LDY     #7
+ROM:6CF0 A0 07					     LDY     #7			     ; offset shot3 timer
 ROM:6CF2
-ROM:6CF2	     loc_6CF2:
-ROM:6CF2 B9 1B 02				     LDA     21Bh,Y
-ROM:6CF5 F0 06					     BEQ     loc_6CFD
-ROM:6CF7 88					     DEY
-ROM:6CF8 C4 0E					     CPY     byte_E
-ROM:6CFA D0 F6					     BNE     loc_6CF2
+ROM:6CF2	     loc_6CF2:							     ; get shot	timer
+ROM:6CF2 B9 1B 02				     LDA     p1PlayerFlag,Y
+ROM:6CF5 F0 06					     BEQ     new_shot_fired	     ; not active, go
+ROM:6CF7 88					     DEY			     ; next shot timer
+ROM:6CF8 C4 0E					     CPY     byte_E		     ; done all	shot timers?
+ROM:6CFA D0 F6					     BNE     loc_6CF2		     ; no, loop
 ROM:6CFC
 ROM:6CFC	     locret_6CFC:
 ROM:6CFC 60					     RTS
 ROM:6CFD	     ; ---------------------------------------------------------------------------
 ROM:6CFD
-ROM:6CFD	     loc_6CFD:
+ROM:6CFD	     new_shot_fired:
 ROM:6CFD 86 0D					     STX     byte_D
-ROM:6CFF A9 12					     LDA     #12h
-ROM:6D01 99 1B 02				     STA     21Bh,Y
-ROM:6D04 B5 61					     LDA     61h,X
+ROM:6CFF A9 12					     LDA     #18
+ROM:6D01 99 1B 02				     STA     p1PlayerFlag,Y	     ; init shot timer
+ROM:6D04 B5 61					     LDA     direction,X
 ROM:6D06 20 D2 77				     JSR     sub_77D2
 ROM:6D09 A6 0D					     LDX     byte_D
 ROM:6D0B C9 80					     CMP     #80h ; 'Ä'
 ROM:6D0D 6A					     ROR     A
 ROM:6D0E 85 09					     STA     byte_9
 ROM:6D10 18					     CLC
-ROM:6D11 7D 3E 02				     ADC     23Eh,X
+ROM:6D11 7D 3E 02				     ADC     byte_23E,X
 ROM:6D14 30 08					     BMI     loc_6D1E
 ROM:6D16 C9 70					     CMP     #70h ; 'p'
 ROM:6D18 90 0A					     BCC     loc_6D24
@@ -1443,15 +1444,15 @@ ROM:6D20 B0 02					     BCS     loc_6D24
 ROM:6D22 A9 91					     LDA     #91h ; 'ë'
 ROM:6D24
 ROM:6D24	     loc_6D24:
-ROM:6D24 99 3E 02				     STA     23Eh,Y
-ROM:6D27 B5 61					     LDA     61h,X
+ROM:6D24 99 3E 02				     STA     byte_23E,Y
+ROM:6D27 B5 61					     LDA     direction,X
 ROM:6D29 20 D5 77				     JSR     sub_77D5
 ROM:6D2C A6 0D					     LDX     byte_D
 ROM:6D2E C9 80					     CMP     #80h ; 'Ä'
 ROM:6D30 6A					     ROR     A
 ROM:6D31 85 0C					     STA     byte_C
 ROM:6D33 18					     CLC
-ROM:6D34 7D 61 02				     ADC     261h,X
+ROM:6D34 7D 61 02				     ADC     byte_261,X
 ROM:6D37 30 08					     BMI     loc_6D41
 ROM:6D39 C9 70					     CMP     #70h ; 'p'
 ROM:6D3B 90 0A					     BCC     loc_6D47
@@ -1464,7 +1465,7 @@ ROM:6D43 B0 02					     BCS     loc_6D47
 ROM:6D45 A9 91					     LDA     #91h ; 'ë'
 ROM:6D47
 ROM:6D47	     loc_6D47:
-ROM:6D47 99 61 02				     STA     261h,Y
+ROM:6D47 99 61 02				     STA     byte_261,Y
 ROM:6D4A A2 00					     LDX     #0
 ROM:6D4C A5 09					     LDA     byte_9
 ROM:6D4E 10 01					     BPL     loc_6D51
@@ -1478,11 +1479,11 @@ ROM:6D57 6A					     ROR     A
 ROM:6D58 18					     CLC
 ROM:6D59 65 09					     ADC     byte_9
 ROM:6D5B 18					     CLC
-ROM:6D5C 7D CA 02				     ADC     2CAh,X
-ROM:6D5F 99 CA 02				     STA     2CAh,Y
+ROM:6D5C 7D CA 02				     ADC     byte_2CA,X
+ROM:6D5F 99 CA 02				     STA     byte_2CA,Y
 ROM:6D62 A5 08					     LDA     byte_8
-ROM:6D64 7D 84 02				     ADC     284h,X
-ROM:6D67 99 84 02				     STA     284h,Y
+ROM:6D64 7D 84 02				     ADC     byte_284,X
+ROM:6D67 99 84 02				     STA     byte_284,Y
 ROM:6D6A A2 00					     LDX     #0
 ROM:6D6C A5 0C					     LDA     byte_C
 ROM:6D6E 10 01					     BPL     loc_6D71
@@ -1496,11 +1497,11 @@ ROM:6D77 6A					     ROR     A
 ROM:6D78 18					     CLC
 ROM:6D79 65 0C					     ADC     byte_C
 ROM:6D7B 18					     CLC
-ROM:6D7C 7D ED 02				     ADC     2EDh,X
-ROM:6D7F 99 ED 02				     STA     2EDh,Y
+ROM:6D7C 7D ED 02				     ADC     byte_2ED,X
+ROM:6D7F 99 ED 02				     STA     byte_2ED,Y
 ROM:6D82 A5 0B					     LDA     byte_B
-ROM:6D84 7D A7 02				     ADC     2A7h,X
-ROM:6D87 99 A7 02				     STA     2A7h,Y
+ROM:6D84 7D A7 02				     ADC     byte_2A7,X
+ROM:6D87 99 A7 02				     STA     byte_2A7,Y
 ROM:6D8A A9 80					     LDA     #80h ; 'Ä'
 ROM:6D8C 95 66					     STA     66h,X
 ROM:6D8E 60					     RTS
@@ -1571,13 +1572,13 @@ ROM:6DF2 A4 0B					     LDY     byte_B
 ROM:6DF4 C8					     INY
 ROM:6DF5 C8					     INY
 ROM:6DF6 20 1A 6F				     JSR     display_initial
-ROM:6DF9 AD 03 20				     LDA     hyperspaceSwitch
-ROM:6DFC 2A					     ROL     A
-ROM:6DFD 26 63					     ROL     photonInputLimit
-ROM:6DFF A5 63					     LDA     photonInputLimit
-ROM:6E01 29 1F					     AND     #1Fh
-ROM:6E03 C9 07					     CMP     #7
-ROM:6E05 D0 27					     BNE     loc_6E2E
+ROM:6DF9 AD 03 20				     LDA     hyperspaceSwitch	     ; read hyperspace button
+ROM:6DFC 2A					     ROL     A			     ; shift into C
+ROM:6DFD 26 63					     ROL     btn_edge_debounce	     ; shift into bit0
+ROM:6DFF A5 63					     LDA     btn_edge_debounce
+ROM:6E01 29 1F					     AND     #1Fh		     ; low 5 bits
+ROM:6E03 C9 07					     CMP     #7			     ; 00111?
+ROM:6E05 D0 27					     BNE     loc_6E2E		     ; no, exit
 ROM:6E07 E6 31					     INC     letterHighScoreEntry
 ROM:6E09 A5 31					     LDA     letterHighScoreEntry
 ROM:6E0B C9 03					     CMP     #3
@@ -3025,7 +3026,7 @@ ROM:7612 90 09					     BCC     loc_761D
 ROM:7614
 ROM:7614	     loc_7614:
 ROM:7614 BD 59 76				     LDA     unk_7659,X
-ROM:7617 A6 19					     LDX     byte_19
+ROM:7617 A6 19					     LDX     curPlayer_x2
 ROM:7619 18					     CLC
 ROM:761A 20 97 73				     JSR     sub_7397
 ROM:761D
@@ -3411,7 +3412,7 @@ ROM:77E5 69 00					     ADC     #0
 ROM:77E7
 ROM:77E7	     loc_77E7:
 ROM:77E7 AA					     TAX
-ROM:77E8 BD B9 57				     LDA     57B9h,X
+ROM:77E8 BD B9 57				     LDA     (DVGROM+7B9h),X	     ; sine table
 ROM:77EB 60					     RTS
 ROM:77EB	     ; End of function sub_77DF
 ROM:77EB
@@ -4382,14 +4383,14 @@ ROM:7EA4 F0 02					     BEQ     loc_7EA8
 ROM:7EA6 86 15					     STX     byte_15
 ROM:7EA8
 ROM:7EA8	     loc_7EA8:
-ROM:7EA8 BC BB 7E				     LDY     7EBBh,X
+ROM:7EA8 BC BB 7E				     LDY     (loc_7EB9+2),X
 ROM:7EAB A9 B0					     LDA     #0B0h ; '∞'
 ROM:7EAD 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:7EAF 88					     DEY
 ROM:7EB0 88					     DEY
 ROM:7EB1
 ROM:7EB1	     loc_7EB1:
-ROM:7EB1 B9 C0 7E				     LDA     7EC0h,Y
+ROM:7EB1 B9 C0 7E				     LDA     unk_7EC0,Y
 ROM:7EB4 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:7EB6 88					     DEY
 ROM:7EB7 10 F8					     BPL     loc_7EB1
@@ -4401,7 +4402,7 @@ ROM:7EBC 33					     .db  33h ;	3
 ROM:7EBD 1D					     .db  1Dh
 ROM:7EBE 17					     .db  17h
 ROM:7EBF 0D					     .db  0Dh
-ROM:7EC0 80					     .db  80h ;	Ä
+ROM:7EC0 80	     unk_7EC0:			     .db  80h ;	Ä
 ROM:7EC1 A0					     .db 0A0h ;	†
 ROM:7EC2 00					     .db    0
 ROM:7EC3 00					     .db    0
