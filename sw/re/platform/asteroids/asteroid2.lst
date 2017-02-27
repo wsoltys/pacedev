@@ -63,7 +63,7 @@ RAM:001D	     ; byte 1 -	tens (in decimal)
 RAM:001D	     ; byte 2 -	thousands (in decimal)
 RAM:001D ?? ??	     highScoreTable:		     .block 2
 RAM:001F ?? ??					     .block 2
-RAM:0021 ?? ??					     .block 2
+RAM:0021 ?? ??	     word_21:			     .block 2
 RAM:0023 ?? ??					     .block 2
 RAM:0025 ?? ??					     .block 2
 RAM:0027 ?? ??	     word_27:			     .block 2
@@ -896,23 +896,23 @@ ROM:69F0	     ; =============== S U B R O U T I N E ============================
 ROM:69F0
 ROM:69F0
 ROM:69F0	     handle_shots_2:
-ROM:69F0 A2 07					     LDX     #7
+ROM:69F0 A2 07					     LDX     #7			     ; values to check
 ROM:69F2
-ROM:69F2	     loc_69F2:							     ; shot timer
+ROM:69F2	     loc_69F2:							     ; timer/flag
 ROM:69F2 BD 1B 02				     LDA     p1PlayerFlag,X
 ROM:69F5 F0 02					     BEQ     loc_69F9		     ; not active, skip
 ROM:69F7 10 04					     BPL     loc_69FD		     ; active, go
 ROM:69F9
 ROM:69F9	     loc_69F9:							     ; next timer
 ROM:69F9 CA					     DEX
-ROM:69FA 10 F6					     BPL     loc_69F2
+ROM:69FA 10 F6					     BPL     loc_69F2		     ; loop 'til done
 ROM:69FC 60					     RTS
 ROM:69FD	     ; ---------------------------------------------------------------------------
 ROM:69FD
 ROM:69FD	     loc_69FD:
 ROM:69FD A0 1C					     LDY     #1Ch
-ROM:69FF E0 04					     CPX     #4
-ROM:6A01 B0 07					     BCS     loc_6A0A
+ROM:69FF E0 04					     CPX     #4			     ; shot timer?
+ROM:6A01 B0 07					     BCS     loc_6A0A		     ; yes, go
 ROM:6A03 88					     DEY
 ROM:6A04 8A					     TXA
 ROM:6A05 D0 03					     BNE     loc_6A0A
@@ -1058,22 +1058,22 @@ ROM:6AD7 A0 00					     LDY     #0
 ROM:6AD9
 ROM:6AD9	     loc_6AD9:
 ROM:6AD9 C8					     INY
-ROM:6ADA B1 0B					     LDA     (0Bh),Y
+ROM:6ADA B1 0B					     LDA     (byte_B),Y
 ROM:6ADC 45 09					     EOR     byte_9
-ROM:6ADE 91 02					     STA     (2),Y		     ; store in	avg ram
+ROM:6ADE 91 02					     STA     (2),Y		     ; store in	avg ram	(cmd)
 ROM:6AE0 88					     DEY
 ROM:6AE1 C9 F0					     CMP     #0F0h ; 'ð'
 ROM:6AE3 B0 1E					     BCS     loc_6B03
 ROM:6AE5 C9 A0					     CMP     #0A0h ; ' '
 ROM:6AE7 B0 16					     BCS     loc_6AFF
-ROM:6AE9 B1 0B					     LDA     (0Bh),Y
+ROM:6AE9 B1 0B					     LDA     (byte_B),Y
 ROM:6AEB 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6AED C8					     INY
 ROM:6AEE C8					     INY
-ROM:6AEF B1 0B					     LDA     (0Bh),Y
+ROM:6AEF B1 0B					     LDA     (byte_B),Y
 ROM:6AF1 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6AF3 C8					     INY
-ROM:6AF4 B1 0B					     LDA     (0Bh),Y
+ROM:6AF4 B1 0B					     LDA     (byte_B),Y
 ROM:6AF6 45 08					     EOR     byte_8
 ROM:6AF8 65 17					     ADC     byte_17
 ROM:6AFA 91 02					     STA     (2),Y		     ; store in	avg ram
@@ -1088,7 +1088,7 @@ ROM:6B00 4C 39 7C				     JMP     update_avg_curr_addr
 ROM:6B03	     ; ---------------------------------------------------------------------------
 ROM:6B03
 ROM:6B03	     loc_6B03:
-ROM:6B03 B1 0B					     LDA     (0Bh),Y
+ROM:6B03 B1 0B					     LDA     (byte_B),Y
 ROM:6B05 45 08					     EOR     byte_8
 ROM:6B07 18					     CLC
 ROM:6B08 65 17					     ADC     byte_17
@@ -1831,25 +1831,25 @@ ROM:6F57
 ROM:6F57	     handle_shots_1:
 ROM:6F57 A2 22					     LDX     #22h ; '"'
 ROM:6F59
-ROM:6F59	     loc_6F59:
-ROM:6F59 BD 00 02				     LDA     200h,X
+ROM:6F59	     loc_6F59:							     ; non-zero, handle	it
+ROM:6F59 BD 00 02				     LDA     P1RAM,X
 ROM:6F5C D0 04					     BNE     loc_6F62
 ROM:6F5E
-ROM:6F5E	     loc_6F5E:
+ROM:6F5E	     loc_6F5E:							     ; next value
 ROM:6F5E CA					     DEX
-ROM:6F5F 10 F8					     BPL     loc_6F59
+ROM:6F5F 10 F8					     BPL     loc_6F59		     ; loop 'til done
 ROM:6F61 60					     RTS
 ROM:6F62	     ; ---------------------------------------------------------------------------
 ROM:6F62
 ROM:6F62	     loc_6F62:
 ROM:6F62 10 63					     BPL     loc_6FC7
-ROM:6F64 20 08 77				     JSR     sub_7708
+ROM:6F64 20 08 77				     JSR     negate_A
 ROM:6F67 4A					     LSR     A
 ROM:6F68 4A					     LSR     A
 ROM:6F69 4A					     LSR     A
-ROM:6F6A 4A					     LSR     A
-ROM:6F6B E0 1B					     CPX     #1Bh
-ROM:6F6D D0 07					     BNE     loc_6F76
+ROM:6F6A 4A					     LSR     A			     ; high nibble
+ROM:6F6B E0 1B					     CPX     #1Bh		     ; playerFlag?
+ROM:6F6D D0 07					     BNE     loc_6F76		     ; no, skip
 ROM:6F6F A5 5C					     LDA     fastTimer
 ROM:6F71 29 01					     AND     #1
 ROM:6F73 4A					     LSR     A
@@ -1861,8 +1861,8 @@ ROM:6F77
 ROM:6F77	     loc_6F77:
 ROM:6F77 7D 00 02				     ADC     200h,X
 ROM:6F7A 30 25					     BMI     loc_6FA1
-ROM:6F7C E0 1B					     CPX     #1Bh
-ROM:6F7E F0 13					     BEQ     loc_6F93
+ROM:6F7C E0 1B					     CPX     #1Bh		     ; playerFlag?
+ROM:6F7E F0 13					     BEQ     loc_6F93		     ; yes, go
 ROM:6F80 B0 17					     BCS     loc_6F99
 ROM:6F82 CE F6 02				     DEC     byte_2F6
 ROM:6F85 D0 05					     BNE     loc_6F8C
@@ -3024,7 +3024,7 @@ ROM:7610 C9 04					     CMP     #4
 ROM:7612 90 09					     BCC     loc_761D
 ROM:7614
 ROM:7614	     loc_7614:
-ROM:7614 BD 59 76				     LDA     7659h,X
+ROM:7614 BD 59 76				     LDA     unk_7659,X
 ROM:7617 A6 19					     LDX     byte_19
 ROM:7619 18					     CLC
 ROM:761A 20 97 73				     JSR     sub_7397
@@ -3059,7 +3059,7 @@ ROM:7658 60					     RTS
 ROM:7658	     ; End of function sub_75EC
 ROM:7658
 ROM:7658	     ; ---------------------------------------------------------------------------
-ROM:7659 10					     .db  10h
+ROM:7659 10	     unk_7659:			     .db  10h
 ROM:765A 05					     .db    5
 ROM:765B 02					     .db    2
 ROM:765C
@@ -3176,19 +3176,19 @@ ROM:76FA 08					     PHP
 ROM:76FB 77 A8					     RRA     0A8h,X
 ROM:76FD 8A					     TXA
 ROM:76FE 10 0E					     BPL     sub_770E
-ROM:7700 20 08 77				     JSR     sub_7708
+ROM:7700 20 08 77				     JSR     negate_A
 ROM:7703 20 0E 77				     JSR     sub_770E
 ROM:7706 49 80					     EOR     #80h ; '€'
 ROM:7708
 ROM:7708	     ; =============== S U B R O U T I N E =======================================
 ROM:7708
 ROM:7708
-ROM:7708	     sub_7708:
+ROM:7708	     negate_A:
 ROM:7708 49 FF					     EOR     #0FFh
 ROM:770A 18					     CLC
 ROM:770B 69 01					     ADC     #1
 ROM:770D 60					     RTS
-ROM:770D	     ; End of function sub_7708
+ROM:770D	     ; End of function negate_A
 ROM:770D
 ROM:770E
 ROM:770E	     ; =============== S U B R O U T I N E =======================================
@@ -3206,7 +3206,7 @@ ROM:771B 98					     TYA
 ROM:771C 20 28 77				     JSR     sub_7728
 ROM:771F 38					     SEC
 ROM:7720 E9 40					     SBC     #40h ; '@'
-ROM:7722 4C 08 77				     JMP     sub_7708
+ROM:7722 4C 08 77				     JMP     negate_A
 ROM:7725	     ; ---------------------------------------------------------------------------
 ROM:7725
 ROM:7725	     loc_7725:
@@ -3396,7 +3396,7 @@ ROM:77D5	     sub_77D5:
 ROM:77D5 10 08					     BPL     sub_77DF
 ROM:77D7 29 7F					     AND     #7Fh ; ''
 ROM:77D9 20 DF 77				     JSR     sub_77DF
-ROM:77DC 4C 08 77				     JMP     sub_7708
+ROM:77DC 4C 08 77				     JMP     negate_A
 ROM:77DC	     ; End of function sub_77D5
 ROM:77DC
 ROM:77DF

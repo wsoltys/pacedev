@@ -21,7 +21,8 @@ static void dvg_parse (uint8_t *buf)
     uint8_t s;
     uint16_t a;
     char chr;
-            
+    char buf[256];
+                
     switch (cmd)
     {
       // vec
@@ -32,9 +33,9 @@ static void dvg_parse (uint8_t *buf)
         //   YYYY YYYY SSSS -mYY | XXXX XXXX BBBB -mXX 
         x = *(p+2) + (((uint16_t)*(p+3) & 0x03) << 8);
         y = *(p+0) + (((uint16_t)*(p+1) & 0x03) << 8);
-        printf ("$%04X: VEC (%02X%02X %02X%02X)\n", 
+        sprintf (buf, "$%04X: VEC (%02X%02X %02X%02X)", 
                 offset, *(p+1), *(p+0), *(p+3), *(p+2));
-        printf ("  (%c%d,%c%d)x%d,B=%d\n",
+        printf ("%-32.32s(%c%d,%c%d)x%d,B=%d\n", buf,
                 (*(p+3) & (1<<2) ? '-' : '+'), x,
                 (*(p+1) & (1<<2) ? '-' : '+'), y,
                   cmd, *(p+3) >> 4);
@@ -47,14 +48,15 @@ static void dvg_parse (uint8_t *buf)
         x = *(p+2) + (((uint16_t)*(p+3) & 0x03) << 8);
         y = *(p+0) + (((uint16_t)*(p+1) & 0x03) << 8);
         s = *(p+3) >> 4;
-        printf ("$%04X: CUR (%02X%02X %02X%02X)\n", 
+        sprintf (buf, "$%04X: CUR (%02X%02X %02X%02X)", 
                 offset, *(p+1), *(p+0), *(p+3), *(p+2));
-        printf ("  (%d,%d)x%d\n", x, y, s);
+        printf ("%-32.32s(%d,%d)x%d\n", buf, x, y, s);
         p += 4;
         break;
       // halt
       case 0x0B :
-        printf ("$%04X: HALT\n", offset);
+        sprintf (buf, "$%04X: HALT\n", offset);
+        printf ("%-32.32s\n", buf);
         done = true;
         break;
       // jsr
@@ -62,7 +64,7 @@ static void dvg_parse (uint8_t *buf)
         // 1100 aaaa aaaa aaaa
         // aaaa aaaa 1100 aaaa 
         a = *(p+0) + (((uint16_t)*(p+1) & 0x0f) << 8);
-        printf ("$%04X: JSR (%02X%02X)\n", offset, *(p+1), *(p+0));
+        sprintf (buf, "$%04X: JSR (%02X%02X)", offset, *(p+1), *(p+0));
         chr = '.';
         // lookup function
         {
@@ -77,12 +79,13 @@ static void dvg_parse (uint8_t *buf)
             }
           }
         }
-        printf ("  addr=$%04X ('%c')\n", (a<<1)-0x800, chr);
+        printf ("%-32.32saddr=$%04X '%c'\n", buf, (a<<1)-0x800, chr);
         p += 2;
         break;
       // rts
       case 0x0D :
-        printf ("$%04X: RTS\n", offset);
+        sprintf (buf, "$%04X: RTS", offset);
+        printf ("%-32.32s\n", buf);
         p += 2;
         break;
       // jmp
@@ -90,13 +93,14 @@ static void dvg_parse (uint8_t *buf)
         // 1110 aaaa aaaa aaaa
         // aaaa aaaa 1110 aaaa 
         a = *(p+0) + (((uint16_t)*(p+1) & 0x0f) << 8);
-        printf ("$%04X: JMP (%02X%02X)\n", offset, *(p+1), *(p+0));
-        printf ("  addr=$%04X\n", (a<<1));
+        sprintf (buf, "$%04X: JMP (%02X%02X)", offset, *(p+1), *(p+0));
+        printf ("%-32.32saddr=$%04X\n", buf, (a<<1));
         p += 2;
         break;
       // svec
       case 0x0F :
-        printf ("$%04X: SVEC\n", offset);
+        sprintf (buf, "$%04X: SVEC", offset);
+        printf ("%-32.32s\n", buf);
         p += 4;
         break;
       default :
