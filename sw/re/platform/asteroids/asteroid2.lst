@@ -97,10 +97,10 @@ RAM:0059	     ;	 0x80 =	unsuccessful (death)
 RAM:0059	     ;	 0x00 =	not active
 RAM:0059 ??	     hyperspaceFlag:		     .block 1
 RAM:005A ??	     timerStartGame:		     .block 1
-RAM:005B ??	     nmi_triggered:		     .block 1
+RAM:005B ??	     VBLANK_triggered:		     .block 1
 RAM:005C ??	     fastTimer:			     .block 1
 RAM:005D ??	     slowTimer:			     .block 1
-RAM:005E ??	     byte_5E:			     .block 1
+RAM:005E ??	     NMI_count:			     .block 1
 RAM:005F ??	     rnd1:			     .block 1
 RAM:0060 ??	     rnd2:			     .block 1
 RAM:0061 ??	     direction:			     .block 1
@@ -613,7 +613,7 @@ ROM:680C AD 07 20				     LDA     selfTest
 ROM:680F
 ROM:680F	     spin:							     ; yes, spin
 ROM:680F 30 FE					     BMI     spin
-ROM:6811 46 5B					     LSR     nmi_triggered	     ; NMI happened?
+ROM:6811 46 5B					     LSR     VBLANK_triggered	     ; 4xNMI happened?
 ROM:6813 90 F7					     BCC     main_inner_loop	     ; no, busy	wait
 ROM:6815
 ROM:6815	     loc_6815:							     ; HALT
@@ -3597,7 +3597,7 @@ ROM:7A9F F0 10					     BEQ     loc_7AB1
 ROM:7AA1 C9 1B					     CMP     #1Bh
 ROM:7AA3 B0 0A					     BCS     loc_7AAF
 ROM:7AA5 A8					     TAY
-ROM:7AA6 A5 5E					     LDA     byte_5E
+ROM:7AA6 A5 5E					     LDA     NMI_count
 ROM:7AA8 29 07					     AND     #7
 ROM:7AAA C9 07					     CMP     #7
 ROM:7AAC 98					     TYA
@@ -3706,7 +3706,7 @@ ROM:7B36	     loc_7B36:
 ROM:7B36 85 73					     STA     totalCoinsForCredits
 ROM:7B38
 ROM:7B38	     loc_7B38:
-ROM:7B38 A5 5E					     LDA     byte_5E
+ROM:7B38 A5 5E					     LDA     NMI_count
 ROM:7B3A 4A					     LSR     A
 ROM:7B3B B0 27					     BCS     locret_7B64
 ROM:7B3D A0 00					     LDY     #0
@@ -3759,12 +3759,12 @@ ROM:7B6E 0D D0 01				     ORA     stack+0D0h		     ; check stack guard bytes
 ROM:7B71
 ROM:7B71	     loc_7B71:							     ; stack overflow -	loop
 ROM:7B71 D0 FE					     BNE     loc_7B71
-ROM:7B73 E6 5E					     INC     byte_5E
-ROM:7B75 A5 5E					     LDA     byte_5E
-ROM:7B77 29 03					     AND     #3
-ROM:7B79 D0 08					     BNE     loc_7B83
-ROM:7B7B E6 5B					     INC     nmi_triggered
-ROM:7B7D A5 5B					     LDA     nmi_triggered
+ROM:7B73 E6 5E					     INC     NMI_count
+ROM:7B75 A5 5E					     LDA     NMI_count
+ROM:7B77 29 03					     AND     #3			     ; every 4th NMI - 62.5Hz (roughly VBLANK)
+ROM:7B79 D0 08					     BNE     loc_7B83		     ; no, skip
+ROM:7B7B E6 5B					     INC     VBLANK_triggered
+ROM:7B7D A5 5B					     LDA     VBLANK_triggered
 ROM:7B7F C9 04					     CMP     #4			     ; reached 4?
 ROM:7B81
 ROM:7B81	     loc_7B81:							     ; yes, spin (hang)
