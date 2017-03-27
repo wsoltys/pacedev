@@ -41,7 +41,7 @@ CODE:5003 32 2B	68			      ld      (byte_682B), a
 CODE:5006 3E 06				      ld      a, 6
 CODE:5008 32 40	68			      ld      (byte_6840), a
 CODE:500B	      ;	clear $45 bytes	@$6f9b
-CODE:500B 21 9B	6F			      ld      hl, 6F9Bh			      ;	start of scratch RAM
+CODE:500B 21 9B	6F			      ld      hl, scratch_0x45		      ;	start of scratch RAM
 CODE:500E 97				      sub     a
 CODE:500F 06 45				      ld      b, 45h ; 'E'                    ; length of scratch RAM
 CODE:5011
@@ -52,7 +52,7 @@ CODE:5013 05				      dec     b				      ;	done all bytes?
 CODE:5014 C2 11	50			      jp      nz, loc_5011		      ;	no, loop
 CODE:5017 3D				      dec     a
 CODE:5018 32 AD	6F			      ld      (byte_6FAD), a
-CODE:501B 31 FB	6F			      ld      sp, STACK
+CODE:501B 31 FB	6F			      ld      sp, STACK_WATERMARK
 CODE:501E 06 20				      ld      b, 20h ; ' '                    ; <SPACE>
 CODE:5020 CD F4	5C			      call    clear_video_with_B
 CODE:5023 11 39	67			      ld      de, aEnterSpeedFact	      ;	"ENTER SPEED FACTOR (0(FAST)-9(SLOW))"
@@ -2249,7 +2249,7 @@ CODE:5D00	      rand:							      ;	CODE XREF: sub_59A1:loc_5095p
 CODE:5D00									      ;	sub_59A1-8FAp ...
 CODE:5D00 C5				      push    bc
 CODE:5D01 E5				      push    hl
-CODE:5D02 2A FB	6F			      ld      hl, (STACK)
+CODE:5D02 2A FB	6F			      ld      hl, (STACK_WATERMARK)
 CODE:5D05
 CODE:5D05	      loc_5D05:							      ;	CODE XREF: rand+23j
 CODE:5D05 06 17				      ld      b, 23
@@ -2271,7 +2271,7 @@ CODE:5D14 E6 FE				      and     0FEh ; 'þ'
 CODE:5D16 6F				      ld      l, a
 CODE:5D17 05				      dec     b
 CODE:5D18 C2 08	5D			      jp      nz, loc_5D08
-CODE:5D1B 22 FB	6F			      ld      (STACK), hl
+CODE:5D1B 22 FB	6F			      ld      (STACK_WATERMARK), hl
 CODE:5D1E 7C				      ld      a, h
 CODE:5D1F E6 0F				      and     0Fh
 CODE:5D21 FE 0A				      cp      0Ah
@@ -2389,7 +2389,7 @@ CODE:5D7F 3A B8	6F			      ld      a, (byte_6FB8)
 CODE:5D82 A7				      and     a
 CODE:5D83 C2 00	5E			      jp      nz, handle_cmd_entry
 CODE:5D86 11 06	00			      ld      de, 6
-CODE:5D89 21 9B	6F			      ld      hl, unk_6F9B
+CODE:5D89 21 9B	6F			      ld      hl, scratch_0x45
 CODE:5D8C
 CODE:5D8C	      loc_5D8C:							      ;	CODE XREF: sub_5D4B+4Cj
 CODE:5D8C 7E				      ld      a, (hl)
@@ -2914,7 +2914,8 @@ CODE:680C 30 57				      dw self_destruct
 CODE:680E 71 57				      dw experimental_ray
 CODE:6810 0C 59				      dw explode_pod
 CODE:6812 62 58				      dw explode_antimatter
-CODE:6814 19 1A	      word_6814:	      dw 1A19h				      ;	DATA XREF: CODE:7033w
+CODE:6814 19 1A	      cmd_l_vector:	      dw 1A19h				      ;	DATA XREF: CODE:7033w
+CODE:6814									      ;	BASIC ENTRY POINT
 CODE:6816 48 49	4D 54+cmd_tbl:		      .ascii 'HIMTDSEXAL',0                   ; DATA XREF: sub_5D4B+FFo
 CODE:6821 48 4C	53 44+aHlsdmt:		      .ascii 'HLSDMT',0
 CODE:6828 02 00	      word_6828:	      dw 2				      ;	DATA XREF: CODE:5293r
@@ -3117,7 +3118,8 @@ CODE:6EDB 20 20	20 20+			      .ascii '                                         
 CODE:6F1B 20 20	20 20+			      .ascii '                                                                '
 CODE:6F5B 20 20	20 20+			      .ascii '                                                                '
 CODE:6F9B	      ;	$45 bytes cleared at startup
-CODE:6F9B 23	      unk_6F9B:		      db  23h ;	#			      ;	DATA XREF: sub_5D4B+3Eo
+CODE:6F9B 23	      scratch_0x45:	      db  23h ;	#			      ;	DATA XREF: sub_59A1-996o
+CODE:6F9B									      ;	sub_5D4B+3Eo
 CODE:6F9C C3				      db 0C3h ;	Ã
 CODE:6F9D BD				      db 0BDh ;	½
 CODE:6F9E 6F				      db  6Fh ;	o
@@ -3164,6 +3166,8 @@ CODE:6FB9									      ;	CODE:5332w ...
 CODE:6FBA 22				      db  22h ;	"
 CODE:6FBB 14				      db  14h
 CODE:6FBC 68				      db  68h ;	h
+CODE:6FBD	      ;	looks like this	had some debug code
+CODE:6FBD	      ;	hooked at $7036
 CODE:6FBD 21	      unk_6FBD:		      db  21h ;	!			      ;	CODE XREF: CODE:7036j
 CODE:6FBE 00				      db    0
 CODE:6FBF 00				      db    0
@@ -3199,6 +3203,9 @@ CODE:6FDC 6F				      db  6Fh ;	o
 CODE:6FDD C3				      db 0C3h ;	Ã
 CODE:6FDE 01				      db    1
 CODE:6FDF 50				      db  50h ;	P
+CODE:6FE0	      ;
+CODE:6FE0	      ;	--- end	of area	cleared	at startup ---
+CODE:6FE0	      ;
 CODE:6FE0 3A				      db  3Ah ;	:
 CODE:6FE1 00				      db    0
 CODE:6FE2 E0				      db 0E0h ;	à
@@ -3226,7 +3233,7 @@ CODE:6FF7 22				      db  22h ;	"
 CODE:6FF8 06				      db    6
 CODE:6FF9 70				      db  70h ;	p
 CODE:6FFA 21				      db  21h ;	!
-CODE:6FFB 60 E0	      STACK:		      dw 0E060h				      ;	DATA XREF: sub_59A1-986o
+CODE:6FFB 60 E0	      STACK_WATERMARK:	      dw 0E060h				      ;	DATA XREF: sub_59A1-986o
 CODE:6FFB									      ;	rand+2r ...
 CODE:6FFD 22				      db  22h ;	"
 CODE:6FFE 14				      db  14h
@@ -3237,7 +3244,8 @@ CODE:7002 D0				      db 0D0h ;	Ð
 CODE:7003 22				      db  22h ;	"
 CODE:7004 08				      db    8
 CODE:7005 70				      db  70h ;	p
-CODE:7006 3E CD				      dw 0CD3Eh
+CODE:7006 3E				      db  3Eh ;	>
+CODE:7007 CD				      db 0CDh ;	Í
 CODE:7008 32				      db  32h ;	2
 CODE:7009 0B				      db  0Bh
 CODE:700A 70				      db  70h ;	p
@@ -3281,8 +3289,8 @@ CODE:7030	      ;	--------------------------------------------------------------
 CODE:7030
 CODE:7030	      loc_7030:							      ;	CODE XREF: CODE:7025j
 CODE:7030 21 03	00			      ld      hl, 3
-CODE:7033 22 14	68			      ld      (word_6814), hl
-CODE:7036 C3 BD	6F			      jp      unk_6FBD
+CODE:7033 22 14	68			      ld      (cmd_l_vector), hl	      ;	hook "L" cmd
+CODE:7036 C3 BD	6F			      jp      unk_6FBD			      ;	debug code???
 CODE:7036	      ;	---------------------------------------------------------------------------
 CODE:7039 DB				      db 0DBh ;	Û
 CODE:703A 00				      db    0
