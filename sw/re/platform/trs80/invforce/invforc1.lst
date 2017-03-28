@@ -19,7 +19,7 @@ VIDEO:3C00
 VIDEO:3C00	       ; Segment type: Regular
 VIDEO:3C00				       segment VIDEO
 VIDEO:3C00				       org 3C00h
-VIDEO:3C00 ?? ?? ?? ??+VIDEO:		       ds 400h				       ; DATA XREF: sub_59A1-943o
+VIDEO:3C00 ?? ?? ?? ??+VIDEO:		       ds 400h				       ; DATA XREF: handle_low_power-943o
 VIDEO:3C00 ?? ?? ?? ??+								       ; clear_video_with_Bo
 VIDEO:3C00 ?? ?? ?? ??+; end of	'VIDEO'
 VIDEO:3C00 ?? ?? ?? ??+
@@ -33,9 +33,9 @@ CODE:5000	      ;	Segment	type: Regular
 CODE:5000				      segment CODE
 CODE:5000				      org 5000h
 CODE:5000 AF				      xor     a
-CODE:5001	      ;	START OF FUNCTION CHUNK	FOR sub_59A1
+CODE:5001	      ;	START OF FUNCTION CHUNK	FOR handle_low_power
 CODE:5001
-CODE:5001	      loc_5001:							      ;	CODE XREF: sub_59A1-5E4j
+CODE:5001	      loc_5001:							      ;	CODE XREF: handle_low_power-5E4j
 CODE:5001 3E 03				      ld      a, 3
 CODE:5003 32 2B	68			      ld      (byte_682B), a
 CODE:5006 3E 06				      ld      a, 6
@@ -45,7 +45,7 @@ CODE:500B 21 9B	6F			      ld      hl, scratch_0x45		      ;	start of scratch RA
 CODE:500E 97				      sub     a
 CODE:500F 06 45				      ld      b, 45h ; 'E'                    ; length of scratch RAM
 CODE:5011
-CODE:5011	      loc_5011:							      ;	CODE XREF: sub_59A1-98Dj
+CODE:5011	      loc_5011:							      ;	CODE XREF: handle_low_power-98Dj
 CODE:5011 77				      ld      (hl), a
 CODE:5012 23				      inc     hl
 CODE:5013 05				      dec     b				      ;	done all bytes?
@@ -61,7 +61,7 @@ CODE:5029 21 00	3D			      ld      hl,  VIDEO+100h
 CODE:502C 11 73	6B			      ld      de, aInvasionForceR	      ;	"  INVASION FORCE  -------  RADIO SHACK "
 CODE:502F CD 3F	5D			      call    print_string
 CODE:5032
-CODE:5032	      loc_5032:							      ;	CODE XREF: sub_59A1-96Cj
+CODE:5032	      loc_5032:							      ;	CODE XREF: handle_low_power-96Cj
 CODE:5032 CD B6	51			      call    keyboard_scan
 CODE:5035 CA 32	50			      jp      z, loc_5032		      ;	no key,	loop
 CODE:5038 E6 0F				      and     0Fh			      ;	low nibble of key (supposedly 0-9)
@@ -83,7 +83,7 @@ CODE:505B	      ;	print main display
 CODE:505B 21 9B	6B			      ld      hl, aLRSensorMineRa	      ;	" L-R SENSOR  %-MINE   ------RADIO SHACK"...
 CODE:505E 11 00	3C			      ld      de, VIDEO
 CODE:5061
-CODE:5061	      loc_5061:							      ;	CODE XREF: sub_59A1-939j
+CODE:5061	      loc_5061:							      ;	CODE XREF: handle_low_power-939j
 CODE:5061 7E				      ld      a, (hl)			      ;	get char
 CODE:5062 12				      ld      (de), a			      ;	write to video
 CODE:5063 13				      inc     de			      ;	next video address
@@ -98,7 +98,7 @@ CODE:5070	      ;	20, 10,	20, 20,	9, 11%
 CODE:5070 21 94	69			      ld      hl, pwr_hypr_ion
 CODE:5073 06 04				      ld      b, 4			      ;	4 power	distribution values to init
 CODE:5075
-CODE:5075	      loc_5075:							      ;	CODE XREF: sub_59A1-928j
+CODE:5075	      loc_5075:							      ;	CODE XREF: handle_low_power-928j
 CODE:5075 36 20				      ld      (hl), 20h	; ' '                 ; init power distibution to 20%
 CODE:5077 23				      inc     hl			      ;	next power value address
 CODE:5078 05				      dec     b				      ;	done all values?
@@ -112,7 +112,7 @@ CODE:5086	      ;	init quadrant data
 CODE:5086 11 2C	01			      ld      de, 300			      ;	# bytes	to clear
 CODE:5089 21 62	68			      ld      hl, quadrant_tbl		      ;	start of quadrant data
 CODE:508C
-CODE:508C	      loc_508C:							      ;	CODE XREF: sub_59A1-90Fj
+CODE:508C	      loc_508C:							      ;	CODE XREF: handle_low_power-90Fj
 CODE:508C 36 00				      ld      (hl), 0			      ;	zero byte
 CODE:508E 23				      inc     hl			      ;	next location
 CODE:508F 1B				      dec     de
@@ -120,45 +120,45 @@ CODE:5090 7A				      ld      a, d
 CODE:5091 B3				      or      e				      ;	done all bytes?
 CODE:5092 C2 8C	50			      jp      nz, loc_508C		      ;	no, loop
 CODE:5095
-CODE:5095	      loc_5095:							      ;	CODE XREF: sub_59A1-907j
-CODE:5095									      ;	sub_59A1-902j
-CODE:5095 CD 00	5D			      call    rand
-CODE:5098 FE 03				      cp      3
-CODE:509A FA 95	50			      jp      m, loc_5095
-CODE:509D FE 06				      cp      6
-CODE:509F F2 95	50			      jp      p, loc_5095
+CODE:5095	      loc_5095:							      ;	CODE XREF: handle_low_power-907j
+CODE:5095									      ;	handle_low_power-902j
+CODE:5095 CD 00	5D			      call    rand_0_9
+CODE:5098 FE 03				      cp      3				      ;	less than 3?
+CODE:509A FA 95	50			      jp      m, loc_5095		      ;	yes, regenerate
+CODE:509D FE 06				      cp      6				      ;	greater	than 5?
+CODE:509F F2 95	50			      jp      p, loc_5095		      ;	yes, regenerate
 CODE:50A2 07				      rlca
 CODE:50A3 07				      rlca
 CODE:50A4 07				      rlca
-CODE:50A5 07				      rlca
+CODE:50A5 07				      rlca				      ;	(3-5)*16
 CODE:50A6 47				      ld      b, a
-CODE:50A7 CD 00	5D			      call    rand
-CODE:50AA 80				      add     a, b
+CODE:50A7 CD 00	5D			      call    rand_0_9
+CODE:50AA 80				      add     a, b			      ;	(3-5)*16 + rnd()
 CODE:50AB 47				      ld      b, a
-CODE:50AC 32 58	68			      ld      (byte_6858), a
+CODE:50AC 32 58	68			      ld      (jovians_left), a
 CODE:50AF
-CODE:50AF	      loc_50AF:							      ;	CODE XREF: sub_59A1-8DFj
-CODE:50AF									      ;	sub_59A1-8CCj ...
-CODE:50AF CD 00	5D			      call    rand
+CODE:50AF	      loc_50AF:							      ;	CODE XREF: handle_low_power-8DFj
+CODE:50AF									      ;	handle_low_power-8CCj ...
+CODE:50AF CD 00	5D			      call    rand_0_9
 CODE:50B2 07				      rlca
 CODE:50B3 07				      rlca
 CODE:50B4 07				      rlca
 CODE:50B5 07				      rlca
 CODE:50B6 4F				      ld      c, a
-CODE:50B7 CD 00	5D			      call    rand
+CODE:50B7 CD 00	5D			      call    rand_0_9
 CODE:50BA 81				      add     a, c
 CODE:50BB C5				      push    bc
-CODE:50BC CD 9A	5B			      call    sub_5B9A
+CODE:50BC CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:50BF C1				      pop     bc
 CODE:50C0 7E				      ld      a, (hl)
 CODE:50C1 A7				      and     a
 CODE:50C2 C2 AF	50			      jp      nz, loc_50AF
 CODE:50C5
-CODE:50C5	      loc_50C5:							      ;	CODE XREF: sub_59A1-8D7j
-CODE:50C5									      ;	sub_59A1-8D2j
-CODE:50C5 CD 00	5D			      call    rand
-CODE:50C8 FE 05				      cp      5
-CODE:50CA F2 C5	50			      jp      p, loc_50C5
+CODE:50C5	      loc_50C5:							      ;	CODE XREF: handle_low_power-8D7j
+CODE:50C5									      ;	handle_low_power-8D2j
+CODE:50C5 CD 00	5D			      call    rand_0_9
+CODE:50C8 FE 05				      cp      5				      ;	greater	than 4?
+CODE:50CA F2 C5	50			      jp      p, loc_50C5		      ;	yes, regenerate
 CODE:50CD 3D				      dec     a
 CODE:50CE B8				      cp      b
 CODE:50CF F2 C5	50			      jp      p, loc_50C5
@@ -169,7 +169,7 @@ CODE:50D5 CA AF	50			      jp      z, loc_50AF
 CODE:50D8 57				      ld      d, a
 CODE:50D9 78				      ld      a, b
 CODE:50DA
-CODE:50DA	      loc_50DA:							      ;	CODE XREF: sub_59A1-8C0j
+CODE:50DA	      loc_50DA:							      ;	CODE XREF: handle_low_power-8C0j
 CODE:50DA C6 99				      add     a, 99h ; '™'
 CODE:50DC 27				      daa
 CODE:50DD CA E8	50			      jp      z, loc_50E8
@@ -179,12 +179,12 @@ CODE:50E4 47				      ld      b, a
 CODE:50E5 C3 AF	50			      jp      loc_50AF
 CODE:50E8	      ;	---------------------------------------------------------------------------
 CODE:50E8
-CODE:50E8	      loc_50E8:							      ;	CODE XREF: sub_59A1-8C4j
+CODE:50E8	      loc_50E8:							      ;	CODE XREF: handle_low_power-8C4j
 CODE:50E8 21 62	68			      ld      hl, quadrant_tbl		      ;	quadrant data
 CODE:50EB 0E 64				      ld      c, 100			      ;	# quadrants to init
 CODE:50ED
-CODE:50ED	      loc_50ED:							      ;	CODE XREF: sub_59A1-8ACj
-CODE:50ED CD 00	5D			      call    rand
+CODE:50ED	      loc_50ED:							      ;	CODE XREF: handle_low_power-8ACj
+CODE:50ED CD 00	5D			      call    rand_0_9
 CODE:50F0 23				      inc     hl
 CODE:50F1 23				      inc     hl
 CODE:50F2 77				      ld      (hl), a			      ;	init 2nd byte of 3
@@ -192,50 +192,50 @@ CODE:50F3 23				      inc     hl
 CODE:50F4 0D				      dec     c				      ;	done all bytes?
 CODE:50F5 C2 ED	50			      jp      nz, loc_50ED		      ;	no, loop
 CODE:50F8
-CODE:50F8	      loc_50F8:							      ;	CODE XREF: sub_59A1-8A5j
-CODE:50F8									      ;	sub_59A1-8A0j
-CODE:50F8 CD 00	5D			      call    rand
-CODE:50FB A7				      and     a
-CODE:50FC CA F8	50			      jp      z, loc_50F8
-CODE:50FF FE 04				      cp      4
-CODE:5101 F2 F8	50			      jp      p, loc_50F8
+CODE:50F8	      loc_50F8:							      ;	CODE XREF: handle_low_power-8A5j
+CODE:50F8									      ;	handle_low_power-8A0j
+CODE:50F8 CD 00	5D			      call    rand_0_9
+CODE:50FB A7				      and     a				      ;	zero?
+CODE:50FC CA F8	50			      jp      z, loc_50F8		      ;	yes, regenerate
+CODE:50FF FE 04				      cp      4				      ;	greater	than 3?
+CODE:5101 F2 F8	50			      jp      p, loc_50F8		      ;	yes, regenerate
 CODE:5104 4F				      ld      c, a
 CODE:5105
-CODE:5105	      loc_5105:							      ;	CODE XREF: sub_59A1-888j
-CODE:5105									      ;	sub_59A1-882j
-CODE:5105 CD 00	5D			      call    rand
+CODE:5105	      loc_5105:							      ;	CODE XREF: handle_low_power-888j
+CODE:5105									      ;	handle_low_power-882j
+CODE:5105 CD 00	5D			      call    rand_0_9
 CODE:5108 07				      rlca
 CODE:5109 07				      rlca
 CODE:510A 07				      rlca
 CODE:510B 07				      rlca
 CODE:510C 47				      ld      b, a
-CODE:510D CD 00	5D			      call    rand
+CODE:510D CD 00	5D			      call    rand_0_9
 CODE:5110 80				      add     a, b
 CODE:5111 C5				      push    bc
-CODE:5112 CD 9A	5B			      call    sub_5B9A
+CODE:5112 CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:5115 C1				      pop     bc
-CODE:5116 23				      inc     hl
+CODE:5116 23				      inc     hl			      ;	2nd byte of data
 CODE:5117 7E				      ld      a, (hl)
-CODE:5118 A7				      and     a
-CODE:5119 C2 05	51			      jp      nz, loc_5105
-CODE:511C 36 01				      ld      (hl), 1
-CODE:511E 0D				      dec     c
-CODE:511F C2 05	51			      jp      nz, loc_5105
-CODE:5122 CD 00	5D			      call    rand
+CODE:5118 A7				      and     a				      ;	zero?
+CODE:5119 C2 05	51			      jp      nz, loc_5105		      ;	no, regenerate
+CODE:511C 36 01				      ld      (hl), 1			      ;	flag ???
+CODE:511E 0D				      dec     c				      ;	done ___?
+CODE:511F C2 05	51			      jp      nz, loc_5105		      ;	no, loop
+CODE:5122 CD 00	5D			      call    rand_0_9			      ;	starting quadrant X
 CODE:5125 47				      ld      b, a
-CODE:5126 CD 00	5D			      call    rand
+CODE:5126 CD 00	5D			      call    rand_0_9			      ;	starting quadrant Y
 CODE:5129 07				      rlca
 CODE:512A 07				      rlca
 CODE:512B 07				      rlca
 CODE:512C 07				      rlca
-CODE:512D 80				      add     a, b
-CODE:512E 32 61	68			      ld      (byte_6861), a
-CODE:5131 CD 2E	5F			      call    print_congratulations
+CODE:512D 80				      add     a, b			      ;	combine
+CODE:512E 32 61	68			      ld      (quadrant), a		      ;	init starting quadrant
+CODE:5131 CD 2E	5F			      call    print_jovians_left
 CODE:5134 3E 03				      ld      a, 3
 CODE:5136 32 B8	6F			      ld      (byte_6FB8), a
 CODE:5139 0E 01				      ld      c, 1
-CODE:513B CD 18	5B			      call    sub_5B18
-CODE:513E CD 81	5B			      call    sub_5B81
+CODE:513B CD 18	5B			      call    print_lr_sensor
+CODE:513E CD 81	5B			      call    print_quadrant
 CODE:5141 CD 4B	5D			      call    sub_5D4B
 CODE:5144 3A C0	53			      ld      a, (byte_53C0)
 CODE:5147 A7				      and     a
@@ -245,57 +245,58 @@ CODE:514E CD CF	5E			      call    print_10_lines
 CODE:5151 11 8A	5F			      ld      de, aCommandHeadqua	      ;	"COMMAND HEADQUARTERS: THE JOVIANS HAVE "...
 CODE:5154 21 40	3F			      ld      hl,  VIDEO+340h
 CODE:5157 CD 3F	5D			      call    print_string
-CODE:515A 1E 11				      ld      e, 11h
+CODE:515A	      ;	animate	HQ officer
+CODE:515A 1E 11				      ld      e, 17			      ;	# animation loops
 CODE:515C
-CODE:515C	      loc_515C:							      ;	CODE XREF: sub_59A1-81Cj
+CODE:515C	      loc_515C:							      ;	CODE XREF: handle_low_power-81Cj
 CODE:515C CD BA	5C			      call    sub_5CBA
-CODE:515F 21 22	3D			      ld      hl,  VIDEO+122h
+CODE:515F 21 22	3D			      ld      hl,  VIDEO+122h		      ;	HQ commander's eye
 CODE:5162 36 88				      ld      (hl), 88h	; 'ˆ'
 CODE:5164 23				      inc     hl
 CODE:5165 36 8C				      ld      (hl), 8Ch	; 'Œ'
-CODE:5167 21 E1	3D			      ld      hl,  VIDEO+1E1h
+CODE:5167 21 E1	3D			      ld      hl,  VIDEO+1E1h		      ;	HQ commander's mouth
 CODE:516A 36 4F				      ld      (hl), 4Fh	; 'O'
 CODE:516C CD BA	5C			      call    sub_5CBA
-CODE:516F 21 22	3D			      ld      hl,  VIDEO+122h
+CODE:516F 21 22	3D			      ld      hl,  VIDEO+122h		      ;	HQ commander's eye
 CODE:5172 36 AA				      ld      (hl), 0AAh ; 'ª'
 CODE:5174 23				      inc     hl
 CODE:5175 36 BB				      ld      (hl), 0BBh ; '»'
-CODE:5177 CD 00	5D			      call    rand
-CODE:517A FE 09				      cp      9
-CODE:517C D2 84	51			      jp      nc, loc_5184
-CODE:517F 21 E1	3D			      ld      hl,  VIDEO+1E1h
+CODE:5177 CD 00	5D			      call    rand_0_9
+CODE:517A FE 09				      cp      9				      ;	9?
+CODE:517C D2 84	51			      jp      nc, loc_5184		      ;	ues, skip
+CODE:517F 21 E1	3D			      ld      hl,  VIDEO+1E1h		      ;	HQ commander's mouth
 CODE:5182 36 2D				      ld      (hl), 2Dh	; '-'
 CODE:5184
-CODE:5184	      loc_5184:							      ;	CODE XREF: sub_59A1-825j
+CODE:5184	      loc_5184:							      ;	CODE XREF: handle_low_power-825j
 CODE:5184 1D				      dec     e
 CODE:5185 C2 5C	51			      jp      nz, loc_515C
 CODE:5188
-CODE:5188	      loc_5188:							      ;	CODE XREF: sub_59A1-859j
-CODE:5188 21 C5	3C			      ld      hl,  VIDEO+0C5h
+CODE:5188	      loc_5188:							      ;	CODE XREF: handle_low_power-859j
+CODE:5188 21 C5	3C			      ld      hl,  VIDEO+0C5h		      ;	current	quadrant on LR sensor display
 CODE:518B CD CC	5B			      call    sub_5BCC
 CODE:518E 21 40	3F			      ld      hl,  VIDEO+340h
 CODE:5191 11 34	60			      ld      de, aHyprHIonIMsrMT	      ;	"HYPR=H,ION=I,MSR=M,TRM=T,PWRDST=D,SELFD"...
 CODE:5194 CD 3C	5D			      call    clear_last_2_lines_print_string
 CODE:5197
-CODE:5197	      loc_5197:							      ;	CODE XREF: sub_59A1-7D0j
+CODE:5197	      game_loop:						      ;	CODE XREF: handle_low_power-7D0j
 CODE:5197 3E FF				      ld      a, 0FFh
 CODE:5199 32 B1	6F			      ld      (cmd_flag), a
 CODE:519C 3A B9	6F			      ld      a, (byte_6FB9)
 CODE:519F A7				      and     a
 CODE:51A0 CA BD	51			      jp      z, loc_51BD
-CODE:51A3 3A 2A	68			      ld      a, (byte_682A)
-CODE:51A6 3D				      dec     a
-CODE:51A7 32 2A	68			      ld      (byte_682A), a
-CODE:51AA F2 BD	51			      jp      p, loc_51BD
+CODE:51A3 3A 2A	68			      ld      a, (engine_explode_countdown)
+CODE:51A6 3D				      dec     a				      ;	tick!
+CODE:51A7 32 2A	68			      ld      (engine_explode_countdown), a
+CODE:51AA F2 BD	51			      jp      p, loc_51BD		      ;	set to explode?	no, skip
 CODE:51AD 11 32	63			      ld      de, aNavigatorTheEn	      ;	"NAVIGATOR:THE ENGINES ARE EXPLODING"
 CODE:51B0 CD 39	5D			      call    print_string_last_line
-CODE:51B3 C3 8E	53			      jp      loc_538E
-CODE:51B3	      ;	END OF FUNCTION	CHUNK FOR sub_59A1
+CODE:51B3 C3 8E	53			      jp      print_game_over_screen
+CODE:51B3	      ;	END OF FUNCTION	CHUNK FOR handle_low_power
 CODE:51B6
 CODE:51B6	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:51B6
 CODE:51B6
-CODE:51B6	      keyboard_scan:						      ;	CODE XREF: sub_59A1:loc_5032p
+CODE:51B6	      keyboard_scan:						      ;	CODE XREF: handle_low_power:loc_5032p
 CODE:51B6									      ;	CODE:523Ap ...
 CODE:51B6 D5				      push    de
 CODE:51B7 CD 2B	00			      call    2Bh			      ;	KBDSCN
@@ -305,20 +306,20 @@ CODE:51BC C9				      ret
 CODE:51BC	      ;	End of function	keyboard_scan
 CODE:51BC
 CODE:51BD	      ;	---------------------------------------------------------------------------
-CODE:51BD	      ;	START OF FUNCTION CHUNK	FOR sub_59A1
+CODE:51BD	      ;	START OF FUNCTION CHUNK	FOR handle_low_power
 CODE:51BD
-CODE:51BD	      loc_51BD:							      ;	CODE XREF: sub_59A1-801j
-CODE:51BD									      ;	sub_59A1-7F7j
-CODE:51BD CD 4B	5D			      call    sub_5D4B
-CODE:51C0 CD A1	59			      call    sub_59A1
+CODE:51BD	      loc_51BD:							      ;	CODE XREF: handle_low_power-801j
+CODE:51BD									      ;	handle_low_power-7F7j
+CODE:51BD CD 4B	5D			      call    sub_5D4B			      ;	update chaser etc
+CODE:51C0 CD A1	59			      call    handle_low_power
 CODE:51C3 3A AA	69			      ld      a, (byte_69AA)
 CODE:51C6 47				      ld      b, a
 CODE:51C7 CD BF	5C			      call    sub_5CBF
 CODE:51CA 97				      sub     a
 CODE:51CB 32 B4	6F			      ld      (byte_6FB4), a
-CODE:51CE CD 0F	5F			      call    sub_5F0F
-CODE:51D1 C3 97	51			      jp      loc_5197
-CODE:51D1	      ;	END OF FUNCTION	CHUNK FOR sub_59A1
+CODE:51CE CD 0F	5F			      call    update_star_time
+CODE:51D1 C3 97	51			      jp      game_loop
+CODE:51D1	      ;	END OF FUNCTION	CHUNK FOR handle_low_power
 CODE:51D4	      ;	---------------------------------------------------------------------------
 CODE:51D4
 CODE:51D4	      hyperdrive:						      ;	DATA XREF: CODE:cmd_jmp_vectorso
@@ -328,7 +329,7 @@ CODE:51D8 32 B6	6F			      ld      (byte_6FB6), a
 CODE:51DB 3A B3	6F			      ld      a, (byte_6FB3)
 CODE:51DE A7				      and     a
 CODE:51DF FA 02	52			      jp      m, loc_5202
-CODE:51E2 CD 00	5D			      call    rand
+CODE:51E2 CD 00	5D			      call    rand_0_9
 CODE:51E5 FE 05				      cp      5
 CODE:51E7 3A 94	69			      ld      a, (pwr_hypr_ion)
 CODE:51EA DA F4	51			      jp      c, loc_51F4
@@ -354,7 +355,7 @@ CODE:5205 C3 39	5D			      jp      print_string_last_line
 CODE:5208	      ;	---------------------------------------------------------------------------
 CODE:5208
 CODE:5208	      loc_5208:							      ;	CODE XREF: CODE:51F9j
-CODE:5208 CD 00	5D			      call    rand
+CODE:5208 CD 00	5D			      call    rand_0_9
 CODE:520B FE 06				      cp      6
 CODE:520D DA 13	52			      jp      c, loc_5213
 CODE:5210 CD 66	5A			      call    loc_5A66
@@ -373,8 +374,8 @@ CODE:5221	      loc_5221:							      ;	CODE XREF: CODE:523Dj
 CODE:5221 C5				      push    bc
 CODE:5222 78				      ld      a, b
 CODE:5223 0E 01				      ld      c, 1
-CODE:5225 CD 18	5B			      call    sub_5B18
-CODE:5228 CD 81	5B			      call    sub_5B81
+CODE:5225 CD 18	5B			      call    print_lr_sensor
+CODE:5228 CD 81	5B			      call    print_quadrant
 CODE:522B 21 C5	3C			      ld      hl,  VIDEO+0C5h
 CODE:522E CD CC	5B			      call    sub_5BCC
 CODE:5231 CD E3	5E			      call    sub_5EE3
@@ -392,7 +393,7 @@ CODE:5246	      ion_engine:						      ;	DATA XREF: CODE:6804o
 CODE:5246 3A 94	69			      ld      a, (pwr_hypr_ion)
 CODE:5249 FE 05				      cp      5
 CODE:524B FA FC	51			      jp      m, loc_51FC
-CODE:524E CD 00	5D			      call    rand
+CODE:524E CD 00	5D			      call    rand_0_9
 CODE:5251 FE 03				      cp      3
 CODE:5253 D2 59	52			      jp      nc, loc_5259
 CODE:5256 CD 66	5A			      call    loc_5A66
@@ -505,8 +506,8 @@ CODE:5317
 CODE:5317	      loc_5317:							      ;	CODE XREF: CODE:52F5j
 CODE:5317 3A 56	68			      ld      a, (byte_6856)
 CODE:531A 0E 01				      ld      c, 1
-CODE:531C CD 18	5B			      call    sub_5B18
-CODE:531F CD 81	5B			      call    sub_5B81
+CODE:531C CD 18	5B			      call    print_lr_sensor
+CODE:531F CD 81	5B			      call    print_quadrant
 CODE:5322 21 C5	3C			      ld      hl,  VIDEO+0C5h
 CODE:5325 CD CC	5B			      call    sub_5BCC
 CODE:5328 C3 E3	5E			      jp      sub_5EE3
@@ -560,9 +561,9 @@ CODE:5388									      ;	sub_544D+41j ...
 CODE:5388 11 BE	61			      ld      de, aFirstOfficerSi	      ;	"FIRST OFFICER: SIR, WE HAVE HIT A TRITO"...
 CODE:538B CD 39	5D			      call    print_string_last_line
 CODE:538B	      ;	END OF FUNCTION	CHUNK FOR sub_544D
-CODE:538E	      ;	START OF FUNCTION CHUNK	FOR sub_59A1
+CODE:538E	      ;	START OF FUNCTION CHUNK	FOR handle_low_power
 CODE:538E
-CODE:538E	      loc_538E:							      ;	CODE XREF: sub_59A1-7EEj
+CODE:538E	      print_game_over_screen:					      ;	CODE XREF: handle_low_power-7EEj
 CODE:538E									      ;	CODE:5427j ...
 CODE:538E 97				      sub     a				      ;	-1
 CODE:538F 32 B1	6F			      ld      (cmd_flag), a
@@ -576,11 +577,11 @@ CODE:53A3 21 80	3F			      ld      hl,  VIDEO+380h
 CODE:53A6 CD 3F	5D			      call    print_string
 CODE:53A9 06 11				      ld      b, 11h
 CODE:53AB
-CODE:53AB	      loc_53AB:							      ;	CODE XREF: print_congratulations+2Cj
+CODE:53AB	      loc_53AB:							      ;	CODE XREF: print_jovians_left+2Cj
 CODE:53AB 11 00	00			      ld      de, 0
 CODE:53AE
-CODE:53AE	      loc_53AE:							      ;	CODE XREF: sub_59A1-5F0j
-CODE:53AE									      ;	sub_59A1-5ECj
+CODE:53AE	      loc_53AE:							      ;	CODE XREF: handle_low_power-5F0j
+CODE:53AE									      ;	handle_low_power-5ECj
 CODE:53AE 1B				      dec     de
 CODE:53AF 7A				      ld      a, d
 CODE:53B0 B3				      or      e
@@ -590,15 +591,15 @@ CODE:53B5 C2 AE	53			      jp      nz, loc_53AE
 CODE:53B8 3E 01				      ld      a, 1
 CODE:53BA 32 C0	53			      ld      (byte_53C0), a
 CODE:53BD C3 01	50			      jp      loc_5001
-CODE:53BD	      ;	END OF FUNCTION	CHUNK FOR sub_59A1
+CODE:53BD	      ;	END OF FUNCTION	CHUNK FOR handle_low_power
 CODE:53BD	      ;	---------------------------------------------------------------------------
-CODE:53C0 00	      byte_53C0:	      db 0				      ;	DATA XREF: sub_59A1-85Dr
-CODE:53C0									      ;	sub_59A1-5E7w
+CODE:53C0 00	      byte_53C0:	      db 0				      ;	DATA XREF: handle_low_power-85Dr
+CODE:53C0									      ;	handle_low_power-5E7w
 CODE:53C1	      ;	---------------------------------------------------------------------------
 CODE:53C1
 CODE:53C1	      loc_53C1:							      ;	CODE XREF: CODE:52E6j
 CODE:53C1									      ;	CODE:52EBj
-CODE:53C1 11 BB	69			      ld      de, asc_69BB		      ;	"                     "
+CODE:53C1 11 BB	69			      ld      de, jovian_officer	      ;	"                     "
 CODE:53C4 CD CF	5E			      call    print_10_lines
 CODE:53C7 11 25	62			      ld      de, aJovianWatchWhe	      ;	"JOVIAN: WATCH WHERE YOU ARE GOING YOU T"...
 CODE:53CA CD 39	5D			      call    print_string_last_line
@@ -648,7 +649,7 @@ CODE:541E 3E 11				      ld      a, 11h
 CODE:5420 32 AF	6F			      ld      (byte_6FAF), a
 CODE:5423 47				      ld      b, a
 CODE:5424 CD BF	5C			      call    sub_5CBF
-CODE:5427 C3 8E	53			      jp      loc_538E
+CODE:5427 C3 8E	53			      jp      print_game_over_screen
 CODE:542A	      ;	---------------------------------------------------------------------------
 CODE:542A
 CODE:542A	      maser:							      ;	DATA XREF: CODE:6806o
@@ -737,7 +738,7 @@ CODE:54AB C3 C9	54			      jp      loc_54C9
 CODE:54AE	      ;	---------------------------------------------------------------------------
 CODE:54AE
 CODE:54AE	      loc_54AE:							      ;	CODE XREF: sub_544D+3Cj
-CODE:54AE CD 00	5D			      call    rand
+CODE:54AE CD 00	5D			      call    rand_0_9
 CODE:54B1 FE 07				      cp      7
 CODE:54B3 FA C9	54			      jp      m, loc_54C9
 CODE:54B6 36 AE				      ld      (hl), 0AEh ; '®'
@@ -868,7 +869,7 @@ CODE:556F E5				      push    hl
 CODE:5570
 CODE:5570	      loc_5570:							      ;	CODE XREF: CODE:5309j
 CODE:5570									      ;	CODE:5643j
-CODE:5570 CD 00	5D			      call    rand
+CODE:5570 CD 00	5D			      call    rand_0_9
 CODE:5573 A7				      and     a
 CODE:5574 CA 85	55			      jp      z, loc_5585
 CODE:5577 21 2A	68			      ld      hl, 682Ah
@@ -918,7 +919,7 @@ CODE:55A4 22 28	68			      ld      (word_6828), hl
 CODE:55A7 F2 B8	55			      jp      p, loc_55B8
 CODE:55AA
 CODE:55AA	      loc_55AA:							      ;	CODE XREF: CODE:55AFj
-CODE:55AA CD 00	5D			      call    rand
+CODE:55AA CD 00	5D			      call    rand_0_9
 CODE:55AD FE 08				      cp      8
 CODE:55AF F2 AA	55			      jp      p, loc_55AA
 CODE:55B2 CD 4D	54			      call    sub_544D
@@ -937,7 +938,7 @@ CODE:55C5	      ;	--------------------------------------------------------------
 CODE:55C5
 CODE:55C5	      loc_55C5:							      ;	CODE XREF: CODE:55BCj
 CODE:55C5									      ;	CODE:55CAj
-CODE:55C5 CD 00	5D			      call    rand
+CODE:55C5 CD 00	5D			      call    rand_0_9
 CODE:55C8 FE 08				      cp      8
 CODE:55CA F2 C5	55			      jp      p, loc_55C5
 CODE:55CD CD 0F	55			      call    sub_550F
@@ -975,7 +976,7 @@ CODE:55EE C2 E4	55			      jp      nz, loc_55E4
 CODE:55F1 19				      add     hl, de
 CODE:55F2 05				      dec     b
 CODE:55F3 C2 E2	55			      jp      nz, loc_55E2
-CODE:55F6 CD 00	5D			      call    rand
+CODE:55F6 CD 00	5D			      call    rand_0_9
 CODE:55F9 FE 05				      cp      5
 CODE:55FB D2 03	56			      jp      nc, loc_5603
 CODE:55FE 3E FF				      ld      a, 0FFh
@@ -989,35 +990,35 @@ CODE:5605 3E 25				      ld      a, 25h ; '%'
 CODE:5607 32 EB	55			      ld      (byte_55EB), a
 CODE:560A C3 DA	55			      jp      loc_55DA
 CODE:560D	      ;	---------------------------------------------------------------------------
-CODE:560D CD 00	5D			      call    rand
+CODE:560D CD 00	5D			      call    rand_0_9
 CODE:5610 FE 05				      cp      5
 CODE:5612 DA 3D	56			      jp      c, loc_563D
 CODE:5615 E1				      pop     hl
 CODE:5616 36 30				      ld      (hl), 30h	; '0'
 CODE:5618 C9				      ret
 CODE:5619	      ;	---------------------------------------------------------------------------
-CODE:5619 CD 00	5D			      call    rand
+CODE:5619 CD 00	5D			      call    rand_0_9
 CODE:561C 07				      rlca
 CODE:561D 07				      rlca
 CODE:561E 07				      rlca
 CODE:561F 07				      rlca
 CODE:5620 47				      ld      b, a
-CODE:5621 CD 00	5D			      call    rand
+CODE:5621 CD 00	5D			      call    rand_0_9
 CODE:5624 80				      add     a, b
-CODE:5625 32 61	68			      ld      (byte_6861), a
+CODE:5625 32 61	68			      ld      (quadrant), a
 CODE:5628 3E 03				      ld      a, 3
 CODE:562A 0E 01				      ld      c, 1
-CODE:562C CD 18	5B			      call    sub_5B18
+CODE:562C CD 18	5B			      call    print_lr_sensor
 CODE:562F 21 C5	3C			      ld      hl,  VIDEO+0C5h
 CODE:5632 CD CC	5B			      call    sub_5BCC
-CODE:5635 CD 81	5B			      call    sub_5B81
+CODE:5635 CD 81	5B			      call    print_quadrant
 CODE:5638 CD E3	5E			      call    sub_5EE3
 CODE:563B E1				      pop     hl
 CODE:563C C9				      ret
 CODE:563D	      ;	---------------------------------------------------------------------------
 CODE:563D
 CODE:563D	      loc_563D:							      ;	CODE XREF: CODE:5612j
-CODE:563D CD 00	5D			      call    rand
+CODE:563D CD 00	5D			      call    rand_0_9
 CODE:5640 CD BA	5C			      call    sub_5CBA
 CODE:5643 C3 70	55			      jp      loc_5570
 CODE:5646	      ;	---------------------------------------------------------------------------
@@ -1026,7 +1027,7 @@ CODE:5649 CD 39	5D			      call    print_string_last_line
 CODE:564C E1				      pop     hl
 CODE:564D
 CODE:564D	      loc_564D:							      ;	CODE XREF: CODE:565Aj
-CODE:564D CD 00	5D			      call    rand
+CODE:564D CD 00	5D			      call    rand_0_9
 CODE:5650 FE 04				      cp      4
 CODE:5652 DA 5D	56			      jp      c, loc_565D
 CODE:5655 06 12				      ld      b, 12h
@@ -1066,8 +1067,8 @@ CODE:567C 97				      sub     a
 CODE:567D 32 B9	6F			      ld      (byte_6FB9), a
 CODE:5680 CD C0	5E			      call    clear_last_2_lines
 CODE:5683 CD A7	5C			      call    sub_5CA7
-CODE:5686 21 21	68			      ld      hl, 6821h
-CODE:5689 11 94	69			      ld      de, 6994h
+CODE:5686 21 21	68			      ld      hl, aHlsdmt		      ;	"HLSDMT"
+CODE:5689 11 94	69			      ld      de, pwr_hypr_ion
 CODE:568C 47				      ld      b, a
 CODE:568D
 CODE:568D	      loc_568D:							      ;	CODE XREF: CODE:5698j
@@ -1169,10 +1170,10 @@ CODE:570D A7				      and     a
 CODE:570E F8				      ret     m
 CODE:570F
 CODE:570F	      loc_570F:							      ;	CODE XREF: update_power_distribution+5Aj
-CODE:570F CD 00	5D			      call    rand
-CODE:5712 FE 04				      cp      4
-CODE:5714 DA 0F	57			      jp      c, loc_570F
-CODE:5717 32 2A	68			      ld      (byte_682A), a
+CODE:570F CD 00	5D			      call    rand_0_9
+CODE:5712 FE 04				      cp      4				      ;	less than 4?
+CODE:5714 DA 0F	57			      jp      c, loc_570F		      ;	yes, regenerate
+CODE:5717 32 2A	68			      ld      (engine_explode_countdown), a
 CODE:571A 3E FF				      ld      a, 0FFh
 CODE:571C 32 B9	6F			      ld      (byte_6FB9), a
 CODE:571F 3E 03				      ld      a, 3
@@ -1214,7 +1215,7 @@ CODE:5754 77				      ld      (hl), a
 CODE:5755 2B				      dec     hl
 CODE:5756 7B				      ld      a, e
 CODE:5757 A7				      and     a
-CODE:5758 CA 8E	53			      jp      z, loc_538E
+CODE:5758 CA 8E	53			      jp      z, print_game_over_screen
 CODE:575B FE 06				      cp      6
 CODE:575D FA 3B	57			      jp      m, loc_573B
 CODE:5760 CD B6	51			      call    keyboard_scan
@@ -1234,7 +1235,7 @@ CODE:577B C3 29	5D			      jp      sub_5D29
 CODE:577E	      ;	---------------------------------------------------------------------------
 CODE:577E
 CODE:577E	      loc_577E:							      ;	CODE XREF: CODE:5775j
-CODE:577E CD 00	5D			      call    rand
+CODE:577E CD 00	5D			      call    rand_0_9
 CODE:5781 A7				      and     a
 CODE:5782 CA 92	57			      jp      z, loc_5792
 CODE:5785 11 3F	68			      ld      de, 683Fh
@@ -1321,17 +1322,17 @@ CODE:5804	      ;	--------------------------------------------------------------
 CODE:5804 21 80	3F			      ld      hl,  VIDEO+380h
 CODE:5807 11 43	66			      ld      de, aHasDestroyedAl	      ;	"HAS DESTROYED ALL THE          JOVIANS "...
 CODE:580A CD 29	5D			      call    sub_5D29
-CODE:580D 3A 61	68			      ld      a, (byte_6861)
-CODE:5810 CD 9A	5B			      call    sub_5B9A
+CODE:580D 3A 61	68			      ld      a, (quadrant)
+CODE:5810 CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:5813 46				      ld      b, (hl)
 CODE:5814 05				      dec     b
 CODE:5815 3E 99				      ld      a, 99h ; '™'
 CODE:5817 90				      sub     b
 CODE:5818 47				      ld      b, a
-CODE:5819 3A 58	68			      ld      a, (byte_6858)
+CODE:5819 3A 58	68			      ld      a, (jovians_left)
 CODE:581C 80				      add     a, b
 CODE:581D 27				      daa
-CODE:581E 32 58	68			      ld      (byte_6858), a
+CODE:581E 32 58	68			      ld      (jovians_left), a
 CODE:5821 36 01				      ld      (hl), 1
 CODE:5823 3E 30				      ld      a, 30h ; '0'
 CODE:5825 32 C5	3C			      ld      (VIDEO+0C5h), a
@@ -1524,9 +1525,9 @@ CODE:5958 CA 8D	59			      jp      z, loc_598D
 CODE:595B FE 25				      cp      25h ; '%'
 CODE:595D CA 88	53			      jp      z, loc_5388
 CODE:5960 FE 5B				      cp      5Bh ; '['
-CODE:5962 CA 8E	53			      jp      z, loc_538E
+CODE:5962 CA 8E	53			      jp      z, print_game_over_screen
 CODE:5965 FE 23				      cp      23h ; '#'
-CODE:5967 CA 8E	53			      jp      z, loc_538E
+CODE:5967 CA 8E	53			      jp      z, print_game_over_screen
 CODE:596A FE 30				      cp      30h ; '0'
 CODE:596C CA 83	59			      jp      z, loc_5983
 CODE:596F FE 2A				      cp      2Ah ; '*'
@@ -1570,77 +1571,77 @@ CODE:59A1
 CODE:59A1	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:59A1
 CODE:59A1
-CODE:59A1	      sub_59A1:							      ;	CODE XREF: sub_59A1-7E1p
+CODE:59A1	      handle_low_power:						      ;	CODE XREF: handle_low_power-7E1p
 CODE:59A1
 CODE:59A1	      ;	FUNCTION CHUNK AT CODE:5001 SIZE 000001B5 BYTES
 CODE:59A1	      ;	FUNCTION CHUNK AT CODE:51BD SIZE 00000017 BYTES
 CODE:59A1	      ;	FUNCTION CHUNK AT CODE:538E SIZE 00000032 BYTES
 CODE:59A1
-CODE:59A1 3A 95	69			      ld      a, (pwr_lr_sensor)
-CODE:59A4 FE 05				      cp      5
-CODE:59A6 F2 D4	59			      jp      p, loc_59D4
-CODE:59A9 21 41	3C			      ld      hl,  VIDEO+41h
-CODE:59AC 11 C1	3C			      ld      de,  VIDEO+0C1h
-CODE:59AF 01 41	3D			      ld      bc,  VIDEO+141h
-CODE:59B2 3E 0B				      ld      a, 0Bh
+CODE:59A1 3A 95	69			      ld      a, (pwr_lr_sensor)	      ;	get power to LR	sensor
+CODE:59A4 FE 05				      cp      5				      ;	greater	than 4%?
+CODE:59A6 F2 D4	59			      jp      p, loc_59D4		      ;	yes, skip
+CODE:59A9 21 41	3C			      ld      hl,  VIDEO+41h		      ;	1st row
+CODE:59AC 11 C1	3C			      ld      de,  VIDEO+0C1h		      ;	2nd row
+CODE:59AF 01 41	3D			      ld      bc,  VIDEO+141h		      ;	3rd row
+CODE:59B2 3E 0B				      ld      a, 11			      ;	11 bytes/row to	wipe
 CODE:59B4
-CODE:59B4	      loc_59B4:							      ;	CODE XREF: sub_59A1+30j
+CODE:59B4	      loc_59B4:							      ;	CODE XREF: handle_low_power+30j
 CODE:59B4 F5				      push    af
 CODE:59B5 3E 20				      ld      a, 20h ; ' '
-CODE:59B7 02				      ld      (bc), a
-CODE:59B8 77				      ld      (hl), a
+CODE:59B7 02				      ld      (bc), a			      ;	space over 3rd row digit
+CODE:59B8 77				      ld      (hl), a			      ;	space over 1st row digit
 CODE:59B9 7B				      ld      a, e
-CODE:59BA FE C5				      cp      0C5h ; 'Å'
-CODE:59BC CA CC	59			      jp      z, loc_59CC
-CODE:59BF FE C6				      cp      0C6h ; 'Æ'
-CODE:59C1 CA CC	59			      jp      z, loc_59CC
-CODE:59C4 FE C7				      cp      0C7h ; 'Ç'
-CODE:59C6 CA CC	59			      jp      z, loc_59CC
+CODE:59BA FE C5				      cp      0C5h ; 'Å'                      ; 1st digit current quadrant?
+CODE:59BC CA CC	59			      jp      z, loc_59CC		      ;	yes, skip
+CODE:59BF FE C6				      cp      0C6h ; 'Æ'                      ; 2nd digit current quadrant?
+CODE:59C1 CA CC	59			      jp      z, loc_59CC		      ;	yes, skip
+CODE:59C4 FE C7				      cp      0C7h ; 'Ç'                      ; 3rd digit current quadrant?
+CODE:59C6 CA CC	59			      jp      z, loc_59CC		      ;	yes, skip
 CODE:59C9 3E 20				      ld      a, 20h ; ' '
-CODE:59CB 12				      ld      (de), a
+CODE:59CB 12				      ld      (de), a			      ;	space over 2nd row digit
 CODE:59CC
-CODE:59CC	      loc_59CC:							      ;	CODE XREF: sub_59A1+1Bj
-CODE:59CC									      ;	sub_59A1+20j ...
+CODE:59CC	      loc_59CC:							      ;	CODE XREF: handle_low_power+1Bj
+CODE:59CC									      ;	handle_low_power+20j ...
 CODE:59CC 13				      inc     de
 CODE:59CD 23				      inc     hl
 CODE:59CE 03				      inc     bc
 CODE:59CF F1				      pop     af
-CODE:59D0 3D				      dec     a
-CODE:59D1 C2 B4	59			      jp      nz, loc_59B4
+CODE:59D0 3D				      dec     a				      ;	done row?
+CODE:59D1 C2 B4	59			      jp      nz, loc_59B4		      ;	no, loop
 CODE:59D4
-CODE:59D4	      loc_59D4:							      ;	CODE XREF: sub_59A1+5j
+CODE:59D4	      loc_59D4:							      ;	CODE XREF: handle_low_power+5j
 CODE:59D4 3A 96	69			      ld      a, (pwr_sr_sensor)
-CODE:59D7 FE 03				      cp      3
-CODE:59D9 F2 F9	59			      jp      p, loc_59F9
+CODE:59D7 FE 03				      cp      3				      ;	greater	than 2%?
+CODE:59D9 F2 F9	59			      jp      p, loc_59F9		      ;	yes, skip
 CODE:59DC 3E 01				      ld      a, 1
 CODE:59DE 32 B8	6F			      ld      (byte_6FB8), a
-CODE:59E1 21 57	3C			      ld      hl,  VIDEO+57h
-CODE:59E4 11 2C	00			      ld      de, 2Ch ;	','
-CODE:59E7 06 0A				      ld      b, 0Ah
+CODE:59E1 21 57	3C			      ld      hl,  VIDEO+57h		      ;	SR sensor display
+CODE:59E4 11 2C	00			      ld      de, 2Ch ;	','                   ; offset to next sector row
+CODE:59E7 06 0A				      ld      b, 10			      ;	10 rows	to overwrite
 CODE:59E9
-CODE:59E9	      loc_59E9:							      ;	CODE XREF: sub_59A1+55j
-CODE:59E9 0E 14				      ld      c, 14h
+CODE:59E9	      loc_59E9:							      ;	CODE XREF: handle_low_power+55j
+CODE:59E9 0E 14				      ld      c, 20			      ;	20 bytes to overwrite
 CODE:59EB
-CODE:59EB	      loc_59EB:							      ;	CODE XREF: sub_59A1+4Ej
-CODE:59EB 36 20				      ld      (hl), 20h	; ' '
-CODE:59ED 23				      inc     hl
-CODE:59EE 0D				      dec     c
-CODE:59EF C2 EB	59			      jp      nz, loc_59EB
-CODE:59F2 36 20				      ld      (hl), 20h	; ' '
-CODE:59F4 19				      add     hl, de
-CODE:59F5 05				      dec     b
-CODE:59F6 C2 E9	59			      jp      nz, loc_59E9
+CODE:59EB	      loc_59EB:							      ;	CODE XREF: handle_low_power+4Ej
+CODE:59EB 36 20				      ld      (hl), 20h	; ' '                 ; space over sector
+CODE:59ED 23				      inc     hl			      ;	next video address
+CODE:59EE 0D				      dec     c				      ;	done row?
+CODE:59EF C2 EB	59			      jp      nz, loc_59EB		      ;	no, loop
+CODE:59F2 36 20				      ld      (hl), 20h	; ' '                 ; space
+CODE:59F4 19				      add     hl, de			      ;	next sector row
+CODE:59F5 05				      dec     b				      ;	done all rows?
+CODE:59F6 C2 E9	59			      jp      nz, loc_59E9		      ;	no, loop
 CODE:59F9
-CODE:59F9	      loc_59F9:							      ;	CODE XREF: sub_59A1+38j
+CODE:59F9	      loc_59F9:							      ;	CODE XREF: handle_low_power+38j
 CODE:59F9 3A B6	6F			      ld      a, (byte_6FB6)
 CODE:59FC A7				      and     a
 CODE:59FD FA 09	5A			      jp      m, loc_5A09
-CODE:5A00 3A C5	3C			      ld      a, (VIDEO+0C5h)
-CODE:5A03 D6 30				      sub     30h ; '0'
-CODE:5A05 A7				      and     a
-CODE:5A06 C2 1D	5A			      jp      nz, loc_5A1D
+CODE:5A00 3A C5	3C			      ld      a, (VIDEO+0C5h)		      ;	#jovian	warships
+CODE:5A03 D6 30				      sub     30h ; '0'                       ; convert to binary
+CODE:5A05 A7				      and     a				      ;	zero?
+CODE:5A06 C2 1D	5A			      jp      nz, loc_5A1D		      ;	no, go
 CODE:5A09
-CODE:5A09	      loc_5A09:							      ;	CODE XREF: sub_59A1+5Cj
+CODE:5A09	      loc_5A09:							      ;	CODE XREF: handle_low_power+5Cj
 CODE:5A09 3A B9	6F			      ld      a, (byte_6FB9)
 CODE:5A0C A7				      and     a
 CODE:5A0D F8				      ret     m
@@ -1651,7 +1652,7 @@ CODE:5A17 11 AC	61			      ld      de, aGreen		      ;	"GREEN"
 CODE:5A1A C3 3F	5D			      jp      print_string
 CODE:5A1D	      ;	---------------------------------------------------------------------------
 CODE:5A1D
-CODE:5A1D	      loc_5A1D:							      ;	CODE XREF: sub_59A1+65j
+CODE:5A1D	      loc_5A1D:							      ;	CODE XREF: handle_low_power+65j
 CODE:5A1D 3A B9	6F			      ld      a, (byte_6FB9)
 CODE:5A20 A7				      and     a
 CODE:5A21 FA 32	5A			      jp      m, loc_5A32
@@ -1661,7 +1662,7 @@ CODE:5A29 21 BB	3C			      ld      hl,  VIDEO+0BBh		      ;	ptr to condition val
 CODE:5A2C 11 B2	61			      ld      de, aRed			      ;	" RED "
 CODE:5A2F CD 3F	5D			      call    print_string
 CODE:5A32
-CODE:5A32	      loc_5A32:							      ;	CODE XREF: sub_59A1+80j
+CODE:5A32	      loc_5A32:							      ;	CODE XREF: handle_low_power+80j
 CODE:5A32 2A 28	68			      ld      hl, (word_6828)
 CODE:5A35 7E				      ld      a, (hl)
 CODE:5A36 F6 80				      or      80h ; '€'
@@ -1674,50 +1675,50 @@ CODE:5A3F CD 48	5D			      call    sub_5D48
 CODE:5A42 7E				      ld      a, (hl)
 CODE:5A43 E6 7F				      and     7Fh ; ''
 CODE:5A45 77				      ld      (hl), a
-CODE:5A46 3A C5	3C			      ld      a, (VIDEO+0C5h)
-CODE:5A49 D6 30				      sub     30h ; '0'
-CODE:5A4B FE 04				      cp      4
-CODE:5A4D F4 DE	5A			      call    p, sub_5ADE
+CODE:5A46 3A C5	3C			      ld      a, (VIDEO+0C5h)		      ;	#jovian	warships
+CODE:5A49 D6 30				      sub     30h ; '0'                       ; convert to binary
+CODE:5A4B FE 04				      cp      4				      ;	more than 3?
+CODE:5A4D F4 DE	5A			      call    p, sub_5ADE		      ;	yes, go
 CODE:5A50 3A 97	69			      ld      a, (pwr_deflectors)
-CODE:5A53 FE 05				      cp      5
-CODE:5A55 FC FC	5A			      call    m, sub_5AFC
+CODE:5A53 FE 05				      cp      5				      ;	less than 5%?
+CODE:5A55 FC FC	5A			      call    m, sub_5AFC		      ;	yes, go
 CODE:5A58 0E 00				      ld      c, 0
-CODE:5A5A 21 97	69			      ld      hl, 6997h
+CODE:5A5A 21 97	69			      ld      hl, pwr_deflectors
 CODE:5A5D 7E				      ld      a, (hl)
-CODE:5A5E A7				      and     a
-CODE:5A5F CA 66	5A			      jp      z, loc_5A66
+CODE:5A5E A7				      and     a				      ;	pwr zero?
+CODE:5A5F CA 66	5A			      jp      z, loc_5A66		      ;	yes, skip
 CODE:5A62 C6 99				      add     a, 99h ; '™'
-CODE:5A64 27				      daa
-CODE:5A65 77				      ld      (hl), a
+CODE:5A64 27				      daa				      ;	decrement power
+CODE:5A65 77				      ld      (hl), a			      ;	update pwr_deflectors
 CODE:5A66
 CODE:5A66	      loc_5A66:							      ;	CODE XREF: CODE:5210p
 CODE:5A66									      ;	CODE:5256p ...
 CODE:5A66 3A B8	69			      ld      a, (power_avail)
 CODE:5A69 C6 99				      add     a, 99h ; '™'
-CODE:5A6B 27				      daa
+CODE:5A6B 27				      daa				      ;	decrement power
 CODE:5A6C 32 B8	69			      ld      (power_avail), a
 CODE:5A6F CD BA	56			      call    update_power_distribution
 CODE:5A72 CD 5D	5F			      call    print_power_avail
-CODE:5A75 3A 58	68			      ld      a, (byte_6858)
-CODE:5A78 A7				      and     a
-CODE:5A79 CA 8E	53			      jp      z, loc_538E
+CODE:5A75 3A 58	68			      ld      a, (jovians_left)
+CODE:5A78 A7				      and     a				      ;	any left?
+CODE:5A79 CA 8E	53			      jp      z, print_game_over_screen	      ;	no, go
 CODE:5A7C 3A AB	69			      ld      a, (byte_69AB)
 CODE:5A7F 3D				      dec     a
 CODE:5A80 32 AB	69			      ld      (byte_69AB), a
 CODE:5A83 C0				      ret     nz
 CODE:5A84
-CODE:5A84	      loc_5A84:							      ;	CODE XREF: sub_59A1+E8j
-CODE:5A84									      ;	sub_59A1+EDj
-CODE:5A84 CD 00	5D			      call    rand
-CODE:5A87 FE 01				      cp      1
-CODE:5A89 FA 84	5A			      jp      m, loc_5A84
-CODE:5A8C FE 05				      cp      5
-CODE:5A8E F2 84	5A			      jp      p, loc_5A84
-CODE:5A91 32 AB	69			      ld      (byte_69AB), a
+CODE:5A84	      loc_5A84:							      ;	CODE XREF: handle_low_power+E8j
+CODE:5A84									      ;	handle_low_power+EDj
+CODE:5A84 CD 00	5D			      call    rand_0_9
+CODE:5A87 FE 01				      cp      1				      ;	less than 1?
+CODE:5A89 FA 84	5A			      jp      m, loc_5A84		      ;	yes, regenerate
+CODE:5A8C FE 05				      cp      5				      ;	greater	than 4?
+CODE:5A8E F2 84	5A			      jp      p, loc_5A84		      ;	yes, regenerate
+CODE:5A91 32 AB	69			      ld      (byte_69AB), a		      ;	update ___
 CODE:5A94 16 04				      ld      d, 4
 CODE:5A96 21 AE	69			      ld      hl, 69AEh
 CODE:5A99
-CODE:5A99	      loc_5A99:							      ;	CODE XREF: sub_59A1+13Aj
+CODE:5A99	      loc_5A99:							      ;	CODE XREF: handle_low_power+13Aj
 CODE:5A99 7E				      ld      a, (hl)
 CODE:5A9A A7				      and     a
 CODE:5A9B C8				      ret     z
@@ -1726,14 +1727,14 @@ CODE:5A9D 23				      inc     hl
 CODE:5A9E 46				      ld      b, (hl)
 CODE:5A9F E5				      push    hl
 CODE:5AA0
-CODE:5AA0	      loc_5AA0:							      ;	CODE XREF: sub_59A1+104j
-CODE:5AA0 CD 00	5D			      call    rand
-CODE:5AA3 FE 08				      cp      8
-CODE:5AA5 F2 A0	5A			      jp      p, loc_5AA0
+CODE:5AA0	      loc_5AA0:							      ;	CODE XREF: handle_low_power+104j
+CODE:5AA0 CD 00	5D			      call    rand_0_9
+CODE:5AA3 FE 08				      cp      8				      ;	greater	than 7?
+CODE:5AA5 F2 A0	5A			      jp      p, loc_5AA0		      ;	yes, regenerate
 CODE:5AA8 21 9A	69			      ld      hl, 699Ah
 CODE:5AAB A7				      and     a
 CODE:5AAC
-CODE:5AAC	      loc_5AAC:							      ;	CODE XREF: sub_59A1+111j
+CODE:5AAC	      loc_5AAC:							      ;	CODE XREF: handle_low_power+111j
 CODE:5AAC CA B5	5A			      jp      z, loc_5AB5
 CODE:5AAF 23				      inc     hl
 CODE:5AB0 23				      inc     hl
@@ -1741,7 +1742,7 @@ CODE:5AB1 3D				      dec     a
 CODE:5AB2 C3 AC	5A			      jp      loc_5AAC
 CODE:5AB5	      ;	---------------------------------------------------------------------------
 CODE:5AB5
-CODE:5AB5	      loc_5AB5:							      ;	CODE XREF: sub_59A1:loc_5AACj
+CODE:5AB5	      loc_5AB5:							      ;	CODE XREF: handle_low_power:loc_5AACj
 CODE:5AB5 5E				      ld      e, (hl)
 CODE:5AB6 23				      inc     hl
 CODE:5AB7 56				      ld      d, (hl)
@@ -1757,7 +1758,7 @@ CODE:5AC4 CA CC	5A			      jp      z, loc_5ACC
 CODE:5AC7 FE 40				      cp      40h ; '@'
 CODE:5AC9 C2 DA	5A			      jp      nz, loc_5ADA
 CODE:5ACC
-CODE:5ACC	      loc_5ACC:							      ;	CODE XREF: sub_59A1+123j
+CODE:5ACC	      loc_5ACC:							      ;	CODE XREF: handle_low_power+123j
 CODE:5ACC 77				      ld      (hl), a
 CODE:5ACD 3E 2E				      ld      a, 2Eh ; '.'
 CODE:5ACF 02				      ld      (bc), a
@@ -1772,17 +1773,17 @@ CODE:5AD7 EB				      ex      de, hl
 CODE:5AD8 23				      inc     hl
 CODE:5AD9 E5				      push    hl
 CODE:5ADA
-CODE:5ADA	      loc_5ADA:							      ;	CODE XREF: sub_59A1+11Dj
-CODE:5ADA									      ;	sub_59A1+128j
+CODE:5ADA	      loc_5ADA:							      ;	CODE XREF: handle_low_power+11Dj
+CODE:5ADA									      ;	handle_low_power+128j
 CODE:5ADA E1				      pop     hl
 CODE:5ADB C3 99	5A			      jp      loc_5A99
-CODE:5ADB	      ;	End of function	sub_59A1
+CODE:5ADB	      ;	End of function	handle_low_power
 CODE:5ADB
 CODE:5ADE
 CODE:5ADE	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5ADE
 CODE:5ADE
-CODE:5ADE	      sub_5ADE:							      ;	CODE XREF: sub_59A1+ACp
+CODE:5ADE	      sub_5ADE:							      ;	CODE XREF: handle_low_power+ACp
 CODE:5ADE 11 79	64			      ld      de, aEngineerThereG	      ;	"ENGINEER:THERE GOES A POWER CRYSTAL, CO"...
 CODE:5AE1 CD 39	5D			      call    print_string_last_line
 CODE:5AE4
@@ -1793,7 +1794,7 @@ CODE:5AE9
 CODE:5AE9	      loc_5AE9:							      ;	CODE XREF: sub_5ADE+12j
 CODE:5AE9 C6 99				      add     a, 99h ; '™'
 CODE:5AEB 27				      daa
-CODE:5AEC CA 8E	53			      jp      z, loc_538E
+CODE:5AEC CA 8E	53			      jp      z, print_game_over_screen
 CODE:5AEF 05				      dec     b
 CODE:5AF0 C2 E9	5A			      jp      nz, loc_5AE9
 CODE:5AF3 32 B8	69			      ld      (power_avail), a
@@ -1805,7 +1806,7 @@ CODE:5AFC
 CODE:5AFC	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5AFC
 CODE:5AFC
-CODE:5AFC	      sub_5AFC:							      ;	CODE XREF: sub_59A1+B4p
+CODE:5AFC	      sub_5AFC:							      ;	CODE XREF: handle_low_power+B4p
 CODE:5AFC 11 A8	64			      ld      de, aEngineerComm_3	      ;	"ENGINEER:COMMANDER, THE SHIELDS ARE FAL"...
 CODE:5AFF CD 39	5D			      call    print_string_last_line
 CODE:5B02 C3 E4	5A			      jp      loc_5AE4
@@ -1824,76 +1825,78 @@ CODE:5B12 E5				      push    hl
 CODE:5B13 D5				      push    de
 CODE:5B14 C5				      push    bc
 CODE:5B15 C3 5F	5E			      jp      clear_cmd_buffer
+CODE:5B18	      ;	some sort of adjustment	to quadrant???
 CODE:5B18
 CODE:5B18	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5B18
 CODE:5B18
-CODE:5B18	      sub_5B18:							      ;	CODE XREF: sub_59A1-866p
+CODE:5B18	      print_lr_sensor:						      ;	CODE XREF: handle_low_power-866p
 CODE:5B18									      ;	CODE:5225p ...
 CODE:5B18 21 58	68			      ld      hl, 6858h
 CODE:5B1B 3C				      inc     a
-CODE:5B1C 06 03				      ld      b, 3
+CODE:5B1C 06 03				      ld      b, 3			      ;	 3 rows	to print
 CODE:5B1E C5				      push    bc
 CODE:5B1F
-CODE:5B1F	      loc_5B1F:							      ;	CODE XREF: sub_5B18+9j
+CODE:5B1F	      loc_5B1F:							      ;	CODE XREF: print_lr_sensor+9j
 CODE:5B1F 23				      inc     hl
 CODE:5B20 3D				      dec     a
 CODE:5B21 C2 1F	5B			      jp      nz, loc_5B1F
-CODE:5B24 3A 61	68			      ld      a, (byte_6861)
+CODE:5B24 3A 61	68			      ld      a, (quadrant)		      ;	current
 CODE:5B27
-CODE:5B27	      loc_5B27:							      ;	CODE XREF: sub_5B18+12j
+CODE:5B27	      loc_5B27:							      ;	CODE XREF: print_lr_sensor+12j
 CODE:5B27 86				      add     a, (hl)
 CODE:5B28 27				      daa
 CODE:5B29 0D				      dec     c
 CODE:5B2A C2 27	5B			      jp      nz, loc_5B27
-CODE:5B2D 32 61	68			      ld      (byte_6861), a
-CODE:5B30 C6 89				      add     a, 89h ; '‰'
+CODE:5B2D 32 61	68			      ld      (quadrant), a
+CODE:5B30	      ;	print LR sensor
+CODE:5B30 C6 89				      add     a, 89h ; '‰'                    ; NW quadrant
 CODE:5B32 27				      daa
-CODE:5B33 11 41	3C			      ld      de,  VIDEO+41h
+CODE:5B33 11 41	3C			      ld      de,  VIDEO+41h		      ;	video address
 CODE:5B36
-CODE:5B36	      loc_5B36:							      ;	CODE XREF: sub_5B18+48j
+CODE:5B36	      loc_5B36:							      ;	CODE XREF: print_lr_sensor+48j
 CODE:5B36 F5				      push    af
 CODE:5B37 D5				      push    de
-CODE:5B38 CD 9A	5B			      call    sub_5B9A
+CODE:5B38 CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:5B3B D1				      pop     de
-CODE:5B3C 0E 03				      ld      c, 3
+CODE:5B3C 0E 03				      ld      c, 3			      ;	3 values / row
 CODE:5B3E
-CODE:5B3E	      loc_5B3E:							      ;	CODE XREF: sub_5B18+36j
-CODE:5B3E 06 03				      ld      b, 3
+CODE:5B3E	      loc_5B3E:							      ;	CODE XREF: print_lr_sensor+36j
+CODE:5B3E 06 03				      ld      b, 3			      ;	3 digits / value
 CODE:5B40
-CODE:5B40	      loc_5B40:							      ;	CODE XREF: sub_5B18+31j
+CODE:5B40	      loc_5B40:							      ;	CODE XREF: print_lr_sensor+31j
 CODE:5B40 7E				      ld      a, (hl)
-CODE:5B41 E6 0F				      and     0Fh
-CODE:5B43 C6 30				      add     a, 30h ; '0'
-CODE:5B45 12				      ld      (de), a
-CODE:5B46 13				      inc     de
-CODE:5B47 23				      inc     hl
-CODE:5B48 05				      dec     b
-CODE:5B49 C2 40	5B			      jp      nz, loc_5B40
-CODE:5B4C 13				      inc     de
-CODE:5B4D 0D				      dec     c
-CODE:5B4E C2 3E	5B			      jp      nz, loc_5B3E
-CODE:5B51 F1				      pop     af
-CODE:5B52 C6 10				      add     a, 10h
+CODE:5B41 E6 0F				      and     0Fh			      ;	low nibble only
+CODE:5B43 C6 30				      add     a, 30h ; '0'                    ; convert to ASCII digit
+CODE:5B45 12				      ld      (de), a			      ;	write to video
+CODE:5B46 13				      inc     de			      ;	next video address
+CODE:5B47 23				      inc     hl			      ;	next data address
+CODE:5B48 05				      dec     b				      ;	done all digits?
+CODE:5B49 C2 40	5B			      jp      nz, loc_5B40		      ;	no, loop
+CODE:5B4C 13				      inc     de			      ;	skip (space)
+CODE:5B4D 0D				      dec     c				      ;	done a row?
+CODE:5B4E C2 3E	5B			      jp      nz, loc_5B3E		      ;	no, loop
+CODE:5B51 F1				      pop     af			      ;	left quadrant
+CODE:5B52 C6 10				      add     a, 10h			      ;	down a quadrant
 CODE:5B54 27				      daa
 CODE:5B55 C1				      pop     bc
-CODE:5B56 05				      dec     b
-CODE:5B57 CA 63	5B			      jp      z, loc_5B63
+CODE:5B56 05				      dec     b				      ;	done all rows?
+CODE:5B57 CA 63	5B			      jp      z, loc_5B63		      ;	yes, exit
 CODE:5B5A C5				      push    bc
-CODE:5B5B 21 74	00			      ld      hl, 74h ;	't'
-CODE:5B5E 19				      add     hl, de
+CODE:5B5B 21 74	00			      ld      hl, 74h ;	't'                   ; offset for next row
+CODE:5B5E 19				      add     hl, de			      ;	update video address
 CODE:5B5F EB				      ex      de, hl
-CODE:5B60 C3 36	5B			      jp      loc_5B36
+CODE:5B60 C3 36	5B			      jp      loc_5B36			      ;	loop
 CODE:5B63	      ;	---------------------------------------------------------------------------
 CODE:5B63
-CODE:5B63	      loc_5B63:							      ;	CODE XREF: sub_5B18+3Fj
-CODE:5B63 3A 61	68			      ld      a, (byte_6861)
+CODE:5B63	      loc_5B63:							      ;	CODE XREF: print_lr_sensor+3Fj
+CODE:5B63 3A 61	68			      ld      a, (quadrant)
 CODE:5B66 0E 01				      ld      c, 1
-CODE:5B68 CD 9A	5B			      call    sub_5B9A
+CODE:5B68 CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:5B6B 06 03				      ld      b, 3
 CODE:5B6D 11 C5	3C			      ld      de,  VIDEO+0C5h
 CODE:5B70
-CODE:5B70	      loc_5B70:							      ;	CODE XREF: sub_5B18+61j
+CODE:5B70	      loc_5B70:							      ;	CODE XREF: print_lr_sensor+61j
 CODE:5B70 7E				      ld      a, (hl)
 CODE:5B71 E6 0F				      and     0Fh
 CODE:5B73 C6 30				      add     a, 30h ; '0'
@@ -1905,84 +1908,86 @@ CODE:5B79 C2 70	5B			      jp      nz, loc_5B70
 CODE:5B7C 97				      sub     a
 CODE:5B7D 32 B6	6F			      ld      (byte_6FB6), a
 CODE:5B80 C9				      ret
-CODE:5B80	      ;	End of function	sub_5B18
+CODE:5B80	      ;	End of function	print_lr_sensor
 CODE:5B80
 CODE:5B81
 CODE:5B81	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5B81
 CODE:5B81
-CODE:5B81	      sub_5B81:							      ;	CODE XREF: sub_59A1-863p
+CODE:5B81	      print_quadrant:						      ;	CODE XREF: handle_low_power-863p
 CODE:5B81									      ;	CODE:5228p ...
-CODE:5B81 3A 61	68			      ld      a, (byte_6861)
-CODE:5B84 21 FC	3C			      ld      hl,  VIDEO+0FCh
+CODE:5B81 3A 61	68			      ld      a, (quadrant)
+CODE:5B84 21 FC	3C			      ld      hl,  VIDEO+0FCh		      ;	video address
 CODE:5B87 4F				      ld      c, a
-CODE:5B88 E6 F0				      and     0F0h ; 'ð'
+CODE:5B88 E6 F0				      and     0F0h ; 'ð'                      ; high nibble only
 CODE:5B8A 0F				      rrca
 CODE:5B8B 0F				      rrca
 CODE:5B8C 0F				      rrca
-CODE:5B8D 0F				      rrca
-CODE:5B8E C6 30				      add     a, 30h ; '0'
-CODE:5B90 77				      ld      (hl), a
+CODE:5B8D 0F				      rrca				      ;	high->low nibble
+CODE:5B8E C6 30				      add     a, 30h ; '0'                    ; convert to ASCII digit
+CODE:5B90 77				      ld      (hl), a			      ;	write to video
 CODE:5B91 23				      inc     hl
-CODE:5B92 23				      inc     hl
+CODE:5B92 23				      inc     hl			      ;	video address += 2
 CODE:5B93 79				      ld      a, c
-CODE:5B94 E6 0F				      and     0Fh
-CODE:5B96 C6 30				      add     a, 30h ; '0'
-CODE:5B98 77				      ld      (hl), a
+CODE:5B94 E6 0F				      and     0Fh			      ;	low nibble only
+CODE:5B96 C6 30				      add     a, 30h ; '0'                    ; convert to ASCII digit
+CODE:5B98 77				      ld      (hl), a			      ;	write to video
 CODE:5B99 C9				      ret
-CODE:5B99	      ;	End of function	sub_5B81
+CODE:5B99	      ;	End of function	print_quadrant
 CODE:5B99
 CODE:5B9A
 CODE:5B9A	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5B9A
 CODE:5B9A
-CODE:5B9A	      sub_5B9A:							      ;	CODE XREF: sub_59A1-8E5p
-CODE:5B9A									      ;	sub_59A1-88Fp ...
+CODE:5B9A	      get_ptr_quadrant_A_data:					      ;	CODE XREF: handle_low_power-8E5p
+CODE:5B9A									      ;	handle_low_power-88Fp ...
 CODE:5B9A 4F				      ld      c, a
-CODE:5B9B E6 F0				      and     0F0h ; 'ð'
+CODE:5B9B E6 F0				      and     0F0h ; 'ð'                      ; high nibble only
 CODE:5B9D 0F				      rrca
 CODE:5B9E 0F				      rrca
 CODE:5B9F 0F				      rrca
-CODE:5BA0 0F				      rrca
+CODE:5BA0 0F				      rrca				      ;	high->low nibble
+CODE:5BA1	      ;	fast multiply HL=A(7:4)*30
 CODE:5BA1 21 00	00			      ld      hl, 0
-CODE:5BA4 11 1E	00			      ld      de, 1Eh
-CODE:5BA7 06 08				      ld      b, 8
+CODE:5BA4 11 1E	00			      ld      de, 30
+CODE:5BA7 06 08				      ld      b, 8			      ;	8 bits
 CODE:5BA9
-CODE:5BA9	      loc_5BA9:							      ;	CODE XREF: sub_5B9A+18j
+CODE:5BA9	      loc_5BA9:							      ;	CODE XREF: get_ptr_quadrant_A_data+18j
 CODE:5BA9 29				      add     hl, hl
 CODE:5BAA 17				      rla
 CODE:5BAB D2 B1	5B			      jp      nc, loc_5BB1
 CODE:5BAE 19				      add     hl, de
 CODE:5BAF CE 00				      adc     a, 0
 CODE:5BB1
-CODE:5BB1	      loc_5BB1:							      ;	CODE XREF: sub_5B9A+11j
-CODE:5BB1 05				      dec     b
-CODE:5BB2 C2 A9	5B			      jp      nz, loc_5BA9
-CODE:5BB5 EB				      ex      de, hl
+CODE:5BB1	      loc_5BB1:							      ;	CODE XREF: get_ptr_quadrant_A_data+11j
+CODE:5BB1 05				      dec     b				      ;	done all bits?
+CODE:5BB2 C2 A9	5B			      jp      nz, loc_5BA9		      ;	no, loop
+CODE:5BB5 EB				      ex      de, hl			      ;	DE=result
+CODE:5BB6	      ;	add A(3:0)*3 to	the result
 CODE:5BB6 79				      ld      a, c
-CODE:5BB7 E6 0F				      and     0Fh
-CODE:5BB9 6F				      ld      l, a
-CODE:5BBA 06 03				      ld      b, 3
+CODE:5BB7 E6 0F				      and     0Fh			      ;	low nibble only
+CODE:5BB9 6F				      ld      l, a			      ;	L=low nibble
+CODE:5BBA 06 03				      ld      b, 3			      ;	multiplier=3
 CODE:5BBC
-CODE:5BBC	      loc_5BBC:							      ;	CODE XREF: sub_5B9A+2Aj
+CODE:5BBC	      loc_5BBC:							      ;	CODE XREF: get_ptr_quadrant_A_data+2Aj
 CODE:5BBC 83				      add     a, e
 CODE:5BBD 5F				      ld      e, a
 CODE:5BBE 3E 00				      ld      a, 0
 CODE:5BC0 8A				      adc     a, d
 CODE:5BC1 57				      ld      d, a
 CODE:5BC2 7D				      ld      a, l
-CODE:5BC3 05				      dec     b
-CODE:5BC4 C2 BC	5B			      jp      nz, loc_5BBC
-CODE:5BC7 21 62	68			      ld      hl, 6862h
-CODE:5BCA 19				      add     hl, de
+CODE:5BC3 05				      dec     b				      ;	done multiplication?
+CODE:5BC4 C2 BC	5B			      jp      nz, loc_5BBC		      ;	no, loop
+CODE:5BC7 21 62	68			      ld      hl, quadrant_tbl
+CODE:5BCA 19				      add     hl, de			      ;	get ptr	to quadrant data
 CODE:5BCB C9				      ret
-CODE:5BCB	      ;	End of function	sub_5B9A
+CODE:5BCB	      ;	End of function	get_ptr_quadrant_A_data
 CODE:5BCB
 CODE:5BCC
 CODE:5BCC	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5BCC
 CODE:5BCC
-CODE:5BCC	      sub_5BCC:							      ;	CODE XREF: sub_59A1-816p
+CODE:5BCC	      sub_5BCC:							      ;	CODE XREF: handle_low_power-816p
 CODE:5BCC									      ;	CODE:522Ep ...
 CODE:5BCC E5				      push    hl
 CODE:5BCD 97				      sub     a
@@ -2016,7 +2021,7 @@ CODE:5BF8 22 AC	69			      ld      (word_69AC), hl
 CODE:5BFB 57				      ld      d, a
 CODE:5BFC
 CODE:5BFC	      loc_5BFC:							      ;	CODE XREF: sub_5BCC+43j
-CODE:5BFC CD 00	5D			      call    rand
+CODE:5BFC CD 00	5D			      call    rand_0_9
 CODE:5BFF FE 01				      cp      1
 CODE:5C01 F2 09	5C			      jp      p, loc_5C09
 CODE:5C04 1E 40				      ld      e, 40h ; '@'
@@ -2067,7 +2072,7 @@ CODE:5C3D CD 6F	5C			      call    sub_5C6F
 CODE:5C40 22 28	68			      ld      (word_6828), hl
 CODE:5C43
 CODE:5C43	      loc_5C43:							      ;	CODE XREF: sub_5BCC+7Cj
-CODE:5C43 CD 00	5D			      call    rand
+CODE:5C43 CD 00	5D			      call    rand_0_9
 CODE:5C46 FE 03				      cp      3
 CODE:5C48 F2 43	5C			      jp      p, loc_5C43
 CODE:5C4B A7				      and     a
@@ -2082,7 +2087,7 @@ CODE:5C56 C2 52	5C			      jp      nz, loc_5C52
 CODE:5C59
 CODE:5C59	      loc_5C59:							      ;	CODE XREF: sub_5BCC+80j
 CODE:5C59									      ;	sub_5BCC+92j
-CODE:5C59 CD 00	5D			      call    rand
+CODE:5C59 CD 00	5D			      call    rand_0_9
 CODE:5C5C FE 04				      cp      4
 CODE:5C5E F2 59	5C			      jp      p, loc_5C59
 CODE:5C61 A7				      and     a
@@ -2102,7 +2107,7 @@ CODE:5C6F
 CODE:5C6F
 CODE:5C6F	      sub_5C6F:							      ;	CODE XREF: sub_5BCC:loc_5C0Bp
 CODE:5C6F									      ;	sub_5BCC:loc_5C23p ...
-CODE:5C6F CD 00	5D			      call    rand
+CODE:5C6F CD 00	5D			      call    rand_0_9
 CODE:5C72 21 58	3C			      ld      hl,  VIDEO+58h
 CODE:5C75 01 40	00			      ld      bc, 40h ;	'@'
 CODE:5C78 A7				      and     a
@@ -2114,7 +2119,7 @@ CODE:5C7D 3D				      dec     a
 CODE:5C7E C2 7C	5C			      jp      nz, loc_5C7C
 CODE:5C81
 CODE:5C81	      loc_5C81:							      ;	CODE XREF: sub_5C6F+Aj
-CODE:5C81 CD 00	5D			      call    rand
+CODE:5C81 CD 00	5D			      call    rand_0_9
 CODE:5C84 07				      rlca
 CODE:5C85 4F				      ld      c, a
 CODE:5C86 06 00				      ld      b, 0
@@ -2169,10 +2174,10 @@ CODE:5CBA
 CODE:5CBA	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5CBA
 CODE:5CBA
-CODE:5CBA	      sub_5CBA:							      ;	CODE XREF: sub_59A1:loc_515Cp
-CODE:5CBA									      ;	sub_59A1-835p ...
-CODE:5CBA CD 00	5D			      call    rand
-CODE:5CBD 3C				      inc     a
+CODE:5CBA	      sub_5CBA:							      ;	CODE XREF: handle_low_power:loc_515Cp
+CODE:5CBA									      ;	handle_low_power-835p ...
+CODE:5CBA CD 00	5D			      call    rand_0_9
+CODE:5CBD 3C				      inc     a				      ;	1-10
 CODE:5CBE 47				      ld      b, a
 CODE:5CBE	      ;	End of function	sub_5CBA
 CODE:5CBE
@@ -2180,7 +2185,7 @@ CODE:5CBF
 CODE:5CBF	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5CBF
 CODE:5CBF
-CODE:5CBF	      sub_5CBF:							      ;	CODE XREF: sub_59A1-7DAp
+CODE:5CBF	      sub_5CBF:							      ;	CODE XREF: handle_low_power-7DAp
 CODE:5CBF									      ;	CODE:5306p ...
 CODE:5CBF E5				      push    hl
 CODE:5CC0 D5				      push    de
@@ -2228,8 +2233,8 @@ CODE:5CF4
 CODE:5CF4	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5CF4
 CODE:5CF4
-CODE:5CF4	      clear_video_with_B:					      ;	CODE XREF: sub_59A1-981p
-CODE:5CF4									      ;	sub_59A1-60Ap ...
+CODE:5CF4	      clear_video_with_B:					      ;	CODE XREF: handle_low_power-981p
+CODE:5CF4									      ;	handle_low_power-60Ap ...
 CODE:5CF4 21 00	3C			      ld      hl, VIDEO
 CODE:5CF7
 CODE:5CF7	      loc_5CF7:							      ;	CODE XREF: clear_video_with_B+8j
@@ -2245,23 +2250,23 @@ CODE:5D00
 CODE:5D00	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D00
 CODE:5D00
-CODE:5D00	      rand:							      ;	CODE XREF: sub_59A1:loc_5095p
-CODE:5D00									      ;	sub_59A1-8FAp ...
+CODE:5D00	      rand_0_9:							      ;	CODE XREF: handle_low_power:loc_5095p
+CODE:5D00									      ;	handle_low_power-8FAp ...
 CODE:5D00 C5				      push    bc
 CODE:5D01 E5				      push    hl
 CODE:5D02 2A FB	6F			      ld      hl, (STACK_WATERMARK)
 CODE:5D05
-CODE:5D05	      loc_5D05:							      ;	CODE XREF: rand+23j
+CODE:5D05	      loc_5D05:							      ;	CODE XREF: rand_0_9+23j
 CODE:5D05 06 17				      ld      b, 23
 CODE:5D07 7D				      ld      a, l
 CODE:5D08
-CODE:5D08	      loc_5D08:							      ;	CODE XREF: rand+18j
+CODE:5D08	      loc_5D08:							      ;	CODE XREF: rand_0_9+18j
 CODE:5D08 E6 06				      and     6
 CODE:5D0A 37				      scf
 CODE:5D0B EA 0F	5D			      jp      pe, loc_5D0F
 CODE:5D0E 3F				      ccf
 CODE:5D0F
-CODE:5D0F	      loc_5D0F:							      ;	CODE XREF: rand+Bj
+CODE:5D0F	      loc_5D0F:							      ;	CODE XREF: rand_0_9+Bj
 CODE:5D0F 7C				      ld      a, h
 CODE:5D10 1F				      rra
 CODE:5D11 67				      ld      h, a
@@ -2273,13 +2278,13 @@ CODE:5D17 05				      dec     b
 CODE:5D18 C2 08	5D			      jp      nz, loc_5D08
 CODE:5D1B 22 FB	6F			      ld      (STACK_WATERMARK), hl
 CODE:5D1E 7C				      ld      a, h
-CODE:5D1F E6 0F				      and     0Fh
-CODE:5D21 FE 0A				      cp      0Ah
-CODE:5D23 D2 05	5D			      jp      nc, loc_5D05
+CODE:5D1F E6 0F				      and     0Fh			      ;	low nibble only
+CODE:5D21 FE 0A				      cp      0Ah			      ;	greater	than 9?
+CODE:5D23 D2 05	5D			      jp      nc, loc_5D05		      ;	yes, regenerate
 CODE:5D26 E1				      pop     hl
 CODE:5D27 C1				      pop     bc
 CODE:5D28 C9				      ret
-CODE:5D28	      ;	End of function	rand
+CODE:5D28	      ;	End of function	rand_0_9
 CODE:5D28
 CODE:5D29
 CODE:5D29	      ;	===============	S U B R	O U T I	N E =======================================
@@ -2301,8 +2306,8 @@ CODE:5D39
 CODE:5D39	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D39
 CODE:5D39
-CODE:5D39	      print_string_last_line:					      ;	CODE XREF: sub_59A1-97Bp
-CODE:5D39									      ;	sub_59A1-7F1p ...
+CODE:5D39	      print_string_last_line:					      ;	CODE XREF: handle_low_power-97Bp
+CODE:5D39									      ;	handle_low_power-7F1p ...
 CODE:5D39 21 C0	3F			      ld      hl,  VIDEO+3C0h		      ;	last line
 CODE:5D39	      ;	End of function	print_string_last_line
 CODE:5D39
@@ -2310,7 +2315,7 @@ CODE:5D3C
 CODE:5D3C	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D3C
 CODE:5D3C
-CODE:5D3C	      clear_last_2_lines_print_string:				      ;	CODE XREF: sub_59A1-80Dp
+CODE:5D3C	      clear_last_2_lines_print_string:				      ;	CODE XREF: handle_low_power-80Dp
 CODE:5D3C									      ;	update_power_distribution+48p ...
 CODE:5D3C CD C0	5E			      call    clear_last_2_lines
 CODE:5D3C	      ;	End of function	clear_last_2_lines_print_string
@@ -2320,8 +2325,8 @@ CODE:5D3F
 CODE:5D3F	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D3F
 CODE:5D3F
-CODE:5D3F	      print_string:						      ;	CODE XREF: sub_59A1-972p
-CODE:5D3F									      ;	sub_59A1-84Ap ...
+CODE:5D3F	      print_string:						      ;	CODE XREF: handle_low_power-972p
+CODE:5D3F									      ;	handle_low_power-84Ap ...
 CODE:5D3F 1A				      ld      a, (de)			      ;	get character
 CODE:5D40 B7				      or      a				      ;	end of string?
 CODE:5D41 C8				      ret     z				      ;	yes, return
@@ -2344,17 +2349,18 @@ CODE:5D4B
 CODE:5D4B	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D4B
 CODE:5D4B
-CODE:5D4B	      sub_5D4B:							      ;	CODE XREF: sub_59A1-860p
-CODE:5D4B									      ;	sub_59A1:loc_51BDp ...
+CODE:5D4B	      sub_5D4B:							      ;	CODE XREF: handle_low_power-860p
+CODE:5D4B									      ;	handle_low_power:loc_51BDp ...
 CODE:5D4B
 CODE:5D4B	      ;	FUNCTION CHUNK AT CODE:5580 SIZE 00000005 BYTES
 CODE:5D4B
 CODE:5D4B E5				      push    hl
 CODE:5D4C D5				      push    de
 CODE:5D4D C5				      push    bc
+CODE:5D4E	      ;	update chaser
 CODE:5D4E 2A EF	67			      ld      hl, (chaser_addr)
 CODE:5D51 7E				      ld      a, (hl)
-CODE:5D52 CD 00	5D			      call    rand
+CODE:5D52 CD 00	5D			      call    rand_0_9
 CODE:5D55 C6 80				      add     a, 80h ; '€'
 CODE:5D57 36 20				      ld      (hl), 20h	; ' '                 ; wipe chaser
 CODE:5D59 23				      inc     hl
@@ -2370,8 +2376,8 @@ CODE:5D64 3E 8F				      ld      a, 8Fh ; ''                    ; chaser graphi
 CODE:5D66 77				      ld      (hl), a			      ;	write to video
 CODE:5D67 22 EF	67			      ld      (chaser_addr), hl		      ;	save new chaser	address
 CODE:5D6A 3A B9	6F			      ld      a, (byte_6FB9)
-CODE:5D6D A7				      and     a
-CODE:5D6E CA 7F	5D			      jp      z, loc_5D7F
+CODE:5D6D A7				      and     a				      ;	critical?
+CODE:5D6E CA 7F	5D			      jp      z, loc_5D7F		      ;	no, skip
 CODE:5D71	      ;	toggles	"CONDITION" value w/graphics
 CODE:5D71 06 05				      ld      b, 5			      ;	5 chars	to toggle
 CODE:5D73 21 BB	3C			      ld      hl,  VIDEO+0BBh		      ;	ptr to condition value
@@ -2457,7 +2463,7 @@ CODE:5DD5	      ;	--------------------------------------------------------------
 CODE:5DD5
 CODE:5DD5	      loc_5DD5:							      ;	CODE XREF: sub_5D4B+78j
 CODE:5DD5									      ;	sub_5D4B+8Fj ...
-CODE:5DD5 CD 00	5D			      call    rand
+CODE:5DD5 CD 00	5D			      call    rand_0_9
 CODE:5DD8 FE 08				      cp      8
 CODE:5DDA F2 D5	5D			      jp      p, loc_5DD5
 CODE:5DDD 21 9A	69			      ld      hl, 699Ah
@@ -2579,7 +2585,7 @@ CODE:5E84
 CODE:5E84	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5E84
 CODE:5E84
-CODE:5E84	      sub_5E84:							      ;	CODE XREF: sub_59A1-60Fp
+CODE:5E84	      sub_5E84:							      ;	CODE XREF: handle_low_power-60Fp
 CODE:5E84 3E 01				      ld      a, 1
 CODE:5E86 32 B8	6F			      ld      (byte_6FB8), a
 CODE:5E89 3E 01				      ld      a, 1
@@ -2632,8 +2638,8 @@ CODE:5ECF
 CODE:5ECF	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5ECF
 CODE:5ECF
-CODE:5ECF	      print_10_lines:						      ;	CODE XREF: sub_59A1-853p
-CODE:5ECF									      ;	sub_59A1-604p ...
+CODE:5ECF	      print_10_lines:						      ;	CODE XREF: handle_low_power-853p
+CODE:5ECF									      ;	handle_low_power-604p ...
 CODE:5ECF 21 57	3C			      ld      hl,  VIDEO+57h
 CODE:5ED2 3E 0A				      ld      a, 10			      ;	# lines	to print
 CODE:5ED4
@@ -2690,19 +2696,19 @@ CODE:5F0F
 CODE:5F0F	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5F0F
 CODE:5F0F
-CODE:5F0F	      sub_5F0F:							      ;	CODE XREF: sub_59A1-7D3p
-CODE:5F0F 21 7F	3C			      ld      hl,  VIDEO+7Fh
+CODE:5F0F	      update_star_time:						      ;	CODE XREF: handle_low_power-7D3p
+CODE:5F0F 21 7F	3C			      ld      hl,  VIDEO+7Fh		      ;	last digit STAR-TIME
 CODE:5F12
-CODE:5F12	      loc_5F12:							      ;	CODE XREF: sub_5F0F+Cj
-CODE:5F12 7E				      ld      a, (hl)
+CODE:5F12	      loc_5F12:							      ;	CODE XREF: update_star_time+Cj
+CODE:5F12 7E				      ld      a, (hl)			      ;	get digit
 CODE:5F13 3C				      inc     a
-CODE:5F14 77				      ld      (hl), a
-CODE:5F15 FE 3A				      cp      3Ah ; ':'
-CODE:5F17 C0				      ret     nz
-CODE:5F18 36 30				      ld      (hl), 30h	; '0'
-CODE:5F1A 2B				      dec     hl
-CODE:5F1B C3 12	5F			      jp      loc_5F12
-CODE:5F1B	      ;	End of function	sub_5F0F
+CODE:5F14 77				      ld      (hl), a			      ;	write back to video
+CODE:5F15 FE 3A				      cp      3Ah ; ':'                       ; ASCII '9'+1?
+CODE:5F17 C0				      ret     nz			      ;	no, return
+CODE:5F18 36 30				      ld      (hl), 30h	; '0'                 ; write '0' to video
+CODE:5F1A 2B				      dec     hl			      ;	previous digit
+CODE:5F1B C3 12	5F			      jp      loc_5F12			      ;	loop
+CODE:5F1B	      ;	End of function	update_star_time
 CODE:5F1B
 CODE:5F1E
 CODE:5F1E	      ;	===============	S U B R	O U T I	N E =======================================
@@ -2710,25 +2716,25 @@ CODE:5F1E
 CODE:5F1E
 CODE:5F1E	      sub_5F1E:							      ;	CODE XREF: sub_544D+71p
 CODE:5F1E									      ;	sub_550F+154p ...
-CODE:5F1E 3A 61	68			      ld      a, (byte_6861)
-CODE:5F21 CD 9A	5B			      call    sub_5B9A
+CODE:5F1E 3A 61	68			      ld      a, (quadrant)
+CODE:5F21 CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:5F24 35				      dec     (hl)
-CODE:5F25 3A 58	68			      ld      a, (byte_6858)
+CODE:5F25 3A 58	68			      ld      a, (jovians_left)
 CODE:5F28 C6 99				      add     a, 99h ; '™'
 CODE:5F2A 27				      daa
-CODE:5F2B 32 58	68			      ld      (byte_6858), a
+CODE:5F2B 32 58	68			      ld      (jovians_left), a
 CODE:5F2B	      ;	End of function	sub_5F1E
 CODE:5F2B
 CODE:5F2E
 CODE:5F2E	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5F2E
 CODE:5F2E
-CODE:5F2E	      print_congratulations:					      ;	CODE XREF: sub_59A1-870p
-CODE:5F2E 3A 58	68			      ld      a, (byte_6858)
-CODE:5F31 21 FE	3D			      ld      hl,  VIDEO+1FEh
-CODE:5F34 A7				      and     a
-CODE:5F35 C2 63	5F			      jp      nz, print_BCD_byte
-CODE:5F38 CD 63	5F			      call    print_BCD_byte
+CODE:5F2E	      print_jovians_left:					      ;	CODE XREF: handle_low_power-870p
+CODE:5F2E 3A 58	68			      ld      a, (jovians_left)
+CODE:5F31 21 FE	3D			      ld      hl,  VIDEO+1FEh		      ;	video address
+CODE:5F34 A7				      and     a				      ;	any left?
+CODE:5F35 C2 63	5F			      jp      nz, print_BCD_byte	      ;	yes, go
+CODE:5F38 CD 63	5F			      call    print_BCD_byte		      ;	display	Jovians	left
 CODE:5F3B 21 80	3F			      ld      hl,  VIDEO+380h		      ;	2nd-last line
 CODE:5F3E 11 DB	64			      ld      de, aCommandHeadq_0	      ;	"COMMAND HEADQUARTERS:  CONGRATULATIONS,"...
 CODE:5F41 CD 3C	5D			      call    clear_last_2_lines_print_string
@@ -2743,7 +2749,7 @@ CODE:5F53 3E 01				      ld      a, 1
 CODE:5F55 32 B8	6F			      ld      (byte_6FB8), a
 CODE:5F58 06 0C				      ld      b, 0Ch
 CODE:5F5A C3 AB	53			      jp      loc_53AB
-CODE:5F5A	      ;	End of function	print_congratulations
+CODE:5F5A	      ;	End of function	print_jovians_left
 CODE:5F5A
 CODE:5F5D
 CODE:5F5D	      ;	===============	S U B R	O U T I	N E =======================================
@@ -2799,11 +2805,11 @@ CODE:5F87	      ;	End of function	sub_5F75
 CODE:5F87
 CODE:5F87	      ;	---------------------------------------------------------------------------
 CODE:5F8A 43 4F	4D 4D+aCommandHeadqua:	      .ascii 'COMMAND HEADQUARTERS: THE JOVIANS HAVE INVADED EARTH SPACE.     YOUR OR'
-CODE:5F8A 41 4E	44 20+								      ;	DATA XREF: sub_59A1-850o
+CODE:5F8A 41 4E	44 20+								      ;	DATA XREF: handle_low_power-850o
 CODE:5F8A 48 45	41 44+			      .ascii 'DERS ARE TO SEARCH FOR AND DESTROY ALL JOVIAN WAR        VESSELS IN EAR'
 CODE:5F8A 51 55	41 52+			      .ascii 'TH\'S 100 QUADRANTS OF SPACE',0
 CODE:6034 48 59	50 52+aHyprHIonIMsrMT:	      .ascii 'HYPR=H,ION=I,MSR=M,TRM=T,PWRDST=D,SELFD=S,EXPRAY=E,POD=A,XPOD=X ',0
-CODE:6034 3D 48	2C 49+								      ;	DATA XREF: sub_59A1-810o
+CODE:6034 3D 48	2C 49+								      ;	DATA XREF: handle_low_power-810o
 CODE:6075 45 4E	47 49+aEngineerComman:	      .ascii 'ENGINEER:COMMANDER, THE ENGINES HAVEN\'T THE POWER TO OPERATE',0
 CODE:6075 4E 45	45 52+								      ;	DATA XREF: CODE:loc_51FCo
 CODE:60B2 45 4E	47 49+aEngineerTheUnk:	      .ascii 'ENGINEER:THE UNKNOWN WE SHOT DISABLED THE HYPERDRIVE. ',0
@@ -2814,8 +2820,8 @@ CODE:6120 46 49	52 53+aFirstOfficer_0:	      .ascii 'FIRST OFFICER:CAPTAIN, WE H
 CODE:6167 43 4F	4D 4D+aCommunications:	      .ascii 'COMMUNICATIONS:THE SPACE STATION HAS ACKNOWLEDGED OUR DOCKING.',0
 CODE:6167 55 4E	49 43+								      ;	DATA XREF: CODE:loc_532Bo
 CODE:61A6 20 44	4F 43+aDock:		      .ascii ' DOCK',0                        ; DATA XREF: CODE:533Eo
-CODE:61AC 47 52	45 45+aGreen:		      .ascii 'GREEN',0                        ; DATA XREF: sub_59A1+76o
-CODE:61B2 20 52	45 44+aRed:		      .ascii ' RED ',0                        ; DATA XREF: sub_59A1+8Bo
+CODE:61AC 47 52	45 45+aGreen:		      .ascii 'GREEN',0                        ; DATA XREF: handle_low_power+76o
+CODE:61B2 20 52	45 44+aRed:		      .ascii ' RED ',0                        ; DATA XREF: handle_low_power+8Bo
 CODE:61B8 43 52	54 43+aCrtcl:		      .ascii 'CRTCL',0                        ; DATA XREF: update_power_distribution+6Do
 CODE:61B8 4C 00									      ;	sub_5E84+12o
 CODE:61BE 46 49	52 53+aFirstOfficerSi:	      .ascii 'FIRST OFFICER: SIR, WE HAVE HIT A TRITON MINE',0
@@ -2831,7 +2837,7 @@ CODE:62A7 54 20	4F 46+								      ;	DATA XREF: sub_544D:loc_54A3o
 CODE:62DE 45 4E	47 49+aEngineerComm_1:	      .ascii 'ENGINEER:COMMANDER, THE MISSILE TUBES ARE POWER DEFICIENT',0
 CODE:6318 43 4F	4D 50+aComputerObject:	      .ascii 'COMPUTER:OBJECT DESTROYED',0    ; DATA XREF: sub_550F+161o
 CODE:6332 4E 41	56 49+aNavigatorTheEn:	      .ascii 'NAVIGATOR:THE ENGINES ARE EXPLODING',0
-CODE:6332 47 41	54 4F+								      ;	DATA XREF: sub_59A1-7F4o
+CODE:6332 47 41	54 4F+								      ;	DATA XREF: handle_low_power-7F4o
 CODE:6356 45 4E	47 49+aEngineerComm_2:	      .ascii 'ENGINEER:COMMANDER, THE ENGINES ARE OVERLOADED, THEY CAN\'T LAST    AT '
 CODE:6356 4E 45	45 52+								      ;	DATA XREF: update_power_distribution:loc_56FCo
 CODE:6356 3A 43	4F 4D+			      .ascii 'THAT RATE',0
@@ -2848,7 +2854,7 @@ CODE:6479 4E 45	45 52+								      ;	DATA XREF: sub_5ADEo
 CODE:64A8 45 4E	47 49+aEngineerComm_3:	      .ascii 'ENGINEER:COMMANDER, THE SHIELDS ARE FALLING APART!',0
 CODE:64A8 4E 45	45 52+								      ;	DATA XREF: sub_5AFCo
 CODE:64DB 43 4F	4D 4D+aCommandHeadq_0:	      .ascii 'COMMAND HEADQUARTERS:  CONGRATULATIONS, YOU HAVE DESTROYED ALL    THE J'
-CODE:64DB 41 4E	44 20+								      ;	DATA XREF: print_congratulations+10o
+CODE:64DB 41 4E	44 20+								      ;	DATA XREF: print_jovians_left+10o
 CODE:64DB 48 45	41 44+			      .ascii 'OVIANS. YOU ARE PROMOTED TO ADMIRAL',0
 CODE:6546 46 49	52 53+aFirstOfficerTh:	      .ascii 'FIRST OFFICER: THE EXPERIMENTAL RAY',0
 CODE:6546 54 20	4F 46+								      ;	DATA XREF: sub_5D29+1o
@@ -2870,10 +2876,10 @@ CODE:669E 48 41	53 20+aHasCausedAComp:	      .ascii 'HAS CAUSED A COMPUTER      
 CODE:669E 43 41	55 53+								      ;	DATA XREF: CODE:5851o
 CODE:66C9 49 53	20 50+aIsPermanentlyD:	      .ascii 'IS PERMANENTLY DISABLED',0      ; DATA XREF: CODE:5778o
 CODE:66E1 53 48	49 50+aShipLogUssPhae:	      .ascii 'SHIP LOG-USS PHAETON-CAPTAIN DAR: SENSORS FOUND DEBRIS BELIEVED THAT OF'
-CODE:66E1 20 4C	4F 47+								      ;	DATA XREF: sub_59A1-601o
+CODE:66E1 20 4C	4F 47+								      ;	DATA XREF: handle_low_power-601o
 CODE:66E1 2D 55	53 53+			      .ascii ' USS HEPHAESTUS.',0
 CODE:6739 45 4E	54 45+aEnterSpeedFact:	      .ascii 'ENTER SPEED FACTOR (0(FAST)-9(SLOW))',0
-CODE:6739 52 20	53 50+								      ;	DATA XREF: sub_59A1-97Eo
+CODE:6739 52 20	53 50+								      ;	DATA XREF: handle_low_power-97Eo
 CODE:675E 57 45	41 50+aWeaponryWeReOu:	      .ascii 'WEAPONRY: WE\'RE OUT OF PODS',0 ; DATA XREF: CODE:5866o
 CODE:677A 43 4F	4D 50+aComputerThePod:	      .ascii 'COMPUTER: THE POD HAS BEEN USED',0
 CODE:677A 55 54	45 52+								      ;	DATA XREF: CODE:5893o
@@ -2882,7 +2888,7 @@ CODE:679A 43 4F	4D 50+aComputerPodLau:	      .ascii 'COMPUTER: POD LAUNCH IS BLO
 CODE:679A 55 54	45 52+								      ;	DATA XREF: CODE:loc_5903o
 CODE:67BA 46 49	52 53+aFirstOfficer_2:	      .ascii 'FIRST OFFICER: THE UNKNOWN IS STEALING POWER CAPTAIN',0
 CODE:67BA 54 20	4F 46+								      ;	DATA XREF: CODE:5646o
-CODE:67EF 19 3F	      chaser_addr:	      dw VIDEO+319h			      ;	DATA XREF: sub_59A1-936r
+CODE:67EF 19 3F	      chaser_addr:	      dw VIDEO+319h			      ;	DATA XREF: handle_low_power-936r
 CODE:67EF									      ;	sub_5D4B+3r ...
 CODE:67F1 00	      byte_67F1:	      db 0				      ;	DATA XREF: sub_544D+13w
 CODE:67F1									      ;	sub_544D+97r
@@ -2901,9 +2907,9 @@ CODE:67FB 18				      db  18h
 CODE:67FC 50				      db  50h ;	P
 CODE:67FD 22				      db  22h ;	"
 CODE:67FE 00				      db    0
-CODE:67FF 08	      byte_67FF:	      db 8				      ;	DATA XREF: sub_59A1-954w
+CODE:67FF 08	      byte_67FF:	      db 8				      ;	DATA XREF: handle_low_power-954w
 CODE:67FF									      ;	CODE:527Cw ...
-CODE:6800 37 3F	      cmd_entry_addr:	      dw VIDEO+337h			      ;	DATA XREF: sub_59A1-949w
+CODE:6800 37 3F	      cmd_entry_addr:	      dw VIDEO+337h			      ;	DATA XREF: handle_low_power-949w
 CODE:6800									      ;	sub_5CA7+1r ...
 CODE:6802 D4 51	      cmd_jmp_vectors:	      dw hyperdrive			      ;	DATA XREF: sub_5D4B+102o
 CODE:6804 46 52				      dw ion_engine
@@ -2917,12 +2923,12 @@ CODE:6812 62 58				      dw explode_antimatter
 CODE:6814 19 1A	      cmd_l_vector:	      dw 1A19h				      ;	DATA XREF: CODE:7033w
 CODE:6814									      ;	BASIC ENTRY POINT
 CODE:6816 48 49	4D 54+cmd_tbl:		      .ascii 'HIMTDSEXAL',0                   ; DATA XREF: sub_5D4B+FFo
-CODE:6821 48 4C	53 44+aHlsdmt:		      .ascii 'HLSDMT',0
+CODE:6821 48 4C	53 44+aHlsdmt:		      .ascii 'HLSDMT',0                       ; DATA XREF: CODE:5686o
 CODE:6828 02 00	      word_6828:	      dw 2				      ;	DATA XREF: CODE:5293r
 CODE:6828									      ;	CODE:52ADw ...
-CODE:682A 00	      byte_682A:	      db 0				      ;	DATA XREF: sub_59A1-7FEr
-CODE:682A									      ;	sub_59A1-7FAw ...
-CODE:682B 03	      byte_682B:	      db 3				      ;	DATA XREF: sub_59A1-99Ew
+CODE:682A 00	      engine_explode_countdown:db 0				      ;	DATA XREF: handle_low_power-7FEr
+CODE:682A									      ;	handle_low_power-7FAw ...
+CODE:682B 03	      byte_682B:	      db 3				      ;	DATA XREF: handle_low_power-99Ew
 CODE:682B									      ;	CODE:5366w ...
 CODE:682C 9C				      db  9Ch ;	œ
 CODE:682D 55				      db  55h ;	U
@@ -2944,7 +2950,7 @@ CODE:683C 46				      db  46h ;	F
 CODE:683D 56				      db  56h ;	V
 CODE:683E 9C				      db  9Ch ;	œ
 CODE:683F 55				      db  55h ;	U
-CODE:6840 06	      byte_6840:	      db 6				      ;	DATA XREF: sub_59A1-999w
+CODE:6840 06	      byte_6840:	      db 6				      ;	DATA XREF: handle_low_power-999w
 CODE:6840									      ;	CODE:58BCw ...
 CODE:6841 A6				      db 0A6h ;	¦
 CODE:6842 57				      db  57h ;	W
@@ -2971,7 +2977,7 @@ CODE:6855									      ;	sub_550F+77r ...
 CODE:6856 00	      byte_6856:	      db 0				      ;	DATA XREF: CODE:5283w
 CODE:6856									      ;	CODE:loc_5317r
 CODE:6857 00				      db    0
-CODE:6858 00	      byte_6858:	      db 0				      ;	DATA XREF: sub_59A1-8F5w
+CODE:6858 00	      jovians_left:	      db 0				      ;	DATA XREF: handle_low_power-8F5w
 CODE:6858									      ;	CODE:5819r ...
 CODE:6859 90				      db  90h ;	
 CODE:685A 91				      db  91h ;	‘
@@ -2981,13 +2987,13 @@ CODE:685D 10				      db  10h
 CODE:685E 09				      db    9
 CODE:685F 99				      db  99h ;	™
 CODE:6860 89				      db  89h ;	‰
-CODE:6861 00	      byte_6861:	      db 0				      ;	DATA XREF: sub_59A1-873w
+CODE:6861 00	      quadrant:		      db 0				      ;	DATA XREF: handle_low_power-873w
 CODE:6861									      ;	CODE:5625w ...
 CODE:6862	      ;	300 bytes cleared at startup
 CODE:6862	      ;	- likely quadrants, 3 bytes each
 CODE:6862 4C 4F	54 20+quadrant_tbl:	      db 4Ch, 4Fh, 54h,	20h, 44h, 57h, 20h, 30h, 0Dh, 19h, 31h
-CODE:6862 44 57	20 30+								      ;	DATA XREF: sub_59A1-918o
-CODE:6862 0D 19	31 33+								      ;	sub_59A1:loc_50E8o
+CODE:6862 44 57	20 30+								      ;	DATA XREF: handle_low_power-918o
+CODE:6862 0D 19	31 33+								      ;	handle_low_power:loc_50E8o ...
 CODE:6862 38 32	20 43+			      db 33h, 38h, 32h,	20h, 43h, 4Ch, 45h, 41h, 52h, 20h, 41h
 CODE:6862 4C 45	41 52+			      db 53h, 43h, 20h,	27h
 CODE:6862 20 41	53 43+			      db [ 6 ],	20h
@@ -3030,13 +3036,14 @@ CODE:6990 3F				      db  3Fh ;	?
 CODE:6991 3F				      db  3Fh ;	?
 CODE:6992 3F				      db  3Fh ;	?
 CODE:6993 3F				      db  3Fh ;	?
-CODE:6994 20	      pwr_hypr_ion:	      db 20h				      ;	DATA XREF: sub_59A1-931o
+CODE:6994 20	      pwr_hypr_ion:	      db 20h				      ;	DATA XREF: handle_low_power-931o
 CODE:6994									      ;	CODE:51E7r ...
-CODE:6995 20	      pwr_lr_sensor:	      db 20h				      ;	DATA XREF: sub_59A1-91Ew
+CODE:6995 20	      pwr_lr_sensor:	      db 20h				      ;	DATA XREF: handle_low_power-91Ew
 CODE:6995									      ;	CODE:530Dw ...
 CODE:6996 10	      pwr_sr_sensor:	      db 10h				      ;	DATA XREF: CODE:5310w
-CODE:6996									      ;	sub_59A1:loc_59D4r
-CODE:6997 20	      pwr_deflectors:	      db 20h				      ;	DATA XREF: sub_59A1+AFr
+CODE:6996									      ;	handle_low_power:loc_59D4r
+CODE:6997 20	      pwr_deflectors:	      db 20h				      ;	DATA XREF: handle_low_power+AFr
+CODE:6997									      ;	handle_low_power+B9o
 CODE:6998 09	      pwr_masers:	      db 9				      ;	DATA XREF: CODE:5432r
 CODE:6999 11	      pwr_trt_missl:	      db 11h				      ;	DATA XREF: CODE:54F4r
 CODE:6999									      ;	CODE:586Cr
@@ -3056,10 +3063,10 @@ CODE:69A6 FE				      db 0FEh ;	þ
 CODE:69A7 FF				      db 0FFh
 CODE:69A8 BE				      db 0BEh ;	¾
 CODE:69A9 FF				      db 0FFh
-CODE:69AA 00	      byte_69AA:	      db 0				      ;	DATA XREF: sub_59A1-963w
-CODE:69AA									      ;	sub_59A1-7DEr ...
-CODE:69AB 00	      byte_69AB:	      db 0				      ;	DATA XREF: sub_59A1-95Ew
-CODE:69AB									      ;	sub_59A1+DBr ...
+CODE:69AA 00	      byte_69AA:	      db 0				      ;	DATA XREF: handle_low_power-963w
+CODE:69AA									      ;	handle_low_power-7DEr ...
+CODE:69AB 00	      byte_69AB:	      db 0				      ;	DATA XREF: handle_low_power-95Ew
+CODE:69AB									      ;	handle_low_power+DBr ...
 CODE:69AC 00 00	      word_69AC:	      dw 0				      ;	DATA XREF: sub_5BCC+2Cw
 CODE:69AC									      ;	sub_5BCC:loc_5C12r ...
 CODE:69AE 48				      db  48h ;	H
@@ -3072,12 +3079,12 @@ CODE:69B4 31				      db  31h ;	1
 CODE:69B5 39				      db  39h ;	9
 CODE:69B6 31				      db  31h ;	1
 CODE:69B7 2C				      db  2Ch ;	,
-CODE:69B8 99	      power_avail:	      db 99h				      ;	DATA XREF: sub_59A1-94Fw
+CODE:69B8 99	      power_avail:	      db 99h				      ;	DATA XREF: handle_low_power-94Fw
 CODE:69B8									      ;	CODE:534Bw ...
-CODE:69B9 10	      triton_misls:	      db 10h				      ;	DATA XREF: sub_59A1-959w
+CODE:69B9 10	      triton_misls:	      db 10h				      ;	DATA XREF: handle_low_power-959w
 CODE:69B9									      ;	CODE:535Ew ...
 CODE:69BA 03	      byte_69BA:	      db 3				      ;	DATA XREF: CODE:5363w
-CODE:69BB 20 20	20 20+asc_69BB:		      .ascii '                     ',0        ; DATA XREF: CODE:loc_53C1o
+CODE:69BB 20 20	20 20+jovian_officer:	      .ascii '                     ',0        ; DATA XREF: CODE:loc_53C1o
 CODE:69D1 20 20	20 20+aSgggd:		      .ascii '        ˜ƒƒƒ¤        ',0
 CODE:69E7 20 20	20 20+aCaRi:		      .ascii '       –    ©       ',0
 CODE:69FD 20 20	20 20+aXIJK:		      .ascii '       • ‰ † ª       ',0
@@ -3087,8 +3094,8 @@ CODE:6A3F 20 20	20 20+aO:		      .ascii '       µ° O °º       ',0
 CODE:6A55 20 20	20 20+aJbmmmvi:		      .ascii '       †ŒŒŒ‚‰       ',0
 CODE:6A6B 20 20	20 20+aJIJI:		      .ascii '      †  ‰ †  ‰      ',0
 CODE:6A81 20 20	20 20+aJI:		      .ascii '     † !>> <<! ‰     ',0
-CODE:6A97 20 20	20 20+hq_officer:	      .ascii '                     ',0        ; DATA XREF: sub_59A1-856o
-CODE:6A97 20 20	20 20+								      ;	sub_59A1-607o ...
+CODE:6A97 20 20	20 20+hq_officer:	      .ascii '                     ',0        ; DATA XREF: handle_low_power-856o
+CODE:6A97 20 20	20 20+								      ;	handle_low_power-607o ...
 CODE:6AAD 20 20	20 20+aMpm:		      .ascii '        °ŒŒ°        ',0
 CODE:6AC3 20 20	20 20+aGgqgggggpgg:	      .ascii '     ƒƒŸƒƒƒƒƒ¯ƒƒ     ',0
 CODE:6AD9 20 20	20 20+aXXKK:		      .ascii '       •·• ª»ª       ',0
@@ -3099,9 +3106,9 @@ CODE:6B31 20 20	20 20+aIJ:		      .ascii '        ‰°°°†        ',0
 CODE:6B47 20 20	20 20+			      .ascii '    ((** < > **))    ',0
 CODE:6B5D 20 20	20 20+			      .ascii '    ((  !! !!  ))    ',0
 CODE:6B73 20 20	49 4E+aInvasionForceR:	      .ascii '  INVASION FORCE  -------  RADIO SHACK ',0
-CODE:6B73 56 41	53 49+								      ;	DATA XREF: sub_59A1-975o
+CODE:6B73 56 41	53 49+								      ;	DATA XREF: handle_low_power-975o
 CODE:6B9B 20 4C	2D 52+aLRSensorMineRa:	      .ascii ' L-R SENSOR  %-MINE   ------RADIO SHACK------ [ USS HEPHAESTUS ['
-CODE:6B9B 20 53	45 4E+								      ;	DATA XREF: sub_59A1-946o
+CODE:6B9B 20 53	45 4E+								      ;	DATA XREF: handle_low_power-946o
 CODE:6BDB 20 30	30 30+a000000000Hephs:	      .ascii ' 000 000 000 [-HEPHS 0I                     I STAR-TIME   300200'
 CODE:6C1B 20 2D	2D 2D+a0Sstn1iICondit:	      .ascii ' ----------- 0-SSTN  1I                     I CONDITION    STDBY'
 CODE:6C5B 20 30	30 30+a000000000@Jcc2:	      .ascii ' 000 000 000 @-JCC   2I                     I QUADRANT      0-0 '
@@ -3118,40 +3125,25 @@ CODE:6EDB 20 20	20 20+			      .ascii '                                         
 CODE:6F1B 20 20	20 20+			      .ascii '                                                                '
 CODE:6F5B 20 20	20 20+			      .ascii '                                                                '
 CODE:6F9B	      ;	$45 bytes cleared at startup
-CODE:6F9B 23	      scratch_0x45:	      db  23h ;	#			      ;	DATA XREF: sub_59A1-996o
-CODE:6F9B									      ;	sub_5D4B+3Eo
-CODE:6F9C C3				      db 0C3h ;	Ã
-CODE:6F9D BD				      db 0BDh ;	½
-CODE:6F9E 6F				      db  6Fh ;	o
-CODE:6F9F 01				      db    1
-CODE:6FA0 CB				      db 0CBh ;	Ë
-CODE:6FA1 21				      db  21h ;	!
-CODE:6FA2 7E				      db  7Eh ;	~
-CODE:6FA3 FE				      db 0FEh ;	þ
-CODE:6FA4 C3				      db 0C3h ;	Ã
-CODE:6FA5 C2				      db 0C2h ;	Â
-CODE:6FA6 E0				      db 0E0h ;	à
-CODE:6FA7 6F				      db  6Fh ;	o
-CODE:6FA8 2B				      db  2Bh ;	+
-CODE:6FA9 7E				      db  7Eh ;	~
-CODE:6FAA B7				      db 0B7h ;	·
-CODE:6FAB CA				      db 0CAh ;	Ê
-CODE:6FAC BD				      db 0BDh ;	½
-CODE:6FAD 6F	      byte_6FAD:	      db 6Fh				      ;	DATA XREF: sub_59A1-989w
+CODE:6F9B 23 C3	BD 6F+scratch_0x45:	      db 23h, 0C3h, 0BDh, 6Fh, 1, 0CBh	      ;	DATA XREF: handle_low_power-996o
+CODE:6F9B 01 CB									      ;	sub_5D4B+3Eo
+CODE:6FA1 21 7E	FE C3+			      db 21h, 7Eh, 0FEh, 0C3h, 0C2h, 0E0h
+CODE:6FA7 6F 2B	7E B7+			      db 6Fh, 2Bh, 7Eh,	0B7h, 0CAh, 0BDh
+CODE:6FAD 6F	      byte_6FAD:	      db 6Fh				      ;	DATA XREF: handle_low_power-989w
 CODE:6FAE FE	      byte_6FAE:	      db 0FEh				      ;	DATA XREF: CODE:5335w
-CODE:6FAE									      ;	sub_59A1+6Dr
+CODE:6FAE									      ;	handle_low_power+6Dr
 CODE:6FAF 7F	      byte_6FAF:	      db 7Fh				      ;	DATA XREF: CODE:5338w
 CODE:6FAF									      ;	CODE:5420w ...
 CODE:6FB0 C2	      byte_6FB0:	      db 0C2h				      ;	DATA XREF: update_power_distribution+6w
 CODE:6FB0									      ;	update_power_distribution+13w ...
-CODE:6FB1 E0	      cmd_flag:		      db 0E0h				      ;	DATA XREF: sub_59A1-808w
-CODE:6FB1									      ;	sub_59A1-612w ...
+CODE:6FB1 E0	      cmd_flag:		      db 0E0h				      ;	DATA XREF: handle_low_power-808w
+CODE:6FB1									      ;	handle_low_power-612w ...
 CODE:6FB1									      ;	0=new; 0xff=none
 CODE:6FB2 6F	      cmd_len:		      db 6Fh				      ;	DATA XREF: sub_5D4B+D4r
 CODE:6FB2									      ;	sub_5D4B+DDw ...
 CODE:6FB3 2E	      byte_6FB3:	      db 2Eh				      ;	DATA XREF: CODE:51DBr
 CODE:6FB3									      ;	CODE:537Fw ...
-CODE:6FB4 1F	      byte_6FB4:	      db 1Fh				      ;	DATA XREF: sub_59A1-7D6w
+CODE:6FB4 1F	      byte_6FB4:	      db 1Fh				      ;	DATA XREF: handle_low_power-7D6w
 CODE:6FB4									      ;	CODE:542Fw ...
 CODE:6FB5 22	      byte_6FB5:	      db 22h				      ;	DATA XREF: CODE:5314w
 CODE:6FB5									      ;	CODE:5382w ...
@@ -3159,9 +3151,9 @@ CODE:6FB6 06	      byte_6FB6:	      db 6				      ;	DATA XREF: CODE:51D8w
 CODE:6FB6									      ;	CODE:57CFw ...
 CODE:6FB7 70	      byte_6FB7:	      db 70h				      ;	DATA XREF: CODE:experimental_rayr
 CODE:6FB7									      ;	CODE:5836w
-CODE:6FB8 2E	      byte_6FB8:	      db 2Eh				      ;	DATA XREF: sub_59A1-86Bw
+CODE:6FB8 2E	      byte_6FB8:	      db 2Eh				      ;	DATA XREF: handle_low_power-86Bw
 CODE:6FB8									      ;	CODE:53D8w ...
-CODE:6FB9 04	      byte_6FB9:	      db 4				      ;	DATA XREF: sub_59A1-805r
+CODE:6FB9 04	      byte_6FB9:	      db 4				      ;	DATA XREF: handle_low_power-805r
 CODE:6FB9									      ;	CODE:5332w ...
 CODE:6FBA 22				      db  22h ;	"
 CODE:6FBB 14				      db  14h
@@ -3233,8 +3225,8 @@ CODE:6FF7 22				      db  22h ;	"
 CODE:6FF8 06				      db    6
 CODE:6FF9 70				      db  70h ;	p
 CODE:6FFA 21				      db  21h ;	!
-CODE:6FFB 60 E0	      STACK_WATERMARK:	      dw 0E060h				      ;	DATA XREF: sub_59A1-986o
-CODE:6FFB									      ;	rand+2r ...
+CODE:6FFB 60 E0	      STACK_WATERMARK:	      dw 0E060h				      ;	DATA XREF: handle_low_power-986o
+CODE:6FFB									      ;	rand_0_9+2r ...
 CODE:6FFD 22				      db  22h ;	"
 CODE:6FFE 14				      db  14h
 CODE:6FFF 68				      db  68h ;	h
