@@ -37,11 +37,11 @@ CODE:5001	      ;	START OF FUNCTION CHUNK	FOR handle_low_power
 CODE:5001
 CODE:5001	      loc_5001:							      ;	CODE XREF: handle_low_power-5E4j
 CODE:5001 3E 03				      ld      a, 3
-CODE:5003 32 2B	68			      ld      (byte_682B), a
+CODE:5003 32 2B	68			      ld      (antimatter_pods), a
 CODE:5006 3E 06				      ld      a, 6
-CODE:5008 32 40	68			      ld      (byte_6840), a
+CODE:5008 32 40	68			      ld      (pod_speed), a
 CODE:500B	      ;	clear $45 bytes	@$6f9b
-CODE:500B 21 9B	6F			      ld      hl, scratch_0x45		      ;	start of scratch RAM
+CODE:500B 21 9B	6F			      ld      hl, antimatter_pod_tbl	      ;	start of scratch RAM
 CODE:500E 97				      sub     a
 CODE:500F 06 45				      ld      b, 45h ; 'E'                    ; length of scratch RAM
 CODE:5011
@@ -50,9 +50,10 @@ CODE:5011 77				      ld      (hl), a
 CODE:5012 23				      inc     hl
 CODE:5013 05				      dec     b				      ;	done all bytes?
 CODE:5014 C2 11	50			      jp      nz, loc_5011		      ;	no, loop
-CODE:5017 3D				      dec     a
-CODE:5018 32 AD	6F			      ld      (byte_6FAD), a
+CODE:5017 3D				      dec     a				      ;	$FF
+CODE:5018 32 AD	6F			      ld      (eot), a			      ;	flag end of pod	table
 CODE:501B 31 FB	6F			      ld      sp, STACK_WATERMARK
+CODE:501E	      ;	display	title screen, prompt for speed factor
 CODE:501E 06 20				      ld      b, 20h ; ' '                    ; <SPACE>
 CODE:5020 CD F4	5C			      call    clear_video_with_B
 CODE:5023 11 39	67			      ld      de, aEnterSpeedFact	      ;	"ENTER SPEED FACTOR (0(FAST)-9(SLOW))"
@@ -73,8 +74,8 @@ CODE:5041 3E 02				      ld      a, 2
 CODE:5043 32 AB	69			      ld      (byte_69AB), a
 CODE:5046 3E 10				      ld      a, 10h			      ;	init number of triton missiles (10)
 CODE:5048 32 B9	69			      ld      (triton_misls), a
-CODE:504B 3E 08				      ld      a, 8
-CODE:504D 32 FF	67			      ld      (byte_67FF), a
+CODE:504B 3E 08				      ld      a, 8			      ;	init ion drive speed
+CODE:504D 32 FF	67			      ld      (ion_speed), a
 CODE:5050 3E 99				      ld      a, 99h ; 'ô'                    ; init power available (99%)
 CODE:5052 32 B8	69			      ld      (power_avail), a
 CODE:5055 21 37	3F			      ld      hl,  VIDEO+337h		      ;	init command entry buffer (on screen)
@@ -108,7 +109,7 @@ CODE:507E 23				      inc     hl			      ;	next pwer value	address
 CODE:507F 36 11				      ld      (hl), 11h			      ;	init triton missiles to	11%
 CODE:5081 3E 10				      ld      a, 10h			      ;	re-init	lr power to 10%
 CODE:5083 32 95	69			      ld      (pwr_lr_sensor), a
-CODE:5086	      ;	init quadrant data
+CODE:5086	      ;	zero quadrant data
 CODE:5086 11 2C	01			      ld      de, 300			      ;	# bytes	to clear
 CODE:5089 21 62	68			      ld      hl, quadrant_tbl		      ;	start of quadrant data
 CODE:508C
@@ -120,13 +121,13 @@ CODE:5090 7A				      ld      a, d
 CODE:5091 B3				      or      e				      ;	done all bytes?
 CODE:5092 C2 8C	50			      jp      nz, loc_508C		      ;	no, loop
 CODE:5095
-CODE:5095	      loc_5095:							      ;	CODE XREF: handle_low_power-907j
+CODE:5095	      init_jovians_left:					      ;	CODE XREF: handle_low_power-907j
 CODE:5095									      ;	handle_low_power-902j
 CODE:5095 CD 00	5D			      call    rand_0_9
 CODE:5098 FE 03				      cp      3				      ;	less than 3?
-CODE:509A FA 95	50			      jp      m, loc_5095		      ;	yes, regenerate
+CODE:509A FA 95	50			      jp      m, init_jovians_left	      ;	yes, regenerate
 CODE:509D FE 06				      cp      6				      ;	greater	than 5?
-CODE:509F F2 95	50			      jp      p, loc_5095		      ;	yes, regenerate
+CODE:509F F2 95	50			      jp      p, init_jovians_left	      ;	yes, regenerate
 CODE:50A2 07				      rlca
 CODE:50A3 07				      rlca
 CODE:50A4 07				      rlca
@@ -134,7 +135,7 @@ CODE:50A5 07				      rlca				      ;	(3-5)*16
 CODE:50A6 47				      ld      b, a
 CODE:50A7 CD 00	5D			      call    rand_0_9
 CODE:50AA 80				      add     a, b			      ;	(3-5)*16 + rnd()
-CODE:50AB 47				      ld      b, a
+CODE:50AB 47				      ld      b, a			      ;	jovians	left to	init
 CODE:50AC 32 58	68			      ld      (jovians_left), a
 CODE:50AF
 CODE:50AF	      loc_50AF:							      ;	CODE XREF: handle_low_power-8DFj
@@ -146,13 +147,13 @@ CODE:50B4 07				      rlca
 CODE:50B5 07				      rlca
 CODE:50B6 4F				      ld      c, a
 CODE:50B7 CD 00	5D			      call    rand_0_9
-CODE:50BA 81				      add     a, c
+CODE:50BA 81				      add     a, c			      ;	random quadrant
 CODE:50BB C5				      push    bc
 CODE:50BC CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:50BF C1				      pop     bc
-CODE:50C0 7E				      ld      a, (hl)
-CODE:50C1 A7				      and     a
-CODE:50C2 C2 AF	50			      jp      nz, loc_50AF
+CODE:50C0 7E				      ld      a, (hl)			      ;	get warships in	quadrant
+CODE:50C1 A7				      and     a				      ;	zero?
+CODE:50C2 C2 AF	50			      jp      nz, loc_50AF		      ;	no, regenerate
 CODE:50C5
 CODE:50C5	      loc_50C5:							      ;	CODE XREF: handle_low_power-8D7j
 CODE:50C5									      ;	handle_low_power-8D2j
@@ -160,26 +161,27 @@ CODE:50C5 CD 00	5D			      call    rand_0_9
 CODE:50C8 FE 05				      cp      5				      ;	greater	than 4?
 CODE:50CA F2 C5	50			      jp      p, loc_50C5		      ;	yes, regenerate
 CODE:50CD 3D				      dec     a
-CODE:50CE B8				      cp      b
-CODE:50CF F2 C5	50			      jp      p, loc_50C5
+CODE:50CE B8				      cp      b				      ;	more than jovians left?
+CODE:50CF F2 C5	50			      jp      p, loc_50C5		      ;	yes, regenerate
 CODE:50D2 3C				      inc     a
-CODE:50D3 77				      ld      (hl), a
-CODE:50D4 A7				      and     a
-CODE:50D5 CA AF	50			      jp      z, loc_50AF
+CODE:50D3 77				      ld      (hl), a			      ;	init warships in quadrant
+CODE:50D4 A7				      and     a				      ;	zero?
+CODE:50D5 CA AF	50			      jp      z, loc_50AF		      ;	yes, regenerate
 CODE:50D8 57				      ld      d, a
-CODE:50D9 78				      ld      a, b
+CODE:50D9 78				      ld      a, b			      ;	jovians	left to	init
 CODE:50DA
 CODE:50DA	      loc_50DA:							      ;	CODE XREF: handle_low_power-8C0j
 CODE:50DA C6 99				      add     a, 99h ; 'ô'
-CODE:50DC 27				      daa
-CODE:50DD CA E8	50			      jp      z, loc_50E8
-CODE:50E0 15				      dec     d
-CODE:50E1 C2 DA	50			      jp      nz, loc_50DA
-CODE:50E4 47				      ld      b, a
-CODE:50E5 C3 AF	50			      jp      loc_50AF
+CODE:50DC 27				      daa				      ;	all done?
+CODE:50DD CA E8	50			      jp      z, init_stars		      ;	yes, go
+CODE:50E0 15				      dec     d				      ;	done for this quadrant?
+CODE:50E1 C2 DA	50			      jp      nz, loc_50DA		      ;	no, loop
+CODE:50E4 47				      ld      b, a			      ;	update jovians left to init
+CODE:50E5 C3 AF	50			      jp      loc_50AF			      ;	loop
 CODE:50E8	      ;	---------------------------------------------------------------------------
+CODE:50E8	      ;	0-9 stars in each quadrant
 CODE:50E8
-CODE:50E8	      loc_50E8:							      ;	CODE XREF: handle_low_power-8C4j
+CODE:50E8	      init_stars:						      ;	CODE XREF: handle_low_power-8C4j
 CODE:50E8 21 62	68			      ld      hl, quadrant_tbl		      ;	quadrant data
 CODE:50EB 0E 64				      ld      c, 100			      ;	# quadrants to init
 CODE:50ED
@@ -187,19 +189,20 @@ CODE:50ED	      loc_50ED:							      ;	CODE XREF: handle_low_power-8ACj
 CODE:50ED CD 00	5D			      call    rand_0_9
 CODE:50F0 23				      inc     hl
 CODE:50F1 23				      inc     hl
-CODE:50F2 77				      ld      (hl), a			      ;	init 2nd byte of 3
-CODE:50F3 23				      inc     hl
-CODE:50F4 0D				      dec     c				      ;	done all bytes?
+CODE:50F2 77				      ld      (hl), a			      ;	init stars in quadrant
+CODE:50F3 23				      inc     hl			      ;	next quadrant
+CODE:50F4 0D				      dec     c				      ;	done all quadrants?
 CODE:50F5 C2 ED	50			      jp      nz, loc_50ED		      ;	no, loop
+CODE:50F8	      ;	1-3 space stations in the game
 CODE:50F8
-CODE:50F8	      loc_50F8:							      ;	CODE XREF: handle_low_power-8A5j
+CODE:50F8	      init_space_stations:					      ;	CODE XREF: handle_low_power-8A5j
 CODE:50F8									      ;	handle_low_power-8A0j
 CODE:50F8 CD 00	5D			      call    rand_0_9
 CODE:50FB A7				      and     a				      ;	zero?
-CODE:50FC CA F8	50			      jp      z, loc_50F8		      ;	yes, regenerate
+CODE:50FC CA F8	50			      jp      z, init_space_stations	      ;	yes, regenerate
 CODE:50FF FE 04				      cp      4				      ;	greater	than 3?
-CODE:5101 F2 F8	50			      jp      p, loc_50F8		      ;	yes, regenerate
-CODE:5104 4F				      ld      c, a
+CODE:5101 F2 F8	50			      jp      p, init_space_stations	      ;	yes, regenerate
+CODE:5104 4F				      ld      c, a			      ;	(1-3)
 CODE:5105
 CODE:5105	      loc_5105:							      ;	CODE XREF: handle_low_power-888j
 CODE:5105									      ;	handle_low_power-882j
@@ -210,17 +213,18 @@ CODE:510A 07				      rlca
 CODE:510B 07				      rlca
 CODE:510C 47				      ld      b, a
 CODE:510D CD 00	5D			      call    rand_0_9
-CODE:5110 80				      add     a, b
+CODE:5110 80				      add     a, b			      ;	random quadrant
 CODE:5111 C5				      push    bc
 CODE:5112 CD 9A	5B			      call    get_ptr_quadrant_A_data
 CODE:5115 C1				      pop     bc
-CODE:5116 23				      inc     hl			      ;	2nd byte of data
+CODE:5116 23				      inc     hl			      ;	space stations in quadrant
 CODE:5117 7E				      ld      a, (hl)
 CODE:5118 A7				      and     a				      ;	zero?
 CODE:5119 C2 05	51			      jp      nz, loc_5105		      ;	no, regenerate
-CODE:511C 36 01				      ld      (hl), 1			      ;	flag ???
-CODE:511E 0D				      dec     c				      ;	done ___?
+CODE:511C 36 01				      ld      (hl), 1			      ;	add a space station
+CODE:511E 0D				      dec     c				      ;	done all space stations?
 CODE:511F C2 05	51			      jp      nz, loc_5105		      ;	no, loop
+CODE:5122	      ;	init starting quadrant
 CODE:5122 CD 00	5D			      call    rand_0_9			      ;	starting quadrant X
 CODE:5125 47				      ld      b, a
 CODE:5126 CD 00	5D			      call    rand_0_9			      ;	starting quadrant Y
@@ -237,9 +241,9 @@ CODE:5139 0E 01				      ld      c, 1
 CODE:513B CD 18	5B			      call    print_lr_sensor
 CODE:513E CD 81	5B			      call    print_quadrant
 CODE:5141 CD 4B	5D			      call    sub_5D4B
-CODE:5144 3A C0	53			      ld      a, (byte_53C0)
-CODE:5147 A7				      and     a
-CODE:5148 C2 88	51			      jp      nz, loc_5188
+CODE:5144 3A C0	53			      ld      a, (played_before)
+CODE:5147 A7				      and     a				      ;	played a game before this?
+CODE:5148 C2 88	51			      jp      nz, loc_5188		      ;	yes, skip animated intro message
 CODE:514B 11 97	6A			      ld      de, hq_officer		      ;	"                     "
 CODE:514E CD CF	5E			      call    print_10_lines
 CODE:5151 11 8A	5F			      ld      de, aCommandHeadqua	      ;	"COMMAND HEADQUARTERS: THE JOVIANS HAVE "...
@@ -273,12 +277,13 @@ CODE:5185 C2 5C	51			      jp      nz, loc_515C
 CODE:5188
 CODE:5188	      loc_5188:							      ;	CODE XREF: handle_low_power-859j
 CODE:5188 21 C5	3C			      ld      hl,  VIDEO+0C5h		      ;	current	quadrant on LR sensor display
-CODE:518B CD CC	5B			      call    sub_5BCC
+CODE:518B CD CC	5B			      call    init_quadrant		      ;	quadrant display
 CODE:518E 21 40	3F			      ld      hl,  VIDEO+340h
 CODE:5191 11 34	60			      ld      de, aHyprHIonIMsrMT	      ;	"HYPR=H,ION=I,MSR=M,TRM=T,PWRDST=D,SELFD"...
 CODE:5194 CD 3C	5D			      call    clear_last_2_lines_print_string
 CODE:5197
 CODE:5197	      game_loop:						      ;	CODE XREF: handle_low_power-7D0j
+CODE:5197									      ;	DATA XREF: CODE:5B0Eo
 CODE:5197 3E FF				      ld      a, 0FFh
 CODE:5199 32 B1	6F			      ld      (cmd_flag), a
 CODE:519C 3A B9	6F			      ld      a, (byte_6FB9)
@@ -358,17 +363,17 @@ CODE:5208	      loc_5208:							      ;	CODE XREF: CODE:51F9j
 CODE:5208 CD 00	5D			      call    rand_0_9
 CODE:520B FE 06				      cp      6
 CODE:520D DA 13	52			      jp      c, loc_5213
-CODE:5210 CD 66	5A			      call    loc_5A66
+CODE:5210 CD 66	5A			      call    dec_pwr_and_XXXX
 CODE:5213
 CODE:5213	      loc_5213:							      ;	CODE XREF: CODE:520Dj
-CODE:5213 CD A7	5C			      call    sub_5CA7
+CODE:5213 CD A7	5C			      call    get_next_cmd_char
 CODE:5216
 CODE:5216	      loc_5216:							      ;	CODE XREF: CODE:5243j
 CODE:5216 D6 30				      sub     30h ; '0'
 CODE:5218 47				      ld      b, a
-CODE:5219 FA 05	5B			      jp      m, loc_5B05
+CODE:5219 FA 05	5B			      jp      m, print_no_sense_and_ret
 CODE:521C FE 08				      cp      8
-CODE:521E F2 05	5B			      jp      p, loc_5B05
+CODE:521E F2 05	5B			      jp      p, print_no_sense_and_ret
 CODE:5221
 CODE:5221	      loc_5221:							      ;	CODE XREF: CODE:523Dj
 CODE:5221 C5				      push    bc
@@ -377,119 +382,119 @@ CODE:5223 0E 01				      ld      c, 1
 CODE:5225 CD 18	5B			      call    print_lr_sensor
 CODE:5228 CD 81	5B			      call    print_quadrant
 CODE:522B 21 C5	3C			      ld      hl,  VIDEO+0C5h
-CODE:522E CD CC	5B			      call    sub_5BCC
-CODE:5231 CD E3	5E			      call    sub_5EE3
+CODE:522E CD CC	5B			      call    init_quadrant
+CODE:5231 CD E3	5E			      call    print_sector
 CODE:5234 06 08				      ld      b, 8
 CODE:5236 CD 48	5D			      call    sub_5D48
 CODE:5239 C1				      pop     bc
 CODE:523A CD B6	51			      call    keyboard_scan
-CODE:523D CA 21	52			      jp      z, loc_5221
-CODE:5240 FE 09				      cp      9
-CODE:5242 C8				      ret     z
-CODE:5243 C3 16	52			      jp      loc_5216
+CODE:523D CA 21	52			      jp      z, loc_5221		      ;	no key,	loop
+CODE:5240 FE 09				      cp      9				      ;	tab?
+CODE:5242 C8				      ret     z				      ;	yes, return
+CODE:5243 C3 16	52			      jp      loc_5216			      ;	loop
 CODE:5246	      ;	---------------------------------------------------------------------------
 CODE:5246
 CODE:5246	      ion_engine:						      ;	DATA XREF: CODE:6804o
 CODE:5246 3A 94	69			      ld      a, (pwr_hypr_ion)
-CODE:5249 FE 05				      cp      5
-CODE:524B FA FC	51			      jp      m, loc_51FC
+CODE:5249 FE 05				      cp      5				      ;	less than 5%?
+CODE:524B FA FC	51			      jp      m, loc_51FC		      ;	yes, exit
 CODE:524E CD 00	5D			      call    rand_0_9
-CODE:5251 FE 03				      cp      3
-CODE:5253 D2 59	52			      jp      nc, loc_5259
-CODE:5256 CD 66	5A			      call    loc_5A66
+CODE:5251 FE 03				      cp      3				      ;	greater	than 2?
+CODE:5253 D2 59	52			      jp      nc, loc_5259		      ;	yes, skip
+CODE:5256 CD 66	5A			      call    dec_pwr_and_XXXX
 CODE:5259
 CODE:5259	      loc_5259:							      ;	CODE XREF: CODE:5253j
 CODE:5259 CD C0	5E			      call    clear_last_2_lines
-CODE:525C CD A7	5C			      call    sub_5CA7
+CODE:525C CD A7	5C			      call    get_next_cmd_char		      ;	direction
 CODE:525F
-CODE:525F	      loc_525F:							      ;	CODE XREF: CODE:52B8j
-CODE:525F D6 30				      sub     30h ; '0'
-CODE:5261 FA 05	5B			      jp      m, loc_5B05
-CODE:5264 FE 08				      cp      8
-CODE:5266 F2 05	5B			      jp      p, loc_5B05
-CODE:5269 4F				      ld      c, a
-CODE:526A CD A7	5C			      call    sub_5CA7
-CODE:526D CA 7F	52			      jp      z, loc_527F
-CODE:5270 D6 30				      sub     30h ; '0'
-CODE:5272 FA 05	5B			      jp      m, loc_5B05
-CODE:5275 FE 0A				      cp      0Ah
-CODE:5277 D2 05	5B			      jp      nc, loc_5B05
+CODE:525F	      get_dir:							      ;	CODE XREF: CODE:52B8j
+CODE:525F D6 30				      sub     30h ; '0'                       ; digit?
+CODE:5261 FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	no, exit
+CODE:5264 FE 08				      cp      8				      ;	greater	than 7?
+CODE:5266 F2 05	5B			      jp      p, print_no_sense_and_ret	      ;	yes, exit
+CODE:5269 4F				      ld      c, a			      ;	tmp store direction
+CODE:526A CD A7	5C			      call    get_next_cmd_char		      ;	speed
+CODE:526D CA 7F	52			      jp      z, loc_527F		      ;	not specified, skip
+CODE:5270 D6 30				      sub     30h ; '0'                       ; digit?
+CODE:5272 FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	no, exit
+CODE:5275 FE 0A				      cp      10			      ;	greater	than 9?
+CODE:5277 D2 05	5B			      jp      nc, print_no_sense_and_ret      ;	yes, exit
 CODE:527A 3C				      inc     a
-CODE:527B 3C				      inc     a
-CODE:527C 32 FF	67			      ld      (byte_67FF), a
+CODE:527B 3C				      inc     a				      ;	speed += 2
+CODE:527C 32 FF	67			      ld      (ion_speed), a		      ;	store
 CODE:527F
 CODE:527F	      loc_527F:							      ;	CODE XREF: CODE:526Dj
-CODE:527F 21 9A	69			      ld      hl, 699Ah
-CODE:5282 79				      ld      a, c
-CODE:5283 32 56	68			      ld      (byte_6856), a
-CODE:5286 A7				      and     a
-CODE:5287 CA 90	52			      jp      z, loc_5290
+CODE:527F 21 9A	69			      ld      hl, dir_addr_delta_tbl
+CODE:5282 79				      ld      a, c			      ;	direction
+CODE:5283 32 56	68			      ld      (ion_dir), a		      ;	save
+CODE:5286 A7				      and     a				      ;	up?
+CODE:5287 CA 90	52			      jp      z, loc_5290		      ;	yes, skip
 CODE:528A
 CODE:528A	      loc_528A:							      ;	CODE XREF: CODE:528Dj
 CODE:528A 23				      inc     hl
-CODE:528B 23				      inc     hl
-CODE:528C 3D				      dec     a
-CODE:528D C2 8A	52			      jp      nz, loc_528A
+CODE:528B 23				      inc     hl			      ;	next table entry
+CODE:528C 3D				      dec     a				      ;	done?
+CODE:528D C2 8A	52			      jp      nz, loc_528A		      ;	no, loop
 CODE:5290
 CODE:5290	      loc_5290:							      ;	CODE XREF: CODE:5287j
 CODE:5290 5E				      ld      e, (hl)
 CODE:5291 23				      inc     hl
-CODE:5292 56				      ld      d, (hl)
-CODE:5293 2A 28	68			      ld      hl, (word_6828)
+CODE:5292 56				      ld      d, (hl)			      ;	DE = video address delta
+CODE:5293 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:5296
 CODE:5296	      loc_5296:							      ;	CODE XREF: CODE:52B3j
-CODE:5296 36 2E				      ld      (hl), 2Eh	; '.'
-CODE:5298 E5				      push    hl
-CODE:5299 19				      add     hl, de
-CODE:529A 7E				      ld      a, (hl)
+CODE:5296 36 2E				      ld      (hl), 2Eh	; '.'                 ; write empty star to quadrant display
+CODE:5298 E5				      push    hl			      ;	save old address
+CODE:5299 19				      add     hl, de			      ;	update USS Hephaestus video address
+CODE:529A 7E				      ld      a, (hl)			      ;	get sector contents
 CODE:529B E6 7F				      and     7Fh ; ''
-CODE:529D FE 2E				      cp      2Eh ; '.'
-CODE:529F C2 C3	52			      jp      nz, loc_52C3
-CODE:52A2 36 5B				      ld      (hl), 5Bh	; '['
-CODE:52A4 3A FF	67			      ld      a, (byte_67FF)
+CODE:529D FE 2E				      cp      2Eh ; '.'                       ; empty?
+CODE:529F C2 C3	52			      jp      nz, loc_52C3		      ;	no, skip
+CODE:52A2 36 5B				      ld      (hl), 5Bh	; '['                 ; USS Hephaestus graphic
+CODE:52A4 3A FF	67			      ld      a, (ion_speed)
 CODE:52A7 47				      ld      b, a
 CODE:52A8 CD 48	5D			      call    sub_5D48
-CODE:52AB E3				      ex      (sp), hl
-CODE:52AC E1				      pop     hl
-CODE:52AD 22 28	68			      ld      (word_6828), hl
+CODE:52AB E3				      ex      (sp), hl			      ;	push new address, HL = old address
+CODE:52AC E1				      pop     hl			      ;	pop new	address
+CODE:52AD 22 28	68			      ld      (hephaestus_video_addr), hl     ;	update
 CODE:52B0 CD B6	51			      call    keyboard_scan
-CODE:52B3 CA 96	52			      jp      z, loc_5296
-CODE:52B6 FE 09				      cp      9
-CODE:52B8 C2 5F	52			      jp      nz, loc_525F
-CODE:52BB 36 5B				      ld      (hl), 5Bh	; '['
-CODE:52BD 22 28	68			      ld      (word_6828), hl
-CODE:52C0 C3 E3	5E			      jp      sub_5EE3
+CODE:52B3 CA 96	52			      jp      z, loc_5296		      ;	no key,	loop
+CODE:52B6 FE 09				      cp      9				      ;	<TAB>?
+CODE:52B8 C2 5F	52			      jp      nz, get_dir		      ;	no, loop
+CODE:52BB 36 5B				      ld      (hl), 5Bh	; '['                 ; write USS Hephaestus graphic to video
+CODE:52BD 22 28	68			      ld      (hephaestus_video_addr), hl     ;	update
+CODE:52C0 C3 E3	5E			      jp      print_sector
 CODE:52C3	      ;	---------------------------------------------------------------------------
 CODE:52C3
 CODE:52C3	      loc_52C3:							      ;	CODE XREF: CODE:529Fj
-CODE:52C3 E1				      pop     hl
-CODE:52C4 22 28	68			      ld      (word_6828), hl
+CODE:52C3 E1				      pop     hl			      ;	old address
+CODE:52C4 22 28	68			      ld      (hephaestus_video_addr), hl     ;	update (stop)
 CODE:52C7 D5				      push    de
-CODE:52C8 CD E3	5E			      call    sub_5EE3
+CODE:52C8 CD E3	5E			      call    print_sector
 CODE:52CB D1				      pop     de
-CODE:52CC 2A 28	68			      ld      hl, (word_6828)
-CODE:52CF 36 5B				      ld      (hl), 5Bh	; '['
-CODE:52D1 19				      add     hl, de
-CODE:52D2 7E				      ld      a, (hl)
-CODE:52D3 FE 8F				      cp      8Fh ; 'è'
+CODE:52CC 2A 28	68			      ld      hl, (hephaestus_video_addr)
+CODE:52CF 36 5B				      ld      (hl), 5Bh	; '['                 ; display USS Hephaestus graphic
+CODE:52D1 19				      add     hl, de			      ;	(potential) new	address
+CODE:52D2 7E				      ld      a, (hl)			      ;	get sector contents
+CODE:52D3 FE 8F				      cp      8Fh ; 'è'                       ; ???
 CODE:52D5 CA 0C	53			      jp      z, loc_530C
 CODE:52D8 E6 7F				      and     7Fh ; ''
-CODE:52DA FE 30				      cp      30h ; '0'
-CODE:52DC CA 2B	53			      jp      z, loc_532B
-CODE:52DF FE 25				      cp      25h ; '%'
-CODE:52E1 CA 88	53			      jp      z, loc_5388
-CODE:52E4 FE 26				      cp      26h ; '&'
-CODE:52E6 CA C1	53			      jp      z, loc_53C1
-CODE:52E9 FE 40				      cp      40h ; '@'
-CODE:52EB CA C1	53			      jp      z, loc_53C1
-CODE:52EE FE 2A				      cp      2Ah ; '*'
-CODE:52F0 CA 18	54			      jp      z, loc_5418
-CODE:52F3 FE 58				      cp      58h ; 'X'
-CODE:52F5 C2 17	53			      jp      nz, loc_5317
+CODE:52DA FE 30				      cp      30h ; '0'                       ; space station?
+CODE:52DC CA 2B	53			      jp      z, dock_space_station	      ;	yes, go
+CODE:52DF FE 25				      cp      25h ; '%'                       ; triton mine
+CODE:52E1 CA 88	53			      jp      z, hit_triton_mine	      ;	yes, go
+CODE:52E4 FE 26				      cp      26h ; '&'                       ; jovian battle cruiser?
+CODE:52E6 CA C1	53			      jp      z, hit_jovian_warship	      ;	yes, go
+CODE:52E9 FE 40				      cp      40h ; '@'                       ; jovian command cruiser?
+CODE:52EB CA C1	53			      jp      z, hit_jovian_warship	      ;	yes, go
+CODE:52EE FE 2A				      cp      2Ah ; '*'                       ; star?
+CODE:52F0 CA 18	54			      jp      z, hit_star		      ;	yes, go
+CODE:52F3 FE 58				      cp      58h ; 'X'                       ; unknown?
+CODE:52F5 C2 17	53			      jp      nz, left_quadrant		      ;	no, go
 CODE:52F8 3E FF				      ld      a, 0FFh
 CODE:52FA 32 55	68			      ld      (byte_6855), a
 CODE:52FD E5				      push    hl
-CODE:52FE 11 20	61			      ld      de, 6120h
+CODE:52FE 11 20	61			      ld      de, aFirstOfficer_0	      ;	"FIRST OFFICER:CAPTAIN, WE HAVE BEEN BLO"...
 CODE:5301 CD 39	5D			      call    print_string_last_line
 CODE:5304 06 08				      ld      b, 8
 CODE:5306 CD BF	5C			      call    sub_5CBF
@@ -503,17 +508,17 @@ CODE:5310 32 96	69			      ld      (pwr_sr_sensor), a
 CODE:5313 3D				      dec     a
 CODE:5314 32 B5	6F			      ld      (byte_6FB5), a
 CODE:5317
-CODE:5317	      loc_5317:							      ;	CODE XREF: CODE:52F5j
-CODE:5317 3A 56	68			      ld      a, (byte_6856)
+CODE:5317	      left_quadrant:						      ;	CODE XREF: CODE:52F5j
+CODE:5317 3A 56	68			      ld      a, (ion_dir)
 CODE:531A 0E 01				      ld      c, 1
 CODE:531C CD 18	5B			      call    print_lr_sensor
 CODE:531F CD 81	5B			      call    print_quadrant
-CODE:5322 21 C5	3C			      ld      hl,  VIDEO+0C5h
-CODE:5325 CD CC	5B			      call    sub_5BCC
-CODE:5328 C3 E3	5E			      jp      sub_5EE3
+CODE:5322 21 C5	3C			      ld      hl,  VIDEO+0C5h		      ;	current	quadrant on LR sensor
+CODE:5325 CD CC	5B			      call    init_quadrant
+CODE:5328 C3 E3	5E			      jp      print_sector
 CODE:532B	      ;	---------------------------------------------------------------------------
 CODE:532B
-CODE:532B	      loc_532B:							      ;	CODE XREF: CODE:52DCj
+CODE:532B	      dock_space_station:					      ;	CODE XREF: CODE:52DCj
 CODE:532B 11 67	61			      ld      de, aCommunications	      ;	"COMMUNICATIONS:THE SPACE STATION HAS AC"...
 CODE:532E CD 39	5D			      call    print_string_last_line
 CODE:5331 97				      sub     a
@@ -523,32 +528,32 @@ CODE:5338 32 AF	6F			      ld      (byte_6FAF), a
 CODE:533B 21 BB	3C			      ld      hl,  VIDEO+0BBh
 CODE:533E 11 A6	61			      ld      de, aDock			      ;	" DOCK"
 CODE:5341 CD 3F	5D			      call    print_string
-CODE:5344 06 1A				      ld      b, 1Ah
+CODE:5344 06 1A				      ld      b, 26
 CODE:5346 CD BF	5C			      call    sub_5CBF
-CODE:5349 3E 99				      ld      a, 99h ; 'ô'
+CODE:5349 3E 99				      ld      a, 99h ; 'ô'                    ; full power
 CODE:534B 32 B8	69			      ld      (power_avail), a
 CODE:534E CD 5D	5F			      call    print_power_avail
 CODE:5351 CD BA	56			      call    update_power_distribution
-CODE:5354 21 7D	3D			      ld      hl,  VIDEO+17Dh
+CODE:5354 21 7D	3D			      ld      hl,  VIDEO+17Dh		      ;	triton misls value video address
 CODE:5357 36 31				      ld      (hl), 31h	; '1'
 CODE:5359 23				      inc     hl
-CODE:535A 36 30				      ld      (hl), 30h	; '0'
-CODE:535C 3E 10				      ld      a, 10h
+CODE:535A 36 30				      ld      (hl), 30h	; '0'                 ; display '10'
+CODE:535C 3E 10				      ld      a, 10h			      ;	max triton missiles
 CODE:535E 32 B9	69			      ld      (triton_misls), a
 CODE:5361 3E 03				      ld      a, 3
 CODE:5363 32 BA	69			      ld      (byte_69BA), a
-CODE:5366 32 2B	68			      ld      (byte_682B), a
-CODE:5369 21 3E	3E			      ld      hl,  VIDEO+23Eh
-CODE:536C CD 63	5F			      call    print_BCD_byte
-CODE:536F 21 9B	6F			      ld      hl, 6F9Bh
-CODE:5372 11 06	00			      ld      de, 6
-CODE:5375 06 03				      ld      b, 3
+CODE:5366 32 2B	68			      ld      (antimatter_pods), a
+CODE:5369 21 3E	3E			      ld      hl,  VIDEO+23Eh		      ;	antimatter pods	value video address
+CODE:536C CD 63	5F			      call    print_BCD_byte		      ;	display	antimatter pods
+CODE:536F 21 9B	6F			      ld      hl, antimatter_pod_tbl
+CODE:5372 11 06	00			      ld      de, 6			      ;	offset to next byte
+CODE:5375 06 03				      ld      b, 3			      ;	bytes to clear
 CODE:5377
 CODE:5377	      loc_5377:							      ;	CODE XREF: CODE:537Bj
-CODE:5377 36 00				      ld      (hl), 0
-CODE:5379 19				      add     hl, de
-CODE:537A 05				      dec     b
-CODE:537B C2 77	53			      jp      nz, loc_5377
+CODE:5377 36 00				      ld      (hl), 0			      ;	flag pod unused
+CODE:5379 19				      add     hl, de			      ;	next entry
+CODE:537A 05				      dec     b				      ;	done all bytes?
+CODE:537B C2 77	53			      jp      nz, loc_5377		      ;	no, loop
 CODE:537E 97				      sub     a
 CODE:537F 32 B3	6F			      ld      (byte_6FB3), a
 CODE:5382 32 B5	6F			      ld      (byte_6FB5), a
@@ -556,7 +561,7 @@ CODE:5385 C3 C0	5E			      jp      clear_last_2_lines
 CODE:5388	      ;	---------------------------------------------------------------------------
 CODE:5388	      ;	START OF FUNCTION CHUNK	FOR sub_544D
 CODE:5388
-CODE:5388	      loc_5388:							      ;	CODE XREF: CODE:52E1j
+CODE:5388	      hit_triton_mine:						      ;	CODE XREF: CODE:52E1j
 CODE:5388									      ;	sub_544D+41j ...
 CODE:5388 11 BE	61			      ld      de, aFirstOfficerSi	      ;	"FIRST OFFICER: SIR, WE HAVE HIT A TRITO"...
 CODE:538B CD 39	5D			      call    print_string_last_line
@@ -589,15 +594,15 @@ CODE:53B1 C2 AE	53			      jp      nz, loc_53AE
 CODE:53B4 05				      dec     b
 CODE:53B5 C2 AE	53			      jp      nz, loc_53AE
 CODE:53B8 3E 01				      ld      a, 1
-CODE:53BA 32 C0	53			      ld      (byte_53C0), a
+CODE:53BA 32 C0	53			      ld      (played_before), a
 CODE:53BD C3 01	50			      jp      loc_5001
 CODE:53BD	      ;	END OF FUNCTION	CHUNK FOR handle_low_power
 CODE:53BD	      ;	---------------------------------------------------------------------------
-CODE:53C0 00	      byte_53C0:	      db 0				      ;	DATA XREF: handle_low_power-85Dr
+CODE:53C0 00	      played_before:	      db 0				      ;	DATA XREF: handle_low_power-85Dr
 CODE:53C0									      ;	handle_low_power-5E7w
 CODE:53C1	      ;	---------------------------------------------------------------------------
 CODE:53C1
-CODE:53C1	      loc_53C1:							      ;	CODE XREF: CODE:52E6j
+CODE:53C1	      hit_jovian_warship:					      ;	CODE XREF: CODE:52E6j
 CODE:53C1									      ;	CODE:52EBj
 CODE:53C1 11 BB	69			      ld      de, jovian_officer	      ;	"                     "
 CODE:53C4 CD CF	5E			      call    print_10_lines
@@ -639,10 +644,10 @@ CODE:540B CD 4B	5D			      call    sub_5D4B
 CODE:540E 1D				      dec     e
 CODE:540F C2 DD	53			      jp      nz, loc_53DD
 CODE:5412 21 C5	3C			      ld      hl,  VIDEO+0C5h
-CODE:5415 C3 CC	5B			      jp      sub_5BCC
+CODE:5415 C3 CC	5B			      jp      init_quadrant
 CODE:5418	      ;	---------------------------------------------------------------------------
 CODE:5418
-CODE:5418	      loc_5418:							      ;	CODE XREF: CODE:52F0j
+CODE:5418	      hit_star:							      ;	CODE XREF: CODE:52F0j
 CODE:5418 11 54	62			      ld      de, aNavigatorWeHit	      ;	"NAVIGATOR:WE HIT A STAR!?!"
 CODE:541B CD 39	5D			      call    print_string_last_line
 CODE:541E 3E 11				      ld      a, 11h
@@ -657,18 +662,18 @@ CODE:542A CD C0	5E			      call    clear_last_2_lines
 CODE:542D 3E FF				      ld      a, 0FFh
 CODE:542F 32 B4	6F			      ld      (byte_6FB4), a
 CODE:5432 3A 98	69			      ld      a, (pwr_masers)
-CODE:5435 FE 08				      cp      8
-CODE:5437 F2 40	54			      jp      p, loc_5440
-CODE:543A 11 6F	62			      ld      de, 626Fh
+CODE:5435 FE 08				      cp      8				      ;	less than 8%?
+CODE:5437 F2 40	54			      jp      p, loc_5440		      ;	no, skip
+CODE:543A 11 6F	62			      ld      de, aEngineerComm_0	      ;	"ENGINEER:COMMANDER, WE HAVEN'T THE POWE"...
 CODE:543D C3 39	5D			      jp      print_string_last_line
 CODE:5440	      ;	---------------------------------------------------------------------------
 CODE:5440
 CODE:5440	      loc_5440:							      ;	CODE XREF: CODE:5437j
-CODE:5440 CD A7	5C			      call    sub_5CA7
-CODE:5443 D6 30				      sub     30h ; '0'
-CODE:5445 FA 05	5B			      jp      m, loc_5B05
-CODE:5448 FE 08				      cp      8
-CODE:544A F2 05	5B			      jp      p, loc_5B05
+CODE:5440 CD A7	5C			      call    get_next_cmd_char		      ;	direction
+CODE:5443 D6 30				      sub     30h ; '0'                       ; digit?
+CODE:5445 FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	no, exit
+CODE:5448 FE 08				      cp      8				      ;	greater	than 7?
+CODE:544A F2 05	5B			      jp      p, print_no_sense_and_ret	      ;	yes, exit
 CODE:544D
 CODE:544D	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:544D
@@ -677,25 +682,25 @@ CODE:544D	      sub_544D:							      ;	CODE XREF: CODE:55B2p
 CODE:544D
 CODE:544D	      ;	FUNCTION CHUNK AT CODE:5388 SIZE 00000006 BYTES
 CODE:544D
-CODE:544D 21 9A	69			      ld      hl, 699Ah
-CODE:5450 A7				      and     a
-CODE:5451 CA 5A	54			      jp      z, loc_545A
+CODE:544D 21 9A	69			      ld      hl, dir_addr_delta_tbl
+CODE:5450 A7				      and     a				      ;	up?
+CODE:5451 CA 5A	54			      jp      z, loc_545A		      ;	yes, exit
 CODE:5454
 CODE:5454	      loc_5454:							      ;	CODE XREF: sub_544D+Aj
 CODE:5454 23				      inc     hl
-CODE:5455 23				      inc     hl
-CODE:5456 3D				      dec     a
-CODE:5457 C2 54	54			      jp      nz, loc_5454
+CODE:5455 23				      inc     hl			      ;	next table entry
+CODE:5456 3D				      dec     a				      ;	done?
+CODE:5457 C2 54	54			      jp      nz, loc_5454		      ;	no, loop
 CODE:545A
 CODE:545A	      loc_545A:							      ;	CODE XREF: sub_544D+4j
 CODE:545A 5E				      ld      e, (hl)
 CODE:545B 23				      inc     hl
-CODE:545C 56				      ld      d, (hl)
+CODE:545C 56				      ld      d, (hl)			      ;	DE = delta
 CODE:545D 3A AF	6F			      ld      a, (byte_6FAF)
 CODE:5460 32 F1	67			      ld      (byte_67F1), a
 CODE:5463 3E 02				      ld      a, 2
 CODE:5465 32 AF	6F			      ld      (byte_6FAF), a
-CODE:5468 2A 28	68			      ld      hl, (word_6828)
+CODE:5468 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:546B 06 00				      ld      b, 0
 CODE:546D D5				      push    de
 CODE:546E
@@ -716,7 +721,7 @@ CODE:5484 CA 6E	54			      jp      z, loc_546E
 CODE:5487 FE 26				      cp      26h ; '&'
 CODE:5489 CA AE	54			      jp      z, loc_54AE
 CODE:548C FE 25				      cp      25h ; '%'
-CODE:548E CA 88	53			      jp      z, loc_5388
+CODE:548E CA 88	53			      jp      z, hit_triton_mine
 CODE:5491 FE 58				      cp      58h ; 'X'
 CODE:5493 C2 A3	54			      jp      nz, loc_54A3
 CODE:5496 D1				      pop     de
@@ -755,7 +760,7 @@ CODE:54C9	      loc_54C9:							      ;	CODE XREF: sub_544D+50j
 CODE:54C9									      ;	sub_544D+5Ej ...
 CODE:54C9 CD 4B	5D			      call    sub_5D4B
 CODE:54CC D1				      pop     de
-CODE:54CD 2A 28	68			      ld      hl, (word_6828)
+CODE:54CD 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:54D0
 CODE:54D0	      loc_54D0:							      ;	CODE XREF: sub_544D+90j
 CODE:54D0 19				      add     hl, de
@@ -779,23 +784,23 @@ CODE:54EB	      ;	--------------------------------------------------------------
 CODE:54EB
 CODE:54EB	      triton_missle:						      ;	DATA XREF: CODE:6808o
 CODE:54EB CD C0	5E			      call    clear_last_2_lines
-CODE:54EE CD 75	5F			      call    sub_5F75
-CODE:54F1 DA 76	56			      jp      c, loc_5676
+CODE:54EE CD 75	5F			      call    dec_triton_misls_and_print
+CODE:54F1 DA 76	56			      jp      c, print_no_more_triton_misls   ;	no missiles, exit
 CODE:54F4 3A 99	69			      ld      a, (pwr_trt_missl)
-CODE:54F7 FE 0A				      cp      0Ah
-CODE:54F9 F2 02	55			      jp      p, loc_5502
+CODE:54F7 FE 0A				      cp      10			      ;	less than 10%?
+CODE:54F9 F2 02	55			      jp      p, titron_pwr_ok		      ;	no, skip
 CODE:54FC
 CODE:54FC	      loc_54FC:							      ;	CODE XREF: CODE:5871j
-CODE:54FC 11 DE	62			      ld      de, 62DEh
+CODE:54FC 11 DE	62			      ld      de, aEngineerComm_1	      ;	"ENGINEER:COMMANDER, THE MISSILE TUBES A"...
 CODE:54FF C3 39	5D			      jp      print_string_last_line
 CODE:5502	      ;	---------------------------------------------------------------------------
 CODE:5502
-CODE:5502	      loc_5502:							      ;	CODE XREF: CODE:54F9j
-CODE:5502 CD A7	5C			      call    sub_5CA7
-CODE:5505 D6 30				      sub     30h ; '0'
-CODE:5507 FA 05	5B			      jp      m, loc_5B05
-CODE:550A FE 08				      cp      8
-CODE:550C F2 05	5B			      jp      p, loc_5B05
+CODE:5502	      titron_pwr_ok:						      ;	CODE XREF: CODE:54F9j
+CODE:5502 CD A7	5C			      call    get_next_cmd_char		      ;	direction
+CODE:5505 D6 30				      sub     30h ; '0'                       ; digit?
+CODE:5507 FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	no, exit
+CODE:550A FE 08				      cp      8				      ;	greater	than 7?
+CODE:550C F2 05	5B			      jp      p, print_no_sense_and_ret	      ;	yes, exit
 CODE:550F
 CODE:550F	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:550F
@@ -807,21 +812,21 @@ CODE:550F	      ;	FUNCTION CHUNK AT CODE:5585 SIZE 00000017 BYTES
 CODE:550F	      ;	FUNCTION CHUNK AT CODE:5662 SIZE 00000014 BYTES
 CODE:550F	      ;	FUNCTION CHUNK AT CODE:5842 SIZE 0000000F BYTES
 CODE:550F
-CODE:550F 21 9A	69			      ld      hl, 699Ah
-CODE:5512 A7				      and     a
-CODE:5513 CA 1C	55			      jp      z, loc_551C
+CODE:550F 21 9A	69			      ld      hl, dir_addr_delta_tbl
+CODE:5512 A7				      and     a				      ;	up?
+CODE:5513 CA 1C	55			      jp      z, loc_551C		      ;	yes, skip
 CODE:5516
 CODE:5516	      loc_5516:							      ;	CODE XREF: sub_550F+Aj
 CODE:5516 23				      inc     hl
-CODE:5517 23				      inc     hl
-CODE:5518 3D				      dec     a
-CODE:5519 C2 16	55			      jp      nz, loc_5516
+CODE:5517 23				      inc     hl			      ;	next tbl entry
+CODE:5518 3D				      dec     a				      ;	done?
+CODE:5519 C2 16	55			      jp      nz, loc_5516		      ;	no, loop
 CODE:551C
 CODE:551C	      loc_551C:							      ;	CODE XREF: sub_550F+4j
 CODE:551C 5E				      ld      e, (hl)
 CODE:551D 23				      inc     hl
 CODE:551E 56				      ld      d, (hl)
-CODE:551F 2A 28	68			      ld      hl, (word_6828)
+CODE:551F 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:5522
 CODE:5522	      loc_5522:							      ;	CODE XREF: sub_550F+28j
 CODE:5522									      ;	sub_550F+2Dj
@@ -854,7 +859,7 @@ CODE:5552 CA 6E	56			      jp      z, loc_566E
 CODE:5555 FE 26				      cp      26h ; '&'
 CODE:5557 CA 62	56			      jp      z, loc_5662
 CODE:555A FE 25				      cp      25h ; '%'
-CODE:555C CA 88	53			      jp      z, loc_5388
+CODE:555C CA 88	53			      jp      z, hit_triton_mine
 CODE:555F FE 58				      cp      58h ; 'X'
 CODE:5561 CA 6F	55			      jp      z, loc_556F
 CODE:5564 FE 5B				      cp      5Bh ; '['
@@ -872,7 +877,7 @@ CODE:5570									      ;	CODE:5643j
 CODE:5570 CD 00	5D			      call    rand_0_9
 CODE:5573 A7				      and     a
 CODE:5574 CA 85	55			      jp      z, loc_5585
-CODE:5577 21 2A	68			      ld      hl, 682Ah
+CODE:5577 21 2A	68			      ld      hl, engine_explode_countdown
 CODE:557A
 CODE:557A	      loc_557A:							      ;	CODE XREF: sub_550F+6Ej
 CODE:557A 3D				      dec     a
@@ -913,9 +918,9 @@ CODE:5599	      ;	END OF FUNCTION	CHUNK FOR sub_550F
 CODE:559C	      ;	---------------------------------------------------------------------------
 CODE:559C 3A B4	6F			      ld      a, (byte_6FB4)
 CODE:559F A7				      and     a
-CODE:55A0 2A 28	68			      ld      hl, (word_6828)
+CODE:55A0 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:55A3 E3				      ex      (sp), hl
-CODE:55A4 22 28	68			      ld      (word_6828), hl
+CODE:55A4 22 28	68			      ld      (hephaestus_video_addr), hl
 CODE:55A7 F2 B8	55			      jp      p, loc_55B8
 CODE:55AA
 CODE:55AA	      loc_55AA:							      ;	CODE XREF: CODE:55AFj
@@ -945,37 +950,37 @@ CODE:55CD CD 0F	55			      call    sub_550F
 CODE:55D0
 CODE:55D0	      loc_55D0:							      ;	CODE XREF: CODE:55B5j
 CODE:55D0 E1				      pop     hl
-CODE:55D1 22 28	68			      ld      (word_6828), hl
+CODE:55D1 22 28	68			      ld      (hephaestus_video_addr), hl
 CODE:55D4 C9				      ret
 CODE:55D5	      ;	---------------------------------------------------------------------------
-CODE:55D5 3E 58				      ld      a, 58h ; 'X'
-CODE:55D7 32 EB	55			      ld      (byte_55EB), a
+CODE:55D5 3E 58				      ld      a, 58h ; 'X'                    ; unknown graphic
+CODE:55D7 32 EB	55			      ld      (loc_55EA+1), a		      ;	patch!
 CODE:55DA
 CODE:55DA	      loc_55DA:							      ;	CODE XREF: CODE:560Aj
-CODE:55DA 21 57	3C			      ld      hl, 3C57h
-CODE:55DD 11 2B	00			      ld      de, 2Bh ;	'+'
-CODE:55E0 06 0A				      ld      b, 0Ah
+CODE:55DA 21 57	3C			      ld      hl,  VIDEO+57h		      ;	top-left '.' in quadrant display
+CODE:55DD 11 2B	00			      ld      de, 2Bh ;	'+'                   ; offset to next line of quadrant display
+CODE:55E0 06 0A				      ld      b, 10			      ;	10 rows	to update
 CODE:55E2
 CODE:55E2	      loc_55E2:							      ;	CODE XREF: CODE:55F3j
-CODE:55E2 0E 15				      ld      c, 15h
+CODE:55E2 0E 15				      ld      c, 21			      ;	21 columns to update
 CODE:55E4
 CODE:55E4	      loc_55E4:							      ;	CODE XREF: CODE:55EEj
-CODE:55E4 7E				      ld      a, (hl)
-CODE:55E5 FE 2E				      cp      2Eh ; '.'
-CODE:55E7 C2 EC	55			      jp      nz, loc_55EC
-CODE:55E7	      ;	---------------------------------------------------------------------------
-CODE:55EA 36				      db  36h ;	6
-CODE:55EB 58	      byte_55EB:	      db 58h				      ;	DATA XREF: CODE:55D7w
-CODE:55EB									      ;	CODE:5607w
-CODE:55EC	      ;	---------------------------------------------------------------------------
+CODE:55E4 7E				      ld      a, (hl)			      ;	get sector contents
+CODE:55E5 FE 2E				      cp      2Eh ; '.'                       ; empty?
+CODE:55E7 C2 EC	55			      jp      nz, loc_55EC		      ;	no, skip
+CODE:55EA	      ;	the object graphic is patched (X/%)
+CODE:55EA
+CODE:55EA	      loc_55EA:							      ;	DATA XREF: CODE:55D7w
+CODE:55EA									      ;	CODE:5607w
+CODE:55EA 36 58				      ld      (hl), 58h	; 'X'                 ; write object graphic to video
 CODE:55EC
 CODE:55EC	      loc_55EC:							      ;	CODE XREF: CODE:55E7j
-CODE:55EC 0D				      dec     c
-CODE:55ED 23				      inc     hl
-CODE:55EE C2 E4	55			      jp      nz, loc_55E4
-CODE:55F1 19				      add     hl, de
-CODE:55F2 05				      dec     b
-CODE:55F3 C2 E2	55			      jp      nz, loc_55E2
+CODE:55EC 0D				      dec     c				      ;	done all columns?
+CODE:55ED 23				      inc     hl			      ;	next video address
+CODE:55EE C2 E4	55			      jp      nz, loc_55E4		      ;	no, loop
+CODE:55F1 19				      add     hl, de			      ;	next row video address
+CODE:55F2 05				      dec     b				      ;	done all rows?
+CODE:55F3 C2 E2	55			      jp      nz, loc_55E2		      ;	no, loop
 CODE:55F6 CD 00	5D			      call    rand_0_9
 CODE:55F9 FE 05				      cp      5
 CODE:55FB D2 03	56			      jp      nc, loc_5603
@@ -986,8 +991,8 @@ CODE:5603	      loc_5603:							      ;	CODE XREF: CODE:55FBj
 CODE:5603 E1				      pop     hl
 CODE:5604 C9				      ret
 CODE:5605	      ;	---------------------------------------------------------------------------
-CODE:5605 3E 25				      ld      a, 25h ; '%'
-CODE:5607 32 EB	55			      ld      (byte_55EB), a
+CODE:5605 3E 25				      ld      a, 25h ; '%'                    ; triton mine
+CODE:5607 32 EB	55			      ld      (loc_55EA+1), a		      ;	patch
 CODE:560A C3 DA	55			      jp      loc_55DA
 CODE:560D	      ;	---------------------------------------------------------------------------
 CODE:560D CD 00	5D			      call    rand_0_9
@@ -1010,9 +1015,9 @@ CODE:5628 3E 03				      ld      a, 3
 CODE:562A 0E 01				      ld      c, 1
 CODE:562C CD 18	5B			      call    print_lr_sensor
 CODE:562F 21 C5	3C			      ld      hl,  VIDEO+0C5h
-CODE:5632 CD CC	5B			      call    sub_5BCC
+CODE:5632 CD CC	5B			      call    init_quadrant
 CODE:5635 CD 81	5B			      call    print_quadrant
-CODE:5638 CD E3	5E			      call    sub_5EE3
+CODE:5638 CD E3	5E			      call    print_sector
 CODE:563B E1				      pop     hl
 CODE:563C C9				      ret
 CODE:563D	      ;	---------------------------------------------------------------------------
@@ -1031,7 +1036,7 @@ CODE:564D CD 00	5D			      call    rand_0_9
 CODE:5650 FE 04				      cp      4
 CODE:5652 DA 5D	56			      jp      c, loc_565D
 CODE:5655 06 12				      ld      b, 12h
-CODE:5657 CD 66	5A			      call    loc_5A66
+CODE:5657 CD 66	5A			      call    dec_pwr_and_XXXX
 CODE:565A C3 4D	56			      jp      loc_564D
 CODE:565D	      ;	---------------------------------------------------------------------------
 CODE:565D
@@ -1057,7 +1062,7 @@ CODE:5673 C3 39	5D			      jp      print_string_last_line
 CODE:5673	      ;	END OF FUNCTION	CHUNK FOR sub_550F
 CODE:5676	      ;	---------------------------------------------------------------------------
 CODE:5676
-CODE:5676	      loc_5676:							      ;	CODE XREF: CODE:54F1j
+CODE:5676	      print_no_more_triton_misls:				      ;	CODE XREF: CODE:54F1j
 CODE:5676 11 4B	64			      ld      de, aWeaponrySirWeH	      ;	"WEAPONRY:SIR, WE HAVE NO MORE TRITON MI"...
 CODE:5679 C3 39	5D			      jp      print_string_last_line
 CODE:567C	      ;	---------------------------------------------------------------------------
@@ -1066,15 +1071,15 @@ CODE:567C	      power_distrib:						      ;	DATA XREF: CODE:680Ao
 CODE:567C 97				      sub     a
 CODE:567D 32 B9	6F			      ld      (byte_6FB9), a
 CODE:5680 CD C0	5E			      call    clear_last_2_lines
-CODE:5683 CD A7	5C			      call    sub_5CA7
-CODE:5686 21 21	68			      ld      hl, aHlsdmt		      ;	"HLSDMT"
+CODE:5683 CD A7	5C			      call    get_next_cmd_char
+CODE:5686 21 21	68			      ld      hl, pwr_subcmd_tbl	      ;	"HLSDMT"
 CODE:5689 11 94	69			      ld      de, pwr_hypr_ion
 CODE:568C 47				      ld      b, a
 CODE:568D
 CODE:568D	      loc_568D:							      ;	CODE XREF: CODE:5698j
 CODE:568D 7E				      ld      a, (hl)
 CODE:568E A7				      and     a
-CODE:568F CA 05	5B			      jp      z, loc_5B05
+CODE:568F CA 05	5B			      jp      z, print_no_sense_and_ret
 CODE:5692 B8				      cp      b
 CODE:5693 CA 9B	56			      jp      z, loc_569B
 CODE:5696 23				      inc     hl
@@ -1083,13 +1088,13 @@ CODE:5698 C3 8D	56			      jp      loc_568D
 CODE:569B	      ;	---------------------------------------------------------------------------
 CODE:569B
 CODE:569B	      loc_569B:							      ;	CODE XREF: CODE:5693j
-CODE:569B CD A7	5C			      call    sub_5CA7
+CODE:569B CD A7	5C			      call    get_next_cmd_char
 CODE:569E CA A3	56			      jp      z, loc_56A3
 CODE:56A1 D6 30				      sub     30h ; '0'
 CODE:56A3
 CODE:56A3	      loc_56A3:							      ;	CODE XREF: CODE:569Ej
 CODE:56A3 47				      ld      b, a
-CODE:56A4 CD A7	5C			      call    sub_5CA7
+CODE:56A4 CD A7	5C			      call    get_next_cmd_char
 CODE:56A7 C2 B0	56			      jp      nz, loc_56B0
 CODE:56AA 48				      ld      c, b
 CODE:56AB 06 00				      ld      b, 0
@@ -1317,7 +1322,7 @@ CODE:57F8	      ;	--------------------------------------------------------------
 CODE:57F8 11 2A	66			      ld      de, aHasJumbledTheQ	      ;	"HAS JUMBLED THE QUADRANT"
 CODE:57FB CD 29	5D			      call    sub_5D29
 CODE:57FE 21 C5	3C			      ld      hl,  VIDEO+0C5h
-CODE:5801 C3 CC	5B			      jp      sub_5BCC
+CODE:5801 C3 CC	5B			      jp      init_quadrant
 CODE:5804	      ;	---------------------------------------------------------------------------
 CODE:5804 21 80	3F			      ld      hl,  VIDEO+380h
 CODE:5807 11 43	66			      ld      de, aHasDestroyedAl	      ;	"HAS DESTROYED ALL THE          JOVIANS "...
@@ -1338,7 +1343,7 @@ CODE:5823 3E 30				      ld      a, 30h ; '0'
 CODE:5825 32 C5	3C			      ld      (VIDEO+0C5h), a
 CODE:5828 CD 1E	5F			      call    sub_5F1E
 CODE:582B 21 C5	3C			      ld      hl,  VIDEO+0C5h
-CODE:582E C3 CC	5B			      jp      sub_5BCC
+CODE:582E C3 CC	5B			      jp      init_quadrant
 CODE:5831	      ;	---------------------------------------------------------------------------
 CODE:5831 11 7A	66			      ld      de, aDestroysItself	      ;	"DESTROYS ITSELF"
 CODE:5834 3E FF				      ld      a, 0FFh
@@ -1367,137 +1372,137 @@ CODE:585C 11 0B	64			      ld      de, aMedicalOfficer	      ;	"MEDICAL OFFICER:
 CODE:585F C3 39	5D			      jp      print_string_last_line
 CODE:5862	      ;	---------------------------------------------------------------------------
 CODE:5862
-CODE:5862	      explode_antimatter:					      ;	DATA XREF: CODE:6812o
-CODE:5862 3A 2B	68			      ld      a, (byte_682B)
-CODE:5865 A7				      and     a
+CODE:5862	      launch_antimatter:					      ;	DATA XREF: CODE:6812o
+CODE:5862 3A 2B	68			      ld      a, (antimatter_pods)
+CODE:5865 A7				      and     a				      ;	none left?
 CODE:5866 11 5E	67			      ld      de, aWeaponryWeReOu	      ;	"WEAPONRY: WE'RE OUT OF PODS"
-CODE:5869 CA 39	5D			      jp      z, print_string_last_line
+CODE:5869 CA 39	5D			      jp      z, print_string_last_line	      ;	yes, exit
 CODE:586C 3A 99	69			      ld      a, (pwr_trt_missl)
-CODE:586F FE 08				      cp      8
-CODE:5871 FA FC	54			      jp      m, loc_54FC
-CODE:5874 CD A7	5C			      call    sub_5CA7
-CODE:5877 CA 05	5B			      jp      z, loc_5B05
-CODE:587A D6 31				      sub     31h ; '1'
-CODE:587C FA 05	5B			      jp      m, loc_5B05
-CODE:587F FE 03				      cp      3
-CODE:5881 F2 05	5B			      jp      p, loc_5B05
-CODE:5884 21 9B	6F			      ld      hl, 6F9Bh
-CODE:5887 47				      ld      b, a
-CODE:5888 07				      rlca
-CODE:5889 80				      add     a, b
-CODE:588A 07				      rlca
+CODE:586F FE 08				      cp      8				      ;	less than 8%?
+CODE:5871 FA FC	54			      jp      m, loc_54FC		      ;	yes, exit
+CODE:5874 CD A7	5C			      call    get_next_cmd_char		      ;	pod #
+CODE:5877 CA 05	5B			      jp      z, print_no_sense_and_ret	      ;	none, exit
+CODE:587A D6 31				      sub     31h ; '1'                       ; less than '1'?
+CODE:587C FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	yes, exit
+CODE:587F FE 03				      cp      3				      ;	greater	than 3?
+CODE:5881 F2 05	5B			      jp      p, print_no_sense_and_ret	      ;	yes, exit
+CODE:5884 21 9B	6F			      ld      hl, antimatter_pod_tbl
+CODE:5887 47				      ld      b, a			      ;	zero-based pod #
+CODE:5888 07				      rlca				      ;	x2
+CODE:5889 80				      add     a, b			      ;	x3
+CODE:588A 07				      rlca				      ;	x6
 CODE:588B 85				      add     a, l
 CODE:588C 6F				      ld      l, a
 CODE:588D 7C				      ld      a, h
 CODE:588E CE 00				      adc     a, 0
-CODE:5890 67				      ld      h, a
-CODE:5891 7E				      ld      a, (hl)
-CODE:5892 A7				      and     a
+CODE:5890 67				      ld      h, a			      ;	ptr pod	entry
+CODE:5891 7E				      ld      a, (hl)			      ;	get pod	status
+CODE:5892 A7				      and     a				      ;	used?
 CODE:5893 11 7A	67			      ld      de, aComputerThePod	      ;	"COMPUTER: THE POD HAS BEEN USED"
-CODE:5896 C2 39	5D			      jp      nz, print_string_last_line
-CODE:5899 CD A7	5C			      call    sub_5CA7
-CODE:589C CA 05	5B			      jp      z, loc_5B05
-CODE:589F D6 30				      sub     30h ; '0'
-CODE:58A1 FA 05	5B			      jp      m, loc_5B05
-CODE:58A4 FE 08				      cp      8
-CODE:58A6 F2 05	5B			      jp      p, loc_5B05
-CODE:58A9 F5				      push    af
-CODE:58AA CD A7	5C			      call    sub_5CA7
-CODE:58AD CA BF	58			      jp      z, loc_58BF
-CODE:58B0 D6 30				      sub     30h ; '0'
-CODE:58B2 FA 05	5B			      jp      m, loc_5B05
-CODE:58B5 FE 0A				      cp      0Ah
-CODE:58B7 F2 05	5B			      jp      p, loc_5B05
+CODE:5896 C2 39	5D			      jp      nz, print_string_last_line      ;	yes, exit
+CODE:5899 CD A7	5C			      call    get_next_cmd_char		      ;	direction
+CODE:589C CA 05	5B			      jp      z, print_no_sense_and_ret	      ;	none, exit
+CODE:589F D6 30				      sub     30h ; '0'                       ; less than '0'?
+CODE:58A1 FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	yes, exit
+CODE:58A4 FE 08				      cp      8				      ;	greater	than 7?
+CODE:58A6 F2 05	5B			      jp      p, print_no_sense_and_ret	      ;	yes, exit
+CODE:58A9 F5				      push    af			      ;	tmp store direction
+CODE:58AA CD A7	5C			      call    get_next_cmd_char		      ;	speed
+CODE:58AD CA BF	58			      jp      z, loc_58BF		      ;	none, skip
+CODE:58B0 D6 30				      sub     30h ; '0'                       ; less than '0'?
+CODE:58B2 FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	yes, exit
+CODE:58B5 FE 0A				      cp      10			      ;	greater	than 9?
+CODE:58B7 F2 05	5B			      jp      p, print_no_sense_and_ret	      ;	yes, exit
 CODE:58BA 3C				      inc     a
-CODE:58BB 07				      rlca
-CODE:58BC 32 40	68			      ld      (byte_6840), a
+CODE:58BB 07				      rlca				      ;	scale
+CODE:58BC 32 40	68			      ld      (pod_speed), a
 CODE:58BF
 CODE:58BF	      loc_58BF:							      ;	CODE XREF: CODE:58ADj
-CODE:58BF 36 01				      ld      (hl), 1
-CODE:58C1 F1				      pop     af
-CODE:58C2 E5				      push    hl
-CODE:58C3 23				      inc     hl
+CODE:58BF 36 01				      ld      (hl), 1			      ;	flag pod launched
+CODE:58C1 F1				      pop     af			      ;	direction
+CODE:58C2 E5				      push    hl			      ;	tmp store pod status
+CODE:58C3 23				      inc     hl			      ;	ptr pod	address	delta
 CODE:58C4 EB				      ex      de, hl
-CODE:58C5 21 9A	69			      ld      hl, 699Ah
+CODE:58C5 21 9A	69			      ld      hl, dir_addr_delta_tbl
 CODE:58C8 07				      rlca
 CODE:58C9 85				      add     a, l
 CODE:58CA 6F				      ld      l, a
 CODE:58CB 7C				      ld      a, h
 CODE:58CC CE 00				      adc     a, 0
-CODE:58CE 67				      ld      h, a
-CODE:58CF 7E				      ld      a, (hl)
-CODE:58D0 12				      ld      (de), a
+CODE:58CE 67				      ld      h, a			      ;	ptr tbl	entry
+CODE:58CF 7E				      ld      a, (hl)			      ;	delta lsb
+CODE:58D0 12				      ld      (de), a			      ;	store in pod delta lsb
 CODE:58D1 23				      inc     hl
 CODE:58D2 13				      inc     de
-CODE:58D3 7E				      ld      a, (hl)
-CODE:58D4 12				      ld      (de), a
+CODE:58D3 7E				      ld      a, (hl)			      ;	delta msb
+CODE:58D4 12				      ld      (de), a			      ;	store in pod delta msb
 CODE:58D5 D5				      push    de
-CODE:58D6 1B				      dec     de
-CODE:58D7 2A 28	68			      ld      hl, (word_6828)
+CODE:58D6 1B				      dec     de			      ;	ptr pod	delta lsb
+CODE:58D7 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:58DA 1A				      ld      a, (de)
 CODE:58DB 85				      add     a, l
-CODE:58DC 6F				      ld      l, a
-CODE:58DD 13				      inc     de
+CODE:58DC 6F				      ld      l, a			      ;	calc video address lsb
+CODE:58DD 13				      inc     de			      ;	ptr pod	delta msb
 CODE:58DE 1A				      ld      a, (de)
 CODE:58DF 8C				      adc     a, h
-CODE:58E0 67				      ld      h, a
+CODE:58E0 67				      ld      h, a			      ;	calc video address msb
 CODE:58E1 D1				      pop     de
-CODE:58E2 13				      inc     de
+CODE:58E2 13				      inc     de			      ;	ptr pod	video address lsb
 CODE:58E3 7D				      ld      a, l
-CODE:58E4 12				      ld      (de), a
+CODE:58E4 12				      ld      (de), a			      ;	store pod video	address	lsb
 CODE:58E5 13				      inc     de
 CODE:58E6 7C				      ld      a, h
-CODE:58E7 12				      ld      (de), a
-CODE:58E8 7E				      ld      a, (hl)
-CODE:58E9 FE 2E				      cp      2Eh ; '.'
-CODE:58EB C2 03	59			      jp      nz, loc_5903
-CODE:58EE 36 23				      ld      (hl), 23h	; '#'
+CODE:58E7 12				      ld      (de), a			      ;	store pod video	address	msb
+CODE:58E8 7E				      ld      a, (hl)			      ;	get sector contents
+CODE:58E9 FE 2E				      cp      2Eh ; '.'                       ; empty?
+CODE:58EB C2 03	59			      jp      nz, print_pod_blocked	      ;	no, exit
+CODE:58EE 36 23				      ld      (hl), 23h	; '#'                 ; write pod graphic to video
 CODE:58F0 13				      inc     de
-CODE:58F1 3A 40	68			      ld      a, (byte_6840)
-CODE:58F4 12				      ld      (de), a
-CODE:58F5 3A 2B	68			      ld      a, (byte_682B)
-CODE:58F8 3D				      dec     a
-CODE:58F9 32 2B	68			      ld      (byte_682B), a
-CODE:58FC E1				      pop     hl
-CODE:58FD 21 3E	3E			      ld      hl, 3E3Eh
+CODE:58F1 3A 40	68			      ld      a, (pod_speed)
+CODE:58F4 12				      ld      (de), a			      ;	store pod speed
+CODE:58F5 3A 2B	68			      ld      a, (antimatter_pods)
+CODE:58F8 3D				      dec     a				      ;	update
+CODE:58F9 32 2B	68			      ld      (antimatter_pods), a
+CODE:58FC E1				      pop     hl			      ;	discard	tmp store
+CODE:58FD 21 3E	3E			      ld      hl,  VIDEO+23Eh		      ;	antimatter pods	value video address
 CODE:5900 C3 63	5F			      jp      print_BCD_byte
 CODE:5903	      ;	---------------------------------------------------------------------------
 CODE:5903
-CODE:5903	      loc_5903:							      ;	CODE XREF: CODE:58EBj
+CODE:5903	      print_pod_blocked:					      ;	CODE XREF: CODE:58EBj
 CODE:5903 11 9A	67			      ld      de, aComputerPodLau	      ;	"COMPUTER: POD LAUNCH IS BLOCKED"
-CODE:5906 E1				      pop     hl
-CODE:5907 36 00				      ld      (hl), 0
+CODE:5906 E1				      pop     hl			      ;	ptr pod	status
+CODE:5907 36 00				      ld      (hl), 0			      ;	flag unused again
 CODE:5909 C3 39	5D			      jp      print_string_last_line
 CODE:590C	      ;	---------------------------------------------------------------------------
 CODE:590C
 CODE:590C	      explode_pod:						      ;	DATA XREF: CODE:6810o
-CODE:590C CD A7	5C			      call    sub_5CA7
-CODE:590F CA 05	5B			      jp      z, loc_5B05
-CODE:5912 D6 31				      sub     31h ; '1'
-CODE:5914 FA 05	5B			      jp      m, loc_5B05
-CODE:5917 FE 03				      cp      3
-CODE:5919 F2 05	5B			      jp      p, loc_5B05
-CODE:591C 47				      ld      b, a
-CODE:591D 07				      rlca
-CODE:591E 80				      add     a, b
-CODE:591F 07				      rlca
-CODE:5920 21 9B	6F			      ld      hl, 6F9Bh
+CODE:590C CD A7	5C			      call    get_next_cmd_char		      ;	pod #
+CODE:590F CA 05	5B			      jp      z, print_no_sense_and_ret	      ;	none, exit
+CODE:5912 D6 31				      sub     31h ; '1'                       ; less than 1?
+CODE:5914 FA 05	5B			      jp      m, print_no_sense_and_ret	      ;	yes, exit
+CODE:5917 FE 03				      cp      3				      ;	greater	than 3?
+CODE:5919 F2 05	5B			      jp      p, print_no_sense_and_ret	      ;	yes exit
+CODE:591C 47				      ld      b, a			      ;	0-based	pod #
+CODE:591D 07				      rlca				      ;	x2
+CODE:591E 80				      add     a, b			      ;	x3
+CODE:591F 07				      rlca				      ;	x6
+CODE:5920 21 9B	6F			      ld      hl, antimatter_pod_tbl
 CODE:5923 85				      add     a, l
 CODE:5924 6F				      ld      l, a
 CODE:5925 7C				      ld      a, h
 CODE:5926 CE 00				      adc     a, 0
-CODE:5928 67				      ld      h, a
-CODE:5929 7E				      ld      a, (hl)
-CODE:592A A7				      and     a
-CODE:592B CA 05	5B			      jp      z, loc_5B05
-CODE:592E FE 01				      cp      1
-CODE:5930 CA 39	59			      jp      z, loc_5939
+CODE:5928 67				      ld      h, a			      ;	get ptr	pod entry
+CODE:5929 7E				      ld      a, (hl)			      ;	pod status
+CODE:592A A7				      and     a				      ;	used?
+CODE:592B CA 05	5B			      jp      z, print_no_sense_and_ret	      ;	no, exit
+CODE:592E FE 01				      cp      1				      ;	launched?
+CODE:5930 CA 39	59			      jp      z, loc_5939		      ;	yes, skip
 CODE:5933 11 7A	67			      ld      de, aComputerThePod	      ;	"COMPUTER: THE POD HAS BEEN USED"
 CODE:5936 C3 39	5D			      jp      print_string_last_line
 CODE:5939	      ;	---------------------------------------------------------------------------
 CODE:5939
 CODE:5939	      loc_5939:							      ;	CODE XREF: CODE:5930j
-CODE:5939 36 02				      ld      (hl), 2
+CODE:5939 36 02				      ld      (hl), 2			      ;	flag exploded
 CODE:593B 23				      inc     hl
 CODE:593C 23				      inc     hl
 CODE:593D 23				      inc     hl
@@ -1507,7 +1512,7 @@ CODE:5940 66				      ld      h, (hl)
 CODE:5941 6F				      ld      l, a
 CODE:5942 36 8F				      ld      (hl), 8Fh	; 'è'
 CODE:5944 EB				      ex      de, hl
-CODE:5945 21 9A	69			      ld      hl, 699Ah
+CODE:5945 21 9A	69			      ld      hl, dir_addr_delta_tbl
 CODE:5948 06 08				      ld      b, 8
 CODE:594A
 CODE:594A	      loc_594A:							      ;	CODE XREF: CODE:5989j
@@ -1523,7 +1528,7 @@ CODE:5953 CA 8D	59			      jp      z, loc_598D
 CODE:5956 FE 40				      cp      40h ; '@'
 CODE:5958 CA 8D	59			      jp      z, loc_598D
 CODE:595B FE 25				      cp      25h ; '%'
-CODE:595D CA 88	53			      jp      z, loc_5388
+CODE:595D CA 88	53			      jp      z, hit_triton_mine
 CODE:5960 FE 5B				      cp      5Bh ; '['
 CODE:5962 CA 8E	53			      jp      z, print_game_over_screen
 CODE:5965 FE 23				      cp      23h ; '#'
@@ -1663,7 +1668,7 @@ CODE:5A2C 11 B2	61			      ld      de, aRed			      ;	" RED "
 CODE:5A2F CD 3F	5D			      call    print_string
 CODE:5A32
 CODE:5A32	      loc_5A32:							      ;	CODE XREF: handle_low_power+80j
-CODE:5A32 2A 28	68			      ld      hl, (word_6828)
+CODE:5A32 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:5A35 7E				      ld      a, (hl)
 CODE:5A36 F6 80				      or      80h ; 'Ä'
 CODE:5A38 77				      ld      (hl), a
@@ -1686,12 +1691,12 @@ CODE:5A58 0E 00				      ld      c, 0
 CODE:5A5A 21 97	69			      ld      hl, pwr_deflectors
 CODE:5A5D 7E				      ld      a, (hl)
 CODE:5A5E A7				      and     a				      ;	pwr zero?
-CODE:5A5F CA 66	5A			      jp      z, loc_5A66		      ;	yes, skip
+CODE:5A5F CA 66	5A			      jp      z, dec_pwr_and_XXXX	      ;	yes, skip
 CODE:5A62 C6 99				      add     a, 99h ; 'ô'
 CODE:5A64 27				      daa				      ;	decrement power
 CODE:5A65 77				      ld      (hl), a			      ;	update pwr_deflectors
 CODE:5A66
-CODE:5A66	      loc_5A66:							      ;	CODE XREF: CODE:5210p
+CODE:5A66	      dec_pwr_and_XXXX:						      ;	CODE XREF: CODE:5210p
 CODE:5A66									      ;	CODE:5256p ...
 CODE:5A66 3A B8	69			      ld      a, (power_avail)
 CODE:5A69 C6 99				      add     a, 99h ; 'ô'
@@ -1716,7 +1721,7 @@ CODE:5A8C FE 05				      cp      5				      ;	greater	than 4?
 CODE:5A8E F2 84	5A			      jp      p, loc_5A84		      ;	yes, regenerate
 CODE:5A91 32 AB	69			      ld      (byte_69AB), a		      ;	update ___
 CODE:5A94 16 04				      ld      d, 4
-CODE:5A96 21 AE	69			      ld      hl, 69AEh
+CODE:5A96 21 AE	69			      ld      hl, word_69AE
 CODE:5A99
 CODE:5A99	      loc_5A99:							      ;	CODE XREF: handle_low_power+13Aj
 CODE:5A99 7E				      ld      a, (hl)
@@ -1731,7 +1736,7 @@ CODE:5AA0	      loc_5AA0:							      ;	CODE XREF: handle_low_power+104j
 CODE:5AA0 CD 00	5D			      call    rand_0_9
 CODE:5AA3 FE 08				      cp      8				      ;	greater	than 7?
 CODE:5AA5 F2 A0	5A			      jp      p, loc_5AA0		      ;	yes, regenerate
-CODE:5AA8 21 9A	69			      ld      hl, 699Ah
+CODE:5AA8 21 9A	69			      ld      hl, dir_addr_delta_tbl
 CODE:5AAB A7				      and     a
 CODE:5AAC
 CODE:5AAC	      loc_5AAC:							      ;	CODE XREF: handle_low_power+111j
@@ -1814,12 +1819,12 @@ CODE:5B02	      ;	End of function	sub_5AFC
 CODE:5B02
 CODE:5B05	      ;	---------------------------------------------------------------------------
 CODE:5B05
-CODE:5B05	      loc_5B05:							      ;	CODE XREF: CODE:5219j
+CODE:5B05	      print_no_sense_and_ret:					      ;	CODE XREF: CODE:5219j
 CODE:5B05									      ;	CODE:521Ej ...
 CODE:5B05 11 E9	60			      ld      de, aFirstOfficerCa	      ;	"FIRST OFFICER:CAPTAIN, YOUR LAST COMMAN"...
 CODE:5B08 CD 39	5D			      call    print_string_last_line
-CODE:5B0B 31 FB	6F			      ld      sp, 6FFBh
-CODE:5B0E 11 97	51			      ld      de, 5197h
+CODE:5B0B 31 FB	6F			      ld      sp, STACK_WATERMARK	      ;	reset stack
+CODE:5B0E 11 97	51			      ld      de, game_loop		      ;	set return address
 CODE:5B11 D5				      push    de
 CODE:5B12 E5				      push    hl
 CODE:5B13 D5				      push    de
@@ -1987,188 +1992,196 @@ CODE:5BCC
 CODE:5BCC	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5BCC
 CODE:5BCC
-CODE:5BCC	      sub_5BCC:							      ;	CODE XREF: handle_low_power-816p
+CODE:5BCC	      init_quadrant:						      ;	CODE XREF: handle_low_power-816p
 CODE:5BCC									      ;	CODE:522Ep ...
-CODE:5BCC E5				      push    hl
+CODE:5BCC E5				      push    hl			      ;	ptr current quadrant on	LR sensor
 CODE:5BCD 97				      sub     a
 CODE:5BCE 32 B8	6F			      ld      (byte_6FB8), a
-CODE:5BD1 11 2C	00			      ld      de, 2Ch ;	','
-CODE:5BD4 21 57	3C			      ld      hl,  VIDEO+57h
-CODE:5BD7 06 0A				      ld      b, 0Ah
+CODE:5BD1	      ;	init quadrant with all '.'
+CODE:5BD1 11 2C	00			      ld      de, 2Ch ;	','                   ; offset to next line of quadrant display
+CODE:5BD4 21 57	3C			      ld      hl,  VIDEO+57h		      ;	quadrant display video address
+CODE:5BD7 06 0A				      ld      b, 10			      ;	10 rows
 CODE:5BD9
-CODE:5BD9	      loc_5BD9:							      ;	CODE XREF: sub_5BCC+1Dj
-CODE:5BD9 0E 0A				      ld      c, 0Ah
+CODE:5BD9	      loc_5BD9:							      ;	CODE XREF: init_quadrant+1Dj
+CODE:5BD9 0E 0A				      ld      c, 10			      ;	10 columns
 CODE:5BDB
-CODE:5BDB	      loc_5BDB:							      ;	CODE XREF: sub_5BCC+16j
-CODE:5BDB 36 20				      ld      (hl), 20h	; ' '
-CODE:5BDD 23				      inc     hl
-CODE:5BDE 36 2E				      ld      (hl), 2Eh	; '.'
-CODE:5BE0 23				      inc     hl
-CODE:5BE1 0D				      dec     c
-CODE:5BE2 C2 DB	5B			      jp      nz, loc_5BDB
-CODE:5BE5 36 20				      ld      (hl), 20h	; ' '
-CODE:5BE7 19				      add     hl, de
-CODE:5BE8 05				      dec     b
-CODE:5BE9 C2 D9	5B			      jp      nz, loc_5BD9
-CODE:5BEC E1				      pop     hl
-CODE:5BED 7E				      ld      a, (hl)
-CODE:5BEE 23				      inc     hl
+CODE:5BDB	      loc_5BDB:							      ;	CODE XREF: init_quadrant+16j
+CODE:5BDB 36 20				      ld      (hl), 20h	; ' '                 ; <SPACE>
+CODE:5BDD 23				      inc     hl			      ;	next video address
+CODE:5BDE 36 2E				      ld      (hl), 2Eh	; '.'                 ; '.'
+CODE:5BE0 23				      inc     hl			      ;	next video address
+CODE:5BE1 0D				      dec     c				      ;	done all columns?
+CODE:5BE2 C2 DB	5B			      jp      nz, loc_5BDB		      ;	no, loop
+CODE:5BE5 36 20				      ld      (hl), 20h	; ' '                 ; <SPACE>
+CODE:5BE7 19				      add     hl, de			      ;	next line of quadrant display
+CODE:5BE8 05				      dec     b				      ;	done all rows?
+CODE:5BE9 C2 D9	5B			      jp      nz, loc_5BD9		      ;	no, loop
+CODE:5BEC	      ;	init warships
+CODE:5BEC E1				      pop     hl			      ;	ptr current quadrant on	LR sensor
+CODE:5BED 7E				      ld      a, (hl)			      ;	get warships
+CODE:5BEE 23				      inc     hl			      ;	ptr space stations
 CODE:5BEF E5				      push    hl
-CODE:5BF0 D6 30				      sub     30h ; '0'
-CODE:5BF2 CA 12	5C			      jp      z, loc_5C12
-CODE:5BF5 21 AE	69			      ld      hl, 69AEh
-CODE:5BF8 22 AC	69			      ld      (word_69AC), hl
-CODE:5BFB 57				      ld      d, a
+CODE:5BF0 D6 30				      sub     30h ; '0'                       ; convert to binary
+CODE:5BF2 CA 12	5C			      jp      z, loc_5C12		      ;	no warships, skip
+CODE:5BF5 21 AE	69			      ld      hl, word_69AE		      ;	ptr table of warships
+CODE:5BF8 22 AC	69			      ld      (word_69AC), hl		      ;	save in	current	tbl ptr
+CODE:5BFB 57				      ld      d, a			      ;	D=warships
 CODE:5BFC
-CODE:5BFC	      loc_5BFC:							      ;	CODE XREF: sub_5BCC+43j
+CODE:5BFC	      loc_5BFC:							      ;	CODE XREF: init_quadrant+43j
 CODE:5BFC CD 00	5D			      call    rand_0_9
-CODE:5BFF FE 01				      cp      1
-CODE:5C01 F2 09	5C			      jp      p, loc_5C09
-CODE:5C04 1E 40				      ld      e, 40h ; '@'
+CODE:5BFF FE 01				      cp      1				      ;	zero?
+CODE:5C01 F2 09	5C			      jp      p, loc_5C09		      ;	no, skip
+CODE:5C04 1E 40				      ld      e, 40h ; '@'                    ; Command Cruiser
 CODE:5C06 C3 0B	5C			      jp      loc_5C0B
 CODE:5C09	      ;	---------------------------------------------------------------------------
 CODE:5C09
-CODE:5C09	      loc_5C09:							      ;	CODE XREF: sub_5BCC+35j
-CODE:5C09 1E 26				      ld      e, 26h ; '&'
+CODE:5C09	      loc_5C09:							      ;	CODE XREF: init_quadrant+35j
+CODE:5C09 1E 26				      ld      e, 26h ; '&'                    ; Battle Cruiser
 CODE:5C0B
-CODE:5C0B	      loc_5C0B:							      ;	CODE XREF: sub_5BCC+3Aj
-CODE:5C0B CD 6F	5C			      call    sub_5C6F
-CODE:5C0E 15				      dec     d
-CODE:5C0F C2 FC	5B			      jp      nz, loc_5BFC
+CODE:5C0B	      loc_5C0B:							      ;	CODE XREF: init_quadrant+3Aj
+CODE:5C0B CD 6F	5C			      call    add_obj_to_quadrant
+CODE:5C0E 15				      dec     d				      ;	done all warships in quadrant?
+CODE:5C0F C2 FC	5B			      jp      nz, loc_5BFC		      ;	no, loop
+CODE:5C12	      ;	init space stations
 CODE:5C12
-CODE:5C12	      loc_5C12:							      ;	CODE XREF: sub_5BCC+26j
-CODE:5C12 2A AC	69			      ld      hl, (word_69AC)
-CODE:5C15 36 00				      ld      (hl), 0
-CODE:5C17 E1				      pop     hl
-CODE:5C18 7E				      ld      a, (hl)
-CODE:5C19 23				      inc     hl
+CODE:5C12	      loc_5C12:							      ;	CODE XREF: init_quadrant+26j
+CODE:5C12 2A AC	69			      ld      hl, (word_69AC)		      ;	get current tbl	ptr
+CODE:5C15 36 00				      ld      (hl), 0			      ;	terminate
+CODE:5C17 E1				      pop     hl			      ;	ptr space stations
+CODE:5C18 7E				      ld      a, (hl)			      ;	get space stations
+CODE:5C19 23				      inc     hl			      ;	ptr stars
 CODE:5C1A E5				      push    hl
-CODE:5C1B D6 30				      sub     30h ; '0'
-CODE:5C1D CA 2A	5C			      jp      z, loc_5C2A
-CODE:5C20 57				      ld      d, a
-CODE:5C21 1E 30				      ld      e, 30h ; '0'
+CODE:5C1B D6 30				      sub     30h ; '0'                       ; convert to binary
+CODE:5C1D CA 2A	5C			      jp      z, loc_5C2A		      ;	none, skip
+CODE:5C20 57				      ld      d, a			      ;	number of space	stations
+CODE:5C21 1E 30				      ld      e, 30h ; '0'                    ; space station graphic
 CODE:5C23
-CODE:5C23	      loc_5C23:							      ;	CODE XREF: sub_5BCC+5Bj
-CODE:5C23 CD 6F	5C			      call    sub_5C6F
-CODE:5C26 15				      dec     d
-CODE:5C27 C2 23	5C			      jp      nz, loc_5C23
+CODE:5C23	      loc_5C23:							      ;	CODE XREF: init_quadrant+5Bj
+CODE:5C23 CD 6F	5C			      call    add_obj_to_quadrant
+CODE:5C26 15				      dec     d				      ;	done all space stations?
+CODE:5C27 C2 23	5C			      jp      nz, loc_5C23		      ;	no, loop
+CODE:5C2A	      ;	init stars
 CODE:5C2A
-CODE:5C2A	      loc_5C2A:							      ;	CODE XREF: sub_5BCC+51j
-CODE:5C2A E1				      pop     hl
-CODE:5C2B 7E				      ld      a, (hl)
-CODE:5C2C D6 30				      sub     30h ; '0'
-CODE:5C2E CA 3B	5C			      jp      z, loc_5C3B
-CODE:5C31 57				      ld      d, a
-CODE:5C32 1E 2A				      ld      e, 2Ah ; '*'
+CODE:5C2A	      loc_5C2A:							      ;	CODE XREF: init_quadrant+51j
+CODE:5C2A E1				      pop     hl			      ;	ptr stars in quadrant
+CODE:5C2B 7E				      ld      a, (hl)			      ;	get stars
+CODE:5C2C D6 30				      sub     30h ; '0'                       ; convert to binary
+CODE:5C2E CA 3B	5C			      jp      z, loc_5C3B		      ;	none, skip
+CODE:5C31 57				      ld      d, a			      ;	number of stars
+CODE:5C32 1E 2A				      ld      e, 2Ah ; '*'                    ; star graphic
 CODE:5C34
-CODE:5C34	      loc_5C34:							      ;	CODE XREF: sub_5BCC+6Cj
-CODE:5C34 CD 6F	5C			      call    sub_5C6F
-CODE:5C37 15				      dec     d
-CODE:5C38 C2 34	5C			      jp      nz, loc_5C34
+CODE:5C34	      loc_5C34:							      ;	CODE XREF: init_quadrant+6Cj
+CODE:5C34 CD 6F	5C			      call    add_obj_to_quadrant
+CODE:5C37 15				      dec     d				      ;	done all stars?
+CODE:5C38 C2 34	5C			      jp      nz, loc_5C34		      ;	no, loop
+CODE:5C3B	      ;	init USS Hephaestus
 CODE:5C3B
-CODE:5C3B	      loc_5C3B:							      ;	CODE XREF: sub_5BCC+62j
-CODE:5C3B 1E 5B				      ld      e, 5Bh ; '['
-CODE:5C3D CD 6F	5C			      call    sub_5C6F
-CODE:5C40 22 28	68			      ld      (word_6828), hl
+CODE:5C3B	      loc_5C3B:							      ;	CODE XREF: init_quadrant+62j
+CODE:5C3B 1E 5B				      ld      e, 5Bh ; '['                    ; USS Hephaestus graphic
+CODE:5C3D CD 6F	5C			      call    add_obj_to_quadrant
+CODE:5C40 22 28	68			      ld      (hephaestus_video_addr), hl
+CODE:5C43	      ;	init mines
 CODE:5C43
-CODE:5C43	      loc_5C43:							      ;	CODE XREF: sub_5BCC+7Cj
+CODE:5C43	      loc_5C43:							      ;	CODE XREF: init_quadrant+7Cj
 CODE:5C43 CD 00	5D			      call    rand_0_9
-CODE:5C46 FE 03				      cp      3
-CODE:5C48 F2 43	5C			      jp      p, loc_5C43
-CODE:5C4B A7				      and     a
-CODE:5C4C CA 59	5C			      jp      z, loc_5C59
-CODE:5C4F 57				      ld      d, a
-CODE:5C50 1E 25				      ld      e, 25h ; '%'
+CODE:5C46 FE 03				      cp      3				      ;	more than 2?
+CODE:5C48 F2 43	5C			      jp      p, loc_5C43		      ;	yes, regenerate
+CODE:5C4B A7				      and     a				      ;	zero?
+CODE:5C4C CA 59	5C			      jp      z, loc_5C59		      ;	yes, skip
+CODE:5C4F 57				      ld      d, a			      ;	(1-2)
+CODE:5C50 1E 25				      ld      e, 25h ; '%'                    ; mine graphic
 CODE:5C52
-CODE:5C52	      loc_5C52:							      ;	CODE XREF: sub_5BCC+8Aj
-CODE:5C52 CD 6F	5C			      call    sub_5C6F
-CODE:5C55 15				      dec     d
-CODE:5C56 C2 52	5C			      jp      nz, loc_5C52
+CODE:5C52	      loc_5C52:							      ;	CODE XREF: init_quadrant+8Aj
+CODE:5C52 CD 6F	5C			      call    add_obj_to_quadrant
+CODE:5C55 15				      dec     d				      ;	done all mines?
+CODE:5C56 C2 52	5C			      jp      nz, loc_5C52		      ;	no, loop
+CODE:5C59	      ;	init unknowns
 CODE:5C59
-CODE:5C59	      loc_5C59:							      ;	CODE XREF: sub_5BCC+80j
-CODE:5C59									      ;	sub_5BCC+92j
+CODE:5C59	      loc_5C59:							      ;	CODE XREF: init_quadrant+80j
+CODE:5C59									      ;	init_quadrant+92j
 CODE:5C59 CD 00	5D			      call    rand_0_9
-CODE:5C5C FE 04				      cp      4
-CODE:5C5E F2 59	5C			      jp      p, loc_5C59
-CODE:5C61 A7				      and     a
+CODE:5C5C FE 04				      cp      4				      ;	more than 3?
+CODE:5C5E F2 59	5C			      jp      p, loc_5C59		      ;	yes, regenerate
+CODE:5C61 A7				      and     a				      ;	zero?
 CODE:5C62 57				      ld      d, a
 CODE:5C63
-CODE:5C63	      loc_5C63:							      ;	CODE XREF: sub_5BCC+A0j
-CODE:5C63 CA E3	5E			      jp      z, sub_5EE3
-CODE:5C66 1E 58				      ld      e, 58h ; 'X'
-CODE:5C68 CD 6F	5C			      call    sub_5C6F
-CODE:5C6B 15				      dec     d
-CODE:5C6C C3 63	5C			      jp      loc_5C63
-CODE:5C6C	      ;	End of function	sub_5BCC
+CODE:5C63	      loc_5C63:							      ;	CODE XREF: init_quadrant+A0j
+CODE:5C63 CA E3	5E			      jp      z, print_sector		      ;	yes, skip
+CODE:5C66 1E 58				      ld      e, 58h ; 'X'                    ; Unknown graphic
+CODE:5C68 CD 6F	5C			      call    add_obj_to_quadrant
+CODE:5C6B 15				      dec     d				      ;	done all unknowns?
+CODE:5C6C C3 63	5C			      jp      loc_5C63			      ;	no, loop
+CODE:5C6C	      ;	End of function	init_quadrant
 CODE:5C6C
+CODE:5C6F	      ;	D=num of (this)	object in quadrant, E=object (graphic)
 CODE:5C6F
 CODE:5C6F	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5C6F
 CODE:5C6F
-CODE:5C6F	      sub_5C6F:							      ;	CODE XREF: sub_5BCC:loc_5C0Bp
-CODE:5C6F									      ;	sub_5BCC:loc_5C23p ...
-CODE:5C6F CD 00	5D			      call    rand_0_9
-CODE:5C72 21 58	3C			      ld      hl,  VIDEO+58h
-CODE:5C75 01 40	00			      ld      bc, 40h ;	'@'
-CODE:5C78 A7				      and     a
-CODE:5C79 CA 81	5C			      jp      z, loc_5C81
+CODE:5C6F	      add_obj_to_quadrant:					      ;	CODE XREF: init_quadrant:loc_5C0Bp
+CODE:5C6F									      ;	init_quadrant:loc_5C23p ...
+CODE:5C6F CD 00	5D			      call    rand_0_9			      ;	rand Y coord
+CODE:5C72 21 58	3C			      ld      hl,  VIDEO+58h		      ;	first '.' in quadrant display
+CODE:5C75 01 40	00			      ld      bc, 40h ;	'@'                   ; offset to next line
+CODE:5C78 A7				      and     a				      ;	zero?
+CODE:5C79 CA 81	5C			      jp      z, loc_5C81		      ;	yes, skip
 CODE:5C7C
-CODE:5C7C	      loc_5C7C:							      ;	CODE XREF: sub_5C6F+Fj
-CODE:5C7C 09				      add     hl, bc
-CODE:5C7D 3D				      dec     a
-CODE:5C7E C2 7C	5C			      jp      nz, loc_5C7C
+CODE:5C7C	      loc_5C7C:							      ;	CODE XREF: add_obj_to_quadrant+Fj
+CODE:5C7C 09				      add     hl, bc			      ;	next line
+CODE:5C7D 3D				      dec     a				      ;	at random line?
+CODE:5C7E C2 7C	5C			      jp      nz, loc_5C7C		      ;	no, loop
 CODE:5C81
-CODE:5C81	      loc_5C81:							      ;	CODE XREF: sub_5C6F+Aj
-CODE:5C81 CD 00	5D			      call    rand_0_9
-CODE:5C84 07				      rlca
+CODE:5C81	      loc_5C81:							      ;	CODE XREF: add_obj_to_quadrant+Aj
+CODE:5C81 CD 00	5D			      call    rand_0_9			      ;	rand X coord
+CODE:5C84 07				      rlca				      ;	x2 for display offset
 CODE:5C85 4F				      ld      c, a
 CODE:5C86 06 00				      ld      b, 0
-CODE:5C88 09				      add     hl, bc
-CODE:5C89 7E				      ld      a, (hl)
-CODE:5C8A FE 2E				      cp      2Eh ; '.'
-CODE:5C8C C2 6F	5C			      jp      nz, sub_5C6F
-CODE:5C8F 73				      ld      (hl), e
+CODE:5C88 09				      add     hl, bc			      ;	offset to X coord
+CODE:5C89 7E				      ld      a, (hl)			      ;	get current contents
+CODE:5C8A FE 2E				      cp      2Eh ; '.'                       ; empty?
+CODE:5C8C C2 6F	5C			      jp      nz, add_obj_to_quadrant	      ;	no, regenerate
+CODE:5C8F 73				      ld      (hl), e			      ;	store object
 CODE:5C90 7B				      ld      a, e
-CODE:5C91 FE 40				      cp      40h ; '@'
-CODE:5C93 CA 99	5C			      jp      z, loc_5C99
-CODE:5C96 FE 26				      cp      26h ; '&'
-CODE:5C98 C0				      ret     nz
+CODE:5C91 FE 40				      cp      40h ; '@'                       ; Jovian Command Cruiser?
+CODE:5C93 CA 99	5C			      jp      z, loc_5C99		      ;	yes, skip
+CODE:5C96 FE 26				      cp      26h ; '&'                       ; Jovian Battle Cruiser?
+CODE:5C98 C0				      ret     nz			      ;	no, return
 CODE:5C99
-CODE:5C99	      loc_5C99:							      ;	CODE XREF: sub_5C6F+24j
+CODE:5C99	      loc_5C99:							      ;	CODE XREF: add_obj_to_quadrant+24j
 CODE:5C99 D5				      push    de
 CODE:5C9A EB				      ex      de, hl
-CODE:5C9B 2A AC	69			      ld      hl, (word_69AC)
-CODE:5C9E 73				      ld      (hl), e
+CODE:5C9B 2A AC	69			      ld      hl, (word_69AC)		      ;	get current tbl	ptr
+CODE:5C9E 73				      ld      (hl), e			      ;	command/battle cruiser
 CODE:5C9F 23				      inc     hl
-CODE:5CA0 72				      ld      (hl), d
+CODE:5CA0 72				      ld      (hl), d			      ;	number warships	in quadrant
 CODE:5CA1 23				      inc     hl
-CODE:5CA2 22 AC	69			      ld      (word_69AC), hl
+CODE:5CA2 22 AC	69			      ld      (word_69AC), hl		      ;	update current tbl ptr
 CODE:5CA5 D1				      pop     de
 CODE:5CA6 C9				      ret
-CODE:5CA6	      ;	End of function	sub_5C6F
+CODE:5CA6	      ;	End of function	add_obj_to_quadrant
 CODE:5CA6
 CODE:5CA7
 CODE:5CA7	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5CA7
 CODE:5CA7
-CODE:5CA7	      sub_5CA7:							      ;	CODE XREF: CODE:loc_5213p
+CODE:5CA7	      get_next_cmd_char:					      ;	CODE XREF: CODE:loc_5213p
 CODE:5CA7									      ;	CODE:525Cp ...
 CODE:5CA7 E5				      push    hl
 CODE:5CA8 2A 00	68			      ld      hl, (cmd_entry_addr)
-CODE:5CAB 7E				      ld      a, (hl)
-CODE:5CAC FE 80				      cp      80h ; 'Ä'
-CODE:5CAE CA B7	5C			      jp      z, loc_5CB7
-CODE:5CB1 23				      inc     hl
-CODE:5CB2 22 00	68			      ld      (cmd_entry_addr),	hl
+CODE:5CAB 7E				      ld      a, (hl)			      ;	get next cmd char
+CODE:5CAC FE 80				      cp      80h ; 'Ä'                       ; graphic space?
+CODE:5CAE CA B7	5C			      jp      z, loc_5CB7		      ;	yes, skip
+CODE:5CB1 23				      inc     hl			      ;	next cmd char
+CODE:5CB2 22 00	68			      ld      (cmd_entry_addr),	hl	      ;	update
 CODE:5CB5 E1				      pop     hl
 CODE:5CB6 C9				      ret
 CODE:5CB7	      ;	---------------------------------------------------------------------------
 CODE:5CB7
-CODE:5CB7	      loc_5CB7:							      ;	CODE XREF: sub_5CA7+7j
-CODE:5CB7 97				      sub     a
+CODE:5CB7	      loc_5CB7:							      ;	CODE XREF: get_next_cmd_char+7j
+CODE:5CB7 97				      sub     a				      ;	zero char
 CODE:5CB8 E1				      pop     hl
 CODE:5CB9 C9				      ret
-CODE:5CB9	      ;	End of function	sub_5CA7
+CODE:5CB9	      ;	End of function	get_next_cmd_char
 CODE:5CB9
 CODE:5CBA
 CODE:5CBA	      ;	===============	S U B R	O U T I	N E =======================================
@@ -2250,7 +2263,7 @@ CODE:5D00
 CODE:5D00	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D00
 CODE:5D00
-CODE:5D00	      rand_0_9:							      ;	CODE XREF: handle_low_power:loc_5095p
+CODE:5D00	      rand_0_9:							      ;	CODE XREF: handle_low_power:init_jovians_leftp
 CODE:5D00									      ;	handle_low_power-8FAp ...
 CODE:5D00 C5				      push    bc
 CODE:5D01 E5				      push    hl
@@ -2394,20 +2407,20 @@ CODE:5D7F	      loc_5D7F:							      ;	CODE XREF: sub_5D4B+23j
 CODE:5D7F 3A B8	6F			      ld      a, (byte_6FB8)
 CODE:5D82 A7				      and     a
 CODE:5D83 C2 00	5E			      jp      nz, handle_cmd_entry
-CODE:5D86 11 06	00			      ld      de, 6
-CODE:5D89 21 9B	6F			      ld      hl, scratch_0x45
+CODE:5D86 11 06	00			      ld      de, 6			      ;	6 bytes	per pod	entry
+CODE:5D89 21 9B	6F			      ld      hl, antimatter_pod_tbl
 CODE:5D8C
 CODE:5D8C	      loc_5D8C:							      ;	CODE XREF: sub_5D4B+4Cj
-CODE:5D8C 7E				      ld      a, (hl)
-CODE:5D8D FE FF				      cp      0FFh
-CODE:5D8F CA 00	5E			      jp      z, handle_cmd_entry
-CODE:5D92 A7				      and     a
-CODE:5D93 C2 9A	5D			      jp      nz, loc_5D9A
+CODE:5D8C 7E				      ld      a, (hl)			      ;	pod status
+CODE:5D8D FE FF				      cp      0FFh			      ;	end of table?
+CODE:5D8F CA 00	5E			      jp      z, handle_cmd_entry	      ;	yes, exit
+CODE:5D92 A7				      and     a				      ;	unused?
+CODE:5D93 C2 9A	5D			      jp      nz, loc_5D9A		      ;	no, exit
 CODE:5D96
 CODE:5D96	      loc_5D96:							      ;	CODE XREF: sub_5D4B+51j
 CODE:5D96									      ;	sub_5D4B+69j
-CODE:5D96 19				      add     hl, de
-CODE:5D97 C3 8C	5D			      jp      loc_5D8C
+CODE:5D96 19				      add     hl, de			      ;	next pod entry
+CODE:5D97 C3 8C	5D			      jp      loc_5D8C			      ;	loop
 CODE:5D9A	      ;	---------------------------------------------------------------------------
 CODE:5D9A
 CODE:5D9A	      loc_5D9A:							      ;	CODE XREF: sub_5D4B+48j
@@ -2436,7 +2449,7 @@ CODE:5DB4 C3 96	5D			      jp      loc_5D96
 CODE:5DB7	      ;	---------------------------------------------------------------------------
 CODE:5DB7
 CODE:5DB7	      loc_5DB7:							      ;	CODE XREF: sub_5D4B+60j
-CODE:5DB7 3A 40	68			      ld      a, (byte_6840)
+CODE:5DB7 3A 40	68			      ld      a, (pod_speed)
 CODE:5DBA 77				      ld      (hl), a
 CODE:5DBB 62				      ld      h, d
 CODE:5DBC 6B				      ld      l, e
@@ -2466,7 +2479,7 @@ CODE:5DD5									      ;	sub_5D4B+8Fj ...
 CODE:5DD5 CD 00	5D			      call    rand_0_9
 CODE:5DD8 FE 08				      cp      8
 CODE:5DDA F2 D5	5D			      jp      p, loc_5DD5
-CODE:5DDD 21 9A	69			      ld      hl, 699Ah
+CODE:5DDD 21 9A	69			      ld      hl, dir_addr_delta_tbl
 CODE:5DE0 07				      rlca
 CODE:5DE1 85				      add     a, l
 CODE:5DE2 6F				      ld      l, a
@@ -2659,38 +2672,38 @@ CODE:5EE3
 CODE:5EE3	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5EE3
 CODE:5EE3
-CODE:5EE3	      sub_5EE3:							      ;	CODE XREF: CODE:5231p
+CODE:5EE3	      print_sector:						      ;	CODE XREF: CODE:5231p
 CODE:5EE3									      ;	CODE:52C0j ...
-CODE:5EE3 2A 28	68			      ld      hl, (word_6828)
-CODE:5EE6 11 A9	C3			      ld      de, 0C3A9h
+CODE:5EE3 2A 28	68			      ld      hl, (hephaestus_video_addr)
+CODE:5EE6 11 A9	C3			      ld      de, 0C3A9h		      ;	$3C58+$C3A9=$10001
 CODE:5EE9 19				      add     hl, de
-CODE:5EEA 11 C0	FF			      ld      de, 0FFC0h
+CODE:5EEA 11 C0	FF			      ld      de, 0FFC0h		      ;	-64 (1 line)
 CODE:5EED 06 00				      ld      b, 0
 CODE:5EEF
-CODE:5EEF	      loc_5EEF:							      ;	CODE XREF: sub_5EE3+13j
-CODE:5EEF 19				      add     hl, de
+CODE:5EEF	      loc_5EEF:							      ;	CODE XREF: print_sector+13j
+CODE:5EEF 19				      add     hl, de			      ;	subtract a line
 CODE:5EF0 7C				      ld      a, h
-CODE:5EF1 A7				      and     a
-CODE:5EF2 FA F9	5E			      jp      m, loc_5EF9
-CODE:5EF5 04				      inc     b
-CODE:5EF6 C3 EF	5E			      jp      loc_5EEF
+CODE:5EF1 A7				      and     a				      ;	negative?
+CODE:5EF2 FA F9	5E			      jp      m, loc_5EF9		      ;	yes, exit
+CODE:5EF5 04				      inc     b				      ;	inc Y coord
+CODE:5EF6 C3 EF	5E			      jp      loc_5EEF			      ;	loop
 CODE:5EF9	      ;	---------------------------------------------------------------------------
 CODE:5EF9
-CODE:5EF9	      loc_5EF9:							      ;	CODE XREF: sub_5EE3+Fj
+CODE:5EF9	      loc_5EF9:							      ;	CODE XREF: print_sector+Fj
 CODE:5EF9 11 40	00			      ld      de, 40h ;	'@'
-CODE:5EFC 19				      add     hl, de
+CODE:5EFC 19				      add     hl, de			      ;	re-adjust
 CODE:5EFD 7D				      ld      a, l
-CODE:5EFE 0F				      rrca
+CODE:5EFE 0F				      rrca				      ;	X coord
 CODE:5EFF E6 0F				      and     0Fh
-CODE:5F01 C6 30				      add     a, 30h ; '0'
-CODE:5F03 21 3E	3D			      ld      hl,  VIDEO+13Eh
-CODE:5F06 77				      ld      (hl), a
-CODE:5F07 21 3C	3D			      ld      hl,  VIDEO+13Ch
+CODE:5F01 C6 30				      add     a, 30h ; '0'                    ; convert to ASCII
+CODE:5F03 21 3E	3D			      ld      hl,  VIDEO+13Eh		      ;	sector X video address
+CODE:5F06 77				      ld      (hl), a			      ;	write to video
+CODE:5F07 21 3C	3D			      ld      hl,  VIDEO+13Ch		      ;	sector Y video address
 CODE:5F0A 78				      ld      a, b
-CODE:5F0B C6 30				      add     a, 30h ; '0'
-CODE:5F0D 77				      ld      (hl), a
+CODE:5F0B C6 30				      add     a, 30h ; '0'                    ; convert to ASCII
+CODE:5F0D 77				      ld      (hl), a			      ;	write to video
 CODE:5F0E C9				      ret
-CODE:5F0E	      ;	End of function	sub_5EE3
+CODE:5F0E	      ;	End of function	print_sector
 CODE:5F0E
 CODE:5F0F
 CODE:5F0F	      ;	===============	S U B R	O U T I	N E =======================================
@@ -2787,21 +2800,21 @@ CODE:5F75
 CODE:5F75	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5F75
 CODE:5F75
-CODE:5F75	      sub_5F75:							      ;	CODE XREF: CODE:54EEp
-CODE:5F75 21 7D	3D			      ld      hl,  VIDEO+17Dh
+CODE:5F75	      dec_triton_misls_and_print:				      ;	CODE XREF: CODE:54EEp
+CODE:5F75 21 7D	3D			      ld      hl,  VIDEO+17Dh		      ;	triton msls value video	address
 CODE:5F78 3A B9	69			      ld      a, (triton_misls)
-CODE:5F7B A7				      and     a
-CODE:5F7C C2 81	5F			      jp      nz, loc_5F81
+CODE:5F7B A7				      and     a				      ;	none?
+CODE:5F7C C2 81	5F			      jp      nz, loc_5F81		      ;	no, skip
 CODE:5F7F 37				      scf
 CODE:5F80 C9				      ret
 CODE:5F81	      ;	---------------------------------------------------------------------------
 CODE:5F81
-CODE:5F81	      loc_5F81:							      ;	CODE XREF: sub_5F75+7j
+CODE:5F81	      loc_5F81:							      ;	CODE XREF: dec_triton_misls_and_print+7j
 CODE:5F81 C6 99				      add     a, 99h ; 'ô'
-CODE:5F83 27				      daa
-CODE:5F84 32 B9	69			      ld      (triton_misls), a
+CODE:5F83 27				      daa				      ;	decrement
+CODE:5F84 32 B9	69			      ld      (triton_misls), a		      ;	update
 CODE:5F87 C3 63	5F			      jp      print_BCD_byte
-CODE:5F87	      ;	End of function	sub_5F75
+CODE:5F87	      ;	End of function	dec_triton_misls_and_print
 CODE:5F87
 CODE:5F87	      ;	---------------------------------------------------------------------------
 CODE:5F8A 43 4F	4D 4D+aCommandHeadqua:	      .ascii 'COMMAND HEADQUARTERS: THE JOVIANS HAVE INVADED EARTH SPACE.     YOUR OR'
@@ -2815,26 +2828,29 @@ CODE:6075 4E 45	45 52+								      ;	DATA XREF: CODE:loc_51FCo
 CODE:60B2 45 4E	47 49+aEngineerTheUnk:	      .ascii 'ENGINEER:THE UNKNOWN WE SHOT DISABLED THE HYPERDRIVE. ',0
 CODE:60B2 4E 45	45 52+								      ;	DATA XREF: CODE:loc_5202o
 CODE:60E9 46 49	52 53+aFirstOfficerCa:	      .ascii 'FIRST OFFICER:CAPTAIN, YOUR LAST COMMAND MADE NO SENSE',0
-CODE:60E9 54 20	4F 46+								      ;	DATA XREF: CODE:loc_5B05o
+CODE:60E9 54 20	4F 46+								      ;	DATA XREF: CODE:print_no_sense_and_reto
 CODE:6120 46 49	52 53+aFirstOfficer_0:	      .ascii 'FIRST OFFICER:CAPTAIN, WE HAVE BEEN BLOCKED BY AN UNKNOWN       OBJECT',0
+CODE:6120 54 20	4F 46+								      ;	DATA XREF: CODE:52FEo
 CODE:6167 43 4F	4D 4D+aCommunications:	      .ascii 'COMMUNICATIONS:THE SPACE STATION HAS ACKNOWLEDGED OUR DOCKING.',0
-CODE:6167 55 4E	49 43+								      ;	DATA XREF: CODE:loc_532Bo
+CODE:6167 55 4E	49 43+								      ;	DATA XREF: CODE:dock_space_stationo
 CODE:61A6 20 44	4F 43+aDock:		      .ascii ' DOCK',0                        ; DATA XREF: CODE:533Eo
 CODE:61AC 47 52	45 45+aGreen:		      .ascii 'GREEN',0                        ; DATA XREF: handle_low_power+76o
 CODE:61B2 20 52	45 44+aRed:		      .ascii ' RED ',0                        ; DATA XREF: handle_low_power+8Bo
 CODE:61B8 43 52	54 43+aCrtcl:		      .ascii 'CRTCL',0                        ; DATA XREF: update_power_distribution+6Do
 CODE:61B8 4C 00									      ;	sub_5E84+12o
 CODE:61BE 46 49	52 53+aFirstOfficerSi:	      .ascii 'FIRST OFFICER: SIR, WE HAVE HIT A TRITON MINE',0
-CODE:61BE 54 20	4F 46+								      ;	DATA XREF: sub_544D:loc_5388o
+CODE:61BE 54 20	4F 46+								      ;	DATA XREF: sub_544D:hit_triton_mineo
 CODE:61EC 43 4F	4D 4D+aCommunicatio_0:	      .ascii 'COMMUNICATIONS:SIR, WE MADE CONTACT WITH A JOVIAN VESSEL',0
 CODE:61EC 55 4E	49 43+								      ;	DATA XREF: CODE:53CDo
 CODE:6225 4A 4F	56 49+aJovianWatchWhe:	      .ascii 'JOVIAN: WATCH WHERE YOU ARE GOING YOU TURKEY!!',0
 CODE:6225 41 4E	3A 20+								      ;	DATA XREF: CODE:53C7o
-CODE:6254 4E 41	56 49+aNavigatorWeHit:	      .ascii 'NAVIGATOR:WE HIT A STAR!?!',0   ; DATA XREF: CODE:loc_5418o
+CODE:6254 4E 41	56 49+aNavigatorWeHit:	      .ascii 'NAVIGATOR:WE HIT A STAR!?!',0   ; DATA XREF: CODE:hit_staro
 CODE:626F 45 4E	47 49+aEngineerComm_0:	      .ascii 'ENGINEER:COMMANDER, WE HAVEN\'T THE POWER TO FIRE MASERS',0
+CODE:626F 4E 45	45 52+								      ;	DATA XREF: CODE:543Ao
 CODE:62A7 46 49	52 53+aFirstOfficer_1:	      .ascii 'FIRST OFFICER:SIR, MY SENSORS SHOW MASER HAD NO EFFECT',0
 CODE:62A7 54 20	4F 46+								      ;	DATA XREF: sub_544D:loc_54A3o
 CODE:62DE 45 4E	47 49+aEngineerComm_1:	      .ascii 'ENGINEER:COMMANDER, THE MISSILE TUBES ARE POWER DEFICIENT',0
+CODE:62DE 4E 45	45 52+								      ;	DATA XREF: CODE:loc_54FCo
 CODE:6318 43 4F	4D 50+aComputerObject:	      .ascii 'COMPUTER:OBJECT DESTROYED',0    ; DATA XREF: sub_550F+161o
 CODE:6332 4E 41	56 49+aNavigatorTheEn:	      .ascii 'NAVIGATOR:THE ENGINES ARE EXPLODING',0
 CODE:6332 47 41	54 4F+								      ;	DATA XREF: handle_low_power-7F4o
@@ -2848,7 +2864,7 @@ CODE:63E3 55 54	45 52+								      ;	DATA XREF: CODE:576Bo
 CODE:640B 4D 45	44 49+aMedicalOfficer:	      .ascii 'MEDICAL OFFICER:I CAN\'T ALLOW YOU TO FIRE THE EXPERIMENTAL RAY!',0
 CODE:640B 43 41	4C 20+								      ;	DATA XREF: CODE:585Co
 CODE:644B 57 45	41 50+aWeaponrySirWeH:	      .ascii 'WEAPONRY:SIR, WE HAVE NO MORE TRITON MISSILES',0
-CODE:644B 4F 4E	52 59+								      ;	DATA XREF: CODE:loc_5676o
+CODE:644B 4F 4E	52 59+								      ;	DATA XREF: CODE:print_no_more_triton_mislso
 CODE:6479 45 4E	47 49+aEngineerThereG:	      .ascii 'ENGINEER:THERE GOES A POWER CRYSTAL, COMMANDER',0
 CODE:6479 4E 45	45 52+								      ;	DATA XREF: sub_5ADEo
 CODE:64A8 45 4E	47 49+aEngineerComm_3:	      .ascii 'ENGINEER:COMMANDER, THE SHIELDS ARE FALLING APART!',0
@@ -2885,7 +2901,7 @@ CODE:677A 43 4F	4D 50+aComputerThePod:	      .ascii 'COMPUTER: THE POD HAS BEEN 
 CODE:677A 55 54	45 52+								      ;	DATA XREF: CODE:5893o
 CODE:677A 3A 20	54 48+								      ;	CODE:5933o
 CODE:679A 43 4F	4D 50+aComputerPodLau:	      .ascii 'COMPUTER: POD LAUNCH IS BLOCKED',0
-CODE:679A 55 54	45 52+								      ;	DATA XREF: CODE:loc_5903o
+CODE:679A 55 54	45 52+								      ;	DATA XREF: CODE:print_pod_blockedo
 CODE:67BA 46 49	52 53+aFirstOfficer_2:	      .ascii 'FIRST OFFICER: THE UNKNOWN IS STEALING POWER CAPTAIN',0
 CODE:67BA 54 20	4F 46+								      ;	DATA XREF: CODE:5646o
 CODE:67EF 19 3F	      chaser_addr:	      dw VIDEO+319h			      ;	DATA XREF: handle_low_power-936r
@@ -2907,10 +2923,10 @@ CODE:67FB 18				      db  18h
 CODE:67FC 50				      db  50h ;	P
 CODE:67FD 22				      db  22h ;	"
 CODE:67FE 00				      db    0
-CODE:67FF 08	      byte_67FF:	      db 8				      ;	DATA XREF: handle_low_power-954w
+CODE:67FF 08	      ion_speed:	      db 8				      ;	DATA XREF: handle_low_power-954w
 CODE:67FF									      ;	CODE:527Cw ...
 CODE:6800 37 3F	      cmd_entry_addr:	      dw VIDEO+337h			      ;	DATA XREF: handle_low_power-949w
-CODE:6800									      ;	sub_5CA7+1r ...
+CODE:6800									      ;	get_next_cmd_char+1r ...
 CODE:6802 D4 51	      cmd_jmp_vectors:	      dw hyperdrive			      ;	DATA XREF: sub_5D4B+102o
 CODE:6804 46 52				      dw ion_engine
 CODE:6806 2A 54				      dw maser
@@ -2919,16 +2935,16 @@ CODE:680A 7C 56				      dw power_distrib
 CODE:680C 30 57				      dw self_destruct
 CODE:680E 71 57				      dw experimental_ray
 CODE:6810 0C 59				      dw explode_pod
-CODE:6812 62 58				      dw explode_antimatter
+CODE:6812 62 58				      dw launch_antimatter
 CODE:6814 19 1A	      cmd_l_vector:	      dw 1A19h				      ;	DATA XREF: CODE:7033w
 CODE:6814									      ;	BASIC ENTRY POINT
 CODE:6816 48 49	4D 54+cmd_tbl:		      .ascii 'HIMTDSEXAL',0                   ; DATA XREF: sub_5D4B+FFo
-CODE:6821 48 4C	53 44+aHlsdmt:		      .ascii 'HLSDMT',0                       ; DATA XREF: CODE:5686o
-CODE:6828 02 00	      word_6828:	      dw 2				      ;	DATA XREF: CODE:5293r
+CODE:6821 48 4C	53 44+pwr_subcmd_tbl:	      .ascii 'HLSDMT',0                       ; DATA XREF: CODE:5686o
+CODE:6828 02 00	      hephaestus_video_addr:  dw 2				      ;	DATA XREF: CODE:5293r
 CODE:6828									      ;	CODE:52ADw ...
 CODE:682A 00	      engine_explode_countdown:db 0				      ;	DATA XREF: handle_low_power-7FEr
 CODE:682A									      ;	handle_low_power-7FAw ...
-CODE:682B 03	      byte_682B:	      db 3				      ;	DATA XREF: handle_low_power-99Ew
+CODE:682B 03	      antimatter_pods:	      db 3				      ;	DATA XREF: handle_low_power-99Ew
 CODE:682B									      ;	CODE:5366w ...
 CODE:682C 9C				      db  9Ch ;	ú
 CODE:682D 55				      db  55h ;	U
@@ -2950,7 +2966,7 @@ CODE:683C 46				      db  46h ;	F
 CODE:683D 56				      db  56h ;	V
 CODE:683E 9C				      db  9Ch ;	ú
 CODE:683F 55				      db  55h ;	U
-CODE:6840 06	      byte_6840:	      db 6				      ;	DATA XREF: handle_low_power-999w
+CODE:6840 06	      pod_speed:	      db 6				      ;	DATA XREF: handle_low_power-999w
 CODE:6840									      ;	CODE:58BCw ...
 CODE:6841 A6				      db 0A6h ;	¶
 CODE:6842 57				      db  57h ;	W
@@ -2974,8 +2990,8 @@ CODE:6853 92				      db  92h ;	í
 CODE:6854 57				      db  57h ;	W
 CODE:6855 00	      byte_6855:	      db 0				      ;	DATA XREF: CODE:52FAw
 CODE:6855									      ;	sub_550F+77r ...
-CODE:6856 00	      byte_6856:	      db 0				      ;	DATA XREF: CODE:5283w
-CODE:6856									      ;	CODE:loc_5317r
+CODE:6856 00	      ion_dir:		      db 0				      ;	DATA XREF: CODE:5283w
+CODE:6856									      ;	CODE:left_quadrantr
 CODE:6857 00				      db    0
 CODE:6858 00	      jovians_left:	      db 0				      ;	DATA XREF: handle_low_power-8F5w
 CODE:6858									      ;	CODE:5819r ...
@@ -2993,7 +3009,7 @@ CODE:6862	      ;	300 bytes cleared at startup
 CODE:6862	      ;	- likely quadrants, 3 bytes each
 CODE:6862 4C 4F	54 20+quadrant_tbl:	      db 4Ch, 4Fh, 54h,	20h, 44h, 57h, 20h, 30h, 0Dh, 19h, 31h
 CODE:6862 44 57	20 30+								      ;	DATA XREF: handle_low_power-918o
-CODE:6862 0D 19	31 33+								      ;	handle_low_power:loc_50E8o ...
+CODE:6862 0D 19	31 33+								      ;	handle_low_power:init_starso ...
 CODE:6862 38 32	20 43+			      db 33h, 38h, 32h,	20h, 43h, 4Ch, 45h, 41h, 52h, 20h, 41h
 CODE:6862 4C 45	41 52+			      db 53h, 43h, 20h,	27h
 CODE:6862 20 41	53 43+			      db [ 6 ],	20h
@@ -3047,44 +3063,34 @@ CODE:6997									      ;	handle_low_power+B9o
 CODE:6998 09	      pwr_masers:	      db 9				      ;	DATA XREF: CODE:5432r
 CODE:6999 11	      pwr_trt_missl:	      db 11h				      ;	DATA XREF: CODE:54F4r
 CODE:6999									      ;	CODE:586Cr
-CODE:699A C0				      db 0C0h ;	¿
-CODE:699B FF				      db 0FFh
-CODE:699C C2				      db 0C2h ;	¬
-CODE:699D FF				      db 0FFh
-CODE:699E 02				      db    2
-CODE:699F 00				      db    0
-CODE:69A0 42				      db  42h ;	B
-CODE:69A1 00				      db    0
-CODE:69A2 40				      db  40h ;	@
-CODE:69A3 00				      db    0
-CODE:69A4 3E				      db  3Eh ;	>
-CODE:69A5 00				      db    0
-CODE:69A6 FE				      db 0FEh ;	˛
-CODE:69A7 FF				      db 0FFh
-CODE:69A8 BE				      db 0BEh ;	æ
-CODE:69A9 FF				      db 0FFh
+CODE:699A C0 FF	      dir_addr_delta_tbl:     dw 0FFC0h				      ;	DATA XREF: CODE:loc_527Fo
+CODE:699A									      ;	sub_544Do ...
+CODE:699C C2 FF				      dw 0FFC2h
+CODE:699E 02 00				      dw 2
+CODE:69A0 42 00				      dw 42h
+CODE:69A2 40 00				      dw 40h
+CODE:69A4 3E 00				      dw 3Eh
+CODE:69A6 FE FF				      dw 0FFFEh
+CODE:69A8 BE FF				      dw 0FFBEh
 CODE:69AA 00	      byte_69AA:	      db 0				      ;	DATA XREF: handle_low_power-963w
 CODE:69AA									      ;	handle_low_power-7DEr ...
 CODE:69AB 00	      byte_69AB:	      db 0				      ;	DATA XREF: handle_low_power-95Ew
 CODE:69AB									      ;	handle_low_power+DBr ...
-CODE:69AC 00 00	      word_69AC:	      dw 0				      ;	DATA XREF: sub_5BCC+2Cw
-CODE:69AC									      ;	sub_5BCC:loc_5C12r ...
-CODE:69AE 48				      db  48h ;	H
-CODE:69AF 2C				      db  2Ch ;	,
-CODE:69B0 27				      db  27h ;	'
-CODE:69B1 2A				      db  2Ah ;	*
-CODE:69B2 27				      db  27h ;	'
-CODE:69B3 2C				      db  2Ch ;	,
-CODE:69B4 31				      db  31h ;	1
-CODE:69B5 39				      db  39h ;	9
-CODE:69B6 31				      db  31h ;	1
-CODE:69B7 2C				      db  2Ch ;	,
+CODE:69AC 00 00	      word_69AC:	      dw 0				      ;	DATA XREF: init_quadrant+2Cw
+CODE:69AC									      ;	init_quadrant:loc_5C12r ...
+CODE:69AE 48 2C	      word_69AE:	      dw 2C48h				      ;	DATA XREF: handle_low_power+F5o
+CODE:69AE									      ;	init_quadrant+29o
+CODE:69AE									      ;	tbl jovians
+CODE:69B0 27 2A				      dw 2A27h
+CODE:69B2 27 2C				      dw 2C27h
+CODE:69B4 31 39				      dw 3931h
+CODE:69B6 31 2C				      dw 2C31h
 CODE:69B8 99	      power_avail:	      db 99h				      ;	DATA XREF: handle_low_power-94Fw
 CODE:69B8									      ;	CODE:534Bw ...
 CODE:69B9 10	      triton_misls:	      db 10h				      ;	DATA XREF: handle_low_power-959w
 CODE:69B9									      ;	CODE:535Ew ...
 CODE:69BA 03	      byte_69BA:	      db 3				      ;	DATA XREF: CODE:5363w
-CODE:69BB 20 20	20 20+jovian_officer:	      .ascii '                     ',0        ; DATA XREF: CODE:loc_53C1o
+CODE:69BB 20 20	20 20+jovian_officer:	      .ascii '                     ',0        ; DATA XREF: CODE:hit_jovian_warshipo
 CODE:69D1 20 20	20 20+aSgggd:		      .ascii '        òÉÉÉ§        ',0
 CODE:69E7 20 20	20 20+aCaRi:		      .ascii '       ñ†   ê©       ',0
 CODE:69FD 20 20	20 20+aXIJK:		      .ascii '       ï â Ü ™       ',0
@@ -3125,11 +3131,19 @@ CODE:6EDB 20 20	20 20+			      .ascii '                                         
 CODE:6F1B 20 20	20 20+			      .ascii '                                                                '
 CODE:6F5B 20 20	20 20+			      .ascii '                                                                '
 CODE:6F9B	      ;	$45 bytes cleared at startup
-CODE:6F9B 23 C3	BD 6F+scratch_0x45:	      db 23h, 0C3h, 0BDh, 6Fh, 1, 0CBh	      ;	DATA XREF: handle_low_power-996o
-CODE:6F9B 01 CB									      ;	sub_5D4B+3Eo
+CODE:6F9B
+CODE:6F9B	      ;	- antimatter pod table
+CODE:6F9B	      ;	  - 3x 6-byte entries
+CODE:6F9B	      ;	    +$0	= pod status (0=used, 1=launched, 2=exploded)
+CODE:6F9B	      ;	    +$1/2 = pod	video address delta
+CODE:6F9B	      ;	    +$3/4 = pod	video address
+CODE:6F9B	      ;	    +$5	= pod speed
+CODE:6F9B 23 C3	BD 6F+antimatter_pod_tbl:     db 23h, 0C3h, 0BDh, 6Fh, 1, 0CBh	      ;	DATA XREF: handle_low_power-996o
+CODE:6F9B 01 CB									      ;	CODE:536Fo ...
 CODE:6FA1 21 7E	FE C3+			      db 21h, 7Eh, 0FEh, 0C3h, 0C2h, 0E0h
 CODE:6FA7 6F 2B	7E B7+			      db 6Fh, 2Bh, 7Eh,	0B7h, 0CAh, 0BDh
-CODE:6FAD 6F	      byte_6FAD:	      db 6Fh				      ;	DATA XREF: handle_low_power-989w
+CODE:6FAD	      ;
+CODE:6FAD 6F	      eot:		      db 6Fh				      ;	DATA XREF: handle_low_power-989w
 CODE:6FAE FE	      byte_6FAE:	      db 0FEh				      ;	DATA XREF: CODE:5335w
 CODE:6FAE									      ;	handle_low_power+6Dr
 CODE:6FAF 7F	      byte_6FAF:	      db 7Fh				      ;	DATA XREF: CODE:5338w
@@ -3226,7 +3240,7 @@ CODE:6FF8 06				      db    6
 CODE:6FF9 70				      db  70h ;	p
 CODE:6FFA 21				      db  21h ;	!
 CODE:6FFB 60 E0	      STACK_WATERMARK:	      dw 0E060h				      ;	DATA XREF: handle_low_power-986o
-CODE:6FFB									      ;	rand_0_9+2r ...
+CODE:6FFB									      ;	CODE:5B0Bo ...
 CODE:6FFD 22				      db  22h ;	"
 CODE:6FFE 14				      db  14h
 CODE:6FFF 68				      db  68h ;	h
@@ -3284,207 +3298,24 @@ CODE:7030 21 03	00			      ld      hl, 3
 CODE:7033 22 14	68			      ld      (cmd_l_vector), hl	      ;	hook "L" cmd
 CODE:7036 C3 BD	6F			      jp      unk_6FBD			      ;	debug code???
 CODE:7036	      ;	---------------------------------------------------------------------------
-CODE:7039 DB				      db 0DBh ;	€
-CODE:703A 00				      db    0
-CODE:703B 00				      db    0
-CODE:703C E6				      db 0E6h ;	Ê
-CODE:703D 40				      db  40h ;	@
-CODE:703E C8				      db 0C8h ;	»
-CODE:703F DB				      db 0DBh ;	€
-CODE:7040 01				      db    1
-CODE:7041 FF				      db 0FFh
-CODE:7042 00				      db    0
-CODE:7043 27				      db  27h ;	'
-CODE:7044 5A				      db  5Ah ;	Z
-CODE:7045 2E				      db  2Eh ;	.
-CODE:7046 2C				      db  2Ch ;	,
-CODE:7047 5A				      db  5Ah ;	Z
-CODE:7048 27				      db  27h ;	'
-CODE:7049 0D				      db  0Dh
-CODE:704A 0D				      db  0Dh
-CODE:704B 31				      db  31h ;	1
-CODE:704C 34				      db  34h ;	4
-CODE:704D 37				      db  37h ;	7
-CODE:704E 31				      db  31h ;	1
-CODE:704F 20				      db  20h
-CODE:7050 20				      db  20h
-CODE:7051 44				      db  44h ;	D
-CODE:7052 53				      db  53h ;	S
-CODE:7053 20				      db  20h
-CODE:7054 33				      db  33h ;	3
-CODE:7055 32				      db  32h ;	2
-CODE:7056 0D				      db  0Dh
-CODE:7057 11				      db  11h
-CODE:7058 31				      db  31h ;	1
-CODE:7059 34				      db  34h ;	4
-CODE:705A 37				      db  37h ;	7
-CODE:705B 32				      db  32h ;	2
-CODE:705C 20				      db  20h
-CODE:705D 53				      db  53h ;	S
-CODE:705E 54				      db  54h ;	T
-CODE:705F 41				      db  41h ;	A
-CODE:7060 43				      db  43h ;	C
-CODE:7061 4B				      db  4Bh ;	K
-CODE:7062 20				      db  20h
-CODE:7063 44				      db  44h ;	D
-CODE:7064 42				      db  42h ;	B
-CODE:7065 20				      db  20h
-CODE:7066 30				      db  30h ;	0
-CODE:7067 0D				      db  0Dh
-CODE:7068 01				      db    1
-CODE:7069 20				      db  20h
-CODE:706A 33				      db  33h ;	3
-CODE:706B 38				      db  38h ;	8
-CODE:706C 0D				      db  0Dh
-CODE:706D 34				      db  34h ;	4
-CODE:706E 31				      db  31h ;	1
-CODE:706F 32				      db  32h ;	2
-CODE:7070 38				      db  38h ;	8
-CODE:7071 30				      db  30h ;	0
-CODE:7072 20				      db  20h
-CODE:7073 20				      db  20h
-CODE:7074 41				      db  41h ;	A
-CODE:7075 53				      db  53h ;	S
-CODE:7076 43				      db  43h ;	C
-CODE:7077 20				      db  20h
-CODE:7078 2F				      db  2Fh ;	/
-CODE:7079 41				      db  41h ;	A
-CODE:707A 52				      db  52h ;	R
-CODE:707B 45				      db  45h ;	E
-CODE:707C 20				      db  20h
-CODE:707D 53				      db  53h ;	S
-CODE:707E 55				      db  55h ;	U
-CODE:707F 43				      db  43h ;	C
-CODE:7080 48				      db  48h ;	H
-CODE:7081 20				      db  20h
-CODE:7082 51				      db  51h ;	Q
-CODE:7083 55				      db  55h ;	U
-CODE:7084 45				      db  45h ;	E
-CODE:7085 53				      db  53h ;	S
-CODE:7086 54				      db  54h ;	T
-CODE:7087 49				      db  49h ;	I
-CODE:7088 4F				      db  4Fh ;	O
-CODE:7089 4E				      db  4Eh ;	N
-CODE:708A 53				      db  53h ;	S
-CODE:708B 20				      db  20h
-CODE:708C 4F				      db  4Fh ;	O
-CODE:708D 4E				      db  4Eh ;	N
-CODE:708E 20				      db  20h
-CODE:708F 59				      db  59h ;	Y
-CODE:7090 4F				      db  4Fh ;	O
-CODE:7091 55				      db  55h ;	U
-CODE:7092 52				      db  52h ;	R
-CODE:7093 20				      db  20h
-CODE:7094 4D				      db  4Dh ;	M
-CODE:7095 49				      db  49h ;	I
-CODE:7096 4E				      db  4Eh ;	N
-CODE:7097 44				      db  44h ;	D
-CODE:7098 20				      db  20h
-CODE:7099 4F				      db  4Fh ;	O
-CODE:709A 46				      db  46h ;	F
-CODE:709B 54				      db  54h ;	T
-CODE:709C 45				      db  45h ;	E
-CODE:709D 4E				      db  4Eh ;	N
-CODE:709E 3F				      db  3Fh ;	?
-CODE:709F 2F				      db  2Fh ;	/
-CODE:70A0 0D				      db  0Dh
-CODE:70A1 0D				      db  0Dh
-CODE:70A2 31				      db  31h ;	1
-CODE:70A3 32				      db  32h ;	2
-CODE:70A4 38				      db  38h ;	8
-CODE:70A5 31				      db  31h ;	1
-CODE:70A6 20				      db  20h
-CODE:70A7 20				      db  20h
-CODE:70A8 44				      db  44h ;	D
-CODE:70A9 42				      db  42h ;	B
-CODE:70AA 20				      db  20h
-CODE:70AB 34				      db  34h ;	4
-CODE:70AC 30				      db  30h ;	0
-CODE:70AD 0D				      db  0Dh
-CODE:70AE 36				      db  36h ;	6
-CODE:70AF 31				      db  31h ;	1
-CODE:70B0 32				      db  32h ;	2
-CODE:70B1 38				      db  38h ;	8
-CODE:70B2 32				      db  32h ;	2
-CODE:70B3 20				      db  20h
-CODE:70B4 20				      db  20h
-CODE:70B5 41				      db  41h ;	A
-CODE:70B6 53				      db  53h ;	S
-CODE:70B7 43				      db  43h ;	C
-CODE:70B8 20				      db  20h
-CODE:70B9 2F				      db  2Fh ;	/
-CODE:70BA 57				      db  57h ;	W
-CODE:70BB 48				      db  48h ;	H
-CODE:70BC 41				      db  41h ;	A
-CODE:70BD 54				      db  54h ;	T
-CODE:70BE 20				      db  20h
-CODE:70BF 49				      db  49h ;	I
-CODE:70C0 53				      db  53h ;	S
-CODE:70C1 20				      db  20h
-CODE:70C2 49				      db  49h ;	I
-CODE:70C3 54				      db  54h ;	T
-CODE:70C4 20				      db  20h
-CODE:70C5 54				      db  54h ;	T
-CODE:70C6 48				      db  48h ;	H
-CODE:70C7 41				      db  41h ;	A
-CODE:70C8 54				      db  54h ;	T
-CODE:70C9 20				      db  20h
-CODE:70CA 59				      db  59h ;	Y
-CODE:70CB 4F				      db  4Fh ;	O
-CODE:70CC 55				      db  55h ;	U
-CODE:70CD 20				      db  20h
-CODE:70CE 52				      db  52h ;	R
-CODE:70CF 45				      db  45h ;	E
-CODE:70D0 00				      db    0
-CODE:70D1 00				      db    0
-CODE:70D2 00				      db    0
-CODE:70D3 00				      db    0
-CODE:70D4 00				      db    0
-CODE:70D5 00				      db    0
-CODE:70D6 00				      db    0
-CODE:70D7 00				      db    0
-CODE:70D8 00				      db    0
-CODE:70D9 00				      db    0
-CODE:70DA 00				      db    0
-CODE:70DB 00				      db    0
-CODE:70DC 00				      db    0
-CODE:70DD 00				      db    0
-CODE:70DE 00				      db    0
-CODE:70DF 00				      db    0
-CODE:70E0 00				      db    0
-CODE:70E1 00				      db    0
-CODE:70E2 00				      db    0
-CODE:70E3 00				      db    0
-CODE:70E4 00				      db    0
-CODE:70E5 00				      db    0
-CODE:70E6 00				      db    0
-CODE:70E7 00				      db    0
-CODE:70E8 00				      db    0
-CODE:70E9 00				      db    0
-CODE:70EA 00				      db    0
-CODE:70EB 00				      db    0
-CODE:70EC 00				      db    0
-CODE:70ED 00				      db    0
-CODE:70EE 00				      db    0
-CODE:70EF 00				      db    0
-CODE:70F0 00				      db    0
-CODE:70F1 00				      db    0
-CODE:70F2 00				      db    0
-CODE:70F3 00				      db    0
-CODE:70F4 00				      db    0
-CODE:70F5 00				      db    0
-CODE:70F6 00				      db    0
-CODE:70F7 00				      db    0
-CODE:70F8 00				      db    0
-CODE:70F9 00				      db    0
-CODE:70FA 00				      db    0
-CODE:70FB 00				      db    0
-CODE:70FC 00				      db    0
-CODE:70FD 00				      db    0
-CODE:70FE 00				      db    0
-CODE:70FF 00				      db    0
-CODE:7100 F1				      db 0F1h ;	Ò
-CODE:7100	      ;	end of 'CODE'
-CODE:7100
-CODE:7100
-CODE:7100				      end
+CODE:7039 DB 00	00 E6+			      db 0DBh, 0, 0, 0E6h, 40h,	0C8h, 0DBh, 1, 0FFh, 0,	27h, 5Ah
+CODE:7039 40 C8	DB 01+			      db 2Eh, 2Ch, 5Ah,	27h, 0Dh, 0Dh, 31h, 34h, 37h, 31h, 20h
+CODE:7039 FF 00	27 5A+			      db 20h, 44h, 53h,	20h, 33h, 32h, 0Dh, 11h, 31h, 34h, 37h
+CODE:7039 2E 2C	5A 27+			      db 32h, 20h, 53h,	54h, 41h, 43h, 4Bh, 20h, 44h, 42h, 20h
+CODE:7039 0D 0D	31 34+			      db 30h, 0Dh, 1, 20h, 33h,	38h, 0Dh, 34h, 31h, 32h, 38h, 30h
+CODE:7039 37 31	20 20+			      db 20h, 20h, 41h,	53h, 43h, 20h, 2Fh, 41h, 52h, 45h, 20h
+CODE:7039 44 53	20 33+			      db 53h, 55h, 43h,	48h, 20h, 51h, 55h, 45h, 53h, 54h, 49h
+CODE:7039 32 0D	11 31+			      db 4Fh, 4Eh, 53h,	20h, 4Fh, 4Eh, 20h, 59h, 4Fh, 55h, 52h
+CODE:7039 34 37	32 20+			      db 20h, 4Dh, 49h,	4Eh, 44h, 20h, 4Fh, 46h, 54h, 45h, 4Eh
+CODE:7039 53 54	41 43+			      db 3Fh, 2Fh, 0Dh,	0Dh, 31h, 32h, 38h, 31h, 20h, 20h, 44h
+CODE:7039 4B 20	44 42+			      db 42h, 20h, 34h,	30h, 0Dh, 36h, 31h, 32h, 38h, 32h, 20h
+CODE:7039 20 30	0D 01+			      db 20h, 41h, 53h,	43h, 20h, 2Fh, 57h, 48h, 41h, 54h, 20h
+CODE:7039 20 33	38 0D+			      db 49h, 53h, 20h,	49h, 54h, 20h, 54h, 48h, 41h, 54h, 20h
+CODE:7039 34 31	32 38+			      db 59h, 4Fh, 55h,	20h, 52h, 45h, 0, 0, 0,	0, 0, 0, 0, 0
+CODE:7039 30 20	20 41+			      db 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0
+CODE:7039 53 43	20 2F+			      db 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0
+CODE:7039 41 52	45 20+			      db 0, 0, 0, 0, 0F1h
+CODE:7039 53 55	43 48+;	end of 'CODE'
+CODE:7039 20 51	55 45+
+CODE:7039 53 54	49 4F+
+CODE:7039 4E 53	20 4F+			      end
