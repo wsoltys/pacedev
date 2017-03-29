@@ -81,7 +81,7 @@ CODE:503B 07				      rlca				      ;	x4
 CODE:503C C6 10				      add     a, #16			      ;	x4 + 16
 CODE:503E 32 AA	69			      ld      (byte_69AA), a
 CODE:5041 3E 02				      ld      a, #2
-CODE:5043 32 AB	69			      ld      (byte_69AB), a
+CODE:5043 32 AB	69			      ld      (time_to_jovian_fire), a
 CODE:5046 3E 10				      ld      a, #0x10			      ;	init number of triton missiles (10)
 CODE:5048 32 B9	69			      ld      (triton_misls), a
 CODE:504B 3E 08				      ld      a, #8			      ;	init ion drive speed
@@ -245,12 +245,12 @@ CODE:512C 07				      rlca
 CODE:512D 80				      add     a, b			      ;	combine
 CODE:512E 32 61	68			      ld      (quadrant), a		      ;	init starting quadrant
 CODE:5131 CD 2E	5F			      call    print_jovians_left
-CODE:5134 3E 03				      ld      a, #3			      ;	SE
-CODE:5136 32 B8	6F			      ld      (byte_6FB8), a
+CODE:5134 3E 03				      ld      a, #3			      ;	SE, flag disabled
+CODE:5136 32 B8	6F			      ld      (disable_pod_update), a
 CODE:5139 0E 01				      ld      c, #1			      ;	1 quadrant
 CODE:513B CD 18	5B			      call    move_quadrant
 CODE:513E CD 81	5B			      call    print_quadrant
-CODE:5141 CD 4B	5D			      call    sub_5D4B
+CODE:5141 CD 4B	5D			      call    update_chaser_pods_cmd_entry
 CODE:5144 3A C0	53			      ld      a, (played_before)
 CODE:5147 A7				      and     a				      ;	played a game before this?
 CODE:5148 C2 88	51			      jp      NZ, loc_5188		      ;	yes, skip animated intro message
@@ -325,7 +325,7 @@ CODE:51BD	      ;	START OF FUNCTION CHUNK	FOR handle_low_power
 CODE:51BD
 CODE:51BD	      loc_51BD:							      ;	CODE XREF: handle_low_power-801j
 CODE:51BD									      ;	handle_low_power-7F7j
-CODE:51BD CD 4B	5D			      call    sub_5D4B			      ;	update chaser etc
+CODE:51BD CD 4B	5D			      call    update_chaser_pods_cmd_entry
 CODE:51C0 CD A1	59			      call    handle_low_power
 CODE:51C3 3A AA	69			      ld      a, (byte_69AA)
 CODE:51C6 47				      ld      b, a
@@ -339,8 +339,8 @@ CODE:51D4	      ;	--------------------------------------------------------------
 CODE:51D4
 CODE:51D4	      hyperdrive:						      ;	DATA XREF: CODE:cmd_jmp_vectorso
 CODE:51D4 CD C0	5E			      call    clear_last_2_lines
-CODE:51D7 97				      sub     a
-CODE:51D8 32 B6	6F			      ld      (byte_6FB6), a
+CODE:51D7 97				      sub     a				      ;	flag normal
+CODE:51D8 32 B6	6F			      ld      (jovian_time_frozen), a
 CODE:51DB 3A B3	6F			      ld      a, (hyperdrive_disabled)
 CODE:51DE A7				      and     a				      ;	disabled?
 CODE:51DF FA 02	52			      jp      M, loc_5202		      ;	yes, exit
@@ -373,7 +373,7 @@ CODE:5208	      loc_5208:							      ;	CODE XREF: CODE:51F9j
 CODE:5208 CD 00	5D			      call    rand_0_9
 CODE:520B FE 06				      cp      #6			      ;	less than 6?
 CODE:520D DA 13	52			      jp      C, loc_5213		      ;	yes, skip
-CODE:5210 CD 66	5A			      call    dec_pwr_and_XXXX
+CODE:5210 CD 66	5A			      call    jovian_attack_and_move
 CODE:5213
 CODE:5213	      loc_5213:							      ;	CODE XREF: CODE:520Dj
 CODE:5213 CD A7	5C			      call    get_next_cmd_char		      ;	direction
@@ -411,7 +411,7 @@ CODE:524B FA FC	51			      jp      M, loc_51FC		      ;	yes, exit
 CODE:524E CD 00	5D			      call    rand_0_9
 CODE:5251 FE 03				      cp      #3			      ;	greater	than 2?
 CODE:5253 D2 59	52			      jp      NC, loc_5259		      ;	yes, skip
-CODE:5256 CD 66	5A			      call    dec_pwr_and_XXXX
+CODE:5256 CD 66	5A			      call    jovian_attack_and_move
 CODE:5259
 CODE:5259	      loc_5259:							      ;	CODE XREF: CODE:5253j
 CODE:5259 CD C0	5E			      call    clear_last_2_lines
@@ -621,8 +621,8 @@ CODE:53CA CD 39	5D			      call    print_string_last_line
 CODE:53CD 11 EC	61			      ld      de, #aCommunicatio_0	      ;	"COMMUNICATIONS:SIR, WE	MADE CONTACT WIT"...
 CODE:53D0 21 80	3F			      ld      hl, # VIDEO+0x380
 CODE:53D3 CD 3F	5D			      call    print_string
-CODE:53D6 3E 01				      ld      a, #1
-CODE:53D8 32 B8	6F			      ld      (byte_6FB8), a
+CODE:53D6 3E 01				      ld      a, #1			      ;	flag disabled
+CODE:53D8 32 B8	6F			      ld      (disable_pod_update), a
 CODE:53DB 1E 14				      ld      e, #20			      ;	20 iterations
 CODE:53DD
 CODE:53DD	      loc_53DD:							      ;	CODE XREF: CODE:540Fj
@@ -651,7 +651,7 @@ CODE:5403 23				      inc     hl
 CODE:5404 36 8C				      ld      (hl), #0x8C ; 'å'
 CODE:5406 21 E1	3D			      ld      hl, # VIDEO+0x1E1
 CODE:5409 36 4F				      ld      (hl), #0x4F ; 'O'
-CODE:540B CD 4B	5D			      call    sub_5D4B
+CODE:540B CD 4B	5D			      call    update_chaser_pods_cmd_entry
 CODE:540E 1D				      dec     e				      ;	done animation?
 CODE:540F C2 DD	53			      jp      NZ, loc_53DD		      ;	no, loop
 CODE:5412 21 C5	3C			      ld      hl, # VIDEO+0xC5		      ;	ptr current quadrant on	LR sensor
@@ -771,7 +771,7 @@ CODE:54C6 32 C5	3C			      ld      (VIDEO+0xC5), a		      ;	update
 CODE:54C9
 CODE:54C9	      wipe_maser:						      ;	CODE XREF: fire_maser+50j
 CODE:54C9									      ;	fire_maser+5Ej	...
-CODE:54C9 CD 4B	5D			      call    sub_5D4B
+CODE:54C9 CD 4B	5D			      call    update_chaser_pods_cmd_entry
 CODE:54CC D1				      pop     de
 CODE:54CD 2A 28	68			      ld      hl, (hephaestus_video_addr)
 CODE:54D0
@@ -868,7 +868,7 @@ CODE:554B 7E				      ld      a, (hl)			      ;	*** dead code
 CODE:554C 3A F3	67			      ld      a, (tmp_sector_contents)
 CODE:554F 77				      ld      (hl), a			      ;	restore	contents
 CODE:5550 FE 30				      cp      #0x30 ; '0'                     ; space station?
-CODE:5552 CA 6E	56			      jp      Z, missile_hit_space_station    ;	yes, go
+CODE:5552 CA 6E	56			      jp      Z, missile_destroyed_object     ;	yes, go
 CODE:5555 FE 26				      cp      #0x26 ; '&'                     ; jovian battle cruiser?
 CODE:5557 CA 62	56			      jp      Z, missile_hit_jovian	      ;	yes, go
 CODE:555A FE 25				      cp      #0x25 ; '%'                     ; triton mine?
@@ -876,7 +876,7 @@ CODE:555C CA 88	53			      jp      Z, hit_triton_mine	      ;	yes, go
 CODE:555F FE 58				      cp      #0x58 ; 'X'                     ; unknown?
 CODE:5561 CA 6F	55			      jp      Z, shot_hit_unknown	      ;	yes, go
 CODE:5564 FE 5B				      cp      #0x5B ; '['                     ; USS Hephaestus?
-CODE:5566 CA 42	58			      jp      Z, dec_power_and_update	      ;	yes, go
+CODE:5566 CA 42	58			      jp      Z, power_minus_2_and_update     ;	yes, go
 CODE:5569 11 04	66			      ld      de, #aComputerTriton	      ;	"COMPUTER:TRITON MISSILE HAS NO	EFFECT"
 CODE:556C C3 39	5D			      jp      print_string_last_line
 CODE:556F	      ;	---------------------------------------------------------------------------
@@ -899,16 +899,16 @@ CODE:557C 23				      inc     hl
 CODE:557D C2 7A	55			      jp      NZ, loc_557A		      ;	no, loop
 CODE:557D	      ;	End of function	move_triton_missile
 CODE:557D
-CODE:5580	      ;	START OF FUNCTION CHUNK	FOR sub_5D4B
+CODE:5580	      ;	START OF FUNCTION CHUNK	FOR update_chaser_pods_cmd_entry
 CODE:5580
 CODE:5580	      jump_HL_vector:						      ;	CODE XREF: CODE:578Fj
-CODE:5580									      ;	sub_5D4B+136j
+CODE:5580									      ;	update_chaser_pods_cmd_entry+136j
 CODE:5580 7E				      ld      a, (hl)
 CODE:5581 23				      inc     hl
 CODE:5582 66				      ld      h, (hl)
 CODE:5583 6F				      ld      l, a			      ;	HL=vector address
 CODE:5584 E9				      jp      (hl)
-CODE:5584	      ;	END OF FUNCTION	CHUNK FOR sub_5D4B
+CODE:5584	      ;	END OF FUNCTION	CHUNK FOR update_chaser_pods_cmd_entry
 CODE:5585	      ;	---------------------------------------------------------------------------
 CODE:5585	      ;	START OF FUNCTION CHUNK	FOR move_triton_missile
 CODE:5585
@@ -926,7 +926,7 @@ CODE:5592	      loc_5592:							      ;	CODE XREF: move_triton_missile+7Bj
 CODE:5592 3A B4	6F			      ld      a, (byte_6FB4)
 CODE:5595 97				      sub     a
 CODE:5596 32 B4	6F			      ld      (byte_6FB4), a
-CODE:5599 C3 6E	56			      jp      missile_hit_space_station
+CODE:5599 C3 6E	56			      jp      missile_destroyed_object
 CODE:5599	      ;	END OF FUNCTION	CHUNK FOR move_triton_missile
 CODE:559C	      ;	---------------------------------------------------------------------------
 CODE:559C	      ;	Either
@@ -1024,6 +1024,9 @@ CODE:5605 3E 25				      ld      a, #0x25 ; '%'                  ; triton mine
 CODE:5607 32 EB	55			      ld      (loc_55EA+1), a		      ;	patch
 CODE:560A C3 DA	55			      jp      loc_55DA
 CODE:560D	      ;	---------------------------------------------------------------------------
+CODE:560D	      ;	randomly either:
+CODE:560D	      ;	* changes unknown to space station, or
+CODE:560D	      ;	* jumps	to option 4
 CODE:560D
 CODE:560D	      missile_hit_unk_6:					      ;	DATA XREF: CODE:6838o
 CODE:560D CD 00	5D			      call    rand_0_9
@@ -1033,6 +1036,7 @@ CODE:5615 E1				      pop     hl			      ;	unknown	object address
 CODE:5616 36 30				      ld      (hl), #0x30 ; '0'               ; is now a space station!
 CODE:5618 C9				      ret
 CODE:5619	      ;	---------------------------------------------------------------------------
+CODE:5619	      ;	warps to a random quadrant
 CODE:5619
 CODE:5619	      missile_hit_unk_3:					      ;	DATA XREF: CODE:6832o
 CODE:5619 CD 00	5D			      call    rand_0_9
@@ -1054,6 +1058,7 @@ CODE:5638 CD E3	5E			      call    print_sector
 CODE:563B E1				      pop     hl			      ;	discard
 CODE:563C C9				      ret
 CODE:563D	      ;	---------------------------------------------------------------------------
+CODE:563D	      ;	rolls the dice again!?!
 CODE:563D
 CODE:563D	      missile_hit_unk_4:					      ;	CODE XREF: CODE:5612j
 CODE:563D									      ;	DATA XREF: CODE:6834o
@@ -1061,6 +1066,7 @@ CODE:563D CD 00	5D			      call    rand_0_9
 CODE:5640 CD BA	5C			      call    sub_5CBA
 CODE:5643 C3 70	55			      jp      loc_5570			      ;	roll the dice again!
 CODE:5646	      ;	---------------------------------------------------------------------------
+CODE:5646	      ;	randomly decrement power, or bug?
 CODE:5646
 CODE:5646	      missile_hit_unk_58:					      ;	DATA XREF: CODE:6836o
 CODE:5646									      ;	CODE:683Co
@@ -1072,13 +1078,13 @@ CODE:564D	      loc_564D:							      ;	CODE XREF: CODE:565Aj
 CODE:564D CD 00	5D			      call    rand_0_9
 CODE:5650 FE 04				      cp      #4			      ;	less than 4?
 CODE:5652 DA 5D	56			      jp      C, loc_565D		      ;	yes, go
-CODE:5655 06 12				      ld      b, #18
-CODE:5657 CD 66	5A			      call    dec_pwr_and_XXXX
+CODE:5655 06 12				      ld      b, #18			      ;	*** dead code
+CODE:5657 CD 66	5A			      call    jovian_attack_and_move
 CODE:565A C3 4D	56			      jp      loc_564D			      ;	loop
 CODE:565D	      ;	---------------------------------------------------------------------------
 CODE:565D
 CODE:565D	      loc_565D:							      ;	CODE XREF: CODE:5652j
-CODE:565D 06 19				      ld      b, #25			      ;	*** dead code
+CODE:565D 06 19				      ld      b, #25			      ;	a bug? should this jump	to decrement power?
 CODE:565F C3 C0	5E			      jp      clear_last_2_lines
 CODE:5662	      ;	---------------------------------------------------------------------------
 CODE:5662	      ;	START OF FUNCTION CHUNK	FOR move_triton_missile
@@ -1090,8 +1096,9 @@ CODE:5666 3A C5	3C			      ld      a, (VIDEO+0xC5)		      ;	warships in quadrant
 CODE:5669 3D				      dec     a				      ;	adjust
 CODE:566A 32 C5	3C			      ld      (VIDEO+0xC5), a		      ;	update
 CODE:566D E1				      pop     hl			      ;	object video address
+CODE:566E	      ;	the object is not removed from any data	table???
 CODE:566E
-CODE:566E	      missile_hit_space_station:				      ;	CODE XREF: move_triton_missile+43j
+CODE:566E	      missile_destroyed_object:					      ;	CODE XREF: move_triton_missile+43j
 CODE:566E									      ;	move_triton_missile+8Aj
 CODE:566E 36 2E				      ld      (hl), #0x2E ; '.'               ; write empty sector to video
 CODE:5670 11 18	63			      ld      de, #aComputerObject	      ;	"COMPUTER:OBJECT DESTROYED"
@@ -1158,16 +1165,16 @@ CODE:56BA	      update_power_distribution:				      ;	CODE XREF: CODE:5351p
 CODE:56BA									      ;	move_triton_missile+33Fj ...
 CODE:56BA 06 06				      ld      b, #6			      ;	6 power	values
 CODE:56BC 11 CD	3D			      ld      de, # VIDEO+0x1CD		      ;	HYPR&ION value
-CODE:56BF 97				      sub     a				      ;	A=0
-CODE:56C0 32 B0	6F			      ld      (byte_6FB0), a
+CODE:56BF 97				      sub     a				      ;	flag OK
+CODE:56C0 32 B0	6F			      ld      (power_overflow),	a
 CODE:56C3 21 94	69			      ld      hl, #pwr_hypr_ion
 CODE:56C6
 CODE:56C6	      loc_56C6:							      ;	CODE XREF: update_power_distribution+32j
 CODE:56C6 86				      add     a, (hl)			      ;	add power value
 CODE:56C7 27				      daa
 CODE:56C8 D2 D0	56			      jp      NC, loc_56D0		      ;	skip if	no overflow
-CODE:56CB 3E FF				      ld      a, #0xFF
-CODE:56CD 32 B0	6F			      ld      (byte_6FB0), a
+CODE:56CB 3E FF				      ld      a, #0xFF			      ;	flag overflow
+CODE:56CD 32 B0	6F			      ld      (power_overflow),	a
 CODE:56D0
 CODE:56D0	      loc_56D0:							      ;	CODE XREF: update_power_distribution+Ej
 CODE:56D0 4F				      ld      c, a			      ;	store total
@@ -1194,8 +1201,8 @@ CODE:56EA 23				      inc     hl			      ;	next power value
 CODE:56EB 79				      ld      a, c			      ;	restore	total
 CODE:56EC C2 C6	56			      jp      NZ, loc_56C6		      ;	no, loop
 CODE:56EF 47				      ld      b, a			      ;	get total
-CODE:56F0 3A B0	6F			      ld      a, (byte_6FB0)		      ;	overflow?
-CODE:56F3 A7				      and     a
+CODE:56F0 3A B0	6F			      ld      a, (power_overflow)
+CODE:56F3 A7				      and     a				      ;	overflow?
 CODE:56F4 FA FC	56			      jp      M, loc_56FC		      ;	yes, go
 CODE:56F7 3A B8	69			      ld      a, (power_avail)
 CODE:56FA B8				      cp      b				      ;	more than available power?
@@ -1223,7 +1230,7 @@ CODE:5721 32 AF	6F			      ld      (byte_6FAF), a
 CODE:5724 21 BB	3C			      ld      hl, # VIDEO+0xBB		      ;	ptr to condition value
 CODE:5727 11 B8	61			      ld      de, #aCrtcl		      ;	"CRTCL"
 CODE:572A CD 3C	5D			      call    clear_last_2_lines_print_string
-CODE:572D C3 4B	5D			      jp      sub_5D4B
+CODE:572D C3 4B	5D			      jp      update_chaser_pods_cmd_entry
 CODE:572D	      ;	End of function	update_power_distribution
 CODE:572D
 CODE:5730	      ;	---------------------------------------------------------------------------
@@ -1231,56 +1238,56 @@ CODE:5730
 CODE:5730	      self_destruct:						      ;	DATA XREF: CODE:680Co
 CODE:5730 11 A6	63			      ld      de, #aComputerSelfDe	      ;	"COMPUTER:SELF DESTRUCT	SEQUENCE INITIAT"...
 CODE:5733 CD 39	5D			      call    print_string_last_line
-CODE:5736 1E 15				      ld      e, #0x15
-CODE:5738 21 EB	3F			      ld      hl, # VIDEO+0x3EB
+CODE:5736 1E 15				      ld      e, #0x15			      ;	15 sec countdown
+CODE:5738 21 EB	3F			      ld      hl, # VIDEO+0x3EB		      ;	self destruct countdown	video address
 CODE:573B
 CODE:573B	      loc_573B:							      ;	CODE XREF: CODE:575Dj
 CODE:573B									      ;	CODE:5763j ...
 CODE:573B 06 10				      ld      b, #0x10
 CODE:573D CD 48	5D			      call    sub_5D48
-CODE:5740 7B				      ld      a, e
+CODE:5740 7B				      ld      a, e			      ;	countdown
 CODE:5741 C6 99				      add     a, #0x99 ; 'ô'
-CODE:5743 27				      daa
-CODE:5744 5F				      ld      e, a
+CODE:5743 27				      daa				      ;	decrement
+CODE:5744 5F				      ld      e, a			      ;	update
 CODE:5745 0F				      rrca
 CODE:5746 0F				      rrca
 CODE:5747 0F				      rrca
 CODE:5748 0F				      rrca
-CODE:5749 E6 0F				      and     #0xF
-CODE:574B C6 30				      add     a, #0x30 ; '0'
-CODE:574D 77				      ld      (hl), a
-CODE:574E 23				      inc     hl
+CODE:5749 E6 0F				      and     #0xF			      ;	high->low nibble
+CODE:574B C6 30				      add     a, #0x30 ; '0'                  ; convert to ASCII
+CODE:574D 77				      ld      (hl), a			      ;	write to video
+CODE:574E 23				      inc     hl			      ;	next video address
 CODE:574F 7B				      ld      a, e
-CODE:5750 E6 0F				      and     #0xF
-CODE:5752 C6 30				      add     a, #0x30 ; '0'
-CODE:5754 77				      ld      (hl), a
-CODE:5755 2B				      dec     hl
+CODE:5750 E6 0F				      and     #0xF			      ;	low nibble only
+CODE:5752 C6 30				      add     a, #0x30 ; '0'                  ; convert to ASCII
+CODE:5754 77				      ld      (hl), a			      ;	write to video
+CODE:5755 2B				      dec     hl			      ;	restore	video address
 CODE:5756 7B				      ld      a, e
-CODE:5757 A7				      and     a
-CODE:5758 CA 8E	53			      jp      Z, print_game_over_screen
-CODE:575B FE 06				      cp      #6
-CODE:575D FA 3B	57			      jp      M, loc_573B
-CODE:5760 CD B6	51			      call    keyboard_scan
-CODE:5763 CA 3B	57			      jp      Z, loc_573B
-CODE:5766 FE 09				      cp      #9
-CODE:5768 C2 3B	57			      jp      NZ, loc_573B
+CODE:5757 A7				      and     a				      ;	done countdown?
+CODE:5758 CA 8E	53			      jp      Z, print_game_over_screen	      ;	yes, exit
+CODE:575B FE 06				      cp      #6			      ;	less than 6s left?
+CODE:575D FA 3B	57			      jp      M, loc_573B		      ;	yes, loop
+CODE:5760 CD B6	51			      call    keyboard_scan		      ;	any key?
+CODE:5763 CA 3B	57			      jp      Z, loc_573B		      ;	no, loop
+CODE:5766 FE 09				      cp      #9			      ;	<TAB>?
+CODE:5768 C2 3B	57			      jp      NZ, loc_573B		      ;	no, loop
 CODE:576B 11 E3	63			      ld      de, #aComputerSelf_0	      ;	"COMPUTER:SELF DESTRUCT	SEQUENCE ABORTED"
 CODE:576E C3 39	5D			      jp      print_string_last_line
 CODE:5771	      ;	---------------------------------------------------------------------------
 CODE:5771
 CODE:5771	      experimental_ray:						      ;	DATA XREF: CODE:680Eo
-CODE:5771 3A B7	6F			      ld      a, (byte_6FB7)
-CODE:5774 A7				      and     a
-CODE:5775 F2 7E	57			      jp      P, loc_577E
+CODE:5771 3A B7	6F			      ld      a, (experimental_ray_disabled)
+CODE:5774 A7				      and     a				      ;	disabled?
+CODE:5775 F2 7E	57			      jp      P, loc_577E		      ;	no, go
 CODE:5778 11 C9	66			      ld      de, #aIsPermanentlyD	      ;	"IS PERMANENTLY	DISABLED"
-CODE:577B C3 29	5D			      jp      sub_5D29
+CODE:577B C3 29	5D			      jp      print_experimental_ray_outcome
 CODE:577E	      ;	---------------------------------------------------------------------------
 CODE:577E
 CODE:577E	      loc_577E:							      ;	CODE XREF: CODE:5775j
 CODE:577E CD 00	5D			      call    rand_0_9
-CODE:5781 A7				      and     a
-CODE:5782 CA 92	57			      jp      Z, loc_5792
-CODE:5785 11 3F	68			      ld      de, #0x683F
+CODE:5781 A7				      and     a				      ;	zero?
+CODE:5782 CA 92	57			      jp      Z, expr_9			      ;	yes, go
+CODE:5785 11 3F	68			      ld      de, # off_683E+1		      ;	2 bytes	before table
 CODE:5788
 CODE:5788	      loc_5788:							      ;	CODE XREF: CODE:578Bj
 CODE:5788 3D				      dec     a
@@ -1291,9 +1298,10 @@ CODE:578E EB				      ex      de, hl
 CODE:578F C3 80	55			      jp      jump_HL_vector
 CODE:5792	      ;	---------------------------------------------------------------------------
 CODE:5792
-CODE:5792	      loc_5792:							      ;	CODE XREF: CODE:5782j
+CODE:5792	      expr_9:							      ;	CODE XREF: CODE:5782j
+CODE:5792									      ;	DATA XREF: CODE:6853o
 CODE:5792 11 6A	65			      ld      de, #aIsFiringTriton	      ;	"IS FIRING TRITON MISSILES"
-CODE:5795 CD 29	5D			      call    sub_5D29
+CODE:5795 CD 29	5D			      call    print_experimental_ray_outcome
 CODE:5798 3E 07				      ld      a, #7
 CODE:579A
 CODE:579A	      loc_579A:							      ;	CODE XREF: CODE:57A0j
@@ -1304,10 +1312,12 @@ CODE:579F 3D				      dec     a
 CODE:57A0 C2 9A	57			      jp      NZ, loc_579A
 CODE:57A3 C3 0F	55			      jp      move_triton_missile
 CODE:57A6	      ;	---------------------------------------------------------------------------
+CODE:57A6
+CODE:57A6	      expr_0:							      ;	DATA XREF: CODE:6841o
 CODE:57A6 11 84	65			      ld      de, #aCausedAChangeI	      ;	"CAUSED	A CHANGE IN SPACIAL	STRUCTUR"...
-CODE:57A9 CD 29	5D			      call    sub_5D29
-CODE:57AC 3E 01				      ld      a, #1
-CODE:57AE 32 B8	6F			      ld      (byte_6FB8), a
+CODE:57A9 CD 29	5D			      call    print_experimental_ray_outcome
+CODE:57AC 3E 01				      ld      a, #1			      ;	flag disabled
+CODE:57AE 32 B8	6F			      ld      (disable_pod_update), a
 CODE:57B1 11 2B	00			      ld      de, #0x2B	; '+'
 CODE:57B4 21 57	3C			      ld      hl, # VIDEO+0x57
 CODE:57B7 06 0A				      ld      b, #0xA
@@ -1327,71 +1337,90 @@ CODE:57C5 05				      dec     b
 CODE:57C6 C2 B9	57			      jp      NZ, loc_57B9
 CODE:57C9 C9				      ret
 CODE:57CA	      ;	---------------------------------------------------------------------------
+CODE:57CA	      ;	freezes	time for jovians in this quadrant
+CODE:57CA
+CODE:57CA	      expr_1:							      ;	DATA XREF: CODE:6843o
 CODE:57CA 11 AD	65			      ld      de, #aHasFrozenTimeF	      ;	"HAS FROZEN TIME FOR THE	JOVIANS"
-CODE:57CD 3E FF				      ld      a, #0xFF
-CODE:57CF 32 B6	6F			      ld      (byte_6FB6), a
-CODE:57D2 C3 29	5D			      jp      sub_5D29
+CODE:57CD 3E FF				      ld      a, #0xFF			      ;	flag frozen
+CODE:57CF 32 B6	6F			      ld      (jovian_time_frozen), a
+CODE:57D2 C3 29	5D			      jp      print_experimental_ray_outcome
 CODE:57D5	      ;	---------------------------------------------------------------------------
+CODE:57D5	      ;	this is	supposed to make jovians invisible
+CODE:57D5	      ;	- but it looks like it makes space stations invisible???
+CODE:57D5
+CODE:57D5	      expr_2:							      ;	DATA XREF: CODE:6845o
 CODE:57D5 11 D4	65			      ld      de, #aHasCausedTheJo	      ;	"HAS CAUSED THE	JOVIANS	TO	BECOME I"...
-CODE:57D8 CD 29	5D			      call    sub_5D29
-CODE:57DB 21 57	3C			      ld      hl, # VIDEO+0x57
-CODE:57DE 11 2B	00			      ld      de, #0x2B	; '+'
-CODE:57E1 06 0A				      ld      b, #0xA
+CODE:57D8 CD 29	5D			      call    print_experimental_ray_outcome
+CODE:57DB 21 57	3C			      ld      hl, # VIDEO+0x57		      ;	first sector in	quadrant video address
+CODE:57DE 11 2B	00			      ld      de, #0x2B	; '+'                 ; offset to next quadrant row
+CODE:57E1 06 0A				      ld      b, #10			      ;	10 rows
 CODE:57E3
 CODE:57E3	      loc_57E3:							      ;	CODE XREF: CODE:57F4j
-CODE:57E3 0E 15				      ld      c, #0x15
+CODE:57E3 0E 15				      ld      c, #21			      ;	21 columns
 CODE:57E5
 CODE:57E5	      loc_57E5:							      ;	CODE XREF: CODE:57EFj
-CODE:57E5 7E				      ld      a, (hl)
-CODE:57E6 FE 30				      cp      #0x30 ; '0'
-CODE:57E8 C2 ED	57			      jp      NZ, loc_57ED
-CODE:57EB 36 2E				      ld      (hl), #0x2E ; '.'
+CODE:57E5 7E				      ld      a, (hl)			      ;	get object from	video
+CODE:57E6 FE 30				      cp      #0x30 ; '0'                     ; space station?
+CODE:57E8 C2 ED	57			      jp      NZ, loc_57ED		      ;	no, skip
+CODE:57EB 36 2E				      ld      (hl), #0x2E ; '.'               ; write empty sector to video
 CODE:57ED
 CODE:57ED	      loc_57ED:							      ;	CODE XREF: CODE:57E8j
-CODE:57ED 23				      inc     hl
-CODE:57EE 0D				      dec     c
-CODE:57EF C2 E5	57			      jp      NZ, loc_57E5
-CODE:57F2 19				      add     hl, de
-CODE:57F3 05				      dec     b
-CODE:57F4 C2 E3	57			      jp      NZ, loc_57E3
+CODE:57ED 23				      inc     hl			      ;	next video address
+CODE:57EE 0D				      dec     c				      ;	done all columns?
+CODE:57EF C2 E5	57			      jp      NZ, loc_57E5		      ;	no, loop
+CODE:57F2 19				      add     hl, de			      ;	next quadrant row video	address
+CODE:57F3 05				      dec     b				      ;	done all rows?
+CODE:57F4 C2 E3	57			      jp      NZ, loc_57E3		      ;	no, loop
 CODE:57F7 C9				      ret
 CODE:57F8	      ;	---------------------------------------------------------------------------
+CODE:57F8	      ;	re-randomises the quadrant
+CODE:57F8
+CODE:57F8	      expr_3:							      ;	DATA XREF: CODE:6847o
 CODE:57F8 11 2A	66			      ld      de, #aHasJumbledTheQ	      ;	"HAS JUMBLED THE QUADRANT"
-CODE:57FB CD 29	5D			      call    sub_5D29
-CODE:57FE 21 C5	3C			      ld      hl, # VIDEO+0xC5
+CODE:57FB CD 29	5D			      call    print_experimental_ray_outcome
+CODE:57FE 21 C5	3C			      ld      hl, # VIDEO+0xC5		      ;	current	quadrant in LR sensor
 CODE:5801 C3 CC	5B			      jp      init_quadrant
 CODE:5804	      ;	---------------------------------------------------------------------------
+CODE:5804	      ;	destroys all Jovians in	quadrant
+CODE:5804
+CODE:5804	      expr_4:							      ;	DATA XREF: CODE:6849o
 CODE:5804 21 80	3F			      ld      hl, # VIDEO+0x380
 CODE:5807 11 43	66			      ld      de, #aHasDestroyedAl	      ;	"HAS DESTROYED ALL THE		JOVIANS	"...
-CODE:580A CD 29	5D			      call    sub_5D29
+CODE:580A CD 29	5D			      call    print_experimental_ray_outcome
 CODE:580D 3A 61	68			      ld      a, (quadrant)
 CODE:5810 CD 9A	5B			      call    get_ptr_quadrant_A_data
-CODE:5813 46				      ld      b, (hl)
-CODE:5814 05				      dec     b
+CODE:5813 46				      ld      b, (hl)			      ;	warships in quadrant
+CODE:5814 05				      dec     b				      ;	adjust for call	below
 CODE:5815 3E 99				      ld      a, #0x99 ; 'ô'
 CODE:5817 90				      sub     b
-CODE:5818 47				      ld      b, a
+CODE:5818 47				      ld      b, a			      ;	negative
 CODE:5819 3A 58	68			      ld      a, (jovians_left)
 CODE:581C 80				      add     a, b
-CODE:581D 27				      daa
-CODE:581E 32 58	68			      ld      (jovians_left), a
-CODE:5821 36 01				      ld      (hl), #1
-CODE:5823 3E 30				      ld      a, #0x30 ; '0'
-CODE:5825 32 C5	3C			      ld      (VIDEO+0xC5), a
-CODE:5828 CD 1E	5F			      call    dec_jovians
-CODE:582B 21 C5	3C			      ld      hl, # VIDEO+0xC5
+CODE:581D 27				      daa				      ;	adjust jovians left
+CODE:581E 32 58	68			      ld      (jovians_left), a		      ;	update
+CODE:5821 36 01				      ld      (hl), #1			      ;	fudge to 1 for call below
+CODE:5823 3E 30				      ld      a, #0x30 ; '0'                  ; 0 warships
+CODE:5825 32 C5	3C			      ld      (VIDEO+0xC5), a		      ;	write to LR sensor video
+CODE:5828 CD 1E	5F			      call    dec_jovians		      ;	handle decrement of jovians
+CODE:582B 21 C5	3C			      ld      hl, # VIDEO+0xC5		      ;	current	quadrant in LR sensor
 CODE:582E C3 CC	5B			      jp      init_quadrant
 CODE:5831	      ;	---------------------------------------------------------------------------
+CODE:5831	      ;	destroys itself
+CODE:5831
+CODE:5831	      expr_5:							      ;	DATA XREF: CODE:684Bo
 CODE:5831 11 7A	66			      ld      de, #aDestroysItself	      ;	"DESTROYS ITSELF"
 CODE:5834 3E FF				      ld      a, #0xFF
-CODE:5836 32 B7	6F			      ld      (byte_6FB7), a
-CODE:5839 C3 29	5D			      jp      sub_5D29
+CODE:5836 32 B7	6F			      ld      (experimental_ray_disabled), a
+CODE:5839 C3 29	5D			      jp      print_experimental_ray_outcome
 CODE:583C	      ;	---------------------------------------------------------------------------
+CODE:583C	      ;	backfires, subtracts 2 from power
+CODE:583C
+CODE:583C	      expr_6:							      ;	DATA XREF: CODE:684Do
 CODE:583C 11 8A	66			      ld      de, #aHasBackfiredOn	      ;	"HAS BACKFIRED ON US"
-CODE:583F CD 29	5D			      call    sub_5D29
+CODE:583F CD 29	5D			      call    print_experimental_ray_outcome
 CODE:5842	      ;	START OF FUNCTION CHUNK	FOR move_triton_missile
 CODE:5842
-CODE:5842	      dec_power_and_update:					      ;	CODE XREF: move_triton_missile+57j
+CODE:5842	      power_minus_2_and_update:					      ;	CODE XREF: move_triton_missile+57j
 CODE:5842 3A B8	69			      ld      a, (power_avail)
 CODE:5845 C6 98				      add     a, #0x98 ; 'ò'
 CODE:5847 27				      daa				      ;	decrement power
@@ -1400,11 +1429,17 @@ CODE:584B CD 5D	5F			      call    print_power_avail
 CODE:584E C3 BA	56			      jp      update_power_distribution
 CODE:584E	      ;	END OF FUNCTION	CHUNK FOR move_triton_missile
 CODE:5851	      ;	---------------------------------------------------------------------------
+CODE:5851	      ;	causes computer	malfunction
+CODE:5851
+CODE:5851	      expr_7:							      ;	DATA XREF: CODE:684Fo
 CODE:5851 11 9E	66			      ld      de, #aHasCausedAComp	      ;	"HAS CAUSED A COMPUTER		MALFUNCT"...
 CODE:5854 3E FF				      ld      a, #0xFF
 CODE:5856 32 B5	6F			      ld      (computer_malfunction), a
-CODE:5859 C3 29	5D			      jp      sub_5D29
+CODE:5859 C3 29	5D			      jp      print_experimental_ray_outcome
 CODE:585C	      ;	---------------------------------------------------------------------------
+CODE:585C	      ;	not allowed to fire
+CODE:585C
+CODE:585C	      expr_8:							      ;	DATA XREF: CODE:6851o
 CODE:585C 11 0B	64			      ld      de, #aMedicalOfficer	      ;	"MEDICAL OFFICER:I CAN'T ALLOW YOU TO FI"...
 CODE:585F C3 39	5D			      jp      print_string_last_line
 CODE:5862	      ;	---------------------------------------------------------------------------
@@ -1533,12 +1568,12 @@ CODE:5929 7E				      ld      a, (hl)			      ;	pod status
 CODE:592A A7				      and     a				      ;	used?
 CODE:592B CA 05	5B			      jp      Z, print_no_sense_and_ret	      ;	no, exit
 CODE:592E FE 01				      cp      #1			      ;	launched?
-CODE:5930 CA 39	59			      jp      Z, loc_5939		      ;	yes, skip
+CODE:5930 CA 39	59			      jp      Z, explode_pod_ok		      ;	yes, skip
 CODE:5933 11 7A	67			      ld      de, #aComputerThePod	      ;	"COMPUTER: THE POD HAS BEEN USED"
 CODE:5936 C3 39	5D			      jp      print_string_last_line
 CODE:5939	      ;	---------------------------------------------------------------------------
 CODE:5939
-CODE:5939	      loc_5939:							      ;	CODE XREF: CODE:5930j
+CODE:5939	      explode_pod_ok:						      ;	CODE XREF: CODE:5930j
 CODE:5939 36 02				      ld      (hl), #2			      ;	flag exploded
 CODE:593B 23				      inc     hl
 CODE:593C 23				      inc     hl
@@ -1546,69 +1581,69 @@ CODE:593D 23				      inc     hl
 CODE:593E 7E				      ld      a, (hl)
 CODE:593F 23				      inc     hl
 CODE:5940 66				      ld      h, (hl)
-CODE:5941 6F				      ld      l, a
-CODE:5942 36 8F				      ld      (hl), #0x8F ; 'è'
+CODE:5941 6F				      ld      l, a			      ;	get pod	video address
+CODE:5942 36 8F				      ld      (hl), #0x8F ; 'è'               ; animate
 CODE:5944 EB				      ex      de, hl
 CODE:5945 21 9A	69			      ld      hl, #dir_addr_delta_tbl
-CODE:5948 06 08				      ld      b, #8
+CODE:5948 06 08				      ld      b, #8			      ;	8 directions to	iterate
 CODE:594A
 CODE:594A	      loc_594A:							      ;	CODE XREF: CODE:5989j
 CODE:594A E5				      push    hl
 CODE:594B 7E				      ld      a, (hl)
 CODE:594C 23				      inc     hl
 CODE:594D 66				      ld      h, (hl)
-CODE:594E 6F				      ld      l, a
-CODE:594F 19				      add     hl, de
-CODE:5950 7E				      ld      a, (hl)
-CODE:5951 FE 26				      cp      #0x26 ; '&'
-CODE:5953 CA 8D	59			      jp      Z, loc_598D
-CODE:5956 FE 40				      cp      #0x40 ; '@'
-CODE:5958 CA 8D	59			      jp      Z, loc_598D
-CODE:595B FE 25				      cp      #0x25 ; '%'
-CODE:595D CA 88	53			      jp      Z, hit_triton_mine
-CODE:5960 FE 5B				      cp      #0x5B ; '['
-CODE:5962 CA 8E	53			      jp      Z, print_game_over_screen
-CODE:5965 FE 23				      cp      #0x23 ; '#'
-CODE:5967 CA 8E	53			      jp      Z, print_game_over_screen
-CODE:596A FE 30				      cp      #0x30 ; '0'
-CODE:596C CA 83	59			      jp      Z, loc_5983
-CODE:596F FE 2A				      cp      #0x2A ; '*'
-CODE:5971 CA 83	59			      jp      Z, loc_5983
-CODE:5974 FE 2B				      cp      #0x2B ; '+'
-CODE:5976 CA 83	59			      jp      Z, loc_5983
-CODE:5979 FE 58				      cp      #0x58 ; 'X'
-CODE:597B CA 83	59			      jp      Z, loc_5983
-CODE:597E FE 2E				      cp      #0x2E ; '.'
-CODE:5980 C2 85	59			      jp      NZ, loc_5985
+CODE:594E 6F				      ld      l, a			      ;	get delta
+CODE:594F 19				      add     hl, de			      ;	add delta to pod video address
+CODE:5950 7E				      ld      a, (hl)			      ;	get sector contents
+CODE:5951 FE 26				      cp      #0x26 ; '&'                     ; jovian battle cruiser?
+CODE:5953 CA 8D	59			      jp      Z, pod_hit_jovian		      ;	yes, go
+CODE:5956 FE 40				      cp      #0x40 ; '@'                     ; command cruiser?
+CODE:5958 CA 8D	59			      jp      Z, pod_hit_jovian		      ;	yes, go
+CODE:595B FE 25				      cp      #0x25 ; '%'                     ; triton mine?
+CODE:595D CA 88	53			      jp      Z, hit_triton_mine	      ;	yes, go
+CODE:5960 FE 5B				      cp      #0x5B ; '['                     ; USS Hephaestus?
+CODE:5962 CA 8E	53			      jp      Z, print_game_over_screen	      ;	yes, go	(oops)
+CODE:5965 FE 23				      cp      #0x23 ; '#'                     ; antimatter pod?
+CODE:5967 CA 8E	53			      jp      Z, print_game_over_screen	      ;	yes, go	(oops)
+CODE:596A FE 30				      cp      #0x30 ; '0'                     ; space station?
+CODE:596C CA 83	59			      jp      Z, pod_animate_object	      ;	yes, go
+CODE:596F FE 2A				      cp      #0x2A ; '*'                     ; star?
+CODE:5971 CA 83	59			      jp      Z, pod_animate_object	      ;	yes, go
+CODE:5974 FE 2B				      cp      #0x2B ; '+'                     ; triton missile?
+CODE:5976 CA 83	59			      jp      Z, pod_animate_object	      ;	yes, go
+CODE:5979 FE 58				      cp      #0x58 ; 'X'                     ; unknown?
+CODE:597B CA 83	59			      jp      Z, pod_animate_object	      ;	yes, go
+CODE:597E FE 2E				      cp      #0x2E ; '.'                     ; empty?
+CODE:5980 C2 85	59			      jp      NZ, loc_5985		      ;	no, skip
 CODE:5983
-CODE:5983	      loc_5983:							      ;	CODE XREF: CODE:596Cj
+CODE:5983	      pod_animate_object:					      ;	CODE XREF: CODE:596Cj
 CODE:5983									      ;	CODE:5971j ...
-CODE:5983 36 8F				      ld      (hl), #0x8F ; 'è'
+CODE:5983 36 8F				      ld      (hl), #0x8F ; 'è'               ; animate
 CODE:5985
 CODE:5985	      loc_5985:							      ;	CODE XREF: CODE:5980j
-CODE:5985 E1				      pop     hl
+CODE:5985 E1				      pop     hl			      ;	direction address delta	table ptr
 CODE:5986 23				      inc     hl
-CODE:5987 23				      inc     hl
-CODE:5988 05				      dec     b
-CODE:5989 C2 4A	59			      jp      NZ, loc_594A
+CODE:5987 23				      inc     hl			      ;	next entry
+CODE:5988 05				      dec     b				      ;	done all directions?
+CODE:5989 C2 4A	59			      jp      NZ, loc_594A		      ;	no, loop
 CODE:598C C9				      ret
 CODE:598D	      ;	---------------------------------------------------------------------------
 CODE:598D
-CODE:598D	      loc_598D:							      ;	CODE XREF: CODE:5953j
+CODE:598D	      pod_hit_jovian:						      ;	CODE XREF: CODE:5953j
 CODE:598D									      ;	CODE:5958j
 CODE:598D E5				      push    hl
-CODE:598E 21 C5	3C			      ld      hl, # VIDEO+0xC5
-CODE:5991 7E				      ld      a, (hl)
+CODE:598E 21 C5	3C			      ld      hl, # VIDEO+0xC5		      ;	current	quadrant LR sensor
+CODE:5991 7E				      ld      a, (hl)			      ;	get warships
 CODE:5992 C6 99				      add     a, #0x99 ; 'ô'
-CODE:5994 27				      daa
-CODE:5995 77				      ld      (hl), a
+CODE:5994 27				      daa				      ;	decrement
+CODE:5995 77				      ld      (hl), a			      ;	write to video
 CODE:5996 C5				      push    bc
 CODE:5997 D5				      push    de
 CODE:5998 CD 1E	5F			      call    dec_jovians
 CODE:599B D1				      pop     de
 CODE:599C C1				      pop     bc
 CODE:599D E1				      pop     hl
-CODE:599E C3 83	59			      jp      loc_5983
+CODE:599E C3 83	59			      jp      pod_animate_object
 CODE:59A1
 CODE:59A1	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:59A1
@@ -1621,7 +1656,7 @@ CODE:59A1	      ;	FUNCTION CHUNK AT CODE:538E SIZE 00000032 BYTES
 CODE:59A1
 CODE:59A1 3A 95	69			      ld      a, (pwr_lr_sensor)	      ;	get power to LR	sensor
 CODE:59A4 FE 05				      cp      #5			      ;	greater	than 4%?
-CODE:59A6 F2 D4	59			      jp      P, loc_59D4		      ;	yes, skip
+CODE:59A6 F2 D4	59			      jp      P, check_sr_sensor	      ;	yes, skip
 CODE:59A9 21 41	3C			      ld      hl, # VIDEO+0x41		      ;	1st row
 CODE:59AC 11 C1	3C			      ld      de, # VIDEO+0xC1		      ;	2nd row
 CODE:59AF 01 41	3D			      ld      bc, # VIDEO+0x141		      ;	3rd row
@@ -1651,12 +1686,12 @@ CODE:59CF F1				      pop     af
 CODE:59D0 3D				      dec     a				      ;	done row?
 CODE:59D1 C2 B4	59			      jp      NZ, loc_59B4		      ;	no, loop
 CODE:59D4
-CODE:59D4	      loc_59D4:							      ;	CODE XREF: handle_low_power+5j
+CODE:59D4	      check_sr_sensor:						      ;	CODE XREF: handle_low_power+5j
 CODE:59D4 3A 96	69			      ld      a, (pwr_sr_sensor)
 CODE:59D7 FE 03				      cp      #3			      ;	greater	than 2%?
-CODE:59D9 F2 F9	59			      jp      P, loc_59F9		      ;	yes, skip
-CODE:59DC 3E 01				      ld      a, #1
-CODE:59DE 32 B8	6F			      ld      (byte_6FB8), a
+CODE:59D9 F2 F9	59			      jp      P, check_jovian_threat	      ;	yes, skip
+CODE:59DC 3E 01				      ld      a, #1			      ;	flag disabled
+CODE:59DE 32 B8	6F			      ld      (disable_pod_update), a
 CODE:59E1 21 57	3C			      ld      hl, # VIDEO+0x57		      ;	SR sensor display
 CODE:59E4 11 2C	00			      ld      de, #0x2C	; ','                 ; offset to next sector row
 CODE:59E7 06 0A				      ld      b, #10			      ;	10 rows	to overwrite
@@ -1674,16 +1709,16 @@ CODE:59F4 19				      add     hl, de			      ;	next sector row
 CODE:59F5 05				      dec     b				      ;	done all rows?
 CODE:59F6 C2 E9	59			      jp      NZ, loc_59E9		      ;	no, loop
 CODE:59F9
-CODE:59F9	      loc_59F9:							      ;	CODE XREF: handle_low_power+38j
-CODE:59F9 3A B6	6F			      ld      a, (byte_6FB6)
-CODE:59FC A7				      and     a
-CODE:59FD FA 09	5A			      jp      M, loc_5A09
+CODE:59F9	      check_jovian_threat:					      ;	CODE XREF: handle_low_power+38j
+CODE:59F9 3A B6	6F			      ld      a, (jovian_time_frozen)
+CODE:59FC A7				      and     a				      ;	frozen?
+CODE:59FD FA 09	5A			      jp      M, condition_green	      ;	yes, skip
 CODE:5A00 3A C5	3C			      ld      a, (VIDEO+0xC5)		      ;	#jovian	warships
 CODE:5A03 D6 30				      sub     #0x30 ; '0'                     ; convert to binary
 CODE:5A05 A7				      and     a				      ;	zero?
-CODE:5A06 C2 1D	5A			      jp      NZ, loc_5A1D		      ;	no, go
+CODE:5A06 C2 1D	5A			      jp      NZ, condition_red		      ;	no, go
 CODE:5A09
-CODE:5A09	      loc_5A09:							      ;	CODE XREF: handle_low_power+5Cj
+CODE:5A09	      condition_green:						      ;	CODE XREF: handle_low_power+5Cj
 CODE:5A09 3A B9	6F			      ld      a, (byte_6FB9)
 CODE:5A0C A7				      and     a
 CODE:5A0D F8				      ret     M
@@ -1694,7 +1729,7 @@ CODE:5A17 11 AC	61			      ld      de, #aGreen		      ;	"GREEN"
 CODE:5A1A C3 3F	5D			      jp      print_string
 CODE:5A1D	      ;	---------------------------------------------------------------------------
 CODE:5A1D
-CODE:5A1D	      loc_5A1D:							      ;	CODE XREF: handle_low_power+65j
+CODE:5A1D	      condition_red:						      ;	CODE XREF: handle_low_power+65j
 CODE:5A1D 3A B9	6F			      ld      a, (byte_6FB9)
 CODE:5A20 A7				      and     a
 CODE:5A21 FA 32	5A			      jp      M, loc_5A32
@@ -1706,34 +1741,34 @@ CODE:5A2F CD 3F	5D			      call    print_string
 CODE:5A32
 CODE:5A32	      loc_5A32:							      ;	CODE XREF: handle_low_power+80j
 CODE:5A32 2A 28	68			      ld      hl, (hephaestus_video_addr)
-CODE:5A35 7E				      ld      a, (hl)
-CODE:5A36 F6 80				      or      #0x80 ; 'Ä'
-CODE:5A38 77				      ld      (hl), a
+CODE:5A35 7E				      ld      a, (hl)			      ;	get Hephaestus graphic
+CODE:5A36 F6 80				      or      #0x80 ; 'Ä'                     ; animate
+CODE:5A38 77				      ld      (hl), a			      ;	write to video
 CODE:5A39 3A AA	69			      ld      a, (byte_69AA)
 CODE:5A3C 0F				      rrca
 CODE:5A3D 3C				      inc     a
 CODE:5A3E 47				      ld      b, a
 CODE:5A3F CD 48	5D			      call    sub_5D48
-CODE:5A42 7E				      ld      a, (hl)
-CODE:5A43 E6 7F				      and     #0x7F ; ''
-CODE:5A45 77				      ld      (hl), a
+CODE:5A42 7E				      ld      a, (hl)			      ;	get Hephaestus graphic
+CODE:5A43 E6 7F				      and     #0x7F ; ''                     ; animate
+CODE:5A45 77				      ld      (hl), a			      ;	write to video
 CODE:5A46 3A C5	3C			      ld      a, (VIDEO+0xC5)		      ;	#jovian	warships
 CODE:5A49 D6 30				      sub     #0x30 ; '0'                     ; convert to binary
 CODE:5A4B FE 04				      cp      #4			      ;	more than 3?
-CODE:5A4D F4 DE	5A			      call    P, sub_5ADE		      ;	yes, go
+CODE:5A4D F4 DE	5A			      call    P, lose_power_crystal	      ;	yes, go
 CODE:5A50 3A 97	69			      ld      a, (pwr_deflectors)
 CODE:5A53 FE 05				      cp      #5			      ;	less than 5%?
-CODE:5A55 FC FC	5A			      call    M, sub_5AFC		      ;	yes, go
+CODE:5A55 FC FC	5A			      call    M, print_shields_failing	      ;	yes, go
 CODE:5A58 0E 00				      ld      c, #0
 CODE:5A5A 21 97	69			      ld      hl, #pwr_deflectors
 CODE:5A5D 7E				      ld      a, (hl)
 CODE:5A5E A7				      and     a				      ;	pwr zero?
-CODE:5A5F CA 66	5A			      jp      Z, dec_pwr_and_XXXX	      ;	yes, skip
+CODE:5A5F CA 66	5A			      jp      Z, jovian_attack_and_move	      ;	yes, skip
 CODE:5A62 C6 99				      add     a, #0x99 ; 'ô'
 CODE:5A64 27				      daa				      ;	decrement power
 CODE:5A65 77				      ld      (hl), a			      ;	update pwr_deflectors
 CODE:5A66
-CODE:5A66	      dec_pwr_and_XXXX:						      ;	CODE XREF: CODE:5210p
+CODE:5A66	      jovian_attack_and_move:					      ;	CODE XREF: CODE:5210p
 CODE:5A66									      ;	CODE:5256p ...
 CODE:5A66 3A B8	69			      ld      a, (power_avail)
 CODE:5A69 C6 99				      add     a, #0x99 ; 'ô'
@@ -1744,10 +1779,10 @@ CODE:5A72 CD 5D	5F			      call    print_power_avail
 CODE:5A75 3A 58	68			      ld      a, (jovians_left)
 CODE:5A78 A7				      and     a				      ;	any left?
 CODE:5A79 CA 8E	53			      jp      Z, print_game_over_screen	      ;	no, go
-CODE:5A7C 3A AB	69			      ld      a, (byte_69AB)
-CODE:5A7F 3D				      dec     a
-CODE:5A80 32 AB	69			      ld      (byte_69AB), a
-CODE:5A83 C0				      ret     NZ
+CODE:5A7C 3A AB	69			      ld      a, (time_to_jovian_fire)
+CODE:5A7F 3D				      dec     a				      ;	zero?
+CODE:5A80 32 AB	69			      ld      (time_to_jovian_fire), a
+CODE:5A83 C0				      ret     NZ			      ;	no, return
 CODE:5A84
 CODE:5A84	      loc_5A84:							      ;	CODE XREF: handle_low_power+E8j
 CODE:5A84									      ;	handle_low_power+EDj
@@ -1756,11 +1791,11 @@ CODE:5A87 FE 01				      cp      #1			      ;	less than 1?
 CODE:5A89 FA 84	5A			      jp      M, loc_5A84		      ;	yes, regenerate
 CODE:5A8C FE 05				      cp      #5			      ;	greater	than 4?
 CODE:5A8E F2 84	5A			      jp      P, loc_5A84		      ;	yes, regenerate
-CODE:5A91 32 AB	69			      ld      (byte_69AB), a		      ;	update ___
-CODE:5A94 16 04				      ld      d, #4
-CODE:5A96 21 AE	69			      ld      hl, #word_69AE
+CODE:5A91 32 AB	69			      ld      (time_to_jovian_fire), a	      ;	update with new	random value
+CODE:5A94 16 04				      ld      d, #4			      ;	*** dead code
+CODE:5A96 21 AE	69			      ld      hl, #jovian_tbl
 CODE:5A99
-CODE:5A99	      loc_5A99:							      ;	CODE XREF: handle_low_power+13Aj
+CODE:5A99	      get_jovian_address:					      ;	CODE XREF: handle_low_power+13Aj
 CODE:5A99 7E				      ld      a, (hl)
 CODE:5A9A A7				      and     a
 CODE:5A9B C8				      ret     Z
@@ -1769,10 +1804,10 @@ CODE:5A9D 23				      inc     hl
 CODE:5A9E 46				      ld      b, (hl)
 CODE:5A9F E5				      push    hl
 CODE:5AA0
-CODE:5AA0	      loc_5AA0:							      ;	CODE XREF: handle_low_power+104j
+CODE:5AA0	      move_jovian:						      ;	CODE XREF: handle_low_power+104j
 CODE:5AA0 CD 00	5D			      call    rand_0_9
 CODE:5AA3 FE 08				      cp      #8			      ;	greater	than 7?
-CODE:5AA5 F2 A0	5A			      jp      P, loc_5AA0		      ;	yes, regenerate
+CODE:5AA5 F2 A0	5A			      jp      P, move_jovian		      ;	yes, regenerate
 CODE:5AA8 21 9A	69			      ld      hl, #dir_addr_delta_tbl
 CODE:5AAB A7				      and     a
 CODE:5AAC
@@ -1780,79 +1815,79 @@ CODE:5AAC	      loc_5AAC:							      ;	CODE XREF: handle_low_power+111j
 CODE:5AAC CA B5	5A			      jp      Z, loc_5AB5
 CODE:5AAF 23				      inc     hl
 CODE:5AB0 23				      inc     hl
-CODE:5AB1 3D				      dec     a
-CODE:5AB2 C3 AC	5A			      jp      loc_5AAC
+CODE:5AB1 3D				      dec     a				      ;	found direction	entry?
+CODE:5AB2 C3 AC	5A			      jp      loc_5AAC			      ;	no, loop
 CODE:5AB5	      ;	---------------------------------------------------------------------------
 CODE:5AB5
 CODE:5AB5	      loc_5AB5:							      ;	CODE XREF: handle_low_power:loc_5AACj
 CODE:5AB5 5E				      ld      e, (hl)
 CODE:5AB6 23				      inc     hl
-CODE:5AB7 56				      ld      d, (hl)
+CODE:5AB7 56				      ld      d, (hl)			      ;	DE=delta
 CODE:5AB8 60				      ld      h, b
 CODE:5AB9 69				      ld      l, c
-CODE:5ABA 19				      add     hl, de
-CODE:5ABB 7E				      ld      a, (hl)
-CODE:5ABC FE 2E				      cp      #0x2E ; '.'
-CODE:5ABE C2 DA	5A			      jp      NZ, loc_5ADA
-CODE:5AC1 0A				      ld      a, (bc)
-CODE:5AC2 FE 26				      cp      #0x26 ; '&'
-CODE:5AC4 CA CC	5A			      jp      Z, loc_5ACC
-CODE:5AC7 FE 40				      cp      #0x40 ; '@'
-CODE:5AC9 C2 DA	5A			      jp      NZ, loc_5ADA
+CODE:5ABA 19				      add     hl, de			      ;	add delta to jovian address
+CODE:5ABB 7E				      ld      a, (hl)			      ;	get sector contents
+CODE:5ABC FE 2E				      cp      #0x2E ; '.'                     ; empty?
+CODE:5ABE C2 DA	5A			      jp      NZ, next_jovian		      ;	no, go
+CODE:5AC1 0A				      ld      a, (bc)			      ;	get jovian ship	type
+CODE:5AC2 FE 26				      cp      #0x26 ; '&'                     ; battle cruiser?
+CODE:5AC4 CA CC	5A			      jp      Z, loc_5ACC		      ;	yes, skip
+CODE:5AC7 FE 40				      cp      #0x40 ; '@'                     ; command cruiser?
+CODE:5AC9 C2 DA	5A			      jp      NZ, next_jovian		      ;	no, go
 CODE:5ACC
 CODE:5ACC	      loc_5ACC:							      ;	CODE XREF: handle_low_power+123j
-CODE:5ACC 77				      ld      (hl), a
-CODE:5ACD 3E 2E				      ld      a, #0x2E ; '.'
-CODE:5ACF 02				      ld      (bc), a
-CODE:5AD0 D1				      pop     de
-CODE:5AD1 1B				      dec     de
+CODE:5ACC 77				      ld      (hl), a			      ;	update sector with jovian vessel
+CODE:5ACD 3E 2E				      ld      a, #0x2E ; '.'                  ; empty sector
+CODE:5ACF 02				      ld      (bc), a			      ;	update original	jovian vessel location
+CODE:5AD0 D1				      pop     de			      ;	jovain tbl ptr
+CODE:5AD1 1B				      dec     de			      ;	lsb
 CODE:5AD2 7D				      ld      a, l
-CODE:5AD3 12				      ld      (de), a
+CODE:5AD3 12				      ld      (de), a			      ;	update lsb of address
 CODE:5AD4 7C				      ld      a, h
 CODE:5AD5 13				      inc     de
-CODE:5AD6 12				      ld      (de), a
+CODE:5AD6 12				      ld      (de), a			      ;	update msb of address
 CODE:5AD7 EB				      ex      de, hl
-CODE:5AD8 23				      inc     hl
+CODE:5AD8 23				      inc     hl			      ;	adjust
 CODE:5AD9 E5				      push    hl
 CODE:5ADA
-CODE:5ADA	      loc_5ADA:							      ;	CODE XREF: handle_low_power+11Dj
+CODE:5ADA	      next_jovian:						      ;	CODE XREF: handle_low_power+11Dj
 CODE:5ADA									      ;	handle_low_power+128j
 CODE:5ADA E1				      pop     hl
-CODE:5ADB C3 99	5A			      jp      loc_5A99
+CODE:5ADB C3 99	5A			      jp      get_jovian_address
 CODE:5ADB	      ;	End of function	handle_low_power
 CODE:5ADB
 CODE:5ADE
 CODE:5ADE	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5ADE
 CODE:5ADE
-CODE:5ADE	      sub_5ADE:							      ;	CODE XREF: handle_low_power+ACp
+CODE:5ADE	      lose_power_crystal:					      ;	CODE XREF: handle_low_power+ACp
 CODE:5ADE 11 79	64			      ld      de, #aEngineerThereG	      ;	"ENGINEER:THERE	GOES A POWER CRYSTAL, CO"...
 CODE:5AE1 CD 39	5D			      call    print_string_last_line
 CODE:5AE4
-CODE:5AE4	      loc_5AE4:							      ;	CODE XREF: sub_5AFC+6j
+CODE:5AE4	      dec_power_by_5:						      ;	CODE XREF: print_shields_failing+6j
 CODE:5AE4 3A B8	69			      ld      a, (power_avail)
-CODE:5AE7 06 05				      ld      b, #5
+CODE:5AE7 06 05				      ld      b, #5			      ;	decrement by 5%
 CODE:5AE9
-CODE:5AE9	      loc_5AE9:							      ;	CODE XREF: sub_5ADE+12j
+CODE:5AE9	      loc_5AE9:							      ;	CODE XREF: lose_power_crystal+12j
 CODE:5AE9 C6 99				      add     a, #0x99 ; 'ô'
-CODE:5AEB 27				      daa
-CODE:5AEC CA 8E	53			      jp      Z, print_game_over_screen
-CODE:5AEF 05				      dec     b
-CODE:5AF0 C2 E9	5A			      jp      NZ, loc_5AE9
-CODE:5AF3 32 B8	69			      ld      (power_avail), a
+CODE:5AEB 27				      daa				      ;	dec power
+CODE:5AEC CA 8E	53			      jp      Z, print_game_over_screen	      ;	no power, game over
+CODE:5AEF 05				      dec     b				      ;	done decrementing?
+CODE:5AF0 C2 E9	5A			      jp      NZ, loc_5AE9		      ;	no, loop
+CODE:5AF3 32 B8	69			      ld      (power_avail), a		      ;	update
 CODE:5AF6 CD 5D	5F			      call    print_power_avail
 CODE:5AF9 C3 BA	56			      jp      update_power_distribution
-CODE:5AF9	      ;	End of function	sub_5ADE
+CODE:5AF9	      ;	End of function	lose_power_crystal
 CODE:5AF9
 CODE:5AFC
 CODE:5AFC	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5AFC
 CODE:5AFC
-CODE:5AFC	      sub_5AFC:							      ;	CODE XREF: handle_low_power+B4p
+CODE:5AFC	      print_shields_failing:					      ;	CODE XREF: handle_low_power+B4p
 CODE:5AFC 11 A8	64			      ld      de, #aEngineerComm_3	      ;	"ENGINEER:COMMANDER, THE SHIELDS ARE FAL"...
 CODE:5AFF CD 39	5D			      call    print_string_last_line
-CODE:5B02 C3 E4	5A			      jp      loc_5AE4
-CODE:5B02	      ;	End of function	sub_5AFC
+CODE:5B02 C3 E4	5A			      jp      dec_power_by_5
+CODE:5B02	      ;	End of function	print_shields_failing
 CODE:5B02
 CODE:5B05	      ;	---------------------------------------------------------------------------
 CODE:5B05
@@ -1949,8 +1984,8 @@ CODE:5B76 13				      inc     de			      ;	next byte in table
 CODE:5B77 23				      inc     hl			      ;	next video address
 CODE:5B78 05				      dec     b				      ;	done all bytes?
 CODE:5B79 C2 70	5B			      jp      NZ, loc_5B70		      ;	no, loop
-CODE:5B7C 97				      sub     a
-CODE:5B7D 32 B6	6F			      ld      (byte_6FB6), a
+CODE:5B7C 97				      sub     a				      ;	flag normal
+CODE:5B7D 32 B6	6F			      ld      (jovian_time_frozen), a
 CODE:5B80 C9				      ret
 CODE:5B80	      ;	End of function	move_quadrant
 CODE:5B80
@@ -2034,8 +2069,8 @@ CODE:5BCC
 CODE:5BCC	      init_quadrant:						      ;	CODE XREF: handle_low_power-816p
 CODE:5BCC									      ;	CODE:522Ep ...
 CODE:5BCC E5				      push    hl			      ;	ptr current quadrant on	LR sensor
-CODE:5BCD 97				      sub     a
-CODE:5BCE 32 B8	6F			      ld      (byte_6FB8), a
+CODE:5BCD 97				      sub     a				      ;	flag enabled
+CODE:5BCE 32 B8	6F			      ld      (disable_pod_update), a
 CODE:5BD1	      ;	init quadrant with all '.'
 CODE:5BD1 11 2C	00			      ld      de, #0x2C	; ','                 ; offset to next line of quadrant display
 CODE:5BD4 21 57	3C			      ld      hl, # VIDEO+0x57		      ;	quadrant display video address
@@ -2062,8 +2097,8 @@ CODE:5BEE 23				      inc     hl			      ;	ptr space stations
 CODE:5BEF E5				      push    hl
 CODE:5BF0 D6 30				      sub     #0x30 ; '0'                     ; convert to binary
 CODE:5BF2 CA 12	5C			      jp      Z, loc_5C12		      ;	no warships, skip
-CODE:5BF5 21 AE	69			      ld      hl, #word_69AE		      ;	ptr table of warships
-CODE:5BF8 22 AC	69			      ld      (word_69AC), hl		      ;	save in	current	tbl ptr
+CODE:5BF5 21 AE	69			      ld      hl, #jovian_tbl		      ;	ptr table of warships
+CODE:5BF8 22 AC	69			      ld      (tmp_jovian_tbl_ptr), hl	      ;	save copy
 CODE:5BFB 57				      ld      d, a			      ;	D=warships
 CODE:5BFC
 CODE:5BFC	      loc_5BFC:							      ;	CODE XREF: init_quadrant+43j
@@ -2084,7 +2119,7 @@ CODE:5C0F C2 FC	5B			      jp      NZ, loc_5BFC		      ;	no, loop
 CODE:5C12	      ;	init space stations
 CODE:5C12
 CODE:5C12	      loc_5C12:							      ;	CODE XREF: init_quadrant+26j
-CODE:5C12 2A AC	69			      ld      hl, (word_69AC)		      ;	get current tbl	ptr
+CODE:5C12 2A AC	69			      ld      hl, (tmp_jovian_tbl_ptr)	      ;	get current ptr
 CODE:5C15 36 00				      ld      (hl), #0			      ;	terminate
 CODE:5C17 E1				      pop     hl			      ;	ptr space stations
 CODE:5C18 7E				      ld      a, (hl)			      ;	get space stations
@@ -2189,12 +2224,12 @@ CODE:5C99
 CODE:5C99	      loc_5C99:							      ;	CODE XREF: add_obj_to_quadrant+24j
 CODE:5C99 D5				      push    de
 CODE:5C9A EB				      ex      de, hl
-CODE:5C9B 2A AC	69			      ld      hl, (word_69AC)		      ;	get current tbl	ptr
-CODE:5C9E 73				      ld      (hl), e			      ;	command/battle cruiser
+CODE:5C9B 2A AC	69			      ld      hl, (tmp_jovian_tbl_ptr)
+CODE:5C9E 73				      ld      (hl), e			      ;	warship	video address lsb
 CODE:5C9F 23				      inc     hl
-CODE:5CA0 72				      ld      (hl), d			      ;	number warships	in quadrant
-CODE:5CA1 23				      inc     hl
-CODE:5CA2 22 AC	69			      ld      (word_69AC), hl		      ;	update current tbl ptr
+CODE:5CA0 72				      ld      (hl), d			      ;	warship	video address msb
+CODE:5CA1 23				      inc     hl			      ;	next entry
+CODE:5CA2 22 AC	69			      ld      (tmp_jovian_tbl_ptr), hl	      ;	update
 CODE:5CA5 D1				      pop     de
 CODE:5CA6 C9				      ret
 CODE:5CA6	      ;	End of function	add_obj_to_quadrant
@@ -2266,7 +2301,7 @@ CODE:5CD7 C2 D1	5C			      jp      NZ, loc_5CD1
 CODE:5CDA 15				      dec     d
 CODE:5CDB C2 D1	5C			      jp      NZ, loc_5CD1
 CODE:5CDE 23				      inc     hl
-CODE:5CDF CD 4B	5D			      call    sub_5D4B
+CODE:5CDF CD 4B	5D			      call    update_chaser_pods_cmd_entry
 CODE:5CE2 05				      dec     b
 CODE:5CE3 CA F1	5C			      jp      Z, loc_5CF1
 CODE:5CE6 3A F2	67			      ld      a, (byte_67F2)
@@ -2342,7 +2377,7 @@ CODE:5D29
 CODE:5D29	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D29
 CODE:5D29
-CODE:5D29	      sub_5D29:							      ;	CODE XREF: CODE:577Bj
+CODE:5D29	      print_experimental_ray_outcome:				      ;	CODE XREF: CODE:577Bj
 CODE:5D29									      ;	CODE:5795p ...
 CODE:5D29 D5				      push    de
 CODE:5D2A 11 46	65			      ld      de, #aFirstOfficerTh	      ;	"FIRST OFFICER:	THE EXPERIMENTAL RAY"
@@ -2352,7 +2387,7 @@ CODE:5D33 D1				      pop     de
 CODE:5D34 23				      inc     hl
 CODE:5D35 CD 3F	5D			      call    print_string
 CODE:5D38 C9				      ret
-CODE:5D38	      ;	End of function	sub_5D29
+CODE:5D38	      ;	End of function	print_experimental_ray_outcome
 CODE:5D38
 CODE:5D39
 CODE:5D39	      ;	===============	S U B R	O U T I	N E =======================================
@@ -2401,7 +2436,7 @@ CODE:5D4B
 CODE:5D4B	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5D4B
 CODE:5D4B
-CODE:5D4B	      sub_5D4B:							      ;	CODE XREF: handle_low_power-860p
+CODE:5D4B	      update_chaser_pods_cmd_entry:				      ;	CODE XREF: handle_low_power-860p
 CODE:5D4B									      ;	handle_low_power:loc_51BDp ...
 CODE:5D4B
 CODE:5D4B	      ;	FUNCTION CHUNK AT CODE:5580 SIZE 00000005 BYTES
@@ -2422,7 +2457,7 @@ CODE:5D5C FE 2B				      cp      #0x2B ; '+'                     ; end? (right)
 CODE:5D5E FA 63	5D			      jp      M, loc_5D63		      ;	no, skip
 CODE:5D61 2E 19				      ld      l, #0x19			      ;	reset to start (left)
 CODE:5D63
-CODE:5D63	      loc_5D63:							      ;	CODE XREF: sub_5D4B+13j
+CODE:5D63	      loc_5D63:							      ;	CODE XREF: update_chaser_pods_cmd_entry+13j
 CODE:5D63 7E				      ld      a, (hl)			      ;	read char (why?)
 CODE:5D64 3E 8F				      ld      a, #0x8F ; 'è'                  ; chaser graphic
 CODE:5D66 77				      ld      (hl), a			      ;	write to video
@@ -2434,7 +2469,7 @@ CODE:5D71	      ;	toggles	"CONDITION" value w/graphics
 CODE:5D71 06 05				      ld      b, #5			      ;	5 chars	to toggle
 CODE:5D73 21 BB	3C			      ld      hl, # VIDEO+0xBB		      ;	ptr to condition value
 CODE:5D76
-CODE:5D76	      loc_5D76:							      ;	CODE XREF: sub_5D4B+31j
+CODE:5D76	      loc_5D76:							      ;	CODE XREF: update_chaser_pods_cmd_entry+31j
 CODE:5D76 7E				      ld      a, (hl)			      ;	get char
 CODE:5D77 C6 80				      add     a, #0x80 ; 'Ä'                  ; toggle graphics
 CODE:5D79 77				      ld      (hl), a			      ;	write back to video
@@ -2442,112 +2477,112 @@ CODE:5D7A 23				      inc     hl			      ;	next address
 CODE:5D7B 05				      dec     b				      ;	done?
 CODE:5D7C C2 76	5D			      jp      NZ, loc_5D76		      ;	no, loop
 CODE:5D7F
-CODE:5D7F	      loc_5D7F:							      ;	CODE XREF: sub_5D4B+23j
-CODE:5D7F 3A B8	6F			      ld      a, (byte_6FB8)
-CODE:5D82 A7				      and     a
-CODE:5D83 C2 00	5E			      jp      NZ, handle_cmd_entry
+CODE:5D7F	      loc_5D7F:							      ;	CODE XREF: update_chaser_pods_cmd_entry+23j
+CODE:5D7F 3A B8	6F			      ld      a, (disable_pod_update)
+CODE:5D82 A7				      and     a				      ;	disabled?
+CODE:5D83 C2 00	5E			      jp      NZ, handle_cmd_entry	      ;	yes, skip
 CODE:5D86 11 06	00			      ld      de, #6			      ;	6 bytes	per pod	entry
 CODE:5D89 21 9B	6F			      ld      hl, #antimatter_pod_tbl
 CODE:5D8C
-CODE:5D8C	      loc_5D8C:							      ;	CODE XREF: sub_5D4B+4Cj
+CODE:5D8C	      loc_5D8C:							      ;	CODE XREF: update_chaser_pods_cmd_entry+4Cj
 CODE:5D8C 7E				      ld      a, (hl)			      ;	pod status
 CODE:5D8D FE FF				      cp      #0xFF			      ;	end of table?
 CODE:5D8F CA 00	5E			      jp      Z, handle_cmd_entry	      ;	yes, exit
 CODE:5D92 A7				      and     a				      ;	unused?
-CODE:5D93 C2 9A	5D			      jp      NZ, loc_5D9A		      ;	no, exit
+CODE:5D93 C2 9A	5D			      jp      NZ, get_pod_data		      ;	no, exit
 CODE:5D96
-CODE:5D96	      loc_5D96:							      ;	CODE XREF: sub_5D4B+51j
-CODE:5D96									      ;	sub_5D4B+69j
+CODE:5D96	      next_pod:							      ;	CODE XREF: update_chaser_pods_cmd_entry+51j
+CODE:5D96									      ;	update_chaser_pods_cmd_entry+69j
 CODE:5D96 19				      add     hl, de			      ;	next pod entry
 CODE:5D97 C3 8C	5D			      jp      loc_5D8C			      ;	loop
 CODE:5D9A	      ;	---------------------------------------------------------------------------
 CODE:5D9A
-CODE:5D9A	      loc_5D9A:							      ;	CODE XREF: sub_5D4B+48j
-CODE:5D9A FE 01				      cp      #1
-CODE:5D9C C2 96	5D			      jp      NZ, loc_5D96
-CODE:5D9F E5				      push    hl
+CODE:5D9A	      get_pod_data:						      ;	CODE XREF: update_chaser_pods_cmd_entry+48j
+CODE:5D9A FE 01				      cp      #1			      ;	pod launched?
+CODE:5D9C C2 96	5D			      jp      NZ, next_pod		      ;	no, return
+CODE:5D9F E5				      push    hl			      ;	pod table entry
 CODE:5DA0 23				      inc     hl
 CODE:5DA1 4E				      ld      c, (hl)
 CODE:5DA2 23				      inc     hl
-CODE:5DA3 46				      ld      b, (hl)
+CODE:5DA3 46				      ld      b, (hl)			      ;	BC = video address delta
 CODE:5DA4 23				      inc     hl
 CODE:5DA5 5E				      ld      e, (hl)
 CODE:5DA6 23				      inc     hl
-CODE:5DA7 56				      ld      d, (hl)
+CODE:5DA7 56				      ld      d, (hl)			      ;	DE = video address
 CODE:5DA8 23				      inc     hl
-CODE:5DA9 7E				      ld      a, (hl)
-CODE:5DAA A7				      and     a
-CODE:5DAB CA B7	5D			      jp      Z, loc_5DB7
-CODE:5DAE 3D				      dec     a
-CODE:5DAF 77				      ld      (hl), a
+CODE:5DA9 7E				      ld      a, (hl)			      ;	speed countdown
+CODE:5DAA A7				      and     a				      ;	zero?
+CODE:5DAB CA B7	5D			      jp      Z, move_pod		      ;	yes, go
+CODE:5DAE 3D				      dec     a				      ;	decrement speed	countdown
+CODE:5DAF 77				      ld      (hl), a			      ;	update
 CODE:5DB0 E1				      pop     hl
 CODE:5DB1
-CODE:5DB1	      loc_5DB1:							      ;	CODE XREF: sub_5D4B+87j
-CODE:5DB1 11 06	00			      ld      de, #6
-CODE:5DB4 C3 96	5D			      jp      loc_5D96
+CODE:5DB1	      offset_for_next_pod:					      ;	CODE XREF: update_chaser_pods_cmd_entry+87j
+CODE:5DB1 11 06	00			      ld      de, #6			      ;	offset to next pod entry
+CODE:5DB4 C3 96	5D			      jp      next_pod
 CODE:5DB7	      ;	---------------------------------------------------------------------------
 CODE:5DB7
-CODE:5DB7	      loc_5DB7:							      ;	CODE XREF: sub_5D4B+60j
-CODE:5DB7 3A 40	68			      ld      a, (pod_speed)
-CODE:5DBA 77				      ld      (hl), a
+CODE:5DB7	      move_pod:							      ;	CODE XREF: update_chaser_pods_cmd_entry+60j
+CODE:5DB7 3A 40	68			      ld      a, (pod_speed)		      ;	reinit speed countdown
+CODE:5DBA 77				      ld      (hl), a			      ;	update pod speed
 CODE:5DBB 62				      ld      h, d
-CODE:5DBC 6B				      ld      l, e
-CODE:5DBD 36 2E				      ld      (hl), #0x2E ; '.'
-CODE:5DBF 09				      add     hl, bc
-CODE:5DC0 7E				      ld      a, (hl)
-CODE:5DC1 FE 2E				      cp      #0x2E ; '.'
-CODE:5DC3 C2 D5	5D			      jp      NZ, loc_5DD5
-CODE:5DC6 36 23				      ld      (hl), #0x23 ; '#'
-CODE:5DC8 D1				      pop     de
+CODE:5DBC 6B				      ld      l, e			      ;	HL = video address
+CODE:5DBD 36 2E				      ld      (hl), #0x2E ; '.'               ; write empty sector to video
+CODE:5DBF 09				      add     hl, bc			      ;	add delta to address
+CODE:5DC0 7E				      ld      a, (hl)			      ;	get sector contents
+CODE:5DC1 FE 2E				      cp      #0x2E ; '.'                     ; empty?
+CODE:5DC3 C2 D5	5D			      jp      NZ, change_pod_dir	      ;	no, go
+CODE:5DC6 36 23				      ld      (hl), #0x23 ; '#'               ; write pod graphic to video
+CODE:5DC8 D1				      pop     de			      ;	pod table entry
 CODE:5DC9 D5				      push    de
 CODE:5DCA 13				      inc     de
 CODE:5DCB 13				      inc     de
-CODE:5DCC EB				      ex      de, hl
+CODE:5DCC EB				      ex      de, hl			      ;	HL = pod table entry+2
 CODE:5DCD
-CODE:5DCD	      loc_5DCD:							      ;	CODE XREF: sub_5D4B+B2j
-CODE:5DCD 23				      inc     hl
-CODE:5DCE 73				      ld      (hl), e
+CODE:5DCD	      update_pod_address:					      ;	CODE XREF: update_chaser_pods_cmd_entry+B2j
+CODE:5DCD 23				      inc     hl			      ;	next entry address
+CODE:5DCE 73				      ld      (hl), e			      ;	video address lsb
 CODE:5DCF 23				      inc     hl
-CODE:5DD0 72				      ld      (hl), d
+CODE:5DD0 72				      ld      (hl), d			      ;	video address msb
 CODE:5DD1 E1				      pop     hl
-CODE:5DD2 C3 B1	5D			      jp      loc_5DB1
+CODE:5DD2 C3 B1	5D			      jp      offset_for_next_pod
 CODE:5DD5	      ;	---------------------------------------------------------------------------
 CODE:5DD5
-CODE:5DD5	      loc_5DD5:							      ;	CODE XREF: sub_5D4B+78j
-CODE:5DD5									      ;	sub_5D4B+8Fj ...
-CODE:5DD5 CD 00	5D			      call    rand_0_9
-CODE:5DD8 FE 08				      cp      #8
-CODE:5DDA F2 D5	5D			      jp      P, loc_5DD5
+CODE:5DD5	      change_pod_dir:						      ;	CODE XREF: update_chaser_pods_cmd_entry+78j
+CODE:5DD5									      ;	update_chaser_pods_cmd_entry+8Fj ...
+CODE:5DD5 CD 00	5D			      call    rand_0_9			      ;	direction
+CODE:5DD8 FE 08				      cp      #8			      ;	greater	than 7?
+CODE:5DDA F2 D5	5D			      jp      P, change_pod_dir		      ;	regenerate
 CODE:5DDD 21 9A	69			      ld      hl, #dir_addr_delta_tbl
-CODE:5DE0 07				      rlca
+CODE:5DE0 07				      rlca				      ;	x2
 CODE:5DE1 85				      add     a, l
 CODE:5DE2 6F				      ld      l, a
 CODE:5DE3 7C				      ld      a, h
 CODE:5DE4 CE 00				      adc     a, #0
-CODE:5DE6 67				      ld      h, a
+CODE:5DE6 67				      ld      h, a			      ;	ptr direction delta address entry
 CODE:5DE7 7E				      ld      a, (hl)
 CODE:5DE8 23				      inc     hl
 CODE:5DE9 66				      ld      h, (hl)
-CODE:5DEA 6F				      ld      l, a
+CODE:5DEA 6F				      ld      l, a			      ;	HL = delta
 CODE:5DEB 44				      ld      b, h
-CODE:5DEC 4D				      ld      c, l
-CODE:5DED 19				      add     hl, de
-CODE:5DEE 7E				      ld      a, (hl)
-CODE:5DEF FE 2E				      cp      #0x2E ; '.'
-CODE:5DF1 C2 D5	5D			      jp      NZ, loc_5DD5
-CODE:5DF4 36 23				      ld      (hl), #0x23 ; '#'
-CODE:5DF6 D1				      pop     de
+CODE:5DEC 4D				      ld      c, l			      ;	BC = delta
+CODE:5DED 19				      add     hl, de			      ;	add delta to video address
+CODE:5DEE 7E				      ld      a, (hl)			      ;	get sector contents
+CODE:5DEF FE 2E				      cp      #0x2E ; '.'                     ; empty?
+CODE:5DF1 C2 D5	5D			      jp      NZ, change_pod_dir	      ;	no, regenerate
+CODE:5DF4 36 23				      ld      (hl), #0x23 ; '#'               ; write pod graphic to video
+CODE:5DF6 D1				      pop     de			      ;	pod table entry
 CODE:5DF7 D5				      push    de
 CODE:5DF8 13				      inc     de
 CODE:5DF9 EB				      ex      de, hl
-CODE:5DFA 71				      ld      (hl), c
+CODE:5DFA 71				      ld      (hl), c			      ;	new delta lsb
 CODE:5DFB 23				      inc     hl
-CODE:5DFC 70				      ld      (hl), b
-CODE:5DFD C3 CD	5D			      jp      loc_5DCD
+CODE:5DFC 70				      ld      (hl), b			      ;	new delta msb
+CODE:5DFD C3 CD	5D			      jp      update_pod_address
 CODE:5E00	      ;	---------------------------------------------------------------------------
 CODE:5E00
-CODE:5E00	      handle_cmd_entry:						      ;	CODE XREF: sub_5D4B+38j
-CODE:5E00									      ;	sub_5D4B+44j
+CODE:5E00	      handle_cmd_entry:						      ;	CODE XREF: update_chaser_pods_cmd_entry+38j
+CODE:5E00									      ;	update_chaser_pods_cmd_entry+44j
 CODE:5E00 3A B1	6F			      ld      a, (cmd_flag)
 CODE:5E03 A7				      and     a				      ;	new command already?
 CODE:5E04 CA 78	5E			      jp      Z, loc_5E78		      ;	yes, exit
@@ -2569,7 +2604,7 @@ CODE:5E28 32 B2	6F			      ld      (cmd_len), a		      ;	save new length
 CODE:5E2B C3 78	5E			      jp      loc_5E78			      ;	exit
 CODE:5E2E	      ;	---------------------------------------------------------------------------
 CODE:5E2E
-CODE:5E2E	      cmd_entered:						      ;	CODE XREF: sub_5D4B+D1j
+CODE:5E2E	      cmd_entered:						      ;	CODE XREF: update_chaser_pods_cmd_entry+D1j
 CODE:5E2E 97				      sub     a				      ;	zero
 CODE:5E2F 32 B1	6F			      ld      (cmd_flag), a		      ;	flag new command
 CODE:5E32 2B				      dec     hl			      ;	back to	<ENTER>
@@ -2583,13 +2618,13 @@ CODE:5E40 78				      ld      a, b			      ;	1st char of command
 CODE:5E41 FE 49				      cp      #0x49 ; 'I'                     ; ???
 CODE:5E43 C2 5F	5E			      jp      NZ, clear_cmd_buffer	      ;	no, skip
 CODE:5E46
-CODE:5E46	      loc_5E46:							      ;	CODE XREF: sub_5D4B+F2j
+CODE:5E46	      loc_5E46:							      ;	CODE XREF: update_chaser_pods_cmd_entry+F2j
 CODE:5E46 23				      inc     hl
 CODE:5E47 22 00	68			      ld      (cmd_entry_addr),	hl
 CODE:5E4A 21 16	68			      ld      hl, #cmd_tbl		      ;	"HIMTDSEXAL"
 CODE:5E4D 11 02	68			      ld      de, #cmd_jmp_vectors
 CODE:5E50
-CODE:5E50	      lookup_cmd:						      ;	CODE XREF: sub_5D4B+111j
+CODE:5E50	      lookup_cmd:						      ;	CODE XREF: update_chaser_pods_cmd_entry+111j
 CODE:5E50 7E				      ld      a, (hl)			      ;	get cmd	entry
 CODE:5E51 A7				      and     a				      ;	end of table?
 CODE:5E52 CA 5F	5E			      jp      Z, clear_cmd_buffer	      ;	yes, exit
@@ -2602,13 +2637,13 @@ CODE:5E5C C3 50	5E			      jp      lookup_cmd		      ;	loop
 CODE:5E5F	      ;	---------------------------------------------------------------------------
 CODE:5E5F
 CODE:5E5F	      clear_cmd_buffer:						      ;	CODE XREF: CODE:5B15j
-CODE:5E5F									      ;	sub_5D4B+C4j ...
+CODE:5E5F									      ;	update_chaser_pods_cmd_entry+C4j ...
 CODE:5E5F 21 37	3F			      ld      hl, # VIDEO+0x337
 CODE:5E62 22 00	68			      ld      (cmd_entry_addr),	hl	      ;	reset cmd entry
 CODE:5E65 3E FF				      ld      a, #0xFF
 CODE:5E67 32 B1	6F			      ld      (cmd_flag), a		      ;	flag no	command
 CODE:5E6A
-CODE:5E6A	      loc_5E6A:							      ;	CODE XREF: sub_5D4B+126j
+CODE:5E6A	      loc_5E6A:							      ;	CODE XREF: update_chaser_pods_cmd_entry+126j
 CODE:5E6A 3E 20				      ld      a, #0x20 ; ' '
 CODE:5E6C 77				      ld      (hl), a			      ;	write space
 CODE:5E6D 23				      inc     hl			      ;	next video address
@@ -2618,28 +2653,28 @@ CODE:5E71 C2 6A	5E			      jp      NZ, loc_5E6A		      ;	no, loop
 CODE:5E74 97				      sub     a				      ;	zero cmd_len
 CODE:5E75 32 B2	6F			      ld      (cmd_len), a
 CODE:5E78
-CODE:5E78	      loc_5E78:							      ;	CODE XREF: sub_5D4B+B9j
-CODE:5E78									      ;	sub_5D4B+BFj ...
+CODE:5E78	      loc_5E78:							      ;	CODE XREF: update_chaser_pods_cmd_entry+B9j
+CODE:5E78									      ;	update_chaser_pods_cmd_entry+BFj ...
 CODE:5E78 C1				      pop     bc
 CODE:5E79 D1				      pop     de
 CODE:5E7A E1				      pop     hl
 CODE:5E7B C9				      ret
 CODE:5E7C	      ;	---------------------------------------------------------------------------
 CODE:5E7C
-CODE:5E7C	      found_cmd:						      ;	CODE XREF: sub_5D4B+10Bj
+CODE:5E7C	      found_cmd:						      ;	CODE XREF: update_chaser_pods_cmd_entry+10Bj
 CODE:5E7C EB				      ex      de, hl			      ;	HL = jump vector
 CODE:5E7D 11 5F	5E			      ld      de, #clear_cmd_buffer
 CODE:5E80 D5				      push    de			      ;	set return address
 CODE:5E81 C3 80	55			      jp      jump_HL_vector
-CODE:5E81	      ;	End of function	sub_5D4B
+CODE:5E81	      ;	End of function	update_chaser_pods_cmd_entry
 CODE:5E81
 CODE:5E84
 CODE:5E84	      ;	===============	S U B R	O U T I	N E =======================================
 CODE:5E84
 CODE:5E84
 CODE:5E84	      animate_destruction:					      ;	CODE XREF: handle_low_power-60Fp
-CODE:5E84 3E 01				      ld      a, #1
-CODE:5E86 32 B8	6F			      ld      (byte_6FB8), a
+CODE:5E84 3E 01				      ld      a, #1			      ;	flag disabled
+CODE:5E86 32 B8	6F			      ld      (disable_pod_update), a
 CODE:5E89 3E 01				      ld      a, #1
 CODE:5E8B 32 B9	6F			      ld      (byte_6FB9), a
 CODE:5E8E 3E 03				      ld      a, #3
@@ -2662,8 +2697,8 @@ CODE:5EB2 06 BF				      ld      b, #0xBF ; 'ø'
 CODE:5EB4 CD F4	5C			      call    clear_video_with_B
 CODE:5EB7 0D				      dec     c				      ;	done?
 CODE:5EB8 C2 A3	5E			      jp      NZ, loc_5EA3		      ;	no, loop
-CODE:5EBB 97				      sub     a
-CODE:5EBC 32 B8	6F			      ld      (byte_6FB8), a
+CODE:5EBB 97				      sub     a				      ;	flag enabled
+CODE:5EBC 32 B8	6F			      ld      (disable_pod_update), a
 CODE:5EBF C9				      ret
 CODE:5EBF	      ;	End of function	animate_destruction
 CODE:5EBF
@@ -2790,15 +2825,15 @@ CODE:5F38 CD 63	5F			      call    print_BCD_byte		      ;	display	Jovians	left
 CODE:5F3B 21 80	3F			      ld      hl, # VIDEO+0x380		      ;	2nd-last line
 CODE:5F3E 11 DB	64			      ld      de, #aCommandHeadq_0	      ;	"COMMAND HEADQUARTERS:	CONGRATULATIONS,"...
 CODE:5F41 CD 3C	5D			      call    clear_last_2_lines_print_string
-CODE:5F44 21 C5	3C			      ld      hl, # VIDEO+0xC5
-CODE:5F47 36 30				      ld      (hl), #0x30 ; '0'
+CODE:5F44 21 C5	3C			      ld      hl, # VIDEO+0xC5		      ;	current	quadrant in LR sensor
+CODE:5F47 36 30				      ld      (hl), #0x30 ; '0'               ; write '0' to warships
 CODE:5F49	      ;	display	officer	from HQ
 CODE:5F49 11 97	6A			      ld      de, #hq_officer		      ;	"		      "
 CODE:5F4C CD CF	5E			      call    print_10_lines
-CODE:5F4F 97				      sub     a				      ;	-1
+CODE:5F4F 97				      sub     a				      ;	flag no	command
 CODE:5F50 32 B1	6F			      ld      (cmd_flag), a
-CODE:5F53 3E 01				      ld      a, #1
-CODE:5F55 32 B8	6F			      ld      (byte_6FB8), a
+CODE:5F53 3E 01				      ld      a, #1			      ;	flag disabled
+CODE:5F55 32 B8	6F			      ld      (disable_pod_update), a
 CODE:5F58 06 0C				      ld      b, #0xC
 CODE:5F5A C3 AB	53			      jp      loc_53AB
 CODE:5F5A	      ;	End of function	print_jovians_left
@@ -2929,7 +2964,7 @@ CODE:63A6 3A 53	45 4C+			      .db 0
 CODE:63E3 43 4F	4D 50+aComputerSelf_0:	      .ascii 'COMPUTER:SELF DESTRUCT SEQUENCE ABORTED'
 CODE:63E3 55 54	45 52+								      ;	DATA XREF: CODE:576Bo
 CODE:63E3 3A 53	45 4C+			      .db 0
-CODE:640B 4D 45	44 49+aMedicalOfficer:	      .ascii 'MEDICAL OFFICER:I CAN'          ; DATA XREF: CODE:585Co
+CODE:640B 4D 45	44 49+aMedicalOfficer:	      .ascii 'MEDICAL OFFICER:I CAN'          ; DATA XREF: CODE:expr_8o
 CODE:640B 43 41	4C 20+			      .db 0x27
 CODE:640B 4F 46	46 49+			      .ascii 'T ALLOW YOU TO FIRE THE EXPERIMENTAL RAY!'
 CODE:640B 43 45	52 3A+			      .db 0
@@ -2937,43 +2972,43 @@ CODE:644B 57 45	41 50+aWeaponrySirWeH:	      .ascii 'WEAPONRY:SIR, WE HAVE NO MO
 CODE:644B 4F 4E	52 59+								      ;	DATA XREF: CODE:print_no_more_triton_mislso
 CODE:644B 3A 53	49 52+			      .db 0
 CODE:6479 45 4E	47 49+aEngineerThereG:	      .ascii 'ENGINEER:THERE GOES A POWER CRYSTAL, COMMANDER'
-CODE:6479 4E 45	45 52+								      ;	DATA XREF: sub_5ADEo
+CODE:6479 4E 45	45 52+								      ;	DATA XREF: lose_power_crystalo
 CODE:6479 3A 54	48 45+			      .db 0
 CODE:64A8 45 4E	47 49+aEngineerComm_3:	      .ascii 'ENGINEER:COMMANDER, THE SHIELDS ARE FALLING APART!'
-CODE:64A8 4E 45	45 52+								      ;	DATA XREF: sub_5AFCo
+CODE:64A8 4E 45	45 52+								      ;	DATA XREF: print_shields_failingo
 CODE:64A8 3A 43	4F 4D+			      .db 0
 CODE:64DB 43 4F	4D 4D+aCommandHeadq_0:	      .ascii 'COMMAND HEADQUARTERS:  CONGRATULATIONS, YOU HAVE DESTROYED ALL    THE J'
 CODE:64DB 41 4E	44 20+								      ;	DATA XREF: print_jovians_left+10o
 CODE:64DB 48 45	41 44+			      .ascii 'OVIANS. YOU ARE PROMOTED TO ADMIRAL'
 CODE:64DB 51 55	41 52+			      .db 0
 CODE:6546 46 49	52 53+aFirstOfficerTh:	      .ascii 'FIRST OFFICER: THE EXPERIMENTAL RAY'
-CODE:6546 54 20	4F 46+								      ;	DATA XREF: sub_5D29+1o
+CODE:6546 54 20	4F 46+								      ;	DATA XREF: print_experimental_ray_outcome+1o
 CODE:6546 46 49	43 45+			      .db 0
-CODE:656A 49 53	20 46+aIsFiringTriton:	      .ascii 'IS FIRING TRITON MISSILES'      ; DATA XREF: CODE:loc_5792o
+CODE:656A 49 53	20 46+aIsFiringTriton:	      .ascii 'IS FIRING TRITON MISSILES'      ; DATA XREF: CODE:expr_9o
 CODE:656A 49 52	49 4E+			      .db 0
 CODE:6584 43 41	55 53+aCausedAChangeI:	      .ascii 'CAUSED A CHANGE IN SPACIAL     STRUCTURE'
-CODE:6584 45 44	20 41+								      ;	DATA XREF: CODE:57A6o
+CODE:6584 45 44	20 41+								      ;	DATA XREF: CODE:expr_0o
 CODE:6584 20 43	48 41+			      .db 0
 CODE:65AD 48 41	53 20+aHasFrozenTimeF:	      .ascii 'HAS FROZEN TIME FOR THE        JOVIANS'
-CODE:65AD 46 52	4F 5A+								      ;	DATA XREF: CODE:57CAo
+CODE:65AD 46 52	4F 5A+								      ;	DATA XREF: CODE:expr_1o
 CODE:65AD 45 4E	20 54+			      .db 0
 CODE:65D4 48 41	53 20+aHasCausedTheJo:	      .ascii 'HAS CAUSED THE JOVIANS TO      BECOME INVISIBLE'
-CODE:65D4 43 41	55 53+								      ;	DATA XREF: CODE:57D5o
+CODE:65D4 43 41	55 53+								      ;	DATA XREF: CODE:expr_2o
 CODE:65D4 45 44	20 54+			      .db 0
 CODE:6604 43 4F	4D 50+aComputerTriton:	      .ascii 'COMPUTER:TRITON MISSILE HAS NO EFFECT'
 CODE:6604 55 54	45 52+								      ;	DATA XREF: move_triton_missile+5Ao
 CODE:6604 3A 54	52 49+			      .db 0
-CODE:662A 48 41	53 20+aHasJumbledTheQ:	      .ascii 'HAS JUMBLED THE QUADRANT'       ; DATA XREF: CODE:57F8o
+CODE:662A 48 41	53 20+aHasJumbledTheQ:	      .ascii 'HAS JUMBLED THE QUADRANT'       ; DATA XREF: CODE:expr_3o
 CODE:662A 4A 55	4D 42+			      .db 0
 CODE:6643 48 41	53 20+aHasDestroyedAl:	      .ascii 'HAS DESTROYED ALL THE          JOVIANS IN THE QUADRANT'
 CODE:6643 44 45	53 54+								      ;	DATA XREF: CODE:5807o
 CODE:6643 52 4F	59 45+			      .db 0
-CODE:667A 44 45	53 54+aDestroysItself:	      .ascii 'DESTROYS ITSELF'                ; DATA XREF: CODE:5831o
+CODE:667A 44 45	53 54+aDestroysItself:	      .ascii 'DESTROYS ITSELF'                ; DATA XREF: CODE:expr_5o
 CODE:667A 52 4F	59 53+			      .db 0
-CODE:668A 48 41	53 20+aHasBackfiredOn:	      .ascii 'HAS BACKFIRED ON US'            ; DATA XREF: CODE:583Co
+CODE:668A 48 41	53 20+aHasBackfiredOn:	      .ascii 'HAS BACKFIRED ON US'            ; DATA XREF: CODE:expr_6o
 CODE:668A 42 41	43 4B+			      .db 0
 CODE:669E 48 41	53 20+aHasCausedAComp:	      .ascii 'HAS CAUSED A COMPUTER          MALFUNCTION'
-CODE:669E 43 41	55 53+								      ;	DATA XREF: CODE:5851o
+CODE:669E 43 41	55 53+								      ;	DATA XREF: CODE:expr_7o
 CODE:669E 45 44	20 41+			      .db 0
 CODE:66C9 49 53	20 50+aIsPermanentlyD:	      .ascii 'IS PERMANENTLY DISABLED'        ; DATA XREF: CODE:5778o
 CODE:66C9 45 52	4D 41+			      .db 0
@@ -2999,7 +3034,7 @@ CODE:67BA 46 49	52 53+aFirstOfficer_2:	      .ascii 'FIRST OFFICER: THE UNKNOWN 
 CODE:67BA 54 20	4F 46+								      ;	DATA XREF: CODE:missile_hit_unk_58o
 CODE:67BA 46 49	43 45+			      .db 0
 CODE:67EF 19 3F	      chaser_addr:	      .dw VIDEO+0x319			      ;	DATA XREF: handle_low_power-936r
-CODE:67EF									      ;	sub_5D4B+3r ...
+CODE:67EF									      ;	update_chaser_pods_cmd_entry+3r ...
 CODE:67F1 00	      byte_67F1:	      .db 0				      ;	DATA XREF: fire_maser+13w
 CODE:67F1									      ;	fire_maser+97r
 CODE:67F2 00	      byte_67F2:	      .db 0				      ;	DATA XREF: sub_5CBF:loc_5CCCw
@@ -3021,7 +3056,7 @@ CODE:67FF 08	      ion_speed:	      .db 8				      ;	DATA XREF: handle_low_power
 CODE:67FF									      ;	CODE:527Cw ...
 CODE:6800 37 3F	      cmd_entry_addr:	      .dw VIDEO+0x337			      ;	DATA XREF: handle_low_power-949w
 CODE:6800									      ;	get_next_cmd_char+1r ...
-CODE:6802 D4 51	      cmd_jmp_vectors:	      .dw hyperdrive			      ;	DATA XREF: sub_5D4B+102o
+CODE:6802 D4 51	      cmd_jmp_vectors:	      .dw hyperdrive			      ;	DATA XREF: update_chaser_pods_cmd_entry+102o
 CODE:6804 46 52				      .dw ion_engine
 CODE:6806 2A 54				      .dw maser
 CODE:6808 EB 54				      .dw triton_missile
@@ -3032,7 +3067,7 @@ CODE:6810 0C 59				      .dw explode_pod
 CODE:6812 62 58				      .dw launch_antimatter
 CODE:6814 19 1A	      cmd_l_vector:	      .dw 0x1A19			      ;	DATA XREF: CODE:7033w
 CODE:6814									      ;	BASIC ENTRY POINT
-CODE:6816 48 49	4D 54+cmd_tbl:		      .ascii 'HIMTDSEXAL'                     ; DATA XREF: sub_5D4B+FFo
+CODE:6816 48 49	4D 54+cmd_tbl:		      .ascii 'HIMTDSEXAL'                     ; DATA XREF: update_chaser_pods_cmd_entry+FFo
 CODE:6816 44 53	45 58+			      .db 0
 CODE:6821 48 4C	53 44+pwr_subcmd_tbl:	      .ascii 'HLSDMT'                         ; DATA XREF: CODE:5686o
 CODE:6821 4D 54	00			      .db 0
@@ -3053,29 +3088,19 @@ CODE:6836 46 56				      .dw missile_hit_unk_58
 CODE:6838 0D 56				      .dw missile_hit_unk_6
 CODE:683A 9C 55				      .dw missile_hit_unk_079
 CODE:683C 46 56				      .dw missile_hit_unk_58
-CODE:683E 9C 55				      .dw missile_hit_unk_079
+CODE:683E 9C 55	      off_683E:		      .dw missile_hit_unk_079		      ;	DATA XREF: CODE:5785o
 CODE:6840 06	      pod_speed:	      .db 6				      ;	DATA XREF: handle_low_power-999w
 CODE:6840									      ;	CODE:58BCw ...
-CODE:6841 A6				      .db 0xA6 ; ¶
-CODE:6842 57				      .db 0x57 ; W
-CODE:6843 CA				      .db 0xCA ;  
-CODE:6844 57				      .db 0x57 ; W
-CODE:6845 D5				      .db 0xD5 ; ’
-CODE:6846 57				      .db 0x57 ; W
-CODE:6847 F8				      .db 0xF8 ; ¯
-CODE:6848 57				      .db 0x57 ; W
-CODE:6849 04				      .db    4
-CODE:684A 58				      .db 0x58 ; X
-CODE:684B 31				      .db 0x31 ; 1
-CODE:684C 58				      .db 0x58 ; X
-CODE:684D 3C				      .db 0x3C ; <
-CODE:684E 58				      .db 0x58 ; X
-CODE:684F 51				      .db 0x51 ; Q
-CODE:6850 58				      .db 0x58 ; X
-CODE:6851 5C				      .db 0x5C ; \
-CODE:6852 58				      .db 0x58 ; X
-CODE:6853 92				      .db 0x92 ; í
-CODE:6854 57				      .db 0x57 ; W
+CODE:6841 A6 57				      .dw expr_0
+CODE:6843 CA 57				      .dw expr_1
+CODE:6845 D5 57				      .dw expr_2
+CODE:6847 F8 57				      .dw expr_3
+CODE:6849 04 58				      .dw expr_4
+CODE:684B 31 58				      .dw expr_5
+CODE:684D 3C 58				      .dw expr_6
+CODE:684F 51 58				      .dw expr_7
+CODE:6851 5C 58				      .dw expr_8
+CODE:6853 92 57				      .dw expr_9
 CODE:6855 00	      blocked_by_unknown:     .db 0				      ;	DATA XREF: CODE:52FAw
 CODE:6855									      ;	move_triton_missile+77r ...
 CODE:6855									      ;	$00=OK,	$FF=blocked
@@ -3138,7 +3163,7 @@ CODE:6994									      ;	CODE:51E7r ...
 CODE:6995 20	      pwr_lr_sensor:	      .db 0x20				      ;	DATA XREF: handle_low_power-91Ew
 CODE:6995									      ;	CODE:530Dw ...
 CODE:6996 10	      pwr_sr_sensor:	      .db 0x10				      ;	DATA XREF: CODE:5310w
-CODE:6996									      ;	handle_low_power:loc_59D4r
+CODE:6996									      ;	handle_low_power:check_sr_sensorr
 CODE:6997 20	      pwr_deflectors:	      .db 0x20				      ;	DATA XREF: handle_low_power+AFr
 CODE:6997									      ;	handle_low_power+B9o
 CODE:6998 09	      pwr_masers:	      .db 9				      ;	DATA XREF: CODE:5432r
@@ -3155,13 +3180,14 @@ CODE:69A6 FE FF				      .dw 0xFFFE
 CODE:69A8 BE FF				      .dw 0xFFBE
 CODE:69AA 00	      byte_69AA:	      .db 0				      ;	DATA XREF: handle_low_power-963w
 CODE:69AA									      ;	handle_low_power-7DEr ...
-CODE:69AB 00	      byte_69AB:	      .db 0				      ;	DATA XREF: handle_low_power-95Ew
+CODE:69AB 00	      time_to_jovian_fire:    .db 0				      ;	DATA XREF: handle_low_power-95Ew
 CODE:69AB									      ;	handle_low_power+DBr ...
-CODE:69AC 00 00	      word_69AC:	      .dw 0				      ;	DATA XREF: init_quadrant+2Cw
+CODE:69AC 00 00	      tmp_jovian_tbl_ptr:     .dw 0				      ;	DATA XREF: init_quadrant+2Cw
 CODE:69AC									      ;	init_quadrant:loc_5C12r ...
-CODE:69AE 48 2C	      word_69AE:	      .dw 0x2C48			      ;	DATA XREF: handle_low_power+F5o
+CODE:69AE	      ;	table of jovian	vessel video addresses
+CODE:69AE	      ;	- maximum of 4 vessels,	zero-terminated
+CODE:69AE 48 2C	      jovian_tbl:	      .dw 0x2C48			      ;	DATA XREF: handle_low_power+F5o
 CODE:69AE									      ;	init_quadrant+29o
-CODE:69AE									      ;	tbl jovians
 CODE:69B0 27 2A				      .dw 0x2A27
 CODE:69B2 27 2C				      .dw 0x2C27
 CODE:69B4 31 39				      .dw 0x3931
@@ -3306,7 +3332,7 @@ CODE:6F9B	      ;	  - 3x 6-byte entries
 CODE:6F9B	      ;	    +$0	= pod status (0=used, 1=launched, 2=exploded)
 CODE:6F9B	      ;	    +$1/2 = pod	video address delta
 CODE:6F9B	      ;	    +$3/4 = pod	video address
-CODE:6F9B	      ;	    +$5	= pod speed
+CODE:6F9B	      ;	    +$5	= pod speed countdown
 CODE:6F9B 23 C3	BD 6F+antimatter_pod_tbl:     .db 0x23,	0xC3, 0xBD, 0x6F, 1, 0xCB     ;	DATA XREF: handle_low_power-996o
 CODE:6F9B 01 CB									      ;	CODE:536Fo ...
 CODE:6FA1 21 7E	FE C3+			      .db 0x21,	0x7E, 0xFE, 0xC3, 0xC2,	0xE0
@@ -3317,13 +3343,14 @@ CODE:6FAE FE	      byte_6FAE:	      .db 0xFE				      ;	DATA XREF: CODE:5335w
 CODE:6FAE									      ;	handle_low_power+6Dr
 CODE:6FAF 7F	      byte_6FAF:	      .db 0x7F				      ;	DATA XREF: CODE:5338w
 CODE:6FAF									      ;	CODE:5420w ...
-CODE:6FB0 C2	      byte_6FB0:	      .db 0xC2				      ;	DATA XREF: update_power_distribution+6w
+CODE:6FB0 C2	      power_overflow:	      .db 0xC2				      ;	DATA XREF: update_power_distribution+6w
 CODE:6FB0									      ;	update_power_distribution+13w ...
+CODE:6FB0									      ;	$00=OK,	$FF=overflow
 CODE:6FB1 E0	      cmd_flag:		      .db 0xE0				      ;	DATA XREF: handle_low_power-808w
 CODE:6FB1									      ;	handle_low_power-612w ...
-CODE:6FB1									      ;	0=new, $FF=none
-CODE:6FB2 6F	      cmd_len:		      .db 0x6F				      ;	DATA XREF: sub_5D4B+D4r
-CODE:6FB2									      ;	sub_5D4B+DDw ...
+CODE:6FB1									      ;	00=new,	$FF=none
+CODE:6FB2 6F	      cmd_len:		      .db 0x6F				      ;	DATA XREF: update_chaser_pods_cmd_entry+D4r
+CODE:6FB2									      ;	update_chaser_pods_cmd_entry+DDw ...
 CODE:6FB3 2E	      hyperdrive_disabled:    .db 0x2E				      ;	DATA XREF: CODE:51DBr
 CODE:6FB3									      ;	CODE:537Fw ...
 CODE:6FB3									      ;	$00=OK,	$FF=disabled
@@ -3332,12 +3359,15 @@ CODE:6FB4									      ;	CODE:542Fw ...
 CODE:6FB5 22	      computer_malfunction:   .db 0x22				      ;	DATA XREF: CODE:5314w
 CODE:6FB5									      ;	CODE:5382w ...
 CODE:6FB5									      ;	$00=OK,	$FF=malfunctioned
-CODE:6FB6 06	      byte_6FB6:	      .db 6				      ;	DATA XREF: CODE:51D8w
+CODE:6FB6 06	      jovian_time_frozen:     .db 6				      ;	DATA XREF: CODE:51D8w
 CODE:6FB6									      ;	CODE:57CFw ...
-CODE:6FB7 70	      byte_6FB7:	      .db 0x70				      ;	DATA XREF: CODE:experimental_rayr
+CODE:6FB6									      ;	$00=normal, $FF=frozen
+CODE:6FB7 70	      experimental_ray_disabled:.db 0x70			      ;	DATA XREF: CODE:experimental_rayr
 CODE:6FB7									      ;	CODE:5836w
-CODE:6FB8 2E	      byte_6FB8:	      .db 0x2E				      ;	DATA XREF: handle_low_power-86Bw
+CODE:6FB7									      ;	$00=OK,	$FF=disabled
+CODE:6FB8 2E	      disable_pod_update:     .db 0x2E				      ;	DATA XREF: handle_low_power-86Bw
 CODE:6FB8									      ;	CODE:53D8w ...
+CODE:6FB8									      ;	$00=OK,	$XX=disabled
 CODE:6FB9 04	      byte_6FB9:	      .db 4				      ;	DATA XREF: handle_low_power-805r
 CODE:6FB9									      ;	CODE:5332w ...
 CODE:6FBA 22				      .db 0x22 ; "
