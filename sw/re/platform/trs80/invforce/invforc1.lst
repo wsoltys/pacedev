@@ -73,7 +73,7 @@ CODE:5020 CD F4	5C			      call    clear_video_with_B
 CODE:5023 11 39	67			      ld      de, #aEnterSpeedFact	      ;	"ENTER SPEED FACTOR (0(FAST)-9(SLOW))"
 CODE:5026 CD 39	5D			      call    print_string_last_line
 CODE:5029 21 00	3D			      ld      hl, # VIDEO+0x100
-CODE:502C 11 73	6B			      ld      de, #aInvasionForceR	      ;	"  INVASION FORCE  -------  RADIO SHACK	"
+CODE:502C 11 73	6B			      ld      de, #aTitle		      ;	"  INVASION FORCE  -------  RADIO SHACK	"
 CODE:502F CD 3F	5D			      call    print_string
 CODE:5032
 CODE:5032	      loc_5032:
@@ -95,7 +95,7 @@ CODE:5052 32 B8	69			      ld      (power_avail), a
 CODE:5055 21 37	3F			      ld      hl, # VIDEO+0x337		      ;	init command entry buffer (on screen)
 CODE:5058 22 00	68			      ld      (cmd_entry_addr),	hl
 CODE:505B	      ;	print main display
-CODE:505B 21 9B	6B			      ld      hl, #aLRSensorMineRa	      ;	" L-R SENSOR  %-MINE   ------RADIO SHACK"...
+CODE:505B 21 9B	6B			      ld      hl, #aMainDisplay		      ;	" L-R SENSOR  %-MINE   ------RADIO SHACK"...
 CODE:505E 11 00	3C			      ld      de, #VIDEO
 CODE:5061
 CODE:5061	      loc_5061:							      ;	get char
@@ -253,7 +253,7 @@ CODE:5141 CD 4B	5D			      call    update_chaser_pods_cmd_entry
 CODE:5144 3A C0	53			      ld      a, (played_before)
 CODE:5147 A7				      and     a				      ;	played a game before this?
 CODE:5148 C2 88	51			      jp      NZ, loc_5188		      ;	yes, skip animated intro message
-CODE:514B 11 97	6A			      ld      de, #hq_officer		      ;	"		      "
+CODE:514B 11 97	6A			      ld      de, #aHQ_Officer		      ;	"		      "
 CODE:514E CD CF	5E			      call    print_10_lines
 CODE:5151 11 8A	5F			      ld      de, #aCommandHeadqua	      ;	"COMMAND HEADQUARTERS: THE JOVIANS HAVE	"...
 CODE:5154 21 40	3F			      ld      hl, # VIDEO+0x340
@@ -578,7 +578,7 @@ CODE:538F 32 B1	6F			      ld      (cmd_flag), a		      ;	disable	cmd entry
 CODE:5392 CD 84	5E			      call    animate_destruction
 CODE:5395 06 20				      ld      b, #0x20 ; ' '                  ; <SPACE>
 CODE:5397 CD F4	5C			      call    clear_video_with_B
-CODE:539A 11 97	6A			      ld      de, #hq_officer		      ;	"		      "
+CODE:539A 11 97	6A			      ld      de, #aHQ_Officer		      ;	"		      "
 CODE:539D CD CF	5E			      call    print_10_lines
 CODE:53A0 11 E1	66			      ld      de, #aShipLogUssPhae	      ;	"SHIP LOG-USS PHAETON-CAPTAIN DAR: SENSO"...
 CODE:53A3 21 80	3F			      ld      hl, # VIDEO+0x380
@@ -604,7 +604,7 @@ CODE:53C0 00	      played_before:	      .db 0
 CODE:53C1	      ;	---------------------------------------------------------------------------
 CODE:53C1
 CODE:53C1	      hit_jovian_warship:					      ;	"		      "
-CODE:53C1 11 BB	69			      ld      de, #jovian_officer
+CODE:53C1 11 BB	69			      ld      de, #aJovian_Officer
 CODE:53C4 CD CF	5E			      call    print_10_lines
 CODE:53C7 11 25	62			      ld      de, #aJovianWatchWhe	      ;	"JOVIAN: WATCH WHERE YOU ARE GOING YOU T"...
 CODE:53CA CD 39	5D			      call    print_string_last_line
@@ -651,6 +651,10 @@ CODE:5418
 CODE:5418	      hit_star:							      ;	"NAVIGATOR:WE HIT A STAR!?!"
 CODE:5418 11 54	62			      ld      de, #aNavigatorWeHit
 CODE:541B CD 39	5D			      call    print_string_last_line
+CODE:541E	      ;	*** BUG	#002
+CODE:541E	      ;	this value is an index into a duty cycle table
+CODE:541E	      ;	which only has 4 entries
+CODE:541E	      ;	- can only assume it's picking up a garbage value
 CODE:541E 3E 11				      ld      a, #17
 CODE:5420 32 AF	6F			      ld      (delay_duty_cycle_i), a
 CODE:5423 47				      ld      b, a
@@ -997,8 +1001,8 @@ CODE:5603	      loc_5603:
 CODE:5603 E1				      pop     hl
 CODE:5604 C9				      ret
 CODE:5605	      ;	---------------------------------------------------------------------------
-CODE:5605	      ;	sets all objects to triton mines
-CODE:5605	      *	randomly disables hyperdrive
+CODE:5605	      ;	* sets all objects to triton mines
+CODE:5605	      ;	* randomly disables hyperdrive
 CODE:5605
 CODE:5605	      missile_hit_unk_2:					      ;	triton mine
 CODE:5605 3E 25				      ld      a, #0x25 ; '%'
@@ -1046,7 +1050,7 @@ CODE:563D CD 00	5D			      call    rand_0_9
 CODE:5640 CD BA	5C			      call    rnd_delay
 CODE:5643 C3 70	55			      jp      loc_5570			      ;	roll the dice again!
 CODE:5646	      ;	---------------------------------------------------------------------------
-CODE:5646	      ;	randomly decrement power, or bug?
+CODE:5646	      ;	randomly decrement power
 CODE:5646
 CODE:5646	      missile_hit_unk_58:					      ;	"FIRST OFFICER:	THE UNKNOWN IS STEALING	"...
 CODE:5646 11 BA	67			      ld      de, #aFirstOfficer_2
@@ -1075,7 +1079,8 @@ CODE:5666 3A C5	3C			      ld      a, (VIDEO+0xC5)		      ;	warships in quadrant
 CODE:5669 3D				      dec     a				      ;	adjust
 CODE:566A 32 C5	3C			      ld      (VIDEO+0xC5), a		      ;	update
 CODE:566D E1				      pop     hl			      ;	object video address
-CODE:566E	      ;	the object is not removed from any data	table???
+CODE:566E	      ;	the object is not removed from any data	table
+CODE:566E	      ;	- confirmed; re-enter the quadrant and it's back!
 CODE:566E
 CODE:566E	      missile_destroyed_object:					      ;	write empty sector to video
 CODE:566E 36 2E				      ld      (hl), #0x2E ; '.'
@@ -1322,6 +1327,7 @@ CODE:57CD 3E FF				      ld      a, #0xFF			      ;	flag frozen
 CODE:57CF 32 B6	6F			      ld      (jovian_time_frozen), a
 CODE:57D2 C3 29	5D			      jp      print_experimental_ray_outcome
 CODE:57D5	      ;	---------------------------------------------------------------------------
+CODE:57D5	      ;	*** BUG	#001
 CODE:57D5	      ;	this is	supposed to make jovians invisible
 CODE:57D5	      ;	- but it looks like it makes space stations invisible???
 CODE:57D5
@@ -2775,7 +2781,7 @@ CODE:5F41 CD 3C	5D			      call    clear_last_2_lines_print_string
 CODE:5F44 21 C5	3C			      ld      hl, # VIDEO+0xC5		      ;	current	quadrant in LR sensor
 CODE:5F47 36 30				      ld      (hl), #0x30 ; '0'               ; write '0' to warships
 CODE:5F49	      ;	display	officer	from HQ
-CODE:5F49 11 97	6A			      ld      de, #hq_officer		      ;	"		      "
+CODE:5F49 11 97	6A			      ld      de, #aHQ_Officer		      ;	"		      "
 CODE:5F4C CD CF	5E			      call    print_10_lines
 CODE:5F4F 97				      sub     a				      ;	flag no	command
 CODE:5F50 32 B1	6F			      ld      (cmd_flag), a
@@ -3005,6 +3011,7 @@ CODE:6857 00				      .db    0
 CODE:6858 00	      jovians_left:	      .db 0
 CODE:6859 90 91	01 11+quadrant_delta_tbl:     .db 0x90,	0x91, 1, 0x11, 0x10, 9,	0x99, 0x89
 CODE:6861 00	      quadrant:		      .db 0
+CODE:6862	      ;	-- start of quadrant table
 CODE:6862	      ;	300 bytes cleared at startup
 CODE:6862	      ;	- quadrant data, 3 bytes
 CODE:6862	      ;	  +$00 - (3:0)=warships
@@ -3043,12 +3050,8 @@ CODE:6862 11 31	33 38+			      .db 0x32,	0x30, 0x48, 0x2C, 0x27,	0x2A, 0x27, 0x2
 CODE:6862 38 20	58 46+			      .db 0x39,	0x31, 0x2C, 0x27, 0x2A,	0x27, 0x2C, 0x30, 0x32
 CODE:6862 4C 41	47 20+			      .db 0x30,	0x48, 0x2C, 0x30, 0xD, 0x20, 0x31, 0x33, 0x39
 CODE:6862 44 42	20 30+			      .db 0x37,	0x20, 0x20, 0x44, 0x42,	0x20, 0x27, 0x2A, 0x27
-CODE:698E 3F				      .db 0x3F ; ?
-CODE:698F 3F				      .db 0x3F ; ?
-CODE:6990 3F				      .db 0x3F ; ?
-CODE:6991 3F				      .db 0x3F ; ?
-CODE:6992 3F				      .db 0x3F ; ?
-CODE:6993 3F				      .db 0x3F ; ?
+CODE:698E	      ;	-- end of quadrant table
+CODE:698E 3F 3F	3F 3F+			      .db 0x3F,	0x3F, 0x3F, 0x3F, 0x3F,	0x3F
 CODE:6994 20	      pwr_hypr_ion:	      .db 0x20
 CODE:6995 20	      pwr_lr_sensor:	      .db 0x20
 CODE:6996 10	      pwr_sr_sensor:	      .db 0x10
@@ -3076,19 +3079,19 @@ CODE:69B6 31 2C				      .dw 0x2C31
 CODE:69B8 99	      power_avail:	      .db 0x99
 CODE:69B9 10	      triton_misls:	      .db 0x10
 CODE:69BA 03	      unused_69BA:	      .db 3
-CODE:69BB 20 20	20 20+jovian_officer:	      .ascii '                     '
+CODE:69BB 20 20	20 20+aJovian_Officer:	      .ascii '                     '
 CODE:69BB 20 20	20 20+			      .db 0
-CODE:69D1 20 20	20 20+aSgggd:		      .ascii '        '
+CODE:69D1 20 20	20 20+			      .ascii '        '
 CODE:69D1 20 20	20 20+			      .db 0x98,	0x83, 0x83, 0x83, 0xA4
 CODE:69D1 98 83	83 83+			      .ascii '        '
 CODE:69D1 A4 20	20 20+			      .db 0
-CODE:69E7 20 20	20 20+aCaRi:		      .ascii '       '
+CODE:69E7 20 20	20 20+			      .ascii '       '
 CODE:69E7 20 20	20 96+			      .db 0x96,	0xA0
 CODE:69E7 A0 20	20 20+			      .ascii '   '
 CODE:69E7 90 A9	20 20+			      .db 0x90,	0xA9
 CODE:69E7 20 20	20 20+			      .ascii '       '
 CODE:69E7 20 00				      .db 0
-CODE:69FD 20 20	20 20+aXIJK:		      .ascii '       '
+CODE:69FD 20 20	20 20+			      .ascii '       '
 CODE:69FD 20 20	20 95+			      .db 0x95
 CODE:69FD 20 89	20 86+			      .ascii ' '
 CODE:69FD 20 AA	20 20+			      .db 0x89
@@ -3098,29 +3101,29 @@ CODE:69FD				      .ascii ' '
 CODE:69FD				      .db 0xAA
 CODE:69FD				      .ascii '       '
 CODE:69FD				      .db 0
-CODE:6A13 20 20	20 20+aXXKK_0:		      .ascii '       '
+CODE:6A13 20 20	20 20+			      .ascii '       '
 CODE:6A13 20 20	20 95+			      .db 0x95,	0xB7, 0x95
 CODE:6A13 B7 95	20 AA+			      .ascii ' '
 CODE:6A13 BB AA	20 20+			      .db 0xAA,	0xBB, 0xAA
 CODE:6A13 20 20	20 20+			      .ascii '       '
 CODE:6A13 20 00				      .db 0
-CODE:6A29 20 20	20 20+aX@K:		      .ascii '       '
+CODE:6A29 20 20	20 20+			      .ascii '       '
 CODE:6A29 20 20	20 95+			      .db 0x95
 CODE:6A29 20 20	40 20+			      .ascii '  @  '
 CODE:6A29 20 AA	20 20+			      .db 0xAA
 CODE:6A29 20 20	20 20+			      .ascii '       '
 CODE:6A29 20 00				      .db 0
-CODE:6A3F 20 20	20 20+aO:		      .ascii '       '
+CODE:6A3F 20 20	20 20+			      .ascii '       '
 CODE:6A3F 20 20	20 B5+			      .db 0xB5,	0xB0
 CODE:6A3F B0 20	4F 20+			      .ascii ' O '
 CODE:6A3F B0 BA	20 20+			      .db 0xB0,	0xBA
 CODE:6A3F 20 20	20 20+			      .ascii '       '
 CODE:6A3F 20 00				      .db 0
-CODE:6A55 20 20	20 20+aJbmmmvi:		      .ascii '       '
+CODE:6A55 20 20	20 20+			      .ascii '       '
 CODE:6A55 20 20	20 86+			      .db 0x86,	0x81, 0x8C, 0x8C, 0x8C,	0x82, 0x89
 CODE:6A55 81 8C	8C 8C+			      .ascii '       '
 CODE:6A55 82 89	20 20+			      .db 0
-CODE:6A6B 20 20	20 20+aJIJI:		      .ascii '      '
+CODE:6A6B 20 20	20 20+			      .ascii '      '
 CODE:6A6B 20 20	86 20+			      .db 0x86
 CODE:6A6B 20 89	20 86+			      .ascii '  '
 CODE:6A6B 20 20	89 20+			      .db 0x89
@@ -3130,30 +3133,30 @@ CODE:6A6B				      .ascii '  '
 CODE:6A6B				      .db 0x89
 CODE:6A6B				      .ascii '      '
 CODE:6A6B				      .db 0
-CODE:6A81 20 20	20 20+aJI:		      .ascii '     '
+CODE:6A81 20 20	20 20+			      .ascii '     '
 CODE:6A81 20 86	20 21+			      .db 0x86
 CODE:6A81 3E 3E	20 3C+			      .ascii ' !>> <<! '
 CODE:6A81 3C 21	20 89+			      .db 0x89
 CODE:6A81 20 20	20 20+			      .ascii '     '
 CODE:6A81 20 00				      .db 0
-CODE:6A97 20 20	20 20+hq_officer:	      .ascii '                     '
+CODE:6A97 20 20	20 20+aHQ_Officer:	      .ascii '                     '
 CODE:6A97 20 20	20 20+			      .db 0
-CODE:6AAD 20 20	20 20+aMpm:		      .ascii '        '
+CODE:6AAD 20 20	20 20+			      .ascii '        '
 CODE:6AAD 20 20	20 20+			      .db 0xB0,	0x8C, 0x8F, 0x8C, 0xB0
 CODE:6AAD B0 8C	8F 8C+			      .ascii '        '
 CODE:6AAD B0 20	20 20+			      .db 0
-CODE:6AC3 20 20	20 20+aGgqgggggpgg:	      .ascii '     '
+CODE:6AC3 20 20	20 20+			      .ascii '     '
 CODE:6AC3 20 83	83 9F+			      .db 0x83,	0x83, 0x9F, 0x83, 0x83,	0x83, 0x83, 0x83, 0xAF
 CODE:6AC3 83 83	83 83+			      .db 0x83,	0x83
 CODE:6AC3 83 AF	83 83+			      .ascii '     '
 CODE:6AC3 20 20	20 20+			      .db 0
-CODE:6AD9 20 20	20 20+aXXKK:		      .ascii '       '
+CODE:6AD9 20 20	20 20+			      .ascii '       '
 CODE:6AD9 20 20	20 95+			      .db 0x95,	0xB7, 0x95
 CODE:6AD9 B7 95	20 AA+			      .ascii ' '
 CODE:6AD9 BB AA	20 20+			      .db 0xAA,	0xBB, 0xAA
 CODE:6AD9 20 20	20 20+			      .ascii '       '
 CODE:6AD9 20 00				      .db 0
-CODE:6AEF 20 20	20 20+aXK:		      .ascii '       '
+CODE:6AEF 20 20	20 20+			      .ascii '       '
 CODE:6AEF 20 20	20 95+			      .db 0x95
 CODE:6AEF 20 20	B0 20+			      .ascii '  '
 CODE:6AEF 20 AA	20 20+			      .db 0xB0
@@ -3161,7 +3164,7 @@ CODE:6AEF 20 20	20 20+			      .ascii '  '
 CODE:6AEF 20 00				      .db 0xAA
 CODE:6AEF				      .ascii '       '
 CODE:6AEF				      .db 0
-CODE:6B05 20 20	20 20+aXMpmK:		      .ascii '       '
+CODE:6B05 20 20	20 20+			      .ascii '       '
 CODE:6B05 20 20	20 95+			      .db 0x95
 CODE:6B05 20 8C	8F 8C+			      .ascii ' '
 CODE:6B05 20 AA	20 20+			      .db 0x8C,	0x8F, 0x8C
@@ -3169,13 +3172,13 @@ CODE:6B05 20 20	20 20+			      .ascii ' '
 CODE:6B05 20 00				      .db 0xAA
 CODE:6B05				      .ascii '       '
 CODE:6B05				      .db 0
-CODE:6B1B 20 20	20 20+aEO:		      .ascii '       '
+CODE:6B1B 20 20	20 20+			      .ascii '       '
 CODE:6B1B 20 20	20 A5+			      .db 0xA5
 CODE:6B1B 20 20	4F 20+			      .ascii '  O  '
 CODE:6B1B 20 9A	20 20+			      .db 0x9A
 CODE:6B1B 20 20	20 20+			      .ascii '       '
 CODE:6B1B 20 00				      .db 0
-CODE:6B31 20 20	20 20+aIJ:		      .ascii '        '
+CODE:6B31 20 20	20 20+			      .ascii '        '
 CODE:6B31 20 20	20 20+			      .db 0x89,	0xB0, 0xB0, 0xB0, 0x86
 CODE:6B31 89 B0	B0 B0+			      .ascii '        '
 CODE:6B31 86 20	20 20+			      .db 0
@@ -3183,21 +3186,21 @@ CODE:6B47 20 20	20 20+			      .ascii '    ((** < > **))    '
 CODE:6B47 28 28	2A 2A+			      .db 0
 CODE:6B5D 20 20	20 20+			      .ascii '    ((  !! !!  ))    '
 CODE:6B5D 28 28	20 20+			      .db 0
-CODE:6B73 20 20	49 4E+aInvasionForceR:	      .ascii '  INVASION FORCE  -------  RADIO SHACK '
+CODE:6B73 20 20	49 4E+aTitle:		      .ascii '  INVASION FORCE  -------  RADIO SHACK '
 CODE:6B73 56 41	53 49+			      .db 0
-CODE:6B9B 20 4C	2D 52+aLRSensorMineRa:	      .ascii ' L-R SENSOR  %-MINE   ------RADIO SHACK------ [ USS HEPHAESTUS ['
-CODE:6BDB 20 30	30 30+a000000000Hephs:	      .ascii ' 000 000 000 [-HEPHS 0I                     I STAR-TIME   300200'
-CODE:6C1B 20 2D	2D 2D+a0Sstn1iICondit:	      .ascii ' ----------- 0-SSTN  1I                     I CONDITION    STDBY'
-CODE:6C5B 20 30	30 30+a000000000@Jcc2:	      .ascii ' 000 000 000 @-JCC   2I                     I QUADRANT      0-0 '
-CODE:6C9B 20 2D	2D 2D+aJbc3iISector00:	      .ascii ' ----------- &-JBC   3I                     I SECTOR        0-0 '
-CODE:6CDB 20 30	30 30+a000000000XUnkn:	      .ascii ' 000 000 000 X-UNKN  4I                     I TRITON MISLS   10 '
-CODE:6D1B 20 20	50 57+aPwrDist5iIPowe:	      .ascii '  PWR DIST   %       5I                     I POWER AVAIL    99%'
-CODE:6D5B 20 20	48 59+aHyprIon206iIJo:	      .ascii '  HYPR&ION   20      6I                     I JOVIANS LEFT   000'
-CODE:6D9B 20 20	4C 52+aLrSensor107iIA:	      .ascii '  LR SENSOR  10      7I                     I ANTIMATTER PODS 03'
-CODE:6DDB 20 20	53 52+aSrSensor208iI7:	      .ascii '  SR SENSOR  20      8I                     I          7  0  1  '
-CODE:6E1B 20 20	44 45+aDeflectors209i:	      .ascii '  DEFLECTORS 20      9I                     I   SCDM:  6  -  2  '
-CODE:6E5B 20 20	4D 41+aMasers09II543:	      .ascii '  MASERS     09       I---------------------I          5  4  3  '
-CODE:6E9B 20 20	54 52+aTrtMissl11I012:	      .ascii '  TRT MISSL  11       I 0 1 2 3 4 5 6 7 8 9 I  COMMAND:         '
+CODE:6B9B 20 4C	2D 52+aMainDisplay:	      .ascii ' L-R SENSOR  %-MINE   ------RADIO SHACK------ [ USS HEPHAESTUS ['
+CODE:6BDB 20 30	30 30+			      .ascii ' 000 000 000 [-HEPHS 0I                     I STAR-TIME   300200'
+CODE:6C1B 20 2D	2D 2D+			      .ascii ' ----------- 0-SSTN  1I                     I CONDITION    STDBY'
+CODE:6C5B 20 30	30 30+			      .ascii ' 000 000 000 @-JCC   2I                     I QUADRANT      0-0 '
+CODE:6C9B 20 2D	2D 2D+			      .ascii ' ----------- &-JBC   3I                     I SECTOR        0-0 '
+CODE:6CDB 20 30	30 30+			      .ascii ' 000 000 000 X-UNKN  4I                     I TRITON MISLS   10 '
+CODE:6D1B 20 20	50 57+			      .ascii '  PWR DIST   %       5I                     I POWER AVAIL    99%'
+CODE:6D5B 20 20	48 59+			      .ascii '  HYPR&ION   20      6I                     I JOVIANS LEFT   000'
+CODE:6D9B 20 20	4C 52+			      .ascii '  LR SENSOR  10      7I                     I ANTIMATTER PODS 03'
+CODE:6DDB 20 20	53 52+			      .ascii '  SR SENSOR  20      8I                     I          7  0  1  '
+CODE:6E1B 20 20	44 45+			      .ascii '  DEFLECTORS 20      9I                     I   SCDM:  6  -  2  '
+CODE:6E5B 20 20	4D 41+			      .ascii '  MASERS     09       I---------------------I          5  4  3  '
+CODE:6E9B 20 20	54 52+			      .ascii '  TRT MISSL  11       I 0 1 2 3 4 5 6 7 8 9 I  COMMAND:         '
 CODE:6EDB 20 20	20 20+			      .ascii '                                                                '
 CODE:6F1B 20 20	20 20+			      .ascii '                                                                '
 CODE:6F5B 20 20	20 20+			      .ascii '                                                                '
