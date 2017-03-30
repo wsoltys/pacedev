@@ -1,6 +1,6 @@
 
 ; +----------------------------------------------------+
-; | TRS-80 Model I/III Invasion Force (enhanced) v1.00 |
+; | TRS-80 Model I/III Invasion Force (enhanced) v1.01 |
 ; |    - by tcdev (msmcdoug@gmail.com)                 |
 ; | Enhancements:                                      |
 ; | - ORG $5200 for disk system compatibility          |
@@ -16,7 +16,7 @@
 ; Trivia: This program was written originally for the
 ;         8080-based SOL-20 Microcomputer in 1977 and
 ;         released as TREK 80.
-;					Tandy obtained the source code and ported it
+;         Tandy obtained the source code and ported it
 ;         to the TRS-80 Model I, removing most of the
 ;         references to the Star Trek universe for
 ;         legal reasons.
@@ -44,43 +44,43 @@
 ; *** BUILD OPTIONS
 .define BUILD_OPT_ENHANCED
 .ifndef BUILD_OPT_ENHANCED
-	; (un)comment as required
-	.define BUILD_OPT_MIXED_CASE
-	.define BUILD_OPT_FIX_RAY_BUG
-	.define BUILD_OPT_KEYPAD_DIRS
+  ; (un)comment as required
+  .define BUILD_OPT_MIXED_CASE
+  .define BUILD_OPT_FIX_RAY_BUG
+  .define BUILD_OPT_KEYPAD_DIRS
 .endif
 ; *** end of BUILD OPTIONS
 
 .ifdef PLATFORM_TRS80
 VIDEO                   .equ    0x3C00
-                        ;.org 		0x5000
-                        .org 		0x5200
+                        ;.org     0x5000
+                        .org    0x5200
 .endif
 
 .ifdef PLATFORM_MICROBEE
 VIDEO                   .equ    0xF000
 ; .COM file format
-                        .org 		0x0100
+                        .org    0x0100
 ; .BEE/.TAP format
-												.org		0x0900
+                        .org    0x0900
 .endif
 
 ; *** derived - do not edit
 .ifdef BUILD_OPT_ENHANCED
-	.define BUILD_OPT_MIXED_CASE
-	.define BUILD_OPT_FIX_RAY_BUG
-	.define BUILD_OPT_KEYPAD_DIRS
+  .define BUILD_OPT_MIXED_CASE
+  .define BUILD_OPT_FIX_RAY_BUG
+  .define BUILD_OPT_KEYPAD_DIRS
 .endif
 ; *** end of derived
 
-	.macro XLATE_DIR
-			push		hl
-			ld			hl, #dir_xlate_tbl				; dir translation table
-			add			l													; offset to entry
-			ld			l, a
-			ld			a, (hl)										; get entry
-			pop			hl
-	.endm
+  .macro XLATE_DIR
+      push    hl
+      ld      hl, #dir_xlate_tbl        ; dir translation table
+      add     l                         ; offset to entry
+      ld      l, a
+      ld      a, (hl)                   ; get entry
+      pop     hl
+  .endm
 
 START:                        
                         xor     a
@@ -418,13 +418,13 @@ loc_5216:                                                       ; less than '0'?
                         cp      #8                              ; greater than 7?
 .else
                         jp      Z, print_no_sense_and_ret       ; 0, exit
-												cp			#5
-												jp			Z, print_no_sense_and_ret
-												cp			#10															; greater than 9?
+                        cp      #5
+                        jp      Z, print_no_sense_and_ret
+                        cp      #10                             ; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
 .ifdef BUILD_OPT_KEYPAD_DIRS                        
-												XLATE_DIR
+                        XLATE_DIR
 .endif
 
 loc_5221:
@@ -466,13 +466,13 @@ get_dir:                                                        ; digit?
                         cp      #8                              ; greater than 7?
 .else
                         jp      Z, print_no_sense_and_ret       ; 0, exit
-												cp			#5
-												jp			Z, print_no_sense_and_ret
-												cp			#10															; greater than 9?
+                        cp      #5
+                        jp      Z, print_no_sense_and_ret
+                        cp      #10                             ; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
 .ifdef BUILD_OPT_KEYPAD_DIRS                        
-												XLATE_DIR
+                        XLATE_DIR
 .endif
                         ld      c, a                            ; tmp store direction
                         call    get_next_cmd_char               ; speed
@@ -738,13 +738,13 @@ loc_5440:                                                       ; direction
                         cp      #8                              ; greater than 7?
 .else
                         jp      Z, print_no_sense_and_ret       ; 0, exit
-												cp			#5
-												jp			Z, print_no_sense_and_ret
-												cp			#10															; greater than 9?
+                        cp      #5
+                        jp      Z, print_no_sense_and_ret
+                        cp      #10                             ; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
 .ifdef BUILD_OPT_KEYPAD_DIRS                        
-												XLATE_DIR
+                        XLATE_DIR
 .endif
 
 ; =============== S U B R O U T I N E =======================================
@@ -876,13 +876,13 @@ triton_pwr_ok:                                                  ; direction
                         cp      #8                              ; greater than 7?
 .else
                         jp      Z, print_no_sense_and_ret       ; 0, exit
-												cp			#5
-												jp			Z, print_no_sense_and_ret
-												cp			#10															; greater than 9?
+                        cp      #5
+                        jp      Z, print_no_sense_and_ret
+                        cp      #10                             ; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
 .ifdef BUILD_OPT_KEYPAD_DIRS                        
-												XLATE_DIR
+                        XLATE_DIR
 .endif
 
 ; =============== S U B R O U T I N E =======================================
@@ -1424,10 +1424,11 @@ loc_57E5:                                                       ; get object fro
                         cp      #0x30 ; '0'                     ; space station?
 .else
                         cp      #0x26 ; '&'                     ; jovian battle cruiser?
-                        jp      NZ, loc_57ED                    ; no, skip
+                        jp      Z, invisible                    ; yes, wipe
                         cp      #0x40 ; '@'                     ; jovian command cruiser?
 .endif                        
-                        jp      NZ, loc_57ED                    ; no, skip
+                        jp      NZ, loc_57ED                    ; no, continue
+invisible:                        
                         ld      (hl), #0x2E ; '.'               ; write empty sector to video
 
 loc_57ED:                                                       ; next video address
@@ -1546,13 +1547,13 @@ launch_antimatter:
                         cp      #8                              ; greater than 7?
 .else
                         jp      Z, print_no_sense_and_ret       ; 0, exit
-												cp			#5
-												jp			Z, print_no_sense_and_ret
-												cp			#10															; greater than 9?
+                        cp      #5
+                        jp      Z, print_no_sense_and_ret
+                        cp      #10                             ; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
 .ifdef BUILD_OPT_KEYPAD_DIRS                        
-												XLATE_DIR
+                        XLATE_DIR
 .endif
                         push    af                              ; tmp store direction
                         call    get_next_cmd_char               ; speed
@@ -3265,14 +3266,14 @@ pwr_sr_sensor:          .db 0x10
 pwr_deflectors:         .db 0x20
 pwr_masers:             .db 9
 pwr_trt_missl:          .db 0x11
-dir_addr_delta_tbl:     .dw 0xFFC0															; N
-                        .dw 0xFFC2															; NE
-                        .dw 2																		; E
-                        .dw 0x42																; SE
-                        .dw 0x40																; S
-                        .dw 0x3E																; SW
-                        .dw 0xFFFE															; W
-                        .dw 0xFFBE															; NW
+dir_addr_delta_tbl:     .dw 0xFFC0                              ; N
+                        .dw 0xFFC2                              ; NE
+                        .dw 2                                   ; E
+                        .dw 0x42                                ; SE
+                        .dw 0x40                                ; S
+                        .dw 0x3E                                ; SW
+                        .dw 0xFFFE                              ; W
+                        .dw 0xFFBE                              ; NW
 game_delay_factor:      .db 0                                   ; (0-9)x4+16
 time_to_jovian_fire:    .db 0
 tmp_jovian_tbl_ptr:     .dw 0
@@ -3443,8 +3444,8 @@ aMainDisplay:           .ascii ' L-R Sensor  %-Mine   ------RADIO SHACK------ [ 
                         .ascii '                                                                '
 
 .ifdef BUILD_OPT_KEYPAD_DIRS
-												.bndry 16
-dir_xlate_tbl:					.db	0xFF, 5, 4, 3, 6, 0xFF, 2, 7, 0, 1
+                        .bndry 16
+dir_xlate_tbl:          .db 0xFF, 5, 4, 3, 6, 0xFF, 2, 7, 0, 1
 .endif                        
 
 ; $45 bytes cleared at startup
@@ -3621,4 +3622,4 @@ loc_7030:
                         .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xF1
 ; end of 'CODE'
 
-												.end START
+                        .end START
