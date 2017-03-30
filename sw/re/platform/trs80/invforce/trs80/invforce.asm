@@ -959,15 +959,7 @@ missile_hit_unk_079:
 
 loc_55AA:                                                       ; dir
                         call    rand_0_9
-.ifndef BUILD_OPT_KEYPAD_DIRS                        
                         cp      #8                              ; greater than 7?
-.else
-												and			a																; 0?
-												jp			Z, loc_55AA											; yes, regenerate
-												cp			#5
-												jp			Z, loc_55AA											; regenerate
-												cp			#10															; greater than 9?
-.endif                        
                         jp      P, loc_55AA                     ; yes, regenerate
                         call    fire_maser                      ; A=dir from unknown object
                         jp      loc_55D0
@@ -985,15 +977,7 @@ loc_55B8:
 
 loc_55C5:                                                       ; dir
                         call    rand_0_9
-.ifndef BUILD_OPT_KEYPAD_DIRS                        
                         cp      #8                              ; greater than 7?
-.else
-												and			a																; 0?
-												jp			Z, loc_55C5											; yes, regenerate
-												cp			#5
-												jp			Z, loc_55C5											; regenerate
-												cp			#10															; greater than 9?
-.endif                        
                         jp      P, loc_55C5                     ; yes, regenerate
                         call    move_triton_missile
 
@@ -1075,7 +1059,7 @@ missile_hit_unk_3:
                         call    rand_0_9
                         add     a, b                            ; random quadrant
                         ld      (quadrant), a                   ; store as current
-                        ld      a, #3                           ; direction=SE (both build options)
+                        ld      a, #3                           ; direction=SE
                         ld      c, #1                           ; 1 quadrant
                         call    move_quadrant
                         ld      hl, # VIDEO+0xC5                ; current quadrant LR sensor
@@ -1321,11 +1305,11 @@ loc_5788:                                                       ; found vector?
                         jp      jump_HL_vector                  ; go
 ; ---------------------------------------------------------------------------
 ; launches a triton missile in a circle
-; *** FIXME
+
 expr_9:                                                         ; "IS FIRING TRITON MISSILES"
                         ld      de, #aIsFiringTriton
                         call    print_experimental_ray_outcome
-                        ld      a, #7                           ; dir=NW (both build options)
+                        ld      a, #7                           ; dir=NW
 
 loc_579A:
                         push    af
@@ -1623,21 +1607,13 @@ explode_pod_ok:                                                 ; flag exploded
                         ld      (hl), #0x8F ; 'è'               ; animate
                         ex      de, hl
                         ld      hl, #dir_addr_delta_tbl
-.ifndef BUILD_OPT_KEYPAD_DIRS
                         ld      b, #8                           ; 8 directions to iterate
-.else
-                        ld      b, #10                          ; 10 direction entries to iterate
-.endif                        
 
 loc_594A:
                         push    hl
                         ld      a, (hl)
                         inc     hl
                         ld      h, (hl)
-.ifdef BUILD_OPT_KEYPAD_DIRS
-												or			h																; zero entry?
-												jp			z, loc_5985											; yes, skip
-.endif                        
                         ld      l, a                            ; get delta
                         add     hl, de                          ; add delta to pod video address
                         ld      a, (hl)                         ; get sector contents
@@ -1847,14 +1823,7 @@ get_jovian_address:
 
 move_jovian:
                         call    rand_0_9
-.ifndef BUILD_OPT_KEYPAD_DIRS                        
                         cp      #8                              ; greater than 7?
-.else
-												jp			Z, move_jovian
-												cp			#5
-												jp			Z, move_jovian
-												cp			#10															; greater than 9?
-.endif                        
                         jp      P, move_jovian                  ; yes, regenerate
                         ld      hl, #dir_addr_delta_tbl
                         and     a
@@ -2581,15 +2550,7 @@ update_pod_address:                                             ; next entry add
 
 change_pod_dir:                                                 ; direction
                         call    rand_0_9
-.ifdef BUILD_OPT_KEYPAD_DIRS
                         cp      #8                              ; greater than 7?
-.else
-												and			a																; zero?
-												jp			Z, change_pod_dir								; yes, regenerate
-												cp			#5
-												jp			Z, change_pod_dir
-												cp			#10															; greater than 9?
-.endif                        
                         jp      P, change_pod_dir               ; regenerate
                         ld      hl, #dir_addr_delta_tbl
                         rlca                                    ; x2
@@ -3250,7 +3211,6 @@ pwr_sr_sensor:          .db 0x10
 pwr_deflectors:         .db 0x20
 pwr_masers:             .db 9
 pwr_trt_missl:          .db 0x11
-.ifndef BUILD_OPT_KEYPAD_DIRS
 dir_addr_delta_tbl:     .dw 0xFFC0															; N
                         .dw 0xFFC2															; NE
                         .dw 2																		; E
@@ -3259,18 +3219,6 @@ dir_addr_delta_tbl:     .dw 0xFFC0															; N
                         .dw 0x3E																; SW
                         .dw 0xFFFE															; W
                         .dw 0xFFBE															; NW
-.else
-dir_addr_delta_tbl:     .dw	0x0000															; (not used)
-                        .dw 0x3E																; SW
-                        .dw 0x40																; S
-                        .dw 0x42																; SE
-                        .dw 0xFFFE															; W
-                        .dw 0																		; (not used)
-                        .dw 2																		; E
-                        .dw 0xFFBE															; NW
-												.dw 0xFFC0															; N
-                        .dw 0xFFC2															; NE
-.endif                        
 game_delay_factor:      .db 0                                   ; (0-9)x4+16
 time_to_jovian_fire:    .db 0
 tmp_jovian_tbl_ptr:     .dw 0
