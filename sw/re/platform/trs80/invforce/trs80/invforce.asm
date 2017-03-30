@@ -21,18 +21,27 @@
 
 ; ===========================================================================
 
-; Segment type: Regular
-                        .org 0x3C00
-VIDEO:                  .ds 0x400
-; end of 'VIDEO'
+; *** BUILD OPTIONS
+.define BUILD_OPT_ENHANCED
+.ifndef BUILD_OPT_ENHANCED
+	; (un)comment as required
+	;.define BUILD_OPT_MIXED_CASE
+	.define BUILD_OPT_FIX_RAY_BUG
+	;.define BUILD_OPT_KEYPAD_DIRS
+.endif
+; *** end of BUILD OPTIONS
 
-; ---------------------------------------------------------------------------
-; File Name   : invforc1.bin
-; Format      : Binary file
-; Base Address: 0000h Range: 4000h - 10000h Loaded length: 0000C000h
-; ===========================================================================
+; *** derived - do not edit
+.ifdef BUILD_OPT_ENHANCED
+	.define BUILD_OPT_MIXED_CASE
+	.define BUILD_OPT_FIX_RAY_BUG
+	.define BUILD_OPT_KEYPAD_DIRS
+.endif
+; *** end of derived
 
-; Segment type: Regular
+
+VIDEO                   .equ    0x3c00
+
                         .org 0x5000
                         xor     a
 ; START OF FUNCTION CHUNK FOR handle_low_power
@@ -1331,8 +1340,13 @@ loc_57E3:                                                       ; 21 columns
 
 loc_57E5:                                                       ; get object from video
                         ld      a, (hl)
-; this should check for '&' and '@'
+.ifndef BUILD_OPT_FIX_RAY_BUG
                         cp      #0x30 ; '0'                     ; space station?
+.else
+                        cp      #0x26 ; '&'                     ; jovian battle cruiser?
+                        jp      NZ, loc_57ED                    ; no, skip
+                        cp      #0x40 ; '@'                     ; jovian command cruiser?
+.endif                        
                         jp      NZ, loc_57ED                    ; no, skip
                         ld      (hl), #0x2E ; '.'               ; write empty sector to video
 
@@ -2831,6 +2845,8 @@ loc_5F81:
 ; End of function dec_triton_misls_and_print
 
 ; ---------------------------------------------------------------------------
+.ifndef BUILD_OPT_MIXED_CASE
+
 aCommandHeadqua:        .ascii 'COMMAND HEADQUARTERS: THE JOVIANS HAVE INVADED EARTH SPACE.     YOUR OR'
                         .ascii 'DERS ARE TO SEARCH FOR AND DESTROY ALL JOVIAN WAR        VESSELS IN EAR'
                         .ascii 'TH'
@@ -2939,6 +2955,118 @@ aComputerPodLau:        .ascii 'COMPUTER: POD LAUNCH IS BLOCKED'
                         .db 0
 aFirstOfficer_2:        .ascii 'FIRST OFFICER: THE UNKNOWN IS STEALING POWER CAPTAIN'
                         .db 0
+.else
+
+aCommandHeadqua:        .ascii 'COMMAND HEADQUARTERS: The Jovians have invaded earth space.     your or'
+                        .ascii 'ders are to search for and destroy all Jovian war        vessels in ear'
+                        .ascii 'th'
+                        .db 0x27
+                        .ascii 's 100 quadrants of space'
+                        .db 0
+aHyprHIonIMsrMT:        .ascii 'Hypr=H,Ion=I,Msr=M,Trm=T,Pwrdst=D,Selfd=S,Expray=E,Pod=A,Xpod=X '
+                        .db 0
+aEngineerComman:        .ascii 'ENGINEER:Commander, the engines haven'
+                        .db 0x27
+                        .ascii 't the power to operate'
+                        .db 0
+aEngineerTheUnk:        .ascii 'ENGINEER:The unknown we shot disabled the hyperdrive. '
+                        .db 0
+aFirstOfficerCa:        .ascii 'FIRST OFFICER:Captain, your last command made no sense'
+                        .db 0
+aFirstOfficer_0:        .ascii 'FIRST OFFICER:Captain, we have been blocked by an unknown       object'
+                        .db 0
+aCommunications:        .ascii 'COMMUNICATIONS:The Space Station has acknowledged our docking.'
+                        .db 0
+aDock:                  .ascii ' DOCK'
+                        .db 0
+aGreen:                 .ascii 'GREEN'
+                        .db 0
+aRed:                   .ascii ' RED '
+                        .db 0
+aCrtcl:                 .ascii 'CRTCL'
+                        .db 0
+aFirstOfficerSi:        .ascii 'FIRST OFFICER: Sir, we have hit a Triton Mine'
+                        .db 0
+aCommunicatio_0:        .ascii 'COMMUNICATIONS:Sir, we made contact with a Jovian vessel'
+                        .db 0
+aJovianWatchWhe:        .ascii 'JOVIAN: Watch where you are going you TURKEY!!'
+                        .db 0
+aNavigatorWeHit:        .ascii 'NAVIGATOR:We hit a star!?!'
+                        .db 0
+aEngineerComm_0:        .ascii 'ENGINEER:Commander, we haven'
+                        .db 0x27
+                        .ascii 't the power to fire Masers'
+                        .db 0
+aFirstOfficer_1:        .ascii 'FIRST OFFICER:Sir, my sensors show Maser had no effect'
+                        .db 0
+aEngineerComm_1:        .ascii 'ENGINEER:Commander, the missile tubes are power deficient'
+                        .db 0
+aComputerObject:        .ascii 'COMPUTER:Object destroyed'
+                        .db 0
+aNavigatorTheEn:        .ascii 'NAVIGATOR:The engines are exploding'
+                        .db 0
+aEngineerComm_2:        .ascii 'ENGINEER:Commander, the engines are overloaded, they can'
+                        .db 0x27
+                        .ascii 't last    at that rate'
+                        .db 0
+aComputerSelfDe:        .ascii 'COMPUTER:Self Destruct Sequence initiated. 15 seconds remain'
+                        .db 0
+aComputerSelf_0:        .ascii 'COMPUTER:Self Destruct Sequence aborted'
+                        .db 0
+aMedicalOfficer:        .ascii 'MEDICAL OFFICER:I can'
+                        .db 0x27
+                        .ascii 't allow you to fire the Experimental Ray!'
+                        .db 0
+aWeaponrySirWeH:        .ascii 'WEAPONRY:Sir, We have no more Triton Missiles'
+                        .db 0
+aEngineerThereG:        .ascii 'ENGINEER:There goes a power crystal, Commander'
+                        .db 0
+aEngineerComm_3:        .ascii 'ENGINEER:Commander, the shields are falling apart!'
+                        .db 0
+aCommandHeadq_0:        .ascii 'COMMAND HEADQUARTERS:  Congratulations, you have destroyed all    the J'
+                        .ascii 'ovians. You are promoted to Admiral'
+                        .db 0
+aFirstOfficerTh:        .ascii 'FIRST OFFICER: The Experimental Ray'
+                        .db 0
+aIsFiringTriton:        .ascii 'is firing Triton Missiles'
+                        .db 0
+aCausedAChangeI:        .ascii 'caused a change in spacial     structure'
+                        .db 0
+aHasFrozenTimeF:        .ascii 'has frozen time for the        Jovians'
+                        .db 0
+aHasCausedTheJo:        .ascii 'has caused the Jovians to      become invisible'
+                        .db 0
+aComputerTriton:        .ascii 'COMPUTER:Triton Missile has no effect'
+                        .db 0
+aHasJumbledTheQ:        .ascii 'has jumbled the quadrant'
+                        .db 0
+aHasDestroyedAl:        .ascii 'has destroyed all the          Jovians in the quadrant'
+                        .db 0
+aDestroysItself:        .ascii 'destroys itself'
+                        .db 0
+aHasBackfiredOn:        .ascii 'has backfired on us'
+                        .db 0
+aHasCausedAComp:        .ascii 'has caused a computer          malfunction'
+                        .db 0
+aIsPermanentlyD:        .ascii 'is permanently disabled'
+                        .db 0
+aShipLogUssPhae:        .ascii 'SHIP LOG-USS PHAETON-CAPTAIN DAR: Sensors found debris believed that of'
+                        .ascii ' USS Hephaestus.'
+                        .db 0
+aEnterSpeedFact:        .ascii 'Enter Speed Factor (0(Fast)-9(Slow))'
+                        .db 0
+aWeaponryWeReOu:        .ascii 'WEAPONRY: We'
+                        .db 0x27
+                        .ascii 're out of pods'
+                        .db 0
+aComputerThePod:        .ascii 'COMPUTER: The pod has been used'
+                        .db 0
+aComputerPodLau:        .ascii 'COMPUTER: Pod launch is blocked'
+                        .db 0
+aFirstOfficer_2:        .ascii 'FIRST OFFICER: The unknown is stealing power Captain'
+                        .db 0
+.endif
+                        
 chaser_addr:            .dw VIDEO+0x319
 tmp_delay_cycle:        .db 0
 delay_cycle:            .db 0
@@ -3175,6 +3303,7 @@ aHQ_Officer:            .ascii '                     '
                         .db 0
                         .ascii '    ((  !! !!  ))    '
                         .db 0
+.ifndef BUILD_OPT_MIXED_CASE
 aTitle:                 .ascii '  INVASION FORCE  -------  RADIO SHACK '
                         .db 0
 aMainDisplay:           .ascii ' L-R SENSOR  %-MINE   ------RADIO SHACK------ [ USS HEPHAESTUS ['
@@ -3190,9 +3319,27 @@ aMainDisplay:           .ascii ' L-R SENSOR  %-MINE   ------RADIO SHACK------ [ 
                         .ascii '  DEFLECTORS 20      9I                     I   SCDM:  6  -  2  '
                         .ascii '  MASERS     09       I---------------------I          5  4  3  '
                         .ascii '  TRT MISSL  11       I 0 1 2 3 4 5 6 7 8 9 I  COMMAND:         '
+.else
+aTitle:                 .ascii '  INVASION FORCE+  -------  RADIO SHACK '
+                        .db 0
+aMainDisplay:           .ascii ' L-R Sensor  %-Mine   ------RADIO SHACK------ [ USS Hephaestus ['
+                        .ascii ' 000 000 000 [-Hephs 0I                     I Star-Time   300200'
+                        .ascii ' ----------- 0-SStn  1I                     I Condition    STDBY'
+                        .ascii ' 000 000 000 @-JCC   2I                     I Quadrant      0-0 '
+                        .ascii ' ----------- &-JBC   3I                     I Sector        0-0 '
+                        .ascii ' 000 000 000 X-Unkn  4I                     I Triton Misls   10 '
+                        .ascii '  Pwr Dist   %       5I                     I Power Avail    99%'
+                        .ascii '  Hypr&Ion   20      6I                     I Jovians Left   000'
+                        .ascii '  LR Sensor  10      7I                     I Antimatter Pods 03'
+                        .ascii '  SR Sensor  20      8I                     I          7  0  1  '
+                        .ascii '  Deflectors 20      9I                     I   SCDM:  6  -  2  '
+                        .ascii '  Masers     09       I---------------------I          5  4  3  '
+                        .ascii '  Trt Missl  11       I 0 1 2 3 4 5 6 7 8 9 I  Command:         '
+.endif
                         .ascii '                                                                '
                         .ascii '                                                                '
                         .ascii '                                                                '
+
 ; $45 bytes cleared at startup
 
 ; - antimatter pod table
