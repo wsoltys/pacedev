@@ -6,7 +6,8 @@
 ifeq (,$(PLATFORM))
 	PLATFORM = trs80
 	START = 5000
-	EXEC = 5000
+	#START = 5200
+	EXEC = $(START)
 endif
 
 # compiler, linker and utilities

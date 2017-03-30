@@ -12,7 +12,7 @@ VIDEO:3C00	       ; Input CRC32  :	E4993BA1
 VIDEO:3C00
 VIDEO:3C00
 VIDEO:3C00	       ; +----------------------------------------------------+
-VIDEO:3C00	       ; | TRS-80 Model	I Invasion Force Disassembly v1.00rc1 |
+VIDEO:3C00	       ; | TRS-80 Model	I Invasion Force Disassembly v1.00rc2 |
 VIDEO:3C00	       ; |    -	by tcdev (msmcdoug@gmail.com)		      |
 VIDEO:3C00	       ; +----------------------------------------------------+
 VIDEO:3C00	       ;
@@ -39,7 +39,7 @@ VIDEO:3C00 ?? ?? ?? ??+VIDEO:		       .ds 0x400
 VIDEO:3C00 ?? ?? ?? ??+; end of	'VIDEO'
 VIDEO:3C00 ?? ?? ?? ??+
 CODE:5000	      ;	---------------------------------------------------------------------------
-CODE:5000	      ;	File Name   : E:\dev\pace\pacedev.net\sw\re\platform\trs80\invforce\invforc1.bin
+CODE:5000	      ;	File Name   : invforc1.bin
 CODE:5000	      ;	Format	    : Binary file
 CODE:5000	      ;	Base Address: 0000h Range: 4000h - 10000h Loaded length: 0000C000h
 CODE:5000	      ;	===========================================================================
@@ -879,7 +879,7 @@ CODE:5570	      loc_5570:							      ;	random entry
 CODE:5570 CD 00	5D			      call    rand_0_9
 CODE:5573 A7				      and     a				      ;	zero?
 CODE:5574 CA 85	55			      jp      Z, finish_shot		      ;	yes, go
-CODE:5577 21 2A	68			      ld      hl, #engine_explode_countdown   ;	2 bytes	before table
+CODE:5577 21 2A	68			      ld      hl, #missile_hit_unknown_tbl-2
 CODE:557A
 CODE:557A	      loc_557A:							      ;	found entry?
 CODE:557A 3D				      dec     a
@@ -1268,7 +1268,7 @@ CODE:577E	      loc_577E:
 CODE:577E CD 00	5D			      call    rand_0_9
 CODE:5781 A7				      and     a				      ;	zero?
 CODE:5782 CA 92	57			      jp      Z, expr_9			      ;	yes, go
-CODE:5785 11 3F	68			      ld      de, # off_683E+1		      ;	2 bytes	before table
+CODE:5785 11 3F	68			      ld      de, #expr_tbl-2
 CODE:5788
 CODE:5788	      loc_5788:							      ;	found vector?
 CODE:5788 3D				      dec     a
@@ -1885,7 +1885,7 @@ CODE:5B18	      ;	===============	S U B R	O U T I	N E ==========================
 CODE:5B18
 CODE:5B18
 CODE:5B18	      move_quadrant:
-CODE:5B18 21 58	68			      ld      hl, #jovians_left		      ;	byte before quadrant_delta_tbl
+CODE:5B18 21 58	68			      ld      hl, #quadrant_delta_tbl-1
 CODE:5B1B 3C				      inc     a				      ;	direction (1-8)???
 CODE:5B1C 06 03				      ld      b, #3			      ;	3 rows to print
 CODE:5B1E C5				      push    bc
@@ -2993,9 +2993,9 @@ CODE:6836 46 56				      .dw missile_hit_unk_58
 CODE:6838 0D 56				      .dw missile_hit_unk_6
 CODE:683A 9C 55				      .dw missile_hit_unk_079
 CODE:683C 46 56				      .dw missile_hit_unk_58
-CODE:683E 9C 55	      off_683E:		      .dw missile_hit_unk_079
+CODE:683E 9C 55				      .dw missile_hit_unk_079
 CODE:6840 06	      pod_speed:	      .db 6
-CODE:6841 A6 57				      .dw expr_0
+CODE:6841 A6 57	      expr_tbl:		      .dw expr_0
 CODE:6843 CA 57				      .dw expr_1
 CODE:6845 D5 57				      .dw expr_2
 CODE:6847 F8 57				      .dw expr_3
