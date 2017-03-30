@@ -1,10 +1,27 @@
 
 ; +----------------------------------------------------+
-; | TRS-80 Model I Invasion Force Disassembly v1.00rc3 |
+; | TRS-80 Model I/III Invasion Force (enhanced) v1.00 |
 ; |    - by tcdev (msmcdoug@gmail.com)                 |
+; | Enhancements:                                      |
+; | - ORG $5200 for disk system compatibility          |
+; |   (the source code is fully relocatable)           |
+; | - Mixed-case text messages throughout the game     |
+; | - Fixed the Experimental Ray bug that makes        |
+; |   Space Stations invisible instead of Jovians      |
+; |   that was introduced in the TRS-80 port.          |
+; | - Modified direction controls to map to            |
+; |   more intuitive numeric keypad layout             |
 ; +----------------------------------------------------+
 ;
-; Memory Map:
+; Trivia: This program was written originally for the
+;         8080-based SOL-20 Microcomputer in 1977 and
+;         released as TREK 80.
+;					Tandy obtained the source code and ported it
+;         to the TRS-80 Model I, removing most of the
+;         references to the Star Trek universe for
+;         legal reasons.
+;
+; Memory Map (original):
 ;
 ; $5000-$5F89 - Code
 ; $5F8A-$67EE - Strings
@@ -21,15 +38,32 @@
 
 ; ===========================================================================
 
+.define PLATFORM_TRS80
+;.define PLATFORM_MICROBEE
+
 ; *** BUILD OPTIONS
 .define BUILD_OPT_ENHANCED
 .ifndef BUILD_OPT_ENHANCED
 	; (un)comment as required
-	;.define BUILD_OPT_MIXED_CASE
+	.define BUILD_OPT_MIXED_CASE
 	.define BUILD_OPT_FIX_RAY_BUG
-	;.define BUILD_OPT_KEYPAD_DIRS
+	.define BUILD_OPT_KEYPAD_DIRS
 .endif
 ; *** end of BUILD OPTIONS
+
+.ifdef PLATFORM_TRS80
+VIDEO                   .equ    0x3C00
+                        ;.org 		0x5000
+                        .org 		0x5200
+.endif
+
+.ifdef PLATFORM_MICROBEE
+VIDEO                   .equ    0xF000
+; .COM file format
+                        .org 		0x0100
+; .BEE/.TAP format
+												.org		0x0900
+.endif
 
 ; *** derived - do not edit
 .ifdef BUILD_OPT_ENHANCED
@@ -39,15 +73,20 @@
 .endif
 ; *** end of derived
 
+	.macro XLATE_DIR
+			push		hl
+			ld			hl, #dir_xlate_tbl				; dir translation table
+			add			l													; offset to entry
+			ld			l, a
+			ld			a, (hl)										; get entry
+			pop			hl
+	.endm
 
-VIDEO                   .equ    0x3c00
-
-                        ;.org 0x5000
-                        .org 0x5200
+START:                        
                         xor     a
 ; START OF FUNCTION CHUNK FOR handle_low_power
 
-START:
+MAIN:
                         ld      a, #3
                         ld      (antimatter_pods), a
                         ld      a, #6
@@ -384,6 +423,9 @@ loc_5216:                                                       ; less than '0'?
 												cp			#10															; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
+.ifdef BUILD_OPT_KEYPAD_DIRS                        
+												XLATE_DIR
+.endif
 
 loc_5221:
                         push    bc
@@ -429,6 +471,9 @@ get_dir:                                                        ; digit?
 												cp			#10															; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
+.ifdef BUILD_OPT_KEYPAD_DIRS                        
+												XLATE_DIR
+.endif
                         ld      c, a                            ; tmp store direction
                         call    get_next_cmd_char               ; speed
                         jp      Z, loc_527F                     ; not specified, skip
@@ -609,7 +654,7 @@ delay:
                         jp      NZ, delay
                         ld      a, #1                           ; flag as played
                         ld      (played_before), a
-                        jp      START
+                        jp      MAIN
 ; END OF FUNCTION CHUNK FOR handle_low_power
 ; ---------------------------------------------------------------------------
 played_before:          .db 0
@@ -698,6 +743,9 @@ loc_5440:                                                       ; direction
 												cp			#10															; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
+.ifdef BUILD_OPT_KEYPAD_DIRS                        
+												XLATE_DIR
+.endif
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -833,6 +881,9 @@ triton_pwr_ok:                                                  ; direction
 												cp			#10															; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
+.ifdef BUILD_OPT_KEYPAD_DIRS                        
+												XLATE_DIR
+.endif
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -1500,6 +1551,9 @@ launch_antimatter:
 												cp			#10															; greater than 9?
 .endif                        
                         jp      P, print_no_sense_and_ret       ; yes, exit
+.ifdef BUILD_OPT_KEYPAD_DIRS                        
+												XLATE_DIR
+.endif
                         push    af                              ; tmp store direction
                         call    get_next_cmd_char               ; speed
                         jp      Z, loc_58BF                     ; none, skip
@@ -3388,6 +3442,11 @@ aMainDisplay:           .ascii ' L-R Sensor  %-Mine   ------RADIO SHACK------ [ 
                         .ascii '                                                                '
                         .ascii '                                                                '
 
+.ifdef BUILD_OPT_KEYPAD_DIRS
+												.bndry 16
+dir_xlate_tbl:					.db	0xFF, 5, 4, 3, 6, 0xFF, 2, 7, 0, 1
+.endif                        
+
 ; $45 bytes cleared at startup
 
 ; - antimatter pod table
@@ -3562,4 +3621,4 @@ loc_7030:
                         .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xF1
 ; end of 'CODE'
 
-; end of file
+												.end START
