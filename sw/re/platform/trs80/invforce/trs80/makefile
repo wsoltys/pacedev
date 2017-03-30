@@ -5,8 +5,8 @@
 
 ifeq (,$(PLATFORM))
 	PLATFORM = trs80
-	START = 5000
-	#START = 5200
+	#START = 5000
+	START = 5200
 	EXEC = $(START)
 endif
 

@@ -42,7 +42,8 @@
 
 VIDEO                   .equ    0x3c00
 
-                        .org 0x5000
+                        ;.org 0x5000
+                        .org 0x5200
                         xor     a
 ; START OF FUNCTION CHUNK FOR handle_low_power
 
