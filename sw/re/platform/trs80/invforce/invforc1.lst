@@ -12,7 +12,7 @@ VIDEO:3C00	       ; Input CRC32  :	E4993BA1
 VIDEO:3C00
 VIDEO:3C00
 VIDEO:3C00	       ; +----------------------------------------------------+
-VIDEO:3C00	       ; | TRS-80 Model	I Invasion Force Disassembly v1.00rc2 |
+VIDEO:3C00	       ; | TRS-80 Model	I Invasion Force Disassembly v1.00rc3 |
 VIDEO:3C00	       ; |    -	by tcdev (msmcdoug@gmail.com)		      |
 VIDEO:3C00	       ; +----------------------------------------------------+
 VIDEO:3C00	       ;
@@ -651,7 +651,7 @@ CODE:5418
 CODE:5418	      hit_star:							      ;	"NAVIGATOR:WE HIT A STAR!?!"
 CODE:5418 11 54	62			      ld      de, #aNavigatorWeHit
 CODE:541B CD 39	5D			      call    print_string_last_line
-CODE:541E	      ;	*** BUG	#002
+CODE:541E	      ;	*** BUG	#001 - in original SOL-20 source code
 CODE:541E	      ;	this value is an index into a duty cycle table
 CODE:541E	      ;	which only has 4 entries
 CODE:541E	      ;	- can only assume it's picking up a garbage value
@@ -1327,7 +1327,7 @@ CODE:57CD 3E FF				      ld      a, #0xFF			      ;	flag frozen
 CODE:57CF 32 B6	6F			      ld      (jovian_time_frozen), a
 CODE:57D2 C3 29	5D			      jp      print_experimental_ray_outcome
 CODE:57D5	      ;	---------------------------------------------------------------------------
-CODE:57D5	      ;	*** BUG	#001
+CODE:57D5	      ;	*** BUG	#002 - introduced in TRS-80 version
 CODE:57D5	      ;	this is	supposed to make jovians invisible
 CODE:57D5	      ;	- but it looks like it makes space stations invisible???
 CODE:57D5
@@ -1343,6 +1343,7 @@ CODE:57E3 0E 15				      ld      c, #21
 CODE:57E5
 CODE:57E5	      loc_57E5:							      ;	get object from	video
 CODE:57E5 7E				      ld      a, (hl)
+CODE:57E6	      ;	this should check for '&' and '@'
 CODE:57E6 FE 30				      cp      #0x30 ; '0'                     ; space station?
 CODE:57E8 C2 ED	57			      jp      NZ, loc_57ED		      ;	no, skip
 CODE:57EB 36 2E				      ld      (hl), #0x2E ; '.'               ; write empty sector to video
