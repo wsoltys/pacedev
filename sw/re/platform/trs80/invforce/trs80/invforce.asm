@@ -1,6 +1,6 @@
 
 ; +----------------------------------------------------+
-; | TRS-80 Model I Invasion Force Disassembly v1.00rc2 |
+; | TRS-80 Model I Invasion Force Disassembly v1.00rc3 |
 ; |    - by tcdev (msmcdoug@gmail.com)                 |
 ; +----------------------------------------------------+
 ;
@@ -639,7 +639,7 @@ loc_53DD:
 hit_star:                                                       ; "NAVIGATOR:WE HIT A STAR!?!"
                         ld      de, #aNavigatorWeHit
                         call    print_string_last_line
-; *** BUG #002
+; *** BUG #001 - in original SOL-20 source code
 ; this value is an index into a duty cycle table
 ; which only has 4 entries
 ; - can only assume it's picking up a garbage value
@@ -1315,7 +1315,7 @@ expr_1:                                                         ; "HAS FROZEN TI
                         ld      (jovian_time_frozen), a
                         jp      print_experimental_ray_outcome
 ; ---------------------------------------------------------------------------
-; *** BUG #001
+; *** BUG #002 - introduced in TRS-80 version
 ; this is supposed to make jovians invisible
 ; - but it looks like it makes space stations invisible???
 
@@ -1331,6 +1331,7 @@ loc_57E3:                                                       ; 21 columns
 
 loc_57E5:                                                       ; get object from video
                         ld      a, (hl)
+; this should check for '&' and '@'
                         cp      #0x30 ; '0'                     ; space station?
                         jp      NZ, loc_57ED                    ; no, skip
                         ld      (hl), #0x2E ; '.'               ; write empty sector to video
