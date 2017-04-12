@@ -1115,22 +1115,22 @@ ROM:6B1C D0 1E					     BNE     loc_6B3C
 ROM:6B1E A9 81					     LDA     #81h ; 'Å'
 ROM:6B20 8D FA 02				     STA     byte_2FA
 ROM:6B23 A6 18					     LDX     curPlayer
-ROM:6B25 D6 57					     DEC     57h,X
+ROM:6B25 D6 57					     DEC     numShipsP1,X	     ; dec number of ships
 ROM:6B27 A2 00					     LDX     #0
 ROM:6B29
-ROM:6B29	     loc_6B29:
+ROM:6B29	     loc_6B29:							     ; flag player exploding
 ROM:6B29 A9 A0					     LDA     #0A0h ; '†'
-ROM:6B2B 9D 1B 02				     STA     21Bh,X
+ROM:6B2B 9D 1B 02				     STA     p1PlayerFlag,X
 ROM:6B2E A9 00					     LDA     #0
-ROM:6B30 9D 3E 02				     STA     23Eh,X
-ROM:6B33 9D 61 02				     STA     261h,X
+ROM:6B30 9D 3E 02				     STA     byte_23E,X
+ROM:6B33 9D 61 02				     STA     byte_261,X
 ROM:6B36 C0 1B					     CPY     #1Bh
 ROM:6B38 90 0D					     BCC     loc_6B47
 ROM:6B3A B0 37					     BCS     loc_6B73
 ROM:6B3C
 ROM:6B3C	     loc_6B3C:
 ROM:6B3C A9 00					     LDA     #0
-ROM:6B3E 9D 1B 02				     STA     21Bh,X
+ROM:6B3E 9D 1B 02				     STA     p1PlayerFlag,X
 ROM:6B41 C0 1B					     CPY     #1Bh
 ROM:6B43 F0 21					     BEQ     loc_6B66
 ROM:6B45 B0 2C					     BCS     loc_6B73
@@ -1158,7 +1158,7 @@ ROM:6B66
 ROM:6B66	     loc_6B66:
 ROM:6B66 8A					     TXA
 ROM:6B67 A6 18					     LDX     curPlayer
-ROM:6B69 D6 57					     DEC     57h,X
+ROM:6B69 D6 57					     DEC     numShipsP1,X
 ROM:6B6B AA					     TAX
 ROM:6B6C A9 81					     LDA     #81h ; 'Å'
 ROM:6B6E 8D FA 02				     STA     byte_2FA
@@ -1172,13 +1172,13 @@ ROM:6B7B F0 CD					     BEQ     loc_6B4A
 ROM:6B7D 86 0D					     STX     byte_D
 ROM:6B7F A6 19					     LDX     curPlayer_x2
 ROM:6B81 AD 1C 02				     LDA     p1SaucerFlag
-ROM:6B84 4A					     LSR     A
-ROM:6B85 A9 99					     LDA     #99h ; 'ô'
-ROM:6B87 B0 02					     BCS     loc_6B8B
-ROM:6B89 A9 20					     LDA     #20h ; ' '
+ROM:6B84 4A					     LSR     A			     ; small saucer?
+ROM:6B85 A9 99					     LDA     #99h ; 'ô'              ; (99+1)*10 = 1,000 pts
+ROM:6B87 B0 02					     BCS     loc_6B8B		     ; yes, skip
+ROM:6B89 A9 20					     LDA     #20h ; ' '              ; 20x10 = 200 pts
 ROM:6B8B
 ROM:6B8B	     loc_6B8B:
-ROM:6B8B 20 97 73				     JSR     sub_7397
+ROM:6B8B 20 97 73				     JSR     add_A_to_score
 ROM:6B8E A6 0D					     LDX     byte_D
 ROM:6B90 4C 4A 6B				     JMP     loc_6B4A
 ROM:6B90	     ; End of function sub_6B0F
@@ -2570,25 +2570,25 @@ ROM:7397
 ROM:7397	     ; =============== S U B R O U T I N E =======================================
 ROM:7397
 ROM:7397
-ROM:7397	     sub_7397:
+ROM:7397	     add_A_to_score:
 ROM:7397 F8					     SED
-ROM:7398 75 52					     ADC     52h,X
-ROM:739A 95 52					     STA     52h,X
+ROM:7398 75 52					     ADC     p1ScoreTens,X
+ROM:739A 95 52					     STA     p1ScoreTens,X
 ROM:739C 90 12					     BCC     loc_73B0
-ROM:739E B5 53					     LDA     53h,X
+ROM:739E B5 53					     LDA     p1ScoreThousands,X
 ROM:73A0 69 00					     ADC     #0
-ROM:73A2 95 53					     STA     53h,X
-ROM:73A4 29 0F					     AND     #0Fh
-ROM:73A6 D0 08					     BNE     loc_73B0
+ROM:73A2 95 53					     STA     p1ScoreThousands,X
+ROM:73A4 29 0F					     AND     #0Fh		     ; another 10,000?
+ROM:73A6 D0 08					     BNE     loc_73B0		     ; no, skip
 ROM:73A8 A9 B0					     LDA     #0B0h ; '∞'
 ROM:73AA 85 68					     STA     timerBonusShipSound
 ROM:73AC A6 18					     LDX     curPlayer
-ROM:73AE F6 57					     INC     57h,X
+ROM:73AE F6 57					     INC     numShipsP1,X	     ; extra ship!
 ROM:73B0
 ROM:73B0	     loc_73B0:
 ROM:73B0 D8					     CLD
 ROM:73B1 60					     RTS
-ROM:73B1	     ; End of function sub_7397
+ROM:73B1	     ; End of function add_A_to_score
 ROM:73B1
 ROM:73B2
 ROM:73B2	     ; =============== S U B R O U T I N E =======================================
@@ -3024,11 +3024,11 @@ ROM:760E F0 04					     BEQ     loc_7614
 ROM:7610 C9 04					     CMP     #4
 ROM:7612 90 09					     BCC     loc_761D
 ROM:7614
-ROM:7614	     loc_7614:
-ROM:7614 BD 59 76				     LDA     unk_7659,X
-ROM:7617 A6 19					     LDX     curPlayer_x2
+ROM:7614	     loc_7614:							     ; score for this asteroid
+ROM:7614 BD 59 76				     LDA     asteroid_score_tbl,X
+ROM:7617 A6 19					     LDX     curPlayer_x2	     ; offset to score for player
 ROM:7619 18					     CLC
-ROM:761A 20 97 73				     JSR     sub_7397
+ROM:761A 20 97 73				     JSR     add_A_to_score	     ; add asteroid score
 ROM:761D
 ROM:761D	     loc_761D:
 ROM:761D BE 00 02				     LDX     200h,Y
@@ -3060,9 +3060,9 @@ ROM:7658 60					     RTS
 ROM:7658	     ; End of function sub_75EC
 ROM:7658
 ROM:7658	     ; ---------------------------------------------------------------------------
-ROM:7659 10	     unk_7659:			     .db  10h
-ROM:765A 05					     .db    5
-ROM:765B 02					     .db    2
+ROM:7659 10	     asteroid_score_tbl:	     .db  10h			     ; 100pts (small asteroid)
+ROM:765A 05					     .db    5			     ; 50pts (medium asteroid)
+ROM:765B 02					     .db    2			     ; 20pts (large asteroid)
 ROM:765C
 ROM:765C	     ; =============== S U B R O U T I N E =======================================
 ROM:765C
