@@ -292,6 +292,7 @@ RAM:0218 ??					     .block 1
 RAM:0219 ??					     .block 1
 RAM:021A ??					     .block 1
 RAM:021B	     ; p1PlayerFlag
+RAM:021B	     ; - 0x00  = in hyperspace?
 RAM:021B	     ; - 0x01  = player	alive and active
 RAM:021B	     ; - 0xA0+ = player	exploding
 RAM:021B ??	     p1PlayerFlag:		     .block 1
@@ -334,7 +335,7 @@ RAM:023A ??					     .block 1
 RAM:023B ??					     .block 1
 RAM:023C ??					     .block 1
 RAM:023D ??					     .block 1
-RAM:023E ??	     byte_23E:			     .block 1
+RAM:023E ??	     some_h_thrust_factor:	     .block 1
 RAM:023F ??	     byte_23F:			     .block 1
 RAM:0240 ??					     .block 1
 RAM:0241 ??					     .block 1
@@ -369,7 +370,7 @@ RAM:025D ??					     .block 1
 RAM:025E ??					     .block 1
 RAM:025F ??					     .block 1
 RAM:0260 ??					     .block 1
-RAM:0261 ??	     byte_261:			     .block 1
+RAM:0261 ??	     some_v_thrust_factor:	     .block 1
 RAM:0262 ??	     byte_262:			     .block 1
 RAM:0263 ??					     .block 1
 RAM:0264 ??					     .block 1
@@ -649,11 +650,11 @@ ROM:684E A5 5A					     LDA     timerStartGame	     ; waiting to start	game?
 ROM:6850 D0 0C					     BNE     loc_685E		     ; yes, skip
 ROM:6852 20 D7 6C				     JSR     handle_fire
 ROM:6855 20 74 6E				     JSR     handle_hyperspace
-ROM:6858 20 3F 70				     JSR     handle_left_right
+ROM:6858 20 3F 70				     JSR     handle_left_right_thrust
 ROM:685B 20 93 6B				     JSR     handle_saucer
 ROM:685E
 ROM:685E	     loc_685E:							     ; ???
-ROM:685E 20 57 6F				     JSR     handle_shots_1
+ROM:685E 20 57 6F				     JSR     handle_objects
 ROM:6861 20 F0 69				     JSR     handle_shots_2	     ; ???
 ROM:6864
 ROM:6864	     loc_6864:							     ; display (C), scores, extra ships
@@ -1018,13 +1019,13 @@ ROM:6A9D	     ; =============== S U B R O U T I N E ============================
 ROM:6A9D
 ROM:6A9D
 ROM:6A9D	     sub_6A9D:
-ROM:6A9D B9 00 02				     LDA     200h,Y
+ROM:6A9D B9 00 02				     LDA     P1RAM,Y
 ROM:6AA0 29 07					     AND     #7
 ROM:6AA2 85 08					     STA     byte_8
 ROM:6AA4 20 B5 77				     JSR     update_prng
 ROM:6AA7 29 18					     AND     #18h
 ROM:6AA9 05 08					     ORA     byte_8
-ROM:6AAB 9D 00 02				     STA     200h,X
+ROM:6AAB 9D 00 02				     STA     P1RAM,X
 ROM:6AAE B9 AF 02				     LDA     2AFh,Y
 ROM:6AB1 9D AF 02				     STA     2AFh,X
 ROM:6AB4 B9 69 02				     LDA     269h,Y
@@ -1044,10 +1045,10 @@ ROM:6AD3
 ROM:6AD3	     ; =============== S U B R O U T I N E =======================================
 ROM:6AD3
 ROM:6AD3
-ROM:6AD3	     sub_6AD3:
+ROM:6AD3	     store_AX_byte_BC:
 ROM:6AD3 85 0B					     STA     byte_B
 ROM:6AD5 86 0C					     STX     byte_C
-ROM:6AD5	     ; End of function sub_6AD3
+ROM:6AD5	     ; End of function store_AX_byte_BC
 ROM:6AD5
 ROM:6AD7
 ROM:6AD7	     ; =============== S U B R O U T I N E =======================================
@@ -1104,10 +1105,10 @@ ROM:6B0F
 ROM:6B0F	     sub_6B0F:
 ROM:6B0F E0 01					     CPX     #1
 ROM:6B11 D0 08					     BNE     loc_6B1B
-ROM:6B13 C0 1B					     CPY     #1Bh
+ROM:6B13 C0 1B					     CPY     #27
 ROM:6B15 D0 12					     BNE     loc_6B29
 ROM:6B17 A2 00					     LDX     #0
-ROM:6B19 A0 1C					     LDY     #1Ch
+ROM:6B19 A0 1C					     LDY     #28
 ROM:6B1B
 ROM:6B1B	     loc_6B1B:
 ROM:6B1B 8A					     TXA
@@ -1122,16 +1123,16 @@ ROM:6B29	     loc_6B29:							     ; flag player exploding
 ROM:6B29 A9 A0					     LDA     #0A0h ; '†'
 ROM:6B2B 9D 1B 02				     STA     p1PlayerFlag,X
 ROM:6B2E A9 00					     LDA     #0
-ROM:6B30 9D 3E 02				     STA     byte_23E,X
-ROM:6B33 9D 61 02				     STA     byte_261,X
-ROM:6B36 C0 1B					     CPY     #1Bh
+ROM:6B30 9D 3E 02				     STA     some_h_thrust_factor,X
+ROM:6B33 9D 61 02				     STA     some_v_thrust_factor,X
+ROM:6B36 C0 1B					     CPY     #27
 ROM:6B38 90 0D					     BCC     loc_6B47
 ROM:6B3A B0 37					     BCS     loc_6B73
 ROM:6B3C
 ROM:6B3C	     loc_6B3C:
 ROM:6B3C A9 00					     LDA     #0
 ROM:6B3E 9D 1B 02				     STA     p1PlayerFlag,X
-ROM:6B41 C0 1B					     CPY     #1Bh
+ROM:6B41 C0 1B					     CPY     #27
 ROM:6B43 F0 21					     BEQ     loc_6B66
 ROM:6B45 B0 2C					     BCS     loc_6B73
 ROM:6B47
@@ -1139,7 +1140,7 @@ ROM:6B47	     loc_6B47:
 ROM:6B47 20 EC 75				     JSR     sub_75EC
 ROM:6B4A
 ROM:6B4A	     loc_6B4A:
-ROM:6B4A B9 00 02				     LDA     200h,Y
+ROM:6B4A B9 00 02				     LDA     P1RAM,Y
 ROM:6B4D 29 03					     AND     #3
 ROM:6B4F 49 02					     EOR     #2
 ROM:6B51 4A					     LSR     A
@@ -1148,7 +1149,7 @@ ROM:6B53 6A					     ROR     A
 ROM:6B54 09 3F					     ORA     #3Fh ; '?'
 ROM:6B56 85 69					     STA     timerExplosionSound
 ROM:6B58 A9 A0					     LDA     #0A0h ; '†'
-ROM:6B5A 99 00 02				     STA     200h,Y
+ROM:6B5A 99 00 02				     STA     P1RAM,Y
 ROM:6B5D A9 00					     LDA     #0
 ROM:6B5F 99 23 02				     STA     223h,Y
 ROM:6B62 99 46 02				     STA     246h,Y
@@ -1425,26 +1426,26 @@ ROM:6CFD 86 0D					     STX     byte_D
 ROM:6CFF A9 12					     LDA     #18
 ROM:6D01 99 1B 02				     STA     p1PlayerFlag,Y	     ; init shot timer
 ROM:6D04 B5 61					     LDA     direction,X
-ROM:6D06 20 D2 77				     JSR     sub_77D2
+ROM:6D06 20 D2 77				     JSR     some_thrust_calc
 ROM:6D09 A6 0D					     LDX     byte_D
 ROM:6D0B C9 80					     CMP     #80h ; 'Ä'
 ROM:6D0D 6A					     ROR     A
 ROM:6D0E 85 09					     STA     byte_9
 ROM:6D10 18					     CLC
-ROM:6D11 7D 3E 02				     ADC     byte_23E,X
+ROM:6D11 7D 3E 02				     ADC     some_h_thrust_factor,X
 ROM:6D14 30 08					     BMI     loc_6D1E
-ROM:6D16 C9 70					     CMP     #70h ; 'p'
+ROM:6D16 C9 70					     CMP     #112
 ROM:6D18 90 0A					     BCC     loc_6D24
-ROM:6D1A A9 6F					     LDA     #6Fh ; 'o'
+ROM:6D1A A9 6F					     LDA     #111
 ROM:6D1C D0 06					     BNE     loc_6D24
 ROM:6D1E
 ROM:6D1E	     loc_6D1E:
-ROM:6D1E C9 91					     CMP     #91h ; 'ë'
+ROM:6D1E C9 91					     CMP     #145
 ROM:6D20 B0 02					     BCS     loc_6D24
-ROM:6D22 A9 91					     LDA     #91h ; 'ë'
+ROM:6D22 A9 91					     LDA     #145
 ROM:6D24
 ROM:6D24	     loc_6D24:
-ROM:6D24 99 3E 02				     STA     byte_23E,Y
+ROM:6D24 99 3E 02				     STA     some_h_thrust_factor,Y
 ROM:6D27 B5 61					     LDA     direction,X
 ROM:6D29 20 D5 77				     JSR     sub_77D5
 ROM:6D2C A6 0D					     LDX     byte_D
@@ -1452,20 +1453,20 @@ ROM:6D2E C9 80					     CMP     #80h ; 'Ä'
 ROM:6D30 6A					     ROR     A
 ROM:6D31 85 0C					     STA     byte_C
 ROM:6D33 18					     CLC
-ROM:6D34 7D 61 02				     ADC     byte_261,X
+ROM:6D34 7D 61 02				     ADC     some_v_thrust_factor,X
 ROM:6D37 30 08					     BMI     loc_6D41
-ROM:6D39 C9 70					     CMP     #70h ; 'p'
+ROM:6D39 C9 70					     CMP     #112
 ROM:6D3B 90 0A					     BCC     loc_6D47
-ROM:6D3D A9 6F					     LDA     #6Fh ; 'o'
+ROM:6D3D A9 6F					     LDA     #111
 ROM:6D3F D0 06					     BNE     loc_6D47
 ROM:6D41
 ROM:6D41	     loc_6D41:
-ROM:6D41 C9 91					     CMP     #91h ; 'ë'
+ROM:6D41 C9 91					     CMP     #145
 ROM:6D43 B0 02					     BCS     loc_6D47
-ROM:6D45 A9 91					     LDA     #91h ; 'ë'
+ROM:6D45 A9 91					     LDA     #145
 ROM:6D47
 ROM:6D47	     loc_6D47:
-ROM:6D47 99 61 02				     STA     byte_261,Y
+ROM:6D47 99 61 02				     STA     some_v_thrust_factor,Y
 ROM:6D4A A2 00					     LDX     #0
 ROM:6D4C A5 09					     LDA     byte_9
 ROM:6D4E 10 01					     BPL     loc_6D51
@@ -1503,7 +1504,7 @@ ROM:6D82 A5 0B					     LDA     byte_B
 ROM:6D84 7D A7 02				     ADC     byte_2A7,X
 ROM:6D87 99 A7 02				     STA     byte_2A7,Y
 ROM:6D8A A9 80					     LDA     #80h ; 'Ä'
-ROM:6D8C 95 66					     STA     66h,X
+ROM:6D8C 95 66					     STA     timerPlayerFireSound,X
 ROM:6D8E 60					     RTS
 ROM:6D8E	     ; End of function handle_fire
 ROM:6D8E
@@ -1585,7 +1586,7 @@ ROM:6E0B C9 03					     CMP     #3
 ROM:6E0D 90 13					     BCC     loc_6E22
 ROM:6E0F A6 18					     LDX     curPlayer
 ROM:6E11 A9 FF					     LDA     #0FFh
-ROM:6E13 95 32					     STA     32h,X
+ROM:6E13 95 32					     STA     placeP1HighScore,X
 ROM:6E15
 ROM:6E15	     loc_6E15:
 ROM:6E15 A2 00					     LDX     #0
@@ -1664,31 +1665,31 @@ ROM:6E74
 ROM:6E74
 ROM:6E74	     handle_hyperspace:
 ROM:6E74 A5 1C					     LDA     numPlayers
-ROM:6E76 F0 5F					     BEQ     locret_6ED7
+ROM:6E76 F0 5F					     BEQ     locret_6ED7	     ; not a real game,	exit
 ROM:6E78 AD 1B 02				     LDA     p1PlayerFlag
-ROM:6E7B 30 5A					     BMI     locret_6ED7
+ROM:6E7B 30 5A					     BMI     locret_6ED7	     ; exploding, exit
 ROM:6E7D AD FA 02				     LDA     byte_2FA
 ROM:6E80 D0 55					     BNE     locret_6ED7
-ROM:6E82 AD 03 20				     LDA     hyperspaceSwitch
-ROM:6E85 10 50					     BPL     locret_6ED7
-ROM:6E87 A9 00					     LDA     #0
+ROM:6E82 AD 03 20				     LDA     hyperspaceSwitch	     ; button pressed?
+ROM:6E85 10 50					     BPL     locret_6ED7	     ; no, exit
+ROM:6E87 A9 00					     LDA     #0			     ; flag hyperspace?
 ROM:6E89 8D 1B 02				     STA     p1PlayerFlag
-ROM:6E8C 8D 3E 02				     STA     byte_23E
-ROM:6E8F 8D 61 02				     STA     byte_261
+ROM:6E8C 8D 3E 02				     STA     some_h_thrust_factor
+ROM:6E8F 8D 61 02				     STA     some_v_thrust_factor
 ROM:6E92 A9 30					     LDA     #30h ; '0'
 ROM:6E94 8D FA 02				     STA     byte_2FA
 ROM:6E97 20 B5 77				     JSR     update_prng
 ROM:6E9A 29 1F					     AND     #1Fh
-ROM:6E9C C9 1D					     CMP     #1Dh
+ROM:6E9C C9 1D					     CMP     #29
 ROM:6E9E 90 02					     BCC     loc_6EA2
-ROM:6EA0 A9 1C					     LDA     #1Ch
+ROM:6EA0 A9 1C					     LDA     #28
 ROM:6EA2
 ROM:6EA2	     loc_6EA2:
 ROM:6EA2 C9 03					     CMP     #3
 ROM:6EA4 B0 02					     BCS     loc_6EA8
 ROM:6EA6 A9 03					     LDA     #3
 ROM:6EA8
-ROM:6EA8	     loc_6EA8:
+ROM:6EA8	     loc_6EA8:							     ; 3-28
 ROM:6EA8 8D 84 02				     STA     byte_284
 ROM:6EAB A2 05					     LDX     #5
 ROM:6EAD
@@ -1697,27 +1698,27 @@ ROM:6EAD 20 B5 77				     JSR     update_prng
 ROM:6EB0 CA					     DEX
 ROM:6EB1 D0 FA					     BNE     loc_6EAD
 ROM:6EB3 29 1F					     AND     #1Fh
-ROM:6EB5 E8					     INX
-ROM:6EB6 C9 18					     CMP     #18h
+ROM:6EB5 E8					     INX			     ; =1 (successful)
+ROM:6EB6 C9 18					     CMP     #24
 ROM:6EB8 90 0C					     BCC     loc_6EC6
 ROM:6EBA 29 07					     AND     #7
 ROM:6EBC 0A					     ASL     A
 ROM:6EBD 69 04					     ADC     #4
 ROM:6EBF CD F6 02				     CMP     byte_2F6
 ROM:6EC2 90 02					     BCC     loc_6EC6
-ROM:6EC4 A2 80					     LDX     #80h ; 'Ä'
+ROM:6EC4 A2 80					     LDX     #80h ; 'Ä'              ; flag unsuccessful (death)
 ROM:6EC6
 ROM:6EC6	     loc_6EC6:
-ROM:6EC6 C9 15					     CMP     #15h
+ROM:6EC6 C9 15					     CMP     #21
 ROM:6EC8 90 02					     BCC     loc_6ECC
-ROM:6ECA A9 14					     LDA     #14h
+ROM:6ECA A9 14					     LDA     #20
 ROM:6ECC
 ROM:6ECC	     loc_6ECC:
 ROM:6ECC C9 03					     CMP     #3
 ROM:6ECE B0 02					     BCS     loc_6ED2
 ROM:6ED0 A9 03					     LDA     #3
 ROM:6ED2
-ROM:6ED2	     loc_6ED2:
+ROM:6ED2	     loc_6ED2:							     ; 3-20
 ROM:6ED2 8D A7 02				     STA     byte_2A7
 ROM:6ED5 86 59					     STX     hyperspaceFlag
 ROM:6ED7
@@ -1829,7 +1830,7 @@ ROM:6F57
 ROM:6F57	     ; =============== S U B R O U T I N E =======================================
 ROM:6F57
 ROM:6F57
-ROM:6F57	     handle_shots_1:
+ROM:6F57	     handle_objects:
 ROM:6F57 A2 22					     LDX     #22h ; '"'
 ROM:6F59
 ROM:6F59	     loc_6F59:							     ; non-zero, handle	it
@@ -1956,7 +1957,7 @@ ROM:7013
 ROM:7013	     loc_7013:
 ROM:7013 9D 8C 02				     STA     28Ch,X
 ROM:7016 85 07					     STA     byte_7
-ROM:7018 BD 00 02				     LDA     200h,X
+ROM:7018 BD 00 02				     LDA     P1RAM,X
 ROM:701B A0 E0					     LDY     #0E0h ; '‡'
 ROM:701D 4A					     LSR     A
 ROM:701E B0 07					     BCS     loc_7027
@@ -1966,9 +1967,9 @@ ROM:7023 B0 02					     BCS     loc_7027
 ROM:7025 A0 00					     LDY     #0
 ROM:7027
 ROM:7027	     loc_7027:
-ROM:7027 20 FE 72				     JSR     sub_72FE
+ROM:7027 20 FE 72				     JSR     display_object
 ROM:702A 4C 5E 6F				     JMP     loc_6F5E
-ROM:702A	     ; End of function handle_shots_1
+ROM:702A	     ; End of function handle_objects
 ROM:702A
 ROM:702D
 ROM:702D	     ; =============== S U B R O U T I N E =======================================
@@ -1988,43 +1989,43 @@ ROM:703F
 ROM:703F	     ; =============== S U B R O U T I N E =======================================
 ROM:703F
 ROM:703F
-ROM:703F	     handle_left_right:
+ROM:703F	     handle_left_right_thrust:
 ROM:703F A5 1C					     LDA     numPlayers
 ROM:7041 F0 42					     BEQ     locret_7085
 ROM:7043 AD 1B 02				     LDA     p1PlayerFlag
-ROM:7046 30 3D					     BMI     locret_7085
+ROM:7046 30 3D					     BMI     locret_7085	     ; exploding - exit
 ROM:7048 AD FA 02				     LDA     byte_2FA
 ROM:704B F0 39					     BEQ     loc_7086
 ROM:704D CE FA 02				     DEC     byte_2FA
 ROM:7050 D0 33					     BNE     locret_7085
 ROM:7052 A4 59					     LDY     hyperspaceFlag
-ROM:7054 30 19					     BMI     loc_706F
-ROM:7056 D0 10					     BNE     loc_7068
+ROM:7054 30 19					     BMI     loc_706F		     ; unsuccessful - go
+ROM:7056 D0 10					     BNE     loc_7068		     ; successful - go
 ROM:7058 20 39 71				     JSR     sub_7139
 ROM:705B D0 24					     BNE     loc_7081
 ROM:705D AC 1C 02				     LDY     p1SaucerFlag
-ROM:7060 F0 06					     BEQ     loc_7068
+ROM:7060 F0 06					     BEQ     loc_7068		     ; no saucer - go
 ROM:7062 A0 02					     LDY     #2
 ROM:7064 8C FA 02				     STY     byte_2FA
 ROM:7067 60					     RTS
 ROM:7068	     ; ---------------------------------------------------------------------------
 ROM:7068
-ROM:7068	     loc_7068:
+ROM:7068	     loc_7068:							     ; flag alive and active
 ROM:7068 A9 01					     LDA     #1
 ROM:706A 8D 1B 02				     STA     p1PlayerFlag
-ROM:706D D0 12					     BNE     loc_7081
+ROM:706D D0 12					     BNE     loc_7081		     ; always go
 ROM:706F
-ROM:706F	     loc_706F:
+ROM:706F	     loc_706F:							     ; flag exploding
 ROM:706F A9 A0					     LDA     #0A0h ; '†'
 ROM:7071 8D 1B 02				     STA     p1PlayerFlag
 ROM:7074 A2 3E					     LDX     #3Eh ; '>'
 ROM:7076 86 69					     STX     timerExplosionSound
 ROM:7078 A6 18					     LDX     curPlayer
-ROM:707A D6 57					     DEC     57h,X
+ROM:707A D6 57					     DEC     numShipsP1,X	     ; dec number of ships
 ROM:707C A9 81					     LDA     #81h ; 'Å'
 ROM:707E 8D FA 02				     STA     byte_2FA
 ROM:7081
-ROM:7081	     loc_7081:
+ROM:7081	     loc_7081:							     ; flag inactive
 ROM:7081 A9 00					     LDA     #0
 ROM:7083 85 59					     STA     hyperspaceFlag
 ROM:7085
@@ -2032,33 +2033,33 @@ ROM:7085	     locret_7085:
 ROM:7085 60					     RTS
 ROM:7086	     ; ---------------------------------------------------------------------------
 ROM:7086
-ROM:7086	     loc_7086:
+ROM:7086	     loc_7086:							     ; left button?
 ROM:7086 AD 07 24				     LDA     rotateLeftSwitch
-ROM:7089 10 04					     BPL     loc_708F
+ROM:7089 10 04					     BPL     loc_708F		     ; no, skip
 ROM:708B A9 03					     LDA     #3
-ROM:708D D0 07					     BNE     loc_7096
+ROM:708D D0 07					     BNE     loc_7096		     ; always go
 ROM:708F
-ROM:708F	     loc_708F:
+ROM:708F	     loc_708F:							     ; right button?
 ROM:708F AD 06 24				     LDA     rotateRightSwitch
-ROM:7092 10 07					     BPL     loc_709B
-ROM:7094 A9 FD					     LDA     #0FDh ; '˝'
+ROM:7092 10 07					     BPL     loc_709B		     ; no, skip
+ROM:7094 A9 FD					     LDA     #-3
 ROM:7096
 ROM:7096	     loc_7096:
 ROM:7096 18					     CLC
-ROM:7097 65 61					     ADC     direction
-ROM:7099 85 61					     STA     direction
+ROM:7097 65 61					     ADC     direction		     ; calc direction
+ROM:7099 85 61					     STA     direction		     ; update
 ROM:709B
 ROM:709B	     loc_709B:
 ROM:709B A5 5C					     LDA     fastTimer
 ROM:709D 4A					     LSR     A
-ROM:709E B0 E5					     BCS     locret_7085
-ROM:70A0 AD 05 24				     LDA     thrustSwitch
-ROM:70A3 10 3C					     BPL     loc_70E1
+ROM:709E B0 E5					     BCS     locret_7085	     ; exit
+ROM:70A0 AD 05 24				     LDA     thrustSwitch	     ; thrust button?
+ROM:70A3 10 3C					     BPL     loc_70E1		     ; no, go
 ROM:70A5 A9 80					     LDA     #80h ; 'Ä'
-ROM:70A7 8D 03 3C				     STA     3C03h
+ROM:70A7 8D 03 3C				     STA     3C03h		     ; sound (ship thrust)
 ROM:70AA A0 00					     LDY     #0
 ROM:70AC A5 61					     LDA     direction
-ROM:70AE 20 D2 77				     JSR     sub_77D2
+ROM:70AE 20 D2 77				     JSR     some_thrust_calc
 ROM:70B1 10 01					     BPL     loc_70B4
 ROM:70B3 88					     DEY
 ROM:70B4
@@ -2068,9 +2069,9 @@ ROM:70B5 18					     CLC
 ROM:70B6 65 64					     ADC     shipHorizontalVelocityLow
 ROM:70B8 AA					     TAX
 ROM:70B9 98					     TYA
-ROM:70BA 6D 3E 02				     ADC     byte_23E
+ROM:70BA 6D 3E 02				     ADC     some_h_thrust_factor
 ROM:70BD 20 25 71				     JSR     sub_7125
-ROM:70C0 8D 3E 02				     STA     byte_23E
+ROM:70C0 8D 3E 02				     STA     some_h_thrust_factor
 ROM:70C3 86 64					     STX     shipHorizontalVelocityLow
 ROM:70C5 A0 00					     LDY     #0
 ROM:70C7 A5 61					     LDA     direction
@@ -2084,20 +2085,20 @@ ROM:70D0 18					     CLC
 ROM:70D1 65 65					     ADC     shipVerticalVelocityLow
 ROM:70D3 AA					     TAX
 ROM:70D4 98					     TYA
-ROM:70D5 6D 61 02				     ADC     byte_261
+ROM:70D5 6D 61 02				     ADC     some_v_thrust_factor
 ROM:70D8 20 25 71				     JSR     sub_7125
-ROM:70DB 8D 61 02				     STA     byte_261
+ROM:70DB 8D 61 02				     STA     some_v_thrust_factor
 ROM:70DE 86 65					     STX     shipVerticalVelocityLow
 ROM:70E0 60					     RTS
 ROM:70E1	     ; ---------------------------------------------------------------------------
 ROM:70E1
 ROM:70E1	     loc_70E1:
 ROM:70E1 A9 00					     LDA     #0
-ROM:70E3 8D 03 3C				     STA     3C03h
-ROM:70E6 AD 3E 02				     LDA     byte_23E
+ROM:70E3 8D 03 3C				     STA     3C03h		     ; sound (ship thrust)
+ROM:70E6 AD 3E 02				     LDA     some_h_thrust_factor
 ROM:70E9 05 64					     ORA     shipHorizontalVelocityLow
 ROM:70EB F0 18					     BEQ     loc_7105
-ROM:70ED AD 3E 02				     LDA     byte_23E
+ROM:70ED AD 3E 02				     LDA     some_h_thrust_factor
 ROM:70F0 0A					     ASL     A
 ROM:70F1 A2 FF					     LDX     #0FFh
 ROM:70F3 18					     CLC
@@ -2110,14 +2111,14 @@ ROM:70FA	     loc_70FA:
 ROM:70FA 65 64					     ADC     shipHorizontalVelocityLow
 ROM:70FC 85 64					     STA     shipHorizontalVelocityLow
 ROM:70FE 8A					     TXA
-ROM:70FF 6D 3E 02				     ADC     byte_23E
-ROM:7102 8D 3E 02				     STA     byte_23E
+ROM:70FF 6D 3E 02				     ADC     some_h_thrust_factor
+ROM:7102 8D 3E 02				     STA     some_h_thrust_factor
 ROM:7105
 ROM:7105	     loc_7105:
 ROM:7105 A5 65					     LDA     shipVerticalVelocityLow
-ROM:7107 0D 61 02				     ORA     byte_261
+ROM:7107 0D 61 02				     ORA     some_v_thrust_factor
 ROM:710A F0 18					     BEQ     locret_7124
-ROM:710C AD 61 02				     LDA     byte_261
+ROM:710C AD 61 02				     LDA     some_v_thrust_factor
 ROM:710F 0A					     ASL     A
 ROM:7110 A2 FF					     LDX     #0FFh
 ROM:7112 18					     CLC
@@ -2130,12 +2131,12 @@ ROM:7119	     loc_7119:
 ROM:7119 65 65					     ADC     shipVerticalVelocityLow
 ROM:711B 85 65					     STA     shipVerticalVelocityLow
 ROM:711D 8A					     TXA
-ROM:711E 6D 61 02				     ADC     byte_261
-ROM:7121 8D 61 02				     STA     byte_261
+ROM:711E 6D 61 02				     ADC     some_v_thrust_factor
+ROM:7121 8D 61 02				     STA     some_v_thrust_factor
 ROM:7124
 ROM:7124	     locret_7124:
 ROM:7124 60					     RTS
-ROM:7124	     ; End of function handle_left_right
+ROM:7124	     ; End of function handle_left_right_thrust
 ROM:7124
 ROM:7125
 ROM:7125	     ; =============== S U B R O U T I N E =======================================
@@ -2168,7 +2169,7 @@ ROM:7139	     sub_7139:
 ROM:7139 A2 1C					     LDX     #1Ch
 ROM:713B
 ROM:713B	     loc_713B:
-ROM:713B BD 00 02				     LDA     200h,X
+ROM:713B BD 00 02				     LDA     P1RAM,X
 ROM:713E F0 1E					     BEQ     loc_715E
 ROM:7140 BD 69 02				     LDA     269h,X
 ROM:7143 38					     SEC
@@ -2290,8 +2291,8 @@ ROM:71E8 A9 60					     LDA     #60h ; '`'
 ROM:71EA 8D CA 02				     STA     byte_2CA
 ROM:71ED 8D ED 02				     STA     byte_2ED
 ROM:71F0 A9 00					     LDA     #0
-ROM:71F2 8D 3E 02				     STA     byte_23E
-ROM:71F5 8D 61 02				     STA     byte_261
+ROM:71F2 8D 3E 02				     STA     some_h_thrust_factor
+ROM:71F5 8D 61 02				     STA     some_v_thrust_factor
 ROM:71F8 A9 10					     LDA     #10h
 ROM:71FA 8D 84 02				     STA     byte_284
 ROM:71FD A9 0C					     LDA     #0Ch
@@ -2463,7 +2464,7 @@ ROM:72FE
 ROM:72FE	     ; =============== S U B R O U T I N E =======================================
 ROM:72FE
 ROM:72FE
-ROM:72FE	     sub_72FE:
+ROM:72FE	     display_object:
 ROM:72FE 84 00					     STY     globalScale
 ROM:7300 86 0D					     STX     byte_D
 ROM:7302 A5 05					     LDA     byte_5
@@ -2505,35 +2506,35 @@ ROM:733B
 ROM:733B	     loc_733B:
 ROM:733B 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:733E A6 0D					     LDX     byte_D
-ROM:7340 BD 00 02				     LDA     200h,X
-ROM:7343 10 16					     BPL     loc_735B
-ROM:7345 E0 1B					     CPX     #1Bh
+ROM:7340 BD 00 02				     LDA     P1RAM,X
+ROM:7343 10 16					     BPL     display_asteroid_or_saucer
+ROM:7345 E0 1B					     CPX     #27
 ROM:7347 F0 0C					     BEQ     loc_7355
 ROM:7349 29 0C					     AND     #0Ch
 ROM:734B 4A					     LSR     A
 ROM:734C A8					     TAY
-ROM:734D B9 F8 50				     LDA     50F8h,Y
-ROM:7350 BE F9 50				     LDX     50F9h,Y
+ROM:734D B9 F8 50				     LDA     (DVGROM+0F8h),Y	     ; shrapnel	table address LSB
+ROM:7350 BE F9 50				     LDX     (DVGROM+0F9h),Y	     ; shrapnel	table address MSB
 ROM:7353 D0 1B					     BNE     loc_7370
 ROM:7355
 ROM:7355	     loc_7355:
-ROM:7355 20 65 74				     JSR     sub_7465
+ROM:7355 20 65 74				     JSR     display_exploding_ship
 ROM:7358 A6 0D					     LDX     byte_D
 ROM:735A 60					     RTS
 ROM:735B	     ; ---------------------------------------------------------------------------
 ROM:735B
-ROM:735B	     loc_735B:
-ROM:735B E0 1B					     CPX     #1Bh
+ROM:735B	     display_asteroid_or_saucer:
+ROM:735B E0 1B					     CPX     #27
 ROM:735D F0 17					     BEQ     loc_7376
-ROM:735F E0 1C					     CPX     #1Ch
-ROM:7361 F0 19					     BEQ     loc_737C
+ROM:735F E0 1C					     CPX     #28
+ROM:7361 F0 19					     BEQ     display_saucer
 ROM:7363 B0 1F					     BCS     loc_7384
 ROM:7365 29 18					     AND     #18h
 ROM:7367 4A					     LSR     A
 ROM:7368 4A					     LSR     A
 ROM:7369 A8					     TAY
-ROM:736A B9 DE 51				     LDA     51DEh,Y
-ROM:736D BE DF 51				     LDX     51DFh,Y
+ROM:736A B9 DE 51				     LDA     (DVGROM+1DEh),Y	     ; asteroid	table address LSB
+ROM:736D BE DF 51				     LDX     (DVGROM+1DFh),Y	     ; asteroid	table address MSB
 ROM:7370
 ROM:7370	     loc_7370:
 ROM:7370 20 45 7D				     JSR     store_AX_in_avg_ram
@@ -2542,14 +2543,14 @@ ROM:7375 60					     RTS
 ROM:7376	     ; ---------------------------------------------------------------------------
 ROM:7376
 ROM:7376	     loc_7376:
-ROM:7376 20 0B 75				     JSR     sub_750B
+ROM:7376 20 0B 75				     JSR     display_ship
 ROM:7379 A6 0D					     LDX     byte_D
 ROM:737B 60					     RTS
 ROM:737C	     ; ---------------------------------------------------------------------------
 ROM:737C
-ROM:737C	     loc_737C:
+ROM:737C	     display_saucer:						     ; saucer table address LSB
 ROM:737C AD 50 52				     LDA     DVGROM+250h
-ROM:737F AE 51 52				     LDX     DVGROM+251h
+ROM:737F AE 51 52				     LDX     DVGROM+251h	     ; saucer table address MSB
 ROM:7382 D0 EC					     BNE     loc_7370
 ROM:7384
 ROM:7384	     loc_7384:
@@ -2564,7 +2565,7 @@ ROM:7393 DE 00 02				     DEC     200h,X
 ROM:7396
 ROM:7396	     locret_7396:
 ROM:7396 60					     RTS
-ROM:7396	     ; End of function sub_72FE
+ROM:7396	     ; End of function display_object
 ROM:7396
 ROM:7397
 ROM:7397	     ; =============== S U B R O U T I N E =======================================
@@ -2725,14 +2726,14 @@ ROM:7465
 ROM:7465	     ; =============== S U B R O U T I N E =======================================
 ROM:7465
 ROM:7465
-ROM:7465	     sub_7465:
+ROM:7465	     display_exploding_ship:
 ROM:7465 AD 1B 02				     LDA     p1PlayerFlag
-ROM:7468 C9 A2					     CMP     #0A2h ; '¢'
+ROM:7468 C9 A2					     CMP     #0A2h ; '¢'             ; 2 frames past exploding?
 ROM:746A B0 22					     BCS     loc_748E
 ROM:746C A2 0A					     LDX     #0Ah
 ROM:746E
 ROM:746E	     loc_746E:
-ROM:746E BD EC 50				     LDA     50ECh,X
+ROM:746E BD EC 50				     LDA     (DVGROM+0ECh),X
 ROM:7471 4A					     LSR     A
 ROM:7472 4A					     LSR     A
 ROM:7473 4A					     LSR     A
@@ -2741,7 +2742,7 @@ ROM:7475 18					     CLC
 ROM:7476 69 F8					     ADC     #0F8h ; '¯'
 ROM:7478 49 F8					     EOR     #0F8h ; '¯'
 ROM:747A 95 7E					     STA     7Eh,X
-ROM:747C BD ED 50				     LDA     50EDh,X
+ROM:747C BD ED 50				     LDA     (DVGROM+0EDh),X
 ROM:747F 4A					     LSR     A
 ROM:7480 4A					     LSR     A
 ROM:7481 4A					     LSR     A
@@ -2766,7 +2767,7 @@ ROM:7499
 ROM:7499	     loc_7499:
 ROM:7499 86 09					     STX     byte_9
 ROM:749B A0 00					     LDY     #0
-ROM:749D BD EC 50				     LDA     50ECh,X
+ROM:749D BD EC 50				     LDA     (DVGROM+0ECh),X
 ROM:74A0 10 01					     BPL     loc_74A3
 ROM:74A2 88					     DEY
 ROM:74A3
@@ -2780,7 +2781,7 @@ ROM:74AB 95 7E					     STA     7Eh,X
 ROM:74AD 85 04					     STA     byte_4
 ROM:74AF 84 05					     STY     byte_5
 ROM:74B1 A0 00					     LDY     #0
-ROM:74B3 BD ED 50				     LDA     50EDh,X
+ROM:74B3 BD ED 50				     LDA     (DVGROM+0EDh),X
 ROM:74B6 10 01					     BPL     loc_74B9
 ROM:74B8 88					     DEY
 ROM:74B9
@@ -2799,14 +2800,14 @@ ROM:74CB A5 03					     LDA     dvg_curr_addr_msb
 ROM:74CD 85 0C					     STA     byte_C
 ROM:74CF 20 49 7C				     JSR     sub_7C49
 ROM:74D2 A4 09					     LDY     byte_9
-ROM:74D4 B9 E0 50				     LDA     50E0h,Y
-ROM:74D7 BE E1 50				     LDX     50E1h,Y
+ROM:74D4 B9 E0 50				     LDA     (DVGROM+0E0h),Y	     ; wrecked ship table address LSB
+ROM:74D7 BE E1 50				     LDX     (DVGROM+0E1h),Y	     ; wrecked ship table address MSB
 ROM:74DA 20 45 7D				     JSR     store_AX_in_avg_ram
 ROM:74DD A4 09					     LDY     byte_9
-ROM:74DF B9 E1 50				     LDA     50E1h,Y
+ROM:74DF B9 E1 50				     LDA     (DVGROM+0E1h),Y	     ; wrecked ship table address MSB
 ROM:74E2 49 04					     EOR     #4
 ROM:74E4 AA					     TAX
-ROM:74E5 B9 E0 50				     LDA     50E0h,Y
+ROM:74E5 B9 E0 50				     LDA     (DVGROM+0E0h),Y	     ; wrecked ship table address LSB
 ROM:74E8 29 0F					     AND     #0Fh
 ROM:74EA 49 04					     EOR     #4
 ROM:74EC 20 45 7D				     JSR     store_AX_in_avg_ram
@@ -2828,13 +2829,13 @@ ROM:7506 CA					     DEX
 ROM:7507 CA					     DEX
 ROM:7508 10 8F					     BPL     loc_7499
 ROM:750A 60					     RTS
-ROM:750A	     ; End of function sub_7465
+ROM:750A	     ; End of function display_exploding_ship
 ROM:750A
 ROM:750B
 ROM:750B	     ; =============== S U B R O U T I N E =======================================
 ROM:750B
 ROM:750B
-ROM:750B	     sub_750B:
+ROM:750B	     display_ship:
 ROM:750B A2 00					     LDX     #0
 ROM:750D 86 17					     STX     byte_17
 ROM:750F A0 00					     LDY     #0
@@ -2845,7 +2846,7 @@ ROM:7517 8A					     TXA
 ROM:7518 38					     SEC
 ROM:7519 E5 61					     SBC     direction
 ROM:751B
-ROM:751B	     loc_751B:
+ROM:751B	     loc_751B:							     ; ABS(direction)
 ROM:751B 85 08					     STA     byte_8
 ROM:751D 24 08					     BIT     byte_8
 ROM:751F 30 02					     BMI     loc_7523
@@ -2863,14 +2864,14 @@ ROM:752C 84 09					     STY     byte_9
 ROM:752E 4A					     LSR     A
 ROM:752F 29 FE					     AND     #0FEh ; '˛'
 ROM:7531 A8					     TAY
-ROM:7532 B9 6E 52				     LDA     (DVGROM+26Eh),Y
-ROM:7535 BE 6F 52				     LDX     (DVGROM+26Fh),Y
-ROM:7538 20 D3 6A				     JSR     sub_6AD3
-ROM:753B AD 05 24				     LDA     thrustSwitch
-ROM:753E 10 14					     BPL     locret_7554
+ROM:7532 B9 6E 52				     LDA     (DVGROM+26Eh),Y	     ; ship table address LSB
+ROM:7535 BE 6F 52				     LDX     (DVGROM+26Fh),Y	     ; ship table address MSB
+ROM:7538 20 D3 6A				     JSR     store_AX_byte_BC
+ROM:753B AD 05 24				     LDA     thrustSwitch	     ; thrust?
+ROM:753E 10 14					     BPL     locret_7554	     ; no, exit
 ROM:7540 A5 5C					     LDA     fastTimer
-ROM:7542 29 04					     AND     #4
-ROM:7544 F0 0E					     BEQ     locret_7554
+ROM:7542 29 04					     AND     #4			     ; time to display thrust?
+ROM:7544 F0 0E					     BEQ     locret_7554	     ; no, exit
 ROM:7546 C8					     INY
 ROM:7547 C8					     INY
 ROM:7548 38					     SEC
@@ -2881,11 +2882,11 @@ ROM:754E 90 01					     BCC     loc_7551
 ROM:7550 E8					     INX
 ROM:7551
 ROM:7551	     loc_7551:
-ROM:7551 20 D3 6A				     JSR     sub_6AD3
+ROM:7551 20 D3 6A				     JSR     store_AX_byte_BC
 ROM:7554
 ROM:7554	     locret_7554:
 ROM:7554 60					     RTS
-ROM:7554	     ; End of function sub_750B
+ROM:7554	     ; End of function display_ship
 ROM:7554
 ROM:7555
 ROM:7555	     ; =============== S U B R O U T I N E =======================================
@@ -3005,10 +3006,10 @@ ROM:75EC	     sub_75EC:
 ROM:75EC 86 0D					     STX     byte_D
 ROM:75EE A9 50					     LDA     #50h ; 'P'
 ROM:75F0 8D F9 02				     STA     byte_2F9
-ROM:75F3 B9 00 02				     LDA     200h,Y
+ROM:75F3 B9 00 02				     LDA     P1RAM,Y
 ROM:75F6 29 78					     AND     #78h ; 'x'
 ROM:75F8 85 0E					     STA     byte_E
-ROM:75FA B9 00 02				     LDA     200h,Y
+ROM:75FA B9 00 02				     LDA     P1RAM,Y
 ROM:75FD 29 07					     AND     #7
 ROM:75FF 4A					     LSR     A
 ROM:7600 AA					     TAX
@@ -3017,8 +3018,8 @@ ROM:7603 05 0E					     ORA     byte_E
 ROM:7605
 ROM:7605	     loc_7605:
 ROM:7605 99 00 02				     STA     200h,Y
-ROM:7608 A5 1C					     LDA     numPlayers
-ROM:760A F0 11					     BEQ     loc_761D
+ROM:7608 A5 1C					     LDA     numPlayers		     ; real game?
+ROM:760A F0 11					     BEQ     loc_761D		     ; no, skip
 ROM:760C A5 0D					     LDA     byte_D
 ROM:760E F0 04					     BEQ     loc_7614
 ROM:7610 C9 04					     CMP     #4
@@ -3380,14 +3381,15 @@ ROM:77D0	     ; End of function update_prng
 ROM:77D0
 ROM:77D0	     ; ---------------------------------------------------------------------------
 ROM:77D1 02	     byte_77D1:			     .db 2
+ROM:77D2	     ; A=direction, Y=?
 ROM:77D2
 ROM:77D2	     ; =============== S U B R O U T I N E =======================================
 ROM:77D2
 ROM:77D2
-ROM:77D2	     sub_77D2:
+ROM:77D2	     some_thrust_calc:
 ROM:77D2 18					     CLC
 ROM:77D3 69 40					     ADC     #40h ; '@'
-ROM:77D3	     ; End of function sub_77D2
+ROM:77D3	     ; End of function some_thrust_calc
 ROM:77D3
 ROM:77D5
 ROM:77D5	     ; =============== S U B R O U T I N E =======================================
