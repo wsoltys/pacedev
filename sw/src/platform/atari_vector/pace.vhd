@@ -218,6 +218,8 @@ begin
       analog_y_out => xval,
       analog_z_out => zval,
       rgb_out => rgb,
+		ext_prog_rom_addr => open,
+		ext_prog_rom_data => (others => '0'),
       dbg => O_DBG,
       buttons => buttons
     );
