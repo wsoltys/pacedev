@@ -113,10 +113,11 @@ package project_pkg is
   constant S6M_EMULATED_FLASH_WIDTH         : natural := 8;
   
   --
-	-- Black Widow-specific constants
-	--
-  constant BWIDOW_H_BITS                    : integer := 9;
-  constant BWIDOW_V_BITS                    : integer := 9;
+  -- Black Widow-specific constants
+  --
+  constant BWIDOW_EXTERNAL_ROM					: boolean := false;
+  constant BWIDOW_H_BITS                    	: integer := 9;
+  constant BWIDOW_V_BITS                    	: integer := 9;
   	
 	-- derived - do not edit
 
