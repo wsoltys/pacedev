@@ -27,7 +27,7 @@ entity target_top is
     START1_LED_L		        : out 	std_logic;
     START2_LED_L		        : out	std_logic;
     --
-    PROG_ROM_ADDR		        : out std_logic_vector(12 downto 0);
+    PROG_ROM_ADDR		        : out std_logic_vector(15 downto 0);
     PROG_ROM_DATA		        : in	std_logic_vector(7 downto 0);
      --
     RESET_6_L               : in    std_logic;
@@ -226,15 +226,22 @@ begin
   pace_inst : entity work.bwidow
     port map
     (
-      reset_h           => reset,
-      clk			          => clk_6M,
-      analog_sound_out  => audio_out,
-      analog_x_out      => x_vector,
-      analog_y_out      => open,
-      analog_z_out      => open,
-      rgb_out           => open,
-      buttons				    => button,
-      dbg				        => open
+      reset_h             => reset,
+      clk			            => clk_6M,
+      analog_sound_out    => audio_out,
+      analog_x_out        => x_vector,
+      analog_y_out        => open,
+      analog_z_out        => open,
+      rgb_out             => open,
+      buttons				      => button,
+      
+      ext_prog_rom_addr   => prog_rom_addr(14 downto 0),
+      ext_prog_rom_data   => prog_rom_data,
+      
+      dbg				          => open
     );
-  
+
+    -- not used
+    prog_rom_addr(15) <= '0';
+    
 end;

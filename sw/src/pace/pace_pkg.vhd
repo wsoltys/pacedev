@@ -48,7 +48,8 @@ package pace_pkg is
     PACE_TARGET_S5L_A0_EP3SL,
     PACE_TARGET_NAVICO_ROCKY,
     PACE_TARGET_NGPACE,
-    PACE_TARGET_S6M_A0
+    PACE_TARGET_S6M_A0,
+    PACE_TARGET_SWEET_VEC		-- James Sweet's Cyclone II Vector Daughter Board
   );
 
 	type PACEFpgaVendor_t is

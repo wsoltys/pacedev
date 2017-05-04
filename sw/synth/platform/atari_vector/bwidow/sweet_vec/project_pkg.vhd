@@ -35,9 +35,8 @@ package project_pkg is
   --
 	-- Black Widow-specific constants
 	--
-  constant BWIDOW_H_BITS                    : integer := 9;
-  constant BWIDOW_V_BITS                    : integer := 9;
-  	
+  constant BWIDOW_EXTERNAL_ROM              : boolean := true;
+  
 	-- derived - do not edit
 
   type from_PROJECT_IO_t is record

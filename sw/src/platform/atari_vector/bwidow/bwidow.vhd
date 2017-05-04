@@ -25,18 +25,23 @@ library ieee;
    use ieee.numeric_std.all;
 	
 use work.pkg_bwidow.all;
+use work.project_pkg.all;
 
 entity bwidow is
   port(
-		reset_h   : in    std_logic;
-		clk			: in    std_logic; --12 MHz
+		reset_h             : in    std_logic;
+		clk			            : in    std_logic; --12 MHz
 		analog_sound_out    : out std_logic_vector(7 downto 0);
-		analog_x_out    : out std_logic_vector(9 downto 0);
-		analog_y_out    : out std_logic_vector(9 downto 0);
-		analog_z_out    : out std_logic_vector(7 downto 0);
-		rgb_out    : out std_logic_vector(2 downto 0);
-		buttons				 : in std_logic_vector(14 downto 0);
-		dbg				 : out std_logic_vector(15 downto 0)
+		analog_x_out        : out std_logic_vector(9 downto 0);
+		analog_y_out        : out std_logic_vector(9 downto 0);
+		analog_z_out        : out std_logic_vector(7 downto 0);
+		rgb_out             : out std_logic_vector(2 downto 0);
+		buttons				      : in std_logic_vector(14 downto 0);
+    
+    ext_prog_rom_addr   : out std_logic_vector(14 downto 0);
+    ext_prog_rom_data   : in	std_logic_vector(7 downto 0);
+    
+		dbg				          : out std_logic_vector(15 downto 0)
 	);
 end bwidow;
 
@@ -131,11 +136,16 @@ begin
 		DO      => c_dout
 	);
 	
-	mypgmrom: pgmrom port map (
-		addr		=> pgmrom_addr(14 downto 0),
-		data		=> pgmrom_dout,
-		clk		=> clk
-	);
+  GEN_ROM : if not BWIDOW_EXTERNAL_ROM generate
+    mypgmrom: pgmrom port map (
+      addr		=> pgmrom_addr(14 downto 0),
+      data		=> pgmrom_dout,
+      clk		=> clk
+    );
+  else generate
+    ext_prog_rom_addr <= pgmrom_addr(14 downto 0);
+    pgmrom_dout <= ext_prog_rom_data;
+  end generate GEN_ROM;
 	
 	mypgmram: ram2k port map (
 		addr		=> pgmram_addr,
