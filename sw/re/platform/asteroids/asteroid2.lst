@@ -666,12 +666,12 @@ ROM:686D 20 03 7C				     JSR     write_CUR_cmd
 ROM:6870 20 B5 77				     JSR     update_prng
 ROM:6873 20 C0 7B				     JSR     halt_dvg		     ; finished	rendering
 ROM:6876 AD FB 02				     LDA     byte_2FB
-ROM:6879 F0 03					     BEQ     loc_687E
+ROM:6879 F0 03					     BEQ     loc_687E		     ; zero, skip
 ROM:687B CE FB 02				     DEC     byte_2FB
 ROM:687E
-ROM:687E	     loc_687E:
+ROM:687E	     loc_687E:							     ; both zero?
 ROM:687E 0D F6 02				     ORA     byte_2F6
-ROM:6881 D0 89					     BNE     main_inner_loop
+ROM:6881 D0 89					     BNE     main_inner_loop	     ; no, go
 ROM:6883 F0 84					     BEQ     main_outer_loop
 ROM:6885
 ROM:6885	     ; =============== S U B R O U T I N E =======================================
@@ -1045,10 +1045,10 @@ ROM:6AD3
 ROM:6AD3	     ; =============== S U B R O U T I N E =======================================
 ROM:6AD3
 ROM:6AD3
-ROM:6AD3	     store_AX_byte_BC:
+ROM:6AD3	     render_ship_in_avgram:
 ROM:6AD3 85 0B					     STA     byte_B
 ROM:6AD5 86 0C					     STX     byte_C
-ROM:6AD5	     ; End of function store_AX_byte_BC
+ROM:6AD5	     ; End of function render_ship_in_avgram
 ROM:6AD5
 ROM:6AD7
 ROM:6AD7	     ; =============== S U B R O U T I N E =======================================
@@ -1060,12 +1060,12 @@ ROM:6AD9
 ROM:6AD9	     loc_6AD9:
 ROM:6AD9 C8					     INY
 ROM:6ADA B1 0B					     LDA     (byte_B),Y
-ROM:6ADC 45 09					     EOR     byte_9
+ROM:6ADC 45 09					     EOR     byte_9		     ; sign for	X,Y deltas
 ROM:6ADE 91 02					     STA     (2),Y		     ; store in	avg ram	(cmd)
 ROM:6AE0 88					     DEY
-ROM:6AE1 C9 F0					     CMP     #0F0h ; 'ð'
+ROM:6AE1 C9 F0					     CMP     #0F0h ; 'ð'             ; SVEC
 ROM:6AE3 B0 1E					     BCS     loc_6B03
-ROM:6AE5 C9 A0					     CMP     #0A0h ; ' '
+ROM:6AE5 C9 A0					     CMP     #0A0h ; ' '             ; CUR
 ROM:6AE7 B0 16					     BCS     loc_6AFF
 ROM:6AE9 B1 0B					     LDA     (byte_B),Y
 ROM:6AEB 91 02					     STA     (2),Y		     ; store in	avg ram
@@ -1075,7 +1075,7 @@ ROM:6AEF B1 0B					     LDA     (byte_B),Y
 ROM:6AF1 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6AF3 C8					     INY
 ROM:6AF4 B1 0B					     LDA     (byte_B),Y
-ROM:6AF6 45 08					     EOR     byte_8
+ROM:6AF6 45 08					     EOR     byte_8		     ; sign for	X,Y deltas
 ROM:6AF8 65 17					     ADC     byte_17
 ROM:6AFA 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6AFC
@@ -1090,7 +1090,7 @@ ROM:6B03	     ; ----------------------------------------------------------------
 ROM:6B03
 ROM:6B03	     loc_6B03:
 ROM:6B03 B1 0B					     LDA     (byte_B),Y
-ROM:6B05 45 08					     EOR     byte_8
+ROM:6B05 45 08					     EOR     byte_8		     ; sign for	X,Y deltas
 ROM:6B07 18					     CLC
 ROM:6B08 65 17					     ADC     byte_17
 ROM:6B0A 91 02					     STA     (2),Y		     ; store in	avg ram
@@ -1224,9 +1224,9 @@ ROM:6BBE 8D F7 02				     STA     byte_2F7
 ROM:6BC1 AD F9 02				     LDA     byte_2F9
 ROM:6BC4 F0 0A					     BEQ     loc_6BD0
 ROM:6BC6 AD F6 02				     LDA     byte_2F6
-ROM:6BC9 F0 CE					     BEQ     locret_6B99
+ROM:6BC9 F0 CE					     BEQ     locret_6B99	     ; , return
 ROM:6BCB CD FD 02				     CMP     byte_2FD
-ROM:6BCE B0 C9					     BCS     locret_6B99
+ROM:6BCE B0 C9					     BCS     locret_6B99	     ; , return
 ROM:6BD0
 ROM:6BD0	     loc_6BD0:
 ROM:6BD0 AD F8 02				     LDA     byte_2F8
@@ -1378,7 +1378,7 @@ ROM:6CC4 85 62					     STA     saucerShotDirection
 ROM:6CC6 A0 03					     LDY     #3
 ROM:6CC8 A2 01					     LDX     #1
 ROM:6CCA 86 0E					     STX     byte_E
-ROM:6CCC 4C F2 6C				     JMP     loc_6CF2
+ROM:6CCC 4C F2 6C				     JMP     find_free_shot_slot
 ROM:6CCC	     ; End of function handle_saucer
 ROM:6CCC
 ROM:6CCC	     ; ---------------------------------------------------------------------------
@@ -1410,24 +1410,24 @@ ROM:6CEC A9 03					     LDA     #3			     ; offset shot0 timer - 1
 ROM:6CEE 85 0E					     STA     byte_E
 ROM:6CF0 A0 07					     LDY     #7			     ; offset shot3 timer
 ROM:6CF2
-ROM:6CF2	     loc_6CF2:							     ; get shot	timer
+ROM:6CF2	     find_free_shot_slot:					     ; get shot	timer
 ROM:6CF2 B9 1B 02				     LDA     p1PlayerFlag,Y
 ROM:6CF5 F0 06					     BEQ     new_shot_fired	     ; not active, go
 ROM:6CF7 88					     DEY			     ; next shot timer
 ROM:6CF8 C4 0E					     CPY     byte_E		     ; done all	shot timers?
-ROM:6CFA D0 F6					     BNE     loc_6CF2		     ; no, loop
+ROM:6CFA D0 F6					     BNE     find_free_shot_slot     ; no, loop
 ROM:6CFC
 ROM:6CFC	     locret_6CFC:
 ROM:6CFC 60					     RTS
 ROM:6CFD	     ; ---------------------------------------------------------------------------
 ROM:6CFD
-ROM:6CFD	     new_shot_fired:
+ROM:6CFD	     new_shot_fired:						     ; was byte_2FA
 ROM:6CFD 86 0D					     STX     byte_D
 ROM:6CFF A9 12					     LDA     #18
 ROM:6D01 99 1B 02				     STA     p1PlayerFlag,Y	     ; init shot timer
 ROM:6D04 B5 61					     LDA     direction,X
 ROM:6D06 20 D2 77				     JSR     some_thrust_calc
-ROM:6D09 A6 0D					     LDX     byte_D
+ROM:6D09 A6 0D					     LDX     byte_D		     ; was byte_2FA
 ROM:6D0B C9 80					     CMP     #80h ; '€'
 ROM:6D0D 6A					     ROR     A
 ROM:6D0E 85 09					     STA     byte_9
@@ -1995,7 +1995,7 @@ ROM:7041 F0 42					     BEQ     locret_7085
 ROM:7043 AD 1B 02				     LDA     p1PlayerFlag
 ROM:7046 30 3D					     BMI     locret_7085	     ; exploding - exit
 ROM:7048 AD FA 02				     LDA     byte_2FA
-ROM:704B F0 39					     BEQ     loc_7086
+ROM:704B F0 39					     BEQ     check_rot_left
 ROM:704D CE FA 02				     DEC     byte_2FA
 ROM:7050 D0 33					     BNE     locret_7085
 ROM:7052 A4 59					     LDY     hyperspaceFlag
@@ -2033,18 +2033,18 @@ ROM:7085	     locret_7085:
 ROM:7085 60					     RTS
 ROM:7086	     ; ---------------------------------------------------------------------------
 ROM:7086
-ROM:7086	     loc_7086:							     ; left button?
+ROM:7086	     check_rot_left:						     ; left button?
 ROM:7086 AD 07 24				     LDA     rotateLeftSwitch
-ROM:7089 10 04					     BPL     loc_708F		     ; no, skip
+ROM:7089 10 04					     BPL     check_rot_right	     ; no, skip
 ROM:708B A9 03					     LDA     #3
-ROM:708D D0 07					     BNE     loc_7096		     ; always go
+ROM:708D D0 07					     BNE     update_dir		     ; always go
 ROM:708F
-ROM:708F	     loc_708F:							     ; right button?
+ROM:708F	     check_rot_right:						     ; right button?
 ROM:708F AD 06 24				     LDA     rotateRightSwitch
 ROM:7092 10 07					     BPL     loc_709B		     ; no, skip
 ROM:7094 A9 FD					     LDA     #-3
 ROM:7096
-ROM:7096	     loc_7096:
+ROM:7096	     update_dir:
 ROM:7096 18					     CLC
 ROM:7097 65 61					     ADC     direction		     ; calc direction
 ROM:7099 85 61					     STA     direction		     ; update
@@ -2211,7 +2211,7 @@ ROM:7168 A2 1A					     LDX     #1Ah
 ROM:716A AD FB 02				     LDA     byte_2FB
 ROM:716D D0 70					     BNE     loc_71DF
 ROM:716F AD 1C 02				     LDA     p1SaucerFlag	     ; saucer active?
-ROM:7172 D0 73					     BNE     locret_71E7	     ; yes, go
+ROM:7172 D0 73					     BNE     locret_71E7	     ; yes, return
 ROM:7174 8D 3F 02				     STA     byte_23F
 ROM:7177 8D 62 02				     STA     byte_262
 ROM:717A EE FD 02				     INC     byte_2FD
@@ -2274,7 +2274,7 @@ ROM:71DF	     loc_71DF:
 ROM:71DF A9 00					     LDA     #0
 ROM:71E1
 ROM:71E1	     loc_71E1:
-ROM:71E1 9D 00 02				     STA     200h,X
+ROM:71E1 9D 00 02				     STA     P1RAM,X
 ROM:71E4 CA					     DEX
 ROM:71E5 10 FA					     BPL     loc_71E1
 ROM:71E7
@@ -2836,53 +2836,53 @@ ROM:750B	     ; =============== S U B R O U T I N E ============================
 ROM:750B
 ROM:750B
 ROM:750B	     display_ship:
-ROM:750B A2 00					     LDX     #0
+ROM:750B A2 00					     LDX     #0			     ; default positive	delta
 ROM:750D 86 17					     STX     byte_17
-ROM:750F A0 00					     LDY     #0
+ROM:750F A0 00					     LDY     #0			     ; default positive	delta
 ROM:7511 A5 61					     LDA     direction
-ROM:7513 10 06					     BPL     loc_751B
-ROM:7515 A0 04					     LDY     #4
-ROM:7517 8A					     TXA
+ROM:7513 10 06					     BPL     loc_751B		     ; positive, skip
+ROM:7515 A0 04					     LDY     #4			     ; flag negative delta
+ROM:7517 8A					     TXA			     ; 0
 ROM:7518 38					     SEC
 ROM:7519 E5 61					     SBC     direction
 ROM:751B
 ROM:751B	     loc_751B:							     ; ABS(direction)
 ROM:751B 85 08					     STA     byte_8
 ROM:751D 24 08					     BIT     byte_8
-ROM:751F 30 02					     BMI     loc_7523
-ROM:7521 50 07					     BVC     loc_752A
+ROM:751F 30 02					     BMI     loc_7523		     ; b7=1
+ROM:7521 50 07					     BVC     loc_752A		     ; b6=0
 ROM:7523
-ROM:7523	     loc_7523:
+ROM:7523	     loc_7523:							     ; flag negative delta
 ROM:7523 A2 04					     LDX     #4
 ROM:7525 A9 80					     LDA     #80h ; '€'
 ROM:7527 38					     SEC
 ROM:7528 E5 08					     SBC     byte_8
 ROM:752A
-ROM:752A	     loc_752A:
+ROM:752A	     loc_752A:							     ; sign for	X/Y delta (which?)
 ROM:752A 86 08					     STX     byte_8
-ROM:752C 84 09					     STY     byte_9
+ROM:752C 84 09					     STY     byte_9		     ; sign for	X/Y delta (which?)
 ROM:752E 4A					     LSR     A
 ROM:752F 29 FE					     AND     #0FEh ; 'þ'
 ROM:7531 A8					     TAY
 ROM:7532 B9 6E 52				     LDA     (DVGROM+26Eh),Y	     ; ship table address LSB
 ROM:7535 BE 6F 52				     LDX     (DVGROM+26Fh),Y	     ; ship table address MSB
-ROM:7538 20 D3 6A				     JSR     store_AX_byte_BC
+ROM:7538 20 D3 6A				     JSR     render_ship_in_avgram
 ROM:753B AD 05 24				     LDA     thrustSwitch	     ; thrust?
 ROM:753E 10 14					     BPL     locret_7554	     ; no, exit
 ROM:7540 A5 5C					     LDA     fastTimer
 ROM:7542 29 04					     AND     #4			     ; time to display thrust?
 ROM:7544 F0 0E					     BEQ     locret_7554	     ; no, exit
 ROM:7546 C8					     INY
-ROM:7547 C8					     INY
+ROM:7547 C8					     INY			     ; Y=2???
 ROM:7548 38					     SEC
 ROM:7549 A6 0C					     LDX     byte_C
 ROM:754B 98					     TYA
 ROM:754C 65 0B					     ADC     byte_B
 ROM:754E 90 01					     BCC     loc_7551
-ROM:7550 E8					     INX
+ROM:7550 E8					     INX			     ; BC+=2
 ROM:7551
 ROM:7551	     loc_7551:
-ROM:7551 20 D3 6A				     JSR     store_AX_byte_BC
+ROM:7551 20 D3 6A				     JSR     render_ship_in_avgram
 ROM:7554
 ROM:7554	     locret_7554:
 ROM:7554 60					     RTS
@@ -2929,7 +2929,7 @@ ROM:758B F0 11					     BEQ     loc_759E
 ROM:758D AD 1B 02				     LDA     p1PlayerFlag	     ; alive?
 ROM:7590 30 0C					     BMI     loc_759E		     ; no, skip
 ROM:7592 05 59					     ORA     hyperspaceFlag	     ; hyperspace?
-ROM:7594 F0 08					     BEQ     loc_759E		     ; no acgive, skip
+ROM:7594 F0 08					     BEQ     loc_759E		     ; not active, skip
 ROM:7596 A5 6D					     LDA     timerThumpSoundOn
 ROM:7598 F0 14					     BEQ     loc_75AE		     ; off, skip
 ROM:759A C6 6D					     DEC     timerThumpSoundOn	     ; update thump sound timer
@@ -3017,7 +3017,7 @@ ROM:7601 F0 02					     BEQ     loc_7605
 ROM:7603 05 0E					     ORA     byte_E
 ROM:7605
 ROM:7605	     loc_7605:
-ROM:7605 99 00 02				     STA     200h,Y
+ROM:7605 99 00 02				     STA     P1RAM,Y
 ROM:7608 A5 1C					     LDA     numPlayers		     ; real game?
 ROM:760A F0 11					     BEQ     loc_761D		     ; no, skip
 ROM:760C A5 0D					     LDA     byte_D
@@ -3032,7 +3032,7 @@ ROM:7619 18					     CLC
 ROM:761A 20 97 73				     JSR     add_A_to_score	     ; add asteroid score
 ROM:761D
 ROM:761D	     loc_761D:
-ROM:761D BE 00 02				     LDX     200h,Y
+ROM:761D BE 00 02				     LDX     P1RAM,Y
 ROM:7620 F0 34					     BEQ     loc_7656
 ROM:7622 20 5A 74				     JSR     sub_745A
 ROM:7625 30 2F					     BMI     loc_7656
