@@ -662,7 +662,7 @@ ROM:6864 20 4F 72				     JSR     display_C_scores_ships
 ROM:6867 20 55 75				     JSR     handle_sounds
 ROM:686A A9 7F					     LDA     #7Fh ; ''              ; X=0x7F
 ROM:686C AA					     TAX			     ; Y=0x7F
-ROM:686D 20 03 7C				     JSR     write_CUR_cmd
+ROM:686D 20 03 7C				     JSR     write_CURx4_cmd
 ROM:6870 20 B5 77				     JSR     update_prng
 ROM:6873 20 C0 7B				     JSR     halt_dvg		     ; finished	rendering
 ROM:6876 AD FB 02				     LDA     byte_2FB
@@ -1045,58 +1045,58 @@ ROM:6AD3
 ROM:6AD3	     ; =============== S U B R O U T I N E =======================================
 ROM:6AD3
 ROM:6AD3
-ROM:6AD3	     render_ship_in_avgram:
-ROM:6AD3 85 0B					     STA     byte_B
-ROM:6AD5 86 0C					     STX     byte_C
-ROM:6AD5	     ; End of function render_ship_in_avgram
+ROM:6AD3	     copy_vector_from_table_to_avgram:
+ROM:6AD3 85 0B					     STA     byte_B		     ; table address (LSB)
+ROM:6AD5 86 0C					     STX     byte_C		     ; table address (MSB)
+ROM:6AD5	     ; End of function copy_vector_from_table_to_avgram
 ROM:6AD5
 ROM:6AD7
 ROM:6AD7	     ; =============== S U B R O U T I N E =======================================
 ROM:6AD7
 ROM:6AD7
-ROM:6AD7	     sub_6AD7:
+ROM:6AD7	     copy_vector_to_avgram:
 ROM:6AD7 A0 00					     LDY     #0
 ROM:6AD9
 ROM:6AD9	     loc_6AD9:
 ROM:6AD9 C8					     INY
-ROM:6ADA B1 0B					     LDA     (byte_B),Y
-ROM:6ADC 45 09					     EOR     byte_9		     ; sign for	X,Y deltas
+ROM:6ADA B1 0B					     LDA     (byte_B),Y		     ; SSSS -mYY (VEC) / 1111 smYY (SVEC)
+ROM:6ADC 45 09					     EOR     byte_9		     ; flag for	flip Y (bit 2)
 ROM:6ADE 91 02					     STA     (2),Y		     ; store in	avg ram	(cmd)
 ROM:6AE0 88					     DEY
-ROM:6AE1 C9 F0					     CMP     #0F0h ; ''             ; SVEC
-ROM:6AE3 B0 1E					     BCS     loc_6B03
-ROM:6AE5 C9 A0					     CMP     #0A0h ; '†'             ; CUR
-ROM:6AE7 B0 16					     BCS     loc_6AFF
-ROM:6AE9 B1 0B					     LDA     (byte_B),Y
+ROM:6AE1 C9 F0					     CMP     #0F0h ; ''             ; SVEC?
+ROM:6AE3 B0 1E					     BCS     is_svec		     ; yes, go
+ROM:6AE5 C9 A0					     CMP     #0A0h ; '†'             ; VEC?
+ROM:6AE7 B0 16					     BCS     loc_6AFF		     ; no, exit
+ROM:6AE9 B1 0B					     LDA     (byte_B),Y		     ; YYYY YYYY
 ROM:6AEB 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6AED C8					     INY
 ROM:6AEE C8					     INY
-ROM:6AEF B1 0B					     LDA     (byte_B),Y
+ROM:6AEF B1 0B					     LDA     (byte_B),Y		     ; XXXX XXXX
 ROM:6AF1 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6AF3 C8					     INY
-ROM:6AF4 B1 0B					     LDA     (byte_B),Y
-ROM:6AF6 45 08					     EOR     byte_8		     ; sign for	X,Y deltas
+ROM:6AF4 B1 0B					     LDA     (byte_B),Y		     ; BBBB -mXX
+ROM:6AF6 45 08					     EOR     byte_8		     ; sign for	X delta
 ROM:6AF8 65 17					     ADC     byte_17
 ROM:6AFA 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6AFC
 ROM:6AFC	     loc_6AFC:
 ROM:6AFC C8					     INY
-ROM:6AFD D0 DA					     BNE     loc_6AD9
+ROM:6AFD D0 DA					     BNE     loc_6AD9		     ; always
 ROM:6AFF
 ROM:6AFF	     loc_6AFF:
 ROM:6AFF 88					     DEY
 ROM:6B00 4C 39 7C				     JMP     update_avg_curr_addr
 ROM:6B03	     ; ---------------------------------------------------------------------------
 ROM:6B03
-ROM:6B03	     loc_6B03:
+ROM:6B03	     is_svec:							     ; BBBB SmXX
 ROM:6B03 B1 0B					     LDA     (byte_B),Y
-ROM:6B05 45 08					     EOR     byte_8		     ; sign for	X,Y deltas
+ROM:6B05 45 08					     EOR     byte_8		     ; flag for	flip X (bit 2)
 ROM:6B07 18					     CLC
 ROM:6B08 65 17					     ADC     byte_17
 ROM:6B0A 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:6B0C C8					     INY
-ROM:6B0D D0 ED					     BNE     loc_6AFC
-ROM:6B0D	     ; End of function sub_6AD7
+ROM:6B0D D0 ED					     BNE     loc_6AFC		     ; always
+ROM:6B0D	     ; End of function copy_vector_to_avgram
 ROM:6B0D
 ROM:6B0F
 ROM:6B0F	     ; =============== S U B R O U T I N E =======================================
@@ -1555,7 +1555,7 @@ ROM:6DCD A9 20					     LDA     #20h ; ' '
 ROM:6DCF 85 00					     STA     globalScale
 ROM:6DD1 A9 64					     LDA     #64h ; 'd'
 ROM:6DD3 A2 39					     LDX     #39h ; '9'
-ROM:6DD5 20 03 7C				     JSR     write_CUR_cmd
+ROM:6DD5 20 03 7C				     JSR     write_CURx4_cmd
 ROM:6DD8 A9 70					     LDA     #70h ; 'p'
 ROM:6DDA 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:6DDD A6 18					     LDX     curPlayer
@@ -1787,10 +1787,10 @@ ROM:6F23 25 33					     AND     placeP2HighScore	     ; entered as <space>?
 ROM:6F25 30 0E					     BMI     display_char_code_Y     ; yes, display
 ROM:6F27 A9 72					     LDA     #72h ; 'r'              ; brightness=7, S=0, X=2
 ROM:6F29 A2 F8					     LDX     #0F8h ; '¯'             ; cmd=SVEC, s=-ve, Y=0
-ROM:6F2B 20 45 7D				     JSR     store_AX_in_avg_ram
+ROM:6F2B 20 45 7D				     JSR     write_AX_to_avgram
 ROM:6F2E A9 01					     LDA     #1			     ; brightness=0, S=0, X=0
 ROM:6F30 A2 F8					     LDX     #0F8h ; '¯'             ; cmd=SVEC, s=-ve, Y=0
-ROM:6F32 4C 45 7D				     JMP     store_AX_in_avg_ram
+ROM:6F32 4C 45 7D				     JMP     write_AX_to_avgram
 ROM:6F32	     ; End of function display_initial
 ROM:6F32
 ROM:6F35
@@ -1800,7 +1800,7 @@ ROM:6F35
 ROM:6F35	     display_char_code_Y:
 ROM:6F35 BE D5 56				     LDX     (DVGROM+6D5h),Y	     ; chr fn
 ROM:6F38 B9 D4 56				     LDA     (DVGROM+6D4h),Y	     ; chr fn
-ROM:6F3B 4C 45 7D				     JMP     store_AX_in_avg_ram
+ROM:6F3B 4C 45 7D				     JMP     write_AX_to_avgram
 ROM:6F3B	     ; End of function display_char_code_Y
 ROM:6F3B
 ROM:6F3E
@@ -1813,7 +1813,7 @@ ROM:6F40 84 08					     STY     byte_8
 ROM:6F42 A2 D5					     LDX     #213		     ; Y coord (x4=852)
 ROM:6F44 A0 E0					     LDY     #0E0h ; '‡'
 ROM:6F46 84 00					     STY     globalScale
-ROM:6F48 20 03 7C				     JSR     write_CUR_cmd
+ROM:6F48 20 03 7C				     JSR     write_CURx4_cmd
 ROM:6F4B
 ROM:6F4B	     loc_6F4B:
 ROM:6F4B A2 DA					     LDX     #0DAh ; '⁄'
@@ -1831,11 +1831,11 @@ ROM:6F57	     ; =============== S U B R O U T I N E ============================
 ROM:6F57
 ROM:6F57
 ROM:6F57	     handle_objects:
-ROM:6F57 A2 22					     LDX     #22h ; '"'
+ROM:6F57 A2 22					     LDX     #22h ; '"'              ; offset to last object in table
 ROM:6F59
-ROM:6F59	     loc_6F59:							     ; non-zero, handle	it
+ROM:6F59	     loc_6F59:							     ; get entry
 ROM:6F59 BD 00 02				     LDA     P1RAM,X
-ROM:6F5C D0 04					     BNE     loc_6F62
+ROM:6F5C D0 04					     BNE     handle_object_entry     ; non-zero	entry, handle it
 ROM:6F5E
 ROM:6F5E	     loc_6F5E:							     ; next value
 ROM:6F5E CA					     DEX
@@ -1843,7 +1843,7 @@ ROM:6F5F 10 F8					     BPL     loc_6F59		     ; loop 'til done
 ROM:6F61 60					     RTS
 ROM:6F62	     ; ---------------------------------------------------------------------------
 ROM:6F62
-ROM:6F62	     loc_6F62:
+ROM:6F62	     handle_object_entry:
 ROM:6F62 10 63					     BPL     loc_6FC7
 ROM:6F64 20 08 77				     JSR     negate_A
 ROM:6F67 4A					     LSR     A
@@ -1861,7 +1861,7 @@ ROM:6F76	     loc_6F76:
 ROM:6F76 38					     SEC
 ROM:6F77
 ROM:6F77	     loc_6F77:
-ROM:6F77 7D 00 02				     ADC     200h,X
+ROM:6F77 7D 00 02				     ADC     P1RAM,X
 ROM:6F7A 30 25					     BMI     loc_6FA1
 ROM:6F7C E0 1B					     CPX     #1Bh		     ; playerFlag?
 ROM:6F7E F0 13					     BEQ     loc_6F93		     ; yes, go
@@ -1887,12 +1887,12 @@ ROM:6F9C 8D F7 02				     STA     byte_2F7
 ROM:6F9F D0 EB					     BNE     loc_6F8C
 ROM:6FA1
 ROM:6FA1	     loc_6FA1:
-ROM:6FA1 9D 00 02				     STA     200h,X
+ROM:6FA1 9D 00 02				     STA     P1RAM,X
 ROM:6FA4 29 F0					     AND     #0F0h ; ''
 ROM:6FA6 18					     CLC
 ROM:6FA7 69 10					     ADC     #10h
-ROM:6FA9 E0 1B					     CPX     #1Bh
-ROM:6FAB D0 02					     BNE     loc_6FAF
+ROM:6FA9 E0 1B					     CPX     #1Bh		     ; PlayerFlag?
+ROM:6FAB D0 02					     BNE     loc_6FAF		     ; no, skip
 ROM:6FAD A9 00					     LDA     #0
 ROM:6FAF
 ROM:6FAF	     loc_6FAF:
@@ -1924,8 +1924,8 @@ ROM:6FD9 7D 69 02				     ADC     269h,X
 ROM:6FDC C9 20					     CMP     #20h ; ' '
 ROM:6FDE 90 0C					     BCC     loc_6FEC
 ROM:6FE0 29 1F					     AND     #1Fh
-ROM:6FE2 E0 1C					     CPX     #1Ch
-ROM:6FE4 D0 06					     BNE     loc_6FEC
+ROM:6FE2 E0 1C					     CPX     #1Ch		     ; SaucerFlag?
+ROM:6FE4 D0 06					     BNE     loc_6FEC		     ; no, go
 ROM:6FE6 20 2D 70				     JSR     sub_702D
 ROM:6FE9 4C 5E 6F				     JMP     loc_6F5E
 ROM:6FEC	     ; ---------------------------------------------------------------------------
@@ -2374,7 +2374,7 @@ ROM:7255 A2 A4					     LDX     #0A4h ; '§'             ; addr = 0x50A4
 ROM:7257 20 FC 7B				     JSR     write_JSR_cmd	     ; "(C)1979 ATARI INC"
 ROM:725A A9 19					     LDA     #25		     ; X coord (x4=100)
 ROM:725C A2 DB					     LDX     #219		     ; Y coord (x4=876)
-ROM:725E 20 03 7C				     JSR     write_CUR_cmd
+ROM:725E 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7261 A9 70					     LDA     #70h ; 'p'              ; scale = 7
 ROM:7263 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7266 A2 00					     LDX     #0
@@ -2409,7 +2409,7 @@ ROM:729A A9 00					     LDA     #0
 ROM:729C 85 00					     STA     globalScale
 ROM:729E A9 78					     LDA     #120		     ; X coord (x4=480)
 ROM:72A0 A2 DB					     LDX     #219		     ; y coord (x4=876)
-ROM:72A2 20 03 7C				     JSR     write_CUR_cmd
+ROM:72A2 20 03 7C				     JSR     write_CURx4_cmd
 ROM:72A5 A9 50					     LDA     #50h ; 'P'              ; scale = 5
 ROM:72A7 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:72AA A9 1D					     LDA     #highScoreTable
@@ -2422,7 +2422,7 @@ ROM:72B7 A9 10					     LDA     #10h
 ROM:72B9 85 00					     STA     globalScale
 ROM:72BB A9 C0					     LDA     #192		     ; X coord (x4=768)
 ROM:72BD A2 DB					     LDX     #219		     ; Y coord (x4=876)
-ROM:72BF 20 03 7C				     JSR     write_CUR_cmd
+ROM:72BF 20 03 7C				     JSR     write_CURx4_cmd
 ROM:72C2 A9 50					     LDA     #50h ; 'P'              ; scale = 5
 ROM:72C4 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:72C7 A2 00					     LDX     #0
@@ -2466,7 +2466,7 @@ ROM:72FE
 ROM:72FE
 ROM:72FE	     display_object:
 ROM:72FE 84 00					     STY     globalScale
-ROM:7300 86 0D					     STX     byte_D
+ROM:7300 86 0D					     STX     byte_D		     ; object offset (from P1RAM)
 ROM:7302 A5 05					     LDA     byte_5
 ROM:7304 4A					     LSR     A
 ROM:7305 66 04					     ROR     byte_4
@@ -2474,7 +2474,7 @@ ROM:7307 4A					     LSR     A
 ROM:7308 66 04					     ROR     byte_4
 ROM:730A 4A					     LSR     A
 ROM:730B 66 04					     ROR     byte_4
-ROM:730D 85 05					     STA     byte_5
+ROM:730D 85 05					     STA     byte_5		     ; 5:4 /= 8
 ROM:730F A5 07					     LDA     byte_7
 ROM:7311 18					     CLC
 ROM:7312 69 04					     ADC     #4
@@ -2484,9 +2484,9 @@ ROM:7317 4A					     LSR     A
 ROM:7318 66 06					     ROR     byte_6
 ROM:731A 4A					     LSR     A
 ROM:731B 66 06					     ROR     byte_6
-ROM:731D 85 07					     STA     byte_7
-ROM:731F A2 04					     LDX     #4
-ROM:7321 20 1C 7C				     JSR     sub_7C1C
+ROM:731D 85 07					     STA     byte_7		     ; 7:6 = (7:6+1024)/8
+ROM:731F A2 04					     LDX     #4			     ; base of temp coordinates
+ROM:7321 20 1C 7C				     JSR     write_CUR_cmd
 ROM:7324 A9 70					     LDA     #70h ; 'p'
 ROM:7326 38					     SEC
 ROM:7327 E5 00					     SBC     globalScale
@@ -2505,63 +2505,63 @@ ROM:7339 B0 F2					     BCS     loc_732D
 ROM:733B
 ROM:733B	     loc_733B:
 ROM:733B 20 DE 7C				     JSR     set_scale_A_bright_0
-ROM:733E A6 0D					     LDX     byte_D
-ROM:7340 BD 00 02				     LDA     P1RAM,X
-ROM:7343 10 16					     BPL     display_asteroid_or_saucer
-ROM:7345 E0 1B					     CPX     #27
-ROM:7347 F0 0C					     BEQ     loc_7355
-ROM:7349 29 0C					     AND     #0Ch
-ROM:734B 4A					     LSR     A
-ROM:734C A8					     TAY
+ROM:733E A6 0D					     LDX     byte_D		     ; restore object offset
+ROM:7340 BD 00 02				     LDA     P1RAM,X		     ; get entry (again)
+ROM:7343 10 16					     BPL     display_shot_ship_asteroid_or_saucer
+ROM:7345 E0 1B					     CPX     #1Bh		     ; PlayerFlag?
+ROM:7347 F0 0C					     BEQ     loc_7355		     ; yes, go
+ROM:7349 29 0C					     AND     #0Ch		     ; pattern (3:2)
+ROM:734B 4A					     LSR     A			     ; pattern (2:1)
+ROM:734C A8					     TAY			     ; pattern = word offset
 ROM:734D B9 F8 50				     LDA     (DVGROM+0F8h),Y	     ; shrapnel	table address LSB
 ROM:7350 BE F9 50				     LDX     (DVGROM+0F9h),Y	     ; shrapnel	table address MSB
-ROM:7353 D0 1B					     BNE     loc_7370
+ROM:7353 D0 1B					     BNE     loc_7370		     ; always
 ROM:7355
 ROM:7355	     loc_7355:
 ROM:7355 20 65 74				     JSR     display_exploding_ship
-ROM:7358 A6 0D					     LDX     byte_D
+ROM:7358 A6 0D					     LDX     byte_D		     ; restore object offset
 ROM:735A 60					     RTS
 ROM:735B	     ; ---------------------------------------------------------------------------
 ROM:735B
-ROM:735B	     display_asteroid_or_saucer:
-ROM:735B E0 1B					     CPX     #27
-ROM:735D F0 17					     BEQ     loc_7376
-ROM:735F E0 1C					     CPX     #28
-ROM:7361 F0 19					     BEQ     display_saucer
-ROM:7363 B0 1F					     BCS     loc_7384
-ROM:7365 29 18					     AND     #18h
+ROM:735B	     display_shot_ship_asteroid_or_saucer:			     ; PlayerFlag?
+ROM:735B E0 1B					     CPX     #1Bh
+ROM:735D F0 17					     BEQ     display_ship	     ; yes, go
+ROM:735F E0 1C					     CPX     #1Ch		     ; SaucerFlag?
+ROM:7361 F0 19					     BEQ     display_saucer	     ; yes, go
+ROM:7363 B0 1F					     BCS     display_shot	     ; shot, go
+ROM:7365 29 18					     AND     #18h		     ; pattern (4:3)
 ROM:7367 4A					     LSR     A
-ROM:7368 4A					     LSR     A
-ROM:7369 A8					     TAY
+ROM:7368 4A					     LSR     A			     ; pattern (2:1)
+ROM:7369 A8					     TAY			     ; pattern = word offset
 ROM:736A B9 DE 51				     LDA     (DVGROM+1DEh),Y	     ; asteroid	table address LSB
 ROM:736D BE DF 51				     LDX     (DVGROM+1DFh),Y	     ; asteroid	table address MSB
 ROM:7370
-ROM:7370	     loc_7370:
-ROM:7370 20 45 7D				     JSR     store_AX_in_avg_ram
-ROM:7373 A6 0D					     LDX     byte_D
+ROM:7370	     loc_7370:							     ; writes JSR instruction
+ROM:7370 20 45 7D				     JSR     write_AX_to_avgram
+ROM:7373 A6 0D					     LDX     byte_D		     ; restore object offset
 ROM:7375 60					     RTS
 ROM:7376	     ; ---------------------------------------------------------------------------
 ROM:7376
-ROM:7376	     loc_7376:
-ROM:7376 20 0B 75				     JSR     display_ship
-ROM:7379 A6 0D					     LDX     byte_D
+ROM:7376	     display_ship:
+ROM:7376 20 0B 75				     JSR     calc_ship_and_render
+ROM:7379 A6 0D					     LDX     byte_D		     ; restore object offset
 ROM:737B 60					     RTS
 ROM:737C	     ; ---------------------------------------------------------------------------
 ROM:737C
 ROM:737C	     display_saucer:						     ; saucer table address LSB
 ROM:737C AD 50 52				     LDA     DVGROM+250h
 ROM:737F AE 51 52				     LDX     DVGROM+251h	     ; saucer table address MSB
-ROM:7382 D0 EC					     BNE     loc_7370
+ROM:7382 D0 EC					     BNE     loc_7370		     ; always
 ROM:7384
-ROM:7384	     loc_7384:
+ROM:7384	     display_shot:
 ROM:7384 A9 70					     LDA     #70h ; 'p'
 ROM:7386 A2 F0					     LDX     #0F0h ; ''
 ROM:7388 20 E0 7C				     JSR     set_scale_A_bright_X
-ROM:738B A6 0D					     LDX     byte_D
+ROM:738B A6 0D					     LDX     byte_D		     ; restore object offset
 ROM:738D A5 5C					     LDA     fastTimer
-ROM:738F 29 03					     AND     #3
-ROM:7391 D0 03					     BNE     locret_7396
-ROM:7393 DE 00 02				     DEC     200h,X
+ROM:738F 29 03					     AND     #3			     ; time to dec?
+ROM:7391 D0 03					     BNE     locret_7396	     ; no, skip
+ROM:7393 DE 00 02				     DEC     P1RAM,X
 ROM:7396
 ROM:7396	     locret_7396:
 ROM:7396 60					     RTS
@@ -2646,7 +2646,7 @@ ROM:73EF F0 67					     BEQ     loc_7458		     ; yes, exit
 ROM:73F1 86 0F					     STX     byte_F		     ; entry counter (x2)
 ROM:73F3 A9 5F					     LDA     #95		     ; x coord (x4=380)
 ROM:73F5 A6 0E					     LDX     byte_E		     ; y coord
-ROM:73F7 20 03 7C				     JSR     write_CUR_cmd
+ROM:73F7 20 03 7C				     JSR     write_CURx4_cmd
 ROM:73FA A9 40					     LDA     #40h ; '@'              ; S=4
 ROM:73FC 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:73FF A5 0F					     LDA     byte_F		     ; entry counter (x2)
@@ -2802,7 +2802,7 @@ ROM:74CF 20 49 7C				     JSR     sub_7C49
 ROM:74D2 A4 09					     LDY     byte_9
 ROM:74D4 B9 E0 50				     LDA     (DVGROM+0E0h),Y	     ; wrecked ship table address LSB
 ROM:74D7 BE E1 50				     LDX     (DVGROM+0E1h),Y	     ; wrecked ship table address MSB
-ROM:74DA 20 45 7D				     JSR     store_AX_in_avg_ram
+ROM:74DA 20 45 7D				     JSR     write_AX_to_avgram
 ROM:74DD A4 09					     LDY     byte_9
 ROM:74DF B9 E1 50				     LDA     (DVGROM+0E1h),Y	     ; wrecked ship table address MSB
 ROM:74E2 49 04					     EOR     #4
@@ -2810,7 +2810,7 @@ ROM:74E4 AA					     TAX
 ROM:74E5 B9 E0 50				     LDA     (DVGROM+0E0h),Y	     ; wrecked ship table address LSB
 ROM:74E8 29 0F					     AND     #0Fh
 ROM:74EA 49 04					     EOR     #4
-ROM:74EC 20 45 7D				     JSR     store_AX_in_avg_ram
+ROM:74EC 20 45 7D				     JSR     write_AX_to_avgram
 ROM:74EF A0 FF					     LDY     #0FFh
 ROM:74F1
 ROM:74F1	     loc_74F1:
@@ -2835,7 +2835,7 @@ ROM:750B
 ROM:750B	     ; =============== S U B R O U T I N E =======================================
 ROM:750B
 ROM:750B
-ROM:750B	     display_ship:
+ROM:750B	     calc_ship_and_render:
 ROM:750B A2 00					     LDX     #0			     ; default positive	delta
 ROM:750D 86 17					     STX     byte_17
 ROM:750F A0 00					     LDY     #0			     ; default positive	delta
@@ -2858,15 +2858,15 @@ ROM:7525 A9 80					     LDA     #80h ; 'Ä'
 ROM:7527 38					     SEC
 ROM:7528 E5 08					     SBC     byte_8
 ROM:752A
-ROM:752A	     loc_752A:							     ; sign for	X/Y delta (which?)
+ROM:752A	     loc_752A:							     ; flag for	flip X
 ROM:752A 86 08					     STX     byte_8
-ROM:752C 84 09					     STY     byte_9		     ; sign for	X/Y delta (which?)
+ROM:752C 84 09					     STY     byte_9		     ; flag for	flip Y
 ROM:752E 4A					     LSR     A
 ROM:752F 29 FE					     AND     #0FEh ; '˛'
 ROM:7531 A8					     TAY
 ROM:7532 B9 6E 52				     LDA     (DVGROM+26Eh),Y	     ; ship table address LSB
 ROM:7535 BE 6F 52				     LDX     (DVGROM+26Fh),Y	     ; ship table address MSB
-ROM:7538 20 D3 6A				     JSR     render_ship_in_avgram
+ROM:7538 20 D3 6A				     JSR     copy_vector_from_table_to_avgram
 ROM:753B AD 05 24				     LDA     thrustSwitch	     ; thrust?
 ROM:753E 10 14					     BPL     locret_7554	     ; no, exit
 ROM:7540 A5 5C					     LDA     fastTimer
@@ -2882,11 +2882,11 @@ ROM:754E 90 01					     BCC     loc_7551
 ROM:7550 E8					     INX			     ; BC+=2
 ROM:7551
 ROM:7551	     loc_7551:
-ROM:7551 20 D3 6A				     JSR     render_ship_in_avgram
+ROM:7551 20 D3 6A				     JSR     copy_vector_from_table_to_avgram
 ROM:7554
 ROM:7554	     locret_7554:
 ROM:7554 60					     RTS
-ROM:7554	     ; End of function display_ship
+ROM:7554	     ; End of function calc_ship_and_render
 ROM:7554
 ROM:7555
 ROM:7555	     ; =============== S U B R O U T I N E =======================================
@@ -3341,9 +3341,9 @@ ROM:77A1 29 1F					     AND     #1Fh
 ROM:77A3 09 40					     ORA     #40h ; '@'
 ROM:77A5 85 0C					     STA     byte_C
 ROM:77A7 A9 00					     LDA     #0
-ROM:77A9 85 08					     STA     byte_8
-ROM:77AB 85 09					     STA     byte_9
-ROM:77AD 20 D7 6A				     JSR     sub_6AD7
+ROM:77A9 85 08					     STA     byte_8		     ; flag to flip X
+ROM:77AB 85 09					     STA     byte_9		     ; flag to flip Y
+ROM:77AD 20 D7 6A				     JSR     copy_vector_to_avgram
 ROM:77B0 28					     PLP
 ROM:77B1 60					     RTS
 ROM:77B2	     ; ---------------------------------------------------------------------------
@@ -3358,23 +3358,23 @@ ROM:77B5
 ROM:77B5
 ROM:77B5	     update_prng:
 ROM:77B5 06 5F					     ASL     rnd1
-ROM:77B7 26 60					     ROL     rnd2
-ROM:77B9 10 02					     BPL     loc_77BD
-ROM:77BB E6 5F					     INC     rnd1
+ROM:77B7 26 60					     ROL     rnd2		     ; shift left 16-bit value
+ROM:77B9 10 02					     BPL     loc_77BD		     ; no shift	out
+ROM:77BB E6 5F					     INC     rnd1		     ; shift into low bit
 ROM:77BD
 ROM:77BD	     loc_77BD:
 ROM:77BD A5 5F					     LDA     rnd1
-ROM:77BF 2C D1 77				     BIT     byte_77D1
-ROM:77C2 F0 04					     BEQ     loc_77C8
-ROM:77C4 49 01					     EOR     #1
+ROM:77BF 2C D1 77				     BIT     byte_77D1		     ; tap on output of	bit0
+ROM:77C2 F0 04					     BEQ     loc_77C8		     ; not set,	skip
+ROM:77C4 49 01					     EOR     #1			     ; XOR bit0
 ROM:77C6 85 5F					     STA     rnd1
 ROM:77C8
-ROM:77C8	     loc_77C8:
+ROM:77C8	     loc_77C8:							     ; check all 0
 ROM:77C8 05 60					     ORA     rnd2
-ROM:77CA D0 02					     BNE     loc_77CE
-ROM:77CC E6 5F					     INC     rnd1
+ROM:77CA D0 02					     BNE     loc_77CE		     ; no, skip
+ROM:77CC E6 5F					     INC     rnd1		     ; =1
 ROM:77CE
-ROM:77CE	     loc_77CE:
+ROM:77CE	     loc_77CE:							     ; return low byte
 ROM:77CE A5 5F					     LDA     rnd1
 ROM:77D0 60					     RTS
 ROM:77D0	     ; End of function update_prng
@@ -3458,7 +3458,7 @@ ROM:7814 0A					     ASL     A			     ; convert to word offset
 ROM:7815 A8					     TAY
 ROM:7816 B9 71 78				     LDA     msgCoords,Y	     ; X
 ROM:7819 BE 72 78				     LDX     (msgCoords+1),Y	     ; Y
-ROM:781C 20 03 7C				     JSR     write_CUR_cmd
+ROM:781C 20 03 7C				     JSR     write_CURx4_cmd
 ROM:781F A9 70					     LDA     #70h ; 'p'
 ROM:7821 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7824 A0 00					     LDY     #0
@@ -3898,7 +3898,7 @@ ROM:7C03
 ROM:7C03	     ; =============== S U B R O U T I N E =======================================
 ROM:7C03
 ROM:7C03
-ROM:7C03	     write_CUR_cmd:
+ROM:7C03	     write_CURx4_cmd:
 ROM:7C03 A0 00					     LDY     #0
 ROM:7C05 84 05					     STY     byte_5
 ROM:7C07 84 07					     STY     byte_7
@@ -3914,13 +3914,13 @@ ROM:7C15 0A					     ASL     A
 ROM:7C16 26 07					     ROL     byte_7		     ; Y*4 (msb)
 ROM:7C18 85 06					     STA     byte_6		     ; Y*4 (lsb)
 ROM:7C1A A2 04					     LDX     #4
-ROM:7C1A	     ; End of function write_CUR_cmd
+ROM:7C1A	     ; End of function write_CURx4_cmd
 ROM:7C1A
 ROM:7C1C
 ROM:7C1C	     ; =============== S U B R O U T I N E =======================================
 ROM:7C1C
 ROM:7C1C
-ROM:7C1C	     sub_7C1C:
+ROM:7C1C	     write_CUR_cmd:
 ROM:7C1C B5 02					     LDA     2,X		     ; @$6 = Y*4 (lsb)
 ROM:7C1E A0 00					     LDY     #0
 ROM:7C20 91 02					     STA     (2),Y		     ; store in	avg ram
@@ -3937,7 +3937,7 @@ ROM:7C32 29 0F					     AND     #0Fh		     ; clear scale nibble
 ROM:7C34 05 00					     ORA     globalScale	     ; global scale
 ROM:7C36 C8					     INY
 ROM:7C37 91 02					     STA     (2),Y		     ; store in	avg ram
-ROM:7C37	     ; End of function sub_7C1C
+ROM:7C37	     ; End of function write_CUR_cmd
 ROM:7C37
 ROM:7C39
 ROM:7C39	     ; =============== S U B R O U T I N E =======================================
@@ -4145,14 +4145,14 @@ ROM:7D45
 ROM:7D45	     ; =============== S U B R O U T I N E =======================================
 ROM:7D45
 ROM:7D45
-ROM:7D45	     store_AX_in_avg_ram:
+ROM:7D45	     write_AX_to_avgram:
 ROM:7D45 A0 00					     LDY     #0
 ROM:7D47 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:7D49 C8					     INY
 ROM:7D4A 8A					     TXA
 ROM:7D4B 91 02					     STA     (2),Y		     ; store in	avg ram
 ROM:7D4D 4C 39 7C				     JMP     update_avg_curr_addr
-ROM:7D4D	     ; End of function store_AX_in_avg_ram
+ROM:7D4D	     ; End of function write_AX_to_avgram
 ROM:7D4D
 ROM:7D50	     ; ---------------------------------------------------------------------------
 ROM:7D50
@@ -4462,7 +4462,7 @@ ROM:7EF4 A2 00					     LDX     #0			     ; addr = 0x5000
 ROM:7EF6 20 FC 7B				     JSR     write_JSR_cmd	     ; draw test pattern
 ROM:7EF9 A9 69					     LDA     #69h ; 'i'
 ROM:7EFB A2 93					     LDX     #93h ; 'ì'
-ROM:7EFD 20 03 7C				     JSR     write_CUR_cmd
+ROM:7EFD 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7F00 A9 30					     LDA     #30h ; '0'
 ROM:7F02 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F05 A2 03					     LDX     #3			     ; 4 dipswitches to	read
@@ -4482,7 +4482,7 @@ ROM:7F1E CA					     DEX			     ; done all	dipswitches?
 ROM:7F1F 10 E6					     BPL     read_dsw1		     ; no, loop
 ROM:7F21 A9 7A					     LDA     #7Ah ; 'z'
 ROM:7F23 A2 9D					     LDX     #9Dh ; 'ù'
-ROM:7F25 20 03 7C				     JSR     write_CUR_cmd
+ROM:7F25 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7F28 A9 10					     LDA     #10h
 ROM:7F2A 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F2D AD 02 28				     LDA     centerCoinMultiplierAndLives
@@ -4517,14 +4517,14 @@ ROM:7F62 38					     SEC
 ROM:7F63 E9 08					     SBC     #8
 ROM:7F65 8D 0C 00				     STA     byte_C
 ROM:7F68 A9 20					     LDA     #20h ; ' '
-ROM:7F6A 20 03 7C				     JSR     write_CUR_cmd
+ROM:7F6A 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7F6D A9 70					     LDA     #70h ; 'p'
 ROM:7F6F 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F72 AD 0B 00				     LDA     byte_B
 ROM:7F75 20 D1 7B				     JSR     display_digit_A
 ROM:7F78 AD D4 56				     LDA     DVGROM+6D4h
 ROM:7F7B AE D5 56				     LDX     DVGROM+6D5h
-ROM:7F7E 20 45 7D				     JSR     store_AX_in_avg_ram
+ROM:7F7E 20 45 7D				     JSR     write_AX_to_avgram
 ROM:7F81 68					     PLA
 ROM:7F82 48					     PHA
 ROM:7F83 4A					     LSR     A
@@ -4541,7 +4541,7 @@ ROM:7F91 CA					     DEX
 ROM:7F92 10 C2					     BPL     loc_7F56
 ROM:7F94 A9 7F					     LDA     #7Fh ; ''
 ROM:7F96 AA					     TAX
-ROM:7F97 20 03 7C				     JSR     write_CUR_cmd
+ROM:7F97 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7F9A 20 C0 7B				     JSR     halt_dvg
 ROM:7F9D
 ROM:7F9D	     loc_7F9D:
