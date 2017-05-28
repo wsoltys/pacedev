@@ -699,18 +699,18 @@ ROM:6AA4 20 B5 77				     JSR     update_prng
 ROM:6AA7 29 18					     AND     #18h
 ROM:6AA9 05 08					     ORA     byte_8
 ROM:6AAB 9D 00 02				     STA     P1RAM,X
-ROM:6AAE B9 AF 02				     LDA     2AFh,Y
-ROM:6AB1 9D AF 02				     STA     2AFh,X
-ROM:6AB4 B9 69 02				     LDA     269h,Y
-ROM:6AB7 9D 69 02				     STA     269h,X
-ROM:6ABA B9 D2 02				     LDA     2D2h,Y
-ROM:6ABD 9D D2 02				     STA     2D2h,X
-ROM:6AC0 B9 8C 02				     LDA     28Ch,Y
-ROM:6AC3 9D 8C 02				     STA     28Ch,X
-ROM:6AC6 B9 23 02				     LDA     223h,Y
-ROM:6AC9 9D 23 02				     STA     223h,X
-ROM:6ACC B9 46 02				     LDA     246h,Y
-ROM:6ACF 9D 46 02				     STA     246h,X
+ROM:6AAE B9 AF 02				     LDA     asteroid_PLh,Y
+ROM:6AB1 9D AF 02				     STA     asteroid_PLh,X
+ROM:6AB4 B9 69 02				     LDA     asteroid_PHh,Y
+ROM:6AB7 9D 69 02				     STA     asteroid_PHh,X
+ROM:6ABA B9 D2 02				     LDA     asteroid_PLv,Y
+ROM:6ABD 9D D2 02				     STA     asteroid_PLv,X
+ROM:6AC0 B9 8C 02				     LDA     asteroid_PHv,Y
+ROM:6AC3 9D 8C 02				     STA     asteroid_PHv,X
+ROM:6AC6 B9 23 02				     LDA     asteroid_Vh,Y
+ROM:6AC9 9D 23 02				     STA     asteroid_Vh,X
+ROM:6ACC B9 46 02				     LDA     asteroid_Vv,Y
+ROM:6ACF 9D 46 02				     STA     asteroid_Vv,X
 ROM:6AD2 60					     RTS
 ROM:6AD2	     ; End of function sub_6A9D
 ROM:6AD2
@@ -824,8 +824,8 @@ ROM:6B56 85 69					     STA     timerExplosionSound
 ROM:6B58 A9 A0					     LDA     #0A0h ; ' '
 ROM:6B5A 99 00 02				     STA     P1RAM,Y
 ROM:6B5D A9 00					     LDA     #0
-ROM:6B5F 99 23 02				     STA     223h,Y
-ROM:6B62 99 46 02				     STA     246h,Y
+ROM:6B5F 99 23 02				     STA     asteroid_Vh,Y
+ROM:6B62 99 46 02				     STA     asteroid_Vv,Y
 ROM:6B65 60					     RTS
 ROM:6B66	     ; ---------------------------------------------------------------------------
 ROM:6B66
@@ -1546,7 +1546,7 @@ ROM:6F89 8C FB 02				     STY     asteroidWaveTimer
 ROM:6F8C
 ROM:6F8C	     loc_6F8C:
 ROM:6F8C A9 00					     LDA     #0
-ROM:6F8E 9D 00 02				     STA     200h,X
+ROM:6F8E 9D 00 02				     STA     P1RAM,X
 ROM:6F91 F0 CB					     BEQ     loc_6F5E
 ROM:6F93
 ROM:6F93	     loc_6F93:
@@ -1570,13 +1570,13 @@ ROM:6FAD A9 00					     LDA     #0
 ROM:6FAF
 ROM:6FAF	     loc_6FAF:
 ROM:6FAF A8					     TAY
-ROM:6FB0 BD AF 02				     LDA     2AFh,X
+ROM:6FB0 BD AF 02				     LDA     asteroid_PLh,X
 ROM:6FB3 85 04					     STA     byte_4
-ROM:6FB5 BD 69 02				     LDA     269h,X
+ROM:6FB5 BD 69 02				     LDA     asteroid_PHh,X
 ROM:6FB8 85 05					     STA     byte_5
-ROM:6FBA BD D2 02				     LDA     2D2h,X
+ROM:6FBA BD D2 02				     LDA     asteroid_PLv,X
 ROM:6FBD 85 06					     STA     byte_6
-ROM:6FBF BD 8C 02				     LDA     28Ch,X
+ROM:6FBF BD 8C 02				     LDA     asteroid_PHv,X
 ROM:6FC2 85 07					     STA     byte_7
 ROM:6FC4 4C 27 70				     JMP     loc_7027
 ROM:6FC7	     ; ---------------------------------------------------------------------------
@@ -1584,16 +1584,16 @@ ROM:6FC7
 ROM:6FC7	     loc_6FC7:
 ROM:6FC7 18					     CLC
 ROM:6FC8 A0 00					     LDY     #0
-ROM:6FCA BD 23 02				     LDA     223h,X
+ROM:6FCA BD 23 02				     LDA     asteroid_Vh,X
 ROM:6FCD 10 01					     BPL     loc_6FD0
 ROM:6FCF 88					     DEY
 ROM:6FD0
 ROM:6FD0	     loc_6FD0:
-ROM:6FD0 7D AF 02				     ADC     2AFh,X
-ROM:6FD3 9D AF 02				     STA     2AFh,X
+ROM:6FD0 7D AF 02				     ADC     asteroid_PLh,X
+ROM:6FD3 9D AF 02				     STA     asteroid_PLh,X
 ROM:6FD6 85 04					     STA     byte_4
 ROM:6FD8 98					     TYA
-ROM:6FD9 7D 69 02				     ADC     269h,X
+ROM:6FD9 7D 69 02				     ADC     asteroid_PHh,X
 ROM:6FDC C9 20					     CMP     #20h ; ' '
 ROM:6FDE 90 0C					     BCC     loc_6FEC
 ROM:6FE0 29 1F					     AND     #1Fh
@@ -1604,20 +1604,20 @@ ROM:6FE9 4C 5E 6F				     JMP     loc_6F5E
 ROM:6FEC	     ; ---------------------------------------------------------------------------
 ROM:6FEC
 ROM:6FEC	     loc_6FEC:
-ROM:6FEC 9D 69 02				     STA     269h,X
+ROM:6FEC 9D 69 02				     STA     asteroid_PHh,X
 ROM:6FEF 85 05					     STA     byte_5
 ROM:6FF1 18					     CLC
 ROM:6FF2 A0 00					     LDY     #0
-ROM:6FF4 BD 46 02				     LDA     246h,X
+ROM:6FF4 BD 46 02				     LDA     asteroid_Vv,X
 ROM:6FF7 10 02					     BPL     loc_6FFB
 ROM:6FF9 A0 FF					     LDY     #0FFh
 ROM:6FFB
 ROM:6FFB	     loc_6FFB:
-ROM:6FFB 7D D2 02				     ADC     2D2h,X
-ROM:6FFE 9D D2 02				     STA     2D2h,X
+ROM:6FFB 7D D2 02				     ADC     asteroid_PLv,X
+ROM:6FFE 9D D2 02				     STA     asteroid_PLv,X
 ROM:7001 85 06					     STA     byte_6
 ROM:7003 98					     TYA
-ROM:7004 7D 8C 02				     ADC     28Ch,X
+ROM:7004 7D 8C 02				     ADC     asteroid_PHv,X
 ROM:7007 C9 18					     CMP     #18h
 ROM:7009 90 08					     BCC     loc_7013
 ROM:700B F0 04					     BEQ     loc_7011
@@ -1628,7 +1628,7 @@ ROM:7011	     loc_7011:
 ROM:7011 A9 00					     LDA     #0
 ROM:7013
 ROM:7013	     loc_7013:
-ROM:7013 9D 8C 02				     STA     28Ch,X
+ROM:7013 9D 8C 02				     STA     asteroid_PHv,X
 ROM:7016 85 07					     STA     byte_7
 ROM:7018 BD 00 02				     LDA     P1RAM,X
 ROM:701B A0 E0					     LDY     #0E0h ; 'à'
@@ -1844,7 +1844,7 @@ ROM:713B
 ROM:713B	     loc_713B:
 ROM:713B BD 00 02				     LDA     P1RAM,X
 ROM:713E F0 1E					     BEQ     loc_715E
-ROM:7140 BD 69 02				     LDA     269h,X
+ROM:7140 BD 69 02				     LDA     asteroid_PHh,X
 ROM:7143 38					     SEC
 ROM:7144 ED 84 02				     SBC     ship_PHh
 ROM:7147 C9 04					     CMP     #4
@@ -1853,7 +1853,7 @@ ROM:714B C9 FC					     CMP     #0FCh ; 'ü'
 ROM:714D 90 0F					     BCC     loc_715E
 ROM:714F
 ROM:714F	     loc_714F:
-ROM:714F BD 8C 02				     LDA     28Ch,X
+ROM:714F BD 8C 02				     LDA     asteroid_PHv,X
 ROM:7152 38					     SEC
 ROM:7153 ED A7 02				     SBC     ship_PHv
 ROM:7156 C9 04					     CMP     #4
@@ -2386,7 +2386,7 @@ ROM:745C	     ; =============== S U B R O U T I N E ============================
 ROM:745C
 ROM:745C
 ROM:745C	     sub_745C:
-ROM:745C BD 00 02				     LDA     200h,X
+ROM:745C BD 00 02				     LDA     P1RAM,X
 ROM:745F F0 03					     BEQ     locret_7464
 ROM:7461 CA					     DEX
 ROM:7462 10 F8					     BPL     sub_745C
@@ -2712,21 +2712,21 @@ ROM:7625 30 2F					     BMI     loc_7656
 ROM:7627 EE F6 02				     INC     currentNumberOfAsteroids
 ROM:762A 20 9D 6A				     JSR     sub_6A9D
 ROM:762D 20 03 72				     JSR     sub_7203
-ROM:7630 BD 23 02				     LDA     223h,X
+ROM:7630 BD 23 02				     LDA     asteroid_Vh,X
 ROM:7633 29 1F					     AND     #1Fh
 ROM:7635 0A					     ASL     A
-ROM:7636 5D AF 02				     EOR     2AFh,X
-ROM:7639 9D AF 02				     STA     2AFh,X
+ROM:7636 5D AF 02				     EOR     asteroid_PLh,X
+ROM:7639 9D AF 02				     STA     asteroid_PLh,X
 ROM:763C 20 5C 74				     JSR     sub_745C
 ROM:763F 30 15					     BMI     loc_7656
 ROM:7641 EE F6 02				     INC     currentNumberOfAsteroids
 ROM:7644 20 9D 6A				     JSR     sub_6A9D
 ROM:7647 20 03 72				     JSR     sub_7203
-ROM:764A BD 46 02				     LDA     246h,X
+ROM:764A BD 46 02				     LDA     asteroid_Vv,X
 ROM:764D 29 1F					     AND     #1Fh
 ROM:764F 0A					     ASL     A
-ROM:7650 5D D2 02				     EOR     2D2h,X
-ROM:7653 9D D2 02				     STA     2D2h,X
+ROM:7650 5D D2 02				     EOR     asteroid_PLv,X
+ROM:7653 9D D2 02				     STA     asteroid_PLv,X
 ROM:7656
 ROM:7656	     loc_7656:
 ROM:7656 A6 0D					     LDX     byte_D
