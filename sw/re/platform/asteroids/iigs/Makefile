@@ -1,21 +1,39 @@
+# Apple IIGS Asteroids makefile
 
-all:
-	ca65 -t apple2 hello.s -o compile/hello.o
-	ld65 -o compile/hello.bin compile/hello.o -C donttouch/apple2.cfg
-	cp donttouch/cc65.dsk test.dsk
-#	java -jar ../ac.jar -dos140 test.dsk
-	tokenize_asoft <loader.txt > compile/apple_loader
-	dos33 test.dsk SAVE A compile/apple_loader HELLO
-	java -jar ../ac.jar -cc65 test.dsk TEST B < compile/hello.bin
+TARGET = asteroid
+
+CC65_DIR = cc65
+
+# compiler, linker and utilities
+AS = $(CC65_DIR)/bin/ca65
+LD = $(CC65_DIR)/bin/ld65
+HEX2BIN = hex2bin
+ECHO = @echo
+CP = copy
+DD = dd
+RM = rm
+MD = mkdir
+OBJC = objcopy
+BIN = $(TARGET).bin
+MAKEFILE = makefile
+
+MEDIA = ast.dsk
+
+all: $(MEDIA)
+
+%.dsk : $(BIN)
+	$(DD) if=$(BIN) of=$(TARGET)#060803.BIN bs=1 skip=4
+
+$(TARGET).o : $(TARGET).s
+	$(AS) -t apple2 $(TARGET).s -o $@
+
+$(BIN) : $(TARGET).o
+	$(LD) -o $@ $< -C apple2.cfg
 
 clean:
-	rm -f compile/hello.o compile/hello.bin test.dsk compile/apple_loader
-#test:
-#	ca65 -t apple2 hello.s
-#	ld65 -o hello.bin hello.o -C ./apple2.cfg
-##	mkdos33fs mog.dsk
-#	cp cc65.dsk mog.dsk
-#	tokenize_asoft <loader.txt > apple_loader
-#	dos33 mog.dsk SAVE A apple_loader HELLO
-#	dd if=hello.bin of=goodbye.bin bs=1 skip=4
-#	dos33 mog.dsk SAVE B goodbye.bin TEST
+	$(ECHO) Deleting intermediate files...
+	$(RM) -f *.o
+	$(ECHO) Deleting executables...
+	$(RM) -f $(BIN)
+	$(RM) -f $(TARGET)#060803.BIN
+	
