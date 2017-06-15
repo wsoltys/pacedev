@@ -3,12 +3,14 @@
 TARGET = asteroid
 
 CC65_DIR = cc65
+C2D_DIR = c2d-master
 
 # compiler, linker and utilities
-AS = $(CC65_DIR)/bin/ca65
-LD = $(CC65_DIR)/bin/ld65
+AS = $(CC65_DIR)/bin/ca65.exe
+LD = $(CC65_DIR)/bin/ld65.exe
 HEX2BIN = hex2bin
 ECHO = @echo
+C2D = $(C2D_DIR)/bin/c2d.exe
 CP = copy
 DD = dd
 RM = rm
@@ -22,8 +24,9 @@ MEDIA = ast.dsk
 all: $(MEDIA)
 
 %.dsk : $(BIN)
-	$(DD) if=$(BIN) of=$(TARGET)#060803.BIN bs=1 skip=4
-
+	$(DD) if=$< of=$(TARGET)#060803.BIN bs=1 skip=4
+	$(C2D) -b $< $@
+	
 $(TARGET).o : $(TARGET).s
 	$(AS) -t apple2 $(TARGET).s -o $@
 
