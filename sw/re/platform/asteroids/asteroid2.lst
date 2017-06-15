@@ -22,223 +22,267 @@ RAM:0000	     ; Format	   : Binary file
 RAM:0000	     ; Base Address: 0000h Range: 6800h	- 8000h	Loaded length: 00001800h
 RAM:0000
 RAM:0000	     ; ; Processor:	   M6502
-RAM:0000	     ; ; Target	assembler: Table Driven	Assembler (TASM) by Speech Technology Inc.
+RAM:0000	     ; ; Target	assembler: SVENSON ELECTRONICS 6502/65C02 ASSEMBLER - V.1.0 - MAY, 1988
 RAM:0000
 RAM:0000	     ; ===========================================================================
 RAM:0000
 RAM:0000	     ; Segment type: Regular
 RAM:0000					     ;.segment RAM
-RAM:0000 ??	     globalScale:		     .block 1
-RAM:0001 ??	     byte_1:			     .block 1
-RAM:0002 ??	     dvg_curr_addr_lsb:		     .block 1
-RAM:0003 ??	     dvg_curr_addr_msb:		     .block 1
-RAM:0004 ??	     byte_4:			     .block 1					     ; tmp store coord conversion
-RAM:0005 ??	     byte_5:			     .block 1					     ; tmp store coord conversion
-RAM:0006 ??	     byte_6:			     .block 1					     ; tmp store coord conversion
-RAM:0007 ??	     byte_7:			     .block 1					     ; tmp store coord conversion
-RAM:0008 ??	     byte_8:			     .block 1					     ; tmp store
-RAM:0009 ??	     byte_9:			     .block 1					     ; tmp store
-RAM:000A ??	     byte_A:			     .block 1
-RAM:000B ??	     byte_B:			     .block 1
-RAM:000C ??	     byte_C:			     .block 1
-RAM:000D ??	     byte_D:			     .block 1
-RAM:000E ??	     byte_E:			     .block 1
-RAM:000F ??	     byte_F:			     .block 1
-RAM:0010 ??	     initial_offset:		     .block 1
-RAM:0011 ??					     .block 1
-RAM:0012 ??					     .block 1
-RAM:0013 ??					     .block 1
-RAM:0014 ??					     .block 1
-RAM:0015 ??	     byte_15:			     .block 1
-RAM:0016 ??	     byte_16:			     .block 1
-RAM:0017 ??	     byte_17:			     .block 1
-RAM:0018 ??	     curPlayer:			     .block 1
-RAM:0019 ??	     curPlayer_x2:		     .block 1
-RAM:001A ??	     numPlayersPreviousGame:	     .block 1
-RAM:001B ??	     unk_1B:			     .block 1
-RAM:001C ??	     numPlayers:		     .block 1
+RAM:0000 ??	     globalScale:		     .BYTE 0 ; (uninited)
+RAM:0001 ??	     byte_1:			     .BYTE 0 ; (uninited)
+RAM:0002 ??	     dvg_curr_addr_lsb:		     .BYTE 0 ; (uninited)
+RAM:0003 ??	     dvg_curr_addr_msb:		     .BYTE 0 ; (uninited)
+RAM:0004 ??	     byte_4:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
+RAM:0005 ??	     byte_5:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
+RAM:0006 ??	     byte_6:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
+RAM:0007 ??	     byte_7:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
+RAM:0008 ??	     byte_8:			     .BYTE 0 ; (uninited)			     ; tmp store
+RAM:0009 ??	     byte_9:			     .BYTE 0 ; (uninited)			     ; tmp store
+RAM:000A ??	     byte_A:			     .BYTE 0 ; (uninited)
+RAM:000B ??	     byte_B:			     .BYTE 0 ; (uninited)
+RAM:000C ??	     byte_C:			     .BYTE 0 ; (uninited)
+RAM:000D ??	     byte_D:			     .BYTE 0 ; (uninited)
+RAM:000E ??	     byte_E:			     .BYTE 0 ; (uninited)
+RAM:000F ??	     byte_F:			     .BYTE 0 ; (uninited)
+RAM:0010 ??	     initial_offset:		     .BYTE 0 ; (uninited)
+RAM:0011					     ; 0 .BYTE uninited	& unexplored
+RAM:0012					     ; 0 .BYTE uninited	& unexplored
+RAM:0013					     ; 0 .BYTE uninited	& unexplored
+RAM:0014					     ; 0 .BYTE uninited	& unexplored
+RAM:0015 ??	     byte_15:			     .BYTE 0 ; (uninited)
+RAM:0016 ??	     byte_16:			     .BYTE 0 ; (uninited)
+RAM:0017 ??	     byte_17:			     .BYTE 0 ; (uninited)
+RAM:0018 ??	     curPlayer:			     .BYTE 0 ; (uninited)
+RAM:0019 ??	     curPlayer_x2:		     .BYTE 0 ; (uninited)
+RAM:001A ??	     numPlayersPreviousGame:	     .BYTE 0 ; (uninited)
+RAM:001B	     unk_1B:			     ; 0 .BYTE uninited	& unexplored
+RAM:001C ??	     numPlayers:		     .BYTE 0 ; (uninited)
 RAM:001D
 RAM:001D	     ; High score format (2 bytes)
 RAM:001D	     ; byte 1 -	tens (in decimal)
 RAM:001D	     ; byte 2 -	thousands (in decimal)
-RAM:001D ?? ??	     highScoreTable:		     .block 2
-RAM:001F ?? ??					     .block 2
-RAM:0021 ?? ??	     word_21:			     .block 2
-RAM:0023 ?? ??					     .block 2
-RAM:0025 ?? ??					     .block 2
-RAM:0027 ?? ??	     word_27:			     .block 2
-RAM:0029 ?? ??					     .block 2
-RAM:002B ?? ??					     .block 2
-RAM:002D ?? ??					     .block 2
-RAM:002F ?? ??					     .block 2
-RAM:0031 ??	     letterHighScoreEntry:	     .block 1
-RAM:0032 ??	     placeP1HighScore:		     .block 1
-RAM:0033 ??	     placeP2HighScore:		     .block 1
-RAM:0034 ?? ?? ??    highScoreInitials:		     .block 3
-RAM:0037 ?? ?? ??				     .block 3
-RAM:003A ?? ?? ??				     .block 3
-RAM:003D ?? ?? ??				     .block 3
-RAM:0040 ?? ?? ??				     .block 3
-RAM:0043 ?? ?? ??				     .block 3
-RAM:0046 ?? ?? ??				     .block 3
-RAM:0049 ?? ?? ??				     .block 3
-RAM:004C ?? ?? ??				     .block 3
-RAM:004F ?? ?? ??    byte_4F:			     .block 3
-RAM:0052 ??	     p1ScoreTens:		     .block 1
-RAM:0053 ??	     p1ScoreThousands:		     .block 1
-RAM:0054 ??	     p2ScoreTens:		     .block 1
-RAM:0055 ??	     p2ScoreThousands:		     .block 1
-RAM:0056 ??	     numStartingShipsPerGame:	     .block 1
-RAM:0057 ??	     numShipsP1:		     .block 1
-RAM:0058 ??	     numShipsP2:		     .block 1
+RAM:001D ?? ??	     highScoreTable:		     .BYTE 0,0 ; (uninited)
+RAM:001F ?? ??					     .BYTE 0,0 ; (uninited)
+RAM:0021 ?? ??	     word_21:			     .BYTE 0,0 ; (uninited)
+RAM:0023 ?? ??					     .BYTE 0,0 ; (uninited)
+RAM:0025 ?? ??					     .BYTE 0,0 ; (uninited)
+RAM:0027 ?? ??	     word_27:			     .BYTE 0,0 ; (uninited)
+RAM:0029 ?? ??					     .BYTE 0,0 ; (uninited)
+RAM:002B ?? ??					     .BYTE 0,0 ; (uninited)
+RAM:002D ?? ??					     .BYTE 0,0 ; (uninited)
+RAM:002F ?? ??					     .BYTE 0,0 ; (uninited)
+RAM:0031	     letterHighScoreEntry:	     ; 0 .BYTE uninited	& unexplored
+RAM:0032 ??	     placeP1HighScore:		     .BYTE 0 ; (uninited)
+RAM:0033	     placeP2HighScore:		     ; 0 .BYTE uninited	& unexplored
+RAM:0034 ?? ?? ??    highScoreInitials:		     .BYTE 0,0,0 ; (uninited)
+RAM:0037 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:003A ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:003D ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:0040 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:0043 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:0046 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:0049 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:004C ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
+RAM:004F ?? ?? ??    byte_4F:			     .BYTE 0,0,0 ; (uninited)
+RAM:0052 ??	     p1ScoreTens:		     .BYTE 0 ; (uninited)
+RAM:0053	     p1ScoreThousands:		     ; 0 .BYTE uninited	& unexplored
+RAM:0054	     p2ScoreTens:		     ; 0 .BYTE uninited	& unexplored
+RAM:0055	     p2ScoreThousands:		     ; 0 .BYTE uninited	& unexplored
+RAM:0056 ??	     numStartingShipsPerGame:	     .BYTE 0 ; (uninited)
+RAM:0057 ??	     numShipsP1:		     .BYTE 0 ; (uninited)
+RAM:0058 ??	     numShipsP2:		     .BYTE 0 ; (uninited)
 RAM:0059	     ; Hyperspace flag:
 RAM:0059	     ; - 0x01 =	successful
 RAM:0059	     ;	 0x80 =	unsuccessful (death)
 RAM:0059	     ;	 0x00 =	not active
-RAM:0059 ??	     hyperspaceFlag:		     .block 1
-RAM:005A ??	     timerStartGame:		     .block 1
-RAM:005B ??	     VBLANK_triggered:		     .block 1
-RAM:005C ??	     fastTimer:			     .block 1
-RAM:005D ??	     slowTimer:			     .block 1
-RAM:005E ??	     NMI_count:			     .block 1
-RAM:005F ??	     rnd1:			     .block 1
-RAM:0060 ??	     rnd2:			     .block 1
-RAM:0061 ??	     direction:			     .block 1
-RAM:0062 ??	     saucerShotDirection:	     .block 1
-RAM:0063 ??	     btn_edge_debounce:		     .block 1
-RAM:0064 ??	     shipHorizontalVelocityLow:	     .block 1
-RAM:0065 ??	     shipVerticalVelocityLow:	     .block 1
-RAM:0066 ??	     timerPlayerFireSound:	     .block 1
-RAM:0067 ??	     timerSaucerFireSound:	     .block 1
-RAM:0068 ??	     timerBonusShipSound:	     .block 1
-RAM:0069 ??	     timerExplosionSound:	     .block 1
-RAM:006A ??	     fireSoundFlagPlayer:	     .block 1
-RAM:006B ??	     fireSoundFlagSaucer:	     .block 1
-RAM:006C ??	     volFreqThumpSound:		     .block 1
-RAM:006D ??	     timerThumpSoundOn:		     .block 1
-RAM:006E ??	     timerThumpSoundOff:	     .block 1
-RAM:006F ??	     io3200ShadowRegister:	     .block 1
-RAM:0070 ??	     CurrNumCredits:		     .block 1
+RAM:0059 ??	     hyperspaceFlag:		     .BYTE 0 ; (uninited)
+RAM:005A ??	     timerStartGame:		     .BYTE 0 ; (uninited)
+RAM:005B ??	     VBLANK_triggered:		     .BYTE 0 ; (uninited)
+RAM:005C ??	     fastTimer:			     .BYTE 0 ; (uninited)
+RAM:005D ??	     slowTimer:			     .BYTE 0 ; (uninited)
+RAM:005E ??	     NMI_count:			     .BYTE 0 ; (uninited)
+RAM:005F ??	     rnd1:			     .BYTE 0 ; (uninited)
+RAM:0060 ??	     rnd2:			     .BYTE 0 ; (uninited)
+RAM:0061 ??	     direction:			     .BYTE 0 ; (uninited)
+RAM:0062 ??	     saucerShotDirection:	     .BYTE 0 ; (uninited)
+RAM:0063 ??	     btn_edge_debounce:		     .BYTE 0 ; (uninited)
+RAM:0064 ??	     shipHorizontalVelocityLow:	     .BYTE 0 ; (uninited)
+RAM:0065 ??	     shipVerticalVelocityLow:	     .BYTE 0 ; (uninited)
+RAM:0066 ??	     timerPlayerFireSound:	     .BYTE 0 ; (uninited)
+RAM:0067 ??	     timerSaucerFireSound:	     .BYTE 0 ; (uninited)
+RAM:0068 ??	     timerBonusShipSound:	     .BYTE 0 ; (uninited)
+RAM:0069 ??	     timerExplosionSound:	     .BYTE 0 ; (uninited)
+RAM:006A	     fireSoundFlagPlayer:	     ; 0 .BYTE uninited	& unexplored
+RAM:006B	     fireSoundFlagSaucer:	     ; 0 .BYTE uninited	& unexplored
+RAM:006C ??	     volFreqThumpSound:		     .BYTE 0 ; (uninited)
+RAM:006D ??	     timerThumpSoundOn:		     .BYTE 0 ; (uninited)
+RAM:006E ??	     timerThumpSoundOff:	     .BYTE 0 ; (uninited)
+RAM:006F ??	     io3200ShadowRegister:	     .BYTE 0 ; (uninited)
+RAM:0070 ??	     CurrNumCredits:		     .BYTE 0 ; (uninited)
 RAM:0071	     ; 4=center_mult, 3..2=right_mult, 1..0=coinage
-RAM:0071 ??	     coinMultCredits:		     .block 1
-RAM:0072 ??	     slamSwitchFlag:		     .block 1
-RAM:0073 ??	     totalCoinsForCredits:	     .block 1
-RAM:0074 ??	     byte_74:			     .block 1
-RAM:0075 ??	     byte_75:			     .block 1
-RAM:0076 ??	     byte_76:			     .block 1
-RAM:0077 ??	     unk_77:			     .block 1
-RAM:0078 ??					     .block 1
-RAM:0079 ??					     .block 1
-RAM:007A ??	     coin_1_inp_length:		     .block 1
-RAM:007B ??	     coin_2_inp_length:		     .block 1
-RAM:007C ??	     coin_3_inp_length:		     .block 1
-RAM:007D ??					     .block 1
-RAM:007E ??					     .block 1
-RAM:007F ??					     .block 1
-RAM:0080 ?? ?? ?? ??+				     .block 80h
-RAM:0100 ?? ?? ?? ??+stack:			     .block 100h
+RAM:0071 ??	     coinMultCredits:		     .BYTE 0 ; (uninited)
+RAM:0072 ??	     slamSwitchFlag:		     .BYTE 0 ; (uninited)
+RAM:0073 ??	     totalCoinsForCredits:	     .BYTE 0 ; (uninited)
+RAM:0074 ??	     byte_74:			     .BYTE 0 ; (uninited)
+RAM:0075 ??	     byte_75:			     .BYTE 0 ; (uninited)
+RAM:0076 ??	     byte_76:			     .BYTE 0 ; (uninited)
+RAM:0077	     unk_77:			     ; 0 .BYTE uninited	& unexplored
+RAM:0078					     ; 0 .BYTE uninited	& unexplored
+RAM:0079					     ; 0 .BYTE uninited	& unexplored
+RAM:007A	     coin_1_inp_length:		     ; 0 .BYTE uninited	& unexplored
+RAM:007B	     coin_2_inp_length:		     ; 0 .BYTE uninited	& unexplored
+RAM:007C	     coin_3_inp_length:		     ; 0 .BYTE uninited	& unexplored
+RAM:007D					     ; 0 .BYTE uninited	& unexplored
+RAM:007E					     ; 0 .BYTE uninited	& unexplored
+RAM:007F					     ; 0 .BYTE uninited	& unexplored
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+stack:			     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
 RAM:0200	     ; status
 RAM:0200	     ; 1-27 Asteroids
 RAM:0200	     ; 0xA0+ = exploding
 RAM:0200	     ; (2:1) = size (0=small, 1=medium,	2=large)
-RAM:0200 ?? ?? ?? ??+P1RAM:			     .block 1Bh					     ; Asteroids 1-27
+RAM:0200 ?? ?? ?? ??+P1RAM:			     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)	; Asteroids 1-27
+RAM:0200 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
 RAM:021B	     ; p1PlayerFlag
 RAM:021B	     ; - 0x00  = in hyperspace?
 RAM:021B	     ; - 0x01  = player	alive and active
 RAM:021B	     ; - 0xA0+ = player	exploding
-RAM:021B ??	     p1PlayerFlag:		     .block 1
+RAM:021B ??	     p1PlayerFlag:		     .BYTE 0 ; (uninited)
 RAM:021C	     ; p1SaucerFlag
 RAM:021C	     ; - 0x00  = no saucer
 RAM:021C	     ; - 0x01  = small saucer
 RAM:021C	     ; - 0x02  = large saucer
 RAM:021C	     ; - 0xA0+ = saucer	exploding
-RAM:021C ??	     p1SaucerFlag:		     .block 1
-RAM:021D ??	     saucerShotTimer1:		     .block 1
-RAM:021E ??	     saucerShotTimer2:		     .block 1
-RAM:021F ??	     p1TimerShot0:		     .block 1
-RAM:0220 ??	     p1TimerShot1:		     .block 1
-RAM:0221 ??	     p1TimerShot2:		     .block 1
-RAM:0222 ??	     p1TimerShot3:		     .block 1
+RAM:021C ??	     p1SaucerFlag:		     .BYTE 0 ; (uninited)
+RAM:021D	     saucerShotTimer1:		     ; 0 .BYTE uninited	& unexplored
+RAM:021E	     saucerShotTimer2:		     ; 0 .BYTE uninited	& unexplored
+RAM:021F ??	     p1TimerShot0:		     .BYTE 0 ; (uninited)
+RAM:0220 ??	     p1TimerShot1:		     .BYTE 0 ; (uninited)
+RAM:0221 ??	     p1TimerShot2:		     .BYTE 0 ; (uninited)
+RAM:0222 ??	     p1TimerShot3:		     .BYTE 0 ; (uninited)
 RAM:0223	     ; Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
-RAM:0223 ?? ?? ?? ??+asteroid_Vh:		     .block 1Bh
-RAM:023E ??	     ship_Vh:			     .block 1
-RAM:023F ??	     saucer_Vh:			     .block 1
-RAM:0240 ?? ??	     saucerShot_Vh:		     .block 2
-RAM:0242 ?? ?? ?? ?? shipShot_Vh:		     .block 4
+RAM:0223 ?? ?? ?? ??+asteroid_Vh:		     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0223 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:023E ??	     ship_Vh:			     .BYTE 0 ; (uninited)
+RAM:023F ??	     saucer_Vh:			     .BYTE 0 ; (uninited)
+RAM:0240 ?? ??	     saucerShot_Vh:		     .BYTE 0,0 ; (uninited)
+RAM:0242 ?? ?? ?? ?? shipShot_Vh:		     .BYTE 0,0,0,0 ; (uninited)
 RAM:0246	     ; Vertical	Velocity 0-255 (255-192)=Down, 1-63=Up
-RAM:0246 ?? ?? ?? ??+asteroid_Vv:		     .block 1Bh
-RAM:0261 ??	     ship_Vv:			     .block 1
-RAM:0262 ??	     saucer_Vv:			     .block 1
-RAM:0263 ?? ??	     saucerShot_Vv:		     .block 2
-RAM:0265 ?? ?? ?? ?? shipShot_Vv:		     .block 4
+RAM:0246 ?? ?? ?? ??+asteroid_Vv:		     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0246 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0261 ??	     ship_Vv:			     .BYTE 0 ; (uninited)
+RAM:0262 ??	     saucer_Vv:			     .BYTE 0 ; (uninited)
+RAM:0263 ?? ??	     saucerShot_Vv:		     .BYTE 0,0 ; (uninited)
+RAM:0265 ?? ?? ?? ?? shipShot_Vv:		     .BYTE 0,0,0,0 ; (uninited)
 RAM:0269	     ; Horiztonal Position High	(0-31) 0=Left, 31=Right
-RAM:0269 ?? ?? ?? ??+asteroid_PHh:		     .block 1Bh
-RAM:0284 ??	     ship_PHh:			     .block 1
-RAM:0285 ??	     saucer_PHh:		     .block 1
-RAM:0286 ?? ??	     saucerShot_PHh:		     .block 2
-RAM:0288 ?? ?? ?? ?? shipShot_PHh:		     .block 4
+RAM:0269 ?? ?? ?? ??+asteroid_PHh:		     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0269 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0284 ??	     ship_PHh:			     .BYTE 0 ; (uninited)
+RAM:0285 ??	     saucer_PHh:		     .BYTE 0 ; (uninited)
+RAM:0286 ?? ??	     saucerShot_PHh:		     .BYTE 0,0 ; (uninited)
+RAM:0288 ?? ?? ?? ?? shipShot_PHh:		     .BYTE 0,0,0,0 ; (uninited)
 RAM:028C	     ; Vertical	Position High (0-23), 0=Bottom,	23=Top
-RAM:028C ?? ?? ?? ??+asteroid_PHv:		     .block 1Bh
-RAM:02A7 ??	     ship_PHv:			     .block 1
-RAM:02A8 ??	     saucer_PHv:		     .block 1
-RAM:02A9 ?? ??	     saucerShot_PHv:		     .block 2
-RAM:02AB ?? ?? ?? ?? shotShot_PHv:		     .block 4
+RAM:028C ?? ?? ?? ??+asteroid_PHv:		     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:028C ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:02A7 ??	     ship_PHv:			     .BYTE 0 ; (uninited)
+RAM:02A8 ??	     saucer_PHv:		     .BYTE 0 ; (uninited)
+RAM:02A9 ?? ??	     saucerShot_PHv:		     .BYTE 0,0 ; (uninited)
+RAM:02AB ?? ?? ?? ?? shotShot_PHv:		     .BYTE 0,0,0,0 ; (uninited)
 RAM:02AF	     ; Horizontal Position Low (0-255),	0=Left,	255=Right
-RAM:02AF ?? ?? ?? ??+asteroid_PLh:		     .block 1Bh
-RAM:02CA ??	     ship_PLh:			     .block 1
-RAM:02CB ??	     saucer_PLh:		     .block 1
-RAM:02CC ?? ??	     saucerShot_PLh:		     .block 2
-RAM:02CE ?? ?? ?? ?? shipShot_PLh:		     .block 4
+RAM:02AF ?? ?? ?? ??+asteroid_PLh:		     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:02AF ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:02CA ??	     ship_PLh:			     .BYTE 0 ; (uninited)
+RAM:02CB ??	     saucer_PLh:		     .BYTE 0 ; (uninited)
+RAM:02CC ?? ??	     saucerShot_PLh:		     .BYTE 0,0 ; (uninited)
+RAM:02CE ?? ?? ?? ?? shipShot_PLh:		     .BYTE 0,0,0,0 ; (uninited)
 RAM:02D2	     ; Vertical	Position Low (0-255), 0=Bottom,	255=Top
-RAM:02D2 ?? ?? ?? ??+asteroid_PLv:		     .block 1Bh
-RAM:02ED ??	     ship_PLv:			     .block 1
-RAM:02EE ??	     saucer_PLv:		     .block 1
-RAM:02EF ?? ??	     saucerShot_PLv:		     .block 2
-RAM:02F1 ?? ?? ?? ?? shipShot_PLv:		     .block 4
-RAM:02F5 ??	     startingAsteroidsPerWave:	     .block 1
-RAM:02F6 ??	     currentNumberOfAsteroids:	     .block 1
-RAM:02F7 ??	     saucerCountdownTimer:	     .block 1
-RAM:02F8 ??	     starting_saucerCountdownTimer:  .block 1
-RAM:02F9 ??	     byte_2F9:			     .block 1					     ; ???goes up after	explosion???
-RAM:02FA ??	     shipSpawnTimer:		     .block 1
-RAM:02FB ??	     asteroidWaveTimer:		     .block 1
-RAM:02FC ??	     byte_2FC:			     .block 1
-RAM:02FD ??	     numAsteroidsLeftBeforeSaucer:   .block 1
-RAM:02FE ??					     .block 1
-RAM:02FF ??					     .block 1
+RAM:02D2 ?? ?? ?? ??+asteroid_PLv:		     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:02D2 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:02ED ??	     ship_PLv:			     .BYTE 0 ; (uninited)
+RAM:02EE ??	     saucer_PLv:		     .BYTE 0 ; (uninited)
+RAM:02EF ?? ??	     saucerShot_PLv:		     .BYTE 0,0 ; (uninited)
+RAM:02F1 ?? ?? ?? ?? shipShot_PLv:		     .BYTE 0,0,0,0 ; (uninited)
+RAM:02F5 ??	     startingAsteroidsPerWave:	     .BYTE 0 ; (uninited)
+RAM:02F6 ??	     currentNumberOfAsteroids:	     .BYTE 0 ; (uninited)
+RAM:02F7 ??	     saucerCountdownTimer:	     .BYTE 0 ; (uninited)
+RAM:02F8 ??	     starting_saucerCountdownTimer:  .BYTE 0 ; (uninited)
+RAM:02F9 ??	     byte_2F9:			     .BYTE 0 ; (uninited)			     ; ???goes up after	explosion???
+RAM:02FA ??	     shipSpawnTimer:		     .BYTE 0 ; (uninited)
+RAM:02FB ??	     asteroidWaveTimer:		     .BYTE 0 ; (uninited)
+RAM:02FC ??	     byte_2FC:			     .BYTE 0 ; (uninited)
+RAM:02FD ??	     numAsteroidsLeftBeforeSaucer:   .BYTE 0 ; (uninited)
+RAM:02FE					     ; 0 .BYTE uninited	& unexplored
+RAM:02FF					     ; 0 .BYTE uninited	& unexplored
 RAM:0300	     ; this gets bank-switched into the	same address space
 RAM:0300	     ; as the P1RAM block to save on code
-RAM:0300 ?? ?? ?? ??+P2RAM:			     .block 100h
+RAM:0300 ?? ?? ?? ??+P2RAM:			     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+RAM:0300 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
 RAM:0300 ?? ?? ?? ??+; end of 'RAM'
 RAM:0300 ?? ?? ?? ??+
 IN0:2000	     ; ===========================================================================
 IN0:2000
 IN0:2000	     ; Segment type: Regular
 IN0:2000					     ;.segment IN0
-IN0:2000					     .org 2000h
-IN0:2000 ??					     .block 1
-IN0:2001 ??	     freq3kHz:			     .block 1
-IN0:2002 ??	     halt:			     .block 1
-IN0:2003 ??	     hyperspaceSwitch:		     .block 1
-IN0:2004 ??	     FireSwitch:		     .block 1
-IN0:2005 ??	     diagStep:			     .block 1
-IN0:2006 ??	     slamSwitch:		     .block 1
-IN0:2007 ??	     selfTest:			     .block 1
+IN0:2000					     * =  $2000
+IN0:2000					     ; 0 .BYTE uninited	& unexplored
+IN0:2001	     freq3kHz:			     ; 0 .BYTE uninited	& unexplored
+IN0:2002	     halt:			     ; 0 .BYTE uninited	& unexplored
+IN0:2003	     hyperspaceSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN0:2004	     FireSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN0:2005	     diagStep:			     ; 0 .BYTE uninited	& unexplored
+IN0:2006 ??	     slamSwitch:		     .BYTE 0 ; (uninited)
+IN0:2007 ??	     selfTest:			     .BYTE 0 ; (uninited)
 IN0:2007	     ; end of 'IN0'
 IN0:2007
 IN1:2400	     ; ===========================================================================
 IN1:2400
 IN1:2400	     ; Segment type: Regular
 IN1:2400					     ;.segment IN1
-IN1:2400					     .org 2400h
-IN1:2400 ??	     leftCoinSwitch:		     .block 1
-IN1:2401 ??	     centerCoinSwitch:		     .block 1
-IN1:2402 ??	     rightCoinSwitch:		     .block 1
-IN1:2403 ??	     p1StartSwitch:		     .block 1
-IN1:2404 ??	     p2StartSwitch:		     .block 1
-IN1:2405 ??	     thrustSwitch:		     .block 1
-IN1:2406 ??	     rotateRightSwitch:		     .block 1
-IN1:2407 ??	     rotateLeftSwitch:		     .block 1
+IN1:2400					     * =  $2400
+IN1:2400	     leftCoinSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2401	     centerCoinSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2402	     rightCoinSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2403	     p1StartSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2404	     p2StartSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2405	     thrustSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2406	     rotateRightSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2407	     rotateLeftSwitch:		     ; 0 .BYTE uninited	& unexplored
 IN1:2407	     ; end of 'IN1'
 IN1:2407
 DSW1:2800	      ;	0 = Free Play, 1 = 1 Coin 2 Credits, 2 = 1 Coin	1 Credit, 3 = 2	Coins 1	Credit
@@ -246,28 +290,282 @@ DSW1:2800	      ;	==============================================================
 DSW1:2800
 DSW1:2800	      ;	Segment	type: Regular
 DSW1:2800					      ;.segment	DSW1
-DSW1:2800					      .org 2800h
-DSW1:2800 ??	      coinage:			      .block 1
+DSW1:2800					      *	=  $2800
+DSW1:2800	      coinage:			      ;	0 .BYTE	uninited & unexplored
 DSW1:2801	      ;	0 = 1x & 4, 1 =	1x & 3,	2 = 2x & 4, 3 =	2x & 3
-DSW1:2801 ??	      rightCoinMultiplier:	      .block 1
-DSW1:2802 ??	      centerCoinMultiplierAndLives:   .block 1
-DSW1:2803 ??	      language:			      .block 1
+DSW1:2801	      rightCoinMultiplier:	      ;	0 .BYTE	uninited & unexplored
+DSW1:2802	      centerCoinMultiplierAndLives:   ;	0 .BYTE	uninited & unexplored
+DSW1:2803	      language:			      ;	0 .BYTE	uninited & unexplored
 DSW1:2803	      ;	end of 'DSW1'
 DSW1:2803
 DVGRAM:4000		; ===========================================================================
 DVGRAM:4000
 DVGRAM:4000		; Segment type:	Regular
 DVGRAM:4000						;.segment DVGRAM
-DVGRAM:4000						.org 4000h
-DVGRAM:4000 ?? ?? ?? ??+DVGRAM:				.block 800h
+DVGRAM:4000						* =  $4000
+DVGRAM:4000 ?? ?? ?? ??+DVGRAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGRAM:4000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 DVGRAM:4000 ?? ?? ?? ??+; end of 'DVGRAM'
 DVGRAM:4000 ?? ?? ?? ??+
 DVGROM:5000		; ===========================================================================
 DVGROM:5000
 DVGROM:5000		; Segment type:	Regular
 DVGROM:5000						;.segment DVGROM
-DVGROM:5000						.org 5000h
-DVGROM:5000 ?? ?? ?? ??+DVGROM:				.block 800h
+DVGROM:5000						* =  $5000
+DVGROM:5000 ?? ?? ?? ??+DVGROM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 DVGROM:5000 ?? ?? ?? ??+; end of 'DVGROM'
 DVGROM:5000 ?? ?? ?? ??+
 ROM:6800	     ; ---------------------------------------------------------------------------
@@ -275,7 +573,7 @@ ROM:6800	     ; ================================================================
 ROM:6800
 ROM:6800	     ; Segment type: Pure code
 ROM:6800					     ;.segment ROM
-ROM:6800					     .org 6800h
+ROM:6800					     * =  $6800
 ROM:6800 4C F3 7C				     JMP     RESET				     ; Debugger? Off in	the weeds? Do Reset.
 ROM:6803	     ; ---------------------------------------------------------------------------
 ROM:6803
@@ -300,17 +598,17 @@ ROM:6818 30 FB					     BMI     loc_6815				     ; wait for	DVG
 ROM:681A AD 01 40				     LDA     DVGRAM+1
 ROM:681D 49 02					     EOR     #2					     ; JMP $0402<->$0002
 ROM:681F 8D 01 40				     STA     DVGRAM+1
-ROM:6822 8D 00 30				     STA     3000h				     ; Start DVG
-ROM:6825 8D 00 34				     STA     3400h				     ; Reset Watchdog
+ROM:6822 8D 00 30				     STA     $3000				     ; Start DVG
+ROM:6825 8D 00 34				     STA     $3400				     ; Reset Watchdog
 ROM:6828 E6 5C					     INC     fastTimer				     ; Update Fast Timer
 ROM:682A D0 02					     BNE     loc_682E
 ROM:682C E6 5D					     INC     slowTimer				     ; Update Slow Timer
 ROM:682E
 ROM:682E	     loc_682E:									     ; ping-pong DVG RAM $4000/$4400
-ROM:682E A2 40					     LDX     #40h ; '@'
+ROM:682E A2 40					     LDX     #$40 ; '@'
 ROM:6830 29 02					     AND     #2
 ROM:6832 D0 02					     BNE     loc_6836
-ROM:6834 A2 44					     LDX     #44h ; 'D'
+ROM:6834 A2 44					     LDX     #$44 ; 'D'
 ROM:6836
 ROM:6836	     loc_6836:
 ROM:6836 A9 02					     LDA     #2
@@ -337,7 +635,7 @@ ROM:6864
 ROM:6864	     loc_6864:									     ; display (C), scores, extra ships
 ROM:6864 20 4F 72				     JSR     display_C_scores_ships
 ROM:6867 20 55 75				     JSR     handle_sounds
-ROM:686A A9 7F					     LDA     #7Fh ; ''                              ; X=0x7F
+ROM:686A A9 7F					     LDA     #$7F ; ''                              ; X=0x7F
 ROM:686C AA					     TAX					     ; Y=0x7F
 ROM:686D 20 03 7C				     JSR     write_CURx4_cmd
 ROM:6870 20 B5 77				     JSR     update_prng
@@ -401,7 +699,7 @@ ROM:68C2 10 77					     BPL     display_push_start			     ; no, exit
 ROM:68C4 A5 6F					     LDA     io3200ShadowRegister
 ROM:68C6 09 04					     ORA     #4					     ; RAMSEL=1	(P2)
 ROM:68C8 85 6F					     STA     io3200ShadowRegister
-ROM:68CA 8D 00 32				     STA     3200h				     ; output
+ROM:68CA 8D 00 32				     STA     $3200				     ; output
 ROM:68CD 20 D8 6E				     JSR     init_players
 ROM:68D0 20 68 71				     JSR     init_wave
 ROM:68D3 20 E8 71				     JSR     init_ship_position_velocity
@@ -414,29 +712,29 @@ ROM:68DE	     start_game:
 ROM:68DE 86 1C					     STX     numPlayers
 ROM:68E0 C6 70					     DEC     CurrNumCredits
 ROM:68E2 A5 6F					     LDA     io3200ShadowRegister
-ROM:68E4 29 F8					     AND     #0F8h ; '¯'                             ; RAMSEL=0 (P1), lamps OFF
+ROM:68E4 29 F8					     AND     #$F8 ; '¯'                              ; RAMSEL=0 (P1), lamps OFF
 ROM:68E6 45 1C					     EOR     numPlayers				     ; player lamp ON
 ROM:68E8 85 6F					     STA     io3200ShadowRegister
-ROM:68EA 8D 00 32				     STA     3200h				     ; output
+ROM:68EA 8D 00 32				     STA     $3200				     ; output
 ROM:68ED 20 E8 71				     JSR     init_ship_position_velocity
 ROM:68F0 A9 01					     LDA     #1
 ROM:68F2 8D FA 02				     STA     shipSpawnTimer
-ROM:68F5 8D FA 03				     STA     P2RAM+0FAh
-ROM:68F8 A9 92					     LDA     #92h ; 'í'
+ROM:68F5 8D FA 03				     STA     P2RAM+$FA
+ROM:68F8 A9 92					     LDA     #$92 ; 'í'
 ROM:68FA 8D F8 02				     STA     starting_saucerCountdownTimer
-ROM:68FD 8D F8 03				     STA     P2RAM+0F8h
-ROM:6900 8D F7 03				     STA     P2RAM+0F7h
+ROM:68FD 8D F8 03				     STA     P2RAM+$F8
+ROM:6900 8D F7 03				     STA     P2RAM+$F7
 ROM:6903 8D F7 02				     STA     saucerCountdownTimer
-ROM:6906 A9 7F					     LDA     #7Fh ; ''
+ROM:6906 A9 7F					     LDA     #$7F ; ''
 ROM:6908 8D FB 02				     STA     asteroidWaveTimer
-ROM:690B 8D FB 03				     STA     P2RAM+0FBh
+ROM:690B 8D FB 03				     STA     P2RAM+$FB
 ROM:690E A9 05					     LDA     #5
 ROM:6910 8D FD 02				     STA     numAsteroidsLeftBeforeSaucer
-ROM:6913 8D FD 03				     STA     P2RAM+0FDh
-ROM:6916 A9 FF					     LDA     #0FFh
+ROM:6913 8D FD 03				     STA     P2RAM+$FD
+ROM:6916 A9 FF					     LDA     #$FF
 ROM:6918 85 32					     STA     placeP1HighScore			     ; flag no high score
 ROM:691A 85 33					     STA     placeP2HighScore			     ; flag no high score
-ROM:691C A9 80					     LDA     #80h ; 'Ä'
+ROM:691C A9 80					     LDA     #$80 ; 'Ä'
 ROM:691E 85 5A					     STA     timerStartGame			     ; init timer
 ROM:6920 0A					     ASL     A					     ; A=0
 ROM:6921 85 18					     STA     curPlayer				     ; init current player
@@ -446,10 +744,10 @@ ROM:6927 85 57					     STA     numShipsP1				     ; init number of ships
 ROM:6929 A9 04					     LDA     #4
 ROM:692B 85 6C					     STA     volFreqThumpSound
 ROM:692D 85 6E					     STA     timerThumpSoundOff			     ; init thump sound
-ROM:692F A9 30					     LDA     #30h ; '0'
+ROM:692F A9 30					     LDA     #$30 ; '0'
 ROM:6931 8D FC 02				     STA     byte_2FC
-ROM:6934 8D FC 03				     STA     P2RAM+0FCh
-ROM:6937 8D 00 3E				     STA     3E00h				     ; sound (noise reset)
+ROM:6934 8D FC 03				     STA     P2RAM+$FC
+ROM:6937 8D 00 3E				     STA     $3E00				     ; sound (noise reset)
 ROM:693A 60					     RTS
 ROM:693B	     ; ---------------------------------------------------------------------------
 ROM:693B
@@ -458,14 +756,14 @@ ROM:693B A5 32					     LDA     placeP1HighScore
 ROM:693D 25 32					     AND     placeP1HighScore
 ROM:693F 10 0B					     BPL     loc_694C
 ROM:6941 A5 5C					     LDA     fastTimer
-ROM:6943 29 20					     AND     #20h ; ' '                              ; display phase?
+ROM:6943 29 20					     AND     #$20 ; ' '                              ; display phase?
 ROM:6945 D0 05					     BNE     loc_694C				     ; no, skip
 ROM:6947 A0 06					     LDY     #6					     ; "PUSH START"
 ROM:6949 20 F6 77				     JSR     PrintPackedMsg
 ROM:694C
 ROM:694C	     loc_694C:
 ROM:694C A5 5C					     LDA     fastTimer
-ROM:694E 29 0F					     AND     #0Fh
+ROM:694E 29 0F					     AND     #$F
 ROM:6950 D0 0C					     BNE     loc_695E
 ROM:6952 A9 01					     LDA     #1
 ROM:6954 C5 70					     CMP     CurrNumCredits
@@ -481,7 +779,7 @@ ROM:6960	     ; ----------------------------------------------------------------
 ROM:6960
 ROM:6960	     handle_end_turn_or_game:
 ROM:6960 A5 5C					     LDA     fastTimer
-ROM:6962 29 3F					     AND     #3Fh ; '?'
+ROM:6962 29 3F					     AND     #$3F ; '?'
 ROM:6964 D0 0A					     BNE     loc_6970
 ROM:6966 AD FC 02				     LDA     byte_2FC
 ROM:6969 C9 08					     CMP     #8
@@ -508,9 +806,9 @@ ROM:6992	     toggle_player:								     ; player alive?
 ROM:6992 AD 1B 02				     LDA     p1PlayerFlag
 ROM:6995 D0 36					     BNE     loc_69CD				     ; yes, skip
 ROM:6997 AD FA 02				     LDA     shipSpawnTimer
-ROM:699A C9 80					     CMP     #80h ; 'Ä'
+ROM:699A C9 80					     CMP     #$80 ; 'Ä'
 ROM:699C D0 2F					     BNE     loc_69CD
-ROM:699E A9 10					     LDA     #10h
+ROM:699E A9 10					     LDA     #$10
 ROM:69A0 8D FA 02				     STA     shipSpawnTimer
 ROM:69A3 A6 1C					     LDX     numPlayers
 ROM:69A5 A5 57					     LDA     numShipsP1
@@ -519,7 +817,7 @@ ROM:69A9 F0 24					     BEQ     loc_69CF				     ; no, exit
 ROM:69AB 20 2D 70				     JSR     sub_702D
 ROM:69AE CA					     DEX					     ; 1 player	game?
 ROM:69AF F0 1C					     BEQ     loc_69CD				     ; yes, exit
-ROM:69B1 A9 80					     LDA     #80h ; 'Ä'
+ROM:69B1 A9 80					     LDA     #$80 ; 'Ä'
 ROM:69B3 85 5A					     STA     timerStartGame
 ROM:69B5 A5 18					     LDA     curPlayer
 ROM:69B7 49 01					     EOR     #1					     ; toggler player
@@ -530,7 +828,7 @@ ROM:69BE 86 18					     STX     curPlayer				     ; update current player
 ROM:69C0 A9 04					     LDA     #4					     ; RAMSEL
 ROM:69C2 45 6F					     EOR     io3200ShadowRegister		     ; toggle
 ROM:69C4 85 6F					     STA     io3200ShadowRegister
-ROM:69C6 8D 00 32				     STA     3200h				     ; output
+ROM:69C6 8D 00 32				     STA     $3200				     ; output
 ROM:69C9 8A					     TXA
 ROM:69CA 0A					     ASL     A					     ; current player *	2
 ROM:69CB 85 19					     STA     curPlayer_x2
@@ -542,11 +840,11 @@ ROM:69CF	     ; ----------------------------------------------------------------
 ROM:69CF
 ROM:69CF	     loc_69CF:
 ROM:69CF 86 1A					     STX     numPlayersPreviousGame
-ROM:69D1 A9 FF					     LDA     #0FFh
+ROM:69D1 A9 FF					     LDA     #$FF
 ROM:69D3 85 1C					     STA     numPlayers				     ; invalidate
 ROM:69D5 20 FA 6E				     JSR     init_sound
 ROM:69D8 A5 6F					     LDA     io3200ShadowRegister
-ROM:69DA 29 F8					     AND     #0F8h ; '¯'                             ; RAMSEL=0, lamps OFF
+ROM:69DA 29 F8					     AND     #$F8 ; '¯'                              ; RAMSEL=0, lamps OFF
 ROM:69DC 09 03					     ORA     #3					     ; lamps ON
 ROM:69DE 85 6F					     STA     io3200ShadowRegister
 ROM:69E0 18					     CLC
@@ -568,7 +866,7 @@ ROM:69EE 60					     RTS
 ROM:69EE	     ; End of function print_PLAYER_N
 ROM:69EE
 ROM:69EE	     ; ---------------------------------------------------------------------------
-ROM:69EF 71					     .db  71h ;	q
+ROM:69EF 71					     .BYTE $71 ; q
 ROM:69F0
 ROM:69F0	     ; =============== S U B R O U T I N E =======================================
 ROM:69F0
@@ -588,7 +886,7 @@ ROM:69FC 60					     RTS
 ROM:69FD	     ; ---------------------------------------------------------------------------
 ROM:69FD
 ROM:69FD	     handle_active_shot:
-ROM:69FD A0 1C					     LDY     #1Ch
+ROM:69FD A0 1C					     LDY     #$1C
 ROM:69FF E0 04					     CPX     #4					     ; shot timer?
 ROM:6A01 B0 07					     BCS     loc_6A0A				     ; yes, go
 ROM:6A03 88					     DEY
@@ -615,10 +913,10 @@ ROM:6A23 66 08					     ROR     byte_8
 ROM:6A25 0A					     ASL     A
 ROM:6A26 F0 0C					     BEQ     loc_6A34
 ROM:6A28 10 6D					     BPL     loc_6A97
-ROM:6A2A 49 FE					     EOR     #0FEh ; '˛'
+ROM:6A2A 49 FE					     EOR     #$FE ; '˛'
 ROM:6A2C D0 69					     BNE     loc_6A97
 ROM:6A2E A5 08					     LDA     byte_8
-ROM:6A30 49 FF					     EOR     #0FFh
+ROM:6A30 49 FF					     EOR     #$FF
 ROM:6A32 85 08					     STA     byte_8
 ROM:6A34
 ROM:6A34	     loc_6A34:
@@ -633,33 +931,33 @@ ROM:6A44 66 09					     ROR     byte_9
 ROM:6A46 0A					     ASL     A
 ROM:6A47 F0 0C					     BEQ     loc_6A55
 ROM:6A49 10 4C					     BPL     loc_6A97
-ROM:6A4B 49 FE					     EOR     #0FEh ; '˛'
+ROM:6A4B 49 FE					     EOR     #$FE ; '˛'
 ROM:6A4D D0 48					     BNE     loc_6A97
 ROM:6A4F A5 09					     LDA     byte_9
-ROM:6A51 49 FF					     EOR     #0FFh
+ROM:6A51 49 FF					     EOR     #$FF
 ROM:6A53 85 09					     STA     byte_9
 ROM:6A55
 ROM:6A55	     loc_6A55:
-ROM:6A55 A9 2A					     LDA     #2Ah ; '*'
+ROM:6A55 A9 2A					     LDA     #$2A ; '*'
 ROM:6A57 46 0B					     LSR     byte_B
 ROM:6A59 B0 08					     BCS     loc_6A63
-ROM:6A5B A9 48					     LDA     #48h ; 'H'
+ROM:6A5B A9 48					     LDA     #$48 ; 'H'
 ROM:6A5D 46 0B					     LSR     byte_B
 ROM:6A5F B0 02					     BCS     loc_6A63
-ROM:6A61 A9 84					     LDA     #84h ; 'Ñ'
+ROM:6A61 A9 84					     LDA     #$84 ; 'Ñ'
 ROM:6A63
 ROM:6A63	     loc_6A63:
 ROM:6A63 E0 01					     CPX     #1
 ROM:6A65 B0 02					     BCS     loc_6A69
-ROM:6A67 69 1C					     ADC     #1Ch
+ROM:6A67 69 1C					     ADC     #$1C
 ROM:6A69
 ROM:6A69	     loc_6A69:
 ROM:6A69 D0 0C					     BNE     loc_6A77
-ROM:6A6B 69 12					     ADC     #12h
+ROM:6A6B 69 12					     ADC     #$12
 ROM:6A6D AE 1C 02				     LDX     p1SaucerFlag
 ROM:6A70 CA					     DEX
 ROM:6A71 F0 02					     BEQ     loc_6A75
-ROM:6A73 69 12					     ADC     #12h
+ROM:6A73 69 12					     ADC     #$12
 ROM:6A75
 ROM:6A75	     loc_6A75:
 ROM:6A75 A2 01					     LDX     #1
@@ -700,7 +998,7 @@ ROM:6A9D B9 00 02				     LDA     P1RAM,Y
 ROM:6AA0 29 07					     AND     #7					     ; bits 2-0
 ROM:6AA2 85 08					     STA     byte_8
 ROM:6AA4 20 B5 77				     JSR     update_prng			     ; random ???
-ROM:6AA7 29 18					     AND     #18h				     ; bits 4-3	only
+ROM:6AA7 29 18					     AND     #$18				     ; bits 4-3	only
 ROM:6AA9 05 08					     ORA     byte_8
 ROM:6AAB 9D 00 02				     STA     P1RAM,X
 ROM:6AAE B9 AF 02				     LDA     asteroid_PLh,Y
@@ -740,9 +1038,9 @@ ROM:6ADA B1 0B					     LDA     (byte_B),Y				     ; SSSS -mYY (VEC) / 1111 smYY
 ROM:6ADC 45 09					     EOR     byte_9				     ; flag for	flip Y (bit 2)
 ROM:6ADE 91 02					     STA     (2),Y				     ; store in	avg ram	(cmd)
 ROM:6AE0 88					     DEY
-ROM:6AE1 C9 F0					     CMP     #0F0h ; ''                             ; SVEC?
+ROM:6AE1 C9 F0					     CMP     #$F0 ; ''                              ; SVEC?
 ROM:6AE3 B0 1E					     BCS     is_svec				     ; yes, go
-ROM:6AE5 C9 A0					     CMP     #0A0h ; '†'                             ; VEC?
+ROM:6AE5 C9 A0					     CMP     #$A0 ; '†'                              ; VEC?
 ROM:6AE7 B0 16					     BCS     loc_6AFF				     ; no, exit
 ROM:6AE9 B1 0B					     LDA     (byte_B),Y				     ; YYYY YYYY
 ROM:6AEB 91 02					     STA     (2),Y				     ; store in	avg ram
@@ -790,14 +1088,14 @@ ROM:6B1B
 ROM:6B1B	     loc_6B1B:
 ROM:6B1B 8A					     TXA
 ROM:6B1C D0 1E					     BNE     loc_6B3C
-ROM:6B1E A9 81					     LDA     #81h ; 'Å'
+ROM:6B1E A9 81					     LDA     #$81 ; 'Å'
 ROM:6B20 8D FA 02				     STA     shipSpawnTimer
 ROM:6B23 A6 18					     LDX     curPlayer
 ROM:6B25 D6 57					     DEC     numShipsP1,X			     ; dec number of ships
 ROM:6B27 A2 00					     LDX     #0					     ; offset to player	ship
 ROM:6B29
 ROM:6B29	     loc_6B29:									     ; flag ship exploding
-ROM:6B29 A9 A0					     LDA     #0A0h ; '†'
+ROM:6B29 A9 A0					     LDA     #$A0 ; '†'
 ROM:6B2B 9D 1B 02				     STA     p1PlayerFlag,X
 ROM:6B2E A9 00					     LDA     #0
 ROM:6B30 9D 3E 02				     STA     ship_Vh,X
@@ -823,9 +1121,9 @@ ROM:6B4F 49 02					     EOR     #2
 ROM:6B51 4A					     LSR     A
 ROM:6B52 6A					     ROR     A
 ROM:6B53 6A					     ROR     A
-ROM:6B54 09 3F					     ORA     #3Fh ; '?'
+ROM:6B54 09 3F					     ORA     #$3F ; '?'
 ROM:6B56 85 69					     STA     timerExplosionSound
-ROM:6B58 A9 A0					     LDA     #0A0h ; '†'                             ; flag exploding
+ROM:6B58 A9 A0					     LDA     #$A0 ; '†'                              ; flag exploding
 ROM:6B5A 99 00 02				     STA     P1RAM,Y				     ; store
 ROM:6B5D A9 00					     LDA     #0
 ROM:6B5F 99 23 02				     STA     asteroid_Vh,Y
@@ -838,7 +1136,7 @@ ROM:6B66 8A					     TXA
 ROM:6B67 A6 18					     LDX     curPlayer
 ROM:6B69 D6 57					     DEC     numShipsP1,X			     ; lose a ship
 ROM:6B6B AA					     TAX					     ; restore object index
-ROM:6B6C A9 81					     LDA     #81h ; 'Å'                              ; init spawn timer
+ROM:6B6C A9 81					     LDA     #$81 ; 'Å'                              ; init spawn timer
 ROM:6B6E 8D FA 02				     STA     shipSpawnTimer
 ROM:6B71 D0 D7					     BNE     explode_asteroid			     ; always
 ROM:6B73
@@ -851,9 +1149,9 @@ ROM:6B7D 86 0D					     STX     byte_D				     ; save object index
 ROM:6B7F A6 19					     LDX     curPlayer_x2
 ROM:6B81 AD 1C 02				     LDA     p1SaucerFlag
 ROM:6B84 4A					     LSR     A					     ; small saucer?
-ROM:6B85 A9 99					     LDA     #99h ; 'ô'                              ; (99+1)*10 = 1,000 pts
+ROM:6B85 A9 99					     LDA     #$99 ; 'ô'                              ; (99+1)*10 = 1,000 pts
 ROM:6B87 B0 02					     BCS     loc_6B8B				     ; yes, skip
-ROM:6B89 A9 20					     LDA     #20h ; ' '                              ; 20x10 = 200 pts
+ROM:6B89 A9 20					     LDA     #$20 ; ' '                              ; 20x10 = 200 pts
 ROM:6B8B
 ROM:6B8B	     loc_6B8B:
 ROM:6B8B 20 97 73				     JSR     add_A_to_score
@@ -909,7 +1207,7 @@ ROM:6BD0	     loc_6BD0:
 ROM:6BD0 AD F8 02				     LDA     starting_saucerCountdownTimer
 ROM:6BD3 38					     SEC
 ROM:6BD4 E9 06					     SBC     #6
-ROM:6BD6 C9 20					     CMP     #20h ; ' '
+ROM:6BD6 C9 20					     CMP     #$20 ; ' '
 ROM:6BD8 90 03					     BCC     loc_6BDD
 ROM:6BDA 8D F8 02				     STA     starting_saucerCountdownTimer
 ROM:6BDD
@@ -924,20 +1222,20 @@ ROM:6BEC 4A					     LSR     A
 ROM:6BED 6E EE 02				     ROR     saucer_PLv
 ROM:6BF0 4A					     LSR     A
 ROM:6BF1 6E EE 02				     ROR     saucer_PLv
-ROM:6BF4 C9 18					     CMP     #18h
+ROM:6BF4 C9 18					     CMP     #$18
 ROM:6BF6 90 02					     BCC     loc_6BFA
-ROM:6BF8 29 17					     AND     #17h
+ROM:6BF8 29 17					     AND     #$17
 ROM:6BFA
 ROM:6BFA	     loc_6BFA:
 ROM:6BFA 8D A8 02				     STA     saucer_PHv
-ROM:6BFD A2 10					     LDX     #10h
+ROM:6BFD A2 10					     LDX     #$10
 ROM:6BFF 24 60					     BIT     rnd2
 ROM:6C01 70 0C					     BVS     loc_6C0F
-ROM:6C03 A9 1F					     LDA     #1Fh
+ROM:6C03 A9 1F					     LDA     #$1F
 ROM:6C05 8D 85 02				     STA     saucer_PHh
-ROM:6C08 A9 FF					     LDA     #0FFh
+ROM:6C08 A9 FF					     LDA     #$FF
 ROM:6C0A 8D CB 02				     STA     saucer_PLh
-ROM:6C0D A2 F0					     LDX     #0F0h ; ''                             ; fixed velocity
+ROM:6C0D A2 F0					     LDX     #$F0 ; ''                              ; fixed velocity
 ROM:6C0F
 ROM:6C0F	     loc_6C0F:
 ROM:6C0F 8E 3F 02				     STX     saucer_Vh
@@ -946,7 +1244,7 @@ ROM:6C14 AD F8 02				     LDA     starting_saucerCountdownTimer
 ROM:6C17 30 17					     BMI     loc_6C30
 ROM:6C19 A4 19					     LDY     curPlayer_x2			     ; p1/p2 score
 ROM:6C1B B9 53 00				     LDA     p1ScoreThousands,Y
-ROM:6C1E C9 30					     CMP     #30h ; '0'                              ; score over 30,000?
+ROM:6C1E C9 30					     CMP     #$30 ; '0'                              ; score over 30,000?
 ROM:6C20 B0 0D					     BCS     loc_6C2F				     ; yes, skip (always small saucer)
 ROM:6C22 20 B5 77				     JSR     update_prng
 ROM:6C25 85 08					     STA     byte_8
@@ -999,7 +1297,7 @@ ROM:6C65	     ; ----------------------------------------------------------------
 ROM:6C65
 ROM:6C65	     handle_small_saucer:
 ROM:6C65 AD 3F 02				     LDA     saucer_Vh
-ROM:6C68 C9 80					     CMP     #80h ; 'Ä'
+ROM:6C68 C9 80					     CMP     #$80 ; 'Ä'
 ROM:6C6A 6A					     ROR     A
 ROM:6C6B 85 0C					     STA     byte_C
 ROM:6C6D AD CA 02				     LDA     ship_PLh
@@ -1016,7 +1314,7 @@ ROM:6C82 38					     SEC
 ROM:6C83 E5 0C					     SBC     byte_C
 ROM:6C85 AA					     TAX
 ROM:6C86 AD 62 02				     LDA     saucer_Vv
-ROM:6C89 C9 80					     CMP     #80h ; 'Ä'
+ROM:6C89 C9 80					     CMP     #$80 ; 'Ä'
 ROM:6C8B 6A					     ROR     A
 ROM:6C8C 85 0C					     STA     byte_C
 ROM:6C8E AD ED 02				     LDA     ship_PLv
@@ -1037,7 +1335,7 @@ ROM:6CAA 85 62					     STA     saucerShotDirection
 ROM:6CAC 20 B5 77				     JSR     update_prng
 ROM:6CAF A6 19					     LDX     curPlayer_x2
 ROM:6CB1 B4 53					     LDY     p1ScoreThousands,X
-ROM:6CB3 C0 35					     CPY     #35h ; '5'                              ; score over 35,000?
+ROM:6CB3 C0 35					     CPY     #$35 ; '5'                              ; score over 35,000?
 ROM:6CB5 A2 00					     LDX     #0
 ROM:6CB7 90 01					     BCC     loc_6CBA				     ; no, skip
 ROM:6CB9 E8					     INX
@@ -1059,11 +1357,11 @@ ROM:6CCC 4C F2 6C				     JMP     find_free_shot_slot
 ROM:6CCC	     ; End of function handle_saucer
 ROM:6CCC
 ROM:6CCC	     ; ---------------------------------------------------------------------------
-ROM:6CCF 8F	     unk_6CCF:			     .db  8Fh ;	è
-ROM:6CD0 87					     .db  87h ;	á
-ROM:6CD1 70	     unk_6CD1:			     .db  70h ;	p
-ROM:6CD2 78					     .db  78h ;	x
-ROM:6CD3 F0 00 00 10 saucer_Vv_tbl:		     .db 0F0h, 0, 0, 10h
+ROM:6CCF 8F	     unk_6CCF:			     .BYTE $8F ; è
+ROM:6CD0 87					     .BYTE $87 ; á
+ROM:6CD1 70	     unk_6CD1:			     .BYTE $70 ; p
+ROM:6CD2 78					     .BYTE $78 ; x
+ROM:6CD3 F0 00 00 10 saucer_Vv_tbl:		     .BYTE $F0,	0, 0, $10
 ROM:6CD7	     ; detects leading edge of fire button press
 ROM:6CD7
 ROM:6CD7	     ; =============== S U B R O U T I N E =======================================
@@ -1102,7 +1400,7 @@ ROM:6D01 99 1B 02				     STA     p1PlayerFlag,Y			     ; init shot timer
 ROM:6D04 B5 61					     LDA     direction,X
 ROM:6D06 20 D2 77				     JSR     some_thrust_calc
 ROM:6D09 A6 0D					     LDX     byte_D				     ; was byte_2FA
-ROM:6D0B C9 80					     CMP     #80h ; 'Ä'
+ROM:6D0B C9 80					     CMP     #$80 ; 'Ä'
 ROM:6D0D 6A					     ROR     A
 ROM:6D0E 85 09					     STA     byte_9
 ROM:6D10 18					     CLC
@@ -1123,7 +1421,7 @@ ROM:6D24 99 3E 02				     STA     ship_Vh,Y
 ROM:6D27 B5 61					     LDA     direction,X
 ROM:6D29 20 D5 77				     JSR     sub_77D5
 ROM:6D2C A6 0D					     LDX     byte_D
-ROM:6D2E C9 80					     CMP     #80h ; 'Ä'
+ROM:6D2E C9 80					     CMP     #$80 ; 'Ä'
 ROM:6D30 6A					     ROR     A
 ROM:6D31 85 0C					     STA     byte_C
 ROM:6D33 18					     CLC
@@ -1149,7 +1447,7 @@ ROM:6D51
 ROM:6D51	     loc_6D51:
 ROM:6D51 86 08					     STX     byte_8
 ROM:6D53 A6 0D					     LDX     byte_D
-ROM:6D55 C9 80					     CMP     #80h ; 'Ä'
+ROM:6D55 C9 80					     CMP     #$80 ; 'Ä'
 ROM:6D57 6A					     ROR     A
 ROM:6D58 18					     CLC
 ROM:6D59 65 09					     ADC     byte_9
@@ -1167,7 +1465,7 @@ ROM:6D71
 ROM:6D71	     loc_6D71:
 ROM:6D71 86 0B					     STX     byte_B
 ROM:6D73 A6 0D					     LDX     byte_D
-ROM:6D75 C9 80					     CMP     #80h ; 'Ä'
+ROM:6D75 C9 80					     CMP     #$80 ; 'Ä'
 ROM:6D77 6A					     ROR     A
 ROM:6D78 18					     CLC
 ROM:6D79 65 0C					     ADC     byte_C
@@ -1177,13 +1475,13 @@ ROM:6D7F 99 ED 02				     STA     ship_PLv,Y
 ROM:6D82 A5 0B					     LDA     byte_B
 ROM:6D84 7D A7 02				     ADC     ship_PHv,X
 ROM:6D87 99 A7 02				     STA     ship_PHv,Y
-ROM:6D8A A9 80					     LDA     #80h ; 'Ä'
+ROM:6D8A A9 80					     LDA     #$80 ; 'Ä'
 ROM:6D8C 95 66					     STA     timerPlayerFireSound,X
 ROM:6D8E 60					     RTS
 ROM:6D8E	     ; End of function handle_fire
 ROM:6D8E
 ROM:6D8E	     ; ---------------------------------------------------------------------------
-ROM:6D8F D8					     .db 0D8h ;	ÿ
+ROM:6D8F D8					     .BYTE $D8 ; ÿ
 ROM:6D90
 ROM:6D90	     ; =============== S U B R O U T I N E =======================================
 ROM:6D90
@@ -1209,7 +1507,7 @@ ROM:6DA8
 ROM:6DA8	     loc_6DA8:
 ROM:6DA8 84 18					     STY     curPlayer
 ROM:6DAA A5 5C					     LDA     fastTimer
-ROM:6DAC 29 10					     AND     #10h
+ROM:6DAC 29 10					     AND     #$10
 ROM:6DAE D0 04					     BNE     loc_6DB4
 ROM:6DB0 98					     TYA
 ROM:6DB1 20 D1 7B				     JSR     display_digit_A
@@ -1223,17 +1521,17 @@ ROM:6DBE A0 03					     LDY     #3					     ; "PLEASE ENTER YOUR INITIALS"
 ROM:6DC0 20 F6 77				     JSR     PrintPackedMsg
 ROM:6DC3 A0 04					     LDY     #4					     ; "PUSH ROTATE TO SELECT LETTER"
 ROM:6DC5 20 F6 77				     JSR     PrintPackedMsg
-ROM:6DC8 A0 05					     LDY     #5					     ; "PUSH HYPERSPACE WHEN LETTER IS CORRECT"
+ROM:6DC8 A0 05					     LDY     #5					     ; "PUSH HYPERSPACE	WHEN LETTER IS CORRECT"
 ROM:6DCA 20 F6 77				     JSR     PrintPackedMsg
-ROM:6DCD A9 20					     LDA     #20h ; ' '
+ROM:6DCD A9 20					     LDA     #$20 ; ' '
 ROM:6DCF 85 00					     STA     globalScale
-ROM:6DD1 A9 64					     LDA     #64h ; 'd'
-ROM:6DD3 A2 39					     LDX     #39h ; '9'
+ROM:6DD1 A9 64					     LDA     #$64 ; 'd'
+ROM:6DD3 A2 39					     LDX     #$39 ; '9'
 ROM:6DD5 20 03 7C				     JSR     write_CURx4_cmd
-ROM:6DD8 A9 70					     LDA     #70h ; 'p'
+ROM:6DD8 A9 70					     LDA     #$70 ; 'p'
 ROM:6DDA 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:6DDD A6 18					     LDX     curPlayer
-ROM:6DDF B4 32					     LDY     32h,X
+ROM:6DDF B4 32					     LDY     $32,X
 ROM:6DE1 84 0B					     STY     byte_B
 ROM:6DE3 98					     TYA
 ROM:6DE4 18					     CLC
@@ -1251,7 +1549,7 @@ ROM:6DF9 AD 03 20				     LDA     hyperspaceSwitch			     ; read hyperspace butt
 ROM:6DFC 2A					     ROL     A					     ; shift into C
 ROM:6DFD 26 63					     ROL     btn_edge_debounce			     ; shift into bit0
 ROM:6DFF A5 63					     LDA     btn_edge_debounce
-ROM:6E01 29 1F					     AND     #1Fh				     ; low 5 bits
+ROM:6E01 29 1F					     AND     #$1F				     ; low 5 bits
 ROM:6E03 C9 07					     CMP     #7					     ; 00111?
 ROM:6E05 D0 27					     BNE     loc_6E2E				     ; no, exit
 ROM:6E07 E6 31					     INC     letterHighScoreEntry
@@ -1259,14 +1557,14 @@ ROM:6E09 A5 31					     LDA     letterHighScoreEntry
 ROM:6E0B C9 03					     CMP     #3
 ROM:6E0D 90 13					     BCC     loc_6E22
 ROM:6E0F A6 18					     LDX     curPlayer
-ROM:6E11 A9 FF					     LDA     #0FFh
+ROM:6E11 A9 FF					     LDA     #$FF
 ROM:6E13 95 32					     STA     placeP1HighScore,X
 ROM:6E15
 ROM:6E15	     loc_6E15:
 ROM:6E15 A2 00					     LDX     #0
 ROM:6E17 86 18					     STX     curPlayer
 ROM:6E19 86 31					     STX     letterHighScoreEntry
-ROM:6E1B A2 F0					     LDX     #0F0h ; ''
+ROM:6E1B A2 F0					     LDX     #$F0 ; ''
 ROM:6E1D 86 5D					     STX     slowTimer
 ROM:6E1F 4C B2 73				     JMP     set_RAMSEL_for_player
 ROM:6E22	     ; ---------------------------------------------------------------------------
@@ -1274,15 +1572,15 @@ ROM:6E22
 ROM:6E22	     loc_6E22:
 ROM:6E22 E6 0C					     INC     byte_C
 ROM:6E24 A6 0C					     LDX     byte_C
-ROM:6E26 A9 F4					     LDA     #0F4h ; 'Ù'
+ROM:6E26 A9 F4					     LDA     #$F4 ; 'Ù'
 ROM:6E28 85 5D					     STA     slowTimer
-ROM:6E2A A9 0B					     LDA     #0Bh
+ROM:6E2A A9 0B					     LDA     #$B
 ROM:6E2C 95 34					     STA     highScoreInitials,X
 ROM:6E2E
 ROM:6E2E	     loc_6E2E:
 ROM:6E2E A5 5D					     LDA     slowTimer
 ROM:6E30 D0 08					     BNE     loc_6E3A
-ROM:6E32 A9 FF					     LDA     #0FFh
+ROM:6E32 A9 FF					     LDA     #$FF
 ROM:6E34 85 32					     STA     placeP1HighScore
 ROM:6E36 85 33					     STA     placeP2HighScore
 ROM:6E38 30 DB					     BMI     loc_6E15
@@ -1299,14 +1597,14 @@ ROM:6E49
 ROM:6E49	     loc_6E49:
 ROM:6E49 AD 06 24				     LDA     rotateRightSwitch
 ROM:6E4C 10 23					     BPL     loc_6E71
-ROM:6E4E A9 FF					     LDA     #0FFh
+ROM:6E4E A9 FF					     LDA     #$FF
 ROM:6E50
 ROM:6E50	     loc_6E50:
 ROM:6E50 A6 0C					     LDX     byte_C
 ROM:6E52 18					     CLC
 ROM:6E53 75 34					     ADC     highScoreInitials,X
 ROM:6E55 30 10					     BMI     loc_6E67
-ROM:6E57 C9 0B					     CMP     #0Bh
+ROM:6E57 C9 0B					     CMP     #$B
 ROM:6E59 B0 0E					     BCS     loc_6E69
 ROM:6E5B C9 01					     CMP     #1
 ROM:6E5D F0 04					     BEQ     loc_6E63
@@ -1314,14 +1612,14 @@ ROM:6E5F A9 00					     LDA     #0
 ROM:6E61 F0 0C					     BEQ     loc_6E6F
 ROM:6E63
 ROM:6E63	     loc_6E63:
-ROM:6E63 A9 0B					     LDA     #0Bh
+ROM:6E63 A9 0B					     LDA     #$B
 ROM:6E65 D0 08					     BNE     loc_6E6F
 ROM:6E67
 ROM:6E67	     loc_6E67:
-ROM:6E67 A9 24					     LDA     #24h ; '$'
+ROM:6E67 A9 24					     LDA     #$24 ; '$'
 ROM:6E69
 ROM:6E69	     loc_6E69:
-ROM:6E69 C9 25					     CMP     #25h ; '%'
+ROM:6E69 C9 25					     CMP     #$25 ; '%'
 ROM:6E6B 90 02					     BCC     loc_6E6F
 ROM:6E6D A9 00					     LDA     #0
 ROM:6E6F
@@ -1350,10 +1648,10 @@ ROM:6E87 A9 00					     LDA     #0					     ; flag hyperspace?
 ROM:6E89 8D 1B 02				     STA     p1PlayerFlag
 ROM:6E8C 8D 3E 02				     STA     ship_Vh
 ROM:6E8F 8D 61 02				     STA     ship_Vv				     ; zero ship velocity
-ROM:6E92 A9 30					     LDA     #30h ; '0'
+ROM:6E92 A9 30					     LDA     #$30 ; '0'
 ROM:6E94 8D FA 02				     STA     shipSpawnTimer
 ROM:6E97 20 B5 77				     JSR     update_prng			     ; random horizontal position
-ROM:6E9A 29 1F					     AND     #1Fh
+ROM:6E9A 29 1F					     AND     #$1F
 ROM:6E9C C9 1D					     CMP     #29
 ROM:6E9E 90 02					     BCC     loc_6EA2
 ROM:6EA0 A9 1C					     LDA     #28
@@ -1371,7 +1669,7 @@ ROM:6EAD	     loc_6EAD:									     ; random vertical position
 ROM:6EAD 20 B5 77				     JSR     update_prng
 ROM:6EB0 CA					     DEX
 ROM:6EB1 D0 FA					     BNE     loc_6EAD
-ROM:6EB3 29 1F					     AND     #1Fh
+ROM:6EB3 29 1F					     AND     #$1F
 ROM:6EB5 E8					     INX					     ; =1 (successful)
 ROM:6EB6 C9 18					     CMP     #24
 ROM:6EB8 90 0C					     BCC     loc_6EC6
@@ -1380,7 +1678,7 @@ ROM:6EBC 0A					     ASL     A
 ROM:6EBD 69 04					     ADC     #4
 ROM:6EBF CD F6 02				     CMP     currentNumberOfAsteroids
 ROM:6EC2 90 02					     BCC     loc_6EC6
-ROM:6EC4 A2 80					     LDX     #80h ; 'Ä'                              ; flag unsuccessful (death)
+ROM:6EC4 A2 80					     LDX     #$80 ; 'Ä'                              ; flag unsuccessful (death)
 ROM:6EC6
 ROM:6EC6	     loc_6EC6:
 ROM:6EC6 C9 15					     CMP     #21
@@ -1420,7 +1718,7 @@ ROM:6EEB
 ROM:6EEB	     loc_6EEB:									     ; init flag
 ROM:6EEB 9D 1B 02				     STA     p1PlayerFlag,X
 ROM:6EEE 9D 1F 02				     STA     p1TimerShot0,X			     ; init timer
-ROM:6EF1 95 51					     STA     51h,X				     ; zero player score
+ROM:6EF1 95 51					     STA     $51,X				     ; zero player score
 ROM:6EF3 CA					     DEX					     ; next byte
 ROM:6EF4 10 F5					     BPL     loc_6EEB				     ; loop until done
 ROM:6EF6 8D F6 02				     STA     currentNumberOfAsteroids
@@ -1433,13 +1731,13 @@ ROM:6EFA
 ROM:6EFA
 ROM:6EFA	     init_sound:
 ROM:6EFA A9 00					     LDA     #0					     ; turn off	sound
-ROM:6EFC 8D 00 36				     STA     3600h				     ; sound (explosion)
-ROM:6EFF 8D 00 3A				     STA     3A00h				     ; sound (thump)
-ROM:6F02 8D 00 3C				     STA     3C00h				     ; sound (saucer)
-ROM:6F05 8D 01 3C				     STA     3C01h				     ; sound (saucer fire)
-ROM:6F08 8D 03 3C				     STA     3C03h				     ; sound (ship thrust)
-ROM:6F0B 8D 04 3C				     STA     3C04h				     ; sound (ship fire)
-ROM:6F0E 8D 05 3C				     STA     3C05h				     ; sound (bonus life)
+ROM:6EFC 8D 00 36				     STA     $3600				     ; sound (explosion)
+ROM:6EFF 8D 00 3A				     STA     $3A00				     ; sound (thump)
+ROM:6F02 8D 00 3C				     STA     $3C00				     ; sound (saucer)
+ROM:6F05 8D 01 3C				     STA     $3C01				     ; sound (saucer fire)
+ROM:6F08 8D 03 3C				     STA     $3C03				     ; sound (ship thrust)
+ROM:6F0B 8D 04 3C				     STA     $3C04				     ; sound (ship fire)
+ROM:6F0E 8D 05 3C				     STA     $3C05				     ; sound (bonus life)
 ROM:6F11 85 69					     STA     timerExplosionSound
 ROM:6F13 85 66					     STA     timerPlayerFireSound
 ROM:6F15 85 67					     STA     timerSaucerFireSound
@@ -1459,11 +1757,11 @@ ROM:6F1F D0 14					     BNE     display_char_code_Y		     ; no, display
 ROM:6F21 A5 32					     LDA     placeP1HighScore
 ROM:6F23 25 33					     AND     placeP2HighScore			     ; entered as <space>?
 ROM:6F25 30 0E					     BMI     display_char_code_Y		     ; yes, display
-ROM:6F27 A9 72					     LDA     #72h ; 'r'                              ; brightness=7, S=0, X=2
-ROM:6F29 A2 F8					     LDX     #0F8h ; '¯'                             ; cmd=SVEC, s=-ve, Y=0
+ROM:6F27 A9 72					     LDA     #$72 ; 'r'                              ; brightness=7, S=0, X=2
+ROM:6F29 A2 F8					     LDX     #$F8 ; '¯'                              ; cmd=SVEC, s=-ve, Y=0
 ROM:6F2B 20 45 7D				     JSR     write_AX_to_avgram
 ROM:6F2E A9 01					     LDA     #1					     ; brightness=0, S=0, X=0
-ROM:6F30 A2 F8					     LDX     #0F8h ; '¯'                             ; cmd=SVEC, s=-ve, Y=0
+ROM:6F30 A2 F8					     LDX     #$F8 ; '¯'                              ; cmd=SVEC, s=-ve, Y=0
 ROM:6F32 4C 45 7D				     JMP     write_AX_to_avgram
 ROM:6F32	     ; End of function display_initial
 ROM:6F32
@@ -1472,8 +1770,8 @@ ROM:6F35	     ; =============== S U B R O U T I N E ============================
 ROM:6F35
 ROM:6F35
 ROM:6F35	     display_char_code_Y:
-ROM:6F35 BE D5 56				     LDX     (DVGROM+6D5h),Y			     ; chr fn
-ROM:6F38 B9 D4 56				     LDA     (DVGROM+6D4h),Y			     ; chr fn
+ROM:6F35 BE D5 56				     LDX     DVGROM+$6D5,Y			     ; chr fn
+ROM:6F38 B9 D4 56				     LDA     DVGROM+$6D4,Y			     ; chr fn
 ROM:6F3B 4C 45 7D				     JMP     write_AX_to_avgram
 ROM:6F3B	     ; End of function display_char_code_Y
 ROM:6F3B
@@ -1485,13 +1783,13 @@ ROM:6F3E	     display_extra_ships:
 ROM:6F3E F0 16					     BEQ     locret_6F56
 ROM:6F40 84 08					     STY     byte_8
 ROM:6F42 A2 D5					     LDX     #213				     ; Y coord (x4=852)
-ROM:6F44 A0 E0					     LDY     #0E0h ; '‡'
+ROM:6F44 A0 E0					     LDY     #$E0 ; '‡'
 ROM:6F46 84 00					     STY     globalScale
 ROM:6F48 20 03 7C				     JSR     write_CURx4_cmd
 ROM:6F4B
 ROM:6F4B	     loc_6F4B:
-ROM:6F4B A2 DA					     LDX     #0DAh ; '⁄'
-ROM:6F4D A9 54					     LDA     #54h ; 'T'                              ; addr=0x54DA
+ROM:6F4B A2 DA					     LDX     #$DA ; '⁄'
+ROM:6F4D A9 54					     LDA     #$54 ; 'T'                              ; addr=0x54DA
 ROM:6F4F 20 FC 7B				     JSR     write_JSR_cmd			     ; display extra ships?
 ROM:6F52 C6 08					     DEC     byte_8
 ROM:6F54 D0 F5					     BNE     loc_6F4B
@@ -1505,7 +1803,7 @@ ROM:6F57	     ; =============== S U B R O U T I N E ============================
 ROM:6F57
 ROM:6F57
 ROM:6F57	     handle_objects:
-ROM:6F57 A2 22					     LDX     #22h ; '"'                              ; offset to last object in table
+ROM:6F57 A2 22					     LDX     #$22 ; '"'                              ; offset to last object in table
 ROM:6F59
 ROM:6F59	     loc_6F59:									     ; get entry
 ROM:6F59 BD 00 02				     LDA     P1RAM,X
@@ -1524,7 +1822,7 @@ ROM:6F67 4A					     LSR     A
 ROM:6F68 4A					     LSR     A
 ROM:6F69 4A					     LSR     A
 ROM:6F6A 4A					     LSR     A					     ; high nibble
-ROM:6F6B E0 1B					     CPX     #1Bh				     ; playerFlag?
+ROM:6F6B E0 1B					     CPX     #$1B				     ; playerFlag?
 ROM:6F6D D0 07					     BNE     loc_6F76				     ; no, skip
 ROM:6F6F A5 5C					     LDA     fastTimer
 ROM:6F71 29 01					     AND     #1
@@ -1537,12 +1835,12 @@ ROM:6F77
 ROM:6F77	     loc_6F77:
 ROM:6F77 7D 00 02				     ADC     P1RAM,X
 ROM:6F7A 30 25					     BMI     loc_6FA1
-ROM:6F7C E0 1B					     CPX     #1Bh				     ; playerFlag?
+ROM:6F7C E0 1B					     CPX     #$1B				     ; playerFlag?
 ROM:6F7E F0 13					     BEQ     loc_6F93				     ; yes, go
 ROM:6F80 B0 17					     BCS     loc_6F99
 ROM:6F82 CE F6 02				     DEC     currentNumberOfAsteroids
 ROM:6F85 D0 05					     BNE     loc_6F8C
-ROM:6F87 A0 7F					     LDY     #7Fh ; ''
+ROM:6F87 A0 7F					     LDY     #$7F ; ''
 ROM:6F89 8C FB 02				     STY     asteroidWaveTimer
 ROM:6F8C
 ROM:6F8C	     loc_6F8C:
@@ -1562,10 +1860,10 @@ ROM:6F9F D0 EB					     BNE     loc_6F8C
 ROM:6FA1
 ROM:6FA1	     loc_6FA1:
 ROM:6FA1 9D 00 02				     STA     P1RAM,X
-ROM:6FA4 29 F0					     AND     #0F0h ; ''
+ROM:6FA4 29 F0					     AND     #$F0 ; ''
 ROM:6FA6 18					     CLC
-ROM:6FA7 69 10					     ADC     #10h
-ROM:6FA9 E0 1B					     CPX     #1Bh				     ; PlayerFlag?
+ROM:6FA7 69 10					     ADC     #$10
+ROM:6FA9 E0 1B					     CPX     #$1B				     ; PlayerFlag?
 ROM:6FAB D0 02					     BNE     loc_6FAF				     ; no, skip
 ROM:6FAD A9 00					     LDA     #0
 ROM:6FAF
@@ -1595,10 +1893,10 @@ ROM:6FD3 9D AF 02				     STA     asteroid_PLh,X
 ROM:6FD6 85 04					     STA     byte_4
 ROM:6FD8 98					     TYA
 ROM:6FD9 7D 69 02				     ADC     asteroid_PHh,X
-ROM:6FDC C9 20					     CMP     #20h ; ' '
+ROM:6FDC C9 20					     CMP     #$20 ; ' '
 ROM:6FDE 90 0C					     BCC     loc_6FEC
-ROM:6FE0 29 1F					     AND     #1Fh
-ROM:6FE2 E0 1C					     CPX     #1Ch				     ; SaucerFlag?
+ROM:6FE0 29 1F					     AND     #$1F
+ROM:6FE2 E0 1C					     CPX     #$1C				     ; SaucerFlag?
 ROM:6FE4 D0 06					     BNE     loc_6FEC				     ; no, go
 ROM:6FE6 20 2D 70				     JSR     sub_702D
 ROM:6FE9 4C 5E 6F				     JMP     loc_6F5E
@@ -1611,7 +1909,7 @@ ROM:6FF1 18					     CLC
 ROM:6FF2 A0 00					     LDY     #0
 ROM:6FF4 BD 46 02				     LDA     asteroid_Vv,X
 ROM:6FF7 10 02					     BPL     loc_6FFB
-ROM:6FF9 A0 FF					     LDY     #0FFh
+ROM:6FF9 A0 FF					     LDY     #$FF
 ROM:6FFB
 ROM:6FFB	     loc_6FFB:
 ROM:6FFB 7D D2 02				     ADC     asteroid_PLv,X
@@ -1619,10 +1917,10 @@ ROM:6FFE 9D D2 02				     STA     asteroid_PLv,X
 ROM:7001 85 06					     STA     byte_6
 ROM:7003 98					     TYA
 ROM:7004 7D 8C 02				     ADC     asteroid_PHv,X
-ROM:7007 C9 18					     CMP     #18h
+ROM:7007 C9 18					     CMP     #$18
 ROM:7009 90 08					     BCC     loc_7013
 ROM:700B F0 04					     BEQ     loc_7011
-ROM:700D A9 17					     LDA     #17h
+ROM:700D A9 17					     LDA     #$17
 ROM:700F D0 02					     BNE     loc_7013
 ROM:7011
 ROM:7011	     loc_7011:
@@ -1632,10 +1930,10 @@ ROM:7013	     loc_7013:
 ROM:7013 9D 8C 02				     STA     asteroid_PHv,X
 ROM:7016 85 07					     STA     byte_7
 ROM:7018 BD 00 02				     LDA     P1RAM,X
-ROM:701B A0 E0					     LDY     #0E0h ; '‡'
+ROM:701B A0 E0					     LDY     #$E0 ; '‡'
 ROM:701D 4A					     LSR     A
 ROM:701E B0 07					     BCS     loc_7027
-ROM:7020 A0 F0					     LDY     #0F0h ; ''
+ROM:7020 A0 F0					     LDY     #$F0 ; ''
 ROM:7022 4A					     LSR     A
 ROM:7023 B0 02					     BCS     loc_7027
 ROM:7025 A0 00					     LDY     #0
@@ -1690,13 +1988,13 @@ ROM:706A 8D 1B 02				     STA     p1PlayerFlag
 ROM:706D D0 12					     BNE     loc_7081				     ; always go
 ROM:706F
 ROM:706F	     loc_706F:									     ; flag exploding
-ROM:706F A9 A0					     LDA     #0A0h ; '†'
+ROM:706F A9 A0					     LDA     #$A0 ; '†'
 ROM:7071 8D 1B 02				     STA     p1PlayerFlag
-ROM:7074 A2 3E					     LDX     #3Eh ; '>'
+ROM:7074 A2 3E					     LDX     #$3E ; '>'
 ROM:7076 86 69					     STX     timerExplosionSound
 ROM:7078 A6 18					     LDX     curPlayer
 ROM:707A D6 57					     DEC     numShipsP1,X			     ; dec number of ships
-ROM:707C A9 81					     LDA     #81h ; 'Å'
+ROM:707C A9 81					     LDA     #$81 ; 'Å'
 ROM:707E 8D FA 02				     STA     shipSpawnTimer
 ROM:7081
 ROM:7081	     loc_7081:									     ; flag inactive
@@ -1729,8 +2027,8 @@ ROM:709D 4A					     LSR     A
 ROM:709E B0 E5					     BCS     locret_7085			     ; exit
 ROM:70A0 AD 05 24				     LDA     thrustSwitch			     ; thrust button?
 ROM:70A3 10 3C					     BPL     loc_70E1				     ; no, go
-ROM:70A5 A9 80					     LDA     #80h ; 'Ä'
-ROM:70A7 8D 03 3C				     STA     3C03h				     ; sound (ship thrust)
+ROM:70A5 A9 80					     LDA     #$80 ; 'Ä'
+ROM:70A7 8D 03 3C				     STA     $3C03				     ; sound (ship thrust)
 ROM:70AA A0 00					     LDY     #0
 ROM:70AC A5 61					     LDA     direction
 ROM:70AE 20 D2 77				     JSR     some_thrust_calc
@@ -1768,15 +2066,15 @@ ROM:70E1	     ; ----------------------------------------------------------------
 ROM:70E1
 ROM:70E1	     loc_70E1:
 ROM:70E1 A9 00					     LDA     #0
-ROM:70E3 8D 03 3C				     STA     3C03h				     ; sound (ship thrust)
+ROM:70E3 8D 03 3C				     STA     $3C03				     ; sound (ship thrust)
 ROM:70E6 AD 3E 02				     LDA     ship_Vh
 ROM:70E9 05 64					     ORA     shipHorizontalVelocityLow
 ROM:70EB F0 18					     BEQ     loc_7105
 ROM:70ED AD 3E 02				     LDA     ship_Vh
 ROM:70F0 0A					     ASL     A
-ROM:70F1 A2 FF					     LDX     #0FFh
+ROM:70F1 A2 FF					     LDX     #$FF
 ROM:70F3 18					     CLC
-ROM:70F4 49 FF					     EOR     #0FFh
+ROM:70F4 49 FF					     EOR     #$FF
 ROM:70F6 30 02					     BMI     loc_70FA
 ROM:70F8 E8					     INX
 ROM:70F9 38					     SEC
@@ -1794,9 +2092,9 @@ ROM:7107 0D 61 02				     ORA     ship_Vv
 ROM:710A F0 18					     BEQ     locret_7124
 ROM:710C AD 61 02				     LDA     ship_Vv
 ROM:710F 0A					     ASL     A
-ROM:7110 A2 FF					     LDX     #0FFh
+ROM:7110 A2 FF					     LDX     #$FF
 ROM:7112 18					     CLC
-ROM:7113 49 FF					     EOR     #0FFh
+ROM:7113 49 FF					     EOR     #$FF
 ROM:7115 30 02					     BMI     loc_7119
 ROM:7117 38					     SEC
 ROM:7118 E8					     INX
@@ -1818,18 +2116,18 @@ ROM:7125
 ROM:7125
 ROM:7125	     sub_7125:
 ROM:7125 30 09					     BMI     loc_7130
-ROM:7127 C9 40					     CMP     #40h ; '@'
+ROM:7127 C9 40					     CMP     #$40 ; '@'
 ROM:7129 90 0D					     BCC     locret_7138
-ROM:712B A2 FF					     LDX     #0FFh
-ROM:712D A9 3F					     LDA     #3Fh ; '?'
+ROM:712B A2 FF					     LDX     #$FF
+ROM:712D A9 3F					     LDA     #$3F ; '?'
 ROM:712F 60					     RTS
 ROM:7130	     ; ---------------------------------------------------------------------------
 ROM:7130
 ROM:7130	     loc_7130:
-ROM:7130 C9 C0					     CMP     #0C0h ; '¿'
+ROM:7130 C9 C0					     CMP     #$C0 ; '¿'
 ROM:7132 B0 04					     BCS     locret_7138
 ROM:7134 A2 01					     LDX     #1
-ROM:7136 A9 C0					     LDA     #0C0h ; '¿'
+ROM:7136 A9 C0					     LDA     #$C0 ; '¿'
 ROM:7138
 ROM:7138	     locret_7138:
 ROM:7138 60					     RTS
@@ -1840,7 +2138,7 @@ ROM:7139	     ; =============== S U B R O U T I N E ============================
 ROM:7139
 ROM:7139
 ROM:7139	     sub_7139:
-ROM:7139 A2 1C					     LDX     #1Ch				     ; offset to saucer's parameter(s)
+ROM:7139 A2 1C					     LDX     #$1C				     ; offset to saucer's parameter(s)
 ROM:713B
 ROM:713B	     loc_713B:									     ; get object status
 ROM:713B BD 00 02				     LDA     P1RAM,X
@@ -1850,7 +2148,7 @@ ROM:7143 38					     SEC
 ROM:7144 ED 84 02				     SBC     ship_PHh
 ROM:7147 C9 04					     CMP     #4					     ; object, ship PHh	within 4?
 ROM:7149 90 04					     BCC     loc_714F
-ROM:714B C9 FC					     CMP     #0FCh ; '¸'
+ROM:714B C9 FC					     CMP     #$FC ; '¸'
 ROM:714D 90 0F					     BCC     loc_715E				     ; no, skip
 ROM:714F
 ROM:714F	     loc_714F:
@@ -1859,7 +2157,7 @@ ROM:7152 38					     SEC
 ROM:7153 ED A7 02				     SBC     ship_PHv
 ROM:7156 C9 04					     CMP     #4					     ; object, ship PHv	within 4?
 ROM:7158 90 09					     BCC     loc_7163				     ; no, exit
-ROM:715A C9 FC					     CMP     #0FCh ; '¸'
+ROM:715A C9 FC					     CMP     #$FC ; '¸'
 ROM:715C B0 05					     BCS     loc_7163				     ; no, exit
 ROM:715E
 ROM:715E	     loc_715E:									     ; next object
@@ -1875,13 +2173,13 @@ ROM:7166 60					     RTS
 ROM:7166	     ; End of function sub_7139
 ROM:7166
 ROM:7166	     ; ---------------------------------------------------------------------------
-ROM:7167 90					     .db  90h ;	ê
+ROM:7167 90					     .BYTE $90 ; ê
 ROM:7168
 ROM:7168	     ; =============== S U B R O U T I N E =======================================
 ROM:7168
 ROM:7168
 ROM:7168	     init_wave:
-ROM:7168 A2 1A					     LDX     #1Ah				     ; offset to 1st asteroid
+ROM:7168 A2 1A					     LDX     #$1A				     ; offset to 1st asteroid
 ROM:716A AD FB 02				     LDA     asteroidWaveTimer
 ROM:716D D0 70					     BNE     loc_71DF
 ROM:716F AD 1C 02				     LDA     p1SaucerFlag			     ; saucer active?
@@ -1906,21 +2204,21 @@ ROM:7193	     loc_7193:
 ROM:7193 8D F6 02				     STA     currentNumberOfAsteroids
 ROM:7196 8D F5 02				     STA     startingAsteroidsPerWave
 ROM:7199 85 08					     STA     byte_8				     ; store as	temp counter
-ROM:719B A0 1C					     LDY     #1Ch				     ; offset to saucer's parameter(s)
+ROM:719B A0 1C					     LDY     #$1C				     ; offset to saucer's parameter(s)
 ROM:719D
 ROM:719D	     init_next_asteroid:							     ; random velocity
 ROM:719D 20 B5 77				     JSR     update_prng
-ROM:71A0 29 18					     AND     #18h				     ; bits 4,3	only
+ROM:71A0 29 18					     AND     #$18				     ; bits 4,3	only
 ROM:71A2 09 04					     ORA     #4					     ; and set bit 2 as	well
 ROM:71A4 9D 00 02				     STA     P1RAM,X				     ; set asteroid status
 ROM:71A7 20 03 72				     JSR     set_asteroid_velocity
 ROM:71AA 20 B5 77				     JSR     update_prng			     ; random position
 ROM:71AD 4A					     LSR     A
-ROM:71AE 29 1F					     AND     #1Fh
+ROM:71AE 29 1F					     AND     #$1F
 ROM:71B0 90 13					     BCC     loc_71C5
-ROM:71B2 C9 18					     CMP     #18h
+ROM:71B2 C9 18					     CMP     #$18
 ROM:71B4 90 02					     BCC     loc_71B8
-ROM:71B6 29 17					     AND     #17h
+ROM:71B6 29 17					     AND     #$17
 ROM:71B8
 ROM:71B8	     loc_71B8:
 ROM:71B8 9D 8C 02				     STA     asteroid_PHv,X
@@ -1939,9 +2237,9 @@ ROM:71D0	     loc_71D0:									     ; offset for next asteroid
 ROM:71D0 CA					     DEX
 ROM:71D1 C6 08					     DEC     byte_8				     ; done all	asteroids for the wave?
 ROM:71D3 D0 C8					     BNE     init_next_asteroid			     ; no, loop
-ROM:71D5 A9 7F					     LDA     #7Fh ; ''
+ROM:71D5 A9 7F					     LDA     #$7F ; ''
 ROM:71D7 8D F7 02				     STA     saucerCountdownTimer
-ROM:71DA A9 30					     LDA     #30h ; '0'
+ROM:71DA A9 30					     LDA     #$30 ; '0'
 ROM:71DC 8D FC 02				     STA     byte_2FC
 ROM:71DF
 ROM:71DF	     loc_71DF:
@@ -1961,15 +2259,15 @@ ROM:71E8	     ; =============== S U B R O U T I N E ============================
 ROM:71E8
 ROM:71E8
 ROM:71E8	     init_ship_position_velocity:
-ROM:71E8 A9 60					     LDA     #60h ; '`'
+ROM:71E8 A9 60					     LDA     #$60 ; '`'
 ROM:71EA 8D CA 02				     STA     ship_PLh
 ROM:71ED 8D ED 02				     STA     ship_PLv
 ROM:71F0 A9 00					     LDA     #0
 ROM:71F2 8D 3E 02				     STA     ship_Vh
 ROM:71F5 8D 61 02				     STA     ship_Vv				     ; zero ship velocity
-ROM:71F8 A9 10					     LDA     #10h
+ROM:71F8 A9 10					     LDA     #$10
 ROM:71FA 8D 84 02				     STA     ship_PHh
-ROM:71FD A9 0C					     LDA     #0Ch
+ROM:71FD A9 0C					     LDA     #$C
 ROM:71FF 8D A7 02				     STA     ship_PHv
 ROM:7202 60					     RTS
 ROM:7202	     ; End of function init_ship_position_velocity
@@ -1980,9 +2278,9 @@ ROM:7203
 ROM:7203
 ROM:7203	     set_asteroid_velocity:
 ROM:7203 20 B5 77				     JSR     update_prng
-ROM:7206 29 8F					     AND     #8Fh ; 'è'
+ROM:7206 29 8F					     AND     #$8F ; 'è'
 ROM:7208 10 02					     BPL     loc_720C
-ROM:720A 09 F0					     ORA     #0F0h ; ''
+ROM:720A 09 F0					     ORA     #$F0 ; ''
 ROM:720C
 ROM:720C	     loc_720C:
 ROM:720C 18					     CLC
@@ -1993,9 +2291,9 @@ ROM:7216 20 B5 77				     JSR     update_prng
 ROM:7219 20 B5 77				     JSR     update_prng
 ROM:721C 20 B5 77				     JSR     update_prng
 ROM:721F 20 B5 77				     JSR     update_prng
-ROM:7222 29 8F					     AND     #8Fh ; 'è'
+ROM:7222 29 8F					     AND     #$8F ; 'è'
 ROM:7224 10 02					     BPL     loc_7228
-ROM:7226 09 F0					     ORA     #0F0h ; ''
+ROM:7226 09 F0					     ORA     #$F0 ; ''
 ROM:7228
 ROM:7228	     loc_7228:
 ROM:7228 18					     CLC
@@ -2011,14 +2309,14 @@ ROM:7233
 ROM:7233
 ROM:7233	     limit_asteroid_velocity:
 ROM:7233 10 0D					     BPL     loc_7242
-ROM:7235 C9 E1					     CMP     #0E1h ; '·'
+ROM:7235 C9 E1					     CMP     #$E1 ; '·'
 ROM:7237 B0 02					     BCS     loc_723B
-ROM:7239 A9 E1					     LDA     #0E1h ; '·'
+ROM:7239 A9 E1					     LDA     #$E1 ; '·'
 ROM:723B
 ROM:723B	     loc_723B:
-ROM:723B C9 FB					     CMP     #0FBh ; '˚'
+ROM:723B C9 FB					     CMP     #$FB ; '˚'
 ROM:723D 90 0F					     BCC     locret_724E
-ROM:723F A9 FA					     LDA     #0FAh ; '˙'
+ROM:723F A9 FA					     LDA     #$FA ; '˙'
 ROM:7241 60					     RTS
 ROM:7242	     ; ---------------------------------------------------------------------------
 ROM:7242
@@ -2028,9 +2326,9 @@ ROM:7244 B0 02					     BCS     loc_7248
 ROM:7246 A9 06					     LDA     #6
 ROM:7248
 ROM:7248	     loc_7248:
-ROM:7248 C9 20					     CMP     #20h ; ' '
+ROM:7248 C9 20					     CMP     #$20 ; ' '
 ROM:724A 90 02					     BCC     locret_724E
-ROM:724C A9 1F					     LDA     #1Fh
+ROM:724C A9 1F					     LDA     #$1F
 ROM:724E
 ROM:724E	     locret_724E:
 ROM:724E 60					     RTS
@@ -2041,15 +2339,15 @@ ROM:724F	     ; =============== S U B R O U T I N E ============================
 ROM:724F
 ROM:724F
 ROM:724F	     display_C_scores_ships:
-ROM:724F A9 10					     LDA     #10h
+ROM:724F A9 10					     LDA     #$10
 ROM:7251 85 00					     STA     globalScale
-ROM:7253 A9 50					     LDA     #50h ; 'P'
-ROM:7255 A2 A4					     LDX     #0A4h ; '§'                             ; addr = 0x50A4
-ROM:7257 20 FC 7B				     JSR     write_JSR_cmd			     ; "(C)1979 ATARI INC"
+ROM:7253 A9 50					     LDA     #$50 ; 'P'
+ROM:7255 A2 A4					     LDX     #$A4 ; '§'                              ; addr = 0x50A4
+ROM:7257 20 FC 7B				     JSR     write_JSR_cmd			     ; "(C)1979	ATARI INC"
 ROM:725A A9 19					     LDA     #25				     ; X coord (x4=100)
 ROM:725C A2 DB					     LDX     #219				     ; Y coord (x4=876)
 ROM:725E 20 03 7C				     JSR     write_CURx4_cmd
-ROM:7261 A9 70					     LDA     #70h ; 'p'                              ; scale = 7
+ROM:7261 A9 70					     LDA     #$70 ; 'p'                              ; scale = 7
 ROM:7263 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7266 A2 00					     LDX     #0
 ROM:7268 A5 1C					     LDA     numPlayers
@@ -2057,14 +2355,14 @@ ROM:726A C9 02					     CMP     #2					     ; 2 players?
 ROM:726C D0 18					     BNE     loc_7286				     ; no, skip
 ROM:726E A5 18					     LDA     curPlayer				     ; player 1?
 ROM:7270 D0 14					     BNE     loc_7286				     ; yes, skip
-ROM:7272 A2 20					     LDX     #20h ; ' '
+ROM:7272 A2 20					     LDX     #$20 ; ' '
 ROM:7274 AD 1B 02				     LDA     p1PlayerFlag
 ROM:7277 05 59					     ORA     hyperspaceFlag
 ROM:7279 D0 0B					     BNE     loc_7286
 ROM:727B AD FA 02				     LDA     shipSpawnTimer
 ROM:727E 30 06					     BMI     loc_7286
 ROM:7280 A5 5C					     LDA     fastTimer
-ROM:7282 29 10					     AND     #10h
+ROM:7282 29 10					     AND     #$10
 ROM:7284 F0 0D					     BEQ     loc_7293				     ; not every frame
 ROM:7286
 ROM:7286	     loc_7286:
@@ -2084,7 +2382,7 @@ ROM:729C 85 00					     STA     globalScale
 ROM:729E A9 78					     LDA     #120				     ; X coord (x4=480)
 ROM:72A0 A2 DB					     LDX     #219				     ; y coord (x4=876)
 ROM:72A2 20 03 7C				     JSR     write_CURx4_cmd
-ROM:72A5 A9 50					     LDA     #50h ; 'P'                              ; scale = 5
+ROM:72A5 A9 50					     LDA     #$50 ; 'P'                              ; scale = 5
 ROM:72A7 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:72AA A9 1D					     LDA     #highScoreTable
 ROM:72AC A0 02					     LDY     #2					     ; 2 bytes to display
@@ -2092,12 +2390,12 @@ ROM:72AE 38					     SEC					     ; flag no zero padding
 ROM:72AF 20 3F 77				     JSR     display_numeric			     ; display high score
 ROM:72B2 A9 00					     LDA     #0
 ROM:72B4 20 D1 7B				     JSR     display_digit_A			     ; display high score units	(=0)
-ROM:72B7 A9 10					     LDA     #10h
+ROM:72B7 A9 10					     LDA     #$10
 ROM:72B9 85 00					     STA     globalScale
 ROM:72BB A9 C0					     LDA     #192				     ; X coord (x4=768)
 ROM:72BD A2 DB					     LDX     #219				     ; Y coord (x4=876)
 ROM:72BF 20 03 7C				     JSR     write_CURx4_cmd
-ROM:72C2 A9 50					     LDA     #50h ; 'P'                              ; scale = 5
+ROM:72C2 A9 50					     LDA     #$50 ; 'P'                              ; scale = 5
 ROM:72C4 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:72C7 A2 00					     LDX     #0
 ROM:72C9 A5 1C					     LDA     numPlayers
@@ -2106,14 +2404,14 @@ ROM:72CD F0 2E					     BEQ     locret_72FD			     ; yes, exit
 ROM:72CF 90 18					     BCC     loc_72E9
 ROM:72D1 A5 18					     LDA     curPlayer
 ROM:72D3 F0 14					     BEQ     loc_72E9
-ROM:72D5 A2 20					     LDX     #20h ; ' '
+ROM:72D5 A2 20					     LDX     #$20 ; ' '
 ROM:72D7 AD 1B 02				     LDA     p1PlayerFlag
 ROM:72DA 05 59					     ORA     hyperspaceFlag
 ROM:72DC D0 0B					     BNE     loc_72E9
 ROM:72DE AD FA 02				     LDA     shipSpawnTimer
 ROM:72E1 30 06					     BMI     loc_72E9
 ROM:72E3 A5 5C					     LDA     fastTimer
-ROM:72E5 29 10					     AND     #10h
+ROM:72E5 29 10					     AND     #$10
 ROM:72E7 F0 0D					     BEQ     loc_72F6				     ; not every frame
 ROM:72E9
 ROM:72E9	     loc_72E9:
@@ -2161,20 +2459,20 @@ ROM:731B 66 06					     ROR     byte_6
 ROM:731D 85 07					     STA     byte_7				     ; 7:6 = (7:6+1024)/8
 ROM:731F A2 04					     LDX     #4					     ; base of temp coordinates
 ROM:7321 20 1C 7C				     JSR     write_CUR_cmd
-ROM:7324 A9 70					     LDA     #70h ; 'p'
+ROM:7324 A9 70					     LDA     #$70 ; 'p'
 ROM:7326 38					     SEC
 ROM:7327 E5 00					     SBC     globalScale
-ROM:7329 C9 A0					     CMP     #0A0h ; '†'
+ROM:7329 C9 A0					     CMP     #$A0 ; '†'
 ROM:732B 90 0E					     BCC     loc_733B
 ROM:732D
 ROM:732D	     loc_732D:
 ROM:732D 48					     PHA
-ROM:732E A9 90					     LDA     #90h ; 'ê'
+ROM:732E A9 90					     LDA     #$90 ; 'ê'
 ROM:7330 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7333 68					     PLA
 ROM:7334 38					     SEC
-ROM:7335 E9 10					     SBC     #10h
-ROM:7337 C9 A0					     CMP     #0A0h ; '†'
+ROM:7335 E9 10					     SBC     #$10
+ROM:7337 C9 A0					     CMP     #$A0 ; '†'
 ROM:7339 B0 F2					     BCS     loc_732D
 ROM:733B
 ROM:733B	     loc_733B:
@@ -2182,13 +2480,13 @@ ROM:733B 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:733E A6 0D					     LDX     byte_D				     ; restore object offset
 ROM:7340 BD 00 02				     LDA     P1RAM,X				     ; get entry (again)
 ROM:7343 10 16					     BPL     display_shot_ship_asteroid_or_saucer
-ROM:7345 E0 1B					     CPX     #1Bh				     ; PlayerFlag?
+ROM:7345 E0 1B					     CPX     #$1B				     ; PlayerFlag?
 ROM:7347 F0 0C					     BEQ     loc_7355				     ; yes, go
-ROM:7349 29 0C					     AND     #0Ch				     ; pattern (3:2)
+ROM:7349 29 0C					     AND     #$C				     ; pattern (3:2)
 ROM:734B 4A					     LSR     A					     ; pattern (2:1)
 ROM:734C A8					     TAY					     ; pattern = word offset
-ROM:734D B9 F8 50				     LDA     (DVGROM+0F8h),Y			     ; shrapnel	table address LSB
-ROM:7350 BE F9 50				     LDX     (DVGROM+0F9h),Y			     ; shrapnel	table address MSB
+ROM:734D B9 F8 50				     LDA     DVGROM+$F8,Y			     ; shrapnel	table address LSB
+ROM:7350 BE F9 50				     LDX     DVGROM+$F9,Y			     ; shrapnel	table address MSB
 ROM:7353 D0 1B					     BNE     loc_7370				     ; always
 ROM:7355
 ROM:7355	     loc_7355:
@@ -2198,17 +2496,17 @@ ROM:735A 60					     RTS
 ROM:735B	     ; ---------------------------------------------------------------------------
 ROM:735B
 ROM:735B	     display_shot_ship_asteroid_or_saucer:					     ; PlayerFlag?
-ROM:735B E0 1B					     CPX     #1Bh
+ROM:735B E0 1B					     CPX     #$1B
 ROM:735D F0 17					     BEQ     display_ship			     ; yes, go
-ROM:735F E0 1C					     CPX     #1Ch				     ; SaucerFlag?
+ROM:735F E0 1C					     CPX     #$1C				     ; SaucerFlag?
 ROM:7361 F0 19					     BEQ     display_saucer			     ; yes, go
 ROM:7363 B0 1F					     BCS     display_shot			     ; shot, go
-ROM:7365 29 18					     AND     #18h				     ; pattern (4:3)
+ROM:7365 29 18					     AND     #$18				     ; pattern (4:3)
 ROM:7367 4A					     LSR     A
 ROM:7368 4A					     LSR     A					     ; pattern (2:1)
 ROM:7369 A8					     TAY					     ; pattern = word offset
-ROM:736A B9 DE 51				     LDA     (DVGROM+1DEh),Y			     ; asteroid	table address LSB
-ROM:736D BE DF 51				     LDX     (DVGROM+1DFh),Y			     ; asteroid	table address MSB
+ROM:736A B9 DE 51				     LDA     DVGROM+$1DE,Y			     ; asteroid	table address LSB
+ROM:736D BE DF 51				     LDX     DVGROM+$1DF,Y			     ; asteroid	table address MSB
 ROM:7370
 ROM:7370	     loc_7370:									     ; writes JSR instruction
 ROM:7370 20 45 7D				     JSR     write_AX_to_avgram
@@ -2223,13 +2521,13 @@ ROM:737B 60					     RTS
 ROM:737C	     ; ---------------------------------------------------------------------------
 ROM:737C
 ROM:737C	     display_saucer:								     ; saucer table address LSB
-ROM:737C AD 50 52				     LDA     DVGROM+250h
-ROM:737F AE 51 52				     LDX     DVGROM+251h			     ; saucer table address MSB
+ROM:737C AD 50 52				     LDA     DVGROM+$250
+ROM:737F AE 51 52				     LDX     DVGROM+$251			     ; saucer table address MSB
 ROM:7382 D0 EC					     BNE     loc_7370				     ; always
 ROM:7384
 ROM:7384	     display_shot:
-ROM:7384 A9 70					     LDA     #70h ; 'p'
-ROM:7386 A2 F0					     LDX     #0F0h ; ''
+ROM:7384 A9 70					     LDA     #$70 ; 'p'
+ROM:7386 A2 F0					     LDX     #$F0 ; ''
 ROM:7388 20 E0 7C				     JSR     set_scale_A_bright_X
 ROM:738B A6 0D					     LDX     byte_D				     ; restore object offset
 ROM:738D A5 5C					     LDA     fastTimer
@@ -2253,9 +2551,9 @@ ROM:739C 90 12					     BCC     loc_73B0
 ROM:739E B5 53					     LDA     p1ScoreThousands,X
 ROM:73A0 69 00					     ADC     #0
 ROM:73A2 95 53					     STA     p1ScoreThousands,X
-ROM:73A4 29 0F					     AND     #0Fh				     ; another 10,000?
+ROM:73A4 29 0F					     AND     #$F				     ; another 10,000?
 ROM:73A6 D0 08					     BNE     loc_73B0				     ; no, skip
-ROM:73A8 A9 B0					     LDA     #0B0h ; '∞'
+ROM:73A8 A9 B0					     LDA     #$B0 ; '∞'
 ROM:73AA 85 68					     STA     timerBonusShipSound
 ROM:73AC A6 18					     LDX     curPlayer
 ROM:73AE F6 57					     INC     numShipsP1,X			     ; extra ship!
@@ -2275,10 +2573,10 @@ ROM:73B4 0A					     ASL     A
 ROM:73B5 0A					     ASL     A					     ; 0/4
 ROM:73B6 85 08					     STA     byte_8
 ROM:73B8 A5 6F					     LDA     io3200ShadowRegister
-ROM:73BA 29 FB					     AND     #0FBh ; '˚'                             ; mask off RAMSEL
+ROM:73BA 29 FB					     AND     #$FB ; '˚'                              ; mask off RAMSEL
 ROM:73BC 05 08					     ORA     byte_8				     ; OR in new RAMSEL
 ROM:73BE 85 6F					     STA     io3200ShadowRegister
-ROM:73C0 8D 00 32				     STA     3200h
+ROM:73C0 8D 00 32				     STA     $3200
 ROM:73C3 60					     RTS
 ROM:73C3	     ; End of function set_RAMSEL_for_player
 ROM:73C3
@@ -2315,13 +2613,13 @@ ROM:73E9 85 00					     STA     globalScale
 ROM:73EB
 ROM:73EB	     display_hs_entry:
 ROM:73EB B5 1D					     LDA     highScoreTable,X
-ROM:73ED 15 1E					     ORA     (highScoreTable+1),X		     ; end of table?
+ROM:73ED 15 1E					     ORA     highScoreTable+1,X			     ; end of table?
 ROM:73EF F0 67					     BEQ     loc_7458				     ; yes, exit
 ROM:73F1 86 0F					     STX     byte_F				     ; entry counter (x2)
 ROM:73F3 A9 5F					     LDA     #95				     ; x coord (x4=380)
 ROM:73F5 A6 0E					     LDX     byte_E				     ; y coord
 ROM:73F7 20 03 7C				     JSR     write_CURx4_cmd
-ROM:73FA A9 40					     LDA     #40h ; '@'                              ; S=4
+ROM:73FA A9 40					     LDA     #$40 ; '@'                              ; S=4
 ROM:73FC 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:73FF A5 0F					     LDA     byte_F				     ; entry counter (x2)
 ROM:7401 4A					     LSR     A					     ; x1
@@ -2334,7 +2632,7 @@ ROM:740A 38					     SEC					     ; flag no zero padding
 ROM:740B A0 01					     LDY     #1					     ; 1 byte to print
 ROM:740D A2 00					     LDX     #0					     ; pad digit
 ROM:740F 20 3F 77				     JSR     display_numeric			     ; display entry no.
-ROM:7412 A9 40					     LDA     #40h ; '@'                              ; S=4
+ROM:7412 A9 40					     LDA     #$40 ; '@'                              ; S=4
 ROM:7414 AA					     TAX					     ; Brightness=4
 ROM:7415 20 E0 7C				     JSR     set_scale_A_bright_X		     ; displays	a dot???
 ROM:7418 A0 00					     LDY     #0					     ; <space>
@@ -2402,37 +2700,37 @@ ROM:7465
 ROM:7465
 ROM:7465	     display_exploding_ship:
 ROM:7465 AD 1B 02				     LDA     p1PlayerFlag
-ROM:7468 C9 A2					     CMP     #0A2h ; '¢'                             ; 2 frames past exploding?
+ROM:7468 C9 A2					     CMP     #$A2 ; '¢'                              ; 2 frames past exploding?
 ROM:746A B0 22					     BCS     loc_748E
-ROM:746C A2 0A					     LDX     #0Ah
+ROM:746C A2 0A					     LDX     #$A
 ROM:746E
 ROM:746E	     loc_746E:
-ROM:746E BD EC 50				     LDA     (DVGROM+0ECh),X
+ROM:746E BD EC 50				     LDA     DVGROM+$EC,X
 ROM:7471 4A					     LSR     A
 ROM:7472 4A					     LSR     A
 ROM:7473 4A					     LSR     A
 ROM:7474 4A					     LSR     A
 ROM:7475 18					     CLC
-ROM:7476 69 F8					     ADC     #0F8h ; '¯'
-ROM:7478 49 F8					     EOR     #0F8h ; '¯'
-ROM:747A 95 7E					     STA     7Eh,X
-ROM:747C BD ED 50				     LDA     (DVGROM+0EDh),X
+ROM:7476 69 F8					     ADC     #$F8 ; '¯'
+ROM:7478 49 F8					     EOR     #$F8 ; '¯'
+ROM:747A 95 7E					     STA     $7E,X
+ROM:747C BD ED 50				     LDA     DVGROM+$ED,X
 ROM:747F 4A					     LSR     A
 ROM:7480 4A					     LSR     A
 ROM:7481 4A					     LSR     A
 ROM:7482 4A					     LSR     A
 ROM:7483 18					     CLC
-ROM:7484 69 F8					     ADC     #0F8h ; '¯'
-ROM:7486 49 F8					     EOR     #0F8h ; '¯'
-ROM:7488 95 8A					     STA     8Ah,X
+ROM:7484 69 F8					     ADC     #$F8 ; '¯'
+ROM:7486 49 F8					     EOR     #$F8 ; '¯'
+ROM:7488 95 8A					     STA     $8A,X
 ROM:748A CA					     DEX
 ROM:748B CA					     DEX
 ROM:748C 10 E0					     BPL     loc_746E
 ROM:748E
 ROM:748E	     loc_748E:
 ROM:748E AD 1B 02				     LDA     p1PlayerFlag
-ROM:7491 49 FF					     EOR     #0FFh
-ROM:7493 29 70					     AND     #70h ; 'p'
+ROM:7491 49 FF					     EOR     #$FF
+ROM:7493 29 70					     AND     #$70 ; 'p'
 ROM:7495 4A					     LSR     A
 ROM:7496 4A					     LSR     A
 ROM:7497 4A					     LSR     A
@@ -2441,31 +2739,31 @@ ROM:7499
 ROM:7499	     loc_7499:
 ROM:7499 86 09					     STX     byte_9
 ROM:749B A0 00					     LDY     #0
-ROM:749D BD EC 50				     LDA     (DVGROM+0ECh),X
+ROM:749D BD EC 50				     LDA     DVGROM+$EC,X
 ROM:74A0 10 01					     BPL     loc_74A3
 ROM:74A2 88					     DEY
 ROM:74A3
 ROM:74A3	     loc_74A3:
 ROM:74A3 18					     CLC
-ROM:74A4 75 7D					     ADC     7Dh,X
-ROM:74A6 95 7D					     STA     7Dh,X
+ROM:74A4 75 7D					     ADC     $7D,X
+ROM:74A6 95 7D					     STA     $7D,X
 ROM:74A8 98					     TYA
-ROM:74A9 75 7E					     ADC     7Eh,X
-ROM:74AB 95 7E					     STA     7Eh,X
+ROM:74A9 75 7E					     ADC     $7E,X
+ROM:74AB 95 7E					     STA     $7E,X
 ROM:74AD 85 04					     STA     byte_4
 ROM:74AF 84 05					     STY     byte_5
 ROM:74B1 A0 00					     LDY     #0
-ROM:74B3 BD ED 50				     LDA     (DVGROM+0EDh),X
+ROM:74B3 BD ED 50				     LDA     DVGROM+$ED,X
 ROM:74B6 10 01					     BPL     loc_74B9
 ROM:74B8 88					     DEY
 ROM:74B9
 ROM:74B9	     loc_74B9:
 ROM:74B9 18					     CLC
-ROM:74BA 75 89					     ADC     89h,X
-ROM:74BC 95 89					     STA     89h,X
+ROM:74BA 75 89					     ADC     $89,X
+ROM:74BC 95 89					     STA     $89,X
 ROM:74BE 98					     TYA
-ROM:74BF 75 8A					     ADC     8Ah,X
-ROM:74C1 95 8A					     STA     8Ah,X
+ROM:74BF 75 8A					     ADC     $8A,X
+ROM:74C1 95 8A					     STA     $8A,X
 ROM:74C3 85 06					     STA     byte_6
 ROM:74C5 84 07					     STY     byte_7
 ROM:74C7 A5 02					     LDA     dvg_curr_addr_lsb
@@ -2474,25 +2772,25 @@ ROM:74CB A5 03					     LDA     dvg_curr_addr_msb
 ROM:74CD 85 0C					     STA     byte_C
 ROM:74CF 20 49 7C				     JSR     sub_7C49
 ROM:74D2 A4 09					     LDY     byte_9
-ROM:74D4 B9 E0 50				     LDA     (DVGROM+0E0h),Y			     ; wrecked ship table address LSB
-ROM:74D7 BE E1 50				     LDX     (DVGROM+0E1h),Y			     ; wrecked ship table address MSB
+ROM:74D4 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; wrecked ship table address LSB
+ROM:74D7 BE E1 50				     LDX     DVGROM+$E1,Y			     ; wrecked ship table address MSB
 ROM:74DA 20 45 7D				     JSR     write_AX_to_avgram
 ROM:74DD A4 09					     LDY     byte_9
-ROM:74DF B9 E1 50				     LDA     (DVGROM+0E1h),Y			     ; wrecked ship table address MSB
+ROM:74DF B9 E1 50				     LDA     DVGROM+$E1,Y			     ; wrecked ship table address MSB
 ROM:74E2 49 04					     EOR     #4
 ROM:74E4 AA					     TAX
-ROM:74E5 B9 E0 50				     LDA     (DVGROM+0E0h),Y			     ; wrecked ship table address LSB
-ROM:74E8 29 0F					     AND     #0Fh
+ROM:74E5 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; wrecked ship table address LSB
+ROM:74E8 29 0F					     AND     #$F
 ROM:74EA 49 04					     EOR     #4
 ROM:74EC 20 45 7D				     JSR     write_AX_to_avgram
-ROM:74EF A0 FF					     LDY     #0FFh
+ROM:74EF A0 FF					     LDY     #$FF
 ROM:74F1
 ROM:74F1	     loc_74F1:
 ROM:74F1 C8					     INY
-ROM:74F2 B1 0B					     LDA     (0Bh),Y
+ROM:74F2 B1 0B					     LDA     ($B),Y
 ROM:74F4 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:74F6 C8					     INY
-ROM:74F7 B1 0B					     LDA     (0Bh),Y
+ROM:74F7 B1 0B					     LDA     ($B),Y
 ROM:74F9 49 04					     EOR     #4
 ROM:74FB 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:74FD C0 03					     CPY     #3
@@ -2528,7 +2826,7 @@ ROM:7521 50 07					     BVC     loc_752A				     ; b6=0
 ROM:7523
 ROM:7523	     loc_7523:									     ; flag negative delta
 ROM:7523 A2 04					     LDX     #4
-ROM:7525 A9 80					     LDA     #80h ; 'Ä'
+ROM:7525 A9 80					     LDA     #$80 ; 'Ä'
 ROM:7527 38					     SEC
 ROM:7528 E5 08					     SBC     byte_8
 ROM:752A
@@ -2536,10 +2834,10 @@ ROM:752A	     loc_752A:									     ; flag for	flip X
 ROM:752A 86 08					     STX     byte_8
 ROM:752C 84 09					     STY     byte_9				     ; flag for	flip Y
 ROM:752E 4A					     LSR     A
-ROM:752F 29 FE					     AND     #0FEh ; '˛'
+ROM:752F 29 FE					     AND     #$FE ; '˛'
 ROM:7531 A8					     TAY
-ROM:7532 B9 6E 52				     LDA     (DVGROM+26Eh),Y			     ; ship table address LSB
-ROM:7535 BE 6F 52				     LDX     (DVGROM+26Fh),Y			     ; ship table address MSB
+ROM:7532 B9 6E 52				     LDA     DVGROM+$26E,Y			     ; ship table address LSB
+ROM:7535 BE 6F 52				     LDX     DVGROM+$26F,Y			     ; ship table address MSB
 ROM:7538 20 D3 6A				     JSR     copy_vector_from_table_to_avgram
 ROM:753B AD 05 24				     LDA     thrustSwitch			     ; thrust?
 ROM:753E 10 14					     BPL     locret_7554			     ; no, exit
@@ -2580,22 +2878,22 @@ ROM:7561 F0 08					     BEQ     loc_756B				     ; no saucer, skip
 ROM:7563 6A					     ROR     A
 ROM:7564 6A					     ROR     A
 ROM:7565 6A					     ROR     A
-ROM:7566 8D 02 3C				     STA     3C02h				     ; sound select (large/small saucer)
-ROM:7569 A2 80					     LDX     #80h ; 'Ä'                              ; enable sound
+ROM:7566 8D 02 3C				     STA     $3C02				     ; sound select (large/small saucer)
+ROM:7569 A2 80					     LDX     #$80 ; 'Ä'                              ; enable sound
 ROM:756B
 ROM:756B	     loc_756B:									     ; sound (saucer)
-ROM:756B 8E 00 3C				     STX     3C00h
+ROM:756B 8E 00 3C				     STX     $3C00
 ROM:756E A2 01					     LDX     #1					     ; index to	saucer fire sound
 ROM:7570 20 CD 75				     JSR     update_player_saucer_sound
-ROM:7573 8D 01 3C				     STA     3C01h				     ; sound (saucer fire)
+ROM:7573 8D 01 3C				     STA     $3C01				     ; sound (saucer fire)
 ROM:7576 CA					     DEX					     ; index to	player sound
 ROM:7577 20 CD 75				     JSR     update_player_saucer_sound
-ROM:757A 8D 04 3C				     STA     3C04h				     ; sound (ship fire)
+ROM:757A 8D 04 3C				     STA     $3C04				     ; sound (ship fire)
 ROM:757D AD 1B 02				     LDA     p1PlayerFlag
 ROM:7580 C9 01					     CMP     #1					     ; alive?
 ROM:7582 F0 04					     BEQ     loc_7588				     ; yes, skip
 ROM:7584 8A					     TXA
-ROM:7585 8D 03 3C				     STA     3C03h				     ; sound (ship thrust)
+ROM:7585 8D 03 3C				     STA     $3C03				     ; sound (ship thrust)
 ROM:7588
 ROM:7588	     loc_7588:
 ROM:7588 AD F6 02				     LDA     currentNumberOfAsteroids
@@ -2611,9 +2909,9 @@ ROM:759C D0 21					     BNE     loc_75BF				     ; not done, skip
 ROM:759E
 ROM:759E	     loc_759E:
 ROM:759E A5 6C					     LDA     volFreqThumpSound
-ROM:75A0 29 0F					     AND     #0Fh
+ROM:75A0 29 0F					     AND     #$F
 ROM:75A2 85 6C					     STA     volFreqThumpSound
-ROM:75A4 8D 00 3A				     STA     3A00h				     ; sound (thump)
+ROM:75A4 8D 00 3A				     STA     $3A00				     ; sound (thump)
 ROM:75A7 AD FC 02				     LDA     byte_2FC
 ROM:75AA 85 6E					     STA     timerThumpSoundOff
 ROM:75AC 10 11					     BPL     loc_75BF
@@ -2624,20 +2922,20 @@ ROM:75B0 D0 0D					     BNE     loc_75BF				     ; not done, skip
 ROM:75B2 A9 04					     LDA     #4
 ROM:75B4 85 6D					     STA     timerThumpSoundOn			     ; init thump on timer
 ROM:75B6 A5 6C					     LDA     volFreqThumpSound
-ROM:75B8 49 14					     EOR     #14h
+ROM:75B8 49 14					     EOR     #$14
 ROM:75BA 85 6C					     STA     volFreqThumpSound
-ROM:75BC 8D 00 3A				     STA     3A00h				     ; sound (thump)
+ROM:75BC 8D 00 3A				     STA     $3A00				     ; sound (thump)
 ROM:75BF
 ROM:75BF	     loc_75BF:
 ROM:75BF A5 69					     LDA     timerExplosionSound
 ROM:75C1 AA					     TAX
-ROM:75C2 29 3F					     AND     #3Fh ; '?'                              ; exploding sound on?
+ROM:75C2 29 3F					     AND     #$3F ; '?'                              ; exploding sound on?
 ROM:75C4 F0 01					     BEQ     loc_75C7				     ; no, skip
 ROM:75C6 CA					     DEX					     ; update timer
 ROM:75C7
 ROM:75C7	     loc_75C7:
 ROM:75C7 86 69					     STX     timerExplosionSound
-ROM:75C9 8E 00 36				     STX     3600h				     ; sound (explosion)
+ROM:75C9 8E 00 36				     STX     $3600				     ; sound (explosion)
 ROM:75CC 60					     RTS
 ROM:75CC	     ; End of function handle_sounds
 ROM:75CC
@@ -2650,11 +2948,11 @@ ROM:75CD B5 6A					     LDA     fireSoundFlagPlayer,X		     ; player/saucer soun
 ROM:75CF 30 0C					     BMI     loc_75DD				     ; branch if ON
 ROM:75D1 B5 66					     LDA     timerPlayerFireSound,X		     ; player/saucer fire sound	timer
 ROM:75D3 10 12					     BPL     loc_75E7
-ROM:75D5 A9 10					     LDA     #10h				     ; init value
+ROM:75D5 A9 10					     LDA     #$10				     ; init value
 ROM:75D7 95 66					     STA     timerPlayerFireSound,X		     ; player/saucer fire sound	timer
 ROM:75D9
 ROM:75D9	     loc_75D9:									     ; turn on sound
-ROM:75D9 A9 80					     LDA     #80h ; 'Ä'
+ROM:75D9 A9 80					     LDA     #$80 ; 'Ä'
 ROM:75DB 30 0C					     BMI     loc_75E9				     ; exit
 ROM:75DD
 ROM:75DD	     loc_75DD:									     ; player/saucer fire sound	timer
@@ -2681,10 +2979,10 @@ ROM:75EC
 ROM:75EC
 ROM:75EC	     handle_asteroid_hit:
 ROM:75EC 86 0D					     STX     byte_D				     ; save object index
-ROM:75EE A9 50					     LDA     #50h ; 'P'
+ROM:75EE A9 50					     LDA     #$50 ; 'P'
 ROM:75F0 8D F9 02				     STA     byte_2F9
 ROM:75F3 B9 00 02				     LDA     P1RAM,Y				     ; asteroid	status
-ROM:75F6 29 78					     AND     #78h ; 'x'                              ; bits 6-3 only
+ROM:75F6 29 78					     AND     #$78 ; 'x'                              ; bits 6-3 only
 ROM:75F8 85 0E					     STA     byte_E
 ROM:75FA B9 00 02				     LDA     P1RAM,Y				     ; asteroid	status
 ROM:75FD 29 07					     AND     #7					     ; bits 2-0	only
@@ -2717,7 +3015,7 @@ ROM:7627 EE F6 02				     INC     currentNumberOfAsteroids		     ; add another a
 ROM:762A 20 9D 6A				     JSR     clone_asteroid_maybe
 ROM:762D 20 03 72				     JSR     set_asteroid_velocity
 ROM:7630 BD 23 02				     LDA     asteroid_Vh,X
-ROM:7633 29 1F					     AND     #1Fh
+ROM:7633 29 1F					     AND     #$1F
 ROM:7635 0A					     ASL     A					     ; twice as	fast
 ROM:7636 5D AF 02				     EOR     asteroid_PLh,X
 ROM:7639 9D AF 02				     STA     asteroid_PLh,X
@@ -2727,7 +3025,7 @@ ROM:7641 EE F6 02				     INC     currentNumberOfAsteroids		     ; add another a
 ROM:7644 20 9D 6A				     JSR     clone_asteroid_maybe
 ROM:7647 20 03 72				     JSR     set_asteroid_velocity
 ROM:764A BD 46 02				     LDA     asteroid_Vv,X
-ROM:764D 29 1F					     AND     #1Fh
+ROM:764D 29 1F					     AND     #$1F
 ROM:764F 0A					     ASL     A					     ; twice as	fast
 ROM:7650 5D D2 02				     EOR     asteroid_PLv,X
 ROM:7653 9D D2 02				     STA     asteroid_PLv,X
@@ -2738,9 +3036,9 @@ ROM:7658 60					     RTS
 ROM:7658	     ; End of function handle_asteroid_hit
 ROM:7658
 ROM:7658	     ; ---------------------------------------------------------------------------
-ROM:7659 10	     asteroid_score_tbl:	     .db  10h					     ; 100pts (small asteroid)
-ROM:765A 05					     .db    5					     ; 50pts (medium asteroid)
-ROM:765B 02					     .db    2					     ; 20pts (large asteroid)
+ROM:7659 10	     asteroid_score_tbl:	     .BYTE $10					     ; 100pts (small asteroid)
+ROM:765A 05					     .BYTE   5					     ; 50pts (medium asteroid)
+ROM:765B 02					     .BYTE   2					     ; 20pts (large asteroid)
 ROM:765C
 ROM:765C	     ; =============== S U B R O U T I N E =======================================
 ROM:765C
@@ -2759,7 +3057,7 @@ ROM:766A
 ROM:766A	     loc_766A:
 ROM:766A B9 1D 00				     LDA     highScoreTable,Y
 ROM:766D D5 52					     CMP     p1ScoreTens,X
-ROM:766F B9 1E 00				     LDA     (highScoreTable+1),Y
+ROM:766F B9 1E 00				     LDA     highScoreTable+1,Y
 ROM:7672 F5 53					     SBC     p1ScoreThousands,X
 ROM:7674 90 23					     BCC     insert_score_in_table		     ; high score here,	exit
 ROM:7676 C8					     INY
@@ -2778,7 +3076,7 @@ ROM:7686 90 0A					     BCC     loc_7692
 ROM:7688 69 02					     ADC     #2
 ROM:768A C9 1E					     CMP     #30
 ROM:768C 90 02					     BCC     loc_7690
-ROM:768E A9 FF					     LDA     #0FFh
+ROM:768E A9 FF					     LDA     #$FF
 ROM:7690
 ROM:7690	     loc_7690:
 ROM:7690 85 33					     STA     placeP2HighScore
@@ -2812,13 +3110,13 @@ ROM:76AE F0 1F					     BEQ     loc_76CF				     ; yes, exit
 ROM:76B0 B5 31					     LDA     letterHighScoreEntry,X
 ROM:76B2 95 34					     STA     highScoreInitials,X
 ROM:76B4 B5 32					     LDA     placeP1HighScore,X
-ROM:76B6 95 35					     STA     (highScoreInitials+1),X
+ROM:76B6 95 35					     STA     highScoreInitials+1,X
 ROM:76B8 B5 33					     LDA     placeP2HighScore,X
-ROM:76BA 95 36					     STA     (highScoreInitials+2),X
+ROM:76BA 95 36					     STA     highScoreInitials+2,X
 ROM:76BC B9 1B 00				     LDA     unk_1B,Y
 ROM:76BF 99 1D 00				     STA     highScoreTable,Y
 ROM:76C2 B9 1C 00				     LDA     numPlayers,Y
-ROM:76C5 99 1E 00				     STA     (highScoreTable+1),Y		     ; shift entry down
+ROM:76C5 99 1E 00				     STA     highScoreTable+1,Y			     ; shift entry down
 ROM:76C8 88					     DEY
 ROM:76C9 88					     DEY					     ; next high score entry
 ROM:76CA CA					     DEX
@@ -2827,43 +3125,43 @@ ROM:76CC CA					     DEX					     ; next initials entry
 ROM:76CD D0 DD					     BNE     loc_76AC				     ; not done, loop
 ROM:76CF
 ROM:76CF	     loc_76CF:									     ; 'A'
-ROM:76CF A9 0B					     LDA     #0Bh
+ROM:76CF A9 0B					     LDA     #$B
 ROM:76D1 95 34					     STA     highScoreInitials,X
 ROM:76D3 A9 00					     LDA     #0
-ROM:76D5 95 35					     STA     (highScoreInitials+1),X
-ROM:76D7 95 36					     STA     (highScoreInitials+2),X
-ROM:76D9 A9 F0					     LDA     #0F0h ; ''
+ROM:76D5 95 35					     STA     highScoreInitials+1,X
+ROM:76D7 95 36					     STA     highScoreInitials+2,X
+ROM:76D9 A9 F0					     LDA     #$F0 ; ''
 ROM:76DB 85 5D					     STA     slowTimer
 ROM:76DD A6 0B					     LDX     byte_B				     ; player 1/2
 ROM:76DF A4 0C					     LDY     byte_C				     ; high score entry	offset
 ROM:76E1 B5 53					     LDA     p1ScoreThousands,X
-ROM:76E3 99 1E 00				     STA     (highScoreTable+1),Y
+ROM:76E3 99 1E 00				     STA     highScoreTable+1,Y
 ROM:76E6 B5 52					     LDA     p1ScoreTens,X
 ROM:76E8 99 1D 00				     STA     highScoreTable,Y			     ; copy score into high score table
 ROM:76EB A0 00					     LDY     #0
 ROM:76ED F0 8D					     BEQ     loc_767C				     ; continue	with next entry
 ROM:76EF
 ROM:76EF	     loc_76EF:
-ROM:76EF DF 98 10				     DCP     1098h,X
+ROM:76EF DF 98 10				     DCP     $1098,X
 ROM:76EF	     ; End of function check_high_score
 ROM:76EF
-ROM:76F2 09 20					     ORA     #20h ; ' '
+ROM:76F2 09 20					     ORA     #$20 ; ' '
 ROM:76F4 08					     PHP
-ROM:76F5 77 20					     RRA     20h,X
+ROM:76F5 77 20					     RRA     $20,X
 ROM:76F7 FC 76 4C				     NOP
 ROM:76FA 08					     PHP
-ROM:76FB 77 A8					     RRA     0A8h,X
+ROM:76FB 77 A8					     RRA     $A8,X
 ROM:76FD 8A					     TXA
 ROM:76FE 10 0E					     BPL     sub_770E
 ROM:7700 20 08 77				     JSR     negate_A
 ROM:7703 20 0E 77				     JSR     sub_770E
-ROM:7706 49 80					     EOR     #80h ; 'Ä'
+ROM:7706 49 80					     EOR     #$80 ; 'Ä'
 ROM:7708
 ROM:7708	     ; =============== S U B R O U T I N E =======================================
 ROM:7708
 ROM:7708
 ROM:7708	     negate_A:
-ROM:7708 49 FF					     EOR     #0FFh
+ROM:7708 49 FF					     EOR     #$FF
 ROM:770A 18					     CLC
 ROM:770B 69 01					     ADC     #1
 ROM:770D 60					     RTS
@@ -2884,12 +3182,12 @@ ROM:7719 85 0C					     STA     byte_C
 ROM:771B 98					     TYA
 ROM:771C 20 28 77				     JSR     sub_7728
 ROM:771F 38					     SEC
-ROM:7720 E9 40					     SBC     #40h ; '@'
+ROM:7720 E9 40					     SBC     #$40 ; '@'
 ROM:7722 4C 08 77				     JMP     negate_A
 ROM:7725	     ; ---------------------------------------------------------------------------
 ROM:7725
 ROM:7725	     loc_7725:
-ROM:7725 A9 20					     LDA     #20h ; ' '
+ROM:7725 A9 20					     LDA     #$20 ; ' '
 ROM:7727 60					     RTS
 ROM:7727	     ; End of function sub_770E
 ROM:7727
@@ -2904,23 +3202,23 @@ ROM:772E 60					     RTS
 ROM:772E	     ; End of function sub_7728
 ROM:772E
 ROM:772E	     ; ---------------------------------------------------------------------------
-ROM:772F 00	     unk_772F:			     .db    0
-ROM:7730 02					     .db    2
-ROM:7731 05					     .db    5
-ROM:7732 07					     .db    7
-ROM:7733 0A					     .db  0Ah
-ROM:7734 0C					     .db  0Ch
-ROM:7735 0F					     .db  0Fh
-ROM:7736 11					     .db  11h
-ROM:7737 13					     .db  13h
-ROM:7738 15					     .db  15h
-ROM:7739 17					     .db  17h
-ROM:773A 19					     .db  19h
-ROM:773B 1A					     .db  1Ah
-ROM:773C 1C					     .db  1Ch
-ROM:773D 1D					     .db  1Dh
-ROM:773E 1F					     .db  1Fh
-ROM:773F	     A=buffer, Y=#bytes, X=pad digit
+ROM:772F 00	     unk_772F:			     .BYTE   0
+ROM:7730 02					     .BYTE   2
+ROM:7731 05					     .BYTE   5
+ROM:7732 07					     .BYTE   7
+ROM:7733 0A					     .BYTE  $A
+ROM:7734 0C					     .BYTE  $C
+ROM:7735 0F					     .BYTE  $F
+ROM:7736 11					     .BYTE $11
+ROM:7737 13					     .BYTE $13
+ROM:7738 15					     .BYTE $15
+ROM:7739 17					     .BYTE $17
+ROM:773A 19					     .BYTE $19
+ROM:773B 1A					     .BYTE $1A
+ROM:773C 1C					     .BYTE $1C
+ROM:773D 1D					     .BYTE $1D
+ROM:773E 1F					     .BYTE $1F
+ROM:773F	     ; A=buffer, Y=#bytes, X=pad digit
 ROM:773F
 ROM:773F	     ; =============== S U B R O U T I N E =======================================
 ROM:773F
@@ -2981,7 +3279,7 @@ ROM:777B 88					     DEY
 ROM:777C D0 F4					     BNE     loc_7772
 ROM:777E A5 0B					     LDA     byte_B
 ROM:7780 2A					     ROL     A
-ROM:7781 29 0F					     AND     #0Fh
+ROM:7781 29 0F					     AND     #$F
 ROM:7783 AA					     TAX
 ROM:7784 60					     RTS
 ROM:7784	     ; End of function sub_776C
@@ -2992,7 +3290,7 @@ ROM:7785
 ROM:7785
 ROM:7785	     display_digit:
 ROM:7785 90 04					     BCC     display_pad_digit			     ; skip if no pad flagged?
-ROM:7787 29 0F					     AND     #0Fh				     ; any pad digit?
+ROM:7787 29 0F					     AND     #$F				     ; any pad digit?
 ROM:7789 F0 27					     BEQ     loc_77B2				     ; no, skip
 ROM:7789	     ; End of function display_digit
 ROM:7789
@@ -3003,19 +3301,19 @@ ROM:778B
 ROM:778B	     display_pad_digit:
 ROM:778B A6 17					     LDX     byte_17				     ; any pad digit?
 ROM:778D F0 23					     BEQ     loc_77B2				     ; none, exit
-ROM:778F 29 0F					     AND     #0Fh
+ROM:778F 29 0F					     AND     #$F
 ROM:7791 18					     CLC
 ROM:7792 69 01					     ADC     #1
 ROM:7794 08					     PHP
 ROM:7795 0A					     ASL     A					     ; x2
 ROM:7796 A8					     TAY					     ; word offset
-ROM:7797 B9 D4 56				     LDA     (DVGROM+6D4h),Y			     ; chr fn
+ROM:7797 B9 D4 56				     LDA     DVGROM+$6D4,Y			     ; chr fn
 ROM:779A 0A					     ASL     A
 ROM:779B 85 0B					     STA     byte_B
-ROM:779D B9 D5 56				     LDA     (DVGROM+6D5h),Y			     ; chr fn
+ROM:779D B9 D5 56				     LDA     DVGROM+$6D5,Y			     ; chr fn
 ROM:77A0 2A					     ROL     A
-ROM:77A1 29 1F					     AND     #1Fh
-ROM:77A3 09 40					     ORA     #40h ; '@'
+ROM:77A1 29 1F					     AND     #$1F
+ROM:77A3 09 40					     ORA     #$40 ; '@'
 ROM:77A5 85 0C					     STA     byte_C
 ROM:77A7 A9 00					     LDA     #0
 ROM:77A9 85 08					     STA     byte_8				     ; flag to flip X
@@ -3060,7 +3358,7 @@ ROM:77D0 60					     RTS
 ROM:77D0	     ; End of function update_prng
 ROM:77D0
 ROM:77D0	     ; ---------------------------------------------------------------------------
-ROM:77D1 02	     byte_77D1:			     .db 2
+ROM:77D1 02	     byte_77D1:			     .BYTE 2
 ROM:77D2	     ; A=direction, Y=?
 ROM:77D2
 ROM:77D2	     ; =============== S U B R O U T I N E =======================================
@@ -3068,7 +3366,7 @@ ROM:77D2
 ROM:77D2
 ROM:77D2	     some_thrust_calc:
 ROM:77D2 18					     CLC
-ROM:77D3 69 40					     ADC     #40h ; '@'
+ROM:77D3 69 40					     ADC     #$40 ; '@'
 ROM:77D3	     ; End of function some_thrust_calc
 ROM:77D3
 ROM:77D5
@@ -3077,7 +3375,7 @@ ROM:77D5
 ROM:77D5
 ROM:77D5	     sub_77D5:
 ROM:77D5 10 08					     BPL     sub_77DF
-ROM:77D7 29 7F					     AND     #7Fh ; ''
+ROM:77D7 29 7F					     AND     #$7F ; ''
 ROM:77D9 20 DF 77				     JSR     sub_77DF
 ROM:77DC 4C 08 77				     JMP     negate_A
 ROM:77DC	     ; End of function sub_77D5
@@ -3087,28 +3385,28 @@ ROM:77DF	     ; =============== S U B R O U T I N E ============================
 ROM:77DF
 ROM:77DF
 ROM:77DF	     sub_77DF:
-ROM:77DF C9 41					     CMP     #41h ; 'A'
+ROM:77DF C9 41					     CMP     #$41 ; 'A'
 ROM:77E1 90 04					     BCC     loc_77E7
-ROM:77E3 49 7F					     EOR     #7Fh ; ''
+ROM:77E3 49 7F					     EOR     #$7F ; ''
 ROM:77E5 69 00					     ADC     #0
 ROM:77E7
 ROM:77E7	     loc_77E7:
 ROM:77E7 AA					     TAX
-ROM:77E8 BD B9 57				     LDA     (DVGROM+7B9h),X			     ; sine table
+ROM:77E8 BD B9 57				     LDA     DVGROM+$7B9,X			     ; sine table
 ROM:77EB 60					     RTS
 ROM:77EB	     ; End of function sub_77DF
 ROM:77EB
 ROM:77EB	     ; ---------------------------------------------------------------------------
-ROM:77EC 00					     .db    0
-ROM:77ED 00					     .db    0
-ROM:77EE 00					     .db    0
-ROM:77EF 00					     .db    0
-ROM:77F0 00					     .db    0
-ROM:77F1 00					     .db    0
-ROM:77F2 00					     .db    0
-ROM:77F3 00					     .db    0
-ROM:77F4 00					     .db    0
-ROM:77F5 00					     .db    0
+ROM:77EC 00					     .BYTE   0
+ROM:77ED 00					     .BYTE   0
+ROM:77EE 00					     .BYTE   0
+ROM:77EF 00					     .BYTE   0
+ROM:77F0 00					     .BYTE   0
+ROM:77F1 00					     .BYTE   0
+ROM:77F2 00					     .BYTE   0
+ROM:77F3 00					     .BYTE   0
+ROM:77F4 00					     .BYTE   0
+ROM:77F5 00					     .BYTE   0
 ROM:77F6	     ; Y=message number
 ROM:77F6	     ; 0=English, 1=German, 2=French, 3=Spanish
 ROM:77F6
@@ -3121,9 +3419,9 @@ ROM:77F6 AD 03 28				     LDA     language
 ROM:77F9 29 03					     AND     #3					     ; mask off	invalid	bits
 ROM:77FB 0A					     ASL     A					     ; convert to word offset
 ROM:77FC AA					     TAX
-ROM:77FD A9 10					     LDA     #10h
+ROM:77FD A9 10					     LDA     #$10
 ROM:77FF 85 00					     STA     globalScale
-ROM:7801 BD 88 78				     LDA     (msgTablePtrs+1),X
+ROM:7801 BD 88 78				     LDA     msgTablePtrs+1,X
 ROM:7804 85 09					     STA     byte_9
 ROM:7806 BD 87 78				     LDA     msgTablePtrs,X
 ROM:7809 85 08					     STA     byte_8				     ; for this	language
@@ -3137,9 +3435,9 @@ ROM:7813 98					     TYA
 ROM:7814 0A					     ASL     A					     ; convert to word offset
 ROM:7815 A8					     TAY
 ROM:7816 B9 71 78				     LDA     msgCoords,Y			     ; X
-ROM:7819 BE 72 78				     LDX     (msgCoords+1),Y			     ; Y
+ROM:7819 BE 72 78				     LDX     msgCoords+1,Y			     ; Y
 ROM:781C 20 03 7C				     JSR     write_CURx4_cmd
-ROM:781F A9 70					     LDA     #70h ; 'p'
+ROM:781F A9 70					     LDA     #$70 ; 'p'
 ROM:7821 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7824 A0 00					     LDY     #0
 ROM:7826 A2 00					     LDX     #0
@@ -3184,23 +3482,23 @@ ROM:7853	     ; =============== S U B R O U T I N E ============================
 ROM:7853
 ROM:7853
 ROM:7853	     add_chr_fn:
-ROM:7853 29 3E					     AND     #3Eh ; '>'                              ; get character (bits 5-1)
+ROM:7853 29 3E					     AND     #$3E ; '>'                              ; get character (bits 5-1)
 ROM:7855 D0 04					     BNE     loc_785B				     ; if not space, skip
 ROM:7857 68					     PLA
 ROM:7858 68					     PLA					     ; pop return address
 ROM:7859 D0 EE					     BNE     loc_7849				     ; return, finishing byte pair (3 chars)
 ROM:785B
 ROM:785B	     loc_785B:									     ; numeric?
-ROM:785B C9 0A					     CMP     #0Ah
+ROM:785B C9 0A					     CMP     #$A
 ROM:785D 90 02					     BCC     loc_7861				     ; yes, skip
-ROM:785F 69 0D					     ADC     #0Dh
+ROM:785F 69 0D					     ADC     #$D
 ROM:7861
 ROM:7861	     loc_7861:									     ; X = chr*2 (chr fn offset)
 ROM:7861 AA					     TAX
-ROM:7862 BD D2 56				     LDA     (DVGROM+6D2h),X			     ; chr fn msb
+ROM:7862 BD D2 56				     LDA     DVGROM+$6D2,X			     ; chr fn msb
 ROM:7865 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7867 C8					     INY
-ROM:7868 BD D3 56				     LDA     (DVGROM+6D3h),X			     ; chr fn lsb
+ROM:7868 BD D3 56				     LDA     DVGROM+$6D3,X			     ; chr fn lsb
 ROM:786B 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:786D C8					     INY
 ROM:786E A2 00					     LDX     #0
@@ -3208,60 +3506,60 @@ ROM:7870 60					     RTS
 ROM:7870	     ; End of function add_chr_fn
 ROM:7870
 ROM:7870	     ; ---------------------------------------------------------------------------
-ROM:7871 64 B6	     msgCoords:			     .db 64h, 0B6h				     ; "HIGH SCORES"
-ROM:7873 64 B6					     .db 64h, 0B6h				     ; "PLAYER"
-ROM:7875 0C AA					     .db 0Ch, 0AAh				     ; "YOUR SCORE...TEN BEST"
-ROM:7877 0C A2					     .db 0Ch, 0A2h				     ; "PLEASE...INITIALS"
-ROM:7879 0C 9A					     .db 0Ch, 9Ah				     ; "PUSH ROTATE...LETTER"
-ROM:787B 0C 92					     .db 0Ch, 92h				     ; "PUSH HYPERSPACE...CORRECT"
-ROM:787D 64 C6					     .db 64h, 0C6h				     ; "PUSH START"
-ROM:787F 64 9D					     .db 64h, 9Dh				     ; "GAME OVER"
-ROM:7881 50 39					     .db 50h, 39h				     ; "1 COIN 2 PLAYS"
-ROM:7883 50 39					     .db 50h, 39h				     ; "1 COIN 1 PLAY"
-ROM:7885 50 39					     .db 50h, 39h				     ; "2 COINS 1 PLAY"
+ROM:7871 64 B6	     msgCoords:			     .BYTE $64,	$B6				     ; "HIGH SCORES"
+ROM:7873 64 B6					     .BYTE $64,	$B6				     ; "PLAYER"
+ROM:7875 0C AA					     .BYTE $C, $AA				     ; "YOUR SCORE...TEN BEST"
+ROM:7877 0C A2					     .BYTE $C, $A2				     ; "PLEASE...INITIALS"
+ROM:7879 0C 9A					     .BYTE $C, $9A				     ; "PUSH ROTATE...LETTER"
+ROM:787B 0C 92					     .BYTE $C, $92				     ; "PUSH HYPERSPACE...CORRECT"
+ROM:787D 64 C6					     .BYTE $64,	$C6				     ; "PUSH START"
+ROM:787F 64 9D					     .BYTE $64,	$9D				     ; "GAME OVER"
+ROM:7881 50 39					     .BYTE $50,	$39				     ; "1 COIN 2 PLAYS"
+ROM:7883 50 39					     .BYTE $50,	$39				     ; "1 COIN 1 PLAY"
+ROM:7885 50 39					     .BYTE $50,	$39				     ; "2 COINS	1 PLAY"
 ROM:7887	     ; Offset into Vector ROM for message tables
-ROM:7887 1E 57	     msgTablePtrs:		     .dw 571Eh					     ; English
-ROM:7889 8F 78					     .dw 788Fh					     ; German
-ROM:788B 46 79					     .dw 7946h					     ; French
-ROM:788D F3 79					     .dw 79F3h					     ; Spanish
+ROM:7887 1E 57	     msgTablePtrs:		     .WORD $571E				     ; English
+ROM:7889 8F 78					     .WORD $788F				     ; German
+ROM:788B 46 79					     .WORD $7946				     ; French
+ROM:788D F3 79					     .WORD $79F3				     ; Spanish
 ROM:788F	     ; German
 ROM:788F	     ; - offsets
-ROM:788F 0B 15 1B 35+				     .db 0Bh, 15h, 1Bh,	35h, 4Dh, 65h, 7Fh, 8Dh, 93h, 9Fh, 0ABh
+ROM:788F 0B 15 1B 35+				     .BYTE $B, $15, $1B, $35, $4D, $65,	$7F, $8D, $93, $9F, $AB
 ROM:789A	     ; - messages
-ROM:789A 64 D2 3B 2E+				     .db 64h, 0D2h, 3Bh, 2Eh, 0C2h, 6Ch, 5Ah, 4Ch, 93h,	6Fh, 0BDh, 1Ah,	4Ch, 12h, 0B0h,	40h, 6Bh, 2Ch, 0Ah
-ROM:789A C2 6C 5A 4C+				     .db 6Ch, 5Ah, 4Ch,	93h, 6Eh, 0Bh, 6Eh, 0C0h, 52h, 6Ch, 92h, 0B8h, 50h, 4Dh, 82h, 0F2h, 58h, 90h, 4Ch
-ROM:789A 93 6F BD 1A+				     .db 4Dh, 0F0h, 4Ch, 80h, 33h, 70h,	0C2h, 42h, 5Ah,	4Ch, 4Ch, 82h, 0BBh, 52h, 0Bh, 58h, 0B2h, 42h, 6Ch
-ROM:789A 4C 12 B0 40+				     .db 9Ah, 0C3h, 4Ah, 82h, 64h, 0Ah,	5Ah, 90h, 0, 0F6h, 6Ch,	9, 0B2h, 3Bh, 2Eh, 0C1h, 4Ch, 4Ch, 0B6h, 2Bh
-ROM:789A 6B 2C 0A 6C+				     .db 20h, 0Dh, 0A6h, 0C1h, 70h, 48h, 50h, 0B6h, 52h, 3Bh, 0D2h, 90h, 0, 0DAh, 64h, 90h, 4Ch, 0C9h, 0D8h
-ROM:789A 5A 4C 93 6E+				     .db 0BEh, 0Ah, 32h, 42h, 9Bh, 0C2h, 67h, 68h, 4Dh,	0AEh, 0A1h, 4Eh, 48h, 50h, 0B6h, 52h, 3Bh, 0D2h, 90h
-ROM:789A 0B 6E C0 52+				     .db 0, 0BEh, 0Ah, 0B6h, 1Eh, 94h, 0D2h, 0A2h, 92h,	0Ah, 2Ch, 0CAh,	4Eh, 7Ah, 65h, 0BDh, 1Ah, 4Ch, 12h
-ROM:789A 6C 92 B8 50+				     .db 92h, 13h, 18h,	62h, 0CAh, 64h,	0F2h, 42h, 20h,	6Eh, 0A3h, 52h,	82h, 40h, 18h, 62h, 0CAh, 64h, 0F2h
-ROM:789A 4D 82 F2 58+				     .db 42h, 18h, 6Eh,	0A3h, 52h, 80h,	0, 20h,	62h, 0CAh, 64h,	0F2h, 64h, 8, 0C2h, 0BDh, 1Ah, 4Ch, 0
+ROM:789A 64 D2 3B 2E+				     .BYTE $64,	$D2, $3B, $2E, $C2, $6C, $5A, $4C, $93,	$6F, $BD, $1A, $4C, $12, $B0, $40, $6B,	$2C, $A, $6C
+ROM:789A C2 6C 5A 4C+				     .BYTE $5A,	$4C, $93, $6E, $B, $6E,	$C0, $52, $6C, $92, $B8, $50, $4D, $82,	$F2, $58, $90, $4C, $4D, $F0
+ROM:789A 93 6F BD 1A+				     .BYTE $4C,	$80, $33, $70, $C2, $42, $5A, $4C, $4C,	$82, $BB, $52, $B, $58,	$B2, $42, $6C, $9A, $C3, $4A
+ROM:789A 4C 12 B0 40+				     .BYTE $82,	$64, $A, $5A, $90, 0, $F6, $6C,	9, $B2,	$3B, $2E, $C1, $4C, $4C, $B6, $2B, $20,	$D, $A6, $C1
+ROM:789A 6B 2C 0A 6C+				     .BYTE $70,	$48, $50, $B6, $52, $3B, $D2, $90, 0, $DA, $64,	$90, $4C, $C9, $D8, $BE, $A, $32, $42, $9B
+ROM:789A 5A 4C 93 6E+				     .BYTE $C2,	$67, $68, $4D, $AE, $A1, $4E, $48, $50,	$B6, $52, $3B, $D2, $90, 0, $BE, $A, $B6, $1E, $94
+ROM:789A 0B 6E C0 52+				     .BYTE $D2,	$A2, $92, $A, $2C, $CA,	$4E, $7A, $65, $BD, $1A, $4C, $12, $92,	$13, $18, $62, $CA, $64, $F2
+ROM:789A 6C 92 B8 50+				     .BYTE $42,	$20, $6E, $A3, $52, $82, $40, $18, $62,	$CA, $64, $F2, $42, $18, $6E, $A3, $52,	$80, 0,	$20
+ROM:789A 4D 82 F2 58+				     .BYTE $62,	$CA, $64, $F2, $64, 8, $C2, $BD, $1A, $4C, 0
 ROM:7946	     ; French
 ROM:7946	     ; - offsets
-ROM:7946 0B 15 19 31+				     .db 0Bh, 15h, 19h,	31h, 41h, 57h, 73h, 7Fh, 89h, 95h, 0A1h
+ROM:7946 0B 15 19 31+				     .BYTE $B, $15, $19, $31, $41, $57,	$73, $7F, $89, $95, $A1
 ROM:7951	     ; - messages
-ROM:7951 8A 5A 84 12+				     .db 8Ah, 5Ah, 84h,	12h, 0CDh, 82h,	0B9h, 0E6h, 0B2h, 40h, 74h, 0F2h, 4Dh, 83h, 0D4h, 0F0h,	0B2h, 42h
-ROM:7951 CD 82 B9 E6+				     .db 0B9h, 0E6h, 0B2h, 42h,	4Dh, 0F0h, 0Eh,	64h, 0Ah, 12h, 0B8h, 46h, 10h, 62h, 4Bh, 60h, 82h, 72h,	0B5h
-ROM:7951 B2 40 74 F2+				     .db 0C0h, 0BEh, 0A8h, 0Ah,	64h, 0C5h, 92h,	0F0h, 74h, 9Dh,	0C2h, 6Ch, 9Ah,	0C3h, 4Ah, 82h,	6Fh, 0A4h
-ROM:7951 4D 83 D4 F0+				     .db 0F2h, 0BDh, 0D2h, 0F0h, 6Ch, 9Eh, 0Ah,	0C2h, 42h, 0A4h, 0F2h, 0B0h, 74h, 9Dh, 0C2h, 6Ch, 9Ah, 0C3h
-ROM:7951 B2 42 B9 E6+				     .db 4Ah, 82h, 6Fh,	0A4h, 0F2h, 0BDh, 0D2h,	0F0h, 58h, 0EDh, 12h, 0B5h, 0E8h, 29h, 0D2h, 0Dh, 72h, 2Ch
-ROM:7951 B2 42 4D F0+				     .db 90h, 0Ch, 12h,	0C6h, 2Ch, 48h,	4Eh, 9Dh, 0ACh,	49h, 0F0h, 48h,	0, 2Dh,	28h, 0CFh, 52h,	0B0h, 6Eh
-ROM:7951 0E 64 0A 12+				     .db 0CDh, 82h, 0BEh, 0Ah, 0B6h, 0,	53h, 64h, 0Ah, 12h, 0Dh, 0Ah, 0B6h, 1Ah, 48h, 0, 18h, 68h, 6Ah,	4Eh
-ROM:7951 B8 46 10 62+				     .db 48h, 48h, 0Bh,	0A6h, 0CAh, 72h, 0B5h, 0C0h, 18h, 68h, 6Ah, 4Eh, 48h, 46h, 0Bh,	0A6h, 0CAh, 72h, 0B0h
-ROM:7951 4B 60 82 72+				     .db 0, 20h, 68h, 6Ah, 4Eh,	4Dh, 0C2h, 18h,	5Ch, 9Eh, 52h, 0CDh, 80h
+ROM:7951 8A 5A 84 12+				     .BYTE $8A,	$5A, $84, $12, $CD, $82, $B9, $E6, $B2,	$40, $74, $F2, $4D, $83, $D4, $F0, $B2,	$42, $B9
+ROM:7951 CD 82 B9 E6+				     .BYTE $E6,	$B2, $42, $4D, $F0, $E,	$64, $A, $12, $B8, $46,	$10, $62, $4B, $60, $82, $72, $B5, $C0,	$BE
+ROM:7951 B2 40 74 F2+				     .BYTE $A8,	$A, $64, $C5, $92, $F0,	$74, $9D, $C2, $6C, $9A, $C3, $4A, $82,	$6F, $A4, $F2, $BD, $D2, $F0
+ROM:7951 4D 83 D4 F0+				     .BYTE $6C,	$9E, $A, $C2, $42, $A4,	$F2, $B0, $74, $9D, $C2, $6C, $9A, $C3,	$4A, $82, $6F, $A4, $F2, $BD
+ROM:7951 B2 42 B9 E6+				     .BYTE $D2,	$F0, $58, $ED, $12, $B5, $E8, $29, $D2,	$D, $72, $2C, $90, $C, $12, $C6, $2C, $48, $4E,	$9D
+ROM:7951 B2 42 4D F0+				     .BYTE $AC,	$49, $F0, $48, 0, $2D, $28, $CF, $52, $B0, $6E,	$CD, $82, $BE, $A, $B6,	0, $53,	$64, $A, $12
+ROM:7951 0E 64 0A 12+				     .BYTE $D, $A, $B6,	$1A, $48, 0, $18, $68, $6A, $4E, $48, $48, $B, $A6, $CA, $72, $B5, $C0,	$18, $68
+ROM:7951 B8 46 10 62+				     .BYTE $6A,	$4E, $48, $46, $B, $A6,	$CA, $72, $B0, 0, $20, $68, $6A, $4E, $4D, $C2,	$18, $5C, $9E, $52
+ROM:7951 4B 60 82 72+				     .BYTE $CD,	$80
 ROM:79F3	     ; Spanish
 ROM:79F3	     ; - offsets
-ROM:79F3 0B 11 17 31+				     .db 0Bh, 11h, 17h,	31h, 45h, 5Fh, 6Bh, 73h, 7Dh, 89h, 93h
+ROM:79F3 0B 11 17 31+				     .BYTE $B, $11, $17, $31, $45, $5F,	$6B, $73, $7D, $89, $93
 ROM:79FE	     ; - messages
-ROM:79FE B2 4E 9D 90+				     .db 0B2h, 4Eh, 9Dh, 90h, 0B8h, 0, 76h, 56h, 2Ah, 26h, 0B0h, 40h, 0BEh, 42h, 0A6h, 64h, 0C1h, 5Ch, 48h
-ROM:79FE B8 00 76 56+				     .db 52h, 0BEh, 0Ah, 0Ah, 64h, 0C5h, 92h, 0Ch, 26h,	0B8h, 50h, 6Ah,	7Ch, 0Ch, 52h, 74h, 0ECh, 4Dh, 0C0h
-ROM:79FE 2A 26 B0 40+				     .db 0A4h, 0ECh, 0Ah, 8Ah, 0D4h, 0ECh, 0Ah,	64h, 0C5h, 92h,	0Dh, 0F2h, 0B8h, 5Ah, 93h, 4Eh,	69h, 60h
-ROM:79FE BE 42 A6 64+				     .db 4Dh, 0C0h, 9Dh, 2Ch, 6Ch, 4Ah,	0Dh, 0A6h, 0C1h, 70h, 48h, 68h,	2Dh, 8Ah, 0Dh, 0D2h, 82h, 4Eh, 3Bh
-ROM:79FE C1 5C 48 52+				     .db 66h, 91h, 6Ch,	0Ch, 0Ah, 0Ch, 12h, 0C5h, 8Bh, 9Dh, 2Ch, 6Ch, 4Ah, 0Bh,	3Ah, 0A2h, 6Ch,	0BDh, 0Ah
-ROM:79FE BE 0A 0A 64+				     .db 3Ah, 40h, 0A6h, 60h, 0B9h, 6Ch, 0Dh, 0F0h, 2Dh, 0B1h, 76h, 52h, 5Ch, 0C2h, 0C2h, 6Ch, 8Bh, 64h, 2Ah
-ROM:79FE C5 92 0C 26+				     .db 27h, 18h, 54h,	69h, 0D8h, 28h,	48h, 0Bh, 0B2h,	4Ah, 0E6h, 0B8h, 0, 18h, 54h, 69h, 0D8h, 28h, 46h
-ROM:79FE B8 50 6A 7C+				     .db 0Bh, 0B2h, 4Ah, 0E7h, 20h, 54h, 69h, 0D8h, 2Dh, 0C2h, 18h, 5Ch, 0CAh, 56h, 98h, 0, 52h
+ROM:79FE B2 4E 9D 90+				     .BYTE $B2,	$4E, $9D, $90, $B8, 0, $76, $56, $2A, $26, $B0,	$40, $BE, $42, $A6, $64, $C1, $5C, $48,	$52
+ROM:79FE B8 00 76 56+				     .BYTE $BE,	$A, $A,	$64, $C5, $92, $C, $26,	$B8, $50, $6A, $7C, $C,	$52, $74, $EC, $4D, $C0, $A4, $EC
+ROM:79FE 2A 26 B0 40+				     .BYTE $A, $8A, $D4, $EC, $A, $64, $C5, $92, $D, $F2, $B8, $5A, $93, $4E, $69, $60,	$4D, $C0, $9D, $2C
+ROM:79FE BE 42 A6 64+				     .BYTE $6C,	$4A, $D, $A6, $C1, $70,	$48, $68, $2D, $8A, $D,	$D2, $82, $4E, $3B, $66, $91, $6C, $C, $A
+ROM:79FE C1 5C 48 52+				     .BYTE $C, $12, $C5, $8B, $9D, $2C,	$6C, $4A, $B, $3A, $A2,	$6C, $BD, $A, $3A, $40,	$A6, $60, $B9, $6C
+ROM:79FE BE 0A 0A 64+				     .BYTE $D, $F0, $2D, $B1, $76, $52,	$5C, $C2, $C2, $6C, $8B, $64, $2A, $27,	$18, $54, $69, $D8, $28, $48
+ROM:79FE C5 92 0C 26+				     .BYTE $B, $B2, $4A, $E6, $B8, 0, $18, $54,	$69, $D8, $28, $46, $B,	$B2, $4A, $E7, $20, $54, $69, $D8
+ROM:79FE B8 50 6A 7C+				     .BYTE $2D,	$C2, $18, $5C, $CA, $56, $98, 0, $52
 ROM:7A93
 ROM:7A93	     ; =============== S U B R O U T I N E =======================================
 ROM:7A93
@@ -3273,10 +3571,10 @@ ROM:7A95	     loc_7A95:									     ; read coinswitch
 ROM:7A95 BD 00 24				     LDA     leftCoinSwitch,X
 ROM:7A98 0A					     ASL     A
 ROM:7A99 B5 7A					     LDA     coin_1_inp_length,X
-ROM:7A9B 29 1F					     AND     #1Fh
+ROM:7A9B 29 1F					     AND     #$1F
 ROM:7A9D 90 37					     BCC     loc_7AD6
 ROM:7A9F F0 10					     BEQ     loc_7AB1
-ROM:7AA1 C9 1B					     CMP     #1Bh
+ROM:7AA1 C9 1B					     CMP     #$1B
 ROM:7AA3 B0 0A					     BCS     loc_7AAF
 ROM:7AA5 A8					     TAY
 ROM:7AA6 A5 5E					     LDA     NMI_count
@@ -3291,9 +3589,9 @@ ROM:7AB1
 ROM:7AB1	     loc_7AB1:
 ROM:7AB1 95 7A					     STA     coin_1_inp_length,X
 ROM:7AB3 AD 06 20				     LDA     slamSwitch
-ROM:7AB6 29 80					     AND     #80h ; 'Ä'
+ROM:7AB6 29 80					     AND     #$80 ; 'Ä'
 ROM:7AB8 F0 04					     BEQ     loc_7ABE
-ROM:7ABA A9 F0					     LDA     #0F0h ; ''
+ROM:7ABA A9 F0					     LDA     #$F0 ; ''
 ROM:7ABC 85 72					     STA     slamSwitchFlag
 ROM:7ABE
 ROM:7ABE	     loc_7ABE:
@@ -3314,16 +3612,16 @@ ROM:7AD3 38					     SEC
 ROM:7AD4 B0 1C					     BCS     loc_7AF2
 ROM:7AD6
 ROM:7AD6	     loc_7AD6:
-ROM:7AD6 C9 1B					     CMP     #1Bh
+ROM:7AD6 C9 1B					     CMP     #$1B
 ROM:7AD8 B0 09					     BCS     loc_7AE3
 ROM:7ADA B5 7A					     LDA     coin_1_inp_length,X
-ROM:7ADC 69 20					     ADC     #20h ; ' '
+ROM:7ADC 69 20					     ADC     #$20 ; ' '
 ROM:7ADE 90 D1					     BCC     loc_7AB1
 ROM:7AE0 F0 01					     BEQ     loc_7AE3
 ROM:7AE2 18					     CLC
 ROM:7AE3
 ROM:7AE3	     loc_7AE3:
-ROM:7AE3 A9 1F					     LDA     #1Fh
+ROM:7AE3 A9 1F					     LDA     #$1F
 ROM:7AE5 B0 CA					     BCS     loc_7AB1
 ROM:7AE7 95 7A					     STA     coin_1_inp_length,X
 ROM:7AE9 B5 77					     LDA     unk_77,X
@@ -3331,7 +3629,7 @@ ROM:7AEB F0 01					     BEQ     loc_7AEE
 ROM:7AED 38					     SEC
 ROM:7AEE
 ROM:7AEE	     loc_7AEE:
-ROM:7AEE A9 78					     LDA     #78h ; 'x'
+ROM:7AEE A9 78					     LDA     #$78 ; 'x'
 ROM:7AF0 95 77					     STA     unk_77,X
 ROM:7AF2
 ROM:7AF2	     loc_7AF2:
@@ -3341,7 +3639,7 @@ ROM:7AF6 E0 01					     CPX     #1
 ROM:7AF8 90 16					     BCC     loc_7B10
 ROM:7AFA F0 0C					     BEQ     loc_7B08
 ROM:7AFC A5 71					     LDA     coinMultCredits
-ROM:7AFE 29 0C					     AND     #0Ch
+ROM:7AFE 29 0C					     AND     #$C
 ROM:7B00 4A					     LSR     A
 ROM:7B01 4A					     LSR     A
 ROM:7B02 F0 0C					     BEQ     loc_7B10
@@ -3350,7 +3648,7 @@ ROM:7B06 D0 08					     BNE     loc_7B10
 ROM:7B08
 ROM:7B08	     loc_7B08:
 ROM:7B08 A5 71					     LDA     coinMultCredits
-ROM:7B0A 29 10					     AND     #10h
+ROM:7B0A 29 10					     AND     #$10
 ROM:7B0C F0 02					     BEQ     loc_7B10
 ROM:7B0E A9 01					     LDA     #1
 ROM:7B10
@@ -3373,7 +3671,7 @@ ROM:7B21 A8					     TAY
 ROM:7B22 F0 12					     BEQ     loc_7B36
 ROM:7B24 4A					     LSR     A
 ROM:7B25 69 00					     ADC     #0
-ROM:7B27 49 FF					     EOR     #0FFh
+ROM:7B27 49 FF					     EOR     #$FF
 ROM:7B29 38					     SEC
 ROM:7B2A 65 73					     ADC     totalCoinsForCredits
 ROM:7B2C 90 0A					     BCC     loc_7B38
@@ -3397,9 +3695,9 @@ ROM:7B41
 ROM:7B41	     loc_7B41:
 ROM:7B41 B5 74					     LDA     byte_74,X
 ROM:7B43 F0 09					     BEQ     loc_7B4E
-ROM:7B45 C9 10					     CMP     #10h
+ROM:7B45 C9 10					     CMP     #$10
 ROM:7B47 90 05					     BCC     loc_7B4E
-ROM:7B49 69 EF					     ADC     #0EFh ; 'Ô'
+ROM:7B49 69 EF					     ADC     #$EF ; 'Ô'
 ROM:7B4B C8					     INY
 ROM:7B4C 95 74					     STA     byte_74,X
 ROM:7B4E
@@ -3414,7 +3712,7 @@ ROM:7B56	     loc_7B56:
 ROM:7B56 B5 74					     LDA     byte_74,X
 ROM:7B58 F0 07					     BEQ     loc_7B61
 ROM:7B5A 18					     CLC
-ROM:7B5B 69 EF					     ADC     #0EFh ; 'Ô'
+ROM:7B5B 69 EF					     ADC     #$EF ; 'Ô'
 ROM:7B5D 95 74					     STA     byte_74,X
 ROM:7B5F 30 03					     BMI     locret_7B64
 ROM:7B61
@@ -3436,8 +3734,8 @@ ROM:7B67 48					     PHA
 ROM:7B68 8A					     TXA
 ROM:7B69 48					     PHA
 ROM:7B6A D8					     CLD
-ROM:7B6B AD FF 01				     LDA     stack+0FFh
-ROM:7B6E 0D D0 01				     ORA     stack+0D0h				     ; check stack guard bytes
+ROM:7B6B AD FF 01				     LDA     stack+$FF
+ROM:7B6E 0D D0 01				     ORA     stack+$D0				     ; check stack guard bytes
 ROM:7B71
 ROM:7B71	     loc_7B71:									     ; stack overflow -	loop
 ROM:7B71 D0 FE					     BNE     loc_7B71
@@ -3455,7 +3753,7 @@ ROM:7B83
 ROM:7B83	     loc_7B83:
 ROM:7B83 20 93 7A				     JSR     handle_coin_switches
 ROM:7B86 A5 6F					     LDA     io3200ShadowRegister
-ROM:7B88 29 C7					     AND     #0C7h ; '«'
+ROM:7B88 29 C7					     AND     #$C7 ; '«'
 ROM:7B8A 24 74					     BIT     byte_74
 ROM:7B8C 10 02					     BPL     loc_7B90
 ROM:7B8E 09 08					     ORA     #8					     ; left coin counter
@@ -3463,19 +3761,19 @@ ROM:7B90
 ROM:7B90	     loc_7B90:
 ROM:7B90 24 75					     BIT     byte_75
 ROM:7B92 10 02					     BPL     loc_7B96
-ROM:7B94 09 10					     ORA     #10h				     ; centre coin counter
+ROM:7B94 09 10					     ORA     #$10				     ; centre coin counter
 ROM:7B96
 ROM:7B96	     loc_7B96:
 ROM:7B96 24 76					     BIT     byte_76
 ROM:7B98 10 02					     BPL     loc_7B9C
-ROM:7B9A 09 20					     ORA     #20h ; ' '                              ; right coin counter
+ROM:7B9A 09 20					     ORA     #$20 ; ' '                              ; right coin counter
 ROM:7B9C
 ROM:7B9C	     loc_7B9C:
 ROM:7B9C 85 6F					     STA     io3200ShadowRegister
-ROM:7B9E 8D 00 32				     STA     3200h				     ; output
+ROM:7B9E 8D 00 32				     STA     $3200				     ; output
 ROM:7BA1 A5 72					     LDA     slamSwitchFlag
 ROM:7BA3 F0 04					     BEQ     loc_7BA9
-ROM:7BA5 A9 80					     LDA     #80h ; 'Ä'
+ROM:7BA5 A9 80					     LDA     #$80 ; 'Ä'
 ROM:7BA7 D0 0E					     BNE     loc_7BB7
 ROM:7BA9
 ROM:7BA9	     loc_7BA9:
@@ -3492,7 +3790,7 @@ ROM:7BB5 6A					     ROR     A
 ROM:7BB6 6A					     ROR     A
 ROM:7BB7
 ROM:7BB7	     loc_7BB7:									     ; sound (bonus life)
-ROM:7BB7 8D 05 3C				     STA     3C05h
+ROM:7BB7 8D 05 3C				     STA     $3C05
 ROM:7BBA 68					     PLA
 ROM:7BBB AA					     TAX
 ROM:7BBC 68					     PLA
@@ -3504,7 +3802,7 @@ ROM:7BC0	     ; =============== S U B R O U T I N E ============================
 ROM:7BC0
 ROM:7BC0
 ROM:7BC0	     halt_dvg:
-ROM:7BC0 A9 B0					     LDA     #0B0h ; '∞'
+ROM:7BC0 A9 B0					     LDA     #$B0 ; '∞'
 ROM:7BC2 A0 00					     LDY     #0
 ROM:7BC4 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7BC6 C8					     INY
@@ -3513,17 +3811,17 @@ ROM:7BC9 D0 6E					     BNE     update_avg_curr_addr
 ROM:7BCB
 ROM:7BCB	     loc_7BCB:
 ROM:7BCB 90 04					     BCC     display_digit_A
-ROM:7BCD 29 0F					     AND     #0Fh				     ; numeric only
+ROM:7BCD 29 0F					     AND     #$F				     ; numeric only
 ROM:7BCF F0 05					     BEQ     loc_7BD6				     ; space, skip
 ROM:7BCF	     ; End of function halt_dvg
 ROM:7BCF
-ROM:7BD1	     A = character
+ROM:7BD1	     ; A = character
 ROM:7BD1
 ROM:7BD1	     ; =============== S U B R O U T I N E =======================================
 ROM:7BD1
 ROM:7BD1
 ROM:7BD1	     display_digit_A:
-ROM:7BD1 29 0F					     AND     #0Fh				     ; numeric only
+ROM:7BD1 29 0F					     AND     #$F				     ; numeric only
 ROM:7BD3 18					     CLC
 ROM:7BD4 69 01					     ADC     #1					     ; convert to char code
 ROM:7BD6
@@ -3532,9 +3830,9 @@ ROM:7BD6 08					     PHP
 ROM:7BD7 0A					     ASL     A					     ; x2 (word	offset)
 ROM:7BD8 A0 00					     LDY     #0
 ROM:7BDA AA					     TAX
-ROM:7BDB BD D4 56				     LDA     (DVGROM+6D4h),X			     ; chr fn msb
+ROM:7BDB BD D4 56				     LDA     DVGROM+$6D4,X			     ; chr fn msb
 ROM:7BDE 91 02					     STA     (2),Y				     ; store in	avg ram
-ROM:7BE0 BD D5 56				     LDA     (DVGROM+6D5h),X			     ; chr fn lsb
+ROM:7BE0 BD D5 56				     LDA     DVGROM+$6D5,X			     ; chr fn lsb
 ROM:7BE3 C8					     INY
 ROM:7BE4 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7BE6 20 39 7C				     JSR     update_avg_curr_addr
@@ -3544,8 +3842,8 @@ ROM:7BEA	     ; End of function display_digit_A
 ROM:7BEA
 ROM:7BEB	     ; ---------------------------------------------------------------------------
 ROM:7BEB 4A					     LSR     A					     ; adjust address
-ROM:7BEC 29 0F					     AND     #0Fh				     ; clear cmd nibble
-ROM:7BEE 09 E0					     ORA     #0E0h ; '‡'                             ; JMP command
+ROM:7BEC 29 0F					     AND     #$F				     ; clear cmd nibble
+ROM:7BEE 09 E0					     ORA     #$E0 ; '‡'                              ; JMP command
 ROM:7BF0	     ; START OF	FUNCTION CHUNK FOR write_JSR_cmd
 ROM:7BF0
 ROM:7BF0	     write_JMP_JSR_cmd:
@@ -3568,8 +3866,8 @@ ROM:7BFC
 ROM:7BFC	     ; FUNCTION	CHUNK AT ROM:7BF0 SIZE 0000000C	BYTES
 ROM:7BFC
 ROM:7BFC 4A					     LSR     A					     ; adjust address
-ROM:7BFD 29 0F					     AND     #0Fh				     ; clear cmd nibble
-ROM:7BFF 09 C0					     ORA     #0C0h ; '¿'                             ; JSR command
+ROM:7BFD 29 0F					     AND     #$F				     ; clear cmd nibble
+ROM:7BFF 09 C0					     ORA     #$C0 ; '¿'                              ; JSR command
 ROM:7C01 D0 ED					     BNE     write_JMP_JSR_cmd
 ROM:7C01	     ; End of function write_JSR_cmd
 ROM:7C01
@@ -3605,15 +3903,15 @@ ROM:7C1C B5 02					     LDA     2,X				     ; @$6 = Y*4 (lsb)
 ROM:7C1E A0 00					     LDY     #0
 ROM:7C20 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7C22 B5 03					     LDA     3,X				     ; @$7 = Y*4 (msb)
-ROM:7C24 29 0F					     AND     #0Fh				     ; clear command nibble
-ROM:7C26 09 A0					     ORA     #0A0h ; '†'                             ; CUR command
+ROM:7C24 29 0F					     AND     #$F				     ; clear command nibble
+ROM:7C26 09 A0					     ORA     #$A0 ; '†'                              ; CUR command
 ROM:7C28 C8					     INY
 ROM:7C29 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7C2B B5 00					     LDA     0,X				     ; @$4 = X*4 (lsb)
 ROM:7C2D C8					     INY
 ROM:7C2E 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7C30 B5 01					     LDA     1,X				     ; @$5 = X*4 (msb)
-ROM:7C32 29 0F					     AND     #0Fh				     ; clear scale nibble
+ROM:7C32 29 0F					     AND     #$F				     ; clear scale nibble
 ROM:7C34 05 00					     ORA     globalScale			     ; global scale
 ROM:7C36 C8					     INY
 ROM:7C37 91 02					     STA     (2),Y				     ; store in	avg ram
@@ -3636,23 +3934,23 @@ ROM:7C43 60					     RTS
 ROM:7C43	     ; End of function update_avg_curr_addr
 ROM:7C43
 ROM:7C43	     ; ---------------------------------------------------------------------------
-ROM:7C44 A9					     .db 0A9h ;	©
-ROM:7C45 D0					     .db 0D0h ;	–
-ROM:7C46 4C					     .db  4Ch ;	L
-ROM:7C47 C2					     .db 0C2h ;	¬
-ROM:7C48 7B					     .db  7Bh ;	{
+ROM:7C44 A9					     .BYTE $A9 ; ©
+ROM:7C45 D0					     .BYTE $D0 ; –
+ROM:7C46 4C					     .BYTE $4C ; L
+ROM:7C47 C2					     .BYTE $C2 ; ¬
+ROM:7C48 7B					     .BYTE $7B ; {
 ROM:7C49
 ROM:7C49	     ; =============== S U B R O U T I N E =======================================
 ROM:7C49
 ROM:7C49
 ROM:7C49	     sub_7C49:
 ROM:7C49 A5 05					     LDA     byte_5
-ROM:7C4B C9 80					     CMP     #80h ; 'Ä'
+ROM:7C4B C9 80					     CMP     #$80 ; 'Ä'
 ROM:7C4D 90 11					     BCC     loc_7C60
-ROM:7C4F 49 FF					     EOR     #0FFh
+ROM:7C4F 49 FF					     EOR     #$FF
 ROM:7C51 85 05					     STA     byte_5
 ROM:7C53 A5 04					     LDA     byte_4
-ROM:7C55 49 FF					     EOR     #0FFh
+ROM:7C55 49 FF					     EOR     #$FF
 ROM:7C57 69 00					     ADC     #0
 ROM:7C59 85 04					     STA     byte_4
 ROM:7C5B 90 02					     BCC     loc_7C5F
@@ -3664,12 +3962,12 @@ ROM:7C60
 ROM:7C60	     loc_7C60:
 ROM:7C60 26 08					     ROL     byte_8
 ROM:7C62 A5 07					     LDA     byte_7
-ROM:7C64 C9 80					     CMP     #80h ; 'Ä'
+ROM:7C64 C9 80					     CMP     #$80 ; 'Ä'
 ROM:7C66 90 11					     BCC     loc_7C79
-ROM:7C68 49 FF					     EOR     #0FFh
+ROM:7C68 49 FF					     EOR     #$FF
 ROM:7C6A 85 07					     STA     byte_7
 ROM:7C6C A5 06					     LDA     byte_6
-ROM:7C6E 49 FF					     EOR     #0FFh
+ROM:7C6E 49 FF					     EOR     #$FF
 ROM:7C70 69 00					     ADC     #0
 ROM:7C72 85 06					     STA     byte_6
 ROM:7C74 90 02					     BCC     loc_7C78
@@ -3719,8 +4017,8 @@ ROM:7CAB
 ROM:7CAB	     loc_7CAB:
 ROM:7CAB 8A					     TXA
 ROM:7CAC 38					     SEC
-ROM:7CAD E9 0A					     SBC     #0Ah
-ROM:7CAF 49 FF					     EOR     #0FFh
+ROM:7CAD E9 0A					     SBC     #$A
+ROM:7CAF 49 FF					     EOR     #$FF
 ROM:7CB1 0A					     ASL     A
 ROM:7CB2 66 08					     ROR     byte_8
 ROM:7CB4 2A					     ROL     A
@@ -3732,7 +4030,7 @@ ROM:7CBB A0 00					     LDY     #0
 ROM:7CBD A5 06					     LDA     byte_6
 ROM:7CBF 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7CC1 A5 08					     LDA     byte_8
-ROM:7CC3 29 F4					     AND     #0F4h ; 'Ù'
+ROM:7CC3 29 F4					     AND     #$F4 ; 'Ù'
 ROM:7CC5 05 07					     ORA     byte_7
 ROM:7CC7 C8					     INY
 ROM:7CC8 91 02					     STA     (2),Y				     ; store in	avg ram
@@ -3779,7 +4077,7 @@ ROM:7CF0
 ROM:7CF3	     ; ---------------------------------------------------------------------------
 ROM:7CF3
 ROM:7CF3	     RESET:									     ; Set stack to...
-ROM:7CF3 A2 FE					     LDX     #0FEh ; '˛'
+ROM:7CF3 A2 FE					     LDX     #$FE ; '˛'
 ROM:7CF5 9A					     TXS					     ; ...1FE (leave 1FF as an underflow indicator)
 ROM:7CF6 D8					     CLD					     ; Clear decimal mode
 ROM:7CF7 A9 00					     LDA     #0					     ; Clearing	RAM
@@ -3787,24 +4085,24 @@ ROM:7CF9 AA					     TAX					     ; Offset to X
 ROM:7CFA
 ROM:7CFA	     loc_7CFA:									     ; Count down from 256
 ROM:7CFA CA					     DEX
-ROM:7CFB 9D 00 03				     STA     300h,X				     ; Clear bank 2 (0300-03FF)
-ROM:7CFE 9D 00 02				     STA     200h,X				     ; Clear bank 1 (0200-02FF)
-ROM:7D01 9D 00 01				     STA     100h,X				     ; Clear RAM (0100-01FF)
+ROM:7CFB 9D 00 03				     STA     $300,X				     ; Clear bank 2 (0300-03FF)
+ROM:7CFE 9D 00 02				     STA     $200,X				     ; Clear bank 1 (0200-02FF)
+ROM:7D01 9D 00 01				     STA     $100,X				     ; Clear RAM (0100-01FF)
 ROM:7D04 95 00					     STA     0,X				     ; Clear RAM (0000-00FF)
 ROM:7D06 D0 F2					     BNE     loc_7CFA				     ; Do all 256 in each area
 ROM:7D08 AC 07 20				     LDY     selfTest				     ; Read IN1
 ROM:7D0B 30 43					     BMI     ServiceMode			     ; Upper bit set...	go handle service mode
 ROM:7D0D E8					     INX					     ; X=1
 ROM:7D0E 8E 00 40				     STX     DVGRAM
-ROM:7D11 A9 E2					     LDA     #0E2h ; '‚'                             ; JMP $0402
+ROM:7D11 A9 E2					     LDA     #$E2 ; '‚'                              ; JMP $0402
 ROM:7D13 8D 01 40				     STA     DVGRAM+1
-ROM:7D16 A9 B0					     LDA     #0B0h ; '∞'                             ; HALT
+ROM:7D16 A9 B0					     LDA     #$B0 ; '∞'                              ; HALT
 ROM:7D18 8D 03 40				     STA     DVGRAM+3
 ROM:7D1B 85 32					     STA     placeP1HighScore
 ROM:7D1D 85 33					     STA     placeP2HighScore
 ROM:7D1F A9 03					     LDA     #3
 ROM:7D21 85 6F					     STA     io3200ShadowRegister
-ROM:7D23 8D 00 32				     STA     3200h				     ; Turn on player 1	& 2 start lamps
+ROM:7D23 8D 00 32				     STA     $3200				     ; Turn on player 1	& 2 start lamps
 ROM:7D26 2D 00 28				     AND     coinage				     ; coinage only
 ROM:7D29 85 71					     STA     coinMultCredits
 ROM:7D2B AD 01 28				     LDA     rightCoinMultiplier
@@ -3837,23 +4135,23 @@ ROM:7D4D
 ROM:7D50	     ; ---------------------------------------------------------------------------
 ROM:7D50
 ROM:7D50	     ServiceMode:								     ; Clear...
-ROM:7D50 9D 00 40				     STA     4000h,X
-ROM:7D53 9D 00 41				     STA     4100h,X				     ; ... all...
-ROM:7D56 9D 00 42				     STA     4200h,X				     ; ... of...
-ROM:7D59 9D 00 43				     STA     4300h,X				     ; ...
-ROM:7D5C 9D 00 44				     STA     4400h,X				     ; ...
-ROM:7D5F 9D 00 45				     STA     4500h,X				     ; ...
-ROM:7D62 9D 00 46				     STA     4600h,X				     ; ...
-ROM:7D65 9D 00 47				     STA     4700h,X				     ; ...
+ROM:7D50 9D 00 40				     STA     $4000,X
+ROM:7D53 9D 00 41				     STA     $4100,X				     ; ... all...
+ROM:7D56 9D 00 42				     STA     $4200,X				     ; ... of...
+ROM:7D59 9D 00 43				     STA     $4300,X				     ; ...
+ROM:7D5C 9D 00 44				     STA     $4400,X				     ; ...
+ROM:7D5F 9D 00 45				     STA     $4500,X				     ; ...
+ROM:7D62 9D 00 46				     STA     $4600,X				     ; ...
+ROM:7D65 9D 00 47				     STA     $4700,X				     ; ...
 ROM:7D68 E8					     INX					     ; ...
 ROM:7D69 D0 E5					     BNE     ServiceMode			     ; ... vector RAM
-ROM:7D6B 8D 00 34				     STA     3400h				     ; Kick watchdog
+ROM:7D6B 8D 00 34				     STA     $3400				     ; Kick watchdog
 ROM:7D6E A2 00					     LDX     #0
 ROM:7D70
 ROM:7D70	     loc_7D70:
 ROM:7D70 B5 00					     LDA     0,X
 ROM:7D72 D0 47					     BNE     loc_7DBB
-ROM:7D74 A9 11					     LDA     #11h
+ROM:7D74 A9 11					     LDA     #$11
 ROM:7D76
 ROM:7D76	     loc_7D76:
 ROM:7D76 95 00					     STA     0,X
@@ -3865,7 +4163,7 @@ ROM:7D7E 0A					     ASL     A
 ROM:7D7F 90 F5					     BCC     loc_7D76
 ROM:7D81 E8					     INX
 ROM:7D82 D0 EC					     BNE     loc_7D70
-ROM:7D84 8D 00 34				     STA     3400h				     ; Kick watchdog
+ROM:7D84 8D 00 34				     STA     $3400				     ; Kick watchdog
 ROM:7D87 8A					     TXA
 ROM:7D88 85 00					     STA     globalScale
 ROM:7D8A 2A					     ROL     A
@@ -3875,7 +4173,7 @@ ROM:7D8B 85 01					     STA     byte_1
 ROM:7D8D A0 00					     LDY     #0
 ROM:7D8F
 ROM:7D8F	     loc_7D8F:
-ROM:7D8F A2 11					     LDX     #11h
+ROM:7D8F A2 11					     LDX     #$11
 ROM:7D91 B1 00					     LDA     (0),Y
 ROM:7D93 D0 2A					     BNE     loc_7DBF
 ROM:7D95
@@ -3890,15 +4188,15 @@ ROM:7D9E AA					     TAX
 ROM:7D9F 90 F4					     BCC     loc_7D95
 ROM:7DA1 C8					     INY
 ROM:7DA2 D0 EB					     BNE     loc_7D8F
-ROM:7DA4 8D 00 34				     STA     3400h				     ; Kick watchdog
+ROM:7DA4 8D 00 34				     STA     $3400				     ; Kick watchdog
 ROM:7DA7 E6 01					     INC     byte_1
 ROM:7DA9 A6 01					     LDX     byte_1
 ROM:7DAB E0 04					     CPX     #4
 ROM:7DAD 90 E0					     BCC     loc_7D8F
-ROM:7DAF A9 40					     LDA     #40h ; '@'
-ROM:7DB1 E0 40					     CPX     #40h ; '@'
+ROM:7DAF A9 40					     LDA     #$40 ; '@'
+ROM:7DB1 E0 40					     CPX     #$40 ; '@'
 ROM:7DB3 90 D6					     BCC     loc_7D8B
-ROM:7DB5 E0 48					     CPX     #48h ; 'H'
+ROM:7DB5 E0 48					     CPX     #$48 ; 'H'
 ROM:7DB7 90 D6					     BCC     loc_7D8F
 ROM:7DB9 B0 69					     BCS     loc_7E24
 ROM:7DBB
@@ -3912,14 +4210,14 @@ ROM:7DC1 A6 01					     LDX     byte_1
 ROM:7DC3 E0 04					     CPX     #4
 ROM:7DC5 90 06					     BCC     loc_7DCD
 ROM:7DC7 C8					     INY
-ROM:7DC8 E0 44					     CPX     #44h ; 'D'
+ROM:7DC8 E0 44					     CPX     #$44 ; 'D'
 ROM:7DCA 90 01					     BCC     loc_7DCD
 ROM:7DCC C8					     INY
 ROM:7DCD
 ROM:7DCD	     loc_7DCD:
-ROM:7DCD C9 10					     CMP     #10h
+ROM:7DCD C9 10					     CMP     #$10
 ROM:7DCF 2A					     ROL     A
-ROM:7DD0 29 1F					     AND     #1Fh
+ROM:7DD0 29 1F					     AND     #$1F
 ROM:7DD2 C9 02					     CMP     #2
 ROM:7DD4 2A					     ROL     A
 ROM:7DD5 29 03					     AND     #3
@@ -3933,12 +4231,12 @@ ROM:7DDC 90 F9					     BCC     loc_7DD7
 ROM:7DDE
 ROM:7DDE	     loc_7DDE:
 ROM:7DDE 4A					     LSR     A
-ROM:7DDF A2 14					     LDX     #14h
+ROM:7DDF A2 14					     LDX     #$14
 ROM:7DE1 90 02					     BCC     loc_7DE5
-ROM:7DE3 A2 1D					     LDX     #1Dh
+ROM:7DE3 A2 1D					     LDX     #$1D
 ROM:7DE5
 ROM:7DE5	     loc_7DE5:									     ; sound (thump) on
-ROM:7DE5 8E 00 3A				     STX     3A00h
+ROM:7DE5 8E 00 3A				     STX     $3A00
 ROM:7DE8 A2 00					     LDX     #0					     ; inner loop = 256
 ROM:7DEA A0 08					     LDY     #8					     ; outer loop = 8
 ROM:7DEC
@@ -3950,11 +4248,11 @@ ROM:7DF1	     loc_7DF1:
 ROM:7DF1 2C 01 20				     BIT     freq3kHz
 ROM:7DF4 30 FB					     BMI     loc_7DF1
 ROM:7DF6 CA					     DEX
-ROM:7DF7 8D 00 34				     STA     3400h				     ; Kick watchdog
+ROM:7DF7 8D 00 34				     STA     $3400				     ; Kick watchdog
 ROM:7DFA D0 F0					     BNE     thump_on_loop
 ROM:7DFC 88					     DEY
 ROM:7DFD D0 ED					     BNE     thump_on_loop
-ROM:7DFF 8E 00 3A				     STX     3A00h				     ; sound (thump) off
+ROM:7DFF 8E 00 3A				     STX     $3A00				     ; sound (thump) off
 ROM:7E02 A0 08					     LDY     #8
 ROM:7E04
 ROM:7E04	     thump_off_loop:
@@ -3965,7 +4263,7 @@ ROM:7E09	     loc_7E09:
 ROM:7E09 2C 01 20				     BIT     freq3kHz
 ROM:7E0C 30 FB					     BMI     loc_7E09
 ROM:7E0E CA					     DEX
-ROM:7E0F 8D 00 34				     STA     3400h				     ; Kick watchdog
+ROM:7E0F 8D 00 34				     STA     $3400				     ; Kick watchdog
 ROM:7E12 D0 F0					     BNE     thump_off_loop
 ROM:7E14 88					     DEY
 ROM:7E15 D0 ED					     BNE     thump_off_loop
@@ -3973,7 +4271,7 @@ ROM:7E17 AA					     TAX
 ROM:7E18 D0 C4					     BNE     loc_7DDE
 ROM:7E1A
 ROM:7E1A	     loc_7E1A:									     ; Kick watchdog
-ROM:7E1A 8D 00 34				     STA     3400h
+ROM:7E1A 8D 00 34				     STA     $3400
 ROM:7E1D AD 07 20				     LDA     selfTest
 ROM:7E20 30 F8					     BMI     loc_7E1A				     ; wait for	switch to be released
 ROM:7E22
@@ -3985,13 +4283,13 @@ ROM:7E24 A9 00					     LDA     #0
 ROM:7E26 A8					     TAY
 ROM:7E27 AA					     TAX
 ROM:7E28 85 08					     STA     byte_8
-ROM:7E2A A9 50					     LDA     #50h ; 'P'
+ROM:7E2A A9 50					     LDA     #$50 ; 'P'
 ROM:7E2C
 ROM:7E2C	     loc_7E2C:
 ROM:7E2C 85 09					     STA     byte_9
 ROM:7E2E A9 04					     LDA     #4
 ROM:7E30 85 0B					     STA     byte_B
-ROM:7E32 A9 FF					     LDA     #0FFh
+ROM:7E32 A9 FF					     LDA     #$FF
 ROM:7E34
 ROM:7E34	     loc_7E34:
 ROM:7E34 51 08					     EOR     (8),Y
@@ -4000,21 +4298,21 @@ ROM:7E37 D0 FB					     BNE     loc_7E34
 ROM:7E39 E6 09					     INC     byte_9
 ROM:7E3B C6 0B					     DEC     byte_B
 ROM:7E3D D0 F5					     BNE     loc_7E34
-ROM:7E3F 95 0D					     STA     0Dh,X
+ROM:7E3F 95 0D					     STA     $D,X
 ROM:7E41 E8					     INX
-ROM:7E42 8D 00 34				     STA     3400h				     ; Kick watchdog
+ROM:7E42 8D 00 34				     STA     $3400				     ; Kick watchdog
 ROM:7E45 A5 09					     LDA     byte_9
-ROM:7E47 C9 58					     CMP     #58h ; 'X'
+ROM:7E47 C9 58					     CMP     #$58 ; 'X'
 ROM:7E49 90 E1					     BCC     loc_7E2C
 ROM:7E4B D0 02					     BNE     loc_7E4F
-ROM:7E4D A9 68					     LDA     #68h ; 'h'
+ROM:7E4D A9 68					     LDA     #$68 ; 'h'
 ROM:7E4F
 ROM:7E4F	     loc_7E4F:
-ROM:7E4F C9 80					     CMP     #80h ; 'Ä'
+ROM:7E4F C9 80					     CMP     #$80 ; 'Ä'
 ROM:7E51 90 D9					     BCC     loc_7E2C
 ROM:7E53 8D 00 03				     STA     P2RAM
 ROM:7E56 A2 04					     LDX     #4					     ; RAMSEL
-ROM:7E58 8E 00 32				     STX     3200h				     ; output
+ROM:7E58 8E 00 32				     STX     $3200				     ; output
 ROM:7E5B 86 15					     STX     byte_15
 ROM:7E5D A2 00					     LDX     #0
 ROM:7E5F CD 00 02				     CMP     P1RAM
@@ -4023,17 +4321,17 @@ ROM:7E64 E8					     INX
 ROM:7E65
 ROM:7E65	     loc_7E65:
 ROM:7E65 AD 00 03				     LDA     P2RAM
-ROM:7E68 C9 88					     CMP     #88h ; 'à'
+ROM:7E68 C9 88					     CMP     #$88 ; 'à'
 ROM:7E6A F0 01					     BEQ     loc_7E6D
 ROM:7E6C E8					     INX
 ROM:7E6D
 ROM:7E6D	     loc_7E6D:
 ROM:7E6D 86 16					     STX     byte_16
-ROM:7E6F A9 10					     LDA     #10h
+ROM:7E6F A9 10					     LDA     #$10
 ROM:7E71 85 00					     STA     globalScale
 ROM:7E73
 ROM:7E73	     loc_7E73:
-ROM:7E73 A2 24					     LDX     #24h ; '$'
+ROM:7E73 A2 24					     LDX     #$24 ; '$'
 ROM:7E75
 ROM:7E75	     loc_7E75:
 ROM:7E75 AD 01 20				     LDA     freq3kHz
@@ -4048,10 +4346,10 @@ ROM:7E82
 ROM:7E82	     loc_7E82:
 ROM:7E82 2C 02 20				     BIT     halt
 ROM:7E85 30 FB					     BMI     loc_7E82
-ROM:7E87 8D 00 34				     STA     3400h				     ; Kick watchdog
+ROM:7E87 8D 00 34				     STA     $3400				     ; Kick watchdog
 ROM:7E8A A9 00					     LDA     #0
 ROM:7E8C 85 02					     STA     dvg_curr_addr_lsb
-ROM:7E8E A9 40					     LDA     #40h ; '@'
+ROM:7E8E A9 40					     LDA     #$40 ; '@'
 ROM:7E90 85 03					     STA     dvg_curr_addr_msb
 ROM:7E92 AD 05 20				     LDA     diagStep
 ROM:7E95 10 5B					     BPL     loc_7EF2
@@ -4065,8 +4363,8 @@ ROM:7EA4 F0 02					     BEQ     loc_7EA8
 ROM:7EA6 86 15					     STX     byte_15
 ROM:7EA8
 ROM:7EA8	     loc_7EA8:
-ROM:7EA8 BC BB 7E				     LDY     (loc_7EB9+2),X
-ROM:7EAB A9 B0					     LDA     #0B0h ; '∞'
+ROM:7EA8 BC BB 7E				     LDY     loc_7EB9+2,X
+ROM:7EAB A9 B0					     LDA     #$B0 ; '∞'
 ROM:7EAD 91 02					     STA     (2),Y				     ; store in	avg ram
 ROM:7EAF 88					     DEY
 ROM:7EB0 88					     DEY
@@ -4080,90 +4378,90 @@ ROM:7EB9
 ROM:7EB9	     loc_7EB9:
 ROM:7EB9 4C 9D 7F				     JMP     loc_7F9D
 ROM:7EB9	     ; ---------------------------------------------------------------------------
-ROM:7EBC 33					     .db  33h ;	3
-ROM:7EBD 1D					     .db  1Dh
-ROM:7EBE 17					     .db  17h
-ROM:7EBF 0D					     .db  0Dh
-ROM:7EC0 80	     unk_7EC0:			     .db  80h ;	Ä
-ROM:7EC1 A0					     .db 0A0h ;	†
-ROM:7EC2 00					     .db    0
-ROM:7EC3 00					     .db    0
-ROM:7EC4 00					     .db    0
-ROM:7EC5 70					     .db  70h ;	p
-ROM:7EC6 00					     .db    0
-ROM:7EC7 00					     .db    0
-ROM:7EC8 FF					     .db 0FFh
-ROM:7EC9 92					     .db  92h ;	í
-ROM:7ECA FF					     .db 0FFh
-ROM:7ECB 73					     .db  73h ;	s
-ROM:7ECC D0					     .db 0D0h ;	–
-ROM:7ECD A1					     .db 0A1h ;	°
-ROM:7ECE 30					     .db  30h ;	0
-ROM:7ECF 02					     .db    2
-ROM:7ED0 00					     .db    0
-ROM:7ED1 70					     .db  70h ;	p
-ROM:7ED2 00					     .db    0
-ROM:7ED3 00					     .db    0
-ROM:7ED4 7F					     .db  7Fh ;	
-ROM:7ED5 FB					     .db 0FBh ;	˚
-ROM:7ED6 0D					     .db  0Dh
-ROM:7ED7 E0					     .db 0E0h ;	‡
-ROM:7ED8 00					     .db    0
-ROM:7ED9 B0					     .db 0B0h ;	∞
-ROM:7EDA 7E					     .db  7Eh ;	~
-ROM:7EDB FA					     .db 0FAh ;	˙
-ROM:7EDC 11					     .db  11h
-ROM:7EDD C0					     .db 0C0h ;	¿
-ROM:7EDE 78					     .db  78h ;	x
-ROM:7EDF FE					     .db 0FEh ;	˛
-ROM:7EE0 00					     .db    0
-ROM:7EE1 B0					     .db 0B0h ;	∞
-ROM:7EE2 13					     .db  13h
-ROM:7EE3 C0					     .db 0C0h ;	¿
-ROM:7EE4 00					     .db    0
-ROM:7EE5 D0					     .db 0D0h ;	–
-ROM:7EE6 15					     .db  15h
-ROM:7EE7 C0					     .db 0C0h ;	¿
-ROM:7EE8 00					     .db    0
-ROM:7EE9 D0					     .db 0D0h ;	–
-ROM:7EEA 17					     .db  17h
-ROM:7EEB C0					     .db 0C0h ;	¿
-ROM:7EEC 00					     .db    0
-ROM:7EED D0					     .db 0D0h ;	–
-ROM:7EEE 7A					     .db  7Ah ;	z
-ROM:7EEF F8					     .db 0F8h ;	¯
-ROM:7EF0 00					     .db    0
-ROM:7EF1 D0					     .db 0D0h ;	–
+ROM:7EBC 33					     .BYTE $33 ; 3
+ROM:7EBD 1D					     .BYTE $1D
+ROM:7EBE 17					     .BYTE $17
+ROM:7EBF 0D					     .BYTE  $D
+ROM:7EC0 80	     unk_7EC0:			     .BYTE $80 ; Ä
+ROM:7EC1 A0					     .BYTE $A0 ; †
+ROM:7EC2 00					     .BYTE   0
+ROM:7EC3 00					     .BYTE   0
+ROM:7EC4 00					     .BYTE   0
+ROM:7EC5 70					     .BYTE $70 ; p
+ROM:7EC6 00					     .BYTE   0
+ROM:7EC7 00					     .BYTE   0
+ROM:7EC8 FF					     .BYTE $FF
+ROM:7EC9 92					     .BYTE $92 ; í
+ROM:7ECA FF					     .BYTE $FF
+ROM:7ECB 73					     .BYTE $73 ; s
+ROM:7ECC D0					     .BYTE $D0 ; –
+ROM:7ECD A1					     .BYTE $A1 ; °
+ROM:7ECE 30					     .BYTE $30 ; 0
+ROM:7ECF 02					     .BYTE   2
+ROM:7ED0 00					     .BYTE   0
+ROM:7ED1 70					     .BYTE $70 ; p
+ROM:7ED2 00					     .BYTE   0
+ROM:7ED3 00					     .BYTE   0
+ROM:7ED4 7F					     .BYTE $7F ; 
+ROM:7ED5 FB					     .BYTE $FB ; ˚
+ROM:7ED6 0D					     .BYTE  $D
+ROM:7ED7 E0					     .BYTE $E0 ; ‡
+ROM:7ED8 00					     .BYTE   0
+ROM:7ED9 B0					     .BYTE $B0 ; ∞
+ROM:7EDA 7E					     .BYTE $7E ; ~
+ROM:7EDB FA					     .BYTE $FA ; ˙
+ROM:7EDC 11					     .BYTE $11
+ROM:7EDD C0					     .BYTE $C0 ; ¿
+ROM:7EDE 78					     .BYTE $78 ; x
+ROM:7EDF FE					     .BYTE $FE ; ˛
+ROM:7EE0 00					     .BYTE   0
+ROM:7EE1 B0					     .BYTE $B0 ; ∞
+ROM:7EE2 13					     .BYTE $13
+ROM:7EE3 C0					     .BYTE $C0 ; ¿
+ROM:7EE4 00					     .BYTE   0
+ROM:7EE5 D0					     .BYTE $D0 ; –
+ROM:7EE6 15					     .BYTE $15
+ROM:7EE7 C0					     .BYTE $C0 ; ¿
+ROM:7EE8 00					     .BYTE   0
+ROM:7EE9 D0					     .BYTE $D0 ; –
+ROM:7EEA 17					     .BYTE $17
+ROM:7EEB C0					     .BYTE $C0 ; ¿
+ROM:7EEC 00					     .BYTE   0
+ROM:7EED D0					     .BYTE $D0 ; –
+ROM:7EEE 7A					     .BYTE $7A ; z
+ROM:7EEF F8					     .BYTE $F8 ; ¯
+ROM:7EF0 00					     .BYTE   0
+ROM:7EF1 D0					     .BYTE $D0 ; –
 ROM:7EF2	     ; ---------------------------------------------------------------------------
 ROM:7EF2
 ROM:7EF2	     loc_7EF2:
-ROM:7EF2 A9 50					     LDA     #50h ; 'P'
+ROM:7EF2 A9 50					     LDA     #$50 ; 'P'
 ROM:7EF4 A2 00					     LDX     #0					     ; addr = 0x5000
 ROM:7EF6 20 FC 7B				     JSR     write_JSR_cmd			     ; draw test pattern
-ROM:7EF9 A9 69					     LDA     #69h ; 'i'
-ROM:7EFB A2 93					     LDX     #93h ; 'ì'
+ROM:7EF9 A9 69					     LDA     #$69 ; 'i'
+ROM:7EFB A2 93					     LDX     #$93 ; 'ì'
 ROM:7EFD 20 03 7C				     JSR     write_CURx4_cmd
-ROM:7F00 A9 30					     LDA     #30h ; '0'
+ROM:7F00 A9 30					     LDA     #$30 ; '0'
 ROM:7F02 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F05 A2 03					     LDX     #3					     ; 4 dipswitches to	read
 ROM:7F07
 ROM:7F07	     read_dsw1:									     ; read next dipswitch
-ROM:7F07 BD 00 28				     LDA     2800h,X
+ROM:7F07 BD 00 28				     LDA     $2800,X
 ROM:7F0A 29 01					     AND     #1					     ; bit0 only
 ROM:7F0C 86 0B					     STX     byte_B
 ROM:7F0E 20 D1 7B				     JSR     display_digit_A
 ROM:7F11 A6 0B					     LDX     byte_B
-ROM:7F13 BD 00 28				     LDA     2800h,X				     ; read dipswitch again
+ROM:7F13 BD 00 28				     LDA     $2800,X				     ; read dipswitch again
 ROM:7F16 29 02					     AND     #2					     ; bit1 only
 ROM:7F18 4A					     LSR     A					     ; ->bit0
 ROM:7F19 20 D1 7B				     JSR     display_digit_A
 ROM:7F1C A6 0B					     LDX     byte_B
 ROM:7F1E CA					     DEX					     ; done all	dipswitches?
 ROM:7F1F 10 E6					     BPL     read_dsw1				     ; no, loop
-ROM:7F21 A9 7A					     LDA     #7Ah ; 'z'
-ROM:7F23 A2 9D					     LDX     #9Dh ; 'ù'
+ROM:7F21 A9 7A					     LDA     #$7A ; 'z'
+ROM:7F23 A2 9D					     LDX     #$9D ; 'ù'
 ROM:7F25 20 03 7C				     JSR     write_CURx4_cmd
-ROM:7F28 A9 10					     LDA     #10h
+ROM:7F28 A9 10					     LDA     #$10
 ROM:7F2A 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F2D AD 02 28				     LDA     centerCoinMultiplierAndLives
 ROM:7F30 29 02					     AND     #2					     ; Coin Multiplier
@@ -4177,17 +4475,17 @@ ROM:7F3E BD F5 7F				     LDA     rightCoinMultiplierTable,X
 ROM:7F41 20 D1 7B				     JSR     display_digit_A
 ROM:7F44 A5 16					     LDA     byte_16
 ROM:7F46 F0 07					     BEQ     loc_7F4F
-ROM:7F48 A2 88					     LDX     #88h ; 'à'
-ROM:7F4A A9 50					     LDA     #50h ; 'P'                              ; addr = 0x5088
+ROM:7F48 A2 88					     LDX     #$88 ; 'à'
+ROM:7F4A A9 50					     LDA     #$50 ; 'P'                              ; addr = 0x5088
 ROM:7F4C 20 FC 7B				     JSR     write_JSR_cmd			     ; more test pattern?
 ROM:7F4F
 ROM:7F4F	     loc_7F4F:
-ROM:7F4F A2 96					     LDX     #96h ; 'ñ'
+ROM:7F4F A2 96					     LDX     #$96 ; 'ñ'
 ROM:7F51 8E 0C 00				     STX     byte_C
 ROM:7F54 A2 07					     LDX     #7
 ROM:7F56
 ROM:7F56	     loc_7F56:
-ROM:7F56 B5 0D					     LDA     0Dh,X
+ROM:7F56 B5 0D					     LDA     $D,X
 ROM:7F58 F0 37					     BEQ     loc_7F91
 ROM:7F5A 48					     PHA
 ROM:7F5B 8E 0B 00				     STX     byte_B
@@ -4196,14 +4494,14 @@ ROM:7F61 8A					     TXA
 ROM:7F62 38					     SEC
 ROM:7F63 E9 08					     SBC     #8
 ROM:7F65 8D 0C 00				     STA     byte_C
-ROM:7F68 A9 20					     LDA     #20h ; ' '
+ROM:7F68 A9 20					     LDA     #$20 ; ' '
 ROM:7F6A 20 03 7C				     JSR     write_CURx4_cmd
-ROM:7F6D A9 70					     LDA     #70h ; 'p'
+ROM:7F6D A9 70					     LDA     #$70 ; 'p'
 ROM:7F6F 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:7F72 AD 0B 00				     LDA     byte_B
 ROM:7F75 20 D1 7B				     JSR     display_digit_A
-ROM:7F78 AD D4 56				     LDA     DVGROM+6D4h
-ROM:7F7B AE D5 56				     LDX     DVGROM+6D5h
+ROM:7F78 AD D4 56				     LDA     DVGROM+$6D4
+ROM:7F7B AE D5 56				     LDX     DVGROM+$6D5
 ROM:7F7E 20 45 7D				     JSR     write_AX_to_avgram
 ROM:7F81 68					     PLA
 ROM:7F82 48					     PHA
@@ -4219,7 +4517,7 @@ ROM:7F91
 ROM:7F91	     loc_7F91:
 ROM:7F91 CA					     DEX
 ROM:7F92 10 C2					     BPL     loc_7F56
-ROM:7F94 A9 7F					     LDA     #7Fh ; ''
+ROM:7F94 A9 7F					     LDA     #$7F ; ''
 ROM:7F96 AA					     TAX
 ROM:7F97 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7F9A 20 C0 7B				     JSR     halt_dvg
@@ -4246,7 +4544,7 @@ ROM:7FB3 45 08					     EOR     byte_8
 ROM:7FB5 86 08					     STX     byte_8
 ROM:7FB7 08					     PHP
 ROM:7FB8 A9 04					     LDA     #4					     ; RAMSEL
-ROM:7FBA 8D 00 32				     STA     3200h				     ; output
+ROM:7FBA 8D 00 32				     STA     $3200				     ; output
 ROM:7FBD 2E 03 20				     ROL     hyperspaceSwitch
 ROM:7FC0 2A					     ROL     A
 ROM:7FC1 2E 04 20				     ROL     FireSwitch
@@ -4267,12 +4565,12 @@ ROM:7FDA 45 09					     EOR     byte_9
 ROM:7FDC F0 02					     BEQ     loc_7FE0
 ROM:7FDE
 ROM:7FDE	     loc_7FDE:
-ROM:7FDE A9 80					     LDA     #80h ; 'Ä'
+ROM:7FDE A9 80					     LDA     #$80 ; 'Ä'
 ROM:7FE0
 ROM:7FE0	     loc_7FE0:									     ; sound (bonus life)
-ROM:7FE0 8D 05 3C				     STA     3C05h
-ROM:7FE3 8D 00 32				     STA     3200h				     ; output
-ROM:7FE6 8D 00 30				     STA     3000h				     ; AVG/DVG go
+ROM:7FE0 8D 05 3C				     STA     $3C05
+ROM:7FE3 8D 00 32				     STA     $3200				     ; output
+ROM:7FE6 8D 00 30				     STA     $3000				     ; AVG/DVG go
 ROM:7FE9 86 0A					     STX     byte_A
 ROM:7FEB 84 09					     STY     byte_9
 ROM:7FED AD 07 20				     LDA     selfTest
@@ -4281,12 +4579,12 @@ ROM:7FF0	     loc_7FF0:									     ; infinite	loop
 ROM:7FF0 10 FE					     BPL     loc_7FF0
 ROM:7FF2 4C 73 7E				     JMP     loc_7E73
 ROM:7FF2	     ; ---------------------------------------------------------------------------
-ROM:7FF5 01 04 05 06 rightCoinMultiplierTable:	     .db 1, 4, 5, 6
-ROM:7FF9 4E					     .db  4Eh ;	N
-ROM:7FFA 65 7B					     .dw NMI					     ; NMI vector
-ROM:7FFC F3 7C					     .dw RESET					     ; RESET vector
-ROM:7FFE F3 7C					     .dw RESET					     ; IRQ/BRK vector (unused)
+ROM:7FF5 01 04 05 06 rightCoinMultiplierTable:	     .BYTE 1, 4, 5, 6
+ROM:7FF9 4E					     .BYTE $4E ; N
+ROM:7FFA 65 7B					     .WORD NMI					     ; NMI vector
+ROM:7FFC F3 7C					     .WORD RESET				     ; RESET vector
+ROM:7FFE F3 7C					     .WORD RESET				     ; IRQ/BRK vector (unused)
 ROM:7FFE	     ; end of 'ROM'
 ROM:7FFE
 ROM:7FFE
-ROM:7FFE					     .end
+ROM:7FFE					     .END
