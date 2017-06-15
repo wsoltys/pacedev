@@ -1,3 +1,8 @@
+.import __MAIN_START__, __BSS_LOAD__ ; Linker generated
+
+.segment "EXEHDR"
+.addr __MAIN_START__ ; Start address
+.word __BSS_LOAD__ - __MAIN_START__ ; Size
 
 
 ;
@@ -144,7 +149,7 @@ coin_3_inp_length:		.BYTE 0	; (uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; end of 'ZEROPAGE'
 
 ; ===========================================================================
@@ -178,7 +183,7 @@ stack .set $100
 ; ===========================================================================
 
 ; Segment type:	Regular
-				.segment "CODE"
+				.segment "BSS"
 				.org $200
 P1RAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited) ; Asteroids 1-27
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
@@ -589,7 +594,7 @@ DVGROM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; ===========================================================================
 
 ; Segment type:	Pure code
-				;.segment ROM
+				.segment "CODE"
 				.org $6800
 				JMP	RESET					; Debugger? Off	in the weeds? Do Reset.
 ; ---------------------------------------------------------------------------

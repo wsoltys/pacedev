@@ -2,6 +2,7 @@
 
 TARGET = asteroid
 
+TYPE = apple2
 CC65_DIR = cc65
 C2D_DIR = c2d-master
 
@@ -24,15 +25,15 @@ MEDIA = asteroid.dsk
 all: $(MEDIA)
 
 %.dsk : $(BIN)
-	$(DD) if=$< of=$(TARGET)#060803.BIN bs=1 skip=4
+	$(DD) if=$< of=$(TARGET)#066800.BIN bs=1 skip=4
 	$(C2D) -b $< $@
 	
 $(TARGET).o : $(TARGET).s
-	$(AS) -t apple2enh $(TARGET).s -o $@ -l $(TARGET).lst
-	$(AS) --cpu 6502X -t apple2enh asteroid2.asm -o asteroid2.o -l asteroid2.lst
+	$(AS) -t $(TYPE) $(TARGET).s -o $@ -l $(TARGET).lst
+	$(AS) --cpu 6502X -t $(TYPE) asteroid2.asm -o asteroid2.o -l asteroid2.lst
 
 $(BIN) : $(TARGET).o
-	$(LD) -o $@ asteroid2.o -C apple2enh-asm.cfg -vm -m asteroid2.map
+	$(LD) -o $@ asteroid2.o --start-addr 0x6800 -C apple2enh-asm.cfg -vm -m asteroid2.map
 
 clean:
 	$(ECHO) Deleting intermediate files...

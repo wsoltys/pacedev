@@ -20,6 +20,14 @@ ZEROPAGE:0000		  ;
 ZEROPAGE:0000		  ; File Name	: E:\dev\pace\pacedev.net\sw\re\platform\asteroids\roms\asteroid2.bin
 ZEROPAGE:0000		  ; Format	: Binary file
 ZEROPAGE:0000		  ; Base Address: 0000h	Range: 6800h - 8000h Loaded length: 00001800h
+ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ; Uncomment for CA65 using apple2enh-asm.cfg
+ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ;.import __MAIN_START__, __BSS_LOAD__	; Linker generated
+ZEROPAGE:0000		  ;.segment "EXEHDR"
+ZEROPAGE:0000		  ;.addr __MAIN_START__	; Start	address
+ZEROPAGE:0000		  ;.word __BSS_LOAD__ -	__MAIN_START__ ; Size
+ZEROPAGE:0000
 ZEROPAGE:0000
 ZEROPAGE:0000		  ; ; Processor:	M6502
 ZEROPAGE:0000		  ; ; Target assembler:	SVENSON	ELECTRONICS 6502/65C02 ASSEMBLER - V.1.0 - MAY,	1988
