@@ -19,7 +19,7 @@ OBJC = objcopy
 BIN = $(TARGET).bin
 MAKEFILE = makefile
 
-MEDIA = ast.dsk
+MEDIA = asteroid.dsk
 
 all: $(MEDIA)
 
