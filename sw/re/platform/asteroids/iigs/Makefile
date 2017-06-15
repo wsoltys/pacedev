@@ -39,4 +39,6 @@ clean:
 	$(ECHO) Deleting executables...
 	$(RM) -f $(BIN)
 	$(RM) -f $(TARGET)#060803.BIN
+	$(ECHO) Deleting dsk file...
+	$(RM) -f $(MEDIA)
 	
