@@ -28,11 +28,11 @@ all: $(MEDIA)
 	$(C2D) -b $< $@
 	
 $(TARGET).o : $(TARGET).s
-	$(AS) -t apple2 $(TARGET).s -o $@ -l $(TARGET).lst
-	$(AS) --cpu 6502X -t apple2 asteroid2.asm -o asteroid2.o -l asteroid2.lst
+	$(AS) -t apple2enh $(TARGET).s -o $@ -l $(TARGET).lst
+	$(AS) --cpu 6502X -t apple2enh asteroid2.asm -o asteroid2.o -l asteroid2.lst
 
 $(BIN) : $(TARGET).o
-	$(LD) -o $@ $< -C apple2.cfg
+	$(LD) -o $@ asteroid2.o -C apple2enh-asm.cfg -vm -m asteroid2.map
 
 clean:
 	$(ECHO) Deleting intermediate files...

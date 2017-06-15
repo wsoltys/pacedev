@@ -47,17 +47,17 @@ byte_D:				.BYTE 0	; (uninited)
 byte_E:				.BYTE 0	; (uninited)
 byte_F:				.BYTE 0	; (uninited)
 initial_offset:			.BYTE 0	; (uninited)
-				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
 byte_15:			.BYTE 0	; (uninited)
 byte_16:			.BYTE 0	; (uninited)
 byte_17:			.BYTE 0	; (uninited)
 curPlayer:			.BYTE 0	; (uninited)
 curPlayer_x2:			.BYTE 0	; (uninited)
 numPlayersPreviousGame:		.BYTE 0	; (uninited)
-unk_1B:				; 0 .BYTE uninited & unexplored
+byte_1B:			.BYTE 0	; (uninited)
 numPlayers:			.BYTE 0	; (uninited)
 
 ; High score format (2 bytes)
@@ -73,9 +73,9 @@ word_27:			.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
-letterHighScoreEntry:		; 0 .BYTE uninited & unexplored
+letterHighScoreEntry:		.BYTE 0	; (uninited)
 placeP1HighScore:		.BYTE 0	; (uninited)
-placeP2HighScore:		; 0 .BYTE uninited & unexplored
+placeP2HighScore:		.BYTE 0	; (uninited)
 highScoreInitials:		.BYTE 0,0,0 ; (uninited)
 				.BYTE 0,0,0 ; (uninited)
 				.BYTE 0,0,0 ; (uninited)
@@ -87,9 +87,9 @@ highScoreInitials:		.BYTE 0,0,0 ; (uninited)
 				.BYTE 0,0,0 ; (uninited)
 byte_4F:			.BYTE 0,0,0 ; (uninited)
 p1ScoreTens:			.BYTE 0	; (uninited)
-p1ScoreThousands:		; 0 .BYTE uninited & unexplored
-p2ScoreTens:			; 0 .BYTE uninited & unexplored
-p2ScoreThousands:		; 0 .BYTE uninited & unexplored
+p1ScoreThousands:		.BYTE 0	; (uninited)
+p2ScoreTens:			.BYTE 0	; (uninited)
+p2ScoreThousands:		.BYTE 0	; (uninited)
 numStartingShipsPerGame:	.BYTE 0	; (uninited)
 numShipsP1:			.BYTE 0	; (uninited)
 numShipsP2:			.BYTE 0	; (uninited)
@@ -114,8 +114,8 @@ timerPlayerFireSound:		.BYTE 0	; (uninited)
 timerSaucerFireSound:		.BYTE 0	; (uninited)
 timerBonusShipSound:		.BYTE 0	; (uninited)
 timerExplosionSound:		.BYTE 0	; (uninited)
-fireSoundFlagPlayer:		; 0 .BYTE uninited & unexplored
-fireSoundFlagSaucer:		; 0 .BYTE uninited & unexplored
+fireSoundFlagPlayer:		.BYTE 0	; (uninited)
+fireSoundFlagSaucer:		.BYTE 0	; (uninited)
 volFreqThumpSound:		.BYTE 0	; (uninited)
 timerThumpSoundOn:		.BYTE 0	; (uninited)
 timerThumpSoundOff:		.BYTE 0	; (uninited)
@@ -128,15 +128,15 @@ totalCoinsForCredits:		.BYTE 0	; (uninited)
 byte_74:			.BYTE 0	; (uninited)
 byte_75:			.BYTE 0	; (uninited)
 byte_76:			.BYTE 0	; (uninited)
-unk_77:				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
-coin_1_inp_length:		; 0 .BYTE uninited & unexplored
-coin_2_inp_length:		; 0 .BYTE uninited & unexplored
-coin_3_inp_length:		; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
+byte_77:			.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+coin_1_inp_length:		.BYTE 0	; (uninited)
+coin_2_inp_length:		.BYTE 0	; (uninited)
+coin_3_inp_length:		.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
@@ -144,31 +144,32 @@ coin_3_inp_length:		; 0 .BYTE uninited & unexplored
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; end of 'ZEROPAGE'
 
 ; ===========================================================================
 
 ; Segment type:	Regular
 				;.segment STACK
-				.org $100
-stack:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.org $100
+;stack:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; end of 'STACK'
+stack .set $100
 
 ; status
 ; 1-27 Asteroids
@@ -177,7 +178,7 @@ stack:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; ===========================================================================
 
 ; Segment type:	Regular
-				;.segment RAM
+				.segment "CODE"
 				.org $200
 P1RAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited) ; Asteroids 1-27
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
@@ -192,8 +193,8 @@ p1PlayerFlag:			.BYTE 0	; (uninited)
 ; - 0x02  = large saucer
 ; - 0xA0+ = saucer exploding
 p1SaucerFlag:			.BYTE 0	; (uninited)
-saucerShotTimer1:		; 0 .BYTE uninited & unexplored
-saucerShotTimer2:		; 0 .BYTE uninited & unexplored
+saucerShotTimer1:		.BYTE 0	; (uninited)
+saucerShotTimer2:		.BYTE 0	; (uninited)
 p1TimerShot0:			.BYTE 0	; (uninited)
 p1TimerShot1:			.BYTE 0	; (uninited)
 p1TimerShot2:			.BYTE 0	; (uninited)
@@ -249,8 +250,8 @@ shipSpawnTimer:			.BYTE 0	; (uninited)
 asteroidWaveTimer:		.BYTE 0	; (uninited)
 byte_2FC:			.BYTE 0	; (uninited)
 numAsteroidsLeftBeforeSaucer:	.BYTE 0	; (uninited)
-				; 0 .BYTE uninited & unexplored
-				; 0 .BYTE uninited & unexplored
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
 ; this gets bank-switched into the same	address	space
 ; as the P1RAM block to	save on	code
 P2RAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
@@ -276,12 +277,12 @@ P2RAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; Segment type:	Regular
 				;.segment IN0
 				.org $2000
-				; 0 .BYTE uninited & unexplored
-freq3kHz:			; 0 .BYTE uninited & unexplored
-halt:				; 0 .BYTE uninited & unexplored
-hyperspaceSwitch:		; 0 .BYTE uninited & unexplored
-FireSwitch:			; 0 .BYTE uninited & unexplored
-diagStep:			; 0 .BYTE uninited & unexplored
+				.BYTE 0	; (uninited)
+freq3kHz:			.BYTE 0	; (uninited)
+halt:				.BYTE 0	; (uninited)
+hyperspaceSwitch:		.BYTE 0	; (uninited)
+FireSwitch:			.BYTE 0	; (uninited)
+diagStep:			.BYTE 0	; (uninited)
 slamSwitch:			.BYTE 0	; (uninited)
 selfTest:			.BYTE 0	; (uninited)
 ; end of 'IN0'
@@ -291,14 +292,14 @@ selfTest:			.BYTE 0	; (uninited)
 ; Segment type:	Regular
 				;.segment IN1
 				.org $2400
-leftCoinSwitch:			; 0 .BYTE uninited & unexplored
-centerCoinSwitch:		; 0 .BYTE uninited & unexplored
-rightCoinSwitch:		; 0 .BYTE uninited & unexplored
-p1StartSwitch:			; 0 .BYTE uninited & unexplored
-p2StartSwitch:			; 0 .BYTE uninited & unexplored
-thrustSwitch:			; 0 .BYTE uninited & unexplored
-rotateRightSwitch:		; 0 .BYTE uninited & unexplored
-rotateLeftSwitch:		; 0 .BYTE uninited & unexplored
+leftCoinSwitch:			.BYTE 0	; (uninited)
+centerCoinSwitch:		.BYTE 0	; (uninited)
+rightCoinSwitch:		.BYTE 0	; (uninited)
+p1StartSwitch:			.BYTE 0	; (uninited)
+p2StartSwitch:			.BYTE 0	; (uninited)
+thrustSwitch:			.BYTE 0	; (uninited)
+rotateRightSwitch:		.BYTE 0	; (uninited)
+rotateLeftSwitch:		.BYTE 0	; (uninited)
 ; end of 'IN1'
 
 ; 0 = Free Play, 1 = 1 Coin 2 Credits, 2 = 1 Coin 1 Credit, 3 =	2 Coins	1 Credit
@@ -307,11 +308,11 @@ rotateLeftSwitch:		; 0 .BYTE uninited & unexplored
 ; Segment type:	Regular
 				;.segment DSW1
 				.org $2800
-coinage:			; 0 .BYTE uninited & unexplored
+coinage:			.BYTE 0	; (uninited)
 ; 0 = 1x & 4, 1	= 1x & 3, 2 = 2x & 4, 3	= 2x & 3
-rightCoinMultiplier:		; 0 .BYTE uninited & unexplored
-centerCoinMultiplierAndLives:	; 0 .BYTE uninited & unexplored
-language:			; 0 .BYTE uninited & unexplored
+rightCoinMultiplier:		.BYTE 0	; (uninited)
+centerCoinMultiplierAndLives:	.BYTE 0	; (uninited)
+language:			.BYTE 0	; (uninited)
 ; end of 'DSW1'
 
 ; ===========================================================================
@@ -3129,7 +3130,7 @@ loc_76AC:									; entry	we're after?
 				STA	highScoreInitials+1,X
 				LDA	placeP2HighScore,X
 				STA	highScoreInitials+2,X
-				LDA	unk_1B,Y
+				LDA	byte_1B,Y
 				STA	highScoreTable,Y
 				LDA	numPlayers,Y
 				STA	highScoreTable+1,Y			; shift	entry down
@@ -3165,8 +3166,9 @@ loc_76EF:
 				PHP
 				RRA	$20,X
 ; this is actually the undocumented SKW	instruction
-; - replace NOP	with .BYTE $fc, $76, $4c
-				.BYTE $fc, $76, $4c
+; - CA65 replace NOP with
+	      .BYTE $fc, $76, $4c
+;				NOP
 				PHP
 				RRA	$A8,X
 				TXA
@@ -3618,13 +3620,13 @@ loc_7ABE:
 				DEC	slamSwitchFlag
 				LDA	#0
 				STA	coin_1_inp_length,X
-				STA	unk_77,X
+				STA	byte_77,X
 
 loc_7ACA:
 				CLC
-				LDA	unk_77,X
+				LDA	byte_77,X
 				BEQ	loc_7AF2
-				DEC	unk_77,X
+				DEC	byte_77,X
 				BNE	loc_7AF2
 				SEC
 				BCS	loc_7AF2
@@ -3642,13 +3644,13 @@ loc_7AE3:
 				LDA	#$1F
 				BCS	loc_7AB1
 				STA	coin_1_inp_length,X
-				LDA	unk_77,X
+				LDA	byte_77,X
 				BEQ	loc_7AEE
 				SEC
 
 loc_7AEE:
 				LDA	#$78 ; 'x'
-				STA	unk_77,X
+				STA	byte_77,X
 
 loc_7AF2:
 				BCC	loc_7B17
@@ -4374,7 +4376,7 @@ loc_7E82:
 				LDX	byte_15
 				LDA	hyperspaceSwitch
 				BPL	loc_7EA8
-				EOR	a:byte_9
+				EOR	a:byte_9					; *** CA65 use a:
 				BPL	loc_7EA8
 				DEX
 				BEQ	loc_7EA8
@@ -4499,19 +4501,19 @@ read_dsw1:									; read next dipswitch
 
 loc_7F4F:
 				LDX	#$96 ; '–'
-				STX	a:byte_C
+				STX	a:byte_C					; *** CA65 use a:
 				LDX	#7
 
 loc_7F56:
 				LDA	$D,X
 				BEQ	loc_7F91
 				PHA
-				STX	a:byte_B
-				LDX	a:byte_C
+				STX	a:byte_B					; *** CA65 use a:
+				LDX	a:byte_C					; *** CA65 use a:
 				TXA
 				SEC
 				SBC	#8
-				STA	a:byte_C
+				STA	a:byte_C					; *** CA65 use a:
 				LDA	#$20 ; ' '
 				JSR	write_CURx4_cmd
 				LDA	#$70 ; 'p'
@@ -4530,7 +4532,7 @@ loc_7F56:
 				JSR	display_digit_A
 				PLA
 				JSR	display_digit_A
-				LDX	a:byte_B
+				LDX	a:byte_B					; *** CA65 use a:
 
 loc_7F91:
 				DEX

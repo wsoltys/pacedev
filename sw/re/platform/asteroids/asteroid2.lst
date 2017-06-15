@@ -1,168 +1,184 @@
-RAM:0000	     ;
-RAM:0000	     ; +-------------------------------------------------------------------------+
-RAM:0000	     ; |   This	file has been generated	by The Interactive Disassembler	(IDA)	 |
-RAM:0000	     ; |	   Copyright (c) 2015 Hex-Rays,	<support@hex-rays.com>		 |
-RAM:0000	     ; |		      License info: 48-B437-7294-77			 |
-RAM:0000	     ; |			Chris Nott, Virtual Logic			 |
-RAM:0000	     ; +-------------------------------------------------------------------------+
-RAM:0000	     ;
-RAM:0000	     ; Input SHA256 : 393574F1F0232302BE07C20B1CBD701EE2C7547DBBF02D0AB836D3B20EA041B7
-RAM:0000	     ; Input MD5    : 2A2ACFD20A2D495DDDEE77AF99730795
-RAM:0000	     ; Input CRC32  : 151C1E33
-RAM:0000
-RAM:0000	     ;
-RAM:0000	     ; +-------------------------------------------------+
-RAM:0000	     ; + Asteroids (Rev	2) Disassembly v0.01		 +
-RAM:0000	     ; +   - by	tcdev (msmcdoug@gmail.com)		 +
-RAM:0000	     ; +   - based on work by Lonnie Howell		 +
-RAM:0000	     ; +-------------------------------------------------+
-RAM:0000	     ;
-RAM:0000	     ; File Name   : E:\dev\pace\pacedev.net\sw\re\platform\asteroids\roms\asteroid2.bin
-RAM:0000	     ; Format	   : Binary file
-RAM:0000	     ; Base Address: 0000h Range: 6800h	- 8000h	Loaded length: 00001800h
-RAM:0000
-RAM:0000	     ; ; Processor:	   M6502
-RAM:0000	     ; ; Target	assembler: SVENSON ELECTRONICS 6502/65C02 ASSEMBLER - V.1.0 - MAY, 1988
-RAM:0000
-RAM:0000	     ; ===========================================================================
-RAM:0000
-RAM:0000	     ; Segment type: Regular
-RAM:0000					     ;.segment RAM
-RAM:0000 ??	     globalScale:		     .BYTE 0 ; (uninited)
-RAM:0001 ??	     byte_1:			     .BYTE 0 ; (uninited)
-RAM:0002 ??	     dvg_curr_addr_lsb:		     .BYTE 0 ; (uninited)
-RAM:0003 ??	     dvg_curr_addr_msb:		     .BYTE 0 ; (uninited)
-RAM:0004 ??	     byte_4:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
-RAM:0005 ??	     byte_5:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
-RAM:0006 ??	     byte_6:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
-RAM:0007 ??	     byte_7:			     .BYTE 0 ; (uninited)			     ; tmp store coord conversion
-RAM:0008 ??	     byte_8:			     .BYTE 0 ; (uninited)			     ; tmp store
-RAM:0009 ??	     byte_9:			     .BYTE 0 ; (uninited)			     ; tmp store
-RAM:000A ??	     byte_A:			     .BYTE 0 ; (uninited)
-RAM:000B ??	     byte_B:			     .BYTE 0 ; (uninited)
-RAM:000C ??	     byte_C:			     .BYTE 0 ; (uninited)
-RAM:000D ??	     byte_D:			     .BYTE 0 ; (uninited)
-RAM:000E ??	     byte_E:			     .BYTE 0 ; (uninited)
-RAM:000F ??	     byte_F:			     .BYTE 0 ; (uninited)
-RAM:0010 ??	     initial_offset:		     .BYTE 0 ; (uninited)
-RAM:0011					     ; 0 .BYTE uninited	& unexplored
-RAM:0012					     ; 0 .BYTE uninited	& unexplored
-RAM:0013					     ; 0 .BYTE uninited	& unexplored
-RAM:0014					     ; 0 .BYTE uninited	& unexplored
-RAM:0015 ??	     byte_15:			     .BYTE 0 ; (uninited)
-RAM:0016 ??	     byte_16:			     .BYTE 0 ; (uninited)
-RAM:0017 ??	     byte_17:			     .BYTE 0 ; (uninited)
-RAM:0018 ??	     curPlayer:			     .BYTE 0 ; (uninited)
-RAM:0019 ??	     curPlayer_x2:		     .BYTE 0 ; (uninited)
-RAM:001A ??	     numPlayersPreviousGame:	     .BYTE 0 ; (uninited)
-RAM:001B	     unk_1B:			     ; 0 .BYTE uninited	& unexplored
-RAM:001C ??	     numPlayers:		     .BYTE 0 ; (uninited)
-RAM:001D
-RAM:001D	     ; High score format (2 bytes)
-RAM:001D	     ; byte 1 -	tens (in decimal)
-RAM:001D	     ; byte 2 -	thousands (in decimal)
-RAM:001D ?? ??	     highScoreTable:		     .BYTE 0,0 ; (uninited)
-RAM:001F ?? ??					     .BYTE 0,0 ; (uninited)
-RAM:0021 ?? ??	     word_21:			     .BYTE 0,0 ; (uninited)
-RAM:0023 ?? ??					     .BYTE 0,0 ; (uninited)
-RAM:0025 ?? ??					     .BYTE 0,0 ; (uninited)
-RAM:0027 ?? ??	     word_27:			     .BYTE 0,0 ; (uninited)
-RAM:0029 ?? ??					     .BYTE 0,0 ; (uninited)
-RAM:002B ?? ??					     .BYTE 0,0 ; (uninited)
-RAM:002D ?? ??					     .BYTE 0,0 ; (uninited)
-RAM:002F ?? ??					     .BYTE 0,0 ; (uninited)
-RAM:0031	     letterHighScoreEntry:	     ; 0 .BYTE uninited	& unexplored
-RAM:0032 ??	     placeP1HighScore:		     .BYTE 0 ; (uninited)
-RAM:0033	     placeP2HighScore:		     ; 0 .BYTE uninited	& unexplored
-RAM:0034 ?? ?? ??    highScoreInitials:		     .BYTE 0,0,0 ; (uninited)
-RAM:0037 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:003A ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:003D ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:0040 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:0043 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:0046 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:0049 ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:004C ?? ?? ??				     .BYTE 0,0,0 ; (uninited)
-RAM:004F ?? ?? ??    byte_4F:			     .BYTE 0,0,0 ; (uninited)
-RAM:0052 ??	     p1ScoreTens:		     .BYTE 0 ; (uninited)
-RAM:0053	     p1ScoreThousands:		     ; 0 .BYTE uninited	& unexplored
-RAM:0054	     p2ScoreTens:		     ; 0 .BYTE uninited	& unexplored
-RAM:0055	     p2ScoreThousands:		     ; 0 .BYTE uninited	& unexplored
-RAM:0056 ??	     numStartingShipsPerGame:	     .BYTE 0 ; (uninited)
-RAM:0057 ??	     numShipsP1:		     .BYTE 0 ; (uninited)
-RAM:0058 ??	     numShipsP2:		     .BYTE 0 ; (uninited)
-RAM:0059	     ; Hyperspace flag:
-RAM:0059	     ; - 0x01 =	successful
-RAM:0059	     ;	 0x80 =	unsuccessful (death)
-RAM:0059	     ;	 0x00 =	not active
-RAM:0059 ??	     hyperspaceFlag:		     .BYTE 0 ; (uninited)
-RAM:005A ??	     timerStartGame:		     .BYTE 0 ; (uninited)
-RAM:005B ??	     VBLANK_triggered:		     .BYTE 0 ; (uninited)
-RAM:005C ??	     fastTimer:			     .BYTE 0 ; (uninited)
-RAM:005D ??	     slowTimer:			     .BYTE 0 ; (uninited)
-RAM:005E ??	     NMI_count:			     .BYTE 0 ; (uninited)
-RAM:005F ??	     rnd1:			     .BYTE 0 ; (uninited)
-RAM:0060 ??	     rnd2:			     .BYTE 0 ; (uninited)
-RAM:0061 ??	     direction:			     .BYTE 0 ; (uninited)
-RAM:0062 ??	     saucerShotDirection:	     .BYTE 0 ; (uninited)
-RAM:0063 ??	     btn_edge_debounce:		     .BYTE 0 ; (uninited)
-RAM:0064 ??	     shipHorizontalVelocityLow:	     .BYTE 0 ; (uninited)
-RAM:0065 ??	     shipVerticalVelocityLow:	     .BYTE 0 ; (uninited)
-RAM:0066 ??	     timerPlayerFireSound:	     .BYTE 0 ; (uninited)
-RAM:0067 ??	     timerSaucerFireSound:	     .BYTE 0 ; (uninited)
-RAM:0068 ??	     timerBonusShipSound:	     .BYTE 0 ; (uninited)
-RAM:0069 ??	     timerExplosionSound:	     .BYTE 0 ; (uninited)
-RAM:006A	     fireSoundFlagPlayer:	     ; 0 .BYTE uninited	& unexplored
-RAM:006B	     fireSoundFlagSaucer:	     ; 0 .BYTE uninited	& unexplored
-RAM:006C ??	     volFreqThumpSound:		     .BYTE 0 ; (uninited)
-RAM:006D ??	     timerThumpSoundOn:		     .BYTE 0 ; (uninited)
-RAM:006E ??	     timerThumpSoundOff:	     .BYTE 0 ; (uninited)
-RAM:006F ??	     io3200ShadowRegister:	     .BYTE 0 ; (uninited)
-RAM:0070 ??	     CurrNumCredits:		     .BYTE 0 ; (uninited)
-RAM:0071	     ; 4=center_mult, 3..2=right_mult, 1..0=coinage
-RAM:0071 ??	     coinMultCredits:		     .BYTE 0 ; (uninited)
-RAM:0072 ??	     slamSwitchFlag:		     .BYTE 0 ; (uninited)
-RAM:0073 ??	     totalCoinsForCredits:	     .BYTE 0 ; (uninited)
-RAM:0074 ??	     byte_74:			     .BYTE 0 ; (uninited)
-RAM:0075 ??	     byte_75:			     .BYTE 0 ; (uninited)
-RAM:0076 ??	     byte_76:			     .BYTE 0 ; (uninited)
-RAM:0077	     unk_77:			     ; 0 .BYTE uninited	& unexplored
-RAM:0078					     ; 0 .BYTE uninited	& unexplored
-RAM:0079					     ; 0 .BYTE uninited	& unexplored
-RAM:007A	     coin_1_inp_length:		     ; 0 .BYTE uninited	& unexplored
-RAM:007B	     coin_2_inp_length:		     ; 0 .BYTE uninited	& unexplored
-RAM:007C	     coin_3_inp_length:		     ; 0 .BYTE uninited	& unexplored
-RAM:007D					     ; 0 .BYTE uninited	& unexplored
-RAM:007E					     ; 0 .BYTE uninited	& unexplored
-RAM:007F					     ; 0 .BYTE uninited	& unexplored
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0080 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+stack:			     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:0100 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ; +-------------------------------------------------------------------------+
+ZEROPAGE:0000		  ; |	This file has been generated by	The Interactive	Disassembler (IDA)    |
+ZEROPAGE:0000		  ; |		Copyright (c) 2015 Hex-Rays, <support@hex-rays.com>	      |
+ZEROPAGE:0000		  ; |			   License info: 48-B437-7294-77		      |
+ZEROPAGE:0000		  ; |			     Chris Nott, Virtual Logic			      |
+ZEROPAGE:0000		  ; +-------------------------------------------------------------------------+
+ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ; Input SHA256 : 393574F1F0232302BE07C20B1CBD701EE2C7547DBBF02D0AB836D3B20EA041B7
+ZEROPAGE:0000		  ; Input MD5	 : 2A2ACFD20A2D495DDDEE77AF99730795
+ZEROPAGE:0000		  ; Input CRC32	 : 151C1E33
+ZEROPAGE:0000
+ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ; +-------------------------------------------------+
+ZEROPAGE:0000		  ; + Asteroids	(Rev 2)	Disassembly v0.01	      +
+ZEROPAGE:0000		  ; +	- by tcdev (msmcdoug@gmail.com)		      +
+ZEROPAGE:0000		  ; +	- based	on work	by Lonnie Howell	      +
+ZEROPAGE:0000		  ; +-------------------------------------------------+
+ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ; File Name	: E:\dev\pace\pacedev.net\sw\re\platform\asteroids\roms\asteroid2.bin
+ZEROPAGE:0000		  ; Format	: Binary file
+ZEROPAGE:0000		  ; Base Address: 0000h	Range: 6800h - 8000h Loaded length: 00001800h
+ZEROPAGE:0000
+ZEROPAGE:0000		  ; ; Processor:	M6502
+ZEROPAGE:0000		  ; ; Target assembler:	SVENSON	ELECTRONICS 6502/65C02 ASSEMBLER - V.1.0 - MAY,	1988
+ZEROPAGE:0000
+ZEROPAGE:0000		  ; ===========================================================================
+ZEROPAGE:0000
+ZEROPAGE:0000		  ; Segment type: Regular
+ZEROPAGE:0000						  ;.segment ZEROPAGE
+ZEROPAGE:0000 ??	  globalScale:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0001 ??	  byte_1:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0002 ??	  dvg_curr_addr_lsb:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0003 ??	  dvg_curr_addr_msb:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0004 ??	  byte_4:			  .BYTE	0 ; (uninited)				  ; tmp	store coord conversion
+ZEROPAGE:0005 ??	  byte_5:			  .BYTE	0 ; (uninited)				  ; tmp	store coord conversion
+ZEROPAGE:0006 ??	  byte_6:			  .BYTE	0 ; (uninited)				  ; tmp	store coord conversion
+ZEROPAGE:0007 ??	  byte_7:			  .BYTE	0 ; (uninited)				  ; tmp	store coord conversion
+ZEROPAGE:0008 ??	  byte_8:			  .BYTE	0 ; (uninited)				  ; tmp	store
+ZEROPAGE:0009 ??	  byte_9:			  .BYTE	0 ; (uninited)				  ; tmp	store
+ZEROPAGE:000A ??	  byte_A:			  .BYTE	0 ; (uninited)
+ZEROPAGE:000B ??	  byte_B:			  .BYTE	0 ; (uninited)
+ZEROPAGE:000C ??	  byte_C:			  .BYTE	0 ; (uninited)
+ZEROPAGE:000D ??	  byte_D:			  .BYTE	0 ; (uninited)
+ZEROPAGE:000E ??	  byte_E:			  .BYTE	0 ; (uninited)
+ZEROPAGE:000F ??	  byte_F:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0010 ??	  initial_offset:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0011 ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:0012 ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:0013 ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:0014 ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:0015 ??	  byte_15:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0016 ??	  byte_16:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0017 ??	  byte_17:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0018 ??	  curPlayer:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0019 ??	  curPlayer_x2:			  .BYTE	0 ; (uninited)
+ZEROPAGE:001A ??	  numPlayersPreviousGame:	  .BYTE	0 ; (uninited)
+ZEROPAGE:001B ??	  byte_1B:			  .BYTE	0 ; (uninited)
+ZEROPAGE:001C ??	  numPlayers:			  .BYTE	0 ; (uninited)
+ZEROPAGE:001D
+ZEROPAGE:001D		  ; High score format (2 bytes)
+ZEROPAGE:001D		  ; byte 1 - tens (in decimal)
+ZEROPAGE:001D		  ; byte 2 - thousands (in decimal)
+ZEROPAGE:001D ?? ??	  highScoreTable:		  .BYTE	0,0 ; (uninited)
+ZEROPAGE:001F ?? ??					  .BYTE	0,0 ; (uninited)
+ZEROPAGE:0021 ?? ??	  word_21:			  .BYTE	0,0 ; (uninited)
+ZEROPAGE:0023 ?? ??					  .BYTE	0,0 ; (uninited)
+ZEROPAGE:0025 ?? ??					  .BYTE	0,0 ; (uninited)
+ZEROPAGE:0027 ?? ??	  word_27:			  .BYTE	0,0 ; (uninited)
+ZEROPAGE:0029 ?? ??					  .BYTE	0,0 ; (uninited)
+ZEROPAGE:002B ?? ??					  .BYTE	0,0 ; (uninited)
+ZEROPAGE:002D ?? ??					  .BYTE	0,0 ; (uninited)
+ZEROPAGE:002F ?? ??					  .BYTE	0,0 ; (uninited)
+ZEROPAGE:0031 ??	  letterHighScoreEntry:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0032 ??	  placeP1HighScore:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0033 ??	  placeP2HighScore:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0034 ?? ?? ??	  highScoreInitials:		  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:0037 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:003A ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:003D ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:0040 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:0043 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:0046 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:0049 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:004C ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:004F ?? ?? ??	  byte_4F:			  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:0052 ??	  p1ScoreTens:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0053 ??	  p1ScoreThousands:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0054 ??	  p2ScoreTens:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0055 ??	  p2ScoreThousands:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0056 ??	  numStartingShipsPerGame:	  .BYTE	0 ; (uninited)
+ZEROPAGE:0057 ??	  numShipsP1:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0058 ??	  numShipsP2:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0059		  ; Hyperspace flag:
+ZEROPAGE:0059		  ; - 0x01 = successful
+ZEROPAGE:0059		  ;   0x80 = unsuccessful (death)
+ZEROPAGE:0059		  ;   0x00 = not active
+ZEROPAGE:0059 ??	  hyperspaceFlag:		  .BYTE	0 ; (uninited)
+ZEROPAGE:005A ??	  timerStartGame:		  .BYTE	0 ; (uninited)
+ZEROPAGE:005B ??	  VBLANK_triggered:		  .BYTE	0 ; (uninited)
+ZEROPAGE:005C ??	  fastTimer:			  .BYTE	0 ; (uninited)
+ZEROPAGE:005D ??	  slowTimer:			  .BYTE	0 ; (uninited)
+ZEROPAGE:005E ??	  NMI_count:			  .BYTE	0 ; (uninited)
+ZEROPAGE:005F ??	  rnd1:				  .BYTE	0 ; (uninited)
+ZEROPAGE:0060 ??	  rnd2:				  .BYTE	0 ; (uninited)
+ZEROPAGE:0061 ??	  direction:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0062 ??	  saucerShotDirection:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0063 ??	  btn_edge_debounce:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0064 ??	  shipHorizontalVelocityLow:	  .BYTE	0 ; (uninited)
+ZEROPAGE:0065 ??	  shipVerticalVelocityLow:	  .BYTE	0 ; (uninited)
+ZEROPAGE:0066 ??	  timerPlayerFireSound:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0067 ??	  timerSaucerFireSound:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0068 ??	  timerBonusShipSound:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0069 ??	  timerExplosionSound:		  .BYTE	0 ; (uninited)
+ZEROPAGE:006A ??	  fireSoundFlagPlayer:		  .BYTE	0 ; (uninited)
+ZEROPAGE:006B ??	  fireSoundFlagSaucer:		  .BYTE	0 ; (uninited)
+ZEROPAGE:006C ??	  volFreqThumpSound:		  .BYTE	0 ; (uninited)
+ZEROPAGE:006D ??	  timerThumpSoundOn:		  .BYTE	0 ; (uninited)
+ZEROPAGE:006E ??	  timerThumpSoundOff:		  .BYTE	0 ; (uninited)
+ZEROPAGE:006F ??	  io3200ShadowRegister:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0070 ??	  CurrNumCredits:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0071		  ; 4=center_mult, 3..2=right_mult, 1..0=coinage
+ZEROPAGE:0071 ??	  coinMultCredits:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0072 ??	  slamSwitchFlag:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0073 ??	  totalCoinsForCredits:		  .BYTE	0 ; (uninited)
+ZEROPAGE:0074 ??	  byte_74:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0075 ??	  byte_75:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0076 ??	  byte_76:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0077 ??	  byte_77:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0078 ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:0079 ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:007A ??	  coin_1_inp_length:		  .BYTE	0 ; (uninited)
+ZEROPAGE:007B ??	  coin_2_inp_length:		  .BYTE	0 ; (uninited)
+ZEROPAGE:007C ??	  coin_3_inp_length:		  .BYTE	0 ; (uninited)
+ZEROPAGE:007D ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:007E ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:007F ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+; end	of 'ZEROPAGE'
+ZEROPAGE:0080 ?? ?? ?? ??+
+STACK:0100	       ; CA65 -	replace	stack with
+STACK:0100	       ; stack .set $100
+STACK:0100	       ; ===========================================================================
+STACK:0100
+STACK:0100	       ; Segment type: Regular
+STACK:0100					       ;.segment STACK
+STACK:0100					       * =  $100
+STACK:0100 ?? ?? ?? ??+stack:			       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+				       .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+STACK:0100 ?? ?? ?? ??+; end of	'STACK'
+STACK:0100 ?? ?? ?? ??+
 RAM:0200	     ; status
 RAM:0200	     ; 1-27 Asteroids
 RAM:0200	     ; 0xA0+ = exploding
 RAM:0200	     ; (2:1) = size (0=small, 1=medium,	2=large)
+RAM:0200	     ; ===========================================================================
+RAM:0200
+RAM:0200	     ; Segment type: Regular
+RAM:0200					     ;.segment RAM
+RAM:0200					     * =  $200
 RAM:0200 ?? ?? ?? ??+P1RAM:			     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)	; Asteroids 1-27
 RAM:0200 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
 RAM:021B	     ; p1PlayerFlag
@@ -176,8 +192,8 @@ RAM:021C	     ; - 0x01  = small saucer
 RAM:021C	     ; - 0x02  = large saucer
 RAM:021C	     ; - 0xA0+ = saucer	exploding
 RAM:021C ??	     p1SaucerFlag:		     .BYTE 0 ; (uninited)
-RAM:021D	     saucerShotTimer1:		     ; 0 .BYTE uninited	& unexplored
-RAM:021E	     saucerShotTimer2:		     ; 0 .BYTE uninited	& unexplored
+RAM:021D ??	     saucerShotTimer1:		     .BYTE 0 ; (uninited)
+RAM:021E ??	     saucerShotTimer2:		     .BYTE 0 ; (uninited)
 RAM:021F ??	     p1TimerShot0:		     .BYTE 0 ; (uninited)
 RAM:0220 ??	     p1TimerShot1:		     .BYTE 0 ; (uninited)
 RAM:0221 ??	     p1TimerShot2:		     .BYTE 0 ; (uninited)
@@ -233,8 +249,8 @@ RAM:02FA ??	     shipSpawnTimer:		     .BYTE 0 ; (uninited)
 RAM:02FB ??	     asteroidWaveTimer:		     .BYTE 0 ; (uninited)
 RAM:02FC ??	     byte_2FC:			     .BYTE 0 ; (uninited)
 RAM:02FD ??	     numAsteroidsLeftBeforeSaucer:   .BYTE 0 ; (uninited)
-RAM:02FE					     ; 0 .BYTE uninited	& unexplored
-RAM:02FF					     ; 0 .BYTE uninited	& unexplored
+RAM:02FE ??					     .BYTE 0 ; (uninited)
+RAM:02FF ??					     .BYTE 0 ; (uninited)
 RAM:0300	     ; this gets bank-switched into the	same address space
 RAM:0300	     ; as the P1RAM block to save on code
 RAM:0300 ?? ?? ?? ??+P2RAM:			     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
@@ -260,12 +276,12 @@ IN0:2000
 IN0:2000	     ; Segment type: Regular
 IN0:2000					     ;.segment IN0
 IN0:2000					     * =  $2000
-IN0:2000					     ; 0 .BYTE uninited	& unexplored
-IN0:2001	     freq3kHz:			     ; 0 .BYTE uninited	& unexplored
-IN0:2002	     halt:			     ; 0 .BYTE uninited	& unexplored
-IN0:2003	     hyperspaceSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN0:2004	     FireSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN0:2005	     diagStep:			     ; 0 .BYTE uninited	& unexplored
+IN0:2000 ??					     .BYTE 0 ; (uninited)
+IN0:2001 ??	     freq3kHz:			     .BYTE 0 ; (uninited)
+IN0:2002 ??	     halt:			     .BYTE 0 ; (uninited)
+IN0:2003 ??	     hyperspaceSwitch:		     .BYTE 0 ; (uninited)
+IN0:2004 ??	     FireSwitch:		     .BYTE 0 ; (uninited)
+IN0:2005 ??	     diagStep:			     .BYTE 0 ; (uninited)
 IN0:2006 ??	     slamSwitch:		     .BYTE 0 ; (uninited)
 IN0:2007 ??	     selfTest:			     .BYTE 0 ; (uninited)
 IN0:2007	     ; end of 'IN0'
@@ -275,14 +291,14 @@ IN1:2400
 IN1:2400	     ; Segment type: Regular
 IN1:2400					     ;.segment IN1
 IN1:2400					     * =  $2400
-IN1:2400	     leftCoinSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN1:2401	     centerCoinSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN1:2402	     rightCoinSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN1:2403	     p1StartSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN1:2404	     p2StartSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN1:2405	     thrustSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN1:2406	     rotateRightSwitch:		     ; 0 .BYTE uninited	& unexplored
-IN1:2407	     rotateLeftSwitch:		     ; 0 .BYTE uninited	& unexplored
+IN1:2400 ??	     leftCoinSwitch:		     .BYTE 0 ; (uninited)
+IN1:2401 ??	     centerCoinSwitch:		     .BYTE 0 ; (uninited)
+IN1:2402 ??	     rightCoinSwitch:		     .BYTE 0 ; (uninited)
+IN1:2403 ??	     p1StartSwitch:		     .BYTE 0 ; (uninited)
+IN1:2404 ??	     p2StartSwitch:		     .BYTE 0 ; (uninited)
+IN1:2405 ??	     thrustSwitch:		     .BYTE 0 ; (uninited)
+IN1:2406 ??	     rotateRightSwitch:		     .BYTE 0 ; (uninited)
+IN1:2407 ??	     rotateLeftSwitch:		     .BYTE 0 ; (uninited)
 IN1:2407	     ; end of 'IN1'
 IN1:2407
 DSW1:2800	      ;	0 = Free Play, 1 = 1 Coin 2 Credits, 2 = 1 Coin	1 Credit, 3 = 2	Coins 1	Credit
@@ -291,11 +307,11 @@ DSW1:2800
 DSW1:2800	      ;	Segment	type: Regular
 DSW1:2800					      ;.segment	DSW1
 DSW1:2800					      *	=  $2800
-DSW1:2800	      coinage:			      ;	0 .BYTE	uninited & unexplored
+DSW1:2800 ??	      coinage:			      .BYTE 0 ;	(uninited)
 DSW1:2801	      ;	0 = 1x & 4, 1 =	1x & 3,	2 = 2x & 4, 3 =	2x & 3
-DSW1:2801	      rightCoinMultiplier:	      ;	0 .BYTE	uninited & unexplored
-DSW1:2802	      centerCoinMultiplierAndLives:   ;	0 .BYTE	uninited & unexplored
-DSW1:2803	      language:			      ;	0 .BYTE	uninited & unexplored
+DSW1:2801 ??	      rightCoinMultiplier:	      .BYTE 0 ;	(uninited)
+DSW1:2802 ??	      centerCoinMultiplierAndLives:   .BYTE 0 ;	(uninited)
+DSW1:2803 ??	      language:			      .BYTE 0 ;	(uninited)
 DSW1:2803	      ;	end of 'DSW1'
 DSW1:2803
 DVGRAM:4000		; ===========================================================================
@@ -2014,7 +2030,7 @@ ROM:708F
 ROM:708F	     check_rot_right:								     ; right button?
 ROM:708F AD 06 24				     LDA     rotateRightSwitch
 ROM:7092 10 07					     BPL     loc_709B				     ; no, skip
-ROM:7094 A9 FD					     LDA     #-3
+ROM:7094 A9 FD					     LDA     #$FD				     ; -3
 ROM:7096
 ROM:7096	     update_dir:
 ROM:7096 18					     CLC
@@ -3113,7 +3129,7 @@ ROM:76B4 B5 32					     LDA     placeP1HighScore,X
 ROM:76B6 95 35					     STA     highScoreInitials+1,X
 ROM:76B8 B5 33					     LDA     placeP2HighScore,X
 ROM:76BA 95 36					     STA     highScoreInitials+2,X
-ROM:76BC B9 1B 00				     LDA     unk_1B,Y
+ROM:76BC B9 1B 00				     LDA     byte_1B,Y
 ROM:76BF 99 1D 00				     STA     highScoreTable,Y
 ROM:76C2 B9 1C 00				     LDA     numPlayers,Y
 ROM:76C5 99 1E 00				     STA     highScoreTable+1,Y			     ; shift entry down
@@ -3148,6 +3164,9 @@ ROM:76EF
 ROM:76F2 09 20					     ORA     #$20 ; ' '
 ROM:76F4 08					     PHP
 ROM:76F5 77 20					     RRA     $20,X
+ROM:76F7	     ; this is actually	the undocumented SKW instruction
+ROM:76F7	     ; - CA65 replace NOP with
+ROM:76F7	     ;	      .BYTE $fc, $76, $4c
 ROM:76F7 FC 76 4C				     NOP
 ROM:76FA 08					     PHP
 ROM:76FB 77 A8					     RRA     $A8,X
@@ -3600,13 +3619,13 @@ ROM:7AC0 F0 08					     BEQ     loc_7ACA
 ROM:7AC2 C6 72					     DEC     slamSwitchFlag
 ROM:7AC4 A9 00					     LDA     #0
 ROM:7AC6 95 7A					     STA     coin_1_inp_length,X
-ROM:7AC8 95 77					     STA     unk_77,X
+ROM:7AC8 95 77					     STA     byte_77,X
 ROM:7ACA
 ROM:7ACA	     loc_7ACA:
 ROM:7ACA 18					     CLC
-ROM:7ACB B5 77					     LDA     unk_77,X
+ROM:7ACB B5 77					     LDA     byte_77,X
 ROM:7ACD F0 23					     BEQ     loc_7AF2
-ROM:7ACF D6 77					     DEC     unk_77,X
+ROM:7ACF D6 77					     DEC     byte_77,X
 ROM:7AD1 D0 1F					     BNE     loc_7AF2
 ROM:7AD3 38					     SEC
 ROM:7AD4 B0 1C					     BCS     loc_7AF2
@@ -3624,13 +3643,13 @@ ROM:7AE3	     loc_7AE3:
 ROM:7AE3 A9 1F					     LDA     #$1F
 ROM:7AE5 B0 CA					     BCS     loc_7AB1
 ROM:7AE7 95 7A					     STA     coin_1_inp_length,X
-ROM:7AE9 B5 77					     LDA     unk_77,X
+ROM:7AE9 B5 77					     LDA     byte_77,X
 ROM:7AEB F0 01					     BEQ     loc_7AEE
 ROM:7AED 38					     SEC
 ROM:7AEE
 ROM:7AEE	     loc_7AEE:
 ROM:7AEE A9 78					     LDA     #$78 ; 'x'
-ROM:7AF0 95 77					     STA     unk_77,X
+ROM:7AF0 95 77					     STA     byte_77,X
 ROM:7AF2
 ROM:7AF2	     loc_7AF2:
 ROM:7AF2 90 23					     BCC     loc_7B17
@@ -4356,7 +4375,7 @@ ROM:7E95 10 5B					     BPL     loc_7EF2
 ROM:7E97 A6 15					     LDX     byte_15
 ROM:7E99 AD 03 20				     LDA     hyperspaceSwitch
 ROM:7E9C 10 0A					     BPL     loc_7EA8
-ROM:7E9E 4D 09 00				     EOR     byte_9
+ROM:7E9E 4D 09 00				     EOR     byte_9				     ; *** CA65	use a:
 ROM:7EA1 10 05					     BPL     loc_7EA8
 ROM:7EA3 CA					     DEX
 ROM:7EA4 F0 02					     BEQ     loc_7EA8
@@ -4481,24 +4500,24 @@ ROM:7F4C 20 FC 7B				     JSR     write_JSR_cmd			     ; more test pattern?
 ROM:7F4F
 ROM:7F4F	     loc_7F4F:
 ROM:7F4F A2 96					     LDX     #$96 ; '–'
-ROM:7F51 8E 0C 00				     STX     byte_C
+ROM:7F51 8E 0C 00				     STX     byte_C				     ; *** CA65	use a:
 ROM:7F54 A2 07					     LDX     #7
 ROM:7F56
 ROM:7F56	     loc_7F56:
 ROM:7F56 B5 0D					     LDA     $D,X
 ROM:7F58 F0 37					     BEQ     loc_7F91
 ROM:7F5A 48					     PHA
-ROM:7F5B 8E 0B 00				     STX     byte_B
-ROM:7F5E AE 0C 00				     LDX     byte_C
+ROM:7F5B 8E 0B 00				     STX     byte_B				     ; *** CA65	use a:
+ROM:7F5E AE 0C 00				     LDX     byte_C				     ; *** CA65	use a:
 ROM:7F61 8A					     TXA
 ROM:7F62 38					     SEC
 ROM:7F63 E9 08					     SBC     #8
-ROM:7F65 8D 0C 00				     STA     byte_C
+ROM:7F65 8D 0C 00				     STA     byte_C				     ; *** CA65	use a:
 ROM:7F68 A9 20					     LDA     #$20 ; ' '
 ROM:7F6A 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7F6D A9 70					     LDA     #$70 ; 'p'
 ROM:7F6F 20 DE 7C				     JSR     set_scale_A_bright_0
-ROM:7F72 AD 0B 00				     LDA     byte_B
+ROM:7F72 AD 0B 00				     LDA     byte_B				     ; *** CA65	use a:
 ROM:7F75 20 D1 7B				     JSR     display_digit_A
 ROM:7F78 AD D4 56				     LDA     DVGROM+$6D4
 ROM:7F7B AE D5 56				     LDX     DVGROM+$6D5
@@ -4512,7 +4531,7 @@ ROM:7F86 4A					     LSR     A
 ROM:7F87 20 D1 7B				     JSR     display_digit_A
 ROM:7F8A 68					     PLA
 ROM:7F8B 20 D1 7B				     JSR     display_digit_A
-ROM:7F8E AE 0B 00				     LDX     byte_B
+ROM:7F8E AE 0B 00				     LDX     byte_B				     ; *** CA65	use a:
 ROM:7F91
 ROM:7F91	     loc_7F91:
 ROM:7F91 CA					     DEX
