@@ -1,8 +1,3 @@
-.import __MAIN_START__, __BSS_LOAD__ ; Linker generated
-
-.segment "EXEHDR"
-.addr __MAIN_START__ ; Start address
-.word __BSS_LOAD__ - __MAIN_START__ ; Size
 
 
 ;
@@ -27,6 +22,14 @@
 ; File Name   :	E:\dev\pace\pacedev.net\sw\re\platform\asteroids\roms\asteroid2.bin
 ; Format      :	Binary file
 ; Base Address:	0000h Range: 6800h - 8000h Loaded length: 00001800h
+;
+; Uncomment for	CA65 using apple2enh-asm.cfg
+;
+.import __MAIN_START__, __BSS_LOAD__ ;	Linker generated
+.segment "EXEHDR"
+.addr __MAIN_START__ ;	Start address
+.word __BSS_LOAD__ - __MAIN_START__ ; Size
+
 
 ; ; Processor:	      M6502
 ; ; Target assembler: SVENSON ELECTRONICS 6502/65C02 ASSEMBLER - V.1.0 - MAY, 1988
@@ -34,7 +37,7 @@
 ; ===========================================================================
 
 ; Segment type:	Regular
-				.segment "ZEROPAGE" : zeropage
+				.ZEROPAGE
 globalScale:			.BYTE 0	; (uninited)
 byte_1:				.BYTE 0	; (uninited)
 dvg_curr_addr_lsb:		.BYTE 0	; (uninited)
@@ -152,29 +155,8 @@ coin_3_inp_length:		.BYTE 0	; (uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; end of 'ZEROPAGE'
 
-; ===========================================================================
-
-; Segment type:	Regular
-				;.segment STACK
-;				.org $100
-;stack:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
-; end of 'STACK'
-stack .set $100
+; CA65 - replace stack with
+stack	.set $100
 
 ; status
 ; 1-27 Asteroids
@@ -183,7 +165,8 @@ stack .set $100
 ; ===========================================================================
 
 ; Segment type:	Regular
-				.segment "BSS"
+				;.segment RAM
+				.BSS
 				.org $200
 P1RAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited) ; Asteroids 1-27
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
@@ -1352,7 +1335,7 @@ handle_small_saucer:
 				SEC
 				SBC	byte_C
 				TAY
-				JSR	loc_76EF+1
+				JSR	loc_76F0
 				STA	saucerShotDirection
 				JSR	update_prng
 				LDX	curPlayer_x2
@@ -3162,20 +3145,22 @@ loc_76CF:									; 'A'
 				STA	highScoreTable,Y			; copy score into high score table
 				LDY	#0
 				BEQ	loc_767C				; continue with	next entry
-
-loc_76EF:
-				DCP	$1098,X
 ; End of function check_high_score
 
-				ORA	#$20 ; ' '
-				PHP
-				RRA	$20,X
-; this is actually the undocumented SKW	instruction
-; - CA65 replace NOP with
-	      .BYTE $fc, $76, $4c
-;				NOP
-				PHP
-				RRA	$A8,X
+; ---------------------------------------------------------------------------
+				.BYTE $DF
+; ---------------------------------------------------------------------------
+
+loc_76F0:
+				TYA
+				BPL	loc_76FC
+				JSR	negate_A
+				JSR	loc_76FC
+				JMP	negate_A
+; ---------------------------------------------------------------------------
+
+loc_76FC:
+				TAY
 				TXA
 				BPL	sub_770E
 				JSR	negate_A
@@ -4523,7 +4508,7 @@ loc_7F56:
 				JSR	write_CURx4_cmd
 				LDA	#$70 ; 'p'
 				JSR	set_scale_A_bright_0
-				LDA	a:byte_B
+				LDA	a:byte_B					; *** CA65 use a:
 				JSR	display_digit_A
 				LDA	DVGROM+$6D4
 				LDX	DVGROM+$6D5

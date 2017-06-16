@@ -27,7 +27,8 @@ ZEROPAGE:0000		  ;.import __MAIN_START__, __BSS_LOAD__	; Linker generated
 ZEROPAGE:0000		  ;.segment "EXEHDR"
 ZEROPAGE:0000		  ;.addr __MAIN_START__	; Start	address
 ZEROPAGE:0000		  ;.word __BSS_LOAD__ -	__MAIN_START__ ; Size
-ZEROPAGE:0000
+ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ;.ZEROPAGE
 ZEROPAGE:0000
 ZEROPAGE:0000		  ; ; Processor:	M6502
 ZEROPAGE:0000		  ; ; Target assembler:	SVENSON	ELECTRONICS 6502/65C02 ASSEMBLER - V.1.0 - MAY,	1988
@@ -182,6 +183,9 @@ RAM:0200	     ; status
 RAM:0200	     ; 1-27 Asteroids
 RAM:0200	     ; 0xA0+ = exploding
 RAM:0200	     ; (2:1) = size (0=small, 1=medium,	2=large)
+RAM:0200	     ;
+RAM:0200	     ; For CA65	replace	with
+RAM:0200	     ;.BSS
 RAM:0200	     ; ===========================================================================
 RAM:0200
 RAM:0200	     ; Segment type: Regular
@@ -593,6 +597,8 @@ DVGROM:5000 ?? ?? ?? ??+				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 DVGROM:5000 ?? ?? ?? ??+; end of 'DVGROM'
 DVGROM:5000 ?? ?? ?? ??+
 ROM:6800	     ; ---------------------------------------------------------------------------
+ROM:6800	     ; For CA65	replace	with
+ROM:6800	     ; .segment	"CODE"
 ROM:6800	     ; ===========================================================================
 ROM:6800
 ROM:6800	     ; Segment type: Pure code
@@ -1354,7 +1360,7 @@ ROM:6CA2 2A					     ROL     A
 ROM:6CA3 38					     SEC
 ROM:6CA4 E5 0C					     SBC     byte_C
 ROM:6CA6 A8					     TAY
-ROM:6CA7 20 F0 76				     JSR     loc_76EF+1
+ROM:6CA7 20 F0 76				     JSR     loc_76F0
 ROM:6CAA 85 62					     STA     saucerShotDirection
 ROM:6CAC 20 B5 77				     JSR     update_prng
 ROM:6CAF A6 19					     LDX     curPlayer_x2
@@ -3164,20 +3170,22 @@ ROM:76E6 B5 52					     LDA     p1ScoreTens,X
 ROM:76E8 99 1D 00				     STA     highScoreTable,Y			     ; copy score into high score table
 ROM:76EB A0 00					     LDY     #0
 ROM:76ED F0 8D					     BEQ     loc_767C				     ; continue	with next entry
-ROM:76EF
-ROM:76EF	     loc_76EF:
-ROM:76EF DF 98 10				     DCP     $1098,X
-ROM:76EF	     ; End of function check_high_score
-ROM:76EF
-ROM:76F2 09 20					     ORA     #$20 ; ' '
-ROM:76F4 08					     PHP
-ROM:76F5 77 20					     RRA     $20,X
-ROM:76F7	     ; this is actually	the undocumented SKW instruction
-ROM:76F7	     ; - CA65 replace NOP with
-ROM:76F7	     ;	      .BYTE $fc, $76, $4c
-ROM:76F7 FC 76 4C				     NOP
-ROM:76FA 08					     PHP
-ROM:76FB 77 A8					     RRA     $A8,X
+ROM:76ED	     ; End of function check_high_score
+ROM:76ED
+ROM:76ED	     ; ---------------------------------------------------------------------------
+ROM:76EF DF					     .BYTE $DF
+ROM:76F0	     ; ---------------------------------------------------------------------------
+ROM:76F0
+ROM:76F0	     loc_76F0:
+ROM:76F0 98					     TYA
+ROM:76F1 10 09					     BPL     loc_76FC
+ROM:76F3 20 08 77				     JSR     negate_A
+ROM:76F6 20 FC 76				     JSR     loc_76FC
+ROM:76F9 4C 08 77				     JMP     negate_A
+ROM:76FC	     ; ---------------------------------------------------------------------------
+ROM:76FC
+ROM:76FC	     loc_76FC:
+ROM:76FC A8					     TAY
 ROM:76FD 8A					     TXA
 ROM:76FE 10 0E					     BPL     sub_770E
 ROM:7700 20 08 77				     JSR     negate_A
