@@ -27,6 +27,7 @@ all: $(MEDIA)
 
 %.dsk : $(BIN)
 	$(DD) if=$< of=$(TARGET)#06$(LOAD).BIN bs=1 skip=4
+	$(DD) if=$< of=6502.BIN bs=1 skip=6148 count=6144
 	$(C2D) -s 6800 -b $< $@
 	
 $(TARGET).o : $(TARGET).s
