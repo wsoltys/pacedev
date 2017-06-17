@@ -1,6 +1,7 @@
 # Apple IIGS Asteroids makefile
 
 TARGET = asteroid
+LA = 5000
 
 TYPE = apple2
 CC65_DIR = cc65
@@ -25,22 +26,22 @@ MEDIA = asteroid.dsk
 all: $(MEDIA)
 
 %.dsk : $(BIN)
-	$(DD) if=$< of=$(TARGET)#066800.BIN bs=1 skip=4
-	$(C2D) -b $< $@
+	$(DD) if=$< of=$(TARGET)#06$(LOAD).BIN bs=1 skip=4
+	$(C2D) -s 6800 -b $< $@
 	
 $(TARGET).o : $(TARGET).s
 	$(AS) -t $(TYPE) $(TARGET).s -o $@ -l $(TARGET).lst
 	$(AS) --cpu 6502X -t $(TYPE) asteroid2.asm -o asteroid2.o -l asteroid2.lst
 
 $(BIN) : $(TARGET).o
-	$(LD) -o $@ asteroid2.o --start-addr 0x6800 -C apple2enh-asm.cfg -vm -m asteroid2.map
+	$(LD) -o $@ asteroid2.o --start-addr 0x$(LA) -C apple2enh-asm.cfg -vm -m asteroid2.map
 
 clean:
 	$(ECHO) Deleting intermediate files...
 	$(RM) -f *.o
 	$(ECHO) Deleting executables...
 	$(RM) -f $(BIN)
-	$(RM) -f $(TARGET)#060803.BIN
+	$(RM) -f $(TARGET)#06$(LA).BIN
 	$(ECHO) Deleting dsk file...
 	$(RM) -f $(MEDIA)
 	
