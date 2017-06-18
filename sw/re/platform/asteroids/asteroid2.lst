@@ -28,6 +28,8 @@ ZEROPAGE:0000		  ;.segment "EXEHDR"
 ZEROPAGE:0000		  ;.addr __MAIN_START__	; Start	address
 ZEROPAGE:0000		  ;.word __BSS_LOAD__ -	__MAIN_START__ ; Size
 ZEROPAGE:0000		  ;
+ZEROPAGE:0000		  ; .include "apple2.inc"
+ZEROPAGE:0000		  ;
 ZEROPAGE:0000		  ;.ZEROPAGE
 ZEROPAGE:0000
 ZEROPAGE:0000		  ; ; Processor:	M6502
@@ -1071,23 +1073,23 @@ ROM:6AD9	     loc_6AD9:
 ROM:6AD9 C8					     INY
 ROM:6ADA B1 0B					     LDA     (byte_B),Y				     ; SSSS -mYY (VEC) / 1111 smYY (SVEC)
 ROM:6ADC 45 09					     EOR     byte_9				     ; flag for	flip Y (bit 2)
-ROM:6ADE 91 02					     STA     (2),Y				     ; store in	avg ram	(cmd)
+ROM:6ADE 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram	(cmd)
 ROM:6AE0 88					     DEY
 ROM:6AE1 C9 F0					     CMP     #$F0 ; 'ð'                              ; SVEC?
 ROM:6AE3 B0 1E					     BCS     is_svec				     ; yes, go
 ROM:6AE5 C9 A0					     CMP     #$A0 ; ' '                              ; VEC?
 ROM:6AE7 B0 16					     BCS     loc_6AFF				     ; no, exit
 ROM:6AE9 B1 0B					     LDA     (byte_B),Y				     ; YYYY YYYY
-ROM:6AEB 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:6AEB 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:6AED C8					     INY
 ROM:6AEE C8					     INY
 ROM:6AEF B1 0B					     LDA     (byte_B),Y				     ; XXXX XXXX
-ROM:6AF1 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:6AF1 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:6AF3 C8					     INY
 ROM:6AF4 B1 0B					     LDA     (byte_B),Y				     ; BBBB -mXX
 ROM:6AF6 45 08					     EOR     byte_8				     ; sign for	X delta
 ROM:6AF8 65 17					     ADC     byte_17
-ROM:6AFA 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:6AFA 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:6AFC
 ROM:6AFC	     loc_6AFC:
 ROM:6AFC C8					     INY
@@ -1103,7 +1105,7 @@ ROM:6B03 B1 0B					     LDA     (byte_B),Y
 ROM:6B05 45 08					     EOR     byte_8				     ; flag for	flip X (bit 2)
 ROM:6B07 18					     CLC
 ROM:6B08 65 17					     ADC     byte_17
-ROM:6B0A 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:6B0A 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:6B0C C8					     INY
 ROM:6B0D D0 ED					     BNE     loc_6AFC				     ; always
 ROM:6B0D	     ; End of function copy_vector_to_avgram
@@ -2822,12 +2824,12 @@ ROM:74EF A0 FF					     LDY     #$FF
 ROM:74F1
 ROM:74F1	     loc_74F1:
 ROM:74F1 C8					     INY
-ROM:74F2 B1 0B					     LDA     ($B),Y
-ROM:74F4 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:74F2 B1 0B					     LDA     (byte_B),Y
+ROM:74F4 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:74F6 C8					     INY
-ROM:74F7 B1 0B					     LDA     ($B),Y
+ROM:74F7 B1 0B					     LDA     (byte_B),Y
 ROM:74F9 49 04					     EOR     #4
-ROM:74FB 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:74FB 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:74FD C0 03					     CPY     #3
 ROM:74FF 90 F0					     BCC     loc_74F1
 ROM:7501 20 39 7C				     JSR     update_avg_curr_addr
@@ -3536,10 +3538,10 @@ ROM:7861
 ROM:7861	     loc_7861:									     ; X = chr*2 (chr fn offset)
 ROM:7861 AA					     TAX
 ROM:7862 BD D2 56				     LDA     DVGROM+$6D2,X			     ; chr fn msb
-ROM:7865 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7865 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7867 C8					     INY
 ROM:7868 BD D3 56				     LDA     DVGROM+$6D3,X			     ; chr fn lsb
-ROM:786B 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:786B 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:786D C8					     INY
 ROM:786E A2 00					     LDX     #0
 ROM:7870 60					     RTS
@@ -3844,9 +3846,9 @@ ROM:7BC0
 ROM:7BC0	     halt_dvg:
 ROM:7BC0 A9 B0					     LDA     #$B0 ; '°'
 ROM:7BC2 A0 00					     LDY     #0
-ROM:7BC4 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7BC4 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BC6 C8					     INY
-ROM:7BC7 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7BC7 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BC9 D0 6E					     BNE     update_avg_curr_addr
 ROM:7BCB
 ROM:7BCB	     loc_7BCB:
@@ -3871,10 +3873,10 @@ ROM:7BD7 0A					     ASL     A					     ; x2 (word	offset)
 ROM:7BD8 A0 00					     LDY     #0
 ROM:7BDA AA					     TAX
 ROM:7BDB BD D4 56				     LDA     DVGROM+$6D4,X			     ; chr fn msb
-ROM:7BDE 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7BDE 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BE0 BD D5 56				     LDA     DVGROM+$6D5,X			     ; chr fn lsb
 ROM:7BE3 C8					     INY
-ROM:7BE4 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7BE4 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BE6 20 39 7C				     JSR     update_avg_curr_addr
 ROM:7BE9 28					     PLP
 ROM:7BEA 60					     RTS
@@ -3888,11 +3890,11 @@ ROM:7BF0	     ; START OF	FUNCTION CHUNK FOR write_JSR_cmd
 ROM:7BF0
 ROM:7BF0	     write_JMP_JSR_cmd:
 ROM:7BF0 A0 01					     LDY     #1
-ROM:7BF2 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7BF2 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BF4 88					     DEY
 ROM:7BF5 8A					     TXA
 ROM:7BF6 6A					     ROR     A					     ; adjust address
-ROM:7BF7 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7BF7 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BF9 C8					     INY
 ROM:7BFA D0 3D					     BNE     update_avg_curr_addr
 ROM:7BFA	     ; END OF FUNCTION CHUNK FOR write_JSR_cmd
@@ -3941,20 +3943,20 @@ ROM:7C1C
 ROM:7C1C	     write_CUR_cmd:
 ROM:7C1C B5 02					     LDA     2,X				     ; @$6 = Y*4 (lsb)
 ROM:7C1E A0 00					     LDY     #0
-ROM:7C20 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7C20 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7C22 B5 03					     LDA     3,X				     ; @$7 = Y*4 (msb)
 ROM:7C24 29 0F					     AND     #$F				     ; clear command nibble
 ROM:7C26 09 A0					     ORA     #$A0 ; ' '                              ; CUR command
 ROM:7C28 C8					     INY
-ROM:7C29 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7C29 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7C2B B5 00					     LDA     0,X				     ; @$4 = X*4 (lsb)
 ROM:7C2D C8					     INY
-ROM:7C2E 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7C2E 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7C30 B5 01					     LDA     1,X				     ; @$5 = X*4 (msb)
 ROM:7C32 29 0F					     AND     #$F				     ; clear scale nibble
 ROM:7C34 05 00					     ORA     globalScale			     ; global scale
 ROM:7C36 C8					     INY
-ROM:7C37 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7C37 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7C37	     ; End of function write_CUR_cmd
 ROM:7C37
 ROM:7C39
@@ -4068,22 +4070,22 @@ ROM:7CB8 0A					     ASL     A
 ROM:7CB9 85 08					     STA     byte_8
 ROM:7CBB A0 00					     LDY     #0
 ROM:7CBD A5 06					     LDA     byte_6
-ROM:7CBF 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7CBF 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7CC1 A5 08					     LDA     byte_8
 ROM:7CC3 29 F4					     AND     #$F4 ; 'ô'
 ROM:7CC5 05 07					     ORA     byte_7
 ROM:7CC7 C8					     INY
-ROM:7CC8 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7CC8 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7CCA A5 04					     LDA     byte_4
 ROM:7CCC C8					     INY
-ROM:7CCD 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7CCD 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7CCF A5 08					     LDA     byte_8
 ROM:7CD1 29 02					     AND     #2
 ROM:7CD3 0A					     ASL     A
 ROM:7CD4 05 01					     ORA     byte_1
 ROM:7CD6 05 05					     ORA     byte_5
 ROM:7CD8 C8					     INY
-ROM:7CD9 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7CD9 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7CDB 4C 39 7C				     JMP     update_avg_curr_addr
 ROM:7CDB	     ; End of function sub_7C49
 ROM:7CDB
@@ -4101,16 +4103,16 @@ ROM:7CE0
 ROM:7CE0
 ROM:7CE0	     set_scale_A_bright_X:
 ROM:7CE0 A0 01					     LDY     #1
-ROM:7CE2 91 02					     STA     (2),Y				     ; store (SSSS -mYY)=A in avg ram
+ROM:7CE2 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store (SSSS -mYY)=A in avg ram
 ROM:7CE4 88					     DEY
 ROM:7CE5 98					     TYA
-ROM:7CE6 91 02					     STA     (2),Y				     ; store (YYYY YYYY)=0 in avg ram
+ROM:7CE6 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store (YYYY YYYY)=0 in avg ram
 ROM:7CE8 C8					     INY
 ROM:7CE9 C8					     INY
-ROM:7CEA 91 02					     STA     (2),Y				     ; store (XXXX XXXX)=0 in avg ram
+ROM:7CEA 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store (XXXX XXXX)=0 in avg ram
 ROM:7CEC C8					     INY
 ROM:7CED 8A					     TXA
-ROM:7CEE 91 02					     STA     (2),Y				     ; store (BBBB -mXX)=X in avg ram
+ROM:7CEE 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store (BBBB -mXX)=X in avg ram
 ROM:7CF0 4C 39 7C				     JMP     update_avg_curr_addr
 ROM:7CF0	     ; End of function set_scale_A_bright_X
 ROM:7CF0
@@ -4165,10 +4167,10 @@ ROM:7D45
 ROM:7D45
 ROM:7D45	     write_AX_to_avgram:
 ROM:7D45 A0 00					     LDY     #0
-ROM:7D47 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7D47 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7D49 C8					     INY
 ROM:7D4A 8A					     TXA
-ROM:7D4B 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7D4B 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7D4D 4C 39 7C				     JMP     update_avg_curr_addr
 ROM:7D4D	     ; End of function write_AX_to_avgram
 ROM:7D4D
@@ -4405,13 +4407,13 @@ ROM:7EA8
 ROM:7EA8	     loc_7EA8:
 ROM:7EA8 BC BB 7E				     LDY     loc_7EB9+2,X
 ROM:7EAB A9 B0					     LDA     #$B0 ; '°'
-ROM:7EAD 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7EAD 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7EAF 88					     DEY
 ROM:7EB0 88					     DEY
 ROM:7EB1
 ROM:7EB1	     loc_7EB1:
 ROM:7EB1 B9 C0 7E				     LDA     unk_7EC0,Y
-ROM:7EB4 91 02					     STA     (2),Y				     ; store in	avg ram
+ROM:7EB4 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7EB6 88					     DEY
 ROM:7EB7 10 F8					     BPL     loc_7EB1
 ROM:7EB9

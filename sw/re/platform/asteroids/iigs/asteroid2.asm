@@ -30,7 +30,8 @@
 .addr __MAIN_START__ ;	Start address
 .word __BSS_LOAD__ - __MAIN_START__ ; Size
 ;
-.import render_frame
+
+.include "apple2.inc"
 
 .ZEROPAGE
 
