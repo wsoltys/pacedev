@@ -30,6 +30,8 @@
 .addr __MAIN_START__ ;	Start address
 .word __BSS_LOAD__ - __MAIN_START__ ; Size
 ;
+.import render_frame
+
 .ZEROPAGE
 
 ; ; Processor:	      M6502
@@ -678,6 +680,7 @@ loc_6864:									; display (C), scores, extra ships
 				JSR	write_CURx4_cmd
 				JSR	update_prng
 				JSR	halt_dvg				; finished rendering
+				jsr	render_frame
 				LDA	asteroidWaveTimer
 				BEQ	loc_687E				; zero,	skip
 				DEC	asteroidWaveTimer

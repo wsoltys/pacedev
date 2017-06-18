@@ -23,6 +23,10 @@ MAKEFILE = makefile
 
 MEDIA = asteroid.dsk
 
+OBJS = \
+	asteroid2.o \
+	video.o
+
 all: $(MEDIA)
 
 %.dsk : $(BIN)
@@ -30,12 +34,11 @@ all: $(MEDIA)
 	$(DD) if=$< of=6502.BIN bs=1 skip=6148 count=6144
 	$(C2D) -s 6800 -b $< $@
 	
-$(TARGET).o : $(TARGET).s
-	$(AS) -t $(TYPE) $(TARGET).s -o $@ -l $(TARGET).lst
-	$(AS) --cpu 6502X -t $(TYPE) asteroid2.asm -o asteroid2.o -l asteroid2.lst
+%.o : %.asm
+	$(AS) -t $(TYPE) $< -o $@ -l $*.lst
 
-$(BIN) : $(TARGET).o
-	$(LD) -o $@ asteroid2.o --start-addr 0x$(LA) -C apple2enh-asm.cfg -vm -m asteroid2.map
+$(BIN) : $(OBJS)
+	$(LD) -o $@ $(OBJS) --start-addr 0x$(LA) -C apple2enh-asm.cfg -vm -m asteroid2.map
 
 clean:
 	$(ECHO) Deleting intermediate files...
