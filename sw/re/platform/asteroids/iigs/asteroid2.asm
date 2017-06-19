@@ -611,10 +611,12 @@ DVGROM:				.BYTE $80, $A0,	0, 0, 0, $70, 0, 0, 0, $90, $FF, $73, $FF, $92,	0, $7
 ; Segment type:	Pure code
 				;.segment ROM
 				.org $6800
+				jsr apple_reset
 				JMP	RESET					; Debugger? Off	in the weeds? Do Reset.
 ; ---------------------------------------------------------------------------
 
 START:										; Reset	Sound, Zero Out	Sound Timers
+				jsr apple_start
 				JSR	init_sound
 				JSR	init_players				; init ships and scores
 
@@ -4165,7 +4167,6 @@ loc_7CFA:									; Count	down from 256
 				ASL	A					; -> bit 4
 				ORA	coinMultCredits
 				STA	coinMultCredits
-				jsr apple_reset
 				JMP	START
 
 ; =============== S U B	R O U T	I N E =======================================

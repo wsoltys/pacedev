@@ -16,10 +16,34 @@ text_row_addr:
 				.word		$450,$4D0,$550,$5D0,$650,$6D0,$750,$7D0
 
 apple_reset:
-				lda			#$02
-				sta			coinMultCredits
+				lda			#$02									; 1 coin, 1 credit
+				sta			coinage								; dipswitch
+				lda			#(1<<0)								; 3 lives
+				sta			centerCoinMultiplierAndLives
 				rts
-				
+
+apple_start:
+				; set current text page to page 1
+				lda			#<PAGE2OFF
+				sta			$C0
+				lda			#>PAGE2OFF
+				sta			$C1
+				lda			#0
+				sta			$C2										; text address mask
+
+				lda			#24
+				sta			cls_row
+				lda			#40
+				sta			cls_col
+				jsr			apple_render_frame		; cls page 1
+				jsr			apple_render_frame		; cls page 2
+
+				lda			#16
+				sta			cls_row
+				lda			#32
+				sta			cls_col
+				rts
+								
 ; find text coordinates for current
 ; 10 bits -> 5 bits
 cur_2_txt:
@@ -47,12 +71,15 @@ cur_2_txt:
 				lda			text_row_addr,y
 				sta			$80
 				lda			text_row_addr+1,y
+				eor			$C2										; page 1/2
 				sta			$81
 				rts
 
 ; print A=chr at CUR ($09,$0A)
 print_chr:
 				ldy			$09										; CUR X
+				; this is a complete fudge
+				inc			$09										; next char address
 				sta			($80),Y
 				rts
 																
@@ -66,6 +93,48 @@ upd_ptr:
 				inc			byte_C
 :				rts				
 
+copyright:
+				; CUR SSS=0,(400,128)
+				lda			#<128
+				sta			$06
+				lda			#>128
+				sta			$07
+				lda			#<400
+				sta			$04
+				lda			#>400
+				sta			$05
+				lda			#00
+				sta			$08		
+				jsr			cur_2_txt
+				lda			#$A8									; '('
+				jsr			print_chr
+				lda			#$83									; 'C'
+				jsr			print_chr
+				lda			#$A9									; ')'
+				jsr			print_chr
+				lda			#$B1									; '1'
+				jsr			print_chr
+				lda			#$B9									; '9'
+				jsr			print_chr
+				lda			#$B7									; '7'
+				jsr			print_chr
+				lda			#$B9									; '9'
+				jsr			print_chr
+				lda			#$A0									; space
+				jsr			print_chr
+				lda			#$81									; 'A'
+				jsr			print_chr
+				lda			#$94									; 'T'
+				jsr			print_chr
+				lda			#$81									; 'A'
+				jsr			print_chr
+				lda			#$92									; 'R'
+				jsr			print_chr
+				lda			#$89									; 'I'
+				jsr			print_chr
+				lda			#0										; so we can BNE
+				rts
+				
 ; $0-$9
 dvg_vec:
 				lda			#4										; 4 bytes in instruction
@@ -109,8 +178,8 @@ dvg_halt:
 
 ; $C
 dvg_jsr:
-				; try matching against character routine
 chk_char:
+				; try matching against character routine
 				ldx			#$00									; char index (x2)
 cl:			lda			$56D4,x								; $5000-$800+$ED4
 				cmp			(byte_B),y
@@ -141,8 +210,8 @@ no_lo:	inx
 				inx
 				cpx			#(37*2)
 				bne			cl
-				; check for asteroid
 chk_asteroid:				
+				; check for asteroid
 				ldx			#$00
 al:			lda			$51DE,x								; $5000-$800+$9DE
 				cmp			(byte_B),y
@@ -165,8 +234,8 @@ al:			lda			$51DE,x								; $5000-$800+$9DE
 				inx
 				cpx			#(4*2)
 				bne			al
-				; check for UFO
 chk_ufo:
+				; check for UFO
 				lda			#$29
 				cmp			(byte_B),y
 				bne			:++
@@ -179,13 +248,25 @@ chk_ufo:
 				bne			jsr_print							; (always)
 :				dey
 :
+chk_copyright:
+				; check for copyright message
+				lda			#$52
+				cmp			(byte_B),y
+				bne			:++
+				iny
+				lda			#$C8
+				cmp			(byte_B),y
+				bne			:+
+				; found copyright
+				jsr			copyright
+				bne			jsr_exit
+:				dey
+:
 chk_null:
 				lda			#0
 				beq			jsr_exit							; (always)
 jsr_print:
 				jsr			print_chr
-				; this is a complete fudge
-				inc			$09										; next char address
 jsr_exit:				
 				lda			#2										; 2 bytes in instruction
 				jsr 		upd_ptr
@@ -242,15 +323,25 @@ handle_dvg_opcode:
 				lda			dvg_jmp_tbl,x
 				pha
 				rts
-								
-apple_render_frame:
-				; clear screen
-				ldx			#(16-1)*2
+
+cls_row:	.byte 0
+cls_col:	.byte 0
+
+cls:
+				lda			cls_row
+				sec
+				sbc			#1
+				asl														; row*2
+				tax
 :				lda			text_row_addr,x
 				sta			$80
 				lda			text_row_addr+1,x
+				eor			$C2
 				sta			$81
-				ldy			#31
+				lda			cls_col
+				sec
+				sbc			#1
+				tay
 				lda			#$A0									; space
 :				sta			($80),y
 				dey
@@ -258,6 +349,13 @@ apple_render_frame:
 				dex
 				dex
 				bpl			:--
+				rts
+				
+apple_render_frame:
+				lda			#$0C
+				eor			$C2										; flip text addr mask
+				sta			$C2
+				jsr			cls										; clear screen
 ;				
 				lda			#2
 				sta			byte_B
@@ -269,7 +367,11 @@ render_loop:
 				dey														; reset to 1st byte
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
+				; flip page
+				lda			#(1<<0)
+				eor			$C0										; toggle softswitch address
+				sta			$C0
+				ldy			#0
+				sta			($C0),y								; flip
 				rts
-
-
 			
