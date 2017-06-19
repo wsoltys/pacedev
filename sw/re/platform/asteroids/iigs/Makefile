@@ -25,7 +25,7 @@ MEDIA = asteroid.dsk
 
 OBJS = \
 	asteroid2.o \
-	video.o
+	apple2.o
 
 all: $(MEDIA)
 
