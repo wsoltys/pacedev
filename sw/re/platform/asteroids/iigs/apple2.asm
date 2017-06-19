@@ -262,6 +262,20 @@ chk_copyright:
 				bne			jsr_exit
 :				dey
 :
+chk_extra_ship:
+				; check for extra ships display
+				lda			#$6D
+				cmp			(byte_B),y
+				bne			:++
+				iny
+				lda			#$CA
+				cmp			(byte_B),y
+				bne			:+
+				; found extra ship
+				lda			#$9E
+				bne			jsr_print
+:				dey
+:
 chk_null:
 				lda			#0
 				beq			jsr_exit							; (always)
@@ -373,5 +387,25 @@ render_loop:
 				sta			$C0
 				ldy			#0
 				sta			($C0),y								; flip
+				
+				; fudge some inputs now
+				
+				lda			#0
+				sta			p1StartSwitch
+				
+				lda			KBD
+				BPL			kbd_exit
+				; got a key
+				sta			KBDSTRB
+				and			#$7F									; scan code
+				cmp			#$31									; '1'?
+				bne			:+
+				lda			#(1<<7)
+				sta			p1StartSwitch
+:				cmp			#$35									; '5'?
+				bne			:+
+				inc			CurrNumCredits
+:								
+kbd_exit:				
 				rts
 			
