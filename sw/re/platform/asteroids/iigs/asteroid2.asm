@@ -681,7 +681,7 @@ loc_6864:									; display (C), scores, extra ships
 				JSR	write_CURx4_cmd
 				JSR	update_prng
 				JSR	halt_dvg				; finished rendering
-				jsr	render_frame
+				jsr	apple_render_frame
 				LDA	asteroidWaveTimer
 				BEQ	loc_687E				; zero,	skip
 				DEC	asteroidWaveTimer
@@ -4165,6 +4165,7 @@ loc_7CFA:									; Count	down from 256
 				ASL	A					; -> bit 4
 				ORA	coinMultCredits
 				STA	coinMultCredits
+				jsr apple_reset
 				JMP	START
 
 ; =============== S U B	R O U T	I N E =======================================

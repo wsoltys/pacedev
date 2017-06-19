@@ -15,6 +15,11 @@ text_row_addr:
 				.word		$428,$4A8,$528,$5A8,$628,$6A8,$728,$7A8
 				.word		$450,$4D0,$550,$5D0,$650,$6D0,$750,$7D0
 
+apple_reset:
+				lda			#$02
+				sta			coinMultCredits
+				rts
+				
 ; find text coordinates for current
 ; 10 bits -> 5 bits
 cur_2_txt:
@@ -105,8 +110,9 @@ dvg_halt:
 ; $C
 dvg_jsr:
 				; try matching against character routine
+chk_char:
 				ldx			#$00									; char index (x2)
-lk1:		lda			$56D4,x
+cl:			lda			$56D4,x								; $5000-$800+$ED4
 				cmp			(byte_B),y
 				bne			no_lo
 				iny
@@ -134,14 +140,54 @@ no_hi:	dey
 no_lo:	inx
 				inx
 				cpx			#(37*2)
-				bne			lk1
+				bne			cl
+				; check for asteroid
+chk_asteroid:				
+				ldx			#$00
+al:			lda			$51DE,x								; $5000-$800+$9DE
+				cmp			(byte_B),y
+				bne			:++
+				iny
+				lda			$51DF,x
+				cmp			(byte_B),y
+				bne			:+
+				; found an asteroid
+				lda			#$A3									; '#'
+				ldx			$08										; global scale
+				beq			jsr_print							; large
+				lda			#$AA									; '*'
+				cpx			#$0f
+				beq			jsr_print							; medium
+				lda			#$AB									; '+'
+				bne			jsr_print							; (always)
+:				dey
+:				inx
+				inx
+				cpx			#(4*2)
+				bne			al
+				; check for UFO
+chk_ufo:
+				lda			#$29
+				cmp			(byte_B),y
+				bne			:++
+				iny
+				lda			#$C9
+				cmp			(byte_B),y
+				bne			:+
+				; found a UFO
+				lda			#$80									; '@'
+				bne			jsr_print							; (always)
+:				dey
+:
+chk_null:
+				lda			#0
 				beq			jsr_exit							; (always)
 jsr_print:
 				jsr			print_chr
 				; this is a complete fudge
 				inc			$09										; next char address
 jsr_exit:				
-:				lda			#2										; 2 bytes in instruction
+				lda			#2										; 2 bytes in instruction
 				jsr 		upd_ptr
 				clc														; no halt
 				rts
@@ -197,7 +243,7 @@ handle_dvg_opcode:
 				pha
 				rts
 								
-render_frame:
+apple_render_frame:
 				; clear screen
 				ldx			#(16-1)*2
 :				lda			text_row_addr,x
