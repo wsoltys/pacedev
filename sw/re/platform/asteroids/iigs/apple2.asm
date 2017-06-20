@@ -23,6 +23,8 @@ apple_reset:
 				rts
 
 apple_start:
+				; enable page1/page2 in 40 column mode
+				sta			_80STOREOFF
 				; set current text page to page 1
 				lda			#<PAGE2OFF
 				sta			$C0
