@@ -7,6 +7,8 @@ KBDSTRB 			= $C010
 
 _80STOREOFF 	= $C000
 _80STOREON 		= $C001
+MAINMEM				= $C003
+AUXMEM				= $C005
 _80COLOFF 		= $C00C
 _80COLON 			= $C00D
 
@@ -17,6 +19,8 @@ PAGE2 				= $C01C				; 1=video page 2 OR aux video
 HIRES 				= $C01D				; 1=hires, 0=lores
 _80COL 				= $C01F				; 1=80-column, 0=40-column
 
+NEWVIDEO			= $C029				; b7=1 enable SHR, b6=1 linear, b5=1 mono DHR
+SHADOW				= $C035				; b3=0 enable SHR
 TEXTOFF 			= $C050
 TEXTON 				= $C051
 MIXEDOFF 			= $C052
@@ -25,6 +29,13 @@ PAGE2OFF 			= $C054
 PAGE2ON 			= $C055
 HIRESSOFF 		= $C056
 HIRESON 			= $C057
+
+; extra IIGS stuff
+
+RDMAINRAM			= $E0C002
+RDCARDRAM			= $E0C003
+WRMAINRAM			= $E0C004
+WRCARDRAM			= $E0C005
 
 ; asteroid2.asm
 
@@ -51,3 +62,18 @@ HIRESON 			= $C057
 .global apple_reset
 .global apple_start
 .global apple_render_frame
+
+.macro IIGSMODE
+	clc
+	xce
+	rep #(1<<5)|(1<<4)
+	.A16
+	.I16
+.endmacro
+
+.macro IIMODE
+	sec
+	xce
+	.A8
+	.I8
+.endmacro

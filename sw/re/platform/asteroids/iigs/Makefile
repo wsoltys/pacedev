@@ -23,9 +23,13 @@ MAKEFILE = makefile
 
 MEDIA = asteroid.dsk
 
-OBJS = \
-	asteroid2.o \
-	apple2.o
+M6502_OBJS = \
+	asteroid2.o
+
+M65816_OBJS = \
+	iigs.o
+
+OBJS = $(M6502_OBJS) $(M65816_OBJS)
 
 all: $(MEDIA)
 
@@ -34,8 +38,11 @@ all: $(MEDIA)
 	$(DD) if=$< of=6502.BIN bs=1 skip=6148 count=6144
 	$(C2D) -s 6800 -b $< $@
 	
-%.o : %.asm
+$(M6502_OBJS) : %.o : %.asm
 	$(AS) -t $(TYPE) $< -o $@ -l $*.lst
+
+$(M65816_OBJS) : %.o : %.asm
+	$(AS) -t $(TYPE) --cpu 65816 $< -o $@ -l $*.lst
 
 $(BIN) : $(OBJS)
 	$(LD) -o $@ $(OBJS) --start-addr 0x$(LA) -C apple2enh-asm.cfg -vm -m asteroid2.map
