@@ -134,6 +134,8 @@ print_chr:
 				; update CUR
 				inc			$C2
 				inc			$C2
+				inc			$C2
+				inc			$C2
 				IIMODE
 				rts
 																
@@ -158,32 +160,30 @@ copyright:
 				lda			#00
 				sta			$08		
 				jsr			cur_2_shr
-				lda			#$A8									; '('
+				lda			#$0D									; 'C'
 				jsr			print_chr
-				lda			#$83									; 'C'
+.if 0
+				lda			#$02									; '1'
 				jsr			print_chr
-				lda			#$A9									; ')'
+				lda			#$0A									; '9'
 				jsr			print_chr
-				lda			#$B1									; '1'
+				lda			#$08									; '7'
 				jsr			print_chr
-				lda			#$B9									; '9'
+				lda			#$0A									; '9'
 				jsr			print_chr
-				lda			#$B7									; '7'
+				lda			#$00									; space
 				jsr			print_chr
-				lda			#$B9									; '9'
+				lda			#$0B									; 'A'
 				jsr			print_chr
-				lda			#$A0									; space
+				lda			#$1E									; 'T'
 				jsr			print_chr
-				lda			#$81									; 'A'
+				lda			#$0B									; 'A'
 				jsr			print_chr
-				lda			#$94									; 'T'
+				lda			#$1C									; 'R'
 				jsr			print_chr
-				lda			#$81									; 'A'
+				lda			#$13									; 'I'
 				jsr			print_chr
-				lda			#$92									; 'R'
-				jsr			print_chr
-				lda			#$89									; 'I'
-				jsr			print_chr
+.endif				
 				lda			#0										; so we can BNE
 				rts
 
