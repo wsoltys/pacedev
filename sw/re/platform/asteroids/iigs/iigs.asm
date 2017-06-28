@@ -379,22 +379,22 @@ handle_dvg_opcode:
 apple_render_frame:
 ;				cls
 				IIGSMODE
-.if 1
+.if 0
 				phb
 				lda			#$0000
 				ldx			#$2000
 				sta			$010000,x
 				ldy			#$2001
 				lda			#$77FF
-				mvn			$01,$01
+				mvn			$01,$01								; 7 cycles/byte
 				plb
 .else				
 				ldx			#$7800
 				lda			#$0
-:				sta			$012000,x
-				dex
-				dex
-				bpl			:-
+:				sta			$012000,x							; 5 cycles
+				dex														; 2 cycles
+				dex														; 2 cycles
+				bpl			:-										; 2 cycles = 11 cycles/word (faster)
 .endif				
 				IIMODE
 				lda			#2
