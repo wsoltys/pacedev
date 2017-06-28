@@ -63,17 +63,25 @@ WRCARDRAM			= $E0C005
 .global apple_start
 .global apple_render_frame
 
+.macro HINT_IIGSMODE
+	.A16
+	.I16
+.endmacro
+
 .macro IIGSMODE
 	clc
 	xce
 	rep #(1<<5)|(1<<4)
-	.A16
-	.I16
+	HINT_IIGSMODE
+.endmacro
+
+.macro HINT_IIMODE
+	.A8
+	.I8
 .endmacro
 
 .macro IIMODE
 	sec
 	xce
-	.A8
-	.I8
+	HINT_IIMODE
 .endmacro

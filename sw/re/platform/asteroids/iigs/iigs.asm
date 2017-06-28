@@ -7,6 +7,7 @@
 .export char_0
 .export char_1
 .export chr_tbl
+.export chk_extra_ship
 
 apple_reset:
 				.A8
@@ -112,8 +113,9 @@ print_chr:
 				IIGSMODE
 				asl														; word offset
 				and			#$00FF
-				tay
+				tax
 				ldy			chr_tbl,x
+render_7x2:				
 				lda			#7										; 7 lines
 				sta			$C4
 				ldx			$C2										; SHR offset
@@ -162,7 +164,6 @@ copyright:
 				jsr			cur_2_shr
 				lda			#$0D									; 'C'
 				jsr			print_chr
-.if 0
 				lda			#$02									; '1'
 				jsr			print_chr
 				lda			#$0A									; '9'
@@ -183,7 +184,6 @@ copyright:
 				jsr			print_chr
 				lda			#$13									; 'I'
 				jsr			print_chr
-.endif				
 				lda			#0										; so we can BNE
 				rts
 
@@ -311,8 +311,11 @@ chk_extra_ship:
 				cmp			(byte_B),y
 				bne			:+
 				; found extra ship
-				lda			#$9E
-				bne			jsr_print
+				IIGSMODE
+				ldy			#extra_ship
+				jsr			render_7x2
+				IIMODE
+				jmp			jsr_exit
 :				dey
 :
 chk_null:
@@ -388,6 +391,26 @@ render_loop:
 				dey														; reset to 1st byte
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
+
+				; fudge some inputs now
+				
+				lda			#0
+				sta			p1StartSwitch
+				
+				lda			KBD
+				BPL			kbd_exit
+				; got a key
+				sta			KBDSTRB
+				and			#$7F									; scan code
+				cmp			#$31									; '1'?
+				bne			:+
+				lda			#(1<<7)
+				sta			p1StartSwitch
+:				cmp			#$35									; '5'?
+				bne			:+
+				inc			CurrNumCredits
+:								
+kbd_exit:				
 				rts
 
 char_SPACE:
@@ -699,4 +722,13 @@ chr_tbl:
 		.word char_Q, char_R, char_S, char_T
 		.word char_U, char_V, char_W, char_X
 		.word char_Y, char_Z
-		
+
+extra_ship:
+		.byte	$00, $10, $00, $00
+		.byte $00, $10, $00, $00
+		.byte $01, $01, $00, $00		
+		.byte $01, $01, $00, $00		
+		.byte $01, $01, $00, $00		
+		.byte $11, $11, $10, $00
+		.byte $10, $00, $10, $00
+				
