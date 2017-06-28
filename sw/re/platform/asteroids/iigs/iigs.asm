@@ -3,11 +3,7 @@
 ; for debugging
 .export cur_2_shr
 .export print_chr
-.export char_SPACE
-.export char_0
-.export char_1
-.export chr_tbl
-.export chk_extra_ship
+.export apple_render_frame
 
 apple_reset:
 				.A8
@@ -381,6 +377,26 @@ handle_dvg_opcode:
 				rts
 
 apple_render_frame:
+;				cls
+				IIGSMODE
+.if 1
+				phb
+				lda			#$0000
+				ldx			#$2000
+				sta			$010000,x
+				ldy			#$2001
+				lda			#$77FF
+				mvn			$01,$01
+				plb
+.else				
+				ldx			#$7800
+				lda			#$0
+:				sta			$012000,x
+				dex
+				dex
+				bpl			:-
+.endif				
+				IIMODE
 				lda			#2
 				sta			byte_B
 				lda			dvg_curr_addr_msb
