@@ -151,7 +151,16 @@ print_asteroid:
 				adc			$C6										; =pattern x6
 				and			#$00FF
 				tax
-				ldy			asteroid_tbl,x
+				lda			$08										; global scale
+				and			#$00FF
+				beq			:+										; large? yes, go
+				inx
+				inx
+				cmp			#$0F									; medium?
+				beq			:+										; yes, go
+				inx
+				inx														; small
+:				ldy			asteroid_tbl,x
 				lda			#16										; 16 lines
 				sta			$C4
 				ldx			$C2										; SHR offset
