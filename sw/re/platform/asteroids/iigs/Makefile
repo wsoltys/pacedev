@@ -27,7 +27,8 @@ M6502_OBJS = \
 	asteroid2.o
 
 M65816_OBJS = \
-	iigs.o
+	iigs.o \
+	bitmaps.o
 
 OBJS = $(M6502_OBJS) $(M65816_OBJS)
 
