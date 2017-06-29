@@ -1130,9 +1130,12 @@ asteroid_18:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
 				
 asteroid_tbl:
-		.word asteroid_0,  asteroid_1,  asteroid_2,  asteroid_3
-		.word asteroid_4,  asteroid_5,  asteroid_6,  asteroid_7
-		.word asteroid_8,  asteroid_9,  asteroid_10, asteroid_11
+		; 4 asteroid patterns; large, medium, small
+		.word asteroid_0,  asteroid_1,  asteroid_2
+		.word asteroid_3,  asteroid_4,  asteroid_5
+		.word asteroid_6,  asteroid_7,  asteroid_8
+		.word asteroid_9,  asteroid_10, asteroid_11
+		; 
 		.word asteroid_12, asteroid_13, asteroid_14, asteroid_15
 		.word asteroid_16, asteroid_17, asteroid_18
 	
