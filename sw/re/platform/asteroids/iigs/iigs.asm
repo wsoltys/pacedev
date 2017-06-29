@@ -480,7 +480,7 @@ render_loop:
 				sta			p1StartSwitch
 				
 				lda			KBD
-				BPL			kbd_exit
+				bpl			kbd_exit							; no key, exit
 				; got a key
 				sta			KBDSTRB
 				and			#$7F									; scan code
@@ -488,10 +488,17 @@ render_loop:
 				bne			:+
 				lda			#(1<<7)
 				sta			p1StartSwitch
+				bne			kbd_exit
 :				cmp			#$35									; '5'?
 				bne			:+
 				inc			CurrNumCredits
-:								
+				bne			kbd_exit
+:				cmp			#$46									; 'F'?
+				bne			:++
+:				lda			KBD
+				bpl			:-										; no key, loop
+				sta			KBDSTRB
+:				
 kbd_exit:				
 				rts
 	
