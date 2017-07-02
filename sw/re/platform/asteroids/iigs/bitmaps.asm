@@ -2,7 +2,7 @@
 .export extra_ship
 .export large_ufo
 .export small_ufo
-.export schrapnel_tbl
+.export shrapnel_tbl
 .export asteroid_tbl
 
 char_SPACE:
@@ -577,7 +577,7 @@ small_ufo:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     
-schrapnel_0:
+shrapnel_0:
     .BYTE  $00, $01, $00, $00, $00, $01, $00, $00
     .BYTE  $00, $00, $00, $10, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
@@ -595,7 +595,7 @@ schrapnel_0:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     
-schrapnel_1:
+shrapnel_1:
     .BYTE  $00, $10, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $10, $00
     .BYTE  $00, $00, $00, $10, $00, $00, $00, $00
@@ -613,7 +613,7 @@ schrapnel_1:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     
-schrapnel_2:
+shrapnel_2:
     .BYTE  $01, $00, $00, $00, $00, $00, $10, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $10, $00, $00, $00, $00
@@ -631,7 +631,7 @@ schrapnel_2:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     
-schrapnel_3:
+shrapnel_3:
     .BYTE  $10, $00, $00, $00, $00, $00, $01, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $10, $00, $00, $00, $00
@@ -649,8 +649,11 @@ schrapnel_3:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $10, $00, $00, $00, $01, $00
 		
-schrapnel_tbl:
-		.word schrapnel_0, schrapnel_1, schrapnel_2, schrapnel_3
+shrapnel_tbl:
+		.word shrapnel_0
+		.word shrapnel_1
+		.word shrapnel_2, shrapnel_2
+		.word shrapnel_3, shrapnel_3
     
 player_ship_0:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00

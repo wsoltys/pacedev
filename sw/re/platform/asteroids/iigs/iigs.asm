@@ -1,6 +1,7 @@
 .include "apple2.inc"
 
 ; for debugging
+.export chk_shrapnel
 .export cur_2_shr
 .export print_chr
 .export apple_render_frame
@@ -9,7 +10,7 @@
 .import extra_ship
 .import large_ufo
 .import small_ufo
-.import schrapnel_tbl
+.import shrapnel_tbl
 .import asteroid_tbl
 
 ; build options
@@ -330,6 +331,40 @@ al:			lda			$51DE,x								; $5000-$800+$9DE
 				inx
 				cpx			#(4*2)
 				bne			al
+chk_shrapnel:
+				; check for shrapnel
+				ldx			#$00
+sl:			lda			$50F8,x								; $5000-$800+$8F8
+				cmp			(byte_B),y
+				bne			:+++
+				iny
+				lda			$50F9,x
+				cmp			(byte_B),y
+				bne			:++
+				; found shrapnel
+				; the original uses 6 global scale factors from $B-$0
+				; and 4 patterns in this sequence
+				; $B:2,6 $C:0,4,6 $D,$E,$F,$0:0,2,4,6
+				; instead we'll just use global scale factor
+				; $B=0, $C=1, $D,$E=2, $F,$0=3
+				IIGSMODE
+				lda			$08										; global scale
+				and			#$00FF
+				bne			:+
+				lda			#$0010
+:				clc
+				sbc			#$0B									; -> 0-5
+				asl														; word offset into table
+				tax
+				ldy			shrapnel_tbl,x
+				jsr			render_16x4
+				HINT_IIMODE
+				jmp			jsr_exit
+:				dey
+:				inx
+				inx
+				cpx			#(4*2)
+				bne			sl
 chk_ufo:
 				; check for UFO
 				lda			#$29
