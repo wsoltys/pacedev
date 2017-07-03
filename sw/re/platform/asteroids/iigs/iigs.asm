@@ -1,6 +1,7 @@
 .include "apple2.inc"
 
 ; for debugging
+.export dvg_vec
 .export chk_shrapnel
 .export cur_2_shr
 .export print_chr
@@ -253,7 +254,23 @@ copyright:
 
 ; $0-$9
 dvg_vec:
-				lda			#4										; 4 bytes in instruction
+				iny
+				lda			(byte_B),y
+				cmp			#$70
+				bne			:+
+				iny
+				iny
+				lda			(byte_B),y
+				cmp			#$F0
+				bne			:+
+				; shot!?!
+				IIGSMODE
+				ldx			$C2										; SHR offset
+				lda			$012000,x
+				ora			#$0100								; arbitrary pixel
+				sta			$012000,x
+				IIMODE
+:				lda			#4										; 4 bytes in instruction
 				jsr 		upd_ptr
 				clc														; no halt
 				rts
@@ -512,8 +529,12 @@ render_loop:
 				; fudge some inputs now
 				
 				lda			#0
+				sta			hyperspaceSwitch
+				sta			FireSwitch
 				sta			p1StartSwitch
-				
+				sta			rotateRightSwitch
+				sta			rotateLeftSwitch
+												
 				lda			KBD
 				bpl			kbd_exit							; no key, exit
 				; got a key
@@ -527,6 +548,21 @@ render_loop:
 :				cmp			#$35									; '5'?
 				bne			:+
 				inc			CurrNumCredits
+				bne			kbd_exit
+:				cmp			#$20									; <space>?
+				bne			:+
+				lda			#(1<<7)								; fire bit
+				sta			FireSwitch
+				bne			kbd_exit
+:				cmp			#$2E									; '.'				
+				bne			:+
+				lda			#(1<<7)
+				sta			rotateRightSwitch
+				bne			kbd_exit
+:				cmp			#$2C									; ','
+				bne			:+
+				lda			#(1<<7)
+				sta			rotateLeftSwitch
 				bne			kbd_exit
 :				cmp			#$46									; 'F'?
 				bne			:++

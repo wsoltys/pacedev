@@ -46,6 +46,11 @@ WRCARDRAM			= $E0C005
 .global CurrNumCredits			: zeropage
 .global coinMultCredits			: zeropage
 
+; IN0
+.global hyperspaceSwitch
+.global FireSwitch
+
+; IN1
 .global leftCoinSwitch
 .global centerCoinSwitch
 .global rightCoinSwitch
