@@ -143,10 +143,10 @@ ZEROPAGE:0079 ??					  .BYTE	0 ; (uninited)
 ZEROPAGE:007A ??	  coin_1_inp_length:		  .BYTE	0 ; (uninited)
 ZEROPAGE:007B ??	  coin_2_inp_length:		  .BYTE	0 ; (uninited)
 ZEROPAGE:007C ??	  coin_3_inp_length:		  .BYTE	0 ; (uninited)
-ZEROPAGE:007D ??					  .BYTE	0 ; (uninited)
-ZEROPAGE:007E ??					  .BYTE	0 ; (uninited)
+ZEROPAGE:007D ??	  byte_7D:			  .BYTE	0 ; (uninited)
+ZEROPAGE:007E ??	  byte_7E:			  .BYTE	0 ; (uninited)
 ZEROPAGE:007F ??					  .BYTE	0 ; (uninited)
-ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
+ZEROPAGE:0080 ?? ?? ?? ??+byte_80:			  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
 ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
 ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
 ZEROPAGE:0080 ?? ?? ?? ??+				  .BYTE	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	; (uninited)
@@ -1412,8 +1412,8 @@ ROM:6CDE 66 63					     ROR     btn_edge_debounce			     ; shift into bit 7
 ROM:6CE0 24 63					     BIT     btn_edge_debounce			     ; test
 ROM:6CE2 10 18					     BPL     locret_6CFC			     ; b7=0, not pressed, exit
 ROM:6CE4 70 16					     BVS     locret_6CFC			     ; b6=1, was pressed, exit
-ROM:6CE6 AD FA 02				     LDA     shipSpawnTimer
-ROM:6CE9 D0 11					     BNE     locret_6CFC
+ROM:6CE6 AD FA 02				     LDA     shipSpawnTimer			     ; ship spawning?
+ROM:6CE9 D0 11					     BNE     locret_6CFC			     ; yes, exit
 ROM:6CEB AA					     TAX
 ROM:6CEC A9 03					     LDA     #3					     ; offset shot0 timer - 1
 ROM:6CEE 85 0E					     STA     byte_E
@@ -1430,7 +1430,7 @@ ROM:6CFC	     locret_6CFC:
 ROM:6CFC 60					     RTS
 ROM:6CFD	     ; ---------------------------------------------------------------------------
 ROM:6CFD
-ROM:6CFD	     new_shot_fired:								     ; was byte_2FA
+ROM:6CFD	     new_shot_fired:								     ; should be 0?
 ROM:6CFD 86 0D					     STX     byte_D
 ROM:6CFF A9 12					     LDA     #18
 ROM:6D01 99 1B 02				     STA     p1PlayerFlag,Y			     ; init shot timer
@@ -2376,7 +2376,7 @@ ROM:724F	     ; =============== S U B R O U T I N E ============================
 ROM:724F
 ROM:724F
 ROM:724F	     display_C_scores_ships:
-ROM:724F A9 10					     LDA     #$10
+ROM:724F A9 10					     LDA     #16
 ROM:7251 85 00					     STA     globalScale
 ROM:7253 A9 50					     LDA     #$50 ; 'P'
 ROM:7255 A2 A4					     LDX     #$A4 ; '¤'                              ; addr = 0x50A4
@@ -2750,7 +2750,7 @@ ROM:7474 4A					     LSR     A
 ROM:7475 18					     CLC
 ROM:7476 69 F8					     ADC     #$F8 ; 'ø'
 ROM:7478 49 F8					     EOR     #$F8 ; 'ø'
-ROM:747A 95 7E					     STA     $7E,X
+ROM:747A 95 7E					     STA     byte_7E,X
 ROM:747C BD ED 50				     LDA     DVGROM+$ED,X
 ROM:747F 4A					     LSR     A
 ROM:7480 4A					     LSR     A
@@ -2759,7 +2759,7 @@ ROM:7482 4A					     LSR     A
 ROM:7483 18					     CLC
 ROM:7484 69 F8					     ADC     #$F8 ; 'ø'
 ROM:7486 49 F8					     EOR     #$F8 ; 'ø'
-ROM:7488 95 8A					     STA     $8A,X
+ROM:7488 95 8A					     STA     byte_80+$A,X
 ROM:748A CA					     DEX
 ROM:748B CA					     DEX
 ROM:748C 10 E0					     BPL     loc_746E
@@ -2782,11 +2782,11 @@ ROM:74A2 88					     DEY
 ROM:74A3
 ROM:74A3	     loc_74A3:
 ROM:74A3 18					     CLC
-ROM:74A4 75 7D					     ADC     $7D,X
-ROM:74A6 95 7D					     STA     $7D,X
+ROM:74A4 75 7D					     ADC     byte_7D,X
+ROM:74A6 95 7D					     STA     byte_7D,X
 ROM:74A8 98					     TYA
-ROM:74A9 75 7E					     ADC     $7E,X
-ROM:74AB 95 7E					     STA     $7E,X
+ROM:74A9 75 7E					     ADC     byte_7E,X
+ROM:74AB 95 7E					     STA     byte_7E,X
 ROM:74AD 85 04					     STA     byte_4
 ROM:74AF 84 05					     STY     byte_5
 ROM:74B1 A0 00					     LDY     #0
@@ -2796,11 +2796,11 @@ ROM:74B8 88					     DEY
 ROM:74B9
 ROM:74B9	     loc_74B9:
 ROM:74B9 18					     CLC
-ROM:74BA 75 89					     ADC     $89,X
-ROM:74BC 95 89					     STA     $89,X
+ROM:74BA 75 89					     ADC     byte_80+9,X
+ROM:74BC 95 89					     STA     byte_80+9,X
 ROM:74BE 98					     TYA
-ROM:74BF 75 8A					     ADC     $8A,X
-ROM:74C1 95 8A					     STA     $8A,X
+ROM:74BF 75 8A					     ADC     byte_80+$A,X
+ROM:74C1 95 8A					     STA     byte_80+$A,X
 ROM:74C3 85 06					     STA     byte_6
 ROM:74C5 84 07					     STY     byte_7
 ROM:74C7 A5 02					     LDA     dvg_curr_addr_lsb
