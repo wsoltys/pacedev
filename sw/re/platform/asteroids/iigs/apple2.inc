@@ -37,6 +37,12 @@ RDCARDRAM			= $E0C003
 WRMAINRAM			= $E0C004
 WRCARDRAM			= $E0C005
 
+;SHRMEM				= $012000
+; adjust to centre 256x192 display
+; - offset by (320-256)/2=32 pixels = 16 ($10) bytes
+; - and by (200-192)/2=4 lines = 4*160=640 ($280) bytes
+SHRMEM				= $012290
+
 ; asteroid2.asm
 
 .global dvg_curr_addr_lsb 	: zeropage

@@ -3,6 +3,7 @@
 ; for debugging
 .export dvg_vec
 .export chk_shrapnel
+.export print_copyright
 .export cur_2_shr
 .export print_chr
 .export apple_render_frame
@@ -13,6 +14,7 @@
 .import small_ufo
 .import shrapnel_tbl
 .import asteroid_tbl
+.import copyright
 
 ; build options
 ; comment-out to disable (not =0)
@@ -129,11 +131,11 @@ render_7x2:
 				sta			$C4
 				ldx			$C2										; SHR offset
 :				lda			0,y
-				ora			$012000,x
-				sta			$012000,x							; 1st half of line
+				ora			SHRMEM,x
+				sta			SHRMEM,x							; 1st half of line
 				lda			2,y
-				ora			$012002,x
-				sta			$012002,x							; 2nd half of line
+				ora			SHRMEM+2,x
+				sta			SHRMEM+2,x							; 2nd half of line
 				iny
 				iny
 				iny
@@ -177,17 +179,17 @@ render_16x4:
 				sta			$C4
 				ldx			$C2										; SHR offset
 :				lda			0,y
-				ora			$012000,x
-				sta			$012000,x							; 1st qtr of line
+				ora			SHRMEM,x
+				sta			SHRMEM,x							; 1st qtr of line
 				lda			2,y
-				ora			$012002,x
-				sta			$012002,x							; 2nd qtr of line
+				ora			SHRMEM+2,x
+				sta			SHRMEM+2,x							; 2nd qtr of line
 				lda			4,y
-				ora			$012004,x
-				sta			$012004,x							; 3rd qtr of line
+				ora			SHRMEM+4,x
+				sta			SHRMEM+4,x							; 3rd qtr of line
 				lda			6,y
-				ora			$012006,x
-				sta			$012006,x							; 4th qtr of line
+				ora			SHRMEM+6,x
+				sta			SHRMEM+6,x							; 4th qtr of line
 				tya
 				clc
 				adc			#8
@@ -214,8 +216,9 @@ upd_ptr:
 				inc			byte_C
 :				rts				
 
-copyright:
+print_copyright:
 				; CUR SSS=0,(400,128)
+.if 0				
 				lda			#<128
 				sta			$06
 				lda			#>128
@@ -227,28 +230,31 @@ copyright:
 				lda			#00
 				sta			$08		
 				jsr			cur_2_shr
-				lda			#$0D									; 'C'
-				jsr			print_chr
-				lda			#$02									; '1'
-				jsr			print_chr
-				lda			#$0A									; '9'
-				jsr			print_chr
-				lda			#$08									; '7'
-				jsr			print_chr
-				lda			#$0A									; '9'
-				jsr			print_chr
-				lda			#$00									; space
-				jsr			print_chr
-				lda			#$0B									; 'A'
-				jsr			print_chr
-				lda			#$1E									; 'T'
-				jsr			print_chr
-				lda			#$0B									; 'A'
-				jsr			print_chr
-				lda			#$1C									; 'R'
-				jsr			print_chr
-				lda			#$13									; 'I'
-				jsr			print_chr
+.endif				
+				IIGSMODE
+				ldy			#copyright
+;				ldx			$C2										; SHR offset ($6F72)
+				ldx			#$6F72
+				lda			#5										; 5 lines
+				sta			$C4
+:				lda			#15										; 15 words/line
+				sta			$C6
+:				lda			0,y
+				ora			SHRMEM,x
+				sta			SHRMEM,x
+				iny
+				iny														; pixel data
+				inx
+				inx														; screen ptr
+				dec			$C6										; done line?
+				bne			:-										; no, loop
+				txa
+				clc
+				adc			#(160-30)							; ptr next line
+				tax
+				dec			$C4										; done all lines?
+				bne			:--										; no, loop
+				IIMODE
 				lda			#0										; so we can BNE
 				rts
 
@@ -266,9 +272,9 @@ dvg_vec:
 				; shot!?!
 				IIGSMODE
 				ldx			$C2										; SHR offset
-				lda			$012000,x
+				lda			SHRMEM,x
 				ora			#$0100								; arbitrary pixel
-				sta			$012000,x
+				sta			SHRMEM,x
 				IIMODE
 :				lda			#4										; 4 bytes in instruction
 				jsr 		upd_ptr
@@ -409,7 +415,7 @@ chk_copyright:
 				cmp			(byte_B),y
 				bne			:+
 				; found copyright
-				jsr			copyright
+				jsr			print_copyright
 				bne			jsr_exit
 :				dey
 :
@@ -508,7 +514,7 @@ apple_render_frame:
 	.else				
 				ldx			#$7800
 				lda			#$0
-:				sta			$012000,x							; 5 cycles
+:				sta			SHRMEM,x							; 5 cycles
 				dex														; 2 cycles
 				dex														; 2 cycles
 				bpl			:-										; 2 cycles = 11 cycles/word (faster)
