@@ -49,6 +49,7 @@ SHRMEM				= $012290
 .global dvg_curr_addr_msb 	: zeropage
 .global byte_B 							: zeropage
 .global byte_C 							: zeropage
+.global direction						: zeropage
 .global CurrNumCredits			: zeropage
 .global coinMultCredits			: zeropage
 

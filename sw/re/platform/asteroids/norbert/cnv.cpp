@@ -17,7 +17,8 @@ int char_pics (void)
 		//printf ("%s", buf);
 		
 		if (strncmp (buf, "char_pic", 8) &&
-		   !strncmp (buf, "char_", 5))
+		   (!strncmp (buf, "char_", 5) ||
+		    !strncmp (buf, "ship_", 5)))
 		{
 			char *p = buf;
 			while (!isspace (*p))

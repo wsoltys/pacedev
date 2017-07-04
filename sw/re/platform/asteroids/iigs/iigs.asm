@@ -9,6 +9,7 @@
 .export apple_render_frame
 
 .import chr_tbl
+.import ship_tbl
 .import extra_ship
 .import large_ufo
 .import small_ufo
@@ -150,7 +151,7 @@ render_7x2:
 				inc			$C2
 				inc			$C2
 				inc			$C2
-				inc			$C2
+;				inc			$C2										; not what Norbert does!?!
 				IIMODE
 				rts
 
@@ -430,7 +431,7 @@ chk_extra_ship:
 				bne			:+
 				; found extra ship
 				IIGSMODE
-				ldy			#extra_ship
+				ldy			extra_ship
 				jsr			render_7x2
 				HINT_IIMODE
 				jmp			jsr_exit
@@ -531,6 +532,24 @@ render_loop:
 				dey														; reset to 1st byte
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
+
+				; now we (always) render the ship
+				IIGSMODE
+				lda			direction							; 0-256
+				and			#$00ff
+				lsr
+				lsr
+				lsr
+				lsr														; dir/16
+				sta			$D0
+				lsr														; dir/8
+				clc
+				adc			$D0										; dir/16+dir/8 = dir/24
+				asl														; word offset
+				tax
+				ldy			ship_tbl,x
+				jsr			render_7x2
+				HINT_IIMODE			
 
 				; fudge some inputs now
 				
