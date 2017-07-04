@@ -72,6 +72,7 @@ cur_2_shr:
 				lsr
 				ror			$09										; CUR X (0-255)
 				; scale Y
+				; - look at increasing the resolution here by using 16-bits!!!
 				lda			$06										; CUR Y (lsb)
 				sta			$0A
 				lda			$07										; CUR Y (msb)
@@ -84,7 +85,7 @@ cur_2_shr:
 				lda			$0A
 				lsr														; (0-64)
 				clc
-				adc			$0A										; (0-128)+(0-64)=(0-192)
+				adc			$0A										; (0-127)+(0-63)=(0-191)
 				sta			$0A
 				; find address (y*160+x/2) 160=128+32
 				lda			#191
@@ -136,7 +137,7 @@ render_7x2:
 				sta			SHRMEM,x							; 1st half of line
 				lda			2,y
 				ora			SHRMEM+2,x
-				sta			SHRMEM+2,x							; 2nd half of line
+				sta			SHRMEM+2,x						; 2nd half of line
 				iny
 				iny
 				iny
@@ -536,7 +537,8 @@ render_loop:
 				; now we (always) render the ship
 				IIGSMODE
 				lda			direction							; 0-256
-				and			#$00ff
+				xba														; high byte for more resolution
+				and			#$ff00
 				lsr
 				lsr
 				lsr
@@ -545,6 +547,8 @@ render_loop:
 				lsr														; dir/8
 				clc
 				adc			$D0										; dir/16+dir/8 = dir/24
+				xba														; back to low byte
+				and			#$00ff								; mask off high-res bits
 				asl														; word offset
 				tax
 				ldy			ship_tbl,x
