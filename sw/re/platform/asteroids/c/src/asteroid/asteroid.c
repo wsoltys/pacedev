@@ -12,11 +12,12 @@
 #define DBGPRINTF_FN    DBGPRINTF ("%s():\n", __FUNCTION__)
 //#define UNTESTED        DBGPRINTF ("*** %s(): UNTESTED ***\n", __FUNCTION__)
 #define UNTESTED        
-//#define UNIMPLEMENTED   DBGPRINTF ("*** %s(): UNMIPLEMENTED ***\n", __FUNCTION__)
-#define UNIMPLEMENTED   
+#define UNIMPLEMENTED   DBGPRINTF ("*** %s(): UNMIPLEMENTED ***\n", __FUNCTION__)
+//#define UNIMPLEMENTED   
 #define UNIMPLEMENTED_AUDIO
 
 #include "osd_types.h"
+#include "asteroid_osd.h"
 
 #pragma pack(1)
 
@@ -54,9 +55,9 @@ static void display_C_scores_ships (void);						// $724F
 static uint8_t display_high_score_table (void);				// $73C4
 static void handle_sounds (void);											// $7555
 static void check_high_score (void);									// $765C
-static void update_prng (void);												// $77B5
+static uint8_t update_prng (void);										// $77B5
 static void halt_dvg (void);													// $7BC0
-static void write_CURx4_cmd (void);										// $7C03
+static void write_CURx4_cmd (uint8_t x, uint8_t y);		// $7C03
 static void reset (void);															// $7CF3
 
 void asteroids2 (void)
@@ -75,6 +76,9 @@ void asteroids2 (void)
 				while (1)
 				{
 					// check self-test
+					if (osd_quit ())
+						return;
+						
 					// wait for vblank
 					// wait for DVG
 					
@@ -100,7 +104,7 @@ void asteroids2 (void)
 					}
 					display_C_scores_ships ();
 					handle_sounds ();
-					write_CURx4_cmd ();
+					write_CURx4_cmd (127, 127);
 					update_prng ();
 					halt_dvg ();
 					if (p->asteroid_wave_timer != 0)
@@ -116,31 +120,31 @@ void asteroids2 (void)
 // $6885
 void handle_start_end_turn_or_game (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $69F0
 void handle_shots (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $6B93
 void handle_saucer (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $6CD7
 void handle_fire (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $6D90
 int8_t handle_high_score_entry (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 	
 	return (-1);
 }
@@ -148,49 +152,49 @@ int8_t handle_high_score_entry (void)
 // $6E74
 void handle_hyperspace (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $6ED8
 void init_players (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $6EFA
 void init_sound (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $6F57
 void update_and_render_objects (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $703F
 void handle_respawn_rot_thrust (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $7168
 void init_wave (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $724F
 void display_C_scores_ships (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $73C4
 uint8_t display_high_score_table (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 	
 	return (0);
 }
@@ -198,35 +202,36 @@ uint8_t display_high_score_table (void)
 // $7555
 void handle_sounds (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $765C
 void check_high_score (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $77B5
-void update_prng (void)
+uint8_t update_prng (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
+	return (1);
 }
 
 // $7BC0
 void halt_dvg (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $7C03
-void write_CURx4_cmd (void)
+void write_CURx4_cmd (uint8_t x, uint8_t y)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }
 
 // $7CF3
 void reset (void)
 {
-	UNIMPLEMENTED;
+	//UNIMPLEMENTED;
 }

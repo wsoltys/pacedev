@@ -24,6 +24,13 @@
 
 extern void asteroids2 (void);
 
+unsigned int osd_quit (void)
+{
+	if (key[KEY_ESC])
+		return (1);
+	return (0);
+}
+
 void main (int argc, char *argv[])
 {
 	allegro_init ();
@@ -40,5 +47,4 @@ void main (int argc, char *argv[])
 
   allegro_exit ();
 }
-
 END_OF_MAIN();
