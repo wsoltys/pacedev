@@ -22,6 +22,8 @@
 // neogeo:  d:\mingw_something\setenv.bat
 //          g++ kl.c -o kl -lalleg
 
+extern void asteroids2 (void);
+
 void main (int argc, char *argv[])
 {
 	allegro_init ();
@@ -31,7 +33,7 @@ void main (int argc, char *argv[])
 	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
 
 	clear_bitmap (screen);
-  knight_lore (gfx);
+  asteroids2 ();
 
   while (!key[KEY_ESC]);	  
 	while (key[KEY_ESC]);	  
