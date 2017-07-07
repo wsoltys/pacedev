@@ -3,6 +3,7 @@
 ; for debugging
 .export dvg_vec
 .export chk_shrapnel
+.export chk_extra_ship
 .export print_copyright
 .export cur_2_shr
 .export print_chr
@@ -60,8 +61,8 @@ apple_start:
 
 ; scale current (10 bits X,Y) for SHR (256x192)
 ; and calc SHR address
-; entry: $09/$0A=X,Y
-; exit: $C0,$C1=Y*160   $C2,$C3=y*160+X/2
+; entry: $04/$05=X, $06/$07=Y
+; exit: $09/$0A=X,Y   $C0,$C1=Y*160   $C2,$C3=y*160+X/2
 cur_2_shr:
 				; scale X
 				lda			$04										; CUR X (lsb)
@@ -87,10 +88,11 @@ cur_2_shr:
 				clc
 				adc			$0A										; (0-127)+(0-63)=(0-191)
 				sta			$0A
-				; find address (y*160+x/2) 160=128+32
 				lda			#191
 				clc
 				sbc			$0A										; Y (inverted)
+				sta			$0A										; store non-inverted Y
+				; find address (y*160+x/2) 160=128+32
 				lsr
 				sta			$C1										; msb (x128)
 				sta			$C3										; msb (x128)
@@ -425,14 +427,21 @@ chk_extra_ship:
 				; check for extra ships display
 				lda			#$6D
 				cmp			(byte_B),y
-				bne			:++
+				bne			:+++
 				iny
 				lda			#$CA
 				cmp			(byte_B),y
-				bne			:+
+				bne			:++
 				; found extra ship
 				IIGSMODE
-				ldy			extra_ship
+				; offset Y because it overwrites score
+				lda			$C2										; SHR offset
+				cmp			#($1360+160)
+				bcs			:+
+				clc
+				adc			#(160*4)
+				sta			$C2										; new SHR offset
+:				ldy			#extra_ship
 				jsr			render_7x2
 				HINT_IIMODE
 				jmp			jsr_exit
