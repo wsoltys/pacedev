@@ -259,7 +259,7 @@ RAM:02F5 ??	     startingAsteroidsPerWave:	     .BYTE 0 ; (uninited)
 RAM:02F6 ??	     currentNumberOfAsteroids:	     .BYTE 0 ; (uninited)
 RAM:02F7 ??	     saucerCountdownTimer:	     .BYTE 0 ; (uninited)
 RAM:02F8 ??	     starting_saucerCountdownTimer:  .BYTE 0 ; (uninited)
-RAM:02F9 ??	     asteroid_hit_timer:	     .BYTE 0 ; (uninited)			     ; ???goes up after	explosion???
+RAM:02F9 ??	     asteroid_hit_timer:	     .BYTE 0 ; (uninited)
 RAM:02FA ??	     shipSpawnTimer:		     .BYTE 0 ; (uninited)
 RAM:02FB ??	     asteroidWaveTimer:		     .BYTE 0 ; (uninited)
 RAM:02FC ??	     starting_ThumpCounter:	     .BYTE 0 ; (uninited)
@@ -846,7 +846,7 @@ ROM:6995 D0 36					     BNE     loc_69CD				     ; yes, skip
 ROM:6997 AD FA 02				     LDA     shipSpawnTimer
 ROM:699A C9 80					     CMP     #$80 ; 'Ä'
 ROM:699C D0 2F					     BNE     loc_69CD
-ROM:699E A9 10					     LDA     #$10
+ROM:699E A9 10					     LDA     #16
 ROM:69A0 8D FA 02				     STA     shipSpawnTimer
 ROM:69A3 A6 1C					     LDX     numPlayers
 ROM:69A5 A5 57					     LDA     numShipsP1
@@ -1127,7 +1127,7 @@ ROM:6B1B
 ROM:6B1B	     loc_6B1B:
 ROM:6B1B 8A					     TXA
 ROM:6B1C D0 1E					     BNE     loc_6B3C
-ROM:6B1E A9 81					     LDA     #$81 ; 'Å'
+ROM:6B1E A9 81					     LDA     #129
 ROM:6B20 8D FA 02				     STA     shipSpawnTimer
 ROM:6B23 A6 18					     LDX     curPlayer
 ROM:6B25 D6 57					     DEC     numShipsP1,X			     ; dec number of ships
@@ -1175,7 +1175,7 @@ ROM:6B66 8A					     TXA
 ROM:6B67 A6 18					     LDX     curPlayer
 ROM:6B69 D6 57					     DEC     numShipsP1,X			     ; lose a ship
 ROM:6B6B AA					     TAX					     ; restore object index
-ROM:6B6C A9 81					     LDA     #$81 ; 'Å'                              ; init spawn timer
+ROM:6B6C A9 81					     LDA     #129				     ; init spawn timer
 ROM:6B6E 8D FA 02				     STA     shipSpawnTimer
 ROM:6B71 D0 D7					     BNE     explode_asteroid			     ; always
 ROM:6B73
@@ -1687,7 +1687,7 @@ ROM:6E87 A9 00					     LDA     #0					     ; flag hyperspace?
 ROM:6E89 8D 1B 02				     STA     p1PlayerFlag
 ROM:6E8C 8D 3E 02				     STA     ship_Vh
 ROM:6E8F 8D 61 02				     STA     ship_Vv				     ; zero ship velocity
-ROM:6E92 A9 30					     LDA     #$30 ; '0'
+ROM:6E92 A9 30					     LDA     #48
 ROM:6E94 8D FA 02				     STA     shipSpawnTimer
 ROM:6E97 20 B5 77				     JSR     update_prng			     ; random horizontal position
 ROM:6E9A 29 1F					     AND     #$1F
@@ -2007,13 +2007,13 @@ ROM:7043 AD 1B 02				     LDA     p1PlayerFlag
 ROM:7046 30 3D					     BMI     locret_7085			     ; exploding - exit
 ROM:7048 AD FA 02				     LDA     shipSpawnTimer
 ROM:704B F0 39					     BEQ     check_rot_left
-ROM:704D CE FA 02				     DEC     shipSpawnTimer
-ROM:7050 D0 33					     BNE     locret_7085			     ; exit
+ROM:704D CE FA 02				     DEC     shipSpawnTimer			     ; still spawning?
+ROM:7050 D0 33					     BNE     locret_7085			     ; yes, exit
 ROM:7052 A4 59					     LDY     hyperspaceFlag
 ROM:7054 30 19					     BMI     loc_706F				     ; unsuccessful - go
 ROM:7056 D0 10					     BNE     end_hyperspace			     ; successful - go
-ROM:7058 20 39 71				     JSR     check_coinciding_objects		     ; don't spawn inside objects
-ROM:705B D0 24					     BNE     loc_7081				     ; extend spawn
+ROM:7058 20 39 71				     JSR     check_near_objs_and_extend_spawn	     ; objects too close?
+ROM:705B D0 24					     BNE     loc_7081				     ; yes, exit
 ROM:705D AC 1C 02				     LDY     p1SaucerFlag
 ROM:7060 F0 06					     BEQ     end_hyperspace			     ; no saucer - go
 ROM:7062 A0 02					     LDY     #2
@@ -2033,7 +2033,7 @@ ROM:7074 A2 3E					     LDX     #$3E ; '>'
 ROM:7076 86 69					     STX     timerExplosionSound
 ROM:7078 A6 18					     LDX     curPlayer
 ROM:707A D6 57					     DEC     numShipsP1,X			     ; dec number of ships
-ROM:707C A9 81					     LDA     #$81 ; 'Å'
+ROM:707C A9 81					     LDA     #129
 ROM:707E 8D FA 02				     STA     shipSpawnTimer
 ROM:7081
 ROM:7081	     loc_7081:									     ; flag inactive
@@ -2172,12 +2172,13 @@ ROM:7138	     locret_7138:
 ROM:7138 60					     RTS
 ROM:7138	     ; End of function calc_thrust_delta
 ROM:7138
+ROM:7139	     ; sets Z flag if no coincident objects
 ROM:7139
 ROM:7139	     ; =============== S U B R O U T I N E =======================================
 ROM:7139
 ROM:7139
-ROM:7139	     check_coinciding_objects:
-ROM:7139 A2 1C					     LDX     #28				     ; 28 objects to check
+ROM:7139	     check_near_objs_and_extend_spawn:
+ROM:7139 A2 1C					     LDX     #28				     ; 29 objects to check
 ROM:713B
 ROM:713B	     loc_713B:									     ; get object status
 ROM:713B BD 00 02				     LDA     P1RAM,X
@@ -2202,14 +2203,14 @@ ROM:715E
 ROM:715E	     loc_715E:									     ; next object
 ROM:715E CA					     DEX
 ROM:715F 10 DA					     BPL     loc_713B				     ; loop thru all objects
-ROM:7161 E8					     INX					     ; X=0
+ROM:7161 E8					     INX					     ; X=0, set	Z flag
 ROM:7162 60					     RTS
 ROM:7163	     ; ---------------------------------------------------------------------------
 ROM:7163
-ROM:7163	     extend_spawn:
+ROM:7163	     extend_spawn:								     ; reset Z flag
 ROM:7163 EE FA 02				     INC     shipSpawnTimer
 ROM:7166 60					     RTS
-ROM:7166	     ; End of function check_coinciding_objects
+ROM:7166	     ; End of function check_near_objs_and_extend_spawn
 ROM:7166
 ROM:7166	     ; ---------------------------------------------------------------------------
 ROM:7167 90					     .BYTE $90 ; ê
@@ -2247,29 +2248,29 @@ ROM:719B A0 1C					     LDY     #$1C				     ; offset to saucer's parameter(s)
 ROM:719D
 ROM:719D	     init_next_asteroid:							     ; random velocity
 ROM:719D 20 B5 77				     JSR     update_prng
-ROM:71A0 29 18					     AND     #$18				     ; bits 4,3	only
-ROM:71A2 09 04					     ORA     #4					     ; and set bit 2 as	well
+ROM:71A0 29 18					     AND     #$18				     ; (4:3) = rnd shape
+ROM:71A2 09 04					     ORA     #4					     ; (2:1) = 10b = large
 ROM:71A4 9D 00 02				     STA     P1RAM,X				     ; set asteroid status
 ROM:71A7 20 03 72				     JSR     set_asteroid_velocity
 ROM:71AA 20 B5 77				     JSR     update_prng			     ; random position
 ROM:71AD 4A					     LSR     A
-ROM:71AE 29 1F					     AND     #$1F
-ROM:71B0 90 13					     BCC     loc_71C5
+ROM:71AE 29 1F					     AND     #$1F				     ; 5 bits of high byte
+ROM:71B0 90 13					     BCC     start_bottom
 ROM:71B2 C9 18					     CMP     #$18
-ROM:71B4 90 02					     BCC     loc_71B8
+ROM:71B4 90 02					     BCC     start_left
 ROM:71B6 29 17					     AND     #$17
 ROM:71B8
-ROM:71B8	     loc_71B8:
+ROM:71B8	     start_left:								     ; y coord (high byte)
 ROM:71B8 9D 8C 02				     STA     asteroid_PHv,X
 ROM:71BB A9 00					     LDA     #0
 ROM:71BD 9D 69 02				     STA     asteroid_PHh,X
-ROM:71C0 9D AF 02				     STA     asteroid_PLh,X
+ROM:71C0 9D AF 02				     STA     asteroid_PLh,X			     ; x coord = 0
 ROM:71C3 F0 0B					     BEQ     loc_71D0
 ROM:71C5
-ROM:71C5	     loc_71C5:
+ROM:71C5	     start_bottom:								     ; x coord (high byte)
 ROM:71C5 9D 69 02				     STA     asteroid_PHh,X
 ROM:71C8 A9 00					     LDA     #0
-ROM:71CA 9D 8C 02				     STA     asteroid_PHv,X
+ROM:71CA 9D 8C 02				     STA     asteroid_PHv,X			     ; y coord = 0
 ROM:71CD 9D D2 02				     STA     asteroid_PLv,X
 ROM:71D0
 ROM:71D0	     loc_71D0:									     ; offset for next asteroid
@@ -2305,9 +2306,9 @@ ROM:71F0 A9 00					     LDA     #0
 ROM:71F2 8D 3E 02				     STA     ship_Vh
 ROM:71F5 8D 61 02				     STA     ship_Vv				     ; zero ship velocity
 ROM:71F8 A9 10					     LDA     #$10
-ROM:71FA 8D 84 02				     STA     ship_PHh
+ROM:71FA 8D 84 02				     STA     ship_PHh				     ; x=$1060 = 4192
 ROM:71FD A9 0C					     LDA     #$C
-ROM:71FF 8D A7 02				     STA     ship_PHv
+ROM:71FF 8D A7 02				     STA     ship_PHv				     ; y=$0C60 = 3168
 ROM:7202 60					     RTS
 ROM:7202	     ; End of function init_ship_position_velocity
 ROM:7202
@@ -2473,6 +2474,8 @@ ROM:72FD 60					     RTS
 ROM:72FD	     ; End of function display_C_scores_ships
 ROM:72FD
 ROM:72FE	     ; Y=$E0/$F0/$00
+ROM:72FE	     ; convert position	from 13	bits (0-8191) to 10 bits (0-1023)
+ROM:72FE	     ; - add a fudge-factor of 1024 (128 after scaling)
 ROM:72FE
 ROM:72FE	     ; =============== S U B R O U T I N E =======================================
 ROM:72FE
