@@ -65,32 +65,26 @@ apple_start:
 ; exit: $09/$0A=X,Y   $C0,$C1=Y*160   $C2,$C3=y*160+X/2
 cur_2_shr:
 				; scale X
-				lda			$04										; CUR X (lsb)
-				sta			$09
-				lda			$05										; CUR X (msb)
+				IIGSMODE
+				lda			$04										; CUR X (0-1023)
 				lsr
-				ror			$09
 				lsr
-				ror			$09										; CUR X (0-255)
+				IIMODE
+				sta			$09										; CUR X (0-255)
 				; scale Y
-				; - look at increasing the resolution here by using 16-bits!!!
-				lda			$06										; CUR Y (lsb)
-				sta			$0A
-				lda			$07										; CUR Y (msb)
+				IIGSMODE
+				lda			$06										; CUR Y (0-1023) (10 bits)
 				lsr
-				ror			$0A
-				lsr
-				ror			$0A
-				lsr
-				ror			$0A										; 7 bits (0-127)
-				lda			$0A
-				lsr														; (0-64)
 				clc
-				adc			$0A										; (0-127)+(0-63)=(0-191)
+				adc			$06										; Y+Y/2 (11 bits)
+				lsr
+				lsr
+				lsr														; CUR Y (0-191) (8 bits)
+				IIMODE
 				sta			$0A
 				lda			#191
 				clc
-				sbc			$0A										; Y (inverted)
+				sbc			$0A
 				sta			$0A										; store non-inverted Y
 				; find address (y*160+x/2) 160=128+32
 				lsr
