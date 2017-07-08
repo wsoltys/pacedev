@@ -23,16 +23,147 @@
 
 typedef struct
 {
+	uint8_t		globalScale;										// $00
+	uint8_t		byte_1;													// $01
+	uint8_t		dvg_curr_addr_lsb;							// $02
+	uint8_t		dvg_curr_addr_msb;							// $03
+	uint8_t		byte_4;													// $04
+	uint8_t		byte_5;													// $05
+	uint8_t		byte_6;													// $06
+	uint8_t		byte_7;													// $07
+	uint8_t		byte_8;													// $08
+	uint8_t		byte_9;													// $09
+	uint8_t		byte_A;													// $0A
+	uint8_t		byte_B;													// $0B
+	uint8_t		byte_C;													// $0C
+	uint8_t		byte_D;													// $0D
+	uint8_t		byte_E;													// $0E
+	uint8_t		byte_F;													// $0F
+	uint8_t		initial_offset;									// $10
+	uint8_t		unused1[4];											// $11-$14	
+	uint8_t		byte_15;												// $15
+	uint8_t		byte_16;												// $16
+	uint8_t		byte_17;												// $17
+	uint8_t		curPlayer;											// $18
+	uint8_t		curPlayer_x2;										// $19
+	uint8_t		numPlayersPreviousGame;					// $1A
+	uint8_t		byte_1B;												// $1B
+	uint8_t		numPlayers;											// $1C
+	// High score format (2 bytes)
+	// byte 1 - tens (in decimal)
+	// byte 2 - thousands (in decimal)
+  uint8_t		highScoreTable[10][2];					// $1D-$30
+  uint8_t		letterHighScoreEntry;						// $31
+  uint8_t		placeP1HighScore;								// $32
+  uint8_t		placeP2HighScore;								// $33
+  uint8_t		highScoreInitials[10][3];				// $34-$51
+  uint8_t		p1ScoreTens;										// $52
+  uint8_t		p1ScoreThousands;								// $53
+  uint8_t		p2ScoreTens;										// $54
+  uint8_t		p2ScoreThousands;								// $55
+  uint8_t		numStartingShipsPerGame;				// $56
+  uint8_t		numShipsP1;											// $57
+  uint8_t		numShipsP2;											// $58
+	// Hyperspace flag:
+	// - 0x01 = successful
+	//   0x80 = unsuccessful (death)
+	//   0x00 = not active
+  uint8_t		hyperspaceFlag;									// $59
 	uint8_t		timer_start_game;								// $5A
+	uint8_t		VBLANK_triggered;								// $5B
 	uint8_t		fast_timer;											// $5C
 	uint8_t		slow_timer;											// $5D
+	uint8_t		NMI_count;											// $5E
+	uint8_t		rnd1;														// $5F
+	uint8_t		rnd2;														// $60
+	uint8_t		direction;											// $61
+	uint8_t		saucerShotDirection;						// $62
+	uint8_t		btn_edge_debounce;							// $63
+	uint8_t		ship_thrust_dH;									// $64
+	uint8_t		ship_thrust_dV;									// $65
+	uint8_t		timerPlayerFireSound;						// $66
+	uint8_t		timerSaucerFireSound;						// $67
+	uint8_t		timerBonusShipSound;						// $68
+	uint8_t		timerExplosionSound;						// $69
+	uint8_t		fireSoundFlagPlayer;						// $6A
+	uint8_t		fireSoundFlagSaucer;						// $6B
+	uint8_t		volFreqThumpSound;							// $6C
+	uint8_t		timerThumpSoundOn;							// $6D
+	uint8_t		timerThumpSoundOff;							// $6E
+	uint8_t		io3200ShadowRegister;						// $6F
+	uint8_t		CurrNumCredits;									// $70
+	// 4=center_mult, 3..2=right_mult, 1..0=coinage
+	uint8_t		coinMultCredits;								// $71
+	uint8_t		slamSwitchFlag;									// $72
+	uint8_t		totalCoinsForCredits;						// $73
+	uint8_t		byte_74;												// $74
+	uint8_t		byte_75;												// $75
+	uint8_t		byte_76;												// $76
+	uint8_t		byte_77;												// $77
+	uint8_t		unused2[2];											// $78-$79
+	uint8_t		coin_1_inp_length;							// $7A
+	uint8_t		coin_2_inp_length;							// $7B
+	uint8_t		coin_3_inp_length;							// $7C
+	uint8_t		byte_7D;												// $7D
+	uint8_t		byte_7E;												// $7E
+	uint8_t		unused3;												// $7F
+	uint8_t		unused4[128];										// $80-$FF
 	
 } ZEROPAGE;
 
 typedef struct
 {
+	// 0xA0+ = exploding
+	// (4:3) = shape (0-3)
+	// (2:1) = size (0=small, 1=medium,	2=large)
+	uint8_t		asteroids[27];									// $0200-$021A
+	// - 0x00  = in hyperspace?
+ 	// - 0x01  = player	alive and active
+ 	//- 0xA0+ = player	exploding
+	uint8_t		p1PlayerFlag;										// $021B
+	// - 0x00  = no saucer
+	// - 0x01  = small saucer
+	// - 0x02  = large saucer
+	// - 0xA0+ = saucer	exploding
+	uint8_t		p1SaucerFlag;										// $021C
+	uint8_t		saucerShotTimer[2];							// $021D-$021E
+	uint8_t		p1TimerShot[4];									// $021F-$0222
+	// Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
+	uint8_t		asteroid_Vh[27];								// $0223-$023D
+	uint8_t		ship_Vh;												// $023E
+	uint8_t		saucer_Vh;											// $023F
+	uint8_t		saucerShot_Vh[2];								// $0240-$0241
+	uint8_t		shipShot_Vh[4];									// $0242-$0245
+	// Vertical	Velocity 0-255 (255-192)=Down, 1-63=Up
+	uint8_t		asteroid_Vv[27];								// $0246-$0260
+	uint8_t		ship_Vv;												// $0261
+	uint8_t		saucer_Vv;											// $0262
+	uint8_t		saucerShot_Vv[2];								// $0264-$0265
+	uint8_t		shipShot_Vv[4];									// $0266-$0269
+	// Horiztonal Position High	(0-31) 0=Left, 31=Right
+	// Horizontal Position Low (0-255),	0=Left,	255=Right
+	uint16_t	asteroid_Ph[27];								// $0269-$0283,$02AF-$02C9
+	uint16_t	ship_Ph;												// $0284,$02CA
+	uint16_t	saucer_Ph;											// $0285,$02CB
+	uint16_t	saucerShot_Ph[2];								// $0286-$0287,$02CC-$02CD
+	uint16_t	shipShot_Ph[4];									// $0288-$028B,$02CE-$02D1
+	// Vertical	Position High (0-23), 0=Bottom,	23=Top
+	// Vertical	Position Low (0-255), 0=Bottom,	255=Top
+	uint16_t	asteroid_Pv[27];								// $028C-$02A6,$02D2-$02EC
+	uint16_t	ship_Pv;												// $02A7,$02ED
+	uint16_t	saucer_Pv;											// $02A8,$02EE
+	uint16_t	saucerShot_Pv[2];								// $02A9-$02AA,$02EF-$02F0
+	uint16_t	shotShot_Pv[4];									// $02AB-$02AE,$02F1-$02F4
+	uint8_t		startingAsteroidsPerWave;				// $02F5
 	uint8_t		current_number_of_asteroids;		// $02F6
+	uint8_t		saucerCountdownTimer;						// $02F7
+	uint8_t		starting_saucerCountdownTimer;	// $02F8
+	uint8_t		asteroid_hit_timer;							// $02F9
+	uint8_t		shipSpawnTimer;									// $02FA
 	uint8_t 	asteroid_wave_timer;						// $02FB
+	uint8_t		starting_ThumpCounter;					// $02FC
+	uint8_t		numAsteroidsLeftBeforeSaucer;		// $02FD
+	uint8_t		unused1[2];											// $02FE-$02FF
 	
 } PLYR_RAM;
 
