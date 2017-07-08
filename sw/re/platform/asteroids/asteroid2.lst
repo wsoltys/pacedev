@@ -2277,7 +2277,7 @@ ROM:71D0	     loc_71D0:									     ; offset for next asteroid
 ROM:71D0 CA					     DEX
 ROM:71D1 C6 08					     DEC     byte_8				     ; done all	asteroids for the wave?
 ROM:71D3 D0 C8					     BNE     init_next_asteroid			     ; no, loop
-ROM:71D5 A9 7F					     LDA     #$7F ; ''
+ROM:71D5 A9 7F					     LDA     #127
 ROM:71D7 8D F7 02				     STA     saucerCountdownTimer
 ROM:71DA A9 30					     LDA     #48
 ROM:71DC 8D FC 02				     STA     starting_ThumpCounter

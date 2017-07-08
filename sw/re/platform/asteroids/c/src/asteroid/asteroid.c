@@ -350,7 +350,9 @@ void handle_respawn_rot_thrust (void)
 void init_wave (void)
 {
 	unsigned int i;
+	unsigned int flag;
 	uint8_t r;
+
 	//UNIMPLEMENTED;
 	
 	if (p->asteroidWaveTimer == 0)
@@ -375,10 +377,31 @@ void init_wave (void)
 			p->p1AsteroidFlag[i] = r;
 			set_asteroid_velocity (i);
 			r = update_prng ();
+			flag = r & 1;
+			r = (r>>1) & 0x1F;
+			if (flag)
+			{
+				if (r >= 0x18)
+					r &= 0x17;
+				start_left:
+					p->asteroid_Pv[i] = ((uint16_t)r)<<8;
+					p->asteroid_Ph[i] = 0;
+			}
+			else
+			{
+				start_bottom:
+					p->asteroid_Ph[i] = ((uint16_t)r)<<8;
+					p->asteroid_Pv[i] = 0;
+			}
+			if (--zp.byte_8 == 0)
+				break;
 		}
+		p->saucerCountdownTimer = 127;
+		p->starting_ThumpCounter = 48;
 	}
 
-	// fixme
+	// set remaining asteroids to inactive
+	for (; i<27; i++)
 		p->p1AsteroidFlag[i] = 0;
 }
 
