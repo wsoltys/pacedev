@@ -94,7 +94,7 @@ ZEROPAGE:0043 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
 ZEROPAGE:0046 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
 ZEROPAGE:0049 ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
 ZEROPAGE:004C ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
-ZEROPAGE:004F ?? ?? ??					  .BYTE	0,0,0 ;	(uninited)
+ZEROPAGE:004F ?? ?? ??	  byte_4F:			  .BYTE	0,0,0 ;	(uninited)
 ZEROPAGE:0052 ??	  p1ScoreTens:			  .BYTE	0 ; (uninited)
 ZEROPAGE:0053 ??	  p1ScoreThousands:		  .BYTE	0 ; (uninited)
 ZEROPAGE:0054 ??	  p2ScoreTens:			  .BYTE	0 ; (uninited)
@@ -1757,7 +1757,7 @@ ROM:6EEB
 ROM:6EEB	     loc_6EEB:									     ; init flag
 ROM:6EEB 9D 1B 02				     STA     p1PlayerFlag,X
 ROM:6EEE 9D 1F 02				     STA     p1TimerShot0,X			     ; init timer
-ROM:6EF1 95 51					     STA     $51,X				     ; zero player score
+ROM:6EF1 95 51					     STA     byte_4F+2,X			     ; zero player score
 ROM:6EF3 CA					     DEX					     ; next byte
 ROM:6EF4 10 F5					     BPL     loc_6EEB				     ; loop until done
 ROM:6EF6 8D F6 02				     STA     currentNumberOfAsteroids
@@ -2244,7 +2244,7 @@ ROM:7193	     loc_7193:
 ROM:7193 8D F6 02				     STA     currentNumberOfAsteroids
 ROM:7196 8D F5 02				     STA     startingAsteroidsPerWave
 ROM:7199 85 08					     STA     byte_8				     ; store as	temp counter
-ROM:719B A0 1C					     LDY     #$1C				     ; offset to saucer's parameter(s)
+ROM:719B A0 1C					     LDY     #28				     ; offset to saucer's parameter(s)
 ROM:719D
 ROM:719D	     init_next_asteroid:							     ; random velocity
 ROM:719D 20 B5 77				     JSR     update_prng

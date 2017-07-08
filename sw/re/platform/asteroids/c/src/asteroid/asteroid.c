@@ -23,6 +23,16 @@
 
 typedef struct
 {
+	uint8_t		coinage;
+	// 0 = 1x & 4, 1 = 1x & 3, 2 = 2x & 4, 3 = 2x & 3
+	uint8_t		rightCoinMultiplier;
+	uint8_t		centreCoinMultiplierAndLives;
+	uint8_t		language;
+	
+} DSW1;		// $2800
+
+typedef struct
+{
 	uint8_t		globalScale;										// $00
 	uint8_t		byte_1;													// $01
 	uint8_t		dvg_curr_addr_lsb;							// $02
@@ -57,10 +67,9 @@ typedef struct
   uint8_t		placeP1HighScore;								// $32
   uint8_t		placeP2HighScore;								// $33
   uint8_t		highScoreInitials[10][3];				// $34-$51
-  uint8_t		p1ScoreTens;										// $52
-  uint8_t		p1ScoreThousands;								// $53
-  uint8_t		p2ScoreTens;										// $54
-  uint8_t		p2ScoreThousands;								// $55
+  // actual scores are x10
+  uint16_t	p1Score;												// $52-$53
+  uint16_t	p2Score;												// $54-$55
   uint8_t		numStartingShipsPerGame;				// $56
   uint8_t		numShipsP1;											// $57
   uint8_t		numShipsP2;											// $58
@@ -111,12 +120,18 @@ typedef struct
 	
 } ZEROPAGE;
 
+#define ASTEROID_SHAPE_MASK			(0x03<<3)
+#define ASTERIOD_SIZE_MASK			(0x03<<1)
+#define ASTEROID_SIZE_LARGE			(0x02<<1)
+#define ASTEROID_SIZE_MEDIUM		(0x01<<1)
+#define ASTEROID_SIZE_SMALL			(0x00<<2)
+
 typedef struct
 {
 	// 0xA0+ = exploding
 	// (4:3) = shape (0-3)
 	// (2:1) = size (0=small, 1=medium,	2=large)
-	uint8_t		asteroids[27];									// $0200-$021A
+	uint8_t		p1AsteroidFlag[27];							// $0200-$021A
 	// - 0x00  = in hyperspace?
  	// - 0x01  = player	alive and active
  	//- 0xA0+ = player	exploding
@@ -155,18 +170,19 @@ typedef struct
 	uint16_t	saucerShot_Pv[2];								// $02A9-$02AA,$02EF-$02F0
 	uint16_t	shotShot_Pv[4];									// $02AB-$02AE,$02F1-$02F4
 	uint8_t		startingAsteroidsPerWave;				// $02F5
-	uint8_t		current_number_of_asteroids;		// $02F6
+	uint8_t		currentNumberOfAsteroids;				// $02F6
 	uint8_t		saucerCountdownTimer;						// $02F7
 	uint8_t		starting_saucerCountdownTimer;	// $02F8
 	uint8_t		asteroid_hit_timer;							// $02F9
 	uint8_t		shipSpawnTimer;									// $02FA
-	uint8_t 	asteroid_wave_timer;						// $02FB
+	uint8_t 	asteroidWaveTimer;							// $02FB
 	uint8_t		starting_ThumpCounter;					// $02FC
 	uint8_t		numAsteroidsLeftBeforeSaucer;		// $02FD
 	uint8_t		unused1[2];											// $02FE-$02FF
 	
 } PLYR_RAM;
 
+static DSW1 dsw1;
 static ZEROPAGE zp;
 static PLYR_RAM plyr_ram[2];
 static PLYR_RAM *p = &plyr_ram[0];
@@ -182,6 +198,7 @@ static void init_sound (void);												// $6EFA
 static void update_and_render_objects (void);					// $6F57
 static void handle_respawn_rot_thrust (void);					// $703F
 static void init_wave (void);													// $7168
+static void set_asteroid_velocity (uint8_t i);				// $7203
 static void display_C_scores_ships (void);						// $724F
 static uint8_t display_high_score_table (void);				// $73C4
 static void handle_sounds (void);											// $7555
@@ -238,10 +255,10 @@ void asteroids2 (void)
 					write_CURx4_cmd (127, 127);
 					update_prng ();
 					halt_dvg ();
-					if (p->asteroid_wave_timer != 0)
-						p->asteroid_wave_timer--;
+					if (p->asteroidWaveTimer != 0)
+						p->asteroidWaveTimer--;
 					else
-						if (p->current_number_of_asteroids == 0)
+						if (p->currentNumberOfAsteroids == 0)
 							break;
 				}
 		}
@@ -289,13 +306,32 @@ void handle_hyperspace (void)
 // $6ED8
 void init_players (void)
 {
-	//UNIMPLEMENTED;
+	unsigned i;
+	
+	p->startingAsteroidsPerWave = 2;
+	zp.numStartingShipsPerGame = (dsw1.centreCoinMultiplierAndLives & 1 ? 3 : 4);
+	p->p1PlayerFlag = 0;
+	p->p1SaucerFlag = 0;
+	for (i=0; i<2; i++)
+		p->saucerShotTimer[i] = 0;
+	for (i=0; i<4; i++)
+		p->p1TimerShot[i] = 0;
+	zp.p1Score = 0;
+	zp.p2Score = 0;
+	p->currentNumberOfAsteroids = (uint8_t)-1;
 }
 
 // $6EFA
 void init_sound (void)
 {
 	//UNIMPLEMENTED;
+	
+	// hit some hardware
+	
+	zp.timerExplosionSound = 0;
+	zp.timerPlayerFireSound = 0;
+	zp.timerSaucerFireSound = 0;
+	zp.timerBonusShipSound = 0;
 }
 
 // $6F57
@@ -313,7 +349,47 @@ void handle_respawn_rot_thrust (void)
 // $7168
 void init_wave (void)
 {
+	unsigned int i;
+	uint8_t r;
 	//UNIMPLEMENTED;
+	
+	if (p->asteroidWaveTimer == 0)
+	{
+		if (p->p1SaucerFlag != 0)
+			return;
+		p->saucer_Vh = 0;
+		p->saucer_Vv = 0;
+		if (++(p->numAsteroidsLeftBeforeSaucer) > 11)
+			p->numAsteroidsLeftBeforeSaucer--;
+		p->startingAsteroidsPerWave += 2;
+		if (p->startingAsteroidsPerWave > 11)
+			p->startingAsteroidsPerWave = 11;
+		p->currentNumberOfAsteroids = p->startingAsteroidsPerWave;
+		// tmp counter
+		zp.byte_8 = p->startingAsteroidsPerWave;
+
+		for (i=0; i<27; i++)
+		{
+			r = update_prng ();
+			r = (r & ASTEROID_SHAPE_MASK) | ASTEROID_SIZE_LARGE;
+			p->p1AsteroidFlag[i] = r;
+			set_asteroid_velocity (i);
+			r = update_prng ();
+		}
+	}
+
+	// fixme
+		p->p1AsteroidFlag[i] = 0;
+}
+
+// $7203
+void set_asteroid_velocity (uint8_t i)
+{
+	uint8_t r;
+	//UNIMPLEMENTED;
+
+	r = update_prng ();
+	r &= 0x8F;
 }
 
 // $724F
@@ -365,4 +441,16 @@ void write_CURx4_cmd (uint8_t x, uint8_t y)
 void reset (void)
 {
 	//UNIMPLEMENTED;
+
+	memset (&zp, 0, sizeof(zp));
+	memset (plyr_ram, 0, sizeof(plyr_ram));
+	// check SelfTest
+	// init DVG shared RAM (JP $0402)
+	// guessing this just needs to be invalid?
+	zp.placeP1HighScore = 0xB0;
+	zp.placeP2HighScore = 0xB0;
+	// turn on both start lamps
+	p = &plyr_ram[0];
+	zp.coinMultCredits = 0x03 & dsw1.coinage;
+	zp.coinMultCredits |= (dsw1.centreCoinMultiplierAndLives & 2) << 3;
 }
