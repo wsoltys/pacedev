@@ -2244,7 +2244,7 @@ ROM:7193	     loc_7193:
 ROM:7193 8D F6 02				     STA     currentNumberOfAsteroids
 ROM:7196 8D F5 02				     STA     startingAsteroidsPerWave
 ROM:7199 85 08					     STA     byte_8				     ; store as	temp counter
-ROM:719B A0 1C					     LDY     #28				     ; offset to saucer's parameter(s)
+ROM:719B A0 1C					     LDY     #28				     ; offset to ship
 ROM:719D
 ROM:719D	     init_next_asteroid:							     ; random velocity
 ROM:719D 20 B5 77				     JSR     update_prng
@@ -2350,14 +2350,14 @@ ROM:7233
 ROM:7233
 ROM:7233	     limit_asteroid_velocity:
 ROM:7233 10 0D					     BPL     loc_7242
-ROM:7235 C9 E1					     CMP     #$E1 ; 'á'
+ROM:7235 C9 E1					     CMP     #-31
 ROM:7237 B0 02					     BCS     loc_723B
-ROM:7239 A9 E1					     LDA     #$E1 ; 'á'
+ROM:7239 A9 E1					     LDA     #-31
 ROM:723B
 ROM:723B	     loc_723B:
-ROM:723B C9 FB					     CMP     #$FB ; 'û'
+ROM:723B C9 FB					     CMP     #-5
 ROM:723D 90 0F					     BCC     locret_724E
-ROM:723F A9 FA					     LDA     #$FA ; 'ú'
+ROM:723F A9 FA					     LDA     #-6
 ROM:7241 60					     RTS
 ROM:7242	     ; ---------------------------------------------------------------------------
 ROM:7242
@@ -2367,9 +2367,9 @@ ROM:7244 B0 02					     BCS     loc_7248
 ROM:7246 A9 06					     LDA     #6
 ROM:7248
 ROM:7248	     loc_7248:
-ROM:7248 C9 20					     CMP     #$20 ; ' '
+ROM:7248 C9 20					     CMP     #32
 ROM:724A 90 02					     BCC     locret_724E
-ROM:724C A9 1F					     LDA     #$1F
+ROM:724C A9 1F					     LDA     #31
 ROM:724E
 ROM:724E	     locret_724E:
 ROM:724E 60					     RTS

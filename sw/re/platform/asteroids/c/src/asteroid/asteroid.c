@@ -83,8 +83,7 @@ typedef struct
 	uint8_t		fast_timer;											// $5C
 	uint8_t		slow_timer;											// $5D
 	uint8_t		NMI_count;											// $5E
-	uint8_t		rnd1;														// $5F
-	uint8_t		rnd2;														// $60
+	uint16_t	rnd;														// $5F-$60
 	uint8_t		direction;											// $61
 	uint8_t		saucerShotDirection;						// $62
 	uint8_t		btn_edge_debounce;							// $63
@@ -144,17 +143,17 @@ typedef struct
 	uint8_t		saucerShotTimer[2];							// $021D-$021E
 	uint8_t		p1TimerShot[4];									// $021F-$0222
 	// Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
-	uint8_t		asteroid_Vh[27];								// $0223-$023D
-	uint8_t		ship_Vh;												// $023E
-	uint8_t		saucer_Vh;											// $023F
-	uint8_t		saucerShot_Vh[2];								// $0240-$0241
-	uint8_t		shipShot_Vh[4];									// $0242-$0245
+	int8_t		asteroid_Vh[27];								// $0223-$023D
+	int8_t		ship_Vh;												// $023E
+	int8_t		saucer_Vh;											// $023F
+	int8_t		saucerShot_Vh[2];								// $0240-$0241
+	int8_t		shipShot_Vh[4];									// $0242-$0245
 	// Vertical	Velocity 0-255 (255-192)=Down, 1-63=Up
-	uint8_t		asteroid_Vv[27];								// $0246-$0260
-	uint8_t		ship_Vv;												// $0261
-	uint8_t		saucer_Vv;											// $0262
-	uint8_t		saucerShot_Vv[2];								// $0264-$0265
-	uint8_t		shipShot_Vv[4];									// $0266-$0269
+	int8_t		asteroid_Vv[27];								// $0246-$0260
+	int8_t		ship_Vv;												// $0261
+	int8_t		saucer_Vv;											// $0262
+	int8_t		saucerShot_Vv[2];								// $0264-$0265
+	int8_t		shipShot_Vv[4];									// $0266-$0269
 	// Horiztonal Position High	(0-31) 0=Left, 31=Right
 	// Horizontal Position Low (0-255),	0=Left,	255=Right
 	uint16_t	asteroid_Ph[27];								// $0269-$0283,$02AF-$02C9
@@ -198,13 +197,18 @@ static void init_sound (void);												// $6EFA
 static void update_and_render_objects (void);					// $6F57
 static void handle_respawn_rot_thrust (void);					// $703F
 static void init_wave (void);													// $7168
-static void set_asteroid_velocity (uint8_t i);				// $7203
+static void set_asteroid_velocity (
+							uint8_t src, 
+							uint8_t dst
+							);																			// $7203
+static int8_t limit_asteroid_velocity (int8_t v);			// $7233
 static void display_C_scores_ships (void);						// $724F
 static uint8_t display_high_score_table (void);				// $73C4
 static void handle_sounds (void);											// $7555
 static void check_high_score (void);									// $765C
 static uint8_t update_prng (void);										// $77B5
 static void halt_dvg (void);													// $7BC0
+static void write_JSR_cmd (uint16_t addr);						// $7BFC
 static void write_CURx4_cmd (uint8_t x, uint8_t y);		// $7C03
 static void reset (void);															// $7CF3
 
@@ -349,7 +353,7 @@ void handle_respawn_rot_thrust (void)
 // $7168
 void init_wave (void)
 {
-	unsigned int i;
+	int i = 0;
 	unsigned int flag;
 	uint8_t r;
 
@@ -370,12 +374,13 @@ void init_wave (void)
 		// tmp counter
 		zp.byte_8 = p->startingAsteroidsPerWave;
 
-		for (i=0; i<27; i++)
+		for (i=27; i>=0; i--)
 		{
 			r = update_prng ();
 			r = (r & ASTEROID_SHAPE_MASK) | ASTEROID_SIZE_LARGE;
 			p->p1AsteroidFlag[i] = r;
-			set_asteroid_velocity (i);
+			// naughty, 28 is actually PlayerFlag
+			set_asteroid_velocity (28, i);
 			r = update_prng ();
 			flag = r & 1;
 			r = (r>>1) & 0x1F;
@@ -401,24 +406,66 @@ void init_wave (void)
 	}
 
 	// set remaining asteroids to inactive
-	for (; i<27; i++)
+	for (; i>=0; i--)
 		p->p1AsteroidFlag[i] = 0;
 }
 
 // $7203
-void set_asteroid_velocity (uint8_t i)
+void set_asteroid_velocity (
+	uint8_t src, 
+	uint8_t dst
+	)
 {
-	uint8_t r;
+	int8_t v;
 	//UNIMPLEMENTED;
 
-	r = update_prng ();
-	r &= 0x8F;
+	v = update_prng ();
+	v &= 0x8F;
+	if (v < 0)
+		v |= 0xF0;
+	v += p->asteroid_Vh[src];
+	v = limit_asteroid_velocity (v);
+	p->asteroid_Vh[dst] = v;
+	update_prng ();
+	update_prng ();
+	update_prng ();
+	v = update_prng ();
+	v &= 0x8F;
+	if (v < 0)
+		v |= 0xF0;
+	v += p->asteroid_Vv[src];
+	v = limit_asteroid_velocity (v);
+	p->asteroid_Vv[dst] = v;
+}
+
+// $7233
+int8_t limit_asteroid_velocity (int8_t v)
+{
+	if (v < 0)
+	{
+		if (v < -31)
+			v = -31;
+		else if (v > -6)
+			v = -6;
+	}
+	else
+	{
+		if (v < 6)
+			v = 6;
+		else if (v > 31)
+			v = 31;
+	}
+	
+	return (v);
 }
 
 // $724F
 void display_C_scores_ships (void)
 {
 	//UNIMPLEMENTED;
+
+	zp.globalScale = 16;
+	write_JSR_cmd (0x50A4);	
 }
 
 // $73C4
@@ -444,14 +491,30 @@ void check_high_score (void)
 // $77B5
 uint8_t update_prng (void)
 {
-	//UNIMPLEMENTED;
-	return (1);
+	uint8_t r;
+	
+	// rnd2 is high byte, rnd1 is low byte
+	zp.rnd <<= 1;
+	if (zp.rnd & (1<<15))
+		zp.rnd |= (1<<0);
+	if (zp.rnd & 2)
+		zp.rnd ^= (1<<0);
+	r = (uint8_t)((zp.rnd >> 8) | zp.rnd);
+	if (r == 0)
+		r++;
+	
+	return (r);
 }
 
 // $7BC0
 void halt_dvg (void)
 {
 	//UNIMPLEMENTED;
+}
+
+// $7BFC
+void write_JSR_cmd (uint16_t addr)
+{
 }
 
 // $7C03
