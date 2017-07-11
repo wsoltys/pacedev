@@ -196,23 +196,22 @@ RAM:0200					     ;.segment RAM
 RAM:0200					     * =  $200
 RAM:0200 ?? ?? ?? ??+P1RAM:			     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)	; Asteroids 1-27
 RAM:0200 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-RAM:021B	     ; p1PlayerFlag
+RAM:021B	     ; ship_Sts
 RAM:021B	     ; - 0x00  = in hyperspace?
 RAM:021B	     ; - 0x01  = player	alive and active
 RAM:021B	     ; - 0xA0+ = player	exploding
-RAM:021B ??	     p1PlayerFlag:		     .BYTE 0 ; (uninited)
-RAM:021C	     ; p1SaucerFlag
+RAM:021B ??	     ship_Sts:			     .BYTE 0 ; (uninited)
+RAM:021C	     ; saucer_Sts
 RAM:021C	     ; - 0x00  = no saucer
 RAM:021C	     ; - 0x01  = small saucer
 RAM:021C	     ; - 0x02  = large saucer
 RAM:021C	     ; - 0xA0+ = saucer	exploding
-RAM:021C ??	     p1SaucerFlag:		     .BYTE 0 ; (uninited)
-RAM:021D ??	     saucerShotTimer1:		     .BYTE 0 ; (uninited)
-RAM:021E ??	     saucerShotTimer2:		     .BYTE 0 ; (uninited)
-RAM:021F ??	     p1TimerShot0:		     .BYTE 0 ; (uninited)
-RAM:0220 ??	     p1TimerShot1:		     .BYTE 0 ; (uninited)
-RAM:0221 ??	     p1TimerShot2:		     .BYTE 0 ; (uninited)
-RAM:0222 ??	     p1TimerShot3:		     .BYTE 0 ; (uninited)
+RAM:021C ??	     saucer_Sts:		     .BYTE 0 ; (uninited)
+RAM:021D ?? ??	     saucerShot_Sts:		     .BYTE 0,0 ; (uninited)
+RAM:021F ?? ?? ?? ?? shipShot_Sts:		     .BYTE 0 ; (uninited)
+RAM:021F					     .BYTE 0 ; (uninited)
+RAM:021F					     .BYTE 0 ; (uninited)
+RAM:021F					     .BYTE 0 ; (uninited)
 RAM:0223	     ; Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
 RAM:0223 ?? ?? ?? ??+asteroid_Vh:		     .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
 RAM:0223 ?? ?? ?? ??+				     .BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
@@ -472,134 +471,134 @@ DVGROM:5000
 DVGROM:5000		; Segment type:	Regular
 DVGROM:5000						;.segment DVGROM
 DVGROM:5000						* =  $5000
-DVGROM:5000 80 A0 00 00+DVGROM:				.BYTE $80, $A0,	0, 0, 0, $70, 0, 0, 0, $90, $FF, $73, $FF, $92,	0, $70
-DVGROM:5000 00 70 00 00+				.BYTE 0, $90, $FF, $77,	$FF, $96, 0, $70, $FF, $92, $FF, $72, 0, $86, 0, $72
-DVGROM:5000 00 90 FF 73+				.BYTE $FE, $87,	$FE, $77, 0, $92, 0, $76, $FE, $81, 0, $72, $FF, $96, $FF, $72
-DVGROM:5000 FF 92 00 70+				.BYTE $7F, $A3,	$FF, 3,	0, $70,	0, 0, $FF, $96,	$FF, $76, $FE, $81, 0, $76
-DVGROM:5000 00 90 FF 77+				.BYTE 0, $92, 0, $72, $FE, $87,	$FE, $73, 0, $86, 0, $76, $FF, $92, $FF, $76
-DVGROM:5000 FF 96 00 70+				.BYTE $FC, $A1,	$F4, 1,	0, $70,	0, 0, $DB, $F0,	0, $F9,	$CF, $F0, 0, $F9
-DVGROM:5000 FF 92 FF 72+				.BYTE $BB, $F0,	0, $F9,	$AF, $F0, 0, $F9, $9B, $F0, 0, $F9, $8F, $F0, 0, $F9
-DVGROM:5000 00 86 00 72+				.BYTE $7B, $F0,	0, $F9,	$6F, $F0, 0, $F9, $5B, $F0, 0, $F9, $4F, $F0, 0, $F9
-DVGROM:5000 FE 87 FE 77+				.BYTE $3B, $F0,	0, $F9,	$2F, $F0, $7C, $D0, $E4, $A0, $5E, $11,	0, $70,	0, 0
+DVGROM:5000 80 A0 00 00+DVGROM:				.BYTE $80, $A0,	$00, $00, $00, $70, $00, $00, $00, $90,	$FF, $73, $FF, $92, $00, $70
+DVGROM:5000 00 70 00 00+				.BYTE $00, $90,	$FF, $77, $FF, $96, $00, $70, $FF, $92,	$FF, $72, $00, $86, $00, $72
+DVGROM:5000 00 90 FF 73+				.BYTE $FE, $87,	$FE, $77, $00, $92, $00, $76, $FE, $81,	$00, $72, $FF, $96, $FF, $72
+DVGROM:5000 FF 92 00 70+				.BYTE $7F, $A3,	$FF, $03, $00, $70, $00, $00, $FF, $96,	$FF, $76, $FE, $81, $00, $76
+DVGROM:5000 00 90 FF 77+				.BYTE $00, $92,	$00, $72, $FE, $87, $FE, $73, $00, $86,	$00, $76, $FF, $92, $FF, $76
+DVGROM:5000 FF 96 00 70+				.BYTE $FC, $A1,	$F4, $01, $00, $70, $00, $00, $DB, $F0,	$00, $F9, $CF, $F0, $00, $F9
+DVGROM:5000 FF 92 FF 72+				.BYTE $BB, $F0,	$00, $F9, $AF, $F0, $00, $F9, $9B, $F0,	$00, $F9, $8F, $F0, $00, $F9
+DVGROM:5000 00 86 00 72+				.BYTE $7B, $F0,	$00, $F9, $6F, $F0, $00, $F9, $5B, $F0,	$00, $F9, $4F, $F0, $00, $F9
+DVGROM:5000 FE 87 FE 77+				.BYTE $3B, $F0,	$00, $F9, $2F, $F0, $7C, $D0, $E4, $A0,	$5E, $11, $00, $70, $00, $00
 DVGROM:5000 00 92 00 76+				.BYTE $80, $CA,	$78, $CA, $D8, $CA, $C7, $CA, $2C, $CB,	$9B, $CA, $F3, $CA, $F3, $CA
-DVGROM:5000 FE 81 00 72+				.BYTE $DD, $CA,	$F3, $EA, $80, $A0, $90, 1, 0, $70, 0, 0, $73, $F5, $73, $F1
-DVGROM:5000 FF 96 FF 72+				.BYTE $78, $F1,	$77, $F1, $77, $F5, $78, $F5, $80, $31,	0, 2, $75, $F8,	$70, $FD
-DVGROM:5000 7F A3 FF 03+				.BYTE $71, $F8,	2, $FD,	$2E, $CB, $63, $CB, $56, $CB, $63, $CB,	$2C, $CB, $78, $CA
-DVGROM:5000 00 70 00 00+				.BYTE 2, $CB, $78, $CA,	$F3, $CA, $BA, $CA, $2C, $CB, $BA, $CA,	$D8, $CA, $8D, $EA
+DVGROM:5000 FE 81 00 72+				.BYTE $DD, $CA,	$F3, $EA, $80, $A0, $90, $01, $00, $70,	$00, $00, $73, $F5, $73, $F1
+DVGROM:5000 FF 96 FF 72+				.BYTE $78, $F1,	$77, $F1, $77, $F5, $78, $F5, $80, $31,	$00, $02, $75, $F8, $70, $FD
+DVGROM:5000 7F A3 FF 03+				.BYTE $71, $F8,	$02, $FD, $2E, $CB, $63, $CB, $56, $CB,	$63, $CB, $2C, $CB, $78, $CA
+DVGROM:5000 00 70 00 00+				.BYTE $02, $CB,	$78, $CA, $F3, $CA, $BA, $CA, $2C, $CB,	$BA, $CA, $D8, $CA, $8D, $EA
 DVGROM:5000 FF 96 FF 76+				.BYTE $C6, $FF,	$C1, $FE, $C3, $F1, $CD, $F1, $C7, $F1,	$C1, $FD, $D8, $1E, $32, $EC
-DVGROM:5000 FE 81 00 76+				.BYTE 0, $C4, $3C, $14,	$A, $46, $D8, $D8, $D0,	$C8, $B5, $C8, $96, $C8, $80, $C8
-DVGROM:5000 00 92 00 72+				.BYTE $D, $F8, $78, $F8, $D, $FD, $78, $F8, 9, $FD, $78, $F8, $B, $F1, $78, $F8
-DVGROM:5000 FE 87 FE 73+				.BYTE $A, $F5, $78, $F8, 8, $F9, $78, $F8, 9, $F3, $78,	$F8, $D, $F3, $78, $F8
-DVGROM:5000 00 86 00 76+				.BYTE $80, $54,	0, 6, $78, $F8,	$F, $F1, $78, $F8, 0, $D0, 0, $30, $80,	7
-DVGROM:5000 FF 92 FF 76+				.BYTE $78, $F8,	$80, $37, $80, 7, $78, $F8, $80, $37, $80, 3, $78, $F8,	$E0, $40
-DVGROM:5000 FC A1 F4 01+				.BYTE $A0, 2, $78, $F8,	$C0, $35, $80, 3, $78, $F8, $80, $33, 0, 0, $78, $F8
-DVGROM:5000 00 70 00 00+				.BYTE $A0, $42,	$E0, 0,	$78, $F8, $A0, $42, $E0, 4, $78, $F8, $E0, $44,	$80, 7
-DVGROM:5000 DB F0 00 F9+				.BYTE $78, $F8,	$E0, $40, $A0, 6, $78, $F8, 0, $D0, 7, $F8, $78, $F8, 7, $FF
-DVGROM:5000 CF F0 00 F9+				.BYTE $78, $F8,	3, $FF,	$78, $F8, $C0, $40, $40, 2, $78, $F8, $80, $35,	0, 3
-DVGROM:5000 BB F0 00 F9+				.BYTE $78, $F8,	0, $FB,	$78, $F8, $40, $42, $C0, 0, $78, $F8, $40, $42,	$C0, 4
-DVGROM:5000 AF F0 00 F9+				.BYTE $78, $F8,	$C0, $44, 0, 7,	$78, $F8, $C0, $40, $40, 6, $78, $F8, 0, $D0
-DVGROM:5000 9B F0 00 F9+				.BYTE 0, $30, $80, 6, $78, $F8,	$80, $36, $80, 6, $78, $F8, $80, $36, $80, 2
-DVGROM:5000 8F F0 00 F9+				.BYTE $78, $F8,	$40, $31, $C0, 3, $78, $F8, $40, $35, $80, 2, $78, $F8,	$80, $32
-DVGROM:5000 7B F0 00 F9+				.BYTE 0, 0, $78, $F8, $C0, $33,	$40, 1,	$78, $F8, $C0, $33, $40, 5, $78, $F8
-DVGROM:5000 6F F0 00 F9+				.BYTE $A0, $44,	$80, 6,	$78, $F8, $40, $31, $C0, 7, $78, $F8, 0, $D0, $F3, $C8
-DVGROM:5000 5B F0 00 F9+				.BYTE $FF, $C8,	$D, $C9, $1A, $C9, 8, $F9, $79,	$F9, $79, $FD, $7D, $F6, $79, $F6
-DVGROM:5000 4F F0 00 F9+				.BYTE $8F, $F6,	$8F, $F0, $7D, $F9, $78, $FA, $79, $F9,	$79, $FD, 0, $D0, $A, $F1
+DVGROM:5000 FE 81 00 76+				.BYTE $00, $C4,	$3C, $14, $0A, $46, $D8, $D8, $D0, $C8,	$B5, $C8, $96, $C8, $80, $C8
+DVGROM:5000 00 92 00 72+				.BYTE $0D, $F8,	$78, $F8, $0D, $FD, $78, $F8, $09, $FD,	$78, $F8, $0B, $F1, $78, $F8
+DVGROM:5000 FE 87 FE 73+				.BYTE $0A, $F5,	$78, $F8, $08, $F9, $78, $F8, $09, $F3,	$78, $F8, $0D, $F3, $78, $F8
+DVGROM:5000 00 86 00 76+				.BYTE $80, $54,	$00, $06, $78, $F8, $0F, $F1, $78, $F8,	$00, $D0, $00, $30, $80, $07
+DVGROM:5000 FF 92 FF 76+				.BYTE $78, $F8,	$80, $37, $80, $07, $78, $F8, $80, $37,	$80, $03, $78, $F8, $E0, $40
+DVGROM:5000 FC A1 F4 01+				.BYTE $A0, $02,	$78, $F8, $C0, $35, $80, $03, $78, $F8,	$80, $33, $00, $00, $78, $F8
+DVGROM:5000 00 70 00 00+				.BYTE $A0, $42,	$E0, $00, $78, $F8, $A0, $42, $E0, $04,	$78, $F8, $E0, $44, $80, $07
+DVGROM:5000 DB F0 00 F9+				.BYTE $78, $F8,	$E0, $40, $A0, $06, $78, $F8, $00, $D0,	$07, $F8, $78, $F8, $07, $FF
+DVGROM:5000 CF F0 00 F9+				.BYTE $78, $F8,	$03, $FF, $78, $F8, $C0, $40, $40, $02,	$78, $F8, $80, $35, $00, $03
+DVGROM:5000 BB F0 00 F9+				.BYTE $78, $F8,	$00, $FB, $78, $F8, $40, $42, $C0, $00,	$78, $F8, $40, $42, $C0, $04
+DVGROM:5000 AF F0 00 F9+				.BYTE $78, $F8,	$C0, $44, $00, $07, $78, $F8, $C0, $40,	$40, $06, $78, $F8, $00, $D0
+DVGROM:5000 9B F0 00 F9+				.BYTE $00, $30,	$80, $06, $78, $F8, $80, $36, $80, $06,	$78, $F8, $80, $36, $80, $02
+DVGROM:5000 8F F0 00 F9+				.BYTE $78, $F8,	$40, $31, $C0, $03, $78, $F8, $40, $35,	$80, $02, $78, $F8, $80, $32
+DVGROM:5000 7B F0 00 F9+				.BYTE $00, $00,	$78, $F8, $C0, $33, $40, $01, $78, $F8,	$C0, $33, $40, $05, $78, $F8
+DVGROM:5000 6F F0 00 F9+				.BYTE $A0, $44,	$80, $06, $78, $F8, $40, $31, $C0, $07,	$78, $F8, $00, $D0, $F3, $C8
+DVGROM:5000 5B F0 00 F9+				.BYTE $FF, $C8,	$0D, $C9, $1A, $C9, $08, $F9, $79, $F9,	$79, $FD, $7D, $F6, $79, $F6
+DVGROM:5000 4F F0 00 F9+				.BYTE $8F, $F6,	$8F, $F0, $7D, $F9, $78, $FA, $79, $F9,	$79, $FD, $00, $D0, $0A, $F1
 DVGROM:5000 3B F0 00 F9+				.BYTE $7A, $F1,	$7D, $F9, $7E, $F5, $7E, $F1, $7D, $FD,	$79, $F6, $7D, $F6, $79, $FD
-DVGROM:5000 2F F0 7C D0+				.BYTE $79, $F1,	$8B, $F5, $8A, $F3, $7D, $F9, 0, $D0, $D, $F8, $7E, $F5, $7A, $F7
+DVGROM:5000 2F F0 7C D0+				.BYTE $79, $F1,	$8B, $F5, $8A, $F3, $7D, $F9, $00, $D0,	$0D, $F8, $7E, $F5, $7A, $F7
 DVGROM:5000 E4 A0 5E 11+				.BYTE $7A, $F3,	$78, $F7, $79, $F8, $7A, $F3, $78, $F9,	$7E, $F3, $7F, $F0, $7F, $F7
-DVGROM:5000 00 70 00 00+				.BYTE $7A, $F5,	0, $D0,	9, $F0,	$7B, $F1, $68, $F1, $7F, $F2, $7F, $F0,	$69, $F6
-DVGROM:5000 80 CA 78 CA+				.BYTE $7F, $F0,	$78, $F7, $7A, $F7, $7B, $F1, $69, $F5,	$69, $F9, $7F, $F2, 0, $D0
-DVGROM:5000 D8 CA C7 CA+				.BYTE $29, $C9,	$E, $F1, $CA, $F8, $B, $F6, 0, $60, $80, $D6, $DB, $F6,	$CA, $F8
-DVGROM:5000 2C CB 9B CA+				.BYTE $DB, $F2,	$DF, $F2, $CD, $F2, $CD, $F8, $CD, $F6,	$DF, $F6, 0, $D0, $90, $52
+DVGROM:5000 00 70 00 00+				.BYTE $7A, $F5,	$00, $D0, $09, $F0, $7B, $F1, $68, $F1,	$7F, $F2, $7F, $F0, $69, $F6
+DVGROM:5000 80 CA 78 CA+				.BYTE $7F, $F0,	$78, $F7, $7A, $F7, $7B, $F1, $69, $F5,	$69, $F9, $7F, $F2, $00, $D0
+DVGROM:5000 D8 CA C7 CA+				.BYTE $29, $C9,	$0E, $F1, $CA, $F8, $0B, $F6, $00, $60,	$80, $D6, $DB, $F6, $CA, $F8
+DVGROM:5000 2C CB 9B CA+				.BYTE $DB, $F2,	$DF, $F2, $CD, $F2, $CD, $F8, $CD, $F6,	$DF, $F6, $00, $D0, $90, $52
 DVGROM:5000 F3 CA F3 CA+				.BYTE $A8, $52,	$CC, $52, $F0, $52, $14, $53, $36, $53,	$5A, $53, $7E, $53, $A2, $53
-DVGROM:5000 DD CA F3 EA+				.BYTE $C6, $53,	$EA, $53, $E, $54, $32,	$54, $56, $54, $7A, $54, $9E, $54, $C2,	$54
-DVGROM:5000 80 A0 90 01+				.BYTE $F, $F6, $C8, $FA, $BD, $F9, 0, $65, 0, $C3, 0, $65, 0, $C7, $B9,	$F9
-DVGROM:5000 00 70 00 00+				.BYTE 0, $D0, $CE, $F9,	$CA, $F9, 0, $D0, $40, $46, $C0, 6, 0, $52, $30, $C4
+DVGROM:5000 DD CA F3 EA+				.BYTE $C6, $53,	$EA, $53, $0E, $54, $32, $54, $56, $54,	$7A, $54, $9E, $54, $C2, $54
+DVGROM:5000 80 A0 90 01+				.BYTE $0F, $F6,	$C8, $FA, $BD, $F9, $00, $65, $00, $C3,	$00, $65, $00, $C7, $B9, $F9
+DVGROM:5000 00 70 00 00+				.BYTE $00, $D0,	$CE, $F9, $CA, $F9, $00, $D0, $40, $46,	$C0, $06, $00, $52, $30, $C4
 DVGROM:5000 73 F5 73 F1+				.BYTE $C0, $41,	$20, $C6, $B0, $64, $18, $C3, $48, $65,	$E0, $C6, $20, $42, $C0, $C1
-DVGROM:5000 78 F1 77 F1+				.BYTE 0, $D0, $D0, $50,	$10, $C6, $60, $42, $C0, $C3, 0, $D0, $80, $46,	$80, 6
+DVGROM:5000 78 F1 77 F1+				.BYTE $00, $D0,	$D0, $50, $10, $C6, $60, $42, $C0, $C3,	$00, $D0, $80, $46, $80, $06
 DVGROM:5000 77 F5 78 F5+				.BYTE $E0, $43,	$C0, $C4, $A0, $41, $60, $C6, $68, $64,	$20, $C3, $90, $65, $C0, $C6
-DVGROM:5000 80 31 00 02+				.BYTE $60, $42,	$A0, $C1, 0, $D0, $90, $50, $30, $C6, $C0, $42,	$80, $C3, 0, $D0
-DVGROM:5000 75 F8 70 FD+				.BYTE $C0, $46,	$40, 6,	$E0, $43, $20, $C5, $60, $41, $80, $C6,	$18, $64, $28, $C3
-DVGROM:5000 71 F8 02 FD+				.BYTE $D0, $65,	$98, $C6, $80, $42, $60, $C1, 0, $D0, $60, $50,	$30, $C6, $20, $43
-DVGROM:5000 2E CB 63 CB+				.BYTE $40, $C3,	0, $D0,	$E, $F7, $C0, $43, $80,	$C5, $20, $41, $A0, $C6, $38, $60
-DVGROM:5000 56 CB 63 CB+				.BYTE $28, $C3,	$10, $66, $60, $C6, $A0, $42, $20, $C1,	0, $D0,	$30, $50, $40, $C6
-DVGROM:5000 2C CB 78 CA+				.BYTE $60, $43,	$E0, $C2, 0, $D0, $20, $47, $C0, 5, $80, $43, $E0, $C5,	$E0, $40
-DVGROM:5000 02 CB 78 CA+				.BYTE $C0, $C6,	$88, $60, $20, $C3, $48, $66, $30, $C6,	$C0, $42, $E0, $C0, 0, $D0
-DVGROM:5000 F3 CA BA CA+				.BYTE $10, $54,	$40, $C6, $A0, $43, $A0, $C2, 0, $D0, $60, $47,	$60, 5,	$60, $43
+DVGROM:5000 80 31 00 02+				.BYTE $60, $42,	$A0, $C1, $00, $D0, $90, $50, $30, $C6,	$C0, $42, $80, $C3, $00, $D0
+DVGROM:5000 75 F8 70 FD+				.BYTE $C0, $46,	$40, $06, $E0, $43, $20, $C5, $60, $41,	$80, $C6, $18, $64, $28, $C3
+DVGROM:5000 71 F8 02 FD+				.BYTE $D0, $65,	$98, $C6, $80, $42, $60, $C1, $00, $D0,	$60, $50, $30, $C6, $20, $43
+DVGROM:5000 2E CB 63 CB+				.BYTE $40, $C3,	$00, $D0, $0E, $F7, $C0, $43, $80, $C5,	$20, $41, $A0, $C6, $38, $60
+DVGROM:5000 56 CB 63 CB+				.BYTE $28, $C3,	$10, $66, $60, $C6, $A0, $42, $20, $C1,	$00, $D0, $30, $50, $40, $C6
+DVGROM:5000 2C CB 78 CA+				.BYTE $60, $43,	$E0, $C2, $00, $D0, $20, $47, $C0, $05,	$80, $43, $E0, $C5, $E0, $40
+DVGROM:5000 02 CB 78 CA+				.BYTE $C0, $C6,	$88, $60, $20, $C3, $48, $66, $30, $C6,	$C0, $42, $E0, $C0, $00, $D0
+DVGROM:5000 F3 CA BA CA+				.BYTE $10, $54,	$40, $C6, $A0, $43, $A0, $C2, $00, $D0,	$60, $47, $60, $05, $60, $43
 DVGROM:5000 2C CB BA CA+				.BYTE $40, $C6,	$80, $40, $C0, $C6, $D8, $60, $10, $C3,	$80, $66, $F0, $C5, $C0, $42
-DVGROM:5000 D8 CA 8D EA+				.BYTE $80, $C0,	0, $D0,	$40, $54, $30, $C6, $E0, $43, $40, $C2,	0, $D0,	$80, $47
-DVGROM:5000 C6 FF C1 FE+				.BYTE 0, 5, $20, $43, $80, $C6,	$40, $40, $E0, $C6, $20, $61, $F8, $C2,	$B0, $66
-DVGROM:5000 C3 F1 CD F1+				.BYTE $B0, $C5,	$E0, $42, $40, $C0, 0, $D0, $80, $54, $30, $C6,	$10, $52, $F0, $C0
-DVGROM:5000 C7 F1 C1 FD+				.BYTE 0, $D0, $80, $47,	$C0, 4,	$E0, $42, $E0, $C6, 0, $40, $E0, $C6, $68, $61
-DVGROM:5000 D8 1E 32 EC+				.BYTE $D8, $C2,	$D8, $66, $68, $C5, $E0, $42, 0, $C0, 0, $D0, $B0, $54,	$20, $C6
-DVGROM:5000 00 C4 3C 14+				.BYTE $20, $52,	$B0, $C0, 0, $D0, $A0, $47, $60, 4, $80, $42, $20, $C7,	$40, $44
-DVGROM:5000 0A 46 D8 D8+				.BYTE $E0, $C6,	$B0, $61, $B0, $C2, $F8, $66, $20, $C5,	$E0, $42, $40, $C4, 0, $D0
-DVGROM:5000 D0 C8 B5 C8+				.BYTE $F0, $54,	$10, $C6, $30, $52, $80, $C0, 0, $D0, $A0, $47,	0, 0, $40, $42
+DVGROM:5000 D8 CA 8D EA+				.BYTE $80, $C0,	$00, $D0, $40, $54, $30, $C6, $E0, $43,	$40, $C2, $00, $D0, $80, $47
+DVGROM:5000 C6 FF C1 FE+				.BYTE $00, $05,	$20, $43, $80, $C6, $40, $40, $E0, $C6,	$20, $61, $F8, $C2, $B0, $66
+DVGROM:5000 C3 F1 CD F1+				.BYTE $B0, $C5,	$E0, $42, $40, $C0, $00, $D0, $80, $54,	$30, $C6, $10, $52, $F0, $C0
+DVGROM:5000 C7 F1 C1 FD+				.BYTE $00, $D0,	$80, $47, $C0, $04, $E0, $42, $E0, $C6,	$00, $40, $E0, $C6, $68, $61
+DVGROM:5000 D8 1E 32 EC+				.BYTE $D8, $C2,	$D8, $66, $68, $C5, $E0, $42, $00, $C0,	$00, $D0, $B0, $54, $20, $C6
+DVGROM:5000 00 C4 3C 14+				.BYTE $20, $52,	$B0, $C0, $00, $D0, $A0, $47, $60, $04,	$80, $42, $20, $C7, $40, $44
+DVGROM:5000 0A 46 D8 D8+				.BYTE $E0, $C6,	$B0, $61, $B0, $C2, $F8, $66, $20, $C5,	$E0, $42, $40, $C4, $00, $D0
+DVGROM:5000 D0 C8 B5 C8+				.BYTE $F0, $54,	$10, $C6, $30, $52, $80, $C0, $00, $D0,	$A0, $47, $00, $00, $40, $42
 DVGROM:5000 96 C8 80 C8+				.BYTE $60, $C7,	$80, $44, $C0, $C6, $F0, $61, $80, $C2,	$10, $67, $D8, $C4, $C0, $42
-DVGROM:5000 0D F8 78 F8+				.BYTE $80, $C4,	0, $D0,	$40, $46, $E0, $C7, $30, $52, $40, $C0,	0, $D0,	$A0, $47
-DVGROM:5000 0D FD 78 F8+				.BYTE $60, 0, $E0, $41,	$80, $C7, $E0, $44, $C0, $C6, $30, $62,	$48, $C2, $20, $67
-DVGROM:5000 09 FD 78 F8+				.BYTE $88, $C4,	$C0, $42, $E0, $C4, 0, $D0, $A0, $46, $A0, $C7,	$40, $52, $10, $C0
-DVGROM:5000 0B F1 78 F8+				.BYTE 0, $D0, $80, $47,	$C0, 0,	$80, $41, $C0, $C7, $20, $45, $A0, $C6,	$60, $62
-DVGROM:5000 0A F5 78 F8+				.BYTE $10, $C2,	$28, $67, $38, $C4, $A0, $42, $20, $C5,	0, $D0,	$E0, $46, $60, $C7
-DVGROM:5000 08 F9 78 F8+				.BYTE $40, $52,	$30, $C4, 0, $D0, $80, $47, 0, 1, $20, $41, $E0, $C7, $60, $45
-DVGROM:5000 09 F3 78 F8+				.BYTE $80, $C6,	$98, $62, $D0, $C1, $28, $67, $18, $C0,	$80, $42, $60, $C5, 0, $D0
-DVGROM:5000 0D F3 78 F8+				.BYTE $40, $47,	$20, $C7, $30, $52, $60, $C4, 0, $D0, $60, $47,	$60, 1,	$C0, $40
+DVGROM:5000 0D F8 78 F8+				.BYTE $80, $C4,	$00, $D0, $40, $46, $E0, $C7, $30, $52,	$40, $C0, $00, $D0, $A0, $47
+DVGROM:5000 0D FD 78 F8+				.BYTE $60, $00,	$E0, $41, $80, $C7, $E0, $44, $C0, $C6,	$30, $62, $48, $C2, $20, $67
+DVGROM:5000 09 FD 78 F8+				.BYTE $88, $C4,	$C0, $42, $E0, $C4, $00, $D0, $A0, $46,	$A0, $C7, $40, $52, $10, $C0
+DVGROM:5000 0B F1 78 F8+				.BYTE $00, $D0,	$80, $47, $C0, $00, $80, $41, $C0, $C7,	$20, $45, $A0, $C6, $60, $62
+DVGROM:5000 0A F5 78 F8+				.BYTE $10, $C2,	$28, $67, $38, $C4, $A0, $42, $20, $C5,	$00, $D0, $E0, $46, $60, $C7
+DVGROM:5000 08 F9 78 F8+				.BYTE $40, $52,	$30, $C4, $00, $D0, $80, $47, $00, $01,	$20, $41, $E0, $C7, $60, $45
+DVGROM:5000 09 F3 78 F8+				.BYTE $80, $C6,	$98, $62, $D0, $C1, $28, $67, $18, $C0,	$80, $42, $60, $C5, $00, $D0
+DVGROM:5000 0D F3 78 F8+				.BYTE $40, $47,	$20, $C7, $30, $52, $60, $C4, $00, $D0,	$60, $47, $60, $01, $C0, $40
 DVGROM:5000 80 54 00 06+				.BYTE $E0, $C7,	$A0, $45, $60, $C6, $C0, $62, $90, $C1,	$20, $67, $68, $C0, $60, $42
-DVGROM:5000 78 F8 0F F1+				.BYTE $A0, $C5,	0, $D0,	$80, $47, $C0, $C6, $30, $52, $90, $C4,	0, $D0,	$20, $47
-DVGROM:5000 78 F8 00 D0+				.BYTE $C0, 1, $30, $50,	0, $C6,	$C0, $45, $20, $C6, $E0, $62, $48, $C1,	$18, $67
-DVGROM:5000 00 30 80 07+				.BYTE $B0, $C0,	$20, $42, $C0, $C5, 0, $D0, $C0, $47, $60, $C6,	$10, $52, $D0, $C4
-DVGROM:5000 78 F8 80 37+				.BYTE 0, $D0, $A, $F7, $CE, $F8, $CD, $FD, 0, $63, 0, $C1, 0, $67, 0, $C1
-DVGROM:5000 80 07 78 F8+				.BYTE $CD, $F9,	0, $D0,	$CD, $FE, $CD, $FA, 0, $D0, $E,	$F7, $7A, $F8, $79, $FD
-DVGROM:5000 80 37 80 03+				.BYTE 0, $63, 0, $75, 0, $67, 0, $75, $79, $F9,	$C0, $60, $80, 2, $9F, $D0
-DVGROM:5000 78 F8 E0 40+				.BYTE $70, $FA,	$72, $F2, $72, $F6, $70, $FE, 6, $F9, $72, $F8,	2, $F6,	0, $D0
-DVGROM:5000 A0 02 78 F8+				.BYTE $70, $FB,	$73, $F0, $71, $F5, $70, $F5, $75, $F5,	$77, $F0, 3, $F0, $71, $F5
-DVGROM:5000 C0 35 80 03+				.BYTE $70, $F5,	$75, $F5, $77, $F0, 3, $F8, 0, $D0, $70, $FB, $72, $F8,	6, $FF
-DVGROM:5000 78 F8 80 33+				.BYTE $72, $F8,	2, $F0,	0, $D0,	$70, $FB, $72, $F0, $72, $F6, $70, $F6,	$76, $F6
-DVGROM:5000 00 00 78 F8+				.BYTE $76, $F0,	3, $F8,	0, $D0,	$70, $FB, $72, $F8, 5, $F7, $77, $F0, 0, $F7
-DVGROM:5000 A0 42 E0 00+				.BYTE $72, $F8,	2, $F0,	0, $D0,	$70, $FB, $72, $F8, 5, $F7, $77, $F0, 0, $F7
-DVGROM:5000 78 F8 A0 42+				.BYTE 3, $F8, 0, $D0, $70, $FB,	$72, $F8, $70, $F6, 6, $F6, $72, $F0, $70, $F6
-DVGROM:5000 E0 04 78 F8+				.BYTE $76, $F8,	3, $F8,	0, $D0,	$70, $FB, 0, $F7, $72, $F8, 0, $F3, $70, $FF
-DVGROM:5000 E0 44 80 07+				.BYTE 2, $F0, 0, $D0, $72, $F8,	6, $F0,	$70, $FB, 2, $F0, $76, $F8, 3, $FF
-DVGROM:5000 78 F8 E0 40+				.BYTE 0, $D0, 0, $F2, $72, $F6,	$72, $F0, $70, $FB, 1, $FF, 0, $D0, $70, $FB
-DVGROM:5000 A0 06 78 F8+				.BYTE 3, $F0, $77, $F7,	$73, $F7, 3, $F0, 0, $D0, 0, $FB, $70, $FF, $72, $F8
-DVGROM:5000 00 D0 07 F8+				.BYTE 2, $F0, 0, $D0, $70, $FB,	$72, $F6, $72, $F2, $70, $FF, 2, $F0, 0, $D0
-DVGROM:5000 78 F8 07 FF+				.BYTE $70, $FB,	$72, $FF, $70, $FB, 1, $FF, 0, $D0, $70, $FB, $72, $F8,	$70, $FF
-DVGROM:5000 78 F8 03 FF+				.BYTE $76, $F8,	3, $F8,	0, $D0,	$70, $FB, $72, $F8, $70, $F7, $76, $F8,	3, $F7
-DVGROM:5000 78 F8 C0 40+				.BYTE 3, $F0, 0, $D0, $70, $FB,	$72, $F8, $70, $FE, $76, $F6, $76, $F0,	2, $F2
-DVGROM:5000 40 02 78 F8+				.BYTE $72, $F6,	2, $F0,	0, $D0,	$70, $FB, $72, $F8, $70, $F7, $76, $F8,	1, $F0
-DVGROM:5000 80 35 00 03+				.BYTE $73, $F7,	2, $F0,	0, $D0,	$72, $F8, $70, $F3, $76, $F8, $70, $F3,	$72, $F8
-DVGROM:5000 78 F8 00 FB+				.BYTE 1, $FF, 0, $D0, 2, $F0, $70, $FB,	6, $F0,	$72, $F8, 1, $FF, 0, $D0
-DVGROM:5000 78 F8 40 42+				.BYTE 0, $FB, $70, $FF,	$72, $F8, $70, $FB, 1, $FF, 0, $D0, 0, $FB, $71, $FF
-DVGROM:5000 C0 00 78 F8+				.BYTE $71, $FB,	1, $FF,	0, $D0,	0, $FB,	$70, $FF, $72, $F2, $72, $F6, $70, $FB
-DVGROM:5000 40 42 C0 04+				.BYTE 1, $FF, 0, $D0, $72, $FB,	6, $F8,	$72, $FF, 2, $F0, 0, $D0, 2, $F0
-DVGROM:5000 78 F8 C0 44+				.BYTE $70, $FA,	$76, $F2, 2, $F8, $76, $F6, 2, $FE, 0, $D0, 0, $FB, $72, $F8
-DVGROM:5000 00 07 78 F8+				.BYTE $76, $FF,	$72, $F8, 2, $F0, 0, $D0, 3, $F8, 0, $D0, 2, $F0, $70, $FB
-DVGROM:5000 C0 40 40 06+				.BYTE 2, $FF, 0, $D0, 0, $FB, $72, $F8,	$70, $F7, $76, $F8, $70, $F7, $72, $F8
-DVGROM:5000 78 F8 00 D0+				.BYTE 2, $F0, 0, $D0, $72, $F8,	$70, $FB, $76, $F8, 0, $F7, $72, $F8, 2, $F7
-DVGROM:5000 00 30 80 06+				.BYTE 0, $D0, 0, $FB, $70, $F7,	$72, $F8, 0, $F3, $70, $FF, 2, $F0, 0, $D0
-DVGROM:5000 78 F8 80 36+				.BYTE $72, $F8,	$70, $F3, $76, $F8, $70, $F3, $72, $F8,	1, $FF,	0, $D0,	0, $F3
-DVGROM:5000 80 06 78 F8+				.BYTE $72, $F8,	$70, $F7, $76, $F8, $70, $FB, 3, $FF, 0, $D0, 0, $FB, $72, $F8
-DVGROM:5000 80 36 80 02+				.BYTE $70, $FF,	2, $F0,	0, $D0,	$72, $F8, $70, $FB, $76, $F8, $70, $FF,	0, $F3
-DVGROM:5000 78 F8 40 31+				.BYTE $72, $F8,	2, $F7,	0, $D0,	2, $F8,	$70, $FB, $76, $F8, $70, $F7, $72, $F8
-DVGROM:5000 C0 03 78 F8+				.BYTE 2, $F7, 0, $D0, $2C, $CB,	$DD, $CA, $2E, $CB, $32, $CB, $3A, $CB,	$41, $CB
+DVGROM:5000 78 F8 0F F1+				.BYTE $A0, $C5,	$00, $D0, $80, $47, $C0, $C6, $30, $52,	$90, $C4, $00, $D0, $20, $47
+DVGROM:5000 78 F8 00 D0+				.BYTE $C0, $01,	$30, $50, $00, $C6, $C0, $45, $20, $C6,	$E0, $62, $48, $C1, $18, $67
+DVGROM:5000 00 30 80 07+				.BYTE $B0, $C0,	$20, $42, $C0, $C5, $00, $D0, $C0, $47,	$60, $C6, $10, $52, $D0, $C4
+DVGROM:5000 78 F8 80 37+				.BYTE $00, $D0,	$0A, $F7, $CE, $F8, $CD, $FD, $00, $63,	$00, $C1, $00, $67, $00, $C1
+DVGROM:5000 80 07 78 F8+				.BYTE $CD, $F9,	$00, $D0, $CD, $FE, $CD, $FA, $00, $D0,	$0E, $F7, $7A, $F8, $79, $FD
+DVGROM:5000 80 37 80 03+				.BYTE $00, $63,	$00, $75, $00, $67, $00, $75, $79, $F9,	$C0, $60, $80, $02, $9F, $D0
+DVGROM:5000 78 F8 E0 40+				.BYTE $70, $FA,	$72, $F2, $72, $F6, $70, $FE, $06, $F9,	$72, $F8, $02, $F6, $00, $D0
+DVGROM:5000 A0 02 78 F8+				.BYTE $70, $FB,	$73, $F0, $71, $F5, $70, $F5, $75, $F5,	$77, $F0, $03, $F0, $71, $F5
+DVGROM:5000 C0 35 80 03+				.BYTE $70, $F5,	$75, $F5, $77, $F0, $03, $F8, $00, $D0,	$70, $FB, $72, $F8, $06, $FF
+DVGROM:5000 78 F8 80 33+				.BYTE $72, $F8,	$02, $F0, $00, $D0, $70, $FB, $72, $F0,	$72, $F6, $70, $F6, $76, $F6
+DVGROM:5000 00 00 78 F8+				.BYTE $76, $F0,	$03, $F8, $00, $D0, $70, $FB, $72, $F8,	$05, $F7, $77, $F0, $00, $F7
+DVGROM:5000 A0 42 E0 00+				.BYTE $72, $F8,	$02, $F0, $00, $D0, $70, $FB, $72, $F8,	$05, $F7, $77, $F0, $00, $F7
+DVGROM:5000 78 F8 A0 42+				.BYTE $03, $F8,	$00, $D0, $70, $FB, $72, $F8, $70, $F6,	$06, $F6, $72, $F0, $70, $F6
+DVGROM:5000 E0 04 78 F8+				.BYTE $76, $F8,	$03, $F8, $00, $D0, $70, $FB, $00, $F7,	$72, $F8, $00, $F3, $70, $FF
+DVGROM:5000 E0 44 80 07+				.BYTE $02, $F0,	$00, $D0, $72, $F8, $06, $F0, $70, $FB,	$02, $F0, $76, $F8, $03, $FF
+DVGROM:5000 78 F8 E0 40+				.BYTE $00, $D0,	$00, $F2, $72, $F6, $72, $F0, $70, $FB,	$01, $FF, $00, $D0, $70, $FB
+DVGROM:5000 A0 06 78 F8+				.BYTE $03, $F0,	$77, $F7, $73, $F7, $03, $F0, $00, $D0,	$00, $FB, $70, $FF, $72, $F8
+DVGROM:5000 00 D0 07 F8+				.BYTE $02, $F0,	$00, $D0, $70, $FB, $72, $F6, $72, $F2,	$70, $FF, $02, $F0, $00, $D0
+DVGROM:5000 78 F8 07 FF+				.BYTE $70, $FB,	$72, $FF, $70, $FB, $01, $FF, $00, $D0,	$70, $FB, $72, $F8, $70, $FF
+DVGROM:5000 78 F8 03 FF+				.BYTE $76, $F8,	$03, $F8, $00, $D0, $70, $FB, $72, $F8,	$70, $F7, $76, $F8, $03, $F7
+DVGROM:5000 78 F8 C0 40+				.BYTE $03, $F0,	$00, $D0, $70, $FB, $72, $F8, $70, $FE,	$76, $F6, $76, $F0, $02, $F2
+DVGROM:5000 40 02 78 F8+				.BYTE $72, $F6,	$02, $F0, $00, $D0, $70, $FB, $72, $F8,	$70, $F7, $76, $F8, $01, $F0
+DVGROM:5000 80 35 00 03+				.BYTE $73, $F7,	$02, $F0, $00, $D0, $72, $F8, $70, $F3,	$76, $F8, $70, $F3, $72, $F8
+DVGROM:5000 78 F8 00 FB+				.BYTE $01, $FF,	$00, $D0, $02, $F0, $70, $FB, $06, $F0,	$72, $F8, $01, $FF, $00, $D0
+DVGROM:5000 78 F8 40 42+				.BYTE $00, $FB,	$70, $FF, $72, $F8, $70, $FB, $01, $FF,	$00, $D0, $00, $FB, $71, $FF
+DVGROM:5000 C0 00 78 F8+				.BYTE $71, $FB,	$01, $FF, $00, $D0, $00, $FB, $70, $FF,	$72, $F2, $72, $F6, $70, $FB
+DVGROM:5000 40 42 C0 04+				.BYTE $01, $FF,	$00, $D0, $72, $FB, $06, $F8, $72, $FF,	$02, $F0, $00, $D0, $02, $F0
+DVGROM:5000 78 F8 C0 44+				.BYTE $70, $FA,	$76, $F2, $02, $F8, $76, $F6, $02, $FE,	$00, $D0, $00, $FB, $72, $F8
+DVGROM:5000 00 07 78 F8+				.BYTE $76, $FF,	$72, $F8, $02, $F0, $00, $D0, $03, $F8,	$00, $D0, $02, $F0, $70, $FB
+DVGROM:5000 C0 40 40 06+				.BYTE $02, $FF,	$00, $D0, $00, $FB, $72, $F8, $70, $F7,	$76, $F8, $70, $F7, $72, $F8
+DVGROM:5000 78 F8 00 D0+				.BYTE $02, $F0,	$00, $D0, $72, $F8, $70, $FB, $76, $F8,	$00, $F7, $72, $F8, $02, $F7
+DVGROM:5000 00 30 80 06+				.BYTE $00, $D0,	$00, $FB, $70, $F7, $72, $F8, $00, $F3,	$70, $FF, $02, $F0, $00, $D0
+DVGROM:5000 78 F8 80 36+				.BYTE $72, $F8,	$70, $F3, $76, $F8, $70, $F3, $72, $F8,	$01, $FF, $00, $D0, $00, $F3
+DVGROM:5000 80 06 78 F8+				.BYTE $72, $F8,	$70, $F7, $76, $F8, $70, $FB, $03, $FF,	$00, $D0, $00, $FB, $72, $F8
+DVGROM:5000 80 36 80 02+				.BYTE $70, $FF,	$02, $F0, $00, $D0, $72, $F8, $70, $FB,	$76, $F8, $70, $FF, $00, $F3
+DVGROM:5000 78 F8 40 31+				.BYTE $72, $F8,	$02, $F7, $00, $D0, $02, $F8, $70, $FB,	$76, $F8, $70, $F7, $72, $F8
+DVGROM:5000 C0 03 78 F8+				.BYTE $02, $F7,	$00, $D0, $2C, $CB, $DD, $CA, $2E, $CB,	$32, $CB, $3A, $CB, $41, $CB
 DVGROM:5000 40 35 80 02+				.BYTE $48, $CB,	$4F, $CB, $56, $CB, $5B, $CB, $63, $CB,	$78, $CA, $80, $CA, $8D, $CA
 DVGROM:5000 78 F8 80 32+				.BYTE $93, $CA,	$9B, $CA, $A3, $CA, $AA, $CA, $B3, $CA,	$BA, $CA, $C1, $CA, $C7, $CA
 DVGROM:5000 00 00 78 F8+				.BYTE $CD, $CA,	$D2, $CA, $D8, $CA, $DD, $CA, $E3, $CA,	$EA, $CA, $F3, $CA, $FB, $CA
-DVGROM:5000 C0 33 40 01+				.BYTE 2, $CB, 8, $CB, $E, $CB, $13, $CB, $1A, $CB, $1F,	$CB, $26, $CB, $B, $13
+DVGROM:5000 C0 33 40 01+				.BYTE $02, $CB,	$08, $CB, $0E, $CB, $13, $CB, $1A, $CB,	$1F, $CB, $26, $CB, $0B, $13
 DVGROM:5000 78 F8 C0 33+				.BYTE $19, $2F,	$41, $55, $6F, $77, $7D, $87, $91, $63,	$56, $60, $6E, $3C, $EC, $4D
-DVGROM:5000 40 05 78 F8+				.BYTE $C0, $A4,	$A, $EA, $6C, 8, 0, $EC, $F2, $B0, $6E,	$3C, $EC, $48, $5A, $B8
-DVGROM:5000 A0 44 80 06+				.BYTE $66, $92,	$42, $9A, $82, $C3, $12, $E, $12, $90, $4C, $4D, $F1, $A4, $12,	$2D
-DVGROM:5000 78 F8 40 31+				.BYTE $D2, $A, $64, $C2, $6C, $F, $66, $CD, $82, $6C, $9A, $C3,	$4A, $85, $C0, $A6
-DVGROM:5000 C0 07 78 F8+				.BYTE $6E, $60,	$6C, $9E, $A, $C2, $42,	$C4, $C2, $BA, $60, $49, $F0, $C, $12, $C6
-DVGROM:5000 00 D0 F3 C8+				.BYTE $12, $B0,	0, $A6,	$6E, $60, $58, $ED, $12, $B5, $E8, $29,	$D2, $E, $D8, $4C
-DVGROM:5000 FF C8 0D C9+				.BYTE $82, $82,	$70, $C2, $6C, $B, $6E,	9, $E6,	$B5, $92, $3E, 0, $A6, $6E, $60
-DVGROM:5000 1A C9 08 F9+				.BYTE $6E, $C1,	$6C, $C0, 0, $59, $62, $48, $66, $D2, $6D, $18,	$4E, $9B, $64, 9
-DVGROM:5000 79 F9 79 FD+				.BYTE 2, $A4, $A, $ED, $C0, $18, $4E, $9B, $64,	8, $C2,	$A4, $A, $E8, 0, $20
-DVGROM:5000 7D F6 79 F6+				.BYTE $4E, $9B,	$64, $B8, $46, $D, $20,	$2F, $40, 0, 3,	6, 9, $C, $10, $13
+DVGROM:5000 40 05 78 F8+				.BYTE $C0, $A4,	$0A, $EA, $6C, $08, $00, $EC, $F2, $B0,	$6E, $3C, $EC, $48, $5A, $B8
+DVGROM:5000 A0 44 80 06+				.BYTE $66, $92,	$42, $9A, $82, $C3, $12, $0E, $12, $90,	$4C, $4D, $F1, $A4, $12, $2D
+DVGROM:5000 78 F8 40 31+				.BYTE $D2, $0A,	$64, $C2, $6C, $0F, $66, $CD, $82, $6C,	$9A, $C3, $4A, $85, $C0, $A6
+DVGROM:5000 C0 07 78 F8+				.BYTE $6E, $60,	$6C, $9E, $0A, $C2, $42, $C4, $C2, $BA,	$60, $49, $F0, $0C, $12, $C6
+DVGROM:5000 00 D0 F3 C8+				.BYTE $12, $B0,	$00, $A6, $6E, $60, $58, $ED, $12, $B5,	$E8, $29, $D2, $0E, $D8, $4C
+DVGROM:5000 FF C8 0D C9+				.BYTE $82, $82,	$70, $C2, $6C, $0B, $6E, $09, $E6, $B5,	$92, $3E, $00, $A6, $6E, $60
+DVGROM:5000 1A C9 08 F9+				.BYTE $6E, $C1,	$6C, $C0, $00, $59, $62, $48, $66, $D2,	$6D, $18, $4E, $9B, $64, $09
+DVGROM:5000 79 F9 79 FD+				.BYTE $02, $A4,	$0A, $ED, $C0, $18, $4E, $9B, $64, $08,	$C2, $A4, $0A, $E8, $00, $20
+DVGROM:5000 7D F6 79 F6+				.BYTE $4E, $9B,	$64, $B8, $46, $0D, $20, $2F, $40, $00,	$03, $06, $09, $0C, $10, $13
 DVGROM:5000 8F F6 8F F0+				.BYTE $16, $19,	$1C, $1F, $22, $25, $28, $2B, $2E, $31,	$33, $36, $39, $3C, $3F, $41
 DVGROM:5000 7D F9 78 FA+				.BYTE $44, $47,	$49, $4C, $4E, $51, $53, $55, $58, $5A,	$5C, $5E, $60, $62, $64, $66
 DVGROM:5000 79 F9 79 FD+				.BYTE $68, $6A,	$6B, $6D, $6F, $70, $71, $73, $74, $75,	$76, $78, $79, $7A, $7A, $7B
-DVGROM:5000 00 D0 0A F1+				.BYTE $7C, $7D,	$7D, $7E, $7E, $7E, $7F, $7F, $7F, $7F,	0, 0, 0, 0, 0, 0
+DVGROM:5000 00 D0 0A F1+				.BYTE $7C, $7D,	$7D, $7E, $7E, $7E, $7F, $7F, $7F, $7F,	$00, $00, $00, $00, $00, $00
 DVGROM:5000 7A F1 7D F9+; end of 'DVGROM'
 DVGROM:5000 7E F5 7E F1+
 ROM:6800	     ; ---------------------------------------------------------------------------
@@ -828,10 +827,10 @@ ROM:6970	     loc_6970:
 ROM:6970 A6 18					     LDX     curPlayer
 ROM:6972 B5 57					     LDA     numShipsP1,X			     ; any ships left?
 ROM:6974 D0 1C					     BNE     toggle_player			     ; yes, skip
-ROM:6976 AD 1F 02				     LDA     p1TimerShot0
-ROM:6979 0D 20 02				     ORA     p1TimerShot1
-ROM:697C 0D 21 02				     ORA     p1TimerShot2
-ROM:697F 0D 22 02				     ORA     p1TimerShot3			     ; shot(s) still active?
+ROM:6976 AD 1F 02				     LDA     shipShot_Sts
+ROM:6979 0D 20 02				     ORA     shipShot_Sts+1
+ROM:697C 0D 21 02				     ORA     shipShot_Sts+2
+ROM:697F 0D 22 02				     ORA     shipShot_Sts+3			     ; shot(s) still active?
 ROM:6982 D0 0E					     BNE     toggle_player			     ; yes, skip
 ROM:6984 A0 07					     LDY     #7					     ; "GAME OVER"
 ROM:6986 20 F6 77				     JSR     PrintPackedMsg
@@ -841,7 +840,7 @@ ROM:698D 90 03					     BCC     toggle_player			     ; no, skip
 ROM:698F 20 E2 69				     JSR     print_PLAYER_N			     ; display player
 ROM:6992
 ROM:6992	     toggle_player:								     ; player alive?
-ROM:6992 AD 1B 02				     LDA     p1PlayerFlag
+ROM:6992 AD 1B 02				     LDA     ship_Sts
 ROM:6995 D0 36					     BNE     loc_69CD				     ; yes, skip
 ROM:6997 AD FA 02				     LDA     shipSpawnTimer
 ROM:699A C9 80					     CMP     #$80 ; '€'
@@ -913,7 +912,7 @@ ROM:69F0	     handle_shots:
 ROM:69F0 A2 07					     LDX     #7					     ; 8 values	to check
 ROM:69F2
 ROM:69F2	     chk_shot:									     ; shot status
-ROM:69F2 BD 1B 02				     LDA     p1PlayerFlag,X
+ROM:69F2 BD 1B 02				     LDA     ship_Sts,X
 ROM:69F5 F0 02					     BEQ     next_shot				     ; not active, skip
 ROM:69F7 10 04					     BPL     handle_active_shot			     ; active, go
 ROM:69F9
@@ -992,7 +991,7 @@ ROM:6A69
 ROM:6A69	     loc_6A69:
 ROM:6A69 D0 0C					     BNE     loc_6A77
 ROM:6A6B 69 12					     ADC     #$12
-ROM:6A6D AE 1C 02				     LDX     p1SaucerFlag
+ROM:6A6D AE 1C 02				     LDX     saucer_Sts
 ROM:6A70 CA					     DEX
 ROM:6A71 F0 02					     BEQ     loc_6A75
 ROM:6A73 69 12					     ADC     #$12
@@ -1099,7 +1098,7 @@ ROM:6AFD D0 DA					     BNE     loc_6AD9				     ; always
 ROM:6AFF
 ROM:6AFF	     loc_6AFF:
 ROM:6AFF 88					     DEY
-ROM:6B00 4C 39 7C				     JMP     update_avg_curr_addr
+ROM:6B00 4C 39 7C				     JMP     update_dvg_curr_addr
 ROM:6B03	     ; ---------------------------------------------------------------------------
 ROM:6B03
 ROM:6B03	     is_svec:									     ; BBBB SmXX
@@ -1135,7 +1134,7 @@ ROM:6B27 A2 00					     LDX     #0					     ; offset to player	ship
 ROM:6B29
 ROM:6B29	     loc_6B29:									     ; flag object exploding
 ROM:6B29 A9 A0					     LDA     #$A0 ; ' '
-ROM:6B2B 9D 1B 02				     STA     p1PlayerFlag,X
+ROM:6B2B 9D 1B 02				     STA     ship_Sts,X
 ROM:6B2E A9 00					     LDA     #0
 ROM:6B30 9D 3E 02				     STA     ship_Vh,X
 ROM:6B33 9D 61 02				     STA     ship_Vv,X				     ; zero object velocity
@@ -1145,7 +1144,7 @@ ROM:6B3A B0 37					     BCS     handle_saucer_hit			     ; no (saucer), go
 ROM:6B3C
 ROM:6B3C	     loc_6B3C:
 ROM:6B3C A9 00					     LDA     #0
-ROM:6B3E 9D 1B 02				     STA     p1PlayerFlag,X			     ; flag object inactive
+ROM:6B3E 9D 1B 02				     STA     ship_Sts,X				     ; flag object inactive
 ROM:6B41 C0 1B					     CPY     #$1B				     ; player?
 ROM:6B43 F0 21					     BEQ     ship_hit_asteroid			     ; yes, go
 ROM:6B45 B0 2C					     BCS     handle_saucer_hit			     ; no (saucer), go
@@ -1186,7 +1185,7 @@ ROM:6B79 A5 1C					     LDA     numPlayers				     ; real game?
 ROM:6B7B F0 CD					     BEQ     explode_asteroid			     ; no, go
 ROM:6B7D 86 0D					     STX     byte_D				     ; save object index
 ROM:6B7F A6 19					     LDX     curPlayer_x2
-ROM:6B81 AD 1C 02				     LDA     p1SaucerFlag
+ROM:6B81 AD 1C 02				     LDA     saucer_Sts
 ROM:6B84 4A					     LSR     A					     ; small saucer?
 ROM:6B85 A9 99					     LDA     #$99 ; '™'                              ; (99+1)*10 = 1,000 pts
 ROM:6B87 B0 02					     BCS     loc_6B8B				     ; yes, skip
@@ -1212,7 +1211,7 @@ ROM:6B99 60					     RTS
 ROM:6B9A	     ; ---------------------------------------------------------------------------
 ROM:6B9A
 ROM:6B9A	     loc_6B9A:
-ROM:6B9A AD 1C 02				     LDA     p1SaucerFlag
+ROM:6B9A AD 1C 02				     LDA     saucer_Sts
 ROM:6B9D 30 FA					     BMI     locret_6B99			     ; exploding? yes, exit
 ROM:6B9F F0 03					     BEQ     handle_new_saucer			     ; no saucer? yes, go
 ROM:6BA1 4C 34 6C				     JMP     handle_existing_saucer		     ; small/large saucer
@@ -1221,7 +1220,7 @@ ROM:6BA4
 ROM:6BA4	     handle_new_saucer:								     ; game active?
 ROM:6BA4 A5 1C					     LDA     numPlayers
 ROM:6BA6 F0 07					     BEQ     loc_6BAF				     ; no, go
-ROM:6BA8 AD 1B 02				     LDA     p1PlayerFlag			     ; player active?
+ROM:6BA8 AD 1B 02				     LDA     ship_Sts				     ; player active?
 ROM:6BAB F0 EC					     BEQ     locret_6B99			     ; no, return
 ROM:6BAD 30 EA					     BMI     locret_6B99			     ; exploding? yes, return
 ROM:6BAF
@@ -1296,7 +1295,7 @@ ROM:6C2F	     loc_6C2F:									     ; small saucer
 ROM:6C2F CA					     DEX
 ROM:6C30
 ROM:6C30	     loc_6C30:
-ROM:6C30 8E 1C 02				     STX     p1SaucerFlag
+ROM:6C30 8E 1C 02				     STX     saucer_Sts
 ROM:6C33 60					     RTS
 ROM:6C34	     ; ---------------------------------------------------------------------------
 ROM:6C34
@@ -1327,7 +1326,7 @@ ROM:6C54
 ROM:6C54	     loc_6C54:
 ROM:6C54 A9 0A					     LDA     #10
 ROM:6C56 8D F7 02				     STA     saucerCountdownTimer
-ROM:6C59 AD 1C 02				     LDA     p1SaucerFlag
+ROM:6C59 AD 1C 02				     LDA     saucer_Sts
 ROM:6C5C 4A					     LSR     A					     ; small saucer?
 ROM:6C5D F0 06					     BEQ     handle_small_saucer		     ; yes, go
 ROM:6C5F 20 B5 77				     JSR     update_prng			     ; random shot direction
@@ -1422,7 +1421,7 @@ ROM:6CEE 85 0E					     STA     byte_E
 ROM:6CF0 A0 07					     LDY     #7					     ; offset shot3 timer
 ROM:6CF2
 ROM:6CF2	     find_free_shot_slot:							     ; get shot	timer
-ROM:6CF2 B9 1B 02				     LDA     p1PlayerFlag,Y
+ROM:6CF2 B9 1B 02				     LDA     ship_Sts,Y
 ROM:6CF5 F0 06					     BEQ     new_shot_fired			     ; not active, go
 ROM:6CF7 88					     DEY					     ; next shot timer
 ROM:6CF8 C4 0E					     CPY     byte_E				     ; done all	shot timers?
@@ -1435,7 +1434,7 @@ ROM:6CFD
 ROM:6CFD	     new_shot_fired:								     ; offset to ship/saucer
 ROM:6CFD 86 0D					     STX     byte_D
 ROM:6CFF A9 12					     LDA     #18
-ROM:6D01 99 1B 02				     STA     p1PlayerFlag,Y			     ; init shot timer
+ROM:6D01 99 1B 02				     STA     ship_Sts,Y				     ; init shot timer
 ROM:6D04 B5 61					     LDA     direction,X			     ; ship/saucer
 ROM:6D06 20 D2 77				     JSR     get_thrust_cos
 ROM:6D09 A6 0D					     LDX     byte_D				     ; was byte_2FA
@@ -1677,14 +1676,14 @@ ROM:6E74
 ROM:6E74	     handle_hyperspace:
 ROM:6E74 A5 1C					     LDA     numPlayers
 ROM:6E76 F0 5F					     BEQ     locret_6ED7			     ; not a real game,	exit
-ROM:6E78 AD 1B 02				     LDA     p1PlayerFlag
+ROM:6E78 AD 1B 02				     LDA     ship_Sts
 ROM:6E7B 30 5A					     BMI     locret_6ED7			     ; exploding, exit
 ROM:6E7D AD FA 02				     LDA     shipSpawnTimer
 ROM:6E80 D0 55					     BNE     locret_6ED7
 ROM:6E82 AD 03 20				     LDA     hyperspaceSwitch			     ; button pressed?
 ROM:6E85 10 50					     BPL     locret_6ED7			     ; no, exit
 ROM:6E87 A9 00					     LDA     #0					     ; flag hyperspace?
-ROM:6E89 8D 1B 02				     STA     p1PlayerFlag
+ROM:6E89 8D 1B 02				     STA     ship_Sts
 ROM:6E8C 8D 3E 02				     STA     ship_Vh
 ROM:6E8F 8D 61 02				     STA     ship_Vv				     ; zero ship velocity
 ROM:6E92 A9 30					     LDA     #48
@@ -1755,8 +1754,8 @@ ROM:6EE7 A9 00					     LDA     #0
 ROM:6EE9 A2 04					     LDX     #4					     ; 4 flags,	4 timers, 4 score bytes
 ROM:6EEB
 ROM:6EEB	     loc_6EEB:									     ; init flag
-ROM:6EEB 9D 1B 02				     STA     p1PlayerFlag,X
-ROM:6EEE 9D 1F 02				     STA     p1TimerShot0,X			     ; init timer
+ROM:6EEB 9D 1B 02				     STA     ship_Sts,X
+ROM:6EEE 9D 1F 02				     STA     shipShot_Sts,X			     ; init timer
 ROM:6EF1 95 51					     STA     byte_4F+2,X			     ; zero player score
 ROM:6EF3 CA					     DEX					     ; next byte
 ROM:6EF4 10 F5					     BPL     loc_6EEB				     ; loop until done
@@ -1990,7 +1989,7 @@ ROM:702D	     zero_saucer:
 ROM:702D AD F8 02				     LDA     starting_saucerCountdownTimer
 ROM:7030 8D F7 02				     STA     saucerCountdownTimer
 ROM:7033 A9 00					     LDA     #0
-ROM:7035 8D 1C 02				     STA     p1SaucerFlag
+ROM:7035 8D 1C 02				     STA     saucer_Sts
 ROM:7038 8D 3F 02				     STA     saucer_Vh
 ROM:703B 8D 62 02				     STA     saucer_Vv
 ROM:703E 60					     RTS
@@ -2003,7 +2002,7 @@ ROM:703F
 ROM:703F	     handle_respawn_rot_thrust:
 ROM:703F A5 1C					     LDA     numPlayers
 ROM:7041 F0 42					     BEQ     locret_7085
-ROM:7043 AD 1B 02				     LDA     p1PlayerFlag
+ROM:7043 AD 1B 02				     LDA     ship_Sts
 ROM:7046 30 3D					     BMI     locret_7085			     ; exploding - exit
 ROM:7048 AD FA 02				     LDA     shipSpawnTimer
 ROM:704B F0 39					     BEQ     check_rot_left
@@ -2014,7 +2013,7 @@ ROM:7054 30 19					     BMI     loc_706F				     ; unsuccessful - go
 ROM:7056 D0 10					     BNE     end_hyperspace			     ; successful - go
 ROM:7058 20 39 71				     JSR     check_near_objs_and_extend_spawn	     ; objects too close?
 ROM:705B D0 24					     BNE     loc_7081				     ; yes, exit
-ROM:705D AC 1C 02				     LDY     p1SaucerFlag
+ROM:705D AC 1C 02				     LDY     saucer_Sts
 ROM:7060 F0 06					     BEQ     end_hyperspace			     ; no saucer - go
 ROM:7062 A0 02					     LDY     #2
 ROM:7064 8C FA 02				     STY     shipSpawnTimer
@@ -2023,12 +2022,12 @@ ROM:7068	     ; ----------------------------------------------------------------
 ROM:7068
 ROM:7068	     end_hyperspace:								     ; flag alive and active
 ROM:7068 A9 01					     LDA     #1
-ROM:706A 8D 1B 02				     STA     p1PlayerFlag
+ROM:706A 8D 1B 02				     STA     ship_Sts
 ROM:706D D0 12					     BNE     loc_7081				     ; always go
 ROM:706F
 ROM:706F	     loc_706F:									     ; flag exploding
 ROM:706F A9 A0					     LDA     #$A0 ; ' '
-ROM:7071 8D 1B 02				     STA     p1PlayerFlag
+ROM:7071 8D 1B 02				     STA     ship_Sts
 ROM:7074 A2 3E					     LDX     #$3E ; '>'
 ROM:7076 86 69					     STX     timerExplosionSound
 ROM:7078 A6 18					     LDX     curPlayer
@@ -2222,7 +2221,7 @@ ROM:7168	     init_wave:
 ROM:7168 A2 1A					     LDX     #26				     ; 26+1 asteroids
 ROM:716A AD FB 02				     LDA     asteroidWaveTimer
 ROM:716D D0 70					     BNE     loc_71DF
-ROM:716F AD 1C 02				     LDA     p1SaucerFlag			     ; saucer active?
+ROM:716F AD 1C 02				     LDA     saucer_Sts				     ; saucer active?
 ROM:7172 D0 73					     BNE     locret_71E7			     ; yes, return
 ROM:7174 8D 3F 02				     STA     saucer_Vh
 ROM:7177 8D 62 02				     STA     saucer_Vv				     ; zero saucer vertical velocity
@@ -2397,7 +2396,7 @@ ROM:726C D0 18					     BNE     loc_7286				     ; no, skip
 ROM:726E A5 18					     LDA     curPlayer				     ; player 1?
 ROM:7270 D0 14					     BNE     loc_7286				     ; yes, skip
 ROM:7272 A2 20					     LDX     #$20 ; ' '
-ROM:7274 AD 1B 02				     LDA     p1PlayerFlag
+ROM:7274 AD 1B 02				     LDA     ship_Sts
 ROM:7277 05 59					     ORA     hyperspaceFlag
 ROM:7279 D0 0B					     BNE     loc_7286
 ROM:727B AD FA 02				     LDA     shipSpawnTimer
@@ -2446,7 +2445,7 @@ ROM:72CF 90 18					     BCC     loc_72E9
 ROM:72D1 A5 18					     LDA     curPlayer
 ROM:72D3 F0 14					     BEQ     loc_72E9
 ROM:72D5 A2 20					     LDX     #$20 ; ' '
-ROM:72D7 AD 1B 02				     LDA     p1PlayerFlag
+ROM:72D7 AD 1B 02				     LDA     ship_Sts
 ROM:72DA 05 59					     ORA     hyperspaceFlag
 ROM:72DC D0 0B					     BNE     loc_72E9
 ROM:72DE AD FA 02				     LDA     shipSpawnTimer
@@ -2743,7 +2742,7 @@ ROM:7465	     ; =============== S U B R O U T I N E ============================
 ROM:7465
 ROM:7465
 ROM:7465	     display_exploding_ship:
-ROM:7465 AD 1B 02				     LDA     p1PlayerFlag
+ROM:7465 AD 1B 02				     LDA     ship_Sts
 ROM:7468 C9 A2					     CMP     #$A2 ; '¢'                              ; 2 frames past exploding?
 ROM:746A B0 22					     BCS     loc_748E
 ROM:746C A2 0A					     LDX     #10				     ; 10 entries to parse
@@ -2772,7 +2771,7 @@ ROM:748B CA					     DEX
 ROM:748C 10 E0					     BPL     loc_746E
 ROM:748E
 ROM:748E	     loc_748E:
-ROM:748E AD 1B 02				     LDA     p1PlayerFlag
+ROM:748E AD 1B 02				     LDA     ship_Sts
 ROM:7491 49 FF					     EOR     #$FF
 ROM:7493 29 70					     AND     #$70 ; 'p'
 ROM:7495 4A					     LSR     A
@@ -2839,7 +2838,7 @@ ROM:74F9 49 04					     EOR     #4
 ROM:74FB 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:74FD C0 03					     CPY     #3
 ROM:74FF 90 F0					     BCC     loc_74F1
-ROM:7501 20 39 7C				     JSR     update_avg_curr_addr
+ROM:7501 20 39 7C				     JSR     update_dvg_curr_addr
 ROM:7504 A6 09					     LDX     byte_9
 ROM:7506 CA					     DEX
 ROM:7507 CA					     DEX
@@ -2916,7 +2915,7 @@ ROM:755A	     ; ----------------------------------------------------------------
 ROM:755A
 ROM:755A	     update_sounds:
 ROM:755A A2 00					     LDX     #0
-ROM:755C AD 1C 02				     LDA     p1SaucerFlag
+ROM:755C AD 1C 02				     LDA     saucer_Sts
 ROM:755F 30 0A					     BMI     loc_756B				     ; exploding, skip
 ROM:7561 F0 08					     BEQ     loc_756B				     ; no saucer, skip
 ROM:7563 6A					     ROR     A
@@ -2933,7 +2932,7 @@ ROM:7573 8D 01 3C				     STA     $3C01				     ; sound (saucer fire)
 ROM:7576 CA					     DEX					     ; index to	player sound
 ROM:7577 20 CD 75				     JSR     update_player_saucer_sound
 ROM:757A 8D 04 3C				     STA     $3C04				     ; sound (ship fire)
-ROM:757D AD 1B 02				     LDA     p1PlayerFlag
+ROM:757D AD 1B 02				     LDA     ship_Sts
 ROM:7580 C9 01					     CMP     #1					     ; alive?
 ROM:7582 F0 04					     BEQ     loc_7588				     ; yes, skip
 ROM:7584 8A					     TXA
@@ -2942,7 +2941,7 @@ ROM:7588
 ROM:7588	     loc_7588:
 ROM:7588 AD F6 02				     LDA     currentNumberOfAsteroids
 ROM:758B F0 11					     BEQ     loc_759E
-ROM:758D AD 1B 02				     LDA     p1PlayerFlag			     ; alive?
+ROM:758D AD 1B 02				     LDA     ship_Sts				     ; alive?
 ROM:7590 30 0C					     BMI     loc_759E				     ; no, skip
 ROM:7592 05 59					     ORA     hyperspaceFlag			     ; hyperspace?
 ROM:7594 F0 08					     BEQ     loc_759E				     ; not active, skip
@@ -3513,7 +3512,7 @@ ROM:7847 90 DF					     BCC     loc_7828				     ; no, loop
 ROM:7849
 ROM:7849	     loc_7849:
 ROM:7849 88					     DEY
-ROM:784A 4C 39 7C				     JMP     update_avg_curr_addr
+ROM:784A 4C 39 7C				     JMP     update_dvg_curr_addr
 ROM:784A	     ; End of function PrintPackedMsg
 ROM:784A
 ROM:784D
@@ -3856,7 +3855,7 @@ ROM:7BC2 A0 00					     LDY     #0
 ROM:7BC4 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BC6 C8					     INY
 ROM:7BC7 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:7BC9 D0 6E					     BNE     update_avg_curr_addr
+ROM:7BC9 D0 6E					     BNE     update_dvg_curr_addr
 ROM:7BCB
 ROM:7BCB	     loc_7BCB:
 ROM:7BCB 90 04					     BCC     display_digit_A
@@ -3884,7 +3883,7 @@ ROM:7BDE 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BE0 BD D5 56				     LDA     DVGROM+$6D5,X			     ; chr fn lsb
 ROM:7BE3 C8					     INY
 ROM:7BE4 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:7BE6 20 39 7C				     JSR     update_avg_curr_addr
+ROM:7BE6 20 39 7C				     JSR     update_dvg_curr_addr
 ROM:7BE9 28					     PLP
 ROM:7BEA 60					     RTS
 ROM:7BEA	     ; End of function display_digit_A
@@ -3903,7 +3902,7 @@ ROM:7BF5 8A					     TXA
 ROM:7BF6 6A					     ROR     A					     ; adjust address
 ROM:7BF7 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BF9 C8					     INY
-ROM:7BFA D0 3D					     BNE     update_avg_curr_addr
+ROM:7BFA D0 3D					     BNE     update_dvg_curr_addr
 ROM:7BFA	     ; END OF FUNCTION CHUNK FOR write_JSR_cmd
 ROM:7BFC	     ; A:X = address
 ROM:7BFC
@@ -3970,7 +3969,7 @@ ROM:7C39
 ROM:7C39	     ; =============== S U B R O U T I N E =======================================
 ROM:7C39
 ROM:7C39
-ROM:7C39	     update_avg_curr_addr:
+ROM:7C39	     update_dvg_curr_addr:
 ROM:7C39 98					     TYA					     ; #bytes this operation
 ROM:7C3A 38					     SEC
 ROM:7C3B 65 02					     ADC     dvg_curr_addr_lsb
@@ -3980,7 +3979,7 @@ ROM:7C41 E6 03					     INC     dvg_curr_addr_msb
 ROM:7C43
 ROM:7C43	     locret_7C43:
 ROM:7C43 60					     RTS
-ROM:7C43	     ; End of function update_avg_curr_addr
+ROM:7C43	     ; End of function update_dvg_curr_addr
 ROM:7C43
 ROM:7C43	     ; ---------------------------------------------------------------------------
 ROM:7C44 A9					     .BYTE $A9 ; ©
@@ -4093,7 +4092,7 @@ ROM:7CD4 05 01					     ORA     byte_1
 ROM:7CD6 05 05					     ORA     byte_5
 ROM:7CD8 C8					     INY
 ROM:7CD9 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:7CDB 4C 39 7C				     JMP     update_avg_curr_addr
+ROM:7CDB 4C 39 7C				     JMP     update_dvg_curr_addr
 ROM:7CDB	     ; End of function from_exploding_ship
 ROM:7CDB
 ROM:7CDE
@@ -4101,7 +4100,7 @@ ROM:7CDE	     ; =============== S U B R O U T I N E ============================
 ROM:7CDE
 ROM:7CDE
 ROM:7CDE	     set_scale_A_bright_0:
-ROM:7CDE A2 00					     LDX     #0					     ; Y=0
+ROM:7CDE A2 00					     LDX     #0					     ; brightness=0
 ROM:7CDE	     ; End of function set_scale_A_bright_0
 ROM:7CDE
 ROM:7CE0
@@ -4120,7 +4119,7 @@ ROM:7CEA 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store (XXXX XXXX)=
 ROM:7CEC C8					     INY
 ROM:7CED 8A					     TXA
 ROM:7CEE 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store (BBBB -mXX)=X in avg ram
-ROM:7CF0 4C 39 7C				     JMP     update_avg_curr_addr
+ROM:7CF0 4C 39 7C				     JMP     update_dvg_curr_addr
 ROM:7CF0	     ; End of function set_scale_A_bright_X
 ROM:7CF0
 ROM:7CF3	     ; ---------------------------------------------------------------------------
@@ -4178,7 +4177,7 @@ ROM:7D47 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7D49 C8					     INY
 ROM:7D4A 8A					     TXA
 ROM:7D4B 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:7D4D 4C 39 7C				     JMP     update_avg_curr_addr
+ROM:7D4D 4C 39 7C				     JMP     update_dvg_curr_addr
 ROM:7D4D	     ; End of function write_AX_to_avgram
 ROM:7D4D
 ROM:7D50	     ; ---------------------------------------------------------------------------
