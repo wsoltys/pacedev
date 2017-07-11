@@ -295,9 +295,22 @@ static void handle_sounds (void);											// $7555
 static void check_high_score (void);									// $765C
 static uint8_t update_prng (void);										// $77B5
 static void halt_dvg (void);													// $7BC0
+static void write_JMP_JSR_cmd (
+							eDVG_OPCODE opcode, 
+							uint16_t addr
+							);																			// $7BF0
 static void write_JSR_cmd (uint16_t addr);						// $7BFC
 static void write_CURx4_cmd (uint8_t x, uint8_t y);		// $7C03
+static void write_CUR_cmd (uint16_t x, uint16_t y);		// $7C1C
+static void update_dvg_curr_addr (void);							// $7C39
 static void reset (void);															// $7CF3
+
+extern void dvgrom_disassemble_jsr (uint16_t addr);
+
+extern uint16_t dvg_x;
+extern uint16_t dvg_y;
+extern uint16_t dvg_scale;
+extern uint16_t dvg_brightness;
 
 static void dump_displaylist (void)
 {
@@ -308,6 +321,9 @@ static void dump_displaylist (void)
 	{
 		DISPLAYLIST_ENTRY *dle = &displaylist[i];
 		
+		if (zp.dvg_curr_addr == i)
+			break;
+
 		switch (dle->opcode)
 		{
 			case VEC0 : case VEC1 : case VEC2 : case VEC3 : case VEC4 :
@@ -315,14 +331,19 @@ static void dump_displaylist (void)
 				break;
 
 			case CUR :
-				sprintf (disasm, "CUR scale=%1d x=%d, y=%d",
-									dle->cur.scale, dle->cur.x, dle->cur.y);
+				sprintf (disasm, "CUR scale=%1d(/%d) x=%d, y=%d",
+									dle->cur.scale, 1<<(9-dle->cur.scale), dle->cur.x, dle->cur.y);
+				dvg_x = dle->cur.x;
+				dvg_y = dle->cur.y;
+				dvg_scale = dle->cur.scale;
 				break;
 								
 			case HALT :
+				sprintf (disasm, "HALT");
 				break;
 								
 			case JSR :
+				sprintf (disasm, "JSR $%04X", dle->jsr_jmp.addr);
 				break;
 								
 			case RTS :
@@ -343,11 +364,12 @@ static void dump_displaylist (void)
 		for (j=0; j<dle->len; j++)
 			b += sprintf (b, "%02X ", dle->byte[j]);
 
-		printf ("%-32.32s %s\n", disasm, bin);
+		printf ("%-16.16s %s\n", bin, disasm);
+
+		if (dle->opcode == JSR)
+			dvgrom_disassemble_jsr (dle->jsr_jmp.addr);
 				
 		if (dle->opcode == HALT)
-			break;
-		if (zp.dvg_curr_addr == i)
 			break;
 	}
 }
@@ -655,30 +677,72 @@ uint8_t update_prng (void)
 // $7BC0
 void halt_dvg (void)
 {
-	//UNIMPLEMENTED;
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+
+	dle->opcode = HALT;
+	
+	dle->byte[0] = 0xB0;
+	dle->byte[1] = 0xB0;
+	dle->len = 2;
+
+	update_dvg_curr_addr ();	
+}
+
+// $7BF0
+void write_JMP_JSR_cmd (eDVG_OPCODE opcode, uint16_t addr)
+{
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+
+	dle->opcode = opcode;
+	dle->jsr_jmp.addr = addr;
+	
+	// convert to word address
+	addr >>= 1;
+	dle->byte[1] = (opcode << 4) | ((addr >> 8) & 0x0F);
+	dle->byte[0] = addr & 0xFF;
+	dle->len = 2;
+	
+	update_dvg_curr_addr ();
 }
 
 // $7BFC
 void write_JSR_cmd (uint16_t addr)
 {
+	write_JMP_JSR_cmd (JSR, addr);
 }
 
 // $7C03
 void write_CURx4_cmd (uint8_t x, uint8_t y)
 {
+	//DBGPRINTF ("%s (%d,%d):\n", __FUNCTION__, x, y);
+
+	write_CUR_cmd ((uint16_t)x*4, (uint16_t)y*4);
+}
+
+// $7C1C
+void write_CUR_cmd (uint16_t x, uint16_t y)
+{
 	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
 
-	dle->opcode = CUR;
-	dle->cur.y = ((uint16_t)zp.byte_7 << 8) | zp.byte_6;
-	dle->cur.x = ((uint16_t)zp.byte_5 << 8) | zp.byte_4;
-	dle->cur.scale = zp.globalScale;
+	//DBGPRINTF ("%s (%d,%d):\n", __FUNCTION__, x, y);
 	
-	dle->byte[0] = zp.byte_6;
-	dle->byte[1] = (zp.byte_7 & 0x0F) | 0xA0;
-	dle->byte[2] = zp.byte_4;
-	dle->byte[3] = (zp.byte_5 & 0x0F) | zp.globalScale;
+	dle->byte[0] = x & 0xFF;
+	dle->byte[1] = ((x >> 8) & 0x0F) | 0xA0;
+	dle->byte[2] = y & 0xFF;
+	dle->byte[3] = ((y >> 8) & 0x0F) | zp.globalScale;
 	dle->len = 4;
 	
+	dle->opcode = CUR;
+	dle->cur.y = y;
+	dle->cur.x = x;
+	dle->cur.scale = dle->byte[3] >> 4;
+
+	update_dvg_curr_addr ();	
+}
+
+// $7C39
+void update_dvg_curr_addr (void)
+{
 	zp.dvg_curr_addr++;
 }
 

@@ -183,6 +183,7 @@ OBJDIR = obj/$(PLATFORM)
 
 ASTEROID_OBJS = \
 	$(OBJDIR)/asteroid.o	\
+	$(OBJDIR)/dvgrom.o \
 	$(OBJDIR)/bitmaps.o
 
 OSD_OBJS = \

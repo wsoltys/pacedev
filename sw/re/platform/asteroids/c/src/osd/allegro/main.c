@@ -31,13 +31,21 @@ unsigned int osd_quit (void)
 	return (0);
 }
 
+void osd_line (unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned brightness)
+{
+	//printf ("line(%d,%d)-(%d,%d)\n", x1, y1, x2, y2);
+	if (brightness)
+		line (screen, x1, 1023-y1, x2, 1023-y2, 15);
+}
+
 void main (int argc, char *argv[])
 {
 	allegro_init ();
 	install_keyboard ();
 
 	set_color_depth (8);
-	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
+	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 1024, 1024, 0, 0);
+	//set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
 
 	clear_bitmap (screen);
   asteroids2 ();
