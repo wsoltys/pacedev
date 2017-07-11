@@ -6,7 +6,7 @@
 
 uint16_t dvg_x;
 uint16_t dvg_y;
-uint16_t dvg_scale;
+int8_t dvg_scale;
 uint16_t dvg_brightness;
 
 #define SCALE(s) (1<<(9-(dvg_scale+s)))
@@ -210,7 +210,7 @@ void dvgrom_disassemble_jsr (uint16_t addr)
         // update hardware
         dvg_x = x;
         dvg_y = y;
-        dvg_scale = s;
+        dvg_scale = (s > 7 ? s-16 : s);
         break;
       // halt
       case 0x0B :
@@ -252,9 +252,9 @@ void dvgrom_disassemble_jsr (uint16_t addr)
       case 0x0F :
       	// 1111 smYY BBBB SmXX
       	// BBBB SmXX 1111 smYY 
-      	x = (*(p+0) & 0x03) << 10;
+      	x = (*(p+0) & 0x03) << 10;		// where does 10 come from?
       	if (*(p+0) & (1<<2)) x = -x;
-      	y = (*(p+1) & 0x03) << 10;
+      	y = (*(p+1) & 0x03) << 10;		// where does 10 come from?
       	if (*(p+1) & (1<<2)) y = -y;
       	s = ((*(p+0) & 0x08) >> 2) | ((*(p+1) & 0x08) >> 3);
       	b = (*(p+0) & 0xf0) >> 4;

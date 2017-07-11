@@ -252,7 +252,7 @@ typedef struct
 		} vec_svec;
 		struct
 		{
-			uint8_t				scale;
+			int8_t				scale;
 			int16_t				x;
 			int16_t				y;
 		} cur;
@@ -281,6 +281,10 @@ static int8_t handle_high_score_entry (void);					// $6D90
 static void handle_hyperspace (void);									// $6E74
 static void init_players (void);											// $6ED8
 static void init_sound (void);												// $6EFA
+static void display_extra_ships (
+							uint8_t x, 
+							uint8_t n
+							);																			// $6F3E
 static void update_and_render_objects (void);					// $6F57
 static void handle_respawn_rot_thrust (void);					// $703F
 static void init_wave (void);													// $7168
@@ -303,13 +307,18 @@ static void write_JSR_cmd (uint16_t addr);						// $7BFC
 static void write_CURx4_cmd (uint8_t x, uint8_t y);		// $7C03
 static void write_CUR_cmd (uint16_t x, uint16_t y);		// $7C1C
 static void update_dvg_curr_addr (void);							// $7C39
+static void set_scale_A_bright_0 (uint8_t a);					// $7CDE 
+static void set_scale_A_bright_X (
+							uint8_t a, 
+							uint8_t x
+							);																			// $7CDE 
 static void reset (void);															// $7CF3
 
 extern void dvgrom_disassemble_jsr (uint16_t addr);
 
 extern uint16_t dvg_x;
 extern uint16_t dvg_y;
-extern uint16_t dvg_scale;
+extern int8_t dvg_scale;
 extern uint16_t dvg_brightness;
 
 static void dump_displaylist (void)
@@ -331,7 +340,7 @@ static void dump_displaylist (void)
 				break;
 
 			case CUR :
-				sprintf (disasm, "CUR scale=%1d(/%d) x=%d, y=%d",
+				sprintf (disasm, "CUR scale=% 1d(/%d) x=%d, y=%d",
 									dle->cur.scale, 1<<(9-dle->cur.scale), dle->cur.x, dle->cur.y);
 				dvg_x = dle->cur.x;
 				dvg_y = dle->cur.y;
@@ -506,6 +515,20 @@ void init_sound (void)
 	zp.timerBonusShipSound = 0;
 }
 
+// $6F3E
+void display_extra_ships (uint8_t x, uint8_t n)
+{
+	if (n == 0)
+		return;
+	zp.globalScale = 0xE0;				// -2
+	write_CURx4_cmd (x, 213);
+	do
+	{
+		write_JSR_cmd (0x54DA);
+		
+	} while (--n);
+}
+
 // $6F57
 void update_and_render_objects (void)
 {
@@ -632,8 +655,13 @@ void display_C_scores_ships (void)
 {
 	//UNIMPLEMENTED;
 
-	zp.globalScale = 16;
-	write_JSR_cmd (0x50A4);	
+	zp.globalScale = 0x10;				// 1
+	write_JSR_cmd (0x50A4);
+	write_CURx4_cmd (25, 219);
+	set_scale_A_bright_0 (0x70);
+	//
+	//display_numeric (zp.p1ScoreTens, 2, .., 1);
+	display_extra_ships (40, 3);
 }
 
 // $73C4
@@ -736,6 +764,7 @@ void write_CUR_cmd (uint16_t x, uint16_t y)
 	dle->cur.y = y;
 	dle->cur.x = x;
 	dle->cur.scale = dle->byte[3] >> 4;
+	if (dle->cur.scale > 7) dle->cur.scale -= 16;
 
 	update_dvg_curr_addr ();	
 }
@@ -744,6 +773,31 @@ void write_CUR_cmd (uint16_t x, uint16_t y)
 void update_dvg_curr_addr (void)
 {
 	zp.dvg_curr_addr++;
+}
+
+// $7CDE 
+void set_scale_A_bright_0 (uint8_t a)
+{
+	set_scale_A_bright_X (a, 0);
+}
+
+// $7CDE 
+void set_scale_A_bright_X (uint8_t a, uint8_t x)
+{
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+
+	dle->byte[1] = a;
+	dle->byte[0] = 0;
+	dle->byte[2] = 0;
+	dle->byte[3] = x;
+	
+	dle->opcode = (eDVG_OPCODE)(a>>4);
+	dle->vec_svec.scale = (uint8_t)dle->opcode;
+	dle->vec_svec.brightness = x>>4;
+	dle->vec_svec.x = 0;
+	dle->vec_svec.y = 0;
+	
+	update_dvg_curr_addr ();
 }
 
 // $7CF3
