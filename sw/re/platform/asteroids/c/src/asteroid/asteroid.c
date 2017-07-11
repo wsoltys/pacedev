@@ -35,8 +35,7 @@ typedef struct
 {
 	uint8_t		globalScale;										// $00
 	uint8_t		byte_1;													// $01
-	uint8_t		dvg_curr_addr_lsb;							// $02
-	uint8_t		dvg_curr_addr_msb;							// $03
+	uint16_t	dvg_curr_addr;									// $02-$03
 	uint8_t		byte_4;													// $04
 	uint8_t		byte_5;													// $05
 	uint8_t		byte_6;													// $06
@@ -127,47 +126,84 @@ typedef struct
 
 typedef struct
 {
-	// 0xA0+ = exploding
-	// (4:3) = shape (0-3)
-	// (2:1) = size (0=small, 1=medium,	2=large)
-	uint8_t		p1AsteroidFlag[27];							// $0200-$021A
-	// - 0x00  = in hyperspace?
- 	// - 0x01  = player	alive and active
- 	//- 0xA0+ = player	exploding
-	uint8_t		p1PlayerFlag;										// $021B
-	// - 0x00  = no saucer
-	// - 0x01  = small saucer
-	// - 0x02  = large saucer
-	// - 0xA0+ = saucer	exploding
-	uint8_t		p1SaucerFlag;										// $021C
-	uint8_t		saucerShotTimer[2];							// $021D-$021E
-	uint8_t		p1TimerShot[4];									// $021F-$0222
+	union
+	{
+		struct
+		{
+			// 0xA0+ = exploding
+			// (4:3) = shape (0-3)
+			// (2:1) = size (0=small, 1=medium,	2=large)
+			uint8_t		asteroid_Sts[27];								// $0200-$021A
+			// - 0x00  = in hyperspace?
+		 	// - 0x01  = player	alive and active
+		 	//- 0xA0+ = player	exploding
+			uint8_t		ship_Sts;												// $021B
+			// - 0x00  = no saucer
+			// - 0x01  = small saucer
+			// - 0x02  = large saucer
+			// - 0xA0+ = saucer	exploding
+			uint8_t		saucer_Sts;											// $021C
+			uint8_t		saucerShot_Sts[2];							// $021D-$021E
+			uint8_t		shipShot_Sts[4];								// $021F-$0222
+		};
+		int8_t			object_Status[27+1+1+2+4];
+	};
+	
 	// Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
-	int8_t		asteroid_Vh[27];								// $0223-$023D
-	int8_t		ship_Vh;												// $023E
-	int8_t		saucer_Vh;											// $023F
-	int8_t		saucerShot_Vh[2];								// $0240-$0241
-	int8_t		shipShot_Vh[4];									// $0242-$0245
+	union
+	{
+		struct
+		{
+			int8_t		asteroid_Vh[27];								// $0223-$023D
+			int8_t		ship_Vh;												// $023E
+			int8_t		saucer_Vh;											// $023F
+			int8_t		saucerShot_Vh[2];								// $0240-$0241
+			int8_t		shipShot_Vh[4];									// $0242-$0245
+		};
+		int8_t			object_Vh[27+1+1+2+4];
+	};
 	// Vertical	Velocity 0-255 (255-192)=Down, 1-63=Up
-	int8_t		asteroid_Vv[27];								// $0246-$0260
-	int8_t		ship_Vv;												// $0261
-	int8_t		saucer_Vv;											// $0262
-	int8_t		saucerShot_Vv[2];								// $0264-$0265
-	int8_t		shipShot_Vv[4];									// $0266-$0269
+	union
+	{
+		struct
+		{
+			int8_t		asteroid_Vv[27];								// $0246-$0260
+			int8_t		ship_Vv;												// $0261
+			int8_t		saucer_Vv;											// $0262
+			int8_t		saucerShot_Vv[2];								// $0264-$0265
+			int8_t		shipShot_Vv[4];									// $0266-$0269
+		};
+		int8_t			object_Vv[27+1+1+2+4];
+	};
 	// Horiztonal Position High	(0-31) 0=Left, 31=Right
 	// Horizontal Position Low (0-255),	0=Left,	255=Right
-	uint16_t	asteroid_Ph[27];								// $0269-$0283,$02AF-$02C9
-	uint16_t	ship_Ph;												// $0284,$02CA
-	uint16_t	saucer_Ph;											// $0285,$02CB
-	uint16_t	saucerShot_Ph[2];								// $0286-$0287,$02CC-$02CD
-	uint16_t	shipShot_Ph[4];									// $0288-$028B,$02CE-$02D1
+	union
+	{
+		struct
+		{
+			uint16_t	asteroid_Ph[27];								// $0269-$0283,$02AF-$02C9
+			uint16_t	ship_Ph;												// $0284,$02CA
+			uint16_t	saucer_Ph;											// $0285,$02CB
+			uint16_t	saucerShot_Ph[2];								// $0286-$0287,$02CC-$02CD
+			uint16_t	shipShot_Ph[4];									// $0288-$028B,$02CE-$02D1
+		};
+		int8_t			object_Vv[27+1+1+2+4];
+	};
 	// Vertical	Position High (0-23), 0=Bottom,	23=Top
 	// Vertical	Position Low (0-255), 0=Bottom,	255=Top
-	uint16_t	asteroid_Pv[27];								// $028C-$02A6,$02D2-$02EC
-	uint16_t	ship_Pv;												// $02A7,$02ED
-	uint16_t	saucer_Pv;											// $02A8,$02EE
-	uint16_t	saucerShot_Pv[2];								// $02A9-$02AA,$02EF-$02F0
-	uint16_t	shotShot_Pv[4];									// $02AB-$02AE,$02F1-$02F4
+	union
+	{
+		struct
+		{
+			uint16_t	asteroid_Pv[27];								// $028C-$02A6,$02D2-$02EC
+			uint16_t	ship_Pv;												// $02A7,$02ED
+			uint16_t	saucer_Pv;											// $02A8,$02EE
+			uint16_t	saucerShot_Pv[2];								// $02A9-$02AA,$02EF-$02F0
+			uint16_t	shipShot_Pv[4];									// $02AB-$02AE,$02F1-$02F4
+		};
+		int8_t			object_Vv[27+1+1+2+4];
+	};
+
 	uint8_t		startingAsteroidsPerWave;				// $02F5
 	uint8_t		currentNumberOfAsteroids;				// $02F6
 	uint8_t		saucerCountdownTimer;						// $02F7
@@ -181,10 +217,61 @@ typedef struct
 	
 } PLYR_RAM;
 
+typedef enum
+{
+	VEC0 = 0,
+	VEC1,
+	VEC2,
+	VEC3,
+	VEC4,
+	VEC5,
+	VEC6,
+	VEC7,
+	VEC8,
+	VEC9,
+	CUR,
+	HALT,
+	JSR,
+	RTS,
+	JMP,
+	SVEC
+	
+} eDVG_OPCODE;
+
+typedef struct
+{
+	eDVG_OPCODE		opcode;
+	union
+	{
+		struct
+		{
+			uint8_t				scale;
+			uint8_t				brightness;
+			int16_t				x;
+			int16_t				y;
+		} vec_svec;
+		struct
+		{
+			uint8_t				scale;
+			int16_t				x;
+			int16_t				y;
+		} cur;
+		struct
+		{
+			uint16_t			addr;
+		} jsr_jmp;
+	};
+	
+	uint8_t				byte[4];
+	uint8_t				len;
+	
+} DISPLAYLIST_ENTRY;
+
 static DSW1 dsw1;
 static ZEROPAGE zp;
 static PLYR_RAM plyr_ram[2];
 static PLYR_RAM *p = &plyr_ram[0];
+static DISPLAYLIST_ENTRY displaylist[256];
 
 static void handle_start_end_turn_or_game (void);			// $6885
 static void handle_shots (void);											// $69F0
@@ -212,6 +299,59 @@ static void write_JSR_cmd (uint16_t addr);						// $7BFC
 static void write_CURx4_cmd (uint8_t x, uint8_t y);		// $7C03
 static void reset (void);															// $7CF3
 
+static void dump_displaylist (void)
+{
+	unsigned i, j;
+	char disasm[128], bin[128], *b;
+	
+	for (i=0; ; i++)
+	{
+		DISPLAYLIST_ENTRY *dle = &displaylist[i];
+		
+		switch (dle->opcode)
+		{
+			case VEC0 : case VEC1 : case VEC2 : case VEC3 : case VEC4 :
+			case VEC5 : case VEC6 : case VEC7 : case VEC8 : case VEC9 :
+				break;
+
+			case CUR :
+				sprintf (disasm, "CUR scale=%1d x=%d, y=%d",
+									dle->cur.scale, dle->cur.x, dle->cur.y);
+				break;
+								
+			case HALT :
+				break;
+								
+			case JSR :
+				break;
+								
+			case RTS :
+				break;
+								
+			case JMP :
+				sprintf (disasm, "JUMP $%04X", dle->jsr_jmp.addr);
+				break;
+								
+			case SVEC :
+				break;
+								
+			default :
+				break;
+		}
+
+		b = bin;		
+		for (j=0; j<dle->len; j++)
+			b += sprintf (b, "%02X ", dle->byte[j]);
+
+		printf ("%-32.32s %s\n", disasm, bin);
+				
+		if (dle->opcode == HALT)
+			break;
+		if (zp.dvg_curr_addr == i)
+			break;
+	}
+}
+
 void asteroids2 (void)
 {
 	start:
@@ -236,7 +376,9 @@ void asteroids2 (void)
 					
 					if (++zp.fast_timer == 0)
 						zp.slow_timer++;
-					
+
+					// ignore ping-pong buffers
+					zp.dvg_curr_addr = 1;
 					handle_start_end_turn_or_game ();
 					check_high_score ();
 					if (handle_high_score_entry () < 0)
@@ -264,9 +406,13 @@ void asteroids2 (void)
 					else
 						if (p->currentNumberOfAsteroids == 0)
 							break;
+							
+					dump_displaylist ();
+					break;
 				}
+				
+				break;
 		}
-		
 }
 
 // $6885
@@ -314,12 +460,12 @@ void init_players (void)
 	
 	p->startingAsteroidsPerWave = 2;
 	zp.numStartingShipsPerGame = (dsw1.centreCoinMultiplierAndLives & 1 ? 3 : 4);
-	p->p1PlayerFlag = 0;
-	p->p1SaucerFlag = 0;
+	p->ship_Sts = 0;
+	p->saucer_Sts = 0;
 	for (i=0; i<2; i++)
-		p->saucerShotTimer[i] = 0;
+		p->saucerShot_Sts[i] = 0;
 	for (i=0; i<4; i++)
-		p->p1TimerShot[i] = 0;
+		p->shipShot_Sts[i] = 0;
 	zp.p1Score = 0;
 	zp.p2Score = 0;
 	p->currentNumberOfAsteroids = (uint8_t)-1;
@@ -361,7 +507,7 @@ void init_wave (void)
 	
 	if (p->asteroidWaveTimer == 0)
 	{
-		if (p->p1SaucerFlag != 0)
+		if (p->saucer_Sts != 0)
 			return;
 		p->saucer_Vh = 0;
 		p->saucer_Vv = 0;
@@ -378,7 +524,7 @@ void init_wave (void)
 		{
 			r = update_prng ();
 			r = (r & ASTEROID_SHAPE_MASK) | ASTEROID_SIZE_LARGE;
-			p->p1AsteroidFlag[i] = r;
+			p->asteroid_Sts[i] = r;
 			// naughty, 28 is actually PlayerFlag
 			set_asteroid_velocity (28, i);
 			r = update_prng ();
@@ -407,7 +553,7 @@ void init_wave (void)
 
 	// set remaining asteroids to inactive
 	for (; i>=0; i--)
-		p->p1AsteroidFlag[i] = 0;
+		p->asteroid_Sts[i] = 0;
 }
 
 // $7203
@@ -423,7 +569,7 @@ void set_asteroid_velocity (
 	v &= 0x8F;
 	if (v < 0)
 		v |= 0xF0;
-	v += p->asteroid_Vh[src];
+	v += p->object_Vh[src];
 	v = limit_asteroid_velocity (v);
 	p->asteroid_Vh[dst] = v;
 	update_prng ();
@@ -433,7 +579,7 @@ void set_asteroid_velocity (
 	v &= 0x8F;
 	if (v < 0)
 		v |= 0xF0;
-	v += p->asteroid_Vv[src];
+	v += p->object_Vv[src];
 	v = limit_asteroid_velocity (v);
 	p->asteroid_Vv[dst] = v;
 }
@@ -520,7 +666,20 @@ void write_JSR_cmd (uint16_t addr)
 // $7C03
 void write_CURx4_cmd (uint8_t x, uint8_t y)
 {
-	//UNIMPLEMENTED;
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+
+	dle->opcode = CUR;
+	dle->cur.y = ((uint16_t)zp.byte_7 << 8) | zp.byte_6;
+	dle->cur.x = ((uint16_t)zp.byte_5 << 8) | zp.byte_4;
+	dle->cur.scale = zp.globalScale;
+	
+	dle->byte[0] = zp.byte_6;
+	dle->byte[1] = (zp.byte_7 & 0x0F) | 0xA0;
+	dle->byte[2] = zp.byte_4;
+	dle->byte[3] = (zp.byte_5 & 0x0F) | zp.globalScale;
+	dle->len = 4;
+	
+	zp.dvg_curr_addr++;
 }
 
 // $7CF3
@@ -530,8 +689,19 @@ void reset (void)
 
 	memset (&zp, 0, sizeof(zp));
 	memset (plyr_ram, 0, sizeof(plyr_ram));
+	
 	// check SelfTest
+	
 	// init DVG shared RAM (JP $0402)
+	displaylist[0].opcode = JMP;
+	displaylist[0].jsr_jmp.addr = 0x0402;
+	memcpy (displaylist[0].byte, "\x01\xE2", 2);
+	displaylist[0].len = 2;
+	// and add a HALT
+	displaylist[1].opcode = HALT;
+	displaylist[1].byte[0] = 0xB0;
+	displaylist[1].len = 2;
+		
 	// guessing this just needs to be invalid?
 	zp.placeP1HighScore = 0xB0;
 	zp.placeP2HighScore = 0xB0;
