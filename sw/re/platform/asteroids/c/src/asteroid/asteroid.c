@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+// Notes:
+//  Global scale -8..7? not 0..15
+//	SVEC X,Y <<= 10
+
 //
 //  KNOWN BUGS:
 //
@@ -77,7 +81,7 @@ typedef struct
 	//   0x80 = unsuccessful (death)
 	//   0x00 = not active
   uint8_t		hyperspaceFlag;									// $59
-	uint8_t		timer_start_game;								// $5A
+	uint8_t		timerStartGame;									// $5A
 	uint8_t		VBLANK_triggered;								// $5B
 	uint8_t		fast_timer;											// $5C
 	uint8_t		slow_timer;											// $5D
@@ -252,7 +256,7 @@ typedef struct
 		} vec_svec;
 		struct
 		{
-			int8_t				scale;
+			uint8_t				scale;
 			int16_t				x;
 			int16_t				y;
 		} cur;
@@ -267,7 +271,7 @@ typedef struct
 	
 } DISPLAYLIST_ENTRY;
 
-static DSW1 dsw1;
+static DSW1 dsw1 = { 2, 0, 0, 0 };	// 1 COIN 1 CREDIT
 static ZEROPAGE zp;
 static PLYR_RAM plyr_ram[2];
 static PLYR_RAM *p = &plyr_ram[0];
@@ -297,7 +301,16 @@ static void display_C_scores_ships (void);						// $724F
 static uint8_t display_high_score_table (void);				// $73C4
 static void handle_sounds (void);											// $7555
 static void check_high_score (void);									// $765C
+static void display_numeric (
+							uint8_t *buf, 
+							uint8_t bytes, 
+							int pad);																// $773F
 static uint8_t update_prng (void);										// $77B5
+static void PrintPackedMsg (uint8_t i);								// $77F6
+static void add_chr_fn (
+						uint8_t chr,
+						uint8_t n
+						);																				// $7853
 static void halt_dvg (void);													// $7BC0
 static void write_JMP_JSR_cmd (
 							eDVG_OPCODE opcode, 
@@ -306,7 +319,7 @@ static void write_JMP_JSR_cmd (
 static void write_JSR_cmd (uint16_t addr);						// $7BFC
 static void write_CURx4_cmd (uint8_t x, uint8_t y);		// $7C03
 static void write_CUR_cmd (uint16_t x, uint16_t y);		// $7C1C
-static void update_dvg_curr_addr (void);							// $7C39
+static void update_dvg_curr_addr (uint8_t inc);				// $7C39
 static void set_scale_A_bright_0 (uint8_t a);					// $7CDE 
 static void set_scale_A_bright_X (
 							uint8_t a, 
@@ -320,6 +333,7 @@ extern uint16_t dvg_x;
 extern uint16_t dvg_y;
 extern int8_t dvg_scale;
 extern uint16_t dvg_brightness;
+extern uint8_t dvgrom[];
 
 static void dump_displaylist (void)
 {
@@ -416,7 +430,7 @@ void asteroids2 (void)
 					{
 						if (display_high_score_table () == 0)
 						{
-							if (zp.timer_start_game != 0)
+							if (zp.timerStartGame != 0)
 							{
 								handle_fire ();
 								handle_hyperspace ();
@@ -449,7 +463,35 @@ void asteroids2 (void)
 // $6885
 void handle_start_end_turn_or_game (void)
 {
+	uint8_t msg;
+	
 	//UNIMPLEMENTED;
+	DBGPRINTF_FN;
+	
+	if (zp.numPlayers == 0)
+	{
+		if ((msg = zp.coinMultCredits & 3) == 0)
+		{
+			freeplay:
+				zp.CurrNumCredits = 2;
+		}
+		else
+		{
+			msg += 7;
+			if (zp.placeP1HighScore & zp.placeP2HighScore & (1<<7))
+				PrintPackedMsg (msg);
+		}
+		check_start:
+			;
+		start_game:
+			;
+	}
+	else
+	{
+		if (zp.timerStartGame != 0)
+		{
+		}
+	}
 }
 
 // $69F0
@@ -660,7 +702,7 @@ void display_C_scores_ships (void)
 	write_CURx4_cmd (25, 219);
 	set_scale_A_bright_0 (0x70);
 	//
-	//display_numeric (zp.p1ScoreTens, 2, .., 1);
+	display_numeric ((uint8_t *)&zp.p1Score, 2, 1);
 	display_extra_ships (40, 3);
 }
 
@@ -684,6 +726,15 @@ void check_high_score (void)
 	//UNIMPLEMENTED;
 }
 
+// $773F
+void display_numeric (uint8_t *buf, uint8_t bytes, int pad)
+{
+	do
+	{
+		
+	} while (--bytes);
+}
+
 // $77B5
 uint8_t update_prng (void)
 {
@@ -702,6 +753,88 @@ uint8_t update_prng (void)
 	return (r);
 }
 
+// $77F6
+void PrintPackedMsg (uint8_t i)
+{
+	static char *msg[] =
+	{
+		"HIGH SCORES",
+		"PLAYER",
+		"YOUR SCORE IS ON OF THE TEN BEST",
+		"PLEASE ENTER YOUR INITIALS",
+		"PUSH ROTATE TO SELECT LETTER",
+		"PUSH HYPERSPACE WHEN LETTER IS CORRECT",
+		"PUSH START",
+		"GAME OVER",
+		"1 COIN 2 PLAYS",
+		"1 COIN 1 PLAY",
+		"2 COINS 1 PLAY"
+	};
+	
+	typedef struct 
+	{
+		uint8_t x;
+		uint8_t y;
+
+	} MSG_COORDS;
+	
+	static MSG_COORDS coord[] =
+	{
+		{ 100, 182 },
+		{ 100, 182 },
+		{  12, 170 },
+		{  12, 162 },
+		{  12, 154 },
+		{  12, 146 },
+		{ 100, 198 },
+		{ 100, 157 },
+		{  80,  57 },
+		{  80,  57 },
+		{  80,  57 }
+	};
+	
+	unsigned j = 0;
+	
+	DBGPRINTF ("%s(%d)=@%d,%d,\"%s\"\n", __FUNCTION__, 
+							i, coord[i].x, coord[i].y, msg[i]);
+	
+	// ignore language for now
+	zp.globalScale = 0x10;			// 1
+	write_CURx4_cmd (coord[i].x, coord[i].y);
+	set_scale_A_bright_0 (0x70);
+	for (; msg[i][j]; j++)
+		add_chr_fn (msg[i][j], j);
+	update_dvg_curr_addr (j);
+}
+
+// $7853
+void add_chr_fn (uint8_t chr, uint8_t n)
+{
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr+n];
+	unsigned offset;
+
+	DBGPRINTF ("%s('%c')\n", __FUNCTION__, chr);
+		
+	// convert to 'asteroids' character set
+	if (chr == ' ')
+		chr = 0;
+	else if (isdigit (chr))
+		chr = 1 + chr - '0';
+	else if (isalpha (chr))
+		chr = 11 + toupper(chr) - 'A';
+	else
+		chr = 0;
+		
+	// add JSR to display list
+	offset = 0x6D4 + (chr<<1);
+	DBGPRINTF ("offset=$%X\n", offset);
+	dle->opcode = dvgrom[offset+1] >> 4;
+	dle->jsr_jmp.addr = 0x5000 |  (((((uint16_t)dvgrom[offset+1] & 0x0f) << 8) | dvgrom[offset])<<1) - 0x1000;
+	dle->byte[0] = dvgrom[offset];
+	dle->byte[1] = dvgrom[offset+1];
+	dle->len = 2;
+}
+
 // $7BC0
 void halt_dvg (void)
 {
@@ -713,7 +846,7 @@ void halt_dvg (void)
 	dle->byte[1] = 0xB0;
 	dle->len = 2;
 
-	update_dvg_curr_addr ();	
+	update_dvg_curr_addr (1);	
 }
 
 // $7BF0
@@ -730,7 +863,7 @@ void write_JMP_JSR_cmd (eDVG_OPCODE opcode, uint16_t addr)
 	dle->byte[0] = addr & 0xFF;
 	dle->len = 2;
 	
-	update_dvg_curr_addr ();
+	update_dvg_curr_addr (1);
 }
 
 // $7BFC
@@ -764,15 +897,14 @@ void write_CUR_cmd (uint16_t x, uint16_t y)
 	dle->cur.y = y;
 	dle->cur.x = x;
 	dle->cur.scale = dle->byte[3] >> 4;
-	if (dle->cur.scale > 7) dle->cur.scale -= 16;
 
-	update_dvg_curr_addr ();	
+	update_dvg_curr_addr (1);	
 }
 
 // $7C39
-void update_dvg_curr_addr (void)
+void update_dvg_curr_addr (uint8_t inc)
 {
-	zp.dvg_curr_addr++;
+	zp.dvg_curr_addr += inc;
 }
 
 // $7CDE 
@@ -797,7 +929,7 @@ void set_scale_A_bright_X (uint8_t a, uint8_t x)
 	dle->vec_svec.x = 0;
 	dle->vec_svec.y = 0;
 	
-	update_dvg_curr_addr ();
+	update_dvg_curr_addr (1);
 }
 
 // $7CF3
