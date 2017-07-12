@@ -56,7 +56,7 @@ typedef struct
 	uint8_t		unused1[4];											// $11-$14	
 	uint8_t		byte_15;												// $15
 	uint8_t		byte_16;												// $16
-	uint8_t		byte_17;												// $17
+	uint8_t		extra_brightness;								// $17
 	uint8_t		curPlayer;											// $18
 	uint8_t		curPlayer_x2;										// $19
 	uint8_t		numPlayersPreviousGame;					// $1A
@@ -83,8 +83,8 @@ typedef struct
   uint8_t		hyperspaceFlag;									// $59
 	uint8_t		timerStartGame;									// $5A
 	uint8_t		VBLANK_triggered;								// $5B
-	uint8_t		fast_timer;											// $5C
-	uint8_t		slow_timer;											// $5D
+	uint8_t		fastTimer;											// $5C
+	uint8_t		slowTimer;											// $5D
 	uint8_t		NMI_count;											// $5E
 	uint16_t	rnd;														// $5F-$60
 	uint8_t		direction;											// $61
@@ -279,6 +279,11 @@ static DISPLAYLIST_ENTRY displaylist[256];
 
 static void handle_start_end_turn_or_game (void);			// $6885
 static void handle_shots (void);											// $69F0
+static void copy_vector_list_to_avgram (
+							uint16_t addr, 
+							uint8_t flip_x, 
+							uint8_t flip_y
+							);																			// $6AD7
 static void handle_saucer (void);											// $6B93
 static void handle_fire (void);												// $6CD7
 static int8_t handle_high_score_entry (void);					// $6D90
@@ -305,6 +310,11 @@ static void display_numeric (
 							uint8_t *buf, 
 							uint8_t bytes, 
 							int pad);																// $773F
+static void display_digit (
+							uint8_t digit, 
+							int pad
+							);																			// $7785
+static void display_bright_digit (uint8_t digit);			// $778B
 static uint8_t update_prng (void);										// $77B5
 static void PrintPackedMsg (uint8_t i);								// $77F6
 static void add_chr_fn (
@@ -419,8 +429,8 @@ void asteroids2 (void)
 					// wait for vblank
 					// wait for DVG
 					
-					if (++zp.fast_timer == 0)
-						zp.slow_timer++;
+					if (++zp.fastTimer == 0)
+						zp.slowTimer++;
 
 					// ignore ping-pong buffers
 					zp.dvg_curr_addr = 1;
@@ -498,6 +508,46 @@ void handle_start_end_turn_or_game (void)
 void handle_shots (void)
 {
 	//UNIMPLEMENTED;
+}
+
+// $6AD7
+void copy_vector_list_to_avgram (uint16_t addr, uint8_t flip_x, uint8_t flip_y)
+{
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+
+	// and back again
+	int offset = (addr - 0x4000) >> 1;
+	unsigned i;
+		
+	for (i=0; ; i++)
+	{
+		dle->byte[1] = dvgrom[offset+1] ^ flip_y;
+		if (dle->byte[1] < 0xF0)
+		{
+			// end of vec/svec commands
+			if (dle->byte[1] >= 0xA0)
+				break;
+
+			// is_vec
+			dle->byte[0] = dvgrom[offset+0];	// Y
+			dle->byte[2] = dvgrom[offset+2];	// X
+			dle->byte[3] = (dvgrom[offset+3] ^ flip_x) + zp.extra_brightness;
+			offset += 4;
+			dle->opcode = (eDVG_OPCODE)(dle->byte[1] >> 4);
+			dle->vec_svec.x = 0;
+			dle->vec_svec.y = 0;
+		}
+		else
+		{
+			is_svec:
+				dle->byte[0] = (dvgrom[offset+0] ^ flip_x) + zp.extra_brightness;
+			offset += 2;
+			dle->opcode = (eDVG_OPCODE)(dle->byte[1] >> 4);
+			dle->vec_svec.x = 0;
+			dle->vec_svec.y = 0;
+		}
+	}
+	update_dvg_curr_addr (i);
 }
 
 // $6B93
@@ -697,12 +747,22 @@ void display_C_scores_ships (void)
 {
 	//UNIMPLEMENTED;
 
+	DBGPRINTF ("%s()\n", __FUNCTION__);
+	
 	zp.globalScale = 0x10;				// 1
 	write_JSR_cmd (0x50A4);
 	write_CURx4_cmd (25, 219);
 	set_scale_A_bright_0 (0x70);
-	//
-	display_numeric ((uint8_t *)&zp.p1Score, 2, 1);
+	zp.extra_brightness = 0;
+	if ((zp.numPlayers != 2 ||
+				zp.curPlayer != 0 ||
+				// this depends on order of evaluation!
+				((zp.extra_brightness = 0x20) && ((p->ship_Sts | zp.hyperspaceFlag) != 0)) ||
+				((int8_t)p->shipSpawnTimer < 0) && (zp.fastTimer & 0x10) != 0))
+	{
+		display_numeric ((uint8_t *)&zp.p1Score, 2, 1);
+		display_bright_digit (0);
+	}
 	display_extra_ships (40, 3);
 }
 
@@ -729,10 +789,54 @@ void check_high_score (void)
 // $773F
 void display_numeric (uint8_t *buf, uint8_t bytes, int pad)
 {
+	signed int n = bytes - 1;
+
+	DBGPRINTF ("%s($%02X,$%02X,%d,%d)\n", __FUNCTION__, 
+							*buf, *(buf+1), bytes, pad);
+	
 	do
 	{
+		uint8_t digit = *(buf+n);
+		display_digit (digit>>4, pad);
+		if (n == 0)
+			pad = 0;
+		display_digit (digit, pad);
 		
-	} while (--bytes);
+	} while (--n >= 0);
+}
+
+// $7785
+void display_digit (uint8_t digit, int pad)
+{
+	DBGPRINTF ("%s(%d,%d)\n", __FUNCTION__, digit, pad);
+	
+	if (pad == 0)
+		display_bright_digit (digit);
+	digit &= 0x0f;
+	if (digit == 0)
+		display_bright_digit (digit);	// fixme
+	else
+		display_bright_digit (digit);
+}
+
+// $778B
+void display_bright_digit (uint8_t digit)
+{
+	int offset;
+	uint16_t addr;
+	
+	DBGPRINTF ("%s(%d)\n", __FUNCTION__, digit);
+
+	if (1 || zp.extra_brightness == 0)
+		;
+	else
+	{
+		digit &= 0x0f;
+		digit++;				// char code
+		offset = 0x6D4 + (digit<<1);
+		addr = 0x4000 + ((uint16_t)dvgrom[offset] << 1) + (((uint16_t)dvgrom[offset+1] << 9) & 0x1F00);
+		copy_vector_list_to_avgram (addr, 0, 0);
+	}	
 }
 
 // $77B5
@@ -795,8 +899,8 @@ void PrintPackedMsg (uint8_t i)
 	
 	unsigned j = 0;
 	
-	DBGPRINTF ("%s(%d)=@%d,%d,\"%s\"\n", __FUNCTION__, 
-							i, coord[i].x, coord[i].y, msg[i]);
+	//DBGPRINTF ("%s(%d)=@%d,%d,\"%s\"\n", __FUNCTION__, 
+	//						i, coord[i].x, coord[i].y, msg[i]);
 	
 	// ignore language for now
 	zp.globalScale = 0x10;			// 1
@@ -813,7 +917,7 @@ void add_chr_fn (uint8_t chr, uint8_t n)
 	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr+n];
 	unsigned offset;
 
-	DBGPRINTF ("%s('%c')\n", __FUNCTION__, chr);
+	//DBGPRINTF ("%s('%c')\n", __FUNCTION__, chr);
 		
 	// convert to 'asteroids' character set
 	if (chr == ' ')
@@ -827,9 +931,8 @@ void add_chr_fn (uint8_t chr, uint8_t n)
 		
 	// add JSR to display list
 	offset = 0x6D4 + (chr<<1);
-	DBGPRINTF ("offset=$%X\n", offset);
 	dle->opcode = dvgrom[offset+1] >> 4;
-	dle->jsr_jmp.addr = 0x5000 |  (((((uint16_t)dvgrom[offset+1] & 0x0f) << 8) | dvgrom[offset])<<1) - 0x1000;
+	dle->jsr_jmp.addr = 0x4000 | (((((uint16_t)dvgrom[offset+1] & 0x0f) << 8) | dvgrom[offset])<<1);
 	dle->byte[0] = dvgrom[offset];
 	dle->byte[1] = dvgrom[offset+1];
 	dle->len = 2;

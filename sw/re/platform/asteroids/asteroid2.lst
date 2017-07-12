@@ -62,7 +62,7 @@ ZEROPAGE:0013 ??					  .BYTE	0 ; (uninited)
 ZEROPAGE:0014 ??					  .BYTE	0 ; (uninited)
 ZEROPAGE:0015 ??	  byte_15:			  .BYTE	0 ; (uninited)
 ZEROPAGE:0016 ??	  byte_16:			  .BYTE	0 ; (uninited)
-ZEROPAGE:0017 ??	  byte_17:			  .BYTE	0 ; (uninited)
+ZEROPAGE:0017 ??	  extra_brightness:		  .BYTE	0 ; (uninited)
 ZEROPAGE:0018 ??	  curPlayer:			  .BYTE	0 ; (uninited)
 ZEROPAGE:0019 ??	  curPlayer_x2:			  .BYTE	0 ; (uninited)
 ZEROPAGE:001A ??	  numPlayersPreviousGame:	  .BYTE	0 ; (uninited)
@@ -1089,7 +1089,7 @@ ROM:6AF1 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:6AF3 C8					     INY
 ROM:6AF4 B1 0B					     LDA     (byte_B),Y				     ; BBBB -mXX
 ROM:6AF6 45 08					     EOR     byte_8				     ; sign for	X delta
-ROM:6AF8 65 17					     ADC     byte_17
+ROM:6AF8 65 17					     ADC     extra_brightness
 ROM:6AFA 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:6AFC
 ROM:6AFC	     loc_6AFC:
@@ -1105,7 +1105,7 @@ ROM:6B03	     is_svec:									     ; BBBB SmXX
 ROM:6B03 B1 0B					     LDA     (byte_B),Y
 ROM:6B05 45 08					     EOR     byte_8				     ; flag for	flip X (bit 2)
 ROM:6B07 18					     CLC
-ROM:6B08 65 17					     ADC     byte_17
+ROM:6B08 65 17					     ADC     extra_brightness
 ROM:6B0A 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:6B0C C8					     INY
 ROM:6B0D D0 ED					     BNE     loc_6AFC				     ; always
@@ -2389,13 +2389,13 @@ ROM:725C A2 DB					     LDX     #219				     ; Y coord (x4=876)
 ROM:725E 20 03 7C				     JSR     write_CURx4_cmd
 ROM:7261 A9 70					     LDA     #$70 ; 'p'                              ; scale = 7
 ROM:7263 20 DE 7C				     JSR     set_scale_A_bright_0
-ROM:7266 A2 00					     LDX     #0
+ROM:7266 A2 00					     LDX     #0					     ; digit brightness	+= 0
 ROM:7268 A5 1C					     LDA     numPlayers
 ROM:726A C9 02					     CMP     #2					     ; 2 players?
 ROM:726C D0 18					     BNE     loc_7286				     ; no, skip
 ROM:726E A5 18					     LDA     curPlayer				     ; player 1?
 ROM:7270 D0 14					     BNE     loc_7286				     ; yes, skip
-ROM:7272 A2 20					     LDX     #$20 ; ' '
+ROM:7272 A2 20					     LDX     #$20 ; ' '                              ; digit brightness += $20
 ROM:7274 AD 1B 02				     LDA     ship_Sts
 ROM:7277 05 59					     ORA     hyperspaceFlag
 ROM:7279 D0 0B					     BNE     loc_7286
@@ -2411,7 +2411,7 @@ ROM:7288 A0 02					     LDY     #2					     ; 2 bytes to display
 ROM:728A 38					     SEC					     ; flag no zero padding
 ROM:728B 20 3F 77				     JSR     display_numeric			     ; display P1 score
 ROM:728E A9 00					     LDA     #0
-ROM:7290 20 8B 77				     JSR     display_pad_digit			     ; display score units (=0)
+ROM:7290 20 8B 77				     JSR     display_bright_digit		     ; display score units (=0)
 ROM:7293
 ROM:7293	     loc_7293:									     ; X coord (x4=160)
 ROM:7293 A9 28					     LDA     #40
@@ -2460,7 +2460,7 @@ ROM:72EB A0 02					     LDY     #2					     ; 2 bytes to display
 ROM:72ED 38					     SEC					     ; flag no zero padding
 ROM:72EE 20 3F 77				     JSR     display_numeric			     ; display P2 score
 ROM:72F1 A9 00					     LDA     #0
-ROM:72F3 20 8B 77				     JSR     display_pad_digit			     ; display score units (=0)
+ROM:72F3 20 8B 77				     JSR     display_bright_digit		     ; display score units (=0)
 ROM:72F6
 ROM:72F6	     loc_72F6:									     ; X coord (x4=828)
 ROM:72F6 A9 CF					     LDA     #207
@@ -2852,7 +2852,7 @@ ROM:750B
 ROM:750B
 ROM:750B	     calc_ship_and_render:
 ROM:750B A2 00					     LDX     #0					     ; default positive	delta
-ROM:750D 86 17					     STX     byte_17
+ROM:750D 86 17					     STX     extra_brightness
 ROM:750F A0 00					     LDY     #0					     ; default positive	delta
 ROM:7511 A5 61					     LDA     direction
 ROM:7513 10 06					     BPL     loc_751B				     ; positive, skip
@@ -3266,18 +3266,18 @@ ROM:773B 1A					     .BYTE $1A
 ROM:773C 1C					     .BYTE $1C
 ROM:773D 1D					     .BYTE $1D
 ROM:773E 1F					     .BYTE $1F
-ROM:773F	     ; A=buffer, Y=#bytes, X=pad digit
+ROM:773F	     ; A=buffer, Y=#bytes
 ROM:773F
 ROM:773F	     ; =============== S U B R O U T I N E =======================================
 ROM:773F
 ROM:773F
 ROM:773F	     display_numeric:
 ROM:773F 08					     PHP
-ROM:7740 86 17					     STX     byte_17				     ; store pad digit
+ROM:7740 86 17					     STX     extra_brightness			     ; save extra brightness
 ROM:7742 88					     DEY					     ; #bytes-1
 ROM:7743 84 16					     STY     byte_16				     ; offset to last byte
 ROM:7745 18					     CLC
-ROM:7746 65 16					     ADC     byte_16				     ; bytes remaining
+ROM:7746 65 16					     ADC     byte_16				     ; buf + #bytes-1
 ROM:7748 85 15					     STA     byte_15				     ; ptr current byte
 ROM:774A 28					     PLP
 ROM:774B AA					     TAX					     ; X=buffer
@@ -3337,7 +3337,7 @@ ROM:7785	     ; =============== S U B R O U T I N E ============================
 ROM:7785
 ROM:7785
 ROM:7785	     display_digit:
-ROM:7785 90 04					     BCC     display_pad_digit			     ; skip if no pad flagged?
+ROM:7785 90 04					     BCC     display_bright_digit		     ; skip if no pad flagged?
 ROM:7787 29 0F					     AND     #$F				     ; any pad digit?
 ROM:7789 F0 27					     BEQ     loc_77B2				     ; no, skip
 ROM:7789	     ; End of function display_digit
@@ -3346,9 +3346,9 @@ ROM:778B
 ROM:778B	     ; =============== S U B R O U T I N E =======================================
 ROM:778B
 ROM:778B
-ROM:778B	     display_pad_digit:
-ROM:778B A6 17					     LDX     byte_17				     ; any pad digit?
-ROM:778D F0 23					     BEQ     loc_77B2				     ; none, exit
+ROM:778B	     display_bright_digit:
+ROM:778B A6 17					     LDX     extra_brightness			     ; extra brightness?
+ROM:778D F0 23					     BEQ     loc_77B2				     ; none, use default routine
 ROM:778F 29 0F					     AND     #$F
 ROM:7791 18					     CLC
 ROM:7792 69 01					     ADC     #1
@@ -3356,12 +3356,12 @@ ROM:7794 08					     PHP
 ROM:7795 0A					     ASL     A					     ; x2
 ROM:7796 A8					     TAY					     ; word offset
 ROM:7797 B9 D4 56				     LDA     DVGROM+$6D4,Y			     ; chr fn
-ROM:779A 0A					     ASL     A
+ROM:779A 0A					     ASL     A					     ; low address * 2
 ROM:779B 85 0B					     STA     byte_B
 ROM:779D B9 D5 56				     LDA     DVGROM+$6D5,Y			     ; chr fn
 ROM:77A0 2A					     ROL     A
-ROM:77A1 29 1F					     AND     #$1F
-ROM:77A3 09 40					     ORA     #$40 ; '@'
+ROM:77A1 29 1F					     AND     #$1F				     ; high address * 2
+ROM:77A3 09 40					     ORA     #$40 ; '@'                              ; +0x4000
 ROM:77A5 85 0C					     STA     byte_C
 ROM:77A7 A9 00					     LDA     #0
 ROM:77A9 85 08					     STA     byte_8				     ; flag to flip X
@@ -3372,8 +3372,8 @@ ROM:77B1 60					     RTS
 ROM:77B2	     ; ---------------------------------------------------------------------------
 ROM:77B2
 ROM:77B2	     loc_77B2:
-ROM:77B2 4C CB 7B				     JMP     loc_7BCB
-ROM:77B2	     ; End of function display_pad_digit
+ROM:77B2 4C CB 7B				     JMP     display_space_digit_A
+ROM:77B2	     ; End of function display_bright_digit
 ROM:77B2
 ROM:77B5	     ; this is a 16-bit	1-tap LFSR
 ROM:77B5	     ; - may or	may not	be maximal length
@@ -3554,17 +3554,17 @@ ROM:7870 60					     RTS
 ROM:7870	     ; End of function add_chr_fn
 ROM:7870
 ROM:7870	     ; ---------------------------------------------------------------------------
-ROM:7871 64 B6	     msgCoords:			     .BYTE $64,	$B6				     ; "HIGH SCORES"
-ROM:7873 64 B6					     .BYTE $64,	$B6				     ; "PLAYER"
-ROM:7875 0C AA					     .BYTE $C, $AA				     ; "YOUR SCORE...TEN BEST"
-ROM:7877 0C A2					     .BYTE $C, $A2				     ; "PLEASE...INITIALS"
-ROM:7879 0C 9A					     .BYTE $C, $9A				     ; "PUSH ROTATE...LETTER"
-ROM:787B 0C 92					     .BYTE $C, $92				     ; "PUSH HYPERSPACE...CORRECT"
-ROM:787D 64 C6					     .BYTE $64,	$C6				     ; "PUSH START"
-ROM:787F 64 9D					     .BYTE $64,	$9D				     ; "GAME OVER"
-ROM:7881 50 39					     .BYTE $50,	$39				     ; "1 COIN 2 PLAYS"
-ROM:7883 50 39					     .BYTE $50,	$39				     ; "1 COIN 1 PLAY"
-ROM:7885 50 39					     .BYTE $50,	$39				     ; "2 COINS	1 PLAY"
+ROM:7871 64 B6	     msgCoords:			     .BYTE 100,	182				     ; "HIGH SCORES"
+ROM:7873 64 B6					     .BYTE 100,	182				     ; "PLAYER"
+ROM:7875 0C AA					     .BYTE 12, 170				     ; "YOUR SCORE...TEN BEST"
+ROM:7877 0C A2					     .BYTE 12, 162				     ; "PLEASE...INITIALS"
+ROM:7879 0C 9A					     .BYTE 12, 154				     ; "PUSH ROTATE...LETTER"
+ROM:787B 0C 92					     .BYTE 12, 146				     ; "PUSH HYPERSPACE...CORRECT"
+ROM:787D 64 C6					     .BYTE 100,	198				     ; "PUSH START"
+ROM:787F 64 9D					     .BYTE 100,	157				     ; "GAME OVER"
+ROM:7881 50 39					     .BYTE 80, 57				     ; "1 COIN 2 PLAYS"
+ROM:7883 50 39					     .BYTE 80, 57				     ; "1 COIN 1 PLAY"
+ROM:7885 50 39					     .BYTE 80, 57				     ; "2 COINS	1 PLAY"
 ROM:7887	     ; Offset into Vector ROM for message tables
 ROM:7887 1E 57	     msgTablePtrs:		     .WORD $571E				     ; English
 ROM:7889 8F 78					     .WORD $788F				     ; German
@@ -3857,7 +3857,7 @@ ROM:7BC6 C8					     INY
 ROM:7BC7 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7BC9 D0 6E					     BNE     update_dvg_curr_addr
 ROM:7BCB
-ROM:7BCB	     loc_7BCB:
+ROM:7BCB	     display_space_digit_A:
 ROM:7BCB 90 04					     BCC     display_digit_A
 ROM:7BCD 29 0F					     AND     #$F				     ; numeric only
 ROM:7BCF F0 05					     BEQ     loc_7BD6				     ; space, skip
