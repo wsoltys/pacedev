@@ -211,13 +211,13 @@ typedef struct
 	uint8_t		startingAsteroidsPerWave;				// $02F5
 	uint8_t		currentNumberOfAsteroids;				// $02F6
 	uint8_t		saucerCountdownTimer;						// $02F7
-	uint8_t		starting_saucerCountdownTimer;	// $02F8
+	uint8_t		starting_saucerCountdownTimer;			// $02F8
 	uint8_t		asteroid_hit_timer;							// $02F9
-	uint8_t		shipSpawnTimer;									// $02FA
-	uint8_t 	asteroidWaveTimer;							// $02FB
+	uint8_t		shipSpawnTimer;								// $02FA
+	uint8_t 		asteroidWaveTimer;							// $02FB
 	uint8_t		starting_ThumpCounter;					// $02FC
-	uint8_t		numAsteroidsLeftBeforeSaucer;		// $02FD
-	uint8_t		unused1[2];											// $02FE-$02FF
+	uint8_t		numAsteroidsLeftBeforeSaucer;			// $02FD
+	uint8_t		unused1[2];									// $02FE-$02FF
 	
 } PLYR_RAM;
 
@@ -345,10 +345,14 @@ extern int8_t dvg_scale;
 extern uint16_t dvg_brightness;
 extern uint8_t dvgrom[];
 
+extern void osd_line (unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned brightness);
+#define SCALE(s) (1<<(9-((dvg_scale+s)&0x0f)))
+
 static void dump_displaylist (void)
 {
 	unsigned i, j;
 	char disasm[128], bin[128], *b;
+	signed sf;
 	
 	for (i=0; ; i++)
 	{
@@ -361,6 +365,18 @@ static void dump_displaylist (void)
 		{
 			case VEC0 : case VEC1 : case VEC2 : case VEC3 : case VEC4 :
 			case VEC5 : case VEC6 : case VEC7 : case VEC8 : case VEC9 :
+	        sprintf (disasm, "VEC scale=%02d(/%-3d) bri=%d x=%-4d y=%-4d", 
+	        				dle->vec_svec.scale, (1<<(9-dle->vec_svec.scale)), 
+	        				dle->vec_svec.brightness, 
+	        				dle->vec_svec.x, dle->vec_svec.y);
+        		// update hardware
+	        sf = SCALE(dle->vec_svec.scale);
+				osd_line (dvg_x, dvg_y,
+									dvg_x + dle->vec_svec.x/sf,
+									dvg_y + dle->vec_svec.y/sf,
+									dle->vec_svec.brightness);
+				dvg_x += dle->vec_svec.x/sf;
+				dvg_y += dle->vec_svec.y/sf;
 				break;
 
 			case CUR :
@@ -387,6 +403,18 @@ static void dump_displaylist (void)
 				break;
 								
 			case SVEC :
+	        sprintf (disasm, "SVEC scale=%02d(/%-3d) bri=%d x=%-4d y=%-4d", 
+	        				dle->vec_svec.scale, (1<<(9-dle->vec_svec.scale)), 
+	        				dle->vec_svec.brightness, 
+	        				dle->vec_svec.x, dle->vec_svec.y);
+	        // update hardware
+	        sf = SCALE(dle->vec_svec.scale);
+				osd_line (dvg_x, dvg_y, 
+								dvg_x + dle->vec_svec.x/sf, 
+								dvg_y + dle->vec_svec.y/sf, 
+								dle->vec_svec.brightness);
+				dvg_x += dle->vec_svec.x/sf;
+				dvg_y += dle->vec_svec.y/sf;
 				break;
 								
 			default :
@@ -513,14 +541,19 @@ void handle_shots (void)
 // $6AD7
 void copy_vector_list_to_avgram (uint16_t addr, uint8_t flip_x, uint8_t flip_y)
 {
-	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+	DISPLAYLIST_ENTRY *dle;
 
 	// and back again
-	int offset = (addr - 0x4000) >> 1;
+	int offset = addr - 0x5000;
 	unsigned i;
+
+	//DBGPRINTF ("%s($%04X,%d,%d)\n", __FUNCTION__, addr, flip_x, flip_y);
+	//DBGPRINTF ("- offset=$%04X\n", offset);
 		
 	for (i=0; ; i++)
 	{
+		dle = &displaylist[zp.dvg_curr_addr+i];
+
 		dle->byte[1] = dvgrom[offset+1] ^ flip_y;
 		if (dle->byte[1] < 0xF0)
 		{
@@ -534,8 +567,12 @@ void copy_vector_list_to_avgram (uint16_t addr, uint8_t flip_x, uint8_t flip_y)
 			dle->byte[3] = (dvgrom[offset+3] ^ flip_x) + zp.extra_brightness;
 			offset += 4;
 			dle->opcode = (eDVG_OPCODE)(dle->byte[1] >> 4);
-			dle->vec_svec.x = 0;
-			dle->vec_svec.y = 0;
+			dle->vec_svec.x = dle->byte[2] + (((uint16_t)dle->byte[3] & 0x03) << 8);
+        if (dle->byte[3] & (1<<2)) dle->vec_svec.x = -dle->vec_svec.x;
+			dle->vec_svec.y = dle->byte[0] + (((uint16_t)dle->byte[1] & 0x03) << 8);
+        if (dle->byte[1] & (1<<2)) dle->vec_svec.y = -dle->vec_svec.y;
+        dle->vec_svec.scale = dle->byte[1] >> 4;
+        dle->vec_svec.brightness = dle->byte[3] >> 4;
 		}
 		else
 		{
@@ -543,8 +580,12 @@ void copy_vector_list_to_avgram (uint16_t addr, uint8_t flip_x, uint8_t flip_y)
 				dle->byte[0] = (dvgrom[offset+0] ^ flip_x) + zp.extra_brightness;
 			offset += 2;
 			dle->opcode = (eDVG_OPCODE)(dle->byte[1] >> 4);
-			dle->vec_svec.x = 0;
-			dle->vec_svec.y = 0;
+			dle->vec_svec.x = (dle->byte[0] & 0x03) << 10;
+      	if (dle->byte[0] & (1<<2)) dle->vec_svec.x = -dle->vec_svec.x;
+			dle->vec_svec.y = (dle->byte[1] & 0x03) << 10;
+      	if (dle->byte[1] & (1<<2)) dle->vec_svec.y = -dle->vec_svec.y;
+      	dle->vec_svec.scale = ((dle->byte[0] & 0x08) >> 2) | ((dle->byte[1] & 0x08) >> 3);
+      	dle->vec_svec.brightness = (dle->byte[0] & 0xf0) >> 4;
 		}
 	}
 	update_dvg_curr_addr (i);
@@ -791,7 +832,7 @@ void display_numeric (uint8_t *buf, uint8_t bytes, int pad)
 {
 	signed int n = bytes - 1;
 
-	DBGPRINTF ("%s($%02X,$%02X,%d,%d)\n", __FUNCTION__, 
+	DBGPRINTF ("%s($%02X$%02X,%d,%d)\n", __FUNCTION__, 
 							*buf, *(buf+1), bytes, pad);
 	
 	do
@@ -812,11 +853,14 @@ void display_digit (uint8_t digit, int pad)
 	
 	if (pad == 0)
 		display_bright_digit (digit);
-	digit &= 0x0f;
-	if (digit == 0)
-		display_bright_digit (digit);	// fixme
 	else
-		display_bright_digit (digit);
+	{
+		digit &= 0x0f;
+		if (digit == 0)
+			display_bright_digit (digit);	// fixme
+		else
+			display_bright_digit (digit);
+	}
 }
 
 // $778B
@@ -827,7 +871,7 @@ void display_bright_digit (uint8_t digit)
 	
 	DBGPRINTF ("%s(%d)\n", __FUNCTION__, digit);
 
-	if (1 || zp.extra_brightness == 0)
+	if (0 && zp.extra_brightness == 0)
 		;
 	else
 	{

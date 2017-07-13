@@ -173,7 +173,6 @@ void dvgrom_disassemble_jsr (uint16_t addr)
 	int sp = 0;
 	unsigned iterations = 0;
 	signed sf;
-	unsigned x2, y2;
 
 	while (!done)
 	{
@@ -205,12 +204,12 @@ void dvgrom_disassemble_jsr (uint16_t addr)
         p += 4;
         // update hardware
         sf = SCALE(s);
-				osd_line (dvg_x, dvg_y,
-									dvg_x + x/sf,
-									dvg_y + y/sf,
-									b);
-				dvg_x += x/sf;
-				dvg_y += y/sf;
+			osd_line (dvg_x, dvg_y,
+							dvg_x + x/sf,
+							dvg_y + y/sf,
+							b);
+			dvg_x += x/sf;
+			dvg_y += y/sf;
         break;
       // cur
       case 0x0A :
@@ -282,11 +281,9 @@ void dvgrom_disassemble_jsr (uint16_t addr)
         p += 2;
         // update hardware
         sf = SCALE(s);
-        x2 = dvg_x + x/sf;
-        y2 = dvg_y + y/sf;
-				osd_line (dvg_x, dvg_y, x2, y2, b);
-				dvg_x += x/sf;
-				dvg_y += y/sf;
+			osd_line (dvg_x, dvg_y, dvg_x + x/sf, dvg_y + y/sf, b);
+			dvg_x += x/sf;
+			dvg_y += y/sf;
         break;
       default :
         break;
