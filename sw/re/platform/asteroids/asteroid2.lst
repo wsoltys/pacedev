@@ -652,7 +652,7 @@ ROM:6836 A9 02					     LDA     #2
 ROM:6838 85 02					     STA     dvg_curr_addr_lsb			     ; 0x02 (after JMP instruction)
 ROM:683A 86 03					     STX     dvg_curr_addr_msb			     ; 0x40/0x44 (ping pong)
 ROM:683C 20 85 68				     JSR     handle_start_end_turn_or_game
-ROM:683F B0 C2					     BCS     START				     ; *** never set?!?	***
+ROM:683F B0 C2					     BCS     START
 ROM:6841 20 5C 76				     JSR     check_high_score
 ROM:6844 20 90 6D				     JSR     handle_high_score_entry
 ROM:6847 10 1B					     BPL     loc_6864				     ; go if new high score
@@ -1974,7 +1974,7 @@ ROM:701E B0 07					     BCS     jsr_display_object			     ; b0=1, go
 ROM:7020 A0 F0					     LDY     #$F0 ; 'ð'
 ROM:7022 4A					     LSR     A					     ; bit 1
 ROM:7023 B0 02					     BCS     jsr_display_object			     ; b1=1, go
-ROM:7025 A0 00					     LDY     #0
+ROM:7025 A0 00					     LDY     #0					     ; globalscale
 ROM:7027
 ROM:7027	     jsr_display_object:
 ROM:7027 20 FE 72				     JSR     display_object

@@ -150,7 +150,7 @@ typedef struct
 			uint8_t		saucerShot_Sts[2];							// $021D-$021E
 			uint8_t		shipShot_Sts[4];								// $021F-$0222
 		};
-		int8_t			object_Status[27+1+1+2+4];
+		int8_t			object_Sts[27+1+1+2+4];
 	};
 	
 	// Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
@@ -191,7 +191,7 @@ typedef struct
 			uint16_t	saucerShot_Ph[2];								// $0286-$0287,$02CC-$02CD
 			uint16_t	shipShot_Ph[4];									// $0288-$028B,$02CE-$02D1
 		};
-		int8_t			object_Vv[27+1+1+2+4];
+		int8_t			object_Ph[27+1+1+2+4];
 	};
 	// Vertical	Position High (0-23), 0=Bottom,	23=Top
 	// Vertical	Position Low (0-255), 0=Bottom,	255=Top
@@ -205,7 +205,7 @@ typedef struct
 			uint16_t	saucerShot_Pv[2];								// $02A9-$02AA,$02EF-$02F0
 			uint16_t	shipShot_Pv[4];									// $02AB-$02AE,$02F1-$02F4
 		};
-		int8_t			object_Vv[27+1+1+2+4];
+		int8_t			object_Pv[27+1+1+2+4];
 	};
 
 	uint8_t		startingAsteroidsPerWave;				// $02F5
@@ -271,13 +271,14 @@ typedef struct
 	
 } DISPLAYLIST_ENTRY;
 
-static DSW1 dsw1 = { 2, 0, 0, 0 };	// 1 COIN 1 CREDIT
+static DSW1 dsw1 = { 2, 0, 1, 0 };	// 1 COIN 1 CREDIT,, 3 ships
 static ZEROPAGE zp;
 static PLYR_RAM plyr_ram[2];
 static PLYR_RAM *p = &plyr_ram[0];
 static DISPLAYLIST_ENTRY displaylist[256];
 
-static void handle_start_end_turn_or_game (void);			// $6885
+static int handle_start_end_turn_or_game (void);			// $6885
+static void print_PLAYER_N (void);										// $69E2
 static void handle_shots (void);											// $69F0
 static void copy_vector_list_to_avgram (
 							uint16_t addr, 
@@ -303,6 +304,10 @@ static void set_asteroid_velocity (
 							);																			// $7203
 static int8_t limit_asteroid_velocity (int8_t v);			// $7233
 static void display_C_scores_ships (void);						// $724F
+static void display_object (
+							uint8_t i,
+							uint8_t scale
+							);																			// $72FE
 static uint8_t display_high_score_table (void);				// $73C4
 static void handle_sounds (void);											// $7555
 static void check_high_score (void);									// $765C
@@ -322,6 +327,11 @@ static void add_chr_fn (
 						uint8_t n
 						);																				// $7853
 static void halt_dvg (void);													// $7BC0
+static void display_space_digit_A (
+							uint8_t digit,
+							int pad
+							);																			// $7BCB
+static void display_digit_A (uint8_t digit);					// $7BD1
 static void write_JMP_JSR_cmd (
 							eDVG_OPCODE opcode, 
 							uint16_t addr
@@ -462,7 +472,8 @@ void asteroids2 (void)
 
 					// ignore ping-pong buffers
 					zp.dvg_curr_addr = 1;
-					handle_start_end_turn_or_game ();
+					if (handle_start_end_turn_or_game () != 0)
+						goto start;
 					check_high_score ();
 					if (handle_high_score_entry () < 0)
 					{
@@ -499,37 +510,61 @@ void asteroids2 (void)
 }
 
 // $6885
-void handle_start_end_turn_or_game (void)
+int handle_start_end_turn_or_game (void)
 {
 	uint8_t msg;
+	uint8_t players;
 	
 	//UNIMPLEMENTED;
 	DBGPRINTF_FN;
 	
 	if (zp.numPlayers == 0)
 	{
-		if ((msg = zp.coinMultCredits & 3) == 0)
-		{
-			freeplay:
-				zp.CurrNumCredits = 2;
-		}
-		else
-		{
-			msg += 7;
-			if (zp.placeP1HighScore & zp.placeP2HighScore & (1<<7))
-				PrintPackedMsg (msg);
-		}
+		check_freeplay:
+			if ((msg = zp.coinMultCredits & 3) == 0)
+			{
+				freeplay:
+					zp.CurrNumCredits = 2;
+			}
+			else
+			{
+				msg += 7;
+				if (zp.placeP1HighScore & zp.placeP2HighScore & (1<<7))
+					PrintPackedMsg (msg);
+			}
 		check_start:
-			;
+			if (zp.CurrNumCredits == 0)
+				return (0);
+			players = 1;
+			init_players ();
+			init_wave ();
+			zp.numShipsP2 = zp.numStartingShipsPerGame;
+			players = 2;
+			zp.CurrNumCredits--;
+			
 		start_game:
-			;
+			zp.placeP1HighScore = 0xFF;
+			zp.placeP2HighScore = 0xFF;
+			zp.numShipsP1 = zp.numStartingShipsPerGame;
 	}
 	else
 	{
 		if (zp.timerStartGame != 0)
 		{
+			zp.timerStartGame--;
+			print_PLAYER_N ();
+			return (0);
 		}
 	}
+	
+	return (0);
+}
+
+// $69E2
+void print_PLAYER_N (void)
+{
+	PrintPackedMsg (1);
+	display_digit_A (zp.curPlayer + 1);
 }
 
 // $69F0
@@ -665,7 +700,30 @@ void display_extra_ships (uint8_t x, uint8_t n)
 // $6F57
 void update_and_render_objects (void)
 {
+	unsigned i;
+	uint8_t scale;
+	
 	//UNIMPLEMENTED;
+	
+	for (i=0; i<34; i++)
+	{
+		if (p->object_Sts[i] == 0)
+			continue;
+			
+		handle_object_entry:
+			if (p->object_Sts[i] < 0)
+			{
+				scale = 0;
+			}
+			else
+			{
+				object_ok:
+					scale = 0;
+			}
+			
+		jsr_display_object:
+			display_object (i, scale);
+	}
 }
 
 // $703F
@@ -703,7 +761,6 @@ void init_wave (void)
 			r = update_prng ();
 			r = (r & ASTEROID_SHAPE_MASK) | ASTEROID_SIZE_LARGE;
 			p->asteroid_Sts[i] = r;
-			// naughty, 28 is actually PlayerFlag
 			set_asteroid_velocity (28, i);
 			r = update_prng ();
 			flag = r & 1;
@@ -799,12 +856,21 @@ void display_C_scores_ships (void)
 				zp.curPlayer != 0 ||
 				// this depends on order of evaluation!
 				((zp.extra_brightness = 0x20) && ((p->ship_Sts | zp.hyperspaceFlag) != 0)) ||
-				((int8_t)p->shipSpawnTimer < 0) && (zp.fastTimer & 0x10) != 0))
+				(((int8_t)p->shipSpawnTimer < 0) && (zp.fastTimer & 0x10) != 0)))
 	{
 		display_numeric ((uint8_t *)&zp.p1Score, 2, 1);
 		display_bright_digit (0);
 	}
-	display_extra_ships (40, 3);
+	display_extra_ships (40, zp.numShipsP1);
+}
+
+// $72FE
+void display_object (uint8_t i, uint8_t scale)
+{
+	zp.globalScale = 0;
+	// add 1024???
+	write_CUR_cmd (p->object_Ph[i]>>3, p->object_Pv[i]>>3);
+	set_scale_A_bright_0 (0x90);
 }
 
 // $73C4
@@ -857,7 +923,7 @@ void display_digit (uint8_t digit, int pad)
 	{
 		digit &= 0x0f;
 		if (digit == 0)
-			display_bright_digit (digit);	// fixme
+			display_space_digit_A (digit, pad);
 		else
 			display_bright_digit (digit);
 	}
@@ -991,6 +1057,41 @@ void halt_dvg (void)
 	
 	dle->byte[0] = 0xB0;
 	dle->byte[1] = 0xB0;
+	dle->len = 2;
+
+	update_dvg_curr_addr (1);	
+}
+
+static void loc_7BD6 (uint8_t digit);
+
+// $7BCB
+void display_space_digit_A (uint8_t digit, int pad)
+{
+	if (pad == 0)
+		display_digit_A (digit);
+	else
+		loc_7BD6 (digit);
+}
+
+// $7BD1
+void display_digit_A (uint8_t digit)
+{
+	digit = (digit & 0x0F) + 1;		// char code
+	loc_7BD6 (digit);
+}
+
+void loc_7BD6 (uint8_t digit)
+{
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+	uint16_t offset;
+	
+	digit <<= 1;
+	// add JSR to display list
+	offset = 0x6D4 + (digit<<1);
+	dle->opcode = dvgrom[offset+1] >> 4;
+	dle->jsr_jmp.addr = 0x4000 | (((((uint16_t)dvgrom[offset+1] & 0x0f) << 8) | dvgrom[offset])<<1);
+	dle->byte[0] = dvgrom[offset];
+	dle->byte[1] = dvgrom[offset+1];
 	dle->len = 2;
 
 	update_dvg_curr_addr (1);	

@@ -34,8 +34,10 @@ unsigned int osd_quit (void)
 void osd_line (unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned brightness)
 {
 	//printf ("line(%d,%d)-(%d,%d)\n", x1, y1, x2, y2);
+	// this is going to be an issue when a less-bright vector overwrites a brighter one
+	// the intensities should add, but in this case they won't
 	if (brightness)
-		line (screen, x1, 1023-y1, x2, 1023-y2, 15);
+		line (screen, x1, 1023-y1, x2, 1023-y2, brightness);
 }
 
 void main (int argc, char *argv[])
@@ -46,6 +48,19 @@ void main (int argc, char *argv[])
 	set_color_depth (8);
 	set_gfx_mode (GFX_AUTODETECT_WINDOWED, 1024, 1024, 0, 0);
 	//set_gfx_mode (GFX_AUTODETECT_WINDOWED, 256, 192, 0, 0);
+
+  PALETTE   pal;
+  unsigned c;
+  for (c=0; c<16; c++)
+  {
+    uint8_t rgb;
+
+		rgb = (c == 0 ? 0 : c*16-1);    
+    pal[c].r = rgb>>2;
+    pal[c].g = rgb>>2;
+    pal[c].b = rgb>>2;
+  }
+	set_palette_range (pal, 0, 15, 1);
 
 	clear_bitmap (screen);
   asteroids2 ();
