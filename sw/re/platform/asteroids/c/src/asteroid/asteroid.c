@@ -309,6 +309,7 @@ static void display_object (
 							uint8_t scale
 							);																			// $72FE
 static uint8_t display_high_score_table (void);				// $73C4
+static void display_exploding_ship (void);						// $7465
 static void handle_sounds (void);											// $7555
 static void check_high_score (void);									// $765C
 static void display_numeric (
@@ -347,6 +348,9 @@ static void set_scale_A_bright_X (
 							uint8_t x
 							);																			// $7CDE 
 static void reset (void);															// $7CF3
+static void write_AX_to_avgram (
+							uint8_t a, 
+							uint8_t x);															// $7D45
 
 extern void dvgrom_disassemble_jsr (uint16_t addr);
 
@@ -701,12 +705,12 @@ void display_extra_ships (uint8_t x, uint8_t n)
 // $6F57
 void update_and_render_objects (void)
 {
-	unsigned i;
+	signed i;
 	uint8_t scale;
 	
 	//UNIMPLEMENTED;
 	
-	for (i=0; i<34; i++)
+	for (i=34; i>=0; i--)
 	{
 		if (p->object_Sts[i] == 0)
 			continue;
@@ -846,9 +850,7 @@ void display_C_scores_ships (void)
 {
 	uint8_t extra_brightness;
 	
-	//UNIMPLEMENTED;
-
-	DBGPRINTF ("%s()\n", __FUNCTION__);
+	//DBGPRINTF ("%s()\n", __FUNCTION__);
 	
 	zp.globalScale = 0x10;				// 1
 	write_JSR_cmd (0x50A4);
@@ -893,10 +895,47 @@ void display_C_scores_ships (void)
 // $72FE
 void display_object (uint8_t i, uint8_t scale)
 {
-	zp.globalScale = 0;
-	// add 1024???
-	write_CUR_cmd (p->object_Ph[i]>>3, p->object_Pv[i]>>3);
+	uint8_t sts;
+
+	zp.globalScale = scale;
+	write_CUR_cmd ((p->object_Ph[i]+1024)>>3, p->object_Pv[i]>>3);
+	// some crap
 	set_scale_A_bright_0 (0x90);
+	if (p->object_Sts[i] < 0)
+	{
+		if (i != 0x1B)
+		{
+			// shrapnel
+			sts = (p->object_Sts[i] & 0x0C) >> 1;
+			write_AX_to_avgram (dvgrom[0xF8+sts], dvgrom[0xF9+sts]);
+		}
+		else
+			display_exploding_ship ();
+		return;
+	}
+	display_shot_ship_asteroid_or_saucer:
+		if (i == 0x1B)
+		{
+			//calc_ship_and_render ();
+		}
+		else 
+		if (i == 0x1C)
+		{
+			// saucer
+			write_AX_to_avgram (dvgrom[0x250], dvgrom[0x251]);
+		}
+		else
+		if (i > 0x1C)
+		{
+			// display_shot
+		}
+		else
+		{
+			// asteroid
+			printf ("%s() : asteroid(%d)\n", __FUNCTION__, i);
+			sts = (p->object_Sts[i] & 0x18) >> 2;
+			write_AX_to_avgram (dvgrom[0x1DE + sts], dvgrom[0x1DF + sts]);
+		}
 }
 
 // $73C4
@@ -905,6 +944,11 @@ uint8_t display_high_score_table (void)
 	//UNIMPLEMENTED;
 	
 	return (0);
+}
+
+// $7465
+void display_exploding_ship (void)
+{
 }
 
 // $7555
@@ -924,8 +968,8 @@ void display_numeric (uint8_t *buf, uint8_t bytes, int pad, uint8_t extra_bright
 {
 	signed int n = bytes - 1;
 
-	DBGPRINTF ("%s($%02X$%02X,%d,%d)\n", __FUNCTION__, 
-							*buf, *(buf+1), bytes, pad);
+	//DBGPRINTF ("%s($%02X$%02X,%d,%d)\n", __FUNCTION__, 
+	//						*buf, *(buf+1), bytes, pad);
 	
 	zp.extra_brightness = extra_brightness;
 	do
@@ -942,7 +986,7 @@ void display_numeric (uint8_t *buf, uint8_t bytes, int pad, uint8_t extra_bright
 // $7785
 void display_digit (uint8_t digit, int pad)
 {
-	DBGPRINTF ("%s(%d,%d)\n", __FUNCTION__, digit, pad);
+	//DBGPRINTF ("%s(%d,%d)\n", __FUNCTION__, digit, pad);
 	
 	if (pad == 0)
 		display_bright_digit (digit);
@@ -962,7 +1006,7 @@ void display_bright_digit (uint8_t digit)
 	int offset;
 	uint16_t addr;
 	
-	DBGPRINTF ("%s(%d)\n", __FUNCTION__, digit);
+	//DBGPRINTF ("%s(%d)\n", __FUNCTION__, digit);
 
 	if (0 && zp.extra_brightness == 0)
 		;
@@ -1234,4 +1278,27 @@ void reset (void)
 	p = &plyr_ram[0];
 	zp.coinMultCredits = 0x03 & dsw1.coinage;
 	zp.coinMultCredits |= (dsw1.centreCoinMultiplierAndLives & 2) << 3;
+}
+
+// $7D45
+void write_AX_to_avgram (uint8_t a, uint8_t x)
+{
+	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
+
+	dle->byte[0] = a;
+	dle->byte[1] = x;
+	dle->len = 2;
+	
+	switch (x & 0xF0)
+	{
+		case 0xC0 :
+			dle->opcode = JSR;
+			dle->jsr_jmp.addr = 0x4000 | (((((uint16_t)x & 0x0F) << 8) | a)<<1);
+			break;
+		
+		default :
+			break;
+	}
+	
+	update_dvg_curr_addr (1);	
 }
