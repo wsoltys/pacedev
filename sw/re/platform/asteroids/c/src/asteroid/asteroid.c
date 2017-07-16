@@ -314,7 +314,8 @@ static void check_high_score (void);									// $765C
 static void display_numeric (
 							uint8_t *buf, 
 							uint8_t bytes, 
-							int pad);																// $773F
+							int pad,
+							uint8_t extra_brightness);							// $773F
 static void display_digit (
 							uint8_t digit, 
 							int pad
@@ -843,6 +844,8 @@ int8_t limit_asteroid_velocity (int8_t v)
 // $724F
 void display_C_scores_ships (void)
 {
+	uint8_t extra_brightness;
+	
 	//UNIMPLEMENTED;
 
 	DBGPRINTF ("%s()\n", __FUNCTION__);
@@ -851,34 +854,37 @@ void display_C_scores_ships (void)
 	write_JSR_cmd (0x50A4);
 	write_CURx4_cmd (25, 219);
 	set_scale_A_bright_0 (0x70);
-	zp.extra_brightness = 0;
+	extra_brightness = 0;
 	if ((zp.numPlayers != 2 ||
 				zp.curPlayer != 0 ||
-				// this depends on order of evaluation!
-				((zp.extra_brightness = 0x20) && ((p->ship_Sts | zp.hyperspaceFlag) != 0)) ||
+				// yes, the brightness is an assignment!
+				((extra_brightness = 0x20) && ((p->ship_Sts | zp.hyperspaceFlag) != 0)) ||
 				(((int8_t)p->shipSpawnTimer < 0) && (zp.fastTimer & 0x10) != 0)))
 	{
-		display_numeric ((uint8_t *)&zp.p1Score, 2, 1);
+		display_numeric ((uint8_t *)&zp.p1Score, 2, 1, extra_brightness);
 		display_bright_digit (0);
 	}
 	display_extra_ships (40, zp.numShipsP1);
 	zp.globalScale = 0;
 	write_CURx4_cmd (120, 219);
 	set_scale_A_bright_0 (0x50);
-	display_numeric ((uint8_t *)zp.highScoreTable, 2, 1);
+	extra_brightness = 0; // set by above JSR
+	display_numeric ((uint8_t *)zp.highScoreTable, 2, 1, extra_brightness);
 	display_digit_A (0);
 	zp.globalScale = 0x10;
 	write_CURx4_cmd (192, 219);
 	set_scale_A_bright_0 (0x50);
+	extra_brightness = 0; // set by above JSR
 	if (zp.numPlayers == 1)
 		return;
 	if (zp.numPlayers == 0 ||
 			zp.curPlayer == 0 ||
-			(p->ship_Sts | zp.hyperspaceFlag) != 0 ||
+			// yes, the brightness is an assignment!
+			((extra_brightness = 0x20) && (p->ship_Sts | zp.hyperspaceFlag)) != 0 ||
 			p->shipSpawnTimer < 0 ||
 			(zp.fastTimer & 0x10) != 0)
 	{
-		display_numeric ((uint8_t *)&zp.p2Score, 2, 1);
+		display_numeric ((uint8_t *)&zp.p2Score, 2, 1, extra_brightness);
 		display_bright_digit (0);
 		display_extra_ships (207, zp.numShipsP2);		
 	}
@@ -914,13 +920,14 @@ void check_high_score (void)
 }
 
 // $773F
-void display_numeric (uint8_t *buf, uint8_t bytes, int pad)
+void display_numeric (uint8_t *buf, uint8_t bytes, int pad, uint8_t extra_brightness)
 {
 	signed int n = bytes - 1;
 
 	DBGPRINTF ("%s($%02X$%02X,%d,%d)\n", __FUNCTION__, 
 							*buf, *(buf+1), bytes, pad);
 	
+	zp.extra_brightness = extra_brightness;
 	do
 	{
 		uint8_t digit = *(buf+n);
