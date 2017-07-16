@@ -213,7 +213,7 @@ typedef struct
 	uint8_t		saucerCountdownTimer;						// $02F7
 	uint8_t		starting_saucerCountdownTimer;			// $02F8
 	uint8_t		asteroid_hit_timer;							// $02F9
-	uint8_t		shipSpawnTimer;								// $02FA
+	int8_t		shipSpawnTimer;								// $02FA
 	uint8_t 		asteroidWaveTimer;							// $02FB
 	uint8_t		starting_ThumpCounter;					// $02FC
 	uint8_t		numAsteroidsLeftBeforeSaucer;			// $02FD
@@ -872,12 +872,16 @@ void display_C_scores_ships (void)
 	set_scale_A_bright_0 (0x50);
 	if (zp.numPlayers == 1)
 		return;
-	if (zp.numPlayers > 1)
+	if (zp.numPlayers == 0 ||
+			zp.curPlayer == 0 ||
+			(p->ship_Sts | zp.hyperspaceFlag) != 0 ||
+			p->shipSpawnTimer < 0 ||
+			(zp.fastTimer & 0x10) != 0)
 	{
+		display_numeric ((uint8_t *)&zp.p2Score, 2, 1);
+		display_bright_digit (0);
+		display_extra_ships (207, zp.numShipsP2);		
 	}
-	display_numeric ((uint8_t *)&zp.p2Score, 2, 1);
-	display_bright_digit (0);
-	display_extra_ships (207, zp.numShipsP2);		
 }
 
 // $72FE
