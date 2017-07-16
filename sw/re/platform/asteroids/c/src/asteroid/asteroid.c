@@ -862,6 +862,22 @@ void display_C_scores_ships (void)
 		display_bright_digit (0);
 	}
 	display_extra_ships (40, zp.numShipsP1);
+	zp.globalScale = 0;
+	write_CURx4_cmd (120, 219);
+	set_scale_A_bright_0 (0x50);
+	display_numeric ((uint8_t *)zp.highScoreTable, 2, 1);
+	display_digit_A (0);
+	zp.globalScale = 0x10;
+	write_CURx4_cmd (192, 219);
+	set_scale_A_bright_0 (0x50);
+	if (zp.numPlayers == 1)
+		return;
+	if (zp.numPlayers > 1)
+	{
+	}
+	display_numeric ((uint8_t *)&zp.p2Score, 2, 1);
+	display_bright_digit (0);
+	display_extra_ships (207, zp.numShipsP2);		
 }
 
 // $72FE
@@ -1070,7 +1086,7 @@ void display_space_digit_A (uint8_t digit, int pad)
 	if (pad == 0)
 		display_digit_A (digit);
 	else
-		loc_7BD6 (digit);
+		loc_7BD6 (digit); // space=0
 }
 
 // $7BD1
@@ -1080,14 +1096,14 @@ void display_digit_A (uint8_t digit)
 	loc_7BD6 (digit);
 }
 
-void loc_7BD6 (uint8_t digit)
+void loc_7BD6 (uint8_t chr_code)
 {
 	DISPLAYLIST_ENTRY *dle = &displaylist[zp.dvg_curr_addr];
 	uint16_t offset;
 	
-	digit <<= 1;
+	chr_code <<= 1;
 	// add JSR to display list
-	offset = 0x6D4 + (digit<<1);
+	offset = 0x6D4 + chr_code;
 	dle->opcode = dvgrom[offset+1] >> 4;
 	dle->jsr_jmp.addr = 0x4000 | (((((uint16_t)dvgrom[offset+1] & 0x0f) << 8) | dvgrom[offset])<<1);
 	dle->byte[0] = dvgrom[offset];
