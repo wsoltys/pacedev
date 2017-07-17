@@ -31,6 +31,11 @@ unsigned int osd_quit (void)
 	return (0);
 }
 
+void osd_cls (void)
+{
+	clear_bitmap (screen);
+}
+
 void osd_line (unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned brightness)
 {
 	//printf ("line(%d,%d)-(%d,%d)\n", x1, y1, x2, y2);

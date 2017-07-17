@@ -191,7 +191,7 @@ typedef struct
 			uint16_t	saucerShot_Ph[2];								// $0286-$0287,$02CC-$02CD
 			uint16_t	shipShot_Ph[4];									// $0288-$028B,$02CE-$02D1
 		};
-		int8_t			object_Ph[27+1+1+2+4];
+		int16_t			object_Ph[27+1+1+2+4];
 	};
 	// Vertical	Position High (0-23), 0=Bottom,	23=Top
 	// Vertical	Position Low (0-255), 0=Bottom,	255=Top
@@ -205,7 +205,7 @@ typedef struct
 			uint16_t	saucerShot_Pv[2];								// $02A9-$02AA,$02EF-$02F0
 			uint16_t	shipShot_Pv[4];									// $02AB-$02AE,$02F1-$02F4
 		};
-		int8_t			object_Pv[27+1+1+2+4];
+		int16_t			object_Pv[27+1+1+2+4];
 	};
 
 	uint8_t		startingAsteroidsPerWave;				// $02F5
@@ -360,6 +360,7 @@ extern int8_t dvg_scale;
 extern uint16_t dvg_brightness;
 extern uint8_t dvgrom[];
 
+extern void osd_cls (void);
 extern void osd_line (unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned brightness);
 #define SCALE(s) (1<<(9-((dvg_scale+s)&0x0f)))
 
@@ -368,6 +369,8 @@ static void dump_displaylist (void)
 	unsigned i, j;
 	char disasm[128], bin[128], *b;
 	signed sf;
+	
+	osd_cls ();
 	
 	for (i=0; ; i++)
 	{
@@ -521,7 +524,7 @@ int handle_start_end_turn_or_game (void)
 	uint8_t players;
 	
 	//UNIMPLEMENTED;
-	DBGPRINTF_FN;
+	//DBGPRINTF_FN;
 	
 	if (zp.numPlayers == 0)
 	{
@@ -706,6 +709,7 @@ void display_extra_ships (uint8_t x, uint8_t n)
 void update_and_render_objects (void)
 {
 	signed i;
+	int8_t delta;
 	uint8_t scale;
 	
 	//UNIMPLEMENTED;
@@ -723,7 +727,35 @@ void update_and_render_objects (void)
 			else
 			{
 				object_ok:
-					scale = 0;
+					delta = 0;
+					if (p->object_Vh[i] < 0)
+						delta--;
+					p->object_Ph[i] += delta;
+					if (p->object_Ph[i] >= 0x2000)
+						p->object_Ph[i] &= 0x1FFF;
+					if (i == 0x1C)
+					{
+						//zero_saucer ();
+						continue;
+					}
+					delta = 0;
+					if (p->object_Vv[i] < 0)
+						delta = -1;
+					p->object_Pv[i] += delta;
+					if (p->object_Pv[i] >= 0x1800)
+					{
+						if (p->object_Pv[i] == 0x1800)
+							p->object_Pv[i] &= 0x00FF;
+						else
+							p->object_Pv[i] &= 0x17FF;
+					}
+					if (p->object_Sts[i] & (1<<0))
+						scale = -2;
+					else
+					if (p->object_Sts[i] & (1<<1))
+						scale = -1;
+					else
+						scale = 0;
 			}
 			
 		jsr_display_object:
@@ -761,12 +793,12 @@ void init_wave (void)
 		// tmp counter
 		zp.byte_8 = p->startingAsteroidsPerWave;
 
-		for (i=27; i>=0; i--)
+		for (i=26; i>=0; i--)
 		{
 			r = update_prng ();
 			r = (r & ASTEROID_SHAPE_MASK) | ASTEROID_SIZE_LARGE;
 			p->asteroid_Sts[i] = r;
-			set_asteroid_velocity (28, i);
+			set_asteroid_velocity (27, i);	// 27 == ship
 			r = update_prng ();
 			flag = r & 1;
 			r = (r>>1) & 0x1F;
@@ -784,6 +816,7 @@ void init_wave (void)
 					p->asteroid_Ph[i] = ((uint16_t)r)<<8;
 					p->asteroid_Pv[i] = 0;
 			}
+			printf ("(%d,%d)\n", p->asteroid_Ph[i], p->asteroid_Pv[i]);
 			if (--zp.byte_8 == 0)
 				break;
 		}
@@ -792,7 +825,7 @@ void init_wave (void)
 	}
 
 	// set remaining asteroids to inactive
-	for (; i>=0; i--)
+	for (--i; i>=0; i--)
 		p->asteroid_Sts[i] = 0;
 }
 
@@ -932,7 +965,7 @@ void display_object (uint8_t i, uint8_t scale)
 		else
 		{
 			// asteroid
-			printf ("%s() : asteroid(%d)\n", __FUNCTION__, i);
+			//printf ("%s() : asteroid(%d)\n", __FUNCTION__, i);
 			sts = (p->object_Sts[i] & 0x18) >> 2;
 			write_AX_to_avgram (dvgrom[0x1DE + sts], dvgrom[0x1DF + sts]);
 		}
@@ -1023,19 +1056,16 @@ void display_bright_digit (uint8_t digit)
 // $77B5
 uint8_t update_prng (void)
 {
-	uint8_t r;
-	
 	// rnd2 is high byte, rnd1 is low byte
 	zp.rnd <<= 1;
 	if (zp.rnd & (1<<15))
 		zp.rnd |= (1<<0);
 	if (zp.rnd & 2)
 		zp.rnd ^= (1<<0);
-	r = (uint8_t)((zp.rnd >> 8) | zp.rnd);
-	if (r == 0)
-		r++;
-	
-	return (r);
+	if (zp.rnd == 0)
+		zp.rnd++;
+
+	return ((uint8_t)(zp.rnd & 0xFF));
 }
 
 // $77F6
