@@ -1058,10 +1058,10 @@ ROM:6AD3
 ROM:6AD3	     ; =============== S U B R O U T I N E =======================================
 ROM:6AD3
 ROM:6AD3
-ROM:6AD3	     copy_vector_list_from_table_to_avgram:
+ROM:6AD3	     copy_vector_list_from_table_to_dvgram:
 ROM:6AD3 85 0B					     STA     byte_B				     ; table address (LSB)
 ROM:6AD5 86 0C					     STX     byte_C				     ; table address (MSB)
-ROM:6AD5	     ; End of function copy_vector_list_from_table_to_avgram
+ROM:6AD5	     ; End of function copy_vector_list_from_table_to_dvgram
 ROM:6AD5
 ROM:6AD7
 ROM:6AD7	     ; =============== S U B R O U T I N E =======================================
@@ -2881,7 +2881,7 @@ ROM:752F 29 FE					     AND     #$FE ; 'þ'
 ROM:7531 A8					     TAY
 ROM:7532 B9 6E 52				     LDA     DVGROM+$26E,Y			     ; ship table address LSB
 ROM:7535 BE 6F 52				     LDX     DVGROM+$26F,Y			     ; ship table address MSB
-ROM:7538 20 D3 6A				     JSR     copy_vector_list_from_table_to_avgram
+ROM:7538 20 D3 6A				     JSR     copy_vector_list_from_table_to_dvgram
 ROM:753B AD 05 24				     LDA     thrustSwitch			     ; thrust?
 ROM:753E 10 14					     BPL     locret_7554			     ; no, exit
 ROM:7540 A5 5C					     LDA     fastTimer
@@ -2897,7 +2897,7 @@ ROM:754E 90 01					     BCC     loc_7551
 ROM:7550 E8					     INX					     ; BC+=2
 ROM:7551
 ROM:7551	     loc_7551:
-ROM:7551 20 D3 6A				     JSR     copy_vector_list_from_table_to_avgram
+ROM:7551 20 D3 6A				     JSR     copy_vector_list_from_table_to_dvgram
 ROM:7554
 ROM:7554	     locret_7554:
 ROM:7554 60					     RTS
