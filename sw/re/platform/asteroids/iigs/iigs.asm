@@ -3,10 +3,11 @@
 ; for debugging
 .export dvg_cur
 .export dvg_chr
+.export dvg_copyright
+.export dvg_asteroid
 .export dvg_halt
 .export chk_shrapnel
 .export chk_extra_ship
-.export print_copyright
 .export cur_2_shr
 .export print_chr
 .export apple_render_frame
@@ -154,60 +155,6 @@ render_7x2:
 				IIMODE
 				rts
 
-; X=pattern word offset
-print_asteroid:
-				IIGSMODE
-				txa														; pattern x2
-				sta			$C6
-				asl														; pattern x4
-				clc
-				adc			$C6										; =pattern x6
-				and			#$00FF
-				tax
-				lda			$08										; global scale
-				and			#$00FF
-				beq			:+										; large? yes, go
-				inx
-				inx
-				cmp			#$0F									; medium?
-				beq			:+										; yes, go
-				inx
-				inx														; small
-:				ldy			asteroid_tbl,x
-render_16x4:
-				lda			#16										; 16 lines
-				sta			$C4
-				ldx			$C2										; SHR offset
-:				lda			0,y
-				ora			SHRMEM,x
-				sta			SHRMEM,x							; 1st qtr of line
-				lda			2,y
-				ora			SHRMEM+2,x
-				sta			SHRMEM+2,x							; 2nd qtr of line
-				lda			4,y
-				ora			SHRMEM+4,x
-				sta			SHRMEM+4,x							; 3rd qtr of line
-				lda			6,y
-				ora			SHRMEM+6,x
-				sta			SHRMEM+6,x							; 4th qtr of line
-				tya
-				clc
-				adc			#8
-				tay
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:-
-				; update CUR
-				lda			$C2
-				clc
-				adc			#8
-				sta			$C2
-				IIMODE
-				rts
-																				
 upd_ptr:
 				clc
 				adc			byte_B
@@ -215,48 +162,6 @@ upd_ptr:
 				bcc			:+
 				inc			byte_C
 :				rts				
-
-print_copyright:
-				; CUR SSS=0,(400,128)
-.if 0				
-				lda			#<128
-				sta			$06
-				lda			#>128
-				sta			$07
-				lda			#<400
-				sta			$04
-				lda			#>400
-				sta			$05
-				lda			#00
-				sta			$08		
-				jsr			cur_2_shr
-.endif				
-				IIGSMODE
-				ldy			#copyright
-;				ldx			$C2										; SHR offset ($6F72)
-				ldx			#$6F72
-				lda			#5										; 5 lines
-				sta			$C4
-:				lda			#15										; 15 words/line
-				sta			$C6
-:				lda			0,y
-				ora			SHRMEM,x
-				sta			SHRMEM,x
-				iny
-				iny														; pixel data
-				inx
-				inx														; screen ptr
-				dec			$C6										; done line?
-				bne			:-										; no, loop
-				txa
-				clc
-				adc			#(160-30)							; ptr next line
-				tax
-				dec			$C4										; done all lines?
-				bne			:--										; no, loop
-				IIMODE
-				lda			#0										; so we can BNE
-				rts
 
 ; $0-$9
 dvg_vec:
@@ -313,7 +218,106 @@ dvg_chr:
         lda     (byte_B),y
 				jmp			jsr_print
         rts
-        
+
+; $3
+dvg_copyright:
+				; CUR SSS=0,(400,128)
+.if 0				
+				lda			#<128
+				sta			$06
+				lda			#>128
+				sta			$07
+				lda			#<400
+				sta			$04
+				lda			#>400
+				sta			$05
+				lda			#00
+				sta			$08		
+				jsr			cur_2_shr
+.endif				
+				IIGSMODE
+				ldy			#copyright
+;				ldx			$C2										; SHR offset ($6F72)
+				ldx			#$6F72
+				lda			#5										; 5 lines
+				sta			$C4
+:				lda			#15										; 15 words/line
+				sta			$C6
+:				lda			0,y
+				ora			SHRMEM,x
+				sta			SHRMEM,x
+				iny
+				iny														; pixel data
+				inx
+				inx														; screen ptr
+				dec			$C6										; done line?
+				bne			:-										; no, loop
+				txa
+				clc
+				adc			#(160-30)							; ptr next line
+				tax
+				dec			$C4										; done all lines?
+				bne			:--										; no, loop
+				IIMODE
+				jmp			jsr_exit
+        rts
+
+; $4
+; $00(2:1)=shape(0-3)
+dvg_asteroid:
+        lda     (byte_B),y
+				IIGSMODE
+				sta			$C6
+				asl														; pattern x4
+				clc
+				adc			$C6										; =pattern x6
+				and			#$00FF
+				tax
+				lda			$08										; global scale
+				and			#$00FF
+				beq			:+										; large? yes, go
+				inx
+				inx
+				cmp			#$0F									; medium?
+				beq			:+										; yes, go
+				inx
+				inx														; small
+:				ldy			asteroid_tbl,x
+render_16x4:
+				lda			#16										; 16 lines
+				sta			$C4
+				ldx			$C2										; SHR offset
+:				lda			0,y
+				ora			SHRMEM,x
+				sta			SHRMEM,x							; 1st qtr of line
+				lda			2,y
+				ora			SHRMEM+2,x
+				sta			SHRMEM+2,x							; 2nd qtr of line
+				lda			4,y
+				ora			SHRMEM+4,x
+				sta			SHRMEM+4,x							; 3rd qtr of line
+				lda			6,y
+				ora			SHRMEM+6,x
+				sta			SHRMEM+6,x							; 4th qtr of line
+				tya
+				clc
+				adc			#8
+				tay
+				clc
+				txa
+				adc			#160									; ptr next line
+				tax
+				dec			$C4										; line counter
+				bne			:-
+				; update CUR
+				lda			$C2
+				clc
+				adc			#8
+				sta			$C2
+				IIMODE
+				jmp			jsr_exit
+        rts
+                        
 ; $F
 dvg_halt:
 				lda			#2										; 2 bytes in instruction
@@ -353,7 +357,7 @@ al:			lda			$51DE,x								; $5000-$800+$9DE
 				cmp			(byte_B),y
 				bne			:+
 				; found an asteroid
-				jsr			print_asteroid
+;				jsr			print_asteroid
 				jmp			jsr_exit
 :				dey
 :				inx
@@ -413,16 +417,6 @@ chk_ufo:
 :
 chk_copyright:
 				; check for copyright message
-				lda			#$52
-				cmp			(byte_B),y
-				bne			:++
-				iny
-				lda			#$C8
-				cmp			(byte_B),y
-				bne			:+
-				; found copyright
-				jsr			print_copyright
-				bne			jsr_exit
 :				dey
 :
 chk_extra_ship:
@@ -485,8 +479,8 @@ dvg_jmp_tbl:
 				.word		dvg_cur-1
 				.word		dvg_chr-1
 				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
+				.word		dvg_copyright-1
+				.word		dvg_asteroid-1
 				.word		dvg_rts-1
 				.word		dvg_rts-1
 				.word		dvg_rts-1

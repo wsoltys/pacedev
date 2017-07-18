@@ -2403,7 +2403,12 @@ display_C_scores_ships:
                                 LDX     #$A4 ; '¤'                              ; addr = 0x50A4
                                 JSR     write_JSR_cmd                           ; "(C)1979 ATARI INC"
 .else
-  ; copyright                                
+                                ldy     #0
+                                lda     #OP_COPYRIGHT
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
 .endif                                
                                 LDA     #25                                     ; X coord (x4=100)
                                 LDX     #219                                    ; Y coord (x4=876)
@@ -2580,7 +2585,12 @@ display_shot_ship_asteroid_or_saucer:                                           
 loc_7370:                                                                       ; writes JSR instruction
                                 JSR     write_AX_to_avgram
 .else
-  ; render asteroid
+                                ldy     #0
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda     #OP_ASTEROID
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
 loc_7370:
 .endif                                
                                 LDX     byte_D                                  ; restore object offset
