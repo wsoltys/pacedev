@@ -1,5 +1,8 @@
 ; apple2.inc
 
+; for .ifdef APPLE_IIGS
+APPLE_IIGS = 1
+
 KBD 					= $C000				; b7=new key, b6..0=key scan code
 KBDSTRB 			= $C010
 

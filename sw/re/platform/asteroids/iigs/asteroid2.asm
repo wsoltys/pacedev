@@ -1841,9 +1841,11 @@ display_extra_ships:
                                 JSR     write_CURx4_cmd
 
 loc_6F4B:
+.ifndef APPLE_IIGS
                                 LDX     #$DA ; 'Ú'
                                 LDA     #$54 ; 'T'                              ; addr=0x54DA
                                 JSR     write_JSR_cmd                           ; display extra ships?
+.endif                                
                                 DEC     byte_8
                                 BNE     loc_6F4B
 
@@ -2396,9 +2398,13 @@ locret_724E:
 display_C_scores_ships:
                                 LDA     #16
                                 STA     globalScale
+.ifndef APPLE_IIGS                                
                                 LDA     #$50 ; 'P'
                                 LDX     #$A4 ; '¤'                              ; addr = 0x50A4
                                 JSR     write_JSR_cmd                           ; "(C)1979 ATARI INC"
+.else
+  ; copyright                                
+.endif                                
                                 LDA     #25                                     ; X coord (x4=100)
                                 LDX     #219                                    ; Y coord (x4=876)
                                 JSR     write_CURx4_cmd
@@ -2542,9 +2548,13 @@ loc_733B:
                                 BEQ     loc_7355                                ; yes, go
                                 AND     #$C                                     ; status (3:2)
                                 LSR     A                                       ; status (3:2)->(2:1)
+.ifndef APPLE_IIGS                                
                                 TAY                                             ; pattern = word offset
                                 LDA     DVGROM+$F8,Y                            ; shrapnel table address LSB
                                 LDX     DVGROM+$F9,Y                            ; shrapnel table address MSB
+.else
+  ; render shrapnel
+.endif                                
                                 BNE     loc_7370                                ; always
 
 loc_7355:
@@ -2562,12 +2572,17 @@ display_shot_ship_asteroid_or_saucer:                                           
                                 AND     #$18                                    ; status (4:3)
                                 LSR     A
                                 LSR     A                                       ; status (4:3)->(2:1)
+.ifndef APPLE_IIGS                                
                                 TAY                                             ; = word offset
                                 LDA     DVGROM+$1DE,Y                           ; asteroid table address LSB
                                 LDX     DVGROM+$1DF,Y                           ; asteroid table address MSB
 
 loc_7370:                                                                       ; writes JSR instruction
                                 JSR     write_AX_to_avgram
+.else
+  ; render asteroid
+loc_7370:
+.endif                                
                                 LDX     byte_D                                  ; restore object offset
                                 RTS
 ; ---------------------------------------------------------------------------
@@ -2579,14 +2594,22 @@ display_ship:
 ; ---------------------------------------------------------------------------
 
 display_saucer:                                                                 ; saucer table address LSB
+.ifndef APPLE_IIGS
                                 LDA     DVGROM+$250
                                 LDX     DVGROM+$251                             ; saucer table address MSB
+.else
+  ; render saucer
+.endif                                
                                 BNE     loc_7370                                ; always
 
 display_shot:
+.ifndef APPLE_IIGS
                                 LDA     #$70 ; 'p'
                                 LDX     #$F0 ; 'ð'
                                 JSR     set_scale_A_bright_X
+.else
+  ; render shot
+.endif                                
                                 LDX     byte_D                                  ; restore object offset
                                 LDA     fastTimer
                                 AND     #3                                      ; time to dec?
@@ -2870,6 +2893,7 @@ calc_ship_and_render:
                                 STX     extra_brightness
                                 LDY     #0                                      ; default positive delta
                                 LDA     direction
+.ifndef APPLE_IIGS                                
                                 BPL     loc_751B                                ; positive, skip
                                 LDY     #4                                      ; flag negative delta
                                 TXA                                             ; 0
@@ -2897,11 +2921,15 @@ loc_752A:                                                                       
                                 LDA     DVGROM+$26E,Y                           ; ship table address LSB
                                 LDX     DVGROM+$26F,Y                           ; ship table address MSB
                                 JSR     copy_vector_list_from_table_to_dvgram
+.else
+  ; render ship
+.endif                                
                                 LDA     thrustSwitch                            ; thrust?
                                 BPL     locret_7554                             ; no, exit
                                 LDA     fastTimer
                                 AND     #4                                      ; time to display thrust?
                                 BEQ     locret_7554                             ; no, exit
+.ifndef APPLE_IIGS                                
                                 INY
                                 INY                                             ; Y=2???
                                 SEC
@@ -2913,6 +2941,9 @@ loc_752A:                                                                       
 
 loc_7551:
                                 JSR     copy_vector_list_from_table_to_dvgram
+.else
+  ; render thrust
+.endif                                
 
 locret_7554:
                                 RTS
@@ -3368,6 +3399,7 @@ display_bright_digit:
                                 CLC
                                 ADC     #1
                                 PHP
+.ifndef APPLE_IIGS                                
                                 ASL     A                                       ; x2
                                 TAY                                             ; word offset
                                 LDA     DVGROM+$6D4,Y                           ; chr fn
@@ -3382,6 +3414,9 @@ display_bright_digit:
                                 STA     byte_8                                  ; flag to flip X
                                 STA     byte_9                                  ; flag to flip Y
                                 JSR     copy_vector_list_to_avgram
+.else
+  ; A = digit (char) code
+.endif
                                 PLP
                                 RTS
 ; ---------------------------------------------------------------------------
@@ -3500,6 +3535,7 @@ loc_7813:                                                                       
                                 LDA     msgCoords,Y                             ; X
                                 LDX     msgCoords+1,Y                           ; Y
                                 JSR     write_CURx4_cmd
+                                rts                                             ; *** FIXME
                                 LDA     #$70 ; 'p'
                                 JSR     set_scale_A_bright_0
                                 LDY     #0
@@ -3557,6 +3593,7 @@ loc_785B:                                                                       
                                 ADC     #$D
 
 loc_7861:                                                                       ; X = chr*2 (chr fn offset)
+.ifndef APPLE_IIGS
                                 TAX
                                 LDA     DVGROM+$6D2,X                           ; chr fn msb
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
@@ -3564,6 +3601,9 @@ loc_7861:                                                                       
                                 LDA     DVGROM+$6D3,X                           ; chr fn lsb
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
                                 INY
+.else
+                                ; A = CHR*2
+.endif                                
                                 LDX     #0
                                 RTS
 ; End of function add_chr_fn
@@ -3890,6 +3930,7 @@ display_digit_A:
 
 loc_7BD6:
                                 PHP
+.ifndef APPLE_IIGS
                                 ASL     A                                       ; x2 (word offset)
                                 LDY     #0
                                 TAX
@@ -3898,7 +3939,10 @@ loc_7BD6:
                                 LDA     DVGROM+$6D5,X                           ; chr fn lsb
                                 INY
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
-                                JSR     update_dvg_curr_addr
+.else
+  ; A = chr code
+.endif                                
+;                                JSR     update_dvg_curr_addr                   ; *** FIXME
                                 PLP
                                 RTS
 ; End of function display_digit_A
@@ -4123,6 +4167,7 @@ set_scale_A_bright_0:
 
 
 set_scale_A_bright_X:
+.ifndef APPLE_IIGS
                                 LDY     #1
                                 STA     (dvg_curr_addr_lsb),Y                   ; store (SSSS -mYY)=A in avg ram
                                 DEY
@@ -4135,6 +4180,9 @@ set_scale_A_bright_X:
                                 TXA
                                 STA     (dvg_curr_addr_lsb),Y                   ; store (BBBB -mXX)=X in avg ram
                                 JMP     update_dvg_curr_addr
+.else
+                                rts
+.endif                                
 ; End of function set_scale_A_bright_X
 
 ; ---------------------------------------------------------------------------
