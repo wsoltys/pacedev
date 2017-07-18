@@ -3604,6 +3604,8 @@ loc_7861:                                                                       
                                 INY
                                 LDA     DVGROM+$6D3,X                           ; chr fn lsb
 .else
+                                sec                                             ; no borrow
+                                sbc     #2                                      ; $6D2 vs $6D4!
                                 sta     (dvg_curr_addr_lsb),y
                                 iny
                                 lda     #OP_CHR

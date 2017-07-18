@@ -1,7 +1,9 @@
 .include "apple2.inc"
 
 ; for debugging
-.export dvg_vec
+.export dvg_cur
+.export dvg_chr
+.export dvg_halt
 .export chk_shrapnel
 .export chk_extra_ship
 .export print_copyright
@@ -543,6 +545,7 @@ render_loop:
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
 
+.if 0
 				; now we (always) render the ship
 				IIGSMODE
 				lda			direction							; 0-256
@@ -563,6 +566,7 @@ render_loop:
 				ldy			ship_tbl,x
 				jsr			render_7x2
 				HINT_IIMODE			
+.endif				
 
 				; fudge some inputs now
 				
