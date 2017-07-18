@@ -1840,14 +1840,26 @@ display_extra_ships:
                                 STY     globalScale
                                 JSR     write_CURx4_cmd
 
-loc_6F4B:
 .ifndef APPLE_IIGS
+loc_6F4B:
                                 LDX     #$DA ; 'Ú'
                                 LDA     #$54 ; 'T'                              ; addr=0x54DA
                                 JSR     write_JSR_cmd                           ; display extra ships?
-.endif                                
                                 DEC     byte_8
                                 BNE     loc_6F4B
+.else                                
+                                ldy     #0
+                                lda     #OP_LIFE
+loc_6F4B:
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                dec     byte_8
+                                bne     loc_6F4B
+                                dey
+                                jsr     update_dvg_curr_addr
+.endif                                
 
 locret_6F56:
                                 RTS
@@ -2932,7 +2944,11 @@ loc_752A:                                                                       
                                 LDX     DVGROM+$26F,Y                           ; ship table address MSB
                                 JSR     copy_vector_list_from_table_to_dvgram
 .else
-  ; render ship
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda     #OP_SHIP
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
 .endif                                
                                 LDA     thrustSwitch                            ; thrust?
                                 BPL     locret_7554                             ; no, exit

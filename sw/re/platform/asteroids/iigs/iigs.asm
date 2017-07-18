@@ -217,7 +217,21 @@ dvg_cur:
 dvg_chr:
         lda     (byte_B),y
 				jmp			jsr_print
-        rts
+
+; $2
+dvg_life:
+				IIGSMODE
+				; offset Y because it overwrites score
+				lda			$C2										; SHR offset
+				cmp			#($1360+160)
+				bcs			:+
+				clc
+				adc			#(160*4)
+				sta			$C2										; new SHR offset
+:				ldy			#extra_ship
+				jsr			render_7x2
+				HINT_IIMODE
+				jmp			jsr_exit
 
 ; $3
 dvg_copyright:
@@ -260,7 +274,6 @@ dvg_copyright:
 				bne			:--										; no, loop
 				IIMODE
 				jmp			jsr_exit
-        rts
 
 ; $4
 ; $00(2:1)=shape(0-3)
@@ -316,8 +329,31 @@ render_16x4:
 				sta			$C2
 				IIMODE
 				jmp			jsr_exit
-        rts
                         
+; $5
+; $00=dir(0-255)
+dvg_ship:
+				IIGSMODE
+				lda			(byte_B),y            ; direction
+				xba														; high byte for more resolution
+				and			#$ff00
+				lsr
+				lsr
+				lsr
+				lsr														; dir/16
+				sta			$D0
+				lsr														; dir/8
+				clc
+				adc			$D0										; dir/16+dir/8 = dir/24
+				xba														; back to low byte
+				and			#$00ff								; mask off high-res bits
+				asl														; word offset
+				tax
+				ldy			ship_tbl,x
+				jsr			render_7x2
+				HINT_IIMODE			
+        jmp     jsr_exit
+        
 ; $F
 dvg_halt:
 				lda			#2										; 2 bytes in instruction
@@ -478,10 +514,10 @@ dvg_svec:
 dvg_jmp_tbl:
 				.word		dvg_cur-1
 				.word		dvg_chr-1
-				.word		dvg_rts-1
+				.word		dvg_life-1
 				.word		dvg_copyright-1
 				.word		dvg_asteroid-1
-				.word		dvg_rts-1
+				.word		dvg_ship-1
 				.word		dvg_rts-1
 				.word		dvg_rts-1
 				.word		dvg_rts-1
