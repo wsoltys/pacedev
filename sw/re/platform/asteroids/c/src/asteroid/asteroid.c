@@ -776,8 +776,6 @@ void init_wave (void)
 	unsigned int flag;
 	uint8_t r;
 
-	//UNIMPLEMENTED;
-	
 	if (p->asteroidWaveTimer == 0)
 	{
 		if (p->saucer_Sts != 0)

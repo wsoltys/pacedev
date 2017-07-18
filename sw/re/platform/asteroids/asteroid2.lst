@@ -3390,7 +3390,7 @@ ROM:77BB E6 5F					     INC     rnd1				     ; shift into low bit
 ROM:77BD
 ROM:77BD	     loc_77BD:
 ROM:77BD A5 5F					     LDA     rnd1
-ROM:77BF 2C D1 77				     BIT     byte_77D1				     ; tap on output of	bit0
+ROM:77BF 2C D1 77				     BIT     tap				     ; tap on output of	bit0
 ROM:77C2 F0 04					     BEQ     loc_77C8				     ; not set,	skip
 ROM:77C4 49 01					     EOR     #1					     ; XOR bit0
 ROM:77C6 85 5F					     STA     rnd1
@@ -3406,7 +3406,7 @@ ROM:77D0 60					     RTS
 ROM:77D0	     ; End of function update_prng
 ROM:77D0
 ROM:77D0	     ; ---------------------------------------------------------------------------
-ROM:77D1 02	     byte_77D1:			     .BYTE 2
+ROM:77D1 02	     tap:			     .BYTE 2
 ROM:77D2	     ; A=direction, Y=offset to	shot timer
 ROM:77D2
 ROM:77D2	     ; =============== S U B R O U T I N E =======================================

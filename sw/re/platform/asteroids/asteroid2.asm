@@ -3392,7 +3392,7 @@ update_prng:
 
 loc_77BD:
 				LDA	rnd1
-				BIT	byte_77D1				; tap on output	of bit0
+				BIT	tap					; tap on output	of bit0
 				BEQ	loc_77C8				; not set, skip
 				EOR	#1					; XOR bit0
 				STA	rnd1
@@ -3408,7 +3408,7 @@ loc_77CE:									; return low byte
 ; End of function update_prng
 
 ; ---------------------------------------------------------------------------
-byte_77D1:			.BYTE 2
+tap:				.BYTE 2
 ; A=direction, Y=offset	to shot	timer
 
 ; =============== S U B	R O U T	I N E =======================================
