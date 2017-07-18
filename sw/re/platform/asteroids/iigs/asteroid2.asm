@@ -29,9 +29,8 @@
 .segment "EXEHDR"
 .addr __MAIN_START__ ;	Start address
 .word __BSS_LOAD__ - __MAIN_START__ ; Size
-;
 
-.include "apple2.inc"
+ .include "apple2.inc"
 
 .ZEROPAGE
 
@@ -65,7 +64,7 @@ initial_offset:			.BYTE 0	; (uninited)
 				.BYTE 0	; (uninited)
 byte_15:			.BYTE 0	; (uninited)
 byte_16:			.BYTE 0	; (uninited)
-byte_17:			.BYTE 0	; (uninited)
+extra_brightness:		.BYTE 0	; (uninited)
 curPlayer:			.BYTE 0	; (uninited)
 curPlayer_x2:			.BYTE 0	; (uninited)
 numPlayersPreviousGame:		.BYTE 0	; (uninited)
@@ -77,10 +76,10 @@ numPlayers:			.BYTE 0	; (uninited)
 ; byte 2 - thousands (in decimal)
 highScoreTable:			.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
-word_21:			.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
-word_27:			.BYTE 0,0 ; (uninited)
+				.BYTE 0,0 ; (uninited)
+				.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
 				.BYTE 0,0 ; (uninited)
@@ -120,8 +119,8 @@ rnd2:				.BYTE 0	; (uninited)
 direction:			.BYTE 0	; (uninited)
 saucerShotDirection:		.BYTE 0	; (uninited)
 btn_edge_debounce:		.BYTE 0	; (uninited)
-shipHorizontalVelocityLow:	.BYTE 0	; (uninited)
-shipVerticalVelocityLow:	.BYTE 0	; (uninited)
+ship_thrust_dH:			.BYTE 0	; (uninited)
+ship_thrust_dV:			.BYTE 0	; (uninited)
 timerPlayerFireSound:		.BYTE 0	; (uninited)
 timerSaucerFireSound:		.BYTE 0	; (uninited)
 timerBonusShipSound:		.BYTE 0	; (uninited)
@@ -146,10 +145,10 @@ byte_77:			.BYTE 0	; (uninited)
 coin_1_inp_length:		.BYTE 0	; (uninited)
 coin_2_inp_length:		.BYTE 0	; (uninited)
 coin_3_inp_length:		.BYTE 0	; (uninited)
+byte_7D:			.BYTE 0	; (uninited)
+byte_7E:			.BYTE 0	; (uninited)
 				.BYTE 0	; (uninited)
-				.BYTE 0	; (uninited)
-				.BYTE 0	; (uninited)
-				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
+byte_80:			.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
@@ -160,12 +159,12 @@ coin_3_inp_length:		.BYTE 0	; (uninited)
 ; end of 'ZEROPAGE'
 
 ; CA65 - replace stack with
-stack	.set $100
 ; ===========================================================================
 
 ; Segment type:	Regular
 				;.segment STACK
 				.org $100
+stack	.set $100
 ;stack:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ;				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
@@ -187,6 +186,7 @@ stack	.set $100
 ; status
 ; 1-27 Asteroids
 ; 0xA0+	= exploding
+; (4:3)	= shape	(0-3)
 ; (2:1)	= size (0=small, 1=medium, 2=large)
 ;
 ; For CA65 replace with
@@ -198,23 +198,22 @@ stack	.set $100
 				.org $200
 P1RAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited) ; Asteroids 1-27
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
-; p1PlayerFlag
+; ship_Sts
 ; - 0x00  = in hyperspace?
 ; - 0x01  = player alive and active
 ; - 0xA0+ = player exploding
-p1PlayerFlag:			.BYTE 0	; (uninited)
-; p1SaucerFlag
+ship_Sts:			.BYTE 0	; (uninited)
+; saucer_Sts
 ; - 0x00  = no saucer
 ; - 0x01  = small saucer
 ; - 0x02  = large saucer
 ; - 0xA0+ = saucer exploding
-p1SaucerFlag:			.BYTE 0	; (uninited)
-saucerShotTimer1:		.BYTE 0	; (uninited)
-saucerShotTimer2:		.BYTE 0	; (uninited)
-p1TimerShot0:			.BYTE 0	; (uninited)
-p1TimerShot1:			.BYTE 0	; (uninited)
-p1TimerShot2:			.BYTE 0	; (uninited)
-p1TimerShot3:			.BYTE 0	; (uninited)
+saucer_Sts:			.BYTE 0	; (uninited)
+saucerShot_Sts:			.BYTE 0,0 ; (uninited)
+shipShot_Sts:			.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
+				.BYTE 0	; (uninited)
 ; Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
 asteroid_Vh:			.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
@@ -261,10 +260,10 @@ startingAsteroidsPerWave:	.BYTE 0	; (uninited)
 currentNumberOfAsteroids:	.BYTE 0	; (uninited)
 saucerCountdownTimer:		.BYTE 0	; (uninited)
 starting_saucerCountdownTimer:	.BYTE 0	; (uninited)
-byte_2F9:			.BYTE 0	; (uninited)				; ???goes up after explosion???
+asteroid_hit_timer:		.BYTE 0	; (uninited)
 shipSpawnTimer:			.BYTE 0	; (uninited)
 asteroidWaveTimer:		.BYTE 0	; (uninited)
-byte_2FC:			.BYTE 0	; (uninited)
+starting_ThumpCounter:		.BYTE 0	; (uninited)
 numAsteroidsLeftBeforeSaucer:	.BYTE 0	; (uninited)
 				.BYTE 0	; (uninited)
 				.BYTE 0	; (uninited)
@@ -466,157 +465,158 @@ DVGRAM:				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 				.BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ;	(uninited)
 ; end of 'DVGRAM'
 
-; ===========================================================================
+; For CA65 add the following line:
+;
 .segment "CODE"
+; ===========================================================================
 
 ; Segment type:	Regular
 				;.segment DVGROM
 				.org $5000
-DVGROM:				.BYTE $80, $A0,	0, 0, 0, $70, 0, 0, 0, $90, $FF, $73, $FF, $92,	0, $70
-				.BYTE 0, $90, $FF, $77,	$FF, $96, 0, $70, $FF, $92, $FF, $72, 0, $86, 0, $72
-				.BYTE $FE, $87,	$FE, $77, 0, $92, 0, $76, $FE, $81, 0, $72, $FF, $96, $FF, $72
-				.BYTE $7F, $A3,	$FF, 3,	0, $70,	0, 0, $FF, $96,	$FF, $76, $FE, $81, 0, $76
-				.BYTE 0, $92, 0, $72, $FE, $87,	$FE, $73, 0, $86, 0, $76, $FF, $92, $FF, $76
-				.BYTE $FC, $A1,	$F4, 1,	0, $70,	0, 0, $DB, $F0,	0, $F9,	$CF, $F0, 0, $F9
-				.BYTE $BB, $F0,	0, $F9,	$AF, $F0, 0, $F9, $9B, $F0, 0, $F9, $8F, $F0, 0, $F9
-				.BYTE $7B, $F0,	0, $F9,	$6F, $F0, 0, $F9, $5B, $F0, 0, $F9, $4F, $F0, 0, $F9
-				.BYTE $3B, $F0,	0, $F9,	$2F, $F0, $7C, $D0, $E4, $A0, $5E, $11,	0, $70,	0, 0
+DVGROM:				.BYTE $80, $A0,	$00, $00, $00, $70, $00, $00, $00, $90,	$FF, $73, $FF, $92, $00, $70
+				.BYTE $00, $90,	$FF, $77, $FF, $96, $00, $70, $FF, $92,	$FF, $72, $00, $86, $00, $72
+				.BYTE $FE, $87,	$FE, $77, $00, $92, $00, $76, $FE, $81,	$00, $72, $FF, $96, $FF, $72
+				.BYTE $7F, $A3,	$FF, $03, $00, $70, $00, $00, $FF, $96,	$FF, $76, $FE, $81, $00, $76
+				.BYTE $00, $92,	$00, $72, $FE, $87, $FE, $73, $00, $86,	$00, $76, $FF, $92, $FF, $76
+				.BYTE $FC, $A1,	$F4, $01, $00, $70, $00, $00, $DB, $F0,	$00, $F9, $CF, $F0, $00, $F9
+				.BYTE $BB, $F0,	$00, $F9, $AF, $F0, $00, $F9, $9B, $F0,	$00, $F9, $8F, $F0, $00, $F9
+				.BYTE $7B, $F0,	$00, $F9, $6F, $F0, $00, $F9, $5B, $F0,	$00, $F9, $4F, $F0, $00, $F9
+				.BYTE $3B, $F0,	$00, $F9, $2F, $F0, $7C, $D0, $E4, $A0,	$5E, $11, $00, $70, $00, $00
 				.BYTE $80, $CA,	$78, $CA, $D8, $CA, $C7, $CA, $2C, $CB,	$9B, $CA, $F3, $CA, $F3, $CA
-				.BYTE $DD, $CA,	$F3, $EA, $80, $A0, $90, 1, 0, $70, 0, 0, $73, $F5, $73, $F1
-				.BYTE $78, $F1,	$77, $F1, $77, $F5, $78, $F5, $80, $31,	0, 2, $75, $F8,	$70, $FD
-				.BYTE $71, $F8,	2, $FD,	$2E, $CB, $63, $CB, $56, $CB, $63, $CB,	$2C, $CB, $78, $CA
-				.BYTE 2, $CB, $78, $CA,	$F3, $CA, $BA, $CA, $2C, $CB, $BA, $CA,	$D8, $CA, $8D, $EA
+				.BYTE $DD, $CA,	$F3, $EA, $80, $A0, $90, $01, $00, $70,	$00, $00, $73, $F5, $73, $F1
+				.BYTE $78, $F1,	$77, $F1, $77, $F5, $78, $F5, $80, $31,	$00, $02, $75, $F8, $70, $FD
+				.BYTE $71, $F8,	$02, $FD, $2E, $CB, $63, $CB, $56, $CB,	$63, $CB, $2C, $CB, $78, $CA
+				.BYTE $02, $CB,	$78, $CA, $F3, $CA, $BA, $CA, $2C, $CB,	$BA, $CA, $D8, $CA, $8D, $EA
 				.BYTE $C6, $FF,	$C1, $FE, $C3, $F1, $CD, $F1, $C7, $F1,	$C1, $FD, $D8, $1E, $32, $EC
-				.BYTE 0, $C4, $3C, $14,	$A, $46, $D8, $D8, $D0,	$C8, $B5, $C8, $96, $C8, $80, $C8
-				.BYTE $D, $F8, $78, $F8, $D, $FD, $78, $F8, 9, $FD, $78, $F8, $B, $F1, $78, $F8
-				.BYTE $A, $F5, $78, $F8, 8, $F9, $78, $F8, 9, $F3, $78,	$F8, $D, $F3, $78, $F8
-				.BYTE $80, $54,	0, 6, $78, $F8,	$F, $F1, $78, $F8, 0, $D0, 0, $30, $80,	7
-				.BYTE $78, $F8,	$80, $37, $80, 7, $78, $F8, $80, $37, $80, 3, $78, $F8,	$E0, $40
-				.BYTE $A0, 2, $78, $F8,	$C0, $35, $80, 3, $78, $F8, $80, $33, 0, 0, $78, $F8
-				.BYTE $A0, $42,	$E0, 0,	$78, $F8, $A0, $42, $E0, 4, $78, $F8, $E0, $44,	$80, 7
-				.BYTE $78, $F8,	$E0, $40, $A0, 6, $78, $F8, 0, $D0, 7, $F8, $78, $F8, 7, $FF
-				.BYTE $78, $F8,	3, $FF,	$78, $F8, $C0, $40, $40, 2, $78, $F8, $80, $35,	0, 3
-				.BYTE $78, $F8,	0, $FB,	$78, $F8, $40, $42, $C0, 0, $78, $F8, $40, $42,	$C0, 4
-				.BYTE $78, $F8,	$C0, $44, 0, 7,	$78, $F8, $C0, $40, $40, 6, $78, $F8, 0, $D0
-				.BYTE 0, $30, $80, 6, $78, $F8,	$80, $36, $80, 6, $78, $F8, $80, $36, $80, 2
-				.BYTE $78, $F8,	$40, $31, $C0, 3, $78, $F8, $40, $35, $80, 2, $78, $F8,	$80, $32
-				.BYTE 0, 0, $78, $F8, $C0, $33,	$40, 1,	$78, $F8, $C0, $33, $40, 5, $78, $F8
-				.BYTE $A0, $44,	$80, 6,	$78, $F8, $40, $31, $C0, 7, $78, $F8, 0, $D0, $F3, $C8
-				.BYTE $FF, $C8,	$D, $C9, $1A, $C9, 8, $F9, $79,	$F9, $79, $FD, $7D, $F6, $79, $F6
-				.BYTE $8F, $F6,	$8F, $F0, $7D, $F9, $78, $FA, $79, $F9,	$79, $FD, 0, $D0, $A, $F1
+				.BYTE $00, $C4,	$3C, $14, $0A, $46, $D8, $D8, $D0, $C8,	$B5, $C8, $96, $C8, $80, $C8
+				.BYTE $0D, $F8,	$78, $F8, $0D, $FD, $78, $F8, $09, $FD,	$78, $F8, $0B, $F1, $78, $F8
+				.BYTE $0A, $F5,	$78, $F8, $08, $F9, $78, $F8, $09, $F3,	$78, $F8, $0D, $F3, $78, $F8
+				.BYTE $80, $54,	$00, $06, $78, $F8, $0F, $F1, $78, $F8,	$00, $D0, $00, $30, $80, $07
+				.BYTE $78, $F8,	$80, $37, $80, $07, $78, $F8, $80, $37,	$80, $03, $78, $F8, $E0, $40
+				.BYTE $A0, $02,	$78, $F8, $C0, $35, $80, $03, $78, $F8,	$80, $33, $00, $00, $78, $F8
+				.BYTE $A0, $42,	$E0, $00, $78, $F8, $A0, $42, $E0, $04,	$78, $F8, $E0, $44, $80, $07
+				.BYTE $78, $F8,	$E0, $40, $A0, $06, $78, $F8, $00, $D0,	$07, $F8, $78, $F8, $07, $FF
+				.BYTE $78, $F8,	$03, $FF, $78, $F8, $C0, $40, $40, $02,	$78, $F8, $80, $35, $00, $03
+				.BYTE $78, $F8,	$00, $FB, $78, $F8, $40, $42, $C0, $00,	$78, $F8, $40, $42, $C0, $04
+				.BYTE $78, $F8,	$C0, $44, $00, $07, $78, $F8, $C0, $40,	$40, $06, $78, $F8, $00, $D0
+				.BYTE $00, $30,	$80, $06, $78, $F8, $80, $36, $80, $06,	$78, $F8, $80, $36, $80, $02
+				.BYTE $78, $F8,	$40, $31, $C0, $03, $78, $F8, $40, $35,	$80, $02, $78, $F8, $80, $32
+				.BYTE $00, $00,	$78, $F8, $C0, $33, $40, $01, $78, $F8,	$C0, $33, $40, $05, $78, $F8
+				.BYTE $A0, $44,	$80, $06, $78, $F8, $40, $31, $C0, $07,	$78, $F8, $00, $D0, $F3, $C8
+				.BYTE $FF, $C8,	$0D, $C9, $1A, $C9, $08, $F9, $79, $F9,	$79, $FD, $7D, $F6, $79, $F6
+				.BYTE $8F, $F6,	$8F, $F0, $7D, $F9, $78, $FA, $79, $F9,	$79, $FD, $00, $D0, $0A, $F1
 				.BYTE $7A, $F1,	$7D, $F9, $7E, $F5, $7E, $F1, $7D, $FD,	$79, $F6, $7D, $F6, $79, $FD
-				.BYTE $79, $F1,	$8B, $F5, $8A, $F3, $7D, $F9, 0, $D0, $D, $F8, $7E, $F5, $7A, $F7
+				.BYTE $79, $F1,	$8B, $F5, $8A, $F3, $7D, $F9, $00, $D0,	$0D, $F8, $7E, $F5, $7A, $F7
 				.BYTE $7A, $F3,	$78, $F7, $79, $F8, $7A, $F3, $78, $F9,	$7E, $F3, $7F, $F0, $7F, $F7
-				.BYTE $7A, $F5,	0, $D0,	9, $F0,	$7B, $F1, $68, $F1, $7F, $F2, $7F, $F0,	$69, $F6
-				.BYTE $7F, $F0,	$78, $F7, $7A, $F7, $7B, $F1, $69, $F5,	$69, $F9, $7F, $F2, 0, $D0
-				.BYTE $29, $C9,	$E, $F1, $CA, $F8, $B, $F6, 0, $60, $80, $D6, $DB, $F6,	$CA, $F8
-				.BYTE $DB, $F2,	$DF, $F2, $CD, $F2, $CD, $F8, $CD, $F6,	$DF, $F6, 0, $D0, $90, $52
+				.BYTE $7A, $F5,	$00, $D0, $09, $F0, $7B, $F1, $68, $F1,	$7F, $F2, $7F, $F0, $69, $F6
+				.BYTE $7F, $F0,	$78, $F7, $7A, $F7, $7B, $F1, $69, $F5,	$69, $F9, $7F, $F2, $00, $D0
+				.BYTE $29, $C9,	$0E, $F1, $CA, $F8, $0B, $F6, $00, $60,	$80, $D6, $DB, $F6, $CA, $F8
+				.BYTE $DB, $F2,	$DF, $F2, $CD, $F2, $CD, $F8, $CD, $F6,	$DF, $F6, $00, $D0, $90, $52
 				.BYTE $A8, $52,	$CC, $52, $F0, $52, $14, $53, $36, $53,	$5A, $53, $7E, $53, $A2, $53
-				.BYTE $C6, $53,	$EA, $53, $E, $54, $32,	$54, $56, $54, $7A, $54, $9E, $54, $C2,	$54
-				.BYTE $F, $F6, $C8, $FA, $BD, $F9, 0, $65, 0, $C3, 0, $65, 0, $C7, $B9,	$F9
-				.BYTE 0, $D0, $CE, $F9,	$CA, $F9, 0, $D0, $40, $46, $C0, 6, 0, $52, $30, $C4
+				.BYTE $C6, $53,	$EA, $53, $0E, $54, $32, $54, $56, $54,	$7A, $54, $9E, $54, $C2, $54
+				.BYTE $0F, $F6,	$C8, $FA, $BD, $F9, $00, $65, $00, $C3,	$00, $65, $00, $C7, $B9, $F9
+				.BYTE $00, $D0,	$CE, $F9, $CA, $F9, $00, $D0, $40, $46,	$C0, $06, $00, $52, $30, $C4
 				.BYTE $C0, $41,	$20, $C6, $B0, $64, $18, $C3, $48, $65,	$E0, $C6, $20, $42, $C0, $C1
-				.BYTE 0, $D0, $D0, $50,	$10, $C6, $60, $42, $C0, $C3, 0, $D0, $80, $46,	$80, 6
+				.BYTE $00, $D0,	$D0, $50, $10, $C6, $60, $42, $C0, $C3,	$00, $D0, $80, $46, $80, $06
 				.BYTE $E0, $43,	$C0, $C4, $A0, $41, $60, $C6, $68, $64,	$20, $C3, $90, $65, $C0, $C6
-				.BYTE $60, $42,	$A0, $C1, 0, $D0, $90, $50, $30, $C6, $C0, $42,	$80, $C3, 0, $D0
-				.BYTE $C0, $46,	$40, 6,	$E0, $43, $20, $C5, $60, $41, $80, $C6,	$18, $64, $28, $C3
-				.BYTE $D0, $65,	$98, $C6, $80, $42, $60, $C1, 0, $D0, $60, $50,	$30, $C6, $20, $43
-				.BYTE $40, $C3,	0, $D0,	$E, $F7, $C0, $43, $80,	$C5, $20, $41, $A0, $C6, $38, $60
-				.BYTE $28, $C3,	$10, $66, $60, $C6, $A0, $42, $20, $C1,	0, $D0,	$30, $50, $40, $C6
-				.BYTE $60, $43,	$E0, $C2, 0, $D0, $20, $47, $C0, 5, $80, $43, $E0, $C5,	$E0, $40
-				.BYTE $C0, $C6,	$88, $60, $20, $C3, $48, $66, $30, $C6,	$C0, $42, $E0, $C0, 0, $D0
-				.BYTE $10, $54,	$40, $C6, $A0, $43, $A0, $C2, 0, $D0, $60, $47,	$60, 5,	$60, $43
+				.BYTE $60, $42,	$A0, $C1, $00, $D0, $90, $50, $30, $C6,	$C0, $42, $80, $C3, $00, $D0
+				.BYTE $C0, $46,	$40, $06, $E0, $43, $20, $C5, $60, $41,	$80, $C6, $18, $64, $28, $C3
+				.BYTE $D0, $65,	$98, $C6, $80, $42, $60, $C1, $00, $D0,	$60, $50, $30, $C6, $20, $43
+				.BYTE $40, $C3,	$00, $D0, $0E, $F7, $C0, $43, $80, $C5,	$20, $41, $A0, $C6, $38, $60
+				.BYTE $28, $C3,	$10, $66, $60, $C6, $A0, $42, $20, $C1,	$00, $D0, $30, $50, $40, $C6
+				.BYTE $60, $43,	$E0, $C2, $00, $D0, $20, $47, $C0, $05,	$80, $43, $E0, $C5, $E0, $40
+				.BYTE $C0, $C6,	$88, $60, $20, $C3, $48, $66, $30, $C6,	$C0, $42, $E0, $C0, $00, $D0
+				.BYTE $10, $54,	$40, $C6, $A0, $43, $A0, $C2, $00, $D0,	$60, $47, $60, $05, $60, $43
 				.BYTE $40, $C6,	$80, $40, $C0, $C6, $D8, $60, $10, $C3,	$80, $66, $F0, $C5, $C0, $42
-				.BYTE $80, $C0,	0, $D0,	$40, $54, $30, $C6, $E0, $43, $40, $C2,	0, $D0,	$80, $47
-				.BYTE 0, 5, $20, $43, $80, $C6,	$40, $40, $E0, $C6, $20, $61, $F8, $C2,	$B0, $66
-				.BYTE $B0, $C5,	$E0, $42, $40, $C0, 0, $D0, $80, $54, $30, $C6,	$10, $52, $F0, $C0
-				.BYTE 0, $D0, $80, $47,	$C0, 4,	$E0, $42, $E0, $C6, 0, $40, $E0, $C6, $68, $61
-				.BYTE $D8, $C2,	$D8, $66, $68, $C5, $E0, $42, 0, $C0, 0, $D0, $B0, $54,	$20, $C6
-				.BYTE $20, $52,	$B0, $C0, 0, $D0, $A0, $47, $60, 4, $80, $42, $20, $C7,	$40, $44
-				.BYTE $E0, $C6,	$B0, $61, $B0, $C2, $F8, $66, $20, $C5,	$E0, $42, $40, $C4, 0, $D0
-				.BYTE $F0, $54,	$10, $C6, $30, $52, $80, $C0, 0, $D0, $A0, $47,	0, 0, $40, $42
+				.BYTE $80, $C0,	$00, $D0, $40, $54, $30, $C6, $E0, $43,	$40, $C2, $00, $D0, $80, $47
+				.BYTE $00, $05,	$20, $43, $80, $C6, $40, $40, $E0, $C6,	$20, $61, $F8, $C2, $B0, $66
+				.BYTE $B0, $C5,	$E0, $42, $40, $C0, $00, $D0, $80, $54,	$30, $C6, $10, $52, $F0, $C0
+				.BYTE $00, $D0,	$80, $47, $C0, $04, $E0, $42, $E0, $C6,	$00, $40, $E0, $C6, $68, $61
+				.BYTE $D8, $C2,	$D8, $66, $68, $C5, $E0, $42, $00, $C0,	$00, $D0, $B0, $54, $20, $C6
+				.BYTE $20, $52,	$B0, $C0, $00, $D0, $A0, $47, $60, $04,	$80, $42, $20, $C7, $40, $44
+				.BYTE $E0, $C6,	$B0, $61, $B0, $C2, $F8, $66, $20, $C5,	$E0, $42, $40, $C4, $00, $D0
+				.BYTE $F0, $54,	$10, $C6, $30, $52, $80, $C0, $00, $D0,	$A0, $47, $00, $00, $40, $42
 				.BYTE $60, $C7,	$80, $44, $C0, $C6, $F0, $61, $80, $C2,	$10, $67, $D8, $C4, $C0, $42
-				.BYTE $80, $C4,	0, $D0,	$40, $46, $E0, $C7, $30, $52, $40, $C0,	0, $D0,	$A0, $47
-				.BYTE $60, 0, $E0, $41,	$80, $C7, $E0, $44, $C0, $C6, $30, $62,	$48, $C2, $20, $67
-				.BYTE $88, $C4,	$C0, $42, $E0, $C4, 0, $D0, $A0, $46, $A0, $C7,	$40, $52, $10, $C0
-				.BYTE 0, $D0, $80, $47,	$C0, 0,	$80, $41, $C0, $C7, $20, $45, $A0, $C6,	$60, $62
-				.BYTE $10, $C2,	$28, $67, $38, $C4, $A0, $42, $20, $C5,	0, $D0,	$E0, $46, $60, $C7
-				.BYTE $40, $52,	$30, $C4, 0, $D0, $80, $47, 0, 1, $20, $41, $E0, $C7, $60, $45
-				.BYTE $80, $C6,	$98, $62, $D0, $C1, $28, $67, $18, $C0,	$80, $42, $60, $C5, 0, $D0
-				.BYTE $40, $47,	$20, $C7, $30, $52, $60, $C4, 0, $D0, $60, $47,	$60, 1,	$C0, $40
+				.BYTE $80, $C4,	$00, $D0, $40, $46, $E0, $C7, $30, $52,	$40, $C0, $00, $D0, $A0, $47
+				.BYTE $60, $00,	$E0, $41, $80, $C7, $E0, $44, $C0, $C6,	$30, $62, $48, $C2, $20, $67
+				.BYTE $88, $C4,	$C0, $42, $E0, $C4, $00, $D0, $A0, $46,	$A0, $C7, $40, $52, $10, $C0
+				.BYTE $00, $D0,	$80, $47, $C0, $00, $80, $41, $C0, $C7,	$20, $45, $A0, $C6, $60, $62
+				.BYTE $10, $C2,	$28, $67, $38, $C4, $A0, $42, $20, $C5,	$00, $D0, $E0, $46, $60, $C7
+				.BYTE $40, $52,	$30, $C4, $00, $D0, $80, $47, $00, $01,	$20, $41, $E0, $C7, $60, $45
+				.BYTE $80, $C6,	$98, $62, $D0, $C1, $28, $67, $18, $C0,	$80, $42, $60, $C5, $00, $D0
+				.BYTE $40, $47,	$20, $C7, $30, $52, $60, $C4, $00, $D0,	$60, $47, $60, $01, $C0, $40
 				.BYTE $E0, $C7,	$A0, $45, $60, $C6, $C0, $62, $90, $C1,	$20, $67, $68, $C0, $60, $42
-				.BYTE $A0, $C5,	0, $D0,	$80, $47, $C0, $C6, $30, $52, $90, $C4,	0, $D0,	$20, $47
-				.BYTE $C0, 1, $30, $50,	0, $C6,	$C0, $45, $20, $C6, $E0, $62, $48, $C1,	$18, $67
-				.BYTE $B0, $C0,	$20, $42, $C0, $C5, 0, $D0, $C0, $47, $60, $C6,	$10, $52, $D0, $C4
-				.BYTE 0, $D0, $A, $F7, $CE, $F8, $CD, $FD, 0, $63, 0, $C1, 0, $67, 0, $C1
-				.BYTE $CD, $F9,	0, $D0,	$CD, $FE, $CD, $FA, 0, $D0, $E,	$F7, $7A, $F8, $79, $FD
-				.BYTE 0, $63, 0, $75, 0, $67, 0, $75, $79, $F9,	$C0, $60, $80, 2, $9F, $D0
-				.BYTE $70, $FA,	$72, $F2, $72, $F6, $70, $FE, 6, $F9, $72, $F8,	2, $F6,	0, $D0
-				.BYTE $70, $FB,	$73, $F0, $71, $F5, $70, $F5, $75, $F5,	$77, $F0, 3, $F0, $71, $F5
-				.BYTE $70, $F5,	$75, $F5, $77, $F0, 3, $F8, 0, $D0, $70, $FB, $72, $F8,	6, $FF
-				.BYTE $72, $F8,	2, $F0,	0, $D0,	$70, $FB, $72, $F0, $72, $F6, $70, $F6,	$76, $F6
-				.BYTE $76, $F0,	3, $F8,	0, $D0,	$70, $FB, $72, $F8, 5, $F7, $77, $F0, 0, $F7
-				.BYTE $72, $F8,	2, $F0,	0, $D0,	$70, $FB, $72, $F8, 5, $F7, $77, $F0, 0, $F7
-				.BYTE 3, $F8, 0, $D0, $70, $FB,	$72, $F8, $70, $F6, 6, $F6, $72, $F0, $70, $F6
-				.BYTE $76, $F8,	3, $F8,	0, $D0,	$70, $FB, 0, $F7, $72, $F8, 0, $F3, $70, $FF
-				.BYTE 2, $F0, 0, $D0, $72, $F8,	6, $F0,	$70, $FB, 2, $F0, $76, $F8, 3, $FF
-				.BYTE 0, $D0, 0, $F2, $72, $F6,	$72, $F0, $70, $FB, 1, $FF, 0, $D0, $70, $FB
-				.BYTE 3, $F0, $77, $F7,	$73, $F7, 3, $F0, 0, $D0, 0, $FB, $70, $FF, $72, $F8
-				.BYTE 2, $F0, 0, $D0, $70, $FB,	$72, $F6, $72, $F2, $70, $FF, 2, $F0, 0, $D0
-				.BYTE $70, $FB,	$72, $FF, $70, $FB, 1, $FF, 0, $D0, $70, $FB, $72, $F8,	$70, $FF
-				.BYTE $76, $F8,	3, $F8,	0, $D0,	$70, $FB, $72, $F8, $70, $F7, $76, $F8,	3, $F7
-				.BYTE 3, $F0, 0, $D0, $70, $FB,	$72, $F8, $70, $FE, $76, $F6, $76, $F0,	2, $F2
-				.BYTE $72, $F6,	2, $F0,	0, $D0,	$70, $FB, $72, $F8, $70, $F7, $76, $F8,	1, $F0
-				.BYTE $73, $F7,	2, $F0,	0, $D0,	$72, $F8, $70, $F3, $76, $F8, $70, $F3,	$72, $F8
-				.BYTE 1, $FF, 0, $D0, 2, $F0, $70, $FB,	6, $F0,	$72, $F8, 1, $FF, 0, $D0
-				.BYTE 0, $FB, $70, $FF,	$72, $F8, $70, $FB, 1, $FF, 0, $D0, 0, $FB, $71, $FF
-				.BYTE $71, $FB,	1, $FF,	0, $D0,	0, $FB,	$70, $FF, $72, $F2, $72, $F6, $70, $FB
-				.BYTE 1, $FF, 0, $D0, $72, $FB,	6, $F8,	$72, $FF, 2, $F0, 0, $D0, 2, $F0
-				.BYTE $70, $FA,	$76, $F2, 2, $F8, $76, $F6, 2, $FE, 0, $D0, 0, $FB, $72, $F8
-				.BYTE $76, $FF,	$72, $F8, 2, $F0, 0, $D0, 3, $F8, 0, $D0, 2, $F0, $70, $FB
-				.BYTE 2, $FF, 0, $D0, 0, $FB, $72, $F8,	$70, $F7, $76, $F8, $70, $F7, $72, $F8
-				.BYTE 2, $F0, 0, $D0, $72, $F8,	$70, $FB, $76, $F8, 0, $F7, $72, $F8, 2, $F7
-				.BYTE 0, $D0, 0, $FB, $70, $F7,	$72, $F8, 0, $F3, $70, $FF, 2, $F0, 0, $D0
-				.BYTE $72, $F8,	$70, $F3, $76, $F8, $70, $F3, $72, $F8,	1, $FF,	0, $D0,	0, $F3
-				.BYTE $72, $F8,	$70, $F7, $76, $F8, $70, $FB, 3, $FF, 0, $D0, 0, $FB, $72, $F8
-				.BYTE $70, $FF,	2, $F0,	0, $D0,	$72, $F8, $70, $FB, $76, $F8, $70, $FF,	0, $F3
-				.BYTE $72, $F8,	2, $F7,	0, $D0,	2, $F8,	$70, $FB, $76, $F8, $70, $F7, $72, $F8
-				.BYTE 2, $F7, 0, $D0, $2C, $CB,	$DD, $CA, $2E, $CB, $32, $CB, $3A, $CB,	$41, $CB
+				.BYTE $A0, $C5,	$00, $D0, $80, $47, $C0, $C6, $30, $52,	$90, $C4, $00, $D0, $20, $47
+				.BYTE $C0, $01,	$30, $50, $00, $C6, $C0, $45, $20, $C6,	$E0, $62, $48, $C1, $18, $67
+				.BYTE $B0, $C0,	$20, $42, $C0, $C5, $00, $D0, $C0, $47,	$60, $C6, $10, $52, $D0, $C4
+				.BYTE $00, $D0,	$0A, $F7, $CE, $F8, $CD, $FD, $00, $63,	$00, $C1, $00, $67, $00, $C1
+				.BYTE $CD, $F9,	$00, $D0, $CD, $FE, $CD, $FA, $00, $D0,	$0E, $F7, $7A, $F8, $79, $FD
+				.BYTE $00, $63,	$00, $75, $00, $67, $00, $75, $79, $F9,	$C0, $60, $80, $02, $9F, $D0
+				.BYTE $70, $FA,	$72, $F2, $72, $F6, $70, $FE, $06, $F9,	$72, $F8, $02, $F6, $00, $D0
+				.BYTE $70, $FB,	$73, $F0, $71, $F5, $70, $F5, $75, $F5,	$77, $F0, $03, $F0, $71, $F5
+				.BYTE $70, $F5,	$75, $F5, $77, $F0, $03, $F8, $00, $D0,	$70, $FB, $72, $F8, $06, $FF
+				.BYTE $72, $F8,	$02, $F0, $00, $D0, $70, $FB, $72, $F0,	$72, $F6, $70, $F6, $76, $F6
+				.BYTE $76, $F0,	$03, $F8, $00, $D0, $70, $FB, $72, $F8,	$05, $F7, $77, $F0, $00, $F7
+				.BYTE $72, $F8,	$02, $F0, $00, $D0, $70, $FB, $72, $F8,	$05, $F7, $77, $F0, $00, $F7
+				.BYTE $03, $F8,	$00, $D0, $70, $FB, $72, $F8, $70, $F6,	$06, $F6, $72, $F0, $70, $F6
+				.BYTE $76, $F8,	$03, $F8, $00, $D0, $70, $FB, $00, $F7,	$72, $F8, $00, $F3, $70, $FF
+				.BYTE $02, $F0,	$00, $D0, $72, $F8, $06, $F0, $70, $FB,	$02, $F0, $76, $F8, $03, $FF
+				.BYTE $00, $D0,	$00, $F2, $72, $F6, $72, $F0, $70, $FB,	$01, $FF, $00, $D0, $70, $FB
+				.BYTE $03, $F0,	$77, $F7, $73, $F7, $03, $F0, $00, $D0,	$00, $FB, $70, $FF, $72, $F8
+				.BYTE $02, $F0,	$00, $D0, $70, $FB, $72, $F6, $72, $F2,	$70, $FF, $02, $F0, $00, $D0
+				.BYTE $70, $FB,	$72, $FF, $70, $FB, $01, $FF, $00, $D0,	$70, $FB, $72, $F8, $70, $FF
+				.BYTE $76, $F8,	$03, $F8, $00, $D0, $70, $FB, $72, $F8,	$70, $F7, $76, $F8, $03, $F7
+				.BYTE $03, $F0,	$00, $D0, $70, $FB, $72, $F8, $70, $FE,	$76, $F6, $76, $F0, $02, $F2
+				.BYTE $72, $F6,	$02, $F0, $00, $D0, $70, $FB, $72, $F8,	$70, $F7, $76, $F8, $01, $F0
+				.BYTE $73, $F7,	$02, $F0, $00, $D0, $72, $F8, $70, $F3,	$76, $F8, $70, $F3, $72, $F8
+				.BYTE $01, $FF,	$00, $D0, $02, $F0, $70, $FB, $06, $F0,	$72, $F8, $01, $FF, $00, $D0
+				.BYTE $00, $FB,	$70, $FF, $72, $F8, $70, $FB, $01, $FF,	$00, $D0, $00, $FB, $71, $FF
+				.BYTE $71, $FB,	$01, $FF, $00, $D0, $00, $FB, $70, $FF,	$72, $F2, $72, $F6, $70, $FB
+				.BYTE $01, $FF,	$00, $D0, $72, $FB, $06, $F8, $72, $FF,	$02, $F0, $00, $D0, $02, $F0
+				.BYTE $70, $FA,	$76, $F2, $02, $F8, $76, $F6, $02, $FE,	$00, $D0, $00, $FB, $72, $F8
+				.BYTE $76, $FF,	$72, $F8, $02, $F0, $00, $D0, $03, $F8,	$00, $D0, $02, $F0, $70, $FB
+				.BYTE $02, $FF,	$00, $D0, $00, $FB, $72, $F8, $70, $F7,	$76, $F8, $70, $F7, $72, $F8
+				.BYTE $02, $F0,	$00, $D0, $72, $F8, $70, $FB, $76, $F8,	$00, $F7, $72, $F8, $02, $F7
+				.BYTE $00, $D0,	$00, $FB, $70, $F7, $72, $F8, $00, $F3,	$70, $FF, $02, $F0, $00, $D0
+				.BYTE $72, $F8,	$70, $F3, $76, $F8, $70, $F3, $72, $F8,	$01, $FF, $00, $D0, $00, $F3
+				.BYTE $72, $F8,	$70, $F7, $76, $F8, $70, $FB, $03, $FF,	$00, $D0, $00, $FB, $72, $F8
+				.BYTE $70, $FF,	$02, $F0, $00, $D0, $72, $F8, $70, $FB,	$76, $F8, $70, $FF, $00, $F3
+				.BYTE $72, $F8,	$02, $F7, $00, $D0, $02, $F8, $70, $FB,	$76, $F8, $70, $F7, $72, $F8
+				.BYTE $02, $F7,	$00, $D0, $2C, $CB, $DD, $CA, $2E, $CB,	$32, $CB, $3A, $CB, $41, $CB
 				.BYTE $48, $CB,	$4F, $CB, $56, $CB, $5B, $CB, $63, $CB,	$78, $CA, $80, $CA, $8D, $CA
 				.BYTE $93, $CA,	$9B, $CA, $A3, $CA, $AA, $CA, $B3, $CA,	$BA, $CA, $C1, $CA, $C7, $CA
 				.BYTE $CD, $CA,	$D2, $CA, $D8, $CA, $DD, $CA, $E3, $CA,	$EA, $CA, $F3, $CA, $FB, $CA
-				.BYTE 2, $CB, 8, $CB, $E, $CB, $13, $CB, $1A, $CB, $1F,	$CB, $26, $CB, $B, $13
+				.BYTE $02, $CB,	$08, $CB, $0E, $CB, $13, $CB, $1A, $CB,	$1F, $CB, $26, $CB, $0B, $13
 				.BYTE $19, $2F,	$41, $55, $6F, $77, $7D, $87, $91, $63,	$56, $60, $6E, $3C, $EC, $4D
-				.BYTE $C0, $A4,	$A, $EA, $6C, 8, 0, $EC, $F2, $B0, $6E,	$3C, $EC, $48, $5A, $B8
-				.BYTE $66, $92,	$42, $9A, $82, $C3, $12, $E, $12, $90, $4C, $4D, $F1, $A4, $12,	$2D
-				.BYTE $D2, $A, $64, $C2, $6C, $F, $66, $CD, $82, $6C, $9A, $C3,	$4A, $85, $C0, $A6
-				.BYTE $6E, $60,	$6C, $9E, $A, $C2, $42,	$C4, $C2, $BA, $60, $49, $F0, $C, $12, $C6
-				.BYTE $12, $B0,	0, $A6,	$6E, $60, $58, $ED, $12, $B5, $E8, $29,	$D2, $E, $D8, $4C
-				.BYTE $82, $82,	$70, $C2, $6C, $B, $6E,	9, $E6,	$B5, $92, $3E, 0, $A6, $6E, $60
-				.BYTE $6E, $C1,	$6C, $C0, 0, $59, $62, $48, $66, $D2, $6D, $18,	$4E, $9B, $64, 9
-				.BYTE 2, $A4, $A, $ED, $C0, $18, $4E, $9B, $64,	8, $C2,	$A4, $A, $E8, 0, $20
-				.BYTE $4E, $9B,	$64, $B8, $46, $D, $20,	$2F, $40, 0, 3,	6, 9, $C, $10, $13
+				.BYTE $C0, $A4,	$0A, $EA, $6C, $08, $00, $EC, $F2, $B0,	$6E, $3C, $EC, $48, $5A, $B8
+				.BYTE $66, $92,	$42, $9A, $82, $C3, $12, $0E, $12, $90,	$4C, $4D, $F1, $A4, $12, $2D
+				.BYTE $D2, $0A,	$64, $C2, $6C, $0F, $66, $CD, $82, $6C,	$9A, $C3, $4A, $85, $C0, $A6
+				.BYTE $6E, $60,	$6C, $9E, $0A, $C2, $42, $C4, $C2, $BA,	$60, $49, $F0, $0C, $12, $C6
+				.BYTE $12, $B0,	$00, $A6, $6E, $60, $58, $ED, $12, $B5,	$E8, $29, $D2, $0E, $D8, $4C
+				.BYTE $82, $82,	$70, $C2, $6C, $0B, $6E, $09, $E6, $B5,	$92, $3E, $00, $A6, $6E, $60
+				.BYTE $6E, $C1,	$6C, $C0, $00, $59, $62, $48, $66, $D2,	$6D, $18, $4E, $9B, $64, $09
+				.BYTE $02, $A4,	$0A, $ED, $C0, $18, $4E, $9B, $64, $08,	$C2, $A4, $0A, $E8, $00, $20
+				.BYTE $4E, $9B,	$64, $B8, $46, $0D, $20, $2F, $40, $00,	$03, $06, $09, $0C, $10, $13
 				.BYTE $16, $19,	$1C, $1F, $22, $25, $28, $2B, $2E, $31,	$33, $36, $39, $3C, $3F, $41
 				.BYTE $44, $47,	$49, $4C, $4E, $51, $53, $55, $58, $5A,	$5C, $5E, $60, $62, $64, $66
 				.BYTE $68, $6A,	$6B, $6D, $6F, $70, $71, $73, $74, $75,	$76, $78, $79, $7A, $7A, $7B
-				.BYTE $7C, $7D,	$7D, $7E, $7E, $7E, $7F, $7F, $7F, $7F,	0, 0, 0, 0, 0, 0
+				.BYTE $7C, $7D,	$7D, $7E, $7E, $7E, $7F, $7F, $7F, $7F,	$00, $00, $00, $00, $00, $00
 ; end of 'DVGROM'
 
-				.res $1000
-
 ; ---------------------------------------------------------------------------
-; For CA65 replace with
+; For CA65 we need to fill from	$5800-$6800 in the .BIN
+; so we	simply add the following line
+;
+.res $1000
 ; ===========================================================================
 
 ; Segment type:	Pure code
 				;.segment ROM
 				.org $6800
-				jsr apple_reset
 				JMP	RESET					; Debugger? Off	in the weeds? Do Reset.
 ; ---------------------------------------------------------------------------
 
 START:										; Reset	Sound, Zero Out	Sound Timers
-				jsr apple_start
 				JSR	init_sound
 				JSR	init_players				; init ships and scores
 
@@ -629,15 +629,11 @@ wave_loop:									; self test switch on?
 spin:										; yes, spin
 				BMI	spin
 				LSR	VBLANK_triggered			; 4xNMI	happened?
-;				BCC	wave_loop				; no, busy wait
-				nop
-				nop
+				BCC	wave_loop				; no, busy wait
 
 loc_6815:									; HALT
 				LDA	halt
-;				BMI	loc_6815				; wait for DVG
-				nop
-				nop
+				BMI	loc_6815				; wait for DVG
 				LDA	DVGRAM+1
 				EOR	#2					; JMP $0402<->$0002
 				STA	DVGRAM+1
@@ -658,7 +654,7 @@ loc_6836:
 				STA	dvg_curr_addr_lsb			; 0x02 (after JMP instruction)
 				STX	dvg_curr_addr_msb			; 0x40/0x44 (ping pong)
 				JSR	handle_start_end_turn_or_game
-				BCS	START					; *** never set?!? ***
+				BCS	START
 				JSR	check_high_score
 				JSR	handle_high_score_entry
 				BPL	loc_6864				; go if	new high score
@@ -668,12 +664,12 @@ loc_6836:
 				BNE	loc_685E				; yes, skip
 				JSR	handle_fire
 				JSR	handle_hyperspace
-				JSR	handle_left_right_thrust		; this does more???
+				JSR	handle_respawn_rot_thrust
 				JSR	handle_saucer
 
-loc_685E:									; ???
-				JSR	handle_objects
-				JSR	handle_shots				; ???
+loc_685E:
+				JSR	update_and_render_objects
+				JSR	handle_shots				; still	not finished???
 
 loc_6864:									; display (C), scores, extra ships
 				JSR	display_C_scores_ships
@@ -683,7 +679,6 @@ loc_6864:									; display (C), scores, extra ships
 				JSR	write_CURx4_cmd
 				JSR	update_prng
 				JSR	halt_dvg				; finished rendering
-				jsr	apple_render_frame
 				LDA	asteroidWaveTimer
 				BEQ	loc_687E				; zero,	skip
 				DEC	asteroidWaveTimer
@@ -788,8 +783,8 @@ start_game:
 				LDA	#4
 				STA	volFreqThumpSound
 				STA	timerThumpSoundOff			; init thump sound
-				LDA	#$30 ; '0'
-				STA	byte_2FC
+				LDA	#48
+				STA	starting_ThumpCounter
 				STA	P2RAM+$FC
 				STA	$3E00					; sound	(noise reset)
 				RTS
@@ -825,19 +820,19 @@ handle_end_turn_or_game:
 				LDA	fastTimer
 				AND	#$3F ; '?'
 				BNE	loc_6970
-				LDA	byte_2FC
+				LDA	starting_ThumpCounter
 				CMP	#8
 				BEQ	loc_6970
-				DEC	byte_2FC
+				DEC	starting_ThumpCounter
 
 loc_6970:
 				LDX	curPlayer
 				LDA	numShipsP1,X				; any ships left?
 				BNE	toggle_player				; yes, skip
-				LDA	p1TimerShot0
-				ORA	p1TimerShot1
-				ORA	p1TimerShot2
-				ORA	p1TimerShot3				; shot(s) still	active?
+				LDA	shipShot_Sts
+				ORA	shipShot_Sts+1
+				ORA	shipShot_Sts+2
+				ORA	shipShot_Sts+3				; shot(s) still	active?
 				BNE	toggle_player				; yes, skip
 				LDY	#7					; "GAME	OVER"
 				JSR	PrintPackedMsg
@@ -847,18 +842,18 @@ loc_6970:
 				JSR	print_PLAYER_N				; display player
 
 toggle_player:									; player alive?
-				LDA	p1PlayerFlag
+				LDA	ship_Sts
 				BNE	loc_69CD				; yes, skip
 				LDA	shipSpawnTimer
 				CMP	#$80 ; 'Ä'
 				BNE	loc_69CD
-				LDA	#$10
+				LDA	#16
 				STA	shipSpawnTimer
 				LDX	numPlayers
 				LDA	numShipsP1
 				ORA	numShipsP2				; either play have ships left?
 				BEQ	loc_69CF				; no, exit
-				JSR	sub_702D
+				JSR	zero_saucer
 				DEX						; 1 player game?
 				BEQ	loc_69CD				; yes, exit
 				LDA	#$80 ; 'Ä'
@@ -918,42 +913,42 @@ print_PLAYER_N:
 handle_shots:
 				LDX	#7					; 8 values to check
 
-loc_69F2:									; shot status
-				LDA	p1PlayerFlag,X
-				BEQ	loc_69F9				; not active, skip
+chk_shot:									; shot status
+				LDA	ship_Sts,X
+				BEQ	next_shot				; not active, skip
 				BPL	handle_active_shot			; active, go
 
-loc_69F9:									; next timer
+next_shot:									; next timer
 				DEX
-				BPL	loc_69F2				; loop 'til done
+				BPL	chk_shot				; loop 'til done
 				RTS
 ; ---------------------------------------------------------------------------
 
-handle_active_shot:
+handle_active_shot:								; offset to saucer
 				LDY	#$1C
-				CPX	#4					; shot timer?
+				CPX	#4					; player shot?
 				BCS	loc_6A0A				; yes, go
-				DEY
+				DEY						; offset to player
 				TXA
-				BNE	loc_6A0A
+				BNE	loc_6A0A				; (always)
 
 loc_6A07:
 				DEY
-				BMI	loc_69F9
+				BMI	next_shot
 
-loc_6A0A:
+loc_6A0A:									; player/saucer
 				LDA	P1RAM,Y
-				BEQ	loc_6A07
-				BMI	loc_6A07
-				STA	byte_B
-				LDA	asteroid_PLh,Y
+				BEQ	loc_6A07				; not active, exit
+				BMI	loc_6A07				; exploding, exit
+				STA	byte_B					; tmp status
+				LDA	asteroid_PLh,Y				; player/saucer	PLh
 				SEC
-				SBC	ship_PLh,X				; shot PLh
+				SBC	ship_PLh,X				; - shot PLh
 				STA	byte_8
-				LDA	asteroid_PHh,Y
-				SBC	ship_PHh,X				; shot PHh
-				LSR	A
-				ROR	byte_8
+				LDA	asteroid_PHh,Y				; player/saucer	PHh
+				SBC	ship_PHh,X				; - shot PHh
+				LSR	A					; /2
+				ROR	byte_8					; low byte
 				ASL	A
 				BEQ	loc_6A34
 				BPL	loc_6A97
@@ -963,18 +958,18 @@ loc_6A0A:
 				EOR	#$FF
 				STA	byte_8
 
-loc_6A34:
+loc_6A34:									; player/saucer	PLv
 				LDA	asteroid_PLv,Y
 				SEC
-				SBC	ship_PLv,X				; shot PLv
+				SBC	ship_PLv,X				; - shot PLv
 				STA	byte_9
-				LDA	asteroid_PHv,Y
-				SBC	ship_PHv,X				; shot PHv
-				LSR	A
-				ROR	byte_9
+				LDA	asteroid_PHv,Y				; player/saucer_PHv
+				SBC	ship_PHv,X				; - shot PHv
+				LSR	A					; /2
+				ROR	byte_9					; low byte
 				ASL	A
 				BEQ	loc_6A55
-				BPL	loc_6A97
+				BPL	loc_6A97				; no hit, go
 				EOR	#$FE ; '˛'
 				BNE	loc_6A97
 				LDA	byte_9
@@ -990,7 +985,7 @@ loc_6A55:
 				BCS	loc_6A63
 				LDA	#$84 ; 'Ñ'
 
-loc_6A63:
+loc_6A63:									; saucer?
 				CPX	#1
 				BCS	loc_6A69
 				ADC	#$1C
@@ -998,7 +993,7 @@ loc_6A63:
 loc_6A69:
 				BNE	loc_6A77
 				ADC	#$12
-				LDX	p1SaucerFlag
+				LDX	saucer_Sts
 				DEX
 				BEQ	loc_6A75
 				ADC	#$12
@@ -1024,7 +1019,7 @@ loc_6A77:
 				JSR	handle_object_hit
 
 loc_6A94:
-				JMP	loc_69F9
+				JMP	next_shot
 ; ---------------------------------------------------------------------------
 
 loc_6A97:
@@ -1033,18 +1028,19 @@ loc_6A97:
 				JMP	loc_6A0A
 ; End of function handle_shots
 
+; Y=offset to source asteroid, X=offset	to empty slot
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-clone_asteroid_maybe:
-				LDA	P1RAM,Y
+clone_asteroid_rnd_shape:
+				LDA	P1RAM,Y					; asteroid status
 				AND	#7					; bits 2-0
 				STA	byte_8
-				JSR	update_prng				; random ???
+				JSR	update_prng				; random asteroid shape
 				AND	#$18					; bits 4-3 only
 				ORA	byte_8
-				STA	P1RAM,X
+				STA	P1RAM,X					; new status
 				LDA	asteroid_PLh,Y
 				STA	asteroid_PLh,X
 				LDA	asteroid_PHh,Y
@@ -1058,45 +1054,45 @@ clone_asteroid_maybe:
 				LDA	asteroid_Vv,Y
 				STA	asteroid_Vv,X
 				RTS
-; End of function clone_asteroid_maybe
+; End of function clone_asteroid_rnd_shape
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-copy_vector_from_table_to_avgram:
+copy_vector_list_from_table_to_dvgram:
 				STA	byte_B					; table	address	(LSB)
 				STX	byte_C					; table	address	(MSB)
-; End of function copy_vector_from_table_to_avgram
+; End of function copy_vector_list_from_table_to_dvgram
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-copy_vector_to_avgram:
+copy_vector_list_to_avgram:
 				LDY	#0
 
 loc_6AD9:
 				INY
 				LDA	(byte_B),Y				; SSSS -mYY (VEC) / 1111 smYY (SVEC)
 				EOR	byte_9					; flag for flip	Y (bit 2)
-				STA	(2),Y					; store	in avg ram (cmd)
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram (cmd)
 				DEY
 				CMP	#$F0 ; ''                              ; SVEC?
 				BCS	is_svec					; yes, go
 				CMP	#$A0 ; '†'                              ; VEC?
 				BCS	loc_6AFF				; no, exit
 				LDA	(byte_B),Y				; YYYY YYYY
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
 				INY
 				LDA	(byte_B),Y				; XXXX XXXX
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
 				LDA	(byte_B),Y				; BBBB -mXX
 				EOR	byte_8					; sign for X delta
-				ADC	byte_17
-				STA	(2),Y					; store	in avg ram
+				ADC	extra_brightness
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 
 loc_6AFC:
 				INY
@@ -1104,18 +1100,18 @@ loc_6AFC:
 
 loc_6AFF:
 				DEY
-				JMP	update_avg_curr_addr
+				JMP	update_dvg_curr_addr
 ; ---------------------------------------------------------------------------
 
 is_svec:									; BBBB SmXX
 				LDA	(byte_B),Y
 				EOR	byte_8					; flag for flip	X (bit 2)
 				CLC
-				ADC	byte_17
-				STA	(2),Y					; store	in avg ram
+				ADC	extra_brightness
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
 				BNE	loc_6AFC				; always
-; End of function copy_vector_to_avgram
+; End of function copy_vector_list_to_avgram
 
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1124,36 +1120,36 @@ is_svec:									; BBBB SmXX
 handle_object_hit:
 				CPX	#1
 				BNE	loc_6B1B
-				CPY	#27
-				BNE	loc_6B29
+				CPY	#$1B					; player hit?
+				BNE	loc_6B29				; no, skip
 				LDX	#0
-				LDY	#28					; ???
+				LDY	#$1C					; saucer
 
 loc_6B1B:
 				TXA
 				BNE	loc_6B3C
-				LDA	#$81 ; 'Å'
+				LDA	#129
 				STA	shipSpawnTimer
 				LDX	curPlayer
 				DEC	numShipsP1,X				; dec number of	ships
 				LDX	#0					; offset to player ship
 
-loc_6B29:									; flag ship exploding
+loc_6B29:									; flag object exploding
 				LDA	#$A0 ; '†'
-				STA	p1PlayerFlag,X
+				STA	ship_Sts,X
 				LDA	#0
 				STA	ship_Vh,X
-				STA	ship_Vv,X				; zero ship velocity
-				CPY	#27					; asteroid?
-				BCC	loc_6B47				; yes, handle it
+				STA	ship_Vv,X				; zero object velocity
+				CPY	#$1B					; asteroid?
+				BCC	loc_6B47				; yes, go
 				BCS	handle_saucer_hit			; no (saucer), go
 
 loc_6B3C:
 				LDA	#0
-				STA	p1PlayerFlag,X				; ???
-				CPY	#27
-				BEQ	ship_hit_asteroid
-				BCS	handle_saucer_hit
+				STA	ship_Sts,X				; flag object inactive
+				CPY	#$1B					; player?
+				BEQ	ship_hit_asteroid			; yes, go
+				BCS	handle_saucer_hit			; no (saucer), go
 
 loc_6B47:
 				JSR	handle_asteroid_hit
@@ -1180,7 +1176,7 @@ ship_hit_asteroid:								; save object index
 				LDX	curPlayer
 				DEC	numShipsP1,X				; lose a ship
 				TAX						; restore object index
-				LDA	#$81 ; 'Å'                              ; init spawn timer
+				LDA	#129					; init spawn timer
 				STA	shipSpawnTimer
 				BNE	explode_asteroid			; always
 
@@ -1191,7 +1187,7 @@ handle_saucer_hit:
 				BEQ	explode_asteroid			; no, go
 				STX	byte_D					; save object index
 				LDX	curPlayer_x2
-				LDA	p1SaucerFlag
+				LDA	saucer_Sts
 				LSR	A					; small	saucer?
 				LDA	#$99 ; 'ô'                              ; (99+1)*10 = 1,000 pts
 				BCS	loc_6B8B				; yes, skip
@@ -1217,7 +1213,7 @@ locret_6B99:
 ; ---------------------------------------------------------------------------
 
 loc_6B9A:
-				LDA	p1SaucerFlag
+				LDA	saucer_Sts
 				BMI	locret_6B99				; exploding? yes, exit
 				BEQ	handle_new_saucer			; no saucer? yes, go
 				JMP	handle_existing_saucer			; small/large saucer
@@ -1226,22 +1222,22 @@ loc_6B9A:
 handle_new_saucer:								; game active?
 				LDA	numPlayers
 				BEQ	loc_6BAF				; no, go
-				LDA	p1PlayerFlag				; player active?
+				LDA	ship_Sts				; player active?
 				BEQ	locret_6B99				; no, return
 				BMI	locret_6B99				; exploding? yes, return
 
-loc_6BAF:
-				LDA	byte_2F9
-				BEQ	loc_6BB7
-				DEC	byte_2F9
+loc_6BAF:									; non-zero?
+				LDA	asteroid_hit_timer
+				BEQ	loc_6BB7				; no, skip
+				DEC	asteroid_hit_timer
 
-loc_6BB7:
+loc_6BB7:									; time for saucer?
 				DEC	saucerCountdownTimer
-				BNE	locret_6B99
+				BNE	locret_6B99				; no, exit
 				LDA	#18
-				STA	saucerCountdownTimer
-				LDA	byte_2F9
-				BEQ	loc_6BD0
+				STA	saucerCountdownTimer			; reinit countdown
+				LDA	asteroid_hit_timer			; asteroid hit recently?
+				BEQ	loc_6BD0				; no, skip
 				LDA	currentNumberOfAsteroids
 				BEQ	locret_6B99				; no asteroids,	return
 				CMP	numAsteroidsLeftBeforeSaucer
@@ -1251,7 +1247,7 @@ loc_6BD0:
 				LDA	starting_saucerCountdownTimer
 				SEC
 				SBC	#6
-				CMP	#$20 ; ' '
+				CMP	#32
 				BCC	loc_6BDD
 				STA	starting_saucerCountdownTimer
 
@@ -1266,9 +1262,9 @@ loc_6BDD:
 				ROR	saucer_PLv
 				LSR	A
 				ROR	saucer_PLv
-				CMP	#$18
+				CMP	#24
 				BCC	loc_6BFA
-				AND	#$17
+				AND	#23
 
 loc_6BFA:
 				STA	saucer_PHv
@@ -1301,7 +1297,7 @@ loc_6C2F:									; small	saucer
 				DEX
 
 loc_6C30:
-				STX	p1SaucerFlag
+				STX	saucer_Sts
 				RTS
 ; ---------------------------------------------------------------------------
 
@@ -1318,8 +1314,8 @@ handle_existing_saucer:
 loc_6C45:									; game active?
 				LDA	numPlayers
 				BEQ	loc_6C4E				; no, skip
-				LDA	shipSpawnTimer
-				BNE	locret_6C53
+				LDA	shipSpawnTimer				; ship spawning?
+				BNE	locret_6C53				; yes, skip
 
 loc_6C4E:
 				DEC	saucerCountdownTimer
@@ -1332,7 +1328,7 @@ locret_6C53:
 loc_6C54:
 				LDA	#10
 				STA	saucerCountdownTimer
-				LDA	p1SaucerFlag
+				LDA	saucer_Sts
 				LSR	A					; small	saucer?
 				BEQ	handle_small_saucer			; yes, go
 				JSR	update_prng				; random shot direction
@@ -1419,15 +1415,15 @@ handle_fire:
 				BIT	btn_edge_debounce			; test
 				BPL	locret_6CFC				; b7=0,	not pressed, exit
 				BVS	locret_6CFC				; b6=1,	was pressed, exit
-				LDA	shipSpawnTimer
-				BNE	locret_6CFC
+				LDA	shipSpawnTimer				; ship spawning?
+				BNE	locret_6CFC				; yes, exit
 				TAX
 				LDA	#3					; offset shot0 timer - 1
 				STA	byte_E
 				LDY	#7					; offset shot3 timer
 
 find_free_shot_slot:								; get shot timer
-				LDA	p1PlayerFlag,Y
+				LDA	ship_Sts,Y
 				BEQ	new_shot_fired				; not active, go
 				DEY						; next shot timer
 				CPY	byte_E					; done all shot	timers?
@@ -1437,33 +1433,33 @@ locret_6CFC:
 				RTS
 ; ---------------------------------------------------------------------------
 
-new_shot_fired:									; was byte_2FA
+new_shot_fired:									; offset to ship/saucer
 				STX	byte_D
 				LDA	#18
-				STA	p1PlayerFlag,Y				; init shot timer
-				LDA	direction,X
-				JSR	some_thrust_calc
+				STA	ship_Sts,Y				; init shot timer
+				LDA	direction,X				; ship/saucer
+				JSR	get_thrust_cos
 				LDX	byte_D					; was byte_2FA
-				CMP	#$80 ; 'Ä'
+				CMP	#$80 ; 'Ä'                              ; down?
 				ROR	A
 				STA	byte_9
 				CLC
-				ADC	ship_Vh,X
+				ADC	ship_Vh,X				; add Vh ship/saucer
 				BMI	loc_6D1E
-				CMP	#112
-				BCC	loc_6D24
-				LDA	#111
+				CMP	#112					; less than 112?
+				BCC	loc_6D24				; no, skip
+				LDA	#111					; min =	111
 				BNE	loc_6D24
 
-loc_6D1E:
+loc_6D1E:									; more than 145?
 				CMP	#145
-				BCS	loc_6D24
-				LDA	#145
+				BCS	loc_6D24				; no, skip
+				LDA	#145					; max =	145
 
-loc_6D24:
+loc_6D24:									; update shot Vh
 				STA	ship_Vh,Y
-				LDA	direction,X
-				JSR	sub_77D5
+				LDA	direction,X				; ship/saucer
+				JSR	get_thrust_sin
 				LDX	byte_D
 				CMP	#$80 ; 'Ä'
 				ROR	A
@@ -1471,17 +1467,17 @@ loc_6D24:
 				CLC
 				ADC	ship_Vv,X
 				BMI	loc_6D41
-				CMP	#112
-				BCC	loc_6D47
-				LDA	#111
+				CMP	#112					; less than 112?
+				BCC	loc_6D47				; no, skip
+				LDA	#111					; min =	111
 				BNE	loc_6D47
 
-loc_6D41:
+loc_6D41:									; more than 145?
 				CMP	#145
-				BCS	loc_6D47
-				LDA	#145
+				BCS	loc_6D47				; no, skip
+				LDA	#145					; max =	145
 
-loc_6D47:
+loc_6D47:									; update shot Vv
 				STA	ship_Vv,Y
 				LDX	#0
 				LDA	byte_9
@@ -1496,11 +1492,11 @@ loc_6D51:
 				CLC
 				ADC	byte_9
 				CLC
-				ADC	ship_PLh,X
-				STA	ship_PLh,Y
+				ADC	ship_PLh,X				; ship/saucer Ph
+				STA	ship_PLh,Y				; update shot Ph
 				LDA	byte_8
-				ADC	ship_PHh,X
-				STA	ship_PHh,Y
+				ADC	ship_PHh,X				; ship/saucer Ph
+				STA	ship_PHh,Y				; update shot Ph
 				LDX	#0
 				LDA	byte_C
 				BPL	loc_6D71
@@ -1514,11 +1510,11 @@ loc_6D71:
 				CLC
 				ADC	byte_C
 				CLC
-				ADC	ship_PLv,X
-				STA	ship_PLv,Y
+				ADC	ship_PLv,X				; ship/saucer Pv
+				STA	ship_PLv,Y				; update shot Pv
 				LDA	byte_B
-				ADC	ship_PHv,X
-				STA	ship_PHv,Y
+				ADC	ship_PHv,X				; ship/saucer Pv
+				STA	ship_PHv,Y				; update shot Pv
 				LDA	#$80 ; 'Ä'
 				STA	timerPlayerFireSound,X
 				RTS
@@ -1682,17 +1678,17 @@ loc_6E71:
 handle_hyperspace:
 				LDA	numPlayers
 				BEQ	locret_6ED7				; not a	real game, exit
-				LDA	p1PlayerFlag
+				LDA	ship_Sts
 				BMI	locret_6ED7				; exploding, exit
 				LDA	shipSpawnTimer
 				BNE	locret_6ED7
 				LDA	hyperspaceSwitch			; button pressed?
 				BPL	locret_6ED7				; no, exit
 				LDA	#0					; flag hyperspace?
-				STA	p1PlayerFlag
+				STA	ship_Sts
 				STA	ship_Vh
 				STA	ship_Vv					; zero ship velocity
-				LDA	#$30 ; '0'
+				LDA	#48
 				STA	shipSpawnTimer
 				JSR	update_prng				; random horizontal position
 				AND	#$1F
@@ -1760,9 +1756,9 @@ loc_6EE5:
 				LDX	#4					; 4 flags, 4 timers, 4 score bytes
 
 loc_6EEB:									; init flag
-				STA	p1PlayerFlag,X
-				STA	p1TimerShot0,X				; init timer
-				STA	$51,X					; zero player score
+				STA	ship_Sts,X
+				STA	shipShot_Sts,X				; init timer
+				STA	byte_4F+2,X				; zero player score
 				DEX						; next byte
 				BPL	loc_6EEB				; loop until done
 				STA	currentNumberOfAsteroids
@@ -1846,21 +1842,21 @@ locret_6F56:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-handle_objects:
-				LDX	#$22 ; '"'                              ; offset to last object in table
+update_and_render_objects:
+				LDX	#34					; 34 objects to	???
 
 loc_6F59:									; get entry
 				LDA	P1RAM,X
 				BNE	handle_object_entry			; non-zero entry, handle it
 
-loc_6F5E:									; next value
+next_object:									; next value
 				DEX
 				BPL	loc_6F59				; loop 'til done
 				RTS
 ; ---------------------------------------------------------------------------
 
-handle_object_entry:
-				BPL	loc_6FC7
+handle_object_entry:								; status < 128,	go
+				BPL	object_ok
 				JSR	negate_A
 				LSR	A
 				LSR	A
@@ -1870,8 +1866,8 @@ handle_object_entry:
 				BNE	loc_6F76				; no, skip
 				LDA	fastTimer
 				AND	#1
-				LSR	A
-				BEQ	loc_6F77
+				LSR	A					; wtf?
+				BEQ	loc_6F77				; always!?!
 
 loc_6F76:
 				SEC
@@ -1890,7 +1886,7 @@ loc_6F77:
 loc_6F8C:
 				LDA	#0
 				STA	P1RAM,X
-				BEQ	loc_6F5E
+				BEQ	next_object
 
 loc_6F93:
 				JSR	init_ship_position_velocity
@@ -1921,29 +1917,29 @@ loc_6FAF:
 				STA	byte_6
 				LDA	asteroid_PHv,X
 				STA	byte_7
-				JMP	loc_7027
+				JMP	jsr_display_object
 ; ---------------------------------------------------------------------------
 
-loc_6FC7:
+object_ok:
 				CLC
 				LDY	#0
-				LDA	asteroid_Vh,X
-				BPL	loc_6FD0
+				LDA	asteroid_Vh,X				; object Vh
+				BPL	loc_6FD0				; +ve, skip
 				DEY
 
-loc_6FD0:
+loc_6FD0:									; object Ph += Vh
 				ADC	asteroid_PLh,X
 				STA	asteroid_PLh,X
 				STA	byte_4
 				TYA
-				ADC	asteroid_PHh,X
-				CMP	#$20 ; ' '
-				BCC	loc_6FEC
-				AND	#$1F
+				ADC	asteroid_PHh,X				; object Ph += Vh
+				CMP	#32					; max?
+				BCC	loc_6FEC				; no, skip
+				AND	#31					; max=31
 				CPX	#$1C					; SaucerFlag?
 				BNE	loc_6FEC				; no, go
-				JSR	sub_702D
-				JMP	loc_6F5E
+				JSR	zero_saucer
+				JMP	next_object
 ; ---------------------------------------------------------------------------
 
 loc_6FEC:
@@ -1951,21 +1947,21 @@ loc_6FEC:
 				STA	byte_5
 				CLC
 				LDY	#0
-				LDA	asteroid_Vv,X
-				BPL	loc_6FFB
+				LDA	asteroid_Vv,X				; object Vv
+				BPL	loc_6FFB				; +ve, skip
 				LDY	#$FF
 
-loc_6FFB:
+loc_6FFB:									; object Pv += Vv
 				ADC	asteroid_PLv,X
 				STA	asteroid_PLv,X
 				STA	byte_6
 				TYA
-				ADC	asteroid_PHv,X
-				CMP	#$18
-				BCC	loc_7013
+				ADC	asteroid_PHv,X				; object Pv += Vv
+				CMP	#24					; max?
+				BCC	loc_7013				; no, skip
 				BEQ	loc_7011
-				LDA	#$17
-				BNE	loc_7013
+				LDA	#23					; max=23
+				BNE	loc_7013				; (always)
 
 loc_7011:
 				LDA	#0
@@ -1973,72 +1969,72 @@ loc_7011:
 loc_7013:
 				STA	asteroid_PHv,X
 				STA	byte_7
-				LDA	P1RAM,X
+				LDA	P1RAM,X					; object status
 				LDY	#$E0 ; '‡'
-				LSR	A
-				BCS	loc_7027
+				LSR	A					; bit 0
+				BCS	jsr_display_object			; b0=1,	go
 				LDY	#$F0 ; ''
-				LSR	A
-				BCS	loc_7027
-				LDY	#0
+				LSR	A					; bit 1
+				BCS	jsr_display_object			; b1=1,	go
+				LDY	#0					; globalscale
 
-loc_7027:
+jsr_display_object:
 				JSR	display_object
-				JMP	loc_6F5E
-; End of function handle_objects
+				JMP	next_object
+; End of function update_and_render_objects
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-sub_702D:
+zero_saucer:
 				LDA	starting_saucerCountdownTimer
 				STA	saucerCountdownTimer
 				LDA	#0
-				STA	p1SaucerFlag
+				STA	saucer_Sts
 				STA	saucer_Vh
 				STA	saucer_Vv
 				RTS
-; End of function sub_702D
+; End of function zero_saucer
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-handle_left_right_thrust:
+handle_respawn_rot_thrust:
 				LDA	numPlayers
 				BEQ	locret_7085
-				LDA	p1PlayerFlag
+				LDA	ship_Sts
 				BMI	locret_7085				; exploding - exit
 				LDA	shipSpawnTimer
 				BEQ	check_rot_left
-				DEC	shipSpawnTimer
-				BNE	locret_7085				; exit
+				DEC	shipSpawnTimer				; still	spawning?
+				BNE	locret_7085				; yes, exit
 				LDY	hyperspaceFlag
 				BMI	loc_706F				; unsuccessful - go
-				BNE	loc_7068				; successful - go
-				JSR	sub_7139				; some comparisons with	asteroids???
-				BNE	loc_7081
-				LDY	p1SaucerFlag
-				BEQ	loc_7068				; no saucer - go
+				BNE	end_hyperspace				; successful - go
+				JSR	check_near_objs_and_extend_spawn	; objects too close?
+				BNE	loc_7081				; yes, exit
+				LDY	saucer_Sts
+				BEQ	end_hyperspace				; no saucer - go
 				LDY	#2
 				STY	shipSpawnTimer
 				RTS
 ; ---------------------------------------------------------------------------
 
-loc_7068:									; flag alive and active
+end_hyperspace:									; flag alive and active
 				LDA	#1
-				STA	p1PlayerFlag
+				STA	ship_Sts
 				BNE	loc_7081				; always go
 
 loc_706F:									; flag exploding
 				LDA	#$A0 ; '†'
-				STA	p1PlayerFlag
+				STA	ship_Sts
 				LDX	#$3E ; '>'
 				STX	timerExplosionSound
 				LDX	curPlayer
 				DEC	numShipsP1,X				; dec number of	ships
-				LDA	#$81 ; 'Å'
+				LDA	#129
 				STA	shipSpawnTimer
 
 loc_7081:									; flag inactive
@@ -2057,7 +2053,7 @@ check_rot_left:									; left button?
 
 check_rot_right:								; right	button?
 				LDA	rotateRightSwitch
-				BPL	loc_709B				; no, skip
+				BPL	check_thrust				; no, skip
 				LDA	#$FD					; -3
 
 update_dir:
@@ -2065,7 +2061,7 @@ update_dir:
 				ADC	direction				; calc direction
 				STA	direction				; update
 
-loc_709B:
+check_thrust:
 				LDA	fastTimer
 				LSR	A
 				BCS	locret_7085				; exit
@@ -2075,36 +2071,36 @@ loc_709B:
 				STA	$3C03					; sound	(ship thrust)
 				LDY	#0
 				LDA	direction
-				JSR	some_thrust_calc
+				JSR	get_thrust_cos
 				BPL	loc_70B4
 				DEY
 
 loc_70B4:
 				ASL	A
 				CLC
-				ADC	shipHorizontalVelocityLow
+				ADC	ship_thrust_dH
 				TAX
 				TYA
 				ADC	ship_Vh
-				JSR	sub_7125
+				JSR	calc_thrust_delta
 				STA	ship_Vh
-				STX	shipHorizontalVelocityLow
+				STX	ship_thrust_dH
 				LDY	#0
 				LDA	direction
-				JSR	sub_77D5
+				JSR	get_thrust_sin
 				BPL	loc_70CF
 				DEY
 
 loc_70CF:
 				ASL	A
 				CLC
-				ADC	shipVerticalVelocityLow
+				ADC	ship_thrust_dV
 				TAX
 				TYA
 				ADC	ship_Vv
-				JSR	sub_7125
+				JSR	calc_thrust_delta
 				STA	ship_Vv
-				STX	shipVerticalVelocityLow
+				STX	ship_thrust_dV
 				RTS
 ; ---------------------------------------------------------------------------
 
@@ -2112,7 +2108,7 @@ loc_70E1:
 				LDA	#0
 				STA	$3C03					; sound	(ship thrust)
 				LDA	ship_Vh
-				ORA	shipHorizontalVelocityLow
+				ORA	ship_thrust_dH
 				BEQ	loc_7105
 				LDA	ship_Vh
 				ASL	A
@@ -2124,14 +2120,14 @@ loc_70E1:
 				SEC
 
 loc_70FA:
-				ADC	shipHorizontalVelocityLow
-				STA	shipHorizontalVelocityLow
+				ADC	ship_thrust_dH
+				STA	ship_thrust_dH
 				TXA
 				ADC	ship_Vh
 				STA	ship_Vh
 
 loc_7105:
-				LDA	shipVerticalVelocityLow
+				LDA	ship_thrust_dV
 				ORA	ship_Vv
 				BEQ	locret_7124
 				LDA	ship_Vv
@@ -2144,54 +2140,55 @@ loc_7105:
 				INX
 
 loc_7119:
-				ADC	shipVerticalVelocityLow
-				STA	shipVerticalVelocityLow
+				ADC	ship_thrust_dV
+				STA	ship_thrust_dV
 				TXA
 				ADC	ship_Vv
 				STA	ship_Vv
 
 locret_7124:
 				RTS
-; End of function handle_left_right_thrust
+; End of function handle_respawn_rot_thrust
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-sub_7125:
+calc_thrust_delta:
 				BMI	loc_7130
-				CMP	#$40 ; '@'
+				CMP	#64
 				BCC	locret_7138
 				LDX	#$FF
-				LDA	#$3F ; '?'
+				LDA	#63
 				RTS
 ; ---------------------------------------------------------------------------
 
 loc_7130:
-				CMP	#$C0 ; '¿'
+				CMP	#192
 				BCS	locret_7138
 				LDX	#1
-				LDA	#$C0 ; '¿'
+				LDA	#192
 
 locret_7138:
 				RTS
-; End of function sub_7125
+; End of function calc_thrust_delta
 
+; sets Z flag if no coincident objects
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-sub_7139:
-				LDX	#$1C					; offset to saucer's parameter(s)
+check_near_objs_and_extend_spawn:
+				LDX	#28					; 29 objects to	check
 
 loc_713B:									; get object status
 				LDA	P1RAM,X
-				BEQ	loc_715E				; no active, skip
+				BEQ	loc_715E				; not active, skip
 				LDA	asteroid_PHh,X
 				SEC
 				SBC	ship_PHh
 				CMP	#4					; object, ship PHh within 4?
-				BCC	loc_714F
+				BCC	loc_714F				; yes, go
 				CMP	#$FC ; '¸'
 				BCC	loc_715E				; no, skip
 
@@ -2200,21 +2197,21 @@ loc_714F:
 				SEC
 				SBC	ship_PHv
 				CMP	#4					; object, ship PHv within 4?
-				BCC	loc_7163				; no, exit
+				BCC	extend_spawn				; yes, go
 				CMP	#$FC ; '¸'
-				BCS	loc_7163				; no, exit
+				BCS	extend_spawn				; yes, go
 
 loc_715E:									; next object
 				DEX
 				BPL	loc_713B				; loop thru all	objects
-				INX						; X=0
+				INX						; X=0, set Z flag
 				RTS
 ; ---------------------------------------------------------------------------
 
-loc_7163:
+extend_spawn:									; reset	Z flag
 				INC	shipSpawnTimer
 				RTS
-; End of function sub_7139
+; End of function check_near_objs_and_extend_spawn
 
 ; ---------------------------------------------------------------------------
 				.BYTE $90 ; ê
@@ -2223,10 +2220,10 @@ loc_7163:
 
 
 init_wave:
-				LDX	#$1A					; offset to 1st	asteroid
+				LDX	#26					; 26+1 asteroids
 				LDA	asteroidWaveTimer
 				BNE	loc_71DF
-				LDA	p1SaucerFlag				; saucer active?
+				LDA	saucer_Sts				; saucer active?
 				BNE	locret_71E7				; yes, return
 				STA	saucer_Vh
 				STA	saucer_Vv				; zero saucer vertical velocity
@@ -2248,43 +2245,43 @@ loc_7193:
 				STA	currentNumberOfAsteroids
 				STA	startingAsteroidsPerWave
 				STA	byte_8					; store	as temp	counter
-				LDY	#$1C					; offset to saucer's parameter(s)
+				LDY	#28					; offset to ship
 
 init_next_asteroid:								; random velocity
 				JSR	update_prng
-				AND	#$18					; bits 4,3 only
-				ORA	#4					; and set bit 2	as well
+				AND	#$18					; (4:3)	= rnd shape
+				ORA	#4					; (2:1)	= 10b =	large
 				STA	P1RAM,X					; set asteroid status
 				JSR	set_asteroid_velocity
 				JSR	update_prng				; random position
 				LSR	A
-				AND	#$1F
-				BCC	loc_71C5
+				AND	#$1F					; 5 bits of high byte
+				BCC	start_bottom
 				CMP	#$18
-				BCC	loc_71B8
+				BCC	start_left
 				AND	#$17
 
-loc_71B8:
+start_left:									; y coord (high	byte)
 				STA	asteroid_PHv,X
 				LDA	#0
 				STA	asteroid_PHh,X
-				STA	asteroid_PLh,X
+				STA	asteroid_PLh,X				; x coord = 0
 				BEQ	loc_71D0
 
-loc_71C5:
+start_bottom:									; x coord (high	byte)
 				STA	asteroid_PHh,X
 				LDA	#0
-				STA	asteroid_PHv,X
+				STA	asteroid_PHv,X				; y coord = 0
 				STA	asteroid_PLv,X
 
 loc_71D0:									; offset for next asteroid
 				DEX
 				DEC	byte_8					; done all asteroids for the wave?
 				BNE	init_next_asteroid			; no, loop
-				LDA	#$7F ; ''
+				LDA	#127
 				STA	saucerCountdownTimer
-				LDA	#$30 ; '0'
-				STA	byte_2FC
+				LDA	#48
+				STA	starting_ThumpCounter
 
 loc_71DF:
 				LDA	#0
@@ -2310,12 +2307,13 @@ init_ship_position_velocity:
 				STA	ship_Vh
 				STA	ship_Vv					; zero ship velocity
 				LDA	#$10
-				STA	ship_PHh
+				STA	ship_PHh				; x=$1060 = 4192
 				LDA	#$C
-				STA	ship_PHv
+				STA	ship_PHv				; y=$0C60 = 3168
 				RTS
 ; End of function init_ship_position_velocity
 
+; Y=source asteroid, X=new asteroid
 
 ; =============== S U B	R O U T	I N E =======================================
 
@@ -2328,9 +2326,9 @@ set_asteroid_velocity:
 
 loc_720C:
 				CLC
-				ADC	asteroid_Vh,Y
+				ADC	asteroid_Vh,Y				; source velocity
 				JSR	limit_asteroid_velocity
-				STA	asteroid_Vh,X
+				STA	asteroid_Vh,X				; new velocity
 				JSR	update_prng
 				JSR	update_prng
 				JSR	update_prng
@@ -2341,9 +2339,9 @@ loc_720C:
 
 loc_7228:
 				CLC
-				ADC	asteroid_Vv,Y
+				ADC	asteroid_Vv,Y				; source velocity
 				JSR	limit_asteroid_velocity
-				STA	asteroid_Vv,X
+				STA	asteroid_Vv,X				; new velocity
 				RTS
 ; End of function set_asteroid_velocity
 
@@ -2353,14 +2351,14 @@ loc_7228:
 
 limit_asteroid_velocity:
 				BPL	loc_7242
-				CMP	#$E1 ; '·'
+				CMP	#256-31
 				BCS	loc_723B
-				LDA	#$E1 ; '·'
+				LDA	#256-31
 
 loc_723B:
-				CMP	#$FB ; '˚'
+				CMP	#256-5
 				BCC	locret_724E
-				LDA	#$FA ; '˙'
+				LDA	#256-6
 				RTS
 ; ---------------------------------------------------------------------------
 
@@ -2370,9 +2368,9 @@ loc_7242:
 				LDA	#6
 
 loc_7248:
-				CMP	#$20 ; ' '
+				CMP	#32
 				BCC	locret_724E
-				LDA	#$1F
+				LDA	#31
 
 locret_724E:
 				RTS
@@ -2383,7 +2381,7 @@ locret_724E:
 
 
 display_C_scores_ships:
-				LDA	#$10
+				LDA	#16
 				STA	globalScale
 				LDA	#$50 ; 'P'
 				LDX	#$A4 ; '§'                              ; addr = 0x50A4
@@ -2393,14 +2391,14 @@ display_C_scores_ships:
 				JSR	write_CURx4_cmd
 				LDA	#$70 ; 'p'                              ; scale = 7
 				JSR	set_scale_A_bright_0
-				LDX	#0
+				LDX	#0					; digit	brightness += 0
 				LDA	numPlayers
 				CMP	#2					; 2 players?
 				BNE	loc_7286				; no, skip
 				LDA	curPlayer				; player 1?
 				BNE	loc_7286				; yes, skip
-				LDX	#$20 ; ' '
-				LDA	p1PlayerFlag
+				LDX	#$20 ; ' '                              ; digit brightness += $20
+				LDA	ship_Sts
 				ORA	hyperspaceFlag
 				BNE	loc_7286
 				LDA	shipSpawnTimer
@@ -2415,7 +2413,7 @@ loc_7286:
 				SEC						; flag no zero padding
 				JSR	display_numeric				; display P1 score
 				LDA	#0
-				JSR	display_pad_digit			; display score	units (=0)
+				JSR	display_bright_digit			; display score	units (=0)
 
 loc_7293:									; X coord (x4=160)
 				LDA	#40
@@ -2449,7 +2447,7 @@ loc_7293:									; X coord (x4=160)
 				LDA	curPlayer
 				BEQ	loc_72E9
 				LDX	#$20 ; ' '
-				LDA	p1PlayerFlag
+				LDA	ship_Sts
 				ORA	hyperspaceFlag
 				BNE	loc_72E9
 				LDA	shipSpawnTimer
@@ -2464,7 +2462,7 @@ loc_72E9:
 				SEC						; flag no zero padding
 				JSR	display_numeric				; display P2 score
 				LDA	#0
-				JSR	display_pad_digit			; display score	units (=0)
+				JSR	display_bright_digit			; display score	units (=0)
 
 loc_72F6:									; X coord (x4=828)
 				LDA	#207
@@ -2476,6 +2474,9 @@ locret_72FD:
 				RTS
 ; End of function display_C_scores_ships
 
+; Y=$E0/$F0/$00
+; convert position from	13 bits	(0-8191) to 10 bits (0-1023)
+; - add	a fudge-factor of 1024 (128 after scaling)
 
 ; =============== S U B	R O U T	I N E =======================================
 
@@ -2483,24 +2484,24 @@ locret_72FD:
 display_object:
 				STY	globalScale
 				STX	byte_D					; object offset	(from P1RAM)
-				LDA	byte_5
+				LDA	byte_5					; object_PHh
+				LSR	A
+				ROR	byte_4					; object_PLh
 				LSR	A
 				ROR	byte_4
 				LSR	A
 				ROR	byte_4
-				LSR	A
-				ROR	byte_4
-				STA	byte_5					; 5:4 /= 8
-				LDA	byte_7
+				STA	byte_5					; object_Ph /= 8
+				LDA	byte_7					; object_PHv
 				CLC
 				ADC	#4
 				LSR	A
-				ROR	byte_6
+				ROR	byte_6					; object_PLv
 				LSR	A
 				ROR	byte_6
 				LSR	A
 				ROR	byte_6
-				STA	byte_7					; 7:6 =	(7:6+1024)/8
+				STA	byte_7					; object_PLv = (object_PLv+1024)/8
 				LDX	#4					; base of temp coordinates
 				JSR	write_CUR_cmd
 				LDA	#$70 ; 'p'
@@ -2522,12 +2523,12 @@ loc_732D:
 loc_733B:
 				JSR	set_scale_A_bright_0
 				LDX	byte_D					; restore object offset
-				LDA	P1RAM,X					; get entry (again)
+				LDA	P1RAM,X					; object status	(again)
 				BPL	display_shot_ship_asteroid_or_saucer
 				CPX	#$1B					; PlayerFlag?
 				BEQ	loc_7355				; yes, go
-				AND	#$C					; pattern (3:2)
-				LSR	A					; pattern (2:1)
+				AND	#$C					; status (3:2)
+				LSR	A					; status (3:2)->(2:1)
 				TAY						; pattern = word offset
 				LDA	DVGROM+$F8,Y				; shrapnel table address LSB
 				LDX	DVGROM+$F9,Y				; shrapnel table address MSB
@@ -2545,10 +2546,10 @@ display_shot_ship_asteroid_or_saucer:						; PlayerFlag?
 				CPX	#$1C					; SaucerFlag?
 				BEQ	display_saucer				; yes, go
 				BCS	display_shot				; shot,	go
-				AND	#$18					; pattern (4:3)
+				AND	#$18					; status (4:3)
 				LSR	A
-				LSR	A					; pattern (2:1)
-				TAY						; pattern = word offset
+				LSR	A					; status (4:3)->(2:1)
+				TAY						; = word offset
 				LDA	DVGROM+$1DE,Y				; asteroid table address LSB
 				LDX	DVGROM+$1DF,Y				; asteroid table address MSB
 
@@ -2743,36 +2744,36 @@ locret_7464:
 
 
 display_exploding_ship:
-				LDA	p1PlayerFlag
+				LDA	ship_Sts
 				CMP	#$A2 ; '¢'                              ; 2 frames past exploding?
 				BCS	loc_748E
-				LDX	#$A
+				LDX	#10					; 10 entries to	parse
 
-loc_746E:
+loc_746E:									; start	at RTS???
 				LDA	DVGROM+$EC,X
 				LSR	A
 				LSR	A
 				LSR	A
-				LSR	A
+				LSR	A					; high->low nibble
 				CLC
 				ADC	#$F8 ; '¯'
 				EOR	#$F8 ; '¯'
-				STA	$7E,X
+				STA	byte_7E,X
 				LDA	DVGROM+$ED,X
 				LSR	A
 				LSR	A
 				LSR	A
-				LSR	A
+				LSR	A					; high->low nibble
 				CLC
 				ADC	#$F8 ; '¯'
 				EOR	#$F8 ; '¯'
-				STA	$8A,X
+				STA	byte_80+$A,X
 				DEX
 				DEX
 				BPL	loc_746E
 
 loc_748E:
-				LDA	p1PlayerFlag
+				LDA	ship_Sts
 				EOR	#$FF
 				AND	#$70 ; 'p'
 				LSR	A
@@ -2789,11 +2790,11 @@ loc_7499:
 
 loc_74A3:
 				CLC
-				ADC	$7D,X
-				STA	$7D,X
-				TYA
-				ADC	$7E,X
-				STA	$7E,X
+				ADC	byte_7D,X
+				STA	byte_7D,X
+				TYA						; 0/-1
+				ADC	byte_7E,X
+				STA	byte_7E,X
 				STA	byte_4
 				STY	byte_5
 				LDY	#0
@@ -2803,18 +2804,18 @@ loc_74A3:
 
 loc_74B9:
 				CLC
-				ADC	$89,X
-				STA	$89,X
-				TYA
-				ADC	$8A,X
-				STA	$8A,X
+				ADC	byte_80+9,X
+				STA	byte_80+9,X
+				TYA						; 0/-1
+				ADC	byte_80+$A,X
+				STA	byte_80+$A,X
 				STA	byte_6
 				STY	byte_7
 				LDA	dvg_curr_addr_lsb
 				STA	byte_B
 				LDA	dvg_curr_addr_msb
 				STA	byte_C
-				JSR	sub_7C49
+				JSR	from_exploding_ship
 				LDY	byte_9
 				LDA	DVGROM+$E0,Y				; wrecked ship table address LSB
 				LDX	DVGROM+$E1,Y				; wrecked ship table address MSB
@@ -2831,15 +2832,15 @@ loc_74B9:
 
 loc_74F1:
 				INY
-				LDA	($B),Y
-				STA	(2),Y					; store	in avg ram
+				LDA	(byte_B),Y
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
-				LDA	($B),Y
+				LDA	(byte_B),Y
 				EOR	#4
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				CPY	#3
 				BCC	loc_74F1
-				JSR	update_avg_curr_addr
+				JSR	update_dvg_curr_addr
 				LDX	byte_9
 				DEX
 				DEX
@@ -2853,7 +2854,7 @@ loc_74F1:
 
 calc_ship_and_render:
 				LDX	#0					; default positive delta
-				STX	byte_17
+				STX	extra_brightness
 				LDY	#0					; default positive delta
 				LDA	direction
 				BPL	loc_751B				; positive, skip
@@ -2882,7 +2883,7 @@ loc_752A:									; flag for flip	X
 				TAY
 				LDA	DVGROM+$26E,Y				; ship table address LSB
 				LDX	DVGROM+$26F,Y				; ship table address MSB
-				JSR	copy_vector_from_table_to_avgram
+				JSR	copy_vector_list_from_table_to_dvgram
 				LDA	thrustSwitch				; thrust?
 				BPL	locret_7554				; no, exit
 				LDA	fastTimer
@@ -2898,7 +2899,7 @@ loc_752A:									; flag for flip	X
 				INX						; BC+=2
 
 loc_7551:
-				JSR	copy_vector_from_table_to_avgram
+				JSR	copy_vector_list_from_table_to_dvgram
 
 locret_7554:
 				RTS
@@ -2916,7 +2917,7 @@ handle_sounds:
 
 update_sounds:
 				LDX	#0
-				LDA	p1SaucerFlag
+				LDA	saucer_Sts
 				BMI	loc_756B				; exploding, skip
 				BEQ	loc_756B				; no saucer, skip
 				ROR	A
@@ -2933,7 +2934,7 @@ loc_756B:									; sound	(saucer)
 				DEX						; index	to player sound
 				JSR	update_player_saucer_sound
 				STA	$3C04					; sound	(ship fire)
-				LDA	p1PlayerFlag
+				LDA	ship_Sts
 				CMP	#1					; alive?
 				BEQ	loc_7588				; yes, skip
 				TXA
@@ -2942,7 +2943,7 @@ loc_756B:									; sound	(saucer)
 loc_7588:
 				LDA	currentNumberOfAsteroids
 				BEQ	loc_759E
-				LDA	p1PlayerFlag				; alive?
+				LDA	ship_Sts				; alive?
 				BMI	loc_759E				; no, skip
 				ORA	hyperspaceFlag				; hyperspace?
 				BEQ	loc_759E				; not active, skip
@@ -2956,7 +2957,7 @@ loc_759E:
 				AND	#$F
 				STA	volFreqThumpSound
 				STA	$3A00					; sound	(thump)
-				LDA	byte_2FC
+				LDA	starting_ThumpCounter
 				STA	timerThumpSoundOff
 				BPL	loc_75BF
 
@@ -3023,19 +3024,19 @@ loc_75E9:									; player/saucer	sound flag
 
 handle_asteroid_hit:
 				STX	byte_D					; save object index
-				LDA	#$50 ; 'P'
-				STA	byte_2F9
+				LDA	#80
+				STA	asteroid_hit_timer
 				LDA	P1RAM,Y					; asteroid status
 				AND	#$78 ; 'x'                              ; bits 6-3 only
 				STA	byte_E
 				LDA	P1RAM,Y					; asteroid status
 				AND	#7					; bits 2-0 only
-				LSR	A					; (2:1)->(1:0)
+				LSR	A					; next size down
 				TAX						; asteroid size
 				BEQ	loc_7605				; small, skip
 				ORA	byte_E
 
-loc_7605:
+loc_7605:									; update asteroid status
 				STA	P1RAM,Y
 				LDA	numPlayers				; real game?
 				BEQ	handle_asteroid_split			; no, skip
@@ -3050,13 +3051,13 @@ add_asteroid_score:								; score	for this asteroid
 				CLC
 				JSR	add_A_to_score				; add asteroid score
 
-handle_asteroid_split:								; status, or 0 if small
+handle_asteroid_split:								; asteroid status
 				LDX	P1RAM,Y
 				BEQ	loc_7656				; small, no split, exit
-				JSR	get_inactive_asteroid_cnt		; any slots left?
-				BMI	loc_7656				; no, exit
+				JSR	get_inactive_asteroid_cnt		; X = empty slot
+				BMI	loc_7656				; no slots, exit
 				INC	currentNumberOfAsteroids		; add another asteroid
-				JSR	clone_asteroid_maybe
+				JSR	clone_asteroid_rnd_shape
 				JSR	set_asteroid_velocity
 				LDA	asteroid_Vh,X
 				AND	#$1F
@@ -3066,7 +3067,7 @@ handle_asteroid_split:								; status, or 0 if small
 				JSR	get_inactive_object_cnt			; any slots left?
 				BMI	loc_7656				; no, exit
 				INC	currentNumberOfAsteroids		; add another asteroid
-				JSR	clone_asteroid_maybe
+				JSR	clone_asteroid_rnd_shape
 				JSR	set_asteroid_velocity
 				LDA	asteroid_Vv,X
 				AND	#$1F
@@ -3267,18 +3268,18 @@ unk_772F:			.BYTE	0
 				.BYTE $1C
 				.BYTE $1D
 				.BYTE $1F
-; A=buffer, Y=#bytes, X=pad digit
+; A=buffer, Y=#bytes
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
 display_numeric:
 				PHP
-				STX	byte_17					; store	pad digit
+				STX	extra_brightness			; save extra brightness
 				DEY						; #bytes-1
 				STY	byte_16					; offset to last byte
 				CLC
-				ADC	byte_16					; bytes	remaining
+				ADC	byte_16					; buf +	#bytes-1
 				STA	byte_15					; ptr current byte
 				PLP
 				TAX						; X=buffer
@@ -3338,7 +3339,7 @@ loc_777B:
 
 
 display_digit:
-				BCC	display_pad_digit			; skip if no pad flagged?
+				BCC	display_bright_digit			; skip if no pad flagged?
 				AND	#$F					; any pad digit?
 				BEQ	loc_77B2				; no, skip
 ; End of function display_digit
@@ -3347,9 +3348,9 @@ display_digit:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-display_pad_digit:
-				LDX	byte_17					; any pad digit?
-				BEQ	loc_77B2				; none,	exit
+display_bright_digit:
+				LDX	extra_brightness			; extra	brightness?
+				BEQ	loc_77B2				; none,	use default routine
 				AND	#$F
 				CLC
 				ADC	#1
@@ -3357,24 +3358,24 @@ display_pad_digit:
 				ASL	A					; x2
 				TAY						; word offset
 				LDA	DVGROM+$6D4,Y				; chr fn
-				ASL	A
+				ASL	A					; low address *	2
 				STA	byte_B
 				LDA	DVGROM+$6D5,Y				; chr fn
 				ROL	A
-				AND	#$1F
-				ORA	#$40 ; '@'
+				AND	#$1F					; high address * 2
+				ORA	#$40 ; '@'                              ; +0x4000
 				STA	byte_C
 				LDA	#0
 				STA	byte_8					; flag to flip X
 				STA	byte_9					; flag to flip Y
-				JSR	copy_vector_to_avgram
+				JSR	copy_vector_list_to_avgram
 				PLP
 				RTS
 ; ---------------------------------------------------------------------------
 
 loc_77B2:
-				JMP	loc_7BCB
-; End of function display_pad_digit
+				JMP	display_space_digit_A
+; End of function display_bright_digit
 
 ; this is a 16-bit 1-tap LFSR
 ; - may	or may not be maximal length
@@ -3391,7 +3392,7 @@ update_prng:
 
 loc_77BD:
 				LDA	rnd1
-				BIT	byte_77D1				; tap on output	of bit0
+				BIT	tap					; tap on output	of bit0
 				BEQ	loc_77C8				; not set, skip
 				EOR	#1					; XOR bit0
 				STA	rnd1
@@ -3407,36 +3408,36 @@ loc_77CE:									; return low byte
 ; End of function update_prng
 
 ; ---------------------------------------------------------------------------
-byte_77D1:			.BYTE 2
-; A=direction, Y=?
+tap:				.BYTE 2
+; A=direction, Y=offset	to shot	timer
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-some_thrust_calc:
+get_thrust_cos:
 				CLC
-				ADC	#$40 ; '@'
-; End of function some_thrust_calc
+				ADC	#64					; (0-127)=up, (128-255)=down
+; End of function get_thrust_cos
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-sub_77D5:
-				BPL	sub_77DF
-				AND	#$7F ; ''
+get_thrust_sin:
+				BPL	sub_77DF				; up? go
+				AND	#$7F ; ''                              ; mask off up/down
 				JSR	sub_77DF
 				JMP	negate_A
-; End of function sub_77D5
+; End of function get_thrust_sin
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
 sub_77DF:
-				CMP	#$41 ; 'A'
-				BCC	loc_77E7
-				EOR	#$7F ; ''
+				CMP	#65					; left/right?
+				BCC	loc_77E7				; right, go
+				EOR	#$7F ; ''                              ; toggle up/down
 				ADC	#0
 
 loc_77E7:
@@ -3513,7 +3514,7 @@ loc_7828:									; get message byte
 
 loc_7849:
 				DEY
-				JMP	update_avg_curr_addr
+				JMP	update_dvg_curr_addr
 ; End of function PrintPackedMsg
 
 
@@ -3545,27 +3546,27 @@ loc_785B:									; numeric?
 loc_7861:									; X = chr*2 (chr fn offset)
 				TAX
 				LDA	DVGROM+$6D2,X				; chr fn msb
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
 				LDA	DVGROM+$6D3,X				; chr fn lsb
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
 				LDX	#0
 				RTS
 ; End of function add_chr_fn
 
 ; ---------------------------------------------------------------------------
-msgCoords:			.BYTE $64, $B6					; "HIGH	SCORES"
-				.BYTE $64, $B6					; "PLAYER"
-				.BYTE $C, $AA					; "YOUR	SCORE...TEN BEST"
-				.BYTE $C, $A2					; "PLEASE...INITIALS"
-				.BYTE $C, $9A					; "PUSH	ROTATE...LETTER"
-				.BYTE $C, $92					; "PUSH	HYPERSPACE...CORRECT"
-				.BYTE $64, $C6					; "PUSH	START"
-				.BYTE $64, $9D					; "GAME	OVER"
-				.BYTE $50, $39					; "1 COIN 2 PLAYS"
-				.BYTE $50, $39					; "1 COIN 1 PLAY"
-				.BYTE $50, $39					; "2 COINS 1 PLAY"
+msgCoords:			.BYTE 100, 182					; "HIGH	SCORES"
+				.BYTE 100, 182					; "PLAYER"
+				.BYTE 12, 170					; "YOUR	SCORE...TEN BEST"
+				.BYTE 12, 162					; "PLEASE...INITIALS"
+				.BYTE 12, 154					; "PUSH	ROTATE...LETTER"
+				.BYTE 12, 146					; "PUSH	HYPERSPACE...CORRECT"
+				.BYTE 100, 198					; "PUSH	START"
+				.BYTE 100, 157					; "GAME	OVER"
+				.BYTE 80, 57					; "1 COIN 2 PLAYS"
+				.BYTE 80, 57					; "1 COIN 1 PLAY"
+				.BYTE 80, 57					; "2 COINS 1 PLAY"
 ; Offset into Vector ROM for message tables
 msgTablePtrs:			.WORD $571E					; English
 				.WORD $788F					; German
@@ -3853,12 +3854,12 @@ loc_7BB7:									; sound	(bonus life)
 halt_dvg:
 				LDA	#$B0 ; '∞'
 				LDY	#0
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
-				STA	(2),Y					; store	in avg ram
-				BNE	update_avg_curr_addr
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
+				BNE	update_dvg_curr_addr
 
-loc_7BCB:
+display_space_digit_A:
 				BCC	display_digit_A
 				AND	#$F					; numeric only
 				BEQ	loc_7BD6				; space, skip
@@ -3880,11 +3881,11 @@ loc_7BD6:
 				LDY	#0
 				TAX
 				LDA	DVGROM+$6D4,X				; chr fn msb
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				LDA	DVGROM+$6D5,X				; chr fn lsb
 				INY
-				STA	(2),Y					; store	in avg ram
-				JSR	update_avg_curr_addr
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
+				JSR	update_dvg_curr_addr
 				PLP
 				RTS
 ; End of function display_digit_A
@@ -3897,13 +3898,13 @@ loc_7BD6:
 
 write_JMP_JSR_cmd:
 				LDY	#1
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				DEY
 				TXA
 				ROR	A					; adjust address
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
-				BNE	update_avg_curr_addr
+				BNE	update_dvg_curr_addr
 ; END OF FUNCTION CHUNK	FOR write_JSR_cmd
 ; A:X =	address
 
@@ -3950,27 +3951,27 @@ write_CURx4_cmd:
 write_CUR_cmd:
 				LDA	2,X					; @$6 =	Y*4 (lsb)
 				LDY	#0
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				LDA	3,X					; @$7 =	Y*4 (msb)
 				AND	#$F					; clear	command	nibble
 				ORA	#$A0 ; '†'                              ; CUR command
 				INY
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				LDA	0,X					; @$4 =	X*4 (lsb)
 				INY
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				LDA	1,X					; @$5 =	X*4 (msb)
 				AND	#$F					; clear	scale nibble
 				ORA	globalScale				; global scale
 				INY
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 ; End of function write_CUR_cmd
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-update_avg_curr_addr:
+update_dvg_curr_addr:
 				TYA						; #bytes this operation
 				SEC
 				ADC	dvg_curr_addr_lsb
@@ -3980,7 +3981,7 @@ update_avg_curr_addr:
 
 locret_7C43:
 				RTS
-; End of function update_avg_curr_addr
+; End of function update_dvg_curr_addr
 
 ; ---------------------------------------------------------------------------
 				.BYTE $A9 ; ©
@@ -3992,7 +3993,7 @@ locret_7C43:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-sub_7C49:
+from_exploding_ship:
 				LDA	byte_5
 				CMP	#$80 ; 'Ä'
 				BCC	loc_7C60
@@ -4077,31 +4078,31 @@ loc_7CAB:
 				STA	byte_8
 				LDY	#0
 				LDA	byte_6
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				LDA	byte_8
 				AND	#$F4 ; 'Ù'
 				ORA	byte_7
 				INY
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				LDA	byte_4
 				INY
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				LDA	byte_8
 				AND	#2
 				ASL	A
 				ORA	byte_1
 				ORA	byte_5
 				INY
-				STA	(2),Y					; store	in avg ram
-				JMP	update_avg_curr_addr
-; End of function sub_7C49
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
+				JMP	update_dvg_curr_addr
+; End of function from_exploding_ship
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
 set_scale_A_bright_0:
-				LDX	#0					; Y=0
+				LDX	#0					; brightness=0
 ; End of function set_scale_A_bright_0
 
 
@@ -4110,17 +4111,17 @@ set_scale_A_bright_0:
 
 set_scale_A_bright_X:
 				LDY	#1
-				STA	(2),Y					; store	(SSSS -mYY)=A in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	(SSSS -mYY)=A in avg ram
 				DEY
 				TYA
-				STA	(2),Y					; store	(YYYY YYYY)=0 in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	(YYYY YYYY)=0 in avg ram
 				INY
 				INY
-				STA	(2),Y					; store	(XXXX XXXX)=0 in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	(XXXX XXXX)=0 in avg ram
 				INY
 				TXA
-				STA	(2),Y					; store	(BBBB -mXX)=X in avg ram
-				JMP	update_avg_curr_addr
+				STA	(dvg_curr_addr_lsb),Y			; store	(BBBB -mXX)=X in avg ram
+				JMP	update_dvg_curr_addr
 ; End of function set_scale_A_bright_X
 
 ; ---------------------------------------------------------------------------
@@ -4174,11 +4175,11 @@ loc_7CFA:									; Count	down from 256
 
 write_AX_to_avgram:
 				LDY	#0
-				STA	(2),Y					; store	in avg ram
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
 				TXA
-				STA	(2),Y					; store	in avg ram
-				JMP	update_avg_curr_addr
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
+				JMP	update_dvg_curr_addr
 ; End of function write_AX_to_avgram
 
 ; ---------------------------------------------------------------------------
@@ -4413,82 +4414,53 @@ loc_7E82:
 
 loc_7EA8:
 				LDY	loc_7EB9+2,X
-				LDA	#$B0 ; '∞'
-				STA	(2),Y					; store	in avg ram
+				LDA	#$B0 ; '∞'                              ; halt
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				DEY
 				DEY
 
 loc_7EB1:
-				LDA	unk_7EC0,Y
-				STA	(2),Y					; store	in avg ram
+				LDA	byte_7EC0,Y
+				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				DEY
 				BPL	loc_7EB1
 
 loc_7EB9:
 				JMP	loc_7F9D
 ; ---------------------------------------------------------------------------
-				.BYTE $33 ; 3
-				.BYTE $1D
-				.BYTE $17
-				.BYTE  $D
-unk_7EC0:			.BYTE $80 ; Ä
-				.BYTE $A0 ; †
-				.BYTE	0
-				.BYTE	0
-				.BYTE	0
-				.BYTE $70 ; p
-				.BYTE	0
-				.BYTE	0
-				.BYTE $FF
-				.BYTE $92 ; í
-				.BYTE $FF
-				.BYTE $73 ; s
-				.BYTE $D0 ; –
-				.BYTE $A1 ; °
-				.BYTE $30 ; 0
-				.BYTE	2
-				.BYTE	0
-				.BYTE $70 ; p
-				.BYTE	0
-				.BYTE	0
-				.BYTE $7F ; 
-				.BYTE $FB ; ˚
-				.BYTE  $D
-				.BYTE $E0 ; ‡
-				.BYTE	0
-				.BYTE $B0 ; ∞
-				.BYTE $7E ; ~
-				.BYTE $FA ; ˙
-				.BYTE $11
-				.BYTE $C0 ; ¿
-				.BYTE $78 ; x
-				.BYTE $FE ; ˛
-				.BYTE	0
-				.BYTE $B0 ; ∞
-				.BYTE $13
-				.BYTE $C0 ; ¿
-				.BYTE	0
-				.BYTE $D0 ; –
-				.BYTE $15
-				.BYTE $C0 ; ¿
-				.BYTE	0
-				.BYTE $D0 ; –
-				.BYTE $17
-				.BYTE $C0 ; ¿
-				.BYTE	0
-				.BYTE $D0 ; –
-				.BYTE $7A ; z
-				.BYTE $F8 ; ¯
-				.BYTE	0
-				.BYTE $D0 ; –
+				.BYTE $33, $1D,	$17, $D
+; entry	1
+byte_7EC0:			.BYTE $80, $A0,	0, 0				; CUR
+				.BYTE 0, $70, 0, 0				; VEC scale=07
+				.BYTE $FF, $92,	$FF, $73			; VEC scale=09
+; entry	2
+				.BYTE $D0, $A1,	$30, 2				; CUR
+				.BYTE 0, $70, 0, 0				; VEC scale=07
+				.BYTE $7F, $FB					; SVEC
+; entry	3
+				.BYTE $D, $E0					; JMP
+				.BYTE 0, $B0					; HALT
+				.BYTE $7E, $FA					; SVEC
+; entry	4
+				.BYTE $11, $C0					; JSR
+				.BYTE $78, $FE					; SVEC
+				.BYTE 0, $B0					; HALT
+				.BYTE $13, $C0					; JSR
+				.BYTE 0, $D0					; RTS
+				.BYTE $15, $C0					; JSR
+				.BYTE 0, $D0					; RTS
+				.BYTE $17, $C0					; JSR
+				.BYTE 0, $D0					; RTS
+				.BYTE $7A, $F8					; SVEC
+				.BYTE 0, $D0					; RTS
 ; ---------------------------------------------------------------------------
 
 loc_7EF2:
 				LDA	#$50 ; 'P'
 				LDX	#0					; addr = 0x5000
 				JSR	write_JSR_cmd				; draw test pattern
-				LDA	#$69 ; 'i'
-				LDX	#$93 ; 'ì'
+				LDA	#105					; X
+				LDX	#147					; Y
 				JSR	write_CURx4_cmd
 				LDA	#$30 ; '0'
 				JSR	set_scale_A_bright_0
