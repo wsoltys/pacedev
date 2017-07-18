@@ -120,7 +120,7 @@ cur_2_shr:
 ; print A=chr at CUR (offset $C3$C2)
 print_chr:
 				IIGSMODE
-				asl														; word offset
+;				asl														; word offset
 				and			#$00FF
 				tax
 				ldy			chr_tbl,x
@@ -279,7 +279,7 @@ dvg_vec:
 				clc														; no halt
 				rts
 				
-; $A				
+; $0
 dvg_cur:
 				lda			(byte_B),y						; Y (lsb)
 				sta			$06
@@ -306,7 +306,13 @@ dvg_cur:
 				clc														; no halt
 				rts
 
-; $B
+; $1
+dvg_chr:
+        lda     (byte_B),y
+				jmp			jsr_print
+        rts
+        
+; $F
 dvg_halt:
 				lda			#2										; 2 bytes in instruction
 				jsr 		upd_ptr
@@ -474,22 +480,22 @@ dvg_svec:
 				rts
 
 dvg_jmp_tbl:
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
-				.word		dvg_vec-1
 				.word		dvg_cur-1
-				.word		dvg_halt-1
-				.word		dvg_jsr-1
+				.word		dvg_chr-1
 				.word		dvg_rts-1
-				.word		dvg_jmp-1
-				.word		dvg_svec-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_rts-1
+				.word		dvg_halt-1
 
 handle_dvg_opcode:
 				and			#$F0									; opcode in high nibble

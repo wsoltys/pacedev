@@ -100,3 +100,17 @@ SHRMEM				= $012290
 	xce
 	HINT_IIMODE
 .endmacro
+
+; tokenised display list commands
+OP_CUR              = $00
+OP_CHR              = $10
+OP_LIFE             = $20
+OP_COPYRIGHT        = $30
+OP_ASTEROID         = $40
+OP_SHIP             = $50
+OP_SAUCER           = $60
+OP_SHOT             = $70
+OP_SHRAPNEL         = $80
+OP_EXPLODING_SHIP   = $90
+OP_BRIGHTNESS       = $E0
+OP_HALT             = $F0

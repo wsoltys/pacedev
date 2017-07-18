@@ -3399,8 +3399,8 @@ display_bright_digit:
                                 CLC
                                 ADC     #1
                                 PHP
-.ifndef APPLE_IIGS                                
                                 ASL     A                                       ; x2
+.ifndef APPLE_IIGS                                
                                 TAY                                             ; word offset
                                 LDA     DVGROM+$6D4,Y                           ; chr fn
                                 ASL     A                                       ; low address * 2
@@ -3415,7 +3415,12 @@ display_bright_digit:
                                 STA     byte_9                                  ; flag to flip Y
                                 JSR     copy_vector_list_to_avgram
 .else
-  ; A = digit (char) code
+                                ldy     #0
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda     #OP_CHR
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
 .endif
                                 PLP
                                 RTS
@@ -3535,7 +3540,6 @@ loc_7813:                                                                       
                                 LDA     msgCoords,Y                             ; X
                                 LDX     msgCoords+1,Y                           ; Y
                                 JSR     write_CURx4_cmd
-                                rts                                             ; *** FIXME
                                 LDA     #$70 ; 'p'
                                 JSR     set_scale_A_bright_0
                                 LDY     #0
@@ -3599,11 +3603,13 @@ loc_7861:                                                                       
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
                                 INY
                                 LDA     DVGROM+$6D3,X                           ; chr fn lsb
+.else
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda     #OP_CHR
+.endif                                
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
                                 INY
-.else
-                                ; A = CHR*2
-.endif                                
                                 LDX     #0
                                 RTS
 ; End of function add_chr_fn
@@ -3905,7 +3911,11 @@ loc_7BB7:                                                                       
 
 
 halt_dvg:
+.ifndef APPLE_IIGS
                                 LDA     #$B0 ; '°'
+.else
+                                lda     #OP_HALT
+.endif
                                 LDY     #0
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
                                 INY
@@ -3930,19 +3940,20 @@ display_digit_A:
 
 loc_7BD6:
                                 PHP
-.ifndef APPLE_IIGS
                                 ASL     A                                       ; x2 (word offset)
                                 LDY     #0
+.ifndef APPLE_IIGS
                                 TAX
                                 LDA     DVGROM+$6D4,X                           ; chr fn msb
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
                                 LDA     DVGROM+$6D5,X                           ; chr fn lsb
+.else
+                                sta     (dvg_curr_addr_lsb),y
+                                lda     #OP_CHR
+.endif                                
                                 INY
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
-.else
-  ; A = chr code
-.endif                                
-;                                JSR     update_dvg_curr_addr                   ; *** FIXME
+                                JSR     update_dvg_curr_addr
                                 PLP
                                 RTS
 ; End of function display_digit_A
@@ -4011,7 +4022,11 @@ write_CUR_cmd:
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
                                 LDA     3,X                                     ; @$7 = Y*4 (msb)
                                 AND     #$F                                     ; clear command nibble
+.ifndef APPLE_IIGS                                
                                 ORA     #$A0 ; ' '                              ; CUR command
+.else
+                                ora     #OP_CUR
+.endif
                                 INY
                                 STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
                                 LDA     0,X                                     ; @$4 = X*4 (lsb)
