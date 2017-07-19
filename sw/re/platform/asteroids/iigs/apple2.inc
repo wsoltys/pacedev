@@ -33,6 +33,14 @@ PAGE2OFF 			= $C054
 PAGE2ON 			= $C055
 HIRESSOFF 		= $C056
 HIRESON 			= $C057
+PB0           = $C061
+PB1           = $C062
+PB2           = $C063
+PADDL0        = $C064
+PADDL1        = $C065
+PADDL2        = $C066
+PADDL3        = $C067
+PTRIG         = $C070
 
 ; extra IIGS stuff
 

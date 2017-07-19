@@ -587,9 +587,53 @@ render_loop:
 				sta			hyperspaceSwitch
 				sta			FireSwitch
 				sta			p1StartSwitch
+				sta     thrustSwitch
 				sta			rotateRightSwitch
 				sta			rotateLeftSwitch
-												
+	
+	; joystick
+	      lda     PTRIG
+	      ldy     #0
+	      nop
+	      nop
+:       lda     PADDL0
+        bpl     :+
+        iny
+        bne     :-
+        dey	      
+:       sty     $E0
+        cpy     #$40
+        bcs     :+
+        lda     #(1<<7)
+        sta     rotateLeftSwitch
+        bne     :++
+:       cpy     #$80
+	      bcs     :+
+	      sta     rotateRightSwitch
+:
+
+; supposed to wait until output is low or 4ms
+        lda     PB0
+        sta     $E2
+        bpl     :+
+        sta     FireSwitch
+
+        lda     PTRIG
+        ldy     #0
+        nop
+        nop
+:       lda     PADDL1
+        bpl     :+
+        iny
+        bne     :-
+        dey
+:       sty     $E1
+        cpy     #$40
+        bcs     :+
+        lda     #(1<<7)
+        sta     thrustSwitch
+:                        
+	      					
 				lda			KBD
 				bpl			kbd_exit							; no key, exit
 				; got a key
