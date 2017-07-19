@@ -7,7 +7,6 @@
 .export dvg_asteroid
 .export dvg_halt
 .export cur_2_shr
-.export print_chr
 .export apple_render_frame
 
 .import chr_tbl
@@ -126,43 +125,6 @@ cur_2_shr:
 				sta			$C3										; msb (address)
 				rts
 
-; print A=chr at CUR (offset $C3$C2)
-print_chr:
-				IIGSMODE
-;				asl														; word offset
-				and			#$00FF
-				tax
-				ldy			chr_tbl,x
-render_7x2:				
-				lda			#7										; 7 lines
-				sta			$C4
-				ldx			$C2										; SHR offset
-:				lda			0,y
-        beq     :+
-				ora			SHRMEM,x
-				sta			SHRMEM,x							; 1st half of line
-:				lda			2,y
-        beq     :+
-				ora			SHRMEM+2,x
-				sta			SHRMEM+2,x						; 2nd half of line
-:				iny
-				iny
-				iny
-				iny
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:---
-				; update CUR
-				inc			$C2
-				inc			$C2
-				inc			$C2
-;				inc			$C2										; not what Norbert does!?!
-				IIMODE
-				rts
-
 upd_ptr:
 				clc
 				adc			byte_B
@@ -207,8 +169,38 @@ dvg_cur:
 
 ; $1
 dvg_chr:
-        lda     (byte_B),y
-				jsr			print_chr
+        lda     (byte_B),y            ; chr x2
+				IIGSMODE
+				and			#$00FF
+				tax
+				ldy			chr_tbl,x
+render_7x2:				
+				lda			#7										; 7 lines
+				sta			$C4
+				ldx			$C2										; SHR offset
+:				lda			0,y
+        beq     :+
+				ora			SHRMEM,x
+				sta			SHRMEM,x							; 1st half of line
+:				lda			2,y
+        beq     :+
+				ora			SHRMEM+2,x
+				sta			SHRMEM+2,x						; 2nd half of line
+:				iny
+				iny
+				iny
+				iny
+				clc
+				txa
+				adc			#160									; ptr next line
+				tax
+				dec			$C4										; line counter
+				bne			:---
+				; update CUR
+				inc			$C2
+				inc			$C2
+				inc			$C2
+				IIMODE
 				OP_EXIT
 
 ; $2
@@ -222,9 +214,8 @@ dvg_life:
 				adc			#(160*4)
 				sta			$C2										; new SHR offset
 :				ldy			#extra_ship
-				jsr			render_7x2
+				jmp     render_7x2
 				HINT_IIMODE
-				OP_EXIT
 
 ; $3
 dvg_copyright:
@@ -347,25 +338,23 @@ dvg_ship:
 				asl														; word offset
 				tax
 				ldy			ship_tbl,x
-				jsr			render_7x2
-				HINT_IIMODE			
-				OP_EXIT
+				jmp			render_7x2
+				HINT_IIMODE
 
 ; $6
 ; $00=
 dvg_saucer:
 				IIGSMODE
 				ldy			#large_ufo
-				jsr			render_16x4
+				jmp			render_16x4
 				HINT_IIMODE
-				OP_EXIT
 
 ; $7
 dvg_shot:
 				IIGSMODE
 				ldx			$C2										; SHR offset
 				lda			SHRMEM,x
-				ora			#$0100								; arbitrary pixel
+				ora			#$0F00								; arbitrary pixel
 				sta			SHRMEM,x
 				IIMODE
 				OP_EXIT
@@ -440,6 +429,111 @@ handle_dvg_opcode:
 				pha
 				rts
 
+erase_chr:
+erase_7x2:				
+				IIGSMODE
+				lda			#7										; 7 lines
+				sta			$C4
+				ldx			$C2										; SHR offset
+:				lda     #0
+				sta			SHRMEM,x							; 1st half of line
+				sta			SHRMEM+2,x						; 2nd half of line
+				clc
+				txa
+				adc			#160									; ptr next line
+				tax
+				dec			$C4										; line counter
+				bne			:-
+				; update CUR
+				inc			$C2
+				inc			$C2
+				inc			$C2
+				IIMODE
+				OP_EXIT
+
+erase_life:
+				jmp     erase_7x2
+				HINT_IIMODE
+
+erase_asteroid:
+erase_16x4:
+				IIGSMODE
+				lda			#16										; 16 lines
+				sta			$C4
+				ldx			$C2										; SHR offset
+:				lda			#0
+				sta			SHRMEM,x							; 1st qtr of line
+				sta			SHRMEM+2,x							; 2nd qtr of line
+				sta			SHRMEM+4,x							; 3rd qtr of line
+				sta			SHRMEM+6,x							; 4th qtr of line
+				clc
+				txa
+				adc			#160									; ptr next line
+				tax
+				dec			$C4										; line counter
+				bne			:-
+				; update CUR
+				lda			$C2
+				clc
+				adc			#8
+				sta			$C2
+				IIMODE
+				OP_EXIT
+
+erase_ship:
+        jmp     erase_7x2
+
+erase_saucer:
+        jmp     erase_16x4
+
+erase_shot:
+				IIGSMODE
+				ldx			$C2										; SHR offset
+				lda			#0
+				sta			SHRMEM,x
+				IIMODE
+				OP_EXIT
+
+erase_shrapnel:
+				jmp     erase_16x4
+
+erase_explodingship:
+        OP_EXIT
+                        
+erase_invalid:
+        OP_EXIT
+        
+erase_jmp_tbl:
+				.word		dvg_cur-1
+				.word		erase_chr-1
+				.word		erase_life-1
+				.word		erase_invalid-1
+				.word		erase_asteroid-1
+				.word		erase_ship-1
+				.word		erase_saucer-1
+				.word		erase_shot-1
+				.word		erase_shrapnel-1
+				.word		erase_explodingship-1
+				.word		erase_invalid-1
+				.word		erase_invalid-1
+				.word		erase_invalid-1
+				.word		erase_invalid-1
+				.word		dvg_scalebrightness-1
+				.word		dvg_halt-1
+				rts
+
+handle_erase_opcode:
+				and			#$F0									; opcode in high nibble
+				lsr
+				lsr
+				lsr														; offset in jump table
+				tax
+				lda			erase_jmp_tbl+1,x
+				pha
+				lda			erase_jmp_tbl,x
+				pha
+        rts
+        
 apple_render_frame:
 ;				cls
 				IIGSMODE
@@ -462,7 +556,20 @@ apple_render_frame:
 				bpl			:-										; 2 cycles = 11 cycles/word (faster)
 	.endif	
 .endif ; BUILD_OPT_RENDER_CLS			
+;
 				IIMODE
+				lda			#2
+				sta			byte_B
+				lda			dvg_curr_addr_msb
+				eor     #$04
+				sta			byte_C
+erase_loop:				
+				ldy			#1										; 2nd byte has the opcode
+				lda			(byte_B),y						; opcode (high nibble)
+				dey														; reset to 1st byte
+				jsr			handle_erase_opcode		; handle it
+				bcc			erase_loop
+;
 				lda			#2
 				sta			byte_B
 				lda			dvg_curr_addr_msb
@@ -473,29 +580,6 @@ render_loop:
 				dey														; reset to 1st byte
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
-
-.if 0
-				; now we (always) render the ship
-				IIGSMODE
-				lda			direction							; 0-256
-				xba														; high byte for more resolution
-				and			#$ff00
-				lsr
-				lsr
-				lsr
-				lsr														; dir/16
-				sta			$D0
-				lsr														; dir/8
-				clc
-				adc			$D0										; dir/16+dir/8 = dir/24
-				xba														; back to low byte
-				and			#$00ff								; mask off high-res bits
-				asl														; word offset
-				tax
-				ldy			ship_tbl,x
-				jsr			render_7x2
-				HINT_IIMODE			
-.endif				
 
 				; fudge some inputs now
 				
