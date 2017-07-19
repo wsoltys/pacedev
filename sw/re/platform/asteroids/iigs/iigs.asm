@@ -21,11 +21,14 @@
 
 ; build options
 ; comment-out to disable (not =0)
-BUILD_OPT_RENDER_CLS = 1
+;BUILD_OPT_RENDER_CLS = 1
 
 apple_reset:
 				.A8
 				.I8
+				lda     SPEED
+				ora     #(1<<7)
+				sta     SPEED
 				lda			#$02									; 1 coin, 1 credit
 				sta			coinage								; dipswitch
 				lda			#(1<<0)								; 3 lives
@@ -46,13 +49,18 @@ apple_start:
 				sta			SHADOW
 				; init the palette
 				IIGSMODE
-				lda			#$000									; black
-				sta			$019e00								; palette=0, colour=0
-				lda			#$fff									; white
-				sta			$019e02								; palette=0, colour=1
+				ldx     #0
+				lda			#$000									; R=G=B=0 (black)
+:				sta			$019e00,x							; palette=0
+        clc
+        adc     #$111
+				inx
+				inx
+				cpx     #(16*2)
+				bne     :-
 				; init SCBs
 				ldx			#200-1								; 200 lines
-				lda			#$0000
+				lda			#$0000                ; palette=0
 :				sta			$019D00,x
 				dex
 				dex
@@ -130,12 +138,14 @@ render_7x2:
 				sta			$C4
 				ldx			$C2										; SHR offset
 :				lda			0,y
+        beq     :+
 				ora			SHRMEM,x
 				sta			SHRMEM,x							; 1st half of line
-				lda			2,y
+:				lda			2,y
+        beq     :+
 				ora			SHRMEM+2,x
 				sta			SHRMEM+2,x						; 2nd half of line
-				iny
+:				iny
 				iny
 				iny
 				iny
@@ -144,7 +154,7 @@ render_7x2:
 				adc			#160									; ptr next line
 				tax
 				dec			$C4										; line counter
-				bne			:-
+				bne			:---
 				; update CUR
 				inc			$C2
 				inc			$C2
@@ -284,18 +294,22 @@ render_16x4:
 				sta			$C4
 				ldx			$C2										; SHR offset
 :				lda			0,y
+        ;beq     :+
 				ora			SHRMEM,x
 				sta			SHRMEM,x							; 1st qtr of line
-				lda			2,y
+:				lda			2,y
+        ;beq     :+
 				ora			SHRMEM+2,x
 				sta			SHRMEM+2,x							; 2nd qtr of line
-				lda			4,y
+:				lda			4,y
+        ;beq     :+
 				ora			SHRMEM+4,x
 				sta			SHRMEM+4,x							; 3rd qtr of line
-				lda			6,y
+:				lda			6,y
+        ;beq     :+
 				ora			SHRMEM+6,x
 				sta			SHRMEM+6,x							; 4th qtr of line
-				tya
+:				tya
 				clc
 				adc			#8
 				tay
@@ -304,7 +318,7 @@ render_16x4:
 				adc			#160									; ptr next line
 				tax
 				dec			$C4										; line counter
-				bne			:-
+				bne			:-----
 				; update CUR
 				lda			$C2
 				clc

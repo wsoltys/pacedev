@@ -24,6 +24,7 @@ _80COL 				= $C01F				; 1=80-column, 0=40-column
 
 NEWVIDEO			= $C029				; b7=1 enable SHR, b6=1 linear, b5=1 mono DHR
 SHADOW				= $C035				; b3=0 enable SHR
+SPEED         = $C036
 TEXTOFF 			= $C050
 TEXTON 				= $C051
 MIXEDOFF 			= $C052
