@@ -2818,6 +2818,7 @@ locret_7464:
 
 display_exploding_ship:
                                 LDA     ship_Sts
+.ifndef APPLE_IIGS                                
                                 CMP     #$A2 ; '¢'                              ; 2 frames past exploding?
                                 BCS     loc_748E
                                 LDX     #10                                     ; 10 entries to parse
@@ -2918,6 +2919,14 @@ loc_74F1:
                                 DEX
                                 DEX
                                 BPL     loc_7499
+.else
+                                ldy     #0
+                                sta     (dvg_curr_addr_lsb),y                   ; ship_Sts
+                                iny
+                                lda     #OP_EXPLODINGSHIP
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
+.endif                                
                                 RTS
 ; End of function display_exploding_ship
 

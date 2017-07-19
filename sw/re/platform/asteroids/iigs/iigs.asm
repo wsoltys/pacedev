@@ -8,6 +8,8 @@
 .export dvg_halt
 .export cur_2_shr
 .export apple_render_frame
+.export read_joystick
+.export read_btns
 
 .import chr_tbl
 .import ship_tbl
@@ -26,7 +28,7 @@ apple_reset:
 				.A8
 				.I8
 				lda     SPEED
-				ora     #(1<<7)
+				ora     #(1<<7)               ; turbo
 				sta     SPEED
 				lda			#$02									; 1 coin, 1 credit
 				sta			coinage								; dipswitch
@@ -44,8 +46,8 @@ apple_start:
 				sta			NEWVIDEO
 				; enable shadowing
 				lda			SHADOW
-				ora			#!(1<<3)+256					; enable for SHR (only)
-				sta			SHADOW
+				ora			#~(1<<3)+256					; enable for SHR (only)
+;				sta			SHADOW
 				; init the palette
 				IIGSMODE
 				ldx     #0
@@ -376,9 +378,8 @@ dvg_shrapnel:
 				asl														; word offset into table
 				tax
 				ldy			shrapnel_tbl,x
-				jsr			render_16x4
+				jmp			render_16x4
 				HINT_IIMODE
-				OP_EXIT
         
 ; $9
 dvg_explodingship:
@@ -452,7 +453,16 @@ erase_7x2:
 				OP_EXIT
 
 erase_life:
-				jmp     erase_7x2
+				IIGSMODE
+				; offset Y because it overwrites score
+				lda			$C2										; SHR offset
+				cmp			#($1360+160)
+				bcs			:+
+				clc
+				adc			#(160*4)
+				sta			$C2										; new SHR offset
+				ldy			#extra_ship
+:				jmp     erase_7x2
 				HINT_IIMODE
 
 erase_asteroid:
@@ -591,48 +601,55 @@ render_loop:
 				sta			rotateRightSwitch
 				sta			rotateLeftSwitch
 	
-	; joystick
+				lda     SPEED
+				and     #~(1<<7)+256            ; slow
+				sta     SPEED
+
+read_joystick:	
+	      lda     #0
+	      sta     $e0
+	      sta     $e1
 	      lda     PTRIG
-	      ldy     #0
-	      nop
-	      nop
-:       lda     PADDL0
-        bpl     :+
-        iny
-        bne     :-
-        dey	      
-:       sty     $E0
-        cpy     #$40
-        bcs     :+
+:       ldx     #1
+:       lda     PADDL0,x
+        bpl     :++
+        inc     $e0,x
+:       dex
+        bpl     :--
+        lda     PADDL0
+        ora     PADDL1
+        bpl     :++
+        lda     $e0
+        ora     $e1
+        bpl     :---
+:       nop
+        bpl     :--
+:       
         lda     #(1<<7)
+        ldy     $e0                     ; X
+chk_left:
+        cpy     #$12                    ; left?
+        bcs     chk_right               ; no, skip
         sta     rotateLeftSwitch
-        bne     :++
-:       cpy     #$80
-	      bcs     :+
+        bne     chk_up
+chk_right:
+        cpy     #$30                    ; right?
+	      bcc     chk_up                  ; no, skip
 	      sta     rotateRightSwitch
+chk_up:
+        ldy     $e1                     ; Y
+        cpy     #$12                    ; up?
+        bcs     read_btns               ; no, skip
+        sta     thrustSwitch
+read_btns:        
+        lda     PB0
+        bpl     :+                      ; no, skip
+        sta     FireSwitch
 :
 
-; supposed to wait until output is low or 4ms
-        lda     PB0
-        sta     $E2
-        bpl     :+
-        sta     FireSwitch
-
-        lda     PTRIG
-        ldy     #0
-        nop
-        nop
-:       lda     PADDL1
-        bpl     :+
-        iny
-        bne     :-
-        dey
-:       sty     $E1
-        cpy     #$40
-        bcs     :+
-        lda     #(1<<7)
-        sta     thrustSwitch
-:                        
+				lda     SPEED
+				ora     #(1<<7)               ; fast
+				sta     SPEED
 	      					
 				lda			KBD
 				bpl			kbd_exit							; no key, exit
@@ -648,21 +665,11 @@ render_loop:
 				bne			:+
 				inc			CurrNumCredits
 				bne			kbd_exit
-:				cmp			#$20									; <space>?
-				bne			:+
-				lda			#(1<<7)								; fire bit
-				sta			FireSwitch
-				bne			kbd_exit
-:				cmp			#$2E									; '.'				
-				bne			:+
-				lda			#(1<<7)
-				sta			rotateRightSwitch
-				bne			kbd_exit
-:				cmp			#$2C									; ','
-				bne			:+
-				lda			#(1<<7)
-				sta			rotateLeftSwitch
-				bne			kbd_exit
+:       cmp     #$20                  ; <SPACE>
+        bne     :+
+        lda     #(1<<7)
+        sta     hyperspaceSwitch
+        bne     kbd_exit				
 :				cmp			#$46									; 'F'?
 				bne			:++
 :				lda			KBD
