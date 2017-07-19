@@ -2570,7 +2570,12 @@ loc_733B:
                                 LDA     DVGROM+$F8,Y                            ; shrapnel table address LSB
                                 LDX     DVGROM+$F9,Y                            ; shrapnel table address MSB
 .else
-  ; render shrapnel
+                                ldy     #0
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda     #OP_SHRAPNEL
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
 .endif                                
                                 BNE     loc_7370                                ; always
 
@@ -2620,7 +2625,12 @@ display_saucer:                                                                 
                                 LDA     DVGROM+$250
                                 LDX     DVGROM+$251                             ; saucer table address MSB
 .else
-  ; render saucer
+                                ldy     #0
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda     #OP_SAUCER
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
 .endif                                
                                 BNE     loc_7370                                ; always
 
@@ -2630,7 +2640,12 @@ display_shot:
                                 LDX     #$F0 ; 'ð'
                                 JSR     set_scale_A_bright_X
 .else
-  ; render shot
+                                ldy     #0
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda     #OP_SHOT
+                                sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
 .endif                                
                                 LDX     byte_D                                  ; restore object offset
                                 LDA     fastTimer

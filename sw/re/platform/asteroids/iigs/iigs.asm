@@ -6,8 +6,6 @@
 .export dvg_copyright
 .export dvg_asteroid
 .export dvg_halt
-.export chk_shrapnel
-.export chk_extra_ship
 .export cur_2_shr
 .export print_chr
 .export apple_render_frame
@@ -163,29 +161,13 @@ upd_ptr:
 				inc			byte_C
 :				rts				
 
-; $0-$9
-dvg_vec:
-				iny
-				lda			(byte_B),y
-				cmp			#$70
-				bne			:+
-				iny
-				iny
-				lda			(byte_B),y
-				cmp			#$F0
-				bne			:+
-				; shot!?!
-				IIGSMODE
-				ldx			$C2										; SHR offset
-				lda			SHRMEM,x
-				ora			#$0100								; arbitrary pixel
-				sta			SHRMEM,x
-				IIMODE
-:				lda			#4										; 4 bytes in instruction
+.macro OP_EXIT
+				lda			#2										; 2 bytes in instruction
 				jsr 		upd_ptr
 				clc														; no halt
 				rts
-				
+.endmacro
+
 ; $0
 dvg_cur:
 				lda			(byte_B),y						; Y (lsb)
@@ -216,7 +198,8 @@ dvg_cur:
 ; $1
 dvg_chr:
         lda     (byte_B),y
-				jmp			jsr_print
+				jsr			print_chr
+				OP_EXIT
 
 ; $2
 dvg_life:
@@ -231,7 +214,7 @@ dvg_life:
 :				ldy			#extra_ship
 				jsr			render_7x2
 				HINT_IIMODE
-				jmp			jsr_exit
+				OP_EXIT
 
 ; $3
 dvg_copyright:
@@ -273,7 +256,7 @@ dvg_copyright:
 				dec			$C4										; done all lines?
 				bne			:--										; no, loop
 				IIMODE
-				jmp			jsr_exit
+				OP_EXIT
 
 ; $4
 ; $00(2:1)=shape(0-3)
@@ -328,7 +311,7 @@ render_16x4:
 				adc			#8
 				sta			$C2
 				IIMODE
-				jmp			jsr_exit
+				OP_EXIT
                         
 ; $5
 ; $00=dir(0-255)
@@ -352,65 +335,29 @@ dvg_ship:
 				ldy			ship_tbl,x
 				jsr			render_7x2
 				HINT_IIMODE			
-        jmp     jsr_exit
-        
-; $F
-dvg_halt:
-				lda			#2										; 2 bytes in instruction
-				jsr 		upd_ptr
-				sec														; flag halt
-				rts
+				OP_EXIT
 
-; $C
-dvg_jsr:
-chk_char:
-				; try matching against character routine
-				ldx			#$00									; char index (x2)
-cl:			lda			$56D4,x								; $5000-$800+$ED4
-				cmp			(byte_B),y
-				bne			no_lo
-				iny
-				lda			$56D5,x
-				cmp			(byte_B),y
-				bne			no_hi
-				; found a character
-				txa
-				lsr														; char index
-				jmp			jsr_print
-no_hi:	dey
-no_lo:	inx
-				inx
-				cpx			#(37*2)
-				bne			cl
-chk_asteroid:				
-				; check for asteroid
-				ldx			#$00
-al:			lda			$51DE,x								; $5000-$800+$9DE
-				cmp			(byte_B),y
-				bne			:++
-				iny
-				lda			$51DF,x
-				cmp			(byte_B),y
-				bne			:+
-				; found an asteroid
-;				jsr			print_asteroid
-				jmp			jsr_exit
-:				dey
-:				inx
-				inx
-				cpx			#(4*2)
-				bne			al
-chk_shrapnel:
-				; check for shrapnel
-				ldx			#$00
-sl:			lda			$50F8,x								; $5000-$800+$8F8
-				cmp			(byte_B),y
-				bne			:+++
-				iny
-				lda			$50F9,x
-				cmp			(byte_B),y
-				bne			:++
-				; found shrapnel
+; $6
+; $00=
+dvg_saucer:
+				IIGSMODE
+				ldy			#large_ufo
+				jsr			render_16x4
+				HINT_IIMODE
+				OP_EXIT
+
+; $7
+dvg_shot:
+				IIGSMODE
+				ldx			$C2										; SHR offset
+				lda			SHRMEM,x
+				ora			#$0100								; arbitrary pixel
+				sta			SHRMEM,x
+				IIMODE
+				OP_EXIT
+        
+; $8
+dvg_shrapnel:
 				; the original uses 6 global scale factors from $B-$0
 				; and 4 patterns in this sequence
 				; $B:2,6 $C:0,4,6 $D,$E,$F,$0:0,2,4,6
@@ -428,87 +375,25 @@ sl:			lda			$50F8,x								; $5000-$800+$8F8
 				ldy			shrapnel_tbl,x
 				jsr			render_16x4
 				HINT_IIMODE
-				jmp			jsr_exit
-:				dey
-:				inx
-				inx
-				cpx			#(4*2)
-				bne			sl
-chk_ufo:
-				; check for UFO
-				lda			#$29
-				cmp			(byte_B),y
-				bne			:++
-				iny
-				lda			#$C9
-				cmp			(byte_B),y
-				bne			:+
-				; found a UFO
-				IIGSMODE
-				ldy			#large_ufo
-				jsr			render_16x4
-				HINT_IIMODE
-				jmp			jsr_exit
-:				dey
-:
-chk_copyright:
-				; check for copyright message
-:				dey
-:
-chk_extra_ship:
-				; check for extra ships display
-				lda			#$6D
-				cmp			(byte_B),y
-				bne			:+++
-				iny
-				lda			#$CA
-				cmp			(byte_B),y
-				bne			:++
-				; found extra ship
-				IIGSMODE
-				; offset Y because it overwrites score
-				lda			$C2										; SHR offset
-				cmp			#($1360+160)
-				bcs			:+
-				clc
-				adc			#(160*4)
-				sta			$C2										; new SHR offset
-:				ldy			#extra_ship
-				jsr			render_7x2
-				HINT_IIMODE
-				jmp			jsr_exit
-:				dey
-:
-chk_null:
-				lda			#0
-				beq			jsr_exit							; (always)
-jsr_print:
-				jsr			print_chr
-jsr_exit:				
-				lda			#2										; 2 bytes in instruction
-				jsr 		upd_ptr
-				clc														; no halt
-				rts
+				OP_EXIT
+        
+; $9
+dvg_explodingship:
+				OP_EXIT
 
-; $D
-dvg_rts:
-				lda			#2										; 2 bytes in instruction
-				jsr 		upd_ptr
-				clc														; no halt
-				rts
+; $A-$D
+dvg_invalid:
+        OP_EXIT
 
 ; $E
-dvg_jmp:
-				lda			#2										; 2 bytes in instruction
-				jsr 		upd_ptr
-				clc														; no halt
-				rts
-
+dvg_scalebrightness:
+				OP_EXIT
+        
 ; $F
-dvg_svec:
+dvg_halt:
 				lda			#2										; 2 bytes in instruction
 				jsr 		upd_ptr
-				clc														; no halt
+				sec														; flag halt
 				rts
 
 dvg_jmp_tbl:
@@ -518,15 +403,15 @@ dvg_jmp_tbl:
 				.word		dvg_copyright-1
 				.word		dvg_asteroid-1
 				.word		dvg_ship-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
-				.word		dvg_rts-1
+				.word		dvg_saucer-1
+				.word		dvg_shot-1
+				.word		dvg_shrapnel-1
+				.word		dvg_explodingship-1
+				.word		dvg_invalid-1
+				.word		dvg_invalid-1
+				.word		dvg_invalid-1
+				.word		dvg_invalid-1
+				.word		dvg_scalebrightness-1
 				.word		dvg_halt-1
 
 handle_dvg_opcode:
