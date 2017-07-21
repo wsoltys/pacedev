@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
-int char_pics (void)
+int char_pics (int shift)
 {
 	FILE *fp = fopen ("char_pics.asm", "rt");
 	if (!fp)
@@ -38,8 +38,10 @@ int char_pics (void)
 				{
 					dword <<= 4;
 					if (*(p++) == '1')
-						dword |= 1;
+						dword |= 0x0f;
 				}
+				if (shift)
+					dword >>= 4;
 				printf ("    .BYTE  ");
 				printf ("$%02X, $%02X, $%02X, $%02X\n", 
 								(dword>>24)&0xff, (dword>>16)&0xff, (dword>>8)&0xff, dword&0xff);
@@ -52,7 +54,7 @@ int char_pics (void)
 	fclose (fp);
 }
 
-int pictures (void)
+int pictures (int shift)
 {
 	FILE *fp = fopen ("pictures.asm", "rt");
 	if (!fp)
@@ -72,7 +74,7 @@ int pictures (void)
 				p++;
 			sprintf (p, ":");
 			printf ("%s\n", buf);
-			unsigned long dword[2] = { 0, 0 };
+			unsigned long dword[3] = { 0, 0, 0 };
 			for (unsigned i=0; i<16; i++)
 			{
 				fgets (buf, 1024, fp);
@@ -88,14 +90,24 @@ int pictures (void)
 					{
 						dword[g] <<= 4;
 						if (*(p++) == '1')
-							dword[g] |= 1;
+							dword[g] |= 0x0f;
 					}
 				}
+				
+				if (shift)
+				{
+					dword[2] = dword[1] << 28;
+					dword[1] = (dword[0] << 28) | (dword[1] >> 4);
+					dword[0] >>= 4;
+				}
+					
 				printf ("    .BYTE  ");
 				printf ("$%02X, $%02X, $%02X, $%02X, ", 
 								(dword[0]>>24)&0xff, (dword[0]>>16)&0xff, (dword[0]>>8)&0xff, dword[0]&0xff);
-				printf ("$%02X, $%02X, $%02X, $%02X\n", 
+				printf ("$%02X, $%02X, $%02X, $%02X, ", 
 								(dword[1]>>24)&0xff, (dword[1]>>16)&0xff, (dword[1]>>8)&0xff, dword[1]&0xff);
+				printf ("$%02X, $%02X\n", 
+								(dword[2]>>24)&0xff, (dword[2]>>16)&0xff);
 			}
 		}
 		
@@ -107,7 +119,9 @@ int pictures (void)
 
 int main (int argc, char *argv[])
 {
-	char_pics ();
-	pictures ();
+	char_pics (0);
+	char_pics (1);
+	pictures (0);
+	pictures (1);
 }
 
