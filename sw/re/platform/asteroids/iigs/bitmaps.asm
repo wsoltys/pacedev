@@ -1,5 +1,6 @@
 .export chr_tbl
 .export ship_tbl
+.export shifted_ship_tbl
 .export extra_ship
 .export large_ufo
 .export small_ufo
@@ -529,6 +530,207 @@ ship_tbl:
 		.word ship_12, ship_13, ship_14,  ship_15
 		.word ship_16, ship_17, ship_18,  ship_19
 		.word ship_20, ship_21, ship_22,  ship_23
+
+shifted_ship_0:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $0F, $F0, $00, $00
+    .BYTE  $00, $FF, $FF, $00
+    .BYTE  $00, $F0, $00, $FF
+    .BYTE  $00, $FF, $FF, $00
+    .BYTE  $0F, $F0, $00, $00
+    .BYTE  $00, $00, $00, $00
+shifted_ship_1:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $0F, $FF, $F0, $00
+    .BYTE  $00, $F0, $0F, $FF
+    .BYTE  $00, $F0, $0F, $F0
+    .BYTE  $00, $FF, $F0, $00
+    .BYTE  $00, $F0, $00, $00
+    .BYTE  $00, $00, $00, $00
+shifted_ship_2:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $FF, $FF
+    .BYTE  $0F, $FF, $00, $F0
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $0F, $00, $00
+    .BYTE  $00, $00, $00, $00
+shifted_ship_3:
+    .BYTE  $00, $00, $00, $FF
+    .BYTE  $00, $00, $FF, $F0
+    .BYTE  $00, $FF, $00, $F0
+    .BYTE  $0F, $FF, $0F, $00
+    .BYTE  $00, $00, $FF, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $00, $F0, $00
+shifted_ship_4:
+    .BYTE  $00, $00, $00, $F0
+    .BYTE  $00, $00, $0F, $F0
+    .BYTE  $00, $00, $F0, $F0
+    .BYTE  $00, $0F, $FF, $00
+    .BYTE  $00, $F0, $0F, $00
+    .BYTE  $00, $00, $0F, $00
+    .BYTE  $00, $00, $0F, $00
+shifted_ship_5:
+    .BYTE  $00, $00, $0F, $00
+    .BYTE  $00, $00, $FF, $00
+    .BYTE  $00, $00, $FF, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $0F, $00, $F0
+    .BYTE  $00, $FF, $FF, $F0
+    .BYTE  $00, $00, $00, $F0
+shifted_ship_6:
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $FF, $FF, $F0
+    .BYTE  $00, $F0, $00, $F0
+shifted_ship_7:
+    .BYTE  $00, $0F, $00, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $F0, $0F, $00
+    .BYTE  $00, $F0, $0F, $00
+    .BYTE  $00, $FF, $FF, $F0
+    .BYTE  $00, $F0, $00, $00
+shifted_ship_8:
+    .BYTE  $00, $F0, $00, $00
+    .BYTE  $00, $FF, $00, $00
+    .BYTE  $00, $F0, $F0, $00
+    .BYTE  $00, $F0, $0F, $00
+    .BYTE  $00, $0F, $F0, $F0
+    .BYTE  $00, $0F, $00, $00
+    .BYTE  $00, $0F, $00, $00
+shifted_ship_9:
+    .BYTE  $0F, $F0, $00, $00
+    .BYTE  $0F, $0F, $F0, $00
+    .BYTE  $00, $F0, $0F, $F0
+    .BYTE  $00, $F0, $0F, $FF
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $00, $F0, $00
+shifted_ship_10:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $0F, $FF, $F0, $00
+    .BYTE  $00, $F0, $0F, $FF
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $00, $0F, $00
+    .BYTE  $00, $00, $00, $00
+shifted_ship_11:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $FF, $FF
+    .BYTE  $0F, $FF, $00, $F0
+    .BYTE  $00, $FF, $00, $F0
+    .BYTE  $00, $00, $FF, $F0
+    .BYTE  $00, $00, $00, $F0
+    .BYTE  $00, $00, $00, $00
+shifted_ship_12:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $FF
+    .BYTE  $00, $0F, $FF, $F0
+    .BYTE  $0F, $F0, $00, $F0
+    .BYTE  $00, $0F, $FF, $F0
+    .BYTE  $00, $00, $00, $FF
+    .BYTE  $00, $00, $00, $00
+shifted_ship_13:
+    .BYTE  $00, $00, $00, $F0
+    .BYTE  $00, $00, $FF, $F0
+    .BYTE  $00, $FF, $00, $F0
+    .BYTE  $0F, $FF, $F0, $F0
+    .BYTE  $00, $00, $0F, $FF
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+shifted_ship_14:
+    .BYTE  $00, $00, $0F, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $F0, $FF, $FF
+    .BYTE  $0F, $FF, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+shifted_ship_15:
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $F0, $0F, $FF
+    .BYTE  $00, $F0, $FF, $00
+    .BYTE  $0F, $FF, $00, $00
+    .BYTE  $0F, $00, $00, $00
+shifted_ship_16:
+    .BYTE  $00, $0F, $00, $00
+    .BYTE  $00, $0F, $00, $00
+    .BYTE  $00, $0F, $F0, $F0
+    .BYTE  $00, $F0, $0F, $00
+    .BYTE  $00, $F0, $F0, $00
+    .BYTE  $00, $FF, $00, $00
+    .BYTE  $00, $F0, $00, $00
+shifted_ship_17:
+    .BYTE  $00, $F0, $00, $00
+    .BYTE  $00, $FF, $FF, $F0
+    .BYTE  $00, $F0, $0F, $00
+    .BYTE  $00, $F0, $0F, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $0F, $F0, $00
+    .BYTE  $00, $0F, $00, $00
+shifted_ship_18:
+    .BYTE  $00, $F0, $00, $F0
+    .BYTE  $00, $FF, $FF, $F0
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $00, $F0, $00
+shifted_ship_19:
+    .BYTE  $00, $00, $00, $F0
+    .BYTE  $00, $FF, $FF, $F0
+    .BYTE  $00, $0F, $00, $F0
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $00, $FF, $00
+    .BYTE  $00, $00, $FF, $00
+    .BYTE  $00, $00, $0F, $00
+shifted_ship_20:
+    .BYTE  $00, $00, $0F, $00
+    .BYTE  $00, $00, $0F, $00
+    .BYTE  $00, $F0, $FF, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $00, $00, $F0, $F0
+    .BYTE  $00, $00, $0F, $F0
+    .BYTE  $00, $00, $00, $F0
+shifted_ship_21:
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $00, $FF, $00
+    .BYTE  $0F, $FF, $0F, $00
+    .BYTE  $00, $0F, $F0, $F0
+    .BYTE  $00, $00, $0F, $F0
+    .BYTE  $00, $00, $00, $0F
+shifted_ship_22:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $0F, $00, $00
+    .BYTE  $00, $00, $F0, $00
+    .BYTE  $00, $0F, $0F, $00
+    .BYTE  $0F, $FF, $F0, $F0
+    .BYTE  $00, $00, $0F, $FF
+    .BYTE  $00, $00, $00, $00
+shifted_ship_23:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $F0, $00, $00
+    .BYTE  $00, $FF, $F0, $00
+    .BYTE  $00, $F0, $0F, $F0
+    .BYTE  $00, $F0, $FF, $FF
+    .BYTE  $0F, $FF, $00, $00
+    .BYTE  $00, $00, $00, $00
+
+shifted_ship_tbl:
+		.word shifted_ship_0,   shifted_ship_1,  shifted_ship_2,  shifted_ship_3
+		.word shifted_ship_4,   shifted_ship_5,  shifted_ship_6,  shifted_ship_7
+		.word shifted_ship_8,   shifted_ship_9, shifted_ship_10,  shifted_ship_11
+		.word shifted_ship_12, shifted_ship_13, shifted_ship_14,  shifted_ship_15
+		.word shifted_ship_16, shifted_ship_17, shifted_ship_18,  shifted_ship_19
+		.word shifted_ship_20, shifted_ship_21, shifted_ship_22,  shifted_ship_23
 		
 extra_ship:
 		.byte	$00, $F0, $00, $00

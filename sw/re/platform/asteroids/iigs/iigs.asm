@@ -13,6 +13,7 @@
 
 .import chr_tbl
 .import ship_tbl
+.import shifted_ship_tbl
 .import extra_ship
 .import large_ufo
 .import small_ufo
@@ -340,7 +341,11 @@ dvg_ship:
 				asl														; word offset
 				tax
 				ldy			ship_tbl,x
-				jmp			render_7x2
+				lda			$09										; X (0-255)
+				bit			#1
+				beq			:+
+				ldy			shifted_ship_tbl,x
+:				jmp			render_7x2
 				HINT_IIMODE
 
 ; $6
@@ -355,8 +360,13 @@ dvg_saucer:
 dvg_shot:
 				IIGSMODE
 				ldx			$C2										; SHR offset
-				lda			SHRMEM,x
-				ora			#$0F00								; arbitrary pixel
+				lda			$09										; X (0-255)
+				bit			#1
+				bne			:+
+				lda			#$F000
+				bne			:++
+:				lda			#$0F00
+:				ora			SHRMEM,x
 				sta			SHRMEM,x
 				IIMODE
 				OP_EXIT
