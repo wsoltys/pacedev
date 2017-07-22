@@ -11,15 +11,18 @@
 .export read_joystick
 .export read_btns
 
+; bitmaps.asm
 .import chr_tbl
+.import copyright
+.import extra_ship
 .import ship_tbl
 .import shifted_ship_tbl
-.import extra_ship
-.import large_ufo
-.import small_ufo
-.import shrapnel_tbl
 .import asteroid_tbl
-.import copyright
+.import shifted_asteroid_tbl
+.import large_saucer
+.import small_saucer
+.import shrapnel_tbl
+.import shifted_shrapnel_tbl
 
 ; build options
 ; comment-out to disable (not =0)
@@ -303,9 +306,13 @@ render_16x4:
         ;beq     :+
 				ora			SHRMEM+6,x
 				sta			SHRMEM+6,x							; 4th qtr of line
+:				lda			8,y
+        ;beq     :+
+				ora			SHRMEM+8,x
+				sta			SHRMEM+8,x							; 5th qtr of line
 :				tya
 				clc
-				adc			#8
+				adc			#10
 				tay
 				clc
 				txa
@@ -352,7 +359,7 @@ dvg_ship:
 ; $00=
 dvg_saucer:
 				IIGSMODE
-				ldy			#large_ufo
+				ldy			#large_saucer
 				jmp			render_16x4
 				HINT_IIMODE
 
