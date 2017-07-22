@@ -319,7 +319,7 @@ render_16x4:
 				adc			#160									; ptr next line
 				tax
 				dec			$C4										; line counter
-				bne			:-----
+				bne			:------
 				; update CUR
 				lda			$C2
 				clc
