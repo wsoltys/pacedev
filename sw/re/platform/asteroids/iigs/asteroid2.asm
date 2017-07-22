@@ -2626,7 +2626,7 @@ display_saucer:                                                                 
                                 LDX     DVGROM+$251                             ; saucer table address MSB
 .else
                                 ldy     #0
-                                sta     (dvg_curr_addr_lsb),y
+                                sta     (dvg_curr_addr_lsb),y										; saucer status
                                 iny
                                 lda     #OP_SAUCER
                                 sta     (dvg_curr_addr_lsb),y

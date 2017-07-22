@@ -20,7 +20,9 @@
 .import asteroid_tbl
 .import shifted_asteroid_tbl
 .import large_saucer
+.import shifted_large_saucer
 .import small_saucer
+.import shifted_small_saucer
 .import shrapnel_tbl
 .import shifted_shrapnel_tbl
 
@@ -70,6 +72,9 @@ apple_start:
 				dex
 				dex
 				bpl			:-				
+				; init other display list
+				lda			#(OP_HALT<<8)|OP_HALT
+				sta			$4400
 				IIMODE
 				rts
 
@@ -286,6 +291,10 @@ dvg_asteroid:
 				inx
 				inx														; small
 :				ldy			asteroid_tbl,x
+				lda			$09										; X (0-255)
+				bit			#1
+				beq			render_16x4
+				ldy			shifted_asteroid_tbl,x
 render_16x4:
 				lda			#16										; 16 lines
 				sta			$C4
@@ -359,8 +368,14 @@ dvg_ship:
 ; $00=
 dvg_saucer:
 				IIGSMODE
+				lda			(byte_B),y						; status
+; fixme								
 				ldy			#large_saucer
-				jmp			render_16x4
+				lda			$09										; X (0-255)
+				bit			#1
+				beq			:+
+				ldy			#shifted_large_saucer
+:				jmp			render_16x4
 				HINT_IIMODE
 
 ; $7
@@ -395,7 +410,11 @@ dvg_shrapnel:
 				asl														; word offset into table
 				tax
 				ldy			shrapnel_tbl,x
-				jmp			render_16x4
+				lda			$09										; X (0-255)
+				bit			#1
+				beq			:+
+				ldy			shifted_shrapnel_tbl,x
+:				jmp			render_16x4
 				HINT_IIMODE
         
 ; $9
@@ -493,6 +512,7 @@ erase_16x4:
 				sta			SHRMEM+2,x							; 2nd qtr of line
 				sta			SHRMEM+4,x							; 3rd qtr of line
 				sta			SHRMEM+6,x							; 4th qtr of line
+				sta			SHRMEM+8,x							; 5th qtr of line
 				clc
 				txa
 				adc			#160									; ptr next line
