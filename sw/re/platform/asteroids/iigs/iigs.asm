@@ -29,6 +29,7 @@
 ; build options
 ; comment-out to disable (not =0)
 ;BUILD_OPT_RENDER_CLS = 1
+BUILD_OPT_COMPILED_SPRITES = 1
 
 apple_reset:
 				.A8
@@ -224,9 +225,52 @@ dvg_life:
 				clc
 				adc			#(160*4)
 				sta			$C2										; new SHR offset
+.ifndef BUILD_OPT_COMPILED_SPRITES				
 :				ldy			#extra_ship
 				jmp     render_7x2
-				HINT_IIMODE
+.else
+:				ldx			$C2										; SHR offset
+;	.byte	$00, $F0, $00, $00
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+;	.byte $00, $F0, $00, $00
+        lda     #$F000
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+;	.byte $0F, $0F, $00, $00		
+        lda     #$0F0F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+;	.byte $0F, $0F, $00, $00		
+        lda     #$0F0F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+;	.byte $0F, $0F, $00, $00		
+        lda     #$0F0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+;	.byte $FF, $FF, $F0, $00
+        lda     #$FFFF
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$00F0
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+;	.byte $F0, $00, $F0, $00
+        lda     #$00F0
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$00F0
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+				; update CUR
+				inc			$C2
+				inc			$C2
+				inc			$C2
+				IIMODE
+				OP_EXIT
+.endif				
 
 ; $3
 dvg_copyright:
