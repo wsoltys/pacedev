@@ -123,3 +123,11 @@ OP_SHRAPNEL         = $80
 OP_EXPLODINGSHIP    = $90
 OP_SCALEBRIGHTNESS  = $E0
 OP_HALT             = $F0
+
+.macro OP_EXIT
+				lda			#2										; 2 bytes in instruction
+				jsr 		upd_ptr
+				clc														; no halt
+				rts
+.endmacro
+

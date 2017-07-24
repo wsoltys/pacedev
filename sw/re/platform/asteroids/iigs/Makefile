@@ -28,6 +28,7 @@ M6502_OBJS = \
 
 M65816_OBJS = \
 	iigs.o \
+	render.o \
 	bitmaps.o
 
 OBJS = $(M6502_OBJS) $(M65816_OBJS)
