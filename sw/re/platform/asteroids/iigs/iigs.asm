@@ -39,7 +39,6 @@
 ; build options
 ; comment-out to disable (not =0)
 ;BUILD_OPT_RENDER_CLS = 1
-BUILD_OPT_COMPILED_SPRITES = 1
 
 apple_reset:
 				.A8
@@ -258,9 +257,31 @@ erase_life:
 				clc
 				adc			#(160*4)
 				sta			$C2										; new SHR offset
+.ifndef BUILD_OPT_COMPILED_SPRITES				
 				ldy			#extra_ship
 :				jmp     erase_7x2
-				HINT_IIMODE
+.else
+        ldx     $C2                   ; SHR offset
+        lda     #0
+;	.byte	$00, $F0, $00, $00
+        sta     SHRMEM+$000,x
+;	.byte $00, $F0, $00, $00
+        sta     SHRMEM+$0A0,x
+;	.byte $0F, $0F, $00, $00		
+        sta     SHRMEM+$140,x
+;	.byte $0F, $0F, $00, $00		
+        sta     SHRMEM+$1E0,x
+;	.byte $0F, $0F, $00, $00		
+        sta     SHRMEM+$280,x
+;	.byte $FF, $FF, $F0, $00
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$322,x
+;	.byte $F0, $00, $F0, $00
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C2,x
+.endif
+				IIMODE
+				OP_EXIT
 
 erase_asteroid:
 erase_16x4:

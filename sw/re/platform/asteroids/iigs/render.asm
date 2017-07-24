@@ -138,6 +138,7 @@ dvg_copyright:
 				jsr			cur_2_shr
 .endif				
 				IIGSMODE
+.ifndef BUILD_OPT_COMPILED_SPRITES				
 				ldy			#copyright
 ;				ldx			$C2										; SHR offset ($6F72)
 				ldx			#$6F72
@@ -160,6 +161,203 @@ dvg_copyright:
 				tax
 				dec			$C4										; done all lines?
 				bne			:--										; no, loop
+.else				
+				ldx			#$6F72
+;	.byte $00, $00, $0F, $00, $FF, $F0, $FF, $F0, $FF, $F0, $00, $00, $0F, $00, $FF, $F0, $0F, $00, $FF, $F0, $FF, $F0, $00, $00, $FF, $F0, $F0, $0F, $0F, $FF
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$F0FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$F0FF
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        lda     #$F0FF
+        ora     SHRMEM+$008,x
+        sta     SHRMEM+$008,x
+        lda     #$000F
+        ora     SHRMEM+$00C,x
+        sta     SHRMEM+$00C,x
+        lda     #$F0FF
+        ora     SHRMEM+$00E,x
+        sta     SHRMEM+$00E,x
+        lda     #$000F
+        ora     SHRMEM+$010,x
+        sta     SHRMEM+$010,x
+        lda     #$F0FF
+        ora     SHRMEM+$012,x
+        sta     SHRMEM+$012,x
+        lda     #$F0FF
+        ora     SHRMEM+$014,x
+        sta     SHRMEM+$014,x
+        lda     #$F0FF
+        ora     SHRMEM+$018,x
+        sta     SHRMEM+$018,x
+        lda     #$0FF0
+        ora     SHRMEM+$01A,x
+        sta     SHRMEM+$01A,x
+        lda     #$FF0F
+        ora     SHRMEM+$01C,x
+        sta     SHRMEM+$01C,x
+;	.byte $FF, $00, $0F, $00, $F0, $F0, $00, $F0, $F0, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $F0, $F0, $0F, $00, $00, $00, $0F, $00, $FF, $0F, $0F, $00
+        lda     #$00FF
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$000F
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F0F0
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$F000
+        ora     SHRMEM+$0A6,x
+        sta     SHRMEM+$0A6,x
+        lda     #$F0F0
+        ora     SHRMEM+$0A8,x
+        sta     SHRMEM+$0A8,x
+        lda     #$F0F0
+        ora     SHRMEM+$0AC,x
+        sta     SHRMEM+$0AC,x
+        lda     #$000F
+        ora     SHRMEM+$0AE,x
+        sta     SHRMEM+$0AE,x
+        lda     #$F0F0
+        ora     SHRMEM+$0B0,x
+        sta     SHRMEM+$0B0,x
+        lda     #$F0F0
+        ora     SHRMEM+$0B2,x
+        sta     SHRMEM+$0B2,x
+        lda     #$000F
+        ora     SHRMEM+$0B4,x
+        sta     SHRMEM+$0B4,x
+        lda     #$000F
+        ora     SHRMEM+$0B8,x
+        sta     SHRMEM+$0B8,x
+        lda     #$0FFF
+        ora     SHRMEM+$0BA,x
+        sta     SHRMEM+$0BA,x
+        lda     #$000F
+        ora     SHRMEM+$0BC,x
+        sta     SHRMEM+$0BC,x
+;	.byte $F0, $00, $0F, $00, $FF, $F0, $00, $F0, $FF, $F0, $00, $00, $FF, $F0, $0F, $00, $FF, $F0, $FF, $F0, $0F, $00, $00, $00, $0F, $00, $F0, $FF, $0F, $00
+        lda     #$00F0
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F0FF
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$F000
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        lda     #$F0FF
+        ora     SHRMEM+$148,x
+        sta     SHRMEM+$148,x
+        lda     #$F0FF
+        ora     SHRMEM+$14C,x
+        sta     SHRMEM+$14C,x
+        lda     #$000F
+        ora     SHRMEM+$14E,x
+        sta     SHRMEM+$14E,x
+        lda     #$F0FF
+        ora     SHRMEM+$150,x
+        sta     SHRMEM+$150,x
+        lda     #$F0FF
+        ora     SHRMEM+$152,x
+        sta     SHRMEM+$152,x
+        lda     #$000F
+        ora     SHRMEM+$154,x
+        sta     SHRMEM+$154,x
+        lda     #$000F
+        ora     SHRMEM+$158,x
+        sta     SHRMEM+$158,x
+        lda     #$FFF0
+        ora     SHRMEM+$15A,x
+        sta     SHRMEM+$15A,x
+        lda     #$000F
+        ora     SHRMEM+$15C,x
+        sta     SHRMEM+$15C,x
+;	.byte $FF, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $FF, $00, $0F, $00, $00, $00, $0F, $00, $F0, $0F, $0F, $00
+        lda     #$00FF
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$F000
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$F000
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        lda     #$F000
+        ora     SHRMEM+$1E8,x
+        sta     SHRMEM+$1E8,x
+        lda     #$F0F0
+        ora     SHRMEM+$1EC,x
+        sta     SHRMEM+$1EC,x
+        lda     #$000F
+        ora     SHRMEM+$1EE,x
+        sta     SHRMEM+$1EE,x
+        lda     #$F0F0
+        ora     SHRMEM+$1F0,x
+        sta     SHRMEM+$1F0,x
+        lda     #$00FF
+        ora     SHRMEM+$1F2,x
+        sta     SHRMEM+$1F2,x
+        lda     #$000F
+        ora     SHRMEM+$1F4,x
+        sta     SHRMEM+$1F4,x
+        lda     #$000F
+        ora     SHRMEM+$1F8,x
+        sta     SHRMEM+$1F8,x
+        lda     #$0FF0
+        ora     SHRMEM+$1FA,x
+        sta     SHRMEM+$1FA,x
+        lda     #$000F
+        ora     SHRMEM+$1FC,x
+        sta     SHRMEM+$1FC,x
+;	.byte $00, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $F0, $F0, $FF, $F0, $00, $00, $FF, $F0, $F0, $0F, $0F, $FF 
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F000
+        ora     SHRMEM+$284,x
+        sta     SHRMEM+$284,x
+        lda     #$F000
+        ora     SHRMEM+$286,x
+        sta     SHRMEM+$286,x
+        lda     #$F000
+        ora     SHRMEM+$288,x
+        sta     SHRMEM+$288,x
+        lda     #$F0F0
+        ora     SHRMEM+$28C,x
+        sta     SHRMEM+$28C,x
+        lda     #$000F
+        ora     SHRMEM+$28E,x
+        sta     SHRMEM+$28E,x
+        lda     #$F0F0
+        ora     SHRMEM+$290,x
+        sta     SHRMEM+$290,x
+        lda     #$F0F0
+        ora     SHRMEM+$292,x
+        sta     SHRMEM+$292,x
+        lda     #$F0FF
+        ora     SHRMEM+$294,x
+        sta     SHRMEM+$294,x
+        lda     #$F0FF
+        ora     SHRMEM+$298,x
+        sta     SHRMEM+$298,x
+        lda     #$0FF0
+        ora     SHRMEM+$29A,x
+        sta     SHRMEM+$29A,x
+        lda     #$FF0F
+        ora     SHRMEM+$29C,x
+        sta     SHRMEM+$29C,x
+.endif        
 				IIMODE
 				OP_EXIT
 

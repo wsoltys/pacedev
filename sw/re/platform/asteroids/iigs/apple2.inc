@@ -131,3 +131,4 @@ OP_HALT             = $F0
 				rts
 .endmacro
 
+BUILD_OPT_COMPILED_SPRITES = 1

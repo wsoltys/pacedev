@@ -27,7 +27,15 @@ int main (int argc, char *argv[])
 	FILE *fp = fopen ("bitmaps.asm", "rt");
 	if (!fp)
 		exit (0);
-	
+
+  FILE *fpR = fopen ("cs_r.asm", "wt");
+  if (!fpR)
+    exit (0);
+    
+  FILE *fpE = fopen ("cs_e.asm", "wt");
+  if (!fpE)
+    exit (0);
+    	
 	char buf[1024];
 		
 	fgets (buf, 1024, fp);
@@ -42,15 +50,14 @@ int main (int argc, char *argv[])
 		  strcpy (name, buf);
 		  fgets (buf, 1024, fp);
 
-      if (strncmp (name, "extra_ship", 10))
-        continue;
-
-		  printf ("%s", name);
+		  fprintf (fpR, "%s", name);
+		  fprintf (fpE, "%s", name);
 
       uint16_t addr = 0;
 		  while (1)
 		  {
-    		printf (";%s", buf+1);
+    		fprintf (fpR, ";%s", buf+1);
+    		fprintf (fpE, ";%s", buf+1);
 
 		    if (!strstr (buf, ".BYTE") && !strstr (buf, ".byte"))
 		      break;
@@ -71,9 +78,11 @@ int main (int argc, char *argv[])
           if (data == 0)
             continue;
 
-          printf ("        lda     #$%04X\n", data);
-          printf ("        ora     SHRMEM+$%03X,x\n", addr+offset);
-          printf ("        sta     SHRMEM+$%03X,x\n", addr+offset);
+          fprintf (fpR, "        lda     #$%04X\n", data);
+          fprintf (fpR, "        ora     SHRMEM+$%03X,x\n", addr+offset);
+          fprintf (fpR, "        sta     SHRMEM+$%03X,x\n", addr+offset);
+          
+          fprintf (fpE, "        sta     SHRMEM+$%03X,x\n", addr+offset);
         }
 		    
 		    addr += 160;  
@@ -85,4 +94,6 @@ int main (int argc, char *argv[])
 	}
 	
 	fclose (fp);
+	fclose (fpR);
+	fclose (fpE);
 }
