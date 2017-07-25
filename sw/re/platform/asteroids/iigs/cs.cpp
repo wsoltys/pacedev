@@ -48,47 +48,77 @@ int main (int argc, char *argv[])
 		  char name[1024];
 
 		  strcpy (name, buf);
-		  fgets (buf, 1024, fp);
 
 		  fprintf (fpR, "%s", name);
 		  fprintf (fpE, "%s", name);
 
-      uint16_t addr = 0;
-		  while (1)
-		  {
-    		fprintf (fpR, ";%s", buf+1);
-    		fprintf (fpE, ";%s", buf+1);
-
-		    if (!strstr (buf, ".BYTE") && !strstr (buf, ".byte"))
-		      break;
-
-        char *p;
-        uint16_t offset = 0;
-        for (p=buf; (p = strchr (p, '$')); offset+=2)
-        {
-          uint16_t data;
-          
-          p++;
-          data = ahextoi (p);
-          p = strchr (p, '$');
-          if (!p) break;
-          p++;
-          data |= (ahextoi (p) << 8);
-
-          if (data == 0)
-            continue;
-
-          fprintf (fpR, "        lda     #$%04X\n", data);
-          fprintf (fpR, "        ora     SHRMEM+$%03X,x\n", addr+offset);
-          fprintf (fpR, "        sta     SHRMEM+$%03X,x\n", addr+offset);
-          
-          fprintf (fpE, "        sta     SHRMEM+$%03X,x\n", addr+offset);
-        }
-		    
-		    addr += 160;  
+      long fpos = ftell (fp);
+      
+      uint16_t offs_tbl[256];
+      int n_offs;
+      
+      for (unsigned i=1; i<16; i++)
+      {
+        fseek (fp, fpos, SEEK_SET);
 		    fgets (buf, 1024, fp);
-		  }
-    }
+
+        uint16_t value = 0;
+        if (i&(1<<3)) value |= 0xF000;
+        if (i&(1<<2)) value |= 0x0F00;
+        if (i&(1<<1)) value |= 0x00F0;
+        if (i&(1<<0)) value |= 0x000F;
+
+        uint16_t addr = 0;
+        n_offs = 0;
+  		  while (1)
+  		  {
+  		    if (!strstr (buf, ".BYTE") && !strstr (buf, ".byte"))
+  		      break;
+
+      		//fprintf (fpR, ";%s", buf+1);
+      		//fprintf (fpE, ";%s", buf+1);
+  
+          char *p;
+          uint16_t offset = 0;
+          for (p=buf; (p = strchr (p, '$')); offset+=2)
+          {
+            uint16_t data;
+            
+            p++;
+            data = ahextoi (p);
+            p = strchr (p, '$');
+            if (!p) break;
+            p++;
+            data |= (ahextoi (p) << 8);
+  
+            if (data != value)
+              continue;
+  
+            offs_tbl[n_offs++] = addr+offset;
+          }
+  		    
+  		    addr += 160;  
+  		    fgets (buf, 1024, fp);
+  		  }
+
+		    // now output
+		    if (n_offs > 3)
+          fprintf (fpR, "        ldy     #$%04X\n", value);
+        for (unsigned i=0; i<n_offs; i++)
+        {  
+          if (n_offs > 3)
+            fprintf (fpR, "        tya\n");
+          else
+            fprintf (fpR, "        lda     #$%04X\n", value);
+          if (value != 0xFFFF)
+            fprintf (fpR, "        ora     SHRMEM+$%03X,x\n", offs_tbl[i]);
+            fprintf (fpR, "        sta     SHRMEM+$%03X,x\n", offs_tbl[i]);
+            
+            fprintf (fpE, "        sta     SHRMEM+$%03X,x\n", offs_tbl[i]);
+		    }
+
+  		} // value
+    } // isalpha
 
 		fgets (buf, 1024, fp);
 	}

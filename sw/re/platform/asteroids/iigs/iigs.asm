@@ -261,24 +261,17 @@ erase_life:
 				ldy			#extra_ship
 :				jmp     erase_7x2
 .else
-        ldx     $C2                   ; SHR offset
+:       ldx     $C2                   ; SHR offset
         lda     #0
-;	.byte	$00, $F0, $00, $00
-        sta     SHRMEM+$000,x
-;	.byte $00, $F0, $00, $00
-        sta     SHRMEM+$0A0,x
-;	.byte $0F, $0F, $00, $00		
-        sta     SHRMEM+$140,x
-;	.byte $0F, $0F, $00, $00		
-        sta     SHRMEM+$1E0,x
-;	.byte $0F, $0F, $00, $00		
-        sta     SHRMEM+$280,x
-;	.byte $FF, $FF, $F0, $00
-        sta     SHRMEM+$320,x
         sta     SHRMEM+$322,x
-;	.byte $F0, $00, $F0, $00
         sta     SHRMEM+$3C0,x
         sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$140,x
+        sta     SHRMEM+$1E0,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$0A0,x
+        sta     SHRMEM+$320,x
 .endif
 				IIMODE
 				OP_EXIT
