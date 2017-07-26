@@ -11,8 +11,8 @@
 .export shifted_large_saucer
 .export small_saucer
 .export shifted_small_saucer
-.export shrapnel_tbl
-.export shifted_shrapnel_tbl
+;.export shrapnel_tbl
+;.export shifted_shrapnel_tbl
 
 char_SPACE:
     .BYTE  $00, $00, $00, $00
@@ -1306,6 +1306,8 @@ shifted_small_saucer:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+.ifndef BUILD_OPT_COMPILED_SPRITES
+
 shrapnel_0:
     .BYTE  $00, $0F, $00, $00, $00, $0F, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $F0, $00, $00, $00, $00, $00, $00
@@ -1468,6 +1470,8 @@ unused_player_ship_0:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+.endif
+
 shifted_unused_player_ship_0:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -1531,8 +1535,6 @@ shifted_asteroid_tbl:
 		.word shifted_asteroid_6,  shifted_asteroid_7,  shifted_asteroid_8
 		.word shifted_asteroid_9,  shifted_asteroid_10, shifted_asteroid_11
 
-.endif
-
 shrapnel_tbl:
 		.word shrapnel_0
 		.word shrapnel_1
@@ -1544,3 +1546,6 @@ shifted_shrapnel_tbl:
 		.word shifted_shrapnel_1
 		.word shifted_shrapnel_2, shifted_shrapnel_2
 		.word shifted_shrapnel_3, shifted_shrapnel_3
+
+.endif
+

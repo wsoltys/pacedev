@@ -68,50 +68,39 @@ render_7x2:
 dvg_life:
 				IIGSMODE
 				; offset Y because it overwrites score
-				lda			$C2										; SHR offset
-				cmp			#($1360+160)
-				bcs			:+
-				clc
-				adc			#(160*4)
-				sta			$C2										; new SHR offset
-.ifndef BUILD_OPT_COMPILED_SPRITES				
-:				ldy			#extra_ship
-				jmp     render_7x2
-.else
-:				ldx			$C2										; SHR offset
+				ldx			$C2										; SHR offset
         lda     #$00F0
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+$280+$322,x
+        sta     SHRMEM+$280+$322,x
         lda     #$00F0
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+$280+$3C0,x
+        sta     SHRMEM+$280+$3C0,x
         lda     #$00F0
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+$280+$3C2,x
+        sta     SHRMEM+$280+$3C2,x
         lda     #$0F0F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+$280+$140,x
+        sta     SHRMEM+$280+$140,x
         lda     #$0F0F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+$280+$1E0,x
+        sta     SHRMEM+$280+$1E0,x
         lda     #$0F0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+$280+$280,x
+        sta     SHRMEM+$280+$280,x
         lda     #$F000
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+$280+$000,x
+        sta     SHRMEM+$280+$000,x
         lda     #$F000
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+$280+$0A0,x
+        sta     SHRMEM+$280+$0A0,x
         lda     #$FFFF
-        sta     SHRMEM+$320,x
+        sta     SHRMEM+$280+$320,x
 				; update CUR
 				inc			$C2
 				inc			$C2
 				inc			$C2
 				IIMODE
 				OP_EXIT
-.endif				
 
 ; $3
 dvg_copyright:
@@ -2165,10 +2154,313 @@ dvg_shot:
 				sta			SHRMEM,x
 				IIMODE
 				OP_EXIT
+
+render_shrapnel_0:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$000F
+        ora     SHRMEM+$504,x
+        sta     SHRMEM+$504,x
+        lda     #$000F
+        ora     SHRMEM+$5A2,x
+        sta     SHRMEM+$5A2,x
+        lda     #$00F0
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        tya
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        tya
+        ora     SHRMEM+$460,x
+        sta     SHRMEM+$460,x
+        tya
+        ora     SHRMEM+$464,x
+        sta     SHRMEM+$464,x
+        tya
+        ora     SHRMEM+$5A4,x
+        sta     SHRMEM+$5A4,x
+        lda     #$F000
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+				IIMODE
+				OP_EXIT
+
+render_shrapnel_1:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        tya
+        ora     SHRMEM+$6E4,x
+        sta     SHRMEM+$6E4,x
+        tya
+        ora     SHRMEM+$782,x
+        sta     SHRMEM+$782,x
+        lda     #$00F0
+        ora     SHRMEM+$0A6,x
+        sta     SHRMEM+$0A6,x
+        lda     #$00F0
+        ora     SHRMEM+$5A6,x
+        sta     SHRMEM+$5A6,x
+        lda     #$00F0
+        ora     SHRMEM+$786,x
+        sta     SHRMEM+$786,x
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A0,x
+				IIMODE
+				OP_EXIT
+
+render_shrapnel_2:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$000F
+        ora     SHRMEM+$640,x
+        sta     SHRMEM+$640,x
+        lda     #$000F
+        ora     SHRMEM+$6E4,x
+        sta     SHRMEM+$6E4,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        tya
+        ora     SHRMEM+$646,x
+        sta     SHRMEM+$646,x
+        tya
+        ora     SHRMEM+$822,x
+        sta     SHRMEM+$822,x
+        tya
+        ora     SHRMEM+$826,x
+        sta     SHRMEM+$826,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+				IIMODE
+				OP_EXIT
+
+render_shrapnel_3:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$6E6,x
+        sta     SHRMEM+$6E6,x
+        tya
+        ora     SHRMEM+$824,x
+        sta     SHRMEM+$824,x
+        tya
+        ora     SHRMEM+$966,x
+        sta     SHRMEM+$966,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        tya
+        ora     SHRMEM+$6E0,x
+        sta     SHRMEM+$6E0,x
+        tya
+        ora     SHRMEM+$962,x
+        sta     SHRMEM+$962,x
+        lda     #$0F00
+        ora     SHRMEM+$3C6,x
+        sta     SHRMEM+$3C6,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+				IIMODE
+				OP_EXIT
+
+render_shifted_shrapnel_0:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        tya
+        ora     SHRMEM+$466,x
+        sta     SHRMEM+$466,x
+        tya
+        ora     SHRMEM+$5A6,x
+        sta     SHRMEM+$5A6,x
+        lda     #$0F00
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F000
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F000
+        ora     SHRMEM+$504,x
+        sta     SHRMEM+$504,x
+        lda     #$F000
+        ora     SHRMEM+$5A2,x
+        sta     SHRMEM+$5A2,x
+				IIMODE
+				OP_EXIT
+
+render_shifted_shrapnel_1:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$0A6,x
+        sta     SHRMEM+$0A6,x
+        lda     #$000F
+        ora     SHRMEM+$5A6,x
+        sta     SHRMEM+$5A6,x
+        lda     #$000F
+        ora     SHRMEM+$786,x
+        sta     SHRMEM+$786,x
+        lda     #$0F00
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$0F00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A0,x
+        ldy     #$F000
+        tya
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        tya
+        ora     SHRMEM+$6E4,x
+        sta     SHRMEM+$6E4,x
+        tya
+        ora     SHRMEM+$782,x
+        sta     SHRMEM+$782,x
+				IIMODE
+				OP_EXIT
+
+render_shifted_shrapnel_2:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        tya
+        ora     SHRMEM+$646,x
+        sta     SHRMEM+$646,x
+        tya
+        ora     SHRMEM+$822,x
+        sta     SHRMEM+$822,x
+        tya
+        ora     SHRMEM+$826,x
+        sta     SHRMEM+$826,x
+        lda     #$0F00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$F000
+        ora     SHRMEM+$640,x
+        sta     SHRMEM+$640,x
+        lda     #$F000
+        ora     SHRMEM+$6E4,x
+        sta     SHRMEM+$6E4,x
+				IIMODE
+				OP_EXIT
+
+render_shifted_shrapnel_3:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        tya
+        ora     SHRMEM+$6E0,x
+        sta     SHRMEM+$6E0,x
+        tya
+        ora     SHRMEM+$962,x
+        sta     SHRMEM+$962,x
+        lda     #$00F0
+        ora     SHRMEM+$3C8,x
+        sta     SHRMEM+$3C8,x
+        lda     #$0F00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        ldy     #$F000
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$6E6,x
+        sta     SHRMEM+$6E6,x
+        tya
+        ora     SHRMEM+$824,x
+        sta     SHRMEM+$824,x
+        tya
+        ora     SHRMEM+$966,x
+        sta     SHRMEM+$966,x
+				IIMODE
+				OP_EXIT
+
+shrapnel_jmp_tbl:
+    		; 4 shrapnel patterns; large, medium, small
+    		.word render_shrapnel_0-1
+    		.word render_shrapnel_1-1
+    		.word render_shrapnel_2-1, render_shrapnel_2-1
+    		.word render_shrapnel_3-1, render_shrapnel_3-1
+
+shifted_shrapnel_jmp_tbl:
+    		; 4 shrapnel patterns; large, medium, small
+    		.word render_shifted_shrapnel_0-1
+    		.word render_shifted_shrapnel_1-1
+    		.word render_shifted_shrapnel_2-1, render_shifted_shrapnel_2-1
+    		.word render_shifted_shrapnel_3-1, render_shifted_shrapnel_3-1
         
 ; $8
 dvg_shrapnel:
-				OP_EXIT
 				; the original uses 6 global scale factors from $B-$0
 				; and 4 patterns in this sequence
 				; $B:2,6 $C:0,4,6 $D,$E,$F,$0:0,2,4,6
@@ -2183,13 +2475,24 @@ dvg_shrapnel:
 				sbc			#$0B									; -> 0-5
 				asl														; word offset into table
 				tax
+.ifndef BUILD_OPT_COMPILED_SPRITES
 				ldy			shrapnel_tbl,x
 				lda			$09										; X (0-255)
 				bit			#1
 				beq			:+
 				ldy			shifted_shrapnel_tbl,x
-:				;jmp			render_16x4
-				HINT_IIMODE
+:				jmp			render_16x4
+.else
+        HINT_IIGSMODE
+				ldy			shrapnel_jmp_tbl,x
+				lda     $09
+				bit     #1
+				beq     :+
+				ldy     shifted_shrapnel_jmp_tbl,x
+:       phy
+				ldx     $C2
+				rts
+.endif				
         
 ; $9
 dvg_explodingship:

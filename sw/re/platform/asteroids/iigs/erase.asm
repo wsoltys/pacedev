@@ -31,20 +31,6 @@
 erase_chr:
 erase_7x2:				
 				IIGSMODE
-.ifndef BUILD_OPT_COMPILED_SPRITES
-				lda			#7										; 7 lines
-				sta			$C4
-				ldx			$C2										; SHR offset
-:				lda     #0
-				sta			SHRMEM,x							; 1st half of line
-				sta			SHRMEM+2,x						; 2nd half of line
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:-
-.else
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$000,x
@@ -61,7 +47,6 @@ erase_7x2:
         sta     SHRMEM+$322,x
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$3C0,x
-.endif
 				; update CUR
 				inc			$C2
 				inc			$C2
@@ -71,33 +56,22 @@ erase_7x2:
 
 erase_life:
 				IIGSMODE
-				; offset Y because it overwrites score
-				lda			$C2										; SHR offset
-				cmp			#($1360+160)
-				bcs			:+
-				clc
-				adc			#(160*4)
-				sta			$C2										; new SHR offset
-.ifndef BUILD_OPT_COMPILED_SPRITES				
-				ldy			#extra_ship
-:				jmp     erase_7x2
-.else
-:       ldx     $C2                   ; SHR offset
+				; offset Y (4=+$280) because it overwrites score
+        ldx     $C2
         lda     #0
-        sta     SHRMEM+$322,x
-        sta     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C2,x
-        sta     SHRMEM+$140,x
-        sta     SHRMEM+$1E0,x
-        sta     SHRMEM+$280,x
-        sta     SHRMEM+$000,x
-        sta     SHRMEM+$0A0,x
-        sta     SHRMEM+$320,x
+        sta     SHRMEM+$280+$322,x
+        sta     SHRMEM+$280+$3C0,x
+        sta     SHRMEM+$280+$3C2,x
+        sta     SHRMEM+$280+$140,x
+        sta     SHRMEM+$280+$1E0,x
+        sta     SHRMEM+$280+$280,x
+        sta     SHRMEM+$280+$000,x
+        sta     SHRMEM+$280+$0A0,x
+        sta     SHRMEM+$280+$320,x
 				; update CUR
 				inc			$C2
 				inc			$C2
 				inc			$C2
-.endif
 				IIMODE
 				OP_EXIT
 
