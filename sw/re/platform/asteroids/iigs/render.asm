@@ -2471,7 +2471,7 @@ dvg_shrapnel:
 				and			#$00FF
 				bne			:+
 				lda			#$0010
-:				clc
+:				sec
 				sbc			#$0B									; -> 0-5
 				asl														; word offset into table
 				tax
