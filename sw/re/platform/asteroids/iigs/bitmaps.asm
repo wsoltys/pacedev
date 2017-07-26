@@ -1,10 +1,12 @@
+.include "apple2.inc"
+
 .export chr_tbl
-.export copyright
+;.export copyright
 .export extra_ship
 .export ship_tbl
 .export shifted_ship_tbl
-.export asteroid_tbl
-.export shifted_asteroid_tbl
+;.export asteroid_tbl
+;.export shifted_asteroid_tbl
 .export large_saucer
 .export shifted_large_saucer
 .export small_saucer
@@ -354,6 +356,7 @@ extra_ship:
 		.byte $FF, $FF, $F0, $00
 		.byte $F0, $00, $F0, $00
 
+.ifndef BUILD_OPT_COMPILED_SPRITES
 ; "(c)1979 ATARI INC " 60x5 pixels
 copyright:
 		.byte $00, $00, $0F, $00, $FF, $F0, $FF, $F0, $FF, $F0, $00, $00, $0F, $00, $FF, $F0, $0F, $00, $FF, $F0, $FF, $F0, $00, $00, $FF, $F0, $F0, $0F, $0F, $FF
@@ -361,6 +364,7 @@ copyright:
 		.byte $F0, $00, $0F, $00, $FF, $F0, $00, $F0, $FF, $F0, $00, $00, $FF, $F0, $0F, $00, $FF, $F0, $FF, $F0, $0F, $00, $00, $00, $0F, $00, $F0, $FF, $0F, $00
 		.byte $FF, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $FF, $00, $0F, $00, $00, $00, $0F, $00, $F0, $0F, $0F, $00
 		.byte $00, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $F0, $F0, $FF, $F0, $00, $00, $FF, $F0, $F0, $0F, $0F, $FF 
+.endif
 
 ship_0:
     .BYTE  $00, $00, $00, $00
@@ -794,6 +798,8 @@ shifted_ship_23:
     .BYTE  $0F, $FF, $00, $00
     .BYTE  $00, $00, $00, $00
 
+.ifndef BUILD_OPT_COMPILED_SPRITES
+
 asteroid_0:
     .BYTE  $00, $00, $F0, $00, $00, $0F, $00, $00, $00, $00
     .BYTE  $00, $0F, $0F, $00, $00, $F0, $F0, $00, $00, $00
@@ -1226,6 +1232,8 @@ shifted_asteroid_11:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+.endif
+
 large_saucer:
     .BYTE  $00, $00, $00, $FF, $FF, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $F0, $0F, $00, $00, $00, $00, $00
@@ -1507,6 +1515,8 @@ shifted_ship_tbl:
 		.word shifted_ship_16, shifted_ship_17, shifted_ship_18,  shifted_ship_19
 		.word shifted_ship_20, shifted_ship_21, shifted_ship_22,  shifted_ship_23
 		
+.ifndef BUILD_OPT_COMPILED_SPRITES
+
 asteroid_tbl:
 		; 4 asteroid patterns; large, medium, small
 		.word asteroid_0,  asteroid_1,  asteroid_2
@@ -1520,6 +1530,8 @@ shifted_asteroid_tbl:
 		.word shifted_asteroid_3,  shifted_asteroid_4,  shifted_asteroid_5
 		.word shifted_asteroid_6,  shifted_asteroid_7,  shifted_asteroid_8
 		.word shifted_asteroid_9,  shifted_asteroid_10, shifted_asteroid_11
+
+.endif
 
 shrapnel_tbl:
 		.word shrapnel_0

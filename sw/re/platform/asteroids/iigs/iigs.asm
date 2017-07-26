@@ -26,6 +26,17 @@
 .import dvg_shrapnel
 .import dvg_explodingship
 
+; erase.asm
+.import erase_chr
+.import erase_life
+.import erase_asteroid
+.import erase_ship
+.import erase_saucer
+.import erase_shot
+.import erase_shrapnel
+.import erase_explodingship
+.import erase_invalid
+
 .export upd_ptr
 
 ; for debugging
@@ -225,105 +236,6 @@ handle_dvg_opcode:
 				lda			dvg_jmp_tbl,x
 				pha
 				rts
-
-erase_chr:
-erase_7x2:				
-				IIGSMODE
-				lda			#7										; 7 lines
-				sta			$C4
-				ldx			$C2										; SHR offset
-:				lda     #0
-				sta			SHRMEM,x							; 1st half of line
-				sta			SHRMEM+2,x						; 2nd half of line
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:-
-				; update CUR
-				inc			$C2
-				inc			$C2
-				inc			$C2
-				IIMODE
-				OP_EXIT
-
-erase_life:
-				IIGSMODE
-				; offset Y because it overwrites score
-				lda			$C2										; SHR offset
-				cmp			#($1360+160)
-				bcs			:+
-				clc
-				adc			#(160*4)
-				sta			$C2										; new SHR offset
-.ifndef BUILD_OPT_COMPILED_SPRITES				
-				ldy			#extra_ship
-:				jmp     erase_7x2
-.else
-:       ldx     $C2                   ; SHR offset
-        lda     #0
-        sta     SHRMEM+$322,x
-        sta     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C2,x
-        sta     SHRMEM+$140,x
-        sta     SHRMEM+$1E0,x
-        sta     SHRMEM+$280,x
-        sta     SHRMEM+$000,x
-        sta     SHRMEM+$0A0,x
-        sta     SHRMEM+$320,x
-.endif
-				IIMODE
-				OP_EXIT
-
-erase_asteroid:
-erase_16x4:
-				IIGSMODE
-				lda			#16										; 16 lines
-				sta			$C4
-				ldx			$C2										; SHR offset
-:				lda			#0
-				sta			SHRMEM,x							; 1st qtr of line
-				sta			SHRMEM+2,x							; 2nd qtr of line
-				sta			SHRMEM+4,x							; 3rd qtr of line
-				sta			SHRMEM+6,x							; 4th qtr of line
-				sta			SHRMEM+8,x							; 5th qtr of line
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:-
-				; update CUR
-				lda			$C2
-				clc
-				adc			#8
-				sta			$C2
-				IIMODE
-				OP_EXIT
-
-erase_ship:
-        jmp     erase_7x2
-
-erase_saucer:
-        jmp     erase_16x4
-
-erase_shot:
-				IIGSMODE
-				ldx			$C2										; SHR offset
-				lda			#0
-				sta			SHRMEM,x
-				IIMODE
-				OP_EXIT
-
-erase_shrapnel:
-				jmp     erase_16x4
-
-erase_explodingship:
-        OP_EXIT
-                        
-erase_invalid:
-        OP_EXIT
         
 erase_jmp_tbl:
 				.word		dvg_cur-1

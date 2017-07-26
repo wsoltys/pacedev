@@ -1200,12 +1200,840 @@ render_asteroid_11:
         IIMODE
         OP_EXIT
 
+render_shifted_asteroid_0:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$0A6,x
+        sta     SHRMEM+$0A6,x
+        tya
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        tya
+        ora     SHRMEM+$284,x
+        sta     SHRMEM+$284,x
+        tya
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        tya
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        tya
+        ora     SHRMEM+$460,x
+        sta     SHRMEM+$460,x
+        tya
+        ora     SHRMEM+$500,x
+        sta     SHRMEM+$500,x
+        tya
+        ora     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A0,x
+        tya
+        ora     SHRMEM+$640,x
+        sta     SHRMEM+$640,x
+        tya
+        ora     SHRMEM+$6E0,x
+        sta     SHRMEM+$6E0,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$288,x
+        sta     SHRMEM+$288,x
+        tya
+        ora     SHRMEM+$648,x
+        sta     SHRMEM+$648,x
+        tya
+        ora     SHRMEM+$6E8,x
+        sta     SHRMEM+$6E8,x
+        lda     #$00FF
+        ora     SHRMEM+$826,x
+        sta     SHRMEM+$826,x
+        lda     #$00FF
+        ora     SHRMEM+$8C2,x
+        sta     SHRMEM+$8C2,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        tya
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        tya
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        tya
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        tya
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        tya
+        ora     SHRMEM+$3C6,x
+        sta     SHRMEM+$3C6,x
+        tya
+        ora     SHRMEM+$506,x
+        sta     SHRMEM+$506,x
+        tya
+        ora     SHRMEM+$5A6,x
+        sta     SHRMEM+$5A6,x
+        tya
+        ora     SHRMEM+$820,x
+        sta     SHRMEM+$820,x
+        tya
+        ora     SHRMEM+$8C4,x
+        sta     SHRMEM+$8C4,x
+        ldy     #$F000
+        tya
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        tya
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        tya
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        tya
+        ora     SHRMEM+$466,x
+        sta     SHRMEM+$466,x
+        tya
+        ora     SHRMEM+$780,x
+        sta     SHRMEM+$780,x
+        lda     #$F0F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F0F0
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$F0FF
+        ora     SHRMEM+$964,x
+        sta     SHRMEM+$964,x
+        lda     #$FF00
+        ora     SHRMEM+$786,x
+        sta     SHRMEM+$786,x
+        lda     #$FF00
+        ora     SHRMEM+$962,x
+        sta     SHRMEM+$962,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_1:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        tya
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        tya
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$00F0
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        lda     #$00F0
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        lda     #$00FF
+        ora     SHRMEM+$464,x
+        sta     SHRMEM+$464,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        tya
+        ora     SHRMEM+$284,x
+        sta     SHRMEM+$284,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        lda     #$0FFF
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$F000
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$F000
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F000
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$FF00
+        ora     SHRMEM+$3C4,x
+        sta     SHRMEM+$3C4,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_2:
+        HINT_IIGSMODE
+        lda     #$00FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$00FF
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$0F00
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$F00F
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_3:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$0A6,x
+        sta     SHRMEM+$0A6,x
+        tya
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        tya
+        ora     SHRMEM+$466,x
+        sta     SHRMEM+$466,x
+        tya
+        ora     SHRMEM+$6E0,x
+        sta     SHRMEM+$6E0,x
+        tya
+        ora     SHRMEM+$8C6,x
+        sta     SHRMEM+$8C6,x
+        tya
+        ora     SHRMEM+$962,x
+        sta     SHRMEM+$962,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$288,x
+        sta     SHRMEM+$288,x
+        tya
+        ora     SHRMEM+$3C6,x
+        sta     SHRMEM+$3C6,x
+        tya
+        ora     SHRMEM+$5A8,x
+        sta     SHRMEM+$5A8,x
+        tya
+        ora     SHRMEM+$648,x
+        sta     SHRMEM+$648,x
+        tya
+        ora     SHRMEM+$824,x
+        sta     SHRMEM+$824,x
+        tya
+        ora     SHRMEM+$966,x
+        sta     SHRMEM+$966,x
+        lda     #$00FF
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        tya
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        tya
+        ora     SHRMEM+$460,x
+        sta     SHRMEM+$460,x
+        tya
+        ora     SHRMEM+$500,x
+        sta     SHRMEM+$500,x
+        tya
+        ora     SHRMEM+$6E6,x
+        sta     SHRMEM+$6E6,x
+        tya
+        ora     SHRMEM+$786,x
+        sta     SHRMEM+$786,x
+        tya
+        ora     SHRMEM+$820,x
+        sta     SHRMEM+$820,x
+        tya
+        ora     SHRMEM+$822,x
+        sta     SHRMEM+$822,x
+        tya
+        ora     SHRMEM+$964,x
+        sta     SHRMEM+$964,x
+        ldy     #$F000
+        tya
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        tya
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        tya
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        tya
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        tya
+        ora     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A0,x
+        tya
+        ora     SHRMEM+$640,x
+        sta     SHRMEM+$640,x
+        tya
+        ora     SHRMEM+$780,x
+        sta     SHRMEM+$780,x
+        tya
+        ora     SHRMEM+$826,x
+        sta     SHRMEM+$826,x
+        lda     #$F00F
+        ora     SHRMEM+$8C4,x
+        sta     SHRMEM+$8C4,x
+        lda     #$F0F0
+        ora     SHRMEM+$8C2,x
+        sta     SHRMEM+$8C2,x
+        lda     #$FF00
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$FF00
+        ora     SHRMEM+$506,x
+        sta     SHRMEM+$506,x
+        lda     #$FF0F
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        lda     #$FFF0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_4:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$00F0
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        lda     #$00F0
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        lda     #$0F00
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$0F00
+        ora     SHRMEM+$284,x
+        sta     SHRMEM+$284,x
+        lda     #$0F00
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        lda     #$0FFF
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$0FFF
+        ora     SHRMEM+$3C4,x
+        sta     SHRMEM+$3C4,x
+        ldy     #$F000
+        tya
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        tya
+        ora     SHRMEM+$464,x
+        sta     SHRMEM+$464,x
+        lda     #$FF00
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_5:
+        HINT_IIGSMODE
+        lda     #$00FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$00FF
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$0F00
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$F00F
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_6:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$0A6,x
+        sta     SHRMEM+$0A6,x
+        tya
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        tya
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        tya
+        ora     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A0,x
+        tya
+        ora     SHRMEM+$5A4,x
+        sta     SHRMEM+$5A4,x
+        tya
+        ora     SHRMEM+$6E4,x
+        sta     SHRMEM+$6E4,x
+        tya
+        ora     SHRMEM+$784,x
+        sta     SHRMEM+$784,x
+        tya
+        ora     SHRMEM+$824,x
+        sta     SHRMEM+$824,x
+        tya
+        ora     SHRMEM+$8C4,x
+        sta     SHRMEM+$8C4,x
+        tya
+        ora     SHRMEM+$8C6,x
+        sta     SHRMEM+$8C6,x
+        tya
+        ora     SHRMEM+$962,x
+        sta     SHRMEM+$962,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$006,x
+        sta     SHRMEM+$006,x
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        tya
+        ora     SHRMEM+$3C8,x
+        sta     SHRMEM+$3C8,x
+        tya
+        ora     SHRMEM+$468,x
+        sta     SHRMEM+$468,x
+        tya
+        ora     SHRMEM+$502,x
+        sta     SHRMEM+$502,x
+        tya
+        ora     SHRMEM+$508,x
+        sta     SHRMEM+$508,x
+        tya
+        ora     SHRMEM+$5A8,x
+        sta     SHRMEM+$5A8,x
+        tya
+        ora     SHRMEM+$966,x
+        sta     SHRMEM+$966,x
+        lda     #$00FF
+        ora     SHRMEM+$644,x
+        sta     SHRMEM+$644,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        tya
+        ora     SHRMEM+$286,x
+        sta     SHRMEM+$286,x
+        tya
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        tya
+        ora     SHRMEM+$646,x
+        sta     SHRMEM+$646,x
+        tya
+        ora     SHRMEM+$6E2,x
+        sta     SHRMEM+$6E2,x
+        tya
+        ora     SHRMEM+$6E6,x
+        sta     SHRMEM+$6E6,x
+        tya
+        ora     SHRMEM+$780,x
+        sta     SHRMEM+$780,x
+        tya
+        ora     SHRMEM+$782,x
+        sta     SHRMEM+$782,x
+        tya
+        ora     SHRMEM+$820,x
+        sta     SHRMEM+$820,x
+        ldy     #$F000
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        tya
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        tya
+        ora     SHRMEM+$640,x
+        sta     SHRMEM+$640,x
+        tya
+        ora     SHRMEM+$6E0,x
+        sta     SHRMEM+$6E0,x
+        tya
+        ora     SHRMEM+$786,x
+        sta     SHRMEM+$786,x
+        tya
+        ora     SHRMEM+$822,x
+        sta     SHRMEM+$822,x
+        tya
+        ora     SHRMEM+$826,x
+        sta     SHRMEM+$826,x
+        lda     #$F0F0
+        ora     SHRMEM+$8C2,x
+        sta     SHRMEM+$8C2,x
+        lda     #$FF00
+        ora     SHRMEM+$500,x
+        sta     SHRMEM+$500,x
+        lda     #$FF0F
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$FF0F
+        ora     SHRMEM+$964,x
+        sta     SHRMEM+$964,x
+        lda     #$FFFF
+        sta     SHRMEM+$004,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_7:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        lda     #$00F0
+        ora     SHRMEM+$286,x
+        sta     SHRMEM+$286,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        tya
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        lda     #$0F0F
+        ora     SHRMEM+$324,x
+        sta     SHRMEM+$324,x
+        lda     #$0FFF
+        ora     SHRMEM+$3C4,x
+        sta     SHRMEM+$3C4,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$F000
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$F00F
+        ora     SHRMEM+$464,x
+        sta     SHRMEM+$464,x
+        lda     #$F0FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$FF0F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_8:
+        HINT_IIGSMODE
+        lda     #$00FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$00FF
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$0F00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F00F
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$F0F0
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_9:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        tya
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        tya
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        tya
+        ora     SHRMEM+$460,x
+        sta     SHRMEM+$460,x
+        tya
+        ora     SHRMEM+$500,x
+        sta     SHRMEM+$500,x
+        tya
+        ora     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A0,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$0A6,x
+        sta     SHRMEM+$0A6,x
+        tya
+        ora     SHRMEM+$288,x
+        sta     SHRMEM+$288,x
+        tya
+        ora     SHRMEM+$328,x
+        sta     SHRMEM+$328,x
+        tya
+        ora     SHRMEM+$3C8,x
+        sta     SHRMEM+$3C8,x
+        tya
+        ora     SHRMEM+$6E8,x
+        sta     SHRMEM+$6E8,x
+        tya
+        ora     SHRMEM+$788,x
+        sta     SHRMEM+$788,x
+        tya
+        ora     SHRMEM+$822,x
+        sta     SHRMEM+$822,x
+        lda     #$00FF
+        ora     SHRMEM+$466,x
+        sta     SHRMEM+$466,x
+        lda     #$00FF
+        ora     SHRMEM+$5A6,x
+        sta     SHRMEM+$5A6,x
+        lda     #$00FF
+        ora     SHRMEM+$966,x
+        sta     SHRMEM+$966,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$504,x
+        sta     SHRMEM+$504,x
+        tya
+        ora     SHRMEM+$780,x
+        sta     SHRMEM+$780,x
+        tya
+        ora     SHRMEM+$826,x
+        sta     SHRMEM+$826,x
+        lda     #$0FF0
+        ora     SHRMEM+$8C2,x
+        sta     SHRMEM+$8C2,x
+        lda     #$0FFF
+        ora     SHRMEM+$8C4,x
+        sta     SHRMEM+$8C4,x
+        ldy     #$F000
+        tya
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        tya
+        ora     SHRMEM+$640,x
+        sta     SHRMEM+$640,x
+        tya
+        ora     SHRMEM+$6E0,x
+        sta     SHRMEM+$6E0,x
+        tya
+        ora     SHRMEM+$824,x
+        sta     SHRMEM+$824,x
+        tya
+        ora     SHRMEM+$8C6,x
+        sta     SHRMEM+$8C6,x
+        lda     #$F00F
+        ora     SHRMEM+$962,x
+        sta     SHRMEM+$962,x
+        lda     #$F0FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        ldy     #$FF00
+        tya
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        tya
+        ora     SHRMEM+$3C6,x
+        sta     SHRMEM+$3C6,x
+        tya
+        ora     SHRMEM+$464,x
+        sta     SHRMEM+$464,x
+        tya
+        ora     SHRMEM+$646,x
+        sta     SHRMEM+$646,x
+        lda     #$FF0F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$FF0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FFFF
+        sta     SHRMEM+$282,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_10:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$000F
+        ora     SHRMEM+$3C4,x
+        sta     SHRMEM+$3C4,x
+        lda     #$00F0
+        ora     SHRMEM+$146,x
+        sta     SHRMEM+$146,x
+        lda     #$00F0
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        lda     #$00F0
+        ora     SHRMEM+$3C6,x
+        sta     SHRMEM+$3C6,x
+        lda     #$00FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$324,x
+        sta     SHRMEM+$324,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        lda     #$F000
+        ora     SHRMEM+$284,x
+        sta     SHRMEM+$284,x
+        lda     #$F000
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$F000
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$FF00
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$FF00
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$FF0F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FFF0
+        ora     SHRMEM+$464,x
+        sta     SHRMEM+$464,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_asteroid_11:
+        HINT_IIGSMODE
+        lda     #$00FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$00FF
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$0F00
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$F0F0
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        IIMODE
+        OP_EXIT
+
 asteroid_jmp_tbl:
     		; 4 asteroid patterns; large, medium, small
     		.word render_asteroid_0-1,  render_asteroid_1-1,  render_asteroid_2-1
     		.word render_asteroid_3-1,  render_asteroid_4-1,  render_asteroid_5-1
     		.word render_asteroid_6-1,  render_asteroid_7-1,  render_asteroid_8-1
     		.word render_asteroid_9-1,  render_asteroid_10-1, render_asteroid_11-1
+
+shifted_asteroid_jmp_tbl:
+    		; 4 asteroid patterns; large, medium, small
+    		.word render_shifted_asteroid_0-1,  render_shifted_asteroid_1-1,  render_shifted_asteroid_2-1
+    		.word render_shifted_asteroid_3-1,  render_shifted_asteroid_4-1,  render_shifted_asteroid_5-1
+    		.word render_shifted_asteroid_6-1,  render_shifted_asteroid_7-1,  render_shifted_asteroid_8-1
+    		.word render_shifted_asteroid_9-1,  render_shifted_asteroid_10-1, render_shifted_asteroid_11-1
 
 ; $4
 ; $00(2:1)=shape(0-3)
@@ -1271,10 +2099,12 @@ render_16x4:
 				OP_EXIT
 .else
         HINT_IIGSMODE
-:				;lda			asteroid_jmp_tbl+1,x
-				;pha
-				lda			asteroid_jmp_tbl,x
-				pha
+:				ldy			asteroid_jmp_tbl,x
+				lda     $09
+				bit     #1
+				beq     :+
+				ldy     shifted_asteroid_jmp_tbl,x
+:       phy
 				ldx     $C2
 				rts
 .endif				
