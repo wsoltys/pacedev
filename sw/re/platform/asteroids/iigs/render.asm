@@ -17,16 +17,12 @@
 
 ; iigs.asm
 .import upd_ptr
+.import dvg_cur
+.import dvg_scalebrightness
+.import dvg_halt
+.import dvg_invalid
 
-.export dvg_chr
-.export dvg_life
-.export dvg_copyright
-.export dvg_asteroid
-.export dvg_ship
-.export dvg_saucer
-.export dvg_shot
-.export dvg_shrapnel
-.export dvg_explodingship
+.export handle_dvg_opcode
 
 ; $1
 dvg_chr:
@@ -2679,3 +2675,32 @@ dvg_shrapnel:
 dvg_explodingship:
 				OP_EXIT
 
+dvg_jmp_tbl:
+				.word		dvg_cur-1
+				.word		dvg_chr-1
+				.word		dvg_life-1
+				.word		dvg_copyright-1
+				.word		dvg_asteroid-1
+				.word		dvg_ship-1
+				.word		dvg_saucer-1
+				.word		dvg_shot-1
+				.word		dvg_shrapnel-1
+				.word		dvg_explodingship-1
+				.word		dvg_invalid-1
+				.word		dvg_invalid-1
+				.word		dvg_invalid-1
+				.word		dvg_invalid-1
+				.word		dvg_scalebrightness-1
+				.word		dvg_halt-1
+
+handle_dvg_opcode:
+				and			#$F0									; opcode in high nibble
+				lsr
+				lsr
+				lsr														; offset in jump table
+				tax
+				lda			dvg_jmp_tbl+1,x
+				pha
+				lda			dvg_jmp_tbl,x
+				pha
+				rts

@@ -2,15 +2,15 @@
 
 .export chr_tbl
 ;.export copyright
-.export extra_ship
+;.export extra_ship
 .export ship_tbl
 .export shifted_ship_tbl
 ;.export asteroid_tbl
 ;.export shifted_asteroid_tbl
-.export large_saucer
-.export shifted_large_saucer
-.export small_saucer
-.export shifted_small_saucer
+;.export large_saucer
+;.export shifted_large_saucer
+;.export small_saucer
+;.export shifted_small_saucer
 ;.export shrapnel_tbl
 ;.export shifted_shrapnel_tbl
 
@@ -347,6 +347,8 @@ char_Z:
     .BYTE  $F0, $00, $00, $00
     .BYTE  $FF, $FF, $F0, $00
 
+.ifndef BUILD_OPT_COMPILED_SPRITES
+
 extra_ship:
 		.byte	$00, $F0, $00, $00
 		.byte $00, $F0, $00, $00
@@ -356,7 +358,6 @@ extra_ship:
 		.byte $FF, $FF, $F0, $00
 		.byte $F0, $00, $F0, $00
 
-.ifndef BUILD_OPT_COMPILED_SPRITES
 ; "(c)1979 ATARI INC " 60x5 pixels
 copyright:
 		.byte $00, $00, $0F, $00, $FF, $F0, $FF, $F0, $FF, $F0, $00, $00, $0F, $00, $FF, $F0, $0F, $00, $FF, $F0, $FF, $F0, $00, $00, $FF, $F0, $F0, $0F, $0F, $FF
@@ -364,6 +365,7 @@ copyright:
 		.byte $F0, $00, $0F, $00, $FF, $F0, $00, $F0, $FF, $F0, $00, $00, $FF, $F0, $0F, $00, $FF, $F0, $FF, $F0, $0F, $00, $00, $00, $0F, $00, $F0, $FF, $0F, $00
 		.byte $FF, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $FF, $00, $0F, $00, $00, $00, $0F, $00, $F0, $0F, $0F, $00
 		.byte $00, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $F0, $F0, $FF, $F0, $00, $00, $FF, $F0, $F0, $0F, $0F, $FF 
+
 .endif
 
 ship_0:
@@ -1232,8 +1234,6 @@ shifted_asteroid_11:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
-.endif
-
 large_saucer:
     .BYTE  $00, $00, $00, $FF, $FF, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $F0, $0F, $00, $00, $00, $00, $00
@@ -1305,8 +1305,6 @@ shifted_small_saucer:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-
-.ifndef BUILD_OPT_COMPILED_SPRITES
 
 shrapnel_0:
     .BYTE  $00, $0F, $00, $00, $00, $0F, $00, $00, $00, $00

@@ -16,32 +16,17 @@
 .import shifted_shrapnel_tbl
 
 ; render.asm
-.import dvg_chr
-.import dvg_life
-.import dvg_copyright
-.import dvg_asteroid
-.import dvg_ship
-.import dvg_saucer
-.import dvg_shot
-.import dvg_shrapnel
-.import dvg_explodingship
+.import handle_dvg_opcode
 
-; erase.asm
-.import erase_chr
-.import erase_life
-.import erase_asteroid
-.import erase_ship
-.import erase_saucer
-.import erase_shot
-.import erase_shrapnel
-.import erase_explodingship
-.import erase_invalid
-
+; erase/render.asm
+.import handle_erase_opcode
 .export upd_ptr
+.export dvg_cur
+.export dvg_scalebrightness
+.export dvg_halt
+.export dvg_invalid
 
 ; for debugging
-.export dvg_cur
-.export dvg_halt
 .export cur_2_shr
 .export apple_render_frame
 .export read_joystick
@@ -207,67 +192,6 @@ dvg_halt:
 				sec														; flag halt
 				rts
 
-dvg_jmp_tbl:
-				.word		dvg_cur-1
-				.word		dvg_chr-1
-				.word		dvg_life-1
-				.word		dvg_copyright-1
-				.word		dvg_asteroid-1
-				.word		dvg_ship-1
-				.word		dvg_saucer-1
-				.word		dvg_shot-1
-				.word		dvg_shrapnel-1
-				.word		dvg_explodingship-1
-				.word		dvg_invalid-1
-				.word		dvg_invalid-1
-				.word		dvg_invalid-1
-				.word		dvg_invalid-1
-				.word		dvg_scalebrightness-1
-				.word		dvg_halt-1
-
-handle_dvg_opcode:
-				and			#$F0									; opcode in high nibble
-				lsr
-				lsr
-				lsr														; offset in jump table
-				tax
-				lda			dvg_jmp_tbl+1,x
-				pha
-				lda			dvg_jmp_tbl,x
-				pha
-				rts
-        
-erase_jmp_tbl:
-				.word		dvg_cur-1
-				.word		erase_chr-1
-				.word		erase_life-1
-				.word		erase_invalid-1
-				.word		erase_asteroid-1
-				.word		erase_ship-1
-				.word		erase_saucer-1
-				.word		erase_shot-1
-				.word		erase_shrapnel-1
-				.word		erase_explodingship-1
-				.word		erase_invalid-1
-				.word		erase_invalid-1
-				.word		erase_invalid-1
-				.word		erase_invalid-1
-				.word		dvg_scalebrightness-1
-				.word		dvg_halt-1
-				rts
-
-handle_erase_opcode:
-				and			#$F0									; opcode in high nibble
-				lsr
-				lsr
-				lsr														; offset in jump table
-				tax
-				lda			erase_jmp_tbl+1,x
-				pha
-				lda			erase_jmp_tbl,x
-				pha
-        rts
-        
 apple_render_frame:
 ;				cls
 				IIGSMODE

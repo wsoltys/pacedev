@@ -17,19 +17,13 @@
 
 ; iigs.asm
 .import upd_ptr
+.import dvg_cur
+.import dvg_scalebrightness
+.import dvg_halt
 
-.export erase_chr
-.export erase_life
-.export erase_asteroid
-.export erase_ship
-.export erase_saucer
-.export erase_shot
-.export erase_shrapnel
-.export erase_explodingship
-.export erase_invalid
+.export handle_erase_opcode
 
 erase_chr:
-erase_7x2:				
 				IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
@@ -76,7 +70,6 @@ erase_life:
 				OP_EXIT
 
 erase_asteroid:
-erase_16x4:
 				IIGSMODE
 				lda			#16										; 16 lines
 				sta			$C4
@@ -378,9 +371,6 @@ erase_shrapnel:
 				sbc			#$0B									; -> 0-5
 				asl														; word offset into table
 				tax
-.ifndef BUILD_OPT_COMPILED_SPRITES
-				jmp     erase_16x4
-.else
 				ldy			shrapnel_jmp_tbl,x
 				lda     $09
 				bit     #1
@@ -389,10 +379,40 @@ erase_shrapnel:
 :       phy
 				ldx     $C2
 				rts
-.endif				
 
 erase_explodingship:
         OP_EXIT
                         
 erase_invalid:
         OP_EXIT
+
+erase_jmp_tbl:
+				.word		dvg_cur-1
+				.word		erase_chr-1
+				.word		erase_life-1
+				.word		erase_invalid-1
+				.word		erase_asteroid-1
+				.word		erase_ship-1
+				.word		erase_saucer-1
+				.word		erase_shot-1
+				.word		erase_shrapnel-1
+				.word		erase_explodingship-1
+				.word		erase_invalid-1
+				.word		erase_invalid-1
+				.word		erase_invalid-1
+				.word		erase_invalid-1
+				.word		dvg_scalebrightness-1
+				.word		dvg_halt-1
+				rts
+
+handle_erase_opcode:
+				and			#$F0									; opcode in high nibble
+				lsr
+				lsr
+				lsr														; offset in jump table
+				tax
+				lda			erase_jmp_tbl+1,x
+				pha
+				lda			erase_jmp_tbl,x
+				pha
+        rts

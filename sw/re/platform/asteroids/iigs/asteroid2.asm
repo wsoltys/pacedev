@@ -4274,7 +4274,11 @@ loc_7CFA:                                                                       
                                 STX     DVGRAM
                                 LDA     #$E2 ; 'â'                              ; JMP $0402
                                 STA     DVGRAM+1
+.ifndef APPLE_IIGS
                                 LDA     #$B0 ; '°'                              ; HALT
+.else
+				                        lda			#OP_HALT
+.endif
                                 STA     DVGRAM+3
                                 STA     placeP1HighScore
                                 STA     placeP2HighScore
