@@ -128,8 +128,178 @@ erase_shot:
 				IIMODE
 				OP_EXIT
 
+erase_shrapnel_0:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$504,x
+        sta     SHRMEM+$5A2,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$460,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$5A4,x
+        sta     SHRMEM+$0A2,x
+				IIMODE
+				OP_EXIT
+
+erase_shrapnel_1:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$6E4,x
+        sta     SHRMEM+$782,x
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$5A0,x
+				IIMODE
+				OP_EXIT
+
+erase_shrapnel_2:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E4,x
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$822,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$326,x
+				IIMODE
+				OP_EXIT
+
+erase_shrapnel_3:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$966,x
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$142,x
+				IIMODE
+				OP_EXIT
+
+erase_shifted_shrapnel_0:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$504,x
+        sta     SHRMEM+$5A2,x
+				IIMODE
+				OP_EXIT
+
+erase_shifted_shrapnel_1:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$6E4,x
+        sta     SHRMEM+$782,x
+				IIMODE
+				OP_EXIT
+
+erase_shifted_shrapnel_2:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$822,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E4,x
+				IIMODE
+				OP_EXIT
+
+erase_shifted_shrapnel_3:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$000,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$3C8,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$966,x
+				IIMODE
+				OP_EXIT
+
+shrapnel_jmp_tbl:
+    		; 4 shrapnel patterns; large, medium, small
+    		.word erase_shrapnel_0-1
+    		.word erase_shrapnel_1-1
+    		.word erase_shrapnel_2-1, erase_shrapnel_2-1
+    		.word erase_shrapnel_3-1, erase_shrapnel_3-1
+
+shifted_shrapnel_jmp_tbl:
+    		; 4 shrapnel patterns; large, medium, small
+    		.word erase_shifted_shrapnel_0-1
+    		.word erase_shifted_shrapnel_1-1
+    		.word erase_shifted_shrapnel_2-1, erase_shifted_shrapnel_2-1
+    		.word erase_shifted_shrapnel_3-1, erase_shifted_shrapnel_3-1
+
 erase_shrapnel:
+				IIGSMODE
+				lda			$08										; global scale
+				and			#$00FF
+				bne			:+
+				lda			#$0010
+:				sec
+				sbc			#$0B									; -> 0-5
+				asl														; word offset into table
+				tax
+.ifndef BUILD_OPT_COMPILED_SPRITES
 				jmp     erase_16x4
+.else
+				ldy			shrapnel_jmp_tbl,x
+				lda     $09
+				bit     #1
+				beq     :+
+				ldy     shifted_shrapnel_jmp_tbl,x
+:       phy
+				ldx     $C2
+				rts
+.endif				
 
 erase_explodingship:
         OP_EXIT
