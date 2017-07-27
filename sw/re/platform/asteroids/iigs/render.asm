@@ -2125,19 +2125,200 @@ dvg_ship:
 :				jmp			render_7x2
 				HINT_IIMODE
 
+render_large_saucer:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$286,x
+        sta     SHRMEM+$286,x
+        tya
+        ora     SHRMEM+$3C6,x
+        sta     SHRMEM+$3C6,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        lda     #$00FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$00FF
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        tya
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        tya
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        tya
+        ora     SHRMEM+$464,x
+        sta     SHRMEM+$464,x
+        lda     #$F000
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F0FF
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$F0FF
+        ora     SHRMEM+$504,x
+        sta     SHRMEM+$504,x
+        lda     #$FF00
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$FF00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FF0F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FF0F
+        ora     SHRMEM+$502,x
+        sta     SHRMEM+$502,x
+        lda     #$FFFF
+        sta     SHRMEM+$322,x
+        lda     #$FFFF
+        sta     SHRMEM+$324,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_large_saucer:
+        HINT_IIGSMODE
+        ldy     #$000F
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$286,x
+        sta     SHRMEM+$286,x
+        tya
+        ora     SHRMEM+$3C6,x
+        sta     SHRMEM+$3C6,x
+        tya
+        ora     SHRMEM+$462,x
+        sta     SHRMEM+$462,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$1E6,x
+        sta     SHRMEM+$1E6,x
+        tya
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        tya
+        ora     SHRMEM+$466,x
+        sta     SHRMEM+$466,x
+        lda     #$0F00
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$0F00
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$F000
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$F0FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$F0FF
+        ora     SHRMEM+$326,x
+        sta     SHRMEM+$326,x
+        lda     #$FF00
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FF00
+        ora     SHRMEM+$502,x
+        sta     SHRMEM+$502,x
+        ldy     #$FFFF
+        tya
+        sta     SHRMEM+$144,x
+        tya
+        sta     SHRMEM+$322,x
+        tya
+        sta     SHRMEM+$324,x
+        tya
+        sta     SHRMEM+$504,x
+        IIMODE
+        OP_EXIT
+
+render_small_saucer:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$00F0
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$00FF
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        lda     #$0F00
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$0F0F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F0F0
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$FF00
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        IIMODE
+        OP_EXIT
+
+render_shifted_small_saucer:
+        HINT_IIGSMODE
+        lda     #$00FF
+        ora     SHRMEM+$004,x
+        sta     SHRMEM+$004,x
+        lda     #$0F00
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$0FFF
+        ora     SHRMEM+$144,x
+        sta     SHRMEM+$144,x
+        lda     #$F000
+        ora     SHRMEM+$0A4,x
+        sta     SHRMEM+$0A4,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F0FF
+        ora     SHRMEM+$1E4,x
+        sta     SHRMEM+$1E4,x
+        IIMODE
+        OP_EXIT
+
 ; $6
 ; $00=
 dvg_saucer:
-				OP_EXIT
 				IIGSMODE
-				lda			(byte_B),y						; status
-; fixme								
-				ldy			#large_saucer
+				ldx			$C2										; SHR offset
 				lda			$09										; X (0-255)
 				bit			#1
-				beq			:+
-				ldy			#shifted_large_saucer
-:				;jmp			render_16x4
+				bne			:+
+				jmp     render_large_saucer
+:				jmp     render_shifted_large_saucer
 				HINT_IIMODE
 
 ; $7

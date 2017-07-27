@@ -116,9 +116,99 @@ erase_ship:
         sta     SHRMEM+$3C0,x
         IIMODE
         OP_EXIT
+
+erase_large_saucer:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$504,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$502,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$324,x
+        IIMODE
+        OP_EXIT
+
+erase_shifted_large_saucer:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$502,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$324,x
+        sta     SHRMEM+$504,x
+        IIMODE
+        OP_EXIT
+
+erase_small_saucer:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$1E2,x
+        IIMODE
+        OP_EXIT
+
+erase_shifted_small_saucer:
+        IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$1E4,x
+        IIMODE
+        OP_EXIT
         
 erase_saucer:
-        jmp     erase_16x4
+				IIGSMODE
+				ldx			$C2										; SHR offset
+				lda			$09										; X (0-255)
+				bit			#1
+				bne			:+
+				jmp     erase_large_saucer
+:				jmp     erase_shifted_large_saucer
+				HINT_IIMODE
 
 erase_shot:
 				IIGSMODE
