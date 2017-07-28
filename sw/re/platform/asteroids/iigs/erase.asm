@@ -23,6 +23,9 @@
 
 .export handle_erase_opcode
 
+; (almost) the whole file should be 65816 now
+        HINT_IIGSMODE
+
 erase_chr:
 				IIGSMODE
 				ldx			$C2										; SHR offset
@@ -45,7 +48,6 @@ erase_chr:
 				inc			$C2
 				inc			$C2
 				inc			$C2
-				IIMODE
 				OP_EXIT
 
 erase_life:
@@ -66,7 +68,6 @@ erase_life:
 				inc			$C2
 				inc			$C2
 				inc			$C2
-				IIMODE
 				OP_EXIT
 
 erase_asteroid:
@@ -86,7 +87,6 @@ erase_asteroid:
 				tax
 				dec			$C4										; line counter
 				bne			:-
-				IIMODE
 				OP_EXIT
 
 erase_ship:
@@ -107,7 +107,6 @@ erase_ship:
         sta     SHRMEM+$322,x
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$3C0,x
-        IIMODE
         OP_EXIT
 
 erase_large_saucer:
@@ -134,7 +133,6 @@ erase_large_saucer:
         sta     SHRMEM+$502,x
         sta     SHRMEM+$322,x
         sta     SHRMEM+$324,x
-        IIMODE
         OP_EXIT
 
 erase_shifted_large_saucer:
@@ -161,7 +159,6 @@ erase_shifted_large_saucer:
         sta     SHRMEM+$322,x
         sta     SHRMEM+$324,x
         sta     SHRMEM+$504,x
-        IIMODE
         OP_EXIT
 
 erase_small_saucer:
@@ -176,7 +173,6 @@ erase_small_saucer:
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$1E2,x
-        IIMODE
         OP_EXIT
 
 erase_shifted_small_saucer:
@@ -190,7 +186,6 @@ erase_shifted_small_saucer:
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$1E4,x
-        IIMODE
         OP_EXIT
         
 erase_saucer:
@@ -201,14 +196,12 @@ erase_saucer:
 				bne			:+
 				jmp     erase_large_saucer
 :				jmp     erase_shifted_large_saucer
-				HINT_IIMODE
 
 erase_shot:
 				IIGSMODE
 				ldx			$C2										; SHR offset
 				lda			#0
 				sta			SHRMEM,x
-				IIMODE
 				OP_EXIT
 
 erase_shrapnel_0:
@@ -225,7 +218,6 @@ erase_shrapnel_0:
         sta     SHRMEM+$464,x
         sta     SHRMEM+$5A4,x
         sta     SHRMEM+$0A2,x
-				IIMODE
 				OP_EXIT
 
 erase_shrapnel_1:
@@ -242,7 +234,6 @@ erase_shrapnel_1:
         sta     SHRMEM+$000,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$5A0,x
-				IIMODE
 				OP_EXIT
 
 erase_shrapnel_2:
@@ -259,7 +250,6 @@ erase_shrapnel_2:
         sta     SHRMEM+$826,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$326,x
-				IIMODE
 				OP_EXIT
 
 erase_shrapnel_3:
@@ -276,7 +266,6 @@ erase_shrapnel_3:
         sta     SHRMEM+$962,x
         sta     SHRMEM+$3C6,x
         sta     SHRMEM+$142,x
-				IIMODE
 				OP_EXIT
 
 erase_shifted_shrapnel_0:
@@ -293,7 +282,6 @@ erase_shifted_shrapnel_0:
         sta     SHRMEM+$282,x
         sta     SHRMEM+$504,x
         sta     SHRMEM+$5A2,x
-				IIMODE
 				OP_EXIT
 
 erase_shifted_shrapnel_1:
@@ -310,7 +298,6 @@ erase_shifted_shrapnel_1:
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$6E4,x
         sta     SHRMEM+$782,x
-				IIMODE
 				OP_EXIT
 
 erase_shifted_shrapnel_2:
@@ -327,7 +314,6 @@ erase_shifted_shrapnel_2:
         sta     SHRMEM+$000,x
         sta     SHRMEM+$640,x
         sta     SHRMEM+$6E4,x
-				IIMODE
 				OP_EXIT
 
 erase_shifted_shrapnel_3:
@@ -344,7 +330,6 @@ erase_shifted_shrapnel_3:
         sta     SHRMEM+$6E6,x
         sta     SHRMEM+$824,x
         sta     SHRMEM+$966,x
-				IIMODE
 				OP_EXIT
 
 shrapnel_jmp_tbl:
@@ -406,13 +391,14 @@ erase_jmp_tbl:
 				rts
 
 handle_erase_opcode:
+        HINT_IIMODE
 				and			#$F0									; opcode in high nibble
 				lsr
 				lsr
 				lsr														; offset in jump table
+				IIGSMODE
+				and     #$00FF
 				tax
-				lda			erase_jmp_tbl+1,x
-				pha
-				lda			erase_jmp_tbl,x
-				pha
-        rts
+				ldy			erase_jmp_tbl,x
+				phy
+        rts                           ; erase

@@ -57,7 +57,6 @@ render_7x2:
 				inc			$C2
 				inc			$C2
 				inc			$C2
-				IIMODE
 				OP_EXIT
 
 ; $2
@@ -95,7 +94,6 @@ dvg_life:
 				inc			$C2
 				inc			$C2
 				inc			$C2
-				IIMODE
 				OP_EXIT
 
 ; $3
@@ -334,7 +332,6 @@ dvg_copyright:
         ora     SHRMEM+$15A,x
         sta     SHRMEM+$15A,x
 .endif        
-				IIMODE
 				OP_EXIT
 
 render_asteroid_0:
@@ -466,7 +463,6 @@ render_asteroid_0:
         lda     #$FF0F
         ora     SHRMEM+$962,x
         sta     SHRMEM+$962,x
-        IIMODE
         OP_EXIT
         
 render_asteroid_1:
@@ -520,7 +516,6 @@ render_asteroid_1:
         lda     #$FF00
         ora     SHRMEM+$462,x
         sta     SHRMEM+$462,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_2:
@@ -549,7 +544,6 @@ render_asteroid_2:
         lda     #$F000
         ora     SHRMEM+$142,x
         sta     SHRMEM+$142,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_3:
@@ -675,7 +669,6 @@ render_asteroid_3:
         lda     #$FF00
         ora     SHRMEM+$964,x
         sta     SHRMEM+$964,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_4:
@@ -729,7 +722,6 @@ render_asteroid_4:
         lda     #$F0F0
         ora     SHRMEM+$3C4,x
         sta     SHRMEM+$3C4,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_5:
@@ -758,7 +750,6 @@ render_asteroid_5:
         lda     #$F000
         ora     SHRMEM+$142,x
         sta     SHRMEM+$142,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_6:
@@ -893,7 +884,6 @@ render_asteroid_6:
         sta     SHRMEM+$3C0,x
         lda     #$FFFF
         sta     SHRMEM+$964,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_7:
@@ -947,7 +937,6 @@ render_asteroid_7:
         lda     #$F0FF
         ora     SHRMEM+$1E2,x
         sta     SHRMEM+$1E2,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_8:
@@ -976,7 +965,6 @@ render_asteroid_8:
         lda     #$F000
         ora     SHRMEM+$142,x
         sta     SHRMEM+$142,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_9:
@@ -1100,7 +1088,6 @@ render_asteroid_9:
         sta     SHRMEM+$002,x
         lda     #$FFFF
         sta     SHRMEM+$280,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_10:
@@ -1153,7 +1140,6 @@ render_asteroid_10:
         lda     #$FF0F
         ora     SHRMEM+$1E4,x
         sta     SHRMEM+$1E4,x
-        IIMODE
         OP_EXIT
 
 render_asteroid_11:
@@ -1182,7 +1168,6 @@ render_asteroid_11:
         lda     #$FF00
         ora     SHRMEM+$0A2,x
         sta     SHRMEM+$0A2,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_0:
@@ -1302,7 +1287,6 @@ render_shifted_asteroid_0:
         lda     #$FF00
         ora     SHRMEM+$962,x
         sta     SHRMEM+$962,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_1:
@@ -1360,7 +1344,6 @@ render_shifted_asteroid_1:
         lda     #$FF00
         ora     SHRMEM+$3C4,x
         sta     SHRMEM+$3C4,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_2:
@@ -1383,7 +1366,6 @@ render_shifted_asteroid_2:
         lda     #$F00F
         ora     SHRMEM+$0A4,x
         sta     SHRMEM+$0A4,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_3:
@@ -1506,7 +1488,6 @@ render_shifted_asteroid_3:
         lda     #$FFF0
         ora     SHRMEM+$0A2,x
         sta     SHRMEM+$0A2,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_4:
@@ -1560,7 +1541,6 @@ render_shifted_asteroid_4:
         lda     #$FF00
         ora     SHRMEM+$1E4,x
         sta     SHRMEM+$1E4,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_5:
@@ -1583,7 +1563,6 @@ render_shifted_asteroid_5:
         lda     #$F00F
         ora     SHRMEM+$0A4,x
         sta     SHRMEM+$0A4,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_6:
@@ -1726,7 +1705,6 @@ render_shifted_asteroid_6:
         sta     SHRMEM+$964,x
         lda     #$FFFF
         sta     SHRMEM+$004,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_7:
@@ -1777,7 +1755,6 @@ render_shifted_asteroid_7:
         lda     #$FF0F
         ora     SHRMEM+$1E2,x
         sta     SHRMEM+$1E2,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_8:
@@ -1797,7 +1774,6 @@ render_shifted_asteroid_8:
         lda     #$F0F0
         ora     SHRMEM+$0A4,x
         sta     SHRMEM+$0A4,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_9:
@@ -1920,7 +1896,6 @@ render_shifted_asteroid_9:
         sta     SHRMEM+$280,x
         lda     #$FFFF
         sta     SHRMEM+$282,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_10:
@@ -1980,7 +1955,6 @@ render_shifted_asteroid_10:
         lda     #$FFF0
         ora     SHRMEM+$464,x
         sta     SHRMEM+$464,x
-        IIMODE
         OP_EXIT
 
 render_shifted_asteroid_11:
@@ -2003,7 +1977,6 @@ render_shifted_asteroid_11:
         lda     #$F0F0
         ora     SHRMEM+$0A4,x
         sta     SHRMEM+$0A4,x
-        IIMODE
         OP_EXIT
 
 asteroid_jmp_tbl:
@@ -2023,6 +1996,7 @@ shifted_asteroid_jmp_tbl:
 ; $4
 ; $00(2:1)=shape(0-3)
 dvg_asteroid:
+        HINT_IIMODE
         lda     (byte_B),y
 				IIGSMODE
 				sta			$C6
@@ -2080,7 +2054,6 @@ render_16x4:
 				clc
 				adc			#8
 				sta			$C2
-				IIMODE
 				OP_EXIT
 .else
         HINT_IIGSMODE
@@ -2119,7 +2092,6 @@ dvg_ship:
 				beq			:+
 				ldy			shifted_ship_tbl,x
 :				jmp			render_7x2
-				HINT_IIMODE
 
 render_large_saucer:
         HINT_IIGSMODE
@@ -2183,7 +2155,6 @@ render_large_saucer:
         sta     SHRMEM+$322,x
         lda     #$FFFF
         sta     SHRMEM+$324,x
-        IIMODE
         OP_EXIT
 
 render_shifted_large_saucer:
@@ -2247,7 +2218,6 @@ render_shifted_large_saucer:
         sta     SHRMEM+$324,x
         tya
         sta     SHRMEM+$504,x
-        IIMODE
         OP_EXIT
 
 render_small_saucer:
@@ -2276,7 +2246,6 @@ render_small_saucer:
         lda     #$FF00
         ora     SHRMEM+$1E2,x
         sta     SHRMEM+$1E2,x
-        IIMODE
         OP_EXIT
 
 render_shifted_small_saucer:
@@ -2302,7 +2271,6 @@ render_shifted_small_saucer:
         lda     #$F0FF
         ora     SHRMEM+$1E4,x
         sta     SHRMEM+$1E4,x
-        IIMODE
         OP_EXIT
 
 ; $6
@@ -2315,7 +2283,6 @@ dvg_saucer:
 				bne			:+
 				jmp     render_large_saucer
 :				jmp     render_shifted_large_saucer
-				HINT_IIMODE
 
 ; $7
 dvg_shot:
@@ -2329,7 +2296,6 @@ dvg_shot:
 :				lda			#$0F00
 :				ora			SHRMEM,x
 				sta			SHRMEM,x
-				IIMODE
 				OP_EXIT
 
 render_shrapnel_0:
@@ -2365,7 +2331,6 @@ render_shrapnel_0:
         lda     #$F000
         ora     SHRMEM+$0A2,x
         sta     SHRMEM+$0A2,x
-				IIMODE
 				OP_EXIT
 
 render_shrapnel_1:
@@ -2401,7 +2366,6 @@ render_shrapnel_1:
         lda     #$F000
         ora     SHRMEM+$5A0,x
         sta     SHRMEM+$5A0,x
-				IIMODE
 				OP_EXIT
 
 render_shrapnel_2:
@@ -2437,7 +2401,6 @@ render_shrapnel_2:
         lda     #$F000
         ora     SHRMEM+$326,x
         sta     SHRMEM+$326,x
-				IIMODE
 				OP_EXIT
 
 render_shrapnel_3:
@@ -2474,7 +2437,6 @@ render_shrapnel_3:
         lda     #$F000
         ora     SHRMEM+$142,x
         sta     SHRMEM+$142,x
-				IIMODE
 				OP_EXIT
 
 render_shifted_shrapnel_0:
@@ -2510,7 +2472,6 @@ render_shifted_shrapnel_0:
         lda     #$F000
         ora     SHRMEM+$5A2,x
         sta     SHRMEM+$5A2,x
-				IIMODE
 				OP_EXIT
 
 render_shifted_shrapnel_1:
@@ -2546,7 +2507,6 @@ render_shifted_shrapnel_1:
         tya
         ora     SHRMEM+$782,x
         sta     SHRMEM+$782,x
-				IIMODE
 				OP_EXIT
 
 render_shifted_shrapnel_2:
@@ -2582,7 +2542,6 @@ render_shifted_shrapnel_2:
         lda     #$F000
         ora     SHRMEM+$6E4,x
         sta     SHRMEM+$6E4,x
-				IIMODE
 				OP_EXIT
 
 render_shifted_shrapnel_3:
@@ -2619,7 +2578,6 @@ render_shifted_shrapnel_3:
         tya
         ora     SHRMEM+$966,x
         sta     SHRMEM+$966,x
-				IIMODE
 				OP_EXIT
 
 shrapnel_jmp_tbl:
@@ -2667,8 +2625,8 @@ dvg_shrapnel:
 				beq     :+
 				ldy     shifted_shrapnel_jmp_tbl,x
 :       phy
-				ldx     $C2
-				rts
+				ldx     $C2                   ; current SHR offset
+				rts                           ; render
 .endif				
         
 ; $9
@@ -2694,6 +2652,7 @@ dvg_jmp_tbl:
 				.word		dvg_halt-1
 
 handle_dvg_opcode:
+        IIMODE
 				and			#$F0									; opcode in high nibble
 				lsr
 				lsr

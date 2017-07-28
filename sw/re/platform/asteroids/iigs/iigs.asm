@@ -152,6 +152,7 @@ upd_ptr:
 
 ; $0
 dvg_cur:
+        IIMODE
 				lda			(byte_B),y						; Y (lsb)
 				sta			$06
 				iny
@@ -187,16 +188,18 @@ dvg_scalebrightness:
         
 ; $F
 dvg_halt:
+        IIMODE
 				lda			#2										; 2 bytes in instruction
 				jsr 		upd_ptr
 				sec														; flag halt
 				rts
 
 apple_render_frame:
-;				cls
-				IIGSMODE
+        HINT_IIMODE
 .ifdef BUILD_OPT_RENDER_CLS
+;				cls
 	.if 0
+				IIGSMODE
 				phb
 				lda			#$0000
 				ldx			#$2000
@@ -213,9 +216,9 @@ apple_render_frame:
 				dex														; 2 cycles
 				bpl			:-										; 2 cycles = 11 cycles/word (faster)
 	.endif	
+				IIMODE
 .endif ; BUILD_OPT_RENDER_CLS			
 ;
-				IIMODE
 				lda			#2
 				sta			byte_B
 				lda			dvg_curr_addr_msb

@@ -125,7 +125,7 @@ OP_SCALEBRIGHTNESS  = $E0
 OP_HALT             = $F0
 
 .macro OP_EXIT
-        HINT_IIMODE
+        IIMODE
 				lda			#2										; 2 bytes in instruction
 				jsr 		upd_ptr
 				clc														; no halt
