@@ -25,10 +25,11 @@
 ;
 ; Uncomment for CA65 using apple2enh-asm.cfg
 ;
-.import __MAIN_START__, __BSS_LOAD__ ;  Linker generated
+.import __MAIN_START__, __MAIN_LAST__, __BSS_LOAD__ ;  Linker generated
 .segment "EXEHDR"
 .addr __MAIN_START__ ;  Start address
-.word __BSS_LOAD__ - __MAIN_START__ ; Size
+;.word __BSS_LOAD__ - __MAIN_START__ ; Size
+.word __MAIN_LAST__ + 1 - __MAIN_START__ ; Size
 
  .include "apple2.inc"
 

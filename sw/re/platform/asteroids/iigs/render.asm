@@ -24,6 +24,14 @@
 
 .export handle_dvg_opcode
 
+.macro  orw     offd, offv
+        lda     offd,y
+        beq     :+
+        ora     SHRMEM+offv,x
+        sta     SHRMEM+offv,x
+:        
+.endmacro
+
 ; $1
 dvg_chr:
         lda     (byte_B),y            ; chr x2
@@ -32,27 +40,21 @@ dvg_chr:
 				tax
 				ldy			chr_tbl,x
 render_7x2:				
-				lda			#7										; 7 lines
-				sta			$C4
 				ldx			$C2										; SHR offset
-:				lda			0,y
-        beq     :+
-				ora			SHRMEM,x
-				sta			SHRMEM,x							; 1st half of line
-:				lda			2,y
-        beq     :+
-				ora			SHRMEM+2,x
-				sta			SHRMEM+2,x						; 2nd half of line
-:				iny
-				iny
-				iny
-				iny
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:---
+				orw     $00, 0*160+0
+				orw     $02, 0*160+2
+				orw     $04, 1*160+0
+				orw     $06, 1*160+2
+				orw     $08, 2*160+0
+				orw     $0A, 2*160+2
+				orw     $0C, 3*160+0
+				orw     $0E, 3*160+2
+				orw     $10, 4*160+0
+				orw     $12, 4*160+2
+				orw     $14, 5*160+0
+				orw     $16, 5*160+2
+				orw     $18, 6*160+0
+				orw     $1A, 6*160+2
 				; update CUR
 				inc			$C2
 				inc			$C2
