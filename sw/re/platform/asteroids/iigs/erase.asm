@@ -23,11 +23,8 @@
 
 .export handle_erase_opcode
 
-; (almost) the whole file should be 65816 now
-        HINT_IIGSMODE
-
 erase_chr:
-				IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$000,x
@@ -51,7 +48,7 @@ erase_chr:
 				OP_EXIT
 
 erase_life:
-				IIGSMODE
+        HINT_IIGSMODE
 				; offset Y (4=+$280) because it overwrites score
         ldx     $C2
         lda     #0
@@ -71,7 +68,7 @@ erase_life:
 				OP_EXIT
 
 erase_asteroid:
-				IIGSMODE
+        HINT_IIGSMODE
 				lda			#16										; 16 lines
 				sta			$C4
 				ldx			$C2										; SHR offset
@@ -90,7 +87,7 @@ erase_asteroid:
 				OP_EXIT
 
 erase_ship:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$000,x
@@ -110,7 +107,7 @@ erase_ship:
         OP_EXIT
 
 erase_large_saucer:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$0A4,x
@@ -136,7 +133,7 @@ erase_large_saucer:
         OP_EXIT
 
 erase_shifted_large_saucer:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$1E2,x
@@ -162,7 +159,7 @@ erase_shifted_large_saucer:
         OP_EXIT
 
 erase_small_saucer:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$0A4,x
@@ -176,7 +173,7 @@ erase_small_saucer:
         OP_EXIT
 
 erase_shifted_small_saucer:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$004,x
@@ -189,7 +186,7 @@ erase_shifted_small_saucer:
         OP_EXIT
         
 erase_saucer:
-				IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
 				lda			$09										; X (0-255)
 				bit			#1
@@ -198,14 +195,14 @@ erase_saucer:
 :				jmp     erase_shifted_large_saucer
 
 erase_shot:
-				IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
 				lda			#0
 				sta			SHRMEM,x
 				OP_EXIT
 
 erase_shrapnel_0:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$282,x
@@ -221,7 +218,7 @@ erase_shrapnel_0:
 				OP_EXIT
 
 erase_shrapnel_1:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$326,x
@@ -237,7 +234,7 @@ erase_shrapnel_1:
 				OP_EXIT
 
 erase_shrapnel_2:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$000,x
@@ -253,7 +250,7 @@ erase_shrapnel_2:
 				OP_EXIT
 
 erase_shrapnel_3:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$006,x
@@ -269,7 +266,7 @@ erase_shrapnel_3:
 				OP_EXIT
 
 erase_shifted_shrapnel_0:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$1E6,x
@@ -285,7 +282,7 @@ erase_shifted_shrapnel_0:
 				OP_EXIT
 
 erase_shifted_shrapnel_1:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$0A6,x
@@ -301,7 +298,7 @@ erase_shifted_shrapnel_1:
 				OP_EXIT
 
 erase_shifted_shrapnel_2:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$006,x
@@ -317,7 +314,7 @@ erase_shifted_shrapnel_2:
 				OP_EXIT
 
 erase_shifted_shrapnel_3:
-        IIGSMODE
+        HINT_IIGSMODE
 				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$000,x
@@ -347,7 +344,7 @@ shifted_shrapnel_jmp_tbl:
     		.word erase_shifted_shrapnel_3-1, erase_shifted_shrapnel_3-1
 
 erase_shrapnel:
-				IIGSMODE
+        HINT_IIGSMODE
 				lda			$08										; global scale
 				and			#$00FF
 				bne			:+
@@ -391,14 +388,12 @@ erase_jmp_tbl:
 				rts
 
 handle_erase_opcode:
-        HINT_IIMODE
-				and			#$F0									; opcode in high nibble
+				IIGSMODE
 				lsr
 				lsr
 				lsr														; offset in jump table
-				IIGSMODE
-				and     #$00FF
+				and     #$001E
 				tax
-				ldy			erase_jmp_tbl,x
-				phy
+				lda			erase_jmp_tbl,x
+				pha
         rts                           ; erase
