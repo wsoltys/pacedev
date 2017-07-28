@@ -1,19 +1,6 @@
 .include "apple2.inc"
 
-; bitmaps.asm
-.import chr_tbl
-.import copyright
-.import extra_ship
-.import ship_tbl
-.import shifted_ship_tbl
-.import asteroid_tbl
-.import shifted_asteroid_tbl
-.import large_saucer
-.import shifted_large_saucer
-.import small_saucer
-.import shifted_small_saucer
-.import shrapnel_tbl
-.import shifted_shrapnel_tbl
+;BUILD_OPT_ERASE_SHRAPNEL = 1
 
 ; iigs.asm
 .import upd_ptr
@@ -67,24 +54,697 @@ erase_life:
 				inc			$C2
 				OP_EXIT
 
-erase_asteroid:
+erase_asteroid_0:
         HINT_IIGSMODE
-				lda			#16										; 16 lines
-				sta			$C4
 				ldx			$C2										; SHR offset
-:				lda			#0
-				sta			SHRMEM,x							; 1st qtr of line
-				sta			SHRMEM+2,x							; 2nd qtr of line
-				sta			SHRMEM+4,x							; 3rd qtr of line
-				sta			SHRMEM+6,x							; 4th qtr of line
-				sta			SHRMEM+8,x							; 5th qtr of line
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:-
+        lda     #0
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$460,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$964,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$0A0,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$8C0,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$140,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$506,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$820,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$962,x
+        OP_EXIT
+
+erase_asteroid_1:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$324,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$3C4,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$462,x
+        OP_EXIT
+
+erase_asteroid_2:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$142,x
+        OP_EXIT
+
+erase_asteroid_3:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$1E0,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$8C6,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$0A0,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$3C4,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$8C0,x
+        sta     SHRMEM+$140,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$460,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$820,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$506,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$822,x
+        sta     SHRMEM+$964,x
+        OP_EXIT
+
+erase_asteroid_4:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$324,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$3C4,x
+        OP_EXIT
+
+erase_asteroid_5:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$142,x
+        OP_EXIT
+
+erase_asteroid_6:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$822,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A4,x
+        sta     SHRMEM+$644,x
+        sta     SHRMEM+$6E4,x
+        sta     SHRMEM+$784,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$8C6,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$1E0,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$506,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$642,x
+        sta     SHRMEM+$8C0,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$6E2,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$782,x
+        sta     SHRMEM+$820,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$964,x
+        OP_EXIT
+
+erase_asteroid_7:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$324,x
+        sta     SHRMEM+$3C4,x
+        sta     SHRMEM+$1E2,x
+        OP_EXIT
+
+erase_asteroid_8:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$142,x
+        OP_EXIT
+
+erase_asteroid_9:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$8C6,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$460,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$966,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$5A4,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$820,x
+        sta     SHRMEM+$8C0,x
+        sta     SHRMEM+$964,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$504,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$280,x
+        OP_EXIT
+
+erase_asteroid_10:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$3C4,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$324,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$1E4,x
+        OP_EXIT
+
+erase_asteroid_11:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$0A2,x
+        OP_EXIT
+
+erase_shifted_asteroid_0:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$460,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$288,x
+        sta     SHRMEM+$648,x
+        sta     SHRMEM+$6E8,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$140,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$506,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$820,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$1E0,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$964,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$962,x
+        OP_EXIT
+
+erase_shifted_asteroid_1:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C4,x
+        OP_EXIT
+
+erase_shifted_asteroid_2:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$0A4,x
+        OP_EXIT
+
+erase_shifted_asteroid_3:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$8C6,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$288,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$5A8,x
+        sta     SHRMEM+$648,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$966,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$140,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$460,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$820,x
+        sta     SHRMEM+$822,x
+        sta     SHRMEM+$964,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$1E0,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$506,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$0A2,x
+        OP_EXIT
+
+erase_shifted_asteroid_4:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$3C4,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$1E4,x
+        OP_EXIT
+
+erase_shifted_asteroid_5:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$0A4,x
+        OP_EXIT
+
+erase_shifted_asteroid_6:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$5A4,x
+        sta     SHRMEM+$6E4,x
+        sta     SHRMEM+$784,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$8C6,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$006,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C8,x
+        sta     SHRMEM+$468,x
+        sta     SHRMEM+$502,x
+        sta     SHRMEM+$508,x
+        sta     SHRMEM+$5A8,x
+        sta     SHRMEM+$966,x
+        sta     SHRMEM+$644,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$326,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$6E2,x
+        sta     SHRMEM+$6E6,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$782,x
+        sta     SHRMEM+$820,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$786,x
+        sta     SHRMEM+$822,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$964,x
+        sta     SHRMEM+$004,x
+        OP_EXIT
+
+erase_shifted_asteroid_7:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$286,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$324,x
+        sta     SHRMEM+$3C4,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E2,x
+        OP_EXIT
+
+erase_shifted_asteroid_8:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$0A4,x
+        OP_EXIT
+
+erase_shifted_asteroid_9:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$320,x
+        sta     SHRMEM+$3C0,x
+        sta     SHRMEM+$460,x
+        sta     SHRMEM+$500,x
+        sta     SHRMEM+$5A0,x
+        sta     SHRMEM+$0A6,x
+        sta     SHRMEM+$288,x
+        sta     SHRMEM+$328,x
+        sta     SHRMEM+$3C8,x
+        sta     SHRMEM+$6E8,x
+        sta     SHRMEM+$788,x
+        sta     SHRMEM+$822,x
+        sta     SHRMEM+$466,x
+        sta     SHRMEM+$5A6,x
+        sta     SHRMEM+$966,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$504,x
+        sta     SHRMEM+$780,x
+        sta     SHRMEM+$826,x
+        sta     SHRMEM+$8C2,x
+        sta     SHRMEM+$8C4,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$640,x
+        sta     SHRMEM+$6E0,x
+        sta     SHRMEM+$824,x
+        sta     SHRMEM+$8C6,x
+        sta     SHRMEM+$962,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$464,x
+        sta     SHRMEM+$646,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$280,x
+        sta     SHRMEM+$282,x
+        OP_EXIT
+
+erase_shifted_asteroid_10:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+$282,x
+        sta     SHRMEM+$3C4,x
+        sta     SHRMEM+$146,x
+        sta     SHRMEM+$1E6,x
+        sta     SHRMEM+$3C6,x
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$002,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$324,x
+        sta     SHRMEM+$462,x
+        sta     SHRMEM+$284,x
+        sta     SHRMEM+$322,x
+        sta     SHRMEM+$3C2,x
+        sta     SHRMEM+$0A4,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$464,x
+        OP_EXIT
+
+erase_shifted_asteroid_11:
+        HINT_IIGSMODE
+				ldx			$C2										; SHR offset
+        lda     #0
+        sta     SHRMEM+$004,x
+        sta     SHRMEM+$1E4,x
+        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+$142,x
+        sta     SHRMEM+$144,x
+        sta     SHRMEM+$0A4,x
 				OP_EXIT
+
+asteroid_jmp_tbl:
+    		; 4 asteroid patterns; large, medium, small
+    		.word erase_asteroid_0-1,  erase_asteroid_1-1,  erase_asteroid_2-1
+    		.word erase_asteroid_3-1,  erase_asteroid_4-1,  erase_asteroid_5-1
+    		.word erase_asteroid_6-1,  erase_asteroid_7-1,  erase_asteroid_8-1
+    		.word erase_asteroid_9-1,  erase_asteroid_10-1, erase_asteroid_11-1
+
+shifted_asteroid_jmp_tbl:
+    		; 4 asteroid patterns; large, medium, small
+    		.word erase_shifted_asteroid_0-1,  erase_shifted_asteroid_1-1,  erase_shifted_asteroid_2-1
+    		.word erase_shifted_asteroid_3-1,  erase_shifted_asteroid_4-1,  erase_shifted_asteroid_5-1
+    		.word erase_shifted_asteroid_6-1,  erase_shifted_asteroid_7-1,  erase_shifted_asteroid_8-1
+    		.word erase_shifted_asteroid_9-1,  erase_shifted_asteroid_10-1, erase_shifted_asteroid_11-1
+
+erase_asteroid:
+        HINT_IIMODE
+        lda     (byte_B),y
+				IIGSMODE
+				sta			$C6
+				asl														; pattern x4
+				clc
+				adc			$C6										; =pattern x6
+				and			#$00FF
+				tax
+				lda			$08										; global scale
+				and			#$00FF
+				beq			:+										; large? yes, go
+				inx
+				inx
+				cmp			#$0F									; medium?
+				beq			:+										; yes, go
+				inx
+				inx														; small
+        HINT_IIGSMODE
+:				ldy			asteroid_jmp_tbl,x
+				lda     $09
+				bit     #1
+				beq     :+
+				ldy     shifted_asteroid_jmp_tbl,x
+:       phy
+				ldx     $C2
+				rts
 
 erase_ship:
         HINT_IIGSMODE
@@ -200,6 +860,8 @@ erase_shot:
 				lda			#0
 				sta			SHRMEM,x
 				OP_EXIT
+
+.ifdef BUILD_OPT_ERASE_SHRAPNEL
 
 erase_shrapnel_0:
         HINT_IIGSMODE
@@ -361,6 +1023,7 @@ erase_shrapnel:
 :       phy
 				ldx     $C2
 				rts
+.endif
 
 erase_explodingship:
         OP_EXIT
@@ -377,7 +1040,11 @@ erase_jmp_tbl:
 				.word		erase_ship-1
 				.word		erase_saucer-1
 				.word		erase_shot-1
+.ifdef BUILD_OPT_ERASE_SHRAPNEL
 				.word		erase_shrapnel-1
+.else
+				.word		erase_invalid-1
+.endif				
 				.word		erase_explodingship-1
 				.word		erase_invalid-1
 				.word		erase_invalid-1

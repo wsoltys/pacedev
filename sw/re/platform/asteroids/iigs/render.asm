@@ -24,6 +24,7 @@
 
 .export handle_dvg_opcode
 
+; still undecided if it's better with the BEQ
 .macro  orw     offd, offv
         lda     offd,y
         beq     :+
@@ -34,8 +35,8 @@
 
 ; $1
 dvg_chr:
-        lda     (byte_B),y            ; chr x2
 				IIGSMODE
+        lda     (byte_B),y            ; chr x2
 				and			#$00FF
 				tax
 				ldy			chr_tbl,x
