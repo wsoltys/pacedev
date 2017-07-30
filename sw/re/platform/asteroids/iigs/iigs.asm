@@ -298,8 +298,10 @@ read_btns:
         lda     PB0
         bpl     :+                      ; no, skip
         sta     FireSwitch
+:				lda			PB1
+				bpl			:+											; no, skip
+				sta			hyperspaceSwitch
 :
-
 				lda     SPEED
 				ora     #(1<<7)               ; fast
 				sta     SPEED

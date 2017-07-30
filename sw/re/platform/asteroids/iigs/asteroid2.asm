@@ -34,7 +34,7 @@
  .include "apple2.inc"
 
 .export START
-.export high_score_entry
+.export display_hs_entry
 
 .ZEROPAGE
 
@@ -1814,12 +1814,18 @@ display_initial:
                                 LDA     placeP1HighScore
                                 AND     placeP2HighScore                        ; entered as <space>?
                                 BMI     display_char_code_Y                     ; yes, display
+.ifndef APPLE_IIGS
                                 LDA     #$72 ; 'r'                              ; brightness=7, S=0, X=2
                                 LDX     #$F8 ; 'ø'                              ; cmd=SVEC, s=-ve, Y=0
                                 JSR     write_AX_to_avgram
                                 LDA     #1                                      ; brightness=0, S=0, X=0
                                 LDX     #$F8 ; 'ø'                              ; cmd=SVEC, s=-ve, Y=0
                                 JMP     write_AX_to_avgram
+.else
+; *** TBD add underline character
+																rts
+.endif
+                                
 ; End of function display_initial
 
 
@@ -1827,9 +1833,19 @@ display_initial:
 
 
 display_char_code_Y:
+.ifndef APPLE_IIGS
                                 LDX     DVGROM+$6D5,Y                           ; chr fn
                                 LDA     DVGROM+$6D4,Y                           ; chr fn
                                 JMP     write_AX_to_avgram
+.else
+																tya
+																ldy			#0
+																sta			(dvg_curr_addr_lsb),y
+																iny
+																lda			#OP_CHR
+																sta			(dvg_curr_addr_lsb),y
+																jmp			update_dvg_curr_addr
+.endif                                
 ; End of function display_char_code_Y
 
 
@@ -2754,9 +2770,13 @@ display_hs_entry:
                                 LDY     #1                                      ; 1 byte to print
                                 LDX     #0                                      ; pad digit
                                 JSR     display_numeric                         ; display entry no.
+.ifndef APPLE_IIGS
                                 LDA     #$40 ; '@'                              ; S=4
                                 TAX                                             ; Brightness=4
                                 JSR     set_scale_A_bright_X                    ; displays a dot???
+.else
+; *** TBD display . character
+.endif                                
                                 LDY     #0                                      ; <space>
                                 JSR     display_char_code_Y
                                 LDA     byte_F                                  ; entry counter (x2)
