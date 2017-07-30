@@ -24,6 +24,9 @@
 
 .export handle_dvg_opcode
 
+; debug
+.export dvg_chr
+
 ; still undecided if it's better with the BEQ
 .macro  orw     offd, offv
         lda     offd,y

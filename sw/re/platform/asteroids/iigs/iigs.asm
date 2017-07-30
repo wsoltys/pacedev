@@ -222,6 +222,7 @@ apple_render_frame:
 				lda			#2
 				sta			byte_B
 				lda			dvg_curr_addr_msb
+				and			#$44
 				eor     #$04
 				sta			byte_C
 erase_loop:				
@@ -234,6 +235,7 @@ erase_loop:
 				lda			#2
 				sta			byte_B
 				lda			dvg_curr_addr_msb
+				and			#$44
 				sta			byte_C
 render_loop:
 				ldy			#1										; 2nd byte has the opcode

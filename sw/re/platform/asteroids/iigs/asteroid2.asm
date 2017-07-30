@@ -33,6 +33,9 @@
 
  .include "apple2.inc"
 
+.export START
+.export high_score_entry
+
 .ZEROPAGE
 
 ; ; Processor:        M6502
@@ -3671,9 +3674,15 @@ loc_7861:                                                                       
 msgCoords:                      .BYTE 100, 182                                  ; "HIGH SCORES"
                                 .BYTE 100, 182                                  ; "PLAYER"
                                 .BYTE 12, 170                                   ; "YOUR SCORE...TEN BEST"
+.ifndef APPLE_IIGS
                                 .BYTE 12, 162                                   ; "PLEASE...INITIALS"
                                 .BYTE 12, 154                                   ; "PUSH ROTATE...LETTER"
                                 .BYTE 12, 146                                   ; "PUSH HYPERSPACE...CORRECT"
+.else
+                                .BYTE 12, 162-4                                   ; "PLEASE...INITIALS"
+                                .BYTE 12, 154-8                                   ; "PUSH ROTATE...LETTER"
+                                .BYTE 12, 146-12                                   ; "PUSH HYPERSPACE...CORRECT"
+.endif                                
                                 .BYTE 100, 198                                  ; "PUSH START"
                                 .BYTE 100, 157                                  ; "GAME OVER"
                                 .BYTE 80, 57                                    ; "1 COIN 2 PLAYS"
