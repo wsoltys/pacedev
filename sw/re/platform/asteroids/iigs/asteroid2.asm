@@ -3621,7 +3621,8 @@ loc_77E7:
 
 
 PrintPackedMsg:
-                                LDA     language
+                                ;LDA     language
+                                lda			#0
                                 AND     #3                                      ; mask off invalid bits
                                 ASL     A                                       ; convert to word offset
                                 TAX
@@ -3738,7 +3739,8 @@ msgCoords:                      .BYTE 100, 182                                  
                                 .BYTE 80, 57                                    ; "1 COIN 1 PLAY"
                                 .BYTE 80, 57                                    ; "2 COINS 1 PLAY"
 ; Offset into Vector ROM for message tables
-msgTablePtrs:                   .WORD $571E                                     ; English
+msgTablePtrs:                   ;.WORD $571E                                     ; English
+																.word english_msg_offset_tbl
                                 .WORD $788F                                     ; German
                                 .WORD $7946                                     ; French
                                 .WORD $79F3                                     ; Spanish
@@ -4799,6 +4801,19 @@ rightCoinMultiplierTable:       .BYTE 1, 4, 5, 6
 ; end of 'ROM'
 
 .ifdef APPLE_IIGS
+english_msg_offset_tbl:
+                                .BYTE $0B, $13, $19, $2F, $41, $55, $6F, $77, $7D, $87, $91
+english_msg_tbl:                                
+                                .BYTE $63, $56, $60, $6E, $3C, $EC, $4D
+                                .BYTE $C0, $A4, $0A, $EA, $6C, $08, $00, $EC, $F2, $B0, $6E, $3C, $EC, $48, $5A, $B8
+                                .BYTE $66, $92, $42, $9A, $82, $C3, $12, $0E, $12, $90, $4C, $4D, $F1, $A4, $12, $2D
+                                .BYTE $D2, $0A, $64, $C2, $6C, $0F, $66, $CD, $82, $6C, $9A, $C3, $4A, $85, $C0, $A6
+                                .BYTE $6E, $60, $6C, $9E, $0A, $C2, $42, $C4, $C2, $BA, $60, $49, $F0, $0C, $12, $C6
+                                .BYTE $12, $B0, $00, $A6, $6E, $60, $58, $ED, $12, $B5, $E8, $29, $D2, $0E, $D8, $4C
+                                .BYTE $82, $82, $70, $C2, $6C, $0B, $6E, $09, $E6, $B5, $92, $3E, $00, $A6, $6E, $60
+                                .BYTE $6E, $C1, $6C, $C0, $00, $59, $62, $48, $66, $D2, $6D, $18, $4E, $9B, $64, $09
+                                .BYTE $02, $A4, $0A, $ED, $C0, $18, $4E, $9B, $64, $08, $C2, $A4, $0A, $E8, $00, $20
+                                .BYTE $4E, $9B, $64, $B8, $46, $0D, $20, $2F, $40
 sine_tbl:
                                 .BYTE $00, $03, $06, $09, $0C, $10, $13
                                 .BYTE $16, $19, $1C, $1F, $22, $25, $28, $2B, $2E, $31, $33, $36, $39, $3C, $3F, $41
