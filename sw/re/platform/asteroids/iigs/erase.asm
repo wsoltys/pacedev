@@ -1,6 +1,6 @@
 .include "apple2.inc"
 
-;BUILD_OPT_ERASE_SHRAPNEL = 1
+BUILD_OPT_ERASE_SHRAPNEL = 1
 
 ; iigs.asm
 .import upd_ptr

@@ -35,6 +35,7 @@
 
 .export START
 .export display_hs_entry
+.export DVGRAM
 
 .ZEROPAGE
 
@@ -295,7 +296,12 @@ P2RAM:                          .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninite
 
 ; Segment type: Regular
                                 ;.segment IN0
+.ifdef APPLE_IIGS
+																.segment "HW"
+																.org $0400
+.else
                                 .org $2000
+.endif
                                 .BYTE 0 ; (uninited)
 freq3kHz:                       .BYTE 0 ; (uninited)
 halt:                           .BYTE 0 ; (uninited)
@@ -310,7 +316,12 @@ selfTest:                       .BYTE 0 ; (uninited)
 
 ; Segment type: Regular
                                 ;.segment IN1
+.ifdef APPLE_IIGS
+																.segment "HW"
+																.org $0500
+.else
                                 .org $2400
+.endif
 leftCoinSwitch:                 .BYTE 0 ; (uninited)
 centerCoinSwitch:               .BYTE 0 ; (uninited)
 rightCoinSwitch:                .BYTE 0 ; (uninited)
@@ -326,7 +337,12 @@ rotateLeftSwitch:               .BYTE 0 ; (uninited)
 
 ; Segment type: Regular
                                 ;.segment DSW1
+.ifdef APPLE_IIGS
+																.segment "HW"
+																.org $0600
+.else
                                 .org $2800
+.endif
 coinage:                        .BYTE 0 ; (uninited)
 ; 0 = 1x & 4, 1 = 1x & 3, 2 = 2x & 4, 3 = 2x & 3
 rightCoinMultiplier:            .BYTE 0 ; (uninited)
@@ -338,6 +354,12 @@ language:                       .BYTE 0 ; (uninited)
 
 ; Segment type: Regular
                                 ;.segment DVGRAM
+.ifdef APPLE_IIGS
+																.segment "DVGRAM"
+																.org $1000
+DVGRAM:													.res $0400														; buffer 1
+																.res $0400														; buffer 2
+.else
                                 .org $4000
 DVGRAM:                         .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
                                 .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
@@ -467,14 +489,13 @@ DVGRAM:                         .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninite
                                 .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
                                 .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
                                 .BYTE 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; (uninited)
+.endif                                
 ; end of 'DVGRAM'
 
-; For CA65 add the following line:
-;
-.segment "CODE"
 ; ===========================================================================
 
 ; Segment type: Regular
+.ifndef APPLE_IIGS
                                 ;.segment DVGROM
                                 .org $5000
 DVGROM:                         .BYTE $80, $A0, $00, $00, $00, $70, $00, $00, $00, $90, $FF, $73, $FF, $92, $00, $70
@@ -605,19 +626,21 @@ DVGROM:                         .BYTE $80, $A0, $00, $00, $00, $70, $00, $00, $0
                                 .BYTE $44, $47, $49, $4C, $4E, $51, $53, $55, $58, $5A, $5C, $5E, $60, $62, $64, $66
                                 .BYTE $68, $6A, $6B, $6D, $6F, $70, $71, $73, $74, $75, $76, $78, $79, $7A, $7A, $7B
                                 .BYTE $7C, $7D, $7D, $7E, $7E, $7E, $7F, $7F, $7F, $7F, $00, $00, $00, $00, $00, $00
+.endif                                
 ; end of 'DVGROM'
 
-; ---------------------------------------------------------------------------
-; For CA65 we need to fill from $5800-$6800 in the .BIN
-; so we simply add the following line
-;
-.res $1000
 ; ===========================================================================
+
+; For CA65 add the following line:
+;
+.segment "CODE"
 
 ; Segment type: Pure code
                                 ;.segment ROM
+.ifndef APPLE_IIGS
                                 .org $6800
-.ifdef APPLE_IIGS
+.else
+																.org		$2000
                                 jsr     apple_reset
 .endif                                
                                 JMP     RESET                                   ; Debugger? Off in the weeds? Do Reset.
@@ -637,7 +660,7 @@ wave_loop:                                                                      
                                 LDA     selfTest
 
 spin:                                                                           ; yes, spin
-                                BMI     spin
+                                ;BMI     spin
                                 LSR     VBLANK_triggered                        ; 4xNMI happened?
 .ifndef APPLE_IIGS
                                 BCC     wave_loop                               ; no, busy wait
@@ -651,17 +674,19 @@ loc_6815:                                                                       
                                 LDA     DVGRAM+1
                                 EOR     #2                                      ; JMP $0402<->$0002
                                 STA     DVGRAM+1
-                                STA     $3000                                   ; Start DVG
-                                STA     $3400                                   ; Reset Watchdog
+                                ;STA     $3000                                   ; Start DVG
+                                ;STA     $3400                                   ; Reset Watchdog
                                 INC     fastTimer                               ; Update Fast Timer
                                 BNE     loc_682E
                                 INC     slowTimer                               ; Update Slow Timer
 
 loc_682E:                                                                       ; ping-pong DVG RAM $4000/$4400
-                                LDX     #$40 ; '@'
+                                ;LDX     #$40 ; '@'
+                                LDX     #>DVGRAM
                                 AND     #2
                                 BNE     loc_6836
-                                LDX     #$44 ; 'D'
+                                ;LDX     #$44 ; 'D'
+                                LDX     #(>DVGRAM)|$04
 
 loc_6836:
                                 LDA     #2
@@ -755,7 +780,7 @@ check_start:                                                                    
                                 LDA     io3200ShadowRegister
                                 ORA     #4                                      ; RAMSEL=1 (P2)
                                 STA     io3200ShadowRegister
-                                STA     $3200                                   ; output
+                                ;STA     $3200                                   ; output
                                 JSR     init_players
                                 JSR     init_wave
                                 JSR     init_ship_position_velocity
@@ -771,7 +796,7 @@ start_game:
                                 AND     #$F8 ; 'ø'                              ; RAMSEL=0 (P1), lamps OFF
                                 EOR     numPlayers                              ; player lamp ON
                                 STA     io3200ShadowRegister
-                                STA     $3200                                   ; output
+                                ;STA     $3200                                   ; output
                                 JSR     init_ship_position_velocity
                                 LDA     #1
                                 STA     shipSpawnTimer
@@ -803,7 +828,7 @@ start_game:
                                 LDA     #48
                                 STA     starting_ThumpCounter
                                 STA     P2RAM+$FC
-                                STA     $3E00                                   ; sound (noise reset)
+                                ;STA     $3E00                                   ; sound (noise reset)
                                 RTS
 ; ---------------------------------------------------------------------------
 
@@ -884,7 +909,7 @@ toggle_player:                                                                  
                                 LDA     #4                                      ; RAMSEL
                                 EOR     io3200ShadowRegister                    ; toggle
                                 STA     io3200ShadowRegister
-                                STA     $3200                                   ; output
+                                ;STA     $3200                                   ; output
                                 TXA
                                 ASL     A                                       ; current player * 2
                                 STA     curPlayer_x2
@@ -1788,13 +1813,13 @@ loc_6EEB:                                                                       
 
 init_sound:
                                 LDA     #0                                      ; turn off sound
-                                STA     $3600                                   ; sound (explosion)
-                                STA     $3A00                                   ; sound (thump)
-                                STA     $3C00                                   ; sound (saucer)
-                                STA     $3C01                                   ; sound (saucer fire)
-                                STA     $3C03                                   ; sound (ship thrust)
-                                STA     $3C04                                   ; sound (ship fire)
-                                STA     $3C05                                   ; sound (bonus life)
+                                ;STA     $3600                                   ; sound (explosion)
+                                ;STA     $3A00                                   ; sound (thump)
+                                ;STA     $3C00                                   ; sound (saucer)
+                                ;STA     $3C01                                   ; sound (saucer fire)
+                                ;STA     $3C03                                   ; sound (ship thrust)
+                                ;STA     $3C04                                   ; sound (ship fire)
+                                ;STA     $3C05                                   ; sound (bonus life)
                                 STA     timerExplosionSound
                                 STA     timerPlayerFireSound
                                 STA     timerSaucerFireSound
@@ -2115,7 +2140,7 @@ check_thrust:
                                 LDA     thrustSwitch                            ; thrust button?
                                 BPL     loc_70E1                                ; no, go
                                 LDA     #$80 ; '€'
-                                STA     $3C03                                   ; sound (ship thrust)
+                                ;STA     $3C03                                   ; sound (ship thrust)
                                 LDY     #0
                                 LDA     direction
                                 JSR     get_thrust_cos
@@ -2153,7 +2178,7 @@ loc_70CF:
 
 loc_70E1:
                                 LDA     #0
-                                STA     $3C03                                   ; sound (ship thrust)
+                                ;STA     $3C03                                   ; sound (ship thrust)
                                 LDA     ship_Vh
                                 ORA     ship_thrust_dH
                                 BEQ     loc_7105
@@ -2714,7 +2739,7 @@ set_RAMSEL_for_player:
                                 AND     #$FB ; 'û'                              ; mask off RAMSEL
                                 ORA     byte_8                                  ; OR in new RAMSEL
                                 STA     io3200ShadowRegister
-                                STA     $3200
+                                ;STA     $3200
                                 RTS
 ; End of function set_RAMSEL_for_player
 
@@ -3041,22 +3066,22 @@ update_sounds:
                                 ROR     A
                                 ROR     A
                                 ROR     A
-                                STA     $3C02                                   ; sound select (large/small saucer)
+                                ;STA     $3C02                                   ; sound select (large/small saucer)
                                 LDX     #$80 ; '€'                              ; enable sound
 
 loc_756B:                                                                       ; sound (saucer)
-                                STX     $3C00
+                                ;STX     $3C00
                                 LDX     #1                                      ; index to saucer fire sound
                                 JSR     update_player_saucer_sound
-                                STA     $3C01                                   ; sound (saucer fire)
+                                ;STA     $3C01                                   ; sound (saucer fire)
                                 DEX                                             ; index to player sound
                                 JSR     update_player_saucer_sound
-                                STA     $3C04                                   ; sound (ship fire)
+                                ;STA     $3C04                                   ; sound (ship fire)
                                 LDA     ship_Sts
                                 CMP     #1                                      ; alive?
                                 BEQ     loc_7588                                ; yes, skip
                                 TXA
-                                STA     $3C03                                   ; sound (ship thrust)
+                                ;STA     $3C03                                   ; sound (ship thrust)
 
 loc_7588:
                                 LDA     currentNumberOfAsteroids
@@ -3074,7 +3099,7 @@ loc_759E:
                                 LDA     volFreqThumpSound
                                 AND     #$F
                                 STA     volFreqThumpSound
-                                STA     $3A00                                   ; sound (thump)
+                                ;STA     $3A00                                   ; sound (thump)
                                 LDA     starting_ThumpCounter
                                 STA     timerThumpSoundOff
                                 BPL     loc_75BF
@@ -3087,7 +3112,7 @@ loc_75AE:                                                                       
                                 LDA     volFreqThumpSound
                                 EOR     #$14
                                 STA     volFreqThumpSound
-                                STA     $3A00                                   ; sound (thump)
+                                ;STA     $3A00                                   ; sound (thump)
 
 loc_75BF:
                                 LDA     timerExplosionSound
@@ -3098,7 +3123,7 @@ loc_75BF:
 
 loc_75C7:
                                 STX     timerExplosionSound
-                                STX     $3600                                   ; sound (explosion)
+                                ;STX     $3600                                   ; sound (explosion)
                                 RTS
 ; End of function handle_sounds
 
@@ -3569,7 +3594,11 @@ sub_77DF:
 
 loc_77E7:
                                 TAX
+.ifndef APPLE_IIGS                                
                                 LDA     DVGROM+$7B9,X                           ; sine table
+.else
+																lda			sine_tbl,x
+.endif                                
                                 RTS
 ; End of function sub_77DF
 
@@ -3961,7 +3990,7 @@ loc_7B96:
 
 loc_7B9C:
                                 STA     io3200ShadowRegister
-                                STA     $3200                                   ; output
+                                ;STA     $3200                                   ; output
                                 LDA     slamSwitchFlag
                                 BEQ     loc_7BA9
                                 LDA     #$80 ; '€'
@@ -3981,7 +4010,7 @@ loc_7BB4:
                                 ROR     A
 
 loc_7BB7:                                                                       ; sound (bonus life)
-                                STA     $3C05
+                                ;STA     $3C05
                                 PLA
                                 TAX
                                 PLA
@@ -4299,7 +4328,7 @@ loc_7CFA:                                                                       
                                 STA     0,X                                     ; Clear RAM (0000-00FF)
                                 BNE     loc_7CFA                                ; Do all 256 in each area
                                 LDY     selfTest                                ; Read IN1
-                                BMI     ServiceMode                             ; Upper bit set... go handle service mode
+                                ;BMI     ServiceMode                             ; Upper bit set... go handle service mode
                                 INX                                             ; X=1
                                 STX     DVGRAM
                                 LDA     #$E2 ; 'â'                              ; JMP $0402
@@ -4314,7 +4343,7 @@ loc_7CFA:                                                                       
                                 STA     placeP2HighScore
                                 LDA     #3
                                 STA     io3200ShadowRegister
-                                STA     $3200                                   ; Turn on player 1 & 2 start lamps
+                                ;STA     $3200                                   ; Turn on player 1 & 2 start lamps
                                 AND     coinage                                 ; coinage only
                                 STA     coinMultCredits
                                 LDA     rightCoinMultiplier
@@ -4357,7 +4386,7 @@ ServiceMode:                                                                    
                                 STA     $4700,X                                 ; ...
                                 INX                                             ; ...
                                 BNE     ServiceMode                             ; ... vector RAM
-                                STA     $3400                                   ; Kick watchdog
+                                ;STA     $3400                                   ; Kick watchdog
                                 LDX     #0
 
 loc_7D70:
@@ -4375,7 +4404,7 @@ loc_7D76:
                                 BCC     loc_7D76
                                 INX
                                 BNE     loc_7D70
-                                STA     $3400                                   ; Kick watchdog
+                                ;STA     $3400                                   ; Kick watchdog
                                 TXA
                                 STA     globalScale
                                 ROL     A
@@ -4400,7 +4429,7 @@ loc_7D95:
                                 BCC     loc_7D95
                                 INY
                                 BNE     loc_7D8F
-                                STA     $3400                                   ; Kick watchdog
+                                ;STA     $3400                                   ; Kick watchdog
                                 INC     byte_1
                                 LDX     byte_1
                                 CPX     #4
@@ -4448,7 +4477,7 @@ loc_7DDE:
                                 LDX     #$1D
 
 loc_7DE5:                                                                       ; sound (thump) on
-                                STX     $3A00
+                                ;STX     $3A00
                                 LDX     #0                                      ; inner loop = 256
                                 LDY     #8                                      ; outer loop = 8
 
@@ -4460,11 +4489,11 @@ loc_7DF1:
                                 BIT     freq3kHz
                                 BMI     loc_7DF1
                                 DEX
-                                STA     $3400                                   ; Kick watchdog
+                                ;STA     $3400                                   ; Kick watchdog
                                 BNE     thump_on_loop
                                 DEY
                                 BNE     thump_on_loop
-                                STX     $3A00                                   ; sound (thump) off
+                                ;STX     $3A00                                   ; sound (thump) off
                                 LDY     #8
 
 thump_off_loop:
@@ -4475,7 +4504,7 @@ loc_7E09:
                                 BIT     freq3kHz
                                 BMI     loc_7E09
                                 DEX
-                                STA     $3400                                   ; Kick watchdog
+                                ;STA     $3400                                   ; Kick watchdog
                                 BNE     thump_off_loop
                                 DEY
                                 BNE     thump_off_loop
@@ -4483,7 +4512,7 @@ loc_7E09:
                                 BNE     loc_7DDE
 
 loc_7E1A:                                                                       ; Kick watchdog
-                                STA     $3400
+                                ;STA     $3400
                                 LDA     selfTest
                                 BMI     loc_7E1A                                ; wait for switch to be released
 
@@ -4512,7 +4541,7 @@ loc_7E34:
                                 BNE     loc_7E34
                                 STA     $D,X
                                 INX
-                                STA     $3400                                   ; Kick watchdog
+                                ;STA     $3400                                   ; Kick watchdog
                                 LDA     byte_9
                                 CMP     #$58 ; 'X'
                                 BCC     loc_7E2C
@@ -4524,7 +4553,7 @@ loc_7E4F:
                                 BCC     loc_7E2C
                                 STA     P2RAM
                                 LDX     #4                                      ; RAMSEL
-                                STX     $3200                                   ; output
+                                ;STX     $3200                                   ; output
                                 STX     byte_15
                                 LDX     #0
                                 CMP     P1RAM
@@ -4558,7 +4587,7 @@ loc_7E7A:
 loc_7E82:
                                 BIT     halt
                                 BMI     loc_7E82
-                                STA     $3400                                   ; Kick watchdog
+                                ;STA     $3400                                   ; Kick watchdog
                                 LDA     #0
                                 STA     dvg_curr_addr_lsb
                                 LDA     #$40 ; '@'
@@ -4683,8 +4712,8 @@ loc_7F56:
                                 JSR     set_scale_A_bright_0
                                 LDA     a:byte_B                                        ; *** CA65 use a:
                                 JSR     display_digit_A
-                                LDA     DVGROM+$6D4
-                                LDX     DVGROM+$6D5
+;                                LDA     DVGROM+$6D4
+;                                LDX     DVGROM+$6D5
                                 JSR     write_AX_to_avgram
                                 PLA
                                 PHA
@@ -4727,7 +4756,7 @@ read_in1:                                                                       
                                 STX     byte_8
                                 PHP
                                 LDA     #4                                      ; RAMSEL
-                                STA     $3200                                   ; output
+                                ;STA     $3200                                   ; output
                                 ROL     hyperspaceSwitch
                                 ROL     A
                                 ROL     FireSwitch
@@ -4751,9 +4780,9 @@ loc_7FDE:
                                 LDA     #$80 ; '€'
 
 loc_7FE0:                                                                       ; sound (bonus life)
-                                STA     $3C05
-                                STA     $3200                                   ; output
-                                STA     $3000                                   ; AVG/DVG go
+                                ;STA     $3C05
+                                ;STA     $3200                                   ; output
+                                ;STA     $3000                                   ; AVG/DVG go
                                 STX     byte_A
                                 STY     byte_9
                                 LDA     selfTest
@@ -4769,5 +4798,12 @@ rightCoinMultiplierTable:       .BYTE 1, 4, 5, 6
                                 .WORD RESET                                     ; IRQ/BRK vector (unused)
 ; end of 'ROM'
 
-
+.ifdef APPLE_IIGS
+sine_tbl:
+                                .BYTE $00, $03, $06, $09, $0C, $10, $13
+                                .BYTE $16, $19, $1C, $1F, $22, $25, $28, $2B, $2E, $31, $33, $36, $39, $3C, $3F, $41
+                                .BYTE $44, $47, $49, $4C, $4E, $51, $53, $55, $58, $5A, $5C, $5E, $60, $62, $64, $66
+                                .BYTE $68, $6A, $6B, $6D, $6F, $70, $71, $73, $74, $75, $76, $78, $79, $7A, $7A, $7B
+                                .BYTE $7C, $7D, $7D, $7E, $7E, $7E, $7F, $7F, $7F, $7F, $00, $00, $00, $00, $00, $00
+.endif
                                 .END

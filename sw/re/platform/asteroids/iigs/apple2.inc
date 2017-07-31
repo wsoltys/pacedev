@@ -82,6 +82,8 @@ SHRMEM				= $012290
 .global coinage
 .global centerCoinMultiplierAndLives
 
+.global DVGRAM
+
 ; apple2.asm
 .global apple_reset
 .global apple_start

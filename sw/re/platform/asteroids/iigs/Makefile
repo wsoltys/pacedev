@@ -1,7 +1,7 @@
 # Apple IIGS Asteroids makefile
 
 TARGET = asteroid
-LA = 5000
+LA = 2000
 
 TYPE = apple2
 CC65_DIR = cc65
@@ -39,7 +39,7 @@ all: $(MEDIA)
 %.dsk : $(BIN)
 	$(DD) if=$< of=$(TARGET)#06$(LOAD).BIN bs=1 skip=4
 	$(DD) if=$< of=6502.BIN bs=1 skip=6148 count=6144
-	$(C2D) -s 6800 -b $< $@
+	$(C2D) -s $(LA) -b $< $@
 	
 $(M6502_OBJS) : %.o : %.asm
 	$(AS) -t $(TYPE) $< -o $@ -l $*.lst

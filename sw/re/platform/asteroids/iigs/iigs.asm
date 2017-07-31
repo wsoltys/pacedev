@@ -80,7 +80,7 @@ apple_start:
 				bpl			:-				
 				; init other display list
 				lda			#(OP_HALT<<8)|OP_HALT
-				sta			$4400
+				sta			DVGRAM+$0400
 				IIMODE
 				rts
 
@@ -222,7 +222,7 @@ apple_render_frame:
 				lda			#2
 				sta			byte_B
 				lda			dvg_curr_addr_msb
-				and			#$44
+				and			#(>DVGRAM)|$04
 				eor     #$04
 				sta			byte_C
 erase_loop:				
@@ -235,7 +235,7 @@ erase_loop:
 				lda			#2
 				sta			byte_B
 				lda			dvg_curr_addr_msb
-				and			#$44
+				and			#(>DVGRAM)|$04
 				sta			byte_C
 render_loop:
 				ldy			#1										; 2nd byte has the opcode
