@@ -2072,7 +2072,1539 @@ render_16x4:
 				ldx     $C2
 				rts
 .endif				
+
+render_ship_0:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00FF
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$00FF
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$F00F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$FF0F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        OP_EXIT
+
+render_ship_1:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$000F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$00FF
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$F0FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FF0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FFFF
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_ship_2:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$F0FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F0FF
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        OP_EXIT
+
+render_ship_3:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        ldy     #$0F00
+        tya
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        tya
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        tya
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        tya
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F00F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$F00F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F0FF
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        OP_EXIT
+
+render_ship_4:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        tya
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$00FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        OP_EXIT
+
+render_ship_5:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$000F
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF0F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_ship_6:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$000F
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$0F00
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF0F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_ship_7:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$000F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$000F
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$FF00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF0F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_ship_8:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$0F0F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$F000
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F00F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$FF00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        OP_EXIT
+
+render_ship_9:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$00FF
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$00FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F0FF
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$FF00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FFF0
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_ship_10:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$00F0
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F0FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FF00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$FFFF
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_ship_11:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$000F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$00FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F00F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F0FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F0FF
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        OP_EXIT
+
+render_ship_12:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00FF
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$00FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F00F
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F00F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        OP_EXIT
+
+render_ship_13:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$F00F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F0FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$FFFF
+        sta     SHRMEM+$1E0,x
+        OP_EXIT
+
+render_ship_14:
+        HINT_IIGSMODE
+        lda     #$00F0
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F0F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F0FF
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$F0FF
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        OP_EXIT
+
+render_ship_15:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$0F00
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$0F0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F0FF
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$F0FF
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FF00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        OP_EXIT
+
+render_ship_16:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$000F
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$0F0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$F000
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$F00F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        OP_EXIT
+
+render_ship_17:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$000F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F000
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$FF00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FF0F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_ship_18:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$0F00
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF0F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_ship_19:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        tya
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        tya
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$00FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$0F00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$FF0F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_ship_20:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$000F
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        tya
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$0F0F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        OP_EXIT
+
+render_ship_21:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$0F00
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$F0FF
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$FF00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        OP_EXIT
+
+render_ship_22:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F0FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$FFFF
+        sta     SHRMEM+$280,x
+        OP_EXIT
+
+render_ship_23:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$00FF
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$0F0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F0FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F0FF
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FF0F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        OP_EXIT
+
+render_shifted_ship_0:
+        HINT_IIGSMODE
+        lda     #$00FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F00F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$F00F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF00
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$FF00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        OP_EXIT
+
+render_shifted_ship_1:
+        HINT_IIGSMODE
+        lda     #$00F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$F00F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$FF00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF0F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$FF0F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        OP_EXIT
+
+render_shifted_ship_2:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$0F00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FF0F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FFFF
+        sta     SHRMEM+$0A2,x
+        OP_EXIT
+
+render_shifted_ship_3:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$00F0
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$00FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F0FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$FF00
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF0F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        OP_EXIT
+
+render_shifted_ship_4:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$000F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$000F
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$00FF
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F00F
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$F0F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        OP_EXIT
+
+render_shifted_ship_5:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$00FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$F000
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$F0FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$FF00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_shifted_ship_6:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$00F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F000
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$F0FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$FF00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_shifted_ship_7:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F0FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$FF00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_shifted_ship_8:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$0F00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$0F00
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F0F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$FF00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_shifted_ship_9:
+        HINT_IIGSMODE
+        ldy     #$00F0
+        tya
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        tya
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        tya
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        tya
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$0F00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$0F0F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F00F
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$F00F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FF0F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        OP_EXIT
+
+render_shifted_ship_10:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$00F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$00F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF0F
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$FF0F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        OP_EXIT
+
+render_shifted_ship_11:
+        HINT_IIGSMODE
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$F000
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$F0FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$FF00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$FF0F
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FFFF
+        sta     SHRMEM+$0A2,x
+        OP_EXIT
+
+render_shifted_ship_12:
+        HINT_IIGSMODE
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$F00F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F0FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F0FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$FF00
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$FF00
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        OP_EXIT
+
+render_shifted_ship_13:
+        HINT_IIGSMODE
+        lda     #$F000
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F0F0
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$F0FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF0F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$FF0F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        OP_EXIT
+
+render_shifted_ship_14:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$00F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$FF0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FFFF
+        sta     SHRMEM+$1E2,x
+        OP_EXIT
+
+render_shifted_ship_15:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$00F0
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$00F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$00FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF0F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$FF0F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_shifted_ship_16:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$0F00
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F0F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$FF00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        OP_EXIT
+
+render_shifted_ship_17:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$0F00
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$0F00
+        ora     SHRMEM+$3C0,x
+        sta     SHRMEM+$3C0,x
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F0FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$FF00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_shifted_ship_18:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$000F
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00F0
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$00F0
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F000
+        ora     SHRMEM+$000,x
+        sta     SHRMEM+$000,x
+        lda     #$F000
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$F0FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$FF00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_shifted_ship_19:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$000F
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$00FF
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$00FF
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$0F00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$F000
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F0FF
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$FF00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        OP_EXIT
+
+render_shifted_ship_20:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$000F
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$F000
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$F00F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$F0F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        OP_EXIT
+
+render_shifted_ship_21:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$002,x
+        sta     SHRMEM+$002,x
+        lda     #$00F0
+        ora     SHRMEM+$0A2,x
+        sta     SHRMEM+$0A2,x
+        lda     #$00FF
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$0F00
+        ora     SHRMEM+$3C2,x
+        sta     SHRMEM+$3C2,x
+        lda     #$F00F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        lda     #$F0F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$FF0F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        OP_EXIT
+
+render_shifted_ship_22:
+        HINT_IIGSMODE
+        lda     #$000F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$0F00
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$0F00
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F0F0
+        ora     SHRMEM+$282,x
+        sta     SHRMEM+$282,x
+        lda     #$FF0F
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$FF0F
+        ora     SHRMEM+$322,x
+        sta     SHRMEM+$322,x
+        OP_EXIT
+
+render_shifted_ship_23:
+        HINT_IIGSMODE
+        lda     #$00F0
+        ora     SHRMEM+$142,x
+        sta     SHRMEM+$142,x
+        lda     #$F000
+        ora     SHRMEM+$0A0,x
+        sta     SHRMEM+$0A0,x
+        lda     #$F000
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+        lda     #$F000
+        ora     SHRMEM+$280,x
+        sta     SHRMEM+$280,x
+        lda     #$F00F
+        ora     SHRMEM+$1E2,x
+        sta     SHRMEM+$1E2,x
+        lda     #$FF00
+        ora     SHRMEM+$140,x
+        sta     SHRMEM+$140,x
+        lda     #$FF0F
+        ora     SHRMEM+$320,x
+        sta     SHRMEM+$320,x
+        lda     #$FFFF
+        sta     SHRMEM+$282,x
+        OP_EXIT
                         
+ship_jmp_tbl:
+    		.word render_ship_0-1,  render_ship_1-1,  render_ship_2-1,  render_ship_3-1
+    		.word render_ship_4-1,  render_ship_5-1,  render_ship_6-1,  render_ship_7-1
+    		.word render_ship_8-1,  render_ship_9-1,  render_ship_10-1, render_ship_11-1
+    		.word render_ship_12-1, render_ship_13-1, render_ship_14-1, render_ship_15-1
+    		.word render_ship_16-1, render_ship_17-1, render_ship_18-1, render_ship_19-1
+    		.word render_ship_20-1, render_ship_21-1, render_ship_22-1, render_ship_23-1
+
+shifted_ship_jmp_tbl:
+    		.word render_shifted_ship_0-1,  render_shifted_ship_1-1,  render_shifted_ship_2-1,  render_shifted_ship_3-1
+    		.word render_shifted_ship_4-1,  render_shifted_ship_5-1,  render_shifted_ship_6-1,  render_shifted_ship_7-1
+    		.word render_shifted_ship_8-1,  render_shifted_ship_9-1,  render_shifted_ship_10-1, render_shifted_ship_11-1
+    		.word render_shifted_ship_12-1, render_shifted_ship_13-1, render_shifted_ship_14-1, render_shifted_ship_15-1
+    		.word render_shifted_ship_16-1, render_shifted_ship_17-1, render_shifted_ship_18-1, render_shifted_ship_19-1
+    		.word render_shifted_ship_20-1, render_shifted_ship_21-1, render_shifted_ship_22-1, render_shifted_ship_23-1
+
 ; $5
 ; $00=dir(0-255)
 dvg_ship:
@@ -2092,12 +3624,14 @@ dvg_ship:
 				and			#$00ff								; mask off high-res bits
 				asl														; word offset
 				tax
-				ldy			ship_tbl,x
+				ldy			ship_jmp_tbl,x
 				lda			$09										; X (0-255)
 				bit			#1
 				beq			:+
-				ldy			shifted_ship_tbl,x
-:				jmp			render_7x2
+				ldy			shifted_ship_jmp_tbl,x
+:       phy
+				ldx     $C2
+				rts
 
 render_large_saucer:
         HINT_IIGSMODE

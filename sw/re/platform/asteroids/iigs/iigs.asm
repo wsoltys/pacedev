@@ -37,8 +37,7 @@
 ;BUILD_OPT_RENDER_CLS = 1
 
 apple_reset:
-				.A8
-				.I8
+				HINT_IIMODE
 				lda     SPEED
 				ora     #(1<<7)               ; turbo
 				sta     SPEED
@@ -49,8 +48,7 @@ apple_reset:
 				rts
 
 apple_start:
-				.A8
-				.I8
+				HINT_IIMODE
 				; switch into superhires mode (from 8-bit mode)
 				lda			NEWVIDEO
 				ora			#(1<<7)|(1<<6)				; SHR, linear
@@ -58,8 +56,8 @@ apple_start:
 				sta			NEWVIDEO
 				; enable shadowing
 				lda			SHADOW
-				ora			#~(1<<3)+256					; enable for SHR (only)
-;				sta			SHADOW
+				and			#~(1<<3)+256					; enable for SHR (only)
+				sta			SHADOW
 				; init the palette
 				IIGSMODE
 				ldx     #0
@@ -245,7 +243,8 @@ render_loop:
 				bcc			render_loop
 
 				; fudge some inputs now
-				
+	
+	inputs:			
 				lda			#0
 				sta			hyperspaceSwitch
 				sta			FireSwitch
