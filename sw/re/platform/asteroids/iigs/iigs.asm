@@ -57,6 +57,10 @@ apple_start:
 				lda			SHADOW
 				and			#~(1<<3)+256					; enable for SHR (only)
 				sta			SHADOW
+				; black border
+				lda			TXTBDR
+				and			#$F0
+				sta			TXTBDR
 				; init the palette
 				IIGSMODE
 				ldx     #0

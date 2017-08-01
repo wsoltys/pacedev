@@ -2636,10 +2636,10 @@ display_shot_ship_asteroid_or_saucer:                                           
                                 CPX     #$1C                                    ; SaucerFlag?
                                 BEQ     display_saucer                          ; yes, go
                                 BCS     display_shot                            ; shot, go
+.ifndef APPLE_IIGS                                
                                 AND     #$18                                    ; status (4:3)
                                 LSR     A
                                 LSR     A                                       ; status (4:3)->(2:1)
-.ifndef APPLE_IIGS                                
                                 TAY                                             ; = word offset
                                 LDA     DVGROM+$1DE,Y                           ; asteroid table address LSB
                                 LDX     DVGROM+$1DF,Y                           ; asteroid table address MSB
@@ -2648,7 +2648,7 @@ loc_7370:                                                                       
                                 JSR     write_AX_to_avgram
 .else
                                 ldy     #0
-                                sta     (dvg_curr_addr_lsb),y
+                                sta     (dvg_curr_addr_lsb),y										; asteroid status
                                 iny
                                 lda     #OP_ASTEROID
                                 sta     (dvg_curr_addr_lsb),y

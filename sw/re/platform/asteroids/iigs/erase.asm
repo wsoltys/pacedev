@@ -1,5 +1,6 @@
 .include "apple2.inc"
 
+BUILD_OPT_ERASE_ASTEROID = 1
 BUILD_OPT_ERASE_SHRAPNEL = 1
 
 ; iigs.asm
@@ -656,37 +657,24 @@ erase_shifted_asteroid_11:
 
 asteroid_jmp_tbl:
     		; 4 asteroid patterns; large, medium, small
-    		.word erase_asteroid_0-1,  erase_asteroid_1-1,  erase_asteroid_2-1
-    		.word erase_asteroid_3-1,  erase_asteroid_4-1,  erase_asteroid_5-1
-    		.word erase_asteroid_6-1,  erase_asteroid_7-1,  erase_asteroid_8-1
-    		.word erase_asteroid_9-1,  erase_asteroid_10-1, erase_asteroid_11-1
+    		.word erase_asteroid_2-1,  erase_asteroid_1-1,  erase_asteroid_0-1,  0
+    		.word erase_asteroid_5-1,  erase_asteroid_4-1,  erase_asteroid_3-1,  0
+    		.word erase_asteroid_8-1,  erase_asteroid_7-1,  erase_asteroid_6-1,  0
+    		.word erase_asteroid_11-1, erase_asteroid_10-1, erase_asteroid_9-1,  0
 
 shifted_asteroid_jmp_tbl:
     		; 4 asteroid patterns; large, medium, small
-    		.word erase_shifted_asteroid_0-1,  erase_shifted_asteroid_1-1,  erase_shifted_asteroid_2-1
-    		.word erase_shifted_asteroid_3-1,  erase_shifted_asteroid_4-1,  erase_shifted_asteroid_5-1
-    		.word erase_shifted_asteroid_6-1,  erase_shifted_asteroid_7-1,  erase_shifted_asteroid_8-1
-    		.word erase_shifted_asteroid_9-1,  erase_shifted_asteroid_10-1, erase_shifted_asteroid_11-1
+    		.word erase_shifted_asteroid_2-1,  erase_shifted_asteroid_1-1,  erase_shifted_asteroid_0-1,  0
+    		.word erase_shifted_asteroid_5-1,  erase_shifted_asteroid_4-1,  erase_shifted_asteroid_3-1,  0
+    		.word erase_shifted_asteroid_8-1,  erase_shifted_asteroid_7-1,  erase_shifted_asteroid_6-1,  0
+    		.word erase_shifted_asteroid_11-1, erase_shifted_asteroid_10-1, erase_shifted_asteroid_9-1,  0
 
 erase_asteroid:
-        HINT_IIGSMODE
-        lda     (byte_B),y
-				sta			$C6
-				asl														; pattern x4
-				clc
-				adc			$C6										; =pattern x6
-				and			#$00FF
-				tax
-				lda			$08										; global scale
-				and			#$00FF
-				beq			:+										; large? yes, go
-				inx
-				inx
-				cmp			#$0F									; medium?
-				beq			:+										; yes, go
-				inx
-				inx														; small
-:				ldy			asteroid_jmp_tbl,x
+				HINT_IIGSMODE
+        lda     (byte_B),y						; status (4:3)=shape, (2:1)=size
+       	and 		#$001E
+       	tax
+				ldy			asteroid_jmp_tbl,x
 				lda     $09
 				bit     #1
 				beq     :+
@@ -983,7 +971,11 @@ erase_jmp_tbl:
 				.word		erase_chr-1
 				.word		erase_life-1
 				.word		erase_invalid-1
+.ifdef BUILD_OPT_ERASE_ASTEROID
 				.word		erase_asteroid-1
+.else
+				.word		erase_invalid-1
+.endif				
 				.word		erase_ship-1
 				.word		erase_saucer-1
 				.word		erase_shot-1

@@ -1947,39 +1947,25 @@ render_shifted_asteroid_11:
 
 asteroid_jmp_tbl:
     		; 4 asteroid patterns; large, medium, small
-    		.word render_asteroid_0-1,  render_asteroid_1-1,  render_asteroid_2-1
-    		.word render_asteroid_3-1,  render_asteroid_4-1,  render_asteroid_5-1
-    		.word render_asteroid_6-1,  render_asteroid_7-1,  render_asteroid_8-1
-    		.word render_asteroid_9-1,  render_asteroid_10-1, render_asteroid_11-1
+    		.word render_asteroid_2-1,  render_asteroid_1-1,  render_asteroid_0-1,  0
+    		.word render_asteroid_5-1,  render_asteroid_4-1,  render_asteroid_3-1,  0
+    		.word render_asteroid_8-1,  render_asteroid_7-1,  render_asteroid_6-1,  0
+    		.word render_asteroid_11-1, render_asteroid_10-1, render_asteroid_9-1,  0
 
 shifted_asteroid_jmp_tbl:
     		; 4 asteroid patterns; large, medium, small
-    		.word render_shifted_asteroid_0-1,  render_shifted_asteroid_1-1,  render_shifted_asteroid_2-1
-    		.word render_shifted_asteroid_3-1,  render_shifted_asteroid_4-1,  render_shifted_asteroid_5-1
-    		.word render_shifted_asteroid_6-1,  render_shifted_asteroid_7-1,  render_shifted_asteroid_8-1
-    		.word render_shifted_asteroid_9-1,  render_shifted_asteroid_10-1, render_shifted_asteroid_11-1
+    		.word render_shifted_asteroid_2-1,  render_shifted_asteroid_1-1,  render_shifted_asteroid_0-1,  0
+    		.word render_shifted_asteroid_5-1,  render_shifted_asteroid_4-1,  render_shifted_asteroid_3-1,  0
+    		.word render_shifted_asteroid_8-1,  render_shifted_asteroid_7-1,  render_shifted_asteroid_6-1,  0
+    		.word render_shifted_asteroid_11-1, render_shifted_asteroid_10-1, render_shifted_asteroid_9-1,  0
 
 ; $4
-; $00(2:1)=shape(0-3)
 dvg_asteroid:
 				HINT_IIGSMODE
-        lda     (byte_B),y
-				sta			$C6
-				asl														; pattern x4
-				clc
-				adc			$C6										; =pattern x6
-				and			#$00FF
-				tax
-				lda			$08										; global scale
-				and			#$00FF
-				beq			:+										; large? yes, go
-				inx
-				inx
-				cmp			#$0F									; medium?
-				beq			:+										; yes, go
-				inx
-				inx														; small
-:				ldy			asteroid_jmp_tbl,x
+        lda     (byte_B),y						; status (4:3)=shape, (2:1)=size
+       	and 		#$001E
+       	tax
+				ldy			asteroid_jmp_tbl,x
 				lda     $09
 				bit     #1
 				beq     :+
