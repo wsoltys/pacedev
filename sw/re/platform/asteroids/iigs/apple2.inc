@@ -126,10 +126,12 @@ OP_EXPLODINGSHIP    = $90
 OP_SCALEBRIGHTNESS  = $E0
 OP_HALT             = $F0
 
+OP_NOERASE					= $08
+
 .macro OP_EXIT
+				inc			byte_B
+				inc			byte_B
         IIMODE
-				lda			#2										; 2 bytes in instruction
-				jsr 		upd_ptr
 				clc														; no halt
 				rts
 .endmacro

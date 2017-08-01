@@ -56,8 +56,6 @@ erase_life:
 
 erase_asteroid_0:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$146,x
@@ -103,8 +101,6 @@ erase_asteroid_0:
 
 erase_asteroid_1:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$004,x
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$142,x
@@ -125,8 +121,6 @@ erase_asteroid_1:
 
 erase_asteroid_2:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$144,x
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E4,x
@@ -139,8 +133,6 @@ erase_asteroid_2:
 
 erase_asteroid_3:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$146,x
         sta     SHRMEM+$1E0,x
         sta     SHRMEM+$320,x
@@ -184,8 +176,6 @@ erase_asteroid_3:
 
 erase_asteroid_4:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E2,x
         sta     SHRMEM+$282,x
@@ -206,8 +196,6 @@ erase_asteroid_4:
 
 erase_asteroid_5:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$144,x
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E4,x
@@ -220,8 +208,6 @@ erase_asteroid_5:
 
 erase_asteroid_6:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$1E6,x
         sta     SHRMEM+$320,x
@@ -269,8 +255,6 @@ erase_asteroid_6:
 
 erase_asteroid_7:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$142,x
         sta     SHRMEM+$322,x
         sta     SHRMEM+$282,x
@@ -291,8 +275,6 @@ erase_asteroid_7:
 
 erase_asteroid_8:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E4,x
@@ -305,8 +287,6 @@ erase_asteroid_8:
 
 erase_asteroid_9:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$142,x
         sta     SHRMEM+$640,x
         sta     SHRMEM+$6E0,x
@@ -350,8 +330,6 @@ erase_asteroid_9:
 
 erase_asteroid_10:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$284,x
         sta     SHRMEM+$322,x
         sta     SHRMEM+$3C2,x
@@ -372,8 +350,6 @@ erase_asteroid_10:
 
 erase_asteroid_11:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$004,x
@@ -386,8 +362,6 @@ erase_asteroid_11:
 
 erase_shifted_asteroid_0:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$002,x
         sta     SHRMEM+$0A6,x
         sta     SHRMEM+$280,x
@@ -429,8 +403,6 @@ erase_shifted_asteroid_0:
 
 erase_shifted_asteroid_1:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$142,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$1E2,x
@@ -452,8 +424,6 @@ erase_shifted_asteroid_1:
 
 erase_shifted_asteroid_2:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E4,x
         sta     SHRMEM+$0A2,x
@@ -464,8 +434,6 @@ erase_shifted_asteroid_2:
 
 erase_shifted_asteroid_3:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$002,x
         sta     SHRMEM+$0A6,x
         sta     SHRMEM+$280,x
@@ -508,8 +476,6 @@ erase_shifted_asteroid_3:
 
 erase_shifted_asteroid_4:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$142,x
         sta     SHRMEM+$322,x
         sta     SHRMEM+$146,x
@@ -530,8 +496,6 @@ erase_shifted_asteroid_4:
 
 erase_shifted_asteroid_5:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E4,x
         sta     SHRMEM+$0A2,x
@@ -542,8 +506,6 @@ erase_shifted_asteroid_5:
 
 erase_shifted_asteroid_6:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$0A6,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$146,x
@@ -593,8 +555,6 @@ erase_shifted_asteroid_6:
 
 erase_shifted_asteroid_7:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$282,x
         sta     SHRMEM+$1E6,x
         sta     SHRMEM+$286,x
@@ -614,8 +574,6 @@ erase_shifted_asteroid_7:
 
 erase_shifted_asteroid_8:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E4,x
         sta     SHRMEM+$142,x
@@ -625,8 +583,6 @@ erase_shifted_asteroid_8:
 
 erase_shifted_asteroid_9:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$146,x
         sta     SHRMEM+$320,x
@@ -669,8 +625,6 @@ erase_shifted_asteroid_9:
 
 erase_shifted_asteroid_10:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$1E2,x
         sta     SHRMEM+$282,x
         sta     SHRMEM+$3C4,x
@@ -693,8 +647,6 @@ erase_shifted_asteroid_10:
 
 erase_shifted_asteroid_11:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E4,x
         sta     SHRMEM+$0A2,x
@@ -736,7 +688,6 @@ erase_asteroid:
 				beq			:+										; yes, go
 				inx
 				inx														; small
-        HINT_IIGSMODE
 :				ldy			asteroid_jmp_tbl,x
 				lda     $09
 				bit     #1
@@ -744,6 +695,7 @@ erase_asteroid:
 				ldy     shifted_asteroid_jmp_tbl,x
 :       phy
 				ldx     $C2
+				lda			#0
 				rts
 
 erase_ship:
@@ -768,7 +720,6 @@ erase_ship:
 
 erase_large_saucer:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$1E2,x
@@ -794,7 +745,6 @@ erase_large_saucer:
 
 erase_shifted_large_saucer:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$1E2,x
         sta     SHRMEM+$286,x
@@ -820,7 +770,6 @@ erase_shifted_large_saucer:
 
 erase_small_saucer:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$004,x
@@ -834,7 +783,6 @@ erase_small_saucer:
 
 erase_shifted_small_saucer:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
         lda     #0
         sta     SHRMEM+$004,x
         sta     SHRMEM+$0A2,x
@@ -865,8 +813,6 @@ erase_shot:
 
 erase_shrapnel_0:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$282,x
         sta     SHRMEM+$504,x
         sta     SHRMEM+$5A2,x
@@ -881,8 +827,6 @@ erase_shrapnel_0:
 
 erase_shrapnel_1:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$326,x
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$6E4,x
@@ -897,8 +841,6 @@ erase_shrapnel_1:
 
 erase_shrapnel_2:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$000,x
         sta     SHRMEM+$640,x
         sta     SHRMEM+$6E4,x
@@ -913,8 +855,6 @@ erase_shrapnel_2:
 
 erase_shrapnel_3:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$006,x
         sta     SHRMEM+$6E6,x
         sta     SHRMEM+$824,x
@@ -929,8 +869,6 @@ erase_shrapnel_3:
 
 erase_shifted_shrapnel_0:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$1E6,x
         sta     SHRMEM+$002,x
         sta     SHRMEM+$006,x
@@ -945,8 +883,6 @@ erase_shifted_shrapnel_0:
 
 erase_shifted_shrapnel_1:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$0A6,x
         sta     SHRMEM+$5A6,x
         sta     SHRMEM+$786,x
@@ -961,8 +897,6 @@ erase_shifted_shrapnel_1:
 
 erase_shifted_shrapnel_2:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$006,x
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$646,x
@@ -977,8 +911,6 @@ erase_shifted_shrapnel_2:
 
 erase_shifted_shrapnel_3:
         HINT_IIGSMODE
-				ldx			$C2										; SHR offset
-        lda     #0
         sta     SHRMEM+$000,x
         sta     SHRMEM+$462,x
         sta     SHRMEM+$6E0,x
@@ -1021,7 +953,8 @@ erase_shrapnel:
 				beq     :+
 				ldy     shifted_shrapnel_jmp_tbl,x
 :       phy
-				ldx     $C2
+				ldx     $C2										; SHR offset
+				lda			#0
 				rts
 .endif
 
