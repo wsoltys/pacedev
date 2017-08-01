@@ -670,9 +670,8 @@ shifted_asteroid_jmp_tbl:
     		.word erase_shifted_asteroid_9-1,  erase_shifted_asteroid_10-1, erase_shifted_asteroid_11-1
 
 erase_asteroid:
-        HINT_IIMODE
+        HINT_IIGSMODE
         lda     (byte_B),y
-				IIGSMODE
 				sta			$C6
 				asl														; pattern x4
 				clc

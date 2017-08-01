@@ -38,12 +38,11 @@
 
 ; $1
 dvg_chr:
-				IIGSMODE
+				HINT_IIGSMODE
         lda     (byte_B),y            ; chr x2
 				and			#$00FF
 				tax
 				ldy			chr_tbl,x
-render_7x2:				
 				ldx			$C2										; SHR offset
 				orw     $00, 0*160+0
 				orw     $02, 0*160+2
@@ -67,8 +66,8 @@ render_7x2:
 
 ; $2
 dvg_life:
-				IIGSMODE
-				; offset Y because it overwrites score
+				HINT_IIGSMODE
+				; offset Y (+$280) because it overwrites score
 				ldx			$C2										; SHR offset
         lda     #$00F0
         ora     SHRMEM+$280+$322,x
@@ -104,45 +103,8 @@ dvg_life:
 
 ; $3
 dvg_copyright:
+				HINT_IIGSMODE
 				; CUR SSS=0,(400,128)
-.if 0				
-				lda			#<128
-				sta			$06
-				lda			#>128
-				sta			$07
-				lda			#<400
-				sta			$04
-				lda			#>400
-				sta			$05
-				lda			#00
-				sta			$08		
-				jsr			cur_2_shr
-.endif				
-				IIGSMODE
-.ifndef BUILD_OPT_COMPILED_SPRITES				
-				ldy			#copyright
-;				ldx			$C2										; SHR offset ($6F72)
-				ldx			#$6F72
-				lda			#5										; 5 lines
-				sta			$C4
-:				lda			#15										; 15 words/line
-				sta			$C6
-:				lda			0,y
-				ora			SHRMEM,x
-				sta			SHRMEM,x
-				iny
-				iny														; pixel data
-				inx
-				inx														; screen ptr
-				dec			$C6										; done line?
-				bne			:-										; no, loop
-				txa
-				clc
-				adc			#(160-30)							; ptr next line
-				tax
-				dec			$C4										; done all lines?
-				bne			:--										; no, loop
-.else				
 				ldx			#$6F72
         ldy     #$000F
         tya
@@ -337,7 +299,6 @@ dvg_copyright:
         lda     #$FFF0
         ora     SHRMEM+$15A,x
         sta     SHRMEM+$15A,x
-.endif        
 				OP_EXIT
 
 render_asteroid_0:
@@ -2002,9 +1963,8 @@ shifted_asteroid_jmp_tbl:
 ; $4
 ; $00(2:1)=shape(0-3)
 dvg_asteroid:
-        HINT_IIMODE
+				HINT_IIGSMODE
         lda     (byte_B),y
-				IIGSMODE
 				sta			$C6
 				asl														; pattern x4
 				clc
@@ -2020,49 +1980,6 @@ dvg_asteroid:
 				beq			:+										; yes, go
 				inx
 				inx														; small
-.ifndef BUILD_OPT_COMPILED_SPRITES
-:				ldy			asteroid_tbl,x
-				lda			$09										; X (0-255)
-				bit			#1
-				beq			render_16x4
-				ldy			shifted_asteroid_tbl,x
-render_16x4:
-				lda			#16										; 16 lines
-				sta			$C4
-				ldx			$C2										; SHR offset
-:				lda			0,y
-				ora			SHRMEM,x
-				sta			SHRMEM,x							; 1st qtr of line
-				lda			2,y
-				ora			SHRMEM+2,x
-				sta			SHRMEM+2,x							; 2nd qtr of line
-				lda			4,y
-				ora			SHRMEM+4,x
-				sta			SHRMEM+4,x							; 3rd qtr of line
-				lda			6,y
-				ora			SHRMEM+6,x
-				sta			SHRMEM+6,x							; 4th qtr of line
-				lda			8,y
-				ora			SHRMEM+8,x
-				sta			SHRMEM+8,x							; 5th qtr of line
-				tya
-				clc
-				adc			#10
-				tay
-				clc
-				txa
-				adc			#160									; ptr next line
-				tax
-				dec			$C4										; line counter
-				bne			:-
-				; update CUR
-				lda			$C2
-				clc
-				adc			#8
-				sta			$C2
-				OP_EXIT
-.else
-        HINT_IIGSMODE
 :				ldy			asteroid_jmp_tbl,x
 				lda     $09
 				bit     #1
@@ -2071,7 +1988,6 @@ render_16x4:
 :       phy
 				ldx     $C2
 				rts
-.endif				
 
 render_ship_0:
         HINT_IIGSMODE
@@ -3608,7 +3524,7 @@ shifted_ship_jmp_tbl:
 ; $5
 ; $00=dir(0-255)
 dvg_ship:
-				IIGSMODE
+				HINT_IIGSMODE
 				lda			(byte_B),y            ; direction
 				xba														; high byte for more resolution
 				and			#$ff00
@@ -3816,7 +3732,7 @@ render_shifted_small_saucer:
 ; $6
 ; $00=
 dvg_saucer:
-				IIGSMODE
+				HINT_IIGSMODE
 				ldx			$C2										; SHR offset
 				lda			$09										; X (0-255)
 				bit			#1
@@ -3826,7 +3742,7 @@ dvg_saucer:
 
 ; $7
 dvg_shot:
-				IIGSMODE
+				HINT_IIGSMODE
 				ldx			$C2										; SHR offset
 				lda			$09										; X (0-255)
 				bit			#1
@@ -4141,7 +4057,7 @@ dvg_shrapnel:
 				; $B:2,6 $C:0,4,6 $D,$E,$F,$0:0,2,4,6
 				; instead we'll just use global scale factor
 				; $B=0, $C=1, $D,$E=2, $F,$0=3
-				IIGSMODE
+				HINT_IIGSMODE
 				lda			$08										; global scale
 				and			#$00FF
 				bne			:+
@@ -4150,15 +4066,6 @@ dvg_shrapnel:
 				sbc			#$0B									; -> 0-5
 				asl														; word offset into table
 				tax
-.ifndef BUILD_OPT_COMPILED_SPRITES
-				ldy			shrapnel_tbl,x
-				lda			$09										; X (0-255)
-				bit			#1
-				beq			:+
-				ldy			shifted_shrapnel_tbl,x
-:				jmp			render_16x4
-.else
-        HINT_IIGSMODE
 				ldy			shrapnel_jmp_tbl,x
 				lda     $09
 				bit     #1
@@ -4167,7 +4074,6 @@ dvg_shrapnel:
 :       phy
 				ldx     $C2                   ; current SHR offset
 				rts                           ; render
-.endif				
         
 ; $9
 dvg_explodingship:
@@ -4192,14 +4098,12 @@ dvg_jmp_tbl:
 				.word		dvg_halt-1
 
 handle_dvg_opcode:
-        IIMODE
-				and			#$F0									; opcode in high nibble
+        IIGSMODE
+				and			#$00F0								; opcode in high nibble
 				lsr
 				lsr
 				lsr														; offset in jump table
 				tax
-				lda			dvg_jmp_tbl+1,x
-				pha
 				lda			dvg_jmp_tbl,x
 				pha
 				rts
