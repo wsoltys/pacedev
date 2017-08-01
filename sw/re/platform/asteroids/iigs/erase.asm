@@ -3,7 +3,6 @@
 BUILD_OPT_ERASE_SHRAPNEL = 1
 
 ; iigs.asm
-.import upd_ptr
 .import dvg_cur
 .import dvg_scalebrightness
 .import dvg_halt

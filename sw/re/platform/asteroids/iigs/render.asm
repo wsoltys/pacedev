@@ -16,7 +16,6 @@
 .import shifted_shrapnel_tbl
 
 ; iigs.asm
-.import upd_ptr
 .import dvg_cur
 .import dvg_scalebrightness
 .import dvg_halt

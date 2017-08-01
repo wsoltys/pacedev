@@ -20,7 +20,6 @@
 
 ; erase/render.asm
 .import handle_erase_opcode
-.export upd_ptr
 .export dvg_cur
 .export dvg_scalebrightness
 .export dvg_halt
@@ -140,14 +139,6 @@ cur_2_shr:
 				sta			$C3										; msb (address)
 				rts
 
-upd_ptr:
-				clc
-				adc			byte_B
-				sta			byte_B
-				bcc			:+
-				inc			byte_C
-:				rts				
-
 ; $0
 dvg_cur:
         IIMODE
@@ -172,9 +163,12 @@ dvg_cur:
 				sta			$08
 				jsr			cur_2_shr							; map to pixel coordinates
 				lda			#4										; 4 bytes in instruction
-				jsr 		upd_ptr
-				clc														; no halt
-				rts
+				clc
+				adc			byte_B
+				sta			byte_B
+				bcc			:+
+				inc			byte_C								; never Carry
+:				rts
 
 ; $A-$D
 dvg_invalid:
@@ -186,9 +180,9 @@ dvg_scalebrightness:
         
 ; $F
 dvg_halt:
+				inc			byte_B
+				inc			byte_B
         IIMODE
-				lda			#2										; 2 bytes in instruction
-				jsr 		upd_ptr
 				sec														; flag halt
 				rts
 
