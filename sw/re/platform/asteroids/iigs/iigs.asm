@@ -217,12 +217,13 @@ apple_render_frame:
 				IIMODE
 .endif ; BUILD_OPT_RENDER_CLS			
 ;
-				lda			#2
+				IIGSMODE
+				lda			dvg_curr_addr_lsb
+				and			#DVGRAM|$0400
+				eor			#$0400
+				ora			#$0002
 				sta			byte_B
-				lda			dvg_curr_addr_msb
-				and			#(>DVGRAM)|$04
-				eor     #$04
-				sta			byte_C
+				IIMODE
 erase_loop:				
 				ldy			#1										; 2nd byte has the opcode
 				lda			(byte_B),y						; opcode (high nibble)
@@ -230,11 +231,12 @@ erase_loop:
 				jsr			handle_erase_opcode		; handle it
 				bcc			erase_loop
 ;
-				lda			#2
+				IIGSMODE
+				lda			dvg_curr_addr_lsb
+				and			#DVGRAM|$0400
+				ora			#$0002
 				sta			byte_B
-				lda			dvg_curr_addr_msb
-				and			#(>DVGRAM)|$04
-				sta			byte_C
+				IIMODE
 render_loop:
 				ldy			#1										; 2nd byte has the opcode
 				lda			(byte_B),y						; opcode (high nibble)
