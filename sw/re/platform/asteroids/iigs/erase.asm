@@ -791,15 +791,31 @@ erase_shifted_small_saucer:
         sta     SHRMEM+$1E4,x
         OP_EXIT
         
+saucer_jmp_tbl:
+				.word $0000
+    		.word erase_small_saucer-1
+    		.word erase_large_saucer-1
+
+shifted_saucer_jmp_tbl:
+				.word $0000
+    		.word erase_shifted_small_saucer-1
+    		.word erase_shifted_large_saucer-1
+
 erase_saucer:
-        HINT_IIGSMODE
-				ldx			$C2										; SHR offset
+				HINT_IIGSMODE
+				lda			(byte_B),y						; status
+				and			#$0003
+				asl
+				tax
+				ldy			saucer_jmp_tbl,x
 				lda			$09										; X (0-255)
 				bit			#1
-				bne			:+
-				jmp     erase_large_saucer
-:				jmp     erase_shifted_large_saucer
-
+				beq			:+
+				ldy			shifted_saucer_jmp_tbl,x
+:				phy
+				ldx			$C2										; SHR offset
+				rts
+				
 erase_shot:
         HINT_IIGSMODE
 				ldx			$C2										; SHR offset

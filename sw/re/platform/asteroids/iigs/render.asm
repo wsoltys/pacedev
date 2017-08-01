@@ -3728,16 +3728,32 @@ render_shifted_small_saucer:
         sta     SHRMEM+$1E4,x
         OP_EXIT
 
+saucer_jmp_tbl:
+				.word $0000
+    		.word render_small_saucer-1
+    		.word render_large_saucer-1
+
+shifted_saucer_jmp_tbl:
+				.word $0000
+    		.word render_shifted_small_saucer-1
+    		.word render_shifted_large_saucer-1
+
 ; $6
 ; $00=
 dvg_saucer:
 				HINT_IIGSMODE
-				ldx			$C2										; SHR offset
+				lda			(byte_B),y						; status
+				and			#$0003
+				asl
+				tax
+				ldy			saucer_jmp_tbl,x
 				lda			$09										; X (0-255)
 				bit			#1
-				bne			:+
-				jmp     render_large_saucer
-:				jmp     render_shifted_large_saucer
+				beq			:+
+				ldy			shifted_saucer_jmp_tbl,x
+:				phy
+				ldx			$C2										; SHR offset
+				rts
 
 ; $7
 dvg_shot:
