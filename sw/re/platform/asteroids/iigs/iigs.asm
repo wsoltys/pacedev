@@ -244,8 +244,10 @@ render_loop:
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
 
-				; fudge some inputs now
-	
+				; read some inputs now
+
+				HINT_IIMODE
+				
 	inputs:			
 				lda			#0
 				sta			hyperspaceSwitch
