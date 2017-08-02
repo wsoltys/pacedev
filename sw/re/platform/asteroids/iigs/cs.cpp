@@ -146,9 +146,7 @@ int main (int argc, char *argv[])
 			unsigned value = ((x+s)%2 == 0 ? 0x00F0 : 0x000F);
 
 			fprintf (fpR, "\n%sship_%d:\n", (s==0 ? "" : "shifted_"), i);				
-      fprintf (fpR, "        lda     #$%04X\n", value);
-      fprintf (fpR, "        ora     SHRMEM+$%03X,x\n", offset);
-      fprintf (fpR, "        sta     SHRMEM+$%03X,x\n", offset);
+      fprintf (fpR, "        thrust  $%03X, $%04X\n", offset, value);
 		}
 	}	
 	

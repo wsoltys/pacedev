@@ -1976,6 +1976,16 @@ dvg_asteroid:
 				ldx     $C2
 				rts
 
+.macro thrust offs, data
+        lda			$c8										; thrust
+        bit			#(1<<11)
+        beq			:+
+        lda     #data
+        ora     SHRMEM+offs,x
+        sta     SHRMEM+offs,x
+:
+.endmacro
+
 render_ship_0:
         HINT_IIGSMODE
         lda     #$000F
@@ -2002,13 +2012,8 @@ render_ship_0:
         lda     #$FF0F
         ora     SHRMEM+$280,x
         sta     SHRMEM+$280,x
-        lda			$c8										; thrust
-        bit			#(1<<11)
-        beq			:+
-        lda     #$00F0
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
-:       OP_EXIT
+        thrust  $1E0, $00F0
+       	OP_EXIT
 
 render_ship_1:
         HINT_IIGSMODE
@@ -2032,6 +2037,7 @@ render_ship_1:
         sta     SHRMEM+$280,x
         lda     #$FFFF
         sta     SHRMEM+$0A0,x
+        thrust  $1E0, $00F0
         OP_EXIT
 
 render_ship_2:
@@ -2060,6 +2066,7 @@ render_ship_2:
         lda     #$F0FF
         ora     SHRMEM+$140,x
         sta     SHRMEM+$140,x
+        thrust  $280, $000F
         OP_EXIT
 
 render_ship_3:
@@ -2098,6 +2105,7 @@ render_ship_3:
         lda     #$F0FF
         ora     SHRMEM+$1E0,x
         sta     SHRMEM+$1E0,x
+        thrust  $320, $000F
         OP_EXIT
 
 render_ship_4:
@@ -2133,6 +2141,7 @@ render_ship_4:
         lda     #$FF00
         ora     SHRMEM+$1E0,x
         sta     SHRMEM+$1E0,x
+        thrust  $321, $00F0
         OP_EXIT
 
 render_ship_5:
@@ -2174,6 +2183,7 @@ render_ship_5:
         lda     #$FF0F
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $3C1, $000F
         OP_EXIT
 
 render_ship_6:
@@ -2214,6 +2224,7 @@ render_ship_6:
         lda     #$FF0F
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $3C1, $000F
         OP_EXIT
 
 render_ship_7:
@@ -2248,6 +2259,7 @@ render_ship_7:
         lda     #$FF0F
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $3C1, $000F
         OP_EXIT
 
 render_ship_8:
@@ -2279,6 +2291,7 @@ render_ship_8:
         lda     #$FF00
         ora     SHRMEM+$280,x
         sta     SHRMEM+$280,x
+        thrust  $322, $00F0
         OP_EXIT
 
 render_ship_9:
@@ -2310,6 +2323,7 @@ render_ship_9:
         lda     #$FFF0
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $322, $000F
         OP_EXIT
 
 render_ship_10:
@@ -2331,6 +2345,7 @@ render_ship_10:
         sta     SHRMEM+$1E0,x
         lda     #$FFFF
         sta     SHRMEM+$0A0,x
+        thrust  $282, $000F
         OP_EXIT
 
 render_ship_11:
@@ -2362,6 +2377,7 @@ render_ship_11:
         lda     #$F0FF
         ora     SHRMEM+$140,x
         sta     SHRMEM+$140,x
+        thrust  $1E3, $00F0
         OP_EXIT
 
 render_ship_12:
@@ -2390,6 +2406,7 @@ render_ship_12:
         lda     #$FF00
         ora     SHRMEM+$280,x
         sta     SHRMEM+$280,x
+        thrust  $1E3, $00F0
         OP_EXIT
 
 render_ship_13:
@@ -2417,6 +2434,7 @@ render_ship_13:
         sta     SHRMEM+$282,x
         lda     #$FFFF
         sta     SHRMEM+$1E0,x
+        thrust  $143, $00F0
         OP_EXIT
 
 render_ship_14:
@@ -2439,6 +2457,7 @@ render_ship_14:
         lda     #$FF00
         ora     SHRMEM+$140,x
         sta     SHRMEM+$140,x
+        thrust  $0A2, $000F
         OP_EXIT
 
 render_ship_15:
@@ -2470,6 +2489,7 @@ render_ship_15:
         lda     #$FF00
         ora     SHRMEM+$140,x
         sta     SHRMEM+$140,x
+        thrust  $0A2, $000F
         OP_EXIT
 
 render_ship_16:
@@ -2501,6 +2521,7 @@ render_ship_16:
         lda     #$FF00
         ora     SHRMEM+$140,x
         sta     SHRMEM+$140,x
+        thrust  $0A2, $00F0
         OP_EXIT
 
 render_ship_17:
@@ -2535,6 +2556,7 @@ render_ship_17:
         lda     #$FF0F
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $001, $000F
         OP_EXIT
 
 render_ship_18:
@@ -2575,6 +2597,7 @@ render_ship_18:
         lda     #$FF0F
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $001, $000F
         OP_EXIT
 
 render_ship_19:
@@ -2616,6 +2639,7 @@ render_ship_19:
         lda     #$FF0F
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $001, $000F
         OP_EXIT
 
 render_ship_20:
@@ -2651,6 +2675,7 @@ render_ship_20:
         lda     #$F000
         ora     SHRMEM+$1E0,x
         sta     SHRMEM+$1E0,x
+        thrust  $0A1, $00F0
         OP_EXIT
 
 render_ship_21:
@@ -2685,6 +2710,7 @@ render_ship_21:
         lda     #$FF00
         ora     SHRMEM+$280,x
         sta     SHRMEM+$280,x
+        thrust  $0A0, $000F
         OP_EXIT
 
 render_ship_22:
@@ -2709,6 +2735,7 @@ render_ship_22:
         sta     SHRMEM+$322,x
         lda     #$FFFF
         sta     SHRMEM+$280,x
+        thrust  $140, $000F
         OP_EXIT
 
 render_ship_23:
@@ -2734,6 +2761,7 @@ render_ship_23:
         lda     #$FF0F
         ora     SHRMEM+$140,x
         sta     SHRMEM+$140,x
+        thrust  $1E0, $00F0
         OP_EXIT
 
 render_shifted_ship_0:
@@ -2762,13 +2790,8 @@ render_shifted_ship_0:
         lda     #$FF00
         ora     SHRMEM+$280,x
         sta     SHRMEM+$280,x
-        lda			$c8										; thrust
-        bit			#(1<<11)
-        beq			:+
-        lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
-:       OP_EXIT
+        thrust  $1E0, $000F
+ 	      OP_EXIT
 
 render_shifted_ship_1:
         HINT_IIGSMODE
@@ -2799,6 +2822,7 @@ render_shifted_ship_1:
         lda     #$FF0F
         ora     SHRMEM+$142,x
         sta     SHRMEM+$142,x
+        thrust  $1E0, $000F
         OP_EXIT
 
 render_shifted_ship_2:
@@ -2823,6 +2847,7 @@ render_shifted_ship_2:
         sta     SHRMEM+$140,x
         lda     #$FFFF
         sta     SHRMEM+$0A2,x
+        thrust  $281, $00F0
         OP_EXIT
 
 render_shifted_ship_3:
@@ -2854,6 +2879,7 @@ render_shifted_ship_3:
         lda     #$FF0F
         ora     SHRMEM+$1E0,x
         sta     SHRMEM+$1E0,x
+        thrust  $321, $00F0
         OP_EXIT
 
 render_shifted_ship_4:
@@ -2885,6 +2911,7 @@ render_shifted_ship_4:
         lda     #$F0F0
         ora     SHRMEM+$142,x
         sta     SHRMEM+$142,x
+        thrust  $321, $000F
         OP_EXIT
 
 render_shifted_ship_5:
@@ -2919,6 +2946,7 @@ render_shifted_ship_5:
         lda     #$FF00
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $3C2, $00F0
         OP_EXIT
 
 render_shifted_ship_6:
@@ -2959,6 +2987,7 @@ render_shifted_ship_6:
         lda     #$FF00
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $3C2, $00F0
         OP_EXIT
 
 render_shifted_ship_7:
@@ -2999,6 +3028,7 @@ render_shifted_ship_7:
         lda     #$FF00
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $3C2, $00F0
         OP_EXIT
 
 render_shifted_ship_8:
@@ -3033,6 +3063,7 @@ render_shifted_ship_8:
         lda     #$FF00
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $322, $000F
         OP_EXIT
 
 render_shifted_ship_9:
@@ -3074,6 +3105,7 @@ render_shifted_ship_9:
         lda     #$FF0F
         ora     SHRMEM+$1E2,x
         sta     SHRMEM+$1E2,x
+        thrust  $323, $00F0
         OP_EXIT
 
 render_shifted_ship_10:
@@ -3102,6 +3134,7 @@ render_shifted_ship_10:
         lda     #$FF0F
         ora     SHRMEM+$142,x
         sta     SHRMEM+$142,x
+        thrust  $283, $00F0
         OP_EXIT
 
 render_shifted_ship_11:
@@ -3126,6 +3159,7 @@ render_shifted_ship_11:
         sta     SHRMEM+$140,x
         lda     #$FFFF
         sta     SHRMEM+$0A2,x
+        thrust  $1E3, $000F
         OP_EXIT
 
 render_shifted_ship_12:
@@ -3154,6 +3188,7 @@ render_shifted_ship_12:
         lda     #$FF00
         ora     SHRMEM+$322,x
         sta     SHRMEM+$322,x
+        thrust  $1E3, $000F
         OP_EXIT
 
 render_shifted_ship_13:
@@ -3179,6 +3214,7 @@ render_shifted_ship_13:
         lda     #$FF0F
         ora     SHRMEM+$282,x
         sta     SHRMEM+$282,x
+        thrust  $143, $000F
         OP_EXIT
 
 render_shifted_ship_14:
@@ -3203,6 +3239,7 @@ render_shifted_ship_14:
         sta     SHRMEM+$280,x
         lda     #$FFFF
         sta     SHRMEM+$1E2,x
+        thrust  $0A3, $00F0
         OP_EXIT
 
 render_shifted_ship_15:
@@ -3240,6 +3277,7 @@ render_shifted_ship_15:
         lda     #$FF0F
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $0A3, $00F0
         OP_EXIT
 
 render_shifted_ship_16:
@@ -3274,6 +3312,7 @@ render_shifted_ship_16:
         lda     #$FF00
         ora     SHRMEM+$320,x
         sta     SHRMEM+$320,x
+        thrust  $0A2, $000F
         OP_EXIT
 
 render_shifted_ship_17:
@@ -3314,6 +3353,7 @@ render_shifted_ship_17:
         lda     #$FF00
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $002, $00F0
         OP_EXIT
 
 render_shifted_ship_18:
@@ -3354,6 +3394,7 @@ render_shifted_ship_18:
         lda     #$FF00
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $002, $00F0
         OP_EXIT
 
 render_shifted_ship_19:
@@ -3388,6 +3429,7 @@ render_shifted_ship_19:
         lda     #$FF00
         ora     SHRMEM+$0A0,x
         sta     SHRMEM+$0A0,x
+        thrust  $002, $00F0
         OP_EXIT
 
 render_shifted_ship_20:
@@ -3419,6 +3461,7 @@ render_shifted_ship_20:
         lda     #$F0F0
         ora     SHRMEM+$282,x
         sta     SHRMEM+$282,x
+        thrust  $0A1, $000F
         OP_EXIT
 
 render_shifted_ship_21:
@@ -3450,6 +3493,7 @@ render_shifted_ship_21:
         lda     #$FF0F
         ora     SHRMEM+$1E0,x
         sta     SHRMEM+$1E0,x
+        thrust  $0A1, $00F0
         OP_EXIT
 
 render_shifted_ship_22:
@@ -3475,6 +3519,7 @@ render_shifted_ship_22:
         lda     #$FF0F
         ora     SHRMEM+$322,x
         sta     SHRMEM+$322,x
+        thrust  $141, $00F0
         OP_EXIT
 
 render_shifted_ship_23:
@@ -3502,6 +3547,7 @@ render_shifted_ship_23:
         sta     SHRMEM+$320,x
         lda     #$FFFF
         sta     SHRMEM+$282,x
+        thrust  $1E0, $000F
         OP_EXIT
                         
 ship_jmp_tbl:
