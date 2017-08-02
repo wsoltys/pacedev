@@ -25,6 +25,8 @@
 
 ; debug
 .export dvg_chr
+.export dvg_ship
+.export render_ship_0
 
 ; still undecided if it's better with the BEQ
 .macro  orw     offd, offv
@@ -2000,7 +2002,13 @@ render_ship_0:
         lda     #$FF0F
         ora     SHRMEM+$280,x
         sta     SHRMEM+$280,x
-        OP_EXIT
+        lda			$c8										; thrust
+        bit			#(1<<11)
+        beq			:+
+        lda     #$00F0
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+:       OP_EXIT
 
 render_ship_1:
         HINT_IIGSMODE
@@ -2754,7 +2762,13 @@ render_shifted_ship_0:
         lda     #$FF00
         ora     SHRMEM+$280,x
         sta     SHRMEM+$280,x
-        OP_EXIT
+        lda			$c8										; thrust
+        bit			#(1<<11)
+        beq			:+
+        lda     #$000F
+        ora     SHRMEM+$1E0,x
+        sta     SHRMEM+$1E0,x
+:       OP_EXIT
 
 render_shifted_ship_1:
         HINT_IIGSMODE
@@ -3511,6 +3525,7 @@ shifted_ship_jmp_tbl:
 dvg_ship:
 				HINT_IIGSMODE
 				lda			(byte_B),y            ; direction
+				sta			$c8										; opcode inc. thrust
 				xba														; high byte for more resolution
 				and			#$ff00
 				lsr

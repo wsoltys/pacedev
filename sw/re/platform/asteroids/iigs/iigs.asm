@@ -56,7 +56,7 @@ apple_start:
 				; enable shadowing
 				lda			SHADOW
 				and			#~(1<<3)+256					; enable for SHR (only)
-				sta			SHADOW
+				;sta			SHADOW
 				; black border
 				lda			TXTBDR
 				and			#$F0

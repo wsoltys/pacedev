@@ -34,7 +34,7 @@
  .include "apple2.inc"
 
 .export START
-.export display_hs_entry
+.export calc_ship_and_render
 .export DVGRAM
 
 .ZEROPAGE
@@ -3016,18 +3016,25 @@ loc_752A:                                                                       
                                 LDA     DVGROM+$26E,Y                           ; ship table address LSB
                                 LDX     DVGROM+$26F,Y                           ; ship table address MSB
                                 JSR     copy_vector_list_from_table_to_dvgram
-.else
-                                sta     (dvg_curr_addr_lsb),y
-                                iny
-                                lda     #OP_SHIP
-                                sta     (dvg_curr_addr_lsb),y
-                                jsr     update_dvg_curr_addr
-.endif                                
                                 LDA     thrustSwitch                            ; thrust?
                                 BPL     locret_7554                             ; no, exit
                                 LDA     fastTimer
                                 AND     #4                                      ; time to display thrust?
                                 BEQ     locret_7554                             ; no, exit
+.else
+                                sta     (dvg_curr_addr_lsb),y
+                                iny
+                                lda			thrustSwitch
+                                bpl			:+
+                                lda			fastTimer
+                                and			#4
+                                beq			:+
+                                lda			#OP_SHIP_THRUST
+                                bne			:++
+:                               lda     #OP_SHIP
+:                               sta     (dvg_curr_addr_lsb),y
+                                jsr     update_dvg_curr_addr
+.endif                                
 .ifndef APPLE_IIGS                                
                                 INY
                                 INY                                             ; Y=2???

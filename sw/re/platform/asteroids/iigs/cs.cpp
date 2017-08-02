@@ -122,6 +122,35 @@ int main (int argc, char *argv[])
 
 		fgets (buf, 1024, fp);
 	}
+
+	unsigned thrust_x_off_tbl[] = 
+	{ 
+		0, 0, 1, 1, 2, 3, 3, 3, 4, 5, 5, 6, 6, 6, 5, 5,
+		4, 3, 3, 3, 2, 1, 1, 0
+	};
+	
+	unsigned thrust_y_off_tbl[] =
+	{
+		3, 3, 4, 5, 5, 6, 6, 6, 5, 5, 4, 3, 3, 2, 1, 1,
+		1, 0, 0, 0, 1, 1, 2, 3
+	};
+
+	for (unsigned s=0; s<2; s++)
+	{
+		for (unsigned i=0; i<24; i++)
+		{
+			unsigned x = thrust_x_off_tbl[i];
+			unsigned y = thrust_y_off_tbl[i];
+			
+			unsigned offset = y * 160 + (x+s)/2;
+			unsigned value = ((x+s)%2 == 0 ? 0x00F0 : 0x000F);
+
+			fprintf (fpR, "\n%sship_%d:\n", (s==0 ? "" : "shifted_"), i);				
+      fprintf (fpR, "        lda     #$%04X\n", value);
+      fprintf (fpR, "        ora     SHRMEM+$%03X,x\n", offset);
+      fprintf (fpR, "        sta     SHRMEM+$%03X,x\n", offset);
+		}
+	}	
 	
 	fclose (fp);
 	fclose (fpR);

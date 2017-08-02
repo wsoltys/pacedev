@@ -120,6 +120,7 @@ OP_LIFE             = $20
 OP_COPYRIGHT        = $30
 OP_ASTEROID         = $40
 OP_SHIP             = $50
+OP_SHIP_THRUST			= OP_SHIP|(1<<3)
 OP_SAUCER           = $60
 OP_SHOT             = $70
 OP_SHRAPNEL         = $80
