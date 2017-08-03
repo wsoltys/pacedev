@@ -28,6 +28,7 @@
 ; for debugging
 .export cur_2_shr
 .export apple_render_frame
+.export erase_loop
 .export read_joystick
 .export read_btns
 
@@ -221,11 +222,8 @@ apple_render_frame:
 				eor			#$0400
 				ora			#$0002
 				sta			byte_B
-				IIMODE
 erase_loop:				
-				ldy			#1										; 2nd byte has the opcode
-				lda			(byte_B),y						; opcode (high nibble)
-				dey														; reset to 1st byte
+				lda			(byte_B)
 				jsr			handle_erase_opcode		; handle it
 				bcc			erase_loop
 ;
