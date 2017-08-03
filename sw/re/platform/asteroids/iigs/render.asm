@@ -40,7 +40,7 @@
 ; $1
 dvg_chr:
 				HINT_IIGSMODE
-        lda     (byte_B),y            ; chr x2
+        lda     (byte_B)            	; chr x2
 				and			#$00FF
 				tax
 				ldy			chr_tbl,x
@@ -1964,7 +1964,7 @@ shifted_asteroid_jmp_tbl:
 ; $4
 dvg_asteroid:
 				HINT_IIGSMODE
-        lda     (byte_B),y						; status (4:3)=shape, (2:1)=size
+        lda     (byte_B)							; status (4:3)=shape, (2:1)=size
        	and 		#$001E
        	tax
 				ldy			asteroid_jmp_tbl,x
@@ -3570,7 +3570,7 @@ shifted_ship_jmp_tbl:
 ; $00=dir(0-255)
 dvg_ship:
 				HINT_IIGSMODE
-				lda			(byte_B),y            ; direction
+				lda			(byte_B)            	; direction
 				sta			$c8										; opcode inc. thrust
 				xba														; high byte for more resolution
 				and			#$ff00
@@ -3789,7 +3789,7 @@ shifted_saucer_jmp_tbl:
 ; $00=
 dvg_saucer:
 				HINT_IIGSMODE
-				lda			(byte_B),y						; status
+				lda			(byte_B)							; status
 				and			#$0003
 				asl
 				tax
@@ -4160,12 +4160,13 @@ dvg_jmp_tbl:
 				.word		dvg_halt-1
 
 handle_dvg_opcode:
-        IIGSMODE
-				and			#$00F0								; opcode in high nibble
+				HINT_IIGSMODE
+        xba
 				lsr
 				lsr
 				lsr														; offset in jump table
+				and     #$001E
 				tax
 				lda			dvg_jmp_tbl,x
 				pha
-				rts
+				rts														; render

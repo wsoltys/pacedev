@@ -10,13 +10,6 @@ BUILD_OPT_ERASE_SHRAPNEL = 1
 
 .export handle_erase_opcode
 
-.macro EOP_EXIT
-				inc			byte_B
-				inc			byte_B
-				clc														; no halt
-				rts
-.endmacro
-
 erase_chr:
         HINT_IIGSMODE
 				ldx			$C2										; SHR offset
@@ -39,7 +32,7 @@ erase_chr:
 				inc			$C2
 				inc			$C2
 				inc			$C2
-				EOP_EXIT
+				OP_EXIT
 
 erase_life:
         HINT_IIGSMODE
@@ -59,7 +52,7 @@ erase_life:
 				inc			$C2
 				inc			$C2
 				inc			$C2
-				EOP_EXIT
+				OP_EXIT
 
 erase_asteroid_0:
         HINT_IIGSMODE
@@ -104,7 +97,7 @@ erase_asteroid_0:
         sta     SHRMEM+$8C4,x
         sta     SHRMEM+$786,x
         sta     SHRMEM+$962,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_1:
         HINT_IIGSMODE
@@ -124,7 +117,7 @@ erase_asteroid_1:
         sta     SHRMEM+$3C4,x
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$462,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_2:
         HINT_IIGSMODE
@@ -136,7 +129,7 @@ erase_asteroid_2:
         sta     SHRMEM+$1E2,x
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$142,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_3:
         HINT_IIGSMODE
@@ -179,7 +172,7 @@ erase_asteroid_3:
         sta     SHRMEM+$326,x
         sta     SHRMEM+$822,x
         sta     SHRMEM+$964,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_4:
         HINT_IIGSMODE
@@ -199,7 +192,7 @@ erase_asteroid_4:
         sta     SHRMEM+$1E4,x
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$3C4,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_5:
         HINT_IIGSMODE
@@ -211,7 +204,7 @@ erase_asteroid_5:
         sta     SHRMEM+$1E2,x
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$142,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_6:
         HINT_IIGSMODE
@@ -258,7 +251,7 @@ erase_asteroid_6:
         sta     SHRMEM+$004,x
         sta     SHRMEM+$3C0,x
         sta     SHRMEM+$964,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_7:
         HINT_IIGSMODE
@@ -278,7 +271,7 @@ erase_asteroid_7:
         sta     SHRMEM+$324,x
         sta     SHRMEM+$3C4,x
         sta     SHRMEM+$1E2,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_8:
         HINT_IIGSMODE
@@ -290,7 +283,7 @@ erase_asteroid_8:
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$1E2,x
         sta     SHRMEM+$142,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_9:
         HINT_IIGSMODE
@@ -333,7 +326,7 @@ erase_asteroid_9:
         sta     SHRMEM+$464,x
         sta     SHRMEM+$002,x
         sta     SHRMEM+$280,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_10:
         HINT_IIGSMODE
@@ -353,7 +346,7 @@ erase_asteroid_10:
         sta     SHRMEM+$002,x
         sta     SHRMEM+$462,x
         sta     SHRMEM+$1E4,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_asteroid_11:
         HINT_IIGSMODE
@@ -365,7 +358,7 @@ erase_asteroid_11:
         sta     SHRMEM+$1E2,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$0A2,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_0:
         HINT_IIGSMODE
@@ -406,7 +399,7 @@ erase_shifted_asteroid_0:
         sta     SHRMEM+$964,x
         sta     SHRMEM+$786,x
         sta     SHRMEM+$962,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_1:
         HINT_IIGSMODE
@@ -427,7 +420,7 @@ erase_shifted_asteroid_1:
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$3C4,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_2:
         HINT_IIGSMODE
@@ -437,7 +430,7 @@ erase_shifted_asteroid_2:
         sta     SHRMEM+$142,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$0A4,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_3:
         HINT_IIGSMODE
@@ -479,7 +472,7 @@ erase_shifted_asteroid_3:
         sta     SHRMEM+$506,x
         sta     SHRMEM+$326,x
         sta     SHRMEM+$0A2,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_4:
         HINT_IIGSMODE
@@ -499,7 +492,7 @@ erase_shifted_asteroid_4:
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$464,x
         sta     SHRMEM+$1E4,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_5:
         HINT_IIGSMODE
@@ -509,7 +502,7 @@ erase_shifted_asteroid_5:
         sta     SHRMEM+$142,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$0A4,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_6:
         HINT_IIGSMODE
@@ -558,7 +551,7 @@ erase_shifted_asteroid_6:
         sta     SHRMEM+$3C0,x
         sta     SHRMEM+$964,x
         sta     SHRMEM+$004,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_7:
         HINT_IIGSMODE
@@ -577,7 +570,7 @@ erase_shifted_asteroid_7:
         sta     SHRMEM+$464,x
         sta     SHRMEM+$004,x
         sta     SHRMEM+$1E2,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_8:
         HINT_IIGSMODE
@@ -586,7 +579,7 @@ erase_shifted_asteroid_8:
         sta     SHRMEM+$142,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$0A4,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_9:
         HINT_IIGSMODE
@@ -628,7 +621,7 @@ erase_shifted_asteroid_9:
         sta     SHRMEM+$002,x
         sta     SHRMEM+$280,x
         sta     SHRMEM+$282,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_10:
         HINT_IIGSMODE
@@ -650,7 +643,7 @@ erase_shifted_asteroid_10:
         sta     SHRMEM+$1E4,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$464,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_asteroid_11:
         HINT_IIGSMODE
@@ -660,7 +653,7 @@ erase_shifted_asteroid_11:
         sta     SHRMEM+$142,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$0A4,x
-				EOP_EXIT
+				OP_EXIT
 
 asteroid_jmp_tbl:
     		; 4 asteroid patterns; large, medium, small
@@ -709,7 +702,7 @@ erase_ship:
         sta     SHRMEM+$322,x
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$3C0,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_large_saucer:
         HINT_IIGSMODE
@@ -734,7 +727,7 @@ erase_large_saucer:
         sta     SHRMEM+$502,x
         sta     SHRMEM+$322,x
         sta     SHRMEM+$324,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_large_saucer:
         HINT_IIGSMODE
@@ -759,7 +752,7 @@ erase_shifted_large_saucer:
         sta     SHRMEM+$322,x
         sta     SHRMEM+$324,x
         sta     SHRMEM+$504,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_small_saucer:
         HINT_IIGSMODE
@@ -772,7 +765,7 @@ erase_small_saucer:
         sta     SHRMEM+$0A2,x
         sta     SHRMEM+$144,x
         sta     SHRMEM+$1E2,x
-        EOP_EXIT
+        OP_EXIT
 
 erase_shifted_small_saucer:
         HINT_IIGSMODE
@@ -784,7 +777,7 @@ erase_shifted_small_saucer:
         sta     SHRMEM+$0A4,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$1E4,x
-        EOP_EXIT
+        OP_EXIT
         
 saucer_jmp_tbl:
 				.word $0000
@@ -816,7 +809,7 @@ erase_shot:
 				ldx			$C2										; SHR offset
 				lda			#0
 				sta			SHRMEM,x
-				EOP_EXIT
+				OP_EXIT
 
 .ifdef BUILD_OPT_ERASE_SHRAPNEL
 
@@ -832,7 +825,7 @@ erase_shrapnel_0:
         sta     SHRMEM+$464,x
         sta     SHRMEM+$5A4,x
         sta     SHRMEM+$0A2,x
-				EOP_EXIT
+				OP_EXIT
 
 erase_shrapnel_1:
         HINT_IIGSMODE
@@ -846,7 +839,7 @@ erase_shrapnel_1:
         sta     SHRMEM+$000,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$5A0,x
-				EOP_EXIT
+				OP_EXIT
 
 erase_shrapnel_2:
         HINT_IIGSMODE
@@ -860,7 +853,7 @@ erase_shrapnel_2:
         sta     SHRMEM+$826,x
         sta     SHRMEM+$142,x
         sta     SHRMEM+$326,x
-				EOP_EXIT
+				OP_EXIT
 
 erase_shrapnel_3:
         HINT_IIGSMODE
@@ -874,7 +867,7 @@ erase_shrapnel_3:
         sta     SHRMEM+$962,x
         sta     SHRMEM+$3C6,x
         sta     SHRMEM+$142,x
-				EOP_EXIT
+				OP_EXIT
 
 erase_shifted_shrapnel_0:
         HINT_IIGSMODE
@@ -888,7 +881,7 @@ erase_shifted_shrapnel_0:
         sta     SHRMEM+$282,x
         sta     SHRMEM+$504,x
         sta     SHRMEM+$5A2,x
-				EOP_EXIT
+				OP_EXIT
 
 erase_shifted_shrapnel_1:
         HINT_IIGSMODE
@@ -902,7 +895,7 @@ erase_shifted_shrapnel_1:
         sta     SHRMEM+$3C2,x
         sta     SHRMEM+$6E4,x
         sta     SHRMEM+$782,x
-				EOP_EXIT
+				OP_EXIT
 
 erase_shifted_shrapnel_2:
         HINT_IIGSMODE
@@ -916,7 +909,7 @@ erase_shifted_shrapnel_2:
         sta     SHRMEM+$000,x
         sta     SHRMEM+$640,x
         sta     SHRMEM+$6E4,x
-				EOP_EXIT
+				OP_EXIT
 
 erase_shifted_shrapnel_3:
         HINT_IIGSMODE
@@ -930,7 +923,7 @@ erase_shifted_shrapnel_3:
         sta     SHRMEM+$6E6,x
         sta     SHRMEM+$824,x
         sta     SHRMEM+$966,x
-				EOP_EXIT
+				OP_EXIT
 
 shrapnel_jmp_tbl:
     		; 4 shrapnel patterns; large, medium, small
@@ -968,37 +961,13 @@ erase_shrapnel:
 .endif
 
 erase_explodingship:
-        EOP_EXIT
+        OP_EXIT
                         
 erase_invalid:
-        EOP_EXIT
+        OP_EXIT
 
-my_dvg_cur:
-				IIMODE
-				ldy			#0
-				jsr			dvg_cur;
-				IIGSMODE
-				clc
-				rts
-								
-my_dvg_scalebrightness:
-				IIMODE
-				ldy			#0
-				jsr			dvg_scalebrightness
-				IIGSMODE
-				clc
-				rts
-				
-my_dvg_halt:
-				IIMODE
-				ldy			#0
-				jsr			dvg_halt
-				IIGSMODE
-				sec
-				rts
-				
 erase_jmp_tbl:
-				.word		my_dvg_cur-1
+				.word		dvg_cur-1
 				.word		erase_chr-1
 				.word		erase_life-1
 				.word		erase_invalid-1
@@ -1020,8 +989,8 @@ erase_jmp_tbl:
 				.word		erase_invalid-1
 				.word		erase_invalid-1
 				.word		erase_invalid-1
-				.word		my_dvg_scalebrightness-1
-				.word		my_dvg_halt-1
+				.word		dvg_scalebrightness-1
+				.word		dvg_halt-1
 				rts
 
 handle_erase_opcode:

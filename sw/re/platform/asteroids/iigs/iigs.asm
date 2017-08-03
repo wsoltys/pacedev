@@ -147,6 +147,7 @@ cur_2_shr:
 ; $0
 dvg_cur:
         IIMODE
+        ldy			#0
 				lda			(byte_B),y						; Y (lsb)
 				sta			$06
 				iny
@@ -173,7 +174,9 @@ dvg_cur:
 				sta			byte_B
 				bcc			:+
 				inc			byte_C								; never Carry
-:				rts
+:				IIGSMODE
+				clc
+				rts
 
 ; $A-$D
 dvg_invalid:
@@ -187,7 +190,6 @@ dvg_scalebrightness:
 dvg_halt:
 				inc			byte_B
 				inc			byte_B
-        IIMODE
 				sec														; flag halt
 				rts
 
@@ -227,22 +229,18 @@ erase_loop:
 				jsr			handle_erase_opcode		; handle it
 				bcc			erase_loop
 ;
-				IIGSMODE
 				lda			dvg_curr_addr_lsb
 				and			#DVGRAM|$0400
 				ora			#$0002
 				sta			byte_B
-				IIMODE
 render_loop:
-				ldy			#1										; 2nd byte has the opcode
-				lda			(byte_B),y						; opcode (high nibble)
-				dey														; reset to 1st byte
+				lda			(byte_B)
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
 
 				; read some inputs now
 
-				HINT_IIMODE
+				IIMODE
 				
 	inputs:			
 				lda			#0

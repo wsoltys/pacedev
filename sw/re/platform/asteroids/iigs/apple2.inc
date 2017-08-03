@@ -133,7 +133,6 @@ OP_NOERASE					= $08
 .macro OP_EXIT
 				inc			byte_B
 				inc			byte_B
-        IIMODE
 				clc														; no halt
 				rts
 .endmacro
