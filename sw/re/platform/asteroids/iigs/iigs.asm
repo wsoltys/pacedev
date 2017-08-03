@@ -34,7 +34,6 @@
 
 ; build options
 ; comment-out to disable (not =0)
-;BUILD_OPT_RENDER_CLS = 1
 
 apple_reset:
 				HINT_IIMODE
@@ -194,30 +193,6 @@ dvg_halt:
 				rts
 
 apple_render_frame:
-        HINT_IIMODE
-.ifdef BUILD_OPT_RENDER_CLS
-;				cls
-	.if 0
-				IIGSMODE
-				phb
-				lda			#$0000
-				ldx			#$2000
-				sta			$010000,x
-				ldy			#$2001
-				lda			#$77FF
-				mvn			$01,$01								; 7 cycles/byte
-				plb
-	.else				
-				ldx			#$7800
-				lda			#$0
-:				sta			SHRMEM,x							; 5 cycles
-				dex														; 2 cycles
-				dex														; 2 cycles
-				bpl			:-										; 2 cycles = 11 cycles/word (faster)
-	.endif	
-				IIMODE
-.endif ; BUILD_OPT_RENDER_CLS			
-;
 				IIGSMODE
 				lda			dvg_curr_addr_lsb
 				and			#DVGRAM|$0400
