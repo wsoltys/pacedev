@@ -675,8 +675,8 @@ erase_asteroid:
        	and 		#$001E
        	tax
 				ldy			asteroid_jmp_tbl,x
-				lda     $09
-				bit     #1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				beq     :+
 				ldy     shifted_asteroid_jmp_tbl,x
 :       phy
@@ -796,8 +796,8 @@ erase_saucer:
 				asl
 				tax
 				ldy			saucer_jmp_tbl,x
-				lda			$09										; X (0-255)
-				bit			#1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				beq			:+
 				ldy			shifted_saucer_jmp_tbl,x
 :				phy
@@ -942,7 +942,6 @@ shifted_shrapnel_jmp_tbl:
 erase_shrapnel:
         HINT_IIGSMODE
 				lda			$08										; global scale
-				and			#$00FF
 				bne			:+
 				lda			#$0010
 :				sec
@@ -950,8 +949,8 @@ erase_shrapnel:
 				asl														; word offset into table
 				tax
 				ldy			shrapnel_jmp_tbl,x
-				lda     $09
-				bit     #1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				beq     :+
 				ldy     shifted_shrapnel_jmp_tbl,x
 :       phy

@@ -1968,8 +1968,8 @@ dvg_asteroid:
        	and 		#$001E
        	tax
 				ldy			asteroid_jmp_tbl,x
-				lda     $09
-				bit     #1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				beq     :+
 				ldy     shifted_asteroid_jmp_tbl,x
 :       phy
@@ -3587,8 +3587,8 @@ dvg_ship:
 				asl														; word offset
 				tax
 				ldy			ship_jmp_tbl,x
-				lda			$09										; X (0-255)
-				bit			#1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				beq			:+
 				ldy			shifted_ship_jmp_tbl,x
 :       phy
@@ -3794,8 +3794,8 @@ dvg_saucer:
 				asl
 				tax
 				ldy			saucer_jmp_tbl,x
-				lda			$09										; X (0-255)
-				bit			#1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				beq			:+
 				ldy			shifted_saucer_jmp_tbl,x
 :				phy
@@ -3806,8 +3806,8 @@ dvg_saucer:
 dvg_shot:
 				HINT_IIGSMODE
 				ldx			$C2										; SHR offset
-				lda			$09										; X (0-255)
-				bit			#1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				bne			:+
 				lda			#$F000
 				bne			:++
@@ -4120,8 +4120,7 @@ dvg_shrapnel:
 				; instead we'll just use global scale factor
 				; $B=0, $C=1, $D,$E=2, $F,$0=3
 				HINT_IIGSMODE
-				lda			$08										; global scale
-				and			#$00FF
+				lda			byte_8								; global scale
 				bne			:+
 				lda			#$0010
 :				sec
@@ -4129,8 +4128,8 @@ dvg_shrapnel:
 				asl														; word offset into table
 				tax
 				ldy			shrapnel_jmp_tbl,x
-				lda     $09
-				bit     #1
+				lda     byte_4								; X (0-255)
+				bit     #(1<<0)
 				beq     :+
 				ldy     shifted_shrapnel_jmp_tbl,x
 :       phy

@@ -26,7 +26,6 @@
 .export dvg_invalid
 
 ; for debugging
-.export cur_2_shr
 .export apple_render_frame
 .export erase_loop
 .export read_joystick
@@ -85,96 +84,60 @@ apple_start:
 				IIMODE
 				rts
 
+shr_y_offs_tbl:
+.repeat	192, I
+				.word		160*I 
+.endrepeat
+
 ; scale current (10 bits X,Y) for SHR (256x192)
 ; and calc SHR address
-; entry: $04/$05=X, $06/$07=Y
-; exit: $09/$0A=X,Y   $C0,$C1=Y*160   $C2,$C3=y*160+X/2
-cur_2_shr:
-				; scale X
-				IIGSMODE
-				lda			$04										; CUR X (0-1023)
-				lsr
-				lsr
-				IIMODE
-				sta			$09										; CUR X (0-255)
-				; scale Y
-				IIGSMODE
-				lda			$06										; CUR Y (0-1023) (10 bits)
-				lsr
-				clc
-				adc			$06										; Y+Y/2 (11 bits)
-				lsr
-				lsr
-				lsr														; CUR Y (0-191) (8 bits)
-				IIMODE
-				sta			$0A
-				lda			#191
-				clc
-				sbc			$0A
-				sta			$0A										; store non-inverted Y
-				; find address (y*160+x/2) 160=128+32
-				lsr
-				sta			$C1										; msb (x128)
-				sta			$C3										; msb (x128)
-				ror
-				and			#(1<<7)
-				sta			$C0										; lsb (x128)
-				sta			$C2										; lsb (x128)
-				lda			$C3
-				lsr
-				ror			$C2
-				lsr
-				ror			$C2										; lsb (x32)
-				sta			$C3										; msb (x32)
-				clc
-				lda			$C0
-				adc			$C2
-				sta			$C0										; lsb (x160)
-				lda			$C1
-				adc			$C3
-				sta			$C1										; msb (x160)
-				lda			$09
-				lsr														; X/2
-				clc
-				adc			$C0
-				sta			$C2										; lsb (address)
-				lda			$C1
-				adc			#$00
-				sta			$C3										; msb (address)
-				rts
-
+; exit: $04/$05=X, $06/$07=Y, $08/$09=global scale, $C0,$C1=Y*160, $C2,$C3=y*160+X/2
 ; $0
 dvg_cur:
-        IIMODE
-        ldy			#0
-				lda			(byte_B),y						; Y (lsb)
-				sta			$06
-				iny
-				lda			(byte_B),y						; Y (msb)
-				and			#$03									; 2 bits only
-				sta			$07
-				iny
-				lda			(byte_B),y						; X (lsb)
-				sta			$04
-				iny
-				lda			(byte_B),y						; X (msb)
-				and			#$03									; 2 bits only
-				sta			$05
-				lda			(byte_B),y						; global scale
+				HINT_IIGSMODE
+				; fortunately bits 11,10 are 00!
+				; scale Y
+				lda			(byte_B)							; CUR Y (0-1023) (10 bits)
 				lsr
-				lsr
-				lsr
-				lsr														; to low nibble
-				sta			$08
-				jsr			cur_2_shr							; map to pixel coordinates
-				lda			#4										; 4 bytes in instruction
 				clc
-				adc			byte_B
-				sta			byte_B
-				bcc			:+
-				inc			byte_C								; never Carry
-:				IIGSMODE
+				adc			(byte_B)							; Y+Y/2 (11 bits)
+				inc			byte_B
+				inc			byte_B
+				lsr
+				lsr
+				lsr														
+				and			#$00FF								; mask off opcode bits
+				sta			byte_6								; CUR Y (0-191) (8 bits)
+				lda			#191
+				sec														; no carry on subtract
+				sbc			byte_6
+				sta			byte_6								; store non-inverted Y
+				; find address of line
+				asl														; y*2 (offset)
+				tax
+				ldy			shr_y_offs_tbl,x
+				sty			$C0
+				; scale X
+				lda			(byte_B)							; global scale
+				xba
+				lsr
+				lsr
+				lsr
+				lsr
+				and			#$000F								; mask off X bits
+				sta			byte_8
+				lda			(byte_B)							; CUR X (0-1023)
+				inc			byte_B
+				inc			byte_B
+				lsr
+				lsr
+				and			#$00FF								; mask off global scale
+				sta			byte_4								; CUR X (0-255)
+				; find address of CUR (y*160+x/2)
+				lsr
 				clc
+				adc			$C0
+				sta			$C2										; should never generate carry!
 				rts
 
 ; $A-$D

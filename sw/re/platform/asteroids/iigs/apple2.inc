@@ -60,6 +60,9 @@ SHRMEM				= $012290
 
 .global dvg_curr_addr_lsb 	: zeropage
 .global dvg_curr_addr_msb 	: zeropage
+.global byte_4 							: zeropage
+.global byte_6 							: zeropage
+.global byte_8 							: zeropage
 .global byte_B 							: zeropage
 .global byte_C 							: zeropage
 .global direction						: zeropage
