@@ -34,8 +34,27 @@
 ; build options
 ; comment-out to disable (not =0)
 
+msg:		.asciiz "       - PRESS ANY KEY TO PLAY -        "
+
 apple_reset:
 				HINT_IIMODE
+
+; stay on the splash screen until key hit
+				sta			KBDSTRB
+				ldy			#0
+:				lda			msg,y									; get msg char
+				beq			waitkey								; zero - done
+				ora			#$80									; convert to Apple code
+				;sta			$6D0,y								; display
+				sta			$7D0,y								; display
+				iny														; next char
+				bne			:-										; always
+waitkey:		
+				lda			KBD
+				bpl			waitkey								; no key, loop
+				sta			KBDSTRB
+				and			#$7F									; scan code
+;
 				lda     SPEED
 				ora     #(1<<7)               ; turbo
 				sta     SPEED

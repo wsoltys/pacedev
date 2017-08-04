@@ -1,18 +1,6 @@
 .include "apple2.inc"
 
 .export chr_tbl
-;.export copyright
-;.export extra_ship
-.export ship_tbl
-.export shifted_ship_tbl
-;.export asteroid_tbl
-;.export shifted_asteroid_tbl
-;.export large_saucer
-;.export shifted_large_saucer
-;.export small_saucer
-;.export shifted_small_saucer
-;.export shrapnel_tbl
-;.export shifted_shrapnel_tbl
 
 char_SPACE:
     .BYTE  $00, $00, $00, $00
@@ -347,6 +335,19 @@ char_Z:
     .BYTE  $F0, $00, $00, $00
     .BYTE  $FF, $FF, $F0, $00
 
+chr_tbl:
+		.word char_SPACE
+		.word char_0, char_1, char_2, char_3
+		.word char_4, char_5, char_6, char_7
+		.word char_8, char_9
+		.word char_A, char_B, char_C, char_D
+		.word char_E, char_F, char_G, char_H
+		.word char_I, char_J, char_K, char_L
+		.word char_M, char_N, char_O, char_P
+		.word char_Q, char_R, char_S, char_T
+		.word char_U, char_V, char_W, char_X
+		.word char_Y, char_Z
+
 .ifndef BUILD_OPT_COMPILED_SPRITES
 
 extra_ship:
@@ -365,8 +366,6 @@ copyright:
 		.byte $F0, $00, $0F, $00, $FF, $F0, $00, $F0, $FF, $F0, $00, $00, $FF, $F0, $0F, $00, $FF, $F0, $FF, $F0, $0F, $00, $00, $00, $0F, $00, $F0, $FF, $0F, $00
 		.byte $FF, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $FF, $00, $0F, $00, $00, $00, $0F, $00, $F0, $0F, $0F, $00
 		.byte $00, $00, $0F, $00, $00, $F0, $00, $F0, $00, $F0, $00, $00, $F0, $F0, $0F, $00, $F0, $F0, $F0, $F0, $FF, $F0, $00, $00, $FF, $F0, $F0, $0F, $0F, $FF 
-
-.endif
 
 ship_0:
     .BYTE  $00, $00, $00, $00
@@ -799,8 +798,6 @@ shifted_ship_23:
     .BYTE  $00, $F0, $FF, $FF
     .BYTE  $0F, $FF, $00, $00
     .BYTE  $00, $00, $00, $00
-
-.ifndef BUILD_OPT_COMPILED_SPRITES
 
 asteroid_0:
     .BYTE  $00, $00, $F0, $00, $00, $0F, $00, $00, $00, $00
@@ -1486,21 +1483,6 @@ shifted_unused_player_ship_0:
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .BYTE  $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
-.endif
-
-chr_tbl:
-		.word char_SPACE
-		.word char_0, char_1, char_2, char_3
-		.word char_4, char_5, char_6, char_7
-		.word char_8, char_9
-		.word char_A, char_B, char_C, char_D
-		.word char_E, char_F, char_G, char_H
-		.word char_I, char_J, char_K, char_L
-		.word char_M, char_N, char_O, char_P
-		.word char_Q, char_R, char_S, char_T
-		.word char_U, char_V, char_W, char_X
-		.word char_Y, char_Z
-
 ship_tbl:
 		.word ship_0,   ship_1,  ship_2,  ship_3
 		.word ship_4,   ship_5,  ship_6,  ship_7
@@ -1517,8 +1499,6 @@ shifted_ship_tbl:
 		.word shifted_ship_16, shifted_ship_17, shifted_ship_18,  shifted_ship_19
 		.word shifted_ship_20, shifted_ship_21, shifted_ship_22,  shifted_ship_23
 		
-.ifndef BUILD_OPT_COMPILED_SPRITES
-
 asteroid_tbl:
 		; 4 asteroid patterns; large, medium, small
 		.word asteroid_0,  asteroid_1,  asteroid_2

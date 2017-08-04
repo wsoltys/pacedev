@@ -21,6 +21,7 @@ OBJC = objcopy
 BIN = $(TARGET).bin
 MAKEFILE = makefile
 
+SPLASH = splash.bin
 MEDIA = asteroid.dsk
 
 M6502_OBJS = \
@@ -39,7 +40,7 @@ all: $(MEDIA)
 %.dsk : $(BIN)
 	$(DD) if=$< of=$(TARGET)#06$(LOAD).BIN bs=1 skip=4
 	$(DD) if=$< of=6502.BIN bs=1 skip=6148 count=6144
-	$(C2D) -s $(LA) -b $< $@
+	$(C2D) -t $(SPLASH) -r 23 -s $(LA) -b $< $@
 	
 $(M6502_OBJS) : %.o : %.asm
 	$(AS) -t $(TYPE) $< -o $@ -l $*.lst
