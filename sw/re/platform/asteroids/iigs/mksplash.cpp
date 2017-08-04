@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
 	r += 2;
 	cprintat (r, "FOR THE APPLE IIGS");
 	r += 3;
-	cprintat (r, "VCF WEST PREVIEW VERSION");
+	cprintat (r, "VCF WEST PREVIEW (WIP) VERSION");
 	r += 3;
 	cprintat (r++, "THIS SOFTWARE COMPRISES THE ORIGINAL");
 	cprintat (r++, "ASTEROID ARCADE ROM CODE ADAPTED AND");
@@ -45,9 +45,9 @@ int main (int argc, char *argv[])
 	cprintat (r++, "NORBERT KEHRER");
 	cprintat (r++, "(ATARI 800XL ASTEROIDS EMULATOR)");
 	r++;	
-	cprintat (r++, "<5> = INSERT COIN");
-	cprintat (r++, "<1> = 1P START");
-	cprintat (r++, "JOYSTICK 1 FOR CONTROLS");
+	cprintat (r++, "   <5>     =  INSERT COIN");
+	cprintat (r++, "   <1>     =  1P START   ");
+	cprintat (r++, "<JOYSTK1>  =  CONTROLS   ");
 
 	cprintat (21, "WWW.RETROPORTS.BLOGSPOT.COM.AU");
 	flags[21] = F_INVERT;

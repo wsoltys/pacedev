@@ -34,8 +34,6 @@
 ; build options
 ; comment-out to disable (not =0)
 
-msg:		.asciiz "       - PRESS ANY KEY TO PLAY -        "
-
 apple_reset:
 				HINT_IIMODE
 
@@ -63,6 +61,8 @@ waitkey:
 				lda			#(1<<0)								; 3 lives
 				sta			centerCoinMultiplierAndLives
 				rts
+
+msg:		.asciiz "       - PRESS ANY KEY TO PLAY -        "
 
 apple_start:
 				HINT_IIMODE
