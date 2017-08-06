@@ -1788,7 +1788,12 @@ init_players:
                                 LDA     #2
                                 STA     startingAsteroidsPerWave
                                 LDX     #3
+.ifndef APPLE_IIGS                                
                                 LSR     centerCoinMultiplierAndLives
+.else
+																lda			centerCoinMultiplierAndLives
+																lsr			a
+.endif                                
                                 BCS     loc_6EE5
                                 INX
 
