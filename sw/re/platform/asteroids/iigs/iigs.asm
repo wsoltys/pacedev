@@ -98,8 +98,8 @@ apple_start:
 				dex
 				bpl			:-				
 				; init other display list
-				lda			#(OP_HALT<<8)|OP_HALT
-				sta			DVGRAM+$0400
+				;lda			#(OP_HALT<<8)|OP_HALT
+				;sta			DVGRAM+$0400
 				IIMODE
 				rts
 
