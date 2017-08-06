@@ -1847,8 +1847,8 @@ display_initial:
                                 LDX     #$F8 ; 'ø'                              ; cmd=SVEC, s=-ve, Y=0
                                 JMP     write_AX_to_avgram
 .else
-; *** TBD add underline character
-																rts
+																ldy			#(38<<1)																; underscore
+																jmp			display_char_code_Y
 .endif
                                 
 ; End of function display_initial
@@ -2799,10 +2799,10 @@ display_hs_entry:
                                 LDA     #$40 ; '@'                              ; S=4
                                 TAX                                             ; Brightness=4
                                 JSR     set_scale_A_bright_X                    ; displays a dot???
-.else
-; *** TBD display . character
-.endif                                
                                 LDY     #0                                      ; <space>
+.else
+                                ldy			#(37<<1)																; period
+.endif                                
                                 JSR     display_char_code_Y
                                 LDA     byte_F                                  ; entry counter (x2)
                                 CLC

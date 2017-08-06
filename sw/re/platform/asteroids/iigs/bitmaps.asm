@@ -335,6 +335,24 @@ char_Z:
     .BYTE  $F0, $00, $00, $00
     .BYTE  $FF, $FF, $F0, $00
 
+char_PERIOD:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $0F, $00, $00, $00
+
+char_UNDERSCORE:
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $00, $00, $00, $00
+    .BYTE  $FF, $FF, $F0, $00
+
 chr_tbl:
 		.word char_SPACE
 		.word char_0, char_1, char_2, char_3
@@ -347,6 +365,7 @@ chr_tbl:
 		.word char_Q, char_R, char_S, char_T
 		.word char_U, char_V, char_W, char_X
 		.word char_Y, char_Z
+		.word char_PERIOD, char_UNDERSCORE
 
 .ifndef BUILD_OPT_COMPILED_SPRITES
 
