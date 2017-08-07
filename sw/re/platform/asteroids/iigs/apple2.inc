@@ -140,4 +140,11 @@ OP_NOERASE					= $08
 				rts
 .endmacro
 
+; offset to ship render coordinates
+
+SHIP_X_OFFS = 5
+SHIP_Y_OFFS = 5
+SHOT_X_OFFS = 8
+SHOT_Y_OFFS = 8
+
 BUILD_OPT_COMPILED_SPRITES = 1

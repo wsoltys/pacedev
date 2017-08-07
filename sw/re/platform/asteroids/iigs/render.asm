@@ -1981,1088 +1981,1092 @@ dvg_asteroid:
         bit			#(1<<11)
         beq			:+
         lda     #data
-        ora     SHRMEM+offs,x
-        sta     SHRMEM+offs,x
+        ora     SHRMEM+SHIP_OFFS+offs,x
+        sta     SHRMEM+SHIP_OFFS+offs,x
 :
 .endmacro
+
+SHIP_OFFS .set (SHIP_Y_OFFS*160+SHIP_X_OFFS/2+1)
 
 render_ship_0:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00FF
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$00FF
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$F00F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$FF0F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         thrust  $1E0, $00F0
        	OP_EXIT
 
 render_ship_1:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$000F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$00FF
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$F0FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$FF0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FFFF
-        sta     SHRMEM+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $1E0, $00F0
         OP_EXIT
 
 render_ship_2:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$F0FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$F0FF
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         thrust  $280, $000F
         OP_EXIT
 
 render_ship_3:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         ldy     #$0F00
         tya
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         tya
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         tya
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         tya
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F00F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$F00F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F0FF
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         thrust  $320, $000F
         OP_EXIT
 
 render_ship_4:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$000F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         ldy     #$00F0
         tya
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         tya
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         tya
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         tya
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$00FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         thrust  $321, $00F0
         OP_EXIT
 
 render_ship_5:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$000F
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         ldy     #$00F0
         tya
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         tya
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         tya
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         tya
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF0F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $3C1, $000F
         OP_EXIT
 
 render_ship_6:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$000F
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$0F00
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF0F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $3C1, $000F
         OP_EXIT
 
 render_ship_7:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$000F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$000F
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$F000
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$FF00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF0F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $3C1, $000F
         OP_EXIT
 
 render_ship_8:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$0F0F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$F000
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F00F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$FF00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         thrust  $322, $00F0
         OP_EXIT
 
 render_ship_9:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$00FF
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$00FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F0FF
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$FF00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$FFF0
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $322, $000F
         OP_EXIT
 
 render_ship_10:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$00F0
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F0FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$FF00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$FFFF
-        sta     SHRMEM+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $282, $000F
         OP_EXIT
 
 render_ship_11:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$000F
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$00FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F00F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F0FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$F0FF
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         thrust  $1E3, $00F0
         OP_EXIT
 
 render_ship_12:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00FF
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$00FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$F00F
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$F00F
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         thrust  $1E3, $00F0
         OP_EXIT
 
 render_ship_13:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$F00F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F0FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$FFFF
-        sta     SHRMEM+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         thrust  $143, $00F0
         OP_EXIT
 
 render_ship_14:
         HINT_IIGSMODE
         lda     #$00F0
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F0F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F0FF
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$F0FF
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         thrust  $0A2, $000F
         OP_EXIT
 
 render_ship_15:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$0F00
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$0F0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F0FF
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$F0FF
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$FF00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         thrust  $0A2, $000F
         OP_EXIT
 
 render_ship_16:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$000F
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$0F0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$F000
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$F00F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         thrust  $0A2, $00F0
         OP_EXIT
 
 render_ship_17:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$000F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$F000
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$FF00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$FF0F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $001, $000F
         OP_EXIT
 
 render_ship_18:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$000F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$0F00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$0F00
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF0F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $001, $000F
         OP_EXIT
 
 render_ship_19:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         ldy     #$00F0
         tya
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         tya
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         tya
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         tya
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$00FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$0F00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$FF0F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $001, $000F
         OP_EXIT
 
 render_ship_20:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$000F
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         ldy     #$00F0
         tya
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         tya
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         tya
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         tya
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$0F0F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         thrust  $0A1, $00F0
         OP_EXIT
 
 render_ship_21:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$0F00
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$F0FF
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$FF00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         thrust  $0A0, $000F
         OP_EXIT
 
 render_ship_22:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F0FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$FFFF
-        sta     SHRMEM+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         thrust  $140, $000F
         OP_EXIT
 
 render_ship_23:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$000F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$00FF
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$0F0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F0FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$F0FF
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$FF0F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         thrust  $1E0, $00F0
         OP_EXIT
+
+SHIP_OFFS .set (SHIP_Y_OFFS*160+SHIP_X_OFFS/2)
 
 render_shifted_ship_0:
         HINT_IIGSMODE
         lda     #$00FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F00F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$F00F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF00
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$FF00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         thrust  $1E0, $000F
  	      OP_EXIT
 
 render_shifted_ship_1:
         HINT_IIGSMODE
         lda     #$00F0
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$F00F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$FF00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF0F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$FF0F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         thrust  $1E0, $000F
         OP_EXIT
 
 render_shifted_ship_2:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$0F00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$F000
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$FF0F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FFFF
-        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         thrust  $281, $00F0
         OP_EXIT
 
 render_shifted_ship_3:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$00F0
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$00FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$F000
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$F0FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$FF00
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF0F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         thrust  $321, $00F0
         OP_EXIT
 
 render_shifted_ship_4:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$000F
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$000F
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$00FF
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F00F
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$F0F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         thrust  $321, $000F
         OP_EXIT
 
 render_shifted_ship_5:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$00FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$F000
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$F0FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$FF00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $3C2, $00F0
         OP_EXIT
 
 render_shifted_ship_6:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$00F0
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F000
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$F0FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$FF00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $3C2, $00F0
         OP_EXIT
 
 render_shifted_ship_7:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F0FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$FF00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $3C2, $00F0
         OP_EXIT
 
 render_shifted_ship_8:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$0F00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$0F00
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F000
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F0F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$FF00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $322, $000F
         OP_EXIT
 
@@ -3070,483 +3074,483 @@ render_shifted_ship_9:
         HINT_IIGSMODE
         ldy     #$00F0
         tya
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         tya
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         tya
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         tya
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$0F00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$0F0F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F00F
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$F00F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$FF0F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         thrust  $323, $00F0
         OP_EXIT
 
 render_shifted_ship_10:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$00F0
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$00F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF0F
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$FF0F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         thrust  $283, $00F0
         OP_EXIT
 
 render_shifted_ship_11:
         HINT_IIGSMODE
         lda     #$F000
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$F000
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$F000
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$F0FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$FF00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$FF0F
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FFFF
-        sta     SHRMEM+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         thrust  $1E3, $000F
         OP_EXIT
 
 render_shifted_ship_12:
         HINT_IIGSMODE
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$F00F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F0FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$F0FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$FF00
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$FF00
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         thrust  $1E3, $000F
         OP_EXIT
 
 render_shifted_ship_13:
         HINT_IIGSMODE
         lda     #$F000
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$F000
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$F0F0
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$F0FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF0F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$FF0F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         thrust  $143, $000F
         OP_EXIT
 
 render_shifted_ship_14:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$00F0
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$FF0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FFFF
-        sta     SHRMEM+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         thrust  $0A3, $00F0
         OP_EXIT
 
 render_shifted_ship_15:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$00F0
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$00F0
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$00FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF0F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$FF0F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $0A3, $00F0
         OP_EXIT
 
 render_shifted_ship_16:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$0F00
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F0F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$FF00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         thrust  $0A2, $000F
         OP_EXIT
 
 render_shifted_ship_17:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$0F00
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$0F00
-        ora     SHRMEM+$3C0,x
-        sta     SHRMEM+$3C0,x
+        ora     SHRMEM+SHIP_OFFS+$3C0,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         lda     #$F000
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F0FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$FF00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $002, $00F0
         OP_EXIT
 
 render_shifted_ship_18:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$000F
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00F0
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$00F0
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F000
-        ora     SHRMEM+$000,x
-        sta     SHRMEM+$000,x
+        ora     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$000,x
         lda     #$F000
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$F0FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$FF00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $002, $00F0
         OP_EXIT
 
 render_shifted_ship_19:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$000F
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$00FF
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$00FF
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$0F00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$F000
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$F0FF
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$FF00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         thrust  $002, $00F0
         OP_EXIT
 
 render_shifted_ship_20:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$000F
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$F000
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$F00F
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$F0F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         thrust  $0A1, $000F
         OP_EXIT
 
 render_shifted_ship_21:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$002,x
-        sta     SHRMEM+$002,x
+        ora     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
         lda     #$00F0
-        ora     SHRMEM+$0A2,x
-        sta     SHRMEM+$0A2,x
+        ora     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
         lda     #$00FF
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$0F00
-        ora     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C2,x
+        ora     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
         lda     #$F00F
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         lda     #$F0F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$FF0F
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         thrust  $0A1, $00F0
         OP_EXIT
 
 render_shifted_ship_22:
         HINT_IIGSMODE
         lda     #$000F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$0F00
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$0F00
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F0F0
-        ora     SHRMEM+$282,x
-        sta     SHRMEM+$282,x
+        ora     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         lda     #$FF0F
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$FF0F
-        ora     SHRMEM+$322,x
-        sta     SHRMEM+$322,x
+        ora     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
         thrust  $141, $00F0
         OP_EXIT
 
 render_shifted_ship_23:
         HINT_IIGSMODE
         lda     #$00F0
-        ora     SHRMEM+$142,x
-        sta     SHRMEM+$142,x
+        ora     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
         lda     #$F000
-        ora     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A0,x
+        ora     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
         lda     #$F000
-        ora     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E0,x
+        ora     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
         lda     #$F000
-        ora     SHRMEM+$280,x
-        sta     SHRMEM+$280,x
+        ora     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
         lda     #$F00F
-        ora     SHRMEM+$1E2,x
-        sta     SHRMEM+$1E2,x
+        ora     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
         lda     #$FF00
-        ora     SHRMEM+$140,x
-        sta     SHRMEM+$140,x
+        ora     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
         lda     #$FF0F
-        ora     SHRMEM+$320,x
-        sta     SHRMEM+$320,x
+        ora     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
         lda     #$FFFF
-        sta     SHRMEM+$282,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
         thrust  $1E0, $000F
         OP_EXIT
                         
@@ -3589,7 +3593,7 @@ dvg_ship:
 				ldy			ship_jmp_tbl,x
 				lda     byte_4								; X (0-255)
 				bit     #(1<<0)
-				beq			:+
+				bne			:+										; reverse logic b/c 5 pixel shift!
 				ldy			shifted_ship_jmp_tbl,x
 :       phy
 				ldx     $C2
@@ -3812,8 +3816,8 @@ dvg_shot:
 				lda			#$F000
 				bne			:++
 :				lda			#$0F00
-:				ora			SHRMEM,x
-				sta			SHRMEM,x
+:				ora			SHRMEM+(SHOT_Y_OFFS*160+SHOT_X_OFFS/2),x
+				sta			SHRMEM+(SHOT_Y_OFFS*160+SHOT_X_OFFS/2),x
 				OP_EXIT
 
 render_shrapnel_0:

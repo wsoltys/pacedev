@@ -684,24 +684,30 @@ erase_asteroid:
 				lda			#0
 				rts
 
+SHIP_OFFS .set (SHIP_Y_OFFS*160+SHIP_X_OFFS/2)
+
 erase_ship:
         HINT_IIGSMODE
 				ldx			$C2										; SHR offset
-        lda     #0
-        sta     SHRMEM+$000,x
-        sta     SHRMEM+$002,x
-        sta     SHRMEM+$0A0,x
-        sta     SHRMEM+$0A2,x
-        sta     SHRMEM+$140,x
-        sta     SHRMEM+$142,x
-        sta     SHRMEM+$1E0,x
-        sta     SHRMEM+$1E2,x
-        sta     SHRMEM+$280,x
-        sta     SHRMEM+$282,x
-        sta     SHRMEM+$320,x
-        sta     SHRMEM+$322,x
-        sta     SHRMEM+$3C2,x
-        sta     SHRMEM+$3C0,x
+				lda			byte_4								; X (0-255)
+				bit			#(1<<0)
+				beq			:+
+				inx
+:       lda     #0
+        sta     SHRMEM+SHIP_OFFS+$000,x
+        sta     SHRMEM+SHIP_OFFS+$002,x
+        sta     SHRMEM+SHIP_OFFS+$0A0,x
+        sta     SHRMEM+SHIP_OFFS+$0A2,x
+        sta     SHRMEM+SHIP_OFFS+$140,x
+        sta     SHRMEM+SHIP_OFFS+$142,x
+        sta     SHRMEM+SHIP_OFFS+$1E0,x
+        sta     SHRMEM+SHIP_OFFS+$1E2,x
+        sta     SHRMEM+SHIP_OFFS+$280,x
+        sta     SHRMEM+SHIP_OFFS+$282,x
+        sta     SHRMEM+SHIP_OFFS+$320,x
+        sta     SHRMEM+SHIP_OFFS+$322,x
+        sta     SHRMEM+SHIP_OFFS+$3C2,x
+        sta     SHRMEM+SHIP_OFFS+$3C0,x
         OP_EXIT
 
 erase_large_saucer:
@@ -808,7 +814,7 @@ erase_shot:
         HINT_IIGSMODE
 				ldx			$C2										; SHR offset
 				lda			#0
-				sta			SHRMEM,x
+				sta			SHRMEM+(SHOT_Y_OFFS*160+SHOT_X_OFFS/2),x
 				OP_EXIT
 
 .ifdef BUILD_OPT_ERASE_SHRAPNEL
