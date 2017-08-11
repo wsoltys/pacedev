@@ -67,8 +67,8 @@ typedef struct
 	// byte 2 - thousands (in decimal)
   uint8_t		highScoreTable[10][2];					// $1D-$30
   uint8_t		letterHighScoreEntry;						// $31
-  uint8_t		placeP1HighScore;								// $32
-  uint8_t		placeP2HighScore;								// $33
+  int8_t		placeP1HighScore;								// $32
+  int8_t		placeP2HighScore;								// $33
   uint8_t		highScoreInitials[10][3];				// $34-$51
   // actual scores are x10
   uint16_t	p1Score;												// $52-$53
@@ -137,18 +137,18 @@ typedef struct
 			// 0xA0+ = exploding
 			// (4:3) = shape (0-3)
 			// (2:1) = size (0=small, 1=medium,	2=large)
-			uint8_t		asteroid_Sts[27];								// $0200-$021A
+			int8_t		asteroid_Sts[27];								// $0200-$021A
 			// - 0x00  = in hyperspace?
 		 	// - 0x01  = player	alive and active
 		 	//- 0xA0+ = player	exploding
-			uint8_t		ship_Sts;												// $021B
+			int8_t		ship_Sts;												// $021B
 			// - 0x00  = no saucer
 			// - 0x01  = small saucer
 			// - 0x02  = large saucer
 			// - 0xA0+ = saucer	exploding
-			uint8_t		saucer_Sts;											// $021C
-			uint8_t		saucerShot_Sts[2];							// $021D-$021E
-			uint8_t		shipShot_Sts[4];								// $021F-$0222
+			int8_t		saucer_Sts;											// $021C
+			int8_t		saucerShot_Sts[2];							// $021D-$021E
+			int8_t		shipShot_Sts[4];								// $021F-$0222
 		};
 		int8_t			object_Sts[27+1+1+2+4];
 	};
@@ -191,7 +191,7 @@ typedef struct
 			uint16_t	saucerShot_Ph[2];								// $0286-$0287,$02CC-$02CD
 			uint16_t	shipShot_Ph[4];									// $0288-$028B,$02CE-$02D1
 		};
-		int16_t			object_Ph[27+1+1+2+4];
+		uint16_t		object_Ph[27+1+1+2+4];
 	};
 	// Vertical	Position High (0-23), 0=Bottom,	23=Top
 	// Vertical	Position Low (0-255), 0=Bottom,	255=Top
@@ -205,7 +205,7 @@ typedef struct
 			uint16_t	saucerShot_Pv[2];								// $02A9-$02AA,$02EF-$02F0
 			uint16_t	shipShot_Pv[4];									// $02AB-$02AE,$02F1-$02F4
 		};
-		int16_t			object_Pv[27+1+1+2+4];
+		uint16_t		object_Pv[27+1+1+2+4];
 	};
 
 	uint8_t		startingAsteroidsPerWave;				// $02F5
@@ -278,6 +278,7 @@ static PLYR_RAM *p = &plyr_ram[0];
 static DISPLAYLIST_ENTRY displaylist[256];
 
 static int handle_start_end_turn_or_game (void);			// $6885
+static int display_push_start (void);									// $693B
 static void print_PLAYER_N (void);										// $69E2
 static void handle_shots (void);											// $69F0
 static void copy_vector_list_to_avgram (
@@ -510,7 +511,17 @@ void asteroids2 (void)
 							break;
 							
 					dump_displaylist ();
-					break;
+					
+					// NMI!!!
+					{
+						static int left_coin_switch_r = 0;
+						int left_coin_switch = osd_key (KEY_LEFT_COIN_SWITCH);
+						if (left_coin_switch_r == 0 && left_coin_switch)
+							zp.CurrNumCredits++;
+						left_coin_switch_r = left_coin_switch;
+					}
+					
+					//break;
 				}
 				
 				break;
@@ -537,13 +548,17 @@ int handle_start_end_turn_or_game (void)
 			else
 			{
 				msg += 7;
-				if (zp.placeP1HighScore & zp.placeP2HighScore & (1<<7))
+				if (zp.placeP1HighScore < 0 && zp.placeP2HighScore < 0)
 					PrintPackedMsg (msg);
 			}
 		check_start:
 			if (zp.CurrNumCredits == 0)
 				return (0);
 			players = 1;
+			if (osd_key (KEY_P1_START))
+				goto start_game;
+			if (zp.CurrNumCredits < 2 || !osd_key (KEY_P2_START))
+				return (display_push_start ());
 			init_players ();
 			init_wave ();
 			zp.numShipsP2 = zp.numStartingShipsPerGame;
@@ -551,6 +566,7 @@ int handle_start_end_turn_or_game (void)
 			zp.CurrNumCredits--;
 			
 		start_game:
+			zp.numPlayers = players;
 			zp.placeP1HighScore = 0xFF;
 			zp.placeP2HighScore = 0xFF;
 			zp.numShipsP1 = zp.numStartingShipsPerGame;
@@ -565,6 +581,19 @@ int handle_start_end_turn_or_game (void)
 		}
 	}
 	
+	return (0);
+}
+
+// $693B
+int display_push_start (void)
+{
+	if (zp.placeP1HighScore < 0)
+		if ((zp.fastTimer & 0x20) == 0)
+			PrintPackedMsg (6);
+	if ((zp.fastTimer & 0x0f) == 0)
+	{
+		// light player leds
+	}
 	return (0);
 }
 
@@ -709,7 +738,6 @@ void display_extra_ships (uint8_t x, uint8_t n)
 void update_and_render_objects (void)
 {
 	signed i;
-	int8_t delta;
 	uint8_t scale;
 	
 	//UNIMPLEMENTED;
@@ -727,10 +755,7 @@ void update_and_render_objects (void)
 			else
 			{
 				object_ok:
-					delta = 0;
-					if (p->object_Vh[i] < 0)
-						delta--;
-					p->object_Ph[i] += delta;
+					p->object_Ph[i] += p->object_Vh[i];
 					if (p->object_Ph[i] >= 0x2000)
 						p->object_Ph[i] &= 0x1FFF;
 					if (i == 0x1C)
@@ -738,13 +763,10 @@ void update_and_render_objects (void)
 						//zero_saucer ();
 						continue;
 					}
-					delta = 0;
-					if (p->object_Vv[i] < 0)
-						delta = -1;
-					p->object_Pv[i] += delta;
+					p->object_Pv[i] += p->object_Vv[i];
 					if (p->object_Pv[i] >= 0x1800)
 					{
-						if (p->object_Pv[i] == 0x1800)
+						if ((p->object_Pv[i] & 0x1800) == 0x1800)
 							p->object_Pv[i] &= 0x00FF;
 						else
 							p->object_Pv[i] &= 0x17FF;
@@ -927,11 +949,20 @@ void display_C_scores_ships (void)
 void display_object (uint8_t i, uint8_t scale)
 {
 	uint8_t sts;
-
+	uint8_t tmp_scale;
+	
 	zp.globalScale = scale;
-	write_CUR_cmd ((p->object_Ph[i]+1024)>>3, p->object_Pv[i]>>3);
-	// some crap
-	set_scale_A_bright_0 (0x90);
+	// +1024 seems like a h/w fudge-factor???
+	write_CUR_cmd ((p->object_Ph[i]/*+1024*/)>>3, p->object_Pv[i]>>3);
+	tmp_scale = 0x70 - zp.globalScale;
+	// this is weird...
+	while (tmp_scale >= 0xA0)
+	{
+		set_scale_A_bright_0 (0x90);
+		tmp_scale -= 0x10;
+	}
+	set_scale_A_bright_0 (tmp_scale);
+	
 	if (p->object_Sts[i] < 0)
 	{
 		if (i != 0x1B)

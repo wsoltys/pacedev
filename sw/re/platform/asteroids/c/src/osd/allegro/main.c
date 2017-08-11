@@ -31,6 +31,11 @@ unsigned int osd_quit (void)
 	return (0);
 }
 
+int osd_key (int _key)
+{
+  return (key[_key]);
+}
+
 void osd_cls (void)
 {
 	clear_bitmap (screen);

@@ -13,12 +13,19 @@
 extern "C"
 {
 #endif
+
+#include "allegro.h"
+
+#define KEY_LEFT_COIN_SWITCH		KEY_5
+#define KEY_MIDDLE_COIN_SWITCH	KEY_6
+#define KEY_P1_START						KEY_1
+#define KEY_P2_START						KEY_2
   
 //void osd_delay (unsigned ms);
 //void osd_clear_scrn (void);
 //void osd_clear_scrn_buffer (void);
 //int osd_readkey (void);
-//int osd_key (int _key);
+int osd_key (int _key);
 //int osd_keypressed (void);
 //void osd_set_palette (uint8_t attr);
 //void osd_set_entire_palette (uint8_t attr);
