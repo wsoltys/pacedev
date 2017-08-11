@@ -650,6 +650,7 @@ START:                                                                          
 .ifdef APPLE_IIGS
                                 jsr     apple_start
 .endif                                
+START2:
                                 JSR     init_sound
                                 JSR     init_players                            ; init ships and scores
 
@@ -693,7 +694,7 @@ loc_6836:
                                 STA     dvg_curr_addr_lsb                       ; 0x02 (after JMP instruction)
                                 STX     dvg_curr_addr_msb                       ; 0x40/0x44 (ping pong)
                                 JSR     handle_start_end_turn_or_game
-                                BCS     START
+                                BCS     START2
                                 JSR     check_high_score
                                 JSR     handle_high_score_entry
                                 BPL     loc_6864                                ; go if new high score

@@ -36,7 +36,7 @@
 
 apple_reset:
 				HINT_IIMODE
-
+				
 ; stay on the splash screen until key hit
 				sta			KBDSTRB
 				ldy			#0
@@ -60,6 +60,7 @@ waitkey:
 				sta			coinage								; dipswitch
 				lda			#(1<<0)								; 3 lives
 				sta			centerCoinMultiplierAndLives
+				sei
 				rts
 
 msg:		.asciiz "       - PRESS ANY KEY TO PLAY -        "
@@ -73,8 +74,9 @@ apple_start:
 				sta			NEWVIDEO
 				; enable shadowing
 				lda			SHADOW
-				and			#~(1<<3)+256					; enable for SHR (only)
-				;sta			SHADOW
+				;and			#~(1<<3)+256					; enable for SHR (only)
+				ora			#(1<<3)								; disable shadowing
+				sta			SHADOW
 				; black border
 				lda			TXTBDR
 				and			#$F0
@@ -100,6 +102,16 @@ apple_start:
 				; init other display list
 				;lda			#(OP_HALT<<8)|OP_HALT
 				;sta			DVGRAM+$0400
+
+; clear the SHR screen				
+				ldx			#$7D00
+				lda			#$0
+:				sta			$012000,x							; 5 cycles
+				dex														; 2 cycles
+				dex														; 2 cycles
+				bpl			:-										; 2 cycles = 11 cycles/word (faster)
+				
+				sei														; disable interrupts
 				IIMODE
 				rts
 
@@ -175,6 +187,11 @@ dvg_halt:
 				rts
 
 apple_render_frame:
+				HINT_IIMODE
+				; disable shadowing
+				lda			SHADOW
+				ora			#(1<<3)								; disable shadowing
+				;sta			SHADOW
 				IIGSMODE
 				lda			dvg_curr_addr_lsb
 				and			#DVGRAM|$0400
@@ -195,10 +212,14 @@ render_loop:
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
 
-				; read some inputs now
-
 				IIMODE
 				
+				; enable shadowing
+				lda			SHADOW
+				and			#~(1<<3)+256					; enable for SHR (only)
+				;sta			SHADOW
+
+				; read some inputs now
 	inputs:			
 				lda			#0
 				sta			hyperspaceSwitch
