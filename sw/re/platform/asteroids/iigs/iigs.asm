@@ -27,6 +27,7 @@
 
 ; for debugging
 .export apple_render_frame
+.export update_screen
 .export erase_loop
 .export read_joystick
 .export read_btns
@@ -236,18 +237,168 @@ render_loop:
 				rep			#$20				
 				.A16
 
+update_screen:
+.if 0
 				; save sp, dp				
 				tdc
 				sta			old_dp
 				tsc
 				sta			old_sp
 
+				; swap banks 0,1
+				sep			#$20
+				sta			RDCARDRAM
+				sta			WRCARDRAM
+				rep			#$20
+
+				; set dp to $2000, sp to end of page
+				lda			#$2000
+				tcd
+				clc
+				adc			#$00FF
+				tcs
+
+				pei			($FE)
+				pei			($FC)
+				pei			($FA)
+				pei			($F8)
+				pei			($F6)
+				pei			($F4)
+				pei			($F2)
+				pei			($F0)
+				pei			($EE)
+				pei			($EC)
+				pei			($EA)
+				pei			($E8)
+				pei			($E6)
+				pei			($E4)
+				pei			($E2)
+				pei			($E0)
+				pei			($DE)
+				pei			($DC)
+				pei			($DA)
+				pei			($D8)
+				pei			($D6)
+				pei			($D4)
+				pei			($D2)
+				pei			($D0)
+				pei			($CE)
+				pei			($CC)
+				pei			($CA)
+				pei			($C8)
+				pei			($C6)
+				pei			($C4)
+				pei			($C2)
+				pei			($C0)
+				pei			($BE)
+				pei			($BC)
+				pei			($BA)
+				pei			($B8)
+				pei			($B6)
+				pei			($B4)
+				pei			($B2)
+				pei			($B0)
+				pei			($AE)
+				pei			($AC)
+				pei			($AA)
+				pei			($A8)
+				pei			($A6)
+				pei			($A4)
+				pei			($A2)
+				pei			($A0)
+				pei			($9E)
+				pei			($9C)
+				pei			($9A)
+				pei			($98)
+				pei			($96)
+				pei			($94)
+				pei			($92)
+				pei			($90)
+				pei			($8E)
+				pei			($8C)
+				pei			($8A)
+				pei			($88)
+				pei			($86)
+				pei			($84)
+				pei			($82)
+				pei			($80)
+				pei			($7E)
+				pei			($7C)
+				pei			($7A)
+				pei			($78)
+				pei			($76)
+				pei			($74)
+				pei			($72)
+				pei			($70)
+				pei			($6E)
+				pei			($6C)
+				pei			($6A)
+				pei			($68)
+				pei			($66)
+				pei			($64)
+				pei			($62)
+				pei			($60)
+				pei			($5E)
+				pei			($5C)
+				pei			($5A)
+				pei			($58)
+				pei			($56)
+				pei			($54)
+				pei			($52)
+				pei			($50)
+				pei			($4E)
+				pei			($4C)
+				pei			($4A)
+				pei			($48)
+				pei			($46)
+				pei			($44)
+				pei			($42)
+				pei			($40)
+				pei			($3E)
+				pei			($3C)
+				pei			($3A)
+				pei			($38)
+				pei			($36)
+				pei			($34)
+				pei			($32)
+				pei			($30)
+				pei			($2E)
+				pei			($2C)
+				pei			($2A)
+				pei			($28)
+				pei			($26)
+				pei			($24)
+				pei			($22)
+				pei			($20)
+				pei			($1E)
+				pei			($1C)
+				pei			($1A)
+				pei			($18)
+				pei			($16)
+				pei			($14)
+				pei			($12)
+				pei			($10)
+				pei			($0E)
+				pei			($0C)
+				pei			($0A)
+				pei			($08)
+				pei			($06)
+				pei			($04)
+				pei			($02)
+				pei			($00)
+				
+				sep			#$20
+				sta			RDMAINRAM
+				sta			WRMAINRAM
+				rep			#$20
+				
 				; and restore sp, dp				
 				lda			old_sp
 				tcs
 				lda			old_dp
 				tcd
-				
+.endif
+
 ; rewrite the SHR screen				
 				ldx			#$7D00
 :				lda			$012000,x
