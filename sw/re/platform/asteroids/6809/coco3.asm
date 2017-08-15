@@ -202,3 +202,21 @@ CMP_DARK_GREEN    .equ  3
 CMP_DARK_CYAN     .equ  29
 CMP_DARK_YELLOW   .equ  4
 CMP_GREY          .equ  32
+
+
+; tokenised display list commands
+OP_CUR              .equ 0x00
+OP_CHR              .equ 0x10
+OP_LIFE             .equ 0x20
+OP_COPYRIGHT        .equ 0x30
+OP_ASTEROID         .equ 0x40
+OP_SHIP             .equ 0x50
+OP_SHIP_THRUST			.equ OP_SHIP|(1<<3)
+OP_SAUCER           .equ 0x60
+OP_SHOT             .equ 0x70
+OP_SHRAPNEL         .equ 0x80
+OP_EXPLODINGSHIP    .equ 0x90
+OP_SCALEBRIGHTNESS  .equ 0xE0
+OP_HALT             .equ 0xF0
+
+OP_NOERASE					.equ 0x08

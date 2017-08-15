@@ -541,6 +541,14 @@ game_loop:
 				
 wave_loop:
 
+				jsr			display_C_scores_ships
+
+				jsr			update_prng
+				jsr			halt_dvg
+				lda			asteroidWaveTimer
+				beq			8$
+				dec			asteroidWaveTimer
+8$:			ora			currentNumberOfAsteroids
 				bne			wave_loop
 				beq			game_loop
 
@@ -566,6 +574,32 @@ init_players:
 ; $6EFA
 init_sound:
 				rts
+
+display_extra_ships:
+        beq     9$
+        sty     *byte_8
+        ldx     #213                                    ; Y coord (x4=852)
+        ldy     #0xE0
+        sty     *globalScale
+        ;jsr     write_CURx4_cmd
+
+.ifndef PLATFORM_COCO3
+1$:     ldx     #$DA ; 'Ú'
+        lda     #$54 ; 'T'                              ; addr=0x54DA
+        jsr     write_JSR_cmd                           ; display extra ships?
+        dec     byte_8
+        bne     1$
+.else                                
+        lda     #OP_LIFE
+1$:     ldy			*dvg_curr_addr_lsb
+				sta			,y+
+				sta			,y+
+        dec     *byte_8
+        bne     1$
+        decb
+        sty			*dvg_curr_addr_lsb
+.endif                                
+9$:			rts
 
 ; $7168
 init_wave:
@@ -671,17 +705,100 @@ limit_asteroid_velocity:
 				bcs			1$
 				lda			#-31
 1$:			cmpa		#-5
-				bcc			4$
+				bcc			9$
 				lda			#-6
 				rts
 2$:			cmpa		#6
 				bcs			3$
 				lda			#6
 3$:			cmpa		#32
-				bcc			4$
+				bcc			9$
 				lda			#31
-4$:			rts
+9$:			rts
 
+; $72F4
+display_C_scores_ships:
+				lda			#16
+				sta			*globalScale
+				lda			#0x50
+				ldx			#0xA4																		; addr = 0x50A4
+				;jsr			write_JSR_cmd														; "(C)1979 ATARI INC"
+				lda			#25																			; X coord (x4=100)
+				ldx			#219																		; Y coord (x4=876)
+				;jsr			write_CURx4_cmd
+				lda			#0x70																		; scale = 7
+				;jsr			set_scale_A_bright_0
+				ldx			#0																			; digit	brightness += 0
+				lda			*numPlayers
+				cmpa		#2																			; 2 players?
+				bne			1$																			; no, skip
+				lda			*curPlayer															; player 1?
+				bne			1$																			; yes, skip
+				ldx			#0x20                              			; digit brightness += $20
+				lda			ship_Sts
+				ora			*hyperspaceFlag
+				bne			1$
+				lda			shipSpawnTimer
+				bmi			1$
+				lda			*fastTimer
+				anda		#0x10
+				beq			2$																			; not every frame
+1$:			lda			#p1ScoreTens
+				ldy			#2																			; 2 bytes to display
+				sec																							; flag no zero padding
+				;jsr			display_numeric													; display P1 score
+				lda			#0
+				;jsr			display_bright_digit										; display score	units (=0)
+2$:			lda			#40																			; X coord (x4=160)
+				ldy			*numShipsP1
+				;jsr			display_extra_ships
+				lda			#0
+				sta			*globalScale
+				lda			#120																		; X coord (x4=480)
+				ldx			#219																		; y coord (x4=876)
+				;jsr			write_CURx4_cmd
+				lda			#0x50                              			; scale = 5
+				;jsr			set_scale_A_bright_0
+				lda			#highScoreTable
+				ldy			#2																			; 2 bytes to display
+				sec																							; flag no zero padding
+				;jsr			display_numeric													; display high score
+				lda			#0
+				;jsr			display_digit_A													; display high score units (=0)
+				lda			#0x10
+				sta			*globalScale
+				lda			#192																		; X coord (x4=768)
+				ldx			#219																		; Y coord (x4=876)
+				;jsr			write_CURx4_cmd
+				lda			#0x50                              			; scale = 5
+				;jsr			set_scale_A_bright_0
+				ldx			#0
+				lda			*numPlayers
+				cmpa		#1																			; 1 player only?
+				beq			9$																			; yes, exit
+				bcc			3$
+				lda			*curPlayer
+				beq			3$
+				ldx			#0x20
+				lda			ship_Sts
+				ora			*hyperspaceFlag
+				bne			3$
+				lda			shipSpawnTimer
+				bmi			3$
+				lda			*fastTimer
+				anda		#0x10
+				beq			4$																			; not every frame
+3$:			lda			#p2ScoreTens
+				ldy			#2																			; 2 bytes to display
+				sec																							; flag no zero padding
+				;jsr			display_numeric													; display P2 score
+				lda			#0
+				;jsr			display_bright_digit										; display score	units (=0)
+4$:			lda			#207																		; X coord (x4=828)
+				ldy			*numShipsP2
+				jmp			display_extra_ships
+9$:			rts
+				
 ; $77B5
 ; this is a 16-bit 1-tap LFSR
 ; - may	or may not be maximal length
@@ -705,6 +822,19 @@ update_prng:
 ; $77D1
 tap:		.byte		0x02
 
+; $7BC0
+halt_dvg:
+				rts
+
+; $7C39
+; B=#bytes
+update_dvg_curr_addr:
+				addb		*dvg_curr_addr_lsb
+				stb			*dvg_curr_addr_lsb
+				bcc			9$
+				inc			*dvg_curr_addr_msb
+9$:			rts				
+				
 ; $7CF3
 reset:
 				jmp			start
