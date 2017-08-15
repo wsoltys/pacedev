@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
 	r += 2;
 	cprintat (r, "FOR THE APPLE IIGS");
 	r += 3;
-	cprintat (r, "VCF WEST PREVIEW (WIP) VERSION");
+	cprintat (r, "PRE-ALPHA DEBUG 1");
 	r += 3;
 	cprintat (r++, "THIS SOFTWARE COMPRISES THE ORIGINAL");
 	cprintat (r++, "ASTEROIDS ARCADE ROM CODE ADAPTED AND");

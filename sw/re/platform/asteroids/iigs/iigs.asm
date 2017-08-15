@@ -72,11 +72,6 @@ apple_start:
 				ora			#(1<<7)|(1<<6)				; SHR, linear
 				and			#~(1<<5)+256					; colour
 				sta			NEWVIDEO
-				; enable shadowing
-				lda			SHADOW
-				;and			#~(1<<3)+256					; enable for SHR (only)
-				ora			#(1<<3)								; disable shadowing
-				sta			SHADOW
 				; black border
 				lda			TXTBDR
 				and			#$F0
@@ -112,6 +107,17 @@ apple_start:
 				bpl			:-										; 2 cycles = 11 cycles/word (faster)
 				
 				sei														; disable interrupts
+
+				; disable shadowing
+				sep			#$20
+				.A8
+				lda			SHADOW
+;				ora			#(1<<3)
+				ora			#$1E
+				sta			SHADOW
+				rep			#$20				
+				.A16
+
 				IIMODE
 				rts
 
@@ -186,13 +192,22 @@ dvg_halt:
 				sec														; flag halt
 				rts
 
+old_dp:	.word		0
+old_sp:	.word		0
+
 apple_render_frame:
-				HINT_IIMODE
-				; disable shadowing
-				lda			SHADOW
-				ora			#(1<<3)								; disable shadowing
-				;sta			SHADOW
 				IIGSMODE
+				
+				; disable shadowing
+				sep			#$20
+				.A8
+				lda			SHADOW
+				;ora			#(1<<3)
+				ora			#$1E
+				sta			SHADOW
+				rep			#$20				
+				.A16
+				
 				lda			dvg_curr_addr_lsb
 				and			#DVGRAM|$0400
 				eor			#$0400
@@ -212,13 +227,37 @@ render_loop:
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
 
-				IIMODE
-				
 				; enable shadowing
+				sep			#$20
+				.A8
 				lda			SHADOW
 				and			#~(1<<3)+256					; enable for SHR (only)
-				;sta			SHADOW
+				sta			SHADOW
+				rep			#$20				
+				.A16
 
+				; save sp, dp				
+				tdc
+				sta			old_dp
+				tsc
+				sta			old_sp
+
+				; and restore sp, dp				
+				lda			old_sp
+				tcs
+				lda			old_dp
+				tcd
+				
+; rewrite the SHR screen				
+				ldx			#$7D00
+:				lda			$012000,x
+				sta			$012000,x							; 5 cycles
+				dex														; 2 cycles
+				dex														; 2 cycles
+				bpl			:-										; 2 cycles = 11 cycles/word (faster)
+
+				IIMODE
+				
 				; read some inputs now
 	inputs:			
 				lda			#0
