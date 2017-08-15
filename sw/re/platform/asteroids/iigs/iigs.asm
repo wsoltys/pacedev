@@ -237,10 +237,11 @@ update_screen:
 				; swap banks 0,1
 				sep			#$20
 				.A8
-				lda			ALTZP
+				lda			RDALTZP
+				lda			STATE
 				sta			old_zp
 				and			#$7F
-				sta			ALTZP
+				sta			STATE
 				rep			#$20
 				.A16
 
@@ -383,7 +384,7 @@ update_screen:
 				sep			#$20
 				.A8
 				lda			old_zp
-				sta			ALTZP
+				sta			STATE
 				rep			#$20
 				.A16
 				

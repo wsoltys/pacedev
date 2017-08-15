@@ -12,6 +12,9 @@ _80STOREOFF 	= $C000
 _80STOREON 		= $C001
 MAINMEM				= $C003
 AUXMEM				= $C005
+SETSTDZP			= $C008
+SETALTZP			= $C009
+RDALTZP				= $C016				; b7 1=AUX, 0=MAIN
 _80COLOFF 		= $C00C
 _80COLON 			= $C00D
 
@@ -41,7 +44,7 @@ PADDL0        = $C064
 PADDL1        = $C065
 PADDL2        = $C066
 PADDL3        = $C067
-ALTZP					= $C068
+STATE					= $C068
 PTRIG         = $C070
 
 ; extra IIGS stuff
