@@ -107,18 +107,6 @@ apple_start:
 				dex														; 2 cycles
 				bpl			:-										; 2 cycles = 11 cycles/word (faster)
 				
-				sei														; disable interrupts
-
-				; disable shadowing
-				sep			#$20
-				.A8
-				lda			SHADOW
-;				ora			#(1<<3)
-				ora			#$1E
-				sta			SHADOW
-				rep			#$20				
-				.A16
-
 				IIMODE
 				rts
 
@@ -203,9 +191,8 @@ apple_render_frame:
 				sep			#$20
 				.A8
 				lda			SHADOW
-				;ora			#(1<<3)
 				ora			#$1E
-				sta			SHADOW
+;				sta			SHADOW
 				rep			#$20				
 				.A16
 				
@@ -223,6 +210,7 @@ erase_loop:
 				and			#DVGRAM|$0400
 				ora			#$0002
 				sta			byte_B
+
 render_loop:
 				lda			(byte_B)
 				jsr			handle_dvg_opcode			; handle it
@@ -399,6 +387,7 @@ update_screen:
 				tcd
 .endif
 
+.if 0
 ; rewrite the SHR screen				
 				ldx			#$7D00
 :				lda			$012000,x
@@ -406,6 +395,7 @@ update_screen:
 				dex														; 2 cycles
 				dex														; 2 cycles
 				bpl			:-										; 2 cycles = 11 cycles/word (faster)
+.endif
 
 				IIMODE
 				
