@@ -181,6 +181,7 @@ dvg_halt:
 				sec														; flag halt
 				rts
 
+old_zp:	.word		0
 old_dp:	.word		0
 old_sp:	.word		0
 
@@ -192,7 +193,7 @@ apple_render_frame:
 				.A8
 				lda			SHADOW
 				ora			#$1E
-;				sta			SHADOW
+				sta			SHADOW
 				rep			#$20				
 				.A16
 				
@@ -226,7 +227,7 @@ render_loop:
 				.A16
 
 update_screen:
-.if 0
+.if 1
 				; save sp, dp				
 				tdc
 				sta			old_dp
@@ -235,12 +236,16 @@ update_screen:
 
 				; swap banks 0,1
 				sep			#$20
-				sta			RDCARDRAM
-				sta			WRCARDRAM
+				.A8
+				lda			ALTZP
+				sta			old_zp
+				and			#$7F
+				sta			ALTZP
 				rep			#$20
+				.A16
 
 				; set dp to $2000, sp to end of page
-				lda			#$2000
+				lda			#$4000
 				tcd
 				clc
 				adc			#$00FF
@@ -376,9 +381,11 @@ update_screen:
 				pei			($00)
 				
 				sep			#$20
-				sta			RDMAINRAM
-				sta			WRMAINRAM
+				.A8
+				lda			old_zp
+				sta			ALTZP
 				rep			#$20
+				.A16
 				
 				; and restore sp, dp				
 				lda			old_sp

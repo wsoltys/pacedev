@@ -41,6 +41,7 @@ PADDL0        = $C064
 PADDL1        = $C065
 PADDL2        = $C066
 PADDL3        = $C067
+ALTZP					= $C068
 PTRIG         = $C070
 
 ; extra IIGS stuff
