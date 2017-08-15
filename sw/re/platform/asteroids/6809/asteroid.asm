@@ -596,7 +596,6 @@ display_extra_ships:
 				sta			,y+
         dec     *byte_8
         bne     1$
-        decb
         sty			*dvg_curr_addr_lsb
 .endif                                
 9$:			rts
