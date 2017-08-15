@@ -168,7 +168,7 @@ saucer_PLv:											.ds		1
 saucerShot_PLv:									.ds		1
 shipShot_PLv:										.ds		4
 startingAsteroidsPerWave:				.ds		1
-currentNumerofAsteroids:				.ds		1
+currentNumberOfAsteroids:				.ds		1
 saucerCountdownTimer:						.ds		1
 starting_saucerCountdownTimer:	.ds		1
 asteroid_hit_timer:							.ds		1
@@ -340,11 +340,7 @@ setup_gime_for_game:
 				;sta			FIRQENR   							
 				lda			#BP										  ; graphics mode, 60Hz, 1 line/row
 				sta			VMODE     							
-	  .ifdef GFX_1BPP				
 				lda			#0x08										; 192 scanlines, 32 bytes/row, 2 colours (256x192)
-	  .else				
-				lda			#0x11										; 192 scanlines, 64 bytes/row, 4 colours (256x192)
-	  .endif				
 				sta			VRES      							
 				lda			#0x00										; black
 				sta			BRDR      							
@@ -454,7 +450,7 @@ inipal:
 
 .endif	; PLATFORM_COCO3
 			
-        jmp     start                   ; asteroids
+        jmp     asteroids
         
 rgb_pal:
     .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
@@ -523,9 +519,202 @@ pal_splash:
 pal_detected:
 				.ds			1
 attr:   .ds     1
-                
-start:
 
+; $2800
+coinage:			      						.ds 1
+;	0 = 1x & 4, 1 =	1x & 3,	2 = 2x & 4, 3 =	2x & 3
+rightCoinMultiplier:	      		.ds 1
+centerCoinMultiplierAndLives:   .ds 1
+language:			      						.ds 1
+
+; $6800                
+asteroids:
+				jsr			coco_reset
+				jmp			reset
+start:
+				jsr			coco_start				
+				jsr			init_sound
+				jsr			init_players
+				
+game_loop:
+				jsr			init_wave
+				
+wave_loop:
+
+				bne			wave_loop
+				beq			game_loop
+
+; $6ED8
+init_players:
+				lda			#2
+				sta			startingAsteroidsPerWave
+				ldx			#3
+				lsr			centerCoinMultiplierAndLives
+				bcs			1$
+				inx
+1$:			stx			*numStartingShipsPerGame
+				lda			#0
+				ldx			#4																			; 4 flags,	4 timers, 4 score bytes
+2$:			sta			ship_Sts,x
+				sta			shipShot_Sts,x													; init timer
+				sta			byte_4F+2,X															; zero player score
+				dex																							; next byte
+				bpl			2$																			; loop until done
+				sta			currentNumberOfAsteroids
+				rts
+						
+; $6EFA
+init_sound:
+				rts
+
+; $7168
+init_wave:
+				ldx			#26																			; 26+1 asteroids
+				lda			asteroidWaveTimer
+				bne			loc_71DF
+				lda			saucer_Sts															; saucer active?
+				bne			locret_71E7															; yes, return
+				sta			saucer_Vh
+				sta			saucer_Vv																; zero saucer vertical velocity
+				inc			numAsteroidsLeftBeforeSaucer
+				lda			numAsteroidsLeftBeforeSaucer
+				cmpa		#11																			; max value
+				bcc			loc_7187																; no, skip
+				dec			numAsteroidsLeftBeforeSaucer						; adjust to max
+
+loc_7187:
+				lda			startingAsteroidsPerWave
+				adda		#2																			; 2 more per wave
+				cmpa		#11																			; max number of	asteroids?
+				bcc			loc_7193																; OK, skip
+				lda			#11																			; limit	to 11
+
+loc_7193:
+				sta			currentNumberOfAsteroids
+				sta			startingAsteroidsPerWave
+				sta			*byte_8																	; store	as temp	counter
+				ldy			#28																			; offset to ship
+
+init_next_asteroid:
+				jsr			update_prng															; random velocity
+				anda		#0x18																		; (4:3)	= rnd shape
+				ora			#4																			; (2:1)	= 10b =	large
+				sta			P1RAM,X																	; set asteroid status
+				jsr			set_asteroid_velocity
+				jsr			update_prng															; random position
+				lsra
+				anda		#0x1F																		; 5 bits of high byte
+				bcc			start_bottom
+				cmpa		#0x18
+				bcc			start_left
+				anda		#0x17
+
+start_left:									
+				sta			asteroid_PHv,X													; y coord (high	byte)
+				lda			#0
+				sta			asteroid_PHh,X
+				sta			asteroid_PLh,X													; x coord = 0
+				beq			loc_71D0
+
+start_bottom:									
+				sta			asteroid_PHh,X													; x coord (high	byte)
+				lda			#0
+				sta			asteroid_PHv,X													; y coord = 0
+				sta			asteroid_PLv,X
+
+loc_71D0:									
+				dex																							; offset for next asteroid
+				dec			*byte_8																	; done all asteroids for the wave?
+				bne			init_next_asteroid											; no, loop
+				lda			#127
+				sta			saucerCountdownTimer
+				lda			#48
+				sta			starting_ThumpCounter
+
+loc_71DF:
+				lda			#0
+
+loc_71E1:									
+				sta			P1RAM,X																	; flag asteroid	as inactive
+				dex																							; offset for next asteroid
+				bpl	loc_71E1																		; loop through remaining entries
+
+locret_71E7:
+				rts
+
+; $7203
+; Y=source asteroid, X=new asteroid
+set_asteroid_velocity:
+				jsr			update_prng
+				anda		#0x8F
+				bpl			1$
+				ora			#0xF0
+1$:			adda		asteroid_Vh,Y														; source velocity
+				jsr			limit_asteroid_velocity
+				sta			asteroid_Vh,X														; new velocity
+				jsr			update_prng
+				jsr			update_prng
+				jsr			update_prng
+				jsr			update_prng
+				anda		#0x8F
+				bpl			2$
+				ora			#0xF0
+2$:			adda		asteroid_Vv,Y														; source velocity
+				jsr			limit_asteroid_velocity
+				sta			asteroid_Vv,X														; new velocity
+				rts
+
+; $7233
+limit_asteroid_velocity:
+				bpl			2$
+				cmpa		#-31
+				bcs			1$
+				lda			#-31
+1$:			cmpa		#-5
+				bcc			4$
+				lda			#-6
+				rts
+2$:			cmpa		#6
+				bcs			3$
+				lda			#6
+3$:			cmpa		#32
+				bcc			4$
+				lda			#31
+4$:			rts
+
+; $77B5
+; this is a 16-bit 1-tap LFSR
+; - may	or may not be maximal length
+;   has	check for zero
+update_prng:
+				asl			*rnd1
+				rol			*rnd2																		; shift	left 16-bit value
+				bpl			1$																			; no shift out
+				inc			*rnd1																		; shift	into low bit
+1$:			lda			*rnd1
+				bita		tap																			; tap on output	of bit0
+				beq			2$																			; not set, skip
+				eora		#1																			; XOR bit0
+				sta			*rnd1
+2$:			ora			*rnd2																		; check	all 0
+				bne			3$																			; no, skip
+				inc			*rnd1																		; =1
+3$:			lda			*rnd1																		; return low byte
+				rts
+
+; $77D1
+tap:		.byte		0x02
+
+; $7CF3
+reset:
+				jmp			start
+				
+coco_reset:
+				rts
+				
+coco_start:
+				rts
+								
 .ifdef BUILD_OPT_PROFILE
 main_isr:
 				tst			IRQENR									; ACk IRQ
