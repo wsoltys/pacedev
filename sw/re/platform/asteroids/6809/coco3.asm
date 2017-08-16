@@ -1,11 +1,18 @@
 				.list		(meb)										; macro expansion binary
-       	.area   idaseg (ABS)
+       	.area   code (REL, CON)
 				.module coco3
 				
 .include "coco3.inc"
 
 .globl	dp_base
 .globl	asteroids
+
+; *** BUILD OPTIONS
+.define BUILD_OPT_NO_SPLASH
+; *** end of BUILD OPTIONS
+
+; *** derived - do not edit
+; *** end of derived
 
 osd_init::
 				orcc		#0x50										; disable interrupts
@@ -90,7 +97,9 @@ splash_get_key:
 				bitb		#8											; pal?
 				beq			4$											; no, skip
 				tsta														; any key hit?
-				;beq			2$											; no, loop
+.ifndef BUILD_OPT_NO_SPLASH				
+				beq			2$											; no, loop
+.endif				
 				bra			setup_gime_for_game
 4$:			bita    #(1<<2)                 ; 'R'?
 				bne     5$											; yes, default, exit

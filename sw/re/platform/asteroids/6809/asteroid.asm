@@ -5,7 +5,7 @@
 ; - graphics kindly supplied by Norbert Kehrer
 ;
 				.list		(meb)										; macro expansion binary
-       	.area   idaseg (ABS)
+       	.area   CODE (REL,CON)
 				.module asteroid
 				
 .define			PLATFORM_COCO3

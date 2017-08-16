@@ -33,7 +33,7 @@ ifeq ($(PLATFORM),coco3)
 endif
 
 ASFLAGS = -l -o -s
-LDFLAGS = -i -m
+LDFLAGS = -i -u -m
 
 LDR_OBJS = $(LDR).rel
 EXE_OBJS = $(EXE).rel coco3.rel
