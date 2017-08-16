@@ -550,12 +550,16 @@ write_CUR_cmd:
 				lda			2,X																			; @$6 =	Y*4 (lsb)
 				ldb			#0
 				ldy			*dvg_curr_addr_msb
-				sta			b,y																			; store	in avg ram
+				sta			1,y																			; store	in avg ram
 				incb
 				lda			3,X																			; @$7 =	Y*4 (msb)
 				anda		#0x0F																		; clear	command	nibble
-				ora			#0xA0                              			; CUR command
-				sta			b,y																			; store	in avg ram
+.ifndef PLATFORM_COCO3
+        ORA     #$A0 ; ' '                              ; CUR command
+.else
+        ora     #OP_CUR
+.endif
+				sta			0,y																			; store	in avg ram
 				incb
 				lda			0,X																			; @$4 =	X*4 (lsb)
 				sta			b,y																			; store	in avg ram

@@ -369,10 +369,63 @@ handle_erase_opcode:
 				rts
 
 dvg_cur:
-				leay		4,y
-				sty			*0x0B
+				ldd			,y											; D = CUR Y (0-1023) (10 bits)
+				lsra														
+				rorb
+				addd		,y++										; Y+Y/2 (11 bits)
+				lsra
+				rorb
+				lsra
+				rorb
+				lsra
+				rorb														; B = CUR Y (0-192) (8 bits)
+				stb			*0x06
+				ldb			#191
+				subb		*0x06
+				stb			*0x06										; store non-inverted Y
+				; find address of line
+				tfr			b,a
+				clrb
+				lsra
+				rorb
+				lsra
+				rorb
+				lsra
+				rorb
+				std			*0xC0
+				; scale X
+				ldd			,y++										; global scale, CUR X (0-1023) (10 bits)
+				lsra
+				rorb
+				lsra
+				rorb
+				stb			*0x04										; CUR X (0-255)
+				lsra
+				lsra
+				sta			*0x08										; global scale
+				; find address of CUR (&line+x/8)
+				ldx			*0xC0
+				lsrb
+				lsrb
+				lsrb
+				abx
+				stx			*0xC2
+				sty			*0x0B										; update dvgram address
 				CLC
 				rts
+
+dvg_life:
+				ldx			*0xC2
+				lda			0xff
+				sta			0,x
+				sta			32,x
+				sta			64,x
+				sta			96,x
+				leay		2,y
+				sty			0x0B
+				CLC
+				rts
+				
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -388,7 +441,7 @@ dvg_halt:
 dvg_jmp_tbl:
 				.word		dvg_cur
 				.word		dvg_nop
-				.word		dvg_nop
+				.word		dvg_life
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
