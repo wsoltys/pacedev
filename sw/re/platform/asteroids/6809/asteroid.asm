@@ -27,8 +27,8 @@
 dp_base:            						.ds     256        
 globalScale 										.equ		0x00
 byte_1                          .equ		0x01
-dvg_curr_addr_lsb               .equ		0x02
-dvg_curr_addr_msb               .equ		0x03
+dvg_curr_addr_msb               .equ		0x02						; swapped on 6809
+dvg_curr_addr_lsb               .equ		0x03						; swapped on 6809
 byte_4                          .equ		0x04
 byte_5                          .equ		0x05
 byte_6                          .equ		0x06
@@ -275,7 +275,7 @@ splash_get_key:
 				bitb		#8											; pal?
 				beq			4$											; no, skip
 				tsta														; any key hit?
-				beq			2$											; no, loop
+				;beq			2$											; no, loop
 				bra			setup_gime_for_game
 4$:			bita    #(1<<2)                 ; 'R'?
 				bne     5$											; yes, default, exit
@@ -541,6 +541,21 @@ game_loop:
 				
 wave_loop:
 
+				lda			dvgram+1
+				eora		#2																			; JMP $0402<->$0002
+				sta			dvgram+1
+				
+				inc			*fastTimer
+				bne			6$
+				inc			*slowTimer
+6$:			ldb			#>dvgram																; ping-pong DVG	RAM $4000/$4400
+				andb		#0x02
+				bne			7$
+				ldb			#>(dvgram+0x0400)
+7$:			lda			#0x02
+				sta			*dvg_curr_addr_lsb											; 0x02 (after JMP instruction)
+				stb			*dvg_curr_addr_msb											; 0x40/0x44 (ping pong)
+				
 				jsr			display_C_scores_ships
 
 				jsr			update_prng
@@ -562,11 +577,12 @@ init_players:
 				inx
 1$:			stx			*numStartingShipsPerGame
 				lda			#0
-				ldx			#4																			; 4 flags,	4 timers, 4 score bytes
+				ldx			#4																			; 4 flags, 4 timers, 4 score bytes
 2$:			sta			ship_Sts,x
 				sta			shipShot_Sts,x													; init timer
-				sta			byte_4F+2,X															; zero player score
-				dex																							; next byte
+				sta			byte_4F+2,x															; zero player score
+				leax		-1,x																		; next byte
+				cmpx		#0
 				bpl			2$																			; loop until done
 				sta			currentNumberOfAsteroids
 				rts
@@ -577,11 +593,11 @@ init_sound:
 
 display_extra_ships:
         beq     9$
-        sty     *byte_8
-        ldx     #213                                    ; Y coord (x4=852)
-        ldy     #0xE0
-        sty     *globalScale
-        ;jsr     write_CURx4_cmd
+        stb     *byte_8
+        ldb     #0xE0
+        stb     *globalScale
+        ldb     #213                                    ; Y coord (x4=852)
+        jsr     write_CURx4_cmd
 
 .ifndef PLATFORM_COCO3
 1$:     ldx     #$DA ; 'Ú'
@@ -591,12 +607,12 @@ display_extra_ships:
         bne     1$
 .else                                
         lda     #OP_LIFE
-1$:     ldy			*dvg_curr_addr_lsb
-				sta			,y+
+     		ldy			*dvg_curr_addr_msb
+1$:			sta			,y+
 				sta			,y+
         dec     *byte_8
         bne     1$
-        sty			*dvg_curr_addr_lsb
+        sty			*dvg_curr_addr_msb
 .endif                                
 9$:			rts
 
@@ -606,7 +622,7 @@ init_wave:
 				lda			asteroidWaveTimer
 				bne			loc_71DF
 				lda			saucer_Sts															; saucer active?
-				bne			locret_71E7															; yes, return
+				lbne		locret_71E7															; yes, return
 				sta			saucer_Vh
 				sta			saucer_Vv																; zero saucer vertical velocity
 				inc			numAsteroidsLeftBeforeSaucer
@@ -656,7 +672,7 @@ start_bottom:
 				sta			asteroid_PLv,X
 
 loc_71D0:									
-				dex																							; offset for next asteroid
+				leax		-1,x																		; offset for next asteroid
 				dec			*byte_8																	; done all asteroids for the wave?
 				bne			init_next_asteroid											; no, loop
 				lda			#127
@@ -669,8 +685,9 @@ loc_71DF:
 
 loc_71E1:									
 				sta			P1RAM,X																	; flag asteroid	as inactive
-				dex																							; offset for next asteroid
-				bpl	loc_71E1																		; loop through remaining entries
+				leax		-1,x																		; offset for next asteroid
+				cmpx		#0
+				bpl			loc_71E1																; loop through remaining entries
 
 locret_71E7:
 				rts
@@ -723,8 +740,8 @@ display_C_scores_ships:
 				ldx			#0xA4																		; addr = 0x50A4
 				;jsr			write_JSR_cmd														; "(C)1979 ATARI INC"
 				lda			#25																			; X coord (x4=100)
-				ldx			#219																		; Y coord (x4=876)
-				;jsr			write_CURx4_cmd
+				ldb			#219																		; Y coord (x4=876)
+				jsr			write_CURx4_cmd
 				lda			#0x70																		; scale = 7
 				;jsr			set_scale_A_bright_0
 				ldx			#0																			; digit	brightness += 0
@@ -749,26 +766,26 @@ display_C_scores_ships:
 				lda			#0
 				;jsr			display_bright_digit										; display score	units (=0)
 2$:			lda			#40																			; X coord (x4=160)
-				ldy			*numShipsP1
-				;jsr			display_extra_ships
+				ldb			*numShipsP1
+				jsr			display_extra_ships
 				lda			#0
 				sta			*globalScale
 				lda			#120																		; X coord (x4=480)
-				ldx			#219																		; y coord (x4=876)
-				;jsr			write_CURx4_cmd
+				ldb			#219																		; y coord (x4=876)
+				jsr			write_CURx4_cmd
 				lda			#0x50                              			; scale = 5
 				;jsr			set_scale_A_bright_0
 				lda			#highScoreTable
 				ldy			#2																			; 2 bytes to display
-				sec																							; flag no zero padding
+				SEC																							; flag no zero padding
 				;jsr			display_numeric													; display high score
 				lda			#0
 				;jsr			display_digit_A													; display high score units (=0)
 				lda			#0x10
 				sta			*globalScale
 				lda			#192																		; X coord (x4=768)
-				ldx			#219																		; Y coord (x4=876)
-				;jsr			write_CURx4_cmd
+				ldb			#219																		; Y coord (x4=876)
+				jsr			write_CURx4_cmd
 				lda			#0x50                              			; scale = 5
 				;jsr			set_scale_A_bright_0
 				ldx			#0
@@ -789,12 +806,12 @@ display_C_scores_ships:
 				beq			4$																			; not every frame
 3$:			lda			#p2ScoreTens
 				ldy			#2																			; 2 bytes to display
-				sec																							; flag no zero padding
+				SEC																							; flag no zero padding
 				;jsr			display_numeric													; display P2 score
 				lda			#0
 				;jsr			display_bright_digit										; display score	units (=0)
 4$:			lda			#207																		; X coord (x4=828)
-				ldy			*numShipsP2
+				ldb			*numShipsP2
 				jmp			display_extra_ships
 9$:			rts
 				
@@ -823,12 +840,58 @@ tap:		.byte		0x02
 
 ; $7BC0
 halt_dvg:
-				rts
+.ifndef PLATFORM_COCO3
+        LDA     #$B0 ; '°'
+.else
+        lda     #OP_HALT
+.endif
+        ldy     *dvg_curr_addr_msb
+        sta			,y+
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+        rts
+
+; $7C03
+; A=X coord, B=Y coord
+write_CURx4_cmd:
+				clr			*byte_5
+				clr			*byte_7
+				asla
+				rol			*byte_5
+				asla
+				rol			*byte_5																	; X*4 (msb)
+				sta			*byte_4																	; X*4 (lsb)
+				aslb
+				rol			*byte_7
+				aslb
+				rol			*byte_7																	; Y*4 (msb)
+				stb			*byte_6																	; Y*4 (lsb)
+				ldx			#4
+
+write_CUR_cmd:
+				lda			2,X																			; @$6 =	Y*4 (lsb)
+				ldb			#0
+				ldy			*dvg_curr_addr_msb
+				sta			b,y																			; store	in avg ram
+				incb
+				lda			3,X																			; @$7 =	Y*4 (msb)
+				anda		#0x0F																		; clear	command	nibble
+				ora			#0xA0                              			; CUR command
+				sta			b,y																			; store	in avg ram
+				incb
+				lda			0,X																			; @$4 =	X*4 (lsb)
+				sta			b,y																			; store	in avg ram
+				incb
+				lda			1,X																			; @$5 =	X*4 (msb)
+				anda		#0x0F																		; clear	scale nibble
+				ora			*globalScale														; global scale
+				sta			b,y																			; store	in avg ram
 
 ; $7C39
 ; B=#bytes
 update_dvg_curr_addr:
-				addb		*dvg_curr_addr_lsb
+				SEC
+				adcb		*dvg_curr_addr_lsb
 				stb			*dvg_curr_addr_lsb
 				bcc			9$
 				inc			*dvg_curr_addr_msb
@@ -836,9 +899,53 @@ update_dvg_curr_addr:
 				
 ; $7CF3
 reset:
+				ldx			#0x100
+1$:			leax		-1,x
+				sta			P1RAM+0x100,x														; clear P2 RAM
+				sta			P1RAM,x																	; clear P1 RAM
+				;sta			$100,x
+				sta			dp_base,x																; clear DP
+				cmpx		#0
+				bne			1$
+				; check for service mode here - not supported												
+				lda			#1
+				sta			dvgram
+				lda			#0xE2
+				sta			dvgram+1																; JMP $0402
+.ifndef PLATFORM_COCO3
+				LDA     #$B0 ; '°'                              ; HALT
+.else
+				lda			#OP_HALT
+.endif
+        sta     dvgram+3
+        lda			#0xB0
+        sta     *placeP1HighScore
+        sta     *placeP2HighScore
+        lda     #3
+        sta     *io3200ShadowRegister
+        ;sta     $3200                                   ; Turn on player 1 & 2 start lamps
+        anda    coinage                                 ; coinage only
+        sta     *coinMultCredits
+        lda     rightCoinMultiplier
+        anda    #3                                      ; multiplier bits only
+        asla
+        asla                                            ; -> bits 3..2
+        ora     *coinMultCredits
+        sta     *coinMultCredits
+        lda     centerCoinMultiplierAndLives
+        anda    #2                                      ; multiplier bit only
+        asla
+        asla
+        asla                                            ; -> bit 4
+        ora     *coinMultCredits
+        sta     *coinMultCredits
 				jmp			start
 				
 coco_reset:
+				lda			#0x02									; 1 coin, 1 credit
+				sta			coinage								; dipswitch
+				lda			#(1<<0)								; 3 lives
+				sta			centerCoinMultiplierAndLives
 				rts
 				
 coco_start:
