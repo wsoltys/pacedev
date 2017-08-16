@@ -351,16 +351,17 @@ attr:   .ds     1
 .globl	language
 
 osd_reset::
+
 ; table of shifted values (2 bytes)
 ; - 1st run seeds low values
         ldb     #0
-        clr     *z80_c
-2$:     lda     *z80_c
+        clr     *0x03
+2$:     lda     *0x03
         ldx     #shift_tbl+0x80
         sta     a,x
         leax    0x100,x
         clr     a,x
-        inc     *z80_c
+        inc     *0x03
         decb
         bne     2$
 ; next 7 runs shift the previous entries
@@ -368,9 +369,9 @@ osd_reset::
         ldu     #shift_tbl+0x80
 3$:     pshs    b
         ldb     #0
-        clr     *z80_c
+        clr     *0x03
 4$:     pshs    b
-        lda     *z80_c
+        lda     *0x03
         tfr     u,x                     ; base for this shift
         ldb     a,x                     ; byte #1
         pshs    b
@@ -380,14 +381,14 @@ osd_reset::
         lsra
         rorb
         pshs    d                       ; b then a
-        lda     *z80_c
+        lda     *0x03
         leax    0x100,x
         puls    b
         stb     a,x                     ; byte #1 shifted
         leax    0x100,x
         puls    b
         stb     a,x                     ; byte #2 shifted
-        inc     *z80_c
+        inc     *0x03
         puls    b
         decb
         bne     4$
@@ -447,11 +448,14 @@ dvg_cur:
 				lsra
 				rorb
 				stb			*0x04										; CUR X (0-255)
+				andb		#0x07
+				stb			*0x05										; pixel offset (0-7)
 				lsra
 				lsra
 				sta			*0x08										; global scale
 				; find address of CUR (&line+x/8)
 				ldx			*0xC0
+				ldb			*0x04										; CUR X (0-255)
 				lsrb
 				lsrb
 				lsrb
@@ -461,7 +465,7 @@ dvg_cur:
 				CLC
 				rts
 
-bmp_life_0:
+bmp_life:
 		.byte $%00100000
 		.byte $%00100000
 		.byte $%01010000
@@ -472,20 +476,39 @@ bmp_life_0:
 
 dvg_life:
 				leay		2,y
-				sty			*0x0B
-				ldx			*0xC2
-				ldy			#bmp_life_0
-				ldb			*0x04										; X (0-255)
-				andb		0x07										; pixel offset
-1$:			lda			,y+
-				ora			,x
-				sta			,x
-				leax		32,x
-				cmpy		#bmp_life_0+7
-				bne			1$
+				sty			*0x0B										; update dvgram address
+				lda			*0x05										; pixel offset (0-7)
+				lsla														; x2
+				adda		#>shift_tbl
+				ldb			#0x80
+				std			*0xD0										; offset
+				inca
+				std			*0xD2										; offset2
+				lda			#7
+				sta			*0xD4										; lines
+				ldu			#bmp_life
+				ldy			*0xC2
+1$:			ldb			,u+											; sprite data byte
+				ldx			*0xD0
+				lda			b,x											; shifted data bye
+				ora			,y
+				sta			,y
+				ldx			*0xD2
+				lda			b,x
+				ora			1,y
+				sta			1,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				lda			*0x05										; pixel offset
+				adda		#6
+				bita		#0x08
+				beq			2$
+				anda		#0x07
 				ldx			*0xC2
 				leax		1,x
 				stx			*0xC2										; update CUR
+2$:			sta			*0x05
 				CLC
 				rts
 				
