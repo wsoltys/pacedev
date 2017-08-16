@@ -327,6 +327,8 @@ pal_splash:
         .dw     0
 
 rgb_pal:
+    .db CMP_DARK_BLACK, CMP_WHITE
+    
     .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
     .db RGB_DARK_GREEN, RGB_DARK_CYAN, RGB_DARK_YELLOW, RGB_GREY
     .db RGB_BLACK, RGB_BLUE, RGB_RED, RGB_MAGENTA
@@ -414,13 +416,32 @@ dvg_cur:
 				CLC
 				rts
 
+bmp_life:
+		.byte $%00100000
+		.byte $%00100000
+		.byte $%01010000
+		.byte $%01010000
+		.byte $%01010000
+		.byte $%11111000
+		.byte $%10001000
+		
 dvg_life:
 				ldx			*0xC2
-				lda			#0xff
+				lda			#0B00100000
 				sta			0,x
 				sta			32,x
+				lda			#0B01010000
 				sta			64,x
 				sta			96,x
+				leax		128,x
+				sta			0,x
+				lda			#0B11111000
+				sta			32,x
+				lda			#0B10001000
+				sta			64,x
+				ldx			*0xC2
+				leax		1,x
+				stx			*0xC2										; update CUR
 				leay		2,y
 				sty			*0x0B
 				CLC
