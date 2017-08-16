@@ -356,8 +356,82 @@ osd_reset::
 				rts
 				
 osd_start::
+				; clear the graphics screen
+				lda			#0
+				ldx			#coco_vram
+1$:			sta			,x+
+				cmpx		#VIDEO_SIZ
+				bne			1$
 				rts
+
+handle_erase_opcode:
+				SEC
+				rts
+
+dvg_cur:
+				leay		4,y
+				sty			*0x0B
+				CLC
+				rts
+dvg_nop:
+				leay		2,y
+				sty			*0x0B
+				CLC
+				rts
+
+dvg_halt:
+				leay		2,y
+				sty			*0x0B
+				SEC
+				rts
+				
+dvg_jmp_tbl:
+				.word		dvg_cur
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_halt
 								
+handle_dvg_opcode:
+				lsra
+				lsra
+				lsra
+				anda		#0x1E
+				ldx			#dvg_jmp_tbl
+				jmp			[a,x]
+				
 osd_render_frame::
-				orcc		#0x50										; disable interrupts
+;
+				ldd			*0x02									; dvg_curr_addr
+				anda		#(>dvgram|0x04)
+				eora		#0x04									; previous frame
+				ldb			#0x02									; start at $0002
+				std			*0x0B
+erase_loop:				
+				ldy			*0x0B
+				ldd			,y
+				jsr			handle_erase_opcode		; handle it
+				bcc			erase_loop
+;
+				ldd			*0x02									; dvg_curr_addr
+				anda		#(>dvgram|0x04)
+				ldb			#0x02									; start at $0002
+				std			*0x0B
+render_loop:
+				ldy			*0x0B
+				ldd			,y
+				jsr			handle_dvg_opcode			; handle it
+				bcc			render_loop
+
 				rts

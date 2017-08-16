@@ -73,12 +73,7 @@ RAMMODE			.equ		0xFFDF
 
 ; some graphics/memory calculations
 
-.define GFX_1BPP
-.ifdef GFX_1BPP
   VIDEO_BPL     .equ    32
-.else
-  VIDEO_BPL     .equ    64
-.endif
   VIDEO_SIZ     .equ    VIDEO_BPL*192
 
 
