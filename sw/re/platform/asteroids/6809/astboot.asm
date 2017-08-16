@@ -7,7 +7,7 @@
         
         .area   idaseg (ABS)
 
-.include "coco3.asm"
+.include "coco3.inc"
 
 .define	ENABLE_SPLASH
 

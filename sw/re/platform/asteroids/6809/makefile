@@ -33,10 +33,10 @@ ifeq ($(PLATFORM),coco3)
 endif
 
 ASFLAGS = -l -o -s
-LDFLAGS = -i
+LDFLAGS = -i -m
 
 LDR_OBJS = $(LDR).rel
-EXE_OBJS = $(EXE).rel
+EXE_OBJS = $(EXE).rel coco3.rel
 
 all: $(MEDIA)
 
@@ -60,7 +60,7 @@ $(FQEN): $(TARGET).rom
 
 $(TARGET).ihx: $(EXE_OBJS)
 	$(ECHO) Linking $@...
-	$(LD) $(LDFLAGS) $<
+	$(LD) $(LDFLAGS) $@ $(EXE_OBJS)
 
 %.rel: %.asm $(MAKEFILE)
 	$(AS) $(ASFLAGS) $<

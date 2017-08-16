@@ -1,222 +1,354 @@
-;
-; *** 6809 stuff
-;
+				.list		(meb)										; macro expansion binary
+       	.area   idaseg (ABS)
+				.module coco3
+				
+.include "coco3.inc"
 
-  .macro	CLC
-    andcc		#~(1<<0)
-  .endm
-  .macro	SEC
-    orcc		#(1<<0)
-  .endm
+.globl	dp_base
+.globl	asteroids
 
-;
-; *** COCO registers
-;
+osd_init::
+				orcc		#0x50										; disable interrupts
+				lds			#stack
 
-PIA0				.equ		0xFF00
-PIA1				.equ		0xFF20
-DATAA       .equ    0x00
-DDRA        .equ    DATAA
-CRA         .equ    0x01
-DATAB       .equ    0x02
-DDRB        .equ    DATAB
-CRB         .equ    0x03
+; switch in 32KB cartridge
+        lda     #COCO|MMUEN|MC3|MC1|MC0 ; 32KB internal ROM
+        sta     INIT0
+; setup MMU to copy ROM
+        lda     #CODE_PG1
+        ldx     #MMUTSK1                ; $0000-$7FFF
+        ldb     #4
+1$:     sta     ,x+
+        inca
+        decb
+        bne     1$                      ; map pages $30-$33
+; copy ROM into RAM        
+        ldx     #0x8000                 ; start of 32KB ROM
+        ldy     #0x0000                 ; destination
+2$:     lda     ,x+
+        sta     ,y+
+        cmpx    #0xff00                 ; done?
+        bne     2$                      ; no, loop
+; setup MMU mapping for game
+        lda     #CODE_PG1
+        ldx     #MMUTSK1+4              ; $8000-$FFFF
+        ldb     #4
+4$:     sta     ,x+
+        inca
+        decb
+        bne     4$                      ; map pages $30-33
+        lda     #VRAM_PG
+        ldx     #MMUTSK1                ; $0000-
+        ldb     #4
+5$:     sta     ,x+
+        inca
+        decb
+        bne     5$                      ; map pages $38-$3B        
+; switch to all-RAM mode
+        sta     RAMMODE        
 
-KEYCOL			.equ		PIA0+2
-KEYROW			.equ		PIA0
+; check for PAL/NTSC GIME
+				lda			#0x3f										; ECB ROM $E000-
+				ldx			#MMUTSK1
+				sta			,x
+				ldb			0x0033									; read BASIC video register mirror
+				lda			#VRAM_PG
+				sta			,x											; restore page
+				stb			pal_detected
 
-;
-; *** GIME registers  	
-;
+display_splash:
+				lda			#0x01										; 32 CPL
+				sta			VRES
+        ldx     #0x400
+        lda     #0x60                   ; green space
+        eora		#0x40										; inverse (black space)
+1$:     sta     ,x+
+        cmpx    #0x600
+        bne     1$
+        ldx     #splash
+        ldy     #0x420
+				jsr			display_lines
+				lda			pal_detected
+				ldx			#ntsc_splash
+				bita		#8											; pal?
+				beq			2$											; no, skip
+				ldx			#pal_splash
+2$:			ldy			#0x540
+   			jsr			display_lines
+				ldx			#PIA0
 
-INIT0				.equ		0xFF90
-COCO        .equ    1<<7
-MMUEN       .equ    1<<6
-IEN         .equ    1<<5
-FEN         .equ    1<<4
-MC3         .equ    1<<3
-MC2         .equ    1<<2
-MC1         .equ    1<<1
-MC0         .equ    1<<0
-INIT1				.equ		0xFF91
-TINS        .equ    1<<5
-TR          .equ    1<<0
-IRQENR			.equ		0xFF92
-FIRQENR			.equ		0xFF93
-TMR         .equ    1<<5
-HBORD       .equ    1<<4
-VBORD       .equ    1<<3
-EI2         .equ    1<<2
-EI1         .equ    1<<1
-EI0         .equ    1<<0
-TMRMSB			.equ		0xFF94
-TMRLSB			.equ		0xFF95
-VMODE				.equ		0xFF98
-BP          .equ    1<<7
-BPI         .equ    1<<5
-MOCH        .equ    1<<4
-H50         .equ    1<<3
-VRES				.equ		0xFF99
-BRDR				.equ		0xFF9A
-VSC					.equ		0xFF9C
-VOFFMSB			.equ		0xFF9D
-VOFFLSB			.equ		0xFF9E
-HOFF				.equ		0xFF9F
-HVEN        .equ    1<<7
-MMUTSK1			.equ		0xFFA0
-MMUTSK2			.equ		0xFFA8
-PALETTE			.equ		0xFFB0
-CPU089			.equ		0xFFD8
-CPU179			.equ		0xFFD9
-ROMMODE			.equ		0xFFDE
-RAMMODE			.equ		0xFFDF
+splash_get_key:
+				clr			cmp											; flag RGB
+2$:			ldb			pal_detected
+				lda			#~(1<<2)								; col=2
+				bitb		#8											; PAL?
+				beq			3$											; no, skip
+				clra														; all columns
+3$:			sta     2,x											; column strobe
+				lda     ,x
+				coma														; active high
+				bitb		#8											; pal?
+				beq			4$											; no, skip
+				tsta														; any key hit?
+				;beq			2$											; no, loop
+				bra			setup_gime_for_game
+4$:			bita    #(1<<2)                 ; 'R'?
+				bne     5$											; yes, default, exit
+        lda     #~(1<<3)								; col=3
+				sta			2,x											; column strobe
+				lda			,x											; active low
+				bita    #(1<<0)                 ; 'C'?
+				bne     2$                      ; try again
+				ldb     #(1<<4)                 ; flag component
+				stb     cmp
+5$:     bra			setup_gime_for_game
+        
+display_lines:        
+1$:     ldb     ,x+                     ; read 'attr'
+        stb     attr
+        lda     ,x                      ; leading null?
+        beq     9$
+				pshs    y
+2$:     lda     ,x+
+        beq     3$
+        eora    attr
+        eora		#0x40										; invert
+        sta     ,y+
+        bra     2$
+3$:     puls    y
+        leay    32,y
+        bra     1$
+9$:			rts
+				
+setup_gime_for_game:
 
-; some graphics/memory calculations
+; need DP for the FISR				
+				lda			#>dp_base
+				tfr			a,dp
 
-.define GFX_1BPP
-.ifdef GFX_1BPP
-  VIDEO_BPL     .equ    32
-.else
-  VIDEO_BPL     .equ    64
+; initialise PLATFORM_COCO3 hardware
+; - disable PIA interrupts
+				lda			#0x34
+				sta			PIA0+1									; PIA0, CA1,2 control
+				sta			PIA0+3									; PIA0, CB1,2 control
+				sta			PIA1+1									; PIA1, CA1,2 control
+				sta			PIA1+3									; PIA1, CB1,2 control
+; - initialise GIME
+				lda			IRQENR									; ACK any pending GIME interrupt
+				lda			FIRQENR									; ACK any pending GIME fast interrupt
+		.ifdef BUILD_OPT_PROFILE
+				lda			#MMUEN|#IEN|#FEN        ; enable GIME MMU, IRQ, FIRQ
+		.else				
+				;lda			#MMUEN|#FEN             ; enable GIME MMU, FIRQ
+				lda			#MMUEN             			; enable GIME MMU
+		.endif
+				sta			INIT0     							
+				lda			#0x00										; slow timer, task 1
+				sta			INIT1     							
+		.ifdef BUILD_OPT_PROFILE
+				lda			#VBORD
+		.else				
+				lda			#0x00										; no VBLANK IRQ
+		.endif
+				sta			IRQENR    							
+				lda			#TMR                    ; TMR FIRQ enabled
+				;sta			FIRQENR   							
+				lda			#BP										  ; graphics mode, 60Hz, 1 line/row
+				sta			VMODE     							
+				lda			#0x08										; 192 scanlines, 32 bytes/row, 2 colours (256x192)
+				sta			VRES      							
+				lda			#0x00										; black
+				sta			BRDR      							
+				lda			#(VRAM_PG<<2)           ; screen at page $38
+				sta			VOFFMSB
+				lda			#0x00
+				sta			VOFFLSB   							
+				lda			#0x00										; normal display, horiz offset 0
+				sta			HOFF      							
+
+				ldx			#PALETTE
+				ldy     #rgb_pal
+				ldb     #16
+inipal:
+				lda     ,y+
+				sta     ,x+
+				decb
+				bne     inipal
+				
+				sta			CPU179									; select fast CPU clock (1.79MHz)
+
+  ; configure timer
+  ; free-run, ~1/20s, used for RND (LFSR) atm
+        lda     #<785
+        sta     TMRLSB
+        lda     #>785
+        sta     TMRMSB
+
+.ifdef BUILD_OPT_PROFILE
+  ; install IRQ handler and enable CPU IRQ
+				lda			IRQENR									; ACK any pending IRQ in the GIME
+        lda     #0x7E                   ; jmp
+        sta     0xFEF7
+        ldx     #main_isr
+        stx     0xFEF8
+        clr			*vbl_cnt
+        andcc   #~(1<<4)                ; enable IRQ in CPU    
 .endif
-  VIDEO_SIZ     .equ    VIDEO_BPL*192
 
+; install FIRQ handler and enable TMR FIRQ
+				;lda			#TMR|HBORD|VBORD        ; TMR FIRQ enabled
+				;sta			FIRQENR   							
+				lda			FIRQENR									; ACK any pending FIRQ in the GIME
+        lda     #0x7E                   ; jmp
+        sta     0xFEF4
+				;ldx     #prng_fisr              ; address
+				;stx     0xFEF5
+        ;andcc   #~(1<<6)                ; enable FIRQ in CPU
 
-; most alternate pages are used by Coco3 BASIC
-; eg. page 34 is the HPUT/HGET buffer
-; and is written whilst BASIC is running
-; $30-$33 are the alternate HIRES page, so safe
-
-; Memory Map		Page
-; ------------  ----
-; $0000-$2FFF   $38/$39   vram
-; $3000-$5FFF   $39/$3A   vid_buf
-; $6000-$67FF   $3B       dvgram
-; $7000-$70FF    "        reverse_tbl
-; $7100-$77FF    "        stack
-; $7800-$7FFF    "        variables
-; $8000-$FFXX   $30-$33   Code+Data
-
-CODE_PG1    .equ    0x30
-VRAM_PG     .equ    0x38
-
-coco_vram   .equ    0x0000
-vidbuf      .equ    VIDEO_SIZ
-dvgram			.equ    0x6000
-reverse_tbl .equ    0x7100
-stack       .equ    0x77ff              ; 1792 bytes
-var_base    .equ    0x7800
-code_base		.equ		0x8000
-
-; equates to keyboard rows
-; - phantom keys appear accordingly
-RJOY_BTN1   .equ    (1<<0)
-LJOY_BTN1   .equ    (1<<1)
-RJOY_BTN2   .equ    (1<<2)
-LJOY_BTN2   .equ    (1<<3)
-
-;.define LEFT_JOYSTICK
+  ; setup the PIAS for joystick sampling
+  
+  ; configure joystick axis selection as outputs
+  ; and also select left/right joystick
+        lda     PIA0+CRA
+        ldb     PIA0+CRB
+        ora     #(1<<5)|(1<<4)          ; CA2 as output
+        orb     #(1<<5)|(1<<4)          ; CB2 as output
 .ifdef LEFT_JOYSTICK
-  JOY_BTN1  .equ    LJOY_BTN1
-  JOY_BTN2  .equ    LJOY_BTN2
+        orb     #(1<<3)                 ; CB2=1 left joystick
 .else
-  .define RIGHT_JOYSTICK
-  JOY_BTN1  .equ    RJOY_BTN1
-  JOY_BTN2  .equ    RJOY_BTN2
+        andb    #~(1<<3)                ; CB2=0 right joystick
 .endif
-; high and low thresholds 
-; for 'digital' operation
-JOY_LO_TH   .equ    0x64                ; ~40%
-JOY_HI_TH   .equ    0x98                ; ~60%
+        sta     PIA0+CRA
+        stb     PIA0+CRB
+  ; configure comparator as input
+        lda     PIA0+CRA
+        anda    #~(1<<2)                ; select DDRA
+        sta     PIA0+CRA
+        lda     PIA0+DDRA
+        anda    #~(1<<7)                ; PA7 as input
+        sta     PIA0+DDRA
+        lda     PIA0+CRA
+        ora     #(1<<2)                 ; select DATAA
+        sta     PIA0+CRA
+  ; configure sound register as outputs
+        lda     PIA1+CRA
+        anda    #~(1<<2)                ; select DDRA
+        sta     PIA1+CRA
+        lda     PIA1+DDRA
+        ora     #0xfc                   ; PA[7..2] as output
+        sta     PIA1+DDRA
+        lda     PIA1+CRA
+        ora     #(1<<2)                 ; select DATAA
+        sta     PIA1+CRA
+          
+  .ifdef HAS_SOUND				
+				lda			PIA1+CRB
+				ora			#(1<<5)|(1<<4)					; set CB2 as output
+		.ifdef USE_1BIT_SOUND
+				anda		~#(1<<3)								; mute (other) sound
+		.else
+				ora			#(1<<3)									; enable (DAC) sound
+		.endif
+				sta			PIA1+CRB
+				; bit2 sets control/data register
+				lda     PIA1+CRB
+				anda    #~(1<<2)                ; select DDRB
+				sta     PIA1+CRB
+				lda     PIA1+DDRB
+				ora     #(1<<1)                 ; PB1 output
+				sta     PIA1+DDRB
+        ; setup for data register				
+				lda     PIA1+CRB
+				ora     #(1<<2)                 ; select DATAB
+				sta     PIA1+CRB
+  .endif  ; HAS_SOUND
 
-.define HAS_SOUND
-.ifdef HAS_SOUND
-  .define USE_1BIT_SOUND
-  .ifdef USE_1BIT_SOUND
-    SOUND_ADDR  .equ		PIA1+2
-    SOUND_MASK  .equ    (1<<1)
-  .else
-    .define USE_DAC_SOUND
-    SOUND_ADDR  .equ		PIA1
-    SOUND_MASK  .equ    0xfc
-  .endif
-.endif
+        jmp     asteroids
+        
+splash:
+;       .asciz  "01234567890123456789012345678901"
+        .db 0
+        .asciz  "````ARCADE`ASTEROIDS`hREVri"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "``````FOR`THE`TRSmxp`COCOs"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "```GRAPHICS`BY`NORBERT`KEHRER"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "```hPREmRELEASE`VERSION`pnqi"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0x40
+        .asciz  "|WWWnRETROPORTSnBLOGSPOTnCOMnAU~"
+        .dw     0
 
-; Coco Keyboard
-;    7  6  5  4  3  2  1  0
-;	0: G  F  E  D  C  B  A  @
-; 1: O  N  M  L  K  J  I  H
-; 2: W  V  U  T  S  R  Q  P
-; 3: SP RT LT DN UP Z  Y  X
-; 4: '  &  %  $  #  "  !  0
-; 4: 7  6  5  4  3  2  1  0
-; 5: ?  >  =  <  +  *  )  (
-; 5: /  .  _  ,  ;  :  9  8
-; 6: SH F2 F1 CT AL BK CL CR
+ntsc_splash:
+        .db 0
+;        .asciz  "`````````NTSC`DETECTED"
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "```````hRiGBohCiOMPOSITE"
+        .dw     0
 
-; Spectrum Palette for Coco3
-; - spectrum format : B=1, R=2, G=4
-; -     coco format : RGBRGB
+pal_splash:
+        .db 0
+;        .asciz  "``````PAL`MACHINE`DETECTED"
+        .asciz  "`"
+        .db 0
+        .asciz  "`"
+        .db 0
+        .asciz  "```````m`PRESS`ANY`KEY`m"
+        .dw     0
 
-ATTR_BLACK      .equ  0
-ATTR_BLUE       .equ  1
-ATTR_RED        .equ  2
-ATTR_MAGENTA    .equ  3
-ATTR_GREEN      .equ  4
-ATTR_CYAN       .equ  5
-ATTR_YELLOW     .equ  6
-ATTR_WHITE      .equ  7
+rgb_pal:
+    .db RGB_DARK_BLACK, RGB_DARK_BLUE, RGB_DARK_RED, RGB_DARK_MAGENTA
+    .db RGB_DARK_GREEN, RGB_DARK_CYAN, RGB_DARK_YELLOW, RGB_GREY
+    .db RGB_BLACK, RGB_BLUE, RGB_RED, RGB_MAGENTA
+    .db RGB_GREEN, RGB_CYAN, RGB_YELLOW, RGB_WHITE
+cmp_pal:    
+    .db CMP_DARK_BLACK, CMP_DARK_BLUE, CMP_DARK_RED, CMP_DARK_MAGENTA
+    .db CMP_DARK_GREEN, CMP_DARK_CYAN, CMP_DARK_YELLOW, CMP_GREY
+    .db CMP_BLACK, CMP_BLUE, CMP_RED, CMP_MAGENTA
+    .db CMP_GREEN, CMP_CYAN, CMP_YELLOW, CMP_WHITE
 
-RGB_DARK_BLACK    .equ  0x00
-RGB_DARK_BLUE     .equ  0x01
-RGB_DARK_RED      .equ  0x04
-RGB_DARK_MAGENTA  .equ  0x05
-RGB_DARK_GREEN    .equ  0x02
-RGB_DARK_CYAN     .equ  0x03
-RGB_DARK_YELLOW   .equ  0x06
-RGB_GREY          .equ  0x07
+pal_detected:
+				.ds			1
+; rgb/composite video selected (bit 4)
+cmp:    .ds 1
+attr:   .ds     1
 
-RGB_BLACK         .equ  RGB_DARK_BLACK*9
-RGB_BLUE          .equ  RGB_DARK_BLUE*9
-RGB_RED           .equ  RGB_DARK_RED*9
-RGB_MAGENTA       .equ  RGB_DARK_MAGENTA*9
-RGB_GREEN         .equ  RGB_DARK_GREEN*9
-RGB_CYAN          .equ  RGB_DARK_CYAN*9
-RGB_YELLOW        .equ  RGB_DARK_YELLOW*9
-RGB_WHITE         .equ  RGB_GREY*9
-                  
-CMP_BLACK         .equ  0
-CMP_BLUE          .equ  28
-CMP_RED           .equ  23
-CMP_MAGENTA       .equ  41
-CMP_GREEN         .equ  17
-CMP_CYAN          .equ  61
-CMP_YELLOW        .equ  51
-CMP_WHITE         .equ  63
+.globl	coinage
+.globl	rightCoinMultiplier
+.globl	centerCoinMultiplierAndLives
+.globl	language
 
-CMP_DARK_BLACK    .equ  0
-CMP_DARK_BLUE     .equ  12
-CMP_DARK_RED      .equ  7
-CMP_DARK_MAGENTA  .equ  9
-CMP_DARK_GREEN    .equ  3
-CMP_DARK_CYAN     .equ  29
-CMP_DARK_YELLOW   .equ  4
-CMP_GREY          .equ  32
-
-
-; tokenised display list commands
-OP_CUR              .equ 0x00
-OP_CHR              .equ 0x10
-OP_LIFE             .equ 0x20
-OP_COPYRIGHT        .equ 0x30
-OP_ASTEROID         .equ 0x40
-OP_SHIP             .equ 0x50
-OP_SHIP_THRUST			.equ OP_SHIP|(1<<3)
-OP_SAUCER           .equ 0x60
-OP_SHOT             .equ 0x70
-OP_SHRAPNEL         .equ 0x80
-OP_EXPLODINGSHIP    .equ 0x90
-OP_SCALEBRIGHTNESS  .equ 0xE0
-OP_HALT             .equ 0xF0
-
-OP_NOERASE					.equ 0x08
+osd_reset::
+				lda			#0x02									; 1 coin, 1 credit
+				sta			coinage								; dipswitch
+				lda			#(1<<0)								; 3 lives
+				sta			centerCoinMultiplierAndLives
+				rts
+				
+osd_start::
+				rts
+								
+osd_render_frame::
+				orcc		#0x50										; disable interrupts
+				rts
