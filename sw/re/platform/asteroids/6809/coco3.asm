@@ -351,6 +351,51 @@ attr:   .ds     1
 .globl	language
 
 osd_reset::
+; table of shifted values (2 bytes)
+; - 1st run seeds low values
+        ldb     #0
+        clr     *z80_c
+2$:     lda     *z80_c
+        ldx     #shift_tbl+0x80
+        sta     a,x
+        leax    0x100,x
+        clr     a,x
+        inc     *z80_c
+        decb
+        bne     2$
+; next 7 runs shift the previous entries
+        ldb     #7
+        ldu     #shift_tbl+0x80
+3$:     pshs    b
+        ldb     #0
+        clr     *z80_c
+4$:     pshs    b
+        lda     *z80_c
+        tfr     u,x                     ; base for this shift
+        ldb     a,x                     ; byte #1
+        pshs    b
+        leax    0x100,x
+        ldb     a,x                     ; byte #2
+        puls    a
+        lsra
+        rorb
+        pshs    d                       ; b then a
+        lda     *z80_c
+        leax    0x100,x
+        puls    b
+        stb     a,x                     ; byte #1 shifted
+        leax    0x100,x
+        puls    b
+        stb     a,x                     ; byte #2 shifted
+        inc     *z80_c
+        puls    b
+        decb
+        bne     4$
+        leau    0x200,u                 ; base for next shift
+        puls    b
+        decb
+        bne     3$
+
 				lda			#0x02									; 1 coin, 1 credit
 				sta			coinage								; dipswitch
 				lda			#(1<<0)								; 3 lives
@@ -416,7 +461,7 @@ dvg_cur:
 				CLC
 				rts
 
-bmp_life:
+bmp_life_0:
 		.byte $%00100000
 		.byte $%00100000
 		.byte $%01010000
@@ -424,26 +469,23 @@ bmp_life:
 		.byte $%01010000
 		.byte $%11111000
 		.byte $%10001000
-		
+
 dvg_life:
+				leay		2,y
+				sty			*0x0B
 				ldx			*0xC2
-				lda			#0B00100000
-				sta			0,x
-				sta			32,x
-				lda			#0B01010000
-				sta			64,x
-				sta			96,x
-				leax		128,x
-				sta			0,x
-				lda			#0B11111000
-				sta			32,x
-				lda			#0B10001000
-				sta			64,x
+				ldy			#bmp_life_0
+				ldb			*0x04										; X (0-255)
+				andb		0x07										; pixel offset
+1$:			lda			,y+
+				ora			,x
+				sta			,x
+				leax		32,x
+				cmpy		#bmp_life_0+7
+				bne			1$
 				ldx			*0xC2
 				leax		1,x
 				stx			*0xC2										; update CUR
-				leay		2,y
-				sty			*0x0B
 				CLC
 				rts
 				
