@@ -544,7 +544,7 @@ write_CURx4_cmd:
 				aslb
 				rol			*byte_7																	; Y*4 (msb)
 				stb			*byte_6																	; Y*4 (lsb)
-				ldx			#4
+				ldx			#dp_base+4
 
 write_CUR_cmd:
 				lda			2,X																			; @$6 =	Y*4 (lsb)
@@ -562,12 +562,12 @@ write_CUR_cmd:
 				sta			0,y																			; store	in avg ram
 				incb
 				lda			0,X																			; @$4 =	X*4 (lsb)
-				sta			b,y																			; store	in avg ram
+				sta			3,y																			; store	in avg ram
 				incb
 				lda			1,X																			; @$5 =	X*4 (msb)
 				anda		#0x0F																		; clear	scale nibble
 				ora			*globalScale														; global scale
-				sta			b,y																			; store	in avg ram
+				sta			2,y																			; store	in avg ram
 
 ; $7C39
 ; B=#bytes
@@ -582,6 +582,7 @@ update_dvg_curr_addr:
 ; $7CF3
 reset:
 				ldx			#0x100
+				lda			#0
 1$:			leax		-1,x
 				sta			P1RAM+0x100,x														; clear P2 RAM
 				sta			P1RAM,x																	; clear P1 RAM

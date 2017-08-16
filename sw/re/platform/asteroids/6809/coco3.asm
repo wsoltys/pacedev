@@ -416,13 +416,13 @@ dvg_cur:
 
 dvg_life:
 				ldx			*0xC2
-				lda			0xff
+				lda			#0xff
 				sta			0,x
 				sta			32,x
 				sta			64,x
 				sta			96,x
 				leay		2,y
-				sty			0x0B
+				sty			*0x0B
 				CLC
 				rts
 				
