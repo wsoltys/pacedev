@@ -194,6 +194,16 @@ P2RAM:													.ds			0x100
 
 jmp_osd_init:
 				jmp			osd_init
+
+; $2400
+leftCoinSwitch::		     				.ds 1
+centerCoinSwitch::		     			.ds 1
+rightCoinSwitch::		     				.ds 1
+p1StartSwitch::		     					.ds 1
+p2StartSwitch::		     					.ds 1
+thrustSwitch::		     					.ds 1
+rotateRightSwitch::		     			.ds 1
+rotateLeftSwitch::		     			.ds 1
 				
 ; $2800
 coinage::			      						.ds 1
@@ -230,6 +240,8 @@ wave_loop:
 7$:			lda			#0x02
 				sta			*dvg_curr_addr_lsb											; 0x02 (after JMP instruction)
 				stb			*dvg_curr_addr_msb											; 0x40/0x44 (ping pong)
+				jsr			handle_start_end_turn_or_game
+				bcs			start
 				
 				jsr			display_C_scores_ships
 
@@ -245,6 +257,116 @@ wave_loop:
 				bne			wave_loop
 				beq			game_loop
 
+; $6885
+handle_start_end_turn_or_game:
+        lda     *numPlayers                             ; game active?
+        beq     check_freeplay                          ; no, skip
+        lda     *timerStartGame                         ; Time before next player starts
+        bne     display_current_player                  ; timer running, go
+        jmp     handle_end_turn_or_game                 ; game active (playing)
+
+display_current_player:                                                         
+        dec     *timerStartGame													; update timer
+        jsr     print_PLAYER_N                          ; show current player
+
+loc_6895:
+        CLC
+        rts
+
+freeplay:                                                                       
+        lda     #2																			; Free Credits!
+        sta     *CurrNumCredits                         ; Can Only Play A 2 Player Game, So Only Need To Add 2
+        bne     check_start                             ; go
+
+check_freeplay:                                                                 
+        lda     *coinMultCredits												; DIP Switch Settings Bitmap
+        anda    #3                                      ; coinage only. freeplay?
+        beq     freeplay                                ; yes, go
+        adda    #7                                      ; calc coinage message
+        tfr     a,b                                     ; Into B for the offset
+        lda     *placeP1HighScore
+        anda    *placeP2HighScore
+        bpl     check_start
+        jsr     PrintPackedMsg                          ; display coinage
+
+check_start:                                                                    
+        ldb     *CurrNumCredits													; credits?
+        beq     loc_6895                                ; no, return
+        ldx     #1                                      ; 1 player
+        lda     p1StartSwitch                           ; P1 start pressed?
+        bmi     start_game                              ; yes, go
+        cmpb    #2                                      ; >=2 credits available?
+        bcc     display_push_start                      ; no, exit
+        lda     p2StartSwitch                           ; P2 start pressed?
+        bpl     display_push_start                      ; no, exit
+        lda     *io3200ShadowRegister
+        ora     #4                                      ; RAMSEL=1 (P2)
+        sta     *io3200ShadowRegister
+        ;sta     $3200                                   ; output
+        jsr     init_players
+        jsr     init_wave
+        jsr     init_ship_position_velocity
+        lda     *numStartingShipsPerGame
+        sta     *numShipsP2
+        ldx     #2                                      ; 2 players
+        dec     *CurrNumCredits
+
+start_game:
+        stx     *numPlayers
+        dec     *CurrNumCredits
+        lda     *io3200ShadowRegister
+        anda    #0xF8                             			; RAMSEL=0 (P1), lamps OFF
+        eora    *numPlayers                             ; player lamp ON
+        sta     io3200ShadowRegister
+        ;sta     $3200                                   ; output
+        jsr     init_ship_position_velocity
+        lda     #1
+        sta     shipSpawnTimer
+        sta     P2RAM+0xFA
+        lda     #0x92 ; '’'
+        sta     starting_saucerCountdownTimer
+        sta     P2RAM+0xF8
+        sta     P2RAM+0xF7
+        sta     saucerCountdownTimer
+        lda     #0x7F ; ''
+        sta     asteroidWaveTimer
+        sta     P2RAM+0xFB
+        lda     #5
+        sta     numAsteroidsLeftBeforeSaucer
+        sta     P2RAM+0xFD
+        lda     #0xFF
+        sta     *placeP1HighScore                       ; flag no high score
+        sta     *placeP2HighScore                       ; flag no high score
+        lda     #0x80
+        sta     *timerStartGame                         ; init timer
+        asla                                            ; A=0
+        sta     *curPlayer                              ; init current player
+        sta     *curPlayer_x2
+        lda     *numStartingShipsPerGame
+        sta     *numShipsP1                             ; init number of ships
+        lda     #4
+        sta     *volFreqThumpSound
+        sta     *timerThumpSoundOff                     ; init thump sound
+        lda     #48
+        sta     starting_ThumpCounter
+        sta     P2RAM+0xFC
+        ;sta     $3E00                                   ; sound (noise reset)
+        rts
+
+; $693B
+display_push_start:
+				CLC
+				rts
+				
+; $6960
+handle_end_turn_or_game:
+				CLC
+				rts
+
+; $69E2
+print_PLAYER_N:
+				rts
+				
 ; $6ED8
 init_players:
 				lda			#2
@@ -370,6 +492,10 @@ loc_71E1:
 locret_71E7:
 				rts
 
+; $71E8
+init_ship_position_velocity:
+				rts
+				
 ; $7203
 ; Y=source asteroid, X=new asteroid
 set_asteroid_velocity:
@@ -598,6 +724,10 @@ update_prng:
 ; $77D1
 tap:		.byte		0x02
 
+; $77F6
+PrintPackedMsg:
+				rts
+				
 ; $7BC0
 halt_dvg:
 .ifndef PLATFORM_COCO3
