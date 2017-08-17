@@ -725,8 +725,111 @@ update_prng:
 tap:		.byte		0x02
 
 ; $77F6
+; B = msg#
 PrintPackedMsg:
+				pshs		b
+        ;lda     language
+        ldb			#0																			; english
+        andb    #3                                      ; mask off invalid bits
+        aslb                                            ; convert to word offset
+        lda     #0x10
+        sta     *globalScale
+        ldx			#msgTablePtrs
+        ldx			b,x																			; for this language
+        puls		b
+        tfr			b,a																			; copy message number
+        ldb			b,x																			; offset for message
+        abx																							; add message number
+        stx			*byte_8
+        asla																						; convert msg# to word offset
+        ldy			#msgCoords
+        ldd			a,y																			; A=X, B=Y
+        jsr     write_CURx4_cmd
+        lda     #0x70
+        ;jsr     set_scale_A_bright_0
+				ldu			*byte_8																	; msg ptr
+1$:     lda     ,u																			; get message byte
+        sta     *byte_B                                 ; temp store
+        lsra                                            ; X,7-1
+        lsra                                            ; XX,7-2 (XX76543X)
+        jsr     inc_msg_ptr_add_chr_fn
+        lda     ,u                                   		; get next message byte
+        rola                                            ; 7->C
+        rol     *byte_B                                 ; 6-0,7
+        rola                                            ; 6->C
+        lda     *byte_B                                 ; 6-0,7
+        rola                                            ; 5-0,7,6
+        asla                                            ; 4-0,7,6,5 (XX21076X)
+        jsr     add_chr_fn
+        lda     ,u                                   		; get same message byte again
+        sta     *byte_B                                 ; temp store (XX54321X)
+        jsr     inc_msg_ptr_add_chr_fn
+        lsr     *byte_B                                 ; end of message?
+        bcc     1$                                			; no, loop
+
+loc_7849:
+.ifndef PLATFORM_COCO3
+        DEY
+        JMP     update_dvg_curr_addr
+.endif        
 				rts
+
+inc_msg_ptr_add_chr_fn:
+				leau		1,u
+
+add_chr_fn:
+        anda    #0x3E                              			; get character (bits 5-1)
+        bne     1$                                			; if not space, skip
+        puls		u																				; pop return address
+        bra     loc_7849                                ; return, finishing byte pair (3 chars)
+1$:     cmpa    #0x0A																		; one of "@_012"?
+        bcs     2$                                			; yes, skip
+        adda    #0x0E
+2$:                                                                       
+.ifndef PLATFORM_COCO3
+        TAX																							; X = chr*2 (chr fn offset)
+        LDA     DVGROM+$6D2,X                           ; chr fn msb
+        STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
+        INY
+        LDA     DVGROM+$6D3,X                           ; chr fn lsb
+        STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
+        INY
+        LDX     #0
+.else
+        ldy			*dvg_curr_addr_msb
+        ldb     #OP_CHR
+        stb			,y+
+        suba    #2                                      ; $6D2 vs $6D4!
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+.endif                                
+        rts
+
+msgCoords:
+				.byte 100, 182                                  ; "HIGH SCORES"
+				.byte 100, 182                                  ; "PLAYER"
+				.byte 12, 170                                   ; "YOUR SCORE...TEN BEST"
+.ifndef PLATFORM_COCO3
+        .byte 12, 162                                   ; "PLEASE...INITIALS"
+        .byte 12, 154                                   ; "PUSH ROTATE...LETTER"
+        .byte 12, 146                                   ; "PUSH HYPERSPACE...CORRECT"
+.else
+        .byte 12, 162-4                                 ; "PLEASE...INITIALS"
+        .byte 12, 154-8                                 ; "PUSH ROTATE...LETTER"
+        .byte 12, 146-12                                ; "PUSH HYPERSPACE...CORRECT"
+.endif                                
+        .byte 100, 198                                  ; "PUSH START"
+        .byte 100, 157                                  ; "GAME OVER"
+        .byte 80, 57                                    ; "1 COIN 2 PLAYS"
+        .byte 80, 57                                    ; "1 COIN 1 PLAY"
+        .byte 80, 57                                    ; "2 COINS 1 PLAY"
+
+; Offset into Vector ROM for message tables
+msgTablePtrs:
+				.word english_msg_offset_tbl										; English
+        .word 0x788F                                    ; German
+        .word 0x7946                                    ; French
+        .word 0x79F3                                    ; Spanish
 				
 ; $7BC0
 halt_dvg:
@@ -895,6 +998,28 @@ main_isr:
 				bra			9$
 8$:			dec			*vbl_cnt
 9$:     rti
+.endif
+
+.ifdef PLATFORM_COCO3
+english_msg_offset_tbl:
+        .byte 0x0B, 0x13, 0x19, 0x2F, 0x41, 0x55, 0x6F, 0x77, 0x7D, 0x87, 0x91
+english_msg_tbl:                                
+        .byte 0x63, 0x56, 0x60, 0x6E, 0x3C, 0xEC, 0x4D
+        .byte 0xC0, 0xA4, 0x0A, 0xEA, 0x6C, 0x08, 0x00, 0xEC, 0xF2, 0xB0, 0x6E, 0x3C, 0xEC, 0x48, 0x5A, 0xB8
+        .byte 0x66, 0x92, 0x42, 0x9A, 0x82, 0xC3, 0x12, 0x0E, 0x12, 0x90, 0x4C, 0x4D, 0xF1, 0xA4, 0x12, 0x2D
+        .byte 0xD2, 0x0A, 0x64, 0xC2, 0x6C, 0x0F, 0x66, 0xCD, 0x82, 0x6C, 0x9A, 0xC3, 0x4A, 0x85, 0xC0, 0xA6
+        .byte 0x6E, 0x60, 0x6C, 0x9E, 0x0A, 0xC2, 0x42, 0xC4, 0xC2, 0xBA, 0x60, 0x49, 0xF0, 0x0C, 0x12, 0xC6
+        .byte 0x12, 0xB0, 0x00, 0xA6, 0x6E, 0x60, 0x58, 0xED, 0x12, 0xB5, 0xE8, 0x29, 0xD2, 0x0E, 0xD8, 0x4C
+        .byte 0x82, 0x82, 0x70, 0xC2, 0x6C, 0x0B, 0x6E, 0x09, 0xE6, 0xB5, 0x92, 0x3E, 0x00, 0xA6, 0x6E, 0x60
+        .byte 0x6E, 0xC1, 0x6C, 0xC0, 0x00, 0x59, 0x62, 0x48, 0x66, 0xD2, 0x6D, 0x18, 0x4E, 0x9B, 0x64, 0x09
+        .byte 0x02, 0xA4, 0x0A, 0xED, 0xC0, 0x18, 0x4E, 0x9B, 0x64, 0x08, 0xC2, 0xA4, 0x0A, 0xE8, 0x00, 0x20
+        .byte 0x4E, 0x9B, 0x64, 0xB8, 0x46, 0x0D, 0x20, 0x2F, 0x40
+sine_tbl:
+        .byte 0x00, 0x03, 0x06, 0x09, 0x0C, 0x10, 0x13
+        .byte 0x16, 0x19, 0x1C, 0x1F, 0x22, 0x25, 0x28, 0x2B, 0x2E, 0x31, 0x33, 0x36, 0x39, 0x3C, 0x3F, 0x41
+        .byte 0x44, 0x47, 0x49, 0x4C, 0x4E, 0x51, 0x53, 0x55, 0x58, 0x5A, 0x5C, 0x5E, 0x60, 0x62, 0x64, 0x66
+        .byte 0x68, 0x6A, 0x6B, 0x6D, 0x6F, 0x70, 0x71, 0x73, 0x74, 0x75, 0x76, 0x78, 0x79, 0x7A, 0x7A, 0x7B
+        .byte 0x7C, 0x7D, 0x7D, 0x7E, 0x7E, 0x7E, 0x7F, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 .endif
 
 				.end		jmp_osd_init

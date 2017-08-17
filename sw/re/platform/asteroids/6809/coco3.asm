@@ -864,9 +864,9 @@ dvg_chr:
 				bita		#0x08
 				beq			2$
 				anda		#0x07
-				ldx			*0xC2
-				leax		1,x
-				stx			*0xC2										; update CUR
+				ldy			*0xC2
+				leay		1,y
+				sty			*0xC2										; update CUR
 2$:			sta			*0x05
 				CLC
 				rts
@@ -913,9 +913,9 @@ dvg_life:
 				bita		#0x08
 				beq			2$
 				anda		#0x07
-				ldx			*0xC2
-				leax		1,x
-				stx			*0xC2										; update CUR
+				ldy			*0xC2
+				leay		1,y
+				sty			*0xC2										; update CUR
 2$:			sta			*0x05
 				CLC
 				rts
@@ -930,12 +930,12 @@ copyright:
 dvg_copyright:
 				leay		2,y
 				sty			*0x0B
-				; CUR SSS=0,(400,128) = 100,32(160) = 12(shift=4)
+				; CUR SSS=0,(400,128) = 100,24(168) = 12(shift=4)
 				; - bitmap data is shifted already
 				ldu			#copyright
 				lda			#5
 				sta			*0xD4
-				ldy			#160*32+12
+				ldy			#168*32+12
 1$:			ldb			#8
 2$:			lda			,u+
 				ora			,y
