@@ -414,9 +414,18 @@ limit_asteroid_velocity:
 display_C_scores_ships:
 				lda			#16
 				sta			*globalScale
+.ifndef PLATFORM_COCO3
 				lda			#0x50
 				ldx			#0xA4																		; addr = 0x50A4
 				;jsr			write_JSR_cmd														; "(C)1979 ATARI INC"
+.else
+        ldy     *dvg_curr_addr_msb
+        ldb     #OP_COPYRIGHT
+        stb			,y+
+        stb			,y+
+        sty     *dvg_curr_addr_msb
+.endif                                
+
 				lda			#25																			; X coord (x4=100)
 				ldb			#219																		; Y coord (x4=876)
 				jsr			write_CURx4_cmd

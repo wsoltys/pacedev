@@ -26,27 +26,38 @@ int main (int argc, char *argv[])
 			strcpy (label, p);
 			new_label = true;
 		}
-		else if (strstr (buf, "BYTE"))
+		else if (strstr (buf, "BYTE") || strstr (buf, "byte"))
 		{
 			if (new_label)
 				printf ("\n%s:\n", label);
 			new_label = false;
 			
 			unsigned bits = 0;
+			unsigned shift = 0;
+			if (!strcmp (label, "copyright"))
+				shift = 4;
 			while (1)
 			{
 				while (*p && *p != '0' && *p != 'F') p++;
 				if (!*p) break;
 				if (bits == 0) printf ("    .byte ");
 				if ((bits%8) == 0) printf ("%s$%%", (bits == 0 ? "" : ", "));
-				printf ("%c", *p == 'F' ? '1' : *p);
-				p++; bits++;
+				if (bits < shift)
+					printf ("0");
+				else
+				{
+					printf ("%c", *p == 'F' ? '1' : *p);
+					p++;
+				}
+				bits++;
 			}
+			for(; (bits%8) != 0; bits++)
+				printf ("0");
 			printf ("\n");
 		}
 
 		// for now
-		if (!strcmp (label, "chr_tbl")) break;
+		//if (!strcmp (label, "chr_tbl")) break;
 			
 		fgets (buf, 1023, fp);
 	}

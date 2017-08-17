@@ -919,7 +919,35 @@ dvg_life:
 2$:			sta			*0x05
 				CLC
 				rts
-				
+
+copyright:
+    .byte $%00000000, $%01001110, $%11101110, $%00000100, $%11100100, $%11101110, $%00001110, $%10010111
+    .byte $%00001100, $%01001010, $%00101010, $%00001010, $%01001010, $%10100100, $%00000100, $%11010100
+    .byte $%00001000, $%01001110, $%00101110, $%00001110, $%01001110, $%11100100, $%00000100, $%10110100
+    .byte $%00001100, $%01000010, $%00100010, $%00001010, $%01001010, $%11000100, $%00000100, $%10010100
+    .byte $%00000000, $%01000010, $%00100010, $%00001010, $%01001010, $%10101110, $%00001110, $%10010111
+
+dvg_copyright:
+				leay		2,y
+				sty			*0x0B
+				; CUR SSS=0,(400,128) = 100,32(160) = 12(shift=4)
+				; - bitmap data is shifted already
+				ldu			#copyright
+				lda			#5
+				sta			*0xD4
+				ldy			#160*32+12
+1$:			ldb			#8
+2$:			lda			,u+
+				ora			,y
+				sta			,y+
+				decb
+				bne			2$
+				leay		32-8,y
+				dec			*0xD4
+				bne			1$
+				CLC
+				rts
+								
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -936,7 +964,7 @@ dvg_jmp_tbl:
 				.word		dvg_cur
 				.word		dvg_chr
 				.word		dvg_life
-				.word		dvg_nop
+				.word		dvg_copyright
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
