@@ -438,11 +438,11 @@ display_C_scores_ships:
 				anda		#0x10
 				beq			2$																			; not every frame
 1$:			lda			#p1ScoreTens
-				ldy			#2																			; 2 bytes to display
+				ldb			#2																			; 2 bytes to display
 				sec																							; flag no zero padding
-				;jsr			display_numeric													; display P1 score
+				jsr			display_numeric													; display P1 score
 				lda			#0
-				;jsr			display_bright_digit										; display score	units (=0)
+				jsr			display_bright_digit										; display score	units (=0)
 2$:			lda			#40																			; X coord (x4=160)
 				ldb			*numShipsP1
 				jsr			display_extra_ships
@@ -454,11 +454,11 @@ display_C_scores_ships:
 				lda			#0x50                              			; scale = 5
 				;jsr			set_scale_A_bright_0
 				lda			#highScoreTable
-				ldy			#2																			; 2 bytes to display
+				ldb			#2																			; 2 bytes to display
 				SEC																							; flag no zero padding
-				;jsr			display_numeric													; display high score
+				jsr			display_numeric													; display high score
 				lda			#0
-				;jsr			display_digit_A													; display high score units (=0)
+				jsr			display_digit_A													; display high score units (=0)
 				lda			#0x10
 				sta			*globalScale
 				lda			#192																		; X coord (x4=768)
@@ -483,16 +483,89 @@ display_C_scores_ships:
 				anda		#0x10
 				beq			4$																			; not every frame
 3$:			lda			#p2ScoreTens
-				ldy			#2																			; 2 bytes to display
+				ldb			#2																			; 2 bytes to display
 				SEC																							; flag no zero padding
-				;jsr			display_numeric													; display P2 score
+				jsr			display_numeric													; display P2 score
 				lda			#0
-				;jsr			display_bright_digit										; display score	units (=0)
+				jsr			display_bright_digit										; display score	units (=0)
 4$:			lda			#207																		; X coord (x4=828)
 				ldb			*numShipsP2
 				jmp			display_extra_ships
 9$:			rts
-				
+
+; $773F
+; A=buffer, B=#bytes, X=extra brightness (not used)
+display_numeric:
+				pshs		cc
+				;stx			*extra_brightness												; save extra brightness
+				decb																						; #bytes-1
+				stb			*byte_16																; offset to last byte
+				adda		*byte_16																; buf +	#bytes-1
+				sta			*byte_15																; ptr current byte
+				ldx			dp_base
+				tfr			a,b
+				abx																							; X=buffer
+				puls		cc
+1$:			pshs		cc
+				lda			0,X																			; get next byte
+				lsra
+				lsra
+				lsra
+				lsra																						; high nibble -> low
+				puls		cc
+				jsr			display_digit
+				lda			*byte_16																; bytes	remaining?
+				bne			2$																			; no, skip
+				CLC																							; flag padding
+2$:			lda			0,X																			; get byte (low	nibble)
+				jsr			display_digit
+				dec			*byte_15																; ptr current byte
+				dec			*byte_16																; done?
+				bpl			1$																			; no, loop
+				rts
+
+; $7785
+display_digit:
+				bcc			display_bright_digit										; skip if no pad flagged?
+				anda		#0x0F																		; any pad digit?
+				beq			loc_77B2																; no, skip
+
+; $778B
+display_bright_digit:
+				ldb			*extra_brightness												; extra	brightness?
+				beq			loc_77B2																; none,	use default routine
+				anda		#0x0F
+				adda		#1
+				pshs		cc
+				asla																						; x2
+.ifndef PLATFORM_COCO3				
+				tay								; word offset
+				lda			DVGROM+$6D4,Y				; chr fn
+				asl			A					; low address *	2
+				sta			byte_B
+				lda			DVGROM+$6D5,Y				; chr fn
+				rol			A
+				and			#$1F					; high address * 2
+				ora			#$40 ; '@'                              ; +0x4000
+				sta			byte_C
+				lda			#0
+				sta			byte_8					; flag to flip X
+				sta			byte_9					; flag to flip Y
+				jsr			copy_vector_list_to_avgram
+.else
+				ldy			*dvg_curr_addr_msb
+				ldb			#OP_CHR
+				sta			,y+
+				sta			,y+
+				sty			*dvg_curr_addr_msb
+.endif				
+				puls		cc
+				rts
+
+; $77B2
+loc_77B2:
+				jmp     display_space_digit_A
+								
 ; $77B5
 ; this is a 16-bit 1-tap LFSR
 ; - may	or may not be maximal length
@@ -527,6 +600,39 @@ halt_dvg:
         sta			,y+
         sta			,y+
         sty			*dvg_curr_addr_msb
+        rts
+
+; $7BCB
+display_space_digit_A:
+        bcc     display_digit_A
+        anda    #0x0F                                   ; numeric only
+        beq     loc_7BD6                                ; space, skip
+
+; $7BD1
+; A = character
+display_digit_A:
+        anda    #0x0F                                   ; numeric only
+        adda   	#1                                      ; convert to char code
+loc_7BD6:
+        pshs		cc
+        asla																						; x2 (word offset)
+.ifndef PLATFORM_COCO3
+        ldy     #0
+        tax
+        lda     DVGROM+$6D4,X                           ; chr fn msb
+        sta     (dvg_curr_addr_lsb),Y                   ; store in avg ram
+        lda     DVGROM+$6D5,X                           ; chr fn lsb
+        iny
+        sta     (dvg_curr_addr_lsb),Y                   ; store in avg ram
+        jsr     update_dvg_curr_addr
+.else
+				ldy			*dvg_curr_addr_msb
+        ldb     #OP_CHR
+        stb     ,y+
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+.endif                                
+        puls		cc
         rts
 
 ; $7C03

@@ -465,6 +465,412 @@ dvg_cur:
 				CLC
 				rts
 
+
+char_SPACE:
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+
+char_0:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+
+char_1:
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+
+char_2:
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%11111000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11111000
+
+char_3:
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%11111000
+
+char_4:
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+
+char_5:
+    .byte $%11111000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%11111000
+
+char_6:
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+
+char_7:
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+
+char_8:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+
+char_9:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+
+char_A:
+    .byte $%00100000
+    .byte $%01010000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+
+char_B:
+    .byte $%11110000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11110000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11110000
+
+char_C:
+    .byte $%11111000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11111000
+
+char_D:
+    .byte $%11100000
+    .byte $%10010000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10010000
+    .byte $%11100000
+
+char_E:
+    .byte $%11111000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11110000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11111000
+
+char_F:
+    .byte $%11111000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11110000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+
+char_G:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10000000
+    .byte $%10111000
+    .byte $%10001000
+    .byte $%11111000
+
+char_H:
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+
+char_I:
+    .byte $%11111000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%11111000
+
+char_J:
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%10001000
+    .byte $%01001000
+    .byte $%00111000
+
+char_K:
+    .byte $%10010000
+    .byte $%10100000
+    .byte $%11000000
+    .byte $%10000000
+    .byte $%11000000
+    .byte $%10100000
+    .byte $%10010000
+
+char_L:
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11111000
+
+char_M:
+    .byte $%10001000
+    .byte $%11011000
+    .byte $%10101000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+
+char_N:
+    .byte $%10001000
+    .byte $%11001000
+    .byte $%10101000
+    .byte $%10101000
+    .byte $%10011000
+    .byte $%10011000
+    .byte $%10001000
+
+char_O:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+
+char_P:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%10000000
+
+char_Q:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10101000
+    .byte $%10010000
+    .byte $%11101000
+
+char_R:
+    .byte $%11111000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+    .byte $%10100000
+    .byte $%10010000
+    .byte $%10001000
+
+char_S:
+    .byte $%11111000
+    .byte $%10000000
+    .byte $%10000000
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%11111000
+
+char_T:
+    .byte $%11111000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+
+char_U:
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%11111000
+
+char_V:
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%01010000
+    .byte $%01010000
+    .byte $%01010000
+    .byte $%00100000
+    .byte $%00100000
+
+char_W:
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%10101000
+    .byte $%11011000
+    .byte $%10001000
+
+char_X:
+    .byte $%10001000
+    .byte $%10001000
+    .byte $%01010000
+    .byte $%00100000
+    .byte $%01010000
+    .byte $%10001000
+    .byte $%10001000
+
+char_Y:
+    .byte $%10001000
+    .byte $%01010000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00100000
+
+char_Z:
+    .byte $%11111000
+    .byte $%00001000
+    .byte $%00010000
+    .byte $%00100000
+    .byte $%01000000
+    .byte $%10000000
+    .byte $%11111000
+
+char_PERIOD:
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%01000000
+
+char_UNDERSCORE:
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%00000000
+    .byte $%11111000
+
+chr_tbl:
+		.word char_SPACE
+		.word char_0, char_1, char_2, char_3
+		.word char_4, char_5, char_6, char_7
+		.word char_8, char_9
+		.word char_A, char_B, char_C, char_D
+		.word char_E, char_F, char_G, char_H
+		.word char_I, char_J, char_K, char_L
+		.word char_M, char_N, char_O, char_P
+		.word char_Q, char_R, char_S, char_T
+		.word char_U, char_V, char_W, char_X
+		.word char_Y, char_Z
+		.word char_PERIOD, char_UNDERSCORE
+
+dvg_chr:
+				lda			1,y											; char code (x2)
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				ldu			#chr_tbl
+				ldu			a,u											; address of char data
+				lda			*0x05										; pixel offset (0-7)
+				lsla														; x2
+				adda		#>shift_tbl
+				ldb			#0x80
+				std			*0xD0										; offset
+				inca
+				std			*0xD2										; offset2
+				lda			#7
+				sta			*0xD4										; lines
+				ldy			*0xC2
+1$:			ldb			,u+											; sprite data byte
+				ldx			*0xD0
+				lda			b,x											; shifted data bye
+				ora			,y
+				sta			,y
+				ldx			*0xD2
+				lda			b,x
+				ora			1,y
+				sta			1,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				lda			*0x05										; pixel offset
+				adda		#6
+				bita		#0x08
+				beq			2$
+				anda		#0x07
+				ldx			*0xC2
+				leax		1,x
+				stx			*0xC2										; update CUR
+2$:			sta			*0x05
+				CLC
+				rts
+				
 bmp_life:
 		.byte $%00100000
 		.byte $%00100000
@@ -487,7 +893,9 @@ dvg_life:
 				lda			#7
 				sta			*0xD4										; lines
 				ldu			#bmp_life
-				ldy			*0xC2
+				ldd			*0xC2
+				addd		#(4*32)									; because it overwrites score
+				tfr			d,y
 1$:			ldb			,u+											; sprite data byte
 				ldx			*0xD0
 				lda			b,x											; shifted data bye
@@ -526,7 +934,7 @@ dvg_halt:
 				
 dvg_jmp_tbl:
 				.word		dvg_cur
-				.word		dvg_nop
+				.word		dvg_chr
 				.word		dvg_life
 				.word		dvg_nop
 				.word		dvg_nop
