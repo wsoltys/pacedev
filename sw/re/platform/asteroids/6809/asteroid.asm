@@ -243,6 +243,8 @@ wave_loop:
 				jsr			handle_start_end_turn_or_game
 				bcs			start
 				
+				jsr			update_and_render_objects
+				
 				jsr			display_C_scores_ships
 
 				jsr			update_prng
@@ -434,6 +436,75 @@ display_extra_ships:
 .endif                                
 9$:			rts
 
+; $6F57
+update_and_render_objects:
+        ldx     #34                                     ; 34 objects to update
+loc_6F59:                                               ; get entry
+        lda     P1RAM,X
+        bne     handle_object_entry                     ; non-zero entry, handle it
+next_object:                                            
+        leax		-1,x
+        cmpx		#0																			; next value
+        bpl     loc_6F59                                ; loop 'til done
+				rts
+				
+handle_object_entry:                                                            
+        bpl     object_ok																; status < 128, go
+        nega
+        lsra
+        lsra
+        lsra
+        lsra
+        cmpx    #0x1B                                   ; playerFlag?
+        bne     1$                                			; no, skip
+        lda     *fastTimer
+        anda    #1
+        lsra
+        beq     2$																			; always
+1$:     sec
+2$:     adca    P1RAM,X
+        bmi     6$
+        cmpx    #0x1B                                   ; playerFlag?
+        beq     4$                                			; yes, go
+        bcs     5$
+        dec     currentNumberOfAsteroids
+        bne     3$
+        lda     #0x7F
+        sta     asteroidWaveTimer
+3$:     lda     #0
+        sta     P1RAM,X
+        beq     next_object															; always
+4$:     jsr     init_ship_position_velocity
+        jmp     3$
+5$:     lda     starting_saucerCountdownTimer
+        sta     saucerCountdownTimer
+        bne     3$
+6$:     sta     P1RAM,X
+        anda    #0xF0
+        adda    #0x10
+        cmpx    #0x1B                                   ; PlayerFlag?
+        bne     7$                                			; no, skip
+        lda     #0
+7$:     tfr			a,b
+        lda     asteroid_PLh,X
+        sta     byte_4
+        lda     asteroid_PHh,X
+        sta     byte_5
+        lda     asteroid_PLv,X
+        sta     byte_6
+        lda     asteroid_PHv,X
+        sta     byte_7
+        jmp     jsr_display_object
+
+; $6FC7
+object_ok:
+				jmp			next_object
+
+; $7027
+jsr_display_object:
+        jsr     display_object
+        jmp     next_object
+
 ; $7168
 init_wave:
 				ldx			#26																			; 26+1 asteroids
@@ -554,7 +625,7 @@ limit_asteroid_velocity:
 				lda			#31
 9$:			rts
 
-; $72F4
+; $724F
 display_C_scores_ships:
 				lda			#16
 				sta			*globalScale
@@ -646,6 +717,113 @@ display_C_scores_ships:
 				jmp			display_extra_ships
 9$:			rts
 
+; $72FE
+; B = scale ($E0/$F0/$00)
+display_object:
+        stb     *globalScale
+        stx     *byte_D                                 ; object offset (from P1RAM)
+        lda     *byte_5                                 ; object_PHh
+        lsra
+        ror     *byte_4                                 ; object_PLh
+        lsra
+        ror     *byte_4
+        lsra
+        ror     *byte_4
+        sta     *byte_5                                 ; object_Ph /= 8
+        lda     *byte_7                                 ; object_PHv
+        adda     #4
+        lsra
+        ror     *byte_6                                 ; object_PLv
+        lsra
+        ror     *byte_6
+        lsra
+        ror     *byte_6
+        sta     *byte_7                                 ; object_PLv = (object_PLv+1024)/8
+        ldx     #dp_base+4                              ; base of temp coordinates
+        jsr     write_CUR_cmd
+        lda     #0x70
+        suba    globalScale
+        cmpa    #0xA0
+        bcc     2$
+1$:     pshs		a
+        lda     #0x90
+        ;jsr     set_scale_A_bright_0
+        puls		a
+        suba    #0x10
+        cmpa    #0xA0
+        bcs     1$
+2$:     ;jsr     set_scale_A_bright_0
+        ldx     *byte_D                                 ; restore object offset
+        lda     P1RAM,X                                 ; object status (again)
+        bpl     display_shot_ship_asteroid_or_saucer
+        cmpx    #0x1B                                   ; PlayerFlag?
+        beq     loc_7355                                ; yes, go
+        anda    #0x0C                                   ; status (3:2)
+        lsra                                            ; status (3:2)->(2:1)
+.ifndef PLATFORM_COCO3                                
+        TAY                                             ; pattern = word offset
+        LDA     DVGROM+$F8,Y                            ; shrapnel table address LSB
+        LDX     DVGROM+$F9,Y                            ; shrapnel table address MSB
+.else
+        ldy     *dvg_curr_addr_msb
+        ldb     #OP_SHRAPNEL
+        stb			,y+
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+.endif                                
+        bra     loc_7370                                ; always
+
+loc_7355:
+        jsr     display_exploding_ship
+        ldx     *byte_D                                 ; restore object offset
+				rts
+
+display_shot_ship_asteroid_or_saucer:
+        cmpx    #0x1B																		; PlayerFlag?
+        beq     display_ship                            ; yes, go
+        cmpx    #0x1C                                   ; SaucerFlag?
+        beq     display_saucer                          ; yes, go
+        bcs     display_shot                            ; shot, go
+.ifndef PLATFORM_COCO3
+        AND     #$18                                    ; status (4:3)
+        LSR     A
+        LSR     A                                       ; status (4:3)->(2:1)
+        TAY                                             ; = word offset
+        LDA     DVGROM+$1DE,Y                           ; asteroid table address LSB
+        LDX     DVGROM+$1DF,Y                           ; asteroid table address MSB
+
+loc_7370:                                                                       
+        JSR     write_AX_to_avgram											; writes JSR instruction
+.else
+        ldy     *dvg_curr_addr_msb
+        ldb     #OP_ASTEROID
+        stb			,y+
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+loc_7370:
+.endif                                
+				ldx			*byte_D
+				rts
+
+; $7376
+display_ship:
+				ldx			*byte_D
+				rts
+
+; $737C
+display_saucer:
+				ldx			*byte_D
+				rts
+
+; $7384
+display_shot:
+				ldx			*byte_D
+				rts
+
+; $7465
+display_exploding_ship:
+				rts
+												
 ; $773F
 ; A=buffer, B=#bytes, X=extra brightness (not used)
 display_numeric:
@@ -708,7 +886,7 @@ display_bright_digit:
 .else
 				ldy			*dvg_curr_addr_msb
 				ldb			#OP_CHR
-				sta			,y+
+				stb			,y+
 				sta			,y+
 				sty			*dvg_curr_addr_msb
 .endif				
