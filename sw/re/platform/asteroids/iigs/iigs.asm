@@ -137,7 +137,7 @@ dvg_cur:
 				lda			#191
 				sec														; no carry on subtract
 				sbc			byte_6
-				sta			byte_6								; store non-inverted Y
+				sta			byte_6				; store non-inverted Y
 				; find address of line
 				asl														; y*2 (offset)
 				tax
@@ -193,7 +193,7 @@ apple_render_frame:
 				.A8
 				lda			SHADOW
 				ora			#$1E
-				sta			SHADOW
+				;sta			SHADOW
 				rep			#$20				
 				.A16
 				
