@@ -234,7 +234,7 @@ wave_loop:
 				bne			6$
 				inc			*slowTimer
 6$:			ldb			#>dvgram																; ping-pong DVG	RAM $4000/$4400
-				andb		#0x02
+				anda		#0x02
 				bne			7$
 				ldb			#>(dvgram+0x0400)
 7$:			lda			#0x02
