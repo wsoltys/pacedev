@@ -185,16 +185,6 @@ numAsteroidsLeftBeforeSaucer:		.ds		1
 				.bndry	0x100
 P2RAM:													.ds			0x100
 
-        .org    code_base
-
-				; filler for now
-				.asciz	'asteroids2'
-        
-				.org		0xc000
-
-jmp_osd_init:
-				jmp			osd_init
-
 ; $2400
 leftCoinSwitch::		     				.ds 1
 centerCoinSwitch::		     			.ds 1
@@ -211,6 +201,16 @@ coinage::			      						.ds 1
 rightCoinMultiplier::	      		.ds 1
 centerCoinMultiplierAndLives::  .ds 1
 language::		      						.ds 1
+
+        .org    code_base
+
+				; filler for now
+				.asciz	'asteroids2'
+        
+				.org		0xc000
+
+jmp_osd_init:
+				jmp			osd_init
 
 ; $6800                
 asteroids::
@@ -292,11 +292,11 @@ check_freeplay:
 check_start:                                                                    
         ldb     *CurrNumCredits													; credits?
         beq     loc_6895                                ; no, return
-        ldx     #1                                      ; 1 player
+        ldb     #1                                      ; 1 player
         lda     p1StartSwitch                           ; P1 start pressed?
         bmi     start_game                              ; yes, go
         cmpb    #2                                      ; >=2 credits available?
-        bcc     display_push_start                      ; no, exit
+        bcs     display_push_start                      ; no, exit
         lda     p2StartSwitch                           ; P2 start pressed?
         bpl     display_push_start                      ; no, exit
         lda     *io3200ShadowRegister
@@ -308,16 +308,16 @@ check_start:
         jsr     init_ship_position_velocity
         lda     *numStartingShipsPerGame
         sta     *numShipsP2
-        ldx     #2                                      ; 2 players
+        ldb     #2                                      ; 2 players
         dec     *CurrNumCredits
 
 start_game:
-        stx     *numPlayers
+        stb     *numPlayers
         dec     *CurrNumCredits
         lda     *io3200ShadowRegister
         anda    #0xF8                             			; RAMSEL=0 (P1), lamps OFF
         eora    *numPlayers                             ; player lamp ON
-        sta     io3200ShadowRegister
+        sta     *io3200ShadowRegister
         ;sta     $3200                                   ; output
         jsr     init_ship_position_velocity
         lda     #1
@@ -355,7 +355,25 @@ start_game:
 
 ; $693B
 display_push_start:
-				CLC
+        lda     *placeP1HighScore
+        anda    *placeP1HighScore
+        bpl     1$
+        lda     *fastTimer
+        anda    #0x20																		; display phase?
+        bne     1$                                			; no, skip
+        ldb     #6                                      ; "PUSH START"
+        jsr     PrintPackedMsg
+1$:     lda     *fastTimer
+        anda    #0x0F
+        bne     2$
+        ; broken & irrelevant on this platform
+        ;lda     #1
+        ;cmp     *CurrNumCredits
+        ;adc     #1
+        ;eor     #1
+        ;eor     *io3200ShadowRegister
+        ;sta     *io3200ShadowRegister
+2$:			CLC
 				rts
 				
 ; $6960

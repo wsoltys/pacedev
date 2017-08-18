@@ -6,6 +6,14 @@
 
 .globl	dp_base
 .globl	asteroids
+.globl	leftCoinSwitch
+.globl	centerCoinSwitch
+.globl	rightCoinSwitch
+.globl	p1StartSwitch
+.globl	p2StartSwitch
+.globl	thrustSwitch
+.globl	rotateRightSwitch
+.globl	rotateLeftSwitch
 
 ; *** BUILD OPTIONS
 .define BUILD_OPT_NO_SPLASH
@@ -397,6 +405,16 @@ osd_reset::
         decb
         bne     3$
 
+				lda			#0
+				sta			leftCoinSwitch
+				sta			centerCoinSwitch
+				sta			rightCoinSwitch
+				sta			p1StartSwitch
+				sta			p2StartSwitch
+				sta			thrustSwitch
+				sta			rotateRightSwitch
+				sta			rotateLeftSwitch
+
 				lda			#0x02									; 1 coin, 1 credit
 				sta			coinage								; dipswitch
 				lda			#(1<<0)								; 3 lives
@@ -410,10 +428,6 @@ osd_start::
 1$:			sta			,x+
 				cmpx		#VIDEO_SIZ
 				bne			1$
-				rts
-
-handle_erase_opcode:
-				SEC
 				rts
 
 dvg_cur:
@@ -831,6 +845,29 @@ chr_tbl:
 		.word char_Y, char_Z
 		.word char_PERIOD, char_UNDERSCORE
 
+erase_chr:
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			#7
+				sta			*0xD4										; lines
+				ldy			*0xC2
+				ldd			#0
+1$:			std			,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				lda			*0x05										; pixel offset
+				adda		#6
+				bita		#0x08
+				beq			2$
+				anda		#0x07
+				ldy			*0xC2
+				leay		1,y
+				sty			*0xC2										; update CUR
+2$:			sta			*0x05
+				CLC
+				rts
+				
 dvg_chr:
 				lda			1,y											; char code (x2)
 				leay		2,y
@@ -960,6 +997,33 @@ dvg_halt:
 				SEC
 				rts
 				
+erase_jmp_tbl:
+				.word		dvg_cur
+				.word		erase_chr
+				.word		erase_chr
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_nop
+				.word		dvg_halt
+								
+handle_erase_opcode:
+				lsra
+				lsra
+				lsra
+				anda		#0x1E
+				ldx			#erase_jmp_tbl
+				jmp			[a,x]
+				rts
+
 dvg_jmp_tbl:
 				.word		dvg_cur
 				.word		dvg_chr
@@ -1008,5 +1072,21 @@ render_loop:
 				ldd			,y
 				jsr			handle_dvg_opcode			; handle it
 				bcc			render_loop
-
+;
+; now for some inputs...
+				ldb			#(1<<7)
+        lda     #~(1<<5)
+				ldx			#KEYROW
+				sta			2,x
+				lda			,x
+				coma
+        bita    #(1<<4)                 ; <5>?
+				beq			2$
+1$:			sta			2,x
+				lda			,x
+				coma
+				bita		#(1<<4)
+				bne			1$											; wait for release
+				inc			*0x70										; CurrNumCredits
+2$:
 				rts
