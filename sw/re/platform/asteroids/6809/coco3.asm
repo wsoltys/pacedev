@@ -1,5 +1,5 @@
 				.list		(meb)										; macro expansion binary
-       	.area   code (REL, CON)
+       	.area   code (ABS, CON)
 				.module coco3
 				
 .include "coco3.inc"
