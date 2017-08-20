@@ -985,6 +985,55 @@ dvg_copyright:
 				CLC
 				rts
 								
+bmp_asteroid:
+		.byte $%00100000
+		.byte $%00100000
+		.byte $%01010000
+		.byte $%01010000
+		.byte $%01010000
+		.byte $%11111000
+		.byte $%10001000
+
+dvg_asteroid:
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			*0x05										; pixel offset (0-7)
+				lsla														; x2
+				adda		#>shift_tbl
+				ldb			#0x80
+				std			*0xD0										; offset
+				inca
+				std			*0xD2										; offset2
+				lda			#7
+				sta			*0xD4										; lines
+				ldu			#bmp_asteroid
+				ldd			*0xC2
+				addd		#(4*32)									; because it overwrites score
+				tfr			d,y
+1$:			ldb			,u+											; sprite data byte
+				ldx			*0xD0
+				lda			b,x											; shifted data bye
+				ora			,y
+				sta			,y
+				ldx			*0xD2
+				lda			b,x
+				ora			1,y
+				sta			1,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				lda			*0x05										; pixel offset
+				adda		#6
+				bita		#0x08
+				beq			2$
+				anda		#0x07
+				ldy			*0xC2
+				leay		1,y
+				sty			*0xC2										; update CUR
+2$:			sta			*0x05
+				CLC
+				rts
+
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -1002,7 +1051,7 @@ erase_jmp_tbl:
 				.word		erase_chr
 				.word		erase_chr
 				.word		dvg_nop
-				.word		dvg_nop
+				.word		erase_chr
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1029,7 +1078,7 @@ dvg_jmp_tbl:
 				.word		dvg_chr
 				.word		dvg_life
 				.word		dvg_copyright
-				.word		dvg_nop
+				.word		dvg_asteroid
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop

@@ -498,12 +498,62 @@ handle_object_entry:
 
 ; $6FC7
 object_ok:
+				ldb			#0
+				lda			asteroid_Vh,X														; object Vh
+				bpl			1$																			; +ve, skip
+				decb
+1$:			adda		asteroid_PLh,X													; object Ph += Vh
+				sta			asteroid_PLh,X
+				sta			*byte_4
+				adcb		asteroid_PHh,X													; object Ph += Vh
+				cmpb		#32																			; max?
+				bcs			2$																			; no, skip
+				andb		#31																			; max=31
+				cmpx		#0x1C																		; SaucerFlag?
+				bne			2$																			; no, go
+				jsr			zero_saucer
 				jmp			next_object
+2$:			stb			asteroid_PHh,X
+				stb			*byte_5
+				ldb			#0
+				lda			asteroid_Vv,X														; object Vv
+				bpl			3$																			; +ve, skip
+				ldb			#0xFF
+3$:			adda		asteroid_PLv,X													; object Pv += Vv
+				sta			asteroid_PLv,X
+				sta			*byte_6
+				adcb		asteroid_PHv,X													; object Pv += Vv
+				cmpb		#24																			; max?
+				bcs			5$																			; no, skip
+				beq			4$
+				ldb			#23																			; max=23
+				bra			5$																			; (always)
+4$:			ldb			#0
+5$:			stb			asteroid_PHv,X
+				stb			*byte_7
+				lda			P1RAM,X																	; object status
+				ldy			#0xE0																		; scale (-2)
+				lsra																						; bit 0
+				bcs			jsr_display_object											; b0=1,	go
+				ldb			#0xF0																		; scale (-1)
+				lsra																						; bit 1
+				bcs			jsr_display_object											; b1=1,	go
+				ldb			#0																			; scale (0)
 
 ; $7027
 jsr_display_object:
         jsr     display_object
         jmp     next_object
+
+; $702D
+zero_saucer:
+        lda     starting_saucerCountdownTimer
+        sta     saucerCountdownTimer
+        lda     #0
+        sta     saucer_Sts
+        sta     saucer_Vh
+        sta     saucer_Vv
+        rts
 
 ; $7168
 init_wave:
@@ -783,7 +833,7 @@ display_shot_ship_asteroid_or_saucer:
         beq     display_ship                            ; yes, go
         cmpx    #0x1C                                   ; SaucerFlag?
         beq     display_saucer                          ; yes, go
-        bcs     display_shot                            ; shot, go
+        bcc     display_shot                            ; shot, go
 .ifndef PLATFORM_COCO3
         AND     #$18                                    ; status (4:3)
         LSR     A
