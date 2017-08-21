@@ -986,13 +986,13 @@ dvg_copyright:
 				rts
 								
 bmp_asteroid:
-		.byte $%00100000
-		.byte $%00100000
-		.byte $%01010000
-		.byte $%01010000
-		.byte $%01010000
-		.byte $%11111000
-		.byte $%10001000
+		.byte $%11111111
+		.byte $%10000001
+		.byte $%10000001
+		.byte $%10000001
+		.byte $%10000001
+		.byte $%10000001
+		.byte $%11111111
 
 dvg_asteroid:
 				leay		2,y
@@ -1007,9 +1007,7 @@ dvg_asteroid:
 				lda			#7
 				sta			*0xD4										; lines
 				ldu			#bmp_asteroid
-				ldd			*0xC2
-				addd		#(4*32)									; because it overwrites score
-				tfr			d,y
+				ldy			*0xC2
 1$:			ldb			,u+											; sprite data byte
 				ldx			*0xD0
 				lda			b,x											; shifted data bye
@@ -1034,6 +1032,9 @@ dvg_asteroid:
 				CLC
 				rts
 
+erase_asteroid:
+				jmp			erase_chr
+								
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -1051,7 +1052,7 @@ erase_jmp_tbl:
 				.word		erase_chr
 				.word		erase_chr
 				.word		dvg_nop
-				.word		erase_chr
+				.word		erase_asteroid
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1138,4 +1139,18 @@ render_loop:
 				bne			1$											; wait for release
 				inc			*0x70										; CurrNumCredits
 2$:
+				; freeze
+        lda     #~(1<<6)
+				ldx			#KEYROW
+				sta			2,x
+				lda			,x
+				coma
+        bita    #(1<<0)                 ; <F>?
+				beq			4$
+3$:			sta			2,x
+				lda			,x
+				coma
+				bita		#(1<<0)
+				bne			3$											; wait for release
+4$:
 				rts

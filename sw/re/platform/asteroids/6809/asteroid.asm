@@ -532,11 +532,11 @@ object_ok:
 5$:			stb			asteroid_PHv,X
 				stb			*byte_7
 				lda			P1RAM,X																	; object status
-				ldy			#0xE0																		; scale (-2)
-				lsra																						; bit 0
+				ldb			#0xE0																		; scale (-2)
+				lsra																						; status bit 0
 				bcs			jsr_display_object											; b0=1,	go
 				ldb			#0xF0																		; scale (-1)
-				lsra																						; bit 1
+				lsra																						; status bit 1
 				bcs			jsr_display_object											; b1=1,	go
 				ldb			#0																			; scale (0)
 
@@ -567,14 +567,14 @@ init_wave:
 				inc			numAsteroidsLeftBeforeSaucer
 				lda			numAsteroidsLeftBeforeSaucer
 				cmpa		#11																			; max value
-				bcc			loc_7187																; no, skip
+				bcs			loc_7187																; no, skip
 				dec			numAsteroidsLeftBeforeSaucer						; adjust to max
 
 loc_7187:
 				lda			startingAsteroidsPerWave
 				adda		#2																			; 2 more per wave
 				cmpa		#11																			; max number of	asteroids?
-				bcc			loc_7193																; OK, skip
+				bcs			loc_7193																; OK, skip
 				lda			#11																			; limit	to 11
 
 loc_7193:
@@ -661,17 +661,17 @@ set_asteroid_velocity:
 limit_asteroid_velocity:
 				bpl			2$
 				cmpa		#-31
-				bcs			1$
+				bcc			1$
 				lda			#-31
 1$:			cmpa		#-5
-				bcc			9$
+				bcs			9$
 				lda			#-6
 				rts
 2$:			cmpa		#6
-				bcs			3$
+				bcc			3$
 				lda			#6
 3$:			cmpa		#32
-				bcc			9$
+				bcs			9$
 				lda			#31
 9$:			rts
 
@@ -1191,10 +1191,11 @@ reset:
 				sta			dvgram+1																; JMP $0402
 .ifndef PLATFORM_COCO3
 				LDA     #$B0 ; '°'                              ; HALT
+        STA     dvgram+3
 .else
 				lda			#OP_HALT
+        sta     dvgram+2
 .endif
-        sta     dvgram+3
         lda			#0xB0
         sta     *placeP1HighScore
         sta     *placeP2HighScore
