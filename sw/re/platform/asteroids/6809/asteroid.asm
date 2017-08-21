@@ -226,10 +226,14 @@ game_loop:
 				
 wave_loop:
 
+				; the arcade checks for SelfTest here
+				; the arcade waits for 'VBLANK' here
+				; the arcade waits for DVG idle here
+								
 				lda			dvgram+1
 				eora		#2																			; JMP $0402<->$0002
 				sta			dvgram+1
-				
+				; the arcade starts the DVG here
 				inc			*fastTimer
 				bne			6$
 				inc			*slowTimer
@@ -242,12 +246,24 @@ wave_loop:
 				stb			*dvg_curr_addr_msb											; 0x40/0x44 (ping pong)
 				jsr			handle_start_end_turn_or_game
 				bcs			start
-				
+				jsr			check_high_score
+				jsr			handle_high_score_entry
+				bpl			loc_6864
+				jsr			display_high_score_table
+				bcs			loc_6864
+				lda			*timerStartGame
+				bne			loc_685E
+				jsr			handle_fire
+				jsr			handle_hyperspace
+				jsr			handle_respawn_rot_thrust
 				jsr			handle_saucer
+loc_685E:
 				jsr			update_and_render_objects
-				
+				jsr			handle_shots
+loc_6864:				
 				jsr			display_C_scores_ships
-
+				jsr			handle_sounds
+				; the arcade centres the beam here
 				jsr			update_prng
 				jsr			halt_dvg
 .ifdef PLATFORM_COCO3
@@ -386,6 +402,10 @@ handle_end_turn_or_game:
 
 ; $69E2
 print_PLAYER_N:
+				rts
+
+; $69F0
+handle_shots:
 				rts
 
 ; $6B93
@@ -553,7 +573,11 @@ unk_6CD1:
 saucer_Vv_tbl:                  
 				.byte 	0xF0, 0x00, 0x00, 0x10
 
-; 6CF2
+; $6CD7
+handle_fire:
+				rts
+				
+; $6CF2
 find_free_shot_slot:                                                            
 ;        lda     ship_Sts,Y															; get shot timer
 ;        beq     new_shot_fired                          ; not active, go
@@ -562,7 +586,16 @@ find_free_shot_slot:
 ;        bne     find_free_shot_slot                     ; no, loop
 locret_6CFC:
         rts
-								
+
+; $6D90
+handle_high_score_entry:
+				lda			#0xFF																		; *** remove me
+				rts
+
+; $6E74
+handle_hyperspace:
+				rts
+																
 ; $6ED8
 init_players:
 				lda			#2
@@ -731,6 +764,10 @@ zero_saucer:
         sta     saucer_Vv
         rts
 
+; $703F
+handle_respawn_rot_thrust:
+				rts
+				
 ; $7168
 init_wave:
 				ldx			#26																			; 26+1 asteroids
@@ -1055,28 +1092,72 @@ display_shot:
 				ldx			*byte_D
 				rts
 
+; $73C4
+display_high_score_table:
+				rts
+				
 ; $7465
 display_exploding_ship:
+				rts
+
+; $7555
+handle_sounds:
+				rts
+				
+; $765C
+check_high_score:
 				rts
 
 ; $76F0
 ; A=?(X), B=?(Y)
 loc_76F0:
-				tstb
+				exg			a,b																			; swap???
+				tsta
 				bpl			loc_76FC
-				negb
+				nega
 				jsr			loc_76FC
-				negb
+				nega
 				rts
             		
 ; $76FC     		
 loc_76FC:   		
-				tay 		
-				txa 		
+				exg			a,b																			; swap 'em back
+				tsta
 				bpl			sub_770E
-				jsr			negate_A
+				nega
 				jsr			sub_770E
-				eor			#$80 ; '€'
+				eora		#0x80
+				nega
+				rts
+				
+sub_770E:
+				sta			*byte_C
+				tfr			b,a
+				cmpa		*byte_C
+				beq			loc_7725
+				bcs			sub_7728
+				ldb			*byte_C
+				sta			*byte_C
+				tfr			b,a
+				jsr			sub_7728
+				suba		#0x40
+				nega
+				rts
+
+loc_7725:
+				lda			#0x20
+				rts
+
+sub_7728:
+				jsr			sub_776C
+				ldx			#unk_772F
+				lda			#1234																		; fix me - need (6502)X
+				lda			a,x
+				rts 		
+
+unk_772F:			
+				.byte		0, 2, 5, 7, 0x0A, 0x0C, 0x0F
+				.byte 	0x11, 0x13, 0x15, 0x17, 0x19, 0x1A, 0x1C, 0x1D, 0x1F
 												
 ; $773F
 ; A=buffer, B=#bytes, X=extra brightness (not used)
@@ -1107,6 +1188,23 @@ display_numeric:
 				dec			*byte_15																; ptr current byte
 				dec			*byte_16																; done?
 				bpl			1$																			; no, loop
+				rts
+
+; $776C
+sub_776C:
+				clr			*byte_B
+				ldb			#4
+1$:			rol			*byte_B
+				rola
+				cmpa		*byte_C
+				bcs			2$
+				sbca		*byte_C
+2$:			decb
+				bne			1$
+				lda			*byte_B
+				rola
+				anda		#0x0F
+;				tax
 				rts
 
 ; $7785
