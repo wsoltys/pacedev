@@ -594,7 +594,7 @@ init_next_asteroid:
 				anda		#0x1F																		; 5 bits of high byte
 				bcc			start_bottom
 				cmpa		#0x18
-				bcc			start_left
+				bcs			start_left
 				anda		#0x17
 
 start_left:									
