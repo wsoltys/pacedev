@@ -436,7 +436,7 @@ handle_new_saucer:
         lsra
         ror     saucer_PLv
         cmpa    #24
-        bcc     5$
+        bcs     5$
         anda    #23
 5$:     sta     saucer_PHv
         ldb     #0x10
@@ -461,7 +461,7 @@ handle_new_saucer:
         lda     starting_saucerCountdownTimer
         lsra
         cmpa    *byte_8
-        bcs     8$
+        bcc     8$
 7$:     decb
 8$:     stb     saucer_Sts
         rts
@@ -507,39 +507,40 @@ handle_small_saucer:
         asl     *byte_B
         rola
         suba    *byte_C
-        tfr			a,b
-        lda     saucer_Vv
-        cmpa    #0x80
-        rora
-        sta     *byte_C
-        lda     ship_PLv
-        sbca    saucer_PLv
-        sta     *byte_B
-        lda     ship_PHv
-        sbca    saucer_PHv
+        ldb     saucer_Vv
+        cmpb    #0x80
+        rorb
+        stb     *byte_C
+        ldb     ship_PLv
+        subb    saucer_PLv
+        stb     *byte_B
+        ldb     ship_PHv
+        sbcb    saucer_PHv
         asl     *byte_B
-        rola
+        rolb
         asl     *byte_B
-        rola
-        sbca    *byte_C
-        ;tay
-        ;jsr     loc_76F0
+        rolb
+        subb    *byte_C
+        jsr     loc_76F0
         sta     *saucerShotDirection
         jsr     update_prng
         ldx     #p1ScoreThousands
         ldb     *curPlayer_x2
         ldb			b,x
         cmpb    #0x35                              			; score over 35,000?
-        ldx     #0
+        ldb     #0
         bcs     1$                                			; no, skip
-        leax		1,y
-1$:     anda    unk_6CCF,X
+        incb
+1$:     ldx			unk_6CCF
+				anda    b,x
         bpl     2$
-        ora     unk_6CD1,X
+        ldx			unk_6CD1
+        ora     b,x
 2$:     adda    *saucerShotDirection
 
 update_shot_direction:
         sta     *saucerShotDirection
+        ; *** these need to change
         ldy     #3
         ldx     #1
         stx     byte_E
@@ -1059,6 +1060,7 @@ display_exploding_ship:
 				rts
 
 ; $76F0
+; A=?(X), B=?(Y)
 loc_76F0:
 				tstb
 				bpl			loc_76FC
