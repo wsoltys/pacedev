@@ -1208,6 +1208,21 @@ asteroid_bmp_tbl:
     		.word asteroid_8,  asteroid_7,  asteroid_6,  0
     		.word asteroid_11, asteroid_10, asteroid_9,  0
 
+erase_asteroid:
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			#16
+				sta			*0xD4										; lines
+				ldy			*0xC2
+				ldd			#0
+1$:			std			,y
+				sta			2,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				CLC
+				rts
+								
 dvg_asteroid:
         lda     1,y											; status (4:3)=shape, (2:1)=size
 				ldu			#asteroid_bmp_tbl
@@ -1256,7 +1271,48 @@ dvg_asteroid:
 				CLC
 				rts
 
-erase_asteroid:
+large_saucer_bmp:
+    .byte $%00000011, $%11000000
+    .byte $%00000010, $%01000000
+    .byte $%00000111, $%11100000
+    .byte $%00001000, $%00010000
+    .byte $%00010000, $%00001000
+    .byte $%00111111, $%11111100
+    .byte $%00010000, $%00001000
+    .byte $%00001000, $%00010000
+    .byte $%00000111, $%11100000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+
+small_saucer_bmp:
+    .byte $%00000001, $%10000000
+    .byte $%00000010, $%01000000
+    .byte $%00000101, $%10100000
+    .byte $%00000011, $%11000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+
+saucer_bmp_tbl:
+				.word 0x0000
+    		.word small_saucer_bmp
+    		.word large_saucer_bmp
+
+erase_saucer:
 				leay		2,y
 				sty			*0x0B										; update dvgram address
 				lda			#16
@@ -1270,7 +1326,56 @@ erase_asteroid:
 				bne			1$											; no, loop
 				CLC
 				rts
-								
+				
+dvg_saucer:
+        lda     1,y											; status 
+        anda		#0x03										; size (1..2)
+        asla
+				ldu			#saucer_bmp_tbl
+				ldu			a,u
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			*0x05										; pixel offset (0-7)
+				lsla														; x2
+				adda		#>shift_tbl
+				ldb			#0x80
+				std			*0xD0										; offset
+				inca
+				std			*0xD2										; offset2
+				lda			#16
+				sta			*0xD4										; lines
+				ldy			*0xC2
+1$:			ldb			,u+											; sprite data byte 1
+				ldx			*0xD0										; offset
+				lda			b,x											; 1st half of byte 1
+				ora			,y
+				sta			,y
+				ldx			*0xD2										; offset2
+				lda			b,x											; 2nd half of byte 1
+				ldb			,u+											; sprite data byte 2
+				ldx			*0xD0										; offset
+				ora			b,x											; 2nd of byte 1, 1st of byte 2
+				ora			1,y
+				sta			1,y
+				ldx			*0xD2										; offset 2
+				lda			b,x											; 2nd of byte 2
+				ora			2,y
+				sta			2,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				lda			*0x05										; pixel offset
+				adda		#6
+				bita		#0x08
+				beq			2$
+				anda		#0x07
+				ldy			*0xC2
+				leay		1,y
+				sty			*0xC2										; update CUR
+2$:			sta			*0x05
+				CLC
+				rts
+
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -1290,7 +1395,7 @@ erase_jmp_tbl:
 				.word		dvg_nop
 				.word		erase_asteroid
 				.word		dvg_nop
-				.word		dvg_nop
+				.word		erase_saucer
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1317,7 +1422,7 @@ dvg_jmp_tbl:
 				.word		dvg_copyright
 				.word		dvg_asteroid
 				.word		dvg_nop
-				.word		dvg_nop
+				.word		dvg_saucer
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop

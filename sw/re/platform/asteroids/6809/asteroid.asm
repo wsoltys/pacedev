@@ -243,6 +243,7 @@ wave_loop:
 				jsr			handle_start_end_turn_or_game
 				bcs			start
 				
+				jsr			handle_saucer
 				jsr			update_and_render_objects
 				
 				jsr			display_C_scores_ships
@@ -386,7 +387,181 @@ handle_end_turn_or_game:
 ; $69E2
 print_PLAYER_N:
 				rts
-				
+
+; $6B93
+handle_saucer:
+        lda     *fastTimer
+        anda    #3                                      ; time to update?
+        beq     loc_6B9A                           			; yes, go
+locret_6B99:
+     		rts
+loc_6B9A:
+     		lda     saucer_Sts
+        bmi     locret_6B99															; exploding? yes, exit
+        beq     handle_new_saucer                       ; no saucer? yes, go
+        jmp     handle_existing_saucer                  ; small/large saucer
+
+handle_new_saucer:                                                              
+        lda     *numPlayers															; game active?
+        beq     1$																			; no, go
+        lda     ship_Sts                                ; player active?
+        beq     locret_6B99                    					; no, return
+        bmi     locret_6B99                             ; exploding? yes, return
+1$:     lda     asteroid_hit_timer											; non-zero?
+        beq     2$																			; no, skip
+        dec     asteroid_hit_timer
+2$:     dec     saucerCountdownTimer										; time for saucer?
+        bne     locret_6B99                             ; no, exit
+        lda     #18
+        sta     saucerCountdownTimer                    ; reinit countdown
+        lda     asteroid_hit_timer                      ; asteroid hit recently?
+        beq     3$																			; no, skip
+        lda     currentNumberOfAsteroids
+        beq     locret_6B99                             ; no asteroids, return
+        cmpa    numAsteroidsLeftBeforeSaucer
+        bcc     locret_6B99                             ; too many asteroids, return
+3$:     lda     starting_saucerCountdownTimer
+        suba    #6
+        cmpa    #32
+        bcs     4$
+        sta     starting_saucerCountdownTimer
+4$:     clra
+        sta     saucer_PLh
+        sta     saucer_PHh
+        jsr     update_prng                             ; random position
+        lsra
+        ror     saucer_PLv
+        lsra
+        ror     saucer_PLv
+        lsra
+        ror     saucer_PLv
+        cmpa    #24
+        bcc     5$
+        anda    #23
+5$:     sta     saucer_PHv
+        ldb     #0x10
+        bita    *rnd2
+        bvs     6$
+        lda     #0x1F
+        sta     saucer_PHh
+        lda     #0xFF
+        sta     saucer_PLh
+        ldb     #0xF0                             			; fixed velocity
+6$:     stb     saucer_Vh
+        ldb     #2                                      ; large saucer
+        lda     starting_saucerCountdownTimer
+        bmi     8$
+        ldy     #p1ScoreThousands
+        lda     *curPlayer_x2                           
+        lda			a,y																			; p1/p2 score
+        cmpa    #0x30                             			; score over 30,000?
+        bcc     7$                                			; yes, skip (always small saucer)
+        jsr     update_prng
+        sta     *byte_8
+        lda     starting_saucerCountdownTimer
+        lsra
+        cmpa    *byte_8
+        bcs     8$
+7$:     decb
+8$:     stb     saucer_Sts
+        rts
+
+handle_existing_saucer:
+        lda     *fastTimer
+        asla
+        bne     1$
+        jsr     update_prng                             ; random Vv
+        anda    #3                                      ; 0-3
+        ldx			#saucer_Vv_tbl
+        lda			a,x																			; get entry
+        sta     saucer_Vv
+1$:   	lda     *numPlayers
+        beq     2$			                                ; no, skip
+        lda     shipSpawnTimer                          ; ship spawning?
+        bne     9$                             					; yes, skip
+2$:     dec     saucerCountdownTimer
+        beq     loc_6C54
+9$:     rts
+
+loc_6C54:
+        lda     #10
+        sta     saucerCountdownTimer
+        lda     saucer_Sts
+        lsra                                            ; small saucer?
+        beq     handle_small_saucer                     ; yes, go
+        jsr     update_prng                             ; random shot direction
+        jmp     update_shot_direction
+
+handle_small_saucer:
+        lda     saucer_Vh
+        cmpa    #0x80
+        rora
+        sta     *byte_C
+        lda     ship_PLh
+        suba    saucer_PLh
+        sta     *byte_B
+        lda     ship_PHh
+        sbca    saucer_PHh
+        asl     *byte_B
+        rola
+        asl     *byte_B
+        rola
+        suba    *byte_C
+        tfr			a,b
+        lda     saucer_Vv
+        cmpa    #0x80
+        rora
+        sta     *byte_C
+        lda     ship_PLv
+        sbca    saucer_PLv
+        sta     *byte_B
+        lda     ship_PHv
+        sbca    saucer_PHv
+        asl     *byte_B
+        rola
+        asl     *byte_B
+        rola
+        sbca    *byte_C
+        ;tay
+        ;jsr     loc_76F0
+        sta     *saucerShotDirection
+        jsr     update_prng
+        ldx     #p1ScoreThousands
+        ldb     *curPlayer_x2
+        ldb			b,x
+        cmpb    #0x35                              			; score over 35,000?
+        ldx     #0
+        bcs     1$                                			; no, skip
+        leax		1,y
+1$:     anda    unk_6CCF,X
+        bpl     2$
+        ora     unk_6CD1,X
+2$:     adda    *saucerShotDirection
+
+update_shot_direction:
+        sta     *saucerShotDirection
+        ldy     #3
+        ldx     #1
+        stx     byte_E
+        jmp     find_free_shot_slot
+
+unk_6CCF:                       
+				.BYTE 0x8F, 0x87
+unk_6CD1:                       
+				.BYTE 0x70, 0x78
+saucer_Vv_tbl:                  
+				.byte 	0xF0, 0x00, 0x00, 0x10
+
+; 6CF2
+find_free_shot_slot:                                                            
+;        lda     ship_Sts,Y															; get shot timer
+;        beq     new_shot_fired                          ; not active, go
+;        dey                                             ; next shot timer
+;        cpy     byte_E                                  ; done all shot timers?
+;        bne     find_free_shot_slot                     ; no, loop
+locret_6CFC:
+        rts
+								
 ; $6ED8
 init_players:
 				lda			#2
@@ -862,8 +1037,17 @@ display_ship:
 
 ; $737C
 display_saucer:
-				ldx			*byte_D
-				rts
+.ifndef PLATFORM_COCO3
+        lda     DVGROM+$250
+        ldx     DVGROM+$251                             ; saucer table address MSB
+.else
+        ldy     *dvg_curr_addr_msb
+        ldb     #OP_SAUCER
+        stb			,y+
+        sta			,y+
+        sty     *dvg_curr_addr_msb
+.endif                                
+        bra			loc_7370                                ; always
 
 ; $7384
 display_shot:
