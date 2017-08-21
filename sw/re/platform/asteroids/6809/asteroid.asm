@@ -1057,6 +1057,24 @@ display_shot:
 ; $7465
 display_exploding_ship:
 				rts
+
+; $76F0
+loc_76F0:
+				tstb
+				bpl			loc_76FC
+				negb
+				jsr			loc_76FC
+				negb
+				rts
+            		
+; $76FC     		
+loc_76FC:   		
+				tay 		
+				txa 		
+				bpl			sub_770E
+				jsr			negate_A
+				jsr			sub_770E
+				eor			#$80 ; '€'
 												
 ; $773F
 ; A=buffer, B=#bytes, X=extra brightness (not used)
