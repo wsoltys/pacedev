@@ -128,6 +128,11 @@ typedef struct
 #define ASTEROID_SIZE_MEDIUM		(0x01<<1)
 #define ASTEROID_SIZE_SMALL			(0x00<<2)
 
+#define SAUCER_SIZE_MASK				0x03
+#define SAUCER_SIZE_LARGE				0x02
+#define SAUCER_SIZE_SMALL				0x01
+#define SAUCER_NONE							0x00
+
 typedef struct
 {
 	union
@@ -279,6 +284,7 @@ static DISPLAYLIST_ENTRY displaylist[256];
 
 static int handle_start_end_turn_or_game (void);			// $6885
 static int display_push_start (void);									// $693B
+static int handle_end_turn_or_game (void);						// $6960
 static void print_PLAYER_N (void);										// $69E2
 static void handle_shots (void);											// $69F0
 static void copy_vector_list_to_avgram (
@@ -597,6 +603,12 @@ int display_push_start (void)
 	return (0);
 }
 
+// $6960
+int handle_end_turn_or_game (void)
+{
+	return (0);
+}
+
 // $69E2
 void print_PLAYER_N (void)
 {
@@ -667,6 +679,94 @@ void copy_vector_list_to_avgram (uint16_t addr, uint8_t flip_x, uint8_t flip_y)
 void handle_saucer (void)
 {
 	//UNIMPLEMENTED;
+
+	uint8_t r;
+	
+	if ((zp.fastTimer & 0x03) != 0)
+		return;
+	if (p->saucer_Sts < 0)
+		return;
+	if (p->saucer_Sts == 0)
+	{
+		uint8_t PHv, PLv;
+
+		handle_new_saucer:
+			if (zp.numPlayers != 0 && p->ship_Sts <= 0)
+				return;
+			if (p->asteroid_hit_timer != 0)
+				p->asteroid_hit_timer--;
+			if (--p->saucerCountdownTimer != 0)
+				return;
+			p->saucerCountdownTimer = 18;
+			if (p->asteroid_hit_timer != 0 &&
+					(p->currentNumberOfAsteroids == 0 ||
+					 p->currentNumberOfAsteroids >= p->numAsteroidsLeftBeforeSaucer))
+				return;
+			if ((p->starting_saucerCountdownTimer - 6) >= 32)
+				p->starting_saucerCountdownTimer -= 6;
+			p->saucer_Ph = 0;
+			r = update_prng ();
+			// can this be made nicer?
+			PLv = p->saucer_Pv & 0x00FF;
+			PLv = (r << 5) | (PLv >> 3);
+			PHv = r >> 3;
+			if (PHv >= 24)
+				PHv &= 23;
+			p->saucer_Pv = (uint16_t)PHv << 8 | PLv;
+			if ((PHv & zp.rnd & (1<<6)) == 0)
+			{
+				p->saucer_Ph = 0x1FFF;
+				p->saucer_Vh = 0xF0;
+			}
+			else
+				p->saucer_Vh = 0x10;
+			if (p->starting_saucerCountdownTimer <= 127)
+			{
+				uint16_t score = (zp.curPlayer_x2 = 0 ? zp.p1Score : zp.p2Score);
+				if (score < (30000/10))
+				{
+					zp.byte_8 = update_prng ();
+					if ((p->starting_saucerCountdownTimer/2) < zp.byte_8)
+						p->saucer_Sts = SAUCER_SIZE_SMALL;
+					else
+						p->saucer_Sts = SAUCER_SIZE_LARGE;
+				}
+				else
+					p->saucer_Sts = SAUCER_SIZE_SMALL;
+			}
+			else
+				p->saucer_Sts = SAUCER_SIZE_LARGE;
+	}
+	else
+	{
+		static int8_t saucer_Vv_tbl[] =
+		{
+			(int8_t)0xF0, 0x00, 0x00, 0x10
+		};
+
+		handle_existing_saucer:
+			if ((zp.fastTimer & 0x7F) == 0)
+			{
+				r = update_prng () & 0x03;
+				p->saucer_Vv = saucer_Vv_tbl[r];
+			}
+			if (zp.numPlayers != 0 && p->shipSpawnTimer != 0)
+				return;
+			if (--p->saucerCountdownTimer != 0)
+				return;
+				
+			p->saucerCountdownTimer = 10;
+			if (p->saucer_Sts != SAUCER_SIZE_SMALL)
+				update_prng ();
+			else
+			{
+				handle_small_saucer:
+					;
+			}
+
+			update_shot_direction:
+				;
+	}		
 }
 
 // $6CD7
