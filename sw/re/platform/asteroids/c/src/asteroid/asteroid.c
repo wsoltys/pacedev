@@ -303,6 +303,7 @@ static void display_extra_ships (
 							uint8_t n
 							);																			// $6F3E
 static void update_and_render_objects (void);					// $6F57
+static void zero_saucer (void);												// $702D
 static void handle_respawn_rot_thrust (void);					// $703F
 static void init_wave (void);													// $7168
 static void set_asteroid_velocity (
@@ -450,7 +451,7 @@ static void dump_displaylist (void)
 		for (j=0; j<dle->len; j++)
 			b += sprintf (b, "%02X ", dle->byte[j]);
 
-		printf ("%-16.16s %s\n", bin, disasm);
+		//printf ("%-16.16s %s\n", bin, disasm);
 
 		if (dle->opcode == JSR)
 			dvgrom_disassemble_jsr (dle->jsr_jmp.addr);
@@ -494,7 +495,7 @@ void asteroids2 (void)
 					{
 						if (display_high_score_table () == 0)
 						{
-							if (zp.timerStartGame != 0)
+							if (zp.timerStartGame == 0)
 							{
 								handle_fire ();
 								handle_hyperspace ();
@@ -702,6 +703,7 @@ void handle_saucer (void)
 					(p->currentNumberOfAsteroids == 0 ||
 					 p->currentNumberOfAsteroids >= p->numAsteroidsLeftBeforeSaucer))
 				return;
+
 			if ((p->starting_saucerCountdownTimer - 6) >= 32)
 				p->starting_saucerCountdownTimer -= 6;
 			p->saucer_Ph = 0;
@@ -736,6 +738,9 @@ void handle_saucer (void)
 			}
 			else
 				p->saucer_Sts = SAUCER_SIZE_LARGE;
+				
+			DBGPRINTF ("handle_new_saucer: P=(%d,%d) V=(%d,%d) SIZE=%d\n",
+									p->saucer_Ph, p->saucer_Pv, p->saucer_Vh, p->saucer_Vv, p->saucer_Sts);
 	}
 	else
 	{
@@ -857,11 +862,13 @@ void update_and_render_objects (void)
 				object_ok:
 					p->object_Ph[i] += p->object_Vh[i];
 					if (p->object_Ph[i] >= 0x2000)
-						p->object_Ph[i] &= 0x1FFF;
-					if (i == 0x1C)
 					{
-						//zero_saucer ();
-						continue;
+						p->object_Ph[i] &= 0x1FFF;
+						if (i == 0x1C)
+						{
+							zero_saucer ();
+							continue;
+						}
 					}
 					p->object_Pv[i] += p->object_Vv[i];
 					if (p->object_Pv[i] >= 0x1800)
@@ -883,6 +890,15 @@ void update_and_render_objects (void)
 		jsr_display_object:
 			display_object (i, scale);
 	}
+}
+
+// $702D
+void zero_saucer (void)
+{
+	p->saucerCountdownTimer = p->starting_saucerCountdownTimer;
+	p->saucer_Sts = 0;
+	p->saucer_Vh = 0;
+	p->saucer_Vv = 0;
 }
 
 // $703F
