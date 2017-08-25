@@ -134,43 +134,43 @@ ship_Sts:												.ds		1
 ; - 0x02  = large saucer
 ; - 0xA0+ = saucer exploding
 saucer_Sts:											.ds		1
-saucerShot_Sts:									.ds		1
+saucerShot_Sts:									.ds		2
 shipShot_Sts:										.ds		4
 ; Horizontal Velocity 0-255 (255-192)=Left, 1-63=Right
 asteroid_Vh:										.ds		27
 ship_Vh:												.ds		1
 saucer_Vh:											.ds		1
-saucerShot_Vh:									.ds		1
+saucerShot_Vh:									.ds		2
 shipShot_Vh:										.ds		4
 ; Vertical Velocity 0-255 (255-192)=Down, 1-63=Up
 asteroid_Vv:										.ds		27
 ship_Vv:												.ds		1
 saucer_Vv:											.ds		1
-saucerShot_Vv:									.ds		1
+saucerShot_Vv:									.ds		2
 shipShot_Vv:										.ds		4
 ; Horiztonal Position High (0-31) 0=Left, 31=Right
 asteroid_PHh:										.ds		27
 ship_PHh:												.ds		1
 saucer_PHh:											.ds		1
-saucerShot_PHh:									.ds		1
+saucerShot_PHh:									.ds		2
 shipShot_PHh:										.ds		4
 ; Vertical Position High (0-23), 0=Bottom, 23=Top
 asteroid_PHv:										.ds		27
 ship_PHv:												.ds		1
 saucer_PHv:											.ds		1
-saucerShot_PHv:									.ds		1
+saucerShot_PHv:									.ds		2
 shipShot_PHv:										.ds		4
 ; Horizontal Position Low (0-255), 0=Left, 255=Right
 asteroid_PLh:										.ds		27
 ship_PLh:												.ds		1
 saucer_PLh:											.ds		1
-saucerShot_PLh:									.ds		1
+saucerShot_PLh:									.ds		2
 shipShot_PLh:										.ds		4
 ; Vertical Position Low (0-255), 0=Bottom, 255=Top
 asteroid_PLv:										.ds		27
 ship_PLv:												.ds		1
 saucer_PLv:											.ds		1
-saucerShot_PLv:									.ds		1
+saucerShot_PLv:									.ds		2
 shipShot_PLv:										.ds		4
 startingAsteroidsPerWave:				.ds		1
 currentNumberOfAsteroids:				.ds		1
@@ -460,8 +460,10 @@ handle_new_saucer:
         anda    #23
 5$:     sta     saucer_PHv
         ldb     #0x10
-        bita    *rnd2
-        bvs     6$
+        ; 6502 code was BIT rnd2; bvs which simply tests rnd2:6
+        lda			*rnd2
+        bita		#(1<<6)
+        bne			6$
         lda     #0x1F
         sta     saucer_PHh
         lda     #0xFF
