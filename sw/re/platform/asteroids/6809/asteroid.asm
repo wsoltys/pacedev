@@ -402,6 +402,11 @@ handle_end_turn_or_game:
 
 ; $69E2
 print_PLAYER_N:
+        ldb     #1                                      ; "PLAYER"
+        jsr     PrintPackedMsg
+        lda     curPlayer
+        inca
+        jsr     display_digit_A
 				rts
 
 ; $69F0
@@ -602,11 +607,11 @@ handle_hyperspace:
 init_players:
 				lda			#2
 				sta			startingAsteroidsPerWave
-				ldx			#3
+				ldb			#3
 				lsr			centerCoinMultiplierAndLives
 				bcs			1$
-				inx
-1$:			stx			*numStartingShipsPerGame
+				incb
+1$:			stb			*numStartingShipsPerGame
 				lda			#0
 				ldx			#4																			; 4 flags, 4 timers, 4 score bytes
 2$:			sta			ship_Sts,x
@@ -848,6 +853,16 @@ locret_71E7:
 
 ; $71E8
 init_ship_position_velocity:
+        lda     #0x60
+        sta     ship_PLh
+        sta     ship_PLv
+        lda     #0
+        sta     ship_Vh
+        sta     ship_Vv                                 ; zero ship velocity
+        lda     #0x10
+        sta     ship_PHh                                ; x=$1060 = 4192
+        lda     #0xC
+        sta     ship_PHv                                ; y=$0C60 = 3168
 				rts
 				
 ; $7203
@@ -1072,6 +1087,7 @@ loc_7370:
 
 ; $7376
 display_ship:
+				jsr			calc_ship_and_render
 				ldx			*byte_D
 				rts
 
@@ -1102,6 +1118,73 @@ display_high_score_table:
 display_exploding_ship:
 				rts
 
+; $750B
+calc_ship_and_render:
+        ;ldb     #0                                      ; default positive delta
+        clr     *extra_brightness
+        ;ldb     #0                                      ; default positive delta
+        lda     *direction
+.ifndef PLATFORM_COCO3                                
+        BPL     loc_751B                                ; positive, skip
+        LDY     #4                                      ; flag negative delta
+        TXA                                             ; 0
+        SEC
+        SBC     direction
+
+loc_751B:                                                                       ; ABS(direction)
+        STA     byte_8
+        BIT     byte_8
+        BMI     loc_7523                                ; b7=1
+        BVC     loc_752A                                ; b6=0
+
+loc_7523:                                                                       ; flag negative delta
+        LDX     #4
+        LDA     #$80 ; '€'
+        SEC
+        SBC     byte_8
+
+loc_752A:                                                                       ; flag for flip X
+        STX     byte_8
+        STY     byte_9                                  ; flag for flip Y
+        LSR     A
+        AND     #$FE ; 'þ'
+        TAY
+        LDA     DVGROM+$26E,Y                           ; ship table address LSB
+        LDX     DVGROM+$26F,Y                           ; ship table address MSB
+        JSR     copy_vector_list_from_table_to_dvgram
+        LDA     thrustSwitch                            ; thrust?
+        BPL     locret_7554                             ; no, exit
+        LDA     fastTimer
+        AND     #4                                      ; time to display thrust?
+        BEQ     locret_7554                             ; no, exit
+        INY
+        INY                                             ; Y=2???
+        SEC
+        LDX     byte_C
+        TYA
+        ADC     byte_B
+        BCC     loc_7551
+        INX                                             ; BC+=2
+
+loc_7551:
+		    JSR     copy_vector_list_from_table_to_dvgram
+.else
+				ldy			*dvg_curr_addr_msb
+        ldb			thrustSwitch
+        bpl			1$
+        ldb			*fastTimer
+        andb		#4
+        beq			1$
+        ldb			#OP_SHIP_THRUST
+        bra			2$
+1$:     ldb     #OP_SHIP
+2$:     stb     ,y+
+				sta			,y+
+        sty     *dvg_curr_addr_msb
+.endif                                
+locret_7554:
+				rts
+				
 ; $7555
 handle_sounds:
 				rts

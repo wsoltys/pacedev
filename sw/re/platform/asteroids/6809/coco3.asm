@@ -1271,6 +1271,13 @@ dvg_asteroid:
 				CLC
 				rts
 
+erase_ship:
+				jsr			erase_chr
+				rts
+				
+dvg_ship:
+				jmp			dvg_life
+				
 large_saucer_bmp:
     .byte $%00000011, $%11000000
     .byte $%00000010, $%01000000
@@ -1394,7 +1401,7 @@ erase_jmp_tbl:
 				.word		erase_chr
 				.word		dvg_nop
 				.word		erase_asteroid
-				.word		dvg_nop
+				.word		erase_chr
 				.word		erase_saucer
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1421,7 +1428,7 @@ dvg_jmp_tbl:
 				.word		dvg_life
 				.word		dvg_copyright
 				.word		dvg_asteroid
-				.word		dvg_nop
+				.word		dvg_ship
 				.word		dvg_saucer
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1479,19 +1486,25 @@ render_loop:
 				bita		#(1<<4)
 				bne			1$											; wait for release
 				inc			*0x70										; CurrNumCredits
-2$:
+2$:			lda			#~(1<<1)
+				sta			2,x
+				lda			,x
+				coma
+				bita		#(1<<4)									; <1>?
+				beq			3$
+				stb			p1StartSwitch
+3$:				
 				; freeze
         lda     #~(1<<6)
-				ldx			#KEYROW
 				sta			2,x
 				lda			,x
 				coma
         bita    #(1<<0)                 ; <F>?
-				beq			4$
-3$:			sta			2,x
+				beq			9$
+8$:			sta			2,x
 				lda			,x
 				coma
 				bita		#(1<<0)
-				bne			3$											; wait for release
-4$:
+				bne			8$											; wait for release
+9$:
 				rts
