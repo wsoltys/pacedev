@@ -49,8 +49,8 @@ void osd_line (unsigned x1, unsigned y1, unsigned x2, unsigned y2, unsigned brig
 	//printf ("line(%d,%d)-(%d,%d)\n", x1, y1, x2, y2);
 	// this is going to be an issue when a less-bright vector overwrites a brighter one
 	// the intensities should add, but in this case they won't
-	y1 = (unsigned)((double)y1*VRES/1024.0)+((1024-788)/2);
-	y2 = (unsigned)((double)y2*VRES/1024.0)+((1024-788)/2);
+	y1 = y1-(1024-VRES)/2;
+	y2 = y2-(1024-VRES)/2;
 	if (brightness)
 		line (screen, x1, VRES-1-y1, x2, VRES-1-y2, brightness);
 }
