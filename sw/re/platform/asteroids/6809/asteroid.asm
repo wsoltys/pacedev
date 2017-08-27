@@ -778,7 +778,7 @@ handle_respawn_rot_thrust:
 				lda			ship_Sts
 				bmi			locret_7085															; exploding - exit
 				lda			shipSpawnTimer
-				;beq			check_rot_left
+				beq			check_rot_left
 				dec			shipSpawnTimer													; still	spawning?
 				bne			locret_7085															; yes, exit
 				ldb			*hyperspaceFlag
@@ -814,6 +814,104 @@ loc_7081:
 
 locret_7085:
 				rts
+
+; $7086
+check_rot_left:
+				lda			rotateLeftSwitch
+				bpl			check_rot_right													; no, skip
+				lda			#3
+				bne			update_dir															; always go
+
+check_rot_right:																				
+				lda			rotateRightSwitch												; right	button?
+				bpl			check_thrust														; no, skip
+				lda			#0xFD																		; -3
+            		
+update_dir: 		
+				adda		*direction															; calc direction
+				sta			*direction															; update
+
+check_thrust:
+				lda			*fastTimer
+				lsra
+				bcs			locret_7085															; exit
+				lda			thrustSwitch														; thrust button?
+				bpl			3$																			; no, go
+				lda			#0x80
+				;sta			$3C03																		; sound	(ship thrust)
+				ldb			#0
+				lda			*direction
+				jsr			get_thrust_cos
+				bpl			1$
+				decb 		
+1$:			asla
+				adda		ship_thrust_dH
+				exg			a,b
+				adda		ship_Vh
+				jsr			calc_thrust_delta
+				sta			ship_Vh
+				stb			ship_thrust_dH
+				ldb			#0
+				lda			*direction
+				jsr			get_thrust_sin
+				bpl			2$
+				decb
+2$:			asla
+				adda		ship_thrust_dV
+				exg			a,b																			; B=dV, A=0/-1
+				adda		ship_Vv
+				jsr			calc_thrust_delta
+				sta			ship_Vv
+				stb			ship_thrust_dV
+				rts
+3$:			lda			#0
+				;sta			$3C03																		; sound	(ship thrust)
+				lda			ship_Vh
+				ora			ship_thrust_dH
+				beq			5$
+				lda			ship_Vh
+				asla
+				ldb			#0xFF
+				CLC
+				coma
+				bmi			4$
+				incb
+				SEC
+4$:			adca		ship_thrust_dH
+				sta			ship_thrust_dH
+				adcb		ship_Vh
+				stb			ship_Vh
+5$:			lda			ship_thrust_dV
+				ora			ship_Vv
+				beq			7$
+				lda			ship_Vv
+				asla
+				ldb			#0xFF
+				CLC
+				coma
+				bmi			6$
+				SEC
+				incb 		
+6$:			adca		ship_thrust_dV
+				sta			ship_thrust_dV
+				adcb		ship_Vv
+				stb			ship_Vv
+7$:			rts
+
+; $7125
+; A=V, B=dV
+calc_thrust_delta:
+        bmi     1$
+        cmpa    #64
+        bcs     2$
+        ldb     #0xFF
+        lda     #63
+        rts
+1$:     cmpa    #192
+        bcc     2$
+        ldb     #1
+        lda     #192
+2$:     rts
 
 ; $7139
 check_near_objs_and_extend_spawn:
@@ -1423,6 +1521,29 @@ update_prng:
 
 ; $77D1
 tap:		.byte		0x02
+
+; $77D2
+get_thrust_cos:
+        adda    #64                                     ; (0-127)=up, (128-255)=down
+
+get_thrust_sin:
+        bpl     1$                                			; up? go
+        anda    #0x7F                              			; mask off up/down
+        jsr     1$
+        nega
+        rts
+1$:     cmpa    #65                                     ; left/right?
+        bcs     2$                                			; right, go
+        eora    #0x7F                              			; toggle up/down
+        inca
+2$:     
+.ifndef PLATFORM_COCO3
+        LDA     DVGROM+$7B9,X                           ; sine table
+.else
+				ldx			#sine_tbl
+				lda			a,x
+.endif                                
+        rts
 
 ; $77F6
 ; B = msg#

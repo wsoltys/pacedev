@@ -1472,39 +1472,47 @@ render_loop:
 				bcc			render_loop
 ;
 ; now for some inputs...
-				ldb			#(1<<7)
-        lda     #~(1<<5)
+				clr			rotateLeftSwitch
+				clr			rotateRightSwitch
+				clr			thrustSwitch
 				ldx			#KEYROW
+				ldb			#(1<<7)
+				lda			#~(1<<1)								; "ROW = 1
 				sta			2,x
 				lda			,x
-				coma
-        bita    #(1<<4)                 ; <5>?
-				beq			2$
-1$:			sta			2,x
-				lda			,x
-				coma
-				bita		#(1<<4)
-				bne			1$											; wait for release
-				inc			*0x70										; CurrNumCredits
-2$:			lda			#~(1<<1)
-				sta			2,x
-				lda			,x
-				coma
 				bita		#(1<<4)									; <1>?
-				beq			3$
+				bne			3$
 				stb			p1StartSwitch
-3$:				
-				; freeze
-        lda     #~(1<<6)
+3$:     lda     #~(1<<3)								; "ROW" = 3
 				sta			2,x
 				lda			,x
-				coma
-        bita    #(1<<0)                 ; <F>?
-				beq			9$
-8$:			sta			2,x
+				bita		#(1<<3)									; <UP>?
+				bne			5$
+				stb			thrustSwitch				
+5$:     lda     #~(1<<5)								; "ROW" = 5
+				sta			2,x
 				lda			,x
-				coma
+				bita		#(1<<3)									; <LEFT>?
+				bne			51$
+				stb			rotateLeftSwitch				
+51$:    bita    #(1<<4)                 ; <5>?
+				bne			6$
+52$:		sta			2,x
+				lda			,x
+				bita		#(1<<4)
+				beq			52$											; wait for release
+				inc			*0x70										; CurrNumCredits
+6$:     lda     #~(1<<6)								; "ROW" = 6
+				sta			2,x
+				lda			,x
+				bita		#(1<<3)									; <RIGHT>?
+				bne			61$
+				stb			rotateRightSwitch
+				; freeze (for snapshot)
+61$:    bita    #(1<<0)                	; <F>?
+				bne			9$
+62$:		sta			2,x
+				lda			,x
 				bita		#(1<<0)
-				bne			8$											; wait for release
-9$:
-				rts
+				beq			62$											; wait for release
+9$:			rts
