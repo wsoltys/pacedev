@@ -773,6 +773,73 @@ zero_saucer:
 
 ; $703F
 handle_respawn_rot_thrust:
+				lda			*numPlayers
+				beq			locret_7085
+				lda			ship_Sts
+				bmi			locret_7085															; exploding - exit
+				lda			shipSpawnTimer
+				;beq			check_rot_left
+				dec			shipSpawnTimer													; still	spawning?
+				bne			locret_7085															; yes, exit
+				ldb			*hyperspaceFlag
+				bmi			loc_706F																; unsuccessful - go
+				bne			end_hyperspace													; successful - go
+				jsr			check_near_objs_and_extend_spawn				; objects too close?
+				bne			loc_7081																; yes, exit
+				ldb			saucer_Sts
+				beq			end_hyperspace													; no saucer - go
+				ldb			#2
+				stb			shipSpawnTimer
+				rts
+
+end_hyperspace:									
+				lda			#1																			; flag alive and active
+				sta			ship_Sts
+				bra			loc_7081																; always go
+            		
+loc_706F:														
+				lda			#0xA0																		; flag exploding
+				sta			ship_Sts
+				ldb			#0x3E
+				stb			timerExplosionSound
+				ldb			*curPlayer
+				ldx			#numShipsP1
+				dec			b,x																			; dec number of	ships
+				lda			#129
+				sta			shipSpawnTimer
+            		
+loc_7081:											
+				lda			#0																			; flag inactive
+				sta			*hyperspaceFlag
+
+locret_7085:
+				rts
+
+; $7139
+check_near_objs_and_extend_spawn:
+				ldx			#28																			; 29 objects to	check
+1$:			lda			P1RAM,x																	; get object status
+				beq			3$																			; not active, skip
+				lda			asteroid_PHh,x
+				suba		ship_PHh
+				cmpa		#4																			; object, ship PHh within 4?
+				bcs			2$																			; yes, go
+				cmpa		#0xFC
+				bcs			3$																			; no, skip
+2$:			lda			asteroid_PHv,x
+				suba		ship_PHv
+				cmpa		#4																			; object, ship PHv within 4?
+				bcs			extend_spawn														; yes, go
+				cmpa		#0xFC
+				bcc			extend_spawn														; yes, go
+3$:			leax		-1,x
+				cmpx		#0
+				bpl			1$																			; loop thru all	objects
+				clrb																						; B=0, set Z flag
+				rts
+
+extend_spawn:									
+				inc			shipSpawnTimer													; reset	Z flag
 				rts
 				
 ; $7168
