@@ -839,35 +839,35 @@ check_thrust:
 				bpl			3$																			; no, go
 				lda			#0x80
 				;sta			$3C03																		; sound	(ship thrust)
-				ldb			#0
+				ldb			#0																			; ??=0
 				lda			*direction
 				jsr			get_thrust_cos
 				bpl			1$
-				decb 		
+				decb 																						; ??=-1
 1$:			asla
-				adda		ship_thrust_dH
-				exg			a,b
-				adda		ship_Vh
-				jsr			calc_thrust_delta
+				adda		*ship_thrust_dH													; add COS term to dH
+				exg			a,b																			; B=new dH, A=0/-1
+				adda		ship_Vh																	; if cos<0 Vh--
+				jsr			limit_thrust
 				sta			ship_Vh
-				stb			ship_thrust_dH
+				stb			*ship_thrust_dH
 				ldb			#0
 				lda			*direction
 				jsr			get_thrust_sin
 				bpl			2$
 				decb
 2$:			asla
-				adda		ship_thrust_dV
+				adda		*ship_thrust_dV
 				exg			a,b																			; B=dV, A=0/-1
 				adda		ship_Vv
-				jsr			calc_thrust_delta
+				jsr			limit_thrust
 				sta			ship_Vv
-				stb			ship_thrust_dV
+				stb			*ship_thrust_dV
 				rts
 3$:			lda			#0
 				;sta			$3C03																		; sound	(ship thrust)
 				lda			ship_Vh
-				ora			ship_thrust_dH
+				ora			*ship_thrust_dH
 				beq			5$
 				lda			ship_Vh
 				asla
@@ -877,11 +877,11 @@ check_thrust:
 				bmi			4$
 				incb
 				SEC
-4$:			adca		ship_thrust_dH
-				sta			ship_thrust_dH
+4$:			adca		*ship_thrust_dH
+				sta			*ship_thrust_dH
 				adcb		ship_Vh
 				stb			ship_Vh
-5$:			lda			ship_thrust_dV
+5$:			lda			*ship_thrust_dV
 				ora			ship_Vv
 				beq			7$
 				lda			ship_Vv
@@ -892,15 +892,15 @@ check_thrust:
 				bmi			6$
 				SEC
 				incb 		
-6$:			adca		ship_thrust_dV
-				sta			ship_thrust_dV
+6$:			adca		*ship_thrust_dV
+				sta			*ship_thrust_dV
 				adcb		ship_Vv
 				stb			ship_Vv
 7$:			rts
 
 ; $7125
-; A=V, B=dV
-calc_thrust_delta:
+; A=Velocity, B=dVelocity
+limit_thrust:
         bmi     1$
         cmpa    #64
         bcs     2$
@@ -1841,7 +1841,7 @@ sine_tbl:
         .byte 0x16, 0x19, 0x1C, 0x1F, 0x22, 0x25, 0x28, 0x2B, 0x2E, 0x31, 0x33, 0x36, 0x39, 0x3C, 0x3F, 0x41
         .byte 0x44, 0x47, 0x49, 0x4C, 0x4E, 0x51, 0x53, 0x55, 0x58, 0x5A, 0x5C, 0x5E, 0x60, 0x62, 0x64, 0x66
         .byte 0x68, 0x6A, 0x6B, 0x6D, 0x6F, 0x70, 0x71, 0x73, 0x74, 0x75, 0x76, 0x78, 0x79, 0x7A, 0x7A, 0x7B
-        .byte 0x7C, 0x7D, 0x7D, 0x7E, 0x7E, 0x7E, 0x7F, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        .byte 0x7C, 0x7D, 0x7D, 0x7E, 0x7E, 0x7E, 0x7F, 0x7F, 0x7F, 0x7F
 .endif
 
 				.end		jmp_osd_init
