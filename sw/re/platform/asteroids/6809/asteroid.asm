@@ -503,9 +503,101 @@ handle_active_shot:
         bmi     9$
         jmp     2$
 
+; $6A9D
+clone_asteroid_rnd_shape:
+        lda     P1RAM,Y                                 ; asteroid status
+        anda    #7                                      ; bits 2-0
+        sta     *byte_8
+        jsr     update_prng                             ; random asteroid shape
+        anda    #0x18                                   ; bits 4-3 only
+        ora     *byte_8
+        sta     P1RAM,X                                 ; new status
+        lda     asteroid_PLh,Y
+        sta     asteroid_PLh,X
+        lda     asteroid_PHh,Y
+        sta     asteroid_PHh,X
+        lda     asteroid_PLv,Y
+        sta     asteroid_PLv,X
+        lda     asteroid_PHv,Y
+        sta     asteroid_PHv,X
+        lda     asteroid_Vh,Y
+        sta     asteroid_Vh,X
+        lda     asteroid_Vv,Y
+        sta     asteroid_Vv,X
+        rts
+
 ; $6B0F
 handle_object_hit:
-				rts
+        cmpx    #1
+        bne     1$
+        cmpy    #0x1B                                   ; player hit?
+        bne     2$                                			; no, skip
+        ldx     #0
+        ldy     #0x1C                                   ; saucer
+1$:     cmpx		#0
+        bne     3$
+        lda     #129
+        sta     shipSpawnTimer
+        tfr			dp,a
+        ldb			#numShipsP1
+        tfr			d,x
+        ldb     *curPlayer
+        dec     b,x                            					; dec number of ships
+        ldx     #0                                      ; offset to player ship
+2$:     lda     #0xA0																		; flag object exploding
+        sta     ship_Sts,X
+        clra
+        sta     ship_Vh,X
+        sta     ship_Vv,X                               ; zero object velocity
+        cmpy    #0x1B                                   ; asteroid?
+        bcs     4$                                			; yes, go
+        bcc     handle_saucer_hit                       ; no (saucer), go
+3$:     clra
+        sta     ship_Sts,X                              ; flag object inactive
+        cmpy    #0x1B                                   ; player?
+        beq     ship_hit_asteroid                       ; yes, go
+        bcc     handle_saucer_hit                       ; no (saucer), go
+4$:     jsr     handle_asteroid_hit
+
+explode_asteroid:                                                               
+        lda     P1RAM,Y																	; (orginal) asteroid status
+        anda    #3
+        eora    #2
+        lsra
+        rora
+        rora
+        ora     #0x3F
+        sta     *timerExplosionSound
+        lda     #0xA0                              			; flag exploding
+        sta     P1RAM,Y                                 ; store
+        clra
+        sta     asteroid_Vh,Y
+        sta     asteroid_Vv,Y                           ; zero asteroid velocity
+        rts
+
+ship_hit_asteroid:                                                              
+        tfr			dp,a
+				ldb			#numShipsP1
+				tfr			d,u
+        ldb     *curPlayer
+        dec     b,u                            					; lose a ship
+        lda     #129                                    ; init spawn timer
+        sta     shipSpawnTimer
+        bne     explode_asteroid                        ; always
+
+handle_saucer_hit:
+        lda     starting_saucerCountdownTimer
+        sta     saucerCountdownTimer
+        lda     *numPlayers                             ; real game?
+        beq     explode_asteroid                        ; no, go
+        ldb     *curPlayer_x2
+        lda     saucer_Sts
+        lsra                                            ; small saucer?
+        lda     #0x99                             			; (99+1)*10 = 1,000 pts
+        bcs     1$                                			; yes, skip
+        lda     #0x20                              			; 20x10 = 200 pts
+1$:     jsr     add_A_to_score
+        jmp     explode_asteroid
 				
 ; $6B93
 handle_saucer:
@@ -664,7 +756,7 @@ update_shot_direction:
         ; *** these need to change
         ldy     #3
         ldx     #1
-        stx     *byte_E
+;        stx     *byte_E
         jmp     find_free_shot_slot
 
 unk_6CCF:                       
@@ -895,9 +987,11 @@ loc_706F:
 				lda			#0xA0																		; flag exploding
 				sta			ship_Sts
 				ldb			#0x3E
-				stb			timerExplosionSound
+				stb			*timerExplosionSound
+				tfr			dp,a
+				ldb			#numShipsP1
+				tfr			d,x
 				ldb			*curPlayer
-				ldx			#numShipsP1
 				dec			b,x																			; dec number of	ships
 				lda			#129
 				sta			shipSpawnTimer
@@ -1260,7 +1354,7 @@ display_C_scores_ships:
 ; B = scale ($E0/$F0/$00)
 display_object:
         stb     *globalScale
-        stx     *byte_D                                 ; object offset (from P1RAM)
+        pshs		x																				; object offset (from P1RAM)
         lda     *byte_5                                 ; object_PHh
         lsra
         ror     *byte_4                                 ; object_PLh
@@ -1292,7 +1386,7 @@ display_object:
         cmpa    #0xA0
         bcs     1$
 2$:     ;jsr     set_scale_A_bright_0
-        ldx     *byte_D                                 ; restore object offset
+        puls		x																				; restore object offset
         lda     P1RAM,X                                 ; object status (again)
         bpl     display_shot_ship_asteroid_or_saucer
         cmpx    #0x1B                                   ; PlayerFlag?
@@ -1369,9 +1463,45 @@ display_shot:
 				ldx			*byte_D
 				rts
 
+; $7397
+; B=offset
+add_A_to_score:
+				ldu			#p1ScoreTens
+				adca		b,u
+				daa
+				sta			b,u
+        bcc     1$
+        ldu			#p1ScoreThousands
+        lda     b,u
+        adca    #0
+        daa
+        sta     b,u
+        anda    #0x0F                                   ; another 10,000?
+        bne     1$                                			; no, skip
+        lda     #0xB0
+        sta     *timerBonusShipSound
+        tfr			dp,a
+        ldb			#numShipsP1
+        tfr			d,u
+        ldb     *curPlayer
+        inc     b,u                            					; extra ship!
+1$:     rts
+
 ; $73C4
 display_high_score_table:
 				rts
+
+; $745A
+get_inactive_asteroid_cnt:
+        ldx     #26                                     ; 27 asteroids
+
+get_inactive_object_cnt:
+        lda     P1RAM,X                                 ; get object status
+        beq     1$                             					; zero, exit
+        leax		-1,x                                    ; next object
+        cmpx		#0
+        bpl     get_inactive_object_cnt                 ; loop thru table
+1$:     rts
 				
 ; $7465
 display_exploding_ship:
@@ -1447,6 +1577,68 @@ locret_7554:
 ; $7555
 handle_sounds:
 				rts
+
+; $75EC
+; X=offset to object that hit asteroid, Y=offset to asteroid
+; - potentially adds 2 more asteroids to the table
+;   but note that the original asteroid object entry remains
+handle_asteroid_hit:
+        pshs		x																				; save object index
+        lda     #80
+        sta     asteroid_hit_timer
+        lda     P1RAM,Y                                 ; asteroid status
+        anda    #0x78                              			; bits 6-3 only
+        sta     *byte_E
+        lda     P1RAM,Y                                 ; asteroid status
+        anda    #7                                      ; bits 2-0 only
+        lsra                                           	; next size down
+        tfr			a,b                                     ; asteroid size
+        beq     1$                                			; small, skip
+        ora     *byte_E
+1$:     sta     P1RAM,Y																	; update asteroid status
+        lda     *numPlayers                             ; real game?
+        beq     handle_asteroid_split                   ; no, skip
+        cmpx		#0																			; object index
+        beq     add_asteroid_score                      ; ship!
+        cmpx    #4                                      ; player shot?
+        bcs     handle_asteroid_split                   ; no, skip score
+
+add_asteroid_score:                                                             
+        lda     asteroid_score_tbl,X										; score for this asteroid
+        ldb     *curPlayer_x2                           ; offset to score for player
+        CLC
+        jsr     add_A_to_score                          ; add asteroid score
+
+handle_asteroid_split:                                                          
+        ;ldx     P1RAM,Y																	; asteroid status
+        beq     1$                                			; small, no split, exit
+        jsr     get_inactive_asteroid_cnt               ; X = empty slot
+        bmi     1$                                			; no slots, exit
+        inc     currentNumberOfAsteroids                ; add another asteroid
+        jsr     clone_asteroid_rnd_shape
+        jsr     set_asteroid_velocity
+        lda     asteroid_Vh,X
+        anda    #0x1F
+        asla                                            ; twice as fast
+        eora    asteroid_PLh,X
+        sta     asteroid_PLh,X
+        jsr     get_inactive_object_cnt                 ; any slots left?
+        bmi     1$                                			; no, exit
+        inc     currentNumberOfAsteroids                ; add another asteroid
+        jsr     clone_asteroid_rnd_shape
+        jsr     set_asteroid_velocity
+        lda     asteroid_Vv,X
+        anda    #0x1F
+        asla                                            ; twice as fast
+        eora    asteroid_PLv,X
+        sta     asteroid_PLv,X
+1$:     puls		x																				; restore object index
+        rts
+
+asteroid_score_tbl:
+        .byte 	0x10                                    ; 100pts (small asteroid)
+        .byte   5                                       ; 50pts (medium asteroid)
+        .byte   2                                       ; 20pts (large asteroid)
 				
 ; $765C
 check_high_score:
