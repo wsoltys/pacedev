@@ -570,7 +570,7 @@ update_shot_direction:
         ; *** these need to change
         ldy     #3
         ldx     #1
-        stx     byte_E
+        stx     *byte_E
         jmp     find_free_shot_slot
 
 unk_6CCF:                       
@@ -847,7 +847,7 @@ check_thrust:
 1$:			asla
 				adda		*ship_thrust_dH													; add COS term to dH
 				exg			a,b																			; B=new dH, A=0/-1
-				adda		ship_Vh																	; if cos<0 Vh--
+				adca		ship_Vh																	; if cos<0 Vh--
 				jsr			limit_thrust
 				sta			ship_Vh
 				stb			*ship_thrust_dH
@@ -859,7 +859,7 @@ check_thrust:
 2$:			asla
 				adda		*ship_thrust_dV
 				exg			a,b																			; B=dV, A=0/-1
-				adda		ship_Vv
+				adca		ship_Vv
 				jsr			limit_thrust
 				sta			ship_Vv
 				stb			*ship_thrust_dV

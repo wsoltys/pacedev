@@ -479,7 +479,6 @@ dvg_cur:
 				CLC
 				rts
 
-
 char_SPACE:
     .byte $%00000000
     .byte $%00000000
@@ -1271,12 +1270,276 @@ dvg_asteroid:
 				CLC
 				rts
 
+ship_0:
+    .byte $%00000000
+    .byte $%11000000
+    .byte $%01111000
+    .byte $%01000110
+    .byte $%01111000
+    .byte $%11000000
+    .byte $%00000000
+
+ship_1:
+    .byte $%00000000
+    .byte $%11110000
+    .byte $%01001110
+    .byte $%01001100
+    .byte $%01110000
+    .byte $%01000000
+    .byte $%00000000
+
+ship_2:
+    .byte $%00000000
+    .byte $%00011110
+    .byte $%11100100
+    .byte $%00101000
+    .byte $%00010000
+    .byte $%00100000
+    .byte $%00000000
+
+ship_3:
+    .byte $%00000110
+    .byte $%00011100
+    .byte $%01100100
+    .byte $%11101000
+    .byte $%00011000
+    .byte $%00010000
+    .byte $%00010000
+
+ship_4:
+    .byte $%00000100
+    .byte $%00001100
+    .byte $%00010100
+    .byte $%00111000
+    .byte $%01001000
+    .byte $%00001000
+    .byte $%00001000
+
+ship_5:
+    .byte $%00001000
+    .byte $%00011000
+    .byte $%00011000
+    .byte $%00101000
+    .byte $%00100100
+    .byte $%01111100
+    .byte $%00000100
+
+ship_6:
+    .byte $%00010000
+    .byte $%00010000
+    .byte $%00101000
+    .byte $%00101000
+    .byte $%00101000
+    .byte $%01111100
+    .byte $%01000100
+
+ship_7:
+    .byte $%00100000
+    .byte $%00110000
+    .byte $%00110000
+    .byte $%01001000
+    .byte $%01001000
+    .byte $%01111100
+    .byte $%01000000
+
+ship_8:
+    .byte $%01000000
+    .byte $%01100000
+    .byte $%01010000
+    .byte $%01001000
+    .byte $%00110100
+    .byte $%00100000
+    .byte $%00100000
+
+ship_9:
+    .byte $%11000000
+    .byte $%10110000
+    .byte $%01001100
+    .byte $%01001110
+    .byte $%00110000
+    .byte $%00110000
+    .byte $%00010000
+
+ship_10:
+    .byte $%00000000
+    .byte $%11110000
+    .byte $%01001110
+    .byte $%00110000
+    .byte $%00010000
+    .byte $%00001000
+    .byte $%00000000
+
+ship_11:
+    .byte $%00000000
+    .byte $%00011110
+    .byte $%11100100
+    .byte $%01100100
+    .byte $%00011100
+    .byte $%00000100
+    .byte $%00000000
+
+ship_12:
+    .byte $%00000000
+    .byte $%00000110
+    .byte $%00111100
+    .byte $%11000100
+    .byte $%00111100
+    .byte $%00000110
+    .byte $%00000000
+
+ship_13:
+    .byte $%00000100
+    .byte $%00011100
+    .byte $%01100100
+    .byte $%11110100
+    .byte $%00001110
+    .byte $%00000000
+    .byte $%00000000
+
+ship_14:
+    .byte $%00001000
+    .byte $%00010000
+    .byte $%00110000
+    .byte $%01011110
+    .byte $%11100000
+    .byte $%00000000
+    .byte $%00000000
+
+ship_15:
+    .byte $%00010000
+    .byte $%00110000
+    .byte $%00110000
+    .byte $%01001110
+    .byte $%01011000
+    .byte $%11100000
+    .byte $%10000000
+
+ship_16:
+    .byte $%00100000
+    .byte $%00100000
+    .byte $%00110100
+    .byte $%01001000
+    .byte $%01010000
+    .byte $%01100000
+    .byte $%01000000
+
+ship_17:
+    .byte $%01000000
+    .byte $%01111100
+    .byte $%01001000
+    .byte $%01001000
+    .byte $%00110000
+    .byte $%00110000
+    .byte $%00100000
+
+ship_18:
+    .byte $%01000100
+    .byte $%01111100
+    .byte $%00101000
+    .byte $%00101000
+    .byte $%00101000
+    .byte $%00010000
+    .byte $%00010000
+
+ship_19:
+    .byte $%00000100
+    .byte $%01111100
+    .byte $%00100100
+    .byte $%00101000
+    .byte $%00011000
+    .byte $%00011000
+    .byte $%00001000
+
+ship_20:
+    .byte $%00001000
+    .byte $%00001000
+    .byte $%01011000
+    .byte $%00101000
+    .byte $%00010100
+    .byte $%00001100
+    .byte $%00000100
+
+ship_21:
+    .byte $%00010000
+    .byte $%00010000
+    .byte $%00011000
+    .byte $%11101000
+    .byte $%00110100
+    .byte $%00001100
+    .byte $%00000010
+
+ship_22:
+    .byte $%00000000
+    .byte $%00100000
+    .byte $%00010000
+    .byte $%00101000
+    .byte $%11110100
+    .byte $%00001110
+    .byte $%00000000
+
+ship_23:
+    .byte $%00000000
+    .byte $%01000000
+    .byte $%01110000
+    .byte $%01001100
+    .byte $%01011110
+    .byte $%11100000
+    .byte $%00000000
+
+ship_tbl:
+		.word ship_0,  ship_1,  ship_2,  ship_3
+		.word ship_4,  ship_5,  ship_6,  ship_7
+		.word ship_8,  ship_9,  ship_10, ship_11
+		.word ship_12, ship_13, ship_14, ship_15
+		.word ship_16, ship_17, ship_18, ship_19
+		.word ship_20, ship_21, ship_22, ship_23
+		
 erase_ship:
 				jsr			erase_chr
 				rts
 				
 dvg_ship:
-				jmp			dvg_life
+				lda			1,y											; direction
+				clrb														; D = direction
+				lsra
+				rorb
+				lsra
+				rorb
+				lsra
+				rorb														; D = (0..31)
+				std			*0xD8
+				lsra
+				rorb														; D = (0..15)
+				addd		*0xD8										; A = dir (0..47) = (0..23)*2
+				anda		#0x3E
+				ldu			#ship_tbl
+				ldu			a,u											; address of BMP				
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			*0x05										; pixel offset (0-7)
+				lsla														; x2
+				adda		#>shift_tbl
+				ldb			#0x80
+				std			*0xD0										; offset
+				inca
+				std			*0xD2										; offset2
+				lda			#7
+				sta			*0xD4										; lines
+				ldy			*0xC2
+1$:			ldb			,u+											; sprite data byte
+				ldx			*0xD0
+				lda			b,x											; shifted data bye
+				ora			,y
+				sta			,y
+				ldx			*0xD2
+				lda			b,x
+				ora			1,y
+				sta			1,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				CLC
+				rts
 				
 large_saucer_bmp:
     .byte $%00000011, $%11000000
