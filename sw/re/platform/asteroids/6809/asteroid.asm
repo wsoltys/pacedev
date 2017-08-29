@@ -479,7 +479,8 @@ handle_active_shot:
 6$:     bne     8$
         adda    #0x12
         ldx     saucer_Sts
-        dex
+        leax		-1,x
+        cmpx		#0
         beq     7$
         adda    #0x12
 7$:     ldx     #1
@@ -538,9 +539,7 @@ handle_object_hit:
         bne     3$
         lda     #129
         sta     shipSpawnTimer
-        tfr			dp,a
-        ldb			#numShipsP1
-        tfr			d,x
+        ldx			#dp_base+numShipsP1
         ldb     *curPlayer
         dec     b,x                            					; dec number of ships
         ldx     #0                                      ; offset to player ship
@@ -576,9 +575,7 @@ explode_asteroid:
         rts
 
 ship_hit_asteroid:                                                              
-        tfr			dp,a
-				ldb			#numShipsP1
-				tfr			d,u
+				ldu			#dp_base+numShipsP1
         ldb     *curPlayer
         dec     b,u                            					; lose a ship
         lda     #129                                    ; init spawn timer
@@ -988,9 +985,7 @@ loc_706F:
 				sta			ship_Sts
 				ldb			#0x3E
 				stb			*timerExplosionSound
-				tfr			dp,a
-				ldb			#numShipsP1
-				tfr			d,x
+				ldx			#dp_base+numShipsP1
 				ldb			*curPlayer
 				dec			b,x																			; dec number of	ships
 				lda			#129
@@ -1480,9 +1475,7 @@ add_A_to_score:
         bne     1$                                			; no, skip
         lda     #0xB0
         sta     *timerBonusShipSound
-        tfr			dp,a
-        ldb			#numShipsP1
-        tfr			d,u
+        ldu			#dp_base+numShipsP1
         ldb     *curPlayer
         inc     b,u                            					; extra ship!
 1$:     rts
