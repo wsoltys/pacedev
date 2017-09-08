@@ -16,7 +16,7 @@ MAKEFILE = makefile
 ASFLAGS = -l -o -s
 LDFLAGS = -i -u -m
 
-OBJS = $(TARGET).rel swsdk.rel
+OBJS = $(TARGET).rel swsdk.rel cpuvecs.rel
 
 all: $(TARGET).rom
 
