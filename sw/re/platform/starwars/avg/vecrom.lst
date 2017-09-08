@@ -1,0 +1,1890 @@
+
+3002:       loc_3002:                                         (XREF:3E3E)
+3002: B8 7D           JSRL      print_space                       ; ' '
+3004: B8 79           JSRL      print_0_O                         ; '0'
+3006: B8 B3           JSRL      print_1                           ; '1'
+3008: B8 B9           JSRL      print_2                           ; '2'
+300A: B8 BD           JSRL      print_3                           ; '3'
+300C: B8 C5           JSRL      print_4                           ; '4'
+300E: B8 8F           JSRL      print_5_S                         ; '5'
+3010: B8 CA           JSRL      print_6                           ; '6'
+3012: B8 CF           JSRL      print_7                           ; '7'
+3014: B8 D4           JSRL      print_8                           ; '8'
+3016: B8 D7           JSRL      print_9                           ; '9'
+3018: B8 2F           JSRL      print_A                           ; 'A'
+301A: B8 37           JSRL      print_B                           ; 'B'
+301C: B8 41           JSRL      print_C                           ; 'C'
+301E: B8 45           JSRL      print_D                           ; 'D'
+3020: B8 4C           JSRL      print_E                           ; 'E'
+3022: B8 4E           JSRL      print_F                           ; 'F'
+3024: B8 55           JSRL      print_G                           ; 'G'
+3026: B8 5A           JSRL      print_H                           ; 'H'
+3028: B8 5F           JSRL      print_I                           ; 'I'
+302A: B8 64           JSRL      print_J                           ; 'J'
+302C: B8 68           JSRL      print_K                           ; 'K'
+302E: B8 6E           JSRL      print_L                           ; 'L'
+3030: B8 72           JSRL      print_M                           ; 'M'
+3032: B8 76           JSRL      print_N                           ; 'N'
+3034: B8 79           JSRL      print_0_O                         ; 'O'
+3036: B8 7F           JSRL      print_P                           ; 'P'
+3038: B8 83           JSRL      print_Q                           ; 'Q'
+303A: B8 8B           JSRL      print_R                           ; 'R'
+303C: B8 8F           JSRL      print_5_S                         ; 'S'
+303E: B8 94           JSRL      print_T                           ; 'T'
+3040: B8 96           JSRL      print_U                           ; 'U'
+3042: B8 9C           JSRL      print_V                           ; 'V'
+3044: B8 A0           JSRL      print_W                           ; 'W'
+3046: B8 A5           JSRL      print_X                           ; 'X'
+3048: B8 A9           JSRL      print_Y                           ; 'Y'
+304A: B8 AF           JSRL      print_Z                           ; 'Z'
+304C: B8 E6           JSRL      print_quote                       ; '''
+304E: B8 EA           JSRL      print_comma                       ; ','
+3050: B8 DC           JSRL      print_period                      ; '.'
+3052: B8 DF           JSRL      print_colon                       ; ':'
+3054: B8 70           JSRL      print_underscore                  ; '_'
+3056: B8 F3           JSRL      print_one_half                    ; '1/2'
+3058: B8 FF           JSRL      print_copyright                   ; '(c)'
+305A: B9 0F           JSRL      print_dash                        ; '-'
+305C: C0 00           RTSL                                        
+
+305E:       print_A:                                          (XREF:33FC)
+305E: 48 E0           SVEC      dX=   0, dY=   8, Z=7             
+3060: 44 E4           SVEC      dX=   4, dY=   4, Z=7             
+3062: 5C E4           SVEC      dX=   4, dY=  -4, Z=7             
+3064: 58 E0           SVEC      dX=   0, dY=  -8, Z=7             
+3066: 45 18           SVEC      dX=  -8, dY=   5, Z=0             
+3068: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+306A: 5B 04           SVEC      dX=   4, dY=  -5, Z=0             
+306C: C0 00           RTSL                                        
+
+306E:       print_B:                                          (XREF:301A)
+306E: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+3070: 40 E5           SVEC      dX=   5, dY=   0, Z=7             
+3072: 5D E2           SVEC      dX=   2, dY=  -3, Z=7             
+3074: 5D FE           SVEC      dX=  -2, dY=  -3, Z=7             
+3076: 40 FB           SVEC      dX=  -5, dY=   0, Z=7             
+3078: 40 06           SVEC      dX=   6, dY=   0, Z=0             
+307A: 5D E2           SVEC      dX=   2, dY=  -3, Z=7             
+307C: 5D FE           SVEC      dX=  -2, dY=  -3, Z=7             
+307E: 40 FA           SVEC      dX=  -6, dY=   0, Z=7             
+3080: F8 7D           JMPL      print_space                       
+
+3082:       print_C:                                          (XREF:33EC)
+3082: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+3084: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3086: 54 18           SVEC      dX=  -8, dY= -12, Z=0             
+3088: F8 70           JMPL      print_underscore                  
+
+308A:       print_D:                                          (XREF:3414)
+308A: 40 E5           SVEC      dX=   5, dY=   0, Z=7             
+308C: 44 E3           SVEC      dX=   3, dY=   4, Z=7             
+308E: 44 E0           SVEC      dX=   0, dY=   4, Z=7             
+3090: 44 FD           SVEC      dX=  -3, dY=   4, Z=7             
+3092: 40 FB           SVEC      dX=  -5, dY=   0, Z=7             
+3094: 54 E0           SVEC      dX=   0, dY= -12, Z=7             
+3096: F8 7D           JMPL      print_space                       
+
+3098:       print_E:                                          (XREF:3410)
+3098: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+309A: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+
+309C:       print_F:                                          (XREF:3022)
+309C: 46 00           SVEC      dX=   0, dY=   6, Z=0             
+309E: 40 E6           SVEC      dX=   6, dY=   0, Z=7             
+30A0: 5A 1A           SVEC      dX=  -6, dY=  -6, Z=0             
+
+30A2:       loc_30A2:                                         (XREF:3114)
+30A2: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+30A4: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+30A6: F8 9A           JMPL      loc_3134                          
+30A8: C0 00           RTSL                                        
+
+30AA:       print_G:                                          (XREF:3024)
+30AA: 45 04           SVEC      dX=   4, dY=   5, Z=0             
+30AC: 40 E4           SVEC      dX=   4, dY=   0, Z=7             
+30AE: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+30B0: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+30B2: F8 41           JMPL      print_C                           
+
+30B4:       print_H:                                          (XREF:340C)
+30B4: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+30B6: 5A 00           SVEC      dX=   0, dY=  -6, Z=0             
+30B8: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+30BA: 5A 00           SVEC      dX=   0, dY=  -6, Z=0             
+30BC: F8 99           JMPL      loc_3132                          
+
+30BE:       print_I:                                          (XREF:340E)
+30BE: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+30C0: 4C 18           SVEC      dX=  -8, dY=  12, Z=0             
+
+30C2:       loc_30C2:                                         (XREF:312A)
+30C2: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+30C4: 40 1C           SVEC      dX=  -4, dY=   0, Z=0             
+30C6: F8 B6           JMPL      loc_316C                          
+
+30C8:       print_J:                                          (XREF:302A)
+30C8: 44 00           SVEC      dX=   0, dY=   4, Z=0             
+30CA: 5C E4           SVEC      dX=   4, dY=  -4, Z=7             
+30CC: 40 E4           SVEC      dX=   4, dY=   0, Z=7             
+30CE: F8 99           JMPL      loc_3132                          
+
+30D0:       print_K:                                          (XREF:302C)
+30D0: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+30D2: 5A 00           SVEC      dX=   0, dY=  -6, Z=0             
+30D4: 46 E8           SVEC      dX=   8, dY=   6, Z=7             
+30D6: 5A 18           SVEC      dX=  -8, dY=  -6, Z=0             
+30D8: 5A E8           SVEC      dX=   8, dY=  -6, Z=7             
+30DA: F8 D2           JMPL      loc_31A4                          
+
+30DC:       print_L:                                          (XREF:3412)
+30DC: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+30DE: 54 E0           SVEC      dX=   0, dY= -12, Z=7             
+
+30E0:       print_underscore:                                 (XREF:3054)
+30E0: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+30E2: F8 D2           JMPL      loc_31A4                          
+
+30E4:       print_M:                                          (XREF:3030)
+30E4: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+30E6: 5C E4           SVEC      dX=   4, dY=  -4, Z=7             
+30E8: 44 E4           SVEC      dX=   4, dY=   4, Z=7             
+30EA: F8 D1           JMPL      loc_31A2                          
+
+30EC:       print_N:                                          (XREF:3032)
+30EC: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+30EE: 54 E8           SVEC      dX=   8, dY= -12, Z=7             
+30F0: F8 99           JMPL      loc_3132                          
+
+30F2:       print_0_O:                                        (XREF:33EE)
+30F2: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+30F4: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+
+30F6:       loc_30F6:                                         (XREF:3104)
+30F6: 54 18           SVEC      dX=  -8, dY= -12, Z=0             
+30F8: F8 51           JMPL      loc_30A2                          
+
+30FA:       print_space:                                      (XREF:3002)
+30FA: 40 0C           SVEC      dX=  12, dY=   0, Z=0             
+30FC: C0 00           RTSL                                        
+
+30FE:       print_P:                                          (XREF:3036)
+30FE: 46 00           SVEC      dX=   0, dY=   6, Z=0             
+3100: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3102: 46 E0           SVEC      dX=   0, dY=   6, Z=7             
+3104: F8 7B           JMPL      loc_30F6                          
+
+3106:       print_Q:                                          (XREF:3038)
+3106: 44 04           SVEC      dX=   4, dY=   4, Z=0             
+3108: 5C E4           SVEC      dX=   4, dY=  -4, Z=7             
+310A: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+310C: 40 E4           SVEC      dX=   4, dY=   0, Z=7             
+310E: 44 E4           SVEC      dX=   4, dY=   4, Z=7             
+3110: 48 E0           SVEC      dX=   0, dY=   8, Z=7             
+3112: 54 18           SVEC      dX=  -8, dY= -12, Z=0             
+3114: F8 51           JMPL      loc_30A2                          
+
+3116:       print_R:                                          (XREF:33F0)
+3116: 46 00           SVEC      dX=   0, dY=   6, Z=0             
+3118: 5A E8           SVEC      dX=   8, dY=  -6, Z=7             
+311A: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+311C: F8 7F           JMPL      print_P                           
+
+311E:       print_5_S:                                        (XREF:340A)
+311E: 40 08           SVEC      dX=   8, dY=   0, Z=0             
+3120: 46 E0           SVEC      dX=   0, dY=   6, Z=7             
+3122: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+3124: 46 E0           SVEC      dX=   0, dY=   6, Z=7             
+3126: F8 C0           JMPL      loc_3180                          
+
+3128:       print_T:                                          (XREF:303E)
+3128: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+312A: F8 61           JMPL      loc_30C2                          
+
+312C:       print_U:                                          (XREF:3040)
+312C: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+312E: 54 E0           SVEC      dX=   0, dY= -12, Z=7             
+3130: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+
+3132:       loc_3132:                                         (XREF:3148)
+3132: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+
+3134:       loc_3134:                                         (XREF:315C)
+3134: 54 04           SVEC      dX=   4, dY= -12, Z=0             
+3136: C0 00           RTSL                                        
+
+3138:       print_V:                                          (XREF:33FE)
+3138: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+313A: 54 E4           SVEC      dX=   4, dY= -12, Z=7             
+313C: 4C E4           SVEC      dX=   4, dY=  12, Z=7             
+313E: F8 9A           JMPL      loc_3134                          
+
+3140:       print_W:                                          (XREF:33FA)
+3140: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+3142: 54 E0           SVEC      dX=   0, dY= -12, Z=7             
+3144: 44 E4           SVEC      dX=   4, dY=   4, Z=7             
+3146: 5C E4           SVEC      dX=   4, dY=  -4, Z=7             
+3148: F8 99           JMPL      loc_3132                          
+
+314A:       print_X:                                          (XREF:3046)
+314A: 4C E8           SVEC      dX=   8, dY=  12, Z=7             
+314C: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+314E: 54 E8           SVEC      dX=   8, dY= -12, Z=7             
+3150: F8 D2           JMPL      loc_31A4                          
+
+3152:       print_Y:                                          (XREF:3048)
+3152: 40 04           SVEC      dX=   4, dY=   0, Z=0             
+3154: 48 E0           SVEC      dX=   0, dY=   8, Z=7             
+3156: 44 FC           SVEC      dX=  -4, dY=   4, Z=7             
+3158: 5C 04           SVEC      dX=   4, dY=  -4, Z=0             
+315A: 44 E4           SVEC      dX=   4, dY=   4, Z=7             
+315C: F8 9A           JMPL      loc_3134                          
+
+315E:       print_Z:                                          (XREF:304A)
+315E: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+3160: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3162: 54 F8           SVEC      dX=  -8, dY= -12, Z=7             
+3164: F8 70           JMPL      print_underscore                  
+
+3166:       print_1:                                          (XREF:3006)
+3166: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3168: 4A 1A           SVEC      dX=  -6, dY=  10, Z=0             
+316A: 42 E2           SVEC      dX=   2, dY=   2, Z=7             
+
+316C:       loc_316C:                                         (XREF:30C6)
+316C: 54 E0           SVEC      dX=   0, dY= -12, Z=7             
+
+316E:       loc_316E:                                         (XREF:31CA)
+316E: 40 08           SVEC      dX=   8, dY=   0, Z=0             
+3170: C0 00           RTSL                                        
+
+3172:       print_2:                                          (XREF:3008)
+3172: 46 E0           SVEC      dX=   0, dY=   6, Z=7             
+3174: 40 08           SVEC      dX=   8, dY=   0, Z=0             
+3176: 46 E0           SVEC      dX=   0, dY=   6, Z=7             
+3178: F8 BF           JMPL      loc_317E                          
+
+317A:       print_3:                                          (XREF:300A)
+317A: 40 08           SVEC      dX=   8, dY=   0, Z=0             
+
+317C:       loc_317C:                                         (XREF:31AC)
+317C: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+
+317E:       loc_317E:                                         (XREF:3178)
+317E: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+
+3180:       loc_3180:                                         (XREF:3126)
+3180: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3182: 5A 18           SVEC      dX=  -8, dY=  -6, Z=0             
+3184: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3186: 5A 18           SVEC      dX=  -8, dY=  -6, Z=0             
+3188: F8 70           JMPL      print_underscore                  
+
+318A:       print_4:                                          (XREF:300C)
+318A: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+318C: 5A E0           SVEC      dX=   0, dY=  -6, Z=7             
+318E: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3190: 46 00           SVEC      dX=   0, dY=   6, Z=0             
+3192: F8 D1           JMPL      loc_31A2                          
+
+3194:       print_6:                                          (XREF:3010)
+3194: 46 00           SVEC      dX=   0, dY=   6, Z=0             
+3196: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3198: 5A E0           SVEC      dX=   0, dY=  -6, Z=7             
+319A: 40 18           SVEC      dX=  -8, dY=   0, Z=0             
+319C: F8 6E           JMPL      print_L                           
+
+319E:       print_7:                                          (XREF:3012)
+319E: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+
+31A0:       loc_31A0:                                         (XREF:31B6)
+31A0: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+
+31A2:       loc_31A2:                                         (XREF:3192)
+31A2: 54 E0           SVEC      dX=   0, dY= -12, Z=7             
+
+31A4:       loc_31A4:                                         (XREF:3150)
+31A4: 40 04           SVEC      dX=   4, dY=   0, Z=0             
+31A6: C0 00           RTSL                                        
+
+31A8:       print_8:                                          (XREF:3014)
+31A8: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+31AA: 54 08           SVEC      dX=   8, dY= -12, Z=0             
+31AC: F8 BE           JMPL      loc_317C                          
+
+31AE:       print_9:                                          (XREF:3016)
+31AE: 4C 00           SVEC      dX=   0, dY=  12, Z=0             
+31B0: 5A E0           SVEC      dX=   0, dY=  -6, Z=7             
+31B2: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+31B4: 46 18           SVEC      dX=  -8, dY=   6, Z=0             
+31B6: F8 D0           JMPL      loc_31A0                          
+
+31B8:       print_period:                                     (XREF:3050)
+31B8: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+31BC: F8 7D           JMPL      print_space                       
+
+31BE:       print_colon:                                      (XREF:3052)
+31BE: 45 04           SVEC      dX=   4, dY=   5, Z=0             
+31C0: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+31C4: 5B 00           SVEC      dX=   0, dY=  -5, Z=0             
+31C6: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+31CA: F8 B7           JMPL      loc_316E                          
+
+31CC:       print_quote:                                      (XREF:304C)
+31CC: 4C 05           SVEC      dX=   5, dY=  12, Z=0             
+31CE: B8 EE           JSRL      sub_31DC                          
+31D0: 54 07           SVEC      dX=   7, dY= -12, Z=0             
+31D2: C0 00           RTSL                                        
+
+31D4:       print_comma:                                      (XREF:304E)
+31D4: 40 02           SVEC      dX=   2, dY=   0, Z=0             
+31D6: B8 EE           JSRL      sub_31DC                          
+31D8: 40 0A           SVEC      dX=  10, dY=   0, Z=0             
+31DA: C0 00           RTSL                                        
+
+31DC:       sub_31DC:                                         (XREF:31D6)
+31DC: 5B FE           SVEC      dX=  -2, dY=  -5, Z=7             
+31DE: 45 E3           SVEC      dX=   3, dY=   5, Z=7             
+31E0: 00 00 FF FE     VCTR      dX=  -1, dY=   0, Z=7             
+31E4: C0 00           RTSL                                        
+
+31E6:       print_one_half:                                   (XREF:3056)
+31E6: 48 02           SVEC      dX=   2, dY=   8, Z=0             
+31E8: 44 E0           SVEC      dX=   0, dY=   4, Z=7             
+31EA: 54 1E           SVEC      dX=  -2, dY= -12, Z=0             
+31EC: 4C E6           SVEC      dX=   6, dY=  12, Z=7             
+31EE: 5A 1E           SVEC      dX=  -2, dY=  -6, Z=0             
+31F0: 40 E4           SVEC      dX=   4, dY=   0, Z=7             
+31F2: 5D E0           SVEC      dX=   0, dY=  -3, Z=7             
+31F4: 40 FB           SVEC      dX=  -5, dY=   0, Z=7             
+31F6: 5D E0           SVEC      dX=   0, dY=  -3, Z=7             
+31F8: 40 E5           SVEC      dX=   5, dY=   0, Z=7             
+31FA: 40 04           SVEC      dX=   4, dY=   0, Z=0             
+31FC: C0 00           RTSL                                        
+
+31FE:       print_copyright:                                  (XREF:3058)
+31FE: 5D 04           SVEC      dX=   4, dY=  -3, Z=0             
+3200: 45 FC           SVEC      dX=  -4, dY=   5, Z=7             
+3202: 48 E0           SVEC      dX=   0, dY=   8, Z=7             
+3204: 45 E4           SVEC      dX=   4, dY=   5, Z=7             
+3206: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3208: 5B 1F           SVEC      dX=  -1, dY=  -5, Z=0             
+320A: 40 FB           SVEC      dX=  -5, dY=   0, Z=7             
+320C: 57 E0           SVEC      dX=   0, dY=  -9, Z=7             
+320E: 40 E5           SVEC      dX=   5, dY=   0, Z=7             
+3210: 5C 19           SVEC      dX=  -7, dY=  -4, Z=0             
+3212: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3214: 45 E4           SVEC      dX=   4, dY=   5, Z=7             
+3216: 48 E0           SVEC      dX=   0, dY=   8, Z=7             
+3218: 45 FC           SVEC      dX=  -4, dY=   5, Z=7             
+321A: 51 00           SVEC      dX=   0, dY= -15, Z=0             
+321C: C0 00           RTSL                                        
+
+321E:       print_dash:                                       (XREF:305A)
+321E: 46 01           SVEC      dX=   1, dY=   6, Z=0             
+3220: 40 E6           SVEC      dX=   6, dY=   0, Z=7             
+3222: 5A 05           SVEC      dX=   5, dY=  -6, Z=0             
+3224: C0 00           RTSL                                        
+3226: 5D 1E           SVEC      dX=  -2, dY=  -3, Z=0             
+3228: 45 E1           SVEC      dX=   1, dY=   5, Z=7             
+322A: 5E 03           SVEC      dX=   3, dY=  -2, Z=0             
+322C: C0 00           RTSL                                        
+322E: 63 FF           COLOR     C=3, Z=255                        
+3230: C0 00           RTSL                                        
+3232: 61 FF           COLOR     C=1, Z=255                        
+3234: C0 00           RTSL                                        
+3236: 61 CC           COLOR     C=1, Z=204                        
+3238: C0 00           RTSL                                        
+323A: 61 80           COLOR     C=1, Z=128                        
+323C: C0 00           RTSL                                        
+323E: 61 40           COLOR     C=1, Z=64                         
+3240: C0 00           RTSL                                        
+3242: 61 00           COLOR     C=1, Z=0                          
+3244: C0 00           RTSL                                        
+3246: 61 00           COLOR     C=1, Z=0                          
+3248: C0 00           RTSL                                        
+324A: 61 00           COLOR     C=1, Z=0                          
+324C: C0 00           RTSL                                        
+324E: 63 FF           COLOR     C=3, Z=255                        
+3250: C0 00           RTSL                                        
+3252: 61 FF           COLOR     C=1, Z=255                        
+3254: C0 00           RTSL                                        
+3256: 61 CC           COLOR     C=1, Z=204                        
+3258: C0 00           RTSL                                        
+325A: 61 80           COLOR     C=1, Z=128                        
+325C: C0 00           RTSL                                        
+325E: 61 40           COLOR     C=1, Z=64                         
+3260: C0 00           RTSL                                        
+3262: 61 00           COLOR     C=1, Z=0                          
+3264: C0 00           RTSL                                        
+3266: 61 00           COLOR     C=1, Z=0                          
+3268: C0 00           RTSL                                        
+326A: 61 00           COLOR     C=1, Z=0                          
+326C: C0 00           RTSL                                        
+326E: 67 FF           COLOR     C=7, Z=255                        
+3270: F9 BF           JMPL      loc_337E                          
+3272: 67 FF           COLOR     C=7, Z=255                        
+3274: F9 C5           JMPL      loc_338A                          
+3276: 66 FF           COLOR     C=6, Z=255                        
+3278: F9 CE           JMPL      loc_339C                          
+327A: 66 FF           COLOR     C=6, Z=255                        
+327C: F9 E3           JMPL      circle                            
+327E: 00 B4 00 E1     VCTR      dX= 112, dY=  90, Z=0             
+3282: A0 16           JSRL      unk_2C                            
+3284: 1E C5 00 0F     VCTR      dX=   7, dY=-157, Z=0             
+3288: A0 16           JSRL      unk_2C                            
+328A: 1F 1F 1E B6     VCTR      dX=-165, dY=-112, Z=0             
+328E: A0 16           JSRL      unk_2C                            
+3290: 01 95 1F 6A     VCTR      dX= -75, dY= 202, Z=0             
+3294: A0 16           JSRL      unk_2C                            
+3296: 01 3B 00 96     VCTR      dX=  75, dY= 157, Z=0             
+329A: A0 16           JSRL      unk_2C                            
+329C: C0 00           RTSL                                        
+329E: 00 87 00 F0     VCTR      dX= 120, dY=  67, Z=0             
+32A2: A0 16           JSRL      unk_2C                            
+32A4: 1E 98 1F E2     VCTR      dX= -15, dY=-180, Z=0             
+32A8: A0 16           JSRL      unk_2C                            
+32AA: 1F 90 1E 98     VCTR      dX=-180, dY= -56, Z=0             
+32AE: A0 16           JSRL      unk_2C                            
+32B0: 01 D8 1F A6     VCTR      dX= -45, dY= 236, Z=0             
+32B4: A0 16           JSRL      unk_2C                            
+32B6: 00 F7 00 F0     VCTR      dX= 120, dY= 123, Z=0             
+32BA: A0 16           JSRL      unk_2C                            
+32BC: C0 00           RTSL                                        
+32BE: 01 51 00 78     VCTR      dX=  60, dY= 168, Z=0             
+32C2: A0 16           JSRL      unk_2C                            
+32C4: 1E DC 00 87     VCTR      dX=  67, dY=-146, Z=0             
+32C8: A0 16           JSRL      unk_2C                            
+32CA: 1E 98 1F 97     VCTR      dX= -52, dY=-180, Z=0             
+32CE: A0 16           JSRL      unk_2C                            
+32D0: 00 9E 1E 7A     VCTR      dX=-195, dY=  79, Z=0             
+32D4: A0 16           JSRL      unk_2C                            
+32D6: 01 AB 00 3C     VCTR      dX=  30, dY= 213, Z=0             
+32DA: A0 16           JSRL      unk_2C                            
+32DC: C0 00           RTSL                                        
+32DE: 1E 82 00 2D     VCTR      dX=  22, dY=-191, Z=0             
+32E2: A0 16           JSRL      unk_2C                            
+32E4: 01 51 00 D2     VCTR      dX= 105, dY= 168, Z=0             
+32E8: A0 16           JSRL      unk_2C                            
+32EA: 01 51 1F A6     VCTR      dX= -45, dY= 168, Z=0             
+32EE: A0 16           JSRL      unk_2C                            
+32F0: 00 17 1E D4     VCTR      dX=-150, dY=  11, Z=0             
+32F4: A0 16           JSRL      unk_2C                            
+32F6: 1E C5 1F 88     VCTR      dX= -60, dY=-157, Z=0             
+32FA: A0 16           JSRL      unk_2C                            
+32FC: C0 00           RTSL                                        
+32FE: B9 80           JSRL      crosshairs                        
+
+3300:       crosshairs:                                       (XREF:32FE)
+3300: 45 05           SVEC      dX=   5, dY=   5, Z=0             
+3302: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+3304: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3306: 40 E5           SVEC      dX=   5, dY=   0, Z=7             
+3308: 5B F6           SVEC      dX= -10, dY=  -5, Z=7             
+330A: 5B 1B           SVEC      dX=  -5, dY=  -5, Z=0             
+330C: 5B 05           SVEC      dX=   5, dY=  -5, Z=0             
+330E: 56 E5           SVEC      dX=   5, dY= -10, Z=7             
+3310: 45 E0           SVEC      dX=   0, dY=   5, Z=7             
+3312: 40 E5           SVEC      dX=   5, dY=   0, Z=7             
+3314: 45 F6           SVEC      dX= -10, dY=   5, Z=7             
+3316: 45 1B           SVEC      dX=  -5, dY=   5, Z=0             
+3318: 5B 1B           SVEC      dX=  -5, dY=  -5, Z=0             
+331A: 56 FB           SVEC      dX=  -5, dY= -10, Z=7             
+331C: 45 E0           SVEC      dX=   0, dY=   5, Z=7             
+331E: 40 FB           SVEC      dX=  -5, dY=   0, Z=7             
+3320: 45 EA           SVEC      dX=  10, dY=   5, Z=7             
+3322: 45 05           SVEC      dX=   5, dY=   5, Z=0             
+3324: 45 1B           SVEC      dX=  -5, dY=   5, Z=0             
+3326: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+3328: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+332A: 40 FB           SVEC      dX=  -5, dY=   0, Z=7             
+332C: 5B EA           SVEC      dX=  10, dY=  -5, Z=7             
+332E: 5B 05           SVEC      dX=   5, dY=  -5, Z=0             
+3330: 80 40           CNTR                                        
+3332: C0 00           RTSL                                        
+3334: 61 80           COLOR     C=1, Z=128                        
+3336: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+333A: C0 00           RTSL                                        
+333C: 80 40           CNTR                                        
+333E: 72 00           SCAL      BIN=2, LIN=0                      
+3340: 61 80           COLOR     C=1, Z=128                        
+3342: 02 28 01 E0     VCTR      dX= 240, dY= 276, Z=0             
+3346: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+334A: 1B B0 00 00     VCTR      dX=   0, dY=-552, Z=0             
+334E: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+3352: 00 00 1C 40     VCTR      dX=-480, dY=   0, Z=0             
+3356: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+335A: 04 50 00 00     VCTR      dX=   0, dY= 552, Z=0             
+335E: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+3362: 80 40           CNTR                                        
+3364: C0 00           RTSL                                        
+3366: 02 28 01 E0     VCTR      dX= 240, dY= 276, Z=0             
+336A: 1B B0 E0 00     VCTR      dX=   0, dY=-552, Z=7             
+336E: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3372: 04 50 E0 00     VCTR      dX=   0, dY= 552, Z=7             
+3376: 02 28 E3 C0     VCTR      dX= 480, dY= 276, Z=7             
+337A: 80 40           CNTR                                        
+337C: C0 00           RTSL                                        
+
+337E:       loc_337E:                                         (XREF:3270)
+337E: 00 00 1F F9     VCTR      dX=  -3, dY=   0, Z=0             
+3382: 40 E7           SVEC      dX=   7, dY=   0, Z=7             
+3384: 00 00 1F F9     VCTR      dX=  -3, dY=   0, Z=0             
+3388: C0 00           RTSL                                        
+
+338A:       loc_338A:                                         (XREF:3274)
+338A: 00 00 1F F9     VCTR      dX=  -3, dY=   0, Z=0             
+338E: 40 E7           SVEC      dX=   7, dY=   0, Z=7             
+3390: 00 07 1F F9     VCTR      dX=  -3, dY=   3, Z=0             
+3394: 59 E0           SVEC      dX=   0, dY=  -7, Z=7             
+3396: 00 07 00 00     VCTR      dX=   0, dY=   3, Z=0             
+339A: C0 00           RTSL                                        
+
+339C:       loc_339C:                                         (XREF:3278)
+339C: 00 00 1F F9     VCTR      dX=  -3, dY=   0, Z=0             
+33A0: 00 05 E0 02     VCTR      dX=   1, dY=   2, Z=7             
+33A4: 00 02 E0 05     VCTR      dX=   2, dY=   1, Z=7             
+33A8: 1F FE E0 05     VCTR      dX=   2, dY=  -1, Z=7             
+33AC: 1F FB E0 02     VCTR      dX=   1, dY=  -2, Z=7             
+33B0: 1F FB FF FE     VCTR      dX=  -1, dY=  -2, Z=7             
+33B4: 1F FE FF FB     VCTR      dX=  -2, dY=  -1, Z=7             
+33B8: 00 02 FF FB     VCTR      dX=  -2, dY=   1, Z=7             
+33BC: 00 05 FF FE     VCTR      dX=  -1, dY=   2, Z=7             
+33C0: 00 00 00 07     VCTR      dX=   3, dY=   0, Z=0             
+33C4: C0 00           RTSL                                        
+
+33C6:       circle:                                           (XREF:327C)
+33C6: 40 19           SVEC      dX=  -7, dY=   0, Z=0             
+33C8: 45 E2           SVEC      dX=   2, dY=   5, Z=7             
+33CA: 42 E5           SVEC      dX=   5, dY=   2, Z=7             
+33CC: 5E E5           SVEC      dX=   5, dY=  -2, Z=7             
+33CE: 5B E2           SVEC      dX=   2, dY=  -5, Z=7             
+33D0: 5B FE           SVEC      dX=  -2, dY=  -5, Z=7             
+33D2: 5E FB           SVEC      dX=  -5, dY=  -2, Z=7             
+33D4: 42 FB           SVEC      dX=  -5, dY=   2, Z=7             
+33D6: 45 FE           SVEC      dX=  -2, dY=   5, Z=7             
+33D8: 40 07           SVEC      dX=   7, dY=   0, Z=0             
+33DA: C0 00           RTSL                                        
+33DC: B9 EF           JSRL      sub_33DE                          
+
+33DE:       sub_33DE:                                         (XREF:33DC)
+33DE: 00 00 E0 00     VCTR      dX=   0, dY=   0, Z=7             
+33E2: C0 00           RTSL                                        
+
+33E4:       score_wave:                                       (XREF:3000)
+33E4: 64 80           COLOR     C=4, Z=128                        
+33E6: 02 10 1E 68     VCTR      dX=-204, dY= 264, Z=0             
+33EA: B8 8F           JSRL      print_5_S                         
+33EC: B8 41           JSRL      print_C                           
+33EE: B8 79           JSRL      print_0_O                         
+33F0: B8 8B           JSRL      print_R                           
+33F2: B8 4C           JSRL      print_E                           
+33F4: 80 40           CNTR                                        
+33F6: 02 10 01 80     VCTR      dX= 192, dY= 264, Z=0             
+33FA: B8 A0           JSRL      print_W                           
+33FC: B8 2F           JSRL      print_A                           
+33FE: B8 9C           JSRL      print_V                           
+3400: B8 4C           JSRL      print_E                           
+3402: 80 40           CNTR                                        
+3404: C0 00           RTSL                                        
+
+3406:       shield:                                           (XREF:3000)
+3406: 01 C8 1F B8     VCTR      dX= -36, dY= 228, Z=0             
+340A: B8 8F           JSRL      print_5_S                         
+340C: B8 5A           JSRL      print_H                           
+340E: B8 5F           JSRL      print_I                           
+3410: B8 4C           JSRL      print_E                           
+3412: B8 6E           JSRL      print_L                           
+3414: B8 45           JSRL      print_D                           
+3416: 80 40           CNTR                                        
+3418: C0 00           RTSL                                        
+
+341A:       upper_right_gun:                                  (XREF:3000)
+341A: 1F 98 01 E0     VCTR      dX= 240, dY= -52, Z=0             
+341E: 61 80           COLOR     C=1, Z=128                        
+3420: 00 1E 00 64     VCTR      dX=  50, dY=  15, Z=0             
+3424: 00 00 FF BA     VCTR      dX= -35, dY=   0, Z=7             
+3428: 56 F6           SVEC      dX= -10, dY= -10, Z=7             
+342A: 00 00 E0 5A     VCTR      dX=  45, dY=   0, Z=7             
+342E: 00 00 1F A6     VCTR      dX= -45, dY=   0, Z=0             
+3432: 56 E0           SVEC      dX=   0, dY= -10, Z=7             
+3434: 00 00 E0 5A     VCTR      dX=  45, dY=   0, Z=7             
+3438: 00 00 1F A6     VCTR      dX= -45, dY=   0, Z=0             
+343C: 56 EA           SVEC      dX=  10, dY= -10, Z=7             
+343E: 00 00 E0 46     VCTR      dX=  35, dY=   0, Z=7             
+3442: 64 80           COLOR     C=4, Z=128                        
+3444: 00 0A 1F B0     VCTR      dX= -40, dY=   5, Z=0             
+3448: 40 F6           SVEC      dX= -10, dY=   0, Z=7             
+344A: 45 FB           SVEC      dX=  -5, dY=   5, Z=7             
+344C: 40 EA           SVEC      dX=  10, dY=   0, Z=7             
+344E: 40 16           SVEC      dX= -10, dY=   0, Z=0             
+3450: 4A E0           SVEC      dX=   0, dY=  10, Z=7             
+3452: 40 EA           SVEC      dX=  10, dY=   0, Z=7             
+3454: 40 16           SVEC      dX= -10, dY=   0, Z=0             
+3456: 45 E5           SVEC      dX=   5, dY=   5, Z=7             
+3458: 40 EA           SVEC      dX=  10, dY=   0, Z=7             
+345A: 45 0A           SVEC      dX=  10, dY=   5, Z=0             
+345C: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+345E: 4A F1           SVEC      dX= -15, dY=  10, Z=7             
+3460: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+3464: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3466: 5B EA           SVEC      dX=  10, dY=  -5, Z=7             
+3468: 56 E5           SVEC      dX=   5, dY= -10, Z=7             
+346A: 1F C4 E0 00     VCTR      dX=   0, dY= -30, Z=7             
+346E: 56 FB           SVEC      dX=  -5, dY= -10, Z=7             
+3470: 5B F6           SVEC      dX= -10, dY=  -5, Z=7             
+3472: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3474: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+3478: 4A EF           SVEC      dX=  15, dY=  10, Z=7             
+347A: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+347C: 56 1B           SVEC      dX=  -5, dY= -10, Z=0             
+347E: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+3482: 56 F1           SVEC      dX= -15, dY= -10, Z=7             
+3484: 4A 0F           SVEC      dX=  15, dY=  10, Z=0             
+3486: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+3488: 00 3C E0 00     VCTR      dX=   0, dY=  30, Z=7             
+348C: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+348E: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+3492: 00 00 1F C4     VCTR      dX= -30, dY=   0, Z=0             
+3496: 4A F1           SVEC      dX= -15, dY=  10, Z=7             
+3498: 61 80           COLOR     C=1, Z=128                        
+349A: 1F C4 00 1E     VCTR      dX=  15, dY= -30, Z=0             
+349E: 00 00 FF CE     VCTR      dX= -25, dY=   0, Z=7             
+34A2: 5B FB           SVEC      dX=  -5, dY=  -5, Z=7             
+34A4: 5B E5           SVEC      dX=   5, dY=  -5, Z=7             
+34A6: 00 00 E0 32     VCTR      dX=  25, dY=   0, Z=7             
+34AA: 45 00           SVEC      dX=   0, dY=   5, Z=0             
+34AC: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+34B0: 80 40           CNTR                                        
+34B2: C0 00           RTSL                                        
+
+34B4:       lower_right_gun:                                  (XREF:3000)
+34B4: 1D D8 01 E0     VCTR      dX= 240, dY=-276, Z=0             
+34B8: 61 80           COLOR     C=1, Z=128                        
+34BA: 1F EC 00 64     VCTR      dX=  50, dY= -10, Z=0             
+34BE: 00 1E FF CE     VCTR      dX= -25, dY=  15, Z=7             
+34C2: 40 F6           SVEC      dX= -10, dY=   0, Z=7             
+34C4: 56 F6           SVEC      dX= -10, dY= -10, Z=7             
+34C6: 56 E0           SVEC      dX=   0, dY= -10, Z=7             
+34C8: 56 EA           SVEC      dX=  10, dY= -10, Z=7             
+34CA: 1F D8 E0 46     VCTR      dX=  35, dY= -20, Z=7             
+34CE: 45 00           SVEC      dX=   0, dY=   5, Z=0             
+34D0: 00 32 FF A6     VCTR      dX= -45, dY=  25, Z=7             
+34D4: 4A 00           SVEC      dX=   0, dY=  10, Z=0             
+34D6: 1F CE E0 5A     VCTR      dX=  45, dY= -25, Z=7             
+34DA: 4F 00           SVEC      dX=   0, dY=  15, Z=0             
+34DC: 00 28 FF BA     VCTR      dX= -35, dY=  20, Z=7             
+34E0: 64 80           COLOR     C=4, Z=128                        
+34E2: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+34E4: 5B FB           SVEC      dX=  -5, dY=  -5, Z=7             
+34E6: 56 E0           SVEC      dX=   0, dY= -10, Z=7             
+34E8: 5B E5           SVEC      dX=   5, dY=  -5, Z=7             
+34EA: 5B EA           SVEC      dX=  10, dY=  -5, Z=7             
+34EC: 45 1B           SVEC      dX=  -5, dY=   5, Z=0             
+34EE: 45 F6           SVEC      dX= -10, dY=   5, Z=7             
+34F0: 4A 00           SVEC      dX=   0, dY=  10, Z=0             
+34F2: 5B EA           SVEC      dX=  10, dY=  -5, Z=7             
+34F4: 45 05           SVEC      dX=   5, dY=   5, Z=0             
+34F6: 45 F6           SVEC      dX= -10, dY=   5, Z=7             
+34F8: 00 00 00 28     VCTR      dX=  20, dY=   0, Z=0             
+34FC: 4A E0           SVEC      dX=   0, dY=  10, Z=7             
+34FE: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+3500: 4A F1           SVEC      dX= -15, dY=  10, Z=7             
+3502: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+3506: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3508: 5B EA           SVEC      dX=  10, dY=  -5, Z=7             
+350A: 56 E5           SVEC      dX=   5, dY= -10, Z=7             
+350C: 1F C4 E0 00     VCTR      dX=   0, dY= -30, Z=7             
+3510: 56 FB           SVEC      dX=  -5, dY= -10, Z=7             
+3512: 5B F6           SVEC      dX= -10, dY=  -5, Z=7             
+3514: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3516: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+351A: 4A EF           SVEC      dX=  15, dY=  10, Z=7             
+351C: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+3520: 56 F1           SVEC      dX= -15, dY= -10, Z=7             
+3522: 4A 0F           SVEC      dX=  15, dY=  10, Z=0             
+3524: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+3526: 00 3C E0 00     VCTR      dX=   0, dY=  30, Z=7             
+352A: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+352C: 4A F1           SVEC      dX= -15, dY=  10, Z=7             
+352E: 56 0F           SVEC      dX=  15, dY= -10, Z=0             
+3530: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+3534: 61 80           COLOR     C=1, Z=128                        
+3536: 1F E2 1F C4     VCTR      dX= -30, dY= -15, Z=0             
+353A: 00 14 FF D8     VCTR      dX= -20, dY=  10, Z=7             
+353E: 40 F6           SVEC      dX= -10, dY=   0, Z=7             
+3540: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3542: 5B E5           SVEC      dX=   5, dY=  -5, Z=7             
+3544: 1F E2 E0 32     VCTR      dX=  25, dY= -15, Z=7             
+3548: 45 00           SVEC      dX=   0, dY=   5, Z=0             
+354A: 00 1E FF C4     VCTR      dX= -30, dY=  15, Z=7             
+354E: 45 05           SVEC      dX=   5, dY=   5, Z=0             
+3550: 1F E2 E0 32     VCTR      dX=  25, dY= -15, Z=7             
+3554: 80 40           CNTR                                        
+3556: C0 00           RTSL                                        
+
+3558:       x_wing_nose:                                      (XREF:3000)
+3558: 1D D8 00 00     VCTR      dX=   0, dY=-276, Z=0             
+355C: 61 80           COLOR     C=1, Z=128                        
+355E: 1F 9C 1F 88     VCTR      dX= -60, dY= -50, Z=0             
+3562: 00 3C E0 14     VCTR      dX=  10, dY=  30, Z=7             
+3566: 4A EA           SVEC      dX=  10, dY=  10, Z=7             
+3568: 4A EF           SVEC      dX=  15, dY=  10, Z=7             
+356A: 4A EA           SVEC      dX=  10, dY=  10, Z=7             
+356C: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+3570: 56 EA           SVEC      dX=  10, dY= -10, Z=7             
+3572: 56 EF           SVEC      dX=  15, dY= -10, Z=7             
+3574: 56 EA           SVEC      dX=  10, dY= -10, Z=7             
+3576: 1F C4 E0 14     VCTR      dX=  10, dY= -30, Z=7             
+357A: 40 11           SVEC      dX= -15, dY=   0, Z=0             
+357C: 00 3C FF EC     VCTR      dX= -10, dY=  30, Z=7             
+3580: 00 28 FF D8     VCTR      dX= -20, dY=  20, Z=7             
+3584: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+3588: 1F D8 FF D8     VCTR      dX= -20, dY= -20, Z=7             
+358C: 1F C4 FF EC     VCTR      dX= -10, dY= -30, Z=7             
+3590: 40 0A           SVEC      dX=  10, dY=   0, Z=0             
+3592: 64 80           COLOR     C=4, Z=128                        
+3594: 00 5A E0 1E     VCTR      dX=  15, dY=  45, Z=7             
+3598: 00 0A 00 50     VCTR      dX=  40, dY=   5, Z=0             
+359C: 1F 9C E0 1E     VCTR      dX=  15, dY= -50, Z=7             
+35A0: 00 46 00 14     VCTR      dX=  10, dY=  35, Z=0             
+35A4: 4F F6           SVEC      dX= -10, dY=  15, Z=7             
+35A6: 00 28 FF E2     VCTR      dX= -15, dY=  20, Z=7             
+35AA: 4A F6           SVEC      dX= -10, dY=  10, Z=7             
+35AC: 1F D8 E0 0A     VCTR      dX=   5, dY= -20, Z=7             
+35B0: 00 28 1F F6     VCTR      dX=  -5, dY=  20, Z=0             
+35B4: 00 00 FF D8     VCTR      dX= -20, dY=   0, Z=7             
+35B8: 1F D8 FF F6     VCTR      dX=  -5, dY= -20, Z=7             
+35BC: 00 28 00 0A     VCTR      dX=   5, dY=  20, Z=0             
+35C0: 56 F6           SVEC      dX= -10, dY= -10, Z=7             
+35C2: 1F D8 FF E2     VCTR      dX= -15, dY= -20, Z=7             
+35C6: 51 F6           SVEC      dX= -10, dY= -15, Z=7             
+35C8: 80 40           CNTR                                        
+35CA: C0 00           RTSL                                        
+
+35CC:       upper_left_gun:                                   (XREF:3000)
+35CC: 1F 98 1E 20     VCTR      dX=-240, dY= -52, Z=0             
+35D0: 61 80           COLOR     C=1, Z=128                        
+35D2: 00 1E 1F 9C     VCTR      dX= -50, dY=  15, Z=0             
+35D6: 00 00 E0 46     VCTR      dX=  35, dY=   0, Z=7             
+35DA: 56 EA           SVEC      dX=  10, dY= -10, Z=7             
+35DC: 00 00 FF A6     VCTR      dX= -45, dY=   0, Z=7             
+35E0: 00 00 00 5A     VCTR      dX=  45, dY=   0, Z=0             
+35E4: 56 E0           SVEC      dX=   0, dY= -10, Z=7             
+35E6: 00 00 FF A6     VCTR      dX= -45, dY=   0, Z=7             
+35EA: 00 00 00 5A     VCTR      dX=  45, dY=   0, Z=0             
+35EE: 56 F6           SVEC      dX= -10, dY= -10, Z=7             
+35F0: 00 00 FF BA     VCTR      dX= -35, dY=   0, Z=7             
+35F4: 64 80           COLOR     C=4, Z=128                        
+35F6: 00 0A 00 50     VCTR      dX=  40, dY=   5, Z=0             
+35FA: 40 EA           SVEC      dX=  10, dY=   0, Z=7             
+35FC: 45 E5           SVEC      dX=   5, dY=   5, Z=7             
+35FE: 40 F6           SVEC      dX= -10, dY=   0, Z=7             
+3600: 40 0A           SVEC      dX=  10, dY=   0, Z=0             
+3602: 4A E0           SVEC      dX=   0, dY=  10, Z=7             
+3604: 40 F6           SVEC      dX= -10, dY=   0, Z=7             
+3606: 40 0A           SVEC      dX=  10, dY=   0, Z=0             
+3608: 45 FB           SVEC      dX=  -5, dY=   5, Z=7             
+360A: 40 F6           SVEC      dX= -10, dY=   0, Z=7             
+360C: 45 16           SVEC      dX= -10, dY=   5, Z=0             
+360E: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+3610: 4A EF           SVEC      dX=  15, dY=  10, Z=7             
+3612: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+3616: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3618: 5B F6           SVEC      dX= -10, dY=  -5, Z=7             
+361A: 56 FB           SVEC      dX=  -5, dY= -10, Z=7             
+361C: 1F C4 E0 00     VCTR      dX=   0, dY= -30, Z=7             
+3620: 56 E5           SVEC      dX=   5, dY= -10, Z=7             
+3622: 5B EA           SVEC      dX=  10, dY=  -5, Z=7             
+3624: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+3626: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+362A: 4A F1           SVEC      dX= -15, dY=  10, Z=7             
+362C: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+362E: 56 05           SVEC      dX=   5, dY= -10, Z=0             
+3630: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+3634: 56 EF           SVEC      dX=  15, dY= -10, Z=7             
+3636: 4A 11           SVEC      dX= -15, dY=  10, Z=0             
+3638: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+363A: 00 3C E0 00     VCTR      dX=   0, dY=  30, Z=7             
+363E: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+3640: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+3644: 00 00 00 3C     VCTR      dX=  30, dY=   0, Z=0             
+3648: 4A EF           SVEC      dX=  15, dY=  10, Z=7             
+364A: 61 80           COLOR     C=1, Z=128                        
+364C: 1F C4 1F E2     VCTR      dX= -15, dY= -30, Z=0             
+3650: 00 00 E0 32     VCTR      dX=  25, dY=   0, Z=7             
+3654: 5B E5           SVEC      dX=   5, dY=  -5, Z=7             
+3656: 5B FB           SVEC      dX=  -5, dY=  -5, Z=7             
+3658: 00 00 FF CE     VCTR      dX= -25, dY=   0, Z=7             
+365C: 45 00           SVEC      dX=   0, dY=   5, Z=0             
+365E: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+3662: 80 40           CNTR                                        
+3664: C0 00           RTSL                                        
+
+3666:       lower_left_gun:                                   (XREF:3000)
+3666: 1D D8 1E 20     VCTR      dX=-240, dY=-276, Z=0             
+366A: 61 80           COLOR     C=1, Z=128                        
+366C: 1F EC 1F 9C     VCTR      dX= -50, dY= -10, Z=0             
+3670: 00 1E E0 32     VCTR      dX=  25, dY=  15, Z=7             
+3674: 40 EA           SVEC      dX=  10, dY=   0, Z=7             
+3676: 56 EA           SVEC      dX=  10, dY= -10, Z=7             
+3678: 56 E0           SVEC      dX=   0, dY= -10, Z=7             
+367A: 56 F6           SVEC      dX= -10, dY= -10, Z=7             
+367C: 1F D8 FF BA     VCTR      dX= -35, dY= -20, Z=7             
+3680: 45 00           SVEC      dX=   0, dY=   5, Z=0             
+3682: 00 32 E0 5A     VCTR      dX=  45, dY=  25, Z=7             
+3686: 4A 00           SVEC      dX=   0, dY=  10, Z=0             
+3688: 1F CE FF A6     VCTR      dX= -45, dY= -25, Z=7             
+368C: 4F 00           SVEC      dX=   0, dY=  15, Z=0             
+368E: 00 28 E0 46     VCTR      dX=  35, dY=  20, Z=7             
+3692: 64 80           COLOR     C=4, Z=128                        
+3694: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+3696: 5B E5           SVEC      dX=   5, dY=  -5, Z=7             
+3698: 56 E0           SVEC      dX=   0, dY= -10, Z=7             
+369A: 5B FB           SVEC      dX=  -5, dY=  -5, Z=7             
+369C: 5B F6           SVEC      dX= -10, dY=  -5, Z=7             
+369E: 45 05           SVEC      dX=   5, dY=   5, Z=0             
+36A0: 45 EA           SVEC      dX=  10, dY=   5, Z=7             
+36A2: 4A 00           SVEC      dX=   0, dY=  10, Z=0             
+36A4: 5B F6           SVEC      dX= -10, dY=  -5, Z=7             
+36A6: 45 1B           SVEC      dX=  -5, dY=   5, Z=0             
+36A8: 45 EA           SVEC      dX=  10, dY=   5, Z=7             
+36AA: 00 00 1F D8     VCTR      dX= -20, dY=   0, Z=0             
+36AE: 4A E0           SVEC      dX=   0, dY=  10, Z=7             
+36B0: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+36B2: 4A EF           SVEC      dX=  15, dY=  10, Z=7             
+36B4: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+36B8: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+36BA: 5B F6           SVEC      dX= -10, dY=  -5, Z=7             
+36BC: 56 FB           SVEC      dX=  -5, dY= -10, Z=7             
+36BE: 1F C4 E0 00     VCTR      dX=   0, dY= -30, Z=7             
+36C2: 56 E5           SVEC      dX=   5, dY= -10, Z=7             
+36C4: 5B EA           SVEC      dX=  10, dY=  -5, Z=7             
+36C6: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+36C8: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+36CC: 4A F1           SVEC      dX= -15, dY=  10, Z=7             
+36CE: 00 00 E0 3C     VCTR      dX=  30, dY=   0, Z=7             
+36D2: 56 EF           SVEC      dX=  15, dY= -10, Z=7             
+36D4: 4A 11           SVEC      dX= -15, dY=  10, Z=0             
+36D6: 4A FB           SVEC      dX=  -5, dY=  10, Z=7             
+36D8: 00 3C E0 00     VCTR      dX=   0, dY=  30, Z=7             
+36DC: 4A E5           SVEC      dX=   5, dY=  10, Z=7             
+36DE: 4A EF           SVEC      dX=  15, dY=  10, Z=7             
+36E0: 56 11           SVEC      dX= -15, dY= -10, Z=0             
+36E2: 00 00 FF C4     VCTR      dX= -30, dY=   0, Z=7             
+36E6: 61 80           COLOR     C=1, Z=128                        
+36E8: 1F E2 00 3C     VCTR      dX=  30, dY= -15, Z=0             
+36EC: 00 14 E0 28     VCTR      dX=  20, dY=  10, Z=7             
+36F0: 40 EA           SVEC      dX=  10, dY=   0, Z=7             
+36F2: 5B E0           SVEC      dX=   0, dY=  -5, Z=7             
+36F4: 5B FB           SVEC      dX=  -5, dY=  -5, Z=7             
+36F6: 1F E2 FF CE     VCTR      dX= -25, dY= -15, Z=7             
+36FA: 45 00           SVEC      dX=   0, dY=   5, Z=0             
+36FC: 00 1E E0 3C     VCTR      dX=  30, dY=  15, Z=7             
+3700: 45 1B           SVEC      dX=  -5, dY=   5, Z=0             
+3702: 1F E2 FF CE     VCTR      dX= -25, dY= -15, Z=7             
+3706: 80 40           CNTR                                        
+3708: C0 00           RTSL                                        
+370A: 1F D8 00 00     VCTR      dX=   0, dY= -20, Z=0             
+370E: FB AE           JMPL      loc_375C                          
+3710: 1F B0 00 00     VCTR      dX=   0, dY= -40, Z=0             
+3714: FB AC           JMPL      loc_3758                          
+3716: 1F 88 00 00     VCTR      dX=   0, dY= -60, Z=0             
+371A: FB AA           JMPL      loc_3754                          
+371C: 1F 60 00 00     VCTR      dX=   0, dY= -80, Z=0             
+3720: FB A8           JMPL      loc_3750                          
+3722: 1F 38 00 00     VCTR      dX=   0, dY=-100, Z=0             
+3726: FB A6           JMPL      loc_374C                          
+3728: 1F D8 00 00     VCTR      dX=   0, dY= -20, Z=0             
+372C: FB BB           JMPL      loc_3776                          
+372E: 1F B0 00 00     VCTR      dX=   0, dY= -40, Z=0             
+3732: FB B9           JMPL      loc_3772                          
+3734: 1F 88 00 00     VCTR      dX=   0, dY= -60, Z=0             
+3738: FB B7           JMPL      loc_376E                          
+373A: 1F 60 00 00     VCTR      dX=   0, dY= -80, Z=0             
+373E: FB B5           JMPL      loc_376A                          
+3740: 1F 38 00 00     VCTR      dX=   0, dY=-100, Z=0             
+3744: FB B3           JMPL      loc_3766                          
+3746: 1F 10 00 00     VCTR      dX=   0, dY=-120, Z=0             
+374A: FB B1           JMPL      loc_3762                          
+
+374C:       loc_374C:                                         (XREF:3726)
+374C: 00 28 20 00     VCTR      dX=   0, dY=  20, Z=1             
+
+3750:       loc_3750:                                         (XREF:3720)
+3750: 00 28 40 00     VCTR      dX=   0, dY=  20, Z=2             
+
+3754:       loc_3754:                                         (XREF:371A)
+3754: 00 28 60 00     VCTR      dX=   0, dY=  20, Z=3             
+
+3758:       loc_3758:                                         (XREF:3714)
+3758: 00 28 80 00     VCTR      dX=   0, dY=  20, Z=4             
+
+375C:       loc_375C:                                         (XREF:370E)
+375C: 00 28 A0 00     VCTR      dX=   0, dY=  20, Z=5             
+3760: C0 00           RTSL                                        
+
+3762:       loc_3762:                                         (XREF:374A)
+3762: 00 28 20 00     VCTR      dX=   0, dY=  20, Z=1             
+
+3766:       loc_3766:                                         (XREF:3744)
+3766: 00 28 40 00     VCTR      dX=   0, dY=  20, Z=2             
+
+376A:       loc_376A:                                         (XREF:373E)
+376A: 00 28 60 00     VCTR      dX=   0, dY=  20, Z=3             
+
+376E:       loc_376E:                                         (XREF:3738)
+376E: 00 28 80 00     VCTR      dX=   0, dY=  20, Z=4             
+
+3772:       loc_3772:                                         (XREF:3732)
+3772: 00 28 A0 00     VCTR      dX=   0, dY=  20, Z=5             
+
+3776:       loc_3776:                                         (XREF:372C)
+3776: 00 28 C0 00     VCTR      dX=   0, dY=  20, Z=6             
+377A: C0 00           RTSL                                        
+377C: BC 0C           JSRL      sub_3818                          
+377E: FC B8           JMPL      loc_3970                          
+3780: BC 0D           JSRL      sub_381A                          
+3782: FC B9           JMPL      loc_3972                          
+3784: BC 0F           JSRL      sub_381E                          
+3786: FC BB           JMPL      loc_3976                          
+3788: BC 11           JSRL      sub_3822                          
+378A: FC BD           JMPL      loc_397A                          
+378C: BC 14           JSRL      sub_3828                          
+378E: FC C0           JMPL      loc_3980                          
+3790: BC 17           JSRL      sub_382E                          
+3792: FC C3           JMPL      loc_3986                          
+3794: BC 1A           JSRL      sub_3834                          
+3796: FC C6           JMPL      loc_398C                          
+3798: BC 1D           JSRL      sub_383A                          
+379A: FC C9           JMPL      loc_3992                          
+379C: BC 20           JSRL      sub_3840                          
+379E: FC CC           JMPL      loc_3998                          
+37A0: BC 23           JSRL      sub_3846                          
+37A2: FC CF           JMPL      loc_399E                          
+37A4: BC 26           JSRL      sub_384C                          
+37A6: FC D2           JMPL      loc_39A4                          
+37A8: BC 29           JSRL      sub_3852                          
+37AA: FC D5           JMPL      loc_39AA                          
+37AC: BC 2C           JSRL      sub_3858                          
+37AE: FC D8           JMPL      loc_39B0                          
+37B0: BC 2F           JSRL      sub_385E                          
+37B2: FC DB           JMPL      loc_39B6                          
+37B4: BC 32           JSRL      sub_3864                          
+37B6: FC DE           JMPL      loc_39BC                          
+37B8: BC 35           JSRL      sub_386A                          
+37BA: FC E1           JMPL      loc_39C2                          
+37BC: BC 38           JSRL      sub_3870                          
+37BE: FC E4           JMPL      loc_39C8                          
+37C0: BC 3B           JSRL      sub_3876                          
+37C2: FC E7           JMPL      loc_39CE                          
+37C4: BC 3E           JSRL      sub_387C                          
+37C6: FC EA           JMPL      loc_39D4                          
+37C8: BC 41           JSRL      sub_3882                          
+37CA: FC ED           JMPL      loc_39DA                          
+37CC: BC 41           JSRL      sub_3882                          
+37CE: FC ED           JMPL      loc_39DA                          
+37D0: BC 42           JSRL      sub_3884                          
+37D2: FC EE           JMPL      loc_39DC                          
+37D4: BC 42           JSRL      sub_3884                          
+37D6: FC EE           JMPL      loc_39DC                          
+37D8: BC 45           JSRL      sub_388A                          
+37DA: FC F1           JMPL      loc_39E2                          
+37DC: BC 45           JSRL      sub_388A                          
+37DE: FC F1           JMPL      loc_39E2                          
+37E0: BC 48           JSRL      sub_3890                          
+37E2: FC F4           JMPL      loc_39E8                          
+37E4: BC 48           JSRL      sub_3890                          
+37E6: FC F4           JMPL      loc_39E8                          
+37E8: BC 4B           JSRL      sub_3896                          
+37EA: FC F7           JMPL      loc_39EE                          
+37EC: BC 4B           JSRL      sub_3896                          
+37EE: FC F7           JMPL      loc_39EE                          
+37F0: BC 4E           JSRL      sub_389C                          
+37F2: FC FA           JMPL      loc_39F4                          
+37F4: BC 4E           JSRL      sub_389C                          
+37F6: FC FA           JMPL      loc_39F4                          
+37F8: BC 51           JSRL      sub_38A2                          
+37FA: FC FD           JMPL      loc_39FA                          
+37FC: BC 51           JSRL      sub_38A2                          
+37FE: FC FD           JMPL      loc_39FA                          
+3800: BC 54           JSRL      sub_38A8                          
+3802: FD 00           JMPL      loc_3A00                          
+3804: BC 54           JSRL      sub_38A8                          
+3806: FD 00           JMPL      loc_3A00                          
+3808: BC 57           JSRL      sub_38AE                          
+380A: FD 03           JMPL      loc_3A06                          
+380C: BC 57           JSRL      sub_38AE                          
+380E: FD 03           JMPL      loc_3A06                          
+3810: BC 5A           JSRL      sub_38B4                          
+3812: FD 06           JMPL      loc_3A0C                          
+3814: BC 5A           JSRL      sub_38B4                          
+3816: FD 06           JMPL      loc_3A0C                          
+
+3818:       sub_3818:                                         (XREF:377C)
+3818: C0 00           RTSL                                        
+
+381A:       sub_381A:                                         (XREF:3780)
+381A: 40 0F           SVEC      dX=  15, dY=   0, Z=0             
+381C: FC B6           JMPL      loc_396C                          
+
+381E:       sub_381E:                                         (XREF:3784)
+381E: 40 0F           SVEC      dX=  15, dY=   0, Z=0             
+3820: FC B2           JMPL      loc_3964                          
+
+3822:       sub_3822:                                         (XREF:3788)
+3822: 00 00 00 3C     VCTR      dX=  30, dY=   0, Z=0             
+3826: FC B1           JMPL      loc_3962                          
+
+3828:       sub_3828:                                         (XREF:378C)
+3828: 00 00 00 3C     VCTR      dX=  30, dY=   0, Z=0             
+382C: FC AD           JMPL      loc_395A                          
+
+382E:       sub_382E:                                         (XREF:3790)
+382E: 00 00 00 5A     VCTR      dX=  45, dY=   0, Z=0             
+3832: FC AC           JMPL      loc_3958                          
+
+3834:       sub_3834:                                         (XREF:3794)
+3834: 00 00 00 5A     VCTR      dX=  45, dY=   0, Z=0             
+3838: FC A8           JMPL      loc_3950                          
+
+383A:       sub_383A:                                         (XREF:3798)
+383A: 00 00 00 78     VCTR      dX=  60, dY=   0, Z=0             
+383E: FC A7           JMPL      loc_394E                          
+
+3840:       sub_3840:                                         (XREF:379C)
+3840: 00 00 00 78     VCTR      dX=  60, dY=   0, Z=0             
+3844: FC A3           JMPL      loc_3946                          
+
+3846:       sub_3846:                                         (XREF:37A0)
+3846: 00 00 00 96     VCTR      dX=  75, dY=   0, Z=0             
+384A: FC A2           JMPL      loc_3944                          
+
+384C:       sub_384C:                                         (XREF:37A4)
+384C: 00 00 00 96     VCTR      dX=  75, dY=   0, Z=0             
+3850: FC 9E           JMPL      loc_393C                          
+
+3852:       sub_3852:                                         (XREF:37A8)
+3852: 00 00 00 B4     VCTR      dX=  90, dY=   0, Z=0             
+3856: FC 9D           JMPL      loc_393A                          
+
+3858:       sub_3858:                                         (XREF:37AC)
+3858: 00 00 00 B4     VCTR      dX=  90, dY=   0, Z=0             
+385C: FC 99           JMPL      loc_3932                          
+
+385E:       sub_385E:                                         (XREF:37B0)
+385E: 00 00 00 D2     VCTR      dX= 105, dY=   0, Z=0             
+3862: FC 98           JMPL      loc_3930                          
+
+3864:       sub_3864:                                         (XREF:37B4)
+3864: 00 00 00 D2     VCTR      dX= 105, dY=   0, Z=0             
+3868: FC 94           JMPL      loc_3928                          
+
+386A:       sub_386A:                                         (XREF:37B8)
+386A: 00 00 00 F0     VCTR      dX= 120, dY=   0, Z=0             
+386E: FC 93           JMPL      loc_3926                          
+
+3870:       sub_3870:                                         (XREF:37BC)
+3870: 00 00 00 F0     VCTR      dX= 120, dY=   0, Z=0             
+3874: FC 8F           JMPL      loc_391E                          
+
+3876:       sub_3876:                                         (XREF:37C0)
+3876: 00 00 00 F0     VCTR      dX= 120, dY=   0, Z=0             
+387A: FC 8E           JMPL      loc_391C                          
+
+387C:       sub_387C:                                         (XREF:37C4)
+387C: 00 00 00 F0     VCTR      dX= 120, dY=   0, Z=0             
+3880: FC 8A           JMPL      loc_3914                          
+
+3882:       sub_3882:                                         (XREF:37CC)
+3882: C0 00           RTSL                                        
+
+3884:       sub_3884:                                         (XREF:37D4)
+3884: 1F F1 E0 1E     VCTR      dX=  15, dY=  -7, Z=7             
+3888: FC 60           JMPL      loc_38C0                          
+
+388A:       sub_388A:                                         (XREF:37DC)
+388A: 1F E2 E0 3C     VCTR      dX=  30, dY= -15, Z=7             
+388E: FC 65           JMPL      loc_38CA                          
+
+3890:       sub_3890:                                         (XREF:37E4)
+3890: 1F D3 E0 5A     VCTR      dX=  45, dY= -22, Z=7             
+3894: FC 69           JMPL      loc_38D2                          
+
+3896:       sub_3896:                                         (XREF:37EC)
+3896: 1F C4 E0 78     VCTR      dX=  60, dY= -30, Z=7             
+389A: FC 6E           JMPL      loc_38DC                          
+
+389C:       sub_389C:                                         (XREF:37F4)
+389C: 1F B5 E0 96     VCTR      dX=  75, dY= -37, Z=7             
+38A0: FC 73           JMPL      loc_38E6                          
+
+38A2:       sub_38A2:                                         (XREF:37FC)
+38A2: 1F A6 E0 B4     VCTR      dX=  90, dY= -45, Z=7             
+38A6: FC 78           JMPL      loc_38F0                          
+
+38A8:       sub_38A8:                                         (XREF:3804)
+38A8: 1F 97 E0 D2     VCTR      dX= 105, dY= -52, Z=7             
+38AC: FC 7D           JMPL      loc_38FA                          
+
+38AE:       sub_38AE:                                         (XREF:380C)
+38AE: 1F 88 E0 F0     VCTR      dX= 120, dY= -60, Z=7             
+38B2: FC 82           JMPL      loc_3904                          
+
+38B4:       sub_38B4:                                         (XREF:3814)
+38B4: 1F 79 E1 0E     VCTR      dX= 135, dY= -67, Z=7             
+38B8: FC 87           JMPL      loc_390E                          
+38BA: C0 00           RTSL                                        
+38BC: 1F F1 00 1E     VCTR      dX=  15, dY=  -7, Z=0             
+
+38C0:       loc_38C0:                                         (XREF:3888)
+38C0: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+38C4: FC B6           JMPL      loc_396C                          
+38C6: 1F E2 00 3C     VCTR      dX=  30, dY= -15, Z=0             
+
+38CA:       loc_38CA:                                         (XREF:388E)
+38CA: 4F E0           SVEC      dX=   0, dY=  15, Z=7             
+38CC: FC B1           JMPL      loc_3962                          
+38CE: 1F D3 00 5A     VCTR      dX=  45, dY= -22, Z=0             
+
+38D2:       loc_38D2:                                         (XREF:3894)
+38D2: 00 2D E0 00     VCTR      dX=   0, dY=  22, Z=7             
+38D6: FC AC           JMPL      loc_3958                          
+38D8: 1F C4 00 78     VCTR      dX=  60, dY= -30, Z=0             
+
+38DC:       loc_38DC:                                         (XREF:389A)
+38DC: 00 3C E0 00     VCTR      dX=   0, dY=  30, Z=7             
+38E0: FC A7           JMPL      loc_394E                          
+38E2: 1F B5 00 96     VCTR      dX=  75, dY= -37, Z=0             
+
+38E6:       loc_38E6:                                         (XREF:38A0)
+38E6: 00 4B E0 00     VCTR      dX=   0, dY=  37, Z=7             
+38EA: FC A2           JMPL      loc_3944                          
+38EC: 1F A6 00 B4     VCTR      dX=  90, dY= -45, Z=0             
+
+38F0:       loc_38F0:                                         (XREF:38A6)
+38F0: 00 5A E0 00     VCTR      dX=   0, dY=  45, Z=7             
+38F4: FC 9D           JMPL      loc_393A                          
+38F6: 1F 97 00 D2     VCTR      dX= 105, dY= -52, Z=0             
+
+38FA:       loc_38FA:                                         (XREF:38AC)
+38FA: 00 69 E0 00     VCTR      dX=   0, dY=  52, Z=7             
+38FE: FC 98           JMPL      loc_3930                          
+3900: 1F 88 00 F0     VCTR      dX= 120, dY= -60, Z=0             
+
+3904:       loc_3904:                                         (XREF:38B2)
+3904: 00 78 E0 00     VCTR      dX=   0, dY=  60, Z=7             
+3908: FC 93           JMPL      loc_3926                          
+390A: 1F 79 01 0E     VCTR      dX= 135, dY= -67, Z=0             
+
+390E:       loc_390E:                                         (XREF:38B8)
+390E: 00 87 E0 00     VCTR      dX=   0, dY=  67, Z=7             
+3912: FC 8E           JMPL      loc_391C                          
+
+3914:       loc_3914:                                         (XREF:3880)
+3914: 1F 79 00 00     VCTR      dX=   0, dY= -67, Z=0             
+3918: 00 87 E0 00     VCTR      dX=   0, dY=  67, Z=7             
+
+391C:       loc_391C:                                         (XREF:3912)
+391C: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+391E:       loc_391E:                                         (XREF:3874)
+391E: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3922: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3926:       loc_3926:                                         (XREF:3908)
+3926: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+3928:       loc_3928:                                         (XREF:3868)
+3928: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+392C: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3930:       loc_3930:                                         (XREF:38FE)
+3930: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+3932:       loc_3932:                                         (XREF:385C)
+3932: 1F A6 00 00     VCTR      dX=   0, dY= -45, Z=0             
+3936: 00 5A E0 00     VCTR      dX=   0, dY=  45, Z=7             
+
+393A:       loc_393A:                                         (XREF:38F4)
+393A: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+393C:       loc_393C:                                         (XREF:3850)
+393C: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3940: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3944:       loc_3944:                                         (XREF:38EA)
+3944: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+3946:       loc_3946:                                         (XREF:3844)
+3946: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+394A: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+394E:       loc_394E:                                         (XREF:38E0)
+394E: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+3950:       loc_3950:                                         (XREF:3838)
+3950: 1F D3 00 00     VCTR      dX=   0, dY= -22, Z=0             
+3954: 00 2D E0 00     VCTR      dX=   0, dY=  22, Z=7             
+
+3958:       loc_3958:                                         (XREF:38D6)
+3958: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+395A:       loc_395A:                                         (XREF:382C)
+395A: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+395E: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3962:       loc_3962:                                         (XREF:38CC)
+3962: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+
+3964:       loc_3964:                                         (XREF:3820)
+3964: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3968: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+396C:       loc_396C:                                         (XREF:38C4)
+396C: 40 F1           SVEC      dX= -15, dY=   0, Z=7             
+396E: C0 00           RTSL                                        
+
+3970:       loc_3970:                                         (XREF:377E)
+3970: C0 00           RTSL                                        
+
+3972:       loc_3972:                                         (XREF:3782)
+3972: 40 11           SVEC      dX= -15, dY=   0, Z=0             
+3974: FD 62           JMPL      loc_3AC4                          
+
+3976:       loc_3976:                                         (XREF:3786)
+3976: 40 11           SVEC      dX= -15, dY=   0, Z=0             
+3978: FD 5E           JMPL      loc_3ABC                          
+
+397A:       loc_397A:                                         (XREF:378A)
+397A: 00 00 1F C4     VCTR      dX= -30, dY=   0, Z=0             
+397E: FD 5D           JMPL      loc_3ABA                          
+
+3980:       loc_3980:                                         (XREF:378E)
+3980: 00 00 1F C4     VCTR      dX= -30, dY=   0, Z=0             
+3984: FD 59           JMPL      loc_3AB2                          
+
+3986:       loc_3986:                                         (XREF:3792)
+3986: 00 00 1F A6     VCTR      dX= -45, dY=   0, Z=0             
+398A: FD 58           JMPL      loc_3AB0                          
+
+398C:       loc_398C:                                         (XREF:3796)
+398C: 00 00 1F A6     VCTR      dX= -45, dY=   0, Z=0             
+3990: FD 54           JMPL      loc_3AA8                          
+
+3992:       loc_3992:                                         (XREF:379A)
+3992: 00 00 1F 88     VCTR      dX= -60, dY=   0, Z=0             
+3996: FD 53           JMPL      loc_3AA6                          
+
+3998:       loc_3998:                                         (XREF:379E)
+3998: 00 00 1F 88     VCTR      dX= -60, dY=   0, Z=0             
+399C: FD 4F           JMPL      loc_3A9E                          
+
+399E:       loc_399E:                                         (XREF:37A2)
+399E: 00 00 1F 6A     VCTR      dX= -75, dY=   0, Z=0             
+39A2: FD 4E           JMPL      loc_3A9C                          
+
+39A4:       loc_39A4:                                         (XREF:37A6)
+39A4: 00 00 1F 6A     VCTR      dX= -75, dY=   0, Z=0             
+39A8: FD 4A           JMPL      loc_3A94                          
+
+39AA:       loc_39AA:                                         (XREF:37AA)
+39AA: 00 00 1F 4C     VCTR      dX= -90, dY=   0, Z=0             
+39AE: FD 49           JMPL      loc_3A92                          
+
+39B0:       loc_39B0:                                         (XREF:37AE)
+39B0: 00 00 1F 4C     VCTR      dX= -90, dY=   0, Z=0             
+39B4: FD 45           JMPL      loc_3A8A                          
+
+39B6:       loc_39B6:                                         (XREF:37B2)
+39B6: 00 00 1F 2E     VCTR      dX=-105, dY=   0, Z=0             
+39BA: FD 44           JMPL      loc_3A88                          
+
+39BC:       loc_39BC:                                         (XREF:37B6)
+39BC: 00 00 1F 2E     VCTR      dX=-105, dY=   0, Z=0             
+39C0: FD 40           JMPL      loc_3A80                          
+
+39C2:       loc_39C2:                                         (XREF:37BA)
+39C2: 00 00 1F 10     VCTR      dX=-120, dY=   0, Z=0             
+39C6: FD 3F           JMPL      loc_3A7E                          
+
+39C8:       loc_39C8:                                         (XREF:37BE)
+39C8: 00 00 1F 10     VCTR      dX=-120, dY=   0, Z=0             
+39CC: FD 3B           JMPL      loc_3A76                          
+
+39CE:       loc_39CE:                                         (XREF:37C2)
+39CE: 00 00 1F 10     VCTR      dX=-120, dY=   0, Z=0             
+39D2: FD 3A           JMPL      loc_3A74                          
+
+39D4:       loc_39D4:                                         (XREF:37C6)
+39D4: 00 00 1F 10     VCTR      dX=-120, dY=   0, Z=0             
+39D8: FD 36           JMPL      loc_3A6C                          
+
+39DA:       loc_39DA:                                         (XREF:37CE)
+39DA: C0 00           RTSL                                        
+
+39DC:       loc_39DC:                                         (XREF:37D6)
+39DC: 1F F1 FF E2     VCTR      dX= -15, dY=  -7, Z=7             
+39E0: FD 0C           JMPL      loc_3A18                          
+
+39E2:       loc_39E2:                                         (XREF:37DE)
+39E2: 1F E2 FF C4     VCTR      dX= -30, dY= -15, Z=7             
+39E6: FD 11           JMPL      loc_3A22                          
+
+39E8:       loc_39E8:                                         (XREF:37E6)
+39E8: 1F D3 FF A6     VCTR      dX= -45, dY= -22, Z=7             
+39EC: FD 15           JMPL      loc_3A2A                          
+
+39EE:       loc_39EE:                                         (XREF:37EE)
+39EE: 1F C4 FF 88     VCTR      dX= -60, dY= -30, Z=7             
+39F2: FD 1A           JMPL      loc_3A34                          
+
+39F4:       loc_39F4:                                         (XREF:37F6)
+39F4: 1F B5 FF 6A     VCTR      dX= -75, dY= -37, Z=7             
+39F8: FD 1F           JMPL      loc_3A3E                          
+
+39FA:       loc_39FA:                                         (XREF:37FE)
+39FA: 1F A6 FF 4C     VCTR      dX= -90, dY= -45, Z=7             
+39FE: FD 24           JMPL      loc_3A48                          
+
+3A00:       loc_3A00:                                         (XREF:3806)
+3A00: 1F 97 FF 2E     VCTR      dX=-105, dY= -52, Z=7             
+3A04: FD 29           JMPL      loc_3A52                          
+
+3A06:       loc_3A06:                                         (XREF:380E)
+3A06: 1F 88 FF 10     VCTR      dX=-120, dY= -60, Z=7             
+3A0A: FD 2E           JMPL      loc_3A5C                          
+
+3A0C:       loc_3A0C:                                         (XREF:3816)
+3A0C: 1F 79 FE F2     VCTR      dX=-135, dY= -67, Z=7             
+3A10: FD 33           JMPL      loc_3A66                          
+3A12: C0 00           RTSL                                        
+3A14: 1F F1 1F E2     VCTR      dX= -15, dY=  -7, Z=0             
+
+3A18:       loc_3A18:                                         (XREF:39E0)
+3A18: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+3A1C: FD 62           JMPL      loc_3AC4                          
+3A1E: 1F E2 1F C4     VCTR      dX= -30, dY= -15, Z=0             
+
+3A22:       loc_3A22:                                         (XREF:39E6)
+3A22: 4F E0           SVEC      dX=   0, dY=  15, Z=7             
+3A24: FD 5D           JMPL      loc_3ABA                          
+3A26: 1F D3 1F A6     VCTR      dX= -45, dY= -22, Z=0             
+
+3A2A:       loc_3A2A:                                         (XREF:39EC)
+3A2A: 00 2D E0 00     VCTR      dX=   0, dY=  22, Z=7             
+3A2E: FD 58           JMPL      loc_3AB0                          
+3A30: 1F C4 1F 88     VCTR      dX= -60, dY= -30, Z=0             
+
+3A34:       loc_3A34:                                         (XREF:39F2)
+3A34: 00 3C E0 00     VCTR      dX=   0, dY=  30, Z=7             
+3A38: FD 53           JMPL      loc_3AA6                          
+3A3A: 1F B5 1F 6A     VCTR      dX= -75, dY= -37, Z=0             
+
+3A3E:       loc_3A3E:                                         (XREF:39F8)
+3A3E: 00 4B E0 00     VCTR      dX=   0, dY=  37, Z=7             
+3A42: FD 4E           JMPL      loc_3A9C                          
+3A44: 1F A6 1F 4C     VCTR      dX= -90, dY= -45, Z=0             
+
+3A48:       loc_3A48:                                         (XREF:39FE)
+3A48: 00 5A E0 00     VCTR      dX=   0, dY=  45, Z=7             
+3A4C: FD 49           JMPL      loc_3A92                          
+3A4E: 1F 97 1F 2E     VCTR      dX=-105, dY= -52, Z=0             
+
+3A52:       loc_3A52:                                         (XREF:3A04)
+3A52: 00 69 E0 00     VCTR      dX=   0, dY=  52, Z=7             
+3A56: FD 44           JMPL      loc_3A88                          
+3A58: 1F 88 1F 10     VCTR      dX=-120, dY= -60, Z=0             
+
+3A5C:       loc_3A5C:                                         (XREF:3A0A)
+3A5C: 00 78 E0 00     VCTR      dX=   0, dY=  60, Z=7             
+3A60: FD 3F           JMPL      loc_3A7E                          
+3A62: 1F 79 1E F2     VCTR      dX=-135, dY= -67, Z=0             
+
+3A66:       loc_3A66:                                         (XREF:3A10)
+3A66: 00 87 E0 00     VCTR      dX=   0, dY=  67, Z=7             
+3A6A: FD 3A           JMPL      loc_3A74                          
+
+3A6C:       loc_3A6C:                                         (XREF:39D8)
+3A6C: 1F 79 00 00     VCTR      dX=   0, dY= -67, Z=0             
+3A70: 00 87 E0 00     VCTR      dX=   0, dY=  67, Z=7             
+
+3A74:       loc_3A74:                                         (XREF:3A6A)
+3A74: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3A76:       loc_3A76:                                         (XREF:39CC)
+3A76: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3A7A: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3A7E:       loc_3A7E:                                         (XREF:3A60)
+3A7E: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3A80:       loc_3A80:                                         (XREF:39C0)
+3A80: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3A84: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3A88:       loc_3A88:                                         (XREF:3A56)
+3A88: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3A8A:       loc_3A8A:                                         (XREF:39B4)
+3A8A: 1F A6 00 00     VCTR      dX=   0, dY= -45, Z=0             
+3A8E: 00 5A E0 00     VCTR      dX=   0, dY=  45, Z=7             
+
+3A92:       loc_3A92:                                         (XREF:3A4C)
+3A92: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3A94:       loc_3A94:                                         (XREF:39A8)
+3A94: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3A98: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3A9C:       loc_3A9C:                                         (XREF:3A42)
+3A9C: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3A9E:       loc_3A9E:                                         (XREF:399C)
+3A9E: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3AA2: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3AA6:       loc_3AA6:                                         (XREF:3A38)
+3AA6: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3AA8:       loc_3AA8:                                         (XREF:3990)
+3AA8: 1F D3 00 00     VCTR      dX=   0, dY= -22, Z=0             
+3AAC: 00 2D E0 00     VCTR      dX=   0, dY=  22, Z=7             
+
+3AB0:       loc_3AB0:                                         (XREF:3A2E)
+3AB0: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3AB2:       loc_3AB2:                                         (XREF:3984)
+3AB2: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3AB6: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3ABA:       loc_3ABA:                                         (XREF:3A24)
+3ABA: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+
+3ABC:       loc_3ABC:                                         (XREF:3978)
+3ABC: 1F F1 00 00     VCTR      dX=   0, dY=  -7, Z=0             
+3AC0: 00 0F E0 00     VCTR      dX=   0, dY=   7, Z=7             
+
+3AC4:       loc_3AC4:                                         (XREF:3A1C)
+3AC4: 40 EF           SVEC      dX=  15, dY=   0, Z=7             
+3AC6: C0 00           RTSL                                        
+3AC8: 62 80           COLOR     C=2, Z=128                        
+3ACA: 1E 20 06 20     VCTR      dX= 784, dY=-240, Z=0             
+3ACE: FD 83           JMPL      loc_3B06                          
+
+3AD0:       death_star_outline:                               (XREF:3000)
+3AD0: 62 80           COLOR     C=2, Z=128                        
+3AD2: 1E 20 19 E0     VCTR      dX=-784, dY=-240, Z=0             
+3AD6: 1E 20 A0 60     VCTR      dX=  48, dY=-240, Z=5             
+3ADA: 1E 20 A0 C0     VCTR      dX=  96, dY=-240, Z=5             
+3ADE: 1E 20 A1 40     VCTR      dX= 160, dY=-240, Z=5             
+3AE2: 1E E0 A1 40     VCTR      dX= 160, dY=-144, Z=5             
+3AE6: 1F 70 A1 40     VCTR      dX= 160, dY= -72, Z=5             
+3AEA: 1F D0 A1 40     VCTR      dX= 160, dY= -24, Z=5             
+3AEE: 00 30 A1 40     VCTR      dX= 160, dY=  24, Z=5             
+3AF2: 00 90 A1 40     VCTR      dX= 160, dY=  72, Z=5             
+3AF6: 01 20 A1 40     VCTR      dX= 160, dY= 144, Z=5             
+3AFA: 01 E0 A1 40     VCTR      dX= 160, dY= 240, Z=5             
+3AFE: 01 E0 C0 C0     VCTR      dX=  96, dY= 240, Z=6             
+3B02: 01 E0 C0 60     VCTR      dX=  48, dY= 240, Z=6             
+
+3B06:       loc_3B06:                                         (XREF:3ACE)
+3B06: 01 E0 E0 20     VCTR      dX=  16, dY= 240, Z=7             
+3B0A: 01 E0 FF E0     VCTR      dX= -16, dY= 240, Z=7             
+3B0E: 01 E0 FF A0     VCTR      dX= -48, dY= 240, Z=7             
+3B12: 01 E0 FF 40     VCTR      dX= -96, dY= 240, Z=7             
+3B16: 01 E0 FE C0     VCTR      dX=-160, dY= 240, Z=7             
+3B1A: 01 20 FE C0     VCTR      dX=-160, dY= 144, Z=7             
+3B1E: 00 90 DE C0     VCTR      dX=-160, dY=  72, Z=6             
+3B22: 00 30 DE C0     VCTR      dX=-160, dY=  24, Z=6             
+3B26: 1F D0 BE C0     VCTR      dX=-160, dY= -24, Z=5             
+3B2A: 1F 70 BE C0     VCTR      dX=-160, dY= -72, Z=5             
+3B2E: 1E E0 BE C0     VCTR      dX=-160, dY=-144, Z=5             
+3B32: 1E 20 BE C0     VCTR      dX=-160, dY=-240, Z=5             
+3B36: 1E 20 BF 40     VCTR      dX= -96, dY=-240, Z=5             
+3B3A: 1E 20 BF A0     VCTR      dX= -48, dY=-240, Z=5             
+3B3E: 1E 20 BF E0     VCTR      dX= -16, dY=-240, Z=5             
+3B42: 1E 20 A0 20     VCTR      dX=  16, dY=-240, Z=5             
+3B46: 72 00           SCAL      BIN=2, LIN=0                      
+3B48: 80 40           CNTR                                        
+3B4A: C0 00           RTSL                                        
+
+3B4C:       death_star_equator:                               (XREF:3000)
+3B4C: 67 80           COLOR     C=7, Z=128                        
+3B4E: 01 E0 06 20     VCTR      dX= 784, dY= 240, Z=0             
+3B52: 1C 70 D3 C0     VCTR      dX=-1568, dY=-456, Z=6            
+3B56: 1F D0 00 00     VCTR      dX=   0, dY= -24, Z=0             
+3B5A: 03 90 CC 40     VCTR      dX= 1568, dY= 456, Z=6            
+3B5E: 72 00           SCAL      BIN=2, LIN=0                      
+3B60: 80 40           CNTR                                        
+3B62: C0 00           RTSL                                        
+
+3B64:       death_star_focus_lens_outline:                    (XREF:3000)
+3B64: 64 80           COLOR     C=4, Z=128                        
+3B66: 03 30 02 80     VCTR      dX= 320, dY= 408, Z=0             
+3B6A: 00 60 DF 80     VCTR      dX= -64, dY=  48, Z=6             
+3B6E: 00 90 DF A0     VCTR      dX= -48, dY=  72, Z=6             
+3B72: 00 C0 DF C0     VCTR      dX= -32, dY=  96, Z=6             
+3B76: 00 C0 DF E0     VCTR      dX= -16, dY=  96, Z=6             
+3B7A: 00 C0 C0 20     VCTR      dX=  16, dY=  96, Z=6             
+3B7E: 00 90 C0 60     VCTR      dX=  48, dY=  72, Z=6             
+3B82: 00 30 C0 80     VCTR      dX=  64, dY=  24, Z=6             
+3B86: 00 00 C0 80     VCTR      dX=  64, dY=   0, Z=6             
+3B8A: 1F A0 C0 80     VCTR      dX=  64, dY= -48, Z=6             
+3B8E: 1F 40 C0 80     VCTR      dX=  64, dY= -96, Z=6             
+3B92: 1F 40 C0 60     VCTR      dX=  48, dY= -96, Z=6             
+3B96: 1F 40 C0 20     VCTR      dX=  16, dY= -96, Z=6             
+3B9A: 1F 40 DF E0     VCTR      dX= -16, dY= -96, Z=6             
+3B9E: 1F 70 DF A0     VCTR      dX= -48, dY= -72, Z=6             
+3BA2: 1F D0 DF 80     VCTR      dX= -64, dY= -24, Z=6             
+3BA6: 00 00 DF A0     VCTR      dX= -48, dY=   0, Z=6             
+3BAA: 00 30 DF A0     VCTR      dX= -48, dY=  24, Z=6             
+3BAE: 72 00           SCAL      BIN=2, LIN=0                      
+3BB0: 80 40           CNTR                                        
+3BB2: C0 00           RTSL                                        
+
+3BB4:       death_star_focus_lens_fill:                       (XREF:3000)
+3BB4: 64 80           COLOR     C=4, Z=128                        
+3BB6: 03 30 02 80     VCTR      dX= 320, dY= 408, Z=0             
+3BBA: 01 E0 A0 40     VCTR      dX=  32, dY= 240, Z=5             
+3BBE: 1E 80 BF 40     VCTR      dX= -96, dY=-192, Z=5             
+3BC2: 00 90 1F A0     VCTR      dX= -48, dY=  72, Z=0             
+3BC6: 00 F0 A1 20     VCTR      dX= 144, dY= 120, Z=5             
+3BCA: 1F D0 BE A0     VCTR      dX=-176, dY= -24, Z=5             
+3BCE: 00 C0 1F E0     VCTR      dX= -16, dY=  96, Z=0             
+3BD2: 1F 70 A1 80     VCTR      dX= 192, dY= -72, Z=5             
+3BD6: 01 50 BE A0     VCTR      dX=-176, dY= 168, Z=5             
+3BDA: 00 90 00 60     VCTR      dX=  48, dY=  72, Z=0             
+3BDE: 1E 20 A1 00     VCTR      dX= 128, dY=-240, Z=5             
+3BE2: 02 10 BF 80     VCTR      dX= -64, dY= 264, Z=5             
+3BE6: 00 00 00 80     VCTR      dX=  64, dY=   0, Z=0             
+3BEA: 1D F0 A0 00     VCTR      dX=   0, dY=-264, Z=5             
+3BEE: 01 B0 A0 80     VCTR      dX=  64, dY= 216, Z=5             
+3BF2: 1C 70 00 80     VCTR      dX=  64, dY=-456, Z=0             
+3BF6: 01 E0 BF 00     VCTR      dX=-128, dY= 240, Z=5             
+3BFA: 1D F0 A0 80     VCTR      dX=  64, dY=-264, Z=5             
+3BFE: 00 00 1F A0     VCTR      dX= -48, dY=   0, Z=0             
+3C02: 02 10 BF E0     VCTR      dX= -16, dY= 264, Z=5             
+3C06: 72 00           SCAL      BIN=2, LIN=0                      
+3C08: 80 40           CNTR                                        
+3C0A: C0 00           RTSL                                        
+
+3C0C:       death_star_panels:                                (XREF:3000)
+3C0C: 62 80           COLOR     C=2, Z=128                        
+3C0E: 08 D0 01 E0     VCTR      dX= 240, dY= 1128, Z=0            
+3C12: 1F 40 A0 40     VCTR      dX=  32, dY= -96, Z=5             
+3C16: 00 30 A0 80     VCTR      dX=  64, dY=  24, Z=5             
+3C1A: 00 30 00 00     VCTR      dX=   0, dY=  24, Z=0             
+3C1E: 1E B0 A0 60     VCTR      dX=  48, dY=-168, Z=5             
+3C22: 00 60 1F E0     VCTR      dX= -16, dY=  48, Z=0             
+3C26: 00 30 A0 80     VCTR      dX=  64, dY=  24, Z=5             
+3C2A: 1E 80 A0 60     VCTR      dX=  48, dY=-192, Z=5             
+3C2E: 00 C0 00 40     VCTR      dX=  32, dY=  96, Z=0             
+3C32: 1A F0 A1 80     VCTR      dX= 192, dY=-648, Z=5             
+3C36: 00 30 A0 80     VCTR      dX=  64, dY=  24, Z=5             
+3C3A: 03 90 BE E0     VCTR      dX=-144, dY= 456, Z=5             
+3C3E: 1D F0 00 20     VCTR      dX=  16, dY=-264, Z=0             
+3C42: 1F D0 BF 80     VCTR      dX= -64, dY= -24, Z=5             
+3C46: 00 F0 1F C0     VCTR      dX= -32, dY= 120, Z=0             
+3C4A: 1E 20 A0 80     VCTR      dX=  64, dY=-240, Z=5             
+3C4E: 1F D0 BF 80     VCTR      dX= -64, dY= -24, Z=5             
+3C52: 00 F0 BF C0     VCTR      dX= -32, dY= 120, Z=5             
+3C56: 1F 10 00 40     VCTR      dX=  32, dY=-120, Z=0             
+3C5A: 1F D0 BF 80     VCTR      dX= -64, dY= -24, Z=5             
+3C5E: 00 F0 BF C0     VCTR      dX= -32, dY= 120, Z=5             
+3C62: 1C 10 01 40     VCTR      dX= 160, dY=-504, Z=0             
+3C66: 01 50 BF C0     VCTR      dX= -32, dY= 168, Z=5             
+3C6A: 00 30 A0 80     VCTR      dX=  64, dY=  24, Z=5             
+3C6E: 00 30 00 80     VCTR      dX=  64, dY=  24, Z=0             
+3C72: 00 30 A0 80     VCTR      dX=  64, dY=  24, Z=5             
+3C76: 1E E0 A0 40     VCTR      dX=  32, dY=-144, Z=5             
+3C7A: 1E 20 1F C0     VCTR      dX= -32, dY=-240, Z=0             
+3C7E: 03 60 BF 60     VCTR      dX= -80, dY= 432, Z=5             
+3C82: 1F D0 BF 80     VCTR      dX= -64, dY= -24, Z=5             
+3C86: 1B 80 A0 E0     VCTR      dX= 112, dY=-576, Z=5             
+3C8A: 00 F0 00 40     VCTR      dX=  32, dY= 120, Z=0             
+3C8E: 1F D0 BF A0     VCTR      dX= -48, dY= -24, Z=5             
+3C92: 00 F0 1F 60     VCTR      dX= -80, dY= 120, Z=0             
+3C96: 00 30 A0 60     VCTR      dX=  48, dY=  24, Z=5             
+3C9A: 72 00           SCAL      BIN=2, LIN=0                      
+3C9C: 80 40           CNTR                                        
+3C9E: C0 00           RTSL                                        
+3CA0: 67 80           COLOR     C=7, Z=128                        
+3CA2: 00 0F 00 31     VCTR      dX=  24, dY=   7, Z=0             
+3CA6: 1F E2 DF 9E     VCTR      dX= -49, dY= -15, Z=6             
+3CAA: 62 80           COLOR     C=2, Z=128                        
+3CAC: 1F E2 A0 09     VCTR      dX=   4, dY= -15, Z=5             
+3CB0: 54 AA           SVEC      dX=  10, dY= -12, Z=5             
+3CB2: 5D AA           SVEC      dX=  10, dY=  -3, Z=5             
+3CB4: 43 AA           SVEC      dX=  10, dY=   3, Z=5             
+3CB6: 4C AA           SVEC      dX=  10, dY=  12, Z=5             
+3CB8: 00 1E C0 09     VCTR      dX=   4, dY=  15, Z=6             
+3CBC: 4F E0           SVEC      dX=   0, dY=  15, Z=7             
+3CBE: 00 1E FF F7     VCTR      dX=  -4, dY=  15, Z=7             
+3CC2: 4C F6           SVEC      dX= -10, dY=  12, Z=7             
+3CC4: 43 D6           SVEC      dX= -10, dY=   3, Z=6             
+3CC6: 5D B6           SVEC      dX= -10, dY=  -3, Z=5             
+3CC8: 54 B6           SVEC      dX= -10, dY= -12, Z=5             
+3CCA: 1F E2 BF F7     VCTR      dX=  -4, dY= -15, Z=5             
+3CCE: 51 A0           SVEC      dX=   0, dY= -15, Z=5             
+3CD0: 64 80           COLOR     C=4, Z=128                        
+3CD2: 00 2D 00 52     VCTR      dX=  41, dY=  22, Z=0             
+3CD6: 1F FA DF F9     VCTR      dX=  -3, dY=  -3, Z=6             
+3CDA: 00 01 DF FA     VCTR      dX=  -3, dY=   0, Z=6             
+3CDE: 00 08 DF F9     VCTR      dX=  -3, dY=   4, Z=6             
+3CE2: 00 0C DF FD     VCTR      dX=  -1, dY=   6, Z=6             
+3CE6: 45 C2           SVEC      dX=   2, dY=   5, Z=6             
+3CE8: 41 C4           SVEC      dX=   4, dY=   1, Z=6             
+3CEA: 1F F1 C0 0B     VCTR      dX=   5, dY=  -7, Z=6             
+3CEE: 5A C0           SVEC      dX=   0, dY=  -6, Z=6             
+3CF0: 64 80           COLOR     C=4, Z=128                        
+3CF2: 00 15 BF EA     VCTR      dX= -11, dY=  10, Z=5             
+3CF6: 00 06 00 0B     VCTR      dX=   5, dY=   3, Z=0             
+3CFA: 50 A0           SVEC      dX=   0, dY= -16, Z=5             
+3CFC: 00 08 1F F7     VCTR      dX=  -4, dY=   4, Z=0             
+3D00: 00 07 A0 09     VCTR      dX=   4, dY=   3, Z=5             
+3D04: 62 80           COLOR     C=2, Z=128                        
+3D06: 00 18 1F FB     VCTR      dX=  -2, dY=  12, Z=0             
+3D0A: 1F F7 A0 0F     VCTR      dX=   7, dY=  -4, Z=5             
+3D0E: 1F E5 A0 08     VCTR      dX=   4, dY= -13, Z=5             
+3D12: 5A BB           SVEC      dX=  -5, dY=  -6, Z=5             
+3D14: 5A 05           SVEC      dX=   5, dY=  -6, Z=0             
+3D16: 1F E1 A0 06     VCTR      dX=   3, dY= -15, Z=5             
+3D1A: 72 00           SCAL      BIN=2, LIN=0                      
+3D1C: 80 40           CNTR                                        
+3D1E: C0 00           RTSL                                        
+
+3D20:       sub_3D20:                                         (XREF:3D94)
+3D20: 00 00 41 00     VCTR      dX= 128, dY=   0, Z=2             
+3D24: 00 10 1F 00     VCTR      dX=-128, dY=   8, Z=0             
+3D28: 00 00 61 00     VCTR      dX= 128, dY=   0, Z=3             
+3D2C: 00 10 1F 00     VCTR      dX=-128, dY=   8, Z=0             
+3D30: 00 00 81 00     VCTR      dX= 128, dY=   0, Z=4             
+3D34: 00 10 1F 00     VCTR      dX=-128, dY=   8, Z=0             
+3D38: 00 00 A1 00     VCTR      dX= 128, dY=   0, Z=5             
+3D3C: 00 10 1F 00     VCTR      dX=-128, dY=   8, Z=0             
+3D40: 00 00 C1 00     VCTR      dX= 128, dY=   0, Z=6             
+3D44: 00 10 1F 00     VCTR      dX=-128, dY=   8, Z=0             
+3D48: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3D4C: C0 00           RTSL                                        
+3D4E: BF AE           JSRL      sub_3F5C                          
+3D50: 80 40           CNTR                                        
+3D52: 00 40 1E 80     VCTR      dX=-192, dY=  32, Z=0             
+3D56: 64 80           COLOR     C=4, Z=128                        
+3D58: BE 90           JSRL      sub_3D20                          
+3D5A: 80 40           CNTR                                        
+3D5C: 00 40 1F 80     VCTR      dX= -64, dY=  32, Z=0             
+3D60: 61 80           COLOR     C=1, Z=128                        
+3D62: BE 90           JSRL      sub_3D20                          
+3D64: 80 40           CNTR                                        
+3D66: 00 40 00 80     VCTR      dX=  64, dY=  32, Z=0             
+3D6A: 62 80           COLOR     C=2, Z=128                        
+3D6C: BE 90           JSRL      sub_3D20                          
+3D6E: 80 40           CNTR                                        
+3D70: 1F 60 1E 80     VCTR      dX=-192, dY= -80, Z=0             
+3D74: 66 80           COLOR     C=6, Z=128                        
+3D76: BE 90           JSRL      sub_3D20                          
+3D78: 80 40           CNTR                                        
+3D7A: 1F 60 1F 80     VCTR      dX= -64, dY= -80, Z=0             
+3D7E: 63 80           COLOR     C=3, Z=128                        
+3D80: BE 90           JSRL      sub_3D20                          
+3D82: 80 40           CNTR                                        
+3D84: 1F 60 00 80     VCTR      dX=  64, dY= -80, Z=0             
+3D88: 65 80           COLOR     C=5, Z=128                        
+3D8A: BE 90           JSRL      sub_3D20                          
+3D8C: 80 40           CNTR                                        
+3D8E: 1F D0 1F 80     VCTR      dX= -64, dY= -24, Z=0             
+3D92: 67 80           COLOR     C=7, Z=128                        
+3D94: BE 90           JSRL      sub_3D20                          
+3D96: 80 40           CNTR                                        
+3D98: 1F 40 00 80     VCTR      dX=  64, dY= -96, Z=0             
+3D9C: 67 00           COLOR     C=7, Z=0                          
+3D9E: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DA2: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DA6: 67 10           COLOR     C=7, Z=16                         
+3DA8: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DAC: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DB0: 67 20           COLOR     C=7, Z=32                         
+3DB2: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DB6: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DBA: 67 30           COLOR     C=7, Z=48                         
+3DBC: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DC0: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DC4: 67 40           COLOR     C=7, Z=64                         
+3DC6: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DCA: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DCE: 67 50           COLOR     C=7, Z=80                         
+3DD0: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DD4: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DD8: 67 60           COLOR     C=7, Z=96                         
+3DDA: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DDE: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DE2: 67 70           COLOR     C=7, Z=112                        
+3DE4: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DE8: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DEC: 67 80           COLOR     C=7, Z=128                        
+3DEE: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3DF2: 1F EC 1F 00     VCTR      dX=-128, dY= -10, Z=0             
+3DF6: 80 40           CNTR                                        
+3DF8: C0 00           RTSL                                        
+3DFA: BF AE           JSRL      sub_3F5C                          
+3DFC: 80 40           CNTR                                        
+3DFE: 1D D8 1E 20     VCTR      dX=-240, dY=-276, Z=0             
+3E02: 04 50 E2 D0     VCTR      dX= 360, dY= 552, Z=7             
+3E06: 1E 90 E0 F0     VCTR      dX= 120, dY=-184, Z=7             
+3E0A: 1D 20 FE 20     VCTR      dX=-240, dY=-368, Z=7             
+3E0E: 02 E0 FE 20     VCTR      dX=-240, dY= 368, Z=7             
+3E12: 01 70 E0 F0     VCTR      dX= 120, dY= 184, Z=7             
+3E16: 1B B0 E2 D0     VCTR      dX= 360, dY=-552, Z=7             
+3E1A: 04 50 00 00     VCTR      dX=   0, dY= 552, Z=0             
+3E1E: 1B B0 FD 30     VCTR      dX=-360, dY=-552, Z=7             
+3E22: 01 70 FF 10     VCTR      dX=-120, dY= 184, Z=7             
+3E26: 02 E0 E1 E0     VCTR      dX= 240, dY= 368, Z=7             
+3E2A: 1D 20 E1 E0     VCTR      dX= 240, dY=-368, Z=7             
+3E2E: 1E 90 FF 10     VCTR      dX=-120, dY=-184, Z=7             
+3E32: 04 50 FD 30     VCTR      dX=-360, dY= 552, Z=7             
+3E36: 80 40           CNTR                                        
+3E38: 1E 9A 1E 20     VCTR      dX=-240, dY=-179, Z=0             
+3E3C: 72 40           SCAL      BIN=2, LIN=64                     
+3E3E: F8 01           JMPL      loc_3002                          
+3E40: 72 00           SCAL      BIN=2, LIN=0                      
+3E42: 80 40           CNTR                                        
+3E44: 1D F1 01 E0     VCTR      dX= 240, dY=-263, Z=0             
+3E48: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E4C: 80 40           CNTR                                        
+3E4E: 1E 51 01 E0     VCTR      dX= 240, dY=-215, Z=0             
+3E52: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E56: 80 40           CNTR                                        
+3E58: 1E B1 01 E0     VCTR      dX= 240, dY=-167, Z=0             
+3E5C: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E60: 80 40           CNTR                                        
+3E62: 1F 11 01 E0     VCTR      dX= 240, dY=-119, Z=0             
+3E66: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E6A: 80 40           CNTR                                        
+3E6C: 1F 71 01 E0     VCTR      dX= 240, dY= -71, Z=0             
+3E70: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E74: 80 40           CNTR                                        
+3E76: 1F D1 01 E0     VCTR      dX= 240, dY= -23, Z=0             
+3E7A: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E7E: 80 40           CNTR                                        
+3E80: 00 31 01 E0     VCTR      dX= 240, dY=  24, Z=0             
+3E84: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E88: 80 40           CNTR                                        
+3E8A: 00 91 01 E0     VCTR      dX= 240, dY=  72, Z=0             
+3E8E: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E92: 80 40           CNTR                                        
+3E94: 00 F1 01 E0     VCTR      dX= 240, dY= 120, Z=0             
+3E98: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3E9C: 80 40           CNTR                                        
+3E9E: 01 51 01 E0     VCTR      dX= 240, dY= 168, Z=0             
+3EA2: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3EA6: 80 40           CNTR                                        
+3EA8: 01 B1 01 E0     VCTR      dX= 240, dY= 216, Z=0             
+3EAC: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3EB0: 80 40           CNTR                                        
+3EB2: 02 11 01 E0     VCTR      dX= 240, dY= 264, Z=0             
+3EB6: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3EBA: 80 40           CNTR                                        
+3EBC: 02 10 1E 21     VCTR      dX=-239, dY= 264, Z=0             
+3EC0: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3EC4: 80 40           CNTR                                        
+3EC6: 02 10 1E 61     VCTR      dX=-207, dY= 264, Z=0             
+3ECA: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3ECE: 80 40           CNTR                                        
+3ED0: 02 10 1E A1     VCTR      dX=-175, dY= 264, Z=0             
+3ED4: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3ED8: 80 40           CNTR                                        
+3EDA: 02 10 1E E1     VCTR      dX=-143, dY= 264, Z=0             
+3EDE: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3EE2: 80 40           CNTR                                        
+3EE4: 02 10 1F 21     VCTR      dX=-111, dY= 264, Z=0             
+3EE8: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3EEC: 80 40           CNTR                                        
+3EEE: 02 10 1F 61     VCTR      dX= -79, dY= 264, Z=0             
+3EF2: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3EF6: 80 40           CNTR                                        
+3EF8: 02 10 1F A1     VCTR      dX= -47, dY= 264, Z=0             
+3EFC: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F00: 80 40           CNTR                                        
+3F02: 02 10 1F E1     VCTR      dX= -15, dY= 264, Z=0             
+3F06: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F0A: 80 40           CNTR                                        
+3F0C: 02 10 00 21     VCTR      dX=  16, dY= 264, Z=0             
+3F10: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F14: 80 40           CNTR                                        
+3F16: 02 10 00 61     VCTR      dX=  48, dY= 264, Z=0             
+3F1A: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F1E: 80 40           CNTR                                        
+3F20: 02 10 00 A1     VCTR      dX=  80, dY= 264, Z=0             
+3F24: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F28: 80 40           CNTR                                        
+3F2A: 02 10 00 E1     VCTR      dX= 112, dY= 264, Z=0             
+3F2E: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F32: 80 40           CNTR                                        
+3F34: 02 10 01 21     VCTR      dX= 144, dY= 264, Z=0             
+3F38: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F3C: 80 40           CNTR                                        
+3F3E: 02 10 01 61     VCTR      dX= 176, dY= 264, Z=0             
+3F42: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F46: 80 40           CNTR                                        
+3F48: 02 10 01 A1     VCTR      dX= 208, dY= 264, Z=0             
+3F4C: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F50: 80 40           CNTR                                        
+3F52: 02 10 01 E1     VCTR      dX= 240, dY= 264, Z=0             
+3F56: 1B E0 E0 00     VCTR      dX=   0, dY=-528, Z=7             
+3F5A: C0 00           RTSL                                        
+
+3F5C:       sub_3F5C:                                         (XREF:3DFA)
+3F5C: 62 50           COLOR     C=2, Z=80                         
+
+3F5E:       sub_3F5E:                                         (XREF:3F90)
+3F5E: 72 00           SCAL      BIN=2, LIN=0                      
+3F60: 80 40           CNTR                                        
+3F62: 1D D8 1E 20     VCTR      dX=-240, dY=-276, Z=0             
+3F66: 00 00 E3 C0     VCTR      dX= 480, dY=   0, Z=7             
+3F6A: 04 50 E0 00     VCTR      dX=   0, dY= 552, Z=7             
+3F6E: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3F72: 1B B0 E0 00     VCTR      dX=   0, dY=-552, Z=7             
+3F76: C0 00           RTSL                                        
+3F78: 00 8A 00 5C     VCTR      dX=  46, dY=  69, Z=0             
+3F7C: 00 00 FF 48     VCTR      dX= -92, dY=   0, Z=7             
+3F80: 1E EC E0 00     VCTR      dX=   0, dY=-138, Z=7             
+3F84: 00 00 E0 B8     VCTR      dX=  92, dY=   0, Z=7             
+3F88: 01 14 E0 00     VCTR      dX=   0, dY= 138, Z=7             
+3F8C: 80 40           CNTR                                        
+3F8E: C0 00           RTSL                                        
+3F90: BF AF           JSRL      sub_3F5E                          
+3F92: 80 40           CNTR                                        
+3F94: 01 00 1E 20     VCTR      dX=-240, dY= 128, Z=0             
+3F98: 00 00 E3 C0     VCTR      dX= 480, dY=   0, Z=7             
+3F9C: 1F FB 00 00     VCTR      dX=   0, dY=  -2, Z=0             
+3FA0: 00 00 FC 40     VCTR      dX=-480, dY=   0, Z=7             
+3FA4: 1F FB 00 00     VCTR      dX=   0, dY=  -2, Z=0             
+3FA8: C0 00           RTSL                                        
+3FAA: 00 0C 01 38     VCTR      dX= 156, dY=   6, Z=0             
+3FAE: 64 80           COLOR     C=4, Z=128                        
+3FB0: 54 E0           SVEC      dX=   0, dY= -12, Z=7             
+3FB2: 40 E8           SVEC      dX=   8, dY=   0, Z=7             
+3FB4: 4C E0           SVEC      dX=   0, dY=  12, Z=7             
+3FB6: 40 F8           SVEC      dX=  -8, dY=   0, Z=7             
+3FB8: 62 80           COLOR     C=2, Z=128                        
+3FBA: 00 6C 1F A8     VCTR      dX= -44, dY=  54, Z=0             
+3FBE: 1F 10 E0 00     VCTR      dX=   0, dY=-120, Z=7             
+3FC2: 54 08           SVEC      dX=   8, dY= -12, Z=0             
+3FC4: 00 00 E0 A0     VCTR      dX=  80, dY=   0, Z=7             
+3FC8: 4C 08           SVEC      dX=   8, dY=  12, Z=0             
+3FCA: 00 F0 E0 00     VCTR      dX=   0, dY= 120, Z=7             
+3FCE: 4C 18           SVEC      dX=  -8, dY=  12, Z=0             
+3FD0: 00 00 FF 60     VCTR      dX= -80, dY=   0, Z=7             
+3FD4: 67 80           COLOR     C=7, Z=128                        
+3FD6: 00 30 1F D0     VCTR      dX= -24, dY=  24, Z=0             
+3FDA: 1E 80 E0 00     VCTR      dX=   0, dY=-192, Z=7             
+3FDE: 00 00 E1 00     VCTR      dX= 128, dY=   0, Z=7             
+3FE2: 01 80 E0 00     VCTR      dX=   0, dY= 192, Z=7             
+3FE6: 00 00 FF 00     VCTR      dX=-128, dY=   0, Z=7             
+3FEA: 80 40           CNTR                                        
+3FEC: C0 00           RTSL                                        
+3FEE: 00 00 00 00     VCTR      dX=   0, dY=   0, Z=0             
+3FF2: 00 00 00 00     VCTR      dX=   0, dY=   0, Z=0             
+3FF6: 00 00 00 00     VCTR      dX=   0, dY=   0, Z=0             
+3FFA: 00 00 00 00     VCTR      dX=   0, dY=   0, Z=0             
+3FFE: 00 00 00 00     VCTR      dX=   0, dY=   0, Z=0             
