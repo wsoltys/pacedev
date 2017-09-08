@@ -43984,14 +43984,14 @@ ROM:E83A 20 4C			     bra     loc_E888
 ROM:E83C	     ; ---------------------------------------------------------------------------
 ROM:E83C
 ROM:E83C	     loc_E83C:							     ; CODE XREF: print_msg_48AE+12j
-ROM:E83C C1 74			     cmpb    #0x74 ; 't'                             ; semi-colon?
+ROM:E83C C1 74			     cmpb    #0x74 ; 't'                             ; colon?
 ROM:E83E 26 05			     bne     loc_E845				     ; no, skip
 ROM:E840 8E 2F DE		     ldx     #0x2FDE
 ROM:E843 20 43			     bra     loc_E888
 ROM:E845	     ; ---------------------------------------------------------------------------
 ROM:E845
 ROM:E845	     loc_E845:							     ; CODE XREF: print_msg_48AE+1Dj
-ROM:E845 C1 80			     cmpb    #0x80 ; '€'                             ; '@'?
+ROM:E845 C1 80			     cmpb    #0x80 ; '€'                             ; '@'? == (C)
 ROM:E847 26 06			     bne     loc_E84F				     ; no, skip
 ROM:E849 8E 30 58		     ldx     #0x3058
 ROM:E84C 5F			     clrb
@@ -44013,7 +44013,7 @@ ROM:E85F 20 27			     bra     loc_E888
 ROM:E861	     ; ---------------------------------------------------------------------------
 ROM:E861
 ROM:E861	     loc_E861:							     ; CODE XREF: print_msg_48AE+39j
-ROM:E861 C1 4E			     cmpb    #0x4E ; 'N'                             ; apostrophe?
+ROM:E861 C1 4E			     cmpb    #0x4E ; 'N'                             ; quote?
 ROM:E863 26 05			     bne     loc_E86A				     ; no, skip
 ROM:E865 8E 2F FE		     ldx     #0x2FFE
 ROM:E868 20 1E			     bra     loc_E888
@@ -44034,7 +44034,7 @@ ROM:E87A 20 0C			     bra     loc_E888
 ROM:E87C	     ; ---------------------------------------------------------------------------
 ROM:E87C
 ROM:E87C	     loc_E87C:							     ; CODE XREF: print_msg_48AE+54j
-ROM:E87C C1 4A			     cmpb    #0x4A ; 'J'                             ; '%'?
+ROM:E87C C1 4A			     cmpb    #0x4A ; 'J'                             ; '%'? ==1/2
 ROM:E87E 26 05			     bne     loc_E885				     ; no, skip
 ROM:E880 8E 30 0C		     ldx     #0x300C
 ROM:E883 20 03			     bra     loc_E888
