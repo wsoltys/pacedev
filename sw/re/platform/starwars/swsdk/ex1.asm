@@ -20,9 +20,20 @@
         .org    0xE000
 
 RESET::
-        
-        SWSDK_KICK_WDOG
-				bra			RESET
+       
+       	lds			#SWSDK_CpuRAMEnd
+     		jsr			SWSDK_Init
+
+				ldy			#SWSDK_VectorRAMStart
+				ldx			#0xB800
+				stx			,y++
+				ldx			#0xE000
+				stx			,y++
+				sta			SWSDK_AVGGo
+				
+9$:     		
+      	SWSDK_KICK_WDOG
+				bra			9$
 
 IRQ::
 				rti
