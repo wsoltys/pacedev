@@ -5,7 +5,7 @@
 ; - graphics kindly supplied by Norbert Kehrer
 ;
 				.list		(meb)										; macro expansion binary
-       	.area   _CODE (ABS,CON)
+       	.area   _CODE (ABS,OVR)
 				.module ex1
 
 .include "swsdk.inc"
@@ -17,10 +17,11 @@
 ; *** derived - do not edit
 ; *** end of derived
 
-        .org    0x8000
+        .org    0xF000
 
 RESET::
         
+        SWSDK_KICK_WDOG
 				bra			RESET
 
 IRQ::

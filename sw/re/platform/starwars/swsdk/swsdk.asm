@@ -1,6 +1,6 @@
 
 				.list		(meb)										; macro expansion binary
-       	.area   _CODE (ABS, CON)
+       	.area   _CODE (ABS, OVR)
 				.module swsdk
 				
 .include "swsdk.inc"
