@@ -6,16 +6,16 @@
 SWSDK_Font 											= 0x3002
 SWSDK_Crosshairs 								= 0x3300
 SWSDK_UpperRightTurret					= 0x341A
-SWDSK_LowerRightTurret					= 0x34B4
-SWDSK_XWingNose									= 0x3558
-SWDSK_UpperLeftTurret						= 0x35CC
-SWDSK_LowerLeftTurret						= 0x3666
+SWSDK_LowerRightTurret					= 0x34B4
+SWSDK_XWingNose									= 0x3558
+SWSDK_UpperLeftTurret						= 0x35CC
+SWSDK_LowerLeftTurret						= 0x3666
 
-SWDSK_DeathStarOutline					= 0x3AD0
-SWDSK_DeathStarEquator					= 0x3B4C
-SWDSK_DeathStarFocusLensOutline	= 0x3B64
-SWDSK_DeathStarFocusLensPanels	= 0x3BB4
-SWDSK_DeathStarPanels						= 0x3C0C
+SWSDK_DeathStarOutline					= 0x3AD0
+SWSDK_DeathStarEquator					= 0x3B4C
+SWSDK_DeathStarFocusLensOutline	= 0x3B64
+SWSDK_DeathStarFocusLensPanels	= 0x3BB4
+SWSDK_DeathStarPanels						= 0x3C0C
 
 ; Memory Map
 
@@ -62,3 +62,4 @@ SWSDK_PRNG											= 0x4703
 				.endm
 				
 				.globl	SWSDK_Init
+				.globl	SWSDK_RenderString

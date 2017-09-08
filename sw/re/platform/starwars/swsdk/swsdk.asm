@@ -62,3 +62,58 @@ SWSDK_Init::
 				sta			SWSDK_LED3
 				SWSDK_ACK_IRQ
 				rts
+
+; copied verbatim from the ROM
+; X=msg ptr, Y=display list
+; uses DP:0,1
+SWSDK_RenderString::
+				ldb			,x+															; chr
+				stx			*0															; save ptr
+				aslb																		; word offset
+				cmpb		#0x82														; pre-alpha?
+				bcs			1$															; yes, go
+				ldx			#SWSDK_Font+0x0014
+				andb		#0x7F
+				bra			render_chr
+1$:			cmpb		#0x74														; colon?
+				bne			2$															; no, skip
+				ldx			#SWSDK_Font-0x0024
+				bra			render_chr
+2$:			cmpb		0x80														; '@'? ==(C)
+				bne			3$															; no, skip
+				ldx			#SWSDK_Font+0x56
+				clrb
+				bra			render_chr
+3$:			cmpb		#0x60														; pre-digit?
+				bcs			4$															; yes, skip
+				ldx			#SWSDK_Font-0x005E
+				bra			render_chr
+4$:			cmpb		#0x40														; ' '?
+				bne			5$															; no, skip
+				ldx			#SWSDK_Font-0x0040
+				bra			render_chr
+5$:			cmpb		#0x4E														; quote?
+				bne			6$															; no, skip
+				ldx			#SWSDK_Font-0x0004
+				bra			render_chr
+6$:			cmpb		#0x58														; ','?
+				bne			7$															; no, skip
+				ldx			#SWSDK_Font-0x000C
+				bra			render_chr
+7$:			cmpb		#0x5A														; '-'?
+				bne			8$															; no, skip
+				ldx			#SWSDK_Font
+				bra			render_chr
+8$:			cmpb		#0x4A														; '%'? ==1/2
+				bne			9$															; no, skip
+				ldx			#SWSDK_Font+0x000A
+				bra			render_chr
+9$:			ldx			#SWSDK_Font-0x000E
+render_chr:
+				ldd			b,x															; get JSRL instruction
+				std			,y++														; write to display list
+				ldx			*0															; restore msg ptr
+				tst			-1,x														; end of msg?
+				bpl			SWSDK_RenderString							; no, loop
+				rts				
+				
