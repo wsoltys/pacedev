@@ -12,5 +12,7 @@
 ; *** derived - do not edit
 ; *** end of derived
 
+        .org    0xF000
+
 SWSDK_Init::
 				rts

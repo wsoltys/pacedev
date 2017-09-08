@@ -2,12 +2,14 @@
 
 TARGET = ex1
 
+MAME_ROMS = 136021.206.1m
+
 # compiler, linker and utilities
 AS = ./as6809
 LD = ./aslink
 HEX2BIN = ./hex2bin
 ECHO = @echo
-CP = copy
+CP = cp
 RM = rm
 MD = mkdir
 OBJC = objcopy
@@ -18,7 +20,10 @@ LDFLAGS = -i -u -m
 
 OBJS = $(TARGET).rel swsdk.rel cpuvecs.rel
 
-all: $(TARGET).rom
+all: $(MAME_ROMS)
+
+$(MAME_ROMS): $(TARGET).rom
+	$(CP) $(TARGET).rom roms/starwars/136021.206.1m
 
 %.rom: %.ihx
 	$(HEX2BIN) -e rom $<
@@ -34,7 +39,7 @@ clean:
 	$(ECHO) Deleting intermediate files...
 	$(RM) -f *.rel
 	$(RM) -f *.ihx
-	$(RM) -f *.rom
 	$(ECHO) Deleting executables...
-	$(RM) -f $(TARGET).bin
+	$(RM) -f $(TARGET).rom
+	$(RM) -f $(MAMEROMS)
   
