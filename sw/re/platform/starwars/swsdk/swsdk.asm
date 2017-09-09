@@ -1,6 +1,6 @@
 
 				.list		(meb)										; macro expansion binary
-       	.area   _CODE (ABS, OVR)
+       	.area   CODE (ABS,OVR)
 				.module swsdk
 				
 .include "swsdk.inc"
@@ -16,7 +16,7 @@
 
 SWSDK_Init::
 				; this is exactly what the original ROM does
-				orcc		#0x10
+				orcc		#(1<<4)													; disable interrupts
 				clr			SWSDK_BankSwitch
 				lda			#0
 				sta			SWSDK_LED1

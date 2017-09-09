@@ -94,19 +94,6 @@ SWSDK_Bank1End									= 0x7FFF
 SWSDK_CpuROMStart								= 0x8000
 SWSDK_CpuROMEnd									= 0xFFFF
 
-; Hardware I/O
-
-SWSDK_AVGGo											= 0x4600
-SWSDK_AVGReset									= 0x4620
-SWSDK_Watchdog									= 0x4640
-SWSDK_IRQAck										= 0x4660
-SWSDK_LED3											= 0x4682
-SWSDK_LED2											= 0x4683
-SWSDK_BankSwitch								= 0x4684
-SWSDK_PRNGReset									= 0x4685
-SWSDK_LED1											= 0x4686
-SWSDK_PRNG											= 0x4703
-
 ; Vector ROM addresses
 
 SWSDK_Font 											= 0x3002				; font table & renders character set
@@ -124,7 +111,30 @@ SWSDK_DeathStarFocusLensOutline	= 0x3B64
 SWSDK_DeathStarFocusLensPanels	= 0x3BB4
 SWSDK_DeathStarPanels						= 0x3C0C
 
+; Hardware I/O
 
+SWSDK_IN1												= 0x4320
+	SWSDK_IN1_AVG_HALT						= (1<<6)
+SWSDK_AVGGo											= 0x4600
+SWSDK_AVGReset									= 0x4620
+SWSDK_Watchdog									= 0x4640
+SWSDK_IRQAck										= 0x4660
+SWSDK_LED3											= 0x4682
+SWSDK_LED2											= 0x4683
+SWSDK_BankSwitch								= 0x4684
+SWSDK_PRNGReset									= 0x4685
+SWSDK_LED1											= 0x4686
+SWSDK_PRNG											= 0x4703
+
+				.macro SWSDK_AVG_HALTED
+				lda			SWSDK_IN1
+				bita		#SWSDK_IN1_AVG_HALT
+				.endm
+				
+				.macro SWSDK_GO_AVG
+				sta			SWSDK_AVGGo
+				.endm
+				
 				.macro SWSDK_RESET_AVG
 				sta			SWSDK_AVGReset
 				.endm
