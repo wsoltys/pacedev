@@ -25,97 +25,52 @@ RESET::
 				ldy			#SWSDK_VectorRAMStart
 
 				; death star
-				ldx			#0x8040													; CNTR
-				stx			,y++
-				ldx			#0x7500													; SCAL BIN=5,LIN=0
-				stx			,y++
-				ldx			#0xA000|(SWSDK_DeathStarOutline>>1)
-				stx			,y++
-				ldx			#0x7500													; SCAL BIN=5,LIN=0
-				stx			,y++
-				ldx			#0xA000|(SWSDK_DeathStarEquator>>1)
-				stx			,y++
-				ldx			#0x7500													; SCAL BIN=5,LIN=0
-				stx			,y++
-				ldx			#0xA000|(SWSDK_DeathStarFocusLensOutline>>1)
-				stx			,y++
-				ldx			#0x7500													; SCAL BIN=5,LIN=0
-				stx			,y++
-				ldx			#0xA000|(SWSDK_DeathStarFocusLensPanels>>1)
-				stx			,y++
-				ldx			#0x7500													; SCAL BIN=5,LIN=0
-				stx			,y++
-				ldx			#0xA000|(SWSDK_DeathStarPanels>>1)
-				stx			,y++
+				SWSDK_CNTR
+				SWSDK_SCAL 5,0
+				SWSDK_JSRL SWSDK_DeathStarOutline
+				SWSDK_SCAL 5,0
+				SWSDK_JSRL SWSDK_DeathStarEquator
+				SWSDK_SCAL 5,0
+				SWSDK_JSRL SWSDK_DeathStarFocusLensOutline
+				SWSDK_SCAL 5,0
+				SWSDK_JSRL SWSDK_DeathStarFocusLensPanels
+				SWSDK_SCAL 5,0
+				SWSDK_JSRL SWSDK_DeathStarPanels
 
 				; font
-				ldx			#0x8040													; CNTR
-				stx			,y++
-				ldx			#0x7200													; SCAL BIN=2,LIN=0
-				stx			,y++
-				ldx			#0x1F98													; VCTR (word1)
-				stx			,y++
-				ldx			#0x1E00													; VCTR (word2)
-				stx			,y++
-				ldx			#0x7200													; SCAL BIN=2,LIN=0
-				stx			,y++
-				ldx			#0x6280													; COLOR C=2,Z=128
-				stx			,y++
-				ldx			#0xA000|(0x3002>>1)							; JSRL $3002
-				stx			,y++
+				SWSDK_CNTR
+				SWSDK_SCAL 2,0
+				SWSDK_VCTR 0x1E00,0x1F98,0
+				SWSDK_COLOR SWSDK_GREEN,128
+				SWSDK_JSRL 0x3002
 				
 				; font
-				ldx			#0x8040													; CNTR
-				stx			,y++
-				ldx			#0x7200													; SCAL BIN=2,LIN=0
-				stx			,y++
-				ldx			#0x1F58													; VCTR (word1)
-				stx			,y++
-				ldx			#0x1E00													; VCTR (word2)
-				stx			,y++
-				ldx			#0x7240													; SCAL BIN=2,LIN=40
-				stx			,y++
-				ldx			#0x6180													; COLOR C=2,Z=128
-				stx			,y++
-				ldx			#0xA000|(0x3002>>1)							; JSRL $3002
-				stx			,y++
+				SWSDK_CNTR
+				SWSDK_SCAL 2,0
+				SWSDK_VCTR 0x1E00,0x1F58,0
+				SWSDK_SCAL 2,0x40
+				SWSDK_COLOR SWSDK_BLUE,128
+				SWSDK_JSRL 0x3002
 				
 				; font
-				ldx			#0x8040													; CNTR
-				stx			,y++
-				ldx			#0x7200													; SCAL BIN=2,LIN=0
-				stx			,y++
-				ldx			#0x1F18													; VCTR (word1)
-				stx			,y++
-				ldx			#0x1E00													; VCTR (word2)
-				stx			,y++
-				ldx			#0x7280													; SCAL BIN=2,LIN=80
-				stx			,y++
-				ldx			#0x6480													; COLOR C=4,Z=128
-				stx			,y++
-				ldx			#0xA000|(0x3002>>1)							; JSRL $3002
-				stx			,y++
+				SWSDK_CNTR
+				SWSDK_SCAL 2,0
+				SWSDK_VCTR 0x1E00,0x1F18,0
+				SWSDK_SCAL 2,0x80
+				SWSDK_COLOR SWSDK_RED,128
+				SWSDK_JSRL 0x3002
 
 				; SDK
-				ldx			#0x8040													; CNTR
-				stx			,y++
-				ldx			#0x7200													; SCAL BIN=2,LIN=0
-				stx			,y++
-				ldx			#0x1E98													; VCTR (word1)
-				stx			,y++
-				ldx			#0x1F00													; VCTR (word2)
-				stx			,y++
-				ldx			#0x7200													; SCAL BIN=2,LIN=0
-				stx			,y++
-				ldx			#0x6280													; COLOR C=2,Z=128
-				stx			,y++
+				SWSDK_CNTR
+				SWSDK_SCAL 2,0
+				SWSDK_VCTR 0x1F00,0x1E98,0
+				SWSDK_COLOR SWSDK_GREEN,128
 				ldx			#sdk_msg
 				jsr			SWSDK_RenderString
 
-				ldx			#0xE000|(0x0000>>1)							; JMPL $0
-				stx			,y++
-				sta			SWSDK_AVGGo
+				SWSDK_JMPL 0
 
+				sta			SWSDK_AVGGo
 9$:     		
       	SWSDK_KICK_WDOG
 				bra			9$

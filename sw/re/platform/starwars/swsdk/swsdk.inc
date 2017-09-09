@@ -1,6 +1,59 @@
 ; Star Wars SDK
 ;
 
+SWSDK_OP_VCTR 									= 0x0000
+SWSDK_OP_HALT										= 0x2000
+SWSDK_OP_SVEC										= 0x4000
+SWSDK_OP_COLOR									= 0x6000
+SWSDK_OP_SCAL										= 0x7000
+SWSDK_OP_CNTR										= 0X8040
+SWSDK_OP_JSRL 									= 0xA000
+SWSDK_OP_RTSL										= 0xC000
+SWSDK_OP_JMPL										= 0xE000
+
+				.macro SWSDK_VCTR dx,dy,z
+				ldd			#SWSDK_OP_VCTR | (dy&0x1FFF)
+				std			,y++
+				ldd			#((z&0x07)<<13) | (dx&0x1FFF)
+				std			,y++
+				.endm
+				
+				.macro SWSDK_HALT
+				ldd			#SWSDK_OP_HALT
+				std			,y++
+				.endm
+
+				.macro SWSDK_COLOR color,zstat
+				ldd			#SWSDK_OP_COLOR | ((color&0x0F)<<8) | (zstat&0xFF) 
+				std			,y++
+				.endm
+
+				.macro SWSDK_SCAL bin,lin
+				ldd			#SWSDK_OP_SCAL | ((bin&0x07)<<8) | (lin&0xFF)
+				std			,y++
+				.endm
+				
+				.macro SWSDK_CNTR
+				ldd			#SWSDK_OP_CNTR
+				std			,y++
+				.endm
+
+				.macro SWSDK_JSRL addr
+				ldd			#SWSDK_OP_JSRL | ((addr&0x3FFF)>>1)
+				std			,y++
+				.endm
+				
+				.macro SWSDK_JMPL addr
+				ldd			#SWSDK_OP_JMPL | ((addr&0x3FFF)>>1)
+				std			,y++
+				.endm
+				
+SWSDK_WHITE											= 7
+SWSDK_YELLOW										= 6
+SWSDK_RED												= 4
+SWSDK_GREEN											= 2
+SWSDK_BLUE											= 1
+												
 ; Vector ROM addresses
 
 SWSDK_Font 											= 0x3002
