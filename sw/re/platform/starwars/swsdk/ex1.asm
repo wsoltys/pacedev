@@ -25,6 +25,8 @@ RESET::
 				ldy			#SWSDK_VectorRAMStart
 
 				; death star
+				; since all deathstar routines reset SCAL
+				; we need to set SCAL before every routine call
 				SWSDK_CNTR
 				SWSDK_SCAL 5,0
 				SWSDK_JSRL SWSDK_DeathStarOutline
@@ -37,30 +39,30 @@ RESET::
 				SWSDK_SCAL 5,0
 				SWSDK_JSRL SWSDK_DeathStarPanels
 
-				; font
+				; font in green
 				SWSDK_CNTR
 				SWSDK_SCAL 2,0
 				SWSDK_VCTR -512,-104,0
 				SWSDK_COLOR SWSDK_GREEN,128
-				SWSDK_JSRL 0x3002
+				SWSDK_JSRL SWSDK_Font
 				
-				; font
+				; font in blue
 				SWSDK_CNTR
 				SWSDK_SCAL 2,0
 				SWSDK_VCTR -512,-168,0
-				SWSDK_SCAL 2,0x40
+				SWSDK_SCAL 2,64
 				SWSDK_COLOR SWSDK_BLUE,128
-				SWSDK_JSRL 0x3002
+				SWSDK_JSRL SWSDK_Font
 				
-				; font
+				; font in red
 				SWSDK_CNTR
 				SWSDK_SCAL 2,0
 				SWSDK_VCTR -512,-232,0
-				SWSDK_SCAL 2,0x80
+				SWSDK_SCAL 2,128
 				SWSDK_COLOR SWSDK_RED,128
-				SWSDK_JSRL 0x3002
+				SWSDK_JSRL SWSDK_Font
 
-				; SDK
+				; SDK message
 				SWSDK_CNTR
 				SWSDK_SCAL 2,0
 				SWSDK_VCTR -256,-360,0
