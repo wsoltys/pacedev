@@ -1,6 +1,7 @@
 
 				.list		(meb)										; macro expansion binary
-       	.area   CODE (ABS,OVR)
+				.bank   ROM (BASE=0xE000,SIZE=0x1FE0)
+       	.area   ROM (REL,CON,BANK=ROM)
 				.module swsdk
 				
 .include "swsdk.inc"
@@ -11,8 +12,6 @@
 
 ; *** derived - do not edit
 ; *** end of derived
-
-        .org    0xF000
 
 SWSDK_Init::
 				; this is exactly what the original ROM does

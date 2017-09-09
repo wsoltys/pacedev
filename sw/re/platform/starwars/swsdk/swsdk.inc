@@ -1,5 +1,13 @@
-; Star Wars SDK
 ;
+; Star Wars SDK
+; msmcdoug@gmail.com
+;
+
+SDSDK_VERSION										= 0x0001
+
+				.macro SWSDK_SZ_VERSION
+				.asciz		"0.0.1"
+				.endm
 
 SWSDK_OP_VCTR 									= 0x0000
 SWSDK_OP_HALT										= 0x2000

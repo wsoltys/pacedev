@@ -14,15 +14,15 @@
 ; *** derived - do not edit
 ; *** end of derived
 
-				.area		DATA (ABS,OVR)
+				.area		DATA (ABS,CON)
 				.org		SWSDK_CpuRAMStart
 
 								.ds			256											; for DP (MAIN)
 								.ds			256											; for DP (IRQ)
 msgy:						.ds			2
 
-       	.area   CODE (ABS,OVR)
-        .org    0xE000
+				.bank   ROM (BASE=0xE000,SIZE=0x1FE0)
+       	.area   ROM (REL,CON,BANK=ROM)
 
 RESET::
        

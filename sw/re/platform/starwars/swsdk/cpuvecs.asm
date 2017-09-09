@@ -3,7 +3,7 @@
 ; 6809 CPU vectors
 
 				.list		(meb)										; macro expansion binary
-       	.area   CODE (ABS,OVR)
+       	.area   CPUVECS (ABS,OVR)
 				.module cpuvecs
 
 				.globl 	IRQ
