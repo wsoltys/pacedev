@@ -12790,14 +12790,14 @@ MATHW:4700	       ; Segment type: Regular
 MATHW:4700			       .area MATHW
 MATHW:4700			       .org 0x4700
 MATHW:4700	       ; assume	dp = 0
-MATHW:4700 ??	       MW0:	       .ds 1					       ; DATA XREF: sub_A459+1Br
+MATHW:4700 ??	       MW0_DIV_REH:    .ds 1					       ; DATA XREF: sub_A459+1Br
 MATHW:4700									       ; sub_A591+1EBr	...
-MATHW:4701 ??	       MW1:	       .ds 1
+MATHW:4701 ??	       MW1_DIV_REL:    .ds 1
 MATHW:4702 ??	       MW2:	       .ds 1
 MATHW:4703 ??	       PRNG:	       .ds 1
 MATHW:4704 ??	       DVSRH:	       .ds 1					       ; DATA XREF: sub_7765+5w
 MATHW:4704									       ; sub_77A4+5w ...
-MATHW:4705 ??	       DVSR1:	       .ds 1
+MATHW:4705 ??	       DVSRL:	       .ds 1
 MATHW:4706 ??	       DVDDH:	       .ds 1					       ; DATA XREF: sub_61B5+33w
 MATHW:4706									       ; sub_A591:loc_A76Bw ...
 MATHW:4707 ??	       DVDDL:	       .ds 1
@@ -21347,7 +21347,7 @@ BANK0:6F01 BF 4B 32		       stx     unk_4B32
 BANK0:6F04 4F			       clra
 BANK0:6F05 E6 02		       ldb     2,x
 BANK0:6F07 CB 03		       addb    #3
-BANK0:6F09 FD 47 01		       std     MW1
+BANK0:6F09 FD 47 01		       std     MW1_DIV_REL
 BANK0:6F0C 86 67		       lda     #0x67 ; 'g'
 BANK0:6F0E BD CD BA		       jsr     go_math_and_wait
 BANK0:6F11 B6 50 00		       lda     word_5000
@@ -21809,7 +21809,7 @@ BANK0:7176
 BANK0:7176	       loc_7176:						       ; CODE XREF: sub_7160+Bj
 BANK0:7176 4F			       clra
 BANK0:7177 C6 05		       ldb     #5
-BANK0:7179 FD 47 01		       std     MW1
+BANK0:7179 FD 47 01		       std     MW1_DIV_REL
 BANK0:717C 86 0E		       lda     #0xE
 BANK0:717E BD CD BA		       jsr     go_math_and_wait
 BANK0:7181
@@ -21826,7 +21826,7 @@ BANK0:7197
 BANK0:7197	       loc_7197:						       ; CODE XREF: sub_7160+2Cj
 BANK0:7197 4F			       clra
 BANK0:7198 C6 05		       ldb     #5
-BANK0:719A FD 47 01		       std     MW1
+BANK0:719A FD 47 01		       std     MW1_DIV_REL
 BANK0:719D 86 1C		       lda     #0x1C
 BANK0:719F BD CD BA		       jsr     go_math_and_wait
 BANK0:71A2
@@ -21843,7 +21843,7 @@ BANK0:71B8
 BANK0:71B8	       loc_71B8:						       ; CODE XREF: sub_7160+4Dj
 BANK0:71B8 4F			       clra
 BANK0:71B9 C6 05		       ldb     #5
-BANK0:71BB FD 47 01		       std     MW1
+BANK0:71BB FD 47 01		       std     MW1_DIV_REL
 BANK0:71BE 86 00		       lda     #0
 BANK0:71C0 BD CD BA		       jsr     go_math_and_wait
 BANK0:71C3
@@ -22852,7 +22852,7 @@ BANK0:7881 9E 64		       ldx     byte_64
 BANK0:7883 4F			       clra
 BANK0:7884 E6 02		       ldb     2,x
 BANK0:7886 CB 03		       addb    #3
-BANK0:7888 FD 47 01		       std     MW1
+BANK0:7888 FD 47 01		       std     MW1_DIV_REL
 BANK0:788B 86 67		       lda     #0x67 ; 'g'
 BANK0:788D BD CD BA		       jsr     go_math_and_wait
 BANK0:7890 B6 50 00		       lda     word_5000
@@ -25880,7 +25880,7 @@ ROM:8620 FD 50 7A		     std     word_507A
 ROM:8623 EC 42			     ldd     2,u
 ROM:8625 FD 50 7C		     std     word_507C
 ROM:8628 CC 00 0F		     ldd     #0xF
-ROM:862B FD 47 01		     std     MW1
+ROM:862B FD 47 01		     std     MW1_DIV_REL
 ROM:862E 86 67			     lda     #0x67 ; 'g'
 ROM:8630 BD CD BA		     jsr     go_math_and_wait
 ROM:8633 FC 50 00		     ldd     word_5000
@@ -25915,7 +25915,7 @@ ROM:8669 FD 50 78		     std     word_5078
 ROM:866C
 ROM:866C	     loc_866C:							     ; CODE XREF: sub_85F9+6Ej
 ROM:866C CC 00 0F		     ldd     #0xF
-ROM:866F FD 47 01		     std     MW1
+ROM:866F FD 47 01		     std     MW1_DIV_REL
 ROM:8672 86 67			     lda     #0x67 ; 'g'
 ROM:8674 BD CD BA		     jsr     go_math_and_wait
 ROM:8677 FC 50 00		     ldd     word_5000
@@ -25986,7 +25986,7 @@ ROM:86D5 FD 50 7A		     std     word_507A
 ROM:86D8 EC 42			     ldd     2,u
 ROM:86DA FD 50 7C		     std     word_507C
 ROM:86DD CC 00 0F		     ldd     #0xF
-ROM:86E0 FD 47 01		     std     MW1
+ROM:86E0 FD 47 01		     std     MW1_DIV_REL
 ROM:86E3 86 67			     lda     #0x67 ; 'g'
 ROM:86E5 BD CD BA		     jsr     go_math_and_wait
 ROM:86E8 FC 50 00		     ldd     word_5000
@@ -26001,7 +26001,7 @@ ROM:86F5 FD 50 7A		     std     word_507A
 ROM:86F8 EC 42			     ldd     2,u
 ROM:86FA FD 50 7C		     std     word_507C
 ROM:86FD CC 00 0F		     ldd     #0xF
-ROM:8700 FD 47 01		     std     MW1
+ROM:8700 FD 47 01		     std     MW1_DIV_REL
 ROM:8703 86 67			     lda     #0x67 ; 'g'
 ROM:8705 BD CD BA		     jsr     go_math_and_wait
 ROM:8708 FC 50 00		     ldd     word_5000
@@ -26169,7 +26169,7 @@ ROM:8811 B3 50 98		     subd    word_5098
 ROM:8814 83 70 00		     subd    #0x7000
 ROM:8817 10 2A 00 83		     lbpl    locret_889E
 ROM:881B CC 00 0F		     ldd     #0xF
-ROM:881E FD 47 01		     std     MW1
+ROM:881E FD 47 01		     std     MW1_DIV_REL
 ROM:8821 86 67			     lda     #0x67 ; 'g'
 ROM:8823 BD CD BA		     jsr     go_math_and_wait
 ROM:8826 FC 50 02		     ldd     word_5002
@@ -26191,7 +26191,7 @@ ROM:8844 BD CD 08		     jsr     sub_CD08
 ROM:8847 CC 00 00		     ldd     #0
 ROM:884A FD 50 7C		     std     word_507C
 ROM:884D CC 00 0F		     ldd     #0xF
-ROM:8850 FD 47 01		     std     MW1
+ROM:8850 FD 47 01		     std     MW1_DIV_REL
 ROM:8853 86 67			     lda     #0x67 ; 'g'
 ROM:8855 BD CD BA		     jsr     go_math_and_wait
 ROM:8858 FC 50 00		     ldd     word_5000
@@ -26254,7 +26254,7 @@ ROM:88AF FD 5E 02		     std     word_5E02
 ROM:88B2 DC 96			     ldd     byte_96
 ROM:88B4 FD 5E 00		     std     word_5E00
 ROM:88B7 CC 01 C0		     ldd     #0x1C0
-ROM:88BA FD 47 01		     std     MW1
+ROM:88BA FD 47 01		     std     MW1_DIV_REL
 ROM:88BD 86 67			     lda     #0x67 ; 'g'
 ROM:88BF BD CD BA		     jsr     go_math_and_wait
 ROM:88C2 FC 50 00		     ldd     word_5000
@@ -26317,7 +26317,7 @@ ROM:8914 FD 50 7C		     std     word_507C
 ROM:8917 CC FC 00		     ldd     #0xFC00
 ROM:891A FD 50 7A		     std     word_507A
 ROM:891D CC 00 0F		     ldd     #0xF
-ROM:8920 FD 47 01		     std     MW1
+ROM:8920 FD 47 01		     std     MW1_DIV_REL
 ROM:8923 86 67			     lda     #0x67 ; 'g'
 ROM:8925 BD CD BA		     jsr     go_math_and_wait
 ROM:8928 FC 50 00		     ldd     word_5000
@@ -26326,7 +26326,7 @@ ROM:892E BD CC E4		     jsr     sub_CCE4
 ROM:8931 CC 04 00		     ldd     #0x400
 ROM:8934 FD 50 7A		     std     word_507A
 ROM:8937 CC 00 0F		     ldd     #0xF
-ROM:893A FD 47 01		     std     MW1
+ROM:893A FD 47 01		     std     MW1_DIV_REL
 ROM:893D 86 67			     lda     #0x67 ; 'g'
 ROM:893F BD CD BA		     jsr     go_math_and_wait
 ROM:8942 FC 50 00		     ldd     word_5000
@@ -26485,7 +26485,7 @@ ROM:89C8	     sub_89C8:							     ; CODE XREF: sub_8961+5J
 ROM:89C8									     ; sub_8969+5J ...
 ROM:89C8 4F			     clra
 ROM:89C9 E6 02			     ldb     2,x
-ROM:89CB FD 47 01		     std     MW1
+ROM:89CB FD 47 01		     std     MW1_DIV_REL
 ROM:89CE 86 00			     lda     #0
 ROM:89D0 7E CD BA		     jmp     go_math_and_wait
 ROM:89D0	     ; End of function sub_89C8
@@ -26497,7 +26497,7 @@ ROM:89D3	     loc_89D3:							     ; CODE XREF: sub_8951+5J
 ROM:89D3									     ; sub_8959+5J
 ROM:89D3 4F			     clra
 ROM:89D4 E6 02			     ldb     2,x
-ROM:89D6 FD 47 01		     std     MW1
+ROM:89D6 FD 47 01		     std     MW1_DIV_REL
 ROM:89D9 86 0E			     lda     #0xE
 ROM:89DB 7E CD BA		     jmp     go_math_and_wait
 ROM:89DB	     ; END OF FUNCTION CHUNK FOR sub_8951
@@ -26508,7 +26508,7 @@ ROM:89DE	     loc_89DE:							     ; CODE XREF: sub_8971+5J
 ROM:89DE									     ; sub_8979+5J
 ROM:89DE 4F			     clra
 ROM:89DF E6 02			     ldb     2,x
-ROM:89E1 FD 47 01		     std     MW1
+ROM:89E1 FD 47 01		     std     MW1_DIV_REL
 ROM:89E4 86 1C			     lda     #0x1C
 ROM:89E6 7E CD BA		     jmp     go_math_and_wait
 ROM:89E6	     ; END OF FUNCTION CHUNK FOR sub_8971
@@ -26955,7 +26955,7 @@ ROM:8C57 9E 5A			     ldx     byte_5A
 ROM:8C59 6F 0A			     clr     0xA,x
 ROM:8C5B 4F			     clra
 ROM:8C5C C6 13			     ldb     #0x13
-ROM:8C5E FD 47 01		     std     MW1
+ROM:8C5E FD 47 01		     std     MW1_DIV_REL
 ROM:8C61 A6 88 11		     lda     0x11,x
 ROM:8C64 85 40			     bita    #0x40 ; '@'
 ROM:8C66 27 19			     beq     loc_8C81
@@ -32133,7 +32133,7 @@ ROM:A260 FD 5E 02		     std     word_5E02
 ROM:A263 CC 1E 00		     ldd     #0x1E00
 ROM:A266 FD 5E 04		     std     word_5E04
 ROM:A269 CC 01 C0		     ldd     #0x1C0
-ROM:A26C FD 47 01		     std     MW1
+ROM:A26C FD 47 01		     std     MW1_DIV_REL
 ROM:A26F 86 67			     lda     #0x67 ; 'g'
 ROM:A271 BD CD BA		     jsr     go_math_and_wait
 ROM:A274 FC 50 00		     ldd     word_5000
@@ -32407,7 +32407,7 @@ ROM:A415 FD 50 7A		     std     word_507A
 ROM:A418 DC B5			     ldd     byte_B5
 ROM:A41A FD 50 7C		     std     word_507C
 ROM:A41D CC 00 0F		     ldd     #0xF
-ROM:A420 FD 47 01		     std     MW1
+ROM:A420 FD 47 01		     std     MW1_DIV_REL
 ROM:A423 86 2A			     lda     #0x2A ; '*'
 ROM:A425 BD CD BA		     jsr     go_math_and_wait
 ROM:A428 FC 50 02		     ldd     word_5002
@@ -32453,7 +32453,7 @@ ROM:A468 FD 50 02		     std     word_5002
 ROM:A46B CC 00 00		     ldd     #0
 ROM:A46E B3 50 44		     subd    word_5044
 ROM:A471 FD 50 04		     std     word_5004
-ROM:A474 FC 47 00		     ldd     MW0
+ROM:A474 FC 47 00		     ldd     MW0_DIV_REH
 ROM:A477 FD 50 00		     std     word_5000
 ROM:A47A 86 86			     lda     #0x86 ; '†'
 ROM:A47C BD CD BA		     jsr     go_math_and_wait
@@ -32963,7 +32963,7 @@ ROM:A770 B3 50 98		     subd    word_5098
 ROM:A773 FD 47 04		     std     DVSRH
 ROM:A776 CC 02 00		     ldd     #0x200
 ROM:A779 FD 47 06		     std     DVDDH
-ROM:A77C B6 47 00		     lda     MW0
+ROM:A77C B6 47 00		     lda     MW0_DIV_REH
 ROM:A77F 48			     asla
 ROM:A780 48			     asla
 ROM:A781 24 01			     bcc     loc_A784
@@ -33845,7 +33845,7 @@ ROM:AB1D
 ROM:AB1D	     loc_AB1D:							     ; CODE XREF: sub_AAE4+2Bj
 ROM:AB1D 4F			     clra
 ROM:AB1E E6 02			     ldb     2,x
-ROM:AB20 FD 47 01		     std     MW1
+ROM:AB20 FD 47 01		     std     MW1_DIV_REL
 ROM:AB23 86 67			     lda     #0x67 ; 'g'
 ROM:AB25 BD CD BA		     jsr     go_math_and_wait
 ROM:AB28 FC 50 00		     ldd     word_5000
@@ -34315,7 +34315,7 @@ ROM:ADD4
 ROM:ADD4	     sub_ADD4:							     ; CODE XREF: sub_ADBD+8P
 ROM:ADD4									     ; sub_ADBD+13P
 ROM:ADD4 CC 00 0F		     ldd     #0xF
-ROM:ADD7 FD 47 01		     std     MW1
+ROM:ADD7 FD 47 01		     std     MW1_DIV_REL
 ROM:ADDA 86 67			     lda     #0x67 ; 'g'
 ROM:ADDC BD CD BA		     jsr     go_math_and_wait
 ROM:ADDF FC 50 00		     ldd     word_5000
@@ -34348,7 +34348,7 @@ ROM:AE11
 ROM:AE11	     loc_AE11:							     ; CODE XREF: sub_ADD4+37j
 ROM:AE11 B3 50 00		     subd    word_5000
 ROM:AE14 2C 49			     bge     locret_AE5F
-ROM:AE16 FC 47 00		     ldd     MW0
+ROM:AE16 FC 47 00		     ldd     MW0_DIV_REH
 ROM:AE19 FD 50 00		     std     word_5000
 ROM:AE1C 86 86			     lda     #0x86 ; '†'
 ROM:AE1E BD CD BA		     jsr     go_math_and_wait
@@ -34776,7 +34776,7 @@ ROM:B0D4 FD 50 02		     std     word_5002
 ROM:B0D7 DC 01			     ldd     word_0+1
 ROM:B0D9 B3 50 40		     subd    word_5040
 ROM:B0DC FD 50 04		     std     word_5004
-ROM:B0DF FC 47 00		     ldd     MW0
+ROM:B0DF FC 47 00		     ldd     MW0_DIV_REH
 ROM:B0E2 FD 50 00		     std     word_5000
 ROM:B0E5 86 86			     lda     #0x86 ; '†'
 ROM:B0E7 BD CD BA		     jsr     go_math_and_wait
@@ -34856,7 +34856,7 @@ ROM:B177 FD 50 04		     std     word_5004
 ROM:B17A DC 01			     ldd     word_0+1
 ROM:B17C B3 50 40		     subd    word_5040
 ROM:B17F FD 50 02		     std     word_5002
-ROM:B182 FC 47 00		     ldd     MW0
+ROM:B182 FC 47 00		     ldd     MW0_DIV_REH
 ROM:B185 FD 50 00		     std     word_5000
 ROM:B188 86 86			     lda     #0x86 ; '†'
 ROM:B18A BD CD BA		     jsr     go_math_and_wait
@@ -34915,7 +34915,7 @@ ROM:B1F8 FD 50 04		     std     word_5004
 ROM:B1FB DC 01			     ldd     word_0+1
 ROM:B1FD B3 50 40		     subd    word_5040
 ROM:B200 FD 50 02		     std     word_5002
-ROM:B203 FC 47 00		     ldd     MW0
+ROM:B203 FC 47 00		     ldd     MW0_DIV_REH
 ROM:B206 FD 50 00		     std     word_5000
 ROM:B209 86 86			     lda     #0x86 ; '†'
 ROM:B20B BD CD BA		     jsr     go_math_and_wait
@@ -35362,7 +35362,7 @@ ROM:B489 10 26 00 89		     lbne    loc_B516
 ROM:B48D 96 9D			     lda     byte_9D
 ROM:B48F 97 DC			     sta     byte_DC
 ROM:B491 CC 00 0F		     ldd     #0xF
-ROM:B494 FD 47 01		     std     MW1
+ROM:B494 FD 47 01		     std     MW1_DIV_REL
 ROM:B497 86 67			     lda     #0x67 ; 'g'
 ROM:B499 BD CD BA		     jsr     go_math_and_wait
 ROM:B49C 96 9C			     lda     byte_9C
@@ -35539,7 +35539,7 @@ ROM:B5C3 10 26 00 89		     lbne    loc_B650
 ROM:B5C7 96 9D			     lda     byte_9D
 ROM:B5C9 97 DC			     sta     byte_DC
 ROM:B5CB CC 00 0F		     ldd     #0xF
-ROM:B5CE FD 47 01		     std     MW1
+ROM:B5CE FD 47 01		     std     MW1_DIV_REL
 ROM:B5D1 86 67			     lda     #0x67 ; 'g'
 ROM:B5D3 BD CD BA		     jsr     go_math_and_wait
 ROM:B5D6 96 9C			     lda     byte_9C
@@ -36123,7 +36123,7 @@ ROM:B95F FD 50 22		     std     word_5022
 ROM:B962 CC 3C 8C		     ldd     #0x3C8C
 ROM:B965 FD 50 24		     std     word_5024
 ROM:B968 CC 00 18		     ldd     #0x18
-ROM:B96B FD 47 01		     std     MW1
+ROM:B96B FD 47 01		     std     MW1_DIV_REL
 ROM:B96E 86 00			     lda     #0
 ROM:B970 BD CD BA		     jsr     go_math_and_wait
 ROM:B973 CC 05 90		     ldd     #0x590
@@ -36131,7 +36131,7 @@ ROM:B976 FD 50 22		     std     word_5022
 ROM:B979 CC 3F C2		     ldd     #0x3FC2
 ROM:B97C FD 50 24		     std     word_5024
 ROM:B97F CC 00 18		     ldd     #0x18
-ROM:B982 FD 47 01		     std     MW1
+ROM:B982 FD 47 01		     std     MW1_DIV_REL
 ROM:B985 86 0E			     lda     #0xE
 ROM:B987 BD CD BA		     jsr     go_math_and_wait
 ROM:B98A 39			     rts
@@ -36303,7 +36303,7 @@ ROM:BA39 FD 50 7A		     std     word_507A
 ROM:BA3C EC 04			     ldd     4,x
 ROM:BA3E FD 50 7C		     std     word_507C
 ROM:BA41 CC 00 0F		     ldd     #0xF
-ROM:BA44 FD 47 01		     std     MW1
+ROM:BA44 FD 47 01		     std     MW1_DIV_REL
 ROM:BA47 86 67			     lda     #0x67 ; 'g'
 ROM:BA49 BD CD BA		     jsr     go_math_and_wait
 ROM:BA4C FC 50 00		     ldd     word_5000
@@ -40280,7 +40280,7 @@ ROM:CDBA
 ROM:CDBA
 ROM:CDBA	     go_math_and_wait:						     ; CODE XREF: sub_6EA2+6CP
 ROM:CDBA									     ; sub_7160+1EP ...
-ROM:CDBA B7 47 00		     sta     MW0				     ; set PROM	address	and GO!
+ROM:CDBA B7 47 00		     sta     MW0_DIV_REH			     ; set PROM	address	and GO!
 ROM:CDBD
 ROM:CDBD	     wait_math:							     ; CODE XREF: go_math_and_wait+6j
 ROM:CDBD 7D 43 20		     tst     IN1				     ; math ready?
@@ -40342,7 +40342,7 @@ ROM:CE0C
 ROM:CE0C	     sub_CE0C:							     ; CODE XREF: BANK0:687CP
 ROM:CE0C									     ; BANK0:68F8P ...
 ROM:CE0C B7 47 02		     sta     MW2
-ROM:CE0F 7F 47 01		     clr     MW1
+ROM:CE0F 7F 47 01		     clr     MW1_DIV_REL
 ROM:CE12 86 77			     lda     #0x77 ; 'w'
 ROM:CE14 BD CD BA		     jsr     go_math_and_wait
 ROM:CE17 39			     rts
@@ -40355,7 +40355,7 @@ ROM:CE18
 ROM:CE18	     sub_CE18:							     ; CODE XREF: sub_7881+F3P
 ROM:CE18									     ; sub_BA12+2P
 ROM:CE18 B7 47 02		     sta     MW2
-ROM:CE1B 7F 47 01		     clr     MW1
+ROM:CE1B 7F 47 01		     clr     MW1_DIV_REL
 ROM:CE1E 86 80			     lda     #0x80 ; '€'                             ; math PROM address
 ROM:CE20 BD CD BA		     jsr     go_math_and_wait
 ROM:CE23 39			     rts
@@ -40368,7 +40368,7 @@ ROM:CE24
 ROM:CE24	     sub_CE24:							     ; CODE XREF: BANK0:6C9FP
 ROM:CE24									     ; sub_6DD2+1BP ...
 ROM:CE24 CC 00 10		     ldd     #0x10
-ROM:CE27 FD 47 01		     std     MW1
+ROM:CE27 FD 47 01		     std     MW1_DIV_REL
 ROM:CE2A 86 00			     lda     #0					     ; math PROM address
 ROM:CE2C 7E CD BA		     jmp     go_math_and_wait
 ROM:CE2C	     ; End of function sub_CE24
@@ -40379,7 +40379,7 @@ ROM:CE2F
 ROM:CE2F
 ROM:CE2F	     sub_CE2F:							     ; CODE XREF: sub_70BD+BP
 ROM:CE2F CC 00 10		     ldd     #0x10
-ROM:CE32 FD 47 01		     std     MW1
+ROM:CE32 FD 47 01		     std     MW1_DIV_REL
 ROM:CE35 86 0E			     lda     #0xE				     ; math PROM address
 ROM:CE37 7E CD BA		     jmp     go_math_and_wait
 ROM:CE37	     ; End of function sub_CE2F
@@ -40390,7 +40390,7 @@ ROM:CE3A
 ROM:CE3A
 ROM:CE3A	     sub_CE3A:							     ; CODE XREF: sub_70CC+BP
 ROM:CE3A CC 00 10		     ldd     #0x10
-ROM:CE3D FD 47 01		     std     MW1
+ROM:CE3D FD 47 01		     std     MW1_DIV_REL
 ROM:CE40 86 1C			     lda     #0x1C				     ; math PROM address
 ROM:CE42 7E CD BA		     jmp     go_math_and_wait
 ROM:CE42	     ; End of function sub_CE3A
@@ -47105,8 +47105,8 @@ ROM:FB38 EC 84			     ldd     ,x
 ROM:FB3A FD 47 06		     std     DVDDH
 ROM:FB3D EC 02			     ldd     2,x
 ROM:FB3F FD 47 04		     std     DVSRH
-ROM:FB42 3D			     mul
-ROM:FB43 FC 47 00		     ldd     MW0
+ROM:FB42 3D			     mul					     ; delay
+ROM:FB43 FC 47 00		     ldd     MW0_DIV_REH
 ROM:FB46 10 A3 04		     cmpd    4,x
 ROM:FB49 6E E4			     jmp     ,s
 ROM:FB49	     ; ---------------------------------------------------------------------------
