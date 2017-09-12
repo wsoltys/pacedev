@@ -37,7 +37,7 @@ SWSDK_OP_JMPL										= 0xE000
 				std			,y++
 				.endm
 
-				; dx, dy signed 5 bits (-32..31)
+				; dx, dy signed 5 bits (-16..15)
 				; - but represent *half* the distance
 				; *** should this macro halve the parameter values???
 				; dz unsigned 3 bits (0..7)
@@ -152,10 +152,9 @@ SWSDK_MATH_OP_40								= 0x40
 SWSDK_MATH_OP_67								= 0x67
 SWSDK_MATH_OP_77								= 0x77
 SWSDK_MATH_OP_80								= 0x80
-; A=[$02,$01] B=[$0F] C=[$00]
-; Result [$02,$01] = (A-B)*C
+; A=[$01,$02] B=[$0F]=0 C=[$00]
+; Result [$01,$02] = A1C,A2C
 SWSDK_MATH_OP_86								= 0x86
-
 
 				.macro SWSDK_AVG_HALTED
 				lda			SWSDK_IN1

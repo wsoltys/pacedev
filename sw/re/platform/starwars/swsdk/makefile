@@ -1,6 +1,7 @@
 # platform options
 
-TARGET = ex1
+EXAMPLES = ex1 ex2
+TARGET = ex2
 
 MAME_ROMS = 136021.206.1m
 
@@ -18,9 +19,11 @@ MAKEFILE = makefile
 ASFLAGS = -l -o -s
 LDFLAGS = -i -u -m
 
-OBJS = $(TARGET).rel swsdk.rel cpuvecs.rel
+SDK_OBJS = swsdk.rel cpuvecs.rel
 
-all: $(MAME_ROMS)
+EX_ROMS = $(patsubst %,%.rom,$(EXAMPLES))
+
+all: $(EX_ROMS) $(MAME_ROMS)
 
 $(MAME_ROMS): $(TARGET).rom
 	$(CP) $(TARGET).rom roms/starwars/136021.206.1m
@@ -28,9 +31,9 @@ $(MAME_ROMS): $(TARGET).rom
 %.rom: %.ihx
 	$(HEX2BIN) -e rom $<
 
-$(TARGET).ihx: $(OBJS)
+%.ihx: %.rel $(SDK_OBJS)
 	$(ECHO) Linking $@...
-	$(LD) $(LDFLAGS) $@ $(OBJS)
+	$(LD) $(LDFLAGS) $@ $< $(SDK_OBJS)
 
 %.rel: %.asm $(MAKEFILE)
 	$(AS) $(ASFLAGS) $<
@@ -40,6 +43,6 @@ clean:
 	$(RM) -f *.rel
 	$(RM) -f *.ihx
 	$(ECHO) Deleting executables...
-	$(RM) -f $(TARGET).rom
+	$(RM) -f *.rom
 	$(RM) -f $(MAMEROMS)
   
