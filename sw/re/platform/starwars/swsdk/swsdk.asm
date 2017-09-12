@@ -115,4 +115,9 @@ render_chr:
 				tst			-1,x														; end of msg?
 				bpl			SWSDK_RenderString							; no, loop
 				rts				
-				
+
+SWSDK_GoMathAndWait::
+				sta			SWSDK_MATHW_MW0
+1$:			tst			SWSDK_IN1
+				bmi			1$				
+				rts				

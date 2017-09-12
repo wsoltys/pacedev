@@ -123,6 +123,7 @@ SWSDK_DeathStarPanels						= 0x3C0C
 
 SWSDK_IN1												= 0x4320
 	SWSDK_IN1_AVG_HALT						= (1<<6)
+	SWSDK_IN1_MATH_RUN						= (1<<7)
 SWSDK_AVGGo											= 0x4600
 SWSDK_AVGReset									= 0x4620
 SWSDK_Watchdog									= 0x4640
@@ -132,7 +133,29 @@ SWSDK_LED2											= 0x4683
 SWSDK_BankSwitch								= 0x4684
 SWSDK_PRNGReset									= 0x4685
 SWSDK_LED1											= 0x4686
-SWSDK_PRNG											= 0x4703
+SWSDK_MATHW_MW0									= 0x4700
+SWSDK_MATHW_MW1									= 0x4701
+SWSDK_MATHW_MW2									= 0x4702
+SWSDK_MATHW_PRNG								= 0x4703
+SWSDK_MATHW_DVSRH								= 0x4704
+SWSDK_MATHW_DVSRL								= 0x4705
+SWSDK_MATHW_DVDDH								= 0x4706
+SWSDK_MATHW_DVDDL								= 0x4707
+
+; Mathbox routines
+
+SWSDK_MATH_OP_00								= 0x00
+SWSDK_MATH_OP_0E								= 0x0E
+SWSDK_MATH_OP_1C								= 0x1C
+SWSDK_MATH_OP_2A								= 0x2A
+SWSDK_MATH_OP_40								= 0x40
+SWSDK_MATH_OP_67								= 0x67
+SWSDK_MATH_OP_77								= 0x77
+SWSDK_MATH_OP_80								= 0x80
+; A=[$02,$01] B=[$0F] C=[$00]
+; Result [$02,$01] = (A-B)*C
+SWSDK_MATH_OP_86								= 0x86
+
 
 				.macro SWSDK_AVG_HALTED
 				lda			SWSDK_IN1
@@ -161,3 +184,4 @@ SWSDK_PRNG											= 0x4703
 				
 				.globl	SWSDK_Init
 				.globl	SWSDK_RenderString
+				.globl	SWSDK_GoMathAndWait

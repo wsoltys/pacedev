@@ -36,6 +36,22 @@ RESET::
 				SWSDK_JMPL 0x1802												; simulate other buffer
 				SWSDK_HALT															; empty 1st half
 
+				; let's do some maths!
+				; my brain hurts!
+				ldu			#SWSDK_MathRAMStart
+				ldd			#(2<<7)
+				std			(2<<1),u												; A(MSB) @$2
+				ldd			#(7<<7)
+				std			(1<<1),u												; A(LSB) @$1 = $207
+				ldd			#(1<<7)
+				std			(0xF<<1),u											; B @$F = $01
+				ldd			#(6<<7)
+				std			(0<<1),u												; C @$F = $06
+				lda			#SWSDK_MATH_OP_86
+				jsr			SWSDK_GoMathAndWait	
+				ldd			(2<<1),u												; MSB	= $000C
+				ldd			(1<<1),u												; LSB = $0024
+
 				ldd			#(-360)&0x1FFF
 				std			msgy
 				
