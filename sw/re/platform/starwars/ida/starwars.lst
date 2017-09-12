@@ -47845,20 +47845,20 @@ ROM:FF03	     loc_FF03:							     ; CODE XREF: ROM:FEBDj
 ROM:FF03									     ; ROM:FEC2j ...
 ROM:FF03 8E 00 00		     ldx     #0
 ROM:FF06
-ROM:FF06	     loc_FF06:							     ; CODE XREF: ROM:FF0Ej
+ROM:FF06	     delay1:							     ; CODE XREF: ROM:FF0Ej
 ROM:FF06 B7 46 40		     sta     wdog
 ROM:FF09 30 01			     leax    1,x
 ROM:FF0B 8C AC 55		     cmpx    #0xAC55
-ROM:FF0E 25 F6			     bcs     loc_FF06
+ROM:FF0E 25 F6			     bcs     delay1
 ROM:FF10 86 FF			     lda     #0xFF
 ROM:FF12 A7 C4			     sta     ,u
 ROM:FF14 8E 00 00		     ldx     #0
 ROM:FF17
-ROM:FF17	     loc_FF17:							     ; CODE XREF: ROM:FF1Fj
+ROM:FF17	     delay2:							     ; CODE XREF: ROM:FF1Fj
 ROM:FF17 B7 46 40		     sta     wdog
 ROM:FF1A 30 01			     leax    1,x
 ROM:FF1C 8C AC 55		     cmpx    #0xAC55
-ROM:FF1F 25 F6			     bcs     loc_FF17
+ROM:FF1F 25 F6			     bcs     delay2
 ROM:FF21 7E FD 07		     jmp     loc_FD07
 ROM:FF24	     ; ---------------------------------------------------------------------------
 ROM:FF24
