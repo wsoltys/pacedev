@@ -21877,6 +21877,9 @@ BANK0:71DC 39			       rts
 BANK0:71DC	       ; End of	function sub_71C4
 BANK0:71DC
 BANK0:71DC	       ; ---------------------------------------------------------------------------
+BANK0:71DD	       ; definitely not	a sine table
+BANK0:71DD	       ; after a short kink in the 1st few samples
+BANK0:71DD	       ; it's almost a straight line
 BANK0:71DD 00 12 00 00+		       .db 0, 0x12, 0
 BANK0:71DD 25 00 00 37+		       .db 0, 0x25, 0
 BANK0:71DD 00 00 49 00+		       .db 0, 0x37, 0
@@ -23039,7 +23042,7 @@ BANK0:79E9	       loc_79E9:						       ; CODE XREF: sub_7881+156j
 BANK0:79E9									       ; sub_7881+15Ej
 BANK0:79E9 9E 64		       ldx     byte_64
 BANK0:79EB E6 06		       ldb     6,x
-BANK0:79ED CE 7A 08		       ldu     #0x7A08
+BANK0:79ED CE 7A 08		       ldu     #word_7A08
 BANK0:79F0 58			       aslb
 BANK0:79F1 EC C5		       ldd     b,u
 BANK0:79F3 ED A1		       std     ,y++
@@ -23054,70 +23057,38 @@ BANK0:7A07 39			       rts
 BANK0:7A07	       ; End of	function sub_7881
 BANK0:7A07
 BANK0:7A07	       ; ---------------------------------------------------------------------------
-BANK0:7A08 62			       .db 0x62	; b
-BANK0:7A09 80			       .db 0x80	; €
-BANK0:7A0A 67			       .db 0x67	; g
-BANK0:7A0B 30			       .db 0x30	; 0
-BANK0:7A0C 62			       .db 0x62	; b
-BANK0:7A0D 80			       .db 0x80	; €
-BANK0:7A0E 67			       .db 0x67	; g
-BANK0:7A0F 30			       .db 0x30	; 0
-BANK0:7A10 62			       .db 0x62	; b
-BANK0:7A11 80			       .db 0x80	; €
-BANK0:7A12 67			       .db 0x67	; g
-BANK0:7A13 40			       .db 0x40	; @
-BANK0:7A14 62			       .db 0x62	; b
-BANK0:7A15 80			       .db 0x80	; €
-BANK0:7A16 67			       .db 0x67	; g
-BANK0:7A17 40			       .db 0x40	; @
-BANK0:7A18 62			       .db 0x62	; b
-BANK0:7A19 80			       .db 0x80	; €
-BANK0:7A1A 67			       .db 0x67	; g
-BANK0:7A1B 50			       .db 0x50	; P
-BANK0:7A1C 62			       .db 0x62	; b
-BANK0:7A1D 80			       .db 0x80	; €
-BANK0:7A1E 67			       .db 0x67	; g
-BANK0:7A1F 50			       .db 0x50	; P
-BANK0:7A20 62			       .db 0x62	; b
-BANK0:7A21 80			       .db 0x80	; €
-BANK0:7A22 67			       .db 0x67	; g
-BANK0:7A23 60			       .db 0x60	; `
-BANK0:7A24 62			       .db 0x62	; b
-BANK0:7A25 80			       .db 0x80	; €
-BANK0:7A26 67			       .db 0x67	; g
-BANK0:7A27 60			       .db 0x60	; `
-BANK0:7A28 62			       .db 0x62	; b
-BANK0:7A29 80			       .db 0x80	; €
-BANK0:7A2A 67			       .db 0x67	; g
-BANK0:7A2B 70			       .db 0x70	; p
-BANK0:7A2C 62			       .db 0x62	; b
-BANK0:7A2D 80			       .db 0x80	; €
-BANK0:7A2E 67			       .db 0x67	; g
-BANK0:7A2F 70			       .db 0x70	; p
-BANK0:7A30 62			       .db 0x62	; b
-BANK0:7A31 80			       .db 0x80	; €
-BANK0:7A32 67			       .db 0x67	; g
-BANK0:7A33 80			       .db 0x80	; €
-BANK0:7A34 62			       .db 0x62	; b
-BANK0:7A35 80			       .db 0x80	; €
-BANK0:7A36 67			       .db 0x67	; g
-BANK0:7A37 80			       .db 0x80	; €
-BANK0:7A38 62			       .db 0x62	; b
-BANK0:7A39 80			       .db 0x80	; €
-BANK0:7A3A 67			       .db 0x67	; g
-BANK0:7A3B 80			       .db 0x80	; €
-BANK0:7A3C 62			       .db 0x62	; b
-BANK0:7A3D 80			       .db 0x80	; €
-BANK0:7A3E 67			       .db 0x67	; g
-BANK0:7A3F 80			       .db 0x80	; €
-BANK0:7A40 62			       .db 0x62	; b
-BANK0:7A41 80			       .db 0x80	; €
-BANK0:7A42 67			       .db 0x67	; g
-BANK0:7A43 80			       .db 0x80	; €
-BANK0:7A44 67			       .db 0x67	; g
-BANK0:7A45 C0			       .db 0xC0	; À
-BANK0:7A46 67			       .db 0x67	; g
-BANK0:7A47 C0			       .db 0xC0	; À
+BANK0:7A08 62 80       word_7A08:      .dw 0x6280				       ; DATA XREF: sub_7881+16Co
+BANK0:7A0A 67 30		       .dw 0x6730
+BANK0:7A0C 62 80		       .dw 0x6280
+BANK0:7A0E 67 30		       .dw 0x6730
+BANK0:7A10 62 80		       .dw 0x6280
+BANK0:7A12 67 40		       .dw 0x6740
+BANK0:7A14 62 80		       .dw 0x6280
+BANK0:7A16 67 40		       .dw 0x6740
+BANK0:7A18 62 80		       .dw 0x6280
+BANK0:7A1A 67 50		       .dw 0x6750
+BANK0:7A1C 62 80		       .dw 0x6280
+BANK0:7A1E 67 50		       .dw 0x6750
+BANK0:7A20 62 80		       .dw 0x6280
+BANK0:7A22 67 60		       .dw 0x6760
+BANK0:7A24 62 80		       .dw 0x6280
+BANK0:7A26 67 60		       .dw 0x6760
+BANK0:7A28 62 80		       .dw 0x6280
+BANK0:7A2A 67 70		       .dw 0x6770
+BANK0:7A2C 62 80		       .dw 0x6280
+BANK0:7A2E 67 70		       .dw 0x6770
+BANK0:7A30 62 80		       .dw 0x6280
+BANK0:7A32 67 80		       .dw 0x6780
+BANK0:7A34 62 80		       .dw 0x6280
+BANK0:7A36 67 80		       .dw 0x6780
+BANK0:7A38 62 80		       .dw 0x6280
+BANK0:7A3A 67 80		       .dw 0x6780
+BANK0:7A3C 62 80		       .dw 0x6280
+BANK0:7A3E 67 80		       .dw 0x6780
+BANK0:7A40 62 80		       .dw 0x6280
+BANK0:7A42 67 80		       .dw 0x6780
+BANK0:7A44 67 C0		       .dw 0x67C0
+BANK0:7A46 67 C0		       .dw 0x67C0
 BANK0:7A48
 BANK0:7A48	       ; =============== S U B R O U T I N E =======================================
 BANK0:7A48
@@ -28929,26 +28900,7 @@ ROM:9523 FF			     .db 0xFF
 ROM:9524 FF			     .db 0xFF
 ROM:9525 FF			     .db 0xFF
 ROM:9526 FF			     .db 0xFF
-ROM:9527 43			     .db 0x43 ;	C
-ROM:9528 4F			     .db 0x4F ;	O
-ROM:9529 50			     .db 0x50 ;	P
-ROM:952A 59			     .db 0x59 ;	Y
-ROM:952B 52			     .db 0x52 ;	R
-ROM:952C 49			     .db 0x49 ;	I
-ROM:952D 47			     .db 0x47 ;	G
-ROM:952E 48			     .db 0x48 ;	H
-ROM:952F 54			     .db 0x54 ;	T
-ROM:9530 20			     .db 0x20
-ROM:9531 31			     .db 0x31 ;	1
-ROM:9532 39			     .db 0x39 ;	9
-ROM:9533 38			     .db 0x38 ;	8
-ROM:9534 33			     .db 0x33 ;	3
-ROM:9535 20			     .db 0x20
-ROM:9536 41			     .db 0x41 ;	A
-ROM:9537 54			     .db 0x54 ;	T
-ROM:9538 41			     .db 0x41 ;	A
-ROM:9539 52			     .db 0x52 ;	R
-ROM:953A 49			     .db 0x49 ;	I
+ROM:9527 43 4F 50 59+aCopyright1983Atari_1:.ascii 'COPYRIGHT 1983 ATARI'
 ROM:953B
 ROM:953B	     ; =============== S U B R O U T I N E =======================================
 ROM:953B
