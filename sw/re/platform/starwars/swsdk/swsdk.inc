@@ -3,10 +3,10 @@
 ; msmcdoug@gmail.com
 ;
 
-SDSDK_VERSION										= 0x0002
+SWSDK_VERSION										= 0x0003
 				.macro SWSDK_SZ_VERSION
 				.ascii		"0.0."
-				.byte			(1<<7)|'2
+				.byte			(1<<7)|0x30|<SWSDK_VERSION
 				.endm
 
 SWSDK_OP_VCTR 									= 0x0000
@@ -119,7 +119,7 @@ SWSDK_DeathStarFocusLensOutline	= 0x3B64
 SWSDK_DeathStarFocusLensPanels	= 0x3BB4
 SWSDK_DeathStarPanels						= 0x3C0C
 
-SWSDK_IntesnsityTestPattern			= 0x3D4E
+SWSDK_IntensityTestPattern			= 0x3D4E
 SWSDK_CrossHatchAndFont					= 0x3DFA
 SWSDK_SquareHatch								= 0x3E40
 
@@ -157,6 +157,7 @@ SWSDK_MATH_OP_2A								= 0x2A
 ; |$24 $28 $2C|   |$14 $15 $16|   |$03 $04 $05|
 ; |$25 $29 $2D| X |$18 $19 $1A| = |$06 $07 $08|
 ; |$26 $2A $2E|   |$1C $1D $1E|   |$09 $0A $0B|
+; and you need to set $0F = 0
 SWSDK_MATH_OP_3x3MatrixMultiply	= 0x40
 
 SWSDK_MATH_OP_67								= 0x67
@@ -165,6 +166,7 @@ SWSDK_MATH_OP_80								= 0x80
 
 ; 1x2 vector by scalar multiplication
 ; [$01 $02] X $00 = [$01 $02]
+; and you need to set $0F = 0
 SWSDK_MATH_OP_86								= 0x86
 
 				.macro SWSDK_AVG_HALTED

@@ -87,7 +87,7 @@ skip_inc:
 				lda			*cnt
 				cmpa		#1
 				bne			1$
-				SWSDK_JSRL SWSDK_IntesnsityTestPattern
+				SWSDK_JSRL SWSDK_IntensityTestPattern
 				bra			3$
 1$:			cmpa		#2
 				bne			2$				
@@ -97,7 +97,6 @@ skip_inc:
 				SWSDK_COLOR SWSDK_RED,128
 				SWSDK_JSRL SWSDK_SquareHatch
 3$:			
-skip_rot:
 
 				SWSDK_HALT
 

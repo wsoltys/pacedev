@@ -69,6 +69,8 @@ RESET::
 				
 				; init rotation matrix
 				ldu			#SWSDK_MathRAMStart
+				ldd			#0
+				std			0x0F*2,u												; clear 'B'
 				leau		0x14*2,u												; start of 'C' in OP$40 routine
 				ldx			#rotation_matrix
 				ldb			#3*3
