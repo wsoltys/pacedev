@@ -18,8 +18,8 @@
 				.org		SWSDK_CpuRAMStart
 
 								.ds			256											; for DP (MAIN)
-i 			.equ 		1								
-col			.equ		2
+i 			.equ 		0x80								
+col			.equ		0x81
 
 								.ds			256											; for DP (IRQ)
 x:							.ds			2*4
@@ -40,6 +40,46 @@ RESET::
 				SWSDK_JMPL 0x1802												; simulate other buffer
 				SWSDK_HALT															; empty 1st half
 
+				; init a rectangle
+				POINT_SHIFT = 2
+				ldx			#x
+				ldy			#y
+				ldd			#0<<POINT_SHIFT
+				std			0*2,x
+				std			0*2,y
+				std			1*2,x
+				std			3*2,y
+				ldd			#255<<POINT_SHIFT
+				std			1*2,y
+				std			2*2,x
+				std			2*2,y
+				std			3*2,x
+				
+				; cos(45)<<14=11585, sin(45)<<14=11585
+				; cos(5)<<14=16322, sin(5)<<14=1428
+				; cos(1)<<14=16382, sin(1)<<14=286
+				; cos(0.25)<<14=16384, sin(0.25)<<14=71
+				; cos(0.05)<<14=16384, sin(0.05)<<14=14
+				COS_THETA = 16322
+				SIN_THETA = 1428
+				TRIG_SHIFT = 0
+				; init rotation matrix
+				; [cos -sin ..] [$14 $15 ..]
+				; [sin  cos ..] [$18 $19 ..]
+				ldu			#SWSDK_MathRAMStart
+				ldd			#(COS_THETA>>TRIG_SHIFT)
+				std			0x14*2,u
+				std			0x19*2,u
+				ldd			#-(SIN_THETA>>TRIG_SHIFT)
+				std			0x15*2,u
+				ldd			#(SIN_THETA>>TRIG_SHIFT)
+				std			0x18*2,u
+
+				clr			*col
+speed		.equ		60
+				lda			#speed
+				sta			*i
+				
 loop:
 
 wait_AVG:
@@ -65,153 +105,132 @@ wait_AVG:
 				SWSDK_CNTR
 				SWSDK_SCAL 2,0
 				SWSDK_VCTR -256,-360,0
-				SWSDK_COLOR SWSDK_GREEN,128
+				SWSDK_COLOR SWSDK_GREEN,255
 				ldx			#sdk_msg
 				jsr			SWSDK_RenderString
+				SWSDK_CNTR
+				SWSDK_VCTR -400,-440,0
+				SWSDK_COLOR SWSDK_WHITE,128
+				ldx			#title_msg
+				jsr			SWSDK_RenderString
 
-				; init a rectangle
-				pshs		y
-				ldx			#x
-				ldy			#y
-				ldd			#0
-				std			0*2,x
-				std			0*2,y
-				std			1*2,x
-				std			2*2,y
-				ldd			#7
-				std			1*2,y
-				std			2*2,x
-				std			2*2,y
-				std			3*2,x
-				puls		y
-
-				ldu			#SWSDK_MathRAMStart
-				
-				; init rotation matrix
-				; [cos -sin ..] [14 15 ..]
-				; [sin  cos ..] [18 19 ..]
-				ldd			#(255>>2)									; cos(5)
-				std			0x14*2,u
-				std			0x19*2,u
-				ldd			#(22>>2)									; sin(5)
-				std			0x18*2,u
-				ldd			#-(22>>2)									; -sin(5)
-				std			0x15*2,u
-
-				lda			#1
-				sta			*i
-				clr			*col
-				
-inner_loop:
-
-				ldx			#x
-				
 				; render it
 				SWSDK_CNTR
-				SWSDK_SCAL 0,0
+				SWSDK_SCAL 2+POINT_SHIFT,0
 
 				inc			*col
 				lda			*col
+				lda			SWSDK_BLUE
 				anda		#0x07
 				ora			#>SWSDK_OP_COLOR
 				ldb			#0xFF
 				std			,y++
+
+				ldx			#x
+								
+				ldd			5*2,x
+				subd		4*2,x
+				anda		#0x1F
+				ora			#>SWSDK_OP_VCTR
+				std			,y++
+				ldd			1*2,x
+				subd		0*2,x
+				anda		#0x1F
+				ora			#(7<<5)
+				std			,y++
+
+				ldd			6*2,x
+				subd		5*2,x
+				anda		#0x1F
+				ora			#>SWSDK_OP_VCTR
+				std			,y++
+				ldd			2*2,x
+				subd		1*2,x
+				anda		#0x1F
+				ora			#(7<<5)
+				std			,y++
+
+				ldd			7*2,x
+				subd		6*2,x
+				anda		#0x1F
+				ora			#>SWSDK_OP_VCTR
+				std			,y++
+				ldd			3*2,x
+				subd		2*2,x
+				anda		#0x1F
+				ora			#(7<<5)
+				std			,y++
+
+				ldd			4*2,x
+				subd		7*2,x
+				anda		#0x1F
+				ora			#>SWSDK_OP_VCTR
+				std			,y++
+				ldd			0*2,x
+				subd		3*2,x
+				anda		#0x1F
+				ora			#(7<<5)
+				std			,y++
+
+				dec			*i
+				bne			skip_rot
+				lda			#speed
+				sta			*i
 				
-				lda			5*2+1,x
-				suba		4*2+1,x
-				anda		#0x1F
-				ora			#>SWSDK_OP_SVEC
-				ldb			1*2+1,x
-				subb		0*2+1,x
-				orb			#(7<<5)
-				std			,y++
-
-				lda			6*2+1,x
-				suba		5*2+1,x
-				anda		#0x1F
-				ora			#>SWSDK_OP_SVEC
-				ldb			2*2+1,x
-				subb		1*2+1,x
-				orb			#(7<<5)
-				std			,y++
-
-				lda			7*2+1,x
-				suba		6*2+1,x
-				anda		#0x1F
-				ora			#>SWSDK_OP_SVEC
-				ldb			3*2+1,x
-				subb		2*2+1,x
-				orb			#(7<<5)
-				std			,y++
-
-				lda			4*2+1,x
-				suba		7*2+1,x
-				anda		#0x1F
-				ora			#>SWSDK_OP_SVEC
-				ldb			0*2+1,x
-				subb		3*2+1,x
-				orb			#(7<<5)
-				std			,y++
-
 				ldu			#SWSDK_MathRAMStart
 
 				; rotate a point
-				
-				ldb			#0
-				lda			0*2+1,x
+				; [x y ..] = [$24 $28 ..]
+				ldd			0*2,x
 				std			0x24*2,u
-				lda			4*2+1,x
+				ldd			4*2,x
 				std			0x28*2,u
 				lda			#SWSDK_MATH_OP_40
 				jsr			SWSDK_GoMathAndWait
 				
 				ldd			3*2,u
-				stb			0*2+1,x
+				std			0*2,x
 				ldd			4*2,u
-				stb			4*2+1,x
+				std			4*2,x
 
-				ldb			#0
-				lda			1*2+1,x
+				ldd			1*2,x
 				std			0x24*2,u
-				lda			5*2+1,x
+				ldd			5*2,x
 				std			0x28*2,u
 				lda			#SWSDK_MATH_OP_40
 				jsr			SWSDK_GoMathAndWait
 				
 				ldd			3*2,u
-				stb			1*2+1,x
+				std			1*2,x
 				ldd			4*2,u
-				stb			5*2+1,x
+				std			5*2,x
 
-				ldb			#0
-				lda			2*2+1,x
+				ldd			2*2,x
 				std			0x24*2,u
-				lda			6*2+1,x
+				ldd			6*2,x
 				std			0x28*2,u
 				lda			#SWSDK_MATH_OP_40
 				jsr			SWSDK_GoMathAndWait
 				
 				ldd			3*2,u
-				stb			2*2+1,x
+				std			2*2,x
 				ldd			4*2,u
-				stb			6*2+1,x
+				std			6*2,x
 
-				ldb			#0
-				lda			3*2+1,x
+				ldd			3*2,x
 				std			0x24*2,u
-				lda			7*2+1,x
+				ldd			7*2,x
 				std			0x28*2,u
 				lda			#SWSDK_MATH_OP_40
 				jsr			SWSDK_GoMathAndWait
 				
 				ldd			3*2,u
-				stb			3*2+1,x
+				std			3*2,x
 				ldd			4*2,u
-				stb			7*2+1,x
+				std			7*2,x
 
-				dec			*i
-				lbpl		inner_loop
-								
+skip_rot:
+
 				SWSDK_HALT
 
 				jmp			loop
@@ -220,6 +239,10 @@ sdk_msg:
 				.ascii	"STAR WARS SDK V0.0."
 				.byte		(1<<7)|'2
 
+title_msg:
+				.ascii	"MATH BOX OP 40: 3X3 MATRIX MULTIPL"
+				.byte		(1<<7)|'Y
+				
 IRQ::
 				SWSDK_ACK_IRQ
 				rti
