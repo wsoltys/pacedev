@@ -3,10 +3,10 @@
 ; msmcdoug@gmail.com
 ;
 
-SDSDK_VERSION										= 0x0001
-
+SDSDK_VERSION										= 0x0002
 				.macro SWSDK_SZ_VERSION
-				.asciz		"0.0.1"
+				.ascii		"0.0."
+				.byte			(1<<7)|'2
 				.endm
 
 SWSDK_OP_VCTR 									= 0x0000
@@ -119,6 +119,10 @@ SWSDK_DeathStarFocusLensOutline	= 0x3B64
 SWSDK_DeathStarFocusLensPanels	= 0x3BB4
 SWSDK_DeathStarPanels						= 0x3C0C
 
+SWSDK_IntesnsityTestPattern			= 0x3D4E
+SWSDK_CrossHatchAndFont					= 0x3DFA
+SWSDK_SquareHatch								= 0x3E40
+
 ; Hardware I/O
 
 SWSDK_IN1												= 0x4320
@@ -142,18 +146,25 @@ SWSDK_MATHW_DVSRL								= 0x4705
 SWSDK_MATHW_DVDDH								= 0x4706
 SWSDK_MATHW_DVDDL								= 0x4707
 
-; Mathbox routines
+; Mathbox routines (word addresses)
 
 SWSDK_MATH_OP_00								= 0x00
 SWSDK_MATH_OP_0E								= 0x0E
 SWSDK_MATH_OP_1C								= 0x1C
 SWSDK_MATH_OP_2A								= 0x2A
-SWSDK_MATH_OP_40								= 0x40
+
+; 3x3 matrix multiplication
+; |$24 $28 $2C|   |$14 $15 $16|   |$03 $04 $05|
+; |$25 $29 $2D| X |$18 $19 $1A| = |$06 $07 $08|
+; |$26 $2A $2E|   |$1C $1D $1E|   |$09 $0A $0B|
+SWSDK_MATH_OP_3x3MatrixMultiply	= 0x40
+
 SWSDK_MATH_OP_67								= 0x67
 SWSDK_MATH_OP_77								= 0x77
 SWSDK_MATH_OP_80								= 0x80
-; A=[$01,$02] B=[$0F]=0 C=[$00]
-; Result [$01,$02] = A1C,A2C
+
+; 1x2 vector by scalar multiplication
+; [$01 $02] X $00 = [$01 $02]
 SWSDK_MATH_OP_86								= 0x86
 
 				.macro SWSDK_AVG_HALTED

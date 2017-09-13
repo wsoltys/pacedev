@@ -137,8 +137,8 @@ wait_AVG:
 				jmp			loop
 
 sdk_msg:
-				.ascii	"STAR WARS SDK V0.0."
-				.byte		(1<<7)|'1
+				.ascii	"STAR WARS SDK "
+				SWSDK_SZ_VERSION
 
 IRQ::
 				SWSDK_ACK_IRQ

@@ -1,8 +1,11 @@
 # platform options
 
-EXAMPLES = ex1 ex2
-TARGET = ex2
+# list of all examples built by this makefile
+EXAMPLES = ex1 ex2 ex3
+# the example to install into MAME
+TARGET = ex3
 
+MAME_DIR = roms/starwars
 MAME_ROMS = 136021.206.1m
 
 # compiler, linker and utilities
@@ -26,7 +29,7 @@ EX_ROMS = $(patsubst %,%.rom,$(EXAMPLES))
 all: $(EX_ROMS) $(MAME_ROMS)
 
 $(MAME_ROMS): $(TARGET).rom
-	$(CP) $(TARGET).rom roms/starwars/136021.206.1m
+	$(CP) $(TARGET).rom $(MAME_DIR)/$(MAME_ROMS)
 
 %.rom: %.ihx
 	$(HEX2BIN) -e rom $<
@@ -44,5 +47,5 @@ clean:
 	$(RM) -f *.ihx
 	$(ECHO) Deleting executables...
 	$(RM) -f *.rom
-	$(RM) -f $(MAMEROMS)
+	$(RM) -f $(MAME_ROMS)
   

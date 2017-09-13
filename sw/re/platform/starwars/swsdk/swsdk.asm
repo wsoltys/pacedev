@@ -101,7 +101,7 @@ SWSDK_RenderString::
 				bra			render_chr
 7$:			cmpb		#0x5A														; '-'?
 				bne			8$															; no, skip
-				ldx			#SWSDK_Font
+				ldx			#SWSDK_Font-2
 				bra			render_chr
 8$:			cmpb		#0x4A														; '%'? ==1/2
 				bne			9$															; no, skip
