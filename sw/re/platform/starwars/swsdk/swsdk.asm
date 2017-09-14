@@ -1,7 +1,5 @@
 
 				.list		(meb)										; macro expansion binary
-				.bank   ROM (BASE=0xE000,SIZE=0x1FE0)
-       	.area   ROM (REL,CON,BANK=ROM)
 				.module swsdk
 				
 .include "swsdk.inc"
@@ -12,6 +10,20 @@
 
 ; *** derived - do not edit
 ; *** end of derived
+
+				.area		DATA (ABS,CON)
+
+SWSDK_in0_shadow::
+        .ds     3                               ; prev, curr, deb
+SWSDK_in1_shadow::
+        .ds     3
+SWSDK_dsw0_shadow::
+        .ds     3
+SWSDK_dsw1_shadow::
+        .ds     3
+
+				.bank   ROM (BASE=0xE000,SIZE=0x1FE0)
+       	.area   ROM (REL,CON,BANK=ROM)
 
 SWSDK_Init::
 				; this is exactly what the original ROM does
@@ -122,9 +134,28 @@ SWSDK_GoMathAndWait::
 				bmi			1$				
 				rts				
 
+debounce_in:
+        ldb     ,x                              ; prev
+        stb     1,x                             ; shift along
+        sta     ,x                              ; curr
+        anda    1,x                             ; prev AND curr
+        ora     2,x                             ; (prev AND cur) OR deb
+        sta     2,x                             ; (tmp) deb
+        orb     ,x++                            ; prev OR curr
+        andb    ,x                              ; (prev or curr) AND deb
+        stb     ,x+                             ; store deb
+        rts
+       
 SWSDK_IRQ::
 				SWSDK_KICK_WDOG
+				ldx     #SWSDK_in0_shadow
 				lda			SWSDK_IN0
-				
+				jsr     debounce_in
+				lda			SWSDK_IN1
+        jsr     debounce_in				
+				lda			SWSDK_DSW0
+        jsr     debounce_in				
+				lda			SWSDK_DSW1
+        jsr     debounce_in				
 				SWSDK_ACK_IRQ
 				rti

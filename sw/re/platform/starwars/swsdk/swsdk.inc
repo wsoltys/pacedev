@@ -139,6 +139,8 @@ SWSDK_IN1                       = 0x4320
   SWSDK_IN1_BUTTON2n            = (1<<5)
   SWSDK_IN1_AVG_HALT            = (1<<6)
   SWSDK_IN1_MATH_RUN            = (1<<7)
+SWSDK_DSW0                      = 0x4340
+SWSDK_DSW1                      = 0x4360
 SWSDK_AVGGo                     = 0x4600
 SWSDK_AVGReset                  = 0x4620
 SWSDK_Watchdog                  = 0x4640
@@ -204,6 +206,15 @@ SWSDK_MATH_OP_86                = 0x86
         .macro SWSDK_RESET_PRNG
         sta     SWSDK_PRNGReset
         .endm
+
+        ; imported memory variables
+        
+        .globl  SWSDK_in0_shadow
+        .globl  SWSDK_in1_shadow
+        .globl  SWSDK_dsw0_shadow
+        .globl  SWSDK_dsw1_shadow
+        
+        ; imported routines
         
         .globl  SWSDK_Init
         .globl  SWSDK_RenderString

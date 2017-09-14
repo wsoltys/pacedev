@@ -22,7 +22,7 @@ cnt			.equ		0x80
 delay		.equ 		0x81								
 
 								.ds			256											; for DP (IRQ)
-object:					.ds			4*4
+object:					.ds			5*4
 
 				.bank   ROM (BASE=0xE000,SIZE=0x1FE0)
        	.area   ROM (REL,CON,BANK=ROM)
@@ -58,6 +58,7 @@ RESET::
 				SWSDK_JMPL 0x1802												; simulate other buffer
 				SWSDK_HALT															; empty 1st half
 
+start:
 				; init an object (rectangle)
 				ldx			#rectangle_vertices
 				ldu			#object
@@ -175,6 +176,11 @@ rotate:
 skip_rot:
 
 				SWSDK_HALT
+
+        ldx     #SWSDK_in0_shadow
+        lda     2,x                             ; debounced
+        bita    #SWSDK_IN0_BUTTON1n
+        lbeq    start                           ; reset
 
 				jmp			loop
 
