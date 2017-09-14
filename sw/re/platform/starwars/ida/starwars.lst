@@ -44736,13 +44736,13 @@ ROM:EF8B
 ROM:EF8B	     loc_EF8B:							     ; CODE XREF: ROM:EF88j
 ROM:EF8B 8E 48 1C		     ldx     #in0_shadow
 ROM:EF8E B6 43 00		     lda     IN0
-ROM:EF91 BD F1 33		     jsr     in_debounce_WTF
+ROM:EF91 BD F1 33		     jsr     in_debounce
 ROM:EF94 B6 43 20		     lda     IN1
-ROM:EF97 BD F1 33		     jsr     in_debounce_WTF
+ROM:EF97 BD F1 33		     jsr     in_debounce
 ROM:EF9A B6 43 40		     lda     DSW0
-ROM:EF9D BD F1 33		     jsr     in_debounce_WTF
+ROM:EF9D BD F1 33		     jsr     in_debounce
 ROM:EFA0 B6 43 60		     lda     DSW1
-ROM:EFA3 BD F1 33		     jsr     in_debounce_WTF
+ROM:EFA3 BD F1 33		     jsr     in_debounce
 ROM:EFA6 96 33			     lda     coins_btns
 ROM:EFA8 97 34			     sta     coins_btns_r
 ROM:EFAA B6 48 21		     lda     in1_shadow+2
@@ -44974,19 +44974,19 @@ ROM:F133
 ROM:F133	     ; =============== S U B R O U T I N E =======================================
 ROM:F133
 ROM:F133
-ROM:F133	     in_debounce_WTF:						     ; CODE XREF: ROM:EF91P
+ROM:F133	     in_debounce:						     ; CODE XREF: ROM:EF91P
 ROM:F133									     ; ROM:EF97P ...
 ROM:F133 E6 84			     ldb     ,x					     ; previous
 ROM:F135 E7 01			     stb     1,x				     ; shift it	along
 ROM:F137 A7 84			     sta     ,x					     ; current
-ROM:F139 A4 01			     anda    1,x				     ; prev AND	curr (same bits)
-ROM:F13B AA 02			     oraa    2,x
-ROM:F13D A7 02			     sta     2,x				     ; store same bits
+ROM:F139 A4 01			     anda    1,x				     ; prev AND	curr
+ROM:F13B AA 02			     oraa    2,x				     ; prev AND	curr OR	deb
+ROM:F13D A7 02			     sta     2,x				     ; store (tmp) deb
 ROM:F13F EA 81			     orab    ,x++				     ; prev OR curr
-ROM:F141 E4 84			     andb    ,x					     ; (prev OR	curr) AND (prev	AND curr)
-ROM:F143 E7 80			     stb     ,x+
+ROM:F141 E4 84			     andb    ,x					     ; (prev OR	curr) AND deb
+ROM:F143 E7 80			     stb     ,x+				     ; store deb
 ROM:F145 39			     rts
-ROM:F145	     ; End of function in_debounce_WTF
+ROM:F145	     ; End of function in_debounce
 ROM:F145
 ROM:F146
 ROM:F146	     ; =============== S U B R O U T I N E =======================================
