@@ -6,9 +6,9 @@
        	.area   CPUVECS (ABS,OVR)
 				.module cpuvecs
 
-				.globl 	IRQ
 				.globl 	RESET
-
+				.globl	SWSDK_IRQ
+				
 				.org		0xFFE0
 
 NMI:
@@ -20,7 +20,7 @@ NMI:
 				.dw			NMI							; SWI3
 				.dw			NMI							; SWI2
 				.dw			NMI							; FIRQ
-				.dw			IRQ							; IRQ
+				.dw			SWSDK_IRQ				; IRQ
 				.dw			NMI							; SWI1
 				.dw			NMI							; NMI
 				.dw			RESET						; RESET

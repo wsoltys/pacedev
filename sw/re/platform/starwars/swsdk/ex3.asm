@@ -185,7 +185,3 @@ sdk_msg:
 title_msg:
 				.ascii	"EX3: MATHBOX OP40 - 3X3 MATRIX MULTIPL"
 				.byte		(1<<7)|'Y
-				
-IRQ::
-				SWSDK_ACK_IRQ
-				rti

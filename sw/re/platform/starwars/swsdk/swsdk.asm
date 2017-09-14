@@ -121,3 +121,10 @@ SWSDK_GoMathAndWait::
 1$:			tst			SWSDK_IN1
 				bmi			1$				
 				rts				
+
+SWSDK_IRQ::
+				SWSDK_KICK_WDOG
+				lda			SWSDK_IN0
+				
+				SWSDK_ACK_IRQ
+				rti

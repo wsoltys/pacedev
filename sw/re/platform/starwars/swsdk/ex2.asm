@@ -109,7 +109,3 @@ sdk_msg:
 title_msg:
 				.ascii	"EX2: TEST PATTERN"
 				.byte		(1<<7)|'S
-				
-IRQ::
-				SWSDK_ACK_IRQ
-				rti

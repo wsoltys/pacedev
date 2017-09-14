@@ -139,7 +139,3 @@ wait_AVG:
 sdk_msg:
 				.ascii	"STAR WARS SDK "
 				SWSDK_SZ_VERSION
-
-IRQ::
-				SWSDK_ACK_IRQ
-				rti
