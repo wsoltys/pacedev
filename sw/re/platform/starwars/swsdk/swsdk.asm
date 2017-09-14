@@ -11,8 +11,9 @@
 ; *** derived - do not edit
 ; *** end of derived
 
-				.area		DATA (ABS,CON)
-
+				.area		DATA (ABS,OVR)
+        .org    SWSDK_CpuRAMEnd-0x3FF
+        
 SWSDK_in0_shadow::
         .ds     3                               ; prev, curr, deb
 SWSDK_in1_shadow::

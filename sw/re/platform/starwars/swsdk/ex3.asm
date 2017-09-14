@@ -14,7 +14,7 @@
 ; *** derived - do not edit
 ; *** end of derived
 
-				.area		DATA (ABS,CON)
+				.area		DATA (ABS,OVR)
 				.org		SWSDK_CpuRAMStart
 
 								.ds			256											; for DP (MAIN)

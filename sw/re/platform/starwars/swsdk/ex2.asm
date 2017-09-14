@@ -14,7 +14,7 @@
 ; *** derived - do not edit
 ; *** end of derived
 
-				.area		DATA (ABS,CON)
+				.area		DATA (ABS,OVR)
 				.org		SWSDK_CpuRAMStart
 
 								.ds			256											; for DP (MAIN)
@@ -78,14 +78,19 @@ wait_AVG:
 				ldx			#title_msg
 				jsr			SWSDK_RenderString
 
-				dec			*delay
-				bne			skip_inc
-				lda			#FRAME_DELAY
-				sta			*delay
-				inc			*cnt
-skip_inc:
+        ; check for leading-edge button press
+        ldx     #SWSDK_in0_shadow
+        lda     1,x                             ; prev (active low)
+        bita    #SWSDK_IN0_BUTTON1n
+        beq     0$                              ; pressed, skip
+        lda     ,x                              ; curr (active low)
+        bita    #SWSDK_IN0_BUTTON1n
+        bne     0$
+
+        inc     *cnt
 				lda			*cnt
-				cmpa		#1
+
+0$:			cmpa		#1
 				bne			1$
 				SWSDK_JSRL SWSDK_IntensityTestPattern
 				bra			3$
