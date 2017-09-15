@@ -25,9 +25,8 @@ msgy:						.ds			2
        	.area   ROM (REL,CON,BANK=ROM)
 
 RESET::
-       
-       	lds			#SWSDK_CpuRAMEnd
-     		jsr			SWSDK_Init
+        ; this MUST be the first instruction       
+     		jmp			SWSDK_Init
 
 				SWSDK_ACK_IRQ
 				andcc		#~(1<<4)												; enable IRQ

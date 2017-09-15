@@ -4,6 +4,8 @@
 				
 .include "swsdk.inc"
 
+        .globl  RESET
+
 ; *** BUILD OPTIONS
 .define BUILD_OPT_NO_SPLASH
 ; *** end of BUILD OPTIONS
@@ -12,7 +14,7 @@
 ; *** end of derived
 
 				.area		DATA (ABS,OVR)
-        .org    SWSDK_CpuRAMEnd-0x3FF
+        .org    SWSDK_VariableStart
         
 SWSDK_in0_shadow::
         .ds     3                               ; prev, curr, deb
@@ -73,7 +75,8 @@ SWSDK_Init::
 				sta			SWSDK_LED2
 				sta			SWSDK_LED3
 				SWSDK_ACK_IRQ
-				rts
+				lds     #SWSDK_Stack
+				jmp     RESET+3
 
 ; copied verbatim from the ROM
 ; X=msg ptr, Y=display list

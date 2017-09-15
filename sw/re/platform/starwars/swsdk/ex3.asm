@@ -20,9 +20,9 @@
 								.ds			256											; for DP (MAIN)
 cnt			.equ		0x80
 delay		.equ 		0x81								
-
 								.ds			256											; for DP (IRQ)
-object:					.ds			5*4
+
+object:					.ds			5*4                     ; allocate a spare (see below)
 
 				.bank   ROM (BASE=0xE000,SIZE=0x1FE0)
        	.area   ROM (REL,CON,BANK=ROM)
@@ -47,9 +47,8 @@ rectangle_vertices:
 								.word		255<<POINT_SHIFT,		255<<POINT_SHIFT
 								.word		255<<POINT_SHIFT,		0<<POINT_SHIFT
 RESET::
-       
-       	lds			#SWSDK_CpuRAMEnd
-     		jsr			SWSDK_Init
+        ; this MUST be the first instruction       
+     		jmp			SWSDK_Init
 
 				SWSDK_ACK_IRQ
 				andcc		#~(1<<4)												; enable IRQ

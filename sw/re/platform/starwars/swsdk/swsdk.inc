@@ -102,6 +102,9 @@ SWSDK_Bank1End                  = 0x7FFF
 SWSDK_CpuROMStart               = 0x8000
 SWSDK_CpuROMEnd                 = 0xFFFF
 
+SWSDK_VariableStart             = SWSDK_CpuRAMEnd-0x03FF
+SWSDK_Stack                     = SWSDK_VariableStart-1
+
 ; Vector ROM addresses
 
 SWSDK_Font                      = 0x3002        ; font table & renders character set

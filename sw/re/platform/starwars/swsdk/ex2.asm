@@ -22,17 +22,14 @@ cnt			.equ		0x80
 delay		.equ 		0x81
 in0 		.equ    0x82
 in1     .equ    0x83
-
 								.ds			256											; for DP (IRQ)
-object:					.ds			4*4
 
 				.bank   ROM (BASE=0xE000,SIZE=0x1FE0)
        	.area   ROM (REL,CON,BANK=ROM)
 
 RESET::
-       
-       	lds			#SWSDK_CpuRAMEnd
-     		jsr			SWSDK_Init
+        ; this MUST be the first instruction       
+     		jmp			SWSDK_Init
 
 				SWSDK_ACK_IRQ
 				andcc		#~(1<<4)												; enable IRQ
@@ -83,7 +80,7 @@ wait_AVG:
 				SWSDK_CNTR
 				SWSDK_VCTR -250,280,0
 				SWSDK_COLOR SWSDK_YELLOW,128
-				SWSDK_SCAL 2,96
+				SWSDK_SCAL 2,96                         ; text a bit smaller
 				ldx			#trigger_msg
 				jsr			SWSDK_RenderString
 
