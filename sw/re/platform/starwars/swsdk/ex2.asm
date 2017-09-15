@@ -1,6 +1,6 @@
 ;
 ;	Star Wars SDK
-; - Example 2 (test pattern routines)
+; - Example 2 (test pattern routines & trigger)
 
 				.list		(meb)										; macro expansion binary
 				.module ex2
@@ -19,7 +19,9 @@
 
 								.ds			256											; for DP (MAIN)
 cnt			.equ		0x80
-delay		.equ 		0x81								
+delay		.equ 		0x81
+in0 		.equ    0x82
+in1     .equ    0x83
 
 								.ds			256											; for DP (IRQ)
 object:					.ds			4*4
@@ -39,10 +41,11 @@ RESET::
 				SWSDK_JMPL 0x1802												; simulate other buffer
 				SWSDK_HALT															; empty 1st half
 
-				clr			*cnt
-FRAME_DELAY			.equ		120
-				lda			#FRAME_DELAY
-				sta			*delay
+        lda     #0
+				sta     *cnt
+				lda     #0
+				sta     *in0
+				sta     *in1
 				
 loop:
 
@@ -77,20 +80,26 @@ wait_AVG:
 				SWSDK_COLOR SWSDK_WHITE,128
 				ldx			#title_msg
 				jsr			SWSDK_RenderString
+				SWSDK_CNTR
+				SWSDK_VCTR -250,280,0
+				SWSDK_COLOR SWSDK_YELLOW,128
+				SWSDK_SCAL 2,96
+				ldx			#trigger_msg
+				jsr			SWSDK_RenderString
 
         ; check for leading-edge button press
-        ldx     #SWSDK_in0_shadow
-        lda     1,x                             ; prev (active low)
-        bita    #SWSDK_IN0_BUTTON1n
-        beq     0$                              ; pressed, skip
-        lda     ,x                              ; curr (active low)
-        bita    #SWSDK_IN0_BUTTON1n
-        bne     0$
-
+    
+        lda     SWSDK_in0_shadow+2              ; debounced
+        coma                                    ; active high
+        ldb     *in0                            ; B=prev (active high)
+        sta     *in0                            ; A=curr (prev=curr)
+        eorb    *in0                            ; B=changed bits
+        andb    *in0                            ; gone high
+        bitb    #SWSDK_IN0_BUTTON1n             ; button 1 high?
+        beq     0$                              ; no, skip
         inc     *cnt
-				lda			*cnt
-
-0$:			cmpa		#1
+0$:			lda			*cnt
+			  cmpa		#1
 				bne			1$
 				SWSDK_JSRL SWSDK_IntensityTestPattern
 				bra			3$
@@ -114,3 +123,7 @@ sdk_msg:
 title_msg:
 				.ascii	"EX2: TEST PATTERN"
 				.byte		(1<<7)|'S
+
+trigger_msg:
+				.ascii	"PRESS TRIGGER FOR NEXT PATTER"
+				.byte		(1<<7)|'N

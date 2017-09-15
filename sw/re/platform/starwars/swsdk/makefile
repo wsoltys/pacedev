@@ -3,7 +3,7 @@
 # list of all examples built by this makefile
 EXAMPLES = ex1 ex2 ex3
 # the example to install into MAME
-TARGET = ex3
+TARGET = ex2
 
 MAME_DIR = roms/starwars
 MAME_ROMS = 136021.206.1m
