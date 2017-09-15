@@ -47,7 +47,6 @@ SWSDK_Init::
 				leau		-1,u
 				cmpu		#0
 				bne			1$
-				puls		y																; save return address
 				lda			#>SWSDK_CpuRAMStart
 				tfr			a,dp
 				; clear RAM
@@ -69,7 +68,6 @@ SWSDK_Init::
 				SWSDK_KICK_WDOG
 				cmpx		#SWSDK_VectorRAMEnd+1
 				bcs			4$												
-				pshs		y																; restore return address
 				lda			#0xFF
 				sta			SWSDK_LED1
 				sta			SWSDK_LED2
