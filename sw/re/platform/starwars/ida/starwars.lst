@@ -12414,6 +12414,46 @@ IO:4340	?? ?? ?? ??+DSW0:	    .ds	0x20
 IO:4360	?? ?? ?? ??+DSW1:	    .ds	0x20
 IO:4360	?? ?? ?? ??+; end of 'IO'
 IO:4360	?? ?? ?? ??+
+ADCRES:4380		; ===========================================================================
+ADCRES:4380
+ADCRES:4380		; Segment type:	Regular
+ADCRES:4380				.area ADCRES
+ADCRES:4380				.org 0x4380
+ADCRES:4380		; assume dp = 0
+ADCRES:4380 ??		adc_result:	.ds 1
+ADCRES:4381 ??				.ds 1
+ADCRES:4382 ??				.ds 1
+ADCRES:4383 ??				.ds 1
+ADCRES:4384 ??				.ds 1
+ADCRES:4385 ??				.ds 1
+ADCRES:4386 ??				.ds 1
+ADCRES:4387 ??				.ds 1
+ADCRES:4388 ??				.ds 1
+ADCRES:4389 ??				.ds 1
+ADCRES:438A ??				.ds 1
+ADCRES:438B ??				.ds 1
+ADCRES:438C ??				.ds 1
+ADCRES:438D ??				.ds 1
+ADCRES:438E ??				.ds 1
+ADCRES:438F ??				.ds 1
+ADCRES:4390 ??				.ds 1
+ADCRES:4391 ??				.ds 1
+ADCRES:4392 ??				.ds 1
+ADCRES:4393 ??				.ds 1
+ADCRES:4394 ??				.ds 1
+ADCRES:4395 ??				.ds 1
+ADCRES:4396 ??				.ds 1
+ADCRES:4397 ??				.ds 1
+ADCRES:4398 ??				.ds 1
+ADCRES:4399 ??				.ds 1
+ADCRES:439A ??				.ds 1
+ADCRES:439B ??				.ds 1
+ADCRES:439C ??				.ds 1
+ADCRES:439D ??				.ds 1
+ADCRES:439E ??				.ds 1
+ADCRES:439F ??				.ds 1
+ADCRES:439F		; end of 'ADCRES'
+ADCRES:439F
 MAIN:4400	      ;	===========================================================================
 MAIN:4400
 MAIN:4400	      ;	Segment	type: Regular
@@ -12774,6 +12814,17 @@ OUT:469E ??			     .ds 1
 OUT:469F ??			     .ds 1
 OUT:469F	     ; end of 'OUT'
 OUT:469F
+ADCSEL:46C0		; ===========================================================================
+ADCSEL:46C0
+ADCSEL:46C0		; Segment type:	Regular
+ADCSEL:46C0				.area ADCSEL
+ADCSEL:46C0				.org 0x46C0
+ADCSEL:46C0		; assume dp = 0
+ADCSEL:46C0 ??		adc_sel_pitch:	.ds 1
+ADCSEL:46C1 ??		adc_sel_yaw:	.ds 1
+ADCSEL:46C2 ??		adc_sel_thrust:	.ds 1
+ADCSEL:46C2		; end of 'ADCSEL'
+ADCSEL:46C2
 SNDRST:46E0		; ===========================================================================
 SNDRST:46E0
 SNDRST:46E0		; Segment type:	Regular
@@ -12843,9 +12894,10 @@ RAM:481F ?? ?? ??    in1_shadow:     .ds 3
 RAM:4822 ?? ?? ??    dsw0_shadow:    .ds 3					     ; DATA XREF: sub_6005+19r
 RAM:4825 ?? ?? ??    dsw1_shadow:    .ds 3
 RAM:4828 ??			     .ds 1
-RAM:4829 ??			     .ds 1
+RAM:4829 ??	     unk_4829:	     .ds 1					     ; DATA XREF: read_pitch_yaw_input+3o
+RAM:4829									     ; read_pitch_yaw_input:select_ud_or_lr_adco
 RAM:482A ??			     .ds 1
-RAM:482B ??			     .ds 1
+RAM:482B ??	     unk_482B:	     .ds 1					     ; DATA XREF: read_pitch_yaw_input+9o
 RAM:482C ??			     .ds 1
 RAM:482D ??			     .ds 1
 RAM:482E ??			     .ds 1
@@ -44762,7 +44814,7 @@ ROM:EFC6 9A 31			     oraa    byte_31
 ROM:EFC8 97 31			     sta     byte_31
 ROM:EFCA
 ROM:EFCA	     loc_EFCA:							     ; CODE XREF: ROM:EFC4j
-ROM:EFCA BD F1 46		     jsr     sub_F146
+ROM:EFCA BD F1 46		     jsr     read_pitch_yaw_input
 ROM:EFCD 96 0A			     lda     unk_A
 ROM:EFCF 26 15			     bne     loc_EFE6
 ROM:EFD1 B6 44 01		     lda     READY_F
@@ -44825,14 +44877,14 @@ ROM:F034 0A 40			     dec     unk_40
 ROM:F036 28 09			     bvc     loc_F041
 ROM:F038 B7 46 20		     sta     avg_reset
 ROM:F03B BD 61 1E		     jsr     sub_611E
-ROM:F03E 7E F1 2F		     jmp     loc_F12F
+ROM:F03E 7E F1 2F		     jmp     loc_F12F				     ; (ack,rti)
 ROM:F041	     ; ---------------------------------------------------------------------------
 ROM:F041
 ROM:F041	     loc_F041:							     ; CODE XREF: ROM:F036j
-ROM:F041 10 2A 00 EA		     lbpl    loc_F12F
+ROM:F041 10 2A 00 EA		     lbpl    loc_F12F				     ; skip to end (ack,rti)
 ROM:F045 B6 43 20		     lda     IN1
-ROM:F048 48			     asla
-ROM:F049 10 2A 00 E2		     lbpl    loc_F12F
+ROM:F048 48			     asla					     ; math run?
+ROM:F049 10 2A 00 E2		     lbpl    loc_F12F				     ; no, skip	to end (ack,rti)
 ROM:F04D 96 3F			     lda     byte_3F
 ROM:F04F 2A 19			     bpl     loc_F06A
 ROM:F051 B6 00 00		     lda     word_0
@@ -44988,21 +45040,32 @@ ROM:F143 E7 80			     stb     ,x+				     ; store deb
 ROM:F145 39			     rts
 ROM:F145	     ; End of function in_debounce
 ROM:F145
+ROM:F146	     ; "Star Wars originally used a Pokey to read the pots.
+ROM:F146	     ;	Unfortunately, Pokey does a really awful job of	reading
+ROM:F146	     ;	pots; it is guaranteed to produce occasional wrong values.
+ROM:F146	     ;	The software to	deal with it is	pretty nasty. After Greg
+ROM:F146	     ;	Rivera brought this to my attention I took the daring step
+ROM:F146	     ;	of actually putting in a real A/D (Gasp!), the ADC-0809.
+ROM:F146	     ;	Unfortunately, many people continued to	use the	original
+ROM:F146	     ;	code to	treat the A/D values as	though they had	come from a
+ROM:F146	     ;	Pokey. Like Greg. That is why the Controller in	Star Wars
+ROM:F146	     ;	keeps getting recentered, usually badly."
+ROM:F146	     ;	- Jed Margolin,	The Secret Life	of Vector Generators
 ROM:F146
 ROM:F146	     ; =============== S U B R O U T I N E =======================================
 ROM:F146
 ROM:F146
-ROM:F146	     sub_F146:							     ; CODE XREF: ROM:loc_EFCAP
+ROM:F146	     read_pitch_yaw_input:					     ; CODE XREF: ROM:loc_EFCAP
 ROM:F146 96 0A			     lda     unk_A
 ROM:F148 44			     lsra
-ROM:F149 10 8E 48 29		     ldy     #0x4829
+ROM:F149 10 8E 48 29		     ldy     #unk_4829
 ROM:F14D 25 04			     bcs     loc_F153
-ROM:F14F 10 8E 48 2B		     ldy     #0x482B
+ROM:F14F 10 8E 48 2B		     ldy     #unk_482B
 ROM:F153
-ROM:F153	     loc_F153:							     ; CODE XREF: sub_F146+7j
+ROM:F153	     loc_F153:							     ; CODE XREF: read_pitch_yaw_input+7j
 ROM:F153 E6 21			     ldb     1,y
-ROM:F155 B6 43 80		     lda     0x4380
-ROM:F158 A7 21			     sta     1,y
+ROM:F155 B6 43 80		     lda     adc_result				     ; read ADC	value
+ROM:F158 A7 21			     sta     1,y				     ; new value
 ROM:F15A A1 A4			     cmpa    ,y
 ROM:F15C 25 0E			     bcs     loc_F16C
 ROM:F15E E1 A4			     cmpb    ,y
@@ -45011,39 +45074,39 @@ ROM:F162 E1 21			     cmpb    1,y
 ROM:F164 23 02			     bls     loc_F168
 ROM:F166 E6 21			     ldb     1,y
 ROM:F168
-ROM:F168	     loc_F168:							     ; CODE XREF: sub_F146+1Ej
+ROM:F168	     loc_F168:							     ; CODE XREF: read_pitch_yaw_input+1Ej
 ROM:F168 E7 A4			     stb     ,y
 ROM:F16A
-ROM:F16A	     loc_F16A:							     ; CODE XREF: sub_F146+1Aj
-ROM:F16A 20 0C			     bra     loc_F178
+ROM:F16A	     loc_F16A:							     ; CODE XREF: read_pitch_yaw_input+1Aj
+ROM:F16A 20 0C			     bra     select_ud_or_lr_adc
 ROM:F16C	     ; ---------------------------------------------------------------------------
 ROM:F16C
-ROM:F16C	     loc_F16C:							     ; CODE XREF: sub_F146+16j
+ROM:F16C	     loc_F16C:							     ; CODE XREF: read_pitch_yaw_input+16j
 ROM:F16C E1 A4			     cmpb    ,y
-ROM:F16E 24 08			     bcc     loc_F178
+ROM:F16E 24 08			     bcc     select_ud_or_lr_adc
 ROM:F170 E1 21			     cmpb    1,y
 ROM:F172 24 02			     bcc     loc_F176
 ROM:F174 E6 21			     ldb     1,y
 ROM:F176
-ROM:F176	     loc_F176:							     ; CODE XREF: sub_F146+2Cj
+ROM:F176	     loc_F176:							     ; CODE XREF: read_pitch_yaw_input+2Cj
 ROM:F176 E7 A4			     stb     ,y
 ROM:F178
-ROM:F178	     loc_F178:							     ; CODE XREF: sub_F146:loc_F16Aj
-ROM:F178									     ; sub_F146+28j
-ROM:F178 10 8C 48 29		     cmpy    #0x4829
-ROM:F17C 26 08			     bne     loc_F186
-ROM:F17E B7 46 C0		     sta     0x46C0
-ROM:F181 B7 46 C0		     sta     0x46C0
+ROM:F178	     select_ud_or_lr_adc:					     ; CODE XREF: read_pitch_yaw_input:loc_F16Aj
+ROM:F178									     ; read_pitch_yaw_input+28j
+ROM:F178 10 8C 48 29		     cmpy    #unk_4829
+ROM:F17C 26 08			     bne     select_lr_adc
+ROM:F17E B7 46 C0		     sta     adc_sel_pitch			     ; up/down
+ROM:F181 B7 46 C0		     sta     adc_sel_pitch
 ROM:F184 20 06			     bra     locret_F18C
 ROM:F186	     ; ---------------------------------------------------------------------------
 ROM:F186
-ROM:F186	     loc_F186:							     ; CODE XREF: sub_F146+36j
-ROM:F186 B7 46 C1		     sta     0x46C1
-ROM:F189 B7 46 C1		     sta     0x46C1
+ROM:F186	     select_lr_adc:						     ; CODE XREF: read_pitch_yaw_input+36j
+ROM:F186 B7 46 C1		     sta     adc_sel_yaw			     ; left/right
+ROM:F189 B7 46 C1		     sta     adc_sel_yaw
 ROM:F18C
-ROM:F18C	     locret_F18C:						     ; CODE XREF: sub_F146+3Ej
+ROM:F18C	     locret_F18C:						     ; CODE XREF: read_pitch_yaw_input+3Ej
 ROM:F18C 39			     rts
-ROM:F18C	     ; End of function sub_F146
+ROM:F18C	     ; End of function read_pitch_yaw_input
 ROM:F18C
 ROM:F18D
 ROM:F18D	     ; =============== S U B R O U T I N E =======================================
