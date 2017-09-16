@@ -20,15 +20,14 @@ VECRAM:0000
 VECRAM:0000		; Segment type:	Regular
 VECRAM:0000				.area VECRAM
 VECRAM:0000		; assume dp = 0
-VECRAM:0000 ?? ??	word_0:		.ds 2						; DATA XREF: BANK0:7D9Cw
-VECRAM:0000										; ROM:EF6Br ...
+VECRAM:0000 ?? ??	word_0:		.ds 2						; DATA XREF: ROM:EF6Br
+VECRAM:0000										; ROM:F051r ...
 VECRAM:0002 ?? ??	word_2:		.ds 2						; DATA XREF: sub_AC52:loc_AC65w
 VECRAM:0002										; sub_AC52+1Fr	...
 VECRAM:0004 ?? ??	word_4:		.ds 2						; DATA XREF: sub_B85E+46r
 VECRAM:0004										; sub_B85E+8Ar	...
 VECRAM:0006 ??				.ds 1
-VECRAM:0007 ??		byte_7:		.ds 1						; DATA XREF: sub_7881:loc_79A5w
-VECRAM:0007										; sub_7881+130r
+VECRAM:0007 ??				.ds 1
 VECRAM:0008 ??				.ds 1
 VECRAM:0009 ??		unk_9:		.ds 1
 VECRAM:000A ??		unk_A:		.ds 1
@@ -51,30 +50,30 @@ VECRAM:001A ??				.ds 1
 VECRAM:001B ??				.ds 1
 VECRAM:001C ??				.ds 1
 VECRAM:001D ??				.ds 1
-VECRAM:001E ??		byte_1E:	.ds 1						; DATA XREF: sub_60BE+43r
+VECRAM:001E ??				.ds 1
 VECRAM:001F ??				.ds 1
 VECRAM:0020 ??				.ds 1
-VECRAM:0021 ??		byte_21:	.ds 1						; DATA XREF: sub_60BE+3Dr
+VECRAM:0021 ??				.ds 1
 VECRAM:0022 ??		unk_22:		.ds 1
 VECRAM:0023 ??				.ds 1
 VECRAM:0024 ??		unk_24:		.ds 1
 VECRAM:0025 ??				.ds 1
 VECRAM:0026 ??		unk_26:		.ds 1
 VECRAM:0027 ??		unk_27:		.ds 1
-VECRAM:0028 ??		byte_28:	.ds 1						; DATA XREF: sub_6005:loc_601Ar
-VECRAM:0028										; ROM:loc_F06Aw ...
+VECRAM:0028 ??		byte_28:	.ds 1						; DATA XREF: ROM:loc_F06Aw
+VECRAM:0028										; ROM:F06Ew ...
 VECRAM:0029 ??		unk_29:		.ds 1
 VECRAM:002A ??		unk_2A:		.ds 1
 VECRAM:002B ??		unk_2B:		.ds 1
 VECRAM:002C ??		unk_2C:		.ds 1
-VECRAM:002D ??		byte_2D:	.ds 1						; DATA XREF: sub_70DB+Er
-VECRAM:002D										; sub_AE60+37r	...
+VECRAM:002D ??		byte_2D:	.ds 1						; DATA XREF: sub_AE60+37r
+VECRAM:002D										; sub_F22B+28w
 VECRAM:002E ??		unk_2E:		.ds 1
-VECRAM:002F ??		byte_2F:	.ds 1						; DATA XREF: sub_70DB+Ar
-VECRAM:002F										; sub_AE60+3Br	...
+VECRAM:002F ??		byte_2F:	.ds 1						; DATA XREF: sub_AE60+3Br
+VECRAM:002F										; sub_F22B+Fw
 VECRAM:0030 ??		unk_30:		.ds 1
-VECRAM:0031 ??		byte_31:	.ds 1						; DATA XREF: sub_6005+20r
-VECRAM:0031										; sub_6005+28w	...
+VECRAM:0031 ??		byte_31:	.ds 1						; DATA XREF: sub_AE60+18r
+VECRAM:0031										; sub_AE60+25w	...
 VECRAM:0032 ??		coins_btns_gone_low:.ds	1
 VECRAM:0033 ??		coins_btns:	.ds 1
 VECRAM:0034 ??		coins_btns_r:	.ds 1
@@ -86,18 +85,15 @@ VECRAM:0039 ??		unk_39:		.ds 1
 VECRAM:003A ??		unk_3A:		.ds 1
 VECRAM:003B ??		unk_3B:		.ds 1
 VECRAM:003C ??		unk_3C:		.ds 1
-VECRAM:003D ??		byte_3D:	.ds 1						; DATA XREF: sub_6005+Aw
-VECRAM:003D										; ROM:EF7Aw
+VECRAM:003D ??		byte_3D:	.ds 1						; DATA XREF: ROM:EF7Aw
 VECRAM:003E ??		unk_3E:		.ds 1
-VECRAM:003F ??		byte_3F:	.ds 1						; DATA XREF: sub_6005:loc_6032r
-VECRAM:003F										; sub_6112r ...
+VECRAM:003F ??		byte_3F:	.ds 1						; DATA XREF: ROM:F04Dr
+VECRAM:003F										; ROM:F05Cw ...
 VECRAM:0040 ??		unk_40:		.ds 1
-VECRAM:0041 ??		byte_41:	.ds 1						; DATA XREF: sub_6005:loc_6036r
-VECRAM:0041										; sub_622D+8r ...
-VECRAM:0042 ??		byte_42:	.ds 1						; DATA XREF: sub_60BE+4w
-VECRAM:0042										; sub_60BE+Aw ...
-VECRAM:0043 ??		byte_43:	.ds 1						; DATA XREF: sub_60BEw
-VECRAM:0043										; sub_63D5+5r ...
+VECRAM:0041 ??				.ds 1
+VECRAM:0042 ??				.ds 1
+VECRAM:0043 ??		byte_43:	.ds 1						; DATA XREF: sub_8495+13r
+VECRAM:0043										; sub_8BE1:loc_8CDBr ...
 VECRAM:0044 ??		byte_44:	.ds 1						; DATA XREF: sub_8341+2w
 VECRAM:0044										; sub_8434+24w	...
 VECRAM:0045 ??		byte_45:	.ds 1						; DATA XREF: sub_8341+4w
@@ -127,41 +123,39 @@ VECRAM:0053										; sub_CE45r ...
 VECRAM:0054 ??		byte_54:	.ds 1						; DATA XREF: sub_B32B-27F0r
 VECRAM:0054										; sub_CE45+2w
 VECRAM:0055 ??				.ds 1
-VECRAM:0056 ??		byte_56:	.ds 1						; DATA XREF: BANK0:6915w
-VECRAM:0056										; BANK0:697Er ...
+VECRAM:0056 ??				.ds 1
 VECRAM:0057 ??				.ds 1
-VECRAM:0058 ??		byte_58:	.ds 1						; DATA XREF: BANK0:691Aw
-VECRAM:0058										; BANK0:697Ar ...
+VECRAM:0058 ??				.ds 1
 VECRAM:0059 ??				.ds 1
 VECRAM:005A ??		byte_5A:	.ds 1						; DATA XREF: sub_8B6D:loc_8B70w
 VECRAM:005A										; sub_8B6D:loc_8B7Br ...
 VECRAM:005B ??				.ds 1
-VECRAM:005C ??		byte_5C:	.ds 1						; DATA XREF: BANK0:62BDw
-VECRAM:005C										; sub_67AA+19w	...
-VECRAM:005D ??		byte_5D:	.ds 1						; DATA XREF: BANK0:62BFw
-VECRAM:005D										; sub_67AA+1Bw	...
-VECRAM:005E ??		byte_5E:	.ds 1						; DATA XREF: BANK0:62C1w
-VECRAM:005E										; sub_67AA+1Dw	...
-VECRAM:005F ??		byte_5F:	.ds 1						; DATA XREF: BANK0:62C3w
-VECRAM:005F										; sub_67AA+1Fw	...
-VECRAM:0060 ??		byte_60:	.ds 1						; DATA XREF: sub_67AA+2w
-VECRAM:0060										; BANK0:685Cr ...
+VECRAM:005C ??		byte_5C:	.ds 1						; DATA XREF: sub_9801+2Dr
+VECRAM:005C										; sub_9801+32w	...
+VECRAM:005D ??		byte_5D:	.ds 1						; DATA XREF: sub_9801+28r
+VECRAM:005D										; sub_9801+2Bw
+VECRAM:005E ??		byte_5E:	.ds 1						; DATA XREF: sub_9801+1Er
+VECRAM:005E										; sub_9801+21w	...
+VECRAM:005F ??		byte_5F:	.ds 1						; DATA XREF: sub_9801+14r
+VECRAM:005F										; sub_9801+17w
+VECRAM:0060 ??		byte_60:	.ds 1						; DATA XREF: sub_953B+7r
+VECRAM:0060										; sub_953B+9w ...
 VECRAM:0061 ??		byte_61:	.ds 1						; DATA XREF: sub_953B+1Aw
 VECRAM:0061										; sub_9558:loc_95A0r ...
-VECRAM:0062 ??		byte_62:	.ds 1						; DATA XREF: sub_7A48+15w
-VECRAM:0062										; sub_9874+6w ...
-VECRAM:0063 ??		byte_63:	.ds 1						; DATA XREF: sub_6DD2r
-VECRAM:0063										; sub_6DD2+6w ...
-VECRAM:0064 ??		byte_64:	.ds 1						; DATA XREF: sub_6EA2+12w
-VECRAM:0064										; sub_6EA2+5Dr	...
+VECRAM:0062 ??		byte_62:	.ds 1						; DATA XREF: sub_9874+6w
+VECRAM:0062										; sub_987F+4w ...
+VECRAM:0063 ??		byte_63:	.ds 1						; DATA XREF: sub_A2F8:loc_A395r
+VECRAM:0063										; sub_A2F8:loc_A3A3w ...
+VECRAM:0064 ??		byte_64:	.ds 1						; DATA XREF: sub_A214:loc_A24Fw
+VECRAM:0064										; sub_A214:loc_A2B0r ...
 VECRAM:0065 ??				.ds 1
 VECRAM:0066 ??				.ds 1
 VECRAM:0067 ??				.ds 1
 VECRAM:0068 ??				.ds 1
 VECRAM:0069 ??				.ds 1
 VECRAM:006A ??				.ds 1
-VECRAM:006B ??		byte_6B:	.ds 1						; DATA XREF: sub_70DB+2r
-VECRAM:006B										; sub_AE60+33r	...
+VECRAM:006B ??		byte_6B:	.ds 1						; DATA XREF: sub_AE60+33r
+VECRAM:006B										; sub_F22Br
 VECRAM:006C ??		unk_6C:		.ds 1
 VECRAM:006D ??				.ds 1
 VECRAM:006E ??				.ds 1
@@ -170,62 +164,57 @@ VECRAM:0070 ??				.ds 1
 VECRAM:0071 ??				.ds 1
 VECRAM:0072 ??				.ds 1
 VECRAM:0073 ??				.ds 1
-VECRAM:0074 ??		byte_74:	.ds 1						; DATA XREF: sub_70DB+6r
-VECRAM:0074										; sub_AE60+2Fr	...
+VECRAM:0074 ??		byte_74:	.ds 1						; DATA XREF: sub_AE60+2Fr
+VECRAM:0074										; sub_F22B+19r
 VECRAM:0075 ??		unk_75:		.ds 1
 VECRAM:0076 ??				.ds 1
 VECRAM:0077 ??				.ds 1
 VECRAM:0078 ??				.ds 1
-VECRAM:0079 ??		byte_79:	.ds 1						; DATA XREF: BANK0:662Fr
-VECRAM:0079										; sub_70DB+10w
+VECRAM:0079 ??				.ds 1
 VECRAM:007A ??				.ds 1
-VECRAM:007B ??		byte_7B:	.ds 1						; DATA XREF: BANK0:loc_6618r
-VECRAM:007B										; sub_70DB+Cw
+VECRAM:007B ??				.ds 1
 VECRAM:007C ??				.ds 1
-VECRAM:007D ??		byte_7D:	.ds 1						; DATA XREF: sub_622Dr
-VECRAM:007D										; sub_6E22+1Er	...
+VECRAM:007D ??		byte_7D:	.ds 1						; DATA XREF: sub_A591+1F5r
+VECRAM:007D										; sub_A591:loc_A790r ...
 VECRAM:007E ??				.ds 1
-VECRAM:007F ??		byte_7F:	.ds 1						; DATA XREF: sub_6F6F+3Er
-VECRAM:007F										; sub_6F6F+45r	...
+VECRAM:007F ??		byte_7F:	.ds 1						; DATA XREF: sub_B6D7+21r
+VECRAM:007F										; sub_B6D7+29r
 VECRAM:0080 ??				.ds 1
 VECRAM:0081 ??				.ds 1
 VECRAM:0082 ??				.ds 1
-VECRAM:0083 ??		byte_83:	.ds 1						; DATA XREF: sub_6161+12w
-VECRAM:0083										; sub_61EC+2w ...
+VECRAM:0083 ??				.ds 1
 VECRAM:0084 ??				.ds 1
 VECRAM:0085 ??				.ds 1
 VECRAM:0086 ??				.ds 1
 VECRAM:0087 ??				.ds 1
 VECRAM:0088 ??				.ds 1
-VECRAM:0089 ??		byte_89:	.ds 1						; DATA XREF: sub_6DA5r
-VECRAM:0089										; sub_6DA5+5w ...
+VECRAM:0089 ??				.ds 1
 VECRAM:008A ??				.ds 1
-VECRAM:008B ??		byte_8B:	.ds 1						; DATA XREF: BANK0:62C5w
-VECRAM:008B										; sub_67AA+15w	...
-VECRAM:008C ??		byte_8C:	.ds 1						; DATA XREF: BANK0:62C7w
-VECRAM:008C										; sub_67AA+17w	...
+VECRAM:008B ??		byte_8B:	.ds 1						; DATA XREF: sub_9558r
+VECRAM:008B										; sub_962A+70w	...
+VECRAM:008C ??		byte_8C:	.ds 1						; DATA XREF: sub_9558+4r
+VECRAM:008C										; sub_9558+Aw ...
 VECRAM:008D ??		byte_8D:	.ds 1						; DATA XREF: sub_9558+14w
 VECRAM:008D										; sub_962A+19w	...
-VECRAM:008E ??		byte_8E:	.ds 1						; DATA XREF: sub_67AA+4w
-VECRAM:008E										; sub_7519+37r	...
+VECRAM:008E ??		byte_8E:	.ds 1						; DATA XREF: sub_9558+Ew
+VECRAM:008E										; sub_962A+9r ...
 VECRAM:008F ??		byte_8F:	.ds 1						; DATA XREF: sub_9558+46w
 VECRAM:008F										; sub_962A:loc_9674r ...
 VECRAM:0090 ??		byte_90:	.ds 1						; DATA XREF: sub_9558+44w
 VECRAM:0090										; sub_962A+29r	...
 VECRAM:0091 ??		byte_91:	.ds 1						; DATA XREF: sub_9558+42w
 VECRAM:0091										; sub_962Ar ...
-VECRAM:0092 ??		byte_92:	.ds 1						; DATA XREF: BANK0:loc_6B99r
-VECRAM:0092										; sub_8341+3Aw	...
-VECRAM:0093 ??		byte_93:	.ds 1						; DATA XREF: BANK0:6B9Dr
-VECRAM:0093										; sub_8434+Cw ...
+VECRAM:0092 ??		byte_92:	.ds 1						; DATA XREF: sub_8341+3Aw
+VECRAM:0092										; sub_83CEr ...
+VECRAM:0093 ??		byte_93:	.ds 1						; DATA XREF: sub_8434+Cw
+VECRAM:0093										; sub_85F9+12r	...
 VECRAM:0094 ??				.ds 1
 VECRAM:0095 ??		byte_95:	.ds 1						; DATA XREF: sub_8341+3Cw
 VECRAM:0095										; sub_8434+20w	...
 VECRAM:0096 ??		byte_96:	.ds 1						; DATA XREF: sub_8434+1Cw
 VECRAM:0096										; sub_889F+13r	...
 VECRAM:0097 ??				.ds 1
-VECRAM:0098 ??		byte_98:	.ds 1						; DATA XREF: BANK0:6A52w
-VECRAM:0098										; BANK0:6B01w ...
+VECRAM:0098 ??				.ds 1
 VECRAM:0099 ??		byte_99:	.ds 1						; DATA XREF: sub_84C6+13w
 VECRAM:0099										; sub_84C6+24r	...
 VECRAM:009A ??		byte_9A:	.ds 1						; DATA XREF: sub_84C6:loc_84EEw
@@ -244,59 +233,55 @@ VECRAM:00A1 ??		byte_A1:	.ds 1						; DATA XREF: sub_BB7B+2w
 VECRAM:00A1										; sub_BB85r
 VECRAM:00A2 ??		byte_A2:	.ds 1						; DATA XREF: sub_B948r
 VECRAM:00A2										; sub_B948:loc_B951w
-VECRAM:00A3 ??		byte_A3:	.ds 1						; DATA XREF: sub_6E22+34r
-VECRAM:00A3										; sub_6E22:loc_6E70r ...
+VECRAM:00A3 ??				.ds 1
 VECRAM:00A4 ??				.ds 1
-VECRAM:00A5 ??		byte_A5:	.ds 1						; DATA XREF: sub_6E22:loc_6E3Ew
-VECRAM:00A5										; sub_6E22:loc_6E50r
+VECRAM:00A5 ??				.ds 1
 VECRAM:00A6 ??				.ds 1
-VECRAM:00A7 ??		byte_A7:	.ds 1						; DATA XREF: BANK0:69E1w
-VECRAM:00A7										; sub_6A0C:loc_6A39r ...
+VECRAM:00A7 ??		byte_A7:	.ds 1						; DATA XREF: sub_A1CE+43w
+VECRAM:00A7										; sub_A214+3Dr
 VECRAM:00A8 ??		byte_A8:	.ds 1						; DATA XREF: sub_A68Bw
 VECRAM:00A8										; sub_A705:loc_A708w ...
 VECRAM:00A9 ??				.ds 1
-VECRAM:00AA ??		byte_AA:	.ds 1						; DATA XREF: sub_60BE+3Bw
-VECRAM:00AA										; sub_60BE+4Dr	...
-VECRAM:00AB ??		byte_AB:	.ds 1						; DATA XREF: sub_60BE+39r
-VECRAM:00AB										; sub_60BE+4Bw
-VECRAM:00AC ??		byte_AC:	.ds 1						; DATA XREF: sub_60BE+51w
-VECRAM:00AC										; sub_622D+2Fr	...
-VECRAM:00AD ??		byte_AD:	.ds 1						; DATA XREF: sub_63D5+6Fw
-VECRAM:00AD										; sub_7519+74w	...
+VECRAM:00AA ??				.ds 1
+VECRAM:00AB ??				.ds 1
+VECRAM:00AC ??		byte_AC:	.ds 1						; DATA XREF: sub_C450+33r
+VECRAM:00AC										; sub_C4EB+46r	...
+VECRAM:00AD ??		byte_AD:	.ds 1						; DATA XREF: sub_95A7+4Dw
+VECRAM:00AD										; sub_97C2+11w	...
 VECRAM:00AE ??				.ds 1
 VECRAM:00AF ??				.ds 1
 VECRAM:00B0 ??				.ds 1
 VECRAM:00B1 ??				.ds 1
 VECRAM:00B2 ??				.ds 1
-VECRAM:00B3 ??		byte_B3:	.ds 1						; DATA XREF: sub_7881+10Er
-VECRAM:00B3										; sub_A40A+9r ...
+VECRAM:00B3 ??		byte_B3:	.ds 1						; DATA XREF: sub_A40A+9r
+VECRAM:00B3										; sub_AAE4+A3r	...
 VECRAM:00B4 ??				.ds 1
-VECRAM:00B5 ??		byte_B5:	.ds 1						; DATA XREF: sub_7881+11Cr
-VECRAM:00B5										; sub_A40A+Er ...
+VECRAM:00B5 ??		byte_B5:	.ds 1						; DATA XREF: sub_A40A+Er
+VECRAM:00B5										; sub_AAE4+B3r	...
 VECRAM:00B6 ??				.ds 1
-VECRAM:00B7 ??		byte_B7:	.ds 1						; DATA XREF: sub_7A48+1Dw
-VECRAM:00B7										; sub_AE60+8w ...
+VECRAM:00B7 ??		byte_B7:	.ds 1						; DATA XREF: sub_AE60+8w
+VECRAM:00B7										; sub_AE60+23w	...
 VECRAM:00B8 ??		byte_B8:	.ds 1						; DATA XREF: sub_AE60+31w
 VECRAM:00B8										; sub_B095+Br ...
 VECRAM:00B9 ??				.ds 1
 VECRAM:00BA ??		byte_BA:	.ds 1						; DATA XREF: sub_AE60+35w
 VECRAM:00BA										; sub_B095+1Ar	...
 VECRAM:00BB ??				.ds 1
-VECRAM:00BC ??		byte_BC:	.ds 1						; DATA XREF: sub_7A48+1Bw
-VECRAM:00BC										; sub_A40A+2Cr	...
-VECRAM:00BD ??		byte_BD:	.ds 1						; DATA XREF: sub_7A48+1Fw
-VECRAM:00BD										; sub_A40A+32w	...
+VECRAM:00BC ??		byte_BC:	.ds 1						; DATA XREF: sub_A40A+2Cr
+VECRAM:00BC										; sub_AAE4+125r ...
+VECRAM:00BD ??		byte_BD:	.ds 1						; DATA XREF: sub_A40A+32w
+VECRAM:00BD										; sub_AE60r ...
 VECRAM:00BE ??		byte_BE:	.ds 1						; DATA XREF: sub_B095+116w
 VECRAM:00BE										; sub_B095+193w ...
 VECRAM:00BF ??				.ds 1
 VECRAM:00C0 ??		byte_C0:	.ds 1						; DATA XREF: sub_B095+73w
 VECRAM:00C0										; sub_B095+11Fw ...
 VECRAM:00C1 ??		unk_C1:		.ds 1
-VECRAM:00C2 ??		byte_C2:	.ds 1						; DATA XREF: sub_7881+14Cw
-VECRAM:00C2										; sub_B32B:loc_8ACFr ...
+VECRAM:00C2 ??		byte_C2:	.ds 1						; DATA XREF: sub_B32B:loc_8ACFr
+VECRAM:00C2										; sub_B32B:loc_8AEDr ...
 VECRAM:00C3 ??				.ds 1
-VECRAM:00C4 ??		byte_C4:	.ds 1						; DATA XREF: sub_7881+143r
-VECRAM:00C4										; sub_7881+148w ...
+VECRAM:00C4 ??		byte_C4:	.ds 1						; DATA XREF: sub_B32B-2810r
+VECRAM:00C4										; sub_AE60+54w	...
 VECRAM:00C5 ??		unk_C5:		.ds 1
 VECRAM:00C6 ??		byte_C6:	.ds 1						; DATA XREF: sub_A459+ADw
 VECRAM:00C6										; sub_A459+E1w	...
@@ -306,7 +291,8 @@ VECRAM:00C8										; sub_A459+ABw	...
 VECRAM:00C9 ??				.ds 1
 VECRAM:00CA ??		byte_CA:	.ds 1						; DATA XREF: sub_AAE4+DAw
 VECRAM:00CA										; sub_AAE4:loc_AC05r ...
-VECRAM:00CB ??				.ds 1
+VECRAM:00CB ??		byte_CB:	.ds 1						; DATA XREF: ROM:F7D0r
+VECRAM:00CB										; ROM:F7D2r
 VECRAM:00CC ??		byte_CC:	.ds 1						; DATA XREF: sub_AAE4+D1r
 VECRAM:00CC										; sub_AAE4+D6w	...
 VECRAM:00CD ??				.ds 1
@@ -321,18 +307,18 @@ VECRAM:00D2 ??		unk_D2:		.ds 1
 VECRAM:00D3 ??				.ds 1
 VECRAM:00D4 ??		unk_D4:		.ds 1
 VECRAM:00D5 ??				.ds 1
-VECRAM:00D6 ??		byte_D6:	.ds 1						; DATA XREF: sub_7881+10Cr
-VECRAM:00D6										; sub_87CB+72w	...
+VECRAM:00D6 ??		byte_D6:	.ds 1						; DATA XREF: sub_87CB+72w
+VECRAM:00D6										; sub_AAE4+A1r	...
 VECRAM:00D7 ??				.ds 1
-VECRAM:00D8 ??		byte_D8:	.ds 1						; DATA XREF: sub_7881+11Ar
-VECRAM:00D8										; sub_87CB+77w	...
+VECRAM:00D8 ??		byte_D8:	.ds 1						; DATA XREF: sub_87CB+77w
+VECRAM:00D8										; sub_AAE4+B1r	...
 VECRAM:00D9 ??				.ds 1
 VECRAM:00DA ??				.ds 1
 VECRAM:00DB ??				.ds 1
 VECRAM:00DC ??		byte_DC:	.ds 1						; DATA XREF: sub_889F+2w
 VECRAM:00DC										; sub_A214+2w ...
-VECRAM:00DD ??		byte_DD:	.ds 1						; DATA XREF: BANK0:65DEr
-VECRAM:00DD										; BANK0:6613w ...
+VECRAM:00DD ??		byte_DD:	.ds 1						; DATA XREF: sub_8ED6+20r
+VECRAM:00DD										; sub_8F7B:loc_8F83w ...
 VECRAM:00DE ??		byte_DE:	.ds 1						; DATA XREF: sub_8ED6+46w
 VECRAM:00DE										; sub_8F34+34r	...
 VECRAM:00DF ??				.ds 1
@@ -345,8 +331,8 @@ VECRAM:00E3 ??				.ds 1
 VECRAM:00E4 ??		byte_E4:	.ds 1						; DATA XREF: sub_8ED6+2Bw
 VECRAM:00E4										; sub_8ED6+36r	...
 VECRAM:00E5 ??				.ds 1
-VECRAM:00E6 ??		byte_E6:	.ds 1						; DATA XREF: BANK0:loc_68C6r
-VECRAM:00E6										; sub_8E1Cw ...
+VECRAM:00E6 ??		byte_E6:	.ds 1						; DATA XREF: sub_8E1Cw
+VECRAM:00E6										; sub_8E1C+4w ...
 VECRAM:00E7 ??				.ds 1
 VECRAM:00E8 ??				.ds 1
 VECRAM:00E9 ??				.ds 1
@@ -12407,11 +12393,14 @@ IO:4300		    ; Segment type: Regular
 IO:4300				    .area IO
 IO:4300				    .org 0x4300
 IO:4300		    ; assume dp	= 0
-IO:4300	?? ?? ?? ??+IN0:	    .ds	0x20
+IO:4300	?? ?? ?? ??+IN0:	    .ds	0x20					    ; DATA XREF: sub_D776r
+IO:4300	?? ?? ?? ??+								    ; sub_D776:loc_D7A6r ...
 IO:4320	?? ?? ?? ??+IN1:	    .ds	0x20					    ; DATA XREF: go_math_and_wait:wait_mathr
 IO:4320	?? ?? ?? ??+								    ; ROM:EF94r ...
-IO:4340	?? ?? ?? ??+DSW0:	    .ds	0x20
-IO:4360	?? ?? ?? ??+DSW1:	    .ds	0x20
+IO:4340	?? ?? ?? ??+DSW0:	    .ds	0x20					    ; DATA XREF: ROM:EF9Ar
+IO:4340	?? ?? ?? ??+								    ; ROM:test_dipswitchesr ...
+IO:4360	?? ?? ?? ??+DSW1:	    .ds	0x20					    ; DATA XREF: ROM:EFA0r
+IO:4360	?? ?? ?? ??+								    ; ROM:F2D9r ...
 IO:4360	?? ?? ?? ??+; end of 'IO'
 IO:4360	?? ?? ?? ??+
 ADCRES:4380		; ===========================================================================
@@ -12420,8 +12409,8 @@ ADCRES:4380		; Segment type:	Regular
 ADCRES:4380				.area ADCRES
 ADCRES:4380				.org 0x4380
 ADCRES:4380		; assume dp = 0
-ADCRES:4380 ??		adc_result:	.ds 1
-ADCRES:4381 ??				.ds 1
+ADCRES:4380 ?? ??	adc_result:	.ds 2						; DATA XREF: read_pitch_yaw_input+Fr
+ADCRES:4380										; ROM:F836r ...
 ADCRES:4382 ??				.ds 1
 ADCRES:4383 ??				.ds 1
 ADCRES:4384 ??				.ds 1
@@ -12745,7 +12734,7 @@ AVG:4600			     .area AVG
 AVG:4600			     .org 0x4600
 AVG:4600	     ; assume dp = 0
 AVG:4600 ?? ?? ?? ??+avg_go:	     .ds 0x20					     ; DATA XREF: ROM:F128w
-AVG:4600 ?? ?? ?? ??+								     ; ROM:FD54w ...
+AVG:4600 ?? ?? ?? ??+								     ; ROM:F714w ...
 AVG:4620 ?? ?? ?? ??+avg_reset:	     .ds 0x20					     ; DATA XREF: ROM:F038w
 AVG:4620 ?? ?? ?? ??+								     ; ROM:F27Bw ...
 AVG:4620 ?? ?? ?? ??+; end of 'AVG'
@@ -12820,8 +12809,10 @@ ADCSEL:46C0		; Segment type:	Regular
 ADCSEL:46C0				.area ADCSEL
 ADCSEL:46C0				.org 0x46C0
 ADCSEL:46C0		; assume dp = 0
-ADCSEL:46C0 ??		adc_sel_pitch:	.ds 1
-ADCSEL:46C1 ??		adc_sel_yaw:	.ds 1
+ADCSEL:46C0 ??		adc_sel_pitch:	.ds 1						; DATA XREF: read_pitch_yaw_input+38w
+ADCSEL:46C0										; read_pitch_yaw_input+3Bw ...
+ADCSEL:46C1 ??		adc_sel_yaw:	.ds 1						; DATA XREF: read_pitch_yaw_input:select_lr_adcw
+ADCSEL:46C1										; read_pitch_yaw_input+43w ...
 ADCSEL:46C2 ??		adc_sel_thrust:	.ds 1
 ADCSEL:46C2		; end of 'ADCSEL'
 ADCSEL:46C2
@@ -12843,9 +12834,11 @@ MATHW:4700			       .org 0x4700
 MATHW:4700	       ; assume	dp = 0
 MATHW:4700 ??	       MW0_DIV_REH:    .ds 1					       ; DATA XREF: sub_A459+1Br
 MATHW:4700									       ; sub_A591+1EBr	...
-MATHW:4701 ??	       MW1_DIV_REL:    .ds 1
+MATHW:4701 ??	       MW1_DIV_REL:    .ds 1					       ; DATA XREF: sub_6EA2+67w
+MATHW:4701									       ; sub_7160+19w ...
 MATHW:4702 ??	       MW2:	       .ds 1
-MATHW:4703 ??	       PRNG:	       .ds 1
+MATHW:4703 ??	       PRNG:	       .ds 1					       ; DATA XREF: sub_6161r
+MATHW:4703									       ; sub_6161+3r ...
 MATHW:4704 ??	       DVSRH:	       .ds 1					       ; DATA XREF: sub_7765+5w
 MATHW:4704									       ; sub_77A4+5w ...
 MATHW:4705 ??	       DVSRL:	       .ds 1
@@ -12860,14 +12853,19 @@ RAM:4800	     ; Segment type: Regular
 RAM:4800			     .area RAM
 RAM:4800			     .org 0x4800
 RAM:4800	     ; assume dp = 0
-RAM:4800 ??	     unk_4800:	     .ds 1					     ; DATA XREF: ROM:F29Co
-RAM:4801 ??			     .ds 1
+RAM:4800 ??	     byte_4800:	     .ds 1					     ; DATA XREF: BANK0:7D9Cw
+RAM:4800									     ; ROM:F29Co
+RAM:4801 ??	     byte_4801:	     .ds 1					     ; DATA XREF: sub_77D4+Dw
+RAM:4801									     ; sub_77D4:loc_780Ew ...
 RAM:4802 ??			     .ds 1
-RAM:4803 ??			     .ds 1
+RAM:4803 ??	     byte_4803:	     .ds 1					     ; DATA XREF: sub_77D4+9w
+RAM:4803									     ; sub_785B+4r ...
 RAM:4804 ??			     .ds 1
-RAM:4805 ??			     .ds 1
+RAM:4805 ??	     byte_4805:	     .ds 1					     ; DATA XREF: sub_77D4+5w
+RAM:4805									     ; sub_785Br ...
 RAM:4806 ??			     .ds 1
-RAM:4807 ??			     .ds 1
+RAM:4807 ??	     byte_4807:	     .ds 1					     ; DATA XREF: sub_7881:loc_79A5w
+RAM:4807									     ; sub_7881+130r
 RAM:4808 ??			     .ds 1
 RAM:4809 ??			     .ds 1
 RAM:480A ??			     .ds 1
@@ -12889,21 +12887,23 @@ RAM:4818									     ; BANK0:65B9w ...
 RAM:481A ?? ??	     word_481A:	     .ds 2					     ; DATA XREF: BANK0:65B6w
 RAM:481A									     ; BANK0:6661w ...
 RAM:481C ?? ?? ??    in0_shadow:     .ds 3					     ; DATA XREF: ROM:loc_EF8Bo
-RAM:481C									     ; sub_622D:loc_6269r ...
-RAM:481F ?? ?? ??    in1_shadow:     .ds 3
-RAM:4822 ?? ?? ??    dsw0_shadow:    .ds 3					     ; DATA XREF: sub_6005+19r
+RAM:481C									     ; sub_60BE+43r ...
+RAM:481F ?? ?? ??    in1_shadow:     .ds 3					     ; DATA XREF: sub_60BE+3Dr
+RAM:481F									     ; ROM:EFAAr
+RAM:4822 ?? ?? ??    dsw0_shadow:    .ds 3					     ; DATA XREF: MAIN+19r
 RAM:4825 ?? ?? ??    dsw1_shadow:    .ds 3
-RAM:4828 ??			     .ds 1
+RAM:4828 ??	     byte_4828:	     .ds 1					     ; DATA XREF: MAIN:loc_601Ar
 RAM:4829 ??	     unk_4829:	     .ds 1					     ; DATA XREF: read_pitch_yaw_input+3o
 RAM:4829									     ; read_pitch_yaw_input:select_ud_or_lr_adco
 RAM:482A ??			     .ds 1
 RAM:482B ??	     unk_482B:	     .ds 1					     ; DATA XREF: read_pitch_yaw_input+9o
 RAM:482C ??			     .ds 1
-RAM:482D ??			     .ds 1
+RAM:482D ??	     byte_482D:	     .ds 1					     ; DATA XREF: sub_70DB+Er
 RAM:482E ??			     .ds 1
-RAM:482F ??			     .ds 1
+RAM:482F ??	     byte_482F:	     .ds 1					     ; DATA XREF: sub_70DB+Ar
 RAM:4830 ??			     .ds 1
-RAM:4831 ??			     .ds 1
+RAM:4831 ??	     byte_4831:	     .ds 1					     ; DATA XREF: MAIN+20r
+RAM:4831									     ; MAIN+28w ...
 RAM:4832 ??			     .ds 1
 RAM:4833 ??			     .ds 1
 RAM:4834 ??			     .ds 1
@@ -12915,13 +12915,17 @@ RAM:4839 ??			     .ds 1
 RAM:483A ??			     .ds 1
 RAM:483B ??			     .ds 1
 RAM:483C ??			     .ds 1
-RAM:483D ??			     .ds 1
+RAM:483D ??	     byte_483D:	     .ds 1					     ; DATA XREF: MAIN+Aw
 RAM:483E ??			     .ds 1
-RAM:483F ??			     .ds 1
+RAM:483F ??	     byte_483F:	     .ds 1					     ; DATA XREF: MAIN:loc_6032r
+RAM:483F									     ; sub_6112r ...
 RAM:4840 ??			     .ds 1
-RAM:4841 ?? ??	     word_4841:	     .ds 2					     ; DATA XREF: sub_D9FA+106w
-RAM:4843 ?? ??	     word_4843:	     .ds 2					     ; DATA XREF: sub_C7FD+60r
-RAM:4843									     ; sub_C7FD+98r ...
+RAM:4841 ??	     jmp_tbl_index:  .ds 1					     ; DATA XREF: MAIN:loc_6036r
+RAM:4841									     ; sub_622D+8r ...
+RAM:4842 ??	     unk_4842:	     .ds 1					     ; DATA XREF: sub_60BE+4w
+RAM:4842									     ; sub_60BE+Aw ...
+RAM:4843 ?? ??	     word_4843:	     .ds 2					     ; DATA XREF: sub_60BEw
+RAM:4843									     ; sub_63D5+5r ...
 RAM:4845 ?? ??	     word_4845:	     .ds 2					     ; DATA XREF: BANK0:6BA7r
 RAM:4845									     ; BANK0:6C01r ...
 RAM:4847 ??			     .ds 1
@@ -12939,28 +12943,38 @@ RAM:4852 ??			     .ds 1
 RAM:4853 ??			     .ds 1
 RAM:4854 ??			     .ds 1
 RAM:4855 ??			     .ds 1
-RAM:4856 ??			     .ds 1
+RAM:4856 ??	     byte_4856:	     .ds 1					     ; DATA XREF: BANK0:6915w
+RAM:4856									     ; BANK0:697Er ...
 RAM:4857 ??			     .ds 1
-RAM:4858 ??			     .ds 1
+RAM:4858 ??	     byte_4858:	     .ds 1					     ; DATA XREF: BANK0:691Aw
+RAM:4858									     ; BANK0:697Ar ...
 RAM:4859 ??			     .ds 1
 RAM:485A ??			     .ds 1
 RAM:485B ??			     .ds 1
-RAM:485C ??			     .ds 1
-RAM:485D ??			     .ds 1
-RAM:485E ??			     .ds 1
-RAM:485F ??			     .ds 1
-RAM:4860 ??			     .ds 1
+RAM:485C ??	     byte_485C:	     .ds 1					     ; DATA XREF: BANK0:62BDw
+RAM:485C									     ; sub_67AA+19w
+RAM:485D ??	     byte_485D:	     .ds 1					     ; DATA XREF: BANK0:62BFw
+RAM:485D									     ; sub_67AA+1Bw
+RAM:485E ??	     byte_485E:	     .ds 1					     ; DATA XREF: BANK0:62C1w
+RAM:485E									     ; sub_67AA+1Dw
+RAM:485F ??	     byte_485F:	     .ds 1					     ; DATA XREF: BANK0:62C3w
+RAM:485F									     ; sub_67AA+1Fw
+RAM:4860 ??	     byte_4860:	     .ds 1					     ; DATA XREF: sub_67AA+2w
+RAM:4860									     ; BANK0:685Cr ...
 RAM:4861 ??			     .ds 1
-RAM:4862 ??			     .ds 1
-RAM:4863 ??			     .ds 1
-RAM:4864 ??			     .ds 1
+RAM:4862 ??	     byte_4862:	     .ds 1					     ; DATA XREF: sub_7A48+15w
+RAM:4863 ??	     byte_4863:	     .ds 1					     ; DATA XREF: sub_6DD2r
+RAM:4863									     ; sub_6DD2+6w ...
+RAM:4864 ??	     byte_4864:	     .ds 1					     ; DATA XREF: sub_6EA2+12w
+RAM:4864									     ; sub_6EA2+5Dr ...
 RAM:4865 ??			     .ds 1
 RAM:4866 ?? ??	     word_4866:	     .ds 2					     ; DATA XREF: BANK0:6283w
 RAM:4866									     ; sub_67D4+5w ...
 RAM:4868 ?? ??	     word_4868:	     .ds 2					     ; DATA XREF: BANK0:628Cw
 RAM:4868									     ; sub_67D4+Bw ...
 RAM:486A ??			     .ds 1
-RAM:486B ?? ??	     word_486B:	     .ds 2					     ; DATA XREF: sub_7A48+2Fw
+RAM:486B ?? ??	     word_486B:	     .ds 2					     ; DATA XREF: sub_70DB+2r
+RAM:486B									     ; sub_7A48+2Fw
 RAM:486D ?? ??	     word_486D:	     .ds 2					     ; DATA XREF: sub_6EA2:loc_6EE0w
 RAM:486D									     ; sub_6EA2+B9w ...
 RAM:486F ?? ??	     word_486F:	     .ds 2					     ; DATA XREF: BANK0:6295w
@@ -12968,40 +12982,50 @@ RAM:486F									     ; sub_67D4+2w ...
 RAM:4871 ?? ??	     word_4871:	     .ds 2					     ; DATA XREF: BANK0:629Ew
 RAM:4871									     ; sub_67D4+8w ...
 RAM:4873 ??			     .ds 1
-RAM:4874 ?? ??	     word_4874:	     .ds 2					     ; DATA XREF: sub_7A48+2Cw
+RAM:4874 ?? ??	     word_4874:	     .ds 2					     ; DATA XREF: sub_70DB+6r
+RAM:4874									     ; sub_7A48+2Cw
 RAM:4876 ?? ??	     word_4876:	     .ds 2					     ; DATA XREF: sub_6EA2+51w
 RAM:4876									     ; sub_6EA2+B3w ...
 RAM:4878 ?? ??	     word_4878:	     .ds 2					     ; DATA XREF: sub_6E22+68r
 RAM:4878									     ; sub_6E22+6Bw ...
 RAM:487A ??			     .ds 1
-RAM:487B ?? ??	     word_487B:	     .ds 2					     ; DATA XREF: sub_CAF3+2Fr
-RAM:487D ??			     .ds 1
+RAM:487B ?? ??	     word_487B:	     .ds 2					     ; DATA XREF: BANK0:loc_6618r
+RAM:487B									     ; sub_70DB+Cw ...
+RAM:487D ??	     byte_487D:	     .ds 1					     ; DATA XREF: sub_622Dr
+RAM:487D									     ; sub_6E22+1Er ...
 RAM:487E ??			     .ds 1
-RAM:487F ?? ??	     word_487F:	     .ds 2					     ; DATA XREF: sub_C4EB+6r
+RAM:487F ?? ??	     word_487F:	     .ds 2					     ; DATA XREF: sub_6F6F+3Er
+RAM:487F									     ; sub_6F6F+45r ...
 RAM:4881 ??			     .ds 1
 RAM:4882 ??			     .ds 1
-RAM:4883 ??			     .ds 1
+RAM:4883 ??	     byte_4883:	     .ds 1					     ; DATA XREF: sub_6161+12w
+RAM:4883									     ; sub_61EC+2w ...
 RAM:4884 ??			     .ds 1
 RAM:4885 ??			     .ds 1
 RAM:4886 ??			     .ds 1
 RAM:4887 ??			     .ds 1
 RAM:4888 ??			     .ds 1
-RAM:4889 ??			     .ds 1
+RAM:4889 ??	     byte_4889:	     .ds 1					     ; DATA XREF: sub_6DA5r
+RAM:4889									     ; sub_6DA5+5w ...
 RAM:488A ??			     .ds 1
-RAM:488B ??			     .ds 1
-RAM:488C ??			     .ds 1
+RAM:488B ??	     byte_488B:	     .ds 1					     ; DATA XREF: BANK0:62C5w
+RAM:488B									     ; sub_67AA+15w
+RAM:488C ??	     byte_488C:	     .ds 1					     ; DATA XREF: BANK0:62C7w
+RAM:488C									     ; sub_67AA+17w
 RAM:488D ??			     .ds 1
-RAM:488E ??			     .ds 1
+RAM:488E ??	     byte_488E:	     .ds 1					     ; DATA XREF: sub_67AA+4w
+RAM:488E									     ; sub_7519+37r
 RAM:488F ??			     .ds 1
 RAM:4890 ??			     .ds 1
 RAM:4891 ??			     .ds 1
-RAM:4892 ??			     .ds 1
-RAM:4893 ??			     .ds 1
+RAM:4892 ??	     byte_4892:	     .ds 1					     ; DATA XREF: BANK0:loc_6B99r
+RAM:4893 ??	     byte_4893:	     .ds 1					     ; DATA XREF: BANK0:6B9Dr
 RAM:4894 ??			     .ds 1
 RAM:4895 ?? ??	     word_4895:	     .ds 2					     ; DATA XREF: sub_743C+5Ar
 RAM:4895									     ; sub_74D5+2Br
 RAM:4897 ??			     .ds 1
-RAM:4898 ??			     .ds 1
+RAM:4898 ??	     byte_4898:	     .ds 1					     ; DATA XREF: BANK0:6A52w
+RAM:4898									     ; BANK0:6B01w ...
 RAM:4899 ??			     .ds 1
 RAM:489A ??			     .ds 1
 RAM:489B ??			     .ds 1
@@ -13012,40 +13036,48 @@ RAM:489F ??			     .ds 1
 RAM:48A0 ??			     .ds 1
 RAM:48A1 ?? ??	     word_48A1:	     .ds 2					     ; DATA XREF: BANK0:6D89r
 RAM:48A1									     ; BANK0:6D9Br
-RAM:48A3 ??			     .ds 1
+RAM:48A3 ??	     byte_48A3:	     .ds 1					     ; DATA XREF: sub_6E22+34r
+RAM:48A3									     ; sub_6E22:loc_6E70r ...
 RAM:48A4 ??			     .ds 1
-RAM:48A5 ??			     .ds 1
+RAM:48A5 ??	     byte_48A5:	     .ds 1					     ; DATA XREF: sub_6E22:loc_6E3Ew
+RAM:48A5									     ; sub_6E22:loc_6E50r
 RAM:48A6 ??			     .ds 1
-RAM:48A7 ??			     .ds 1
+RAM:48A7 ??	     byte_48A7:	     .ds 1					     ; DATA XREF: BANK0:69E1w
+RAM:48A7									     ; sub_6A0C:loc_6A39r ...
 RAM:48A8 ??			     .ds 1
 RAM:48A9 ??			     .ds 1
-RAM:48AA ??			     .ds 1
-RAM:48AB ??			     .ds 1
-RAM:48AC ??			     .ds 1
-RAM:48AD ??			     .ds 1
+RAM:48AA ??	     byte_48AA:	     .ds 1					     ; DATA XREF: sub_60BE+3Bw
+RAM:48AA									     ; sub_60BE+4Dr ...
+RAM:48AB ??	     byte_48AB:	     .ds 1					     ; DATA XREF: sub_60BE+39r
+RAM:48AB									     ; sub_60BE+4Bw
+RAM:48AC ??	     byte_48AC:	     .ds 1					     ; DATA XREF: sub_60BE+51w
+RAM:48AC									     ; sub_622D+2Fr ...
+RAM:48AD ??	     byte_48AD:	     .ds 1					     ; DATA XREF: sub_63D5+6Fw
+RAM:48AD									     ; sub_7519+74w ...
 RAM:48AE ?? ??	     word_48AE:	     .ds 2					     ; DATA XREF: sub_D923+Fw
 RAM:48AE									     ; sub_D942+Fw ...
 RAM:48B0 ??			     .ds 1
 RAM:48B1 ??	     unk_48B1:	     .ds 1
 RAM:48B2 ??			     .ds 1
-RAM:48B3 ??			     .ds 1
+RAM:48B3 ??	     byte_48B3:	     .ds 1					     ; DATA XREF: sub_7881+10Er
 RAM:48B4 ??			     .ds 1
-RAM:48B5 ??			     .ds 1
+RAM:48B5 ??	     byte_48B5:	     .ds 1					     ; DATA XREF: sub_7881+11Cr
 RAM:48B6 ??			     .ds 1
-RAM:48B7 ??			     .ds 1
+RAM:48B7 ??	     byte_48B7:	     .ds 1					     ; DATA XREF: sub_7A48+1Dw
 RAM:48B8 ??			     .ds 1
 RAM:48B9 ??			     .ds 1
 RAM:48BA ??			     .ds 1
 RAM:48BB ??			     .ds 1
-RAM:48BC ??			     .ds 1
-RAM:48BD ??			     .ds 1
+RAM:48BC ??	     byte_48BC:	     .ds 1					     ; DATA XREF: sub_7A48+1Bw
+RAM:48BD ??	     byte_48BD:	     .ds 1					     ; DATA XREF: sub_7A48+1Fw
 RAM:48BE ??			     .ds 1
 RAM:48BF ??			     .ds 1
 RAM:48C0 ??			     .ds 1
 RAM:48C1 ??			     .ds 1
-RAM:48C2 ??			     .ds 1
+RAM:48C2 ??	     byte_48C2:	     .ds 1					     ; DATA XREF: sub_7881+14Cw
 RAM:48C3 ??			     .ds 1
-RAM:48C4 ??			     .ds 1
+RAM:48C4 ??	     byte_48C4:	     .ds 1					     ; DATA XREF: sub_7881+143r
+RAM:48C4									     ; sub_7881+148w
 RAM:48C5 ??			     .ds 1
 RAM:48C6 ??			     .ds 1
 RAM:48C7 ??			     .ds 1
@@ -13063,14 +13095,15 @@ RAM:48D2 ??			     .ds 1
 RAM:48D3 ??			     .ds 1
 RAM:48D4 ??			     .ds 1
 RAM:48D5 ??			     .ds 1
-RAM:48D6 ??			     .ds 1
+RAM:48D6 ??	     byte_48D6:	     .ds 1					     ; DATA XREF: sub_7881+10Cr
 RAM:48D7 ??			     .ds 1
-RAM:48D8 ??			     .ds 1
+RAM:48D8 ??	     byte_48D8:	     .ds 1					     ; DATA XREF: sub_7881+11Ar
 RAM:48D9 ??			     .ds 1
 RAM:48DA ??			     .ds 1
 RAM:48DB ??			     .ds 1
 RAM:48DC ??			     .ds 1
-RAM:48DD ??			     .ds 1
+RAM:48DD ??	     byte_48DD:	     .ds 1					     ; DATA XREF: BANK0:65DEr
+RAM:48DD									     ; BANK0:6613w ...
 RAM:48DE ??			     .ds 1
 RAM:48DF ??			     .ds 1
 RAM:48E0 ?? ??	     word_48E0:	     .ds 2					     ; DATA XREF: sub_8F34+3Dr
@@ -13079,7 +13112,7 @@ RAM:48E2 ??			     .ds 1
 RAM:48E3 ??			     .ds 1
 RAM:48E4 ??			     .ds 1
 RAM:48E5 ??			     .ds 1
-RAM:48E6 ??			     .ds 1
+RAM:48E6 ??	     byte_48E6:	     .ds 1					     ; DATA XREF: BANK0:loc_68C6r
 RAM:48E7 ??			     .ds 1
 RAM:48E8 ??			     .ds 1
 RAM:48E9 ??			     .ds 1
@@ -13667,10 +13700,8 @@ RAM:4B2D ?? ??	     word_4B2D:	     .ds 2					     ; DATA XREF: sub_67AA+21w
 RAM:4B2D									     ; BANK0:684Cr ...
 RAM:4B2F ?? ??	     word_4B2F:	     .ds 2					     ; DATA XREF: sub_768D+2Er
 RAM:4B2F									     ; sub_973A+12r ...
-RAM:4B31 ??	     unk_4B31:	     .ds 1					     ; DATA XREF: sub_60BE+11w
+RAM:4B31 ?? ??	     word_4B31:	     .ds 2					     ; DATA XREF: sub_60BE+11w
 RAM:4B31									     ; sub_60BE:loc_60D4r ...
-RAM:4B32 ??	     unk_4B32:	     .ds 1					     ; DATA XREF: sub_6EA2r
-RAM:4B32									     ; sub_6EA2+2Cw ...
 RAM:4B33 ??			     .ds 1
 RAM:4B34 ?? ??	     word_4B34:	     .ds 2					     ; DATA XREF: BANK0:62A9w
 RAM:4B34									     ; BANK0:6728r ...
@@ -19005,7 +19036,7 @@ BANK0:6000
 BANK0:6000	       ; Segment type: Pure code
 BANK0:6000			       .area BANK0
 BANK0:6000			       .org 0x6000
-BANK0:6000	       ; assume	dp = 0
+BANK0:6000	       ; assume	dp = 0x48
 BANK0:6000 7E			       .db 0x7E	; ~
 BANK0:6001 F2			       .db 0xF2	; Ú
 BANK0:6002 61			       .db 0x61	; a
@@ -19015,53 +19046,53 @@ BANK0:6005
 BANK0:6005	       ; =============== S U B R O U T I N E =======================================
 BANK0:6005
 BANK0:6005
-BANK0:6005	       sub_6005:						       ; CODE XREF: sub_6005+Cj
-BANK0:6005									       ; sub_6005+24j ...
+BANK0:6005	       MAIN:							       ; CODE XREF: MAIN+Cj
+BANK0:6005									       ; MAIN+24j ...
 BANK0:6005 8E 00 00		       ldx     #0
 BANK0:6008 CC F8 00		       ldd     #0xF800
 BANK0:600B 86 48		       lda     #0x48 ; 'H'
 BANK0:600D 1F 8B		       tfr     a, dp
-BANK0:600F 04 3D		       lsr     byte_3D
-BANK0:6011 24 F2		       bcc     sub_6005
+BANK0:600F 04 3D		       lsr     byte_483D
+BANK0:6011 24 F2		       bcc     MAIN
 BANK0:6013 11 8C 4F FF		       cmps    #0x4FFF
 BANK0:6017 27 01		       beq     loc_601A
 BANK0:6019 39			       rts
 BANK0:601A	       ; ---------------------------------------------------------------------------
 BANK0:601A
-BANK0:601A	       loc_601A:						       ; CODE XREF: sub_6005+12j
-BANK0:601A 96 28		       lda     byte_28
+BANK0:601A	       loc_601A:						       ; CODE XREF: MAIN+12j
+BANK0:601A 96 28		       lda     byte_4828
 BANK0:601C 26 11		       bne     loc_602F
 BANK0:601E B6 48 24		       lda     dsw0_shadow+2
-BANK0:6021 84 80		       anda    #0x80 ; 'Ä'
-BANK0:6023 26 0A		       bne     loc_602F
-BANK0:6025 96 31		       lda     byte_31
-BANK0:6027 85 80		       bita    #0x80 ; 'Ä'
-BANK0:6029 27 DA		       beq     sub_6005
-BANK0:602B 84 7F		       anda    #0x7F ; ''
-BANK0:602D 97 31		       sta     byte_31
+BANK0:6021 84 80		       anda    #0x80				       ; Freeze?
+BANK0:6023 26 0A		       bne     loc_602F				       ; no, skip
+BANK0:6025 96 31		       lda     byte_4831
+BANK0:6027 85 80		       bita    #0x80 ; 'Ä'                             ; soft reset???
+BANK0:6029 27 DA		       beq     MAIN				       ; yes, go
+BANK0:602B 84 7F		       anda    #0x7F ; ''                             ; mask off soft reset???
+BANK0:602D 97 31		       sta     byte_4831
 BANK0:602F
-BANK0:602F	       loc_602F:						       ; CODE XREF: sub_6005+17j
-BANK0:602F									       ; sub_6005+1Ej
+BANK0:602F	       loc_602F:						       ; CODE XREF: MAIN+17j
+BANK0:602F									       ; MAIN+1Ej
 BANK0:602F BD 60 BE		       jsr     sub_60BE
 BANK0:6032
-BANK0:6032	       loc_6032:						       ; CODE XREF: sub_6005+2Fj
-BANK0:6032 96 3F		       lda     byte_3F
+BANK0:6032	       loc_6032:						       ; CODE XREF: MAIN+2Fj
+BANK0:6032 96 3F		       lda     byte_483F
 BANK0:6034 2B FC		       bmi     loc_6032
 BANK0:6036
-BANK0:6036	       loc_6036:
-BANK0:6036 96 41		       lda     byte_41
-BANK0:6038 81 3D		       cmpa    #0x3D ; '='
+BANK0:6036	       loc_6036:						       ; jump tbl index
+BANK0:6036 96 41		       lda     jmp_tbl_index
+BANK0:6038 81 3D		       cmpa    #61				       ; valid?
 BANK0:603A
-BANK0:603A	       loc_603A:						       ; CODE XREF: sub_6005:loc_603Aj
-BANK0:603A 24 FE		       bcc     loc_603A
-BANK0:603C 48			       asla
-BANK0:603D 8E 60 44		       ldx     #off_6044
-BANK0:6040 AD 96		       jsr     [a,x]
-BANK0:6042 20 C1		       bra     sub_6005
-BANK0:6042	       ; End of	function sub_6005
+BANK0:603A	       loc_603A:						       ; CODE XREF: MAIN:loc_603Aj
+BANK0:603A 24 FE		       bcc     loc_603A				       ; no, spin
+BANK0:603C 48			       asla					       ; word offset
+BANK0:603D 8E 60 44		       ldx     #main_jmp_tbl
+BANK0:6040 AD 96		       jsr     [a,x]				       ; go
+BANK0:6042 20 C1		       bra     MAIN
+BANK0:6042	       ; End of	function MAIN
 BANK0:6042
 BANK0:6042	       ; ---------------------------------------------------------------------------
-BANK0:6044 62 75       off_6044:       .dw loc_6275				       ; DATA XREF: sub_6005+38o
+BANK0:6044 62 75       main_jmp_tbl:   .dw loc_6275				       ; DATA XREF: MAIN+38o
 BANK0:6046 64 E2		       .dw loc_64E2
 BANK0:6048 64 F1		       .dw loc_64F1
 BANK0:604A 65 13		       .dw loc_6513
@@ -19126,55 +19157,55 @@ BANK0:60BE
 BANK0:60BE	       ; =============== S U B R O U T I N E =======================================
 BANK0:60BE
 BANK0:60BE
-BANK0:60BE	       sub_60BE:						       ; CODE XREF: sub_6005:loc_602FP
-BANK0:60BE 0C 43		       inc     byte_43
+BANK0:60BE	       sub_60BE:						       ; CODE XREF: MAIN:loc_602FP
+BANK0:60BE 0C 43		       inc     word_4843
 BANK0:60C0 26 08		       bne     loc_60CA
-BANK0:60C2 0C 42		       inc     byte_42
+BANK0:60C2 0C 42		       inc     unk_4842
 BANK0:60C4 26 04		       bne     loc_60CA
 BANK0:60C6 86 80		       lda     #0x80 ; 'Ä'
-BANK0:60C8 97 42		       sta     byte_42
+BANK0:60C8 97 42		       sta     unk_4842
 BANK0:60CA
 BANK0:60CA	       loc_60CA:						       ; CODE XREF: sub_60BE+2j
 BANK0:60CA									       ; sub_60BE+6j
 BANK0:60CA B6 48 14		       lda     word_4814
 BANK0:60CD 26 05		       bne     loc_60D4
-BANK0:60CF B7 4B 31		       sta     unk_4B31
+BANK0:60CF B7 4B 31		       sta     word_4B31
 BANK0:60D2 20 20		       bra     loc_60F4
 BANK0:60D4	       ; ---------------------------------------------------------------------------
 BANK0:60D4
 BANK0:60D4	       loc_60D4:						       ; CODE XREF: sub_60BE+Fj
-BANK0:60D4 B6 4B 31		       lda     unk_4B31
+BANK0:60D4 B6 4B 31		       lda     word_4B31
 BANK0:60D7 26 0B		       bne     loc_60E4
 BANK0:60D9 BD BD 12		       jsr     sub_BD12
 BANK0:60DC B6 48 14		       lda     word_4814
-BANK0:60DF B7 4B 31		       sta     unk_4B31
+BANK0:60DF B7 4B 31		       sta     word_4B31
 BANK0:60E2 20 10		       bra     loc_60F4
 BANK0:60E4	       ; ---------------------------------------------------------------------------
 BANK0:60E4
 BANK0:60E4	       loc_60E4:						       ; CODE XREF: sub_60BE+19j
-BANK0:60E4 B6 4B 31		       lda     unk_4B31
+BANK0:60E4 B6 4B 31		       lda     word_4B31
 BANK0:60E7 B1 48 14		       cmpa    word_4814
 BANK0:60EA 24 08		       bcc     loc_60F4
 BANK0:60EC BD BD 03		       jsr     sub_BD03
 BANK0:60EF 86 FF		       lda     #0xFF
-BANK0:60F1 B7 4B 31		       sta     unk_4B31
+BANK0:60F1 B7 4B 31		       sta     word_4B31
 BANK0:60F4
 BANK0:60F4	       loc_60F4:						       ; CODE XREF: sub_60BE+14j
 BANK0:60F4									       ; sub_60BE+24j ...
 BANK0:60F4 BD 70 DB		       jsr     sub_70DB
-BANK0:60F7 96 AB		       lda     byte_AB
-BANK0:60F9 97 AA		       sta     byte_AA
-BANK0:60FB 96 21		       lda     byte_21
+BANK0:60F7 96 AB		       lda     byte_48AB
+BANK0:60F9 97 AA		       sta     byte_48AA
+BANK0:60FB 96 21		       lda     in1_shadow+2
 BANK0:60FD 84 30		       anda    #0x30 ; '0'
 BANK0:60FF 34 02		       pshs    a
-BANK0:6101 96 1E		       lda     byte_1E
+BANK0:6101 96 1E		       lda     in0_shadow+2
 BANK0:6103 84 CF		       anda    #0xCF ; 'œ'
 BANK0:6105 AA E0		       oraa    ,s+
 BANK0:6107 84 F4		       anda    #0xF4 ; 'Ù'
-BANK0:6109 97 AB		       sta     byte_AB
-BANK0:610B 98 AA		       eora    byte_AA
-BANK0:610D 94 AA		       anda    byte_AA
-BANK0:610F 97 AC		       sta     byte_AC
+BANK0:6109 97 AB		       sta     byte_48AB
+BANK0:610B 98 AA		       eora    byte_48AA
+BANK0:610D 94 AA		       anda    byte_48AA
+BANK0:610F 97 AC		       sta     byte_48AC
 BANK0:6111 39			       rts
 BANK0:6111	       ; End of	function sub_60BE
 BANK0:6111
@@ -19184,7 +19215,7 @@ BANK0:6112
 BANK0:6112
 BANK0:6112	       sub_6112:						       ; CODE XREF: BANK0:loc_6306P
 BANK0:6112									       ; BANK0:loc_6348P ...
-BANK0:6112 96 3F		       lda     byte_3F
+BANK0:6112 96 3F		       lda     byte_483F
 BANK0:6114 C6 70		       ldb     #0x70 ; 'p'
 BANK0:6116 1F 02		       tfr     d, y
 BANK0:6118 CC B9 9E		       ldd     #0xB99E
@@ -19221,7 +19252,7 @@ BANK0:6134 CC 20 20		       ldd     #0x2020
 BANK0:6137 ED A1		       std     ,y++
 BANK0:6139 ED A0		       std     ,y+
 BANK0:613B 1F 20		       tfr     y, d
-BANK0:613D 90 3F		       suba    byte_3F
+BANK0:613D 90 3F		       suba    byte_483F
 BANK0:613F 80 14		       suba    #0x14
 BANK0:6141 25 12		       bcs     loc_6155
 BANK0:6143 BD 61 1E		       jsr     sub_611E
@@ -19233,7 +19264,7 @@ BANK0:6152 FD 27 FC		       std     word_27FC
 BANK0:6155
 BANK0:6155	       loc_6155:						       ; CODE XREF: sub_612F+12j
 BANK0:6155 86 FF		       lda     #0xFF
-BANK0:6157 97 3F		       sta     byte_3F
+BANK0:6157 97 3F		       sta     byte_483F
 BANK0:6159 39			       rts
 BANK0:6159	       ; End of	function sub_612F
 BANK0:6159
@@ -19263,7 +19294,7 @@ BANK0:616E B7 46 85		       sta     RST_PRNG
 BANK0:6171
 BANK0:6171	       loc_6171:						       ; CODE XREF: sub_6161+6j
 BANK0:6171 86 80		       lda     #0x80 ; 'Ä'
-BANK0:6173 97 83		       sta     byte_83
+BANK0:6173 97 83		       sta     byte_4883
 BANK0:6175 8E 49 00		       ldx     #0x4900
 BANK0:6178 CE 50 F0		       ldu     #0x50F0
 BANK0:617B C6 1C		       ldb     #0x1C
@@ -19331,7 +19362,7 @@ BANK0:61EC
 BANK0:61EC	       sub_61EC:						       ; CODE XREF: BANK0:62B5P
 BANK0:61EC									       ; BANK0:67EBP ...
 BANK0:61EC 86 80		       lda     #0x80 ; 'Ä'
-BANK0:61EE 97 83		       sta     byte_83
+BANK0:61EE 97 83		       sta     byte_4883
 BANK0:61F0 8E 5C 60		       ldx     #0x5C60
 BANK0:61F3
 BANK0:61F3	       loc_61F3:						       ; CODE XREF: sub_61EC+20j
@@ -19378,14 +19409,14 @@ BANK0:622D
 BANK0:622D
 BANK0:622D	       sub_622D:						       ; CODE XREF: BANK0:loc_6322P
 BANK0:622D									       ; BANK0:loc_6364P ...
-BANK0:622D D6 7D		       ldb     byte_7D
+BANK0:622D D6 7D		       ldb     byte_487D
 BANK0:622F C1 A0		       cmpb    #0xA0 ; '†'
 BANK0:6231 2E 0B		       bgt     loc_623E
 BANK0:6233 86 08		       lda     #8
-BANK0:6235 91 41		       cmpa    byte_41
+BANK0:6235 91 41		       cmpa    jmp_tbl_index
 BANK0:6237 27 03		       beq     loc_623C
 BANK0:6239 4A			       deca
-BANK0:623A 97 41		       sta     byte_41
+BANK0:623A 97 41		       sta     jmp_tbl_index
 BANK0:623C
 BANK0:623C	       loc_623C:						       ; CODE XREF: sub_622D+Aj
 BANK0:623C 20 0D		       bra     loc_624B
@@ -19395,10 +19426,10 @@ BANK0:623E	       loc_623E:						       ; CODE XREF: sub_622D+4j
 BANK0:623E C1 60		       cmpb    #0x60 ; '`'
 BANK0:6240 2D 09		       blt     loc_624B
 BANK0:6242 86 0C		       lda     #0xC
-BANK0:6244 91 41		       cmpa    byte_41
+BANK0:6244 91 41		       cmpa    jmp_tbl_index
 BANK0:6246 27 03		       beq     loc_624B
 BANK0:6248 4A			       deca
-BANK0:6249 97 41		       sta     byte_41
+BANK0:6249 97 41		       sta     jmp_tbl_index
 BANK0:624B
 BANK0:624B	       loc_624B:						       ; CODE XREF: sub_622D:loc_623Cj
 BANK0:624B									       ; sub_622D+13j ...
@@ -19411,11 +19442,11 @@ BANK0:6257
 BANK0:6257	       loc_6257:						       ; CODE XREF: sub_622D+23j
 BANK0:6257 B6 48 14		       lda     word_4814
 BANK0:625A 27 0D		       beq     loc_6269
-BANK0:625C 96 AC		       lda     byte_AC
+BANK0:625C 96 AC		       lda     byte_48AC
 BANK0:625E 84 F0		       anda    #0xF0 ; ''
 BANK0:6260 27 07		       beq     loc_6269
 BANK0:6262 86 19		       lda     #0x19
-BANK0:6264 97 41		       sta     byte_41
+BANK0:6264 97 41		       sta     jmp_tbl_index
 BANK0:6266 7A 48 14		       dec     word_4814
 BANK0:6269
 BANK0:6269	       loc_6269:						       ; CODE XREF: sub_622D+2Dj
@@ -19424,7 +19455,7 @@ BANK0:6269 B6 48 1E		       lda     in0_shadow+2
 BANK0:626C 84 10		       anda    #0x10
 BANK0:626E 26 04		       bne     locret_6274
 BANK0:6270 86 01		       lda     #1
-BANK0:6272 97 41		       sta     byte_41
+BANK0:6272 97 41		       sta     jmp_tbl_index
 BANK0:6274
 BANK0:6274	       locret_6274:						       ; CODE XREF: sub_622D+41j
 BANK0:6274 39			       rts
@@ -19432,7 +19463,7 @@ BANK0:6274	       ; End of	function sub_622D
 BANK0:6274
 BANK0:6275	       ; ---------------------------------------------------------------------------
 BANK0:6275
-BANK0:6275	       loc_6275:						       ; DATA XREF: BANK0:off_6044o
+BANK0:6275	       loc_6275:						       ; DATA XREF: BANK0:main_jmp_tblo
 BANK0:6275 1A 10		       orcc    #0x10
 BANK0:6277 8E 45 34		       ldx     #0x4534
 BANK0:627A BD C6 D4		       jsr     sub_C6D4
@@ -19450,7 +19481,7 @@ BANK0:629B BD 62 D5		       jsr     sub_62D5
 BANK0:629E B7 48 71		       sta     word_4871
 BANK0:62A1 1C EF		       andcc   #0xEF ; 'Ô'
 BANK0:62A3 86 0B		       lda     #0xB
-BANK0:62A5 97 41		       sta     byte_41
+BANK0:62A5 97 41		       sta     jmp_tbl_index
 BANK0:62A7 86 FF		       lda     #0xFF
 BANK0:62A9 B7 4B 34		       sta     word_4B34
 BANK0:62AC BD 61 B5		       jsr     sub_61B5
@@ -19459,12 +19490,12 @@ BANK0:62B2 BD 61 1E		       jsr     sub_611E
 BANK0:62B5 BD 61 EC		       jsr     sub_61EC
 BANK0:62B8 BD D9 1A		       jsr     sub_D91A
 BANK0:62BB 86 00		       lda     #0
-BANK0:62BD 97 5C		       sta     byte_5C
-BANK0:62BF 97 5D		       sta     byte_5D
-BANK0:62C1 97 5E		       sta     byte_5E
-BANK0:62C3 97 5F		       sta     byte_5F
-BANK0:62C5 97 8B		       sta     byte_8B
-BANK0:62C7 97 8C		       sta     byte_8C
+BANK0:62BD 97 5C		       sta     byte_485C
+BANK0:62BF 97 5D		       sta     byte_485D
+BANK0:62C1 97 5E		       sta     byte_485E
+BANK0:62C3 97 5F		       sta     byte_485F
+BANK0:62C5 97 8B		       sta     byte_488B
+BANK0:62C7 97 8C		       sta     byte_488C
 BANK0:62C9 BD CC 18		       jsr     sub_CC18
 BANK0:62CC 86 FF		       lda     #0xFF
 BANK0:62CE B7 4A EC		       sta     word_4AEC
@@ -19504,7 +19535,7 @@ BANK0:62F7 B7 4A DC		       sta     word_4ADB+1
 BANK0:62FA CC 64 80		       ldd     #0x6480
 BANK0:62FD FD 4B 10		       std     word_4B10
 BANK0:6300 BD D9 1A		       jsr     sub_D91A
-BANK0:6303 0C 41		       inc     byte_41
+BANK0:6303 0C 41		       inc     jmp_tbl_index
 BANK0:6305 39			       rts
 BANK0:6306	       ; ---------------------------------------------------------------------------
 BANK0:6306
@@ -19518,7 +19549,7 @@ BANK0:6315 BD 61 2F		       jsr     sub_612F
 BANK0:6318 BD 6D B6		       jsr     sub_6DB6
 BANK0:631B FC 4B 0E		       ldd     word_4B0E
 BANK0:631E 2A 02		       bpl     loc_6322
-BANK0:6320 0C 41		       inc     byte_41
+BANK0:6320 0C 41		       inc     jmp_tbl_index
 BANK0:6322
 BANK0:6322	       loc_6322:						       ; CODE XREF: BANK0:631Ej
 BANK0:6322 BD 62 2D		       jsr     sub_622D
@@ -19537,7 +19568,7 @@ BANK0:6339 B7 4A DC		       sta     word_4ADB+1
 BANK0:633C CC 65 80		       ldd     #0x6580
 BANK0:633F FD 4B 10		       std     word_4B10
 BANK0:6342 BD D9 1A		       jsr     sub_D91A
-BANK0:6345 0C 41		       inc     byte_41
+BANK0:6345 0C 41		       inc     jmp_tbl_index
 BANK0:6347 39			       rts
 BANK0:6348	       ; ---------------------------------------------------------------------------
 BANK0:6348
@@ -19551,7 +19582,7 @@ BANK0:6357 BD 61 2F		       jsr     sub_612F
 BANK0:635A BD 6D C0		       jsr     sub_6DC0
 BANK0:635D FC 4B 0E		       ldd     word_4B0E
 BANK0:6360 2A 02		       bpl     loc_6364
-BANK0:6362 0C 41		       inc     byte_41
+BANK0:6362 0C 41		       inc     jmp_tbl_index
 BANK0:6364
 BANK0:6364	       loc_6364:						       ; CODE XREF: BANK0:6360j
 BANK0:6364 BD 62 2D		       jsr     sub_622D
@@ -19628,7 +19659,7 @@ BANK0:63D5	       sub_63D5:						       ; CODE XREF: BANK0:630CP
 BANK0:63D5									       ; BANK0:634EP ...
 BANK0:63D5 B6 48 14		       lda     word_4814
 BANK0:63D8 26 11		       bne     loc_63EB
-BANK0:63DA 96 43		       lda     byte_43
+BANK0:63DA 96 43		       lda     word_4843
 BANK0:63DC 84 10		       anda    #0x10
 BANK0:63DE 26 04		       bne     print_game_over
 BANK0:63E0 C6 06		       ldb     #6
@@ -19652,7 +19683,7 @@ BANK0:63F0 B6 48 14		       lda     word_4814
 BANK0:63F3 26 1B		       bne     loc_6410
 BANK0:63F5 B6 48 12		       lda     word_4812
 BANK0:63F8 27 0A		       beq     loc_6404
-BANK0:63FA 96 43		       lda     byte_43
+BANK0:63FA 96 43		       lda     word_4843
 BANK0:63FC 84 10		       anda    #0x10
 BANK0:63FE 27 04		       beq     loc_6404
 BANK0:6400 20 0E		       bra     loc_6410
@@ -19703,7 +19734,7 @@ BANK0:6440 8B 06		       adda    #6
 BANK0:6442
 BANK0:6442	       loc_6442:						       ; CODE XREF: sub_63D5+69j
 BANK0:6442 C6 02		       ldb     #2
-BANK0:6444 D7 AD		       stb     byte_AD
+BANK0:6444 D7 AD		       stb     byte_48AD
 BANK0:6446 BD E7 90		       jsr     sub_E790
 BANK0:6449 B6 48 12		       lda     word_4812
 BANK0:644C 27 05		       beq     loc_6453
@@ -19734,7 +19765,7 @@ BANK0:6474 BD 61 5A		       jsr     sub_615A
 BANK0:6477 CE 50 38		       ldu     #0x5038
 BANK0:647A BD CD C3		       jsr     sub_CDC3
 BANK0:647D BD CC 38		       jsr     loc_CC38
-BANK0:6480 0C 41		       inc     byte_41
+BANK0:6480 0C 41		       inc     jmp_tbl_index
 BANK0:6482 39			       rts
 BANK0:6483	       ; ---------------------------------------------------------------------------
 BANK0:6483
@@ -19768,7 +19799,7 @@ BANK0:64BD 83 00 01		       subd    #1
 BANK0:64C0 FD 4B 0E		       std     word_4B0E
 BANK0:64C3 2A 04		       bpl     loc_64C9
 BANK0:64C5 86 05		       lda     #5
-BANK0:64C7 97 41		       sta     byte_41
+BANK0:64C7 97 41		       sta     jmp_tbl_index
 BANK0:64C9
 BANK0:64C9	       loc_64C9:						       ; CODE XREF: BANK0:64C3j
 BANK0:64C9 BD 62 2D		       jsr     sub_622D
@@ -19796,7 +19827,7 @@ BANK0:64E2 BD D9 1A		       jsr     sub_D91A
 BANK0:64E5 CC 00 00		       ldd     #0
 BANK0:64E8 FD 4B 0C		       std     word_4B0C
 BANK0:64EB FD 48 AF		       std     word_48AE+1
-BANK0:64EE 0C 41		       inc     byte_41
+BANK0:64EE 0C 41		       inc     jmp_tbl_index
 BANK0:64F0 39			       rts
 BANK0:64F1	       ; ---------------------------------------------------------------------------
 BANK0:64F1
@@ -19805,18 +19836,18 @@ BANK0:64F1 BD 61 12		       jsr     sub_6112
 BANK0:64F4 BD BE 20		       jsr     sub_BE20
 BANK0:64F7 BD D9 23		       jsr     sub_D923
 BANK0:64FA BD 61 2F		       jsr     sub_612F
-BANK0:64FD 96 AC		       lda     byte_AC
+BANK0:64FD 96 AC		       lda     byte_48AC
 BANK0:64FF 84 04		       anda    #4
 BANK0:6501 27 04		       beq     loc_6507
 BANK0:6503 86 03		       lda     #3
-BANK0:6505 97 41		       sta     byte_41
+BANK0:6505 97 41		       sta     jmp_tbl_index
 BANK0:6507
 BANK0:6507	       loc_6507:						       ; CODE XREF: BANK0:6501j
 BANK0:6507 B6 48 1E		       lda     in0_shadow+2
 BANK0:650A 84 10		       anda    #0x10
 BANK0:650C 27 04		       beq     locret_6512
 BANK0:650E 86 05		       lda     #5
-BANK0:6510 97 41		       sta     byte_41
+BANK0:6510 97 41		       sta     jmp_tbl_index
 BANK0:6512
 BANK0:6512	       locret_6512:						       ; CODE XREF: BANK0:650Cj
 BANK0:6512 39			       rts
@@ -19836,7 +19867,7 @@ BANK0:652A 86 03		       lda     #3
 BANK0:652C BD C3 69		       jsr     loc_C369
 BANK0:652F
 BANK0:652F	       loc_652F:						       ; CODE XREF: BANK0:6528j
-BANK0:652F 0C 41		       inc     byte_41
+BANK0:652F 0C 41		       inc     jmp_tbl_index
 BANK0:6531 39			       rts
 BANK0:6532	       ; ---------------------------------------------------------------------------
 BANK0:6532
@@ -19853,7 +19884,7 @@ BANK0:6548 BD C5 A4		       jsr     sub_C5A4
 BANK0:654B BD C4 EB		       jsr     sub_C4EB
 BANK0:654E BD D9 23		       jsr     sub_D923
 BANK0:6551 BD 61 2F		       jsr     sub_612F
-BANK0:6554 96 AC		       lda     byte_AC
+BANK0:6554 96 AC		       lda     byte_48AC
 BANK0:6556 84 04		       anda    #4
 BANK0:6558 27 03		       beq     loc_655D
 BANK0:655A 7E F2 61		       jmp     RESET
@@ -19865,7 +19896,7 @@ BANK0:6560 84 10		       anda    #0x10
 BANK0:6562 27 07		       beq     locret_656B
 BANK0:6564 BD D9 1A		       jsr     sub_D91A
 BANK0:6567 86 05		       lda     #5
-BANK0:6569 97 41		       sta     byte_41
+BANK0:6569 97 41		       sta     jmp_tbl_index
 BANK0:656B
 BANK0:656B	       locret_656B:						       ; CODE XREF: BANK0:6562j
 BANK0:656B 39			       rts
@@ -19888,7 +19919,7 @@ BANK0:6588 BD D8 DF		       jsr     sub_D8DF
 BANK0:658B 5C			       incb
 BANK0:658C C1 3A		       cmpb    #0x3A ; ':'
 BANK0:658E 25 F6		       bcs     loc_6586
-BANK0:6590 0C 41		       inc     byte_41
+BANK0:6590 0C 41		       inc     jmp_tbl_index
 BANK0:6592 39			       rts
 BANK0:6592	       ; ---------------------------------------------------------------------------
 BANK0:6593 00 64       word_6593:      .dw 0x64					       ; DATA XREF: BANK0:65C0o
@@ -19907,7 +19938,7 @@ BANK0:65A8 2A 13		       bpl     loc_65BD
 BANK0:65AA 86 00		       lda     #0
 BANK0:65AC B7 4B 15		       sta     word_4B14+1
 BANK0:65AF 86 1B		       lda     #0x1B
-BANK0:65B1 97 41		       sta     byte_41
+BANK0:65B1 97 41		       sta     jmp_tbl_index
 BANK0:65B3 7F 48 1B		       clr     word_481A+1
 BANK0:65B6 7F 48 1A		       clr     word_481A
 BANK0:65B9 7F 48 19		       clr     word_4818+1
@@ -19931,7 +19962,7 @@ BANK0:65D4 CC BE 50		       ldd     #0xBE50
 BANK0:65D7 ED A1		       std     ,y++
 BANK0:65D9 8C 65 9F		       cmpx    #0x659F
 BANK0:65DC 25 E5		       bcs     loc_65C3
-BANK0:65DE 96 DD		       lda     byte_DD
+BANK0:65DE 96 DD		       lda     byte_48DD
 BANK0:65E0 2A 05		       bpl     loc_65E7
 BANK0:65E2 CC 63 80		       ldd     #0x6380
 BANK0:65E5 20 03		       bra     loc_65EA
@@ -19963,11 +19994,11 @@ BANK0:660B	       loc_660B:						       ; CODE XREF: BANK0:6607j
 BANK0:660B BD E7 90		       jsr     sub_E790
 BANK0:660E BD 61 2F		       jsr     sub_612F
 BANK0:6611 86 FF		       lda     #0xFF
-BANK0:6613 97 DD		       sta     byte_DD
+BANK0:6613 97 DD		       sta     byte_48DD
 BANK0:6615 8E 65 93		       ldx     #0x6593
 BANK0:6618
 BANK0:6618	       loc_6618:						       ; CODE XREF: BANK0:666Dj
-BANK0:6618 DC 7B		       ldd     byte_7B
+BANK0:6618 DC 7B		       ldd     word_487B
 BANK0:661A C3 FF 98		       addd    #0xFF98
 BANK0:661D A3 84		       subd    ,x
 BANK0:661F 4D			       tsta
@@ -19980,7 +20011,7 @@ BANK0:6626	       loc_6626:						       ; CODE XREF: BANK0:6620j
 BANK0:6626 FD 4A FA		       std     word_4AF9+1
 BANK0:6629 10 83 00 48		       cmpd    #0x48 ; 'H'
 BANK0:662D 24 39		       bcc     loc_6668
-BANK0:662F DC 79		       ldd     byte_79
+BANK0:662F DC 79		       ldd     word_4878+1
 BANK0:6631 A3 02		       subd    2,x
 BANK0:6633 4D			       tsta
 BANK0:6634 2A 04		       bpl     loc_663A
@@ -19997,13 +20028,13 @@ BANK0:6647 24 1F		       bcc     loc_6668
 BANK0:6649 1F 10		       tfr     x, d
 BANK0:664B 83 65 93		       subd    #0x6593
 BANK0:664E 54			       lsrb
-BANK0:664F D7 DD		       stb     byte_DD
+BANK0:664F D7 DD		       stb     byte_48DD
 BANK0:6651 F7 4B 15		       stb     word_4B14+1
-BANK0:6654 96 AC		       lda     byte_AC
+BANK0:6654 96 AC		       lda     byte_48AC
 BANK0:6656 84 F0		       anda    #0xF0 ; ''
 BANK0:6658 27 0D		       beq     locret_6667
 BANK0:665A 86 1B		       lda     #0x1B
-BANK0:665C 97 41		       sta     byte_41
+BANK0:665C 97 41		       sta     jmp_tbl_index
 BANK0:665E 7F 48 1B		       clr     word_481A+1
 BANK0:6661 7F 48 1A		       clr     word_481A
 BANK0:6664 7F 48 19		       clr     word_4818+1
@@ -20042,7 +20073,7 @@ BANK0:669E 86 3D		       lda     #0x3D ; '='
 BANK0:66A0 BD D8 DF		       jsr     sub_D8DF
 BANK0:66A3 BD BD 80		       jsr     sub_BD80
 BANK0:66A6 BD CC 38		       jsr     loc_CC38
-BANK0:66A9 0C 41		       inc     byte_41
+BANK0:66A9 0C 41		       inc     jmp_tbl_index
 BANK0:66AB 39			       rts
 BANK0:66AC	       ; ---------------------------------------------------------------------------
 BANK0:66AC
@@ -20073,7 +20104,7 @@ BANK0:66E3	       loc_66E3:						       ; CODE XREF: BANK0:66DBj
 BANK0:66E3 FC 4A EC		       ldd     word_4AEC
 BANK0:66E6 2A 1F		       bpl     locret_6707
 BANK0:66E8 86 0B		       lda     #0xB
-BANK0:66EA 97 41		       sta     byte_41
+BANK0:66EA 97 41		       sta     jmp_tbl_index
 BANK0:66EC CE 4A B6		       ldu     #0x4AB6
 BANK0:66EF 8E 45 20		       ldx     #0x4520
 BANK0:66F2 86 08		       lda     #8
@@ -20091,7 +20122,7 @@ BANK0:6708	       ; ------------------------------------------------------------
 BANK0:6708
 BANK0:6708	       loc_6708:						       ; DATA XREF: BANK0:604Eo
 BANK0:6708									       ; BANK0:6072o
-BANK0:6708 0C 41		       inc     byte_41
+BANK0:6708 0C 41		       inc     jmp_tbl_index
 BANK0:670A BD 61 1E		       jsr     sub_611E
 BANK0:670D
 BANK0:670D	       ; =============== S U B R O U T I N E =======================================
@@ -20176,16 +20207,16 @@ BANK0:678C 86 FF		       lda     #0xFF
 BANK0:678E B7 4B 34		       sta     word_4B34
 BANK0:6791 BD D9 1A		       jsr     sub_D91A
 BANK0:6794 BD BD 44		       jsr     sub_BD44
-BANK0:6797 0C 41		       inc     byte_41
+BANK0:6797 0C 41		       inc     jmp_tbl_index
 BANK0:6799 39			       rts
 BANK0:679A	       ; ---------------------------------------------------------------------------
 BANK0:679A
 BANK0:679A	       loc_679A:						       ; DATA XREF: BANK0:6078o
 BANK0:679A 86 0D		       lda     #0xD
-BANK0:679C 97 41		       sta     byte_41
+BANK0:679C 97 41		       sta     jmp_tbl_index
 BANK0:679E CC 00 00		       ldd     #0
-BANK0:67A1 DD 42		       std     byte_42
-BANK0:67A3 97 DD		       sta     byte_DD
+BANK0:67A1 DD 42		       std     unk_4842
+BANK0:67A3 97 DD		       sta     byte_48DD
 BANK0:67A5 B6 45 93		       lda     word_4593
 BANK0:67A8 84 03		       anda    #3
 BANK0:67AA
@@ -20194,8 +20225,8 @@ BANK0:67AA
 BANK0:67AA
 BANK0:67AA	       sub_67AA:						       ; CODE XREF: sub_CD08+5P
 BANK0:67AA 8B 06		       adda    #6
-BANK0:67AC 97 60		       sta     byte_60
-BANK0:67AE 97 8E		       sta     byte_8E
+BANK0:67AC 97 60		       sta     byte_4860
+BANK0:67AE 97 8E		       sta     byte_488E
 BANK0:67B0 B6 45 93		       lda     word_4593
 BANK0:67B3 44			       lsra
 BANK0:67B4 44			       lsra
@@ -20203,12 +20234,12 @@ BANK0:67B5 84 03		       anda    #3
 BANK0:67B7 B7 4B 18		       sta     word_4B18
 BANK0:67BA 86 00		       lda     #0
 BANK0:67BC B7 4B 17		       sta     word_4B16+1
-BANK0:67BF 97 8B		       sta     byte_8B
-BANK0:67C1 97 8C		       sta     byte_8C
-BANK0:67C3 97 5C		       sta     byte_5C
-BANK0:67C5 97 5D		       sta     byte_5D
-BANK0:67C7 97 5E		       sta     byte_5E
-BANK0:67C9 97 5F		       sta     byte_5F
+BANK0:67BF 97 8B		       sta     byte_488B
+BANK0:67C1 97 8C		       sta     byte_488C
+BANK0:67C3 97 5C		       sta     byte_485C
+BANK0:67C5 97 5D		       sta     byte_485D
+BANK0:67C7 97 5E		       sta     byte_485E
+BANK0:67C9 97 5F		       sta     byte_485F
 BANK0:67CB B7 4B 2D		       sta     word_4B2D
 BANK0:67CE B7 4B 37		       sta     word_4B36+1
 BANK0:67D1
@@ -20241,11 +20272,11 @@ BANK0:67F0 B7 50 80		       sta     word_5080
 BANK0:67F3 B7 50 8A		       sta     word_508A
 BANK0:67F6 86 00		       lda     #0
 BANK0:67F8 B7 48 13		       sta     word_4812+1
-BANK0:67FB 0C 41		       inc     byte_41
+BANK0:67FB 0C 41		       inc     jmp_tbl_index
 BANK0:67FD
 BANK0:67FD	       loc_67FD:						       ; DATA XREF: BANK0:607Co
 BANK0:67FD 86 1D		       lda     #0x1D
-BANK0:67FF 97 41		       sta     byte_41
+BANK0:67FF 97 41		       sta     jmp_tbl_index
 BANK0:6801 39			       rts
 BANK0:6802	       ; ---------------------------------------------------------------------------
 BANK0:6802
@@ -20273,13 +20304,13 @@ BANK0:6828 86 0F		       lda     #0xF
 BANK0:682A
 BANK0:682A	       loc_682A:						       ; CODE XREF: BANK0:6826j
 BANK0:682A B7 4B 19		       sta     word_4B18+1
-BANK0:682D 0C 41		       inc     byte_41
+BANK0:682D 0C 41		       inc     jmp_tbl_index
 BANK0:682F
 BANK0:682F	       loc_682F:						       ; DATA XREF: BANK0:6080o
 BANK0:682F 86 1F		       lda     #0x1F
-BANK0:6831 97 41		       sta     byte_41
+BANK0:6831 97 41		       sta     jmp_tbl_index
 BANK0:6833 86 00		       lda     #0
-BANK0:6835 97 DD		       sta     byte_DD
+BANK0:6835 97 DD		       sta     byte_48DD
 BANK0:6837 39			       rts
 BANK0:6838	       ; ---------------------------------------------------------------------------
 BANK0:6838
@@ -20297,11 +20328,11 @@ BANK0:6851 CC 00 27		       ldd     #0x27 ; '''
 BANK0:6854 FD 4B 0E		       std     word_4B0E
 BANK0:6857
 BANK0:6857	       loc_6857:						       ; CODE XREF: BANK0:684Fj
-BANK0:6857 0C 41		       inc     byte_41
+BANK0:6857 0C 41		       inc     jmp_tbl_index
 BANK0:6859
 BANK0:6859	       loc_6859:						       ; DATA XREF: BANK0:6084o
 BANK0:6859 BD 72 C7		       jsr     sub_72C7
-BANK0:685C 96 60		       lda     byte_60
+BANK0:685C 96 60		       lda     byte_4860
 BANK0:685E 10 2B 04 14		       lbmi    loc_6C76
 BANK0:6862
 BANK0:6862	       loc_6862:						       ; CODE XREF: sub_CD38+5P
@@ -20356,11 +20387,11 @@ BANK0:68BC	       loc_68BC:						       ; CODE XREF: BANK0:68B5j
 BANK0:68BC 10 83 01 A4		       cmpd    #0x1A4
 BANK0:68C0 25 04		       bcs     loc_68C6
 BANK0:68C2 86 21		       lda     #0x21 ; '!'
-BANK0:68C4 97 41		       sta     byte_41
+BANK0:68C4 97 41		       sta     jmp_tbl_index
 BANK0:68C6
 BANK0:68C6	       loc_68C6:						       ; CODE XREF: BANK0:loc_68A4j
 BANK0:68C6									       ; BANK0:68AFj ...
-BANK0:68C6 96 E6		       lda     byte_E6
+BANK0:68C6 96 E6		       lda     byte_48E6
 BANK0:68C8 81 03		       cmpa    #3
 BANK0:68CA 24 03		       bcc     locret_68CF
 BANK0:68CC BD 8F 7B		       jsr     sub_8F7B
@@ -20371,11 +20402,11 @@ BANK0:68D0	       ; ------------------------------------------------------------
 BANK0:68D0
 BANK0:68D0	       loc_68D0:						       ; DATA XREF: BANK0:6086o
 BANK0:68D0 7C 4B 3B		       inc     word_4B3B
-BANK0:68D3 0C 41		       inc     byte_41
+BANK0:68D3 0C 41		       inc     jmp_tbl_index
 BANK0:68D5
 BANK0:68D5	       loc_68D5:						       ; DATA XREF: BANK0:6088o
 BANK0:68D5 BD 72 C7		       jsr     sub_72C7
-BANK0:68D8 96 60		       lda     byte_60
+BANK0:68D8 96 60		       lda     byte_4860
 BANK0:68DA 10 2B 03 98		       lbmi    loc_6C76
 BANK0:68DE BD A8 49		       jsr     sub_A849
 BANK0:68E1 BD 98 98		       jsr     sub_9898
@@ -20397,7 +20428,7 @@ BANK0:6905 30 88 19		       leax    0x19,x
 BANK0:6908 8C 49 4B		       cmpx    #0x494B
 BANK0:690B 25 F4		       bcs     loc_6901
 BANK0:690D 86 23		       lda     #0x23 ; '#'
-BANK0:690F 97 41		       sta     byte_41
+BANK0:690F 97 41		       sta     jmp_tbl_index
 BANK0:6911
 BANK0:6911	       locret_6911:						       ; CODE XREF: BANK0:6903j
 BANK0:6911 39			       rts
@@ -20405,9 +20436,9 @@ BANK0:6912	       ; ------------------------------------------------------------
 BANK0:6912
 BANK0:6912	       loc_6912:						       ; DATA XREF: BANK0:608Ao
 BANK0:6912 CC 77 80		       ldd     #0x7780
-BANK0:6915 DD 56		       std     byte_56
+BANK0:6915 DD 56		       std     byte_4856
 BANK0:6917 CC 01 00		       ldd     #0x100
-BANK0:691A DD 58		       std     byte_58
+BANK0:691A DD 58		       std     byte_4858
 BANK0:691C B6 4B 2D		       lda     word_4B2D
 BANK0:691F 26 09		       bne     loc_692A
 BANK0:6921 B6 4B 14		       lda     word_4B14
@@ -20427,7 +20458,7 @@ BANK0:692D	       sub_692D:						       ; CODE XREF: sub_CD50+5P
 BANK0:692D BD BD EE		       jsr     sub_BDEE
 BANK0:6930
 BANK0:6930	       loc_6930:						       ; CODE XREF: BANK0:6928j
-BANK0:6930 0C 41		       inc     byte_41
+BANK0:6930 0C 41		       inc     jmp_tbl_index
 BANK0:6932 39			       rts
 BANK0:6932	       ; End of	function sub_692D
 BANK0:6932
@@ -20444,7 +20475,7 @@ BANK0:6945 FC 50 80		       ldd     word_5080
 BANK0:6948 10 83 3F 00		       cmpd    #0x3F00
 BANK0:694C 2D 04		       blt     locret_6952
 BANK0:694E 86 25		       lda     #0x25 ; '%'
-BANK0:6950 97 41		       sta     byte_41
+BANK0:6950 97 41		       sta     jmp_tbl_index
 BANK0:6952
 BANK0:6952	       locret_6952:						       ; CODE XREF: BANK0:694Cj
 BANK0:6952 39			       rts
@@ -20461,7 +20492,7 @@ BANK0:6962
 BANK0:6962	       loc_6962:						       ; CODE XREF: BANK0:6956j
 BANK0:6962									       ; BANK0:695Dj
 BANK0:6962 BD BE 0C		       jsr     sub_BE0C
-BANK0:6965 0C 41		       inc     byte_41
+BANK0:6965 0C 41		       inc     jmp_tbl_index
 BANK0:6967 39			       rts
 BANK0:6968	       ; ---------------------------------------------------------------------------
 BANK0:6968
@@ -20474,12 +20505,12 @@ BANK0:6974 BD 6D D2		       jsr     sub_6DD2
 BANK0:6977
 BANK0:6977	       loc_6977:						       ; CODE XREF: sub_CD5C+5P
 BANK0:6977 BD 6F 67		       jsr     sub_6F67
-BANK0:697A D6 58		       ldb     byte_58
+BANK0:697A D6 58		       ldb     byte_4858
 BANK0:697C 50			       negb
 BANK0:697D 1D			       sex
-BANK0:697E D3 56		       addd    byte_56
+BANK0:697E D3 56		       addd    byte_4856
 BANK0:6980 C4 7F		       andb    #0x7F ; ''
-BANK0:6982 DD 56		       std     byte_56
+BANK0:6982 DD 56		       std     byte_4856
 BANK0:6984 10 83 73 10		       cmpd    #0x7310
 BANK0:6988 22 0D		       bhi     loc_6997
 BANK0:698A B6 4B 14		       lda     word_4B14
@@ -20492,19 +20523,19 @@ BANK0:6993	       loc_6993:						       ; CODE XREF: BANK0:698Dj
 BANK0:6993 86 29		       lda     #0x29 ; ')'
 BANK0:6995
 BANK0:6995	       loc_6995:						       ; CODE XREF: BANK0:6991j
-BANK0:6995 97 41		       sta     byte_41
+BANK0:6995 97 41		       sta     jmp_tbl_index
 BANK0:6997
 BANK0:6997	       loc_6997:						       ; CODE XREF: BANK0:6988j
-BANK0:6997 DC 58		       ldd     byte_58
+BANK0:6997 DC 58		       ldd     byte_4858
 BANK0:6999 C3 00 60		       addd    #0x60 ; '`'
-BANK0:699C DD 58		       std     byte_58
-BANK0:699E 96 83		       lda     byte_83
+BANK0:699C DD 58		       std     byte_4858
+BANK0:699E 96 83		       lda     byte_4883
 BANK0:69A0 80 02		       suba    #2
 BANK0:69A2 22 02		       bhi     loc_69A6
 BANK0:69A4 86 00		       lda     #0
 BANK0:69A6
 BANK0:69A6	       loc_69A6:						       ; CODE XREF: BANK0:69A2j
-BANK0:69A6 97 83		       sta     byte_83
+BANK0:69A6 97 83		       sta     byte_4883
 BANK0:69A8 39			       rts
 BANK0:69A9	       ; ---------------------------------------------------------------------------
 BANK0:69A9
@@ -20536,19 +20567,19 @@ BANK0:69D6 FD 50 98		       std     word_5098
 BANK0:69D9 CC 20 00		       ldd     #0x2000
 BANK0:69DC FD 50 9C		       std     word_509C
 BANK0:69DF 86 00		       lda     #0
-BANK0:69E1 97 A7		       sta     byte_A7
+BANK0:69E1 97 A7		       sta     byte_48A7
 BANK0:69E3 B7 4B 35		       sta     word_4B34+1
 BANK0:69E6 B7 4B 3D		       sta     word_4B3D
 BANK0:69E9 86 00		       lda     #0
 BANK0:69EB B7 4B 0E		       sta     word_4B0E
 BANK0:69EE BD BD 94		       jsr     sub_BD94
-BANK0:69F1 0C 41		       inc     byte_41
+BANK0:69F1 0C 41		       inc     jmp_tbl_index
 BANK0:69F3 39			       rts
 BANK0:69F4	       ; ---------------------------------------------------------------------------
 BANK0:69F4
 BANK0:69F4	       loc_69F4:						       ; DATA XREF: BANK0:6098o
 BANK0:69F4 BD 73 90		       jsr     sub_7390
-BANK0:69F7 96 60		       lda     byte_60
+BANK0:69F7 96 60		       lda     byte_4860
 BANK0:69F9 10 2B 02 B9		       lbmi    loc_6CB6
 BANK0:69FD BD A8 49		       jsr     sub_A849
 BANK0:6A00 BD 98 90		       jsr     sub_9890
@@ -20571,7 +20602,7 @@ BANK0:6A21 22 03		       bhi     loc_6A26
 BANK0:6A23 FD 50 86		       std     word_5086
 BANK0:6A26
 BANK0:6A26	       loc_6A26:						       ; CODE XREF: sub_6A0C+15j
-BANK0:6A26 96 43		       lda     byte_43
+BANK0:6A26 96 43		       lda     word_4843
 BANK0:6A28 84 0F		       anda    #0xF
 BANK0:6A2A 26 0D		       bne     loc_6A39
 BANK0:6A2C B6 4B 0E		       lda     word_4B0E
@@ -20583,7 +20614,7 @@ BANK0:6A36	       loc_6A36:						       ; CODE XREF: sub_6A0C+25j
 BANK0:6A36 7C 4B 0E		       inc     word_4B0E
 BANK0:6A39
 BANK0:6A39	       loc_6A39:						       ; CODE XREF: sub_6A0C+1Ej
-BANK0:6A39 96 A7		       lda     byte_A7
+BANK0:6A39 96 A7		       lda     byte_48A7
 BANK0:6A3B 81 05		       cmpa    #5
 BANK0:6A3D 25 10		       bcs     locret_6A4F
 BANK0:6A3F 86 01		       lda     #1
@@ -20592,7 +20623,7 @@ BANK0:6A44 B6 50 98		       lda     word_5098
 BANK0:6A47 81 80		       cmpa    #0x80 ; 'Ä'
 BANK0:6A49 24 04		       bcc     locret_6A4F
 BANK0:6A4B 86 2B		       lda     #0x2B ; '+'
-BANK0:6A4D 97 41		       sta     byte_41
+BANK0:6A4D 97 41		       sta     jmp_tbl_index
 BANK0:6A4F
 BANK0:6A4F	       locret_6A4F:						       ; CODE XREF: sub_6A0C+31j
 BANK0:6A4F									       ; sub_6A0C+3Dj
@@ -20604,7 +20635,7 @@ BANK0:6A50
 BANK0:6A50	       loc_6A50:						       ; DATA XREF: BANK0:6092o
 BANK0:6A50									       ; BANK0:609Ao
 BANK0:6A50 86 00		       lda     #0
-BANK0:6A52 97 98		       sta     byte_98
+BANK0:6A52 97 98		       sta     byte_4898
 BANK0:6A54 B7 4B 36		       sta     word_4B36
 BANK0:6A57 B6 4B 15		       lda     word_4B14+1
 BANK0:6A5A 81 1F		       cmpa    #0x1F
@@ -20624,7 +20655,7 @@ BANK0:6A6F BD 83 A4		       jsr     sub_83A4
 BANK0:6A72 BD BD 71		       jsr     sub_BD71
 BANK0:6A75 CC 00 00		       ldd     #0
 BANK0:6A78 FD 4B 0E		       std     word_4B0E
-BANK0:6A7B 0C 41		       inc     byte_41
+BANK0:6A7B 0C 41		       inc     jmp_tbl_index
 BANK0:6A7D 39			       rts
 BANK0:6A7E	       ; ---------------------------------------------------------------------------
 BANK0:6A7E
@@ -20632,7 +20663,7 @@ BANK0:6A7E	       loc_6A7E:						       ; DATA XREF: BANK0:6094o
 BANK0:6A7E BD 61 5A		       jsr     sub_615A
 BANK0:6A81 BD 83 41		       jsr     sub_8341
 BANK0:6A84 86 2F		       lda     #0x2F ; '/'
-BANK0:6A86 97 41		       sta     byte_41
+BANK0:6A86 97 41		       sta     jmp_tbl_index
 BANK0:6A88 39			       rts
 BANK0:6A89	       ; ---------------------------------------------------------------------------
 BANK0:6A89
@@ -20652,7 +20683,7 @@ BANK0:6AA0	       ; =============== S U B R O U T I N E ========================
 BANK0:6AA0
 BANK0:6AA0
 BANK0:6AA0	       sub_6AA0:						       ; CODE XREF: sub_CD74+5P
-BANK0:6AA0 0E 83		       jmp     byte_83
+BANK0:6AA0 0E 83		       jmp     byte_4883
 BANK0:6AA0	       ; End of	function sub_6AA0
 BANK0:6AA0
 BANK0:6AA0	       ; ---------------------------------------------------------------------------
@@ -20674,7 +20705,7 @@ BANK0:6AB1 FD 50 9A		       std     word_509A
 BANK0:6AB4 FD 4B 0E		       std     word_4B0E
 BANK0:6AB7 BD 6F F1		       jsr     loc_6FF1
 BANK0:6ABA BD 83 41		       jsr     sub_8341
-BANK0:6ABD 0C 41		       inc     byte_41
+BANK0:6ABD 0C 41		       inc     jmp_tbl_index
 BANK0:6ABF
 BANK0:6ABF	       loc_6ABF:						       ; DATA XREF: BANK0:60A0o
 BANK0:6ABF BD 74 13		       jsr     sub_7413
@@ -20699,7 +20730,7 @@ BANK0:6AF2 FD 50 9C		       std     word_509C
 BANK0:6AF5 86 00		       lda     #0
 BANK0:6AF7 B7 4B 36		       sta     word_4B36
 BANK0:6AFA 86 2F		       lda     #0x2F ; '/'
-BANK0:6AFC 97 41		       sta     byte_41
+BANK0:6AFC 97 41		       sta     jmp_tbl_index
 BANK0:6AFE
 BANK0:6AFE	       locret_6AFE:						       ; CODE XREF: BANK0:6ADAj
 BANK0:6AFE 39			       rts
@@ -20707,7 +20738,7 @@ BANK0:6AFF	       ; ------------------------------------------------------------
 BANK0:6AFF
 BANK0:6AFF	       loc_6AFF:						       ; DATA XREF: BANK0:60A6o
 BANK0:6AFF 86 01		       lda     #1
-BANK0:6B01 97 98		       sta     byte_98
+BANK0:6B01 97 98		       sta     byte_4898
 BANK0:6B03 BD 61 5A		       jsr     sub_615A
 BANK0:6B06 BD 83 41		       jsr     sub_8341
 BANK0:6B09 86 FF		       lda     #0xFF
@@ -20723,7 +20754,7 @@ BANK0:6B1A B7 4B 19		       sta     word_4B18+1
 BANK0:6B1D
 BANK0:6B1D	       loc_6B1D:						       ; DATA XREF: BANK0:60A8o
 BANK0:6B1D 86 2F		       lda     #0x2F ; '/'
-BANK0:6B1F 97 41		       sta     byte_41
+BANK0:6B1F 97 41		       sta     jmp_tbl_index
 BANK0:6B21 39			       rts
 BANK0:6B22	       ; ---------------------------------------------------------------------------
 BANK0:6B22
@@ -20733,11 +20764,11 @@ BANK0:6B24 B7 4B 3E		       sta     word_4B3D+1
 BANK0:6B27 B7 4B 0E		       sta     word_4B0E
 BANK0:6B2A CC 03 00		       ldd     #0x300
 BANK0:6B2D FD 50 86		       std     word_5086
-BANK0:6B30 0C 41		       inc     byte_41
+BANK0:6B30 0C 41		       inc     jmp_tbl_index
 BANK0:6B32
 BANK0:6B32	       loc_6B32:						       ; DATA XREF: BANK0:60A4o
 BANK0:6B32 BD 74 3C		       jsr     sub_743C
-BANK0:6B35 96 60		       lda     byte_60
+BANK0:6B35 96 60		       lda     byte_4860
 BANK0:6B37 10 2B 01 A6		       lbmi    loc_6CE1
 BANK0:6B3B BD A8 49		       jsr     sub_A849
 BANK0:6B3E BD AD 6C		       jsr     sub_AD6C
@@ -20749,7 +20780,7 @@ BANK0:6B4D BD 6E A1		       jsr     nullsub_1
 BANK0:6B50 86 10		       lda     #0x10
 BANK0:6B52 BD CE 0C		       jsr     sub_CE0C
 BANK0:6B55 BD 70 3B		       jsr     sub_703B
-BANK0:6B58 96 43		       lda     byte_43
+BANK0:6B58 96 43		       lda     word_4843
 BANK0:6B5A 84 0F		       anda    #0xF
 BANK0:6B5C 26 3B		       bne     loc_6B99
 BANK0:6B5E B6 4B 0E		       lda     word_4B0E
@@ -20796,9 +20827,9 @@ BANK0:6B96									       ; BANK0:6B8Dj ...
 BANK0:6B96 7C 4B 0E		       inc     word_4B0E
 BANK0:6B99
 BANK0:6B99	       loc_6B99:						       ; CODE XREF: BANK0:6B5Cj
-BANK0:6B99 96 92		       lda     byte_92
+BANK0:6B99 96 92		       lda     byte_4892
 BANK0:6B9B 27 3D		       beq     locret_6BDA
-BANK0:6B9D DC 93		       ldd     byte_93
+BANK0:6B9D DC 93		       ldd     byte_4893
 BANK0:6B9F B3 50 98		       subd    word_5098
 BANK0:6BA2 83 08 00		       subd    #0x800
 BANK0:6BA5 22 33		       bhi     locret_6BDA
@@ -20808,17 +20839,17 @@ BANK0:6BAC 86 01		       lda     #1
 BANK0:6BAE B7 4B 3E		       sta     word_4B3D+1
 BANK0:6BB1 BD BD B2		       jsr     sub_BDB2
 BANK0:6BB4 BD 98 74		       jsr     sub_9874
-BANK0:6BB7 96 60		       lda     byte_60
+BANK0:6BB7 96 60		       lda     byte_4860
 BANK0:6BB9 10 2F 01 24		       lble    loc_6CE1
 BANK0:6BBD 86 31		       lda     #0x31 ; '1'
-BANK0:6BBF 97 41		       sta     byte_41
+BANK0:6BBF 97 41		       sta     jmp_tbl_index
 BANK0:6BC1 BD BD 3A		       jsr     sub_BD3A
 BANK0:6BC4 20 14		       bra     locret_6BDA
 BANK0:6BC6	       ; ---------------------------------------------------------------------------
 BANK0:6BC6
 BANK0:6BC6	       loc_6BC6:						       ; CODE XREF: BANK0:6BAAj
 BANK0:6BC6 86 11		       lda     #0x11
-BANK0:6BC8 97 41		       sta     byte_41
+BANK0:6BC8 97 41		       sta     jmp_tbl_index
 BANK0:6BCA B6 4B 15		       lda     word_4B14+1
 BANK0:6BCD 81 03		       cmpa    #3
 BANK0:6BCF 2D 09		       blt     locret_6BDA
@@ -20841,12 +20872,12 @@ BANK0:6BE3 B7 50 80		       sta     word_5080
 BANK0:6BE6 B7 50 8A		       sta     word_508A
 BANK0:6BE9 86 04		       lda     #4
 BANK0:6BEB B7 4B 0E		       sta     word_4B0E
-BANK0:6BEE 0C 41		       inc     byte_41
+BANK0:6BEE 0C 41		       inc     jmp_tbl_index
 BANK0:6BF0 39			       rts
 BANK0:6BF1	       ; ---------------------------------------------------------------------------
 BANK0:6BF1
 BANK0:6BF1	       loc_6BF1:						       ; DATA XREF: BANK0:60ACo
-BANK0:6BF1 96 43		       lda     byte_43
+BANK0:6BF1 96 43		       lda     word_4843
 BANK0:6BF3 84 0F		       anda    #0xF
 BANK0:6BF5 26 35		       bne     loc_6C2C
 BANK0:6BF7 7A 4B 0E		       dec     word_4B0E
@@ -20919,7 +20950,7 @@ BANK0:6C69 B7 4B 18		       sta     word_4B18
 BANK0:6C6C 86 FF		       lda     #0xFF
 BANK0:6C6E B7 4B 2D		       sta     word_4B2D
 BANK0:6C71 86 1D		       lda     #0x1D
-BANK0:6C73 97 41		       sta     byte_41
+BANK0:6C73 97 41		       sta     jmp_tbl_index
 BANK0:6C75
 BANK0:6C75	       locret_6C75:						       ; CODE XREF: BANK0:6C3Aj
 BANK0:6C75 39			       rts
@@ -20930,7 +20961,7 @@ BANK0:6C76									       ; BANK0:68DAj
 BANK0:6C76									       ; DATA XREF: ...
 BANK0:6C76 BD BD 58		       jsr     sub_BD58
 BANK0:6C79 86 36		       lda     #0x36 ; '6'
-BANK0:6C7B 97 41		       sta     byte_41
+BANK0:6C7B 97 41		       sta     jmp_tbl_index
 BANK0:6C7D CC 00 00		       ldd     #0
 BANK0:6C80 FD 4B 0E		       std     word_4B0E
 BANK0:6C83 39			       rts
@@ -20953,7 +20984,7 @@ BANK0:6CA8 FD 4B 0E		       std     word_4B0E
 BANK0:6CAB 10 83 00 28		       cmpd    #0x28 ; '('
 BANK0:6CAF 25 04		       bcs     locret_6CB5
 BANK0:6CB1 86 3B		       lda     #0x3B ; ';'
-BANK0:6CB3 97 41		       sta     byte_41
+BANK0:6CB3 97 41		       sta     jmp_tbl_index
 BANK0:6CB5
 BANK0:6CB5	       locret_6CB5:						       ; CODE XREF: BANK0:6CAFj
 BANK0:6CB5 39			       rts
@@ -20963,7 +20994,7 @@ BANK0:6CB6	       loc_6CB6:						       ; CODE XREF: BANK0:69F9j
 BANK0:6CB6									       ; DATA XREF: BANK0:60B2o
 BANK0:6CB6 BD BD 58		       jsr     sub_BD58
 BANK0:6CB9 86 38		       lda     #0x38 ; '8'
-BANK0:6CBB 97 41		       sta     byte_41
+BANK0:6CBB 97 41		       sta     jmp_tbl_index
 BANK0:6CBD CC 00 00		       ldd     #0
 BANK0:6CC0 FD 4B 0E		       std     word_4B0E
 BANK0:6CC3 39			       rts
@@ -20979,7 +21010,7 @@ BANK0:6CD3 FD 4B 0E		       std     word_4B0E
 BANK0:6CD6 10 83 00 28		       cmpd    #0x28 ; '('
 BANK0:6CDA 25 04		       bcs     locret_6CE0
 BANK0:6CDC 86 3B		       lda     #0x3B ; ';'
-BANK0:6CDE 97 41		       sta     byte_41
+BANK0:6CDE 97 41		       sta     jmp_tbl_index
 BANK0:6CE0
 BANK0:6CE0	       locret_6CE0:						       ; CODE XREF: BANK0:6CDAj
 BANK0:6CE0 39			       rts
@@ -20990,7 +21021,7 @@ BANK0:6CE1									       ; BANK0:6BB9j
 BANK0:6CE1									       ; DATA XREF: ...
 BANK0:6CE1 BD BD 58		       jsr     sub_BD58
 BANK0:6CE4 86 3A		       lda     #0x3A ; ':'
-BANK0:6CE6 97 41		       sta     byte_41
+BANK0:6CE6 97 41		       sta     jmp_tbl_index
 BANK0:6CE8 CC 00 00		       ldd     #0
 BANK0:6CEB FD 4B 0E		       std     word_4B0E
 BANK0:6CEE 39			       rts
@@ -21006,7 +21037,7 @@ BANK0:6CFE FD 4B 0E		       std     word_4B0E
 BANK0:6D01 10 83 00 28		       cmpd    #0x28 ; '('
 BANK0:6D05 25 04		       bcs     locret_6D0B
 BANK0:6D07 86 3B		       lda     #0x3B ; ';'
-BANK0:6D09 97 41		       sta     byte_41
+BANK0:6D09 97 41		       sta     jmp_tbl_index
 BANK0:6D0B
 BANK0:6D0B	       locret_6D0B:						       ; CODE XREF: BANK0:6D05j
 BANK0:6D0B 39			       rts
@@ -21015,7 +21046,7 @@ BANK0:6D0C
 BANK0:6D0C	       loc_6D0C:						       ; DATA XREF: BANK0:60BAo
 BANK0:6D0C BD BD 49		       jsr     sub_BD49
 BANK0:6D0F BD BD 0D		       jsr     sub_BD0D
-BANK0:6D12 0C 41		       inc     byte_41
+BANK0:6D12 0C 41		       inc     jmp_tbl_index
 BANK0:6D14 39			       rts
 BANK0:6D15	       ; ---------------------------------------------------------------------------
 BANK0:6D15
@@ -21038,19 +21069,19 @@ BANK0:6D33 BD BD 7B		       jsr     sub_BD7B
 BANK0:6D36 86 05		       lda     #5
 BANK0:6D38
 BANK0:6D38	       loc_6D38:						       ; CODE XREF: BANK0:6D31j
-BANK0:6D38 97 41		       sta     byte_41
+BANK0:6D38 97 41		       sta     jmp_tbl_index
 BANK0:6D3A 39			       rts
 BANK0:6D3B	       ; ---------------------------------------------------------------------------
 BANK0:6D3B
 BANK0:6D3B	       loc_6D3B:						       ; DATA XREF: BANK0:6066o
 BANK0:6D3B CC 73 04		       ldd     #0x7304
-BANK0:6D3E DD 56		       std     byte_56
+BANK0:6D3E DD 56		       std     byte_4856
 BANK0:6D40 CC 0A FF		       ldd     #0xAFF
-BANK0:6D43 DD 58		       std     byte_58
+BANK0:6D43 DD 58		       std     byte_4858
 BANK0:6D45 BD 61 EC		       jsr     sub_61EC
 BANK0:6D48 CE 50 38		       ldu     #0x5038
 BANK0:6D4B BD CD C3		       jsr     sub_CDC3
-BANK0:6D4E 0C 41		       inc     byte_41
+BANK0:6D4E 0C 41		       inc     jmp_tbl_index
 BANK0:6D50 BD BD 8F		       jsr     sub_BD8F
 BANK0:6D53 39			       rts
 BANK0:6D54	       ; ---------------------------------------------------------------------------
@@ -21059,31 +21090,31 @@ BANK0:6D54	       loc_6D54:						       ; DATA XREF: BANK0:6068o
 BANK0:6D54 BD 75 B9		       jsr     sub_75B9
 BANK0:6D57 BD 95 58		       jsr     sub_9558
 BANK0:6D5A BD 98 90		       jsr     sub_9890
-BANK0:6D5D D6 58		       ldb     byte_58
+BANK0:6D5D D6 58		       ldb     byte_4858
 BANK0:6D5F 1D			       sex
-BANK0:6D60 D3 56		       addd    byte_56
+BANK0:6D60 D3 56		       addd    byte_4856
 BANK0:6D62 C3 00 80		       addd    #0x80 ; 'Ä'
 BANK0:6D65 C4 7F		       andb    #0x7F ; ''
-BANK0:6D67 DD 56		       std     byte_56
+BANK0:6D67 DD 56		       std     byte_4856
 BANK0:6D69 10 83 76 80		       cmpd    #0x7680
 BANK0:6D6D 25 04		       bcs     loc_6D73
 BANK0:6D6F 86 13		       lda     #0x13
-BANK0:6D71 97 41		       sta     byte_41
+BANK0:6D71 97 41		       sta     jmp_tbl_index
 BANK0:6D73
 BANK0:6D73	       loc_6D73:						       ; CODE XREF: BANK0:6D6Dj
-BANK0:6D73 DC 58		       ldd     byte_58
+BANK0:6D73 DC 58		       ldd     byte_4858
 BANK0:6D75 83 00 10		       subd    #0x10
 BANK0:6D78 2A 03		       bpl     loc_6D7D
 BANK0:6D7A CC 00 00		       ldd     #0
 BANK0:6D7D
 BANK0:6D7D	       loc_6D7D:						       ; CODE XREF: BANK0:6D78j
-BANK0:6D7D DD 58		       std     byte_58
+BANK0:6D7D DD 58		       std     byte_4858
 BANK0:6D7F 39			       rts
 BANK0:6D80	       ; ---------------------------------------------------------------------------
 BANK0:6D80
 BANK0:6D80	       loc_6D80:						       ; DATA XREF: BANK0:606Ao
 BANK0:6D80 BD BB 7B		       jsr     sub_BB7B
-BANK0:6D83 0C 41		       inc     byte_41
+BANK0:6D83 0C 41		       inc     jmp_tbl_index
 BANK0:6D85 39			       rts
 BANK0:6D86	       ; ---------------------------------------------------------------------------
 BANK0:6D86
@@ -21093,14 +21124,14 @@ BANK0:6D89 B6 48 A1		       lda     word_48A1
 BANK0:6D8C 81 01		       cmpa    #1
 BANK0:6D8E 25 04		       bcs     locret_6D94
 BANK0:6D90 86 15		       lda     #0x15
-BANK0:6D92 97 41		       sta     byte_41
+BANK0:6D92 97 41		       sta     jmp_tbl_index
 BANK0:6D94
 BANK0:6D94	       locret_6D94:						       ; CODE XREF: BANK0:6D8Ej
 BANK0:6D94 39			       rts
 BANK0:6D95	       ; ---------------------------------------------------------------------------
 BANK0:6D95
 BANK0:6D95	       loc_6D95:						       ; DATA XREF: BANK0:606Eo
-BANK0:6D95 0C 41		       inc     byte_41
+BANK0:6D95 0C 41		       inc     jmp_tbl_index
 BANK0:6D97 39			       rts
 BANK0:6D98	       ; ---------------------------------------------------------------------------
 BANK0:6D98
@@ -21109,7 +21140,7 @@ BANK0:6D98 BD 76 0A		       jsr     sub_760A
 BANK0:6D9B B6 48 A1		       lda     word_48A1
 BANK0:6D9E 26 04		       bne     locret_6DA4
 BANK0:6DA0 86 33		       lda     #0x33 ; '3'
-BANK0:6DA2 97 41		       sta     byte_41
+BANK0:6DA2 97 41		       sta     jmp_tbl_index
 BANK0:6DA4
 BANK0:6DA4	       locret_6DA4:						       ; CODE XREF: BANK0:6D9Ej
 BANK0:6DA4 39			       rts
@@ -21118,9 +21149,9 @@ BANK0:6DA5	       ; =============== S U B R O U T I N E ========================
 BANK0:6DA5
 BANK0:6DA5
 BANK0:6DA5	       sub_6DA5:						       ; CODE XREF: BANK0:loc_6780P
-BANK0:6DA5 DC 89		       ldd     byte_89
+BANK0:6DA5 DC 89		       ldd     byte_4889
 BANK0:6DA7 C3 00 80		       addd    #0x80 ; 'Ä'
-BANK0:6DAA DD 89		       std     byte_89
+BANK0:6DAA DD 89		       std     byte_4889
 BANK0:6DAC FC 4B 26		       ldd     word_4B26
 BANK0:6DAF C3 00 80		       addd    #0x80 ; 'Ä'
 BANK0:6DB2 FD 4B 26		       std     word_4B26
@@ -21154,9 +21185,9 @@ BANK0:6DCA	       ; =============== S U B R O U T I N E ========================
 BANK0:6DCA
 BANK0:6DCA
 BANK0:6DCA	       sub_6DCA:						       ; CODE XREF: BANK0:64B7P
-BANK0:6DCA DC 89		       ldd     byte_89
+BANK0:6DCA DC 89		       ldd     byte_4889
 BANK0:6DCC C3 00 80		       addd    #0x80 ; 'Ä'
-BANK0:6DCF DD 89		       std     byte_89
+BANK0:6DCF DD 89		       std     byte_4889
 BANK0:6DD1 39			       rts
 BANK0:6DD1	       ; End of	function sub_6DCA
 BANK0:6DD1
@@ -21166,16 +21197,16 @@ BANK0:6DD2
 BANK0:6DD2
 BANK0:6DD2	       sub_6DD2:						       ; CODE XREF: BANK0:6877P
 BANK0:6DD2									       ; BANK0:693FP ...
-BANK0:6DD2 96 63		       lda     byte_63
+BANK0:6DD2 96 63		       lda     byte_4863
 BANK0:6DD4 27 1A		       beq     loc_6DF0
 BANK0:6DD6 2F 07		       ble     loc_6DDF
-BANK0:6DD8 0A 63		       dec     byte_63
+BANK0:6DD8 0A 63		       dec     byte_4863
 BANK0:6DDA CC 04 FF		       ldd     #0x4FF
 BANK0:6DDD 20 05		       bra     loc_6DE4
 BANK0:6DDF	       ; ---------------------------------------------------------------------------
 BANK0:6DDF
 BANK0:6DDF	       loc_6DDF:						       ; CODE XREF: sub_6DD2+4j
-BANK0:6DDF 0C 63		       inc     byte_63
+BANK0:6DDF 0C 63		       inc     byte_4863
 BANK0:6DE1 CC FB 01		       ldd     #0xFB01
 BANK0:6DE4
 BANK0:6DE4	       loc_6DE4:						       ; CODE XREF: sub_6DD2+Bj
@@ -21196,16 +21227,16 @@ BANK0:6DFA	       ; =============== S U B R O U T I N E ========================
 BANK0:6DFA
 BANK0:6DFA
 BANK0:6DFA	       sub_6DFA:						       ; CODE XREF: BANK0:68F3P
-BANK0:6DFA 96 63		       lda     byte_63
+BANK0:6DFA 96 63		       lda     byte_4863
 BANK0:6DFC 27 1A		       beq     loc_6E18
 BANK0:6DFE 2F 07		       ble     loc_6E07
-BANK0:6E00 0A 63		       dec     byte_63
+BANK0:6E00 0A 63		       dec     byte_4863
 BANK0:6E02 CC 04 FF		       ldd     #0x4FF
 BANK0:6E05 20 05		       bra     loc_6E0C
 BANK0:6E07	       ; ---------------------------------------------------------------------------
 BANK0:6E07
 BANK0:6E07	       loc_6E07:						       ; CODE XREF: sub_6DFA+4j
-BANK0:6E07 0C 63		       inc     byte_63
+BANK0:6E07 0C 63		       inc     byte_4863
 BANK0:6E09 CC FB 01		       ldd     #0xFB01
 BANK0:6E0C
 BANK0:6E0C	       loc_6E0C:						       ; CODE XREF: sub_6DFA+Bj
@@ -21226,7 +21257,7 @@ BANK0:6E22	       ; =============== S U B R O U T I N E ========================
 BANK0:6E22
 BANK0:6E22
 BANK0:6E22	       sub_6E22:						       ; CODE XREF: sub_6A0CP
-BANK0:6E22 96 63		       lda     byte_63
+BANK0:6E22 96 63		       lda     byte_4863
 BANK0:6E24 27 08		       beq     loc_6E2E
 BANK0:6E26 2F 03		       ble     loc_6E2B
 BANK0:6E28 4A			       deca
@@ -21237,42 +21268,42 @@ BANK0:6E2B	       loc_6E2B:						       ; CODE XREF: sub_6E22+4j
 BANK0:6E2B 4C			       inca
 BANK0:6E2C
 BANK0:6E2C	       loc_6E2C:						       ; CODE XREF: sub_6E22+7j
-BANK0:6E2C 97 63		       sta     byte_63
+BANK0:6E2C 97 63		       sta     byte_4863
 BANK0:6E2E
 BANK0:6E2E	       loc_6E2E:						       ; CODE XREF: sub_6E22+2j
-BANK0:6E2E 96 63		       lda     byte_63
+BANK0:6E2E 96 63		       lda     byte_4863
 BANK0:6E30 2A 01		       bpl     loc_6E33
 BANK0:6E32 40			       nega
 BANK0:6E33
 BANK0:6E33	       loc_6E33:						       ; CODE XREF: sub_6E22+Ej
 BANK0:6E33 C6 20		       ldb     #0x20 ; ' '
 BANK0:6E35 3D			       mul
-BANK0:6E36 0D 63		       tst     byte_63
+BANK0:6E36 0D 63		       tst     byte_4863
 BANK0:6E38 2A 04		       bpl     loc_6E3E
 BANK0:6E3A 43			       coma
 BANK0:6E3B 50			       negb
 BANK0:6E3C 82 FF		       sbca    #0xFF
 BANK0:6E3E
 BANK0:6E3E	       loc_6E3E:						       ; CODE XREF: sub_6E22+16j
-BANK0:6E3E DD A5		       std     byte_A5
-BANK0:6E40 96 7D		       lda     byte_7D
+BANK0:6E3E DD A5		       std     byte_48A5
+BANK0:6E40 96 7D		       lda     byte_487D
 BANK0:6E42 2A 01		       bpl     loc_6E45
 BANK0:6E44 43			       coma
 BANK0:6E45
 BANK0:6E45	       loc_6E45:						       ; CODE XREF: sub_6E22+20j
 BANK0:6E45 C6 02		       ldb     #2
 BANK0:6E47 3D			       mul
-BANK0:6E48 0D 7D		       tst     byte_7D
+BANK0:6E48 0D 7D		       tst     byte_487D
 BANK0:6E4A 2A 04		       bpl     loc_6E50
 BANK0:6E4C 43			       coma
 BANK0:6E4D 50			       negb
 BANK0:6E4E 82 FF		       sbca    #0xFF
 BANK0:6E50
 BANK0:6E50	       loc_6E50:						       ; CODE XREF: sub_6E22+28j
-BANK0:6E50 D3 A5		       addd    byte_A5
-BANK0:6E52 0D 63		       tst     byte_63
+BANK0:6E50 D3 A5		       addd    byte_48A5
+BANK0:6E52 0D 63		       tst     byte_4863
 BANK0:6E54 26 1A		       bne     loc_6E70
-BANK0:6E56 93 A3		       subd    byte_A3
+BANK0:6E56 93 A3		       subd    byte_48A3
 BANK0:6E58 2F 0B		       ble     loc_6E65
 BANK0:6E5A 10 83 00 10		       cmpd    #0x10
 BANK0:6E5E 2F 03		       ble     loc_6E63
@@ -21294,7 +21325,7 @@ BANK0:6E70	       ; ------------------------------------------------------------
 BANK0:6E70
 BANK0:6E70	       loc_6E70:						       ; CODE XREF: sub_6E22+32j
 BANK0:6E70									       ; sub_6FE0+57P
-BANK0:6E70 93 A3		       subd    byte_A3
+BANK0:6E70 93 A3		       subd    byte_48A3
 BANK0:6E72 2F 0B		       ble     loc_6E7F
 BANK0:6E74 10 83 00 32		       cmpd    #0x32 ; '2'
 BANK0:6E78 2F 03		       ble     loc_6E7D
@@ -21315,8 +21346,8 @@ BANK0:6E88 1F 98		       tfr     b, a
 BANK0:6E8A BB 48 78		       adda    word_4878
 BANK0:6E8D B7 48 78		       sta     word_4878
 BANK0:6E90 1D			       sex
-BANK0:6E91 D3 A3		       addd    byte_A3
-BANK0:6E93 DD A3		       std     byte_A3
+BANK0:6E91 D3 A3		       addd    byte_48A3
+BANK0:6E93 DD A3		       std     byte_48A3
 BANK0:6E95 8E 48 70		       ldx     #0x4870
 BANK0:6E98 BD 71 11		       jsr     sub_7111
 BANK0:6E9B 27 03		       beq     locret_6EA0
@@ -21332,7 +21363,7 @@ BANK0:6EA2	       ; =============== S U B R O U T I N E ========================
 BANK0:6EA2
 BANK0:6EA2
 BANK0:6EA2	       sub_6EA2:						       ; CODE XREF: sub_6DD2:loc_6DF0P
-BANK0:6EA2 BE 4B 32		       ldx     unk_4B32
+BANK0:6EA2 BE 4B 32		       ldx     word_4B31+1
 BANK0:6EA5 26 03		       bne     loc_6EAA
 BANK0:6EA7 8E 49 00		       ldx     #0x4900
 BANK0:6EAA
@@ -21343,7 +21374,7 @@ BANK0:6EAC 81 01		       cmpa    #1
 BANK0:6EAE 26 09		       bne     loc_6EB9
 BANK0:6EB0 A6 06		       lda     6,x
 BANK0:6EB2 26 05		       bne     loc_6EB9
-BANK0:6EB4 9F 64		       stx     byte_64
+BANK0:6EB4 9F 64		       stx     byte_4864
 BANK0:6EB6 7E 6E F7		       jmp     loc_6EF7
 BANK0:6EB9	       ; ---------------------------------------------------------------------------
 BANK0:6EB9
@@ -21361,7 +21392,7 @@ BANK0:6EC9 25 DF		       bcs     loc_6EAA
 BANK0:6ECB
 BANK0:6ECB	       loc_6ECB:						       ; CODE XREF: sub_6DFA:loc_6E18P
 BANK0:6ECB CC 00 00		       ldd     #0
-BANK0:6ECE FD 4B 32		       std     unk_4B32
+BANK0:6ECE FD 4B 32		       std     word_4B31+1
 BANK0:6ED1 B6 50 80		       lda     word_5080
 BANK0:6ED4 2B 05		       bmi     loc_6EDB
 BANK0:6ED6 F6 50 84		       ldb     word_5084
@@ -21394,8 +21425,8 @@ BANK0:6EF7	       loc_6EF7:						       ; CODE XREF: sub_6EA2+14J
 BANK0:6EF7 86 10		       lda     #0x10
 BANK0:6EF9 BD CE 0C		       jsr     sub_CE0C
 BANK0:6EFC BD 71 60		       jsr     sub_7160
-BANK0:6EFF 9E 64		       ldx     byte_64
-BANK0:6F01 BF 4B 32		       stx     unk_4B32
+BANK0:6EFF 9E 64		       ldx     byte_4864
+BANK0:6F01 BF 4B 32		       stx     word_4B31+1
 BANK0:6F04 4F			       clra
 BANK0:6F05 E6 02		       ldb     2,x
 BANK0:6F07 CB 03		       addb    #3
@@ -21462,9 +21493,9 @@ BANK0:6F5F
 BANK0:6F5F
 BANK0:6F5F	       sub_6F5F:						       ; CODE XREF: BANK0:687FP
 BANK0:6F5F									       ; BANK0:68FBP ...
-BANK0:6F5F DC 42		       ldd     byte_42
+BANK0:6F5F DC 42		       ldd     unk_4842
 BANK0:6F61 BD CD AB		       jsr     sub_CDAB
-BANK0:6F64 DD 89		       std     byte_89
+BANK0:6F64 DD 89		       std     byte_4889
 BANK0:6F66 39			       rts
 BANK0:6F66	       ; End of	function sub_6F5F
 BANK0:6F66
@@ -21474,9 +21505,9 @@ BANK0:6F67
 BANK0:6F67
 BANK0:6F67	       sub_6F67:						       ; CODE XREF: BANK0:6942P
 BANK0:6F67									       ; BANK0:loc_6977P
-BANK0:6F67 DC 42		       ldd     byte_42
+BANK0:6F67 DC 42		       ldd     unk_4842
 BANK0:6F69 BD CD A9		       jsr     sub_CDA9
-BANK0:6F6C DD 89		       std     byte_89
+BANK0:6F6C DD 89		       std     byte_4889
 BANK0:6F6E 39			       rts
 BANK0:6F6E	       ; End of	function sub_6F67
 BANK0:6F6E
@@ -21488,9 +21519,9 @@ BANK0:6F6F	       sub_6F6F:						       ; CODE XREF: sub_6A0C+8P
 BANK0:6F6F FC 50 86		       ldd     word_5086
 BANK0:6F72 F3 50 98		       addd    word_5098
 BANK0:6F75 28 06		       bvc     loc_6F7D
-BANK0:6F77 0C A7		       inc     byte_A7
+BANK0:6F77 0C A7		       inc     byte_48A7
 BANK0:6F79 28 02		       bvc     loc_6F7D
-BANK0:6F7B 0A A7		       dec     byte_A7
+BANK0:6F7B 0A A7		       dec     byte_48A7
 BANK0:6F7D
 BANK0:6F7D	       loc_6F7D:						       ; CODE XREF: sub_6F6F+6j
 BANK0:6F7D									       ; sub_6F6F+Aj
@@ -21498,14 +21529,14 @@ BANK0:6F7D FD 50 98		       std     word_5098
 BANK0:6F80 FD 50 40		       std     word_5040
 BANK0:6F83 FC 50 86		       ldd     word_5086
 BANK0:6F86 BD CD B1		       jsr     loc_CDB1
-BANK0:6F89 D6 7D		       ldb     byte_7D
+BANK0:6F89 D6 7D		       ldb     byte_487D
 BANK0:6F8B 2A 01		       bpl     loc_6F8E
 BANK0:6F8D 53			       comb
 BANK0:6F8E
 BANK0:6F8E	       loc_6F8E:						       ; CODE XREF: sub_6F6F+1Cj
 BANK0:6F8E 58			       aslb
 BANK0:6F8F 3D			       mul
-BANK0:6F90 0D 7D		       tst     byte_7D
+BANK0:6F90 0D 7D		       tst     byte_487D
 BANK0:6F92 2C 04		       bge     loc_6F98
 BANK0:6F94 43			       coma
 BANK0:6F95 50			       negb
@@ -21519,14 +21550,14 @@ BANK0:6FA1 FD 50 9A		       std     word_509A
 BANK0:6FA4 FD 50 42		       std     word_5042
 BANK0:6FA7 FC 50 86		       ldd     word_5086
 BANK0:6FAA BD CD B1		       jsr     loc_CDB1
-BANK0:6FAD D6 7F		       ldb     byte_7F
+BANK0:6FAD D6 7F		       ldb     word_487F
 BANK0:6FAF 2A 01		       bpl     loc_6FB2
 BANK0:6FB1 53			       comb
 BANK0:6FB2
 BANK0:6FB2	       loc_6FB2:						       ; CODE XREF: sub_6F6F+40j
 BANK0:6FB2 12			       nop
 BANK0:6FB3 3D			       mul
-BANK0:6FB4 0D 7F		       tst     byte_7F
+BANK0:6FB4 0D 7F		       tst     word_487F
 BANK0:6FB6 2A 04		       bpl     loc_6FBC
 BANK0:6FB8 43			       coma
 BANK0:6FB9 50			       negb
@@ -21603,7 +21634,7 @@ BANK0:7029 CC 3E EB		       ldd     #0x3EEB
 BANK0:702C FD 50 24		       std     word_5024
 BANK0:702F BD CE 24		       jsr     sub_CE24
 BANK0:7032 CC 00 00		       ldd     #0
-BANK0:7035 93 A3		       subd    byte_A3
+BANK0:7035 93 A3		       subd    byte_48A3
 BANK0:7037 BD 6E 70		       jsr     loc_6E70
 BANK0:703A 39			       rts
 BANK0:703A	       ; End of	function sub_6FE0
@@ -21619,13 +21650,13 @@ BANK0:7041 FD 50 98		       std     word_5098
 BANK0:7044 FD 50 40		       std     word_5040
 BANK0:7047 FC 50 86		       ldd     word_5086
 BANK0:704A BD CD B1		       jsr     loc_CDB1
-BANK0:704D D6 7D		       ldb     byte_7D
+BANK0:704D D6 7D		       ldb     byte_487D
 BANK0:704F 2A 01		       bpl     loc_7052
 BANK0:7051 53			       comb
 BANK0:7052
 BANK0:7052	       loc_7052:						       ; CODE XREF: sub_703B+14j
 BANK0:7052 3D			       mul
-BANK0:7053 0D 7D		       tst     byte_7D
+BANK0:7053 0D 7D		       tst     byte_487D
 BANK0:7055 2C 04		       bge     loc_705B
 BANK0:7057 43			       coma
 BANK0:7058 50			       negb
@@ -21656,14 +21687,14 @@ BANK0:7083 58			       aslb
 BANK0:7084 49			       rola
 BANK0:7085 58			       aslb
 BANK0:7086 49			       rola
-BANK0:7087 D6 7F		       ldb     byte_7F
+BANK0:7087 D6 7F		       ldb     word_487F
 BANK0:7089 2A 01		       bpl     loc_708C
 BANK0:708B 53			       comb
 BANK0:708C
 BANK0:708C	       loc_708C:						       ; CODE XREF: sub_703B+4Ej
 BANK0:708C 58			       aslb
 BANK0:708D 3D			       mul
-BANK0:708E 0D 7F		       tst     byte_7F
+BANK0:708E 0D 7F		       tst     word_487F
 BANK0:7090 2A 04		       bpl     loc_7096
 BANK0:7092 43			       coma
 BANK0:7093 50			       negb
@@ -21734,14 +21765,14 @@ BANK0:70DB
 BANK0:70DB	       sub_70DB:						       ; CODE XREF: sub_60BE:loc_60F4P
 BANK0:70DB									       ; BANK0:6874P ...
 BANK0:70DB 1A 10		       orcc    #0x10
-BANK0:70DD DC 6B		       ldd     byte_6B
-BANK0:70DF DD 7F		       std     byte_7F
-BANK0:70E1 DC 74		       ldd     byte_74
-BANK0:70E3 DD 7D		       std     byte_7D
-BANK0:70E5 DC 2F		       ldd     byte_2F
-BANK0:70E7 DD 7B		       std     byte_7B
-BANK0:70E9 DC 2D		       ldd     byte_2D
-BANK0:70EB DD 79		       std     byte_79
+BANK0:70DD DC 6B		       ldd     word_486B
+BANK0:70DF DD 7F		       std     word_487F
+BANK0:70E1 DC 74		       ldd     word_4874
+BANK0:70E3 DD 7D		       std     byte_487D
+BANK0:70E5 DC 2F		       ldd     byte_482F
+BANK0:70E7 DD 7B		       std     word_487B
+BANK0:70E9 DC 2D		       ldd     byte_482D
+BANK0:70EB DD 79		       std     word_4878+1
 BANK0:70ED 1C EF		       andcc   #0xEF ; 'Ô'
 BANK0:70EF 39			       rts
 BANK0:70EF	       ; End of	function sub_70DB
@@ -22223,7 +22254,7 @@ BANK0:7447 BD 76 1D		       jsr     sub_761D
 BANK0:744A B6 4B 0E		       lda     word_4B0E
 BANK0:744D 81 04		       cmpa    #4
 BANK0:744F 22 13		       bhi     loc_7464
-BANK0:7451 96 98		       lda     byte_98
+BANK0:7451 96 98		       lda     byte_4898
 BANK0:7453 26 05		       bne     loc_745A
 BANK0:7455 BD 76 D3		       jsr     loc_76D3
 BANK0:7458 20 0A		       bra     loc_7464
@@ -22242,7 +22273,7 @@ BANK0:7467 26 28		       bne     loc_7491
 BANK0:7469 B6 4B 0E		       lda     word_4B0E
 BANK0:746C 81 08		       cmpa    #8
 BANK0:746E 22 21		       bhi     loc_7491
-BANK0:7470 96 98		       lda     byte_98
+BANK0:7470 96 98		       lda     byte_4898
 BANK0:7472 26 1D		       bne     loc_7491
 BANK0:7474 B6 4B 35		       lda     word_4B34+1
 BANK0:7477 26 18		       bne     loc_7491
@@ -22253,7 +22284,7 @@ BANK0:7480 20 0C		       bra     loc_748E
 BANK0:7482	       ; ---------------------------------------------------------------------------
 BANK0:7482
 BANK0:7482	       loc_7482:						       ; CODE XREF: sub_743C+40j
-BANK0:7482 96 43		       lda     byte_43
+BANK0:7482 96 43		       lda     word_4843
 BANK0:7484 84 10		       anda    #0x10
 BANK0:7486 26 04		       bne     loc_748C
 BANK0:7488 C6 4C		       ldb     #0x4C ; 'L'
@@ -22370,7 +22401,7 @@ BANK0:7546 CC 00 90		       ldd     #0x90 ; 'ê'
 BANK0:7549 ED A1		       std     ,y++
 BANK0:754B CC 00 70		       ldd     #0x70 ; 'p'
 BANK0:754E ED A1		       std     ,y++
-BANK0:7550 96 8E		       lda     byte_8E
+BANK0:7550 96 8E		       lda     byte_488E
 BANK0:7552 BD E7 AD		       jsr     loc_E7AD
 BANK0:7555 CC 80 40		       ldd     #0x8040
 BANK0:7558 ED A1		       std     ,y++
@@ -22387,7 +22418,7 @@ BANK0:756B 27 2F		       beq     loc_759C
 BANK0:756D F6 45 93		       ldb     word_4593
 BANK0:7570 C4 03		       andb    #3
 BANK0:7572 CB 06		       addb    #6
-BANK0:7574 D1 60		       cmpb    byte_60
+BANK0:7574 D1 60		       cmpb    byte_4860
 BANK0:7576 22 04		       bhi     loc_757C
 BANK0:7578 C6 4A		       ldb     #0x4A ; 'J'
 BANK0:757A 20 1D		       bra     loc_7599
@@ -22401,7 +22432,7 @@ BANK0:7584 EF A1		       stu     ,y++
 BANK0:7586 CE 1E C0		       ldu     #0x1EC0
 BANK0:7589 EF A1		       stu     ,y++
 BANK0:758B C6 01		       ldb     #1
-BANK0:758D D7 AD		       stb     byte_AD
+BANK0:758D D7 AD		       stb     byte_48AD
 BANK0:758F BD E7 AD		       jsr     loc_E7AD
 BANK0:7592 CC 80 40		       ldd     #0x8040
 BANK0:7595 ED A1		       std     ,y++
@@ -22505,7 +22536,7 @@ BANK0:762A ED A1		       std     ,y++
 BANK0:762C CC 1E 20		       ldd     #0x1E20
 BANK0:762F ED A1		       std     ,y++
 BANK0:7631 86 06		       lda     #6
-BANK0:7633 97 AD		       sta     byte_AD
+BANK0:7633 97 AD		       sta     byte_48AD
 BANK0:7635 8E 48 5C		       ldx     #0x485C
 BANK0:7638 BD E7 64		       jsr     sub_E764
 BANK0:763B CC 80 40		       ldd     #0x8040
@@ -22527,7 +22558,7 @@ BANK0:7658 ED A1		       std     ,y++
 BANK0:765A CC 1E 50		       ldd     #0x1E50
 BANK0:765D ED A1		       std     ,y++
 BANK0:765F 86 05		       lda     #5
-BANK0:7661 97 AD		       sta     byte_AD
+BANK0:7661 97 AD		       sta     byte_48AD
 BANK0:7663 8E 4B 28		       ldx     #0x4B28
 BANK0:7666 BD E7 72		       jsr     sub_E772
 BANK0:7669 CC 80 40		       ldd     #0x8040
@@ -22541,7 +22572,7 @@ BANK0:7676 ED A1		       std     ,y++
 BANK0:7678 CC 01 38		       ldd     #0x138
 BANK0:767B ED A1		       std     ,y++
 BANK0:767D 86 01		       lda     #1
-BANK0:767F 97 AD		       sta     byte_AD
+BANK0:767F 97 AD		       sta     byte_48AD
 BANK0:7681 B6 4B 16		       lda     word_4B16
 BANK0:7684 BD E7 90		       jsr     sub_E790
 BANK0:7687 CC 80 40		       ldd     #0x8040
@@ -22559,7 +22590,7 @@ BANK0:768D B6 4B 13		       lda     word_4B12+1
 BANK0:7690 2F 6A		       ble     loc_76FC
 BANK0:7692 B6 4B 1A		       lda     word_4B1A
 BANK0:7695 27 3C		       beq     loc_76D3
-BANK0:7697 96 43		       lda     byte_43
+BANK0:7697 96 43		       lda     word_4843
 BANK0:7699 84 30		       anda    #0x30 ; '0'
 BANK0:769B 27 31		       beq     loc_76CE
 BANK0:769D C6 40		       ldb     #64				       ; "POINTS NEXT TOWER"
@@ -22571,7 +22602,7 @@ BANK0:76AA ED A1		       std     ,y++
 BANK0:76AC CC 1E D0		       ldd     #0x1ED0
 BANK0:76AF ED A1		       std     ,y++
 BANK0:76B1 86 04		       lda     #4
-BANK0:76B3 97 AD		       sta     byte_AD
+BANK0:76B3 97 AD		       sta     byte_48AD
 BANK0:76B5 B6 4B 2E		       lda     word_4B2D+1
 BANK0:76B8 BD E7 90		       jsr     sub_E790
 BANK0:76BB B6 4B 2F		       lda     word_4B2F
@@ -22600,7 +22631,7 @@ BANK0:76E6 ED A1		       std     ,y++
 BANK0:76E8 CC 01 68		       ldd     #0x168
 BANK0:76EB ED A1		       std     ,y++
 BANK0:76ED 86 01		       lda     #1
-BANK0:76EF 97 AD		       sta     byte_AD
+BANK0:76EF 97 AD		       sta     byte_48AD
 BANK0:76F1 B6 4B 1A		       lda     word_4B1A
 BANK0:76F4 BD E7 90		       jsr     sub_E790
 BANK0:76F7 CC 80 40		       ldd     #0x8040
@@ -22781,11 +22812,11 @@ BANK0:77D4
 BANK0:77D4	       sub_77D4:						       ; CODE XREF: sub_77A4+2CP
 BANK0:77D4 BD CC F0		       jsr     sub_CCF0
 BANK0:77D7 EC 3C		       ldd     -4,y
-BANK0:77D9 DD 05		       std     word_4+1
+BANK0:77D9 DD 05		       std     byte_4805
 BANK0:77DB EC 3E		       ldd     -2,y
-BANK0:77DD DD 03		       std     word_2+1
-BANK0:77DF DC 56		       ldd     byte_56
-BANK0:77E1 DD 01		       std     word_0+1
+BANK0:77DD DD 03		       std     byte_4803
+BANK0:77DF DC 56		       ldd     byte_4856
+BANK0:77E1 DD 01		       std     byte_4801
 BANK0:77E3 CE BD 68		       ldu     #0xBD68
 BANK0:77E6 BD 78 63		       jsr     sub_7863
 BANK0:77E9 CE BD A6		       ldu     #0xBDA6
@@ -22796,14 +22827,14 @@ BANK0:77F5 CE BD DA		       ldu     #0xBDDA
 BANK0:77F8 BD 78 5B		       jsr     sub_785B
 BANK0:77FB CE BE 06		       ldu     #0xBE06
 BANK0:77FE BD 78 5B		       jsr     sub_785B
-BANK0:7801 DC 56		       ldd     byte_56
+BANK0:7801 DC 56		       ldd     byte_4856
 BANK0:7803 80 03		       suba    #3
 BANK0:7805 10 83 70 00		       cmpd    #0x7000
 BANK0:7809 24 03		       bcc     loc_780E
 BANK0:780B CC 70 00		       ldd     #0x7000
 BANK0:780E
 BANK0:780E	       loc_780E:						       ; CODE XREF: sub_77D4+35j
-BANK0:780E DD 01		       std     word_0+1
+BANK0:780E DD 01		       std     byte_4801
 BANK0:7810 81 70		       cmpa    #0x70 ; 'p'
 BANK0:7812 26 05		       bne     loc_7819
 BANK0:7814 CC 66 60		       ldd     #0x6660
@@ -22856,9 +22887,9 @@ BANK0:785B
 BANK0:785B
 BANK0:785B	       sub_785B:						       ; CODE XREF: sub_77D4+18P
 BANK0:785B									       ; sub_77D4+1EP ...
-BANK0:785B DC 05		       ldd     word_4+1
+BANK0:785B DC 05		       ldd     byte_4805
 BANK0:785D ED A1		       std     ,y++
-BANK0:785F DC 03		       ldd     word_2+1
+BANK0:785F DC 03		       ldd     byte_4803
 BANK0:7861 ED A1		       std     ,y++
 BANK0:7861	       ; End of	function sub_785B
 BANK0:7861
@@ -22867,7 +22898,7 @@ BANK0:7863	       ; =============== S U B R O U T I N E ========================
 BANK0:7863
 BANK0:7863
 BANK0:7863	       sub_7863:						       ; CODE XREF: sub_77D4+12P
-BANK0:7863 DC 01		       ldd     word_0+1
+BANK0:7863 DC 01		       ldd     byte_4801
 BANK0:7865 ED A1		       std     ,y++
 BANK0:7867 EF A1		       stu     ,y++
 BANK0:7869 39			       rts
@@ -22882,13 +22913,13 @@ BANK0:786A									       ; sub_7315+17P ...
 BANK0:786A 8E 49 00		       ldx     #0x4900
 BANK0:786D
 BANK0:786D	       loc_786D:						       ; CODE XREF: sub_786A+14j
-BANK0:786D 9F 64		       stx     byte_64
+BANK0:786D 9F 64		       stx     byte_4864
 BANK0:786F A6 03		       lda     3,x
 BANK0:7871 27 03		       beq     loc_7876
 BANK0:7873 BD 78 81		       jsr     sub_7881
 BANK0:7876
 BANK0:7876	       loc_7876:						       ; CODE XREF: sub_786A+7j
-BANK0:7876 9E 64		       ldx     byte_64
+BANK0:7876 9E 64		       ldx     byte_4864
 BANK0:7878 30 88 19		       leax    0x19,x
 BANK0:787B 8C 49 4B		       cmpx    #0x494B
 BANK0:787E 25 ED		       bcs     loc_786D
@@ -22903,7 +22934,7 @@ BANK0:7881	       ; =============== S U B R O U T I N E ========================
 BANK0:7881
 BANK0:7881
 BANK0:7881	       sub_7881:						       ; CODE XREF: sub_786A+9P
-BANK0:7881 9E 64		       ldx     byte_64
+BANK0:7881 9E 64		       ldx     byte_4864
 BANK0:7883 4F			       clra
 BANK0:7884 E6 02		       ldb     2,x
 BANK0:7886 CB 03		       addb    #3
@@ -22994,7 +23025,7 @@ BANK0:7935 FD 50 1C		       std     word_501C
 BANK0:7938 FC 50 74		       ldd     word_5074
 BANK0:793B B3 50 70		       subd    word_5070
 BANK0:793E 10 24 FF 3E		       lbcc    locret_7880
-BANK0:7942 9E 64		       ldx     byte_64
+BANK0:7942 9E 64		       ldx     byte_4864
 BANK0:7944 EC 88 15		       ldd     0x15,x
 BANK0:7947 8A 10		       oraa    #0x10
 BANK0:7949 ED 88 15		       std     0x15,x
@@ -23034,55 +23065,55 @@ BANK0:7980 86 86		       lda     #0x86 ; 'Ü'
 BANK0:7982 BD CD BA		       jsr     go_math_and_wait
 BANK0:7985 FC 50 02		       ldd     word_5002
 BANK0:7988 C3 00 0A		       addd    #0xA
-BANK0:798B DD 01		       std     word_0+1
-BANK0:798D DC D6		       ldd     byte_D6
-BANK0:798F 93 B3		       subd    byte_B3
+BANK0:798B DD 01		       std     byte_4801
+BANK0:798D DC D6		       ldd     byte_48D6
+BANK0:798F 93 B3		       subd    byte_48B3
 BANK0:7991 2A 04		       bpl     loc_7997
 BANK0:7993 43			       coma
 BANK0:7994 50			       negb
 BANK0:7995 82 FF		       sbca    #0xFF
 BANK0:7997
 BANK0:7997	       loc_7997:						       ; CODE XREF: sub_7881+110j
-BANK0:7997 DD 05		       std     word_4+1
-BANK0:7999 DD 03		       std     word_2+1
-BANK0:799B DC D8		       ldd     byte_D8
-BANK0:799D 93 B5		       subd    byte_B5
+BANK0:7997 DD 05		       std     byte_4805
+BANK0:7999 DD 03		       std     byte_4803
+BANK0:799B DC D8		       ldd     byte_48D8
+BANK0:799D 93 B5		       subd    byte_48B5
 BANK0:799F 2A 04		       bpl     loc_79A5
 BANK0:79A1 43			       coma
 BANK0:79A2 50			       negb
 BANK0:79A3 82 FF		       sbca    #0xFF
 BANK0:79A5
 BANK0:79A5	       loc_79A5:						       ; CODE XREF: sub_7881+11Ej
-BANK0:79A5 DD 07		       std     byte_7
-BANK0:79A7 D3 03		       addd    word_2+1
-BANK0:79A9 DD 03		       std     word_2+1
-BANK0:79AB DC 05		       ldd     word_4+1
-BANK0:79AD 93 01		       subd    word_0+1
+BANK0:79A5 DD 07		       std     byte_4807
+BANK0:79A7 D3 03		       addd    byte_4803
+BANK0:79A9 DD 03		       std     byte_4803
+BANK0:79AB DC 05		       ldd     byte_4805
+BANK0:79AD 93 01		       subd    byte_4801
 BANK0:79AF 2E 1E		       bgt     loc_79CF
-BANK0:79B1 DC 07		       ldd     byte_7
-BANK0:79B3 93 01		       subd    word_0+1
+BANK0:79B1 DC 07		       ldd     byte_4807
+BANK0:79B3 93 01		       subd    byte_4801
 BANK0:79B5 2E 18		       bgt     loc_79CF
-BANK0:79B7 DC 01		       ldd     word_0+1
+BANK0:79B7 DC 01		       ldd     byte_4801
 BANK0:79B9 44			       lsra
 BANK0:79BA 56			       rorb
-BANK0:79BB D3 01		       addd    word_0+1
-BANK0:79BD 93 03		       subd    word_2+1
+BANK0:79BB D3 01		       addd    byte_4801
+BANK0:79BD 93 03		       subd    byte_4803
 BANK0:79BF 2D 0E		       blt     loc_79CF
 BANK0:79C1 FC 50 18		       ldd     word_5018
-BANK0:79C4 10 93 C4		       cmpd    byte_C4
+BANK0:79C4 10 93 C4		       cmpd    byte_48C4
 BANK0:79C7 24 06		       bcc     loc_79CF
-BANK0:79C9 DD C4		       std     byte_C4
-BANK0:79CB 9E 64		       ldx     byte_64
-BANK0:79CD 9F C2		       stx     byte_C2
+BANK0:79C9 DD C4		       std     byte_48C4
+BANK0:79CB 9E 64		       ldx     byte_4864
+BANK0:79CD 9F C2		       stx     byte_48C2
 BANK0:79CF
 BANK0:79CF	       loc_79CF:						       ; CODE XREF: sub_7881+12Ej
 BANK0:79CF									       ; sub_7881+134j	...
-BANK0:79CF DC 01		       ldd     word_0+1
-BANK0:79D1 D3 01		       addd    word_0+1
-BANK0:79D3 D3 01		       addd    word_0+1
-BANK0:79D5 93 03		       subd    word_2+1
+BANK0:79CF DC 01		       ldd     byte_4801
+BANK0:79D1 D3 01		       addd    byte_4801
+BANK0:79D3 D3 01		       addd    byte_4801
+BANK0:79D5 93 03		       subd    byte_4803
 BANK0:79D7 25 10		       bcs     loc_79E9
-BANK0:79D9 9E 64		       ldx     byte_64
+BANK0:79D9 9E 64		       ldx     byte_4864
 BANK0:79DB A6 03		       lda     3,x
 BANK0:79DD 81 01		       cmpa    #1
 BANK0:79DF 26 08		       bne     loc_79E9
@@ -23092,7 +23123,7 @@ BANK0:79E6 ED 88 15		       std     0x15,x
 BANK0:79E9
 BANK0:79E9	       loc_79E9:						       ; CODE XREF: sub_7881+156j
 BANK0:79E9									       ; sub_7881+15Ej
-BANK0:79E9 9E 64		       ldx     byte_64
+BANK0:79E9 9E 64		       ldx     byte_4864
 BANK0:79EB E6 06		       ldb     6,x
 BANK0:79ED CE 7A 08		       ldu     #word_7A08
 BANK0:79F0 58			       aslb
@@ -23155,13 +23186,13 @@ BANK0:7A57 FD 50 9C		       std     word_509C
 BANK0:7A5A
 BANK0:7A5A	       loc_7A5A:						       ; CODE XREF: BANK0:loc_6802P
 BANK0:7A5A CC 00 00		       ldd     #0
-BANK0:7A5D 97 62		       sta     byte_62
-BANK0:7A5F 97 63		       sta     byte_63
-BANK0:7A61 97 31		       sta     byte_31
-BANK0:7A63 97 BC		       sta     byte_BC
-BANK0:7A65 97 B7		       sta     byte_B7
-BANK0:7A67 97 BD		       sta     byte_BD
-BANK0:7A69 DD A3		       std     byte_A3
+BANK0:7A5D 97 62		       sta     byte_4862
+BANK0:7A5F 97 63		       sta     byte_4863
+BANK0:7A61 97 31		       sta     byte_4831
+BANK0:7A63 97 BC		       sta     byte_48BC
+BANK0:7A65 97 B7		       sta     byte_48B7
+BANK0:7A67 97 BD		       sta     byte_48BD
+BANK0:7A69 DD A3		       std     byte_48A3
 BANK0:7A6B B7 48 78		       sta     word_4878
 BANK0:7A6E B7 48 6E		       sta     word_486D+1
 BANK0:7A71 B7 48 77		       sta     word_4876+1
@@ -23954,8 +23985,8 @@ BANK0:7D99 0A			       .db  0xA
 BANK0:7D9A	       ; ---------------------------------------------------------------------------
 BANK0:7D9A
 BANK0:7D9A	       loc_7D9A:						       ; CODE XREF: sub_CD80+5P
-BANK0:7D9A 0A 01		       dec     word_0+1
-BANK0:7D9C 00 00		       neg     word_0
+BANK0:7D9A 0A 01		       dec     byte_4801
+BANK0:7D9C 00 00		       neg     byte_4800
 BANK0:7D9C	       ; ---------------------------------------------------------------------------
 BANK0:7D9E 01			       .db    1
 BANK0:7D9F A0			       .db 0xA0	; †
@@ -32791,7 +32822,7 @@ ROM:A695 C6 01			     ldb     #1
 ROM:A697 E7 44			     stb     4,u
 ROM:A699 B6 4B 3C		     lda     word_4B3B+1
 ROM:A69C 2F 0D			     ble     loc_A6AB
-ROM:A69E BC 4B 32		     cmpx    unk_4B32
+ROM:A69E BC 4B 32		     cmpx    word_4B31+1
 ROM:A6A1 26 08			     bne     loc_A6AB
 ROM:A6A3 7A 4B 3C		     dec     word_4B3B+1
 ROM:A6A6 26 03			     bne     loc_A6AB
@@ -38801,13 +38832,13 @@ ROM:C6B8	     sub_C6B8:							     ; CODE XREF: sub_C413+17P
 ROM:C6B8									     ; sub_C5F2+25P ...
 ROM:C6B8 86 FF			     lda     #0xFF
 ROM:C6BA B7 46 87		     sta     NVRAM_RECALL
-ROM:C6BD BD 60 05		     jsr     sub_6005
+ROM:C6BD BD 60 05		     jsr     MAIN
 ROM:C6C0 86 00			     lda     #0
 ROM:C6C2 B7 46 87		     sta     NVRAM_RECALL
 ROM:C6C5 CE 00 00		     ldu     #0
 ROM:C6C8
 ROM:C6C8	     loc_C6C8:							     ; CODE XREF: sub_C6B8+19j
-ROM:C6C8 BD 60 05		     jsr     sub_6005
+ROM:C6C8 BD 60 05		     jsr     MAIN
 ROM:C6CB 33 41			     leau    1,u
 ROM:C6CD 11 83 00 20		     cmpu    #0x20 ; ' '
 ROM:C6D1 25 F5			     bcs     loc_C6C8
@@ -43330,7 +43361,7 @@ ROM:DAF5 FC 4A E4		     ldd     word_4AE4
 ROM:DAF8 10 83 02 00		     cmpd    #0x200
 ROM:DAFC 25 05			     bcs     loc_DB03
 ROM:DAFE 86 07			     lda     #7
-ROM:DB00 B7 48 41		     sta     word_4841
+ROM:DB00 B7 48 41		     sta     jmp_tbl_index
 ROM:DB03
 ROM:DB03	     loc_DB03:							     ; CODE XREF: sub_D9FA+102j
 ROM:DB03 10 B3 4A E2		     cmpd    word_4AE2
@@ -43956,9 +43987,9 @@ ROM:E811
 ROM:E811	     loc_E811:							     ; CODE XREF: print_msg_48AE_at+10j
 ROM:E811 ED A1			     std     ,y++
 ROM:E813 BD E8 21		     jsr     print_msg_48AE
-ROM:E816 CC 72 00		     ldd     #0x7200
+ROM:E816 CC 72 00		     ldd     #0x7200				     ; COLR 2,0
 ROM:E819 ED A1			     std     ,y++
-ROM:E81B CC 80 40		     ldd     #0x8040
+ROM:E81B CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:E81E ED A1			     std     ,y++
 ROM:E820 39			     rts
 ROM:E820	     ; End of function print_msg_48AE_at
@@ -45052,6 +45083,10 @@ ROM:F146	     ;	Pokey. Like Greg. That is why the Controller in	Star Wars
 ROM:F146	     ;	keeps getting recentered, usually badly."
 ROM:F146	     ;	- Jed Margolin,	The Secret Life	of Vector Generators
 ROM:F146
+ROM:F146	     ; If new lies between the 2 old values
+ROM:F146	     ; - replaces *both* with new, else
+ROM:F146	     ; - keeps closer of the 2 old values
+ROM:F146
 ROM:F146	     ; =============== S U B R O U T I N E =======================================
 ROM:F146
 ROM:F146
@@ -45067,12 +45102,12 @@ ROM:F153 E6 21			     ldb     1,y
 ROM:F155 B6 43 80		     lda     adc_result				     ; read ADC	value
 ROM:F158 A7 21			     sta     1,y				     ; new value
 ROM:F15A A1 A4			     cmpa    ,y
-ROM:F15C 25 0E			     bcs     loc_F16C
+ROM:F15C 25 0E			     bcs     loc_F16C				     ; go if new<0,y (check old)
 ROM:F15E E1 A4			     cmpb    ,y
-ROM:F160 23 08			     bls     loc_F16A
+ROM:F160 23 08			     bls     loc_F16A				     ; go if old<=0,y (discard old)
 ROM:F162 E1 21			     cmpb    1,y
-ROM:F164 23 02			     bls     loc_F168
-ROM:F166 E6 21			     ldb     1,y
+ROM:F164 23 02			     bls     loc_F168				     ; go if old>0,y & old<=new	(store old)
+ROM:F166 E6 21			     ldb     1,y				     ; (store new again)
 ROM:F168
 ROM:F168	     loc_F168:							     ; CODE XREF: read_pitch_yaw_input+1Ej
 ROM:F168 E7 A4			     stb     ,y
@@ -45083,10 +45118,10 @@ ROM:F16C	     ; ----------------------------------------------------------------
 ROM:F16C
 ROM:F16C	     loc_F16C:							     ; CODE XREF: read_pitch_yaw_input+16j
 ROM:F16C E1 A4			     cmpb    ,y
-ROM:F16E 24 08			     bcc     select_ud_or_lr_adc
+ROM:F16E 24 08			     bcc     select_ud_or_lr_adc		     ; go if old>=0,y (discard old)
 ROM:F170 E1 21			     cmpb    1,y
-ROM:F172 24 02			     bcc     loc_F176
-ROM:F174 E6 21			     ldb     1,y
+ROM:F172 24 02			     bcc     loc_F176				     ; go if old<0,y & old>=new	(store old)
+ROM:F174 E6 21			     ldb     1,y				     ; (store new again)
 ROM:F176
 ROM:F176	     loc_F176:							     ; CODE XREF: read_pitch_yaw_input+2Cj
 ROM:F176 E7 A4			     stb     ,y
@@ -45314,7 +45349,7 @@ ROM:F294 B7 46 E0		     sta     soundrst
 ROM:F297 86 00			     lda     #0
 ROM:F299 B7 44 00		     sta     main_rw
 ROM:F29C	     ; clear RAM (x3 areas)
-ROM:F29C 8E 48 00		     ldx     #unk_4800				     ; start of	RAM
+ROM:F29C 8E 48 00		     ldx     #byte_4800				     ; start of	RAM
 ROM:F29F CC 00 00		     ldd     #0
 ROM:F2A2
 ROM:F2A2	     loc_F2A2:							     ; CODE XREF: ROM:F2A7j
@@ -45907,9 +45942,9 @@ ROM:F641 20 AA			     bra     loc_F5ED
 ROM:F643	     ; ---------------------------------------------------------------------------
 ROM:F643
 ROM:F643	     loc_F643:							     ; CODE XREF: ROM:loc_F5EBj
-ROM:F643 CC 20 20		     ldd     #0x2020
-ROM:F646 ED A1			     std     ,y++
-ROM:F648 CE F7 23		     ldu     #0xF723
+ROM:F643 CC 20 20		     ldd     #0x2020				     ; HALT (AVG)
+ROM:F646 ED A1			     std     ,y++				     ; write to	display	list
+ROM:F648 CE F7 23		     ldu     #unk_F723
 ROM:F64B 0F C0			     clr     byte_C0
 ROM:F64D 86 03			     lda     #3
 ROM:F64F 97 C5			     sta     unk_C5
@@ -45918,6 +45953,8 @@ ROM:F653 97 C7			     sta     unk_C7
 ROM:F655 97 D6			     sta     byte_D6
 ROM:F657 8E F3 4E		     ldx     #0xF34E
 ROM:F65A 9F D4			     stx     unk_D4
+ROM:F65C
+ROM:F65C	     loc_F65C:							     ; CODE XREF: ROM:F71Cj
 ROM:F65C CC 00 01		     ldd     #1
 ROM:F65F 8E 00 00		     ldx     #0
 ROM:F662
@@ -45928,23 +45965,23 @@ ROM:F667 8C 07 08		     cmpx    #0x708
 ROM:F66A 25 F6			     bcs     loc_F662
 ROM:F66C B7 46 20		     sta     avg_reset
 ROM:F66F B6 43 20		     lda     IN1
-ROM:F672 84 04			     anda    #4
-ROM:F674 26 03			     bne     loc_F679
-ROM:F676 7E F7 20		     jmp     loc_F720
+ROM:F672 84 04			     anda    #4					     ; service step? (active low)
+ROM:F674 26 03			     bne     loc_F679				     ; no, skip
+ROM:F676 7E F7 20		     jmp     spin
 ROM:F679	     ; ---------------------------------------------------------------------------
 ROM:F679
 ROM:F679	     loc_F679:							     ; CODE XREF: ROM:F674j
 ROM:F679 B6 43 00		     lda     IN0
-ROM:F67C 84 04			     anda    #4
-ROM:F67E 26 1F			     bne     loc_F69F
+ROM:F67C 84 04			     anda    #4					     ; service1? (active low)
+ROM:F67E 26 1F			     bne     loc_F69F				     ; no, skip
 ROM:F680 96 C5			     lda     unk_C5
 ROM:F682 27 19			     beq     loc_F69D
 ROM:F684 4A			     deca
 ROM:F685 26 16			     bne     loc_F69D
 ROM:F687 33 42			     leau    2,u
-ROM:F689 11 83 F7 35		     cmpu    #0xF735
+ROM:F689 11 83 F7 35		     cmpu    #unk_F735
 ROM:F68D 25 03			     bcs     loc_F692
-ROM:F68F CE F7 25		     ldu     #0xF725
+ROM:F68F CE F7 25		     ldu     #test_jmp_tbl
 ROM:F692
 ROM:F692	     loc_F692:							     ; CODE XREF: ROM:F68Dj
 ROM:F692 CC 00 00		     ldd     #0
@@ -45964,9 +46001,9 @@ ROM:F6A1
 ROM:F6A1	     loc_F6A1:							     ; CODE XREF: ROM:loc_F69Dj
 ROM:F6A1 97 C5			     sta     unk_C5
 ROM:F6A3 B6 43 00		     lda     IN0
-ROM:F6A6 43			     coma
-ROM:F6A7 84 C0			     anda    #0xC0 ; '¿'
-ROM:F6A9 27 1C			     beq     loc_F6C7
+ROM:F6A6 43			     coma					     ; active high
+ROM:F6A7 84 C0			     anda    #0xC0 ; '¿'                             ; button 1 or 4?
+ROM:F6A9 27 1C			     beq     loc_F6C7				     ; neither,	skip
 ROM:F6AB 96 C6			     lda     byte_C6
 ROM:F6AD 27 16			     beq     loc_F6C5
 ROM:F6AF 4A			     deca
@@ -45999,9 +46036,9 @@ ROM:F6C9 97 C6			     sta     byte_C6
 ROM:F6CB 11 83 F7 33		     cmpu    #0xF733
 ROM:F6CF 26 1F			     bne     loc_F6F0
 ROM:F6D1 B6 43 20		     lda     IN1
-ROM:F6D4 43			     coma
-ROM:F6D5 84 30			     anda    #0x30 ; '0'
-ROM:F6D7 27 11			     beq     loc_F6EA
+ROM:F6D4 43			     coma					     ; active high
+ROM:F6D5 84 30			     anda    #0x30 ; '0'                             ; button 2 or 3?
+ROM:F6D7 27 11			     beq     loc_F6EA				     ; neither,	skip
 ROM:F6D9 96 C7			     lda     unk_C7
 ROM:F6DB 27 0B			     beq     loc_F6E8
 ROM:F6DD 4A			     deca
@@ -46042,51 +46079,34 @@ ROM:F709	     loc_F709:							     ; CODE XREF: ROM:F701j
 ROM:F709									     ; ROM:F705j
 ROM:F709 ED A1			     std     ,y++
 ROM:F70B 6E D4			     jmp     [,u]
-ROM:F70B	     ; ---------------------------------------------------------------------------
-ROM:F70D CC			     .db 0xCC ;	Ã
-ROM:F70E 20			     .db 0x20
-ROM:F70F 20			     .db 0x20
-ROM:F710 ED			     .db 0xED ;	Ì
-ROM:F711 A1			     .db 0xA1 ;	°
-ROM:F712 ED			     .db 0xED ;	Ì
-ROM:F713 A1			     .db 0xA1 ;	°
-ROM:F714 B7			     .db 0xB7 ;	∑
-ROM:F715 46			     .db 0x46 ;	F
-ROM:F716 00			     .db    0
-ROM:F717 B6			     .db 0xB6 ;	∂
-ROM:F718 43			     .db 0x43 ;	C
-ROM:F719 00			     .db    0
-ROM:F71A 84			     .db 0x84 ;	Ñ
-ROM:F71B 10			     .db 0x10
-ROM:F71C 10			     .db 0x10
-ROM:F71D 27			     .db 0x27 ;	'
-ROM:F71E FF			     .db 0xFF
-ROM:F71F 3C			     .db 0x3C ;	<
-ROM:F720	     ; ---------------------------------------------------------------------------
+ROM:F70D	     ; ---------------------------------------------------------------------------
+ROM:F70D
+ROM:F70D	     avg_go_wait_service_switch:				     ; CODE XREF: ROM:F869J
+ROM:F70D									     ; ROM:F889J ...
+ROM:F70D CC 20 20		     ldd     #0x2020				     ; HALT (AVG)
+ROM:F710 ED A1			     std     ,y++				     ; write to	display	list
+ROM:F712 ED A1			     std     ,y++				     ; and again for good measure
+ROM:F714 B7 46 00		     sta     avg_go
+ROM:F717 B6 43 00		     lda     IN0
+ROM:F71A 84 10			     anda    #0x10				     ; service?	(active	low)
+ROM:F71C 10 27 FF 3C		     lbeq    loc_F65C				     ; yes, go
 ROM:F720
-ROM:F720	     loc_F720:							     ; CODE XREF: ROM:F676J
-ROM:F720									     ; ROM:loc_F720J ...
-ROM:F720 7E F7 20		     jmp     loc_F720
+ROM:F720	     spin:							     ; CODE XREF: ROM:F676J
+ROM:F720									     ; ROM:spinJ ...
+ROM:F720 7E F7 20		     jmp     spin
 ROM:F720	     ; ---------------------------------------------------------------------------
-ROM:F723 F7			     .db 0xF7 ;	˜
+ROM:F723 F7	     unk_F723:	     .db 0xF7 ;	˜				     ; DATA XREF: ROM:F648o
 ROM:F724 4F			     .db 0x4F ;	O
-ROM:F725 F7			     .db 0xF7 ;	˜
-ROM:F726 7F			     .db 0x7F ;	
-ROM:F727 F9			     .db 0xF9 ;	˘
-ROM:F728 58			     .db 0x58 ;	X
-ROM:F729 F8			     .db 0xF8 ;	¯
-ROM:F72A 8C			     .db 0x8C ;	å
-ROM:F72B F8			     .db 0xF8 ;	¯
-ROM:F72C 84			     .db 0x84 ;	Ñ
-ROM:F72D F8			     .db 0xF8 ;	¯
-ROM:F72E 94			     .db 0x94 ;	î
-ROM:F72F F8			     .db 0xF8 ;	¯
-ROM:F730 AA			     .db 0xAA ;	™
-ROM:F731 F8			     .db 0xF8 ;	¯
-ROM:F732 CC			     .db 0xCC ;	Ã
-ROM:F733 F9			     .db 0xF9 ;	˘
-ROM:F734 3F			     .db 0x3F ;	?
-ROM:F735 64			     .db 0x64 ;	d
+ROM:F725 F7 7F	     test_jmp_tbl:   .dw switch_test				     ; DATA XREF: ROM:F68Fo
+ROM:F725									     ; ROM:F866o
+ROM:F727 F9 58	     off_F727:	     .dw math_box_test				     ; DATA XREF: ROM:F984o
+ROM:F729 F8 8C			     .dw loc_F88C
+ROM:F72B F8 84			     .dw loc_F884
+ROM:F72D F8 94			     .dw loc_F894
+ROM:F72F F8 AA			     .dw bip_test
+ROM:F731 F8 CC			     .dw loc_F8CC
+ROM:F733 F9 3F			     .dw loc_F93F
+ROM:F735 64	     unk_F735:	     .db 0x64 ;	d				     ; DATA XREF: ROM:F689o
 ROM:F736 80			     .db 0x80 ;	Ä
 ROM:F737 62			     .db 0x62 ;	b
 ROM:F738 80			     .db 0x80 ;	Ä
@@ -46160,546 +46180,311 @@ ROM:F77B D4			     .db 0xD4 ;	‘
 ROM:F77C 7E			     .db 0x7E ;	~
 ROM:F77D F7			     .db 0xF7 ;	˜
 ROM:F77E 14			     .db 0x14
-ROM:F77F B7			     .db 0xB7 ;	∑
-ROM:F780 46			     .db 0x46 ;	F
-ROM:F781 C0			     .db 0xC0 ;	¿
-ROM:F782 B7			     .db 0xB7 ;	∑
-ROM:F783 46			     .db 0x46 ;	F
-ROM:F784 C0			     .db 0xC0 ;	¿
-ROM:F785 CC			     .db 0xCC ;	Ã
-ROM:F786 BF			     .db 0xBF ;	ø
-ROM:F787 AE			     .db 0xAE ;	Æ
-ROM:F788 ED			     .db 0xED ;	Ì
-ROM:F789 A1			     .db 0xA1 ;	°
-ROM:F78A CC			     .db 0xCC ;	Ã
-ROM:F78B 80			     .db 0x80 ;	Ä
-ROM:F78C 40			     .db 0x40 ;	@
-ROM:F78D ED			     .db 0xED ;	Ì
-ROM:F78E A1			     .db 0xA1 ;	°
-ROM:F78F 10			     .db 0x10
-ROM:F790 CE			     .db 0xCE ;	Œ
-ROM:F791 4F			     .db 0x4F ;	O
-ROM:F792 FF			     .db 0xFF
-ROM:F793 C6			     .db 0xC6 ;	∆
-ROM:F794 9E			     .db 0x9E ;	û
-ROM:F795 BD			     .db 0xBD ;	Ω
-ROM:F796 E7			     .db 0xE7 ;	Á
-ROM:F797 C7			     .db 0xC7 ;	«
-ROM:F798 C6			     .db 0xC6 ;	∆
-ROM:F799 D3			     .db 0xD3 ;	”
-ROM:F79A BD			     .db 0xBD ;	Ω
-ROM:F79B E7			     .db 0xE7 ;	Á
-ROM:F79C C7			     .db 0xC7 ;	«
-ROM:F79D C6			     .db 0xC6 ;	∆
-ROM:F79E 9F			     .db 0x9F ;	ü
-ROM:F79F D7			     .db 0xD7 ;	◊
-ROM:F7A0 CE			     .db 0xCE ;	Œ
-ROM:F7A1 B6			     .db 0xB6 ;	∂
-ROM:F7A2 43			     .db 0x43 ;	C
-ROM:F7A3 00			     .db    0
-ROM:F7A4 F6			     .db 0xF6 ;	ˆ
-ROM:F7A5 43			     .db 0x43 ;	C
-ROM:F7A6 20			     .db 0x20
-ROM:F7A7 CA			     .db 0xCA ;	 
-ROM:F7A8 C7			     .db 0xC7 ;	«
-ROM:F7A9 DD			     .db 0xDD ;	›
-ROM:F7AA CC			     .db 0xCC ;	Ã
-ROM:F7AB 58			     .db 0x58 ;	X
-ROM:F7AC 49			     .db 0x49 ;	I
-ROM:F7AD DD			     .db 0xDD ;	›
-ROM:F7AE CC			     .db 0xCC ;	Ã
-ROM:F7AF 25			     .db 0x25 ;	%
-ROM:F7B0 05			     .db    5
-ROM:F7B1 D6			     .db 0xD6 ;	÷
-ROM:F7B2 CE			     .db 0xCE ;	Œ
-ROM:F7B3 BD			     .db 0xBD ;	Ω
-ROM:F7B4 E7			     .db 0xE7 ;	Á
-ROM:F7B5 C7			     .db 0xC7 ;	«
-ROM:F7B6 0C			     .db  0xC
-ROM:F7B7 CE			     .db 0xCE ;	Œ
-ROM:F7B8 DC			     .db 0xDC ;	‹
-ROM:F7B9 CC			     .db 0xCC ;	Ã
-ROM:F7BA 26			     .db 0x26 ;	&
-ROM:F7BB EF			     .db 0xEF ;	Ô
-ROM:F7BC DC			     .db 0xDC ;	‹
-ROM:F7BD C8			     .db 0xC8 ;	»
-ROM:F7BE DD			     .db 0xDD ;	›
-ROM:F7BF CA			     .db 0xCA ;	 
-ROM:F7C0 B6			     .db 0xB6 ;	∂
-ROM:F7C1 43			     .db 0x43 ;	C
-ROM:F7C2 00			     .db    0
-ROM:F7C3 84			     .db 0x84 ;	Ñ
-ROM:F7C4 CF			     .db 0xCF ;	œ
-ROM:F7C5 F6			     .db 0xF6 ;	ˆ
-ROM:F7C6 43			     .db 0x43 ;	C
-ROM:F7C7 20			     .db 0x20
-ROM:F7C8 C4			     .db 0xC4 ;	ƒ
-ROM:F7C9 3A			     .db 0x3A ;	:
-ROM:F7CA DD			     .db 0xDD ;	›
-ROM:F7CB C8			     .db 0xC8 ;	»
-ROM:F7CC 98			     .db 0x98 ;	ò
-ROM:F7CD CA			     .db 0xCA ;	 
-ROM:F7CE 94			     .db 0x94 ;	î
-ROM:F7CF CA			     .db 0xCA ;	 
-ROM:F7D0 D8			     .db 0xD8 ;	ÿ
-ROM:F7D1 CB			     .db 0xCB ;	À
-ROM:F7D2 D4			     .db 0xD4 ;	‘
-ROM:F7D3 CB			     .db 0xCB ;	À
-ROM:F7D4 10			     .db 0x10
-ROM:F7D5 83			     .db 0x83 ;	É
-ROM:F7D6 00			     .db    0
-ROM:F7D7 00			     .db    0
-ROM:F7D8 27			     .db 0x27 ;	'
-ROM:F7D9 05			     .db    5
-ROM:F7DA 86			     .db 0x86 ;	Ü
-ROM:F7DB 3B			     .db 0x3B ;	;
-ROM:F7DC B7			     .db 0xB7 ;	∑
-ROM:F7DD 44			     .db 0x44 ;	D
-ROM:F7DE 00			     .db    0
-ROM:F7DF CC			     .db 0xCC ;	Ã
-ROM:F7E0 1E			     .db 0x1E
-ROM:F7E1 A2			     .db 0xA2 ;	¢
-ROM:F7E2 ED			     .db 0xED ;	Ì
-ROM:F7E3 A1			     .db 0xA1 ;	°
-ROM:F7E4 CC			     .db 0xCC ;	Ã
-ROM:F7E5 1F			     .db 0x1F
-ROM:F7E6 74			     .db 0x74 ;	t
-ROM:F7E7 ED			     .db 0xED ;	Ì
-ROM:F7E8 A1			     .db 0xA1 ;	°
-ROM:F7E9 86			     .db 0x86 ;	Ü
-ROM:F7EA 10			     .db 0x10
-ROM:F7EB BD			     .db 0xBD ;	Ω
-ROM:F7EC E7			     .db 0xE7 ;	Á
-ROM:F7ED 90			     .db 0x90 ;	ê
-ROM:F7EE FC			     .db 0xFC ;	¸
-ROM:F7EF 30			     .db 0x30 ;	0
-ROM:F7F0 1E			     .db 0x1E
-ROM:F7F1 ED			     .db 0xED ;	Ì
-ROM:F7F2 A1			     .db 0xA1 ;	°
-ROM:F7F3 FC			     .db 0xFC ;	¸
-ROM:F7F4 30			     .db 0x30 ;	0
-ROM:F7F5 02			     .db    2
-ROM:F7F6 ED			     .db 0xED ;	Ì
-ROM:F7F7 A1			     .db 0xA1 ;	°
-ROM:F7F8 B6			     .db 0xB6 ;	∂
-ROM:F7F9 43			     .db 0x43 ;	C
-ROM:F7FA 40			     .db 0x40 ;	@
-ROM:F7FB BD			     .db 0xBD ;	Ω
-ROM:F7FC F8			     .db 0xF8 ;	¯
-ROM:F7FD 6C			     .db 0x6C ;	l
-ROM:F7FE CC			     .db 0xCC ;	Ã
-ROM:F7FF 1E			     .db 0x1E
-ROM:F800 70			     .db 0x70 ;	p
-ROM:F801 ED			     .db 0xED ;	Ì
-ROM:F802 A1			     .db 0xA1 ;	°
-ROM:F803 CC			     .db 0xCC ;	Ã
-ROM:F804 1F			     .db 0x1F
-ROM:F805 5C			     .db 0x5C ;	\
-ROM:F806 ED			     .db 0xED ;	Ì
-ROM:F807 A1			     .db 0xA1 ;	°
-ROM:F808 86			     .db 0x86 ;	Ü
-ROM:F809 10			     .db 0x10
-ROM:F80A BD			     .db 0xBD ;	Ω
-ROM:F80B E7			     .db 0xE7 ;	Á
-ROM:F80C 90			     .db 0x90 ;	ê
-ROM:F80D FC			     .db 0xFC ;	¸
-ROM:F80E 30			     .db 0x30 ;	0
-ROM:F80F 20			     .db 0x20
-ROM:F810 ED			     .db 0xED ;	Ì
-ROM:F811 A1			     .db 0xA1 ;	°
-ROM:F812 FC			     .db 0xFC ;	¸
-ROM:F813 30			     .db 0x30 ;	0
-ROM:F814 22			     .db 0x22 ;	"
-ROM:F815 ED			     .db 0xED ;	Ì
-ROM:F816 A1			     .db 0xA1 ;	°
-ROM:F817 FC			     .db 0xFC ;	¸
-ROM:F818 30			     .db 0x30 ;	0
-ROM:F819 02			     .db    2
-ROM:F81A ED			     .db 0xED ;	Ì
-ROM:F81B A1			     .db 0xA1 ;	°
-ROM:F81C B6			     .db 0xB6 ;	∂
-ROM:F81D 43			     .db 0x43 ;	C
-ROM:F81E 60			     .db 0x60 ;	`
-ROM:F81F BD			     .db 0xBD ;	Ω
-ROM:F820 F8			     .db 0xF8 ;	¯
-ROM:F821 6C			     .db 0x6C ;	l
-ROM:F822 C6			     .db 0xC6 ;	∆
-ROM:F823 AF			     .db 0xAF ;	Ø
-ROM:F824 BD			     .db 0xBD ;	Ω
-ROM:F825 E7			     .db 0xE7 ;	Á
-ROM:F826 C7			     .db 0xC7 ;	«
-ROM:F827 CC			     .db 0xCC ;	Ã
-ROM:F828 BF			     .db 0xBF ;	ø
-ROM:F829 D5			     .db 0xD5 ;	’
-ROM:F82A ED			     .db 0xED ;	Ì
-ROM:F82B A1			     .db 0xA1 ;	°
-ROM:F82C CC			     .db 0xCC ;	Ã
-ROM:F82D 00			     .db    0
-ROM:F82E 00			     .db    0
-ROM:F82F ED			     .db 0xED ;	Ì
-ROM:F830 A1			     .db 0xA1 ;	°
-ROM:F831 CC			     .db 0xCC ;	Ã
-ROM:F832 01			     .db    1
-ROM:F833 40			     .db 0x40 ;	@
-ROM:F834 ED			     .db 0xED ;	Ì
-ROM:F835 A1			     .db 0xA1 ;	°
-ROM:F836 F6			     .db 0xF6 ;	ˆ
-ROM:F837 43			     .db 0x43 ;	C
-ROM:F838 80			     .db 0x80 ;	Ä
-ROM:F839 C0			     .db 0xC0 ;	¿
-ROM:F83A 80			     .db 0x80 ;	Ä
-ROM:F83B 1D			     .db 0x1D
-ROM:F83C 1F			     .db 0x1F
-ROM:F83D 03			     .db    3
-ROM:F83E 47			     .db 0x47 ;	G
-ROM:F83F 56			     .db 0x56 ;	V
-ROM:F840 33			     .db 0x33 ;	3
-ROM:F841 CB			     .db 0xCB ;	À
-ROM:F842 1F			     .db 0x1F
-ROM:F843 30			     .db 0x30 ;	0
-ROM:F844 84			     .db 0x84 ;	Ñ
-ROM:F845 1F			     .db 0x1F
-ROM:F846 ED			     .db 0xED ;	Ì
-ROM:F847 A1			     .db 0xA1 ;	°
-ROM:F848 B7			     .db 0xB7 ;	∑
-ROM:F849 46			     .db 0x46 ;	F
-ROM:F84A C1			     .db 0xC1 ;	¡
-ROM:F84B B7			     .db 0xB7 ;	∑
-ROM:F84C 46			     .db 0x46 ;	F
-ROM:F84D C1			     .db 0xC1 ;	¡
-ROM:F84E 8E			     .db 0x8E ;	é
-ROM:F84F 00			     .db    0
-ROM:F850 14			     .db 0x14
-ROM:F851 30			     .db 0x30 ;	0
-ROM:F852 1F			     .db 0x1F
-ROM:F853 26			     .db 0x26 ;	&
-ROM:F854 FC			     .db 0xFC ;	¸
-ROM:F855 F6			     .db 0xF6 ;	ˆ
-ROM:F856 43			     .db 0x43 ;	C
-ROM:F857 80			     .db 0x80 ;	Ä
-ROM:F858 C0			     .db 0xC0 ;	¿
-ROM:F859 80			     .db 0x80 ;	Ä
-ROM:F85A 1D			     .db 0x1D
-ROM:F85B 84			     .db 0x84 ;	Ñ
-ROM:F85C 1F			     .db 0x1F
-ROM:F85D 8A			     .db 0x8A ;	ä
-ROM:F85E E0			     .db 0xE0 ;	‡
-ROM:F85F ED			     .db 0xED ;	Ì
-ROM:F860 A1			     .db 0xA1 ;	°
-ROM:F861 CC			     .db 0xCC ;	Ã
-ROM:F862 80			     .db 0x80 ;	Ä
-ROM:F863 40			     .db 0x40 ;	@
-ROM:F864 ED			     .db 0xED ;	Ì
-ROM:F865 A1			     .db 0xA1 ;	°
-ROM:F866 CE			     .db 0xCE ;	Œ
-ROM:F867 F7			     .db 0xF7 ;	˜
-ROM:F868 25			     .db 0x25 ;	%
-ROM:F869 7E			     .db 0x7E ;	~
-ROM:F86A F7			     .db 0xF7 ;	˜
-ROM:F86B 0D			     .db  0xD
-ROM:F86C C6			     .db 0xC6 ;	∆
-ROM:F86D 07			     .db    7
-ROM:F86E 44			     .db 0x44 ;	D
-ROM:F86F 24			     .db 0x24 ;	$
-ROM:F870 05			     .db    5
-ROM:F871 BE			     .db 0xBE ;	æ
-ROM:F872 30			     .db 0x30 ;	0
-ROM:F873 22			     .db 0x22 ;	"
-ROM:F874 20			     .db 0x20
-ROM:F875 03			     .db    3
-ROM:F876 BE			     .db 0xBE ;	æ
-ROM:F877 30			     .db 0x30 ;	0
-ROM:F878 32			     .db 0x32 ;	2
-ROM:F879 AF			     .db 0xAF ;	Ø
-ROM:F87A A1			     .db 0xA1 ;	°
-ROM:F87B 5A			     .db 0x5A ;	Z
-ROM:F87C 2A			     .db 0x2A ;	*
-ROM:F87D F0			     .db 0xF0 ;	
-ROM:F87E CC			     .db 0xCC ;	Ã
-ROM:F87F 80			     .db 0x80 ;	Ä
-ROM:F880 40			     .db 0x40 ;	@
-ROM:F881 ED			     .db 0xED ;	Ì
-ROM:F882 A1			     .db 0xA1 ;	°
-ROM:F883 39			     .db 0x39 ;	9
-ROM:F884 CC			     .db 0xCC ;	Ã
-ROM:F885 BF			     .db 0xBF ;	ø
-ROM:F886 20			     .db 0x20
-ROM:F887 ED			     .db 0xED ;	Ì
-ROM:F888 A1			     .db 0xA1 ;	°
-ROM:F889 7E			     .db 0x7E ;	~
-ROM:F88A F7			     .db 0xF7 ;	˜
-ROM:F88B 0D			     .db  0xD
-ROM:F88C CC			     .db 0xCC ;	Ã
-ROM:F88D BE			     .db 0xBE ;	æ
-ROM:F88E FD			     .db 0xFD ;	˝
-ROM:F88F ED			     .db 0xED ;	Ì
-ROM:F890 A1			     .db 0xA1 ;	°
-ROM:F891 7E			     .db 0x7E ;	~
-ROM:F892 F7			     .db 0xF7 ;	˜
-ROM:F893 0D			     .db  0xD
-ROM:F894 CC			     .db 0xCC ;	Ã
-ROM:F895 BE			     .db 0xBE ;	æ
-ROM:F896 A7			     .db 0xA7 ;	ß
-ROM:F897 ED			     .db 0xED ;	Ì
-ROM:F898 A1			     .db 0xA1 ;	°
-ROM:F899 C6			     .db 0xC6 ;	∆
-ROM:F89A CE			     .db 0xCE ;	Œ
-ROM:F89B D7			     .db 0xD7 ;	◊
-ROM:F89C CE			     .db 0xCE ;	Œ
-ROM:F89D BD			     .db 0xBD ;	Ω
-ROM:F89E E7			     .db 0xE7 ;	Á
-ROM:F89F C7			     .db 0xC7 ;	«
-ROM:F8A0 D6			     .db 0xD6 ;	÷
-ROM:F8A1 CE			     .db 0xCE ;	Œ
-ROM:F8A2 5C			     .db 0x5C ;	\
-ROM:F8A3 C1			     .db 0xC1 ;	¡
-ROM:F8A4 D3			     .db 0xD3 ;	”
-ROM:F8A5 25			     .db 0x25 ;	%
-ROM:F8A6 F4			     .db 0xF4 ;	Ù
-ROM:F8A7 7E			     .db 0x7E ;	~
-ROM:F8A8 F7			     .db 0xF7 ;	˜
-ROM:F8A9 0D			     .db  0xD
-ROM:F8AA CC			     .db 0xCC ;	Ã
-ROM:F8AB BF			     .db 0xBF ;	ø
-ROM:F8AC AE			     .db 0xAE ;	Æ
-ROM:F8AD ED			     .db 0xED ;	Ì
-ROM:F8AE A1			     .db 0xA1 ;	°
-ROM:F8AF CC			     .db 0xCC ;	Ã
-ROM:F8B0 BF			     .db 0xBF ;	ø
-ROM:F8B1 B3			     .db 0xB3 ;	≥
-ROM:F8B2 ED			     .db 0xED ;	Ì
-ROM:F8B3 A1			     .db 0xA1 ;	°
-ROM:F8B4 ED			     .db 0xED ;	Ì
-ROM:F8B5 A1			     .db 0xA1 ;	°
-ROM:F8B6 ED			     .db 0xED ;	Ì
-ROM:F8B7 A1			     .db 0xA1 ;	°
-ROM:F8B8 ED			     .db 0xED ;	Ì
-ROM:F8B9 A1			     .db 0xA1 ;	°
-ROM:F8BA CC			     .db 0xCC ;	Ã
-ROM:F8BB 80			     .db 0x80 ;	Ä
-ROM:F8BC 40			     .db 0x40 ;	@
-ROM:F8BD ED			     .db 0xED ;	Ì
-ROM:F8BE A1			     .db 0xA1 ;	°
-ROM:F8BF C6			     .db 0xC6 ;	∆
-ROM:F8C0 C9			     .db 0xC9 ;	…
-ROM:F8C1 BD			     .db 0xBD ;	Ω
-ROM:F8C2 E7			     .db 0xE7 ;	Á
-ROM:F8C3 C7			     .db 0xC7 ;	«
-ROM:F8C4 C6			     .db 0xC6 ;	∆
-ROM:F8C5 CA			     .db 0xCA ;	 
-ROM:F8C6 BD			     .db 0xBD ;	Ω
-ROM:F8C7 E7			     .db 0xE7 ;	Á
-ROM:F8C8 C7			     .db 0xC7 ;	«
-ROM:F8C9 7E			     .db 0x7E ;	~
-ROM:F8CA F7			     .db 0xF7 ;	˜
-ROM:F8CB 0D			     .db  0xD
-ROM:F8CC 96			     .db 0x96 ;	ñ
-ROM:F8CD C6			     .db 0xC6 ;	∆
-ROM:F8CE 81			     .db 0x81 ;	Å
-ROM:F8CF 01			     .db    1
-ROM:F8D0 22			     .db 0x22 ;	"
-ROM:F8D1 07			     .db    7
-ROM:F8D2 CC			     .db 0xCC ;	Ã
-ROM:F8D3 00			     .db    0
-ROM:F8D4 00			     .db    0
-ROM:F8D5 DD			     .db 0xDD ;	›
-ROM:F8D6 C2			     .db 0xC2 ;	¬
-ROM:F8D7 97			     .db 0x97 ;	ó
-ROM:F8D8 C4			     .db 0xC4 ;	ƒ
-ROM:F8D9 CC			     .db 0xCC ;	Ã
-ROM:F8DA 60			     .db 0x60 ;	`
-ROM:F8DB 00			     .db    0
-ROM:F8DC ED			     .db 0xED ;	Ì
-ROM:F8DD A1			     .db 0xA1 ;	°
-ROM:F8DE CC			     .db 0xCC ;	Ã
-ROM:F8DF BF			     .db 0xBF ;	ø
-ROM:F8E0 AF			     .db 0xAF ;	Ø
-ROM:F8E1 ED			     .db 0xED ;	Ì
-ROM:F8E2 A1			     .db 0xA1 ;	°
-ROM:F8E3 CC			     .db 0xCC ;	Ã
-ROM:F8E4 80			     .db 0x80 ;	Ä
-ROM:F8E5 40			     .db 0x40 ;	@
-ROM:F8E6 ED			     .db 0xED ;	Ì
-ROM:F8E7 A1			     .db 0xA1 ;	°
-ROM:F8E8 DC			     .db 0xDC ;	‹
-ROM:F8E9 C2			     .db 0xC2 ;	¬
-ROM:F8EA C3			     .db 0xC3 ;	√
-ROM:F8EB 00			     .db    0
-ROM:F8EC 01			     .db    1
-ROM:F8ED 0D			     .db  0xD
-ROM:F8EE C4			     .db 0xC4 ;	ƒ
-ROM:F8EF 26			     .db 0x26 ;	&
-ROM:F8F0 0F			     .db  0xF
-ROM:F8F1 C1			     .db 0xC1 ;	¡
-ROM:F8F2 FC			     .db 0xFC ;	¸
-ROM:F8F3 25			     .db 0x25 ;	%
-ROM:F8F4 07			     .db    7
-ROM:F8F5 86			     .db 0x86 ;	Ü
-ROM:F8F6 01			     .db    1
-ROM:F8F7 97			     .db 0x97 ;	ó
-ROM:F8F8 C4			     .db 0xC4 ;	ƒ
-ROM:F8F9 CC			     .db 0xCC ;	Ã
-ROM:F8FA 00			     .db    0
-ROM:F8FB 00			     .db    0
-ROM:F8FC DD			     .db 0xDD ;	›
-ROM:F8FD C2			     .db 0xC2 ;	¬
-ROM:F8FE 20			     .db 0x20
-ROM:F8FF 17			     .db 0x17
-ROM:F900 C1			     .db 0xC1 ;	¡
-ROM:F901 B0			     .db 0xB0 ;	∞
-ROM:F902 25			     .db 0x25 ;	%
-ROM:F903 02			     .db    2
-ROM:F904 5F			     .db 0x5F ;	_
-ROM:F905 4C			     .db 0x4C ;	L
-ROM:F906 81			     .db 0x81 ;	Å
-ROM:F907 08			     .db    8
-ROM:F908 25			     .db 0x25 ;	%
-ROM:F909 05			     .db    5
-ROM:F90A 0F			     .db  0xF
-ROM:F90B C4			     .db 0xC4 ;	ƒ
-ROM:F90C CC			     .db 0xCC ;	Ã
-ROM:F90D 00			     .db    0
-ROM:F90E 00			     .db    0
-ROM:F90F DD			     .db 0xDD ;	›
-ROM:F910 C2			     .db 0xC2 ;	¬
-ROM:F911 C1			     .db 0xC1 ;	¡
-ROM:F912 7F			     .db 0x7F ;	
-ROM:F913 25			     .db 0x25 ;	%
-ROM:F914 02			     .db    2
-ROM:F915 C6			     .db 0xC6 ;	∆
-ROM:F916 7F			     .db 0x7F ;	
-ROM:F917 8A			     .db 0x8A ;	ä
-ROM:F918 70			     .db 0x70 ;	p
-ROM:F919 ED			     .db 0xED ;	Ì
-ROM:F91A A1			     .db 0xA1 ;	°
-ROM:F91B CC			     .db 0xCC ;	Ã
-ROM:F91C 62			     .db 0x62 ;	b
-ROM:F91D 80			     .db 0x80 ;	Ä
-ROM:F91E ED			     .db 0xED ;	Ì
-ROM:F91F A1			     .db 0xA1 ;	°
-ROM:F920 CC			     .db 0xCC ;	Ã
-ROM:F921 BF			     .db 0xBF ;	ø
-ROM:F922 BC			     .db 0xBC ;	º
-ROM:F923 ED			     .db 0xED ;	Ì
-ROM:F924 A1			     .db 0xA1 ;	°
-ROM:F925 CC			     .db 0xCC ;	Ã
-ROM:F926 72			     .db 0x72 ;	r
-ROM:F927 00			     .db    0
-ROM:F928 ED			     .db 0xED ;	Ì
-ROM:F929 A1			     .db 0xA1 ;	°
-ROM:F92A D6			     .db 0xD6 ;	÷
-ROM:F92B C4			     .db 0xC4 ;	ƒ
-ROM:F92C 26			     .db 0x26 ;	&
-ROM:F92D 04			     .db    4
-ROM:F92E C6			     .db 0xC6 ;	∆
-ROM:F92F CC			     .db 0xCC ;	Ã
-ROM:F930 20			     .db 0x20
-ROM:F931 02			     .db    2
-ROM:F932 C6			     .db 0xC6 ;	∆
-ROM:F933 CD			     .db 0xCD ;	Õ
-ROM:F934 BD			     .db 0xBD ;	Ω
-ROM:F935 E7			     .db 0xE7 ;	Á
-ROM:F936 C7			     .db 0xC7 ;	«
-ROM:F937 C6			     .db 0xC6 ;	∆
-ROM:F938 CB			     .db 0xCB ;	À
-ROM:F939 BD			     .db 0xBD ;	Ω
-ROM:F93A E7			     .db 0xE7 ;	Á
-ROM:F93B C7			     .db 0xC7 ;	«
-ROM:F93C 7E			     .db 0x7E ;	~
-ROM:F93D F7			     .db 0xF7 ;	˜
-ROM:F93E 0D			     .db  0xD
-ROM:F93F CC			     .db 0xCC ;	Ã
-ROM:F940 BF			     .db 0xBF ;	ø
-ROM:F941 C8			     .db 0xC8 ;	»
-ROM:F942 ED			     .db 0xED ;	Ì
-ROM:F943 A1			     .db 0xA1 ;	°
-ROM:F944 8E			     .db 0x8E ;	é
-ROM:F945 00			     .db    0
-ROM:F946 38			     .db 0x38 ;	8
-ROM:F947 CC			     .db 0xCC ;	Ã
-ROM:F948 BF			     .db 0xBF ;	ø
-ROM:F949 CC			     .db 0xCC ;	Ã
-ROM:F94A ED			     .db 0xED ;	Ì
-ROM:F94B A1			     .db 0xA1 ;	°
-ROM:F94C 30			     .db 0x30 ;	0
-ROM:F94D 1F			     .db 0x1F
-ROM:F94E 26			     .db 0x26 ;	&
-ROM:F94F FA			     .db 0xFA ;	˙
-ROM:F950 CC			     .db 0xCC ;	Ã
-ROM:F951 80			     .db 0x80 ;	Ä
-ROM:F952 40			     .db 0x40 ;	@
-ROM:F953 ED			     .db 0xED ;	Ì
-ROM:F954 A1			     .db 0xA1 ;	°
-ROM:F955 7E			     .db 0x7E ;	~
-ROM:F956 F7			     .db 0xF7 ;	˜
-ROM:F957 0D			     .db  0xD
-ROM:F958 CC			     .db 0xCC ;	Ã
-ROM:F959 BF			     .db 0xBF ;	ø
-ROM:F95A AE			     .db 0xAE ;	Æ
-ROM:F95B ED			     .db 0xED ;	Ì
-ROM:F95C A1			     .db 0xA1 ;	°
-ROM:F95D CC			     .db 0xCC ;	Ã
-ROM:F95E 80			     .db 0x80 ;	Ä
-ROM:F95F 40			     .db 0x40 ;	@
-ROM:F960 ED			     .db 0xED ;	Ì
-ROM:F961 A1			     .db 0xA1 ;	°
-ROM:F962 CC			     .db 0xCC ;	Ã
-ROM:F963 72			     .db 0x72 ;	r
-ROM:F964 00			     .db    0
-ROM:F965 ED			     .db 0xED ;	Ì
-ROM:F966 A1			     .db 0xA1 ;	°
-ROM:F967 10			     .db 0x10
-ROM:F968 CE			     .db 0xCE ;	Œ
-ROM:F969 4F			     .db 0x4F ;	O
-ROM:F96A FF			     .db 0xFF
-ROM:F96B C6			     .db 0xC6 ;	∆
-ROM:F96C C2			     .db 0xC2 ;	¬
-ROM:F96D BD			     .db 0xBD ;	Ω
-ROM:F96E E7			     .db 0xE7 ;	Á
-ROM:F96F C7			     .db 0xC7 ;	«
-ROM:F970 86			     .db 0x86 ;	Ü
-ROM:F971 5D			     .db 0x5D ;	]
-ROM:F972 B7			     .db 0xB7 ;	∑
-ROM:F973 47			     .db 0x47 ;	G
-ROM:F974 00			     .db    0
-ROM:F975 7D			     .db 0x7D ;	}
-ROM:F976 43			     .db 0x43 ;	C
-ROM:F977 20			     .db 0x20
-ROM:F978 2A			     .db 0x2A ;	*
-ROM:F979 05			     .db    5
-ROM:F97A 7D			     .db 0x7D ;	}
-ROM:F97B 43			     .db 0x43 ;	C
-ROM:F97C 20			     .db 0x20
-ROM:F97D 2A			     .db 0x2A ;	*
-ROM:F97E 0B			     .db  0xB
-ROM:F97F C6			     .db 0xC6 ;	∆
-ROM:F980 C3			     .db 0xC3 ;	√
-ROM:F981 BD			     .db 0xBD ;	Ω
-ROM:F982 E7			     .db 0xE7 ;	Á
-ROM:F983 C7			     .db 0xC7 ;	«
-ROM:F984 CE			     .db 0xCE ;	Œ
-ROM:F985 F7			     .db 0xF7 ;	˜
-ROM:F986 27			     .db 0x27 ;	'
-ROM:F987 7E			     .db 0x7E ;	~
-ROM:F988 F7			     .db 0xF7 ;	˜
-ROM:F989 0D			     .db  0xD
-ROM:F98A CC			     .db 0xCC ;	Ã
-ROM:F98B 62			     .db 0x62 ;	b
-ROM:F98C 80			     .db 0x80 ;	Ä
-ROM:F98D ED			     .db 0xED ;	Ì
-ROM:F98E A1			     .db 0xA1 ;	°
-ROM:F98F 0F			     .db  0xF
-ROM:F990 CC			     .db 0xCC ;	Ã
-ROM:F991 8E			     .db 0x8E ;	é
-ROM:F992 FB			     .db 0xFB ;	˚
-ROM:F993 4B			     .db 0x4B ;	K
-ROM:F994 10			     .db 0x10
-ROM:F995 CE			     .db 0xCE ;	Œ
-ROM:F996 F9			     .db 0xF9 ;	˘
-ROM:F997 9B			     .db 0x9B ;	õ
-ROM:F998 7E			     .db 0x7E ;	~
-ROM:F999 FB			     .db 0xFB ;	˚
-ROM:F99A 38			     .db 0x38 ;	8
+ROM:F77F	     ; ---------------------------------------------------------------------------
+ROM:F77F
+ROM:F77F	     switch_test:						     ; DATA XREF: ROM:test_jmp_tblo
+ROM:F77F B7 46 C0		     sta     adc_sel_pitch
+ROM:F782 B7 46 C0		     sta     adc_sel_pitch
+ROM:F785 CC BF AE		     ldd     #0xBFAE
+ROM:F788 ED A1			     std     ,y++
+ROM:F78A CC 80 40		     ldd     #0x8040
+ROM:F78D ED A1			     std     ,y++
+ROM:F78F 10 CE 4F FF		     lds     #0x4FFF
+ROM:F793 C6 9E			     ldb     #158				     ; "SWITCH TEST"
+ROM:F795 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F798 C6 D3			     ldb     #211				     ; "PRESS AUX COIN TO CONTINUE"
+ROM:F79A BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F79D C6 9F			     ldb     #159				     ; "LEFT FIRE"
+ROM:F79F D7 CE			     stb     byte_CE
+ROM:F7A1 B6 43 00		     lda     IN0
+ROM:F7A4 F6 43 20		     ldb     IN1
+ROM:F7A7 CA C7			     orab    #0xC7 ; '«'                             ; mask out non-switches
+ROM:F7A9 DD CC			     std     byte_CC
+ROM:F7AB
+ROM:F7AB	     loc_F7AB:							     ; CODE XREF: ROM:F7BAj
+ROM:F7AB 58			     aslb
+ROM:F7AC 49			     rola
+ROM:F7AD DD CC			     std     byte_CC
+ROM:F7AF 25 05			     bcs     loc_F7B6
+ROM:F7B1 D6 CE			     ldb     byte_CE
+ROM:F7B3 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F7B6
+ROM:F7B6	     loc_F7B6:							     ; CODE XREF: ROM:F7AFj
+ROM:F7B6 0C CE			     inc     byte_CE				     ; next message
+ROM:F7B8 DC CC			     ldd     byte_CC
+ROM:F7BA 26 EF			     bne     loc_F7AB
+ROM:F7BC DC C8			     ldd     byte_C8
+ROM:F7BE DD CA			     std     byte_CA
+ROM:F7C0 B6 43 00		     lda     IN0
+ROM:F7C3 84 CF			     anda    #0xCF ; 'œ'                             ; mask out unused, service
+ROM:F7C5 F6 43 20		     ldb     IN1
+ROM:F7C8 C4 3A			     andb    #0x3A ; ':'                             ; mask out math box, avg, diag
+ROM:F7CA DD C8			     std     byte_C8
+ROM:F7CC 98 CA			     eora    byte_CA
+ROM:F7CE 94 CA			     anda    byte_CA
+ROM:F7D0 D8 CB			     eorb    byte_CB
+ROM:F7D2 D4 CB			     andb    byte_CB
+ROM:F7D4 10 83 00 00		     cmpd    #0
+ROM:F7D8 27 05			     beq     loc_F7DF
+ROM:F7DA 86 3B			     lda     #0x3B ; ';'
+ROM:F7DC B7 44 00		     sta     main_rw
+ROM:F7DF
+ROM:F7DF	     loc_F7DF:							     ; CODE XREF: ROM:F7D8j
+ROM:F7DF CC 1E A2		     ldd     #0x1EA2
+ROM:F7E2 ED A1			     std     ,y++
+ROM:F7E4 CC 1F 74		     ldd     #0x1F74
+ROM:F7E7 ED A1			     std     ,y++
+ROM:F7E9 86 10			     lda     #0x10
+ROM:F7EB BD E7 90		     jsr     sub_E790
+ROM:F7EE FC 30 1E		     ldd     0x301E
+ROM:F7F1 ED A1			     std     ,y++
+ROM:F7F3 FC 30 02		     ldd     0x3002
+ROM:F7F6 ED A1			     std     ,y++
+ROM:F7F8 B6 43 40		     lda     DSW0
+ROM:F7FB BD F8 6C		     jsr     sub_F86C
+ROM:F7FE CC 1E 70		     ldd     #0x1E70
+ROM:F801 ED A1			     std     ,y++
+ROM:F803 CC 1F 5C		     ldd     #0x1F5C
+ROM:F806 ED A1			     std     ,y++
+ROM:F808 86 10			     lda     #0x10
+ROM:F80A BD E7 90		     jsr     sub_E790
+ROM:F80D FC 30 20		     ldd     0x3020
+ROM:F810 ED A1			     std     ,y++
+ROM:F812 FC 30 22		     ldd     0x3022
+ROM:F815 ED A1			     std     ,y++
+ROM:F817 FC 30 02		     ldd     0x3002
+ROM:F81A ED A1			     std     ,y++
+ROM:F81C B6 43 60		     lda     DSW1
+ROM:F81F BD F8 6C		     jsr     sub_F86C
+ROM:F822 C6 AF			     ldb     #175				     ; "POT TEST"
+ROM:F824 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F827 CC BF D5		     ldd     #0xBFD5
+ROM:F82A ED A1			     std     ,y++
+ROM:F82C CC 00 00		     ldd     #0
+ROM:F82F ED A1			     std     ,y++
+ROM:F831 CC 01 40		     ldd     #0x140
+ROM:F834 ED A1			     std     ,y++
+ROM:F836 F6 43 80		     ldb     adc_result
+ROM:F839 C0 80			     subb    #0x80 ; 'Ä'
+ROM:F83B 1D			     sex
+ROM:F83C 1F 03			     tfr     d,	u
+ROM:F83E 47			     asra
+ROM:F83F 56			     rorb
+ROM:F840 33 CB			     leau    d,u
+ROM:F842 1F 30			     tfr     u,	d
+ROM:F844 84 1F			     anda    #0x1F
+ROM:F846 ED A1			     std     ,y++
+ROM:F848 B7 46 C1		     sta     adc_sel_yaw
+ROM:F84B B7 46 C1		     sta     adc_sel_yaw
+ROM:F84E 8E 00 14		     ldx     #0x14
+ROM:F851
+ROM:F851	     loc_F851:							     ; CODE XREF: ROM:F853j
+ROM:F851 30 1F			     leax    -1,x
+ROM:F853 26 FC			     bne     loc_F851
+ROM:F855 F6 43 80		     ldb     adc_result
+ROM:F858 C0 80			     subb    #0x80 ; 'Ä'
+ROM:F85A 1D			     sex
+ROM:F85B 84 1F			     anda    #0x1F
+ROM:F85D 8A E0			     oraa    #0xE0 ; '‡'                             ; JMPL (AVG)
+ROM:F85F ED A1			     std     ,y++
+ROM:F861 CC 80 40		     ldd     #0x8040				     ; CNTR
+ROM:F864 ED A1			     std     ,y++
+ROM:F866 CE F7 25		     ldu     #test_jmp_tbl			     ; jump table
+ROM:F869 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F86C
+ROM:F86C	     ; =============== S U B R O U T I N E =======================================
+ROM:F86C
+ROM:F86C
+ROM:F86C	     sub_F86C:							     ; CODE XREF: ROM:F7FBP
+ROM:F86C									     ; ROM:F81FP
+ROM:F86C C6 07			     ldb     #7
+ROM:F86E
+ROM:F86E	     loc_F86E:							     ; CODE XREF: sub_F86C+10j
+ROM:F86E 44			     lsra
+ROM:F86F 24 05			     bcc     loc_F876
+ROM:F871 BE 30 22		     ldx     0x3022
+ROM:F874 20 03			     bra     loc_F879
+ROM:F876	     ; ---------------------------------------------------------------------------
+ROM:F876
+ROM:F876	     loc_F876:							     ; CODE XREF: sub_F86C+3j
+ROM:F876 BE 30 32		     ldx     0x3032
+ROM:F879
+ROM:F879	     loc_F879:							     ; CODE XREF: sub_F86C+8j
+ROM:F879 AF A1			     stx     ,y++
+ROM:F87B 5A			     decb
+ROM:F87C 2A F0			     bpl     loc_F86E
+ROM:F87E CC 80 40		     ldd     #0x8040
+ROM:F881 ED A1			     std     ,y++
+ROM:F883 39			     rts
+ROM:F883	     ; End of function sub_F86C
+ROM:F883
+ROM:F884	     ; ---------------------------------------------------------------------------
+ROM:F884
+ROM:F884	     loc_F884:							     ; DATA XREF: ROM:F72Bo
+ROM:F884 CC BF 20		     ldd     #0xBF20
+ROM:F887 ED A1			     std     ,y++
+ROM:F889 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F88C	     ; ---------------------------------------------------------------------------
+ROM:F88C
+ROM:F88C	     loc_F88C:							     ; DATA XREF: ROM:F729o
+ROM:F88C CC BE FD		     ldd     #0xBEFD
+ROM:F88F ED A1			     std     ,y++
+ROM:F891 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F894	     ; ---------------------------------------------------------------------------
+ROM:F894
+ROM:F894	     loc_F894:							     ; DATA XREF: ROM:F72Do
+ROM:F894 CC BE A7		     ldd     #0xBEA7
+ROM:F897 ED A1			     std     ,y++
+ROM:F899 C6 CE			     ldb     #206				     ; "0. OFF"
+ROM:F89B
+ROM:F89B	     loc_F89B:							     ; CODE XREF: ROM:F8A5j
+ROM:F89B D7 CE			     stb     byte_CE
+ROM:F89D BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F8A0 D6 CE			     ldb     byte_CE
+ROM:F8A2 5C			     incb					     ; next msg
+ROM:F8A3 C1 D3			     cmpb    #211				     ; done all	messages?
+ROM:F8A5 25 F4			     bcs     loc_F89B				     ; no, loop
+ROM:F8A7 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F8AA	     ; ---------------------------------------------------------------------------
+ROM:F8AA
+ROM:F8AA	     bip_test:							     ; DATA XREF: ROM:F72Fo
+ROM:F8AA CC BF AE		     ldd     #0xBFAE
+ROM:F8AD ED A1			     std     ,y++
+ROM:F8AF CC BF B3		     ldd     #0xBFB3
+ROM:F8B2 ED A1			     std     ,y++
+ROM:F8B4 ED A1			     std     ,y++
+ROM:F8B6 ED A1			     std     ,y++
+ROM:F8B8 ED A1			     std     ,y++
+ROM:F8BA CC 80 40		     ldd     #0x8040				     ; CNTR
+ROM:F8BD ED A1			     std     ,y++
+ROM:F8BF C6 C9			     ldb     #201				     ; "BIP TEST"
+ROM:F8C1 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F8C4 C6 CA			     ldb     #202				     ; "ALIGN THE BOXES"
+ROM:F8C6 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F8C9 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F8CC	     ; ---------------------------------------------------------------------------
+ROM:F8CC
+ROM:F8CC	     loc_F8CC:							     ; DATA XREF: ROM:F731o
+ROM:F8CC 96 C6			     lda     byte_C6
+ROM:F8CE 81 01			     cmpa    #1
+ROM:F8D0 22 07			     bhi     loc_F8D9
+ROM:F8D2 CC 00 00		     ldd     #0
+ROM:F8D5 DD C2			     std     byte_C2
+ROM:F8D7 97 C4			     sta     byte_C4
+ROM:F8D9
+ROM:F8D9	     loc_F8D9:							     ; CODE XREF: ROM:F8D0j
+ROM:F8D9 CC 60 00		     ldd     #0x6000				     ; COLR 0,0
+ROM:F8DC ED A1			     std     ,y++
+ROM:F8DE CC BF AF		     ldd     #0xBFAF
+ROM:F8E1 ED A1			     std     ,y++
+ROM:F8E3 CC 80 40		     ldd     #0x8040				     ; CNTR
+ROM:F8E6 ED A1			     std     ,y++
+ROM:F8E8 DC C2			     ldd     byte_C2
+ROM:F8EA C3 00 01		     addd    #1
+ROM:F8ED 0D C4			     tst     byte_C4
+ROM:F8EF 26 0F			     bne     loc_F900
+ROM:F8F1 C1 FC			     cmpb    #0xFC ; '¸'
+ROM:F8F3 25 07			     bcs     loc_F8FC
+ROM:F8F5 86 01			     lda     #1
+ROM:F8F7 97 C4			     sta     byte_C4
+ROM:F8F9 CC 00 00		     ldd     #0
+ROM:F8FC
+ROM:F8FC	     loc_F8FC:							     ; CODE XREF: ROM:F8F3j
+ROM:F8FC DD C2			     std     byte_C2
+ROM:F8FE 20 17			     bra     loc_F917
+ROM:F900	     ; ---------------------------------------------------------------------------
+ROM:F900
+ROM:F900	     loc_F900:							     ; CODE XREF: ROM:F8EFj
+ROM:F900 C1 B0			     cmpb    #0xB0 ; '∞'
+ROM:F902 25 02			     bcs     loc_F906
+ROM:F904 5F			     clrb
+ROM:F905 4C			     inca
+ROM:F906
+ROM:F906	     loc_F906:							     ; CODE XREF: ROM:F902j
+ROM:F906 81 08			     cmpa    #8
+ROM:F908 25 05			     bcs     loc_F90F
+ROM:F90A 0F C4			     clr     byte_C4
+ROM:F90C CC 00 00		     ldd     #0
+ROM:F90F
+ROM:F90F	     loc_F90F:							     ; CODE XREF: ROM:F908j
+ROM:F90F DD C2			     std     byte_C2
+ROM:F911 C1 7F			     cmpb    #0x7F ; ''
+ROM:F913 25 02			     bcs     loc_F917
+ROM:F915 C6 7F			     ldb     #0x7F ; ''
+ROM:F917
+ROM:F917	     loc_F917:							     ; CODE XREF: ROM:F8FEj
+ROM:F917									     ; ROM:F913j
+ROM:F917 8A 70			     oraa    #0x70 ; 'p'
+ROM:F919 ED A1			     std     ,y++
+ROM:F91B CC 62 80		     ldd     #0x6280				     ; COLR 2,128 (GREEN)
+ROM:F91E ED A1			     std     ,y++
+ROM:F920 CC BF BC		     ldd     #0xBFBC
+ROM:F923 ED A1			     std     ,y++
+ROM:F925 CC 72 00		     ldd     #0x7200				     ; SCAL 2,0
+ROM:F928 ED A1			     std     ,y++
+ROM:F92A D6 C4			     ldb     byte_C4
+ROM:F92C 26 04			     bne     loc_F932
+ROM:F92E C6 CC			     ldb     #0xCC ; 'Ã'
+ROM:F930 20 02			     bra     loc_F934
+ROM:F932	     ; ---------------------------------------------------------------------------
+ROM:F932
+ROM:F932	     loc_F932:							     ; CODE XREF: ROM:F92Cj
+ROM:F932 C6 CD			     ldb     #205				     ; "LINEAR AND BINARY"
+ROM:F934
+ROM:F934	     loc_F934:							     ; CODE XREF: ROM:F930j
+ROM:F934 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F937 C6 CB			     ldb     #203				     ; "SCALE TEST"
+ROM:F939 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F93C 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F93F	     ; ---------------------------------------------------------------------------
+ROM:F93F
+ROM:F93F	     loc_F93F:							     ; DATA XREF: ROM:F733o
+ROM:F93F CC BF C8		     ldd     #0xBFC8
+ROM:F942 ED A1			     std     ,y++
+ROM:F944 8E 00 38		     ldx     #0x38 ; '8'
+ROM:F947 CC BF CC		     ldd     #0xBFCC
+ROM:F94A
+ROM:F94A	     loc_F94A:							     ; CODE XREF: ROM:F94Ej
+ROM:F94A ED A1			     std     ,y++
+ROM:F94C 30 1F			     leax    -1,x
+ROM:F94E 26 FA			     bne     loc_F94A
+ROM:F950 CC 80 40		     ldd     #0x8040				     ; CNTR
+ROM:F953 ED A1			     std     ,y++
+ROM:F955 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F958	     ; ---------------------------------------------------------------------------
+ROM:F958
+ROM:F958	     math_box_test:						     ; DATA XREF: ROM:off_F727o
+ROM:F958 CC BF AE		     ldd     #0xBFAE
+ROM:F95B ED A1			     std     ,y++
+ROM:F95D CC 80 40		     ldd     #0x8040				     ; CNTR (AVG)
+ROM:F960 ED A1			     std     ,y++
+ROM:F962 CC 72 00		     ldd     #0x7200				     ; SCAL 2,0	(AVG)
+ROM:F965 ED A1			     std     ,y++
+ROM:F967 10 CE 4F FF		     lds     #0x4FFF
+ROM:F96B C6 C2			     ldb     #194				     ; "MATH BOX TEST"
+ROM:F96D BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F970 86 5D			     lda     #93
+ROM:F972 B7 47 00		     sta     MW0_DIV_REH
+ROM:F975 7D 43 20		     tst     IN1				     ; math run?
+ROM:F978 2A 05			     bpl     loc_F97F				     ; no, skip
+ROM:F97A 7D 43 20		     tst     IN1				     ; math run?
+ROM:F97D 2A 0B			     bpl     loc_F98A				     ; no, skip
+ROM:F97F
+ROM:F97F	     loc_F97F:							     ; CODE XREF: ROM:F978j
+ROM:F97F C6 C3			     ldb     #195				     ; "BAD MATHBOX READY_LINE"
+ROM:F981 BD E7 C7		     jsr     print_colour_msg_B_at
+ROM:F984 CE F7 27		     ldu     #off_F727
+ROM:F987 7E F7 0D		     jmp     avg_go_wait_service_switch
+ROM:F98A	     ; ---------------------------------------------------------------------------
+ROM:F98A
+ROM:F98A	     loc_F98A:							     ; CODE XREF: ROM:F97Dj
+ROM:F98A CC 62 80		     ldd     #0x6280				     ; COLR 2,128 (GREEN)
+ROM:F98D ED A1			     std     ,y++
+ROM:F98F 0F CC			     clr     byte_CC
+ROM:F991 8E FB 4B		     ldx     #0xFB4B
+ROM:F994 10 CE F9 9B		     lds     #0xF99B
+ROM:F998 7E FB 38		     jmp     loc_FB38
+ROM:F998	     ; ---------------------------------------------------------------------------
 ROM:F99B 27			     .db 0x27 ;	'
 ROM:F99C 7C			     .db 0x7C ;	|
 ROM:F99D DD			     .db 0xDD ;	›
@@ -47115,7 +46900,8 @@ ROM:FB36 FA			     .db 0xFA ;	˙
 ROM:FB37 4E			     .db 0x4E ;	N
 ROM:FB38	     ; ---------------------------------------------------------------------------
 ROM:FB38
-ROM:FB38	     loc_FB38:							     ; CODE XREF: ROM:loc_FEA4J
+ROM:FB38	     loc_FB38:							     ; CODE XREF: ROM:F998J
+ROM:FB38									     ; ROM:loc_FEA4J
 ROM:FB38 EC 84			     ldd     ,x
 ROM:FB3A FD 47 06		     std     DVDDH
 ROM:FB3D EC 02			     ldd     2,x
@@ -47125,12 +46911,7 @@ ROM:FB43 FC 47 00		     ldd     MW0_DIV_REH
 ROM:FB46 10 A3 04		     cmpd    4,x
 ROM:FB49 6E E4			     jmp     ,s
 ROM:FB49	     ; ---------------------------------------------------------------------------
-ROM:FB4B 40			     .db 0x40 ;	@
-ROM:FB4C 00			     .db    0
-ROM:FB4D 40			     .db 0x40 ;	@
-ROM:FB4E 00			     .db    0
-ROM:FB4F 40			     .db 0x40 ;	@
-ROM:FB50 00			     .db    0
+ROM:FB4B 40 00 40 00+		     .dw 0x4000, 0x4000, 0x4000			     ; DVDDH, DVSRH, DIV_REH
 ROM:FB51 00			     .db    0
 ROM:FB52 C8			     .db 0xC8 ;	»
 ROM:FB53 55			     .db 0x55 ;	U
@@ -47579,7 +47360,7 @@ ROM:FD0C F6 43 20		     ldb     IN1
 ROM:FD0F C4 04			     andb    #4
 ROM:FD11 10 83 00 00		     cmpd    #0
 ROM:FD15 27 03			     beq     loc_FD1A
-ROM:FD17 7E F7 20		     jmp     loc_F720
+ROM:FD17 7E F7 20		     jmp     spin
 ROM:FD1A	     ; ---------------------------------------------------------------------------
 ROM:FD1A
 ROM:FD1A	     loc_FD1A:							     ; CODE XREF: ROM:FD15j
