@@ -23,7 +23,7 @@ ROM:6000
 ROM:6000 ; Segment type: Pure code
 ROM:6000		 .area ROM
 ROM:6000		 .org 0x6000
-ROM:6000 ; assume dp = 0
+ROM:6000 ; assume dp = 0x48
 ROM:6000		 .db 0x7E ; ~
 ROM:6001		 .db 0xF2 ; ò
 ROM:6002		 .db 0x61 ; a
@@ -4174,16 +4174,16 @@ ROM:7DFA		 ldd	 0x5074
 ROM:7DFD		 subd	 0x5070
 ROM:7E00		 lbcc	 loc_7E5D
 ROM:7E04		 ldd	 0x4700
-ROM:7E07		 std	 0x5000
+ROM:7E07		 std	 0x5000		 ; C
 ROM:7E0A		 lda	 #0x86 ; '†'
 ROM:7E0C		 jsr	 0xCDBA		 ; go_math_and_wait
 ROM:7E0F		 clrb
-ROM:7E10		 lda	 0x5004
+ROM:7E10		 lda	 0x5004		 ; R2
 ROM:7E13		 lsra
 ROM:7E14		 rolb
 ROM:7E15		 lsra
 ROM:7E16		 rolb
-ROM:7E17		 lda	 0x5002
+ROM:7E17		 lda	 0x5002		 ; R1
 ROM:7E1A		 lsra
 ROM:7E1B		 rolb
 ROM:7E1C		 lsra
