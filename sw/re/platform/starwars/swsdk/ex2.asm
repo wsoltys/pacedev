@@ -103,6 +103,7 @@ wait_AVG:
 1$:			cmpa		#2
 				bne			2$				
 				SWSDK_JSRL SWSDK_CrossHatchAndFont
+				;SWSDK_JSRL 0x333C
 				bra			3$
 2$:			clr			*cnt
 				SWSDK_COLOR SWSDK_RED,128
