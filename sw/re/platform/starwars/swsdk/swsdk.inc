@@ -126,6 +126,7 @@ SWSDK_DeathStarPanels           = 0x3C0C
 SWSDK_IntensityTestPattern      = 0x3D4E
 SWSDK_CrossHatchAndFont         = 0x3DFA
 SWSDK_SquareHatch               = 0x3E40
+SWSDK_ScreenBorder              = 0x3F5C
 
 ; Hardware I/O
 
