@@ -12438,7 +12438,7 @@ X2212:4538 ??			       .ds 1
 X2212:4539 ??			       .ds 1
 X2212:453A ??			       .ds 1
 X2212:453B ??			       .ds 1
-X2212:453C ??			       .ds 1
+X2212:453C ??	       unk_453C:       .ds 1					       ; DATA XREF: fmt_accounting_info+14o
 X2212:453D ??			       .ds 1
 X2212:453E ??			       .ds 1
 X2212:453F ??			       .ds 1
@@ -12514,8 +12514,8 @@ X2212:4584 ??			       .ds 1
 X2212:4585 ??			       .ds 1
 X2212:4586 ??			       .ds 1
 X2212:4587 ??			       .ds 1
-X2212:4588 ?? ??       word_4588:      .ds 2					       ; DATA XREF: sub_BE20+4Fr
-X2212:4588									       ; sub_BE20+55r
+X2212:4588 ?? ??       word_4588:      .ds 2					       ; DATA XREF: fmt_accounting_info+4Fr
+X2212:4588									       ; fmt_accounting_info+55r
 X2212:458A ??			       .ds 1
 X2212:458B ??			       .ds 1
 X2212:458C ??			       .ds 1
@@ -12532,7 +12532,7 @@ X2212:4595 ??			       .ds 1
 X2212:4596 ?? ??       word_4596:      .ds 2					       ; DATA XREF: test_nvram+7Dr
 X2212:4596									       ; test_nvram+8Fr
 X2212:4598 ?? ??       word_4598:      .ds 2					       ; DATA XREF: BANK0:651Dw
-X2212:4598									       ; sub_C450+27r ...
+X2212:4598									       ; fmt_game_options+27r ...
 X2212:459A ??			       .ds 1
 X2212:459B ??			       .ds 1
 X2212:459C ??			       .ds 1
@@ -12904,7 +12904,7 @@ RAM:485E ??	     byte_485E:	     .ds 1					     ; DATA XREF: BANK0:62C1w
 RAM:485E									     ; sub_67AA+1Dw ...
 RAM:485F ??	     byte_485F:	     .ds 1					     ; DATA XREF: BANK0:62C3w
 RAM:485F									     ; sub_67AA+1Fw ...
-RAM:4860 ??	     byte_4860:	     .ds 1					     ; DATA XREF: sub_67AA+2w
+RAM:4860 ??	     shields:	     .ds 1					     ; DATA XREF: sub_67AA+2w
 RAM:4860									     ; BANK0:685Cr ...
 RAM:4861 ??	     byte_4861:	     .ds 1					     ; DATA XREF: sub_953B+1Aw
 RAM:4861									     ; sub_9558:loc_95A0r ...
@@ -12992,7 +12992,9 @@ RAM:489D									     ; sub_B3E4+1Cr ...
 RAM:489E ??	     byte_489E:	     .ds 1					     ; DATA XREF: sub_B43F:loc_B483w
 RAM:489E									     ; sub_B43F+E0r ...
 RAM:489F ??	     byte_489F:	     .ds 1					     ; DATA XREF: sub_BB7B+7w
-RAM:48A0 ??			     .ds 1
+RAM:489F									     ; ROM:BB9Er ...
+RAM:48A0 ??	     byte_48A0:	     .ds 1					     ; DATA XREF: ROM:BBD5r
+RAM:48A0									     ; ROM:BC38r
 RAM:48A1 ?? ??	     word_48A1:	     .ds 2					     ; DATA XREF: BANK0:6D89r
 RAM:48A1									     ; BANK0:6D9Br ...
 RAM:48A3 ??	     byte_48A3:	     .ds 1					     ; DATA XREF: sub_6E22+34r
@@ -13012,7 +13014,7 @@ RAM:48AB ??	     byte_48AB:	     .ds 1					     ; DATA XREF: sub_60BE+39r
 RAM:48AB									     ; sub_60BE+4Bw
 RAM:48AC ??	     byte_48AC:	     .ds 1					     ; DATA XREF: sub_60BE+51w
 RAM:48AC									     ; sub_622D+2Fr ...
-RAM:48AD ??	     byte_48AD:	     .ds 1					     ; DATA XREF: print_insert_coins_or_start+6Fw
+RAM:48AD ??	     pad_digits_maybe:.ds 1					     ; DATA XREF: print_insert_coins_or_start+6Fw
 RAM:48AD									     ; sub_7519+74w ...
 RAM:48AE ?? ??	     msg_no:	     .ds 2					     ; DATA XREF: print_colour_msgs_at_4A52+Fw
 RAM:48AE									     ; print_msgs_at_4A52+Fw ...
@@ -13634,13 +13636,13 @@ RAM:4AF8 ?? ??	     word_4AF8:	     .ds 2					     ; DATA XREF: sub_C5F2+6Dw
 RAM:4AF8									     ; sub_C690+17r
 RAM:4AFA ??	     unk_4AFA:	     .ds 1					     ; DATA XREF: BANK0:loc_6626w
 RAM:4AFA									     ; BANK0:6640r ...
-RAM:4AFB ?? ??	     word_4AFB:	     .ds 2					     ; DATA XREF: sub_BE20+79r
-RAM:4AFB									     ; sub_BE20+80w ...
-RAM:4AFD ?? ??	     word_4AFD:	     .ds 2					     ; DATA XREF: sub_BE20+DBr
-RAM:4AFD									     ; sub_BE20+10Fr ...
-RAM:4AFF ?? ??	     word_4AFF:	     .ds 2					     ; DATA XREF: sub_BE20+7Cr
+RAM:4AFB ?? ??	     word_4AFB:	     .ds 2					     ; DATA XREF: fmt_accounting_info+79r
+RAM:4AFB									     ; fmt_accounting_info+80w	...
+RAM:4AFD ?? ??	     word_4AFD:	     .ds 2					     ; DATA XREF: fmt_accounting_info+DBr
+RAM:4AFD									     ; fmt_accounting_info+10Fr ...
+RAM:4AFF ?? ??	     word_4AFF:	     .ds 2					     ; DATA XREF: fmt_accounting_info+7Cr
 RAM:4AFF									     ; sub_C02F+3Er ...
-RAM:4B01 ?? ??	     word_4B01:	     .ds 2					     ; DATA XREF: sub_BE20+18Ew
+RAM:4B01 ?? ??	     word_4B01:	     .ds 2					     ; DATA XREF: fmt_accounting_info+18Ew
 RAM:4B01									     ; sub_C02F+2Ar ...
 RAM:4B03 ??			     .ds 1
 RAM:4B04 ?? ??	     word_4B04:	     .ds 2					     ; DATA XREF: sub_C20C+Br
@@ -19082,18 +19084,19 @@ BANK0:6042	       ; End of	function MAIN
 BANK0:6042
 BANK0:6042	       ; ---------------------------------------------------------------------------
 BANK0:6044 62 75       main_jmp_tbl:   .dw loc_6275				       ; DATA XREF: MAIN+38o
-BANK0:6046 64 E2		       .dw loc_64E2
-BANK0:6048 64 F1		       .dw loc_64F1
-BANK0:604A 65 13		       .dw loc_6513
-BANK0:604C 65 32		       .dw loc_6532
-BANK0:604E 67 08		       .dw loc_6708
-BANK0:6050 67 6B		       .dw star_wars_intro
-BANK0:6052 62 E4		       .dw loc_62E4
-BANK0:6054 63 06		       .dw loc_6306
+BANK0:6044									       ; 0 -> 11
+BANK0:6046 64 E2		       .dw clr_curr_msg_lists			       ; 1++
+BANK0:6048 64 F1		       .dw accounting_screen			       ; 2 -> 5
+BANK0:604A 65 13		       .dw loc_6513				       ; 3++
+BANK0:604C 65 32		       .dw game_options_screen			       ; 4++
+BANK0:604E 67 08		       .dw copy_avg_routines_to_vecram		       ; 5++
+BANK0:6050 67 6B		       .dw star_wars_intro			       ; 6
+BANK0:6052 62 E4		       .dw loc_62E4				       ; 7++
+BANK0:6054 63 06		       .dw score_wave_insert_coins		       ; 8++
 BANK0:6056 63 26		       .dw loc_6326
 BANK0:6058 63 48		       .dw loc_6348
-BANK0:605A 64 59		       .dw loc_6459
-BANK0:605C 64 83		       .dw high_score_table
+BANK0:605A 64 59		       .dw loc_6459				       ; 11++
+BANK0:605C 64 83		       .dw high_score_table			       ; 12 -> 5
 BANK0:605E 65 6C		       .dw loc_656C
 BANK0:6060 65 9F		       .dw loc_659F
 BANK0:6062 66 70		       .dw loc_6670
@@ -19104,7 +19107,7 @@ BANK0:606A 6D 80		       .dw loc_6D80
 BANK0:606C 6D 86		       .dw loc_6D86
 BANK0:606E 6D 95		       .dw loc_6D95
 BANK0:6070 6D 98		       .dw loc_6D98
-BANK0:6072 67 08		       .dw loc_6708
+BANK0:6072 67 08		       .dw copy_avg_routines_to_vecram
 BANK0:6074 67 6B		       .dw star_wars_intro
 BANK0:6076 67 87		       .dw loc_6787
 BANK0:6078 67 9A		       .dw loc_679A
@@ -19202,7 +19205,7 @@ BANK0:6112
 BANK0:6112	       ; =============== S U B R O U T I N E =======================================
 BANK0:6112
 BANK0:6112
-BANK0:6112	       init_display_list_ptr:					       ; CODE XREF: BANK0:loc_6306P
+BANK0:6112	       init_display_list_ptr:					       ; CODE XREF: BANK0:score_wave_insert_coinsP
 BANK0:6112									       ; BANK0:loc_6348P ...
 BANK0:6112 96 3F		       lda     display_list_msb
 BANK0:6114 C6 70		       ldb     #0x70 ; 'p'
@@ -19216,18 +19219,18 @@ BANK0:611E
 BANK0:611E	       ; =============== S U B R O U T I N E =======================================
 BANK0:611E
 BANK0:611E
-BANK0:611E	       sub_611E:						       ; CODE XREF: sub_612F+14P
+BANK0:611E	       copy_3d_logo_etc_to_vecram:				       ; CODE XREF: sub_612F+14P
 BANK0:611E									       ; BANK0:62B2P ...
-BANK0:611E 8E CE DE		       ldx     #0xCEDE				       ; "STAR WARS"???
-BANK0:6121 CE 28 00		       ldu     #0x2800
+BANK0:611E 8E CE DE		       ldx     #STAR_WARS_3D_LOGO		       ; "STAR WARS"???
+BANK0:6121 CE 28 00		       ldu     #0x2800				       ; vector	ram buffer
 BANK0:6124
-BANK0:6124	       loc_6124:						       ; CODE XREF: sub_611E+Ej
+BANK0:6124	       loc_6124:						       ; CODE XREF: copy_3d_logo_etc_to_vecram+Ej
 BANK0:6124 EC 81		       ldd     ,x++
 BANK0:6126 ED C1		       std     ,u++
-BANK0:6128 11 83 30 00		       cmpu    #0x3000
-BANK0:612C 25 F6		       bcs     loc_6124
+BANK0:6128 11 83 30 00		       cmpu    #0x3000				       ; done?
+BANK0:612C 25 F6		       bcs     loc_6124				       ; no, loop
 BANK0:612E 39			       rts
-BANK0:612E	       ; End of	function sub_611E
+BANK0:612E	       ; End of	function copy_3d_logo_etc_to_vecram
 BANK0:612E
 BANK0:612F
 BANK0:612F	       ; =============== S U B R O U T I N E =======================================
@@ -19244,7 +19247,7 @@ BANK0:613B 1F 20		       tfr     y, d
 BANK0:613D 90 3F		       suba    display_list_msb
 BANK0:613F 80 14		       suba    #0x14
 BANK0:6141 25 12		       bcs     loc_6155
-BANK0:6143 BD 61 1E		       jsr     sub_611E
+BANK0:6143 BD 61 1E		       jsr     copy_3d_logo_etc_to_vecram
 BANK0:6146 CC 20 20		       ldd     #0x2020				       ; HALT (probably)
 BANK0:6149 FD 13 FE		       std     word_13FE
 BANK0:614C FD 13 FC		       std     word_13FC
@@ -19469,13 +19472,13 @@ BANK0:6298 8E 4A FD		       ldx     #0x4AFD
 BANK0:629B BD 62 D5		       jsr     sub_62D5
 BANK0:629E B7 48 71		       sta     word_4871
 BANK0:62A1 1C EF		       andcc   #0xEF ; 'Ô'
-BANK0:62A3 86 0B		       lda     #0xB
+BANK0:62A3 86 0B		       lda     #11
 BANK0:62A5 97 41		       sta     jmp_tbl_index
 BANK0:62A7 86 FF		       lda     #0xFF
 BANK0:62A9 B7 4B 34		       sta     word_4B34
 BANK0:62AC BD 61 B5		       jsr     sub_61B5
 BANK0:62AF BD 61 5A		       jsr     sub_615A
-BANK0:62B2 BD 61 1E		       jsr     sub_611E
+BANK0:62B2 BD 61 1E		       jsr     copy_3d_logo_etc_to_vecram
 BANK0:62B5 BD 61 EC		       jsr     sub_61EC
 BANK0:62B8 BD D9 1A		       jsr     clear_msg_list_at_4A52
 BANK0:62BB 86 00		       lda     #0
@@ -19528,7 +19531,7 @@ BANK0:6303 0C 41		       inc     jmp_tbl_index
 BANK0:6305 39			       rts
 BANK0:6306	       ; ---------------------------------------------------------------------------
 BANK0:6306
-BANK0:6306	       loc_6306:						       ; DATA XREF: BANK0:6054o
+BANK0:6306	       score_wave_insert_coins:					       ; DATA XREF: BANK0:6054o
 BANK0:6306 BD 61 12		       jsr     init_display_list_ptr
 BANK0:6309 BD 76 1D		       jsr     print_score_wave
 BANK0:630C BD 63 D5		       jsr     print_insert_coins_or_start
@@ -19723,7 +19726,7 @@ BANK0:6440 8B 06		       adda    #6
 BANK0:6442
 BANK0:6442	       loc_6442:						       ; CODE XREF: print_insert_coins_or_start+69j
 BANK0:6442 C6 02		       ldb     #2
-BANK0:6444 D7 AD		       stb     byte_48AD
+BANK0:6444 D7 AD		       stb     pad_digits_maybe
 BANK0:6446 BD E7 90		       jsr     sub_E790
 BANK0:6449 B6 48 12		       lda     some_more_credits
 BANK0:644C 27 05		       beq     loc_6453
@@ -19811,7 +19814,7 @@ BANK0:64E1	       ; End of	function print_copyright_msgs
 BANK0:64E1
 BANK0:64E2	       ; ---------------------------------------------------------------------------
 BANK0:64E2
-BANK0:64E2	       loc_64E2:						       ; DATA XREF: BANK0:6046o
+BANK0:64E2	       clr_curr_msg_lists:					       ; DATA XREF: BANK0:6046o
 BANK0:64E2 BD D9 1A		       jsr     clear_msg_list_at_4A52
 BANK0:64E5 CC 00 00		       ldd     #0
 BANK0:64E8 FD 4B 0C		       std     word_4B0C
@@ -19820,9 +19823,9 @@ BANK0:64EE 0C 41		       inc     jmp_tbl_index
 BANK0:64F0 39			       rts
 BANK0:64F1	       ; ---------------------------------------------------------------------------
 BANK0:64F1
-BANK0:64F1	       loc_64F1:						       ; DATA XREF: BANK0:6048o
+BANK0:64F1	       accounting_screen:					       ; DATA XREF: BANK0:6048o
 BANK0:64F1 BD 61 12		       jsr     init_display_list_ptr
-BANK0:64F4 BD BE 20		       jsr     sub_BE20
+BANK0:64F4 BD BE 20		       jsr     fmt_accounting_info
 BANK0:64F7 BD D9 23		       jsr     print_colour_msgs_at_4A52
 BANK0:64FA BD 61 2F		       jsr     sub_612F
 BANK0:64FD 96 AC		       lda     byte_48AC
@@ -19832,9 +19835,9 @@ BANK0:6503 86 03		       lda     #3
 BANK0:6505 97 41		       sta     jmp_tbl_index
 BANK0:6507
 BANK0:6507	       loc_6507:						       ; CODE XREF: BANK0:6501j
-BANK0:6507 B6 48 1E		       lda     in0_shadow+2
-BANK0:650A 84 10		       anda    #0x10
-BANK0:650C 27 04		       beq     locret_6512
+BANK0:6507 B6 48 1E		       lda     in0_shadow+2			       ; debounced
+BANK0:650A 84 10		       anda    #0x10				       ; service switch?
+BANK0:650C 27 04		       beq     locret_6512			       ; no, skip
 BANK0:650E 86 05		       lda     #5
 BANK0:6510 97 41		       sta     jmp_tbl_index
 BANK0:6512
@@ -19860,9 +19863,9 @@ BANK0:652F 0C 41		       inc     jmp_tbl_index
 BANK0:6531 39			       rts
 BANK0:6532	       ; ---------------------------------------------------------------------------
 BANK0:6532
-BANK0:6532	       loc_6532:						       ; DATA XREF: BANK0:604Co
+BANK0:6532	       game_options_screen:					       ; DATA XREF: BANK0:604Co
 BANK0:6532 BD 61 12		       jsr     init_display_list_ptr
-BANK0:6535 BD C4 50		       jsr     sub_C450
+BANK0:6535 BD C4 50		       jsr     fmt_game_options
 BANK0:6538 CC 67 80		       ldd     #0x6780
 BANK0:653B ED A1		       std     ,y++
 BANK0:653D C6 66		       ldb     #102				       ; "Value	of a coin"
@@ -19880,9 +19883,9 @@ BANK0:655A 7E F2 61		       jmp     RESET
 BANK0:655D	       ; ---------------------------------------------------------------------------
 BANK0:655D
 BANK0:655D	       loc_655D:						       ; CODE XREF: BANK0:6558j
-BANK0:655D B6 48 1E		       lda     in0_shadow+2
-BANK0:6560 84 10		       anda    #0x10
-BANK0:6562 27 07		       beq     locret_656B
+BANK0:655D B6 48 1E		       lda     in0_shadow+2			       ; debounced
+BANK0:6560 84 10		       anda    #0x10				       ; service switch?
+BANK0:6562 27 07		       beq     locret_656B			       ; yes, exit
 BANK0:6564 BD D9 1A		       jsr     clear_msg_list_at_4A52
 BANK0:6567 86 05		       lda     #5
 BANK0:6569 97 41		       sta     jmp_tbl_index
@@ -20108,11 +20111,12 @@ BANK0:6707
 BANK0:6707	       locret_6707:						       ; CODE XREF: BANK0:66E6j
 BANK0:6707 39			       rts
 BANK0:6708	       ; ---------------------------------------------------------------------------
+BANK0:6708	       ; this includes the 3D "STAR WARS" logo
 BANK0:6708
-BANK0:6708	       loc_6708:						       ; DATA XREF: BANK0:604Eo
+BANK0:6708	       copy_avg_routines_to_vecram:				       ; DATA XREF: BANK0:604Eo
 BANK0:6708									       ; BANK0:6072o
 BANK0:6708 0C 41		       inc     jmp_tbl_index
-BANK0:670A BD 61 1E		       jsr     sub_611E
+BANK0:670A BD 61 1E		       jsr     copy_3d_logo_etc_to_vecram
 BANK0:670D
 BANK0:670D	       ; =============== S U B R O U T I N E =======================================
 BANK0:670D
@@ -20214,7 +20218,7 @@ BANK0:67AA
 BANK0:67AA
 BANK0:67AA	       sub_67AA:						       ; CODE XREF: sub_CD08+5P
 BANK0:67AA 8B 06		       adda    #6
-BANK0:67AC 97 60		       sta     byte_4860
+BANK0:67AC 97 60		       sta     shields
 BANK0:67AE 97 8E		       sta     byte_488E
 BANK0:67B0 B6 45 93		       lda     word_4593
 BANK0:67B3 44			       lsra
@@ -20321,7 +20325,7 @@ BANK0:6857 0C 41		       inc     jmp_tbl_index
 BANK0:6859
 BANK0:6859	       loc_6859:						       ; DATA XREF: BANK0:6084o
 BANK0:6859 BD 72 C7		       jsr     sub_72C7
-BANK0:685C 96 60		       lda     byte_4860
+BANK0:685C 96 60		       lda     shields
 BANK0:685E 10 2B 04 14		       lbmi    loc_6C76
 BANK0:6862
 BANK0:6862	       loc_6862:						       ; CODE XREF: sub_CD38+5P
@@ -20395,7 +20399,7 @@ BANK0:68D3 0C 41		       inc     jmp_tbl_index
 BANK0:68D5
 BANK0:68D5	       loc_68D5:						       ; DATA XREF: BANK0:6088o
 BANK0:68D5 BD 72 C7		       jsr     sub_72C7
-BANK0:68D8 96 60		       lda     byte_4860
+BANK0:68D8 96 60		       lda     shields
 BANK0:68DA 10 2B 03 98		       lbmi    loc_6C76
 BANK0:68DE BD A8 49		       jsr     sub_A849
 BANK0:68E1 BD 98 98		       jsr     sub_9898
@@ -20568,7 +20572,7 @@ BANK0:69F4	       ; ------------------------------------------------------------
 BANK0:69F4
 BANK0:69F4	       loc_69F4:						       ; DATA XREF: BANK0:6098o
 BANK0:69F4 BD 73 90		       jsr     sub_7390
-BANK0:69F7 96 60		       lda     byte_4860
+BANK0:69F7 96 60		       lda     shields
 BANK0:69F9 10 2B 02 B9		       lbmi    loc_6CB6
 BANK0:69FD BD A8 49		       jsr     sub_A849
 BANK0:6A00 BD 98 90		       jsr     sub_9890
@@ -20757,7 +20761,7 @@ BANK0:6B30 0C 41		       inc     jmp_tbl_index
 BANK0:6B32
 BANK0:6B32	       loc_6B32:						       ; DATA XREF: BANK0:60A4o
 BANK0:6B32 BD 74 3C		       jsr     sub_743C
-BANK0:6B35 96 60		       lda     byte_4860
+BANK0:6B35 96 60		       lda     shields
 BANK0:6B37 10 2B 01 A6		       lbmi    loc_6CE1
 BANK0:6B3B BD A8 49		       jsr     sub_A849
 BANK0:6B3E BD AD 6C		       jsr     sub_AD6C
@@ -20828,7 +20832,7 @@ BANK0:6BAC 86 01		       lda     #1
 BANK0:6BAE B7 4B 3E		       sta     word_4B3D+1
 BANK0:6BB1 BD BD B2		       jsr     sub_BDB2
 BANK0:6BB4 BD 98 74		       jsr     sub_9874
-BANK0:6BB7 96 60		       lda     byte_4860
+BANK0:6BB7 96 60		       lda     shields
 BANK0:6BB9 10 2F 01 24		       lble    loc_6CE1
 BANK0:6BBD 86 31		       lda     #0x31 ; '1'
 BANK0:6BBF 97 41		       sta     jmp_tbl_index
@@ -22060,7 +22064,7 @@ BANK0:72ED BD E7 C7		       jsr     print_colour_msg_B_at
 BANK0:72F0
 BANK0:72F0	       loc_72F0:						       ; CODE XREF: sub_72C7+11j
 BANK0:72F0									       ; sub_72C7+1Aj
-BANK0:72F0 BD 95 A7		       jsr     sub_95A7
+BANK0:72F0 BD 95 A7		       jsr     print_shield_gauge
 BANK0:72F3 BD 77 65		       jsr     sub_7765
 BANK0:72F6 BD B6 B9		       jsr     sub_B6B9
 BANK0:72F9 BD CD 80		       jsr     maths_CD80
@@ -22085,7 +22089,7 @@ BANK0:7318 86 10		       lda     #0x10
 BANK0:731A BD CE 0C		       jsr     sub_CE0C
 BANK0:731D BD 71 60		       jsr     sub_7160
 BANK0:7320 BD 76 1D		       jsr     print_score_wave
-BANK0:7323 BD 95 A7		       jsr     sub_95A7
+BANK0:7323 BD 95 A7		       jsr     print_shield_gauge
 BANK0:7326 BD CD 80		       jsr     maths_CD80
 BANK0:7329 BD BA 12		       jsr     sub_BA12
 BANK0:732C BD 78 6A		       jsr     sub_786A
@@ -22106,7 +22110,7 @@ BANK0:733F 86 10		       lda     #0x10
 BANK0:7341 BD CE 0C		       jsr     sub_CE0C
 BANK0:7344 BD 71 60		       jsr     sub_7160
 BANK0:7347 BD 76 1D		       jsr     print_score_wave
-BANK0:734A BD 95 A7		       jsr     sub_95A7
+BANK0:734A BD 95 A7		       jsr     print_shield_gauge
 BANK0:734D BD B6 B9		       jsr     sub_B6B9
 BANK0:7350 BD CD 80		       jsr     maths_CD80
 BANK0:7353 BD 77 65		       jsr     sub_7765
@@ -22131,7 +22135,7 @@ BANK0:7372 86 10		       lda     #0x10
 BANK0:7374 BD CE 0C		       jsr     sub_CE0C
 BANK0:7377 BD 71 60		       jsr     sub_7160
 BANK0:737A BD 76 1D		       jsr     print_score_wave
-BANK0:737D BD 95 A7		       jsr     sub_95A7
+BANK0:737D BD 95 A7		       jsr     print_shield_gauge
 BANK0:7380 BD B6 B9		       jsr     sub_B6B9
 BANK0:7383 BD CD 80		       jsr     maths_CD80
 BANK0:7386 BD 77 A4		       jsr     sub_77A4
@@ -22151,7 +22155,7 @@ BANK0:7395 BD CE 0C		       jsr     sub_CE0C
 BANK0:7398 BD 71 60		       jsr     sub_7160
 BANK0:739B BD 76 1D		       jsr     print_score_wave
 BANK0:739E BD 76 8D		       jsr     sub_768D
-BANK0:73A1 BD 95 A7		       jsr     sub_95A7
+BANK0:73A1 BD 95 A7		       jsr     print_shield_gauge
 BANK0:73A4 BD B6 B9		       jsr     sub_B6B9
 BANK0:73A7 BD CD 8C		       jsr     sub_CD8C
 BANK0:73AA BD AE 60		       jsr     sub_AE60
@@ -22176,7 +22180,7 @@ BANK0:73C8 BD CE 0C		       jsr     sub_CE0C
 BANK0:73CB BD 71 60		       jsr     sub_7160
 BANK0:73CE BD 76 1D		       jsr     print_score_wave
 BANK0:73D1 BD 76 8D		       jsr     sub_768D
-BANK0:73D4 BD 95 A7		       jsr     sub_95A7
+BANK0:73D4 BD 95 A7		       jsr     print_shield_gauge
 BANK0:73D7 BD CD 8C		       jsr     sub_CD8C
 BANK0:73DA BD AA E4		       jsr     sub_AAE4
 BANK0:73DD BD A2 14		       jsr     sub_A214
@@ -22199,7 +22203,7 @@ BANK0:73F5 BD 76 1D		       jsr     print_score_wave
 BANK0:73F8 BD 76 D3		       jsr     loc_76D3
 BANK0:73FB C6 4F		       ldb     #79				       ; "USE THE FORCE"
 BANK0:73FD BD E7 C7		       jsr     print_colour_msg_B_at
-BANK0:7400 BD 95 A7		       jsr     sub_95A7
+BANK0:7400 BD 95 A7		       jsr     print_shield_gauge
 BANK0:7403 BD B6 B9		       jsr     sub_B6B9
 BANK0:7406 BD CD 8C		       jsr     sub_CD8C
 BANK0:7409 BD BA 12		       jsr     sub_BA12
@@ -22221,7 +22225,7 @@ BANK0:741E BD 76 1D		       jsr     print_score_wave
 BANK0:7421 BD 76 D3		       jsr     loc_76D3
 BANK0:7424 C6 4F		       ldb     #79				       ; "USE THE FORCE"
 BANK0:7426 BD E7 C7		       jsr     print_colour_msg_B_at
-BANK0:7429 BD 95 A7		       jsr     sub_95A7
+BANK0:7429 BD 95 A7		       jsr     print_shield_gauge
 BANK0:742C BD B6 B9		       jsr     sub_B6B9
 BANK0:742F BD 85 9B		       jsr     sub_859B
 BANK0:7432 BD BA 12		       jsr     sub_BA12
@@ -22313,7 +22317,7 @@ BANK0:74B3 BD 97 C2		       jsr     sub_97C2
 BANK0:74B6
 BANK0:74B6	       loc_74B6:						       ; CODE XREF: sub_743C+6Cj
 BANK0:74B6									       ; sub_743C+75j
-BANK0:74B6 BD 95 A7		       jsr     sub_95A7
+BANK0:74B6 BD 95 A7		       jsr     print_shield_gauge
 BANK0:74B9 BD B6 B9		       jsr     sub_B6B9
 BANK0:74BC BD 85 9B		       jsr     sub_859B
 BANK0:74BF BD AE 60		       jsr     sub_AE60
@@ -22344,7 +22348,7 @@ BANK0:74ED C6 46		       ldb     #70				       ; "EXHAUST PORT MISSED"
 BANK0:74EF BD E7 C7		       jsr     print_colour_msg_B_at
 BANK0:74F2
 BANK0:74F2	       loc_74F2:						       ; CODE XREF: sub_74D5+11j
-BANK0:74F2 BD 95 A7		       jsr     sub_95A7
+BANK0:74F2 BD 95 A7		       jsr     print_shield_gauge
 BANK0:74F5 BD 85 9B		       jsr     sub_859B
 BANK0:74F8 BD AA E4		       jsr     sub_AAE4
 BANK0:74FB B6 4B 2D		       lda     word_4B2D
@@ -22374,7 +22378,7 @@ BANK0:751C 86 10		       lda     #0x10
 BANK0:751E BD CE 0C		       jsr     sub_CE0C
 BANK0:7521 BD 71 60		       jsr     sub_7160
 BANK0:7524 BD 76 1D		       jsr     print_score_wave
-BANK0:7527 BD 95 A7		       jsr     sub_95A7
+BANK0:7527 BD 95 A7		       jsr     print_shield_gauge
 BANK0:752A BD B6 B9		       jsr     sub_B6B9
 BANK0:752D BD CD 80		       jsr     maths_CD80
 BANK0:7530 C6 45		       ldb     #69				       ; "DEATH	STAR DESTROYED"
@@ -22391,8 +22395,8 @@ BANK0:7549 ED A1		       std     ,y++
 BANK0:754B CC 00 70		       ldd     #0x70 ; 'p'
 BANK0:754E ED A1		       std     ,y++
 BANK0:7550 96 8E		       lda     byte_488E
-BANK0:7552 BD E7 AD		       jsr     loc_E7AD
-BANK0:7555 CC 80 40		       ldd     #0x8040
+BANK0:7552 BD E7 AD		       jsr     print_hex_digit
+BANK0:7555 CC 80 40		       ldd     #0x8040				       ; CNTR
 BANK0:7558 ED A1		       std     ,y++
 BANK0:755A
 BANK0:755A	       loc_755A:						       ; CODE XREF: sub_7519+21j
@@ -22407,7 +22411,7 @@ BANK0:756B 27 2F		       beq     loc_759C
 BANK0:756D F6 45 93		       ldb     word_4593
 BANK0:7570 C4 03		       andb    #3
 BANK0:7572 CB 06		       addb    #6
-BANK0:7574 D1 60		       cmpb    byte_4860
+BANK0:7574 D1 60		       cmpb    shields
 BANK0:7576 22 04		       bhi     loc_757C
 BANK0:7578 C6 4A		       ldb     #0x4A ; 'J'
 BANK0:757A 20 1D		       bra     loc_7599
@@ -22421,8 +22425,8 @@ BANK0:7584 EF A1		       stu     ,y++
 BANK0:7586 CE 1E C0		       ldu     #0x1EC0
 BANK0:7589 EF A1		       stu     ,y++
 BANK0:758B C6 01		       ldb     #1
-BANK0:758D D7 AD		       stb     byte_48AD
-BANK0:758F BD E7 AD		       jsr     loc_E7AD
+BANK0:758D D7 AD		       stb     pad_digits_maybe
+BANK0:758F BD E7 AD		       jsr     print_hex_digit
 BANK0:7592 CC 80 40		       ldd     #0x8040
 BANK0:7595 ED A1		       std     ,y++
 BANK0:7597 C6 49		       ldb     #73				       ; "ADDED	TO DEFLECTOR SHIELD"
@@ -22463,7 +22467,7 @@ BANK0:75C7 2F 03		       ble     loc_75CC
 BANK0:75C9 BD 97 C2		       jsr     sub_97C2
 BANK0:75CC
 BANK0:75CC	       loc_75CC:						       ; CODE XREF: sub_75B9+Ej
-BANK0:75CC BD 95 A7		       jsr     sub_95A7
+BANK0:75CC BD 95 A7		       jsr     print_shield_gauge
 BANK0:75CF BD B6 B9		       jsr     sub_B6B9
 BANK0:75D2 BD 77 A4		       jsr     sub_77A4
 BANK0:75D5 BD 61 2F		       jsr     sub_612F
@@ -22479,17 +22483,17 @@ BANK0:75D9 BD 61 12		       jsr     init_display_list_ptr
 BANK0:75DC 86 10		       lda     #0x10
 BANK0:75DE BD CE 0C		       jsr     sub_CE0C
 BANK0:75E1 BD 76 1D		       jsr     print_score_wave
-BANK0:75E4 BD 95 A7		       jsr     sub_95A7
+BANK0:75E4 BD 95 A7		       jsr     print_shield_gauge
 BANK0:75E7 BD B6 B9		       jsr     sub_B6B9
 BANK0:75EA CC 1F 98		       ldd     #0x1F98
 BANK0:75ED ED A1		       std     ,y++
 BANK0:75EF CC 00 00		       ldd     #0
 BANK0:75F2 ED A1		       std     ,y++
-BANK0:75F4 CC 72 00		       ldd     #0x7200
+BANK0:75F4 CC 72 00		       ldd     #0x7200				       ; SCAL 2,0
 BANK0:75F7 ED A1		       std     ,y++
-BANK0:75F9 CC BE 50		       ldd     #0xBE50
+BANK0:75F9 CC BE 50		       ldd     #0xBE50				       ; JSRL small death star ($3CA0)
 BANK0:75FC ED A1		       std     ,y++
-BANK0:75FE CC 72 00		       ldd     #0x7200
+BANK0:75FE CC 72 00		       ldd     #0x7200				       ; SCAL 2,0
 BANK0:7601 ED A1		       std     ,y++
 BANK0:7603 BD BB 85		       jsr     sub_BB85
 BANK0:7606 BD 61 2F		       jsr     sub_612F
@@ -22503,7 +22507,7 @@ BANK0:760A
 BANK0:760A	       sub_760A:						       ; CODE XREF: BANK0:loc_6D98P
 BANK0:760A BD 61 12		       jsr     init_display_list_ptr
 BANK0:760D BD 76 1D		       jsr     print_score_wave
-BANK0:7610 BD 95 A7		       jsr     sub_95A7
+BANK0:7610 BD 95 A7		       jsr     print_shield_gauge
 BANK0:7613 BD B6 B9		       jsr     sub_B6B9
 BANK0:7616 BD BB 85		       jsr     sub_BB85
 BANK0:7619 BD 61 2F		       jsr     sub_612F
@@ -22525,7 +22529,7 @@ BANK0:762A ED A1		       std     ,y++
 BANK0:762C CC 1E 20		       ldd     #0x1E20				       ; VCTR
 BANK0:762F ED A1		       std     ,y++
 BANK0:7631 86 06		       lda     #6
-BANK0:7633 97 AD		       sta     byte_48AD
+BANK0:7633 97 AD		       sta     pad_digits_maybe
 BANK0:7635 8E 48 5C		       ldx     #0x485C
 BANK0:7638 BD E7 64		       jsr     sub_E764
 BANK0:763B CC 80 40		       ldd     #0x8040				       ; CNTR
@@ -22547,7 +22551,7 @@ BANK0:7658 ED A1		       std     ,y++
 BANK0:765A CC 1E 50		       ldd     #0x1E50				       ; VCTR
 BANK0:765D ED A1		       std     ,y++
 BANK0:765F 86 05		       lda     #5
-BANK0:7661 97 AD		       sta     byte_48AD
+BANK0:7661 97 AD		       sta     pad_digits_maybe
 BANK0:7663 8E 4B 28		       ldx     #0x4B28
 BANK0:7666 BD E7 72		       jsr     sub_E772
 BANK0:7669 CC 80 40		       ldd     #0x8040				       ; CNTR
@@ -22561,7 +22565,7 @@ BANK0:7676 ED A1		       std     ,y++
 BANK0:7678 CC 01 38		       ldd     #0x138				       ; VCTR
 BANK0:767B ED A1		       std     ,y++
 BANK0:767D 86 01		       lda     #1
-BANK0:767F 97 AD		       sta     byte_48AD
+BANK0:767F 97 AD		       sta     pad_digits_maybe
 BANK0:7681 B6 4B 16		       lda     word_4B16
 BANK0:7684 BD E7 90		       jsr     sub_E790
 BANK0:7687 CC 80 40		       ldd     #0x8040				       ; CNTR
@@ -22591,7 +22595,7 @@ BANK0:76AA ED A1		       std     ,y++
 BANK0:76AC CC 1E D0		       ldd     #0x1ED0
 BANK0:76AF ED A1		       std     ,y++
 BANK0:76B1 86 04		       lda     #4
-BANK0:76B3 97 AD		       sta     byte_48AD
+BANK0:76B3 97 AD		       sta     pad_digits_maybe
 BANK0:76B5 B6 4B 2E		       lda     word_4B2D+1
 BANK0:76B8 BD E7 90		       jsr     sub_E790
 BANK0:76BB B6 4B 2F		       lda     word_4B2F
@@ -22620,7 +22624,7 @@ BANK0:76E6 ED A1		       std     ,y++
 BANK0:76E8 CC 01 68		       ldd     #0x168
 BANK0:76EB ED A1		       std     ,y++
 BANK0:76ED 86 01		       lda     #1
-BANK0:76EF 97 AD		       sta     byte_48AD
+BANK0:76EF 97 AD		       sta     pad_digits_maybe
 BANK0:76F1 B6 4B 1A		       lda     word_4B1A
 BANK0:76F4 BD E7 90		       jsr     sub_E790
 BANK0:76F7 CC 80 40		       ldd     #0x8040
@@ -22665,7 +22669,7 @@ BANK0:7720	       ; =============== S U B R O U T I N E ========================
 BANK0:7720
 BANK0:7720
 BANK0:7720	       sub_7720:						       ; CODE XREF: BANK0:680CP
-BANK0:7720									       ; sub_BE20+1A5P
+BANK0:7720									       ; fmt_accounting_info+1A5P
 BANK0:7720 FD 4A D7		       std     word_4AD6+1
 BANK0:7723 CC 00 00		       ldd     #0
 BANK0:7726 FD 4A D4		       std     word_4AD4
@@ -28981,14 +28985,14 @@ ROM:953B	     sub_953B:							     ; CODE XREF: BANK0:6C1FP
 ROM:953B B6 45 92		     lda     unk_4592
 ROM:953E 84 03			     anda    #3
 ROM:9540 27 15			     beq     locret_9557
-ROM:9542 9B 60			     adda    byte_4860
-ROM:9544 97 60			     sta     byte_4860
+ROM:9542 9B 60			     adda    shields
+ROM:9544 97 60			     sta     shields
 ROM:9546 B6 45 93		     lda     word_4593
 ROM:9549 84 03			     anda    #3
 ROM:954B 8B 06			     adda    #6
-ROM:954D 91 60			     cmpa    byte_4860
+ROM:954D 91 60			     cmpa    shields
 ROM:954F 24 02			     bcc     loc_9553
-ROM:9551 97 60			     sta     byte_4860
+ROM:9551 97 60			     sta     shields
 ROM:9553
 ROM:9553	     loc_9553:							     ; CODE XREF: sub_953B+14j
 ROM:9553 86 14			     lda     #0x14
@@ -29010,19 +29014,19 @@ ROM:955C 96 8C			     lda     byte_488C
 ROM:955E 2E 40			     bgt     loc_95A0
 ROM:9560 86 01			     lda     #1
 ROM:9562 97 8C			     sta     byte_488C
-ROM:9564 96 60			     lda     byte_4860
+ROM:9564 96 60			     lda     shields
 ROM:9566 97 8E			     sta     byte_488E
 ROM:9568 86 F6			     lda     #0xF6 ; 'ˆ'
-ROM:956A 9B 60			     adda    byte_4860
+ROM:956A 9B 60			     adda    shields
 ROM:956C 97 8D			     sta     byte_488D
-ROM:956E 0A 60			     dec     byte_4860
+ROM:956E 0A 60			     dec     shields
 ROM:9570 2C 06			     bge     loc_9578
 ROM:9572 86 FF			     lda     #0xFF
-ROM:9574 97 60			     sta     byte_4860
+ROM:9574 97 60			     sta     shields
 ROM:9576 0F 8C			     clr     byte_488C
 ROM:9578
 ROM:9578	     loc_9578:							     ; CODE XREF: sub_9558+18j
-ROM:9578 96 60			     lda     byte_4860
+ROM:9578 96 60			     lda     shields
 ROM:957A 81 00			     cmpa    #0
 ROM:957C 26 08			     bne     loc_9586
 ROM:957E BD BD 35		     jsr     sub_BD35
@@ -29064,27 +29068,27 @@ ROM:95A7
 ROM:95A7	     ; =============== S U B R O U T I N E =======================================
 ROM:95A7
 ROM:95A7
-ROM:95A7	     sub_95A7:							     ; CODE XREF: sub_72C7:loc_72F0P
+ROM:95A7	     print_shield_gauge:					     ; CODE XREF: sub_72C7:loc_72F0P
 ROM:95A7									     ; sub_7315+EP ...
 ROM:95A7 96 8C			     lda     byte_488C
 ROM:95A9 26 07			     bne     loc_95B2
-ROM:95AB 96 60			     lda     byte_4860
-ROM:95AD 2E 03			     bgt     loc_95B2
-ROM:95AF 7E 96 04		     jmp     loc_9604
+ROM:95AB 96 60			     lda     shields				     ; any shields left?
+ROM:95AD 2E 03			     bgt     loc_95B2				     ; yes, skip
+ROM:95AF 7E 96 04		     jmp     print_shield_gone
 ROM:95B2	     ; ---------------------------------------------------------------------------
 ROM:95B2
-ROM:95B2	     loc_95B2:							     ; CODE XREF: sub_95A7+2j
-ROM:95B2									     ; sub_95A7+6j
-ROM:95B2 D6 60			     ldb     byte_4860
-ROM:95B4 58			     aslb
-ROM:95B5 8E 96 B6		     ldx     #0x96B6
-ROM:95B8 EE 85			     ldu     b,x
-ROM:95BA EF A1			     stu     ,y++
-ROM:95BC CC BA 03		     ldd     #0xBA03
+ROM:95B2	     loc_95B2:							     ; CODE XREF: print_shield_gauge+2j
+ROM:95B2									     ; print_shield_gauge+6j
+ROM:95B2 D6 60			     ldb     shields
+ROM:95B4 58			     aslb					     ; word offset
+ROM:95B5 8E 96 B6		     ldx     #shield_color_tbl
+ROM:95B8 EE 85			     ldu     b,x				     ; colour entry
+ROM:95BA EF A1			     stu     ,y++				     ; to display list
+ROM:95BC CC BA 03		     ldd     #0xBA03				     ; JSRL shield ($3406)
 ROM:95BF ED A1			     std     ,y++
-ROM:95C1 CC 02 28		     ldd     #0x228
+ROM:95C1 CC 02 28		     ldd     #0x228				     ; VCTR 0,552,0
 ROM:95C4 ED A1			     std     ,y++
-ROM:95C6 CC 00 00		     ldd     #0
+ROM:95C6 CC 00 00		     ldd     #0					     ; (2nd word)
 ROM:95C9 ED A1			     std     ,y++
 ROM:95CB 96 8C			     lda     byte_488C
 ROM:95CD 27 05			     beq     loc_95D4
@@ -29092,68 +29096,68 @@ ROM:95CF BD 96 2A		     jsr     sub_962A
 ROM:95D2 20 03			     bra     loc_95D7
 ROM:95D4	     ; ---------------------------------------------------------------------------
 ROM:95D4
-ROM:95D4	     loc_95D4:							     ; CODE XREF: sub_95A7+26j
+ROM:95D4	     loc_95D4:							     ; CODE XREF: print_shield_gauge+26j
 ROM:95D4 BD 96 0F		     jsr     sub_960F
 ROM:95D7
-ROM:95D7	     loc_95D7:							     ; CODE XREF: sub_95A7+2Bj
-ROM:95D7 CC 1F D0		     ldd     #0x1FD0
+ROM:95D7	     loc_95D7:							     ; CODE XREF: print_shield_gauge+2Bj
+ROM:95D7 CC 1F D0		     ldd     #0x1FD0				     ; VCTR -12,-48,0
 ROM:95DA ED A1			     std     ,y++
-ROM:95DC CC 1F F4		     ldd     #0x1FF4
+ROM:95DC CC 1F F4		     ldd     #0x1FF4				     ; (2nd word)
 ROM:95DF ED A1			     std     ,y++
 ROM:95E1 96 8C			     lda     byte_488C
 ROM:95E3 2F 05			     ble     loc_95EA
-ROM:95E5 CE A0 18		     ldu     #0xA018
+ROM:95E5 CE A0 18		     ldu     #0xA018				     ; JSRL ($36)
 ROM:95E8 20 08			     bra     loc_95F2
 ROM:95EA	     ; ---------------------------------------------------------------------------
 ROM:95EA
-ROM:95EA	     loc_95EA:							     ; CODE XREF: sub_95A7+3Cj
-ROM:95EA D6 60			     ldb     byte_4860
-ROM:95EC 58			     aslb
-ROM:95ED 8E 96 B6		     ldx     #0x96B6
-ROM:95F0 EE 85			     ldu     b,x
+ROM:95EA	     loc_95EA:							     ; CODE XREF: print_shield_gauge+3Cj
+ROM:95EA D6 60			     ldb     shields
+ROM:95EC 58			     aslb					     ; word offset
+ROM:95ED 8E 96 B6		     ldx     #shield_color_tbl
+ROM:95F0 EE 85			     ldu     b,x				     ; colour entry
 ROM:95F2
-ROM:95F2	     loc_95F2:							     ; CODE XREF: sub_95A7+41j
-ROM:95F2 EF A1			     stu     ,y++
-ROM:95F4 0F AD			     clr     byte_48AD
-ROM:95F6 96 60			     lda     byte_4860
+ROM:95F2	     loc_95F2:							     ; CODE XREF: print_shield_gauge+41j
+ROM:95F2 EF A1			     stu     ,y++				     ; to display list
+ROM:95F4 0F AD			     clr     pad_digits_maybe
+ROM:95F6 96 60			     lda     shields
 ROM:95F8 2C 01			     bge     loc_95FB
 ROM:95FA 4F			     clra
 ROM:95FB
-ROM:95FB	     loc_95FB:							     ; CODE XREF: sub_95A7+51j
-ROM:95FB BD E7 AD		     jsr     loc_E7AD
-ROM:95FE CC 80 40		     ldd     #0x8040
+ROM:95FB	     loc_95FB:							     ; CODE XREF: print_shield_gauge+51j
+ROM:95FB BD E7 AD		     jsr     print_hex_digit
+ROM:95FE CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:9601 ED A1			     std     ,y++
 ROM:9603 39			     rts
 ROM:9604	     ; ---------------------------------------------------------------------------
 ROM:9604
-ROM:9604	     loc_9604:							     ; CODE XREF: sub_95A7+8J
-ROM:9604 CC 71 00		     ldd     #0x7100
+ROM:9604	     print_shield_gone:						     ; CODE XREF: print_shield_gauge+8J
+ROM:9604 CC 71 00		     ldd     #0x7100				     ; SCAL 1,0
 ROM:9607 ED A1			     std     ,y++
 ROM:9609 C6 0E			     ldb     #14				     ; "SHIELD GONE"
 ROM:960B BD E7 C7		     jsr     print_colour_msg_B_at
 ROM:960E 39			     rts
-ROM:960E	     ; End of function sub_95A7
+ROM:960E	     ; End of function print_shield_gauge
 ROM:960E
 ROM:960F
 ROM:960F	     ; =============== S U B R O U T I N E =======================================
 ROM:960F
 ROM:960F
-ROM:960F	     sub_960F:							     ; CODE XREF: sub_95A7:loc_95D4P
-ROM:960F D6 60			     ldb     byte_4860
-ROM:9611 58			     aslb
-ROM:9612 8E 96 B6		     ldx     #0x96B6
-ROM:9615 EC 85			     ldd     b,x
+ROM:960F	     sub_960F:							     ; CODE XREF: print_shield_gauge:loc_95D4P
+ROM:960F D6 60			     ldb     shields
+ROM:9611 58			     aslb					     ; word offset
+ROM:9612 8E 96 B6		     ldx     #shield_color_tbl
+ROM:9615 EC 85			     ldd     b,x				     ; colour entry
 ROM:9617 0D 61			     tst     byte_4861
 ROM:9619 27 02			     beq     loc_961D
 ROM:961B CA FF			     orab    #0xFF
 ROM:961D
 ROM:961D	     loc_961D:							     ; CODE XREF: sub_960F+Aj
 ROM:961D ED A1			     std     ,y++
-ROM:961F D6 60			     ldb     byte_4860
-ROM:9621 58			     aslb
-ROM:9622 8E 96 CA		     ldx     #0x96CA
-ROM:9625 EE 85			     ldu     b,x
-ROM:9627 EF A1			     stu     ,y++
+ROM:961F D6 60			     ldb     shields
+ROM:9621 58			     aslb					     ; word offset
+ROM:9622 8E 96 CA		     ldx     #shield_something_tbl
+ROM:9625 EE 85			     ldu     b,x				     ; get entry
+ROM:9627 EF A1			     stu     ,y++				     ; to display list
 ROM:9629 39			     rts
 ROM:9629	     ; End of function sub_960F
 ROM:9629
@@ -29161,7 +29165,7 @@ ROM:962A
 ROM:962A	     ; =============== S U B R O U T I N E =======================================
 ROM:962A
 ROM:962A
-ROM:962A	     sub_962A:							     ; CODE XREF: sub_95A7+28P
+ROM:962A	     sub_962A:							     ; CODE XREF: print_shield_gauge+28P
 ROM:962A 96 91			     lda     byte_4891
 ROM:962C 26 1D			     bne     loc_964B
 ROM:962E CE A0 18		     ldu     #0xA018
@@ -29198,7 +29202,7 @@ ROM:9661 96 43			     lda     some_timer
 ROM:9663 84 00			     anda    #0
 ROM:9665 26 0B			     bne     loc_9672
 ROM:9667 0C 90			     inc     byte_4890
-ROM:9669 D6 60			     ldb     byte_4860
+ROM:9669 D6 60			     ldb     shields
 ROM:966B 8E 97 18		     ldx     #0x9718
 ROM:966E A6 85			     lda     b,x
 ROM:9670 97 8D			     sta     byte_488D
@@ -29234,7 +29238,7 @@ ROM:9694 26 0A			     bne     locret_96A0
 ROM:9696 86 00			     lda     #0
 ROM:9698 97 8C			     sta     byte_488C
 ROM:969A 97 8B			     sta     byte_488B
-ROM:969C 96 60			     lda     byte_4860
+ROM:969C 96 60			     lda     shields
 ROM:969E 97 8E			     sta     byte_488E
 ROM:96A0
 ROM:96A0	     locret_96A0:						     ; CODE XREF: sub_962A:loc_9649j
@@ -29247,12 +29251,12 @@ ROM:96A1	     ; =============== S U B R O U T I N E ============================
 ROM:96A1
 ROM:96A1
 ROM:96A1	     sub_96A1:							     ; CODE XREF: sub_962A:loc_964BP
-ROM:96A1 D6 60			     ldb     byte_4860
+ROM:96A1 D6 60			     ldb     shields
 ROM:96A3 58			     aslb
 ROM:96A4 8E 96 B6		     ldx     #0x96B6
 ROM:96A7 EC 85			     ldd     b,x
 ROM:96A9 ED A1			     std     ,y++
-ROM:96AB D6 60			     ldb     byte_4860
+ROM:96AB D6 60			     ldb     shields
 ROM:96AD 58			     aslb
 ROM:96AE 8E 96 CA		     ldx     #0x96CA
 ROM:96B1 EE 85			     ldu     b,x
@@ -29261,46 +29265,29 @@ ROM:96B5 39			     rts
 ROM:96B5	     ; End of function sub_96A1
 ROM:96B5
 ROM:96B5	     ; ---------------------------------------------------------------------------
-ROM:96B6 60			     .db 0x60 ;	`
-ROM:96B7 80			     .db 0x80 ;	Ä
-ROM:96B8 64			     .db 0x64 ;	d
-ROM:96B9 80			     .db 0x80 ;	Ä
-ROM:96BA 64			     .db 0x64 ;	d
-ROM:96BB 80			     .db 0x80 ;	Ä
-ROM:96BC 66			     .db 0x66 ;	f
-ROM:96BD 80			     .db 0x80 ;	Ä
-ROM:96BE 66			     .db 0x66 ;	f
-ROM:96BF 80			     .db 0x80 ;	Ä
-ROM:96C0 62			     .db 0x62 ;	b
-ROM:96C1 80			     .db 0x80 ;	Ä
-ROM:96C2 62			     .db 0x62 ;	b
-ROM:96C3 80			     .db 0x80 ;	Ä
-ROM:96C4 62			     .db 0x62 ;	b
-ROM:96C5 80			     .db 0x80 ;	Ä
-ROM:96C6 62			     .db 0x62 ;	b
-ROM:96C7 80			     .db 0x80 ;	Ä
-ROM:96C8 62			     .db 0x62 ;	b
-ROM:96C9 80			     .db 0x80 ;	Ä
-ROM:96CA BB			     .db 0xBB ;	ª
-ROM:96CB E4			     .db 0xE4 ;	‰
-ROM:96CC BB			     .db 0xBB ;	ª
-ROM:96CD E8			     .db 0xE8 ;	Ë
-ROM:96CE BB			     .db 0xBB ;	ª
-ROM:96CF EC			     .db 0xEC ;	Ï
-ROM:96D0 BB			     .db 0xBB ;	ª
-ROM:96D1 F0			     .db 0xF0 ;	
-ROM:96D2 BB			     .db 0xBB ;	ª
-ROM:96D3 F4			     .db 0xF4 ;	Ù
-ROM:96D4 BB			     .db 0xBB ;	ª
-ROM:96D5 F8			     .db 0xF8 ;	¯
-ROM:96D6 BB			     .db 0xBB ;	ª
-ROM:96D7 FC			     .db 0xFC ;	¸
-ROM:96D8 BC			     .db 0xBC ;	º
-ROM:96D9 00			     .db    0
-ROM:96DA BC			     .db 0xBC ;	º
-ROM:96DB 04			     .db    4
-ROM:96DC BC			     .db 0xBC ;	º
-ROM:96DD 08			     .db    8
+ROM:96B6 60 80	     shield_color_tbl:.dw 0x6080				     ; DATA XREF: print_shield_gauge+Eo
+ROM:96B6									     ; print_shield_gauge+46o ...
+ROM:96B6									     ; COLR 0,128
+ROM:96B8 64 80			     .dw 0x6480					     ; COLR RED,128
+ROM:96BA 64 80			     .dw 0x6480					     ; COLR RED,128
+ROM:96BC 66 80			     .dw 0x6680					     ; COLR YELLOW,128
+ROM:96BE 66 80			     .dw 0x6680					     ; COLR YELLOW,128
+ROM:96C0 62 80			     .dw 0x6280					     ; COLR GREEN,128
+ROM:96C2 62 80			     .dw 0x6280					     ; COLR GREEN,128
+ROM:96C4 62 80			     .dw 0x6280					     ; COLR GREEN,128
+ROM:96C6 62 80			     .dw 0x6280					     ; COLR GREEN,128
+ROM:96C8 62 80			     .dw 0x6280					     ; COLR GREEN,128
+ROM:96CA BB E4	     shield_something_tbl:.dw 0xBBE4				     ; DATA XREF: sub_960F+13o
+ROM:96CA									     ; JSRL ($37C8)
+ROM:96CC BB E8			     .dw 0xBBE8					     ; JSRL ($37D0)
+ROM:96CE BB EC			     .dw 0xBBEC					     ; JSRL ($37D8)
+ROM:96D0 BB F0			     .dw 0xBBF0					     ; JSRL ($37E0)
+ROM:96D2 BB F4			     .dw 0xBBF4					     ; JSRL ($37E8)
+ROM:96D4 BB F8			     .dw 0xBBF8					     ; JSRL ($37F0)
+ROM:96D6 BB FC			     .dw 0xBBFC					     ; JSRL ($37F8)
+ROM:96D8 BC 00			     .dw 0xBC00					     ; JSRL ($3800)
+ROM:96DA BC 04			     .dw 0xBC04					     ; JSRL ($3808)
+ROM:96DC BC 08			     .dw 0xBC08					     ; JSRL ($3810)
 ROM:96DE BB			     .db 0xBB ;	ª
 ROM:96DF E6			     .db 0xE6 ;	Ê
 ROM:96E0 BB			     .db 0xBB ;	ª
@@ -29430,7 +29417,7 @@ ROM:9775	     ; =============== S U B R O U T I N E ============================
 ROM:9775
 ROM:9775
 ROM:9775	     sub_9775:							     ; CODE XREF: BANK0:6C10P
-ROM:9775 D6 60			     ldb     byte_4860
+ROM:9775 D6 60			     ldb     shields
 ROM:9777 27 32			     beq     locret_97AB
 ROM:9779 CE 98 65		     ldu     #0x9865
 ROM:977C 86 00			     lda     #0
@@ -29496,7 +29483,7 @@ ROM:97CA ED A1			     std     ,y++
 ROM:97CC CC 1E C0		     ldd     #0x1EC0
 ROM:97CF ED A1			     std     ,y++
 ROM:97D1 86 04			     lda     #4
-ROM:97D3 97 AD			     sta     byte_48AD
+ROM:97D3 97 AD			     sta     pad_digits_maybe
 ROM:97D5 BD 97 AC		     jsr     sub_97AC
 ROM:97D8 30 5F			     leax    -1,u
 ROM:97DA BD E7 72		     jsr     sub_E772
@@ -32325,7 +32312,7 @@ ROM:A363 10 2D 00 8D		     lblt    loc_A3F4
 ROM:A367 A6 04			     lda     4,x
 ROM:A369 81 03			     cmpa    #3
 ROM:A36B 27 3A			     beq     loc_A3A7
-ROM:A36D 96 60			     lda     byte_4860
+ROM:A36D 96 60			     lda     shields
 ROM:A36F 2D 03			     blt     loc_A374
 ROM:A371 BD BD D0		     jsr     sub_BDD0
 ROM:A374
@@ -32338,7 +32325,7 @@ ROM:A37F CC A0 18		     ldd     #0xA018
 ROM:A382 FD 5E 02		     std     word_5E02
 ROM:A385 CC 60 80		     ldd     #0x6080
 ROM:A388 FD 5E 00		     std     word_5E00
-ROM:A38B 96 60			     lda     byte_4860
+ROM:A38B 96 60			     lda     shields
 ROM:A38D 2D 06			     blt     loc_A395
 ROM:A38F BD 98 74		     jsr     sub_9874
 ROM:A392 BD BD B2		     jsr     sub_BDB2
@@ -32383,7 +32370,7 @@ ROM:A3CF B3 50 86		     subd    word_5086
 ROM:A3D2 2E 20			     bgt     loc_A3F4
 ROM:A3D4 CC A0 18		     ldd     #0xA018
 ROM:A3D7 FD 5E 00		     std     word_5E00
-ROM:A3DA 96 60			     lda     byte_4860
+ROM:A3DA 96 60			     lda     shields
 ROM:A3DC 2D 06			     blt     loc_A3E4
 ROM:A3DE BD 98 74		     jsr     sub_9874
 ROM:A3E1 BD BD B2		     jsr     sub_BDB2
@@ -32631,7 +32618,7 @@ ROM:A591	     sub_A591:							     ; CODE XREF: sub_A214+97P
 ROM:A591
 ROM:A591	     ; FUNCTION	CHUNK AT ROM:A728 SIZE 0000008E	BYTES
 ROM:A591
-ROM:A591 96 60			     lda     byte_4860
+ROM:A591 96 60			     lda     shields
 ROM:A593 2D 1D			     blt     locret_A5B2
 ROM:A595 9E 64			     ldx     byte_4864
 ROM:A597 CE 49 C2		     ldu     #0x49C2
@@ -34188,7 +34175,7 @@ ROM:AD08 BD BD F3		     jsr     sub_BDF3
 ROM:AD0B B6 4B 37		     lda     word_4B36+1
 ROM:AD0E 26 0F			     bne     locret_AD1F
 ROM:AD10 7C 4B 37		     inc     word_4B36+1
-ROM:AD13 96 60			     lda     byte_4860
+ROM:AD13 96 60			     lda     shields
 ROM:AD15 81 03			     cmpa    #3
 ROM:AD17 23 06			     bls     locret_AD1F
 ROM:AD19 BD BD 21		     jsr     sub_BD21
@@ -35426,7 +35413,7 @@ ROM:B4EA 83 04 00		     subd    #0x400
 ROM:B4ED 22 1C			     bhi     loc_B50B
 ROM:B4EF 86 0F			     lda     #0xF
 ROM:B4F1 97 DC			     sta     byte_48DC
-ROM:B4F3 96 60			     lda     byte_4860
+ROM:B4F3 96 60			     lda     shields
 ROM:B4F5 2D 06			     blt     loc_B4FD
 ROM:B4F7 BD 98 74		     jsr     sub_9874
 ROM:B4FA BD BD B2		     jsr     sub_BDB2
@@ -35603,7 +35590,7 @@ ROM:B624 83 04 00		     subd    #0x400
 ROM:B627 22 1C			     bhi     loc_B645
 ROM:B629 86 0F			     lda     #0xF
 ROM:B62B 97 DC			     sta     byte_48DC
-ROM:B62D 96 60			     lda     byte_4860
+ROM:B62D 96 60			     lda     shields
 ROM:B62F 2D 06			     blt     loc_B637
 ROM:B631 BD 98 74		     jsr     sub_9874
 ROM:B634 BD BD B2		     jsr     sub_BDB2
@@ -35725,7 +35712,7 @@ ROM:B6C7	     ; =============== S U B R O U T I N E ============================
 ROM:B6C7
 ROM:B6C7
 ROM:B6C7	     sub_B6C7:							     ; CODE XREF: sub_B6B9P
-ROM:B6C7 CC 63 80		     ldd     #0x6380
+ROM:B6C7 CC 63 80		     ldd     #0x6380				     ; COLR CYAN,128
 ROM:B6CA ED A1			     std     ,y++
 ROM:B6CA	     ; End of function sub_B6C7
 ROM:B6CA
@@ -35735,7 +35722,7 @@ ROM:B6CC
 ROM:B6CC
 ROM:B6CC	     sub_B6CC:							     ; CODE XREF: sub_B6C0P
 ROM:B6CC									     ; sub_C7FD+263P
-ROM:B6CC CC A0 12		     ldd     #0xA012
+ROM:B6CC CC A0 12		     ldd     #0xA012				     ; JSRL ($24)
 ROM:B6CF ED A1			     std     ,y++
 ROM:B6D1 FC 32 FE		     ldd     0x32FE
 ROM:B6D4 ED A1			     std     ,y++
@@ -36622,360 +36609,237 @@ ROM:BB85
 ROM:BB85	     sub_BB85:							     ; CODE XREF: sub_75D9+2AP
 ROM:BB85									     ; sub_760A+CP
 ROM:BB85 96 A1			     lda     word_48A1
-ROM:BB87 48			     asla
-ROM:BB88 8E BB 8E		     ldx     #0xBB8E
+ROM:BB87 48			     asla					     ; word offset
+ROM:BB88 8E BB 8E		     ldx     #off_BB8E
 ROM:BB8B AD 96			     jsr     [a,x]
+ROM:BB8D
+ROM:BB8D	     locret_BB8D:						     ; DATA XREF: ROM:off_BB8Eo
 ROM:BB8D 39			     rts
 ROM:BB8D	     ; End of function sub_BB85
 ROM:BB8D
 ROM:BB8D	     ; ---------------------------------------------------------------------------
-ROM:BB8E BB			     .db 0xBB ;	ª
-ROM:BB8F 8D			     .db 0x8D ;	ç
-ROM:BB90 BB			     .db 0xBB ;	ª
-ROM:BB91 98			     .db 0x98 ;	ò
-ROM:BB92 BB			     .db 0xBB ;	ª
-ROM:BB93 BB			     .db 0xBB ;	ª
-ROM:BB94 BC			     .db 0xBC ;	º
-ROM:BB95 1E			     .db 0x1E
-ROM:BB96 BC			     .db 0xBC ;	º
-ROM:BB97 85			     .db 0x85 ;	Ö
-ROM:BB98 CC			     .db 0xCC ;	Ã
-ROM:BB99 64			     .db 0x64 ;	d
-ROM:BB9A 80			     .db 0x80 ;	Ä
-ROM:BB9B CE			     .db 0xCE ;	Œ
-ROM:BB9C 76			     .db 0x76 ;	v
-ROM:BB9D F0			     .db 0xF0 ;	
-ROM:BB9E 9E			     .db 0x9E ;	û
-ROM:BB9F 9F			     .db 0x9F ;	ü
-ROM:BBA0 BD			     .db 0xBD ;	Ω
-ROM:BBA1 BC			     .db 0xBC ;	º
-ROM:BBA2 AE			     .db 0xAE ;	Æ
-ROM:BBA3 DC			     .db 0xDC ;	‹
-ROM:BBA4 9F			     .db 0x9F ;	ü
-ROM:BBA5 C3			     .db 0xC3 ;	√
-ROM:BBA6 00			     .db    0
-ROM:BBA7 02			     .db    2
-ROM:BBA8 DD			     .db 0xDD ;	›
-ROM:BBA9 9F			     .db 0x9F ;	ü
-ROM:BBAA 10			     .db 0x10
-ROM:BBAB 83			     .db 0x83 ;	É
-ROM:BBAC 00			     .db    0
-ROM:BBAD 3F			     .db 0x3F ;	?
-ROM:BBAE 24			     .db 0x24 ;	$
-ROM:BBAF 0A			     .db  0xA
-ROM:BBB0 CC			     .db 0xCC ;	Ã
-ROM:BBB1 00			     .db    0
-ROM:BBB2 01			     .db    1
-ROM:BBB3 DD			     .db 0xDD ;	›
-ROM:BBB4 9F			     .db 0x9F ;	ü
-ROM:BBB5 0C			     .db  0xC
-ROM:BBB6 A1			     .db 0xA1 ;	°
-ROM:BBB7 BD			     .db 0xBD ;	Ω
-ROM:BBB8 BD			     .db 0xBD ;	Ω
-ROM:BBB9 B7			     .db 0xB7 ;	∑
-ROM:BBBA 39			     .db 0x39 ;	9
-ROM:BBBB 9E			     .db 0x9E ;	û
-ROM:BBBC 9F			     .db 0x9F ;	ü
-ROM:BBBD CC			     .db 0xCC ;	Ã
-ROM:BBBE 61			     .db 0x61 ;	a
-ROM:BBBF FF			     .db 0xFF
-ROM:BBC0 CE			     .db 0xCE ;	Œ
-ROM:BBC1 76			     .db 0x76 ;	v
-ROM:BBC2 F0			     .db 0xF0 ;	
-ROM:BBC3 BD			     .db 0xBD ;	Ω
-ROM:BBC4 BC			     .db 0xBC ;	º
-ROM:BBC5 AE			     .db 0xAE ;	Æ
-ROM:BBC6 DC			     .db 0xDC ;	‹
-ROM:BBC7 9F			     .db 0x9F ;	ü
-ROM:BBC8 C3			     .db 0xC3 ;	√
-ROM:BBC9 00			     .db    0
-ROM:BBCA 02			     .db    2
-ROM:BBCB DD			     .db 0xDD ;	›
-ROM:BBCC 9F			     .db 0x9F ;	ü
-ROM:BBCD 10			     .db 0x10
-ROM:BBCE 83			     .db 0x83 ;	É
-ROM:BBCF 00			     .db    0
-ROM:BBD0 3F			     .db 0x3F ;	?
-ROM:BBD1 24			     .db 0x24 ;	$
-ROM:BBD2 38			     .db 0x38 ;	8
-ROM:BBD3 C6			     .db 0xC6 ;	∆
-ROM:BBD4 3F			     .db 0x3F ;	?
-ROM:BBD5 D0			     .db 0xD0 ;	–
-ROM:BBD6 A0			     .db 0xA0 ;	†
-ROM:BBD7 4F			     .db 0x4F ;	O
-ROM:BBD8 1F			     .db 0x1F
-ROM:BBD9 01			     .db    1
-ROM:BBDA CC			     .db 0xCC ;	Ã
-ROM:BBDB 64			     .db 0x64 ;	d
-ROM:BBDC FF			     .db 0xFF
-ROM:BBDD BD			     .db 0xBD ;	Ω
-ROM:BBDE BC			     .db 0xBC ;	º
-ROM:BBDF AE			     .db 0xAE ;	Æ
-ROM:BBE0 DC			     .db 0xDC ;	‹
-ROM:BBE1 9F			     .db 0x9F ;	ü
-ROM:BBE2 58			     .db 0x58 ;	X
-ROM:BBE3 49			     .db 0x49 ;	I
-ROM:BBE4 58			     .db 0x58 ;	X
-ROM:BBE5 49			     .db 0x49 ;	I
-ROM:BBE6 58			     .db 0x58 ;	X
-ROM:BBE7 49			     .db 0x49 ;	I
-ROM:BBE8 43			     .db 0x43 ;	C
-ROM:BBE9 53			     .db 0x53 ;	S
-ROM:BBEA 2B			     .db 0x2B ;	+
-ROM:BBEB 03			     .db    3
-ROM:BBEC 4A			     .db 0x4A ;	J
-ROM:BBED CA			     .db 0xCA ;	 
-ROM:BBEE 80			     .db 0x80 ;	Ä
-ROM:BBEF C3			     .db 0xC3 ;	√
-ROM:BBF0 76			     .db 0x76 ;	v
-ROM:BBF1 70			     .db 0x70 ;	p
-ROM:BBF2 5D			     .db 0x5D ;	]
-ROM:BBF3 2B			     .db 0x2B ;	+
-ROM:BBF4 03			     .db    3
-ROM:BBF5 4A			     .db 0x4A ;	J
-ROM:BBF6 C4			     .db 0xC4 ;	ƒ
-ROM:BBF7 7F			     .db 0x7F ;	
-ROM:BBF8 1F			     .db 0x1F
-ROM:BBF9 03			     .db    3
-ROM:BBFA DC			     .db 0xDC ;	‹
-ROM:BBFB 9F			     .db 0x9F ;	ü
-ROM:BBFC 54			     .db 0x54 ;	T
-ROM:BBFD 54			     .db 0x54 ;	T
-ROM:BBFE C4			     .db 0xC4 ;	ƒ
-ROM:BBFF 07			     .db    7
-ROM:BC00 C8			     .db 0xC8 ;	»
-ROM:BC01 07			     .db    7
-ROM:BC02 5C			     .db 0x5C ;	\
-ROM:BC03 1F			     .db 0x1F
-ROM:BC04 01			     .db    1
-ROM:BC05 CC			     .db 0xCC ;	Ã
-ROM:BC06 64			     .db 0x64 ;	d
-ROM:BC07 FF			     .db 0xFF
-ROM:BC08 BD			     .db 0xBD ;	Ω
-ROM:BC09 BC			     .db 0xBC ;	º
-ROM:BC0A C8			     .db 0xC8 ;	»
-ROM:BC0B DC			     .db 0xDC ;	‹
-ROM:BC0C 9F			     .db 0x9F ;	ü
-ROM:BC0D 10			     .db 0x10
-ROM:BC0E 83			     .db 0x83 ;	É
-ROM:BC0F 00			     .db    0
-ROM:BC10 3F			     .db 0x3F ;	?
-ROM:BC11 25			     .db 0x25 ;	%
-ROM:BC12 0A			     .db  0xA
-ROM:BC13 CC			     .db 0xCC ;	Ã
-ROM:BC14 00			     .db    0
-ROM:BC15 01			     .db    1
-ROM:BC16 DD			     .db 0xDD ;	›
-ROM:BC17 9F			     .db 0x9F ;	ü
-ROM:BC18 0C			     .db  0xC
-ROM:BC19 A1			     .db 0xA1 ;	°
-ROM:BC1A BD			     .db 0xBD ;	Ω
-ROM:BC1B BD			     .db 0xBD ;	Ω
-ROM:BC1C B7			     .db 0xB7 ;	∑
-ROM:BC1D 39			     .db 0x39 ;	9
-ROM:BC1E 9E			     .db 0x9E ;	û
-ROM:BC1F 9F			     .db 0x9F ;	ü
-ROM:BC20 CC			     .db 0xCC ;	Ã
-ROM:BC21 67			     .db 0x67 ;	g
-ROM:BC22 FF			     .db 0xFF
-ROM:BC23 CE			     .db 0xCE ;	Œ
-ROM:BC24 76			     .db 0x76 ;	v
-ROM:BC25 70			     .db 0x70 ;	p
-ROM:BC26 BD			     .db 0xBD ;	Ω
-ROM:BC27 BC			     .db 0xBC ;	º
-ROM:BC28 AE			     .db 0xAE ;	Æ
-ROM:BC29 DC			     .db 0xDC ;	‹
-ROM:BC2A 9F			     .db 0x9F ;	ü
-ROM:BC2B C3			     .db 0xC3 ;	√
-ROM:BC2C 00			     .db    0
-ROM:BC2D 03			     .db    3
-ROM:BC2E DD			     .db 0xDD ;	›
-ROM:BC2F 9F			     .db 0x9F ;	ü
-ROM:BC30 10			     .db 0x10
-ROM:BC31 83			     .db 0x83 ;	É
-ROM:BC32 00			     .db    0
-ROM:BC33 3F			     .db 0x3F ;	?
-ROM:BC34 24			     .db 0x24 ;	$
-ROM:BC35 0D			     .db  0xD
-ROM:BC36 C6			     .db 0xC6 ;	∆
-ROM:BC37 3F			     .db 0x3F ;	?
-ROM:BC38 D0			     .db 0xD0 ;	–
-ROM:BC39 A0			     .db 0xA0 ;	†
-ROM:BC3A 4F			     .db 0x4F ;	O
-ROM:BC3B 1F			     .db 0x1F
-ROM:BC3C 01			     .db    1
-ROM:BC3D CC			     .db 0xCC ;	Ã
-ROM:BC3E 61			     .db 0x61 ;	a
-ROM:BC3F FF			     .db 0xFF
-ROM:BC40 BD			     .db 0xBD ;	Ω
-ROM:BC41 BC			     .db 0xBC ;	º
-ROM:BC42 AE			     .db 0xAE ;	Æ
-ROM:BC43 DC			     .db 0xDC ;	‹
-ROM:BC44 9F			     .db 0x9F ;	ü
-ROM:BC45 10			     .db 0x10
-ROM:BC46 83			     .db 0x83 ;	É
-ROM:BC47 00			     .db    0
-ROM:BC48 3F			     .db 0x3F ;	?
-ROM:BC49 24			     .db 0x24 ;	$
-ROM:BC4A 27			     .db 0x27 ;	'
-ROM:BC4B 58			     .db 0x58 ;	X
-ROM:BC4C 49			     .db 0x49 ;	I
-ROM:BC4D 58			     .db 0x58 ;	X
-ROM:BC4E 49			     .db 0x49 ;	I
-ROM:BC4F 58			     .db 0x58 ;	X
-ROM:BC50 49			     .db 0x49 ;	I
-ROM:BC51 43			     .db 0x43 ;	C
-ROM:BC52 53			     .db 0x53 ;	S
-ROM:BC53 2B			     .db 0x2B ;	+
-ROM:BC54 03			     .db    3
-ROM:BC55 4A			     .db 0x4A ;	J
-ROM:BC56 CA			     .db 0xCA ;	 
-ROM:BC57 80			     .db 0x80 ;	Ä
-ROM:BC58 C3			     .db 0xC3 ;	√
-ROM:BC59 76			     .db 0x76 ;	v
-ROM:BC5A 70			     .db 0x70 ;	p
-ROM:BC5B 5D			     .db 0x5D ;	]
-ROM:BC5C 2B			     .db 0x2B ;	+
-ROM:BC5D 03			     .db    3
-ROM:BC5E 4A			     .db 0x4A ;	J
-ROM:BC5F C4			     .db 0xC4 ;	ƒ
-ROM:BC60 7F			     .db 0x7F ;	
-ROM:BC61 1F			     .db 0x1F
-ROM:BC62 03			     .db    3
-ROM:BC63 DC			     .db 0xDC ;	‹
-ROM:BC64 9F			     .db 0x9F ;	ü
-ROM:BC65 C4			     .db 0xC4 ;	ƒ
-ROM:BC66 0F			     .db  0xF
-ROM:BC67 C8			     .db 0xC8 ;	»
-ROM:BC68 0F			     .db  0xF
-ROM:BC69 5C			     .db 0x5C ;	\
-ROM:BC6A 1F			     .db 0x1F
-ROM:BC6B 01			     .db    1
-ROM:BC6C CC			     .db 0xCC ;	Ã
-ROM:BC6D 61			     .db 0x61 ;	a
-ROM:BC6E FF			     .db 0xFF
-ROM:BC6F BD			     .db 0xBD ;	Ω
-ROM:BC70 BC			     .db 0xBC ;	º
-ROM:BC71 C8			     .db 0xC8 ;	»
-ROM:BC72 DC			     .db 0xDC ;	‹
-ROM:BC73 9F			     .db 0x9F ;	ü
-ROM:BC74 10			     .db 0x10
-ROM:BC75 83			     .db 0x83 ;	É
-ROM:BC76 00			     .db    0
-ROM:BC77 50			     .db 0x50 ;	P
-ROM:BC78 25			     .db 0x25 ;	%
-ROM:BC79 0A			     .db  0xA
-ROM:BC7A CC			     .db 0xCC ;	Ã
-ROM:BC7B 00			     .db    0
-ROM:BC7C 80			     .db 0x80 ;	Ä
-ROM:BC7D DD			     .db 0xDD ;	›
-ROM:BC7E 9F			     .db 0x9F ;	ü
-ROM:BC7F 0C			     .db  0xC
-ROM:BC80 A1			     .db 0xA1 ;	°
-ROM:BC81 BD			     .db 0xBD ;	Ω
-ROM:BC82 BD			     .db 0xBD ;	Ω
-ROM:BC83 B7			     .db 0xB7 ;	∑
-ROM:BC84 39			     .db 0x39 ;	9
-ROM:BC85 DC			     .db 0xDC ;	‹
-ROM:BC86 9F			     .db 0x9F ;	ü
-ROM:BC87 83			     .db 0x83 ;	É
-ROM:BC88 00			     .db    0
-ROM:BC89 04			     .db    4
-ROM:BC8A DD			     .db 0xDD ;	›
-ROM:BC8B 9F			     .db 0x9F ;	ü
-ROM:BC8C 10			     .db 0x10
-ROM:BC8D 83			     .db 0x83 ;	É
-ROM:BC8E 00			     .db    0
-ROM:BC8F 08			     .db    8
-ROM:BC90 25			     .db 0x25 ;	%
-ROM:BC91 17			     .db 0x17
-ROM:BC92 C3			     .db 0xC3 ;	√
-ROM:BC93 75			     .db 0x75 ;	u
-ROM:BC94 00			     .db    0
-ROM:BC95 1F			     .db 0x1F
-ROM:BC96 03			     .db    3
-ROM:BC97 DC			     .db 0xDC ;	‹
-ROM:BC98 9F			     .db 0x9F ;	ü
-ROM:BC99 44			     .db 0x44 ;	D
-ROM:BC9A 56			     .db 0x56 ;	V
-ROM:BC9B C4			     .db 0xC4 ;	ƒ
-ROM:BC9C 3F			     .db 0x3F ;	?
-ROM:BC9D C8			     .db 0xC8 ;	»
-ROM:BC9E 3F			     .db 0x3F ;	?
-ROM:BC9F 1F			     .db 0x1F
-ROM:BCA0 01			     .db    1
-ROM:BCA1 CC			     .db 0xCC ;	Ã
-ROM:BCA2 67			     .db 0x67 ;	g
-ROM:BCA3 FF			     .db 0xFF
-ROM:BCA4 BD			     .db 0xBD ;	Ω
-ROM:BCA5 BC			     .db 0xBC ;	º
-ROM:BCA6 C8			     .db 0xC8 ;	»
-ROM:BCA7 20			     .db 0x20
-ROM:BCA8 04			     .db    4
-ROM:BCA9 86			     .db 0x86 ;	Ü
-ROM:BCAA 00			     .db    0
-ROM:BCAB 97			     .db 0x97 ;	ó
-ROM:BCAC A1			     .db 0xA1 ;	°
-ROM:BCAD 39			     .db 0x39 ;	9
-ROM:BCAE ED			     .db 0xED ;	Ì
-ROM:BCAF A1			     .db 0xA1 ;	°
-ROM:BCB0 CC			     .db 0xCC ;	Ã
-ROM:BCB1 1F			     .db 0x1F
-ROM:BCB2 98			     .db 0x98 ;	ò
-ROM:BCB3 ED			     .db 0xED ;	Ì
-ROM:BCB4 A1			     .db 0xA1 ;	°
-ROM:BCB5 CC			     .db 0xCC ;	Ã
-ROM:BCB6 00			     .db    0
-ROM:BCB7 00			     .db    0
-ROM:BCB8 ED			     .db 0xED ;	Ì
-ROM:BCB9 A1			     .db 0xA1 ;	°
-ROM:BCBA EF			     .db 0xEF ;	Ô
-ROM:BCBB A1			     .db 0xA1 ;	°
-ROM:BCBC CC			     .db 0xCC ;	Ã
-ROM:BCBD BD			     .db 0xBD ;	Ω
-ROM:BCBE 69			     .db 0x69 ;	i
-ROM:BCBF ED			     .db 0xED ;	Ì
-ROM:BCC0 A1			     .db 0xA1 ;	°
-ROM:BCC1 33			     .db 0x33 ;	3
-ROM:BCC2 5E			     .db 0x5E ;	^
-ROM:BCC3 30			     .db 0x30 ;	0
-ROM:BCC4 1F			     .db 0x1F
-ROM:BCC5 26			     .db 0x26 ;	&
-ROM:BCC6 E9			     .db 0xE9 ;	È
-ROM:BCC7 39			     .db 0x39 ;	9
-ROM:BCC8 ED			     .db 0xED ;	Ì
-ROM:BCC9 A1			     .db 0xA1 ;	°
-ROM:BCCA CC			     .db 0xCC ;	Ã
-ROM:BCCB 1F			     .db 0x1F
-ROM:BCCC 98			     .db 0x98 ;	ò
-ROM:BCCD ED			     .db 0xED ;	Ì
-ROM:BCCE A1			     .db 0xA1 ;	°
-ROM:BCCF CC			     .db 0xCC ;	Ã
-ROM:BCD0 00			     .db    0
-ROM:BCD1 00			     .db    0
-ROM:BCD2 ED			     .db 0xED ;	Ì
-ROM:BCD3 A1			     .db 0xA1 ;	°
-ROM:BCD4 EF			     .db 0xEF ;	Ô
-ROM:BCD5 A1			     .db 0xA1 ;	°
-ROM:BCD6 CC			     .db 0xCC ;	Ã
-ROM:BCD7 BD			     .db 0xBD ;	Ω
-ROM:BCD8 69			     .db 0x69 ;	i
-ROM:BCD9 ED			     .db 0xED ;	Ì
-ROM:BCDA A1			     .db 0xA1 ;	°
-ROM:BCDB 1F			     .db 0x1F
-ROM:BCDC 30			     .db 0x30 ;	0
-ROM:BCDD 83			     .db 0x83 ;	É
-ROM:BCDE 00			     .db    0
-ROM:BCDF 04			     .db    4
-ROM:BCE0 C4			     .db 0xC4 ;	ƒ
-ROM:BCE1 7F			     .db 0x7F ;	
-ROM:BCE2 1F			     .db 0x1F
-ROM:BCE3 03			     .db    3
-ROM:BCE4 30			     .db 0x30 ;	0
-ROM:BCE5 1F			     .db 0x1F
-ROM:BCE6 26			     .db 0x26 ;	&
-ROM:BCE7 E2			     .db 0xE2 ;	‚
-ROM:BCE8 39			     .db 0x39 ;	9
+ROM:BB8E BB 8D	     off_BB8E:	     .dw locret_BB8D				     ; DATA XREF: sub_BB85+3o
+ROM:BB90 BB 98			     .dw loc_BB98
+ROM:BB92 BB BB			     .dw loc_BBBB
+ROM:BB94 BC 1E			     .dw loc_BC1E
+ROM:BB96 BC 85			     .dw loc_BC85
+ROM:BB98	     ; ---------------------------------------------------------------------------
+ROM:BB98
+ROM:BB98	     loc_BB98:							     ; DATA XREF: ROM:BB90o
+ROM:BB98 CC 64 80		     ldd     #0x6480				     ; COLR RED,128
+ROM:BB9B CE 76 F0		     ldu     #0x76F0
+ROM:BB9E 9E 9F			     ldx     byte_489F
+ROM:BBA0 BD BC AE		     jsr     sub_BCAE
+ROM:BBA3 DC 9F			     ldd     byte_489F
+ROM:BBA5 C3 00 02		     addd    #2
+ROM:BBA8 DD 9F			     std     byte_489F
+ROM:BBAA 10 83 00 3F		     cmpd    #0x3F ; '?'
+ROM:BBAE 24 0A			     bcc     locret_BBBA
+ROM:BBB0 CC 00 01		     ldd     #1
+ROM:BBB3 DD 9F			     std     byte_489F
+ROM:BBB5 0C A1			     inc     word_48A1
+ROM:BBB7 BD BD B7		     jsr     sub_BDB7
+ROM:BBBA
+ROM:BBBA	     locret_BBBA:						     ; CODE XREF: ROM:BBAEj
+ROM:BBBA 39			     rts
+ROM:BBBB	     ; ---------------------------------------------------------------------------
+ROM:BBBB
+ROM:BBBB	     loc_BBBB:							     ; DATA XREF: ROM:BB92o
+ROM:BBBB 9E 9F			     ldx     byte_489F
+ROM:BBBD CC 61 FF		     ldd     #0x61FF				     ; COLR BLUE,255
+ROM:BBC0 CE 76 F0		     ldu     #0x76F0
+ROM:BBC3 BD BC AE		     jsr     sub_BCAE
+ROM:BBC6 DC 9F			     ldd     byte_489F
+ROM:BBC8 C3 00 02		     addd    #2
+ROM:BBCB DD 9F			     std     byte_489F
+ROM:BBCD 10 83 00 3F		     cmpd    #0x3F ; '?'
+ROM:BBD1 24 38			     bcc     loc_BC0B
+ROM:BBD3 C6 3F			     ldb     #0x3F ; '?'
+ROM:BBD5 D0 A0			     subb    byte_48A0
+ROM:BBD7 4F			     clra
+ROM:BBD8 1F 01			     tfr     d,	x
+ROM:BBDA CC 64 FF		     ldd     #0x64FF
+ROM:BBDD BD BC AE		     jsr     sub_BCAE				     ; COLR RED,255
+ROM:BBE0 DC 9F			     ldd     byte_489F
+ROM:BBE2 58			     aslb
+ROM:BBE3 49			     rola
+ROM:BBE4 58			     aslb
+ROM:BBE5 49			     rola
+ROM:BBE6 58			     aslb
+ROM:BBE7 49			     rola
+ROM:BBE8 43			     coma
+ROM:BBE9 53			     comb
+ROM:BBEA 2B 03			     bmi     loc_BBEF
+ROM:BBEC 4A			     deca
+ROM:BBED CA 80			     orab    #0x80 ; 'Ä'
+ROM:BBEF
+ROM:BBEF	     loc_BBEF:							     ; CODE XREF: ROM:BBEAj
+ROM:BBEF C3 76 70		     addd    #0x7670
+ROM:BBF2 5D			     tstb
+ROM:BBF3 2B 03			     bmi     loc_BBF8
+ROM:BBF5 4A			     deca
+ROM:BBF6 C4 7F			     andb    #0x7F ; ''
+ROM:BBF8
+ROM:BBF8	     loc_BBF8:							     ; CODE XREF: ROM:BBF3j
+ROM:BBF8 1F 03			     tfr     d,	u
+ROM:BBFA DC 9F			     ldd     byte_489F
+ROM:BBFC 54			     lsrb
+ROM:BBFD 54			     lsrb
+ROM:BBFE C4 07			     andb    #7
+ROM:BC00 C8 07			     eorb    #7
+ROM:BC02 5C			     incb
+ROM:BC03 1F 01			     tfr     d,	x
+ROM:BC05 CC 64 FF		     ldd     #0x64FF				     ; COLR RED,255
+ROM:BC08 BD BC C8		     jsr     sub_BCC8
+ROM:BC0B
+ROM:BC0B	     loc_BC0B:							     ; CODE XREF: ROM:BBD1j
+ROM:BC0B DC 9F			     ldd     byte_489F
+ROM:BC0D 10 83 00 3F		     cmpd    #0x3F ; '?'
+ROM:BC11 25 0A			     bcs     locret_BC1D
+ROM:BC13 CC 00 01		     ldd     #1
+ROM:BC16 DD 9F			     std     byte_489F
+ROM:BC18 0C A1			     inc     word_48A1
+ROM:BC1A BD BD B7		     jsr     sub_BDB7
+ROM:BC1D
+ROM:BC1D	     locret_BC1D:						     ; CODE XREF: ROM:BC11j
+ROM:BC1D 39			     rts
+ROM:BC1E	     ; ---------------------------------------------------------------------------
+ROM:BC1E
+ROM:BC1E	     loc_BC1E:							     ; DATA XREF: ROM:BB94o
+ROM:BC1E 9E 9F			     ldx     byte_489F
+ROM:BC20 CC 67 FF		     ldd     #0x67FF				     ; COLR WHITE,255
+ROM:BC23 CE 76 70		     ldu     #0x7670
+ROM:BC26 BD BC AE		     jsr     sub_BCAE
+ROM:BC29 DC 9F			     ldd     byte_489F
+ROM:BC2B C3 00 03		     addd    #3
+ROM:BC2E DD 9F			     std     byte_489F
+ROM:BC30 10 83 00 3F		     cmpd    #0x3F ; '?'
+ROM:BC34 24 0D			     bcc     loc_BC43
+ROM:BC36 C6 3F			     ldb     #0x3F ; '?'
+ROM:BC38 D0 A0			     subb    byte_48A0
+ROM:BC3A 4F			     clra
+ROM:BC3B 1F 01			     tfr     d,	x
+ROM:BC3D CC 61 FF		     ldd     #0x61FF				     ; COLR BLUE,255
+ROM:BC40 BD BC AE		     jsr     sub_BCAE
+ROM:BC43
+ROM:BC43	     loc_BC43:							     ; CODE XREF: ROM:BC34j
+ROM:BC43 DC 9F			     ldd     byte_489F
+ROM:BC45 10 83 00 3F		     cmpd    #0x3F ; '?'
+ROM:BC49 24 27			     bcc     loc_BC72
+ROM:BC4B 58			     aslb
+ROM:BC4C 49			     rola
+ROM:BC4D 58			     aslb
+ROM:BC4E 49			     rola
+ROM:BC4F 58			     aslb
+ROM:BC50 49			     rola
+ROM:BC51 43			     coma
+ROM:BC52 53			     comb
+ROM:BC53 2B 03			     bmi     loc_BC58
+ROM:BC55 4A			     deca
+ROM:BC56 CA 80			     orab    #0x80 ; 'Ä'
+ROM:BC58
+ROM:BC58	     loc_BC58:							     ; CODE XREF: ROM:BC53j
+ROM:BC58 C3 76 70		     addd    #0x7670
+ROM:BC5B 5D			     tstb
+ROM:BC5C 2B 03			     bmi     loc_BC61
+ROM:BC5E 4A			     deca
+ROM:BC5F C4 7F			     andb    #0x7F ; ''
+ROM:BC61
+ROM:BC61	     loc_BC61:							     ; CODE XREF: ROM:BC5Cj
+ROM:BC61 1F 03			     tfr     d,	u
+ROM:BC63 DC 9F			     ldd     byte_489F
+ROM:BC65 C4 0F			     andb    #0xF
+ROM:BC67 C8 0F			     eorb    #0xF
+ROM:BC69 5C			     incb
+ROM:BC6A 1F 01			     tfr     d,	x
+ROM:BC6C CC 61 FF		     ldd     #0x61FF
+ROM:BC6F BD BC C8		     jsr     sub_BCC8
+ROM:BC72
+ROM:BC72	     loc_BC72:							     ; CODE XREF: ROM:BC49j
+ROM:BC72 DC 9F			     ldd     byte_489F
+ROM:BC74 10 83 00 50		     cmpd    #0x50 ; 'P'
+ROM:BC78 25 0A			     bcs     locret_BC84
+ROM:BC7A CC 00 80		     ldd     #0x80 ; 'Ä'
+ROM:BC7D DD 9F			     std     byte_489F
+ROM:BC7F 0C A1			     inc     word_48A1
+ROM:BC81 BD BD B7		     jsr     sub_BDB7
+ROM:BC84
+ROM:BC84	     locret_BC84:						     ; CODE XREF: ROM:BC78j
+ROM:BC84 39			     rts
+ROM:BC85	     ; ---------------------------------------------------------------------------
+ROM:BC85
+ROM:BC85	     loc_BC85:							     ; DATA XREF: ROM:BB96o
+ROM:BC85 DC 9F			     ldd     byte_489F
+ROM:BC87 83 00 04		     subd    #4
+ROM:BC8A DD 9F			     std     byte_489F
+ROM:BC8C 10 83 00 08		     cmpd    #8
+ROM:BC90 25 17			     bcs     loc_BCA9
+ROM:BC92 C3 75 00		     addd    #0x7500
+ROM:BC95 1F 03			     tfr     d,	u
+ROM:BC97 DC 9F			     ldd     byte_489F
+ROM:BC99 44			     lsra
+ROM:BC9A 56			     rorb
+ROM:BC9B C4 3F			     andb    #0x3F ; '?'
+ROM:BC9D C8 3F			     eorb    #0x3F ; '?'
+ROM:BC9F 1F 01			     tfr     d,	x
+ROM:BCA1 CC 67 FF		     ldd     #0x67FF
+ROM:BCA4 BD BC C8		     jsr     sub_BCC8
+ROM:BCA7 20 04			     bra     locret_BCAD
+ROM:BCA9	     ; ---------------------------------------------------------------------------
+ROM:BCA9
+ROM:BCA9	     loc_BCA9:							     ; CODE XREF: ROM:BC90j
+ROM:BCA9 86 00			     lda     #0
+ROM:BCAB 97 A1			     sta     word_48A1
+ROM:BCAD
+ROM:BCAD	     locret_BCAD:						     ; CODE XREF: ROM:BCA7j
+ROM:BCAD 39			     rts
+ROM:BCAE
+ROM:BCAE	     ; =============== S U B R O U T I N E =======================================
+ROM:BCAE
+ROM:BCAE
+ROM:BCAE	     sub_BCAE:							     ; CODE XREF: ROM:BBA0P
+ROM:BCAE									     ; ROM:BBC3P ...
+ROM:BCAE ED A1			     std     ,y++
+ROM:BCB0
+ROM:BCB0	     loc_BCB0:							     ; CODE XREF: sub_BCAE+17j
+ROM:BCB0 CC 1F 98		     ldd     #0x1F98
+ROM:BCB3 ED A1			     std     ,y++
+ROM:BCB5 CC 00 00		     ldd     #0
+ROM:BCB8 ED A1			     std     ,y++
+ROM:BCBA EF A1			     stu     ,y++
+ROM:BCBC CC BD 69		     ldd     #0xBD69
+ROM:BCBF ED A1			     std     ,y++
+ROM:BCC1 33 5E			     leau    -2,u
+ROM:BCC3 30 1F			     leax    -1,x
+ROM:BCC5 26 E9			     bne     loc_BCB0
+ROM:BCC7 39			     rts
+ROM:BCC7	     ; End of function sub_BCAE
+ROM:BCC7
+ROM:BCC8
+ROM:BCC8	     ; =============== S U B R O U T I N E =======================================
+ROM:BCC8
+ROM:BCC8
+ROM:BCC8	     sub_BCC8:							     ; CODE XREF: ROM:BC08P
+ROM:BCC8									     ; ROM:BC6FP ...
+ROM:BCC8 ED A1			     std     ,y++
+ROM:BCCA
+ROM:BCCA	     loc_BCCA:							     ; CODE XREF: sub_BCC8+1Ej
+ROM:BCCA CC 1F 98		     ldd     #0x1F98
+ROM:BCCD ED A1			     std     ,y++
+ROM:BCCF CC 00 00		     ldd     #0
+ROM:BCD2 ED A1			     std     ,y++
+ROM:BCD4 EF A1			     stu     ,y++
+ROM:BCD6 CC BD 69		     ldd     #0xBD69
+ROM:BCD9 ED A1			     std     ,y++
+ROM:BCDB 1F 30			     tfr     u,	d
+ROM:BCDD 83 00 04		     subd    #4
+ROM:BCE0 C4 7F			     andb    #0x7F ; ''
+ROM:BCE2 1F 03			     tfr     d,	u
+ROM:BCE4 30 1F			     leax    -1,x
+ROM:BCE6 26 E2			     bne     loc_BCCA
+ROM:BCE8 39			     rts
+ROM:BCE8	     ; End of function sub_BCC8
+ROM:BCE8
 ROM:BCE9	     ; ---------------------------------------------------------------------------
 ROM:BCE9	     ; START OF	FUNCTION CHUNK FOR sub_BD03
 ROM:BCE9
@@ -37340,12 +37204,16 @@ ROM:BDB2 86 26			     lda     #0x26 ; '&'
 ROM:BDB4 7E BC E9		     jmp     loc_BCE9
 ROM:BDB4	     ; End of function sub_BDB2
 ROM:BDB4
-ROM:BDB4	     ; ---------------------------------------------------------------------------
-ROM:BDB7 86			     .db 0x86 ;	Ü
-ROM:BDB8 27			     .db 0x27 ;	'
-ROM:BDB9 7E			     .db 0x7E ;	~
-ROM:BDBA BC			     .db 0xBC ;	º
-ROM:BDBB E9			     .db 0xE9 ;	È
+ROM:BDB7
+ROM:BDB7	     ; =============== S U B R O U T I N E =======================================
+ROM:BDB7
+ROM:BDB7
+ROM:BDB7	     sub_BDB7:							     ; CODE XREF: ROM:BBB7P
+ROM:BDB7									     ; ROM:BC1AP ...
+ROM:BDB7 86 27			     lda     #0x27 ; '''
+ROM:BDB9 7E BC E9		     jmp     loc_BCE9
+ROM:BDB9	     ; End of function sub_BDB7
+ROM:BDB9
 ROM:BDBC
 ROM:BDBC	     ; =============== S U B R O U T I N E =======================================
 ROM:BDBC
@@ -37530,37 +37398,37 @@ ROM:BE20
 ROM:BE20	     ; =============== S U B R O U T I N E =======================================
 ROM:BE20
 ROM:BE20
-ROM:BE20	     sub_BE20:							     ; CODE XREF: BANK0:64F4P
-ROM:BE20 86 59			     lda     #0x59 ; 'Y'
+ROM:BE20	     fmt_accounting_info:					     ; CODE XREF: BANK0:64F4P
+ROM:BE20 86 59			     lda     #89				     ; "ACCOUNTING INFORMATION"
 ROM:BE22
-ROM:BE22	     loc_BE22:							     ; CODE XREF: sub_BE20+8j
+ROM:BE22	     loc_BE22:							     ; CODE XREF: fmt_accounting_info+8j
 ROM:BE22 BD D8 DF		     jsr     add_msg_A_if_not_already_in
-ROM:BE25 4C			     inca
-ROM:BE26 81 65			     cmpa    #0x65 ; 'e'
-ROM:BE28 25 F8			     bcs     loc_BE22
-ROM:BE2A 86 D3			     lda     #0xD3 ; '”'
+ROM:BE25 4C			     inca					     ; next msg
+ROM:BE26 81 65			     cmpa    #101				     ; done all	messages?
+ROM:BE28 25 F8			     bcs     loc_BE22				     ; no, loop
+ROM:BE2A 86 D3			     lda     #211				     ; "PRESS AUX COIN TO CONTINUE"
 ROM:BE2C BD D8 DF		     jsr     add_msg_A_if_not_already_in
-ROM:BE2F CC 64 80		     ldd     #0x6480
-ROM:BE32 ED A1			     std     ,y++
-ROM:BE34 8E 45 3C		     ldx     #0x453C
-ROM:BE37 CE C7 BB		     ldu     #0xC7BB
+ROM:BE2F CC 64 80		     ldd     #0x6480				     ; COLR RED,128
+ROM:BE32 ED A1			     std     ,y++				     ; to display list
+ROM:BE34 8E 45 3C		     ldx     #unk_453C
+ROM:BE37 CE C7 BB		     ldu     #word_C7BB
 ROM:BE3A
-ROM:BE3A	     loc_BE3A:							     ; CODE XREF: sub_BE20+3Fj
-ROM:BE3A EC C1			     ldd     ,u++
-ROM:BE3C ED A1			     std     ,y++
-ROM:BE3E CC 00 30		     ldd     #0x30 ; '0'
-ROM:BE41 ED A1			     std     ,y++
+ROM:BE3A	     loc_BE3A:							     ; CODE XREF: fmt_accounting_info+3Fj
+ROM:BE3A EC C1			     ldd     ,u++				     ; VCTR (1st word)
+ROM:BE3C ED A1			     std     ,y++				     ; to display list
+ROM:BE3E CC 00 30		     ldd     #0x30 ; '0'                             ; z=0,dX=48 (2nd word)
+ROM:BE41 ED A1			     std     ,y++				     ; to display list
 ROM:BE43 FF 4A FA		     stu     unk_4AFA
 ROM:BE46 C6 05			     ldb     #5
-ROM:BE48 D7 AD			     stb     byte_48AD
+ROM:BE48 D7 AD			     stb     pad_digits_maybe
 ROM:BE4A C6 05			     ldb     #5
 ROM:BE4C
-ROM:BE4C	     loc_BE4C:							     ; CODE XREF: sub_BE20+32j
+ROM:BE4C	     loc_BE4C:							     ; CODE XREF: fmt_accounting_info+32j
 ROM:BE4C A6 80			     lda     ,x+
-ROM:BE4E BD E7 AD		     jsr     loc_E7AD
-ROM:BE51 5A			     decb
-ROM:BE52 2A F8			     bpl     loc_BE4C
-ROM:BE54 CC 80 40		     ldd     #0x8040
+ROM:BE4E BD E7 AD		     jsr     print_hex_digit
+ROM:BE51 5A			     decb					     ; done all	digits?
+ROM:BE52 2A F8			     bpl     loc_BE4C				     ; no, loop
+ROM:BE54 CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:BE57 ED A1			     std     ,y++
 ROM:BE59 FE 4A FA		     ldu     unk_4AFA
 ROM:BE5C 8C 45 54		     cmpx    #0x4554
@@ -37570,12 +37438,12 @@ ROM:BE64 ED A1			     std     ,y++
 ROM:BE66 CC 01 3C		     ldd     #0x13C
 ROM:BE69 ED A1			     std     ,y++
 ROM:BE6B 86 01			     lda     #1
-ROM:BE6D 97 AD			     sta     byte_48AD
+ROM:BE6D 97 AD			     sta     pad_digits_maybe
 ROM:BE6F B6 45 88		     lda     word_4588
-ROM:BE72 BD E7 AD		     jsr     loc_E7AD
+ROM:BE72 BD E7 AD		     jsr     print_hex_digit
 ROM:BE75 B6 45 89		     lda     word_4588+1
-ROM:BE78 BD E7 AD		     jsr     loc_E7AD
-ROM:BE7B CC 80 40		     ldd     #0x8040
+ROM:BE78 BD E7 AD		     jsr     print_hex_digit
+ROM:BE7B CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:BE7E ED A1			     std     ,y++
 ROM:BE80 8E 45 48		     ldx     #0x4548
 ROM:BE83 BD C6 D4		     jsr     sub_C6D4
@@ -37599,7 +37467,7 @@ ROM:BEB0 ED A1			     std     ,y++
 ROM:BEB2 CC 00 30		     ldd     #0x30 ; '0'
 ROM:BEB5 ED A1			     std     ,y++
 ROM:BEB7 C6 05			     ldb     #5
-ROM:BEB9 D7 AD			     stb     byte_48AD
+ROM:BEB9 D7 AD			     stb     pad_digits_maybe
 ROM:BEBB B6 4A FA		     lda     unk_4AFA
 ROM:BEBE BD E7 90		     jsr     sub_E790
 ROM:BEC1 B6 4A FB		     lda     word_4AFB
@@ -37616,7 +37484,7 @@ ROM:BEDE ED A1			     std     ,y++
 ROM:BEE0 CC 00 30		     ldd     #0x30 ; '0'
 ROM:BEE3 ED A1			     std     ,y++
 ROM:BEE5 C6 07			     ldb     #7
-ROM:BEE7 D7 AD			     stb     byte_48AD
+ROM:BEE7 D7 AD			     stb     pad_digits_maybe
 ROM:BEE9 B6 4A FA		     lda     unk_4AFA
 ROM:BEEC BD E7 90		     jsr     sub_E790
 ROM:BEEF B6 4A FB		     lda     word_4AFB
@@ -37635,7 +37503,7 @@ ROM:BF12 ED A1			     std     ,y++
 ROM:BF14 CC 00 30		     ldd     #0x30 ; '0'
 ROM:BF17 ED A1			     std     ,y++
 ROM:BF19 C6 07			     ldb     #7
-ROM:BF1B D7 AD			     stb     byte_48AD
+ROM:BF1B D7 AD			     stb     pad_digits_maybe
 ROM:BF1D B6 4A FA		     lda     unk_4AFA
 ROM:BF20 BD E7 90		     jsr     sub_E790
 ROM:BF23 B6 4A FB		     lda     word_4AFB
@@ -37664,7 +37532,7 @@ ROM:BF61 B6 4A FA		     lda     unk_4AFA
 ROM:BF64 25 03			     bcs     loc_BF69
 ROM:BF66 7C 4A FA		     inc     unk_4AFA
 ROM:BF69
-ROM:BF69	     loc_BF69:							     ; CODE XREF: sub_BE20+144j
+ROM:BF69	     loc_BF69:							     ; CODE XREF: fmt_accounting_info+144j
 ROM:BF69 44			     lsra
 ROM:BF6A 44			     lsra
 ROM:BF6B 44			     lsra
@@ -37676,8 +37544,8 @@ ROM:BF75 81 0F			     cmpa    #0xF
 ROM:BF77 25 03			     bcs     loc_BF7C
 ROM:BF79 7C 4A FA		     inc     unk_4AFA
 ROM:BF7C
-ROM:BF7C	     loc_BF7C:							     ; CODE XREF: sub_BE20+12Cj
-ROM:BF7C									     ; sub_BE20+157j
+ROM:BF7C	     loc_BF7C:							     ; CODE XREF: fmt_accounting_info+12Cj
+ROM:BF7C									     ; fmt_accounting_info+157j
 ROM:BF7C FC C7 C5		     ldd     word_C7C5
 ROM:BF7F ED A1			     std     ,y++
 ROM:BF81 CC 00 30		     ldd     #0x30 ; '0'
@@ -37699,7 +37567,7 @@ ROM:BFAB BD C6 D7		     jsr     loc_C6D7
 ROM:BFAE 7F 4B 01		     clr     word_4B01
 ROM:BFB1 BD C0 2F		     jsr     sub_C02F
 ROM:BFB4
-ROM:BFB4	     loc_BFB4:							     ; CODE XREF: sub_BE20+183j
+ROM:BFB4	     loc_BFB4:							     ; CODE XREF: fmt_accounting_info+183j
 ROM:BFB4 FC C7 C7		     ldd     word_C7C7
 ROM:BFB7 ED A1			     std     ,y++
 ROM:BFB9 CC 00 30		     ldd     #0x30 ; '0'
@@ -37709,7 +37577,7 @@ ROM:BFBF F6 4A FA		     ldb     unk_4AFA
 ROM:BFC2 8E 00 10		     ldx     #0x10
 ROM:BFC5 BD 77 20		     jsr     sub_7720
 ROM:BFC8 C6 01			     ldb     #1
-ROM:BFCA D7 AD			     stb     byte_48AD
+ROM:BFCA D7 AD			     stb     pad_digits_maybe
 ROM:BFCC B6 4A D6		     lda     word_4AD6
 ROM:BFCF BD E7 90		     jsr     sub_E790
 ROM:BFD2 CC 80 40		     ldd     #0x8040
@@ -37719,7 +37587,7 @@ ROM:BFD9 F7 4A FA		     stb     unk_4AFA
 ROM:BFDC CE C7 CD		     ldu     #0xC7CD
 ROM:BFDF FF 4A FC		     stu     word_4AFB+1
 ROM:BFE2
-ROM:BFE2	     loc_BFE2:							     ; CODE XREF: sub_BE20+20Cj
+ROM:BFE2	     loc_BFE2:							     ; CODE XREF: fmt_accounting_info+20Cj
 ROM:BFE2 FE 4A FC		     ldu     word_4AFB+1
 ROM:BFE5 EC C1			     ldd     ,u++
 ROM:BFE7 ED A1			     std     ,y++
@@ -37729,10 +37597,10 @@ ROM:BFEF CC 1E D4		     ldd     #0x1ED4
 ROM:BFF2 20 03			     bra     loc_BFF7
 ROM:BFF4	     ; ---------------------------------------------------------------------------
 ROM:BFF4
-ROM:BFF4	     loc_BFF4:							     ; CODE XREF: sub_BE20+1CDj
+ROM:BFF4	     loc_BFF4:							     ; CODE XREF: fmt_accounting_info+1CDj
 ROM:BFF4 CC 00 64		     ldd     #0x64 ; 'd'
 ROM:BFF7
-ROM:BFF7	     loc_BFF7:							     ; CODE XREF: sub_BE20+1D2j
+ROM:BFF7	     loc_BFF7:							     ; CODE XREF: fmt_accounting_info+1D2j
 ROM:BFF7 ED A1			     std     ,y++
 ROM:BFF9 FF 4A FC		     stu     word_4AFB+1
 ROM:BFFC 8E C7 A3		     ldx     #0xC7A3
@@ -37743,28 +37611,28 @@ ROM:C007 FC 30 02		     ldd     0x3002
 ROM:C00A ED A1			     std     ,y++
 ROM:C00C ED A1			     std     ,y++
 ROM:C00E C6 00			     ldb     #0
-ROM:C010 D7 AD			     stb     byte_48AD
+ROM:C010 D7 AD			     stb     pad_digits_maybe
 ROM:C012 8E 45 64		     ldx     #0x4564
 ROM:C015 F6 4A FA		     ldb     unk_4AFA
 ROM:C018 58			     aslb
 ROM:C019 A6 85			     lda     b,x
-ROM:C01B BD E7 AD		     jsr     loc_E7AD
+ROM:C01B BD E7 AD		     jsr     print_hex_digit
 ROM:C01E 5C			     incb
 ROM:C01F A6 85			     lda     b,x
-ROM:C021 BD E7 AD		     jsr     loc_E7AD
+ROM:C021 BD E7 AD		     jsr     print_hex_digit
 ROM:C024 CC 80 40		     ldd     #0x8040
 ROM:C027 ED A1			     std     ,y++
 ROM:C029 7A 4A FA		     dec     unk_4AFA
 ROM:C02C 2A B4			     bpl     loc_BFE2
 ROM:C02E 39			     rts
-ROM:C02E	     ; End of function sub_BE20
+ROM:C02E	     ; End of function fmt_accounting_info
 ROM:C02E
 ROM:C02F
 ROM:C02F	     ; =============== S U B R O U T I N E =======================================
 ROM:C02F
 ROM:C02F
-ROM:C02F	     sub_C02F:							     ; CODE XREF: sub_BE20+137P
-ROM:C02F									     ; sub_BE20+191P
+ROM:C02F	     sub_C02F:							     ; CODE XREF: fmt_accounting_info+137P
+ROM:C02F									     ; fmt_accounting_info+191P
 ROM:C02F 8E 4A FE		     ldx     #0x4AFE
 ROM:C032 86 01			     lda     #1
 ROM:C034 B7 4B 02		     sta     word_4B01+1
@@ -37821,8 +37689,8 @@ ROM:C087
 ROM:C087	     ; =============== S U B R O U T I N E =======================================
 ROM:C087
 ROM:C087
-ROM:C087	     sub_C087:							     ; CODE XREF: sub_BE20+B8P
-ROM:C087									     ; sub_BE20+ECP
+ROM:C087	     sub_C087:							     ; CODE XREF: fmt_accounting_info+B8P
+ROM:C087									     ; fmt_accounting_info+ECP
 ROM:C087 8D 00			     bsr     *+2
 ROM:C087	     ; End of function sub_C087
 ROM:C087
@@ -38403,22 +38271,22 @@ ROM:C450
 ROM:C450	     ; =============== S U B R O U T I N E =======================================
 ROM:C450
 ROM:C450
-ROM:C450	     sub_C450:							     ; CODE XREF: BANK0:6535P
-ROM:C450 86 65			     lda     #0x65 ; 'e'
+ROM:C450	     fmt_game_options:						     ; CODE XREF: BANK0:6535P
+ROM:C450 86 65			     lda     #101				     ; "GAME OPTION"
 ROM:C452
-ROM:C452	     loc_C452:							     ; CODE XREF: sub_C450+8j
+ROM:C452	     loc_C452:							     ; CODE XREF: fmt_game_options+8j
 ROM:C452 BD D8 DF		     jsr     add_msg_A_if_not_already_in
-ROM:C455 4C			     inca
-ROM:C456 81 74			     cmpa    #0x74 ; 't'
-ROM:C458 25 F8			     bcs     loc_C452
-ROM:C45A 86 D4			     lda     #0xD4 ; '‘'
+ROM:C455 4C			     inca					     ; next msg
+ROM:C456 81 74			     cmpa    #116				     ; done all	messages?
+ROM:C458 25 F8			     bcs     loc_C452				     ; no, loop
+ROM:C45A 86 D4			     lda     #212				     ; "PRESS AUX COIN FOR SELF	TEST"
 ROM:C45C BD D8 DF		     jsr     add_msg_A_if_not_already_in
-ROM:C45F CC 62 80		     ldd     #0x6280
-ROM:C462 ED A1			     std     ,y++
+ROM:C45F CC 62 80		     ldd     #0x6280				     ; COLR GREEN,128
+ROM:C462 ED A1			     std     ,y++				     ; to display list
 ROM:C464 86 0B			     lda     #0xB
 ROM:C466 B7 4A FE		     sta     word_4AFD+1
 ROM:C469
-ROM:C469	     loc_C469:							     ; CODE XREF: sub_C450+22j
+ROM:C469	     loc_C469:							     ; CODE XREF: fmt_game_options+22j
 ROM:C469 B6 4A FE		     lda     word_4AFD+1
 ROM:C46C BD C5 A4		     jsr     sub_C5A4
 ROM:C46F 7A 4A FE		     dec     word_4AFD+1
@@ -38439,21 +38307,21 @@ ROM:C490 86 01			     lda     #1
 ROM:C492 BD C2 4E		     jsr     sub_C24E
 ROM:C495 BD CC 18		     jsr     sub_CC18
 ROM:C498
-ROM:C498	     loc_C498:							     ; CODE XREF: sub_C450+3Ej
+ROM:C498	     loc_C498:							     ; CODE XREF: fmt_game_options+3Ej
 ROM:C498 B6 45 98		     lda     word_4598
 ROM:C49B 84 04			     anda    #4
 ROM:C49D 27 12			     beq     loc_C4B1
 ROM:C49F 8E 45 4E		     ldx     #0x454E
 ROM:C4A2 CC 00 00		     ldd     #0
 ROM:C4A5
-ROM:C4A5	     loc_C4A5:							     ; CODE XREF: sub_C450+5Aj
+ROM:C4A5	     loc_C4A5:							     ; CODE XREF: fmt_game_options+5Aj
 ROM:C4A5 ED 81			     std     ,x++
 ROM:C4A7 8C 45 8E		     cmpx    #0x458E
 ROM:C4AA 25 F9			     bcs     loc_C4A5
 ROM:C4AC 86 02			     lda     #2
 ROM:C4AE BD C2 B3		     jsr     loc_C2B3
 ROM:C4B1
-ROM:C4B1	     loc_C4B1:							     ; CODE XREF: sub_C450+4Dj
+ROM:C4B1	     loc_C4B1:							     ; CODE XREF: fmt_game_options+4Dj
 ROM:C4B1 B6 45 98		     lda     word_4598
 ROM:C4B4 84 02			     anda    #2
 ROM:C4B6 27 22			     beq     loc_C4DA
@@ -38467,26 +38335,26 @@ ROM:C4C8 CE 45 00		     ldu     #0x4500
 ROM:C4CB F6 C7 B7		     ldb     word_C7B7
 ROM:C4CE F7 4B 02		     stb     word_4B01+1
 ROM:C4D1
-ROM:C4D1	     loc_C4D1:							     ; CODE XREF: sub_C450+88j
+ROM:C4D1	     loc_C4D1:							     ; CODE XREF: fmt_game_options+88j
 ROM:C4D1 E6 C0			     ldb     ,u+
 ROM:C4D3 E7 80			     stb     ,x+
 ROM:C4D5 7A 4B 02		     dec     word_4B01+1
 ROM:C4D8 26 F7			     bne     loc_C4D1
 ROM:C4DA
-ROM:C4DA	     loc_C4DA:							     ; CODE XREF: sub_C450+66j
+ROM:C4DA	     loc_C4DA:							     ; CODE XREF: fmt_game_options+66j
 ROM:C4DA B6 45 98		     lda     word_4598
 ROM:C4DD 84 01			     anda    #1
 ROM:C4DF 27 03			     beq     loc_C4E4
 ROM:C4E1 BD C5 F2		     jsr     sub_C5F2
 ROM:C4E4
-ROM:C4E4	     loc_C4E4:							     ; CODE XREF: sub_C450+8Fj
+ROM:C4E4	     loc_C4E4:							     ; CODE XREF: fmt_game_options+8Fj
 ROM:C4E4 CC 00 00		     ldd     #0
 ROM:C4E7 FD 45 98		     std     word_4598
 ROM:C4EA
-ROM:C4EA	     locret_C4EA:						     ; CODE XREF: sub_C450+2Cj
-ROM:C4EA									     ; sub_C450+37j
+ROM:C4EA	     locret_C4EA:						     ; CODE XREF: fmt_game_options+2Cj
+ROM:C4EA									     ; fmt_game_options+37j
 ROM:C4EA 39			     rts
-ROM:C4EA	     ; End of function sub_C450
+ROM:C4EA	     ; End of function fmt_game_options
 ROM:C4EA
 ROM:C4EB
 ROM:C4EB	     ; =============== S U B R O U T I N E =======================================
@@ -38610,7 +38478,7 @@ ROM:C5A4	     ; =============== S U B R O U T I N E ============================
 ROM:C5A4
 ROM:C5A4
 ROM:C5A4	     sub_C5A4:							     ; CODE XREF: BANK0:6548P
-ROM:C5A4									     ; sub_C450+1CP ...
+ROM:C5A4									     ; fmt_game_options+1CP ...
 ROM:C5A4 8E C7 97		     ldx     #0xC797
 ROM:C5A7 E6 86			     ldb     a,x
 ROM:C5A9 F7 4A FA		     stb     unk_4AFA
@@ -38660,7 +38528,7 @@ ROM:C5F2
 ROM:C5F2	     ; =============== S U B R O U T I N E =======================================
 ROM:C5F2
 ROM:C5F2
-ROM:C5F2	     sub_C5F2:							     ; CODE XREF: sub_C450+91P
+ROM:C5F2	     sub_C5F2:							     ; CODE XREF: fmt_game_options+91P
 ROM:C5F2
 ROM:C5F2	     ; FUNCTION	CHUNK AT ROM:C65B SIZE 0000001F	BYTES
 ROM:C5F2
@@ -38786,7 +38654,7 @@ ROM:C690
 ROM:C690	     ; =============== S U B R O U T I N E =======================================
 ROM:C690
 ROM:C690
-ROM:C690	     sub_C690:							     ; CODE XREF: sub_C450+24P
+ROM:C690	     sub_C690:							     ; CODE XREF: fmt_game_options+24P
 ROM:C690 B6 4A F7		     lda     word_4AF6+1
 ROM:C693 27 22			     beq     locret_C6B7
 ROM:C695 81 01			     cmpa    #1
@@ -38839,11 +38707,11 @@ ROM:C6D4	     ; =============== S U B R O U T I N E ============================
 ROM:C6D4
 ROM:C6D4
 ROM:C6D4	     sub_C6D4:							     ; CODE XREF: BANK0:627AP
-ROM:C6D4									     ; sub_BE20+63P ...
+ROM:C6D4									     ; fmt_accounting_info+63P	...
 ROM:C6D4 CE 4A FA		     ldu     #0x4AFA
 ROM:C6D7
-ROM:C6D7	     loc_C6D7:							     ; CODE XREF: sub_BE20+6CP
-ROM:C6D7									     ; sub_BE20+134P ...
+ROM:C6D7	     loc_C6D7:							     ; CODE XREF: fmt_accounting_info+6CP
+ROM:C6D7									     ; fmt_accounting_info+134P ...
 ROM:C6D7 86 03			     lda     #3
 ROM:C6D9
 ROM:C6D9	     loc_C6D9:							     ; CODE XREF: sub_CC18+12P
@@ -38905,10 +38773,10 @@ ROM:C70E
 ROM:C70E	     ; =============== S U B R O U T I N E =======================================
 ROM:C70E
 ROM:C70E
-ROM:C70E	     sub_C70E:							     ; CODE XREF: sub_BE20+169P
-ROM:C70E									     ; sub_BE20+1E4P
+ROM:C70E	     sub_C70E:							     ; CODE XREF: fmt_accounting_info+169P
+ROM:C70E									     ; fmt_accounting_info+1E4P
 ROM:C70E C6 00			     ldb     #0
-ROM:C710 D7 AD			     stb     byte_48AD
+ROM:C710 D7 AD			     stb     pad_digits_maybe
 ROM:C712 1F 89			     tfr     a,	b
 ROM:C714 44			     lsra
 ROM:C715 44			     lsra
@@ -38919,7 +38787,7 @@ ROM:C71A 25 02			     bcs     loc_C71E
 ROM:C71C 86 09			     lda     #9
 ROM:C71E
 ROM:C71E	     loc_C71E:							     ; CODE XREF: sub_C70E+Cj
-ROM:C71E BD E7 AD		     jsr     loc_E7AD
+ROM:C71E BD E7 AD		     jsr     print_hex_digit
 ROM:C721 86 B8			     lda     #0xB8 ; '∏'
 ROM:C723 A7 A0			     sta     ,y+
 ROM:C725 86 DF			     lda     #0xDF ; 'ﬂ'
@@ -39067,21 +38935,18 @@ ROM:C7B4 5A			     .db 0x5A ;	Z
 ROM:C7B5 60			     .db 0x60 ;	`
 ROM:C7B6 00			     .db    0
 ROM:C7B7 08 34	     word_C7B7:	     .dw 0x834					     ; DATA XREF: test_nvram:loc_C3B7r
-ROM:C7B7									     ; sub_C450+7Br
+ROM:C7B7									     ; fmt_game_options+7Br
 ROM:C7B9 90			     .db 0x90 ;	ê
 ROM:C7BA 98			     .db 0x98 ;	ò
-ROM:C7BB 01			     .db    1
-ROM:C7BC B8			     .db 0xB8 ;	∏
-ROM:C7BD 01			     .db    1
-ROM:C7BE 90			     .db 0x90 ;	ê
-ROM:C7BF 01			     .db    1
-ROM:C7C0 68			     .db 0x68 ;	h
-ROM:C7C1 01 18	     word_C7C1:	     .dw 0x118					     ; DATA XREF: sub_BE20+41r
-ROM:C7C3 01 40	     word_C7C3:	     .dw 0x140					     ; DATA XREF: sub_BE20+8Dr
-ROM:C7C5 00 B4	     word_C7C5:	     .dw 0xB4					     ; DATA XREF: sub_BE20:loc_BF7Cr
-ROM:C7C7 00 50	     word_C7C7:	     .dw 0x50					     ; DATA XREF: sub_BE20:loc_BFB4r
-ROM:C7C9 00 DC	     word_C7C9:	     .dw 0xDC					     ; DATA XREF: sub_BE20+BBr
-ROM:C7CB 00 78	     word_C7CB:	     .dw 0x78					     ; DATA XREF: sub_BE20+EFr
+ROM:C7BB 01 B8	     word_C7BB:	     .dw 0x1B8					     ; DATA XREF: fmt_accounting_info+17o
+ROM:C7BD 01 90			     .dw 0x190
+ROM:C7BF 01 68			     .dw 0x168
+ROM:C7C1 01 18	     word_C7C1:	     .dw 0x118					     ; DATA XREF: fmt_accounting_info+41r
+ROM:C7C3 01 40	     word_C7C3:	     .dw 0x140					     ; DATA XREF: fmt_accounting_info+8Dr
+ROM:C7C5 00 B4	     word_C7C5:	     .dw 0xB4					     ; DATA XREF: fmt_accounting_info:loc_BF7Cr
+ROM:C7C7 00 50	     word_C7C7:	     .dw 0x50					     ; DATA XREF: fmt_accounting_info:loc_BFB4r
+ROM:C7C9 00 DC	     word_C7C9:	     .dw 0xDC					     ; DATA XREF: fmt_accounting_info+BBr
+ROM:C7CB 00 78	     word_C7CB:	     .dw 0x78					     ; DATA XREF: fmt_accounting_info+EFr
 ROM:C7CD 1E			     .db 0x1E
 ROM:C7CE 6B			     .db 0x6B ;	k
 ROM:C7CF 1E			     .db 0x1E
@@ -39138,7 +39003,7 @@ ROM:C7FD	     sub_C7FD:							     ; CODE XREF: BANK0:64AEP
 ROM:C7FD									     ; BANK0:66B5P
 ROM:C7FD 7D 4A EC		     tst     word_4AEC
 ROM:C800 2B 0F			     bmi     loc_C811
-ROM:C802 86 3E			     lda     #0x3E ; '>'
+ROM:C802 86 3E			     lda     #62				     ; PRINCESS	LEIA'S REBEL FORCE"
 ROM:C804 BD D8 DF		     jsr     add_msg_A_if_not_already_in
 ROM:C807 CC 72 00		     ldd     #0x7200				     ; SCAL 2,0
 ROM:C80A ED A1			     std     ,y++
@@ -39147,7 +39012,7 @@ ROM:C80F 20 0D			     bra     loc_C81E
 ROM:C811	     ; ---------------------------------------------------------------------------
 ROM:C811
 ROM:C811	     loc_C811:							     ; CODE XREF: sub_C7FD+3j
-ROM:C811 86 3F			     lda     #0x3F ; '?'
+ROM:C811 86 3F			     lda     #63				     ; "PRINCESS LEIA'S REBEL FORCE"
 ROM:C813 BD D8 DF		     jsr     add_msg_A_if_not_already_in
 ROM:C816 CC 71 40		     ldd     #0x7140				     ; SCAL 1,64
 ROM:C819 ED A1			     std     ,y++
@@ -39340,7 +39205,7 @@ ROM:C916 86 10			     lda     #0x10
 ROM:C918
 ROM:C918	     loc_C918:							     ; CODE XREF: sub_C7FD+117j
 ROM:C918 C6 01			     ldb     #1
-ROM:C91A D7 AD			     stb     byte_48AD
+ROM:C91A D7 AD			     stb     pad_digits_maybe
 ROM:C91C BD E7 90		     jsr     sub_E790
 ROM:C91F CC B8 DC		     ldd     #0xB8DC
 ROM:C922 ED A1			     std     ,y++
@@ -39358,7 +39223,7 @@ ROM:C939 CC 1F F0		     ldd     #0x1FF0
 ROM:C93C ED A1			     std     ,y++
 ROM:C93E FF 4A F1		     stu     word_4AF1
 ROM:C941 C6 06			     ldb     #6
-ROM:C943 D7 AD			     stb     byte_48AD
+ROM:C943 D7 AD			     stb     pad_digits_maybe
 ROM:C945 BD E7 64		     jsr     sub_E764
 ROM:C948 30 04			     leax    4,x
 ROM:C94A CC 80 40		     ldd     #0x8040
@@ -39854,7 +39719,7 @@ ROM:CC18	     ; =============== S U B R O U T I N E ============================
 ROM:CC18
 ROM:CC18
 ROM:CC18	     sub_CC18:							     ; CODE XREF: BANK0:62C9P
-ROM:CC18									     ; sub_C450+45P
+ROM:CC18									     ; fmt_game_options+45P
 ROM:CC18 BD CC 5B		     jsr     sub_CC5B
 ROM:CC1B 86 01			     lda     #1
 ROM:CC1D BD C2 C3		     jsr     sub_C2C3
@@ -40542,1928 +40407,173 @@ ROM:CEC7 FF			     .db 0xFF
 ROM:CEC8 FF			     .db 0xFF
 ROM:CEC9 FF			     .db 0xFF
 ROM:CECA 43 4F 50 59+aCopyright1983At:.ascii 'COPYRIGHT 1983 ATARI'
-ROM:CEDE 1A			     .db 0x1A
-ROM:CEDF F6			     .db 0xF6 ;	ˆ
-ROM:CEE0 1D			     .db 0x1D
-ROM:CEE1 A8			     .db 0xA8 ;	®
-ROM:CEE2 00			     .db    0
-ROM:CEE3 00			     .db    0
-ROM:CEE4 E2			     .db 0xE2 ;	‚
-ROM:CEE5 08			     .db    8
-ROM:CEE6 1F			     .db 0x1F
-ROM:CEE7 7E			     .db 0x7E ;	~
-ROM:CEE8 E0			     .db 0xE0 ;	‡
-ROM:CEE9 00			     .db    0
-ROM:CEEA 00			     .db    0
-ROM:CEEB 00			     .db    0
-ROM:CEEC FF			     .db 0xFF
-ROM:CEED 74			     .db 0x74 ;	t
-ROM:CEEE BB			     .db 0xBB ;	ª
-ROM:CEEF 91			     .db 0x91 ;	ë
-ROM:CEF0 1E			     .db 0x1E
-ROM:CEF1 C0			     .db 0xC0 ;	¿
-ROM:CEF2 FF			     .db 0xFF
-ROM:CEF3 CE			     .db 0xCE ;	Œ
-ROM:CEF4 BB			     .db 0xBB ;	ª
-ROM:CEF5 8B			     .db 0x8B ;	ã
-ROM:CEF6 00			     .db    0
-ROM:CEF7 00			     .db    0
-ROM:CEF8 FF			     .db 0xFF
-ROM:CEF9 4C			     .db 0x4C ;	L
-ROM:CEFA BB			     .db 0xBB ;	ª
-ROM:CEFB 91			     .db 0x91 ;	ë
-ROM:CEFC 01			     .db    1
-ROM:CEFD 40			     .db 0x40 ;	@
-ROM:CEFE E0			     .db 0xE0 ;	‡
-ROM:CEFF 50			     .db 0x50 ;	P
-ROM:CF00 00			     .db    0
-ROM:CF01 00			     .db    0
-ROM:CF02 FF			     .db 0xFF
-ROM:CF03 4C			     .db 0x4C ;	L
-ROM:CF04 51			     .db 0x51 ;	Q
-ROM:CF05 FB			     .db 0xFB ;	˚
-ROM:CF06 1F			     .db 0x1F
-ROM:CF07 EC			     .db 0xEC ;	Ï
-ROM:CF08 E0			     .db 0xE0 ;	‡
-ROM:CF09 32			     .db 0x32 ;	2
-ROM:CF0A 1F			     .db 0x1F
-ROM:CF0B A6			     .db 0xA6 ;	¶
-ROM:CF0C E0			     .db 0xE0 ;	‡
-ROM:CF0D 32			     .db 0x32 ;	2
-ROM:CF0E BB			     .db 0xBB ;	ª
-ROM:CF0F 91			     .db 0x91 ;	ë
-ROM:CF10 1F			     .db 0x1F
-ROM:CF11 B0			     .db 0xB0 ;	∞
-ROM:CF12 FF			     .db 0xFF
-ROM:CF13 EC			     .db 0xEC ;	Ï
-ROM:CF14 BB			     .db 0xBB ;	ª
-ROM:CF15 91			     .db 0x91 ;	ë
-ROM:CF16 1F			     .db 0x1F
-ROM:CF17 9C			     .db 0x9C ;	ú
-ROM:CF18 FF			     .db 0xFF
-ROM:CF19 88			     .db 0x88 ;	à
-ROM:CF1A BB			     .db 0xBB ;	ª
-ROM:CF1B 8B			     .db 0x8B ;	ã
-ROM:CF1C 00			     .db    0
-ROM:CF1D 00			     .db    0
-ROM:CF1E FE			     .db 0xFE ;	˛
-ROM:CF1F 0C			     .db  0xC
-ROM:CF20 BB			     .db 0xBB ;	ª
-ROM:CF21 8B			     .db 0x8B ;	ã
-ROM:CF22 00			     .db    0
-ROM:CF23 8C			     .db 0x8C ;	å
-ROM:CF24 E0			     .db 0xE0 ;	‡
-ROM:CF25 5A			     .db 0x5A ;	Z
-ROM:CF26 00			     .db    0
-ROM:CF27 00			     .db    0
-ROM:CF28 E1			     .db 0xE1 ;	·
-ROM:CF29 40			     .db 0x40 ;	@
-ROM:CF2A 4A			     .db 0x4A ;	J
-ROM:CF2B E5			     .db 0xE5 ;	Â
-ROM:CF2C 00			     .db    0
-ROM:CF2D 14			     .db 0x14
-ROM:CF2E FF			     .db 0xFF
-ROM:CF2F D8			     .db 0xD8 ;	ÿ
-ROM:CF30 BB			     .db 0xBB ;	ª
-ROM:CF31 85			     .db 0x85 ;	Ö
-ROM:CF32 00			     .db    0
-ROM:CF33 5A			     .db 0x5A ;	Z
-ROM:CF34 FF			     .db 0xFF
-ROM:CF35 CE			     .db 0xCE ;	Œ
-ROM:CF36 BB			     .db 0xBB ;	ª
-ROM:CF37 8B			     .db 0x8B ;	ã
-ROM:CF38 00			     .db    0
-ROM:CF39 50			     .db 0x50 ;	P
-ROM:CF3A E0			     .db 0xE0 ;	‡
-ROM:CF3B 28			     .db 0x28 ;	(
-ROM:CF3C 00			     .db    0
-ROM:CF3D 64			     .db 0x64 ;	d
-ROM:CF3E E0			     .db 0xE0 ;	‡
-ROM:CF3F 82			     .db 0x82 ;	Ç
-ROM:CF40 72			     .db 0x72 ;	r
-ROM:CF41 00			     .db    0
-ROM:CF42 80			     .db 0x80 ;	Ä
-ROM:CF43 40			     .db 0x40 ;	@
-ROM:CF44 C0			     .db 0xC0 ;	¿
-ROM:CF45 00			     .db    0
-ROM:CF46 1A			     .db 0x1A
-ROM:CF47 F6			     .db 0xF6 ;	ˆ
-ROM:CF48 00			     .db    0
-ROM:CF49 B4			     .db 0xB4 ;	¥
-ROM:CF4A 1E			     .db 0x1E
-ROM:CF4B 3E			     .db 0x3E ;	>
-ROM:CF4C E0			     .db 0xE0 ;	‡
-ROM:CF4D B4			     .db 0xB4 ;	¥
-ROM:CF4E BB			     .db 0xBB ;	ª
-ROM:CF4F 8B			     .db 0x8B ;	ã
-ROM:CF50 00			     .db    0
-ROM:CF51 00			     .db    0
-ROM:CF52 FF			     .db 0xFF
-ROM:CF53 60			     .db 0x60 ;	`
-ROM:CF54 BB			     .db 0xBB ;	ª
-ROM:CF55 8B			     .db 0x8B ;	ã
-ROM:CF56 00			     .db    0
-ROM:CF57 46			     .db 0x46 ;	F
-ROM:CF58 FF			     .db 0xFF
-ROM:CF59 E2			     .db 0xE2 ;	‚
-ROM:CF5A BB			     .db 0xBB ;	ª
-ROM:CF5B 8E			     .db 0x8E ;	é
-ROM:CF5C 00			     .db    0
-ROM:CF5D 00			     .db    0
-ROM:CF5E FF			     .db 0xFF
-ROM:CF5F 56			     .db 0x56 ;	V
-ROM:CF60 BB			     .db 0xBB ;	ª
-ROM:CF61 91			     .db 0x91 ;	ë
-ROM:CF62 1F			     .db 0x1F
-ROM:CF63 BA			     .db 0xBA ;	∫
-ROM:CF64 FF			     .db 0xFF
-ROM:CF65 F6			     .db 0xF6 ;	ˆ
-ROM:CF66 BB			     .db 0xBB ;	ª
-ROM:CF67 91			     .db 0x91 ;	ë
-ROM:CF68 00			     .db    0
-ROM:CF69 00			     .db    0
-ROM:CF6A FF			     .db 0xFF
-ROM:CF6B 60			     .db 0x60 ;	`
-ROM:CF6C BB			     .db 0xBB ;	ª
-ROM:CF6D 8B			     .db 0x8B ;	ã
-ROM:CF6E 01			     .db    1
-ROM:CF6F C2			     .db 0xC2 ;	¬
-ROM:CF70 E0			     .db 0xE0 ;	‡
-ROM:CF71 78			     .db 0x78 ;	x
-ROM:CF72 00			     .db    0
-ROM:CF73 00			     .db    0
-ROM:CF74 E0			     .db 0xE0 ;	‡
-ROM:CF75 E6			     .db 0xE6 ;	Ê
-ROM:CF76 1F			     .db 0x1F
-ROM:CF77 88			     .db 0x88 ;	à
-ROM:CF78 1F			     .db 0x1F
-ROM:CF79 92			     .db 0x92 ;	í
-ROM:CF7A BB			     .db 0xBB ;	ª
-ROM:CF7B 8B			     .db 0x8B ;	ã
-ROM:CF7C 1F			     .db 0x1F
-ROM:CF7D 74			     .db 0x74 ;	t
-ROM:CF7E E0			     .db 0xE0 ;	‡
-ROM:CF7F 46			     .db 0x46 ;	F
-ROM:CF80 00			     .db    0
-ROM:CF81 00			     .db    0
-ROM:CF82 FF			     .db 0xFF
-ROM:CF83 92			     .db 0x92 ;	í
-ROM:CF84 00			     .db    0
-ROM:CF85 8C			     .db 0x8C ;	å
-ROM:CF86 E0			     .db 0xE0 ;	‡
-ROM:CF87 28			     .db 0x28 ;	(
-ROM:CF88 72			     .db 0x72 ;	r
-ROM:CF89 00			     .db    0
-ROM:CF8A 80			     .db 0x80 ;	Ä
-ROM:CF8B 40			     .db 0x40 ;	@
-ROM:CF8C C0			     .db 0xC0 ;	¿
-ROM:CF8D 00			     .db    0
-ROM:CF8E 1A			     .db 0x1A
-ROM:CF8F F6			     .db 0xF6 ;	ˆ
-ROM:CF90 02			     .db    2
-ROM:CF91 26			     .db 0x26 ;	&
-ROM:CF92 00			     .db    0
-ROM:CF93 00			     .db    0
-ROM:CF94 FE			     .db 0xFE ;	˛
-ROM:CF95 E8			     .db 0xE8 ;	Ë
-ROM:CF96 BB			     .db 0xBB ;	ª
-ROM:CF97 91			     .db 0x91 ;	ë
-ROM:CF98 1E			     .db 0x1E
-ROM:CF99 3E			     .db 0x3E ;	>
-ROM:CF9A E0			     .db 0xE0 ;	‡
-ROM:CF9B 5A			     .db 0x5A ;	Z
-ROM:CF9C 00			     .db    0
-ROM:CF9D 00			     .db    0
-ROM:CF9E E0			     .db 0xE0 ;	‡
-ROM:CF9F AA			     .db 0xAA ;	™
-ROM:CFA0 BB			     .db 0xBB ;	ª
-ROM:CFA1 8E			     .db 0x8E ;	é
-ROM:CFA2 00			     .db    0
-ROM:CFA3 8C			     .db 0x8C ;	å
-ROM:CFA4 FF			     .db 0xFF
-ROM:CFA5 D8			     .db 0xD8 ;	ÿ
-ROM:CFA6 1F			     .db 0x1F
-ROM:CFA7 74			     .db 0x74 ;	t
-ROM:CFA8 E1			     .db 0xE1 ;	·
-ROM:CFA9 22			     .db 0x22 ;	"
-ROM:CFAA BB			     .db 0xBB ;	ª
-ROM:CFAB 8B			     .db 0x8B ;	ã
-ROM:CFAC 00			     .db    0
-ROM:CFAD 00			     .db    0
-ROM:CFAE E1			     .db 0xE1 ;	·
-ROM:CFAF 54			     .db 0x54 ;	T
-ROM:CFB0 BB			     .db 0xBB ;	ª
-ROM:CFB1 8B			     .db 0x8B ;	ã
-ROM:CFB2 00			     .db    0
-ROM:CFB3 8C			     .db 0x8C ;	å
-ROM:CFB4 FF			     .db 0xFF
-ROM:CFB5 A6			     .db 0xA6 ;	¶
-ROM:CFB6 00			     .db    0
-ROM:CFB7 00			     .db    0
-ROM:CFB8 FE			     .db 0xFE ;	˛
-ROM:CFB9 F2			     .db 0xF2 ;	Ú
-ROM:CFBA 00			     .db    0
-ROM:CFBB 14			     .db 0x14
-ROM:CFBC FF			     .db 0xFF
-ROM:CFBD D8			     .db 0xD8 ;	ÿ
-ROM:CFBE 00			     .db    0
-ROM:CFBF 3C			     .db 0x3C ;	<
-ROM:CFC0 E0			     .db 0xE0 ;	‡
-ROM:CFC1 3C			     .db 0x3C ;	<
-ROM:CFC2 BB			     .db 0xBB ;	ª
-ROM:CFC3 88			     .db 0x88 ;	à
-ROM:CFC4 00			     .db    0
-ROM:CFC5 6E			     .db 0x6E ;	n
-ROM:CFC6 FF			     .db 0xFF
-ROM:CFC7 CE			     .db 0xCE ;	Œ
-ROM:CFC8 00			     .db    0
-ROM:CFC9 78			     .db 0x78 ;	x
-ROM:CFCA FF			     .db 0xFF
-ROM:CFCB 4C			     .db 0x4C ;	L
-ROM:CFCC 1F			     .db 0x1F
-ROM:CFCD 88			     .db 0x88 ;	à
-ROM:CFCE 00			     .db    0
-ROM:CFCF 0A			     .db  0xA
-ROM:CFD0 BB			     .db 0xBB ;	ª
-ROM:CFD1 88			     .db 0x88 ;	à
-ROM:CFD2 1F			     .db 0x1F
-ROM:CFD3 D8			     .db 0xD8 ;	ÿ
-ROM:CFD4 E0			     .db 0xE0 ;	‡
-ROM:CFD5 3C			     .db 0x3C ;	<
-ROM:CFD6 56			     .db 0x56 ;	V
-ROM:CFD7 E5			     .db 0xE5 ;	Â
-ROM:CFD8 1F			     .db 0x1F
-ROM:CFD9 CE			     .db 0xCE ;	Œ
-ROM:CFDA FF			     .db 0xFF
-ROM:CFDB D8			     .db 0xD8 ;	ÿ
-ROM:CFDC 00			     .db    0
-ROM:CFDD 00			     .db    0
-ROM:CFDE FF			     .db 0xFF
-ROM:CFDF 7E			     .db 0x7E ;	~
-ROM:CFE0 00			     .db    0
-ROM:CFE1 6E			     .db 0x6E ;	n
-ROM:CFE2 FF			     .db 0xFF
-ROM:CFE3 D8			     .db 0xD8 ;	ÿ
-ROM:CFE4 00			     .db    0
-ROM:CFE5 00			     .db    0
-ROM:CFE6 E0			     .db 0xE0 ;	‡
-ROM:CFE7 8C			     .db 0x8C ;	å
-ROM:CFE8 72			     .db 0x72 ;	r
-ROM:CFE9 00			     .db    0
-ROM:CFEA 80			     .db 0x80 ;	Ä
-ROM:CFEB 40			     .db 0x40 ;	@
-ROM:CFEC C0			     .db 0xC0 ;	¿
-ROM:CFED 00			     .db    0
-ROM:CFEE 18			     .db 0x18
-ROM:CFEF BC			     .db 0xBC ;	º
-ROM:CFF0 1C			     .db 0x1C
-ROM:CFF1 4A			     .db 0x4A ;	J
-ROM:CFF2 BB			     .db 0xBB ;	ª
-ROM:CFF3 9A			     .db 0x9A ;	ö
-ROM:CFF4 1F			     .db 0x1F
-ROM:CFF5 24			     .db 0x24 ;	$
-ROM:CFF6 FF			     .db 0xFF
-ROM:CFF7 BA			     .db 0xBA ;	∫
-ROM:CFF8 00			     .db    0
-ROM:CFF9 DC			     .db 0xDC ;	‹
-ROM:CFFA E0			     .db 0xE0 ;	‡
-ROM:CFFB A0			     .db 0xA0 ;	†
-ROM:CFFC 00			     .db    0
-ROM:CFFD 00			     .db    0
-ROM:CFFE E0			     .db 0xE0 ;	‡
-ROM:CFFF 8C			     .db 0x8C ;	å
-ROM:D000 BB			     .db 0xBB ;	ª
-ROM:D001 9A			     .db 0x9A ;	ö
-ROM:D002 1F			     .db 0x1F
-ROM:D003 24			     .db 0x24 ;	$
-ROM:D004 FF			     .db 0xFF
-ROM:D005 BA			     .db 0xBA ;	∫
-ROM:D006 00			     .db    0
-ROM:D007 DC			     .db 0xDC ;	‹
-ROM:D008 E0			     .db 0xE0 ;	‡
-ROM:D009 AA			     .db 0xAA ;	™
-ROM:D00A 00			     .db    0
-ROM:D00B 00			     .db    0
-ROM:D00C E0			     .db 0xE0 ;	‡
-ROM:D00D 8C			     .db 0x8C ;	å
-ROM:D00E BB			     .db 0xBB ;	ª
-ROM:D00F 9D			     .db 0x9D ;	ù
-ROM:D010 1D			     .db 0x1D
-ROM:D011 E4			     .db 0xE4 ;	‰
-ROM:D012 FE			     .db 0xFE ;	˛
-ROM:D013 E8			     .db 0xE8 ;	Ë
-ROM:D014 BB			     .db 0xBB ;	ª
-ROM:D015 A3			     .db 0xA3 ;	£
-ROM:D016 00			     .db    0
-ROM:D017 00			     .db    0
-ROM:D018 FF			     .db 0xFF
-ROM:D019 10			     .db 0x10
-ROM:D01A BB			     .db 0xBB ;	ª
-ROM:D01B A3			     .db 0xA3 ;	£
-ROM:D01C 00			     .db    0
-ROM:D01D 96			     .db 0x96 ;	ñ
-ROM:D01E E0			     .db 0xE0 ;	‡
-ROM:D01F 32			     .db 0x32 ;	2
-ROM:D020 1F			     .db 0x1F
-ROM:D021 6A			     .db 0x6A ;	j
-ROM:D022 FF			     .db 0xFF
-ROM:D023 7E			     .db 0x7E ;	~
-ROM:D024 BB			     .db 0xBB ;	ª
-ROM:D025 A3			     .db 0xA3 ;	£
-ROM:D026 00			     .db    0
-ROM:D027 00			     .db    0
-ROM:D028 FF			     .db 0xFF
-ROM:D029 10			     .db 0x10
-ROM:D02A BB			     .db 0xBB ;	ª
-ROM:D02B A3			     .db 0xA3 ;	£
-ROM:D02C 02			     .db    2
-ROM:D02D 1C			     .db 0x1C
-ROM:D02E E0			     .db 0xE0 ;	‡
-ROM:D02F B4			     .db 0xB4 ;	¥
-ROM:D030 00			     .db    0
-ROM:D031 00			     .db    0
-ROM:D032 E0			     .db 0xE0 ;	‡
-ROM:D033 BE			     .db 0xBE ;	æ
-ROM:D034 72			     .db 0x72 ;	r
-ROM:D035 00			     .db    0
-ROM:D036 80			     .db 0x80 ;	Ä
-ROM:D037 40			     .db 0x40 ;	@
-ROM:D038 C0			     .db 0xC0 ;	¿
-ROM:D039 00			     .db    0
-ROM:D03A 18			     .db 0x18
-ROM:D03B BC			     .db 0xBC ;	º
-ROM:D03C 1F			     .db 0x1F
-ROM:D03D B0			     .db 0xB0 ;	∞
-ROM:D03E 1D			     .db 0x1D
-ROM:D03F E4			     .db 0xE4 ;	‰
-ROM:D040 E0			     .db 0xE0 ;	‡
-ROM:D041 82			     .db 0x82 ;	Ç
-ROM:D042 BB			     .db 0xBB ;	ª
-ROM:D043 A3			     .db 0xA3 ;	£
-ROM:D044 00			     .db    0
-ROM:D045 00			     .db    0
-ROM:D046 FF			     .db 0xFF
-ROM:D047 38			     .db 0x38 ;	8
-ROM:D048 BB			     .db 0xBB ;	ª
-ROM:D049 A3			     .db 0xA3 ;	£
-ROM:D04A 00			     .db    0
-ROM:D04B 50			     .db 0x50 ;	P
-ROM:D04C FF			     .db 0xFF
-ROM:D04D E2			     .db 0xE2 ;	‚
-ROM:D04E BB			     .db 0xBB ;	ª
-ROM:D04F A3			     .db 0xA3 ;	£
-ROM:D050 00			     .db    0
-ROM:D051 00			     .db    0
-ROM:D052 FF			     .db 0xFF
-ROM:D053 2E			     .db 0x2E ;	.
-ROM:D054 BB			     .db 0xBB ;	ª
-ROM:D055 A3			     .db 0xA3 ;	£
-ROM:D056 1F			     .db 0x1F
-ROM:D057 B0			     .db 0xB0 ;	∞
-ROM:D058 FF			     .db 0xFF
-ROM:D059 C4			     .db 0xC4 ;	ƒ
-ROM:D05A BB			     .db 0xBB ;	ª
-ROM:D05B A3			     .db 0xA3 ;	£
-ROM:D05C 00			     .db    0
-ROM:D05D 00			     .db    0
-ROM:D05E FF			     .db 0xFF
-ROM:D05F 24			     .db 0x24 ;	$
-ROM:D060 BB			     .db 0xBB ;	ª
-ROM:D061 A3			     .db 0xA3 ;	£
-ROM:D062 02			     .db    2
-ROM:D063 1C			     .db 0x1C
-ROM:D064 E1			     .db 0xE1 ;	·
-ROM:D065 18			     .db 0x18
-ROM:D066 00			     .db    0
-ROM:D067 00			     .db    0
-ROM:D068 E1			     .db 0xE1 ;	·
-ROM:D069 36			     .db 0x36 ;	6
-ROM:D06A 1F			     .db 0x1F
-ROM:D06B 88			     .db 0x88 ;	à
-ROM:D06C 1F			     .db 0x1F
-ROM:D06D 56			     .db 0x56 ;	V
-ROM:D06E BB			     .db 0xBB ;	ª
-ROM:D06F A0			     .db 0xA0 ;	†
-ROM:D070 1F			     .db 0x1F
-ROM:D071 2E			     .db 0x2E ;	.
-ROM:D072 E0			     .db 0xE0 ;	‡
-ROM:D073 3C			     .db 0x3C ;	<
-ROM:D074 00			     .db    0
-ROM:D075 00			     .db    0
-ROM:D076 FF			     .db 0xFF
-ROM:D077 56			     .db 0x56 ;	V
-ROM:D078 00			     .db    0
-ROM:D079 D2			     .db 0xD2 ;	“
-ROM:D07A E0			     .db 0xE0 ;	‡
-ROM:D07B 6E			     .db 0x6E ;	n
-ROM:D07C 72			     .db 0x72 ;	r
-ROM:D07D 00			     .db    0
-ROM:D07E 80			     .db 0x80 ;	Ä
-ROM:D07F 40			     .db 0x40 ;	@
-ROM:D080 C0			     .db 0xC0 ;	¿
-ROM:D081 00			     .db    0
-ROM:D082 18			     .db 0x18
-ROM:D083 BC			     .db 0xBC ;	º
-ROM:D084 01			     .db    1
-ROM:D085 9A			     .db 0x9A ;	ö
-ROM:D086 00			     .db    0
-ROM:D087 00			     .db    0
-ROM:D088 FE			     .db 0xFE ;	˛
-ROM:D089 84			     .db 0x84 ;	Ñ
-ROM:D08A 1D			     .db 0x1D
-ROM:D08B E4			     .db 0xE4 ;	‰
-ROM:D08C E0			     .db 0xE0 ;	‡
-ROM:D08D 0A			     .db  0xA
-ROM:D08E 00			     .db    0
-ROM:D08F 00			     .db    0
-ROM:D090 E0			     .db 0xE0 ;	‡
-ROM:D091 C8			     .db 0xC8 ;	»
-ROM:D092 BB			     .db 0xBB ;	ª
-ROM:D093 A3			     .db 0xA3 ;	£
-ROM:D094 00			     .db    0
-ROM:D095 B4			     .db 0xB4 ;	¥
-ROM:D096 FF			     .db 0xFF
-ROM:D097 EC			     .db 0xEC ;	Ï
-ROM:D098 1F			     .db 0x1F
-ROM:D099 4C			     .db 0x4C ;	L
-ROM:D09A E1			     .db 0xE1 ;	·
-ROM:D09B 54			     .db 0x54 ;	T
-ROM:D09C BB			     .db 0xBB ;	ª
-ROM:D09D A3			     .db 0xA3 ;	£
-ROM:D09E 00			     .db    0
-ROM:D09F 00			     .db    0
-ROM:D0A0 E2			     .db 0xE2 ;	‚
-ROM:D0A1 58			     .db 0x58 ;	X
-ROM:D0A2 BB			     .db 0xBB ;	ª
-ROM:D0A3 A3			     .db 0xA3 ;	£
-ROM:D0A4 00			     .db    0
-ROM:D0A5 78			     .db 0x78 ;	x
-ROM:D0A6 E0			     .db 0xE0 ;	‡
-ROM:D0A7 78			     .db 0x78 ;	x
-ROM:D0A8 BB			     .db 0xBB ;	ª
-ROM:D0A9 A3			     .db 0xA3 ;	£
-ROM:D0AA 00			     .db    0
-ROM:D0AB 6E			     .db 0x6E ;	n
-ROM:D0AC FF			     .db 0xFF
-ROM:D0AD C4			     .db 0xC4 ;	ƒ
-ROM:D0AE 00			     .db    0
-ROM:D0AF 78			     .db 0x78 ;	x
-ROM:D0B0 FF			     .db 0xFF
-ROM:D0B1 1A			     .db 0x1A
-ROM:D0B2 00			     .db    0
-ROM:D0B3 14			     .db 0x14
-ROM:D0B4 FF			     .db 0xFF
-ROM:D0B5 A6			     .db 0xA6 ;	¶
-ROM:D0B6 00			     .db    0
-ROM:D0B7 28			     .db 0x28 ;	(
-ROM:D0B8 FF			     .db 0xFF
-ROM:D0B9 EC			     .db 0xEC ;	Ï
-ROM:D0BA 00			     .db    0
-ROM:D0BB 00			     .db    0
-ROM:D0BC E1			     .db 0xE1 ;	·
-ROM:D0BD 68			     .db 0x68 ;	h
-ROM:D0BE BB			     .db 0xBB ;	ª
-ROM:D0BF 9D			     .db 0x9D ;	ù
-ROM:D0C0 00			     .db    0
-ROM:D0C1 82			     .db 0x82 ;	Ç
-ROM:D0C2 FF			     .db 0xFF
-ROM:D0C3 B0			     .db 0xB0 ;	∞
-ROM:D0C4 00			     .db    0
-ROM:D0C5 00			     .db    0
-ROM:D0C6 FE			     .db 0xFE ;	˛
-ROM:D0C7 70			     .db 0x70 ;	p
-ROM:D0C8 1F			     .db 0x1F
-ROM:D0C9 9C			     .db 0x9C ;	ú
-ROM:D0CA FF			     .db 0xFF
-ROM:D0CB 9C			     .db 0x9C ;	ú
-ROM:D0CC BB			     .db 0xBB ;	ª
-ROM:D0CD 9A			     .db 0x9A ;	ö
-ROM:D0CE 1F			     .db 0x1F
-ROM:D0CF 9C			     .db 0x9C ;	ú
-ROM:D0D0 E0			     .db 0xE0 ;	‡
-ROM:D0D1 28			     .db 0x28 ;	(
-ROM:D0D2 BB			     .db 0xBB ;	ª
-ROM:D0D3 9D			     .db 0x9D ;	ù
-ROM:D0D4 1F			     .db 0x1F
-ROM:D0D5 92			     .db 0x92 ;	í
-ROM:D0D6 E0			     .db 0xE0 ;	‡
-ROM:D0D7 BE			     .db 0xBE ;	æ
-ROM:D0D8 BB			     .db 0xBB ;	ª
-ROM:D0D9 94			     .db 0x94 ;	î
-ROM:D0DA 1F			     .db 0x1F
-ROM:D0DB EC			     .db 0xEC ;	Ï
-ROM:D0DC E0			     .db 0xE0 ;	‡
-ROM:D0DD 50			     .db 0x50 ;	P
-ROM:D0DE 51			     .db 0x51 ;	Q
-ROM:D0DF E5			     .db 0xE5 ;	Â
-ROM:D0E0 00			     .db    0
-ROM:D0E1 00			     .db    0
-ROM:D0E2 FE			     .db 0xFE ;	˛
-ROM:D0E3 E8			     .db 0xE8 ;	Ë
-ROM:D0E4 00			     .db    0
-ROM:D0E5 1E			     .db 0x1E
-ROM:D0E6 FF			     .db 0xFF
-ROM:D0E7 42			     .db 0x42 ;	B
-ROM:D0E8 00			     .db    0
-ROM:D0E9 50			     .db 0x50 ;	P
-ROM:D0EA E0			     .db 0xE0 ;	‡
-ROM:D0EB 8C			     .db 0x8C ;	å
-ROM:D0EC BB			     .db 0xBB ;	ª
-ROM:D0ED 97			     .db 0x97 ;	ó
-ROM:D0EE 00			     .db    0
-ROM:D0EF 82			     .db 0x82 ;	Ç
-ROM:D0F0 FF			     .db 0xFF
-ROM:D0F1 D8			     .db 0xD8 ;	ÿ
-ROM:D0F2 00			     .db    0
-ROM:D0F3 78			     .db 0x78 ;	x
-ROM:D0F4 FF			     .db 0xFF
-ROM:D0F5 38			     .db 0x38 ;	8
-ROM:D0F6 1F			     .db 0x1F
-ROM:D0F7 88			     .db 0x88 ;	à
-ROM:D0F8 1F			     .db 0x1F
-ROM:D0F9 CE			     .db 0xCE ;	Œ
-ROM:D0FA BB			     .db 0xBB ;	ª
-ROM:D0FB 9A			     .db 0x9A ;	ö
-ROM:D0FC 1F			     .db 0x1F
-ROM:D0FD C4			     .db 0xC4 ;	ƒ
-ROM:D0FE E0			     .db 0xE0 ;	‡
-ROM:D0FF 64			     .db 0x64 ;	d
-ROM:D100 1F			     .db 0x1F
-ROM:D101 D8			     .db 0xD8 ;	ÿ
-ROM:D102 E0			     .db 0xE0 ;	‡
-ROM:D103 0A			     .db  0xA
-ROM:D104 1F			     .db 0x1F
-ROM:D105 E2			     .db 0xE2 ;	‚
-ROM:D106 FF			     .db 0xFF
-ROM:D107 B0			     .db 0xB0 ;	∞
-ROM:D108 00			     .db    0
-ROM:D109 00			     .db    0
-ROM:D10A FF			     .db 0xFF
-ROM:D10B 2E			     .db 0x2E ;	.
-ROM:D10C 00			     .db    0
-ROM:D10D 82			     .db 0x82 ;	Ç
-ROM:D10E FF			     .db 0xFF
-ROM:D10F F6			     .db 0xF6 ;	ˆ
-ROM:D110 00			     .db    0
-ROM:D111 00			     .db    0
-ROM:D112 E0			     .db 0xE0 ;	‡
-ROM:D113 BE			     .db 0xBE ;	æ
-ROM:D114 72			     .db 0x72 ;	r
-ROM:D115 00			     .db    0
-ROM:D116 80			     .db 0x80 ;	Ä
-ROM:D117 40			     .db 0x40 ;	@
-ROM:D118 C0			     .db 0xC0 ;	¿
-ROM:D119 00			     .db    0
-ROM:D11A 64			     .db 0x64 ;	d
-ROM:D11B FF			     .db 0xFF
-ROM:D11C 00			     .db    0
-ROM:D11D 78			     .db 0x78 ;	x
-ROM:D11E E0			     .db 0xE0 ;	‡
-ROM:D11F 0A			     .db  0xA
-ROM:D120 1F			     .db 0x1F
-ROM:D121 D3			     .db 0xD3 ;	”
-ROM:D122 00			     .db    0
-ROM:D123 1E			     .db 0x1E
-ROM:D124 1F			     .db 0x1F
-ROM:D125 B5			     .db 0xB5 ;	µ
-ROM:D126 FF			     .db 0xFF
-ROM:D127 D8			     .db 0xD8 ;	ÿ
-ROM:D128 00			     .db    0
-ROM:D129 3C			     .db 0x3C ;	<
-ROM:D12A E0			     .db 0xE0 ;	‡
-ROM:D12B 4B			     .db 0x4B ;	K
-ROM:D12C A0			     .db 0xA0 ;	†
-ROM:D12D 18			     .db 0x18
-ROM:D12E A0			     .db 0xA0 ;	†
-ROM:D12F 16			     .db 0x16
-ROM:D130 64			     .db 0x64 ;	d
-ROM:D131 FF			     .db 0xFF
-ROM:D132 1F			     .db 0x1F
-ROM:D133 D3			     .db 0xD3 ;	”
-ROM:D134 1F			     .db 0x1F
-ROM:D135 FB			     .db 0xFB ;	˚
-ROM:D136 1F			     .db 0x1F
-ROM:D137 F1			     .db 0xF1 ;	Ò
-ROM:D138 FF			     .db 0xFF
-ROM:D139 BA			     .db 0xBA ;	∫
-ROM:D13A 1F			     .db 0x1F
-ROM:D13B D3			     .db 0xD3 ;	”
-ROM:D13C E0			     .db 0xE0 ;	‡
-ROM:D13D 50			     .db 0x50 ;	P
-ROM:D13E A0			     .db 0xA0 ;	†
-ROM:D13F 18			     .db 0x18
-ROM:D140 A0			     .db 0xA0 ;	†
-ROM:D141 16			     .db 0x16
-ROM:D142 64			     .db 0x64 ;	d
-ROM:D143 FF			     .db 0xFF
-ROM:D144 1F			     .db 0x1F
-ROM:D145 D3			     .db 0xD3 ;	”
-ROM:D146 1F			     .db 0x1F
-ROM:D147 EC			     .db 0xEC ;	Ï
-ROM:D148 00			     .db    0
-ROM:D149 5A			     .db 0x5A ;	Z
-ROM:D14A FF			     .db 0xFF
-ROM:D14B C4			     .db 0xC4 ;	ƒ
-ROM:D14C 1F			     .db 0x1F
-ROM:D14D B5			     .db 0xB5 ;	µ
-ROM:D14E E0			     .db 0xE0 ;	‡
-ROM:D14F 1E			     .db 0x1E
-ROM:D150 51			     .db 0x51 ;	Q
-ROM:D151 16			     .db 0x16
-ROM:D152 00			     .db    0
-ROM:D153 69			     .db 0x69 ;	i
-ROM:D154 FF			     .db 0xFF
-ROM:D155 F6			     .db 0xF6 ;	ˆ
-ROM:D156 1F			     .db 0x1F
-ROM:D157 88			     .db 0x88 ;	à
-ROM:D158 FF			     .db 0xFF
-ROM:D159 E2			     .db 0xE2 ;	‚
-ROM:D15A A0			     .db 0xA0 ;	†
-ROM:D15B 18			     .db 0x18
-ROM:D15C A0			     .db 0xA0 ;	†
-ROM:D15D 16			     .db 0x16
-ROM:D15E 64			     .db 0x64 ;	d
-ROM:D15F FF			     .db 0xFF
-ROM:D160 00			     .db    0
-ROM:D161 2D			     .db 0x2D ;	-
-ROM:D162 1F			     .db 0x1F
-ROM:D163 F6			     .db 0xF6 ;	ˆ
-ROM:D164 00			     .db    0
-ROM:D165 4B			     .db 0x4B ;	K
-ROM:D166 E0			     .db 0xE0 ;	‡
-ROM:D167 28			     .db 0x28 ;	(
-ROM:D168 1F			     .db 0x1F
-ROM:D169 C4			     .db 0xC4 ;	ƒ
-ROM:D16A FF			     .db 0xFF
-ROM:D16B C4			     .db 0xC4 ;	ƒ
-ROM:D16C 00			     .db    0
-ROM:D16D 2D			     .db 0x2D ;	-
-ROM:D16E 00			     .db    0
-ROM:D16F 0A			     .db  0xA
-ROM:D170 00			     .db    0
-ROM:D171 0F			     .db  0xF
-ROM:D172 E0			     .db 0xE0 ;	‡
-ROM:D173 32			     .db 0x32 ;	2
-ROM:D174 00			     .db    0
-ROM:D175 0F			     .db  0xF
-ROM:D176 FF			     .db 0xFF
-ROM:D177 B0			     .db 0xB0 ;	∞
-ROM:D178 A0			     .db 0xA0 ;	†
-ROM:D179 18			     .db 0x18
-ROM:D17A A0			     .db 0xA0 ;	†
-ROM:D17B 16			     .db 0x16
-ROM:D17C 64			     .db 0x64 ;	d
-ROM:D17D FF			     .db 0xFF
-ROM:D17E 00			     .db    0
-ROM:D17F 2D			     .db 0x2D ;	-
-ROM:D180 00			     .db    0
-ROM:D181 00			     .db    0
-ROM:D182 1F			     .db 0x1F
-ROM:D183 C4			     .db 0xC4 ;	ƒ
-ROM:D184 E0			     .db 0xE0 ;	‡
-ROM:D185 50			     .db 0x50 ;	P
-ROM:D186 00			     .db    0
-ROM:D187 3C			     .db 0x3C ;	<
-ROM:D188 FF			     .db 0xFF
-ROM:D189 E2			     .db 0xE2 ;	‚
-ROM:D18A 00			     .db    0
-ROM:D18B 3C			     .db 0x3C ;	<
-ROM:D18C 00			     .db    0
-ROM:D18D 00			     .db    0
-ROM:D18E A0			     .db 0xA0 ;	†
-ROM:D18F 18			     .db 0x18
-ROM:D190 A0			     .db 0xA0 ;	†
-ROM:D191 16			     .db 0x16
-ROM:D192 64			     .db 0x64 ;	d
-ROM:D193 FF			     .db 0xFF
-ROM:D194 1F			     .db 0x1F
-ROM:D195 88			     .db 0x88 ;	à
-ROM:D196 E0			     .db 0xE0 ;	‡
-ROM:D197 1E			     .db 0x1E
-ROM:D198 A0			     .db 0xA0 ;	†
-ROM:D199 18			     .db 0x18
-ROM:D19A A0			     .db 0xA0 ;	†
-ROM:D19B 16			     .db 0x16
-ROM:D19C 64			     .db 0x64 ;	d
-ROM:D19D FF			     .db 0xFF
-ROM:D19E C0			     .db 0xC0 ;	¿
-ROM:D19F 00			     .db    0
-ROM:D1A0 64			     .db 0x64 ;	d
-ROM:D1A1 FF			     .db 0xFF
-ROM:D1A2 00			     .db    0
-ROM:D1A3 5A			     .db 0x5A ;	Z
-ROM:D1A4 E0			     .db 0xE0 ;	‡
-ROM:D1A5 0F			     .db  0xF
-ROM:D1A6 1F			     .db 0x1F
-ROM:D1A7 F1			     .db 0xF1 ;	Ò
-ROM:D1A8 00			     .db    0
-ROM:D1A9 0F			     .db  0xF
-ROM:D1AA 1F			     .db 0x1F
-ROM:D1AB B5			     .db 0xB5 ;	µ
-ROM:D1AC FF			     .db 0xFF
-ROM:D1AD E2			     .db 0xE2 ;	‚
-ROM:D1AE 00			     .db    0
-ROM:D1AF 2D			     .db 0x2D ;	-
-ROM:D1B0 E0			     .db 0xE0 ;	‡
-ROM:D1B1 50			     .db 0x50 ;	P
-ROM:D1B2 A0			     .db 0xA0 ;	†
-ROM:D1B3 18			     .db 0x18
-ROM:D1B4 A0			     .db 0xA0 ;	†
-ROM:D1B5 16			     .db 0x16
-ROM:D1B6 64			     .db 0x64 ;	d
-ROM:D1B7 FF			     .db 0xFF
-ROM:D1B8 1F			     .db 0x1F
-ROM:D1B9 CC			     .db 0xCC ;	Ã
-ROM:D1BA 00			     .db    0
-ROM:D1BB 05			     .db    5
-ROM:D1BC 00			     .db    0
-ROM:D1BD 07			     .db    7
-ROM:D1BE FF			     .db 0xFF
-ROM:D1BF AB			     .db 0xAB ;	´
-ROM:D1C0 1F			     .db 0x1F
-ROM:D1C1 B5			     .db 0xB5 ;	µ
-ROM:D1C2 E0			     .db 0xE0 ;	‡
-ROM:D1C3 46			     .db 0x46 ;	F
-ROM:D1C4 A0			     .db 0xA0 ;	†
-ROM:D1C5 18			     .db 0x18
-ROM:D1C6 A0			     .db 0xA0 ;	†
-ROM:D1C7 16			     .db 0x16
-ROM:D1C8 64			     .db 0x64 ;	d
-ROM:D1C9 FF			     .db 0xFF
-ROM:D1CA 1F			     .db 0x1F
-ROM:D1CB F1			     .db 0xF1 ;	Ò
-ROM:D1CC 1F			     .db 0x1F
-ROM:D1CD CE			     .db 0xCE ;	Œ
-ROM:D1CE 00			     .db    0
-ROM:D1CF 5A			     .db 0x5A ;	Z
-ROM:D1D0 FF			     .db 0xFF
-ROM:D1D1 EC			     .db 0xEC ;	Ï
-ROM:D1D2 1F			     .db 0x1F
-ROM:D1D3 88			     .db 0x88 ;	à
-ROM:D1D4 E0			     .db 0xE0 ;	‡
-ROM:D1D5 00			     .db    0
-ROM:D1D6 4F			     .db 0x4F ;	O
-ROM:D1D7 16			     .db 0x16
-ROM:D1D8 00			     .db    0
-ROM:D1D9 5A			     .db 0x5A ;	Z
-ROM:D1DA E0			     .db 0xE0 ;	‡
-ROM:D1DB 14			     .db 0x14
-ROM:D1DC 1F			     .db 0x1F
-ROM:D1DD 90			     .db 0x90 ;	ê
-ROM:D1DE FF			     .db 0xFF
-ROM:D1DF CE			     .db 0xCE ;	Œ
-ROM:D1E0 A0			     .db 0xA0 ;	†
-ROM:D1E1 18			     .db 0x18
-ROM:D1E2 A0			     .db 0xA0 ;	†
-ROM:D1E3 16			     .db 0x16
-ROM:D1E4 64			     .db 0x64 ;	d
-ROM:D1E5 FF			     .db 0xFF
-ROM:D1E6 00			     .db    0
-ROM:D1E7 3C			     .db 0x3C ;	<
-ROM:D1E8 1F			     .db 0x1F
-ROM:D1E9 F1			     .db 0xF1 ;	Ò
-ROM:D1EA 00			     .db    0
-ROM:D1EB 34			     .db 0x34 ;	4
-ROM:D1EC E0			     .db 0xE0 ;	‡
-ROM:D1ED 41			     .db 0x41 ;	A
-ROM:D1EE 1F			     .db 0x1F
-ROM:D1EF E2			     .db 0xE2 ;	‚
-ROM:D1F0 FF			     .db 0xFF
-ROM:D1F1 B0			     .db 0xB0 ;	∞
-ROM:D1F2 00			     .db    0
-ROM:D1F3 2D			     .db 0x2D ;	-
-ROM:D1F4 00			     .db    0
-ROM:D1F5 14			     .db 0x14
-ROM:D1F6 1F			     .db 0x1F
-ROM:D1F7 F1			     .db 0xF1 ;	Ò
-ROM:D1F8 E0			     .db 0xE0 ;	‡
-ROM:D1F9 3C			     .db 0x3C ;	<
-ROM:D1FA 00			     .db    0
-ROM:D1FB 2D			     .db 0x2D ;	-
-ROM:D1FC FF			     .db 0xFF
-ROM:D1FD B0			     .db 0xB0 ;	∞
-ROM:D1FE A0			     .db 0xA0 ;	†
-ROM:D1FF 18			     .db 0x18
-ROM:D200 A0			     .db 0xA0 ;	†
-ROM:D201 16			     .db 0x16
-ROM:D202 64			     .db 0x64 ;	d
-ROM:D203 FF			     .db 0xFF
-ROM:D204 4F			     .db 0x4F ;	O
-ROM:D205 05			     .db    5
-ROM:D206 1F			     .db 0x1F
-ROM:D207 B5			     .db 0xB5 ;	µ
-ROM:D208 E0			     .db 0xE0 ;	‡
-ROM:D209 46			     .db 0x46 ;	F
-ROM:D20A 00			     .db    0
-ROM:D20B 5A			     .db 0x5A ;	Z
-ROM:D20C FF			     .db 0xFF
-ROM:D20D E2			     .db 0xE2 ;	‚
-ROM:D20E 00			     .db    0
-ROM:D20F 25			     .db 0x25 ;	%
-ROM:D210 00			     .db    0
-ROM:D211 1E			     .db 0x1E
-ROM:D212 A0			     .db 0xA0 ;	†
-ROM:D213 18			     .db 0x18
-ROM:D214 A0			     .db 0xA0 ;	†
-ROM:D215 16			     .db 0x16
-ROM:D216 64			     .db 0x64 ;	d
-ROM:D217 FF			     .db 0xFF
-ROM:D218 1F			     .db 0x1F
-ROM:D219 81			     .db 0x81 ;	Å
-ROM:D21A E0			     .db 0xE0 ;	‡
-ROM:D21B 00			     .db    0
-ROM:D21C A0			     .db 0xA0 ;	†
-ROM:D21D 18			     .db 0x18
-ROM:D21E A0			     .db 0xA0 ;	†
-ROM:D21F 16			     .db 0x16
-ROM:D220 64			     .db 0x64 ;	d
-ROM:D221 FF			     .db 0xFF
-ROM:D222 C0			     .db 0xC0 ;	¿
-ROM:D223 00			     .db    0
-ROM:D224 64			     .db 0x64 ;	d
-ROM:D225 FF			     .db 0xFF
-ROM:D226 00			     .db    0
-ROM:D227 5A			     .db 0x5A ;	Z
-ROM:D228 E0			     .db 0xE0 ;	‡
-ROM:D229 0A			     .db  0xA
-ROM:D22A 4B			     .db 0x4B ;	K
-ROM:D22B 0F			     .db  0xF
-ROM:D22C A0			     .db 0xA0 ;	†
-ROM:D22D 18			     .db 0x18
-ROM:D22E A0			     .db 0xA0 ;	†
-ROM:D22F 16			     .db 0x16
-ROM:D230 64			     .db 0x64 ;	d
-ROM:D231 FF			     .db 0xFF
-ROM:D232 1F			     .db 0x1F
-ROM:D233 90			     .db 0x90 ;	ê
-ROM:D234 FF			     .db 0xFF
-ROM:D235 D8			     .db 0xD8 ;	ÿ
-ROM:D236 00			     .db    0
-ROM:D237 4B			     .db 0x4B ;	K
-ROM:D238 E0			     .db 0xE0 ;	‡
-ROM:D239 3C			     .db 0x3C ;	<
-ROM:D23A 1F			     .db 0x1F
-ROM:D23B D3			     .db 0xD3 ;	”
-ROM:D23C 1F			     .db 0x1F
-ROM:D23D F6			     .db 0xF6 ;	ˆ
-ROM:D23E 1F			     .db 0x1F
-ROM:D23F E2			     .db 0xE2 ;	‚
-ROM:D240 FF			     .db 0xFF
-ROM:D241 CE			     .db 0xCE ;	Œ
-ROM:D242 00			     .db    0
-ROM:D243 0F			     .db  0xF
-ROM:D244 E0			     .db 0xE0 ;	‡
-ROM:D245 55			     .db 0x55 ;	U
-ROM:D246 A0			     .db 0xA0 ;	†
-ROM:D247 18			     .db 0x18
-ROM:D248 A0			     .db 0xA0 ;	†
-ROM:D249 16			     .db 0x16
-ROM:D24A 64			     .db 0x64 ;	d
-ROM:D24B FF			     .db 0xFF
-ROM:D24C 1F			     .db 0x1F
-ROM:D24D E2			     .db 0xE2 ;	‚
-ROM:D24E 1F			     .db 0x1F
-ROM:D24F F1			     .db 0xF1 ;	Ò
-ROM:D250 00			     .db    0
-ROM:D251 0F			     .db  0xF
-ROM:D252 FF			     .db 0xFF
-ROM:D253 BA			     .db 0xBA ;	∫
-ROM:D254 1F			     .db 0x1F
-ROM:D255 C4			     .db 0xC4 ;	ƒ
-ROM:D256 E0			     .db 0xE0 ;	‡
-ROM:D257 46			     .db 0x46 ;	F
-ROM:D258 1F			     .db 0x1F
-ROM:D259 D3			     .db 0xD3 ;	”
-ROM:D25A 1F			     .db 0x1F
-ROM:D25B EC			     .db 0xEC ;	Ï
-ROM:D25C A0			     .db 0xA0 ;	†
-ROM:D25D 18			     .db 0x18
-ROM:D25E A0			     .db 0xA0 ;	†
-ROM:D25F 16			     .db 0x16
-ROM:D260 64			     .db 0x64 ;	d
-ROM:D261 FF			     .db 0xFF
-ROM:D262 00			     .db    0
-ROM:D263 69			     .db 0x69 ;	i
-ROM:D264 FF			     .db 0xFF
-ROM:D265 CE			     .db 0xCE ;	Œ
-ROM:D266 1F			     .db 0x1F
-ROM:D267 97			     .db 0x97 ;	ó
-ROM:D268 FF			     .db 0xFF
-ROM:D269 F6			     .db 0xF6 ;	ˆ
-ROM:D26A 4F			     .db 0x4F ;	O
-ROM:D26B 16			     .db 0x16
-ROM:D26C 00			     .db    0
-ROM:D26D 4B			     .db 0x4B ;	K
-ROM:D26E E0			     .db 0xE0 ;	‡
-ROM:D26F 1E			     .db 0x1E
-ROM:D270 1F			     .db 0x1F
-ROM:D271 A6			     .db 0xA6 ;	¶
-ROM:D272 FF			     .db 0xFF
-ROM:D273 BA			     .db 0xBA ;	∫
-ROM:D274 00			     .db    0
-ROM:D275 26			     .db 0x26 ;	&
-ROM:D276 1F			     .db 0x1F
-ROM:D277 F6			     .db 0xF6 ;	ˆ
-ROM:D278 A0			     .db 0xA0 ;	†
-ROM:D279 18			     .db 0x18
-ROM:D27A A0			     .db 0xA0 ;	†
-ROM:D27B 16			     .db 0x16
-ROM:D27C 64			     .db 0x64 ;	d
-ROM:D27D FF			     .db 0xFF
-ROM:D27E 00			     .db    0
-ROM:D27F 34			     .db 0x34 ;	4
-ROM:D280 E0			     .db 0xE0 ;	‡
-ROM:D281 50			     .db 0x50 ;	P
-ROM:D282 1F			     .db 0x1F
-ROM:D283 F1			     .db 0xF1 ;	Ò
-ROM:D284 FF			     .db 0xFF
-ROM:D285 A6			     .db 0xA6 ;	¶
-ROM:D286 00			     .db    0
-ROM:D287 2D			     .db 0x2D ;	-
-ROM:D288 00			     .db    0
-ROM:D289 28			     .db 0x28 ;	(
-ROM:D28A 1F			     .db 0x1F
-ROM:D28B E2			     .db 0xE2 ;	‚
-ROM:D28C E0			     .db 0xE0 ;	‡
-ROM:D28D 32			     .db 0x32 ;	2
-ROM:D28E 00			     .db    0
-ROM:D28F 5A			     .db 0x5A ;	Z
-ROM:D290 FF			     .db 0xFF
-ROM:D291 C4			     .db 0xC4 ;	ƒ
-ROM:D292 A0			     .db 0xA0 ;	†
-ROM:D293 18			     .db 0x18
-ROM:D294 A0			     .db 0xA0 ;	†
-ROM:D295 16			     .db 0x16
-ROM:D296 64			     .db 0x64 ;	d
-ROM:D297 FF			     .db 0xFF
-ROM:D298 00			     .db    0
-ROM:D299 2D			     .db 0x2D ;	-
-ROM:D29A 00			     .db    0
-ROM:D29B 32			     .db 0x32 ;	2
-ROM:D29C 1F			     .db 0x1F
-ROM:D29D 79			     .db 0x79 ;	y
-ROM:D29E E0			     .db 0xE0 ;	‡
-ROM:D29F 0A			     .db  0xA
-ROM:D2A0 A0			     .db 0xA0 ;	†
-ROM:D2A1 18			     .db 0x18
-ROM:D2A2 A0			     .db 0xA0 ;	†
-ROM:D2A3 16			     .db 0x16
-ROM:D2A4 64			     .db 0x64 ;	d
-ROM:D2A5 FF			     .db 0xFF
-ROM:D2A6 C0			     .db 0xC0 ;	¿
-ROM:D2A7 00			     .db    0
-ROM:D2A8 64			     .db 0x64 ;	d
-ROM:D2A9 FF			     .db 0xFF
-ROM:D2AA 1F			     .db 0x1F
-ROM:D2AB 81			     .db 0x81 ;	Å
-ROM:D2AC E0			     .db 0xE0 ;	‡
-ROM:D2AD 0F			     .db  0xF
-ROM:D2AE A0			     .db 0xA0 ;	†
-ROM:D2AF 18			     .db 0x18
-ROM:D2B0 A0			     .db 0xA0 ;	†
-ROM:D2B1 16			     .db 0x16
-ROM:D2B2 64			     .db 0x64 ;	d
-ROM:D2B3 FF			     .db 0xFF
-ROM:D2B4 00			     .db    0
-ROM:D2B5 34			     .db 0x34 ;	4
-ROM:D2B6 00			     .db    0
-ROM:D2B7 19			     .db 0x19
-ROM:D2B8 00			     .db    0
-ROM:D2B9 4B			     .db 0x4B ;	K
-ROM:D2BA FF			     .db 0xFF
-ROM:D2BB D8			     .db 0xD8 ;	ÿ
-ROM:D2BC 1F			     .db 0x1F
-ROM:D2BD B5			     .db 0xB5 ;	µ
-ROM:D2BE E0			     .db 0xE0 ;	‡
-ROM:D2BF 3C			     .db 0x3C ;	<
-ROM:D2C0 00			     .db    0
-ROM:D2C1 35			     .db 0x35 ;	5
-ROM:D2C2 00			     .db    0
-ROM:D2C3 05			     .db    5
-ROM:D2C4 00			     .db    0
-ROM:D2C5 16			     .db 0x16
-ROM:D2C6 FF			     .db 0xFF
-ROM:D2C7 BF			     .db 0xBF ;	ø
-ROM:D2C8 1F			     .db 0x1F
-ROM:D2C9 F1			     .db 0xF1 ;	Ò
-ROM:D2CA E0			     .db 0xE0 ;	‡
-ROM:D2CB 55			     .db 0x55 ;	U
-ROM:D2CC A0			     .db 0xA0 ;	†
-ROM:D2CD 18			     .db 0x18
-ROM:D2CE A0			     .db 0xA0 ;	†
-ROM:D2CF 16			     .db 0x16
-ROM:D2D0 64			     .db 0x64 ;	d
-ROM:D2D1 FF			     .db 0xFF
-ROM:D2D2 00			     .db    0
-ROM:D2D3 2D			     .db 0x2D ;	-
-ROM:D2D4 1F			     .db 0x1F
-ROM:D2D5 F1			     .db 0xF1 ;	Ò
-ROM:D2D6 1F			     .db 0x1F
-ROM:D2D7 E2			     .db 0xE2 ;	‚
-ROM:D2D8 FF			     .db 0xFF
-ROM:D2D9 BA			     .db 0xBA ;	∫
-ROM:D2DA 00			     .db    0
-ROM:D2DB 4B			     .db 0x4B ;	K
-ROM:D2DC E0			     .db 0xE0 ;	‡
-ROM:D2DD 46			     .db 0x46 ;	F
-ROM:D2DE 00			     .db    0
-ROM:D2DF 16			     .db 0x16
-ROM:D2E0 1F			     .db 0x1F
-ROM:D2E1 F1			     .db 0xF1 ;	Ò
-ROM:D2E2 A0			     .db 0xA0 ;	†
-ROM:D2E3 18			     .db 0x18
-ROM:D2E4 A0			     .db 0xA0 ;	†
-ROM:D2E5 16			     .db 0x16
-ROM:D2E6 64			     .db 0x64 ;	d
-ROM:D2E7 FF			     .db 0xFF
-ROM:D2E8 1F			     .db 0x1F
-ROM:D2E9 9F			     .db 0x9F ;	ü
-ROM:D2EA FF			     .db 0xFF
-ROM:D2EB C9			     .db 0xC9 ;	…
-ROM:D2EC 00			     .db    0
-ROM:D2ED 69			     .db 0x69 ;	i
-ROM:D2EE FF			     .db 0xFF
-ROM:D2EF F1			     .db 0xF1 ;	Ò
-ROM:D2F0 40			     .db 0x40 ;	@
-ROM:D2F1 11			     .db 0x11
-ROM:D2F2 A0			     .db 0xA0 ;	†
-ROM:D2F3 18			     .db 0x18
-ROM:D2F4 A0			     .db 0xA0 ;	†
-ROM:D2F5 16			     .db 0x16
-ROM:D2F6 64			     .db 0x64 ;	d
-ROM:D2F7 FF			     .db 0xFF
-ROM:D2F8 1F			     .db 0x1F
-ROM:D2F9 97			     .db 0x97 ;	ó
-ROM:D2FA E0			     .db 0xE0 ;	‡
-ROM:D2FB 2D			     .db 0x2D ;	-
-ROM:D2FC 00			     .db    0
-ROM:D2FD 4B			     .db 0x4B ;	K
-ROM:D2FE FF			     .db 0xFF
-ROM:D2FF BA			     .db 0xBA ;	∫
-ROM:D300 1F			     .db 0x1F
-ROM:D301 DA			     .db 0xDA ;	⁄
-ROM:D302 1F			     .db 0x1F
-ROM:D303 F6			     .db 0xF6 ;	ˆ
-ROM:D304 1F			     .db 0x1F
-ROM:D305 DB			     .db 0xDB ;	€
-ROM:D306 E0			     .db 0xE0 ;	‡
-ROM:D307 50			     .db 0x50 ;	P
-ROM:D308 00			     .db    0
-ROM:D309 00			     .db    0
-ROM:D30A FF			     .db 0xFF
-ROM:D30B AB			     .db 0xAB ;	´
-ROM:D30C A0			     .db 0xA0 ;	†
-ROM:D30D 18			     .db 0x18
-ROM:D30E A0			     .db 0xA0 ;	†
-ROM:D30F 16			     .db 0x16
-ROM:D310 64			     .db 0x64 ;	d
-ROM:D311 FF			     .db 0xFF
-ROM:D312 1F			     .db 0x1F
-ROM:D313 E2			     .db 0xE2 ;	‚
-ROM:D314 00			     .db    0
-ROM:D315 23			     .db 0x23 ;	#
-ROM:D316 00			     .db    0
-ROM:D317 1E			     .db 0x1E
-ROM:D318 E0			     .db 0xE0 ;	‡
-ROM:D319 32			     .db 0x32 ;	2
-ROM:D31A 1F			     .db 0x1F
-ROM:D31B A6			     .db 0xA6 ;	¶
-ROM:D31C FF			     .db 0xFF
-ROM:D31D C4			     .db 0xC4 ;	ƒ
-ROM:D31E 1F			     .db 0x1F
-ROM:D31F E2			     .db 0xE2 ;	‚
-ROM:D320 00			     .db    0
-ROM:D321 28			     .db 0x28 ;	(
-ROM:D322 00			     .db    0
-ROM:D323 78			     .db 0x78 ;	x
-ROM:D324 E0			     .db 0xE0 ;	‡
-ROM:D325 14			     .db 0x14
-ROM:D326 A0			     .db 0xA0 ;	†
-ROM:D327 18			     .db 0x18
-ROM:D328 A0			     .db 0xA0 ;	†
-ROM:D329 16			     .db 0x16
-ROM:D32A 64			     .db 0x64 ;	d
-ROM:D32B FF			     .db 0xFF
-ROM:D32C C0			     .db 0xC0 ;	¿
-ROM:D32D 00			     .db    0
-ROM:D32E 4F			     .db 0x4F ;	O
-ROM:D32F E0			     .db 0xE0 ;	‡
-ROM:D330 00			     .db    0
-ROM:D331 00			     .db    0
-ROM:D332 00			     .db    0
-ROM:D333 3C			     .db 0x3C ;	<
-ROM:D334 1F			     .db 0x1F
-ROM:D335 E2			     .db 0xE2 ;	‚
-ROM:D336 FF			     .db 0xFF
-ROM:D337 C4			     .db 0xC4 ;	ƒ
-ROM:D338 1F			     .db 0x1F
-ROM:D339 E2			     .db 0xE2 ;	‚
-ROM:D33A E0			     .db 0xE0 ;	‡
-ROM:D33B 28			     .db 0x28 ;	(
-ROM:D33C 1F			     .db 0x1F
-ROM:D33D E2			     .db 0xE2 ;	‚
-ROM:D33E 1F			     .db 0x1F
-ROM:D33F D8			     .db 0xD8 ;	ÿ
-ROM:D340 00			     .db    0
-ROM:D341 3C			     .db 0x3C ;	<
-ROM:D342 E0			     .db 0xE0 ;	‡
-ROM:D343 00			     .db    0
-ROM:D344 1F			     .db 0x1F
-ROM:D345 E2			     .db 0xE2 ;	‚
-ROM:D346 FF			     .db 0xFF
-ROM:D347 D8			     .db 0xD8 ;	ÿ
-ROM:D348 00			     .db    0
-ROM:D349 5A			     .db 0x5A ;	Z
-ROM:D34A 00			     .db    0
-ROM:D34B 00			     .db    0
-ROM:D34C 1F			     .db 0x1F
-ROM:D34D C4			     .db 0xC4 ;	ƒ
-ROM:D34E E0			     .db 0xE0 ;	‡
-ROM:D34F 28			     .db 0x28 ;	(
-ROM:D350 C0			     .db 0xC0 ;	¿
-ROM:D351 00			     .db    0
-ROM:D352 40			     .db 0x40 ;	@
-ROM:D353 F6			     .db 0xF6 ;	ˆ
-ROM:D354 00			     .db    0
-ROM:D355 5A			     .db 0x5A ;	Z
-ROM:D356 00			     .db    0
-ROM:D357 00			     .db    0
-ROM:D358 1F			     .db 0x1F
-ROM:D359 A6			     .db 0xA6 ;	¶
-ROM:D35A E0			     .db 0xE0 ;	‡
-ROM:D35B 14			     .db 0x14
-ROM:D35C 00			     .db    0
-ROM:D35D 3C			     .db 0x3C ;	<
-ROM:D35E E0			     .db 0xE0 ;	‡
-ROM:D35F 14			     .db 0x14
-ROM:D360 1F			     .db 0x1F
-ROM:D361 C4			     .db 0xC4 ;	ƒ
-ROM:D362 00			     .db    0
-ROM:D363 14			     .db 0x14
-ROM:D364 00			     .db    0
-ROM:D365 00			     .db    0
-ROM:D366 FF			     .db 0xFF
-ROM:D367 D8			     .db 0xD8 ;	ÿ
-ROM:D368 1F			     .db 0x1F
-ROM:D369 C4			     .db 0xC4 ;	ƒ
-ROM:D36A E0			     .db 0xE0 ;	‡
-ROM:D36B 14			     .db 0x14
-ROM:D36C 00			     .db    0
-ROM:D36D 00			     .db    0
-ROM:D36E 1F			     .db 0x1F
-ROM:D36F C4			     .db 0xC4 ;	ƒ
-ROM:D370 00			     .db    0
-ROM:D371 3C			     .db 0x3C ;	<
-ROM:D372 E0			     .db 0xE0 ;	‡
-ROM:D373 28			     .db 0x28 ;	(
-ROM:D374 C0			     .db 0xC0 ;	¿
-ROM:D375 00			     .db    0
-ROM:D376 51			     .db 0x51 ;	Q
-ROM:D377 E0			     .db 0xE0 ;	‡
-ROM:D378 00			     .db    0
-ROM:D379 00			     .db    0
-ROM:D37A 1F			     .db 0x1F
-ROM:D37B C4			     .db 0xC4 ;	ƒ
-ROM:D37C 00			     .db    0
-ROM:D37D 1E			     .db 0x1E
-ROM:D37E E0			     .db 0xE0 ;	‡
-ROM:D37F 3C			     .db 0x3C ;	<
-ROM:D380 00			     .db    0
-ROM:D381 1E			     .db 0x1E
-ROM:D382 FF			     .db 0xFF
-ROM:D383 D8			     .db 0xD8 ;	ÿ
-ROM:D384 00			     .db    0
-ROM:D385 1E			     .db 0x1E
-ROM:D386 00			     .db    0
-ROM:D387 28			     .db 0x28 ;	(
-ROM:D388 1F			     .db 0x1F
-ROM:D389 C4			     .db 0xC4 ;	ƒ
-ROM:D38A E0			     .db 0xE0 ;	‡
-ROM:D38B 00			     .db    0
-ROM:D38C 00			     .db    0
-ROM:D38D 1E			     .db 0x1E
-ROM:D38E E0			     .db 0xE0 ;	‡
-ROM:D38F 28			     .db 0x28 ;	(
-ROM:D390 1F			     .db 0x1F
-ROM:D391 A6			     .db 0xA6 ;	¶
-ROM:D392 00			     .db    0
-ROM:D393 00			     .db    0
-ROM:D394 00			     .db    0
-ROM:D395 3C			     .db 0x3C ;	<
-ROM:D396 FF			     .db 0xFF
-ROM:D397 D8			     .db 0xD8 ;	ÿ
-ROM:D398 C0			     .db 0xC0 ;	¿
-ROM:D399 00			     .db    0
-ROM:D39A 40			     .db 0x40 ;	@
-ROM:D39B EA			     .db 0xEA ;	Í
-ROM:D39C 1F			     .db 0x1F
-ROM:D39D A6			     .db 0xA6 ;	¶
-ROM:D39E 00			     .db    0
-ROM:D39F 00			     .db    0
-ROM:D3A0 00			     .db    0
-ROM:D3A1 5A			     .db 0x5A ;	Z
-ROM:D3A2 FF			     .db 0xFF
-ROM:D3A3 EC			     .db 0xEC ;	Ï
-ROM:D3A4 1F			     .db 0x1F
-ROM:D3A5 C4			     .db 0xC4 ;	ƒ
-ROM:D3A6 FF			     .db 0xFF
-ROM:D3A7 EC			     .db 0xEC ;	Ï
-ROM:D3A8 00			     .db    0
-ROM:D3A9 3C			     .db 0x3C ;	<
-ROM:D3AA 1F			     .db 0x1F
-ROM:D3AB EC			     .db 0xEC ;	Ï
-ROM:D3AC 00			     .db    0
-ROM:D3AD 00			     .db    0
-ROM:D3AE E0			     .db 0xE0 ;	‡
-ROM:D3AF 28			     .db 0x28 ;	(
-ROM:D3B0 00			     .db    0
-ROM:D3B1 3C			     .db 0x3C ;	<
-ROM:D3B2 FF			     .db 0xFF
-ROM:D3B3 EC			     .db 0xEC ;	Ï
-ROM:D3B4 00			     .db    0
-ROM:D3B5 00			     .db    0
-ROM:D3B6 00			     .db    0
-ROM:D3B7 3C			     .db 0x3C ;	<
-ROM:D3B8 1F			     .db 0x1F
-ROM:D3B9 C4			     .db 0xC4 ;	ƒ
-ROM:D3BA FF			     .db 0xFF
-ROM:D3BB D8			     .db 0xD8 ;	ÿ
-ROM:D3BC C0			     .db 0xC0 ;	¿
-ROM:D3BD 00			     .db    0
-ROM:D3BE 44			     .db 0x44 ;	D
-ROM:D3BF 1A			     .db 0x1A
-ROM:D3C0 B9			     .db 0xB9 ;	π
-ROM:D3C1 EF			     .db 0xEF ;	Ô
-ROM:D3C2 56			     .db 0x56 ;	V
-ROM:D3C3 22			     .db 0x22 ;	"
-ROM:D3C4 B9			     .db 0xB9 ;	π
-ROM:D3C5 EF			     .db 0xEF ;	Ô
-ROM:D3C6 42			     .db 0x42 ;	B
-ROM:D3C7 2A			     .db 0x2A ;	*
-ROM:D3C8 B9			     .db 0xB9 ;	π
-ROM:D3C9 EF			     .db 0xEF ;	Ô
-ROM:D3CA 46			     .db 0x46 ;	F
-ROM:D3CB 04			     .db    4
-ROM:D3CC C0			     .db 0xC0 ;	¿
-ROM:D3CD 00			     .db    0
-ROM:D3CE 46			     .db 0x46 ;	F
-ROM:D3CF 04			     .db    4
-ROM:D3D0 B9			     .db 0xB9 ;	π
-ROM:D3D1 EF			     .db 0xEF ;	Ô
-ROM:D3D2 5E			     .db 0x5E ;	^
-ROM:D3D3 36			     .db 0x36 ;	6
-ROM:D3D4 F6			     .db 0xF6 ;	ˆ
-ROM:D3D5 71			     .db 0x71 ;	q
-ROM:D3D6 5C			     .db 0x5C ;	\
-ROM:D3D7 06			     .db    6
-ROM:D3D8 4A			     .db 0x4A ;	J
-ROM:D3D9 3E			     .db 0x3E ;	>
-ROM:D3DA F6			     .db 0xF6 ;	ˆ
-ROM:D3DB 79			     .db 0x79 ;	y
-ROM:D3DC 41			     .db 0x41 ;	A
-ROM:D3DD 05			     .db    5
-ROM:D3DE B9			     .db 0xB9 ;	π
-ROM:D3DF EF			     .db 0xEF ;	Ô
-ROM:D3E0 5F			     .db 0x5F ;	_
-ROM:D3E1 3B			     .db 0x3B ;	;
-ROM:D3E2 B9			     .db 0xB9 ;	π
-ROM:D3E3 EF			     .db 0xEF ;	Ô
-ROM:D3E4 F6			     .db 0xF6 ;	ˆ
-ROM:D3E5 7C			     .db 0x7C ;	|
-ROM:D3E6 5C			     .db 0x5C ;	\
-ROM:D3E7 06			     .db    6
-ROM:D3E8 45			     .db 0x45 ;	E
-ROM:D3E9 3F			     .db 0x3F ;	?
-ROM:D3EA B9			     .db 0xB9 ;	π
-ROM:D3EB EF			     .db 0xEF ;	Ô
-ROM:D3EC 5F			     .db 0x5F ;	_
-ROM:D3ED 3B			     .db 0x3B ;	;
-ROM:D3EE B9			     .db 0xB9 ;	π
-ROM:D3EF EF			     .db 0xEF ;	Ô
-ROM:D3F0 F6			     .db 0xF6 ;	ˆ
-ROM:D3F1 78			     .db 0x78 ;	x
-ROM:D3F2 5C			     .db 0x5C ;	\
-ROM:D3F3 06			     .db    6
-ROM:D3F4 4A			     .db 0x4A ;	J
-ROM:D3F5 3E			     .db 0x3E ;	>
-ROM:D3F6 B9			     .db 0xB9 ;	π
-ROM:D3F7 EF			     .db 0xEF ;	Ô
-ROM:D3F8 5E			     .db 0x5E ;	^
-ROM:D3F9 16			     .db 0x16
-ROM:D3FA F6			     .db 0xF6 ;	ˆ
-ROM:D3FB 71			     .db 0x71 ;	q
-ROM:D3FC B9			     .db 0xB9 ;	π
-ROM:D3FD EF			     .db 0xEF ;	Ô
-ROM:D3FE 5B			     .db 0x5B ;	[
-ROM:D3FF 01			     .db    1
-ROM:D400 B9			     .db 0xB9 ;	π
-ROM:D401 EF			     .db 0xEF ;	Ô
-ROM:D402 4A			     .db 0x4A ;	J
-ROM:D403 3E			     .db 0x3E ;	>
-ROM:D404 B9			     .db 0xB9 ;	π
-ROM:D405 EF			     .db 0xEF ;	Ô
-ROM:D406 5F			     .db 0x5F ;	_
-ROM:D407 1B			     .db 0x1B
-ROM:D408 B9			     .db 0xB9 ;	π
-ROM:D409 EF			     .db 0xEF ;	Ô
-ROM:D40A 42			     .db 0x42 ;	B
-ROM:D40B 2A			     .db 0x2A ;	*
-ROM:D40C B9			     .db 0xB9 ;	π
-ROM:D40D EF			     .db 0xEF ;	Ô
-ROM:D40E 5C			     .db 0x5C ;	\
-ROM:D40F 06			     .db    6
-ROM:D410 C0			     .db 0xC0 ;	¿
-ROM:D411 00			     .db    0
-ROM:D412 B9			     .db 0xB9 ;	π
-ROM:D413 EF			     .db 0xEF ;	Ô
-ROM:D414 5A			     .db 0x5A ;	Z
-ROM:D415 1C			     .db 0x1C
-ROM:D416 B9			     .db 0xB9 ;	π
-ROM:D417 EF			     .db 0xEF ;	Ô
-ROM:D418 42			     .db 0x42 ;	B
-ROM:D419 2A			     .db 0x2A ;	*
-ROM:D41A B9			     .db 0xB9 ;	π
-ROM:D41B EF			     .db 0xEF ;	Ô
-ROM:D41C 5F			     .db 0x5F ;	_
-ROM:D41D 1B			     .db 0x1B
-ROM:D41E F6			     .db 0xF6 ;	ˆ
-ROM:D41F 91			     .db 0x91 ;	ë
-ROM:D420 5A			     .db 0x5A ;	Z
-ROM:D421 1C			     .db 0x1C
-ROM:D422 B9			     .db 0xB9 ;	π
-ROM:D423 EF			     .db 0xEF ;	Ô
-ROM:D424 4A			     .db 0x4A ;	J
-ROM:D425 3E			     .db 0x3E ;	>
-ROM:D426 B9			     .db 0xB9 ;	π
-ROM:D427 EF			     .db 0xEF ;	Ô
-ROM:D428 42			     .db 0x42 ;	B
-ROM:D429 2A			     .db 0x2A ;	*
-ROM:D42A B9			     .db 0xB9 ;	π
-ROM:D42B EF			     .db 0xEF ;	Ô
-ROM:D42C 59			     .db 0x59 ;	Y
-ROM:D42D 17			     .db 0x17
-ROM:D42E B9			     .db 0xB9 ;	π
-ROM:D42F EF			     .db 0xEF ;	Ô
-ROM:D430 41			     .db 0x41 ;	A
-ROM:D431 25			     .db 0x25 ;	%
-ROM:D432 B9			     .db 0xB9 ;	π
-ROM:D433 EF			     .db 0xEF ;	Ô
-ROM:D434 42			     .db 0x42 ;	B
-ROM:D435 0A			     .db  0xA
-ROM:D436 C0			     .db 0xC0 ;	¿
-ROM:D437 00			     .db    0
-ROM:D438 5C			     .db 0x5C ;	\
-ROM:D439 06			     .db    6
-ROM:D43A B9			     .db 0xB9 ;	π
-ROM:D43B EF			     .db 0xEF ;	Ô
-ROM:D43C 5E			     .db 0x5E ;	^
-ROM:D43D 36			     .db 0x36 ;	6
-ROM:D43E F6			     .db 0xF6 ;	ˆ
-ROM:D43F A2			     .db 0xA2 ;	¢
-ROM:D440 5F			     .db 0x5F ;	_
-ROM:D441 1B			     .db 0x1B
-ROM:D442 47			     .db 0x47 ;	G
-ROM:D443 29			     .db 0x29 ;	)
-ROM:D444 B9			     .db 0xB9 ;	π
-ROM:D445 EF			     .db 0xEF ;	Ô
-ROM:D446 5E			     .db 0x5E ;	^
-ROM:D447 16			     .db 0x16
-ROM:D448 B9			     .db 0xB9 ;	π
-ROM:D449 EF			     .db 0xEF ;	Ô
-ROM:D44A 56			     .db 0x56 ;	V
-ROM:D44B 22			     .db 0x22 ;	"
-ROM:D44C B9			     .db 0xB9 ;	π
-ROM:D44D EF			     .db 0xEF ;	Ô
-ROM:D44E 42			     .db 0x42 ;	B
-ROM:D44F 0A			     .db  0xA
-ROM:D450 B9			     .db 0xB9 ;	π
-ROM:D451 EF			     .db 0xEF ;	Ô
-ROM:D452 43			     .db 0x43 ;	C
-ROM:D453 35			     .db 0x35 ;	5
-ROM:D454 B9			     .db 0xB9 ;	π
-ROM:D455 EF			     .db 0xEF ;	Ô
-ROM:D456 F6			     .db 0xF6 ;	ˆ
-ROM:D457 D2			     .db 0xD2 ;	“
-ROM:D458 B9			     .db 0xB9 ;	π
-ROM:D459 EF			     .db 0xEF ;	Ô
-ROM:D45A 5F			     .db 0x5F ;	_
-ROM:D45B 1B			     .db 0x1B
-ROM:D45C 42			     .db 0x42 ;	B
-ROM:D45D 2A			     .db 0x2A ;	*
-ROM:D45E B9			     .db 0xB9 ;	π
-ROM:D45F EF			     .db 0xEF ;	Ô
-ROM:D460 45			     .db 0x45 ;	E
-ROM:D461 3F			     .db 0x3F ;	?
-ROM:D462 B9			     .db 0xB9 ;	π
-ROM:D463 EF			     .db 0xEF ;	Ô
-ROM:D464 5E			     .db 0x5E ;	^
-ROM:D465 36			     .db 0x36 ;	6
-ROM:D466 F6			     .db 0xF6 ;	ˆ
-ROM:D467 B5			     .db 0xB5 ;	µ
-ROM:D468 B9			     .db 0xB9 ;	π
-ROM:D469 EF			     .db 0xEF ;	Ô
-ROM:D46A 5A			     .db 0x5A ;	Z
-ROM:D46B 1C			     .db 0x1C
-ROM:D46C B9			     .db 0xB9 ;	π
-ROM:D46D EF			     .db 0xEF ;	Ô
-ROM:D46E 45			     .db 0x45 ;	E
-ROM:D46F 3F			     .db 0x3F ;	?
-ROM:D470 B9			     .db 0xB9 ;	π
-ROM:D471 EF			     .db 0xEF ;	Ô
-ROM:D472 46			     .db 0x46 ;	F
-ROM:D473 24			     .db 0x24 ;	$
-ROM:D474 B9			     .db 0xB9 ;	π
-ROM:D475 EF			     .db 0xEF ;	Ô
-ROM:D476 5C			     .db 0x5C ;	\
-ROM:D477 26			     .db 0x26 ;	&
-ROM:D478 B9			     .db 0xB9 ;	π
-ROM:D479 EF			     .db 0xEF ;	Ô
-ROM:D47A 5B			     .db 0x5B ;	[
-ROM:D47B 21			     .db 0x21 ;	!
-ROM:D47C B9			     .db 0xB9 ;	π
-ROM:D47D EF			     .db 0xEF ;	Ô
-ROM:D47E 45			     .db 0x45 ;	E
-ROM:D47F 1F			     .db 0x1F
-ROM:D480 5E			     .db 0x5E ;	^
-ROM:D481 36			     .db 0x36 ;	6
-ROM:D482 43			     .db 0x43 ;	C
-ROM:D483 0F			     .db  0xF
-ROM:D484 C0			     .db 0xC0 ;	¿
-ROM:D485 00			     .db    0
-ROM:D486 5A			     .db 0x5A ;	Z
-ROM:D487 1C			     .db 0x1C
-ROM:D488 B9			     .db 0xB9 ;	π
-ROM:D489 EF			     .db 0xEF ;	Ô
-ROM:D48A 4A			     .db 0x4A ;	J
-ROM:D48B 3E			     .db 0x3E ;	>
-ROM:D48C B9			     .db 0xB9 ;	π
-ROM:D48D EF			     .db 0xEF ;	Ô
-ROM:D48E 41			     .db 0x41 ;	A
-ROM:D48F 25			     .db 0x25 ;	%
-ROM:D490 B9			     .db 0xB9 ;	π
-ROM:D491 EF			     .db 0xEF ;	Ô
-ROM:D492 5C			     .db 0x5C ;	\
-ROM:D493 26			     .db 0x26 ;	&
-ROM:D494 B9			     .db 0xB9 ;	π
-ROM:D495 EF			     .db 0xEF ;	Ô
-ROM:D496 5A			     .db 0x5A ;	Z
-ROM:D497 3C			     .db 0x3C ;	<
-ROM:D498 B9			     .db 0xB9 ;	π
-ROM:D499 EF			     .db 0xEF ;	Ô
-ROM:D49A 5F			     .db 0x5F ;	_
-ROM:D49B 3B			     .db 0x3B ;	;
-ROM:D49C 48			     .db 0x48 ;	H
-ROM:D49D 0E			     .db  0xE
-ROM:D49E C0			     .db 0xC0 ;	¿
-ROM:D49F 00			     .db    0
-ROM:D4A0 5A			     .db 0x5A ;	Z
-ROM:D4A1 1C			     .db 0x1C
-ROM:D4A2 B9			     .db 0xB9 ;	π
-ROM:D4A3 EF			     .db 0xEF ;	Ô
-ROM:D4A4 4A			     .db 0x4A ;	J
-ROM:D4A5 3E			     .db 0x3E ;	>
-ROM:D4A6 B9			     .db 0xB9 ;	π
-ROM:D4A7 EF			     .db 0xEF ;	Ô
-ROM:D4A8 58			     .db 0x58 ;	X
-ROM:D4A9 2C			     .db 0x2C ;	,
-ROM:D4AA F7			     .db 0xF7 ;	˜
-ROM:D4AB 1A			     .db 0x1A
-ROM:D4AC B9			     .db 0xB9 ;	π
-ROM:D4AD EF			     .db 0xEF ;	Ô
-ROM:D4AE 5A			     .db 0x5A ;	Z
-ROM:D4AF 1C			     .db 0x1C
-ROM:D4B0 B9			     .db 0xB9 ;	π
-ROM:D4B1 EF			     .db 0xEF ;	Ô
-ROM:D4B2 4A			     .db 0x4A ;	J
-ROM:D4B3 3E			     .db 0x3E ;	>
-ROM:D4B4 B9			     .db 0xB9 ;	π
-ROM:D4B5 EF			     .db 0xEF ;	Ô
-ROM:D4B6 5B			     .db 0x5B ;	[
-ROM:D4B7 01			     .db    1
-ROM:D4B8 B9			     .db 0xB9 ;	π
-ROM:D4B9 EF			     .db 0xEF ;	Ô
-ROM:D4BA 42			     .db 0x42 ;	B
-ROM:D4BB 2A			     .db 0x2A ;	*
-ROM:D4BC B9			     .db 0xB9 ;	π
-ROM:D4BD EF			     .db 0xEF ;	Ô
-ROM:D4BE 45			     .db 0x45 ;	E
-ROM:D4BF 1F			     .db 0x1F
-ROM:D4C0 F6			     .db 0xF6 ;	ˆ
-ROM:D4C1 F9			     .db 0xF9 ;	˘
-ROM:D4C2 5A			     .db 0x5A ;	Z
-ROM:D4C3 1C			     .db 0x1C
-ROM:D4C4 B9			     .db 0xB9 ;	π
-ROM:D4C5 EF			     .db 0xEF ;	Ô
-ROM:D4C6 4A			     .db 0x4A ;	J
-ROM:D4C7 3E			     .db 0x3E ;	>
-ROM:D4C8 B9			     .db 0xB9 ;	π
-ROM:D4C9 EF			     .db 0xEF ;	Ô
-ROM:D4CA 5C			     .db 0x5C ;	\
-ROM:D4CB 26			     .db 0x26 ;	&
-ROM:D4CC B9			     .db 0xB9 ;	π
-ROM:D4CD EF			     .db 0xEF ;	Ô
-ROM:D4CE 46			     .db 0x46 ;	F
-ROM:D4CF 24			     .db 0x24 ;	$
-ROM:D4D0 B9			     .db 0xB9 ;	π
-ROM:D4D1 EF			     .db 0xEF ;	Ô
-ROM:D4D2 56			     .db 0x56 ;	V
-ROM:D4D3 22			     .db 0x22 ;	"
-ROM:D4D4 F6			     .db 0xF6 ;	ˆ
-ROM:D4D5 75			     .db 0x75 ;	u
-ROM:D4D6 B9			     .db 0xB9 ;	π
-ROM:D4D7 EF			     .db 0xEF ;	Ô
-ROM:D4D8 5A			     .db 0x5A ;	Z
-ROM:D4D9 1C			     .db 0x1C
-ROM:D4DA B9			     .db 0xB9 ;	π
-ROM:D4DB EF			     .db 0xEF ;	Ô
-ROM:D4DC 42			     .db 0x42 ;	B
-ROM:D4DD 2A			     .db 0x2A ;	*
-ROM:D4DE B9			     .db 0xB9 ;	π
-ROM:D4DF EF			     .db 0xEF ;	Ô
-ROM:D4E0 45			     .db 0x45 ;	E
-ROM:D4E1 3F			     .db 0x3F ;	?
-ROM:D4E2 B9			     .db 0xB9 ;	π
-ROM:D4E3 EF			     .db 0xEF ;	Ô
-ROM:D4E4 5E			     .db 0x5E ;	^
-ROM:D4E5 36			     .db 0x36 ;	6
-ROM:D4E6 B9			     .db 0xB9 ;	π
-ROM:D4E7 EF			     .db 0xEF ;	Ô
-ROM:D4E8 45			     .db 0x45 ;	E
-ROM:D4E9 3F			     .db 0x3F ;	?
-ROM:D4EA B9			     .db 0xB9 ;	π
-ROM:D4EB EF			     .db 0xEF ;	Ô
-ROM:D4EC 42			     .db 0x42 ;	B
-ROM:D4ED 2A			     .db 0x2A ;	*
-ROM:D4EE F7			     .db 0xF7 ;	˜
-ROM:D4EF 25			     .db 0x25 ;	%
-ROM:D4F0 44			     .db 0x44 ;	D
-ROM:D4F1 1A			     .db 0x1A
-ROM:D4F2 B9			     .db 0xB9 ;	π
-ROM:D4F3 EF			     .db 0xEF ;	Ô
-ROM:D4F4 5B			     .db 0x5B ;	[
-ROM:D4F5 21			     .db 0x21 ;	!
-ROM:D4F6 B9			     .db 0xB9 ;	π
-ROM:D4F7 EF			     .db 0xEF ;	Ô
-ROM:D4F8 5C			     .db 0x5C ;	\
-ROM:D4F9 26			     .db 0x26 ;	&
-ROM:D4FA B9			     .db 0xB9 ;	π
-ROM:D4FB EF			     .db 0xEF ;	Ô
-ROM:D4FC 46			     .db 0x46 ;	F
-ROM:D4FD 24			     .db 0x24 ;	$
-ROM:D4FE B9			     .db 0xB9 ;	π
-ROM:D4FF EF			     .db 0xEF ;	Ô
-ROM:D500 45			     .db 0x45 ;	E
-ROM:D501 3F			     .db 0x3F ;	?
-ROM:D502 F7			     .db 0xF7 ;	˜
-ROM:D503 25			     .db 0x25 ;	%
-ROM:D504 44			     .db 0x44 ;	D
-ROM:D505 1A			     .db 0x1A
-ROM:D506 B9			     .db 0xB9 ;	π
-ROM:D507 EF			     .db 0xEF ;	Ô
-ROM:D508 56			     .db 0x56 ;	V
-ROM:D509 22			     .db 0x22 ;	"
-ROM:D50A B9			     .db 0xB9 ;	π
-ROM:D50B EF			     .db 0xEF ;	Ô
-ROM:D50C 46			     .db 0x46 ;	F
-ROM:D50D 24			     .db 0x24 ;	$
-ROM:D50E B9			     .db 0xB9 ;	π
-ROM:D50F EF			     .db 0xEF ;	Ô
-ROM:D510 5C			     .db 0x5C ;	\
-ROM:D511 26			     .db 0x26 ;	&
-ROM:D512 B9			     .db 0xB9 ;	π
-ROM:D513 EF			     .db 0xEF ;	Ô
-ROM:D514 4A			     .db 0x4A ;	J
-ROM:D515 3E			     .db 0x3E ;	>
-ROM:D516 F7			     .db 0xF7 ;	˜
-ROM:D517 25			     .db 0x25 ;	%
-ROM:D518 5B			     .db 0x5B ;	[
-ROM:D519 01			     .db    1
-ROM:D51A B9			     .db 0xB9 ;	π
-ROM:D51B EF			     .db 0xEF ;	Ô
-ROM:D51C 45			     .db 0x45 ;	E
-ROM:D51D 3F			     .db 0x3F ;	?
-ROM:D51E B9			     .db 0xB9 ;	π
-ROM:D51F EF			     .db 0xEF ;	Ô
-ROM:D520 44			     .db 0x44 ;	D
-ROM:D521 3A			     .db 0x3A ;	:
-ROM:D522 B9			     .db 0xB9 ;	π
-ROM:D523 EF			     .db 0xEF ;	Ô
-ROM:D524 5C			     .db 0x5C ;	\
-ROM:D525 06			     .db    6
-ROM:D526 46			     .db 0x46 ;	F
-ROM:D527 24			     .db 0x24 ;	$
-ROM:D528 B9			     .db 0xB9 ;	π
-ROM:D529 EF			     .db 0xEF ;	Ô
-ROM:D52A 5C			     .db 0x5C ;	\
-ROM:D52B 06			     .db    6
-ROM:D52C C0			     .db 0xC0 ;	¿
-ROM:D52D 00			     .db    0
-ROM:D52E 00			     .db    0
-ROM:D52F 96			     .db 0x96 ;	ñ
-ROM:D530 1F			     .db 0x1F
-ROM:D531 9C			     .db 0x9C ;	ú
-ROM:D532 B6			     .db 0xB6 ;	∂
-ROM:D533 F2			     .db 0xF2 ;	Ú
-ROM:D534 B6			     .db 0xB6 ;	∂
-ROM:D535 C5			     .db 0xC5 ;	≈
-ROM:D536 B7			     .db 0xB7 ;	∑
-ROM:D537 1D			     .db 0x1D
-ROM:D538 1F			     .db 0x1F
-ROM:D539 BE			     .db 0xBE ;	æ
-ROM:D53A 1F			     .db 0x1F
-ROM:D53B D8			     .db 0xD8 ;	ÿ
-ROM:D53C B6			     .db 0xB6 ;	∂
-ROM:D53D 8F			     .db 0x8F ;	è
-ROM:D53E B6			     .db 0xB6 ;	∂
-ROM:D53F E7			     .db 0xE7 ;	Á
-ROM:D540 B6			     .db 0xB6 ;	∂
-ROM:D541 AD			     .db 0xAD ;	≠
-ROM:D542 1F			     .db 0x1F
-ROM:D543 A6			     .db 0xA6 ;	¶
-ROM:D544 1F			     .db 0x1F
-ROM:D545 B0			     .db 0xB0 ;	∞
-ROM:D546 B6			     .db 0xB6 ;	∂
-ROM:D547 A1			     .db 0xA1 ;	°
-ROM:D548 B6			     .db 0xB6 ;	∂
-ROM:D549 7C			     .db 0x7C ;	|
-ROM:D54A B6			     .db 0xB6 ;	∂
-ROM:D54B BD			     .db 0xBD ;	Ω
-ROM:D54C B6			     .db 0xB6 ;	∂
-ROM:D54D 78			     .db 0x78 ;	x
-ROM:D54E B6			     .db 0xB6 ;	∂
-ROM:D54F AD			     .db 0xAD ;	≠
-ROM:D550 72			     .db 0x72 ;	r
-ROM:D551 00			     .db    0
-ROM:D552 80			     .db 0x80 ;	Ä
-ROM:D553 40			     .db 0x40 ;	@
-ROM:D554 C0			     .db 0xC0 ;	¿
-ROM:D555 00			     .db    0
-ROM:D556 00			     .db    0
-ROM:D557 1E			     .db 0x1E
-ROM:D558 1F			     .db 0x1F
-ROM:D559 9C			     .db 0x9C ;	ú
-ROM:D55A B6			     .db 0xB6 ;	∂
-ROM:D55B F2			     .db 0xF2 ;	Ú
-ROM:D55C B6			     .db 0xB6 ;	∂
-ROM:D55D C5			     .db 0xC5 ;	≈
-ROM:D55E B6			     .db 0xB6 ;	∂
-ROM:D55F BD			     .db 0xBD ;	Ω
-ROM:D560 B6			     .db 0xB6 ;	∂
-ROM:D561 84			     .db 0x84 ;	Ñ
-ROM:D562 B6			     .db 0xB6 ;	∂
-ROM:D563 7C			     .db 0x7C ;	|
-ROM:D564 B6			     .db 0xB6 ;	∂
-ROM:D565 70			     .db 0x70 ;	p
-ROM:D566 B6			     .db 0xB6 ;	∂
-ROM:D567 9A			     .db 0x9A ;	ö
-ROM:D568 B6			     .db 0xB6 ;	∂
-ROM:D569 E1			     .db 0xE1 ;	·
-ROM:D56A 72			     .db 0x72 ;	r
-ROM:D56B 00			     .db    0
-ROM:D56C 80			     .db 0x80 ;	Ä
-ROM:D56D 40			     .db 0x40 ;	@
-ROM:D56E C0			     .db 0xC0 ;	¿
-ROM:D56F 00			     .db    0
-ROM:D570 00			     .db    0
-ROM:D571 5A			     .db 0x5A ;	Z
-ROM:D572 1F			     .db 0x1F
-ROM:D573 B0			     .db 0xB0 ;	∞
-ROM:D574 B6			     .db 0xB6 ;	∂
-ROM:D575 BD			     .db 0xBD ;	Ω
-ROM:D576 B6			     .db 0xB6 ;	∂
-ROM:D577 9A			     .db 0x9A ;	ö
-ROM:D578 B7			     .db 0xB7 ;	∑
-ROM:D579 09			     .db    9
-ROM:D57A B6			     .db 0xB6 ;	∂
-ROM:D57B AD			     .db 0xAD ;	≠
-ROM:D57C B6			     .db 0xB6 ;	∂
-ROM:D57D BD			     .db 0xBD ;	Ω
-ROM:D57E B6			     .db 0xB6 ;	∂
-ROM:D57F C5			     .db 0xC5 ;	≈
-ROM:D580 72			     .db 0x72 ;	r
-ROM:D581 00			     .db    0
-ROM:D582 80			     .db 0x80 ;	Ä
-ROM:D583 40			     .db 0x40 ;	@
-ROM:D584 C0			     .db 0xC0 ;	¿
-ROM:D585 00			     .db    0
-ROM:D586 00			     .db    0
-ROM:D587 96			     .db 0x96 ;	ñ
-ROM:D588 1F			     .db 0x1F
-ROM:D589 C4			     .db 0xC4 ;	ƒ
-ROM:D58A B6			     .db 0xB6 ;	∂
-ROM:D58B E7			     .db 0xE7 ;	Á
-ROM:D58C B6			     .db 0xB6 ;	∂
-ROM:D58D C5			     .db 0xC5 ;	≈
-ROM:D58E B6			     .db 0xB6 ;	∂
-ROM:D58F 70			     .db 0x70 ;	p
-ROM:D590 B6			     .db 0xB6 ;	∂
-ROM:D591 70			     .db 0x70 ;	p
-ROM:D592 B7			     .db 0xB7 ;	∑
-ROM:D593 1D			     .db 0x1D
-ROM:D594 72			     .db 0x72 ;	r
-ROM:D595 00			     .db    0
-ROM:D596 80			     .db 0x80 ;	Ä
-ROM:D597 40			     .db 0x40 ;	@
-ROM:D598 C0			     .db 0xC0 ;	¿
-ROM:D599 00			     .db    0
-ROM:D59A 1F			     .db 0x1F
-ROM:D59B A0			     .db 0xA0 ;	†
-ROM:D59C 1F			     .db 0x1F
-ROM:D59D B0			     .db 0xB0 ;	∞
-ROM:D59E B6			     .db 0xB6 ;	∂
-ROM:D59F 7F			     .db 0x7F ;	
-ROM:D5A0 B6			     .db 0xB6 ;	∂
-ROM:D5A1 AD			     .db 0xAD ;	≠
-ROM:D5A2 1F			     .db 0x1F
-ROM:D5A3 DA			     .db 0xDA ;	⁄
-ROM:D5A4 00			     .db    0
-ROM:D5A5 14			     .db 0x14
-ROM:D5A6 B7			     .db 0xB7 ;	∑
-ROM:D5A7 13			     .db 0x13
-ROM:D5A8 B6			     .db 0xB6 ;	∂
-ROM:D5A9 9A			     .db 0x9A ;	ö
-ROM:D5AA B6			     .db 0xB6 ;	∂
-ROM:D5AB 8F			     .db 0x8F ;	è
-ROM:D5AC B6			     .db 0xB6 ;	∂
-ROM:D5AD E7			     .db 0xE7 ;	Á
-ROM:D5AE 1F			     .db 0x1F
-ROM:D5AF AE			     .db 0xAE ;	Æ
-ROM:D5B0 1F			     .db 0x1F
-ROM:D5B1 9C			     .db 0x9C ;	ú
-ROM:D5B2 B7			     .db 0xB7 ;	∑
-ROM:D5B3 1D			     .db 0x1D
-ROM:D5B4 B6			     .db 0xB6 ;	∂
-ROM:D5B5 7C			     .db 0x7C ;	|
-ROM:D5B6 B6			     .db 0xB6 ;	∂
-ROM:D5B7 8A			     .db 0x8A ;	ä
-ROM:D5B8 72			     .db 0x72 ;	r
-ROM:D5B9 00			     .db    0
-ROM:D5BA 80			     .db 0x80 ;	Ä
-ROM:D5BB 40			     .db 0x40 ;	@
-ROM:D5BC C0			     .db 0xC0 ;	¿
-ROM:D5BD 00			     .db    0
-ROM:D5BE 1F			     .db 0x1F
-ROM:D5BF 88			     .db 0x88 ;	à
-ROM:D5C0 1F			     .db 0x1F
-ROM:D5C1 B0			     .db 0xB0 ;	∞
-ROM:D5C2 B6			     .db 0xB6 ;	∂
-ROM:D5C3 C5			     .db 0xC5 ;	≈
-ROM:D5C4 B7			     .db 0xB7 ;	∑
-ROM:D5C5 09			     .db    9
-ROM:D5C6 B6			     .db 0xB6 ;	∂
-ROM:D5C7 AD			     .db 0xAD ;	≠
-ROM:D5C8 B6			     .db 0xB6 ;	∂
-ROM:D5C9 70			     .db 0x70 ;	p
-ROM:D5CA B6			     .db 0xB6 ;	∂
-ROM:D5CB 70			     .db 0x70 ;	p
-ROM:D5CC B6			     .db 0xB6 ;	∂
-ROM:D5CD C5			     .db 0xC5 ;	≈
-ROM:D5CE B6			     .db 0xB6 ;	∂
-ROM:D5CF BD			     .db 0xBD ;	Ω
-ROM:D5D0 72			     .db 0x72 ;	r
-ROM:D5D1 00			     .db    0
-ROM:D5D2 80			     .db 0x80 ;	Ä
-ROM:D5D3 40			     .db 0x40 ;	@
-ROM:D5D4 C0			     .db 0xC0 ;	¿
-ROM:D5D5 00			     .db    0
-ROM:D5D6 1F			     .db 0x1F
-ROM:D5D7 5E			     .db 0x5E ;	^
-ROM:D5D8 1F			     .db 0x1F
-ROM:D5D9 C4			     .db 0xC4 ;	ƒ
-ROM:D5DA B7			     .db 0xB7 ;	∑
-ROM:D5DB 09			     .db    9
-ROM:D5DC B6			     .db 0xB6 ;	∂
-ROM:D5DD 9A			     .db 0x9A ;	ö
-ROM:D5DE B6			     .db 0xB6 ;	∂
-ROM:D5DF 78			     .db 0x78 ;	x
-ROM:D5E0 B6			     .db 0xB6 ;	∂
-ROM:D5E1 B1			     .db 0xB1 ;	±
-ROM:D5E2 B6			     .db 0xB6 ;	∂
-ROM:D5E3 AD			     .db 0xAD ;	≠
-ROM:D5E4 B6			     .db 0xB6 ;	∂
-ROM:D5E5 BD			     .db 0xBD ;	Ω
-ROM:D5E6 B6			     .db 0xB6 ;	∂
-ROM:D5E7 FC			     .db 0xFC ;	¸
-ROM:D5E8 72			     .db 0x72 ;	r
-ROM:D5E9 00			     .db    0
-ROM:D5EA 80			     .db 0x80 ;	Ä
-ROM:D5EB 40			     .db 0x40 ;	@
-ROM:D5EC C0			     .db 0xC0 ;	¿
-ROM:D5ED 00			     .db    0
-ROM:D5EE 1F			     .db 0x1F
-ROM:D5EF 2E			     .db 0x2E ;	.
-ROM:D5F0 1F			     .db 0x1F
-ROM:D5F1 D8			     .db 0xD8 ;	ÿ
-ROM:D5F2 B6			     .db 0xB6 ;	∂
-ROM:D5F3 D4			     .db 0xD4 ;	‘
-ROM:D5F4 B6			     .db 0xB6 ;	∂
-ROM:D5F5 8A			     .db 0x8A ;	ä
-ROM:D5F6 B6			     .db 0xB6 ;	∂
-ROM:D5F7 BD			     .db 0xBD ;	Ω
-ROM:D5F8 B6			     .db 0xB6 ;	∂
-ROM:D5F9 A1			     .db 0xA1 ;	°
-ROM:D5FA B6			     .db 0xB6 ;	∂
-ROM:D5FB AD			     .db 0xAD ;	≠
-ROM:D5FC B7			     .db 0xB7 ;	∑
-ROM:D5FD 1D			     .db 0x1D
-ROM:D5FE 72			     .db 0x72 ;	r
-ROM:D5FF 00			     .db    0
-ROM:D600 80			     .db 0x80 ;	Ä
-ROM:D601 40			     .db 0x40 ;	@
-ROM:D602 C0			     .db 0xC0 ;	¿
-ROM:D603 00			     .db    0
-ROM:D604 61			     .db 0x61 ;	a
-ROM:D605 FF			     .db 0xFF
-ROM:D606 62			     .db 0x62 ;	b
-ROM:D607 FF			     .db 0xFF
-ROM:D608 63			     .db 0x63 ;	c
-ROM:D609 FF			     .db 0xFF
-ROM:D60A 64			     .db 0x64 ;	d
-ROM:D60B FF			     .db 0xFF
-ROM:D60C 65			     .db 0x65 ;	e
-ROM:D60D FF			     .db 0xFF
-ROM:D60E 66			     .db 0x66 ;	f
-ROM:D60F FF			     .db 0xFF
-ROM:D610 67			     .db 0x67 ;	g
-ROM:D611 FF			     .db 0xFF
-ROM:D612 61	     unk_D612:	     .db 0x61 ;	a				     ; DATA XREF: ROM:F117o
-ROM:D613 80			     .db 0x80 ;	Ä
-ROM:D614 62			     .db 0x62 ;	b
-ROM:D615 80			     .db 0x80 ;	Ä
-ROM:D616 63			     .db 0x63 ;	c
-ROM:D617 80			     .db 0x80 ;	Ä
-ROM:D618 64			     .db 0x64 ;	d
-ROM:D619 80			     .db 0x80 ;	Ä
-ROM:D61A 65			     .db 0x65 ;	e
-ROM:D61B 80			     .db 0x80 ;	Ä
-ROM:D61C 66			     .db 0x66 ;	f
-ROM:D61D 80			     .db 0x80 ;	Ä
-ROM:D61E 67			     .db 0x67 ;	g
-ROM:D61F 80			     .db 0x80 ;	Ä
-ROM:D620 F9			     .db 0xF9 ;	˘
-ROM:D621 17			     .db 0x17
-ROM:D622 F9			     .db 0xF9 ;	˘
-ROM:D623 19			     .db 0x19
-ROM:D624 F9			     .db 0xF9 ;	˘
-ROM:D625 1B			     .db 0x1B
-ROM:D626 F9			     .db 0xF9 ;	˘
-ROM:D627 1D			     .db 0x1D
-ROM:D628 F9			     .db 0xF9 ;	˘
-ROM:D629 1F			     .db 0x1F
-ROM:D62A F9			     .db 0xF9 ;	˘
-ROM:D62B 21			     .db 0x21 ;	!
-ROM:D62C F9			     .db 0xF9 ;	˘
-ROM:D62D 23			     .db 0x23 ;	#
-ROM:D62E F9			     .db 0xF9 ;	˘
-ROM:D62F 25			     .db 0x25 ;	%
-ROM:D630 F9			     .db 0xF9 ;	˘
-ROM:D631 27			     .db 0x27 ;	'
-ROM:D632 F9			     .db 0xF9 ;	˘
-ROM:D633 29			     .db 0x29 ;	)
-ROM:D634 F9			     .db 0xF9 ;	˘
-ROM:D635 2B			     .db 0x2B ;	+
-ROM:D636 F9			     .db 0xF9 ;	˘
-ROM:D637 2D			     .db 0x2D ;	-
-ROM:D638 F9			     .db 0xF9 ;	˘
-ROM:D639 2F			     .db 0x2F ;	/
-ROM:D63A F9			     .db 0xF9 ;	˘
-ROM:D63B 31			     .db 0x31 ;	1
-ROM:D63C F9			     .db 0xF9 ;	˘
-ROM:D63D 33			     .db 0x33 ;	3
-ROM:D63E F9			     .db 0xF9 ;	˘
-ROM:D63F 35			     .db 0x35 ;	5
-ROM:D640 F9			     .db 0xF9 ;	˘
-ROM:D641 37			     .db 0x37 ;	7
-ROM:D642 F9			     .db 0xF9 ;	˘
-ROM:D643 39			     .db 0x39 ;	9
-ROM:D644 F9			     .db 0xF9 ;	˘
-ROM:D645 3B			     .db 0x3B ;	;
-ROM:D646 F9			     .db 0xF9 ;	˘
-ROM:D647 3D			     .db 0x3D ;	=
-ROM:D648 F5			     .db 0xF5 ;	ı
-ROM:D649 1E			     .db 0x1E
-ROM:D64A F5			     .db 0xF5 ;	ı
-ROM:D64B 61			     .db 0x61 ;	a
-ROM:D64C F5			     .db 0xF5 ;	ı
-ROM:D64D A3			     .db 0xA3 ;	£
-ROM:D64E F5			     .db 0xF5 ;	ı
-ROM:D64F E5			     .db 0xE5 ;	Â
-ROM:D650 F9			     .db 0xF9 ;	˘
-ROM:D651 3F			     .db 0x3F ;	?
-ROM:D652 F9			     .db 0xF9 ;	˘
-ROM:D653 4F			     .db 0x4F ;	O
-ROM:D654 F9			     .db 0xF9 ;	˘
-ROM:D655 5F			     .db 0x5F ;	_
-ROM:D656 F9			     .db 0xF9 ;	˘
-ROM:D657 6F			     .db 0x6F ;	o
-ROM:D658 F6			     .db 0xF6 ;	ˆ
-ROM:D659 28			     .db 0x28 ;	(
-ROM:D65A F6			     .db 0xF6 ;	ˆ
-ROM:D65B 3A			     .db 0x3A ;	:
-ROM:D65C F6			     .db 0xF6 ;	ˆ
-ROM:D65D 4C			     .db 0x4C ;	L
-ROM:D65E F6			     .db 0xF6 ;	ˆ
-ROM:D65F 5E			     .db 0x5E ;	^
+ROM:CEDE 1A F6 1D A8+STAR_WARS_3D_LOGO:.db 0x1A, 0xF6, 0x1D, 0xA8, 0, 0, 0xE2, 8, 0x1F,	0x7E, 0xE0, 0, 0
+ROM:CEDE 00 00 E2 08+								     ; DATA XREF: copy_3d_logo_etc_to_vecramo
+ROM:CEDE 1F 7E E0 00+		     .db 0, 0xFF, 0x74,	0xBB, 0x91, 0x1E, 0xC0,	0xFF, 0xCE, 0xBB, 0x8B
+ROM:CEDE 00 00 FF 74+		     .db 0, 0, 0xFF, 0x4C, 0xBB, 0x91, 1, 0x40,	0xE0, 0x50, 0, 0, 0xFF
+ROM:CEDE BB 91 1E C0+		     .db 0x4C, 0x51, 0xFB, 0x1F, 0xEC, 0xE0, 0x32, 0x1F, 0xA6, 0xE0, 0x32
+ROM:CEDE FF CE BB 8B+		     .db 0xBB, 0x91, 0x1F, 0xB0, 0xFF, 0xEC, 0xBB, 0x91, 0x1F, 0x9C, 0xFF
+ROM:CEDE 00 00 FF 4C+		     .db 0x88, 0xBB, 0x8B, 0, 0, 0xFE, 0xC, 0xBB, 0x8B,	0, 0x8C, 0xE0
+ROM:CEDE BB 91 01 40+		     .db 0x5A, 0, 0, 0xE1, 0x40, 0x4A, 0xE5, 0,	0x14, 0xFF, 0xD8, 0xBB
+ROM:CEDE E0 50 00 00+		     .db 0x85, 0, 0x5A,	0xFF, 0xCE, 0xBB, 0x8B,	0, 0x50, 0xE0, 0x28, 0
+ROM:CEDE FF 4C 51 FB+		     .db 0x64, 0xE0, 0x82, 0x72, 0, 0x80, 0x40,	0xC0, 0, 0x1A, 0xF6, 0
+ROM:CEDE 1F EC E0 32+		     .db 0xB4, 0x1E, 0x3E, 0xE0, 0xB4, 0xBB, 0x8B, 0, 0, 0xFF, 0x60, 0xBB
+ROM:CEDE 1F A6 E0 32+		     .db 0x8B, 0, 0x46,	0xFF, 0xE2, 0xBB, 0x8E,	0, 0, 0xFF, 0x56, 0xBB
+ROM:CEDE BB 91 1F B0+		     .db 0x91, 0x1F, 0xBA, 0xFF, 0xF6, 0xBB, 0x91, 0, 0, 0xFF, 0x60, 0xBB
+ROM:CEDE FF EC BB 91+		     .db 0x8B, 1, 0xC2,	0xE0, 0x78, 0, 0, 0xE0,	0xE6, 0x1F, 0x88, 0x1F
+ROM:CEDE 1F 9C FF 88+		     .db 0x92, 0xBB, 0x8B, 0x1F, 0x74, 0xE0, 0x46, 0, 0, 0xFF, 0x92, 0
+ROM:CEDE BB 8B 00 00+		     .db 0x8C, 0xE0, 0x28, 0x72, 0, 0x80, 0x40,	0xC0, 0, 0x1A, 0xF6, 2
+ROM:CEDE FE 0C BB 8B+		     .db 0x26, 0, 0, 0xFE, 0xE8, 0xBB, 0x91, 0x1E, 0x3E, 0xE0, 0x5A, 0
+ROM:CEDE 00 8C E0 5A+		     .db 0, 0xE0, 0xAA,	0xBB, 0x8E, 0, 0x8C, 0xFF, 0xD8, 0x1F, 0x74, 0xE1
+ROM:CEDE 00 00 E1 40+		     .db 0x22, 0xBB, 0x8B, 0, 0, 0xE1, 0x54, 0xBB, 0x8B, 0, 0x8C, 0xFF
+ROM:CEDE 4A E5 00 14+		     .db 0xA6, 0, 0, 0xFE, 0xF2, 0, 0x14, 0xFF,	0xD8, 0, 0x3C, 0xE0, 0x3C
+ROM:CEDE FF D8 BB 85+		     .db 0xBB, 0x88, 0,	0x6E, 0xFF, 0xCE, 0, 0x78, 0xFF, 0x4C, 0x1F, 0x88
+ROM:CEDE 00 5A FF CE+		     .db 0, 0xA, 0xBB, 0x88, 0x1F, 0xD8, 0xE0, 0x3C, 0x56, 0xE5, 0x1F
+ROM:CEDE BB 8B 00 50+		     .db 0xCE, 0xFF, 0xD8, 0, 0, 0xFF, 0x7E, 0,	0x6E, 0xFF, 0xD8, 0, 0
+ROM:CEDE E0 28 00 64+		     .db 0xE0, 0x8C, 0x72, 0, 0x80, 0x40, 0xC0,	0, 0x18, 0xBC, 0x1C, 0x4A
+ROM:CEDE E0 82 72 00+		     .db 0xBB, 0x9A, 0x1F, 0x24, 0xFF, 0xBA, 0,	0xDC, 0xE0, 0xA0, 0, 0
+ROM:CEDE 80 40 C0 00+		     .db 0xE0, 0x8C, 0xBB, 0x9A, 0x1F, 0x24, 0xFF, 0xBA, 0, 0xDC, 0xE0
+ROM:CEDE 1A F6 00 B4+		     .db 0xAA, 0, 0, 0xE0, 0x8C, 0xBB, 0x9D, 0x1D, 0xE4, 0xFE, 0xE8, 0xBB
+ROM:CEDE 1E 3E E0 B4+		     .db 0xA3, 0, 0, 0xFF, 0x10, 0xBB, 0xA3, 0,	0x96, 0xE0, 0x32, 0x1F
+ROM:CEDE BB 8B 00 00+		     .db 0x6A, 0xFF, 0x7E, 0xBB, 0xA3, 0, 0, 0xFF, 0x10, 0xBB, 0xA3, 2
+ROM:CEDE FF 60 BB 8B+		     .db 0x1C, 0xE0, 0xB4, 0, 0, 0xE0, 0xBE, 0x72, 0, 0x80, 0x40, 0xC0
+ROM:CEDE 00 46 FF E2+		     .db 0, 0x18, 0xBC,	0x1F, 0xB0, 0x1D, 0xE4,	0xE0, 0x82, 0xBB, 0xA3
+ROM:CEDE BB 8E 00 00+		     .db 0, 0, 0xFF, 0x38, 0xBB, 0xA3, 0, 0x50,	0xFF, 0xE2, 0xBB, 0xA3
+ROM:CEDE FF 56 BB 91+		     .db 0, 0, 0xFF, 0x2E, 0xBB, 0xA3, 0x1F, 0xB0, 0xFF, 0xC4, 0xBB, 0xA3
+ROM:CEDE 1F BA FF F6+		     .db 0, 0, 0xFF, 0x24, 0xBB, 0xA3, 2, 0x1C,	0xE1, 0x18, 0, 0, 0xE1
+ROM:CEDE BB 91 00 00+		     .db 0x36, 0x1F, 0x88, 0x1F, 0x56, 0xBB, 0xA0, 0x1F, 0x2E, 0xE0, 0x3C
+ROM:CEDE FF 60 BB 8B+		     .db 0, 0, 0xFF, 0x56, 0, 0xD2, 0xE0, 0x6E,	0x72, 0, 0x80, 0x40, 0xC0
+ROM:CEDE 01 C2 E0 78+		     .db 0, 0x18, 0xBC,	1, 0x9A, 0, 0, 0xFE, 0x84, 0x1D, 0xE4, 0xE0, 0xA
+ROM:CEDE 00 00 E0 E6+		     .db 0, 0, 0xE0, 0xC8, 0xBB, 0xA3, 0, 0xB4,	0xFF, 0xEC, 0x1F, 0x4C
+ROM:CEDE 1F 88 1F 92+		     .db 0xE1, 0x54, 0xBB, 0xA3, 0, 0, 0xE2, 0x58, 0xBB, 0xA3, 0, 0x78
+ROM:CEDE BB 8B 1F 74+		     .db 0xE0, 0x78, 0xBB, 0xA3, 0, 0x6E, 0xFF,	0xC4, 0, 0x78, 0xFF, 0x1A
+ROM:CEDE E0 46 00 00+		     .db 0, 0x14, 0xFF,	0xA6, 0, 0x28, 0xFF, 0xEC, 0, 0, 0xE1, 0x68, 0xBB
+ROM:CEDE FF 92 00 8C+		     .db 0x9D, 0, 0x82,	0xFF, 0xB0, 0, 0, 0xFE,	0x70, 0x1F, 0x9C, 0xFF
+ROM:CEDE E0 28 72 00+		     .db 0x9C, 0xBB, 0x9A, 0x1F, 0x9C, 0xE0, 0x28, 0xBB, 0x9D, 0x1F, 0x92
+ROM:CEDE 80 40 C0 00+		     .db 0xE0, 0xBE, 0xBB, 0x94, 0x1F, 0xEC, 0xE0, 0x50, 0x51, 0xE5, 0
+ROM:CEDE 1A F6 02 26+		     .db 0, 0xFE, 0xE8,	0, 0x1E, 0xFF, 0x42, 0,	0x50, 0xE0, 0x8C, 0xBB
+ROM:CEDE 00 00 FE E8+		     .db 0x97, 0, 0x82,	0xFF, 0xD8, 0, 0x78, 0xFF, 0x38, 0x1F, 0x88, 0x1F
+ROM:CEDE BB 91 1E 3E+		     .db 0xCE, 0xBB, 0x9A, 0x1F, 0xC4, 0xE0, 0x64, 0x1F, 0xD8, 0xE0, 0xA
+ROM:CEDE E0 5A 00 00+		     .db 0x1F, 0xE2, 0xFF, 0xB0, 0, 0, 0xFF, 0x2E, 0, 0x82, 0xFF, 0xF6
+ROM:CEDE E0 AA BB 8E+		     .db 0, 0, 0xE0, 0xBE, 0x72, 0, 0x80, 0x40,	0xC0, 0, 0x64, 0xFF, 0
+ROM:CEDE 00 8C FF D8+		     .db 0x78, 0xE0, 0xA, 0x1F,	0xD3, 0, 0x1E, 0x1F, 0xB5, 0xFF, 0xD8
+ROM:CEDE 1F 74 E1 22+		     .db 0, 0x3C, 0xE0,	0x4B, 0xA0, 0x18, 0xA0,	0x16, 0x64, 0xFF, 0x1F
+ROM:CEDE BB 8B 00 00+		     .db 0xD3, 0x1F, 0xFB, 0x1F, 0xF1, 0xFF, 0xBA, 0x1F, 0xD3, 0xE0, 0x50
+ROM:CEDE E1 54 BB 8B+		     .db 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0x1F, 0xD3, 0x1F, 0xEC, 0
+ROM:CEDE 00 8C FF A6+		     .db 0x5A, 0xFF, 0xC4, 0x1F, 0xB5, 0xE0, 0x1E, 0x51, 0x16, 0, 0x69
+ROM:CEDE 00 00 FE F2+		     .db 0xFF, 0xF6, 0x1F, 0x88, 0xFF, 0xE2, 0xA0, 0x18, 0xA0, 0x16, 0x64
+ROM:CEDE 00 14 FF D8+		     .db 0xFF, 0, 0x2D,	0x1F, 0xF6, 0, 0x4B, 0xE0, 0x28, 0x1F, 0xC4, 0xFF
+ROM:CEDE 00 3C E0 3C+		     .db 0xC4, 0, 0x2D,	0, 0xA,	0, 0xF,	0xE0, 0x32, 0, 0xF, 0xFF, 0xB0
+ROM:CEDE BB 88 00 6E+		     .db 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0,	0x2D, 0, 0, 0x1F, 0xC4
+ROM:CEDE FF CE 00 78+		     .db 0xE0, 0x50, 0,	0x3C, 0xFF, 0xE2, 0, 0x3C, 0, 0, 0xA0, 0x18, 0xA0
+ROM:CEDE FF 4C 1F 88+		     .db 0x16, 0x64, 0xFF, 0x1F, 0x88, 0xE0, 0x1E, 0xA0, 0x18, 0xA0, 0x16
+ROM:CEDE 00 0A BB 88+		     .db 0x64, 0xFF, 0xC0, 0, 0x64, 0xFF, 0, 0x5A, 0xE0, 0xF, 0x1F, 0xF1
+ROM:CEDE 1F D8 E0 3C+		     .db 0, 0xF, 0x1F, 0xB5, 0xFF, 0xE2, 0, 0x2D, 0xE0,	0x50, 0xA0, 0x18
+ROM:CEDE 56 E5 1F CE+		     .db 0xA0, 0x16, 0x64, 0xFF, 0x1F, 0xCC, 0,	5, 0, 7, 0xFF, 0xAB, 0x1F
+ROM:CEDE FF D8 00 00+		     .db 0xB5, 0xE0, 0x46, 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0x1F, 0xF1
+ROM:CEDE FF 7E 00 6E+		     .db 0x1F, 0xCE, 0,	0x5A, 0xFF, 0xEC, 0x1F,	0x88, 0xE0, 0, 0x4F, 0x16
+ROM:CEDE FF D8 00 00+		     .db 0, 0x5A, 0xE0,	0x14, 0x1F, 0x90, 0xFF,	0xCE, 0xA0, 0x18, 0xA0
+ROM:CEDE E0 8C 72 00+		     .db 0x16, 0x64, 0xFF, 0, 0x3C, 0x1F, 0xF1,	0, 0x34, 0xE0, 0x41, 0x1F
+ROM:CEDE 80 40 C0 00+		     .db 0xE2, 0xFF, 0xB0, 0, 0x2D, 0, 0x14, 0x1F, 0xF1, 0xE0, 0x3C, 0
+ROM:CEDE 18 BC 1C 4A+		     .db 0x2D, 0xFF, 0xB0, 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0x4F, 5
+ROM:CEDE BB 9A 1F 24+		     .db 0x1F, 0xB5, 0xE0, 0x46, 0, 0x5A, 0xFF,	0xE2, 0, 0x25, 0, 0x1E
+ROM:CEDE FF BA 00 DC+		     .db 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0x1F, 0x81, 0xE0, 0, 0xA0
+ROM:CEDE E0 A0 00 00+		     .db 0x18, 0xA0, 0x16, 0x64, 0xFF, 0xC0, 0,	0x64, 0xFF, 0, 0x5A, 0xE0
+ROM:CEDE E0 8C BB 9A+		     .db 0xA, 0x4B, 0xF, 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0x1F, 0x90
+ROM:CEDE 1F 24 FF BA+		     .db 0xFF, 0xD8, 0,	0x4B, 0xE0, 0x3C, 0x1F,	0xD3, 0x1F, 0xF6, 0x1F
+ROM:CEDE 00 DC E0 AA+		     .db 0xE2, 0xFF, 0xCE, 0, 0xF, 0xE0, 0x55, 0xA0, 0x18, 0xA0, 0x16
+ROM:CEDE 00 00 E0 8C+		     .db 0x64, 0xFF, 0x1F, 0xE2, 0x1F, 0xF1, 0,	0xF, 0xFF, 0xBA, 0x1F
+ROM:CEDE BB 9D 1D E4+		     .db 0xC4, 0xE0, 0x46, 0x1F, 0xD3, 0x1F, 0xEC, 0xA0, 0x18, 0xA0, 0x16
+ROM:CEDE FE E8 BB A3+		     .db 0x64, 0xFF, 0,	0x69, 0xFF, 0xCE, 0x1F,	0x97, 0xFF, 0xF6, 0x4F
+ROM:CEDE 00 00 FF 10+		     .db 0x16, 0, 0x4B,	0xE0, 0x1E, 0x1F, 0xA6,	0xFF, 0xBA, 0, 0x26, 0x1F
+ROM:CEDE BB A3 00 96+		     .db 0xF6, 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0, 0x34, 0xE0, 0x50
+ROM:CEDE E0 32 1F 6A+		     .db 0x1F, 0xF1, 0xFF, 0xA6, 0, 0x2D, 0, 0x28, 0x1F, 0xE2, 0xE0, 0x32
+ROM:CEDE FF 7E BB A3+		     .db 0, 0x5A, 0xFF,	0xC4, 0xA0, 0x18, 0xA0,	0x16, 0x64, 0xFF, 0, 0x2D
+ROM:CEDE 00 00 FF 10+		     .db 0, 0x32, 0x1F,	0x79, 0xE0, 0xA, 0xA0, 0x18, 0xA0, 0x16, 0x64
+ROM:CEDE BB A3 02 1C+		     .db 0xFF, 0xC0, 0,	0x64, 0xFF, 0x1F, 0x81,	0xE0, 0xF, 0xA0, 0x18
+ROM:CEDE E0 B4 00 00+		     .db 0xA0, 0x16, 0x64, 0xFF, 0, 0x34, 0, 0x19, 0, 0x4B, 0xFF, 0xD8
+ROM:CEDE E0 BE 72 00+		     .db 0x1F, 0xB5, 0xE0, 0x3C, 0, 0x35, 0, 5,	0, 0x16, 0xFF, 0xBF, 0x1F
+ROM:CEDE 80 40 C0 00+		     .db 0xF1, 0xE0, 0x55, 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0, 0x2D
+ROM:CEDE 18 BC 1F B0+		     .db 0x1F, 0xF1, 0x1F, 0xE2, 0xFF, 0xBA, 0,	0x4B, 0xE0, 0x46, 0, 0x16
+ROM:CEDE 1D E4 E0 82+		     .db 0x1F, 0xF1, 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0x1F, 0x9F, 0xFF
+ROM:CEDE BB A3 00 00+		     .db 0xC9, 0, 0x69,	0xFF, 0xF1, 0x40, 0x11,	0xA0, 0x18, 0xA0, 0x16
+ROM:CEDE FF 38 BB A3+		     .db 0x64, 0xFF, 0x1F, 0x97, 0xE0, 0x2D, 0,	0x4B, 0xFF, 0xBA, 0x1F
+ROM:CEDE 00 50 FF E2+		     .db 0xDA, 0x1F, 0xF6, 0x1F, 0xDB, 0xE0, 0x50, 0, 0, 0xFF, 0xAB, 0xA0
+ROM:CEDE BB A3 00 00+		     .db 0x18, 0xA0, 0x16, 0x64, 0xFF, 0x1F, 0xE2, 0, 0x23, 0, 0x1E, 0xE0
+ROM:CEDE FF 2E BB A3+		     .db 0x32, 0x1F, 0xA6, 0xFF, 0xC4, 0x1F, 0xE2, 0, 0x28, 0, 0x78, 0xE0
+ROM:CEDE 1F B0 FF C4+		     .db 0x14, 0xA0, 0x18, 0xA0, 0x16, 0x64, 0xFF, 0xC0, 0, 0x4F, 0xE0
+ROM:CEDE BB A3 00 00+		     .db 0, 0, 0, 0x3C,	0x1F, 0xE2, 0xFF, 0xC4,	0x1F, 0xE2, 0xE0, 0x28
+ROM:CEDE FF 24 BB A3+		     .db 0x1F, 0xE2, 0x1F, 0xD8, 0, 0x3C, 0xE0,	0, 0x1F, 0xE2, 0xFF, 0xD8
+ROM:CEDE 02 1C E1 18+		     .db 0, 0x5A, 0, 0,	0x1F, 0xC4, 0xE0, 0x28,	0xC0, 0, 0x40, 0xF6, 0
+ROM:CEDE 00 00 E1 36+		     .db 0x5A, 0, 0, 0x1F, 0xA6, 0xE0, 0x14, 0,	0x3C, 0xE0, 0x14, 0x1F
+ROM:CEDE 1F 88 1F 56+		     .db 0xC4, 0, 0x14,	0, 0, 0xFF, 0xD8, 0x1F,	0xC4, 0xE0, 0x14, 0, 0
+ROM:CEDE BB A0 1F 2E+		     .db 0x1F, 0xC4, 0,	0x3C, 0xE0, 0x28, 0xC0,	0, 0x51, 0xE0, 0, 0, 0x1F
+ROM:CEDE E0 3C 00 00+		     .db 0xC4, 0, 0x1E,	0xE0, 0x3C, 0, 0x1E, 0xFF, 0xD8, 0, 0x1E, 0, 0x28
+ROM:CEDE FF 56 00 D2+		     .db 0x1F, 0xC4, 0xE0, 0, 0, 0x1E, 0xE0, 0x28, 0x1F, 0xA6, 0, 0, 0
+ROM:CEDE E0 6E 72 00+		     .db 0x3C, 0xFF, 0xD8, 0xC0, 0, 0x40, 0xEA,	0x1F, 0xA6, 0, 0, 0, 0x5A
+ROM:CEDE 80 40 C0 00+		     .db 0xFF, 0xEC, 0x1F, 0xC4, 0xFF, 0xEC, 0,	0x3C, 0x1F, 0xEC, 0, 0
+ROM:CEDE 18 BC 01 9A+		     .db 0xE0, 0x28, 0,	0x3C, 0xFF, 0xEC, 0, 0,	0, 0x3C, 0x1F, 0xC4, 0xFF
+ROM:CEDE 00 00 FE 84+		     .db 0xD8, 0xC0, 0,	0x44, 0x1A, 0xB9, 0xEF,	0x56, 0x22, 0xB9, 0xEF
+ROM:CEDE 1D E4 E0 0A+		     .db 0x42, 0x2A, 0xB9, 0xEF, 0x46, 4, 0xC0,	0, 0x46, 4, 0xB9, 0xEF
+ROM:CEDE 00 00 E0 C8+		     .db 0x5E, 0x36, 0xF6, 0x71, 0x5C, 6, 0x4A,	0x3E, 0xF6, 0x79, 0x41
+ROM:CEDE BB A3 00 B4+		     .db 5, 0xB9, 0xEF,	0x5F, 0x3B, 0xB9, 0xEF,	0xF6, 0x7C, 0x5C, 6, 0x45
+ROM:CEDE FF EC 1F 4C+		     .db 0x3F, 0xB9, 0xEF, 0x5F, 0x3B, 0xB9, 0xEF, 0xF6, 0x78, 0x5C, 6
+ROM:CEDE E1 54 BB A3+		     .db 0x4A, 0x3E, 0xB9, 0xEF, 0x5E, 0x16, 0xF6, 0x71, 0xB9, 0xEF, 0x5B
+ROM:CEDE 00 00 E2 58+		     .db 1, 0xB9, 0xEF,	0x4A, 0x3E, 0xB9, 0xEF,	0x5F, 0x1B, 0xB9, 0xEF
+ROM:CEDE BB A3 00 78+		     .db 0x42, 0x2A, 0xB9, 0xEF, 0x5C, 6, 0xC0,	0, 0xB9, 0xEF, 0x5A, 0x1C
+ROM:CEDE E0 78 BB A3+		     .db 0xB9, 0xEF, 0x42, 0x2A, 0xB9, 0xEF, 0x5F, 0x1B, 0xF6, 0x91, 0x5A
+ROM:CEDE 00 6E FF C4+		     .db 0x1C, 0xB9, 0xEF, 0x4A, 0x3E, 0xB9, 0xEF, 0x42, 0x2A, 0xB9, 0xEF
+ROM:CEDE 00 78 FF 1A+		     .db 0x59, 0x17, 0xB9, 0xEF, 0x41, 0x25, 0xB9, 0xEF, 0x42, 0xA, 0xC0
+ROM:CEDE 00 14 FF A6+		     .db 0, 0x5C, 6, 0xB9, 0xEF, 0x5E, 0x36, 0xF6, 0xA2, 0x5F, 0x1B, 0x47
+ROM:CEDE 00 28 FF EC+		     .db 0x29, 0xB9, 0xEF, 0x5E, 0x16, 0xB9, 0xEF, 0x56, 0x22, 0xB9, 0xEF
+ROM:CEDE 00 00 E1 68+		     .db 0x42, 0xA, 0xB9, 0xEF,	0x43, 0x35, 0xB9, 0xEF,	0xF6, 0xD2, 0xB9
+ROM:CEDE BB 9D 00 82+		     .db 0xEF, 0x5F, 0x1B, 0x42, 0x2A, 0xB9, 0xEF, 0x45, 0x3F, 0xB9, 0xEF
+ROM:CEDE FF B0 00 00+		     .db 0x5E, 0x36, 0xF6, 0xB5, 0xB9, 0xEF, 0x5A, 0x1C, 0xB9, 0xEF, 0x45
+ROM:CEDE FE 70 1F 9C+		     .db 0x3F, 0xB9, 0xEF, 0x46, 0x24, 0xB9, 0xEF, 0x5C, 0x26, 0xB9, 0xEF
+ROM:CEDE FF 9C BB 9A+		     .db 0x5B, 0x21, 0xB9, 0xEF, 0x45, 0x1F, 0x5E, 0x36, 0x43, 0xF, 0xC0
+ROM:CEDE 1F 9C E0 28+		     .db 0, 0x5A, 0x1C,	0xB9, 0xEF, 0x4A, 0x3E,	0xB9, 0xEF, 0x41, 0x25
+ROM:CEDE BB 9D 1F 92+		     .db 0xB9, 0xEF, 0x5C, 0x26, 0xB9, 0xEF, 0x5A, 0x3C, 0xB9, 0xEF, 0x5F
+ROM:CEDE E0 BE BB 94+		     .db 0x3B, 0x48, 0xE, 0xC0,	0, 0x5A, 0x1C, 0xB9, 0xEF, 0x4A, 0x3E
+ROM:CEDE 1F EC E0 50+		     .db 0xB9, 0xEF, 0x58, 0x2C, 0xF7, 0x1A, 0xB9, 0xEF, 0x5A, 0x1C, 0xB9
+ROM:CEDE 51 E5 00 00+		     .db 0xEF, 0x4A, 0x3E, 0xB9, 0xEF, 0x5B, 1,	0xB9, 0xEF, 0x42, 0x2A
+ROM:CEDE FE E8 00 1E+		     .db 0xB9, 0xEF, 0x45, 0x1F, 0xF6, 0xF9, 0x5A, 0x1C, 0xB9, 0xEF, 0x4A
+ROM:CEDE FF 42 00 50+		     .db 0x3E, 0xB9, 0xEF, 0x5C, 0x26, 0xB9, 0xEF, 0x46, 0x24, 0xB9, 0xEF
+ROM:CEDE E0 8C BB 97+		     .db 0x56, 0x22, 0xF6, 0x75, 0xB9, 0xEF, 0x5A, 0x1C, 0xB9, 0xEF, 0x42
+ROM:CEDE 00 82 FF D8+		     .db 0x2A, 0xB9, 0xEF, 0x45, 0x3F, 0xB9, 0xEF, 0x5E, 0x36, 0xB9, 0xEF
+ROM:CEDE 00 78 FF 38+		     .db 0x45, 0x3F, 0xB9, 0xEF, 0x42, 0x2A, 0xF7, 0x25, 0x44, 0x1A, 0xB9
+ROM:CEDE 1F 88 1F CE+		     .db 0xEF, 0x5B, 0x21, 0xB9, 0xEF, 0x5C, 0x26, 0xB9, 0xEF, 0x46, 0x24
+ROM:CEDE BB 9A 1F C4+		     .db 0xB9, 0xEF, 0x45, 0x3F, 0xF7, 0x25, 0x44, 0x1A, 0xB9, 0xEF, 0x56
+ROM:CEDE E0 64 1F D8+		     .db 0x22, 0xB9, 0xEF, 0x46, 0x24, 0xB9, 0xEF, 0x5C, 0x26, 0xB9, 0xEF
+ROM:CEDE E0 0A 1F E2+		     .db 0x4A, 0x3E, 0xF7, 0x25, 0x5B, 1, 0xB9,	0xEF, 0x45, 0x3F, 0xB9
+ROM:CEDE FF B0 00 00+		     .db 0xEF, 0x44, 0x3A, 0xB9, 0xEF, 0x5C, 6,	0x46, 0x24, 0xB9, 0xEF
+ROM:CEDE FF 2E 00 82+		     .db 0x5C, 6, 0xC0,	0, 0, 0x96, 0x1F, 0x9C,	0xB6, 0xF2, 0xB6, 0xC5
+ROM:CEDE FF F6 00 00+		     .db 0xB7, 0x1D, 0x1F, 0xBE, 0x1F, 0xD8, 0xB6, 0x8F, 0xB6, 0xE7, 0xB6
+ROM:CEDE E0 BE 72 00+		     .db 0xAD, 0x1F, 0xA6, 0x1F, 0xB0, 0xB6, 0xA1, 0xB6, 0x7C, 0xB6, 0xBD
+ROM:CEDE 80 40 C0 00+		     .db 0xB6, 0x78, 0xB6, 0xAD, 0x72, 0, 0x80,	0x40, 0xC0, 0, 0, 0x1E
+ROM:CEDE 64 FF 00 78+		     .db 0x1F, 0x9C, 0xB6, 0xF2, 0xB6, 0xC5, 0xB6, 0xBD, 0xB6, 0x84, 0xB6
+ROM:CEDE E0 0A 1F D3+		     .db 0x7C, 0xB6, 0x70, 0xB6, 0x9A, 0xB6, 0xE1, 0x72, 0, 0x80, 0x40
+ROM:CEDE 00 1E 1F B5+		     .db 0xC0, 0, 0, 0x5A, 0x1F, 0xB0, 0xB6, 0xBD, 0xB6, 0x9A, 0xB7, 9
+ROM:CEDE FF D8 00 3C+		     .db 0xB6, 0xAD, 0xB6, 0xBD, 0xB6, 0xC5, 0x72, 0, 0x80, 0x40, 0xC0
+ROM:CEDE E0 4B A0 18+		     .db 0, 0, 0x96, 0x1F, 0xC4, 0xB6, 0xE7, 0xB6, 0xC5, 0xB6, 0x70, 0xB6
+ROM:CEDE A0 16 64 FF+		     .db 0x70, 0xB7, 0x1D, 0x72, 0, 0x80, 0x40,	0xC0, 0, 0x1F, 0xA0, 0x1F
+ROM:CEDE 1F D3 1F FB+		     .db 0xB0, 0xB6, 0x7F, 0xB6, 0xAD, 0x1F, 0xDA, 0, 0x14, 0xB7, 0x13
+ROM:CEDE 1F F1 FF BA+		     .db 0xB6, 0x9A, 0xB6, 0x8F, 0xB6, 0xE7, 0x1F, 0xAE, 0x1F, 0x9C, 0xB7
+ROM:CEDE 1F D3 E0 50+		     .db 0x1D, 0xB6, 0x7C, 0xB6, 0x8A, 0x72, 0,	0x80, 0x40, 0xC0, 0, 0x1F
+ROM:CEDE A0 18 A0 16+		     .db 0x88, 0x1F, 0xB0, 0xB6, 0xC5, 0xB7, 9,	0xB6, 0xAD, 0xB6, 0x70
+ROM:CEDE 64 FF 1F D3+		     .db 0xB6, 0x70, 0xB6, 0xC5, 0xB6, 0xBD, 0x72, 0, 0x80, 0x40, 0xC0
+ROM:CEDE 1F EC 00 5A+		     .db 0, 0x1F, 0x5E,	0x1F, 0xC4, 0xB7, 9, 0xB6, 0x9A, 0xB6, 0x78, 0xB6
+ROM:CEDE FF C4 1F B5+		     .db 0xB1, 0xB6, 0xAD, 0xB6, 0xBD, 0xB6, 0xFC, 0x72, 0, 0x80, 0x40
+ROM:CEDE E0 1E 51 16+		     .db 0xC0, 0, 0x1F,	0x2E, 0x1F, 0xD8, 0xB6,	0xD4, 0xB6, 0x8A, 0xB6
+ROM:CEDE 00 69 FF F6+		     .db 0xBD, 0xB6, 0xA1, 0xB6, 0xAD, 0xB7, 0x1D, 0x72, 0, 0x80, 0x40
+ROM:CEDE 1F 88 FF E2+		     .db 0xC0, 0, 0x61,	0xFF, 0x62, 0xFF, 0x63,	0xFF, 0x64, 0xFF, 0x65
+ROM:CEDE A0 18 A0 16+		     .db 0xFF, 0x66, 0xFF, 0x67, 0xFF, 0x61, 0x80, 0x62, 0x80, 0x63, 0x80
+ROM:CEDE 64 FF 00 2D+		     .db 0x64, 0x80, 0x65, 0x80, 0x66, 0x80, 0x67, 0x80, 0xF9, 0x17, 0xF9
+ROM:CEDE 1F F6 00 4B+		     .db 0x19, 0xF9, 0x1B, 0xF9, 0x1D, 0xF9, 0x1F, 0xF9, 0x21, 0xF9, 0x23
+ROM:CEDE E0 28 1F C4+		     .db 0xF9, 0x25, 0xF9, 0x27, 0xF9, 0x29, 0xF9, 0x2B, 0xF9, 0x2D, 0xF9
+ROM:CEDE FF C4 00 2D+		     .db 0x2F, 0xF9, 0x31, 0xF9, 0x33, 0xF9, 0x35, 0xF9, 0x37, 0xF9, 0x39
+ROM:CEDE 00 0A 00 0F+		     .db 0xF9, 0x3B, 0xF9, 0x3D, 0xF5, 0x1E, 0xF5, 0x61, 0xF5, 0xA3, 0xF5
+ROM:CEDE E0 32 00 0F+		     .db 0xE5, 0xF9, 0x3F, 0xF9, 0x4F, 0xF9, 0x5F, 0xF9, 0x6F, 0xF6, 0x28
+ROM:CEDE FF B0 A0 18+		     .db 0xF6, 0x3A, 0xF6, 0x4C, 0xF6, 0x5E
 ROM:D660
 ROM:D660	     ; =============== S U B R O U T I N E =======================================
 ROM:D660
@@ -43796,9 +41906,9 @@ ROM:E764	     sub_E764:							     ; CODE XREF: print_score_wave+1BP
 ROM:E764									     ; sub_C7FD+148P
 ROM:E764 A6 84			     lda     ,x
 ROM:E766 BD E7 90		     jsr     sub_E790
-ROM:E769 96 AD			     lda     byte_48AD
+ROM:E769 96 AD			     lda     pad_digits_maybe
 ROM:E76B 2E 05			     bgt     sub_E772
-ROM:E76D CC B9 13		     ldd     #0xB913
+ROM:E76D CC B9 13		     ldd     #0xB913				     ; JSRL ($3226)
 ROM:E770 ED A1			     std     ,y++
 ROM:E770	     ; End of function sub_E764
 ROM:E770
@@ -43815,15 +41925,15 @@ ROM:E779 44			     lsra
 ROM:E77A 44			     lsra
 ROM:E77B 44			     lsra
 ROM:E77C 44			     lsra
-ROM:E77D BD E7 AD		     jsr     loc_E7AD
-ROM:E780 96 AD			     lda     byte_48AD
+ROM:E77D BD E7 AD		     jsr     print_hex_digit
+ROM:E780 96 AD			     lda     pad_digits_maybe
 ROM:E782 2E 05			     bgt     loc_E789
-ROM:E784 CC B9 13		     ldd     #0xB913
+ROM:E784 CC B9 13		     ldd     #0xB913				     ; JSRL ($3226)
 ROM:E787 ED A1			     std     ,y++
 ROM:E789
 ROM:E789	     loc_E789:							     ; CODE XREF: sub_E772+10j
 ROM:E789 A6 02			     lda     2,x
-ROM:E78B BD E7 AD		     jsr     loc_E7AD
+ROM:E78B BD E7 AD		     jsr     print_hex_digit
 ROM:E78E A6 03			     lda     3,x
 ROM:E78E	     ; End of function sub_E772
 ROM:E78E
@@ -43839,7 +41949,7 @@ ROM:E793 54			     lsrb
 ROM:E794 54			     lsrb
 ROM:E795 C4 1E			     andb    #0x1E
 ROM:E797 26 09			     bne     loc_E7A2
-ROM:E799 0D AD			     tst     byte_48AD
+ROM:E799 0D AD			     tst     pad_digits_maybe
 ROM:E79B 2F 05			     ble     loc_E7A2
 ROM:E79D FE 30 02		     ldu     0x3002
 ROM:E7A0 20 07			     bra     loc_E7A9
@@ -43847,34 +41957,34 @@ ROM:E7A2	     ; ----------------------------------------------------------------
 ROM:E7A2
 ROM:E7A2	     loc_E7A2:							     ; CODE XREF: sub_E790+7j
 ROM:E7A2									     ; sub_E790+Bj
-ROM:E7A2 0F AD			     clr     byte_48AD
+ROM:E7A2 0F AD			     clr     pad_digits_maybe
 ROM:E7A4 CE 30 04		     ldu     #0x3004
 ROM:E7A7 EE C5			     ldu     b,u
 ROM:E7A9
 ROM:E7A9	     loc_E7A9:							     ; CODE XREF: sub_E790+10j
-ROM:E7A9 0A AD			     dec     byte_48AD
+ROM:E7A9 0A AD			     dec     pad_digits_maybe
 ROM:E7AB EF A1			     stu     ,y++
 ROM:E7AD
-ROM:E7AD	     loc_E7AD:							     ; CODE XREF: sub_7519+39P
+ROM:E7AD	     print_hex_digit:						     ; CODE XREF: sub_7519+39P
 ROM:E7AD									     ; sub_7519+76P ...
-ROM:E7AD 48			     asla
-ROM:E7AE 84 1E			     anda    #0x1E
+ROM:E7AD 48			     asla					     ; word offset
+ROM:E7AE 84 1E			     anda    #0x1E				     ; 0-15 (x2)
 ROM:E7B0 26 09			     bne     loc_E7BB
-ROM:E7B2 0D AD			     tst     byte_48AD
+ROM:E7B2 0D AD			     tst     pad_digits_maybe
 ROM:E7B4 2F 05			     ble     loc_E7BB
-ROM:E7B6 FE 30 02		     ldu     0x3002
+ROM:E7B6 FE 30 02		     ldu     0x3002				     ; JSRL print_space
 ROM:E7B9 20 07			     bra     loc_E7C2
 ROM:E7BB	     ; ---------------------------------------------------------------------------
 ROM:E7BB
 ROM:E7BB	     loc_E7BB:							     ; CODE XREF: sub_E790+20j
 ROM:E7BB									     ; sub_E790+24j
-ROM:E7BB 0F AD			     clr     byte_48AD
-ROM:E7BD CE 30 04		     ldu     #0x3004
-ROM:E7C0 EE C6			     ldu     a,u
+ROM:E7BB 0F AD			     clr     pad_digits_maybe
+ROM:E7BD CE 30 04		     ldu     #0x3004				     ; base of digits
+ROM:E7C0 EE C6			     ldu     a,u				     ; get entry for digit (x2)	in A
 ROM:E7C2
 ROM:E7C2	     loc_E7C2:							     ; CODE XREF: sub_E790+29j
-ROM:E7C2 0A AD			     dec     byte_48AD
-ROM:E7C4 EF A1			     stu     ,y++
+ROM:E7C2 0A AD			     dec     pad_digits_maybe
+ROM:E7C4 EF A1			     stu     ,y++				     ; JSRL (digit)
 ROM:E7C6 39			     rts
 ROM:E7C6	     ; End of function sub_E790
 ROM:E7C6
@@ -44881,7 +42991,7 @@ ROM:F034									     ; ROM:EFFAj
 ROM:F034 0A 40			     dec     byte_4840
 ROM:F036 28 09			     bvc     loc_F041
 ROM:F038 B7 46 20		     sta     avg_reset
-ROM:F03B BD 61 1E		     jsr     sub_611E
+ROM:F03B BD 61 1E		     jsr     copy_3d_logo_etc_to_vecram
 ROM:F03E 7E F1 2F		     jmp     loc_F12F				     ; (ack,rti)
 ROM:F041	     ; ---------------------------------------------------------------------------
 ROM:F041
@@ -45013,7 +43123,7 @@ ROM:F114 5F			     clrb
 ROM:F115
 ROM:F115	     loc_F115:							     ; CODE XREF: ROM:F112j
 ROM:F115 D7 3C			     stb     byte_483C
-ROM:F117 CE D6 12		     ldu     #unk_D612
+ROM:F117 CE D6 12		     ldu     #(STAR_WARS_3D_LOGO+0x734)
 ROM:F11A EC C5			     ldd     b,u
 ROM:F11C FD 00 34		     std     coins_btns_r
 ROM:F11F CC C0 00		     ldd     #0xC000
@@ -45795,9 +43905,9 @@ ROM:F578 26 73			     bne     loc_F5ED
 ROM:F57A 10 8E 00 00		     ldy     #0
 ROM:F57E CC 60 00		     ldd     #0x6000
 ROM:F581 ED A1			     std     ,y++
-ROM:F583 CC BF AE		     ldd     #0xBFAE
+ROM:F583 CC BF AE		     ldd     #0xBFAE				     ; JSRL Screen Border ($3F5C)
 ROM:F586 ED A1			     std     ,y++
-ROM:F588 CC 80 40		     ldd     #0x8040
+ROM:F588 CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:F58B ED A1			     std     ,y++
 ROM:F58D 86 48			     lda     #0x48 ; 'H'
 ROM:F58F 1F 8B			     tfr     a,	dp
@@ -46159,9 +44269,9 @@ ROM:F77F
 ROM:F77F	     switch_test:						     ; DATA XREF: ROM:test_jmp_tblo
 ROM:F77F B7 46 C0		     sta     adc_sel_pitch
 ROM:F782 B7 46 C0		     sta     adc_sel_pitch
-ROM:F785 CC BF AE		     ldd     #0xBFAE
+ROM:F785 CC BF AE		     ldd     #0xBFAE				     ; JSRL Screen border ($3F5C)
 ROM:F788 ED A1			     std     ,y++
-ROM:F78A CC 80 40		     ldd     #0x8040
+ROM:F78A CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:F78D ED A1			     std     ,y++
 ROM:F78F 10 CE 4F FF		     lds     #0x4FFF
 ROM:F793 C6 9E			     ldb     #158				     ; "SWITCH TEST"
@@ -46287,7 +44397,7 @@ ROM:F879	     loc_F879:							     ; CODE XREF: sub_F86C+8j
 ROM:F879 AF A1			     stx     ,y++
 ROM:F87B 5A			     decb
 ROM:F87C 2A F0			     bpl     loc_F86E
-ROM:F87E CC 80 40		     ldd     #0x8040
+ROM:F87E CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:F881 ED A1			     std     ,y++
 ROM:F883 39			     rts
 ROM:F883	     ; End of function sub_F86C
@@ -46295,7 +44405,7 @@ ROM:F883
 ROM:F884	     ; ---------------------------------------------------------------------------
 ROM:F884
 ROM:F884	     loc_F884:							     ; DATA XREF: ROM:F72Bo
-ROM:F884 CC BF 20		     ldd     #0xBF20
+ROM:F884 CC BF 20		     ldd     #0xBF20				     ; JSRL Checkerboard ($3E40)
 ROM:F887 ED A1			     std     ,y++
 ROM:F889 7E F7 0D		     jmp     avg_go_wait_service_switch
 ROM:F88C	     ; ---------------------------------------------------------------------------
@@ -46322,9 +44432,9 @@ ROM:F8A7 7E F7 0D		     jmp     avg_go_wait_service_switch
 ROM:F8AA	     ; ---------------------------------------------------------------------------
 ROM:F8AA
 ROM:F8AA	     bip_test:							     ; DATA XREF: ROM:F72Fo
-ROM:F8AA CC BF AE		     ldd     #0xBFAE
+ROM:F8AA CC BF AE		     ldd     #0xBFAE				     ; JSRL Screen border ($3F5C)
 ROM:F8AD ED A1			     std     ,y++
-ROM:F8AF CC BF B3		     ldd     #0xBFB3
+ROM:F8AF CC BF B3		     ldd     #0xBFB3				     ; JSRL ($3F66)
 ROM:F8B2 ED A1			     std     ,y++
 ROM:F8B4 ED A1			     std     ,y++
 ROM:F8B6 ED A1			     std     ,y++
@@ -46349,7 +44459,7 @@ ROM:F8D9
 ROM:F8D9	     loc_F8D9:							     ; CODE XREF: ROM:F8D0j
 ROM:F8D9 CC 60 00		     ldd     #0x6000				     ; COLR 0,0
 ROM:F8DC ED A1			     std     ,y++
-ROM:F8DE CC BF AF		     ldd     #0xBFAF
+ROM:F8DE CC BF AF		     ldd     #0xBFAF				     ; JSRL screen border ($3F5E)
 ROM:F8E1 ED A1			     std     ,y++
 ROM:F8E3 CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:F8E6 ED A1			     std     ,y++
@@ -46392,7 +44502,7 @@ ROM:F917 8A 70			     oraa    #0x70 ; 'p'
 ROM:F919 ED A1			     std     ,y++
 ROM:F91B CC 62 80		     ldd     #0x6280				     ; COLR 2,128 (GREEN)
 ROM:F91E ED A1			     std     ,y++
-ROM:F920 CC BF BC		     ldd     #0xBFBC
+ROM:F920 CC BF BC		     ldd     #0xBFBC				     ; JSRL ($3F78)
 ROM:F923 ED A1			     std     ,y++
 ROM:F925 CC 72 00		     ldd     #0x7200				     ; SCAL 2,0
 ROM:F928 ED A1			     std     ,y++
@@ -46413,10 +44523,10 @@ ROM:F93C 7E F7 0D		     jmp     avg_go_wait_service_switch
 ROM:F93F	     ; ---------------------------------------------------------------------------
 ROM:F93F
 ROM:F93F	     loc_F93F:							     ; DATA XREF: ROM:F733o
-ROM:F93F CC BF C8		     ldd     #0xBFC8
+ROM:F93F CC BF C8		     ldd     #0xBFC8				     ; JSRL ($3F90)
 ROM:F942 ED A1			     std     ,y++
 ROM:F944 8E 00 38		     ldx     #0x38 ; '8'
-ROM:F947 CC BF CC		     ldd     #0xBFCC
+ROM:F947 CC BF CC		     ldd     #0xBFCC				     ; JSRL ($3F98)
 ROM:F94A
 ROM:F94A	     loc_F94A:							     ; CODE XREF: ROM:F94Ej
 ROM:F94A ED A1			     std     ,y++
@@ -46428,7 +44538,7 @@ ROM:F955 7E F7 0D		     jmp     avg_go_wait_service_switch
 ROM:F958	     ; ---------------------------------------------------------------------------
 ROM:F958
 ROM:F958	     math_box_test:						     ; DATA XREF: ROM:off_F727o
-ROM:F958 CC BF AE		     ldd     #0xBFAE
+ROM:F958 CC BF AE		     ldd     #0xBFAE				     ; JSRL green screen border	($3F5C)
 ROM:F95B ED A1			     std     ,y++
 ROM:F95D CC 80 40		     ldd     #0x8040				     ; CNTR (AVG)
 ROM:F960 ED A1			     std     ,y++
@@ -47352,14 +45462,14 @@ ROM:FD2F E1 C0			     cmpb    ,u+				     ; matching	dip setting?
 ROM:FD31 26 27			     bne     loc_FD5A				     ; no, skip
 ROM:FD33 B7 46 20		     sta     avg_reset
 ROM:FD36 10 8E 00 00		     ldy     #0
-ROM:FD3A CC BF AE		     ldd     #0xBFAE
+ROM:FD3A CC BF AE		     ldd     #0xBFAE				     ; JSRL green screen border	($3F5C)
 ROM:FD3D ED A1			     std     ,y++
-ROM:FD3F CC 80 40		     ldd     #0x8040
+ROM:FD3F CC 80 40		     ldd     #0x8040				     ; CNTR
 ROM:FD42 ED A1			     std     ,y++
 ROM:FD44 A6 C4			     lda     ,u
 ROM:FD46 10 CE 4F FF		     lds     #0x4FFF
 ROM:FD4A BD E7 90		     jsr     sub_E790
-ROM:FD4D CC 20 20		     ldd     #0x2020
+ROM:FD4D CC 20 20		     ldd     #0x2020				     ; HALT
 ROM:FD50 ED A1			     std     ,y++
 ROM:FD52 ED A1			     std     ,y++
 ROM:FD54 B7 46 00		     sta     avg_go
