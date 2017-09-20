@@ -17205,16 +17205,16 @@ ROM:7C62 2A 1F			     bpl     loc_7C83
 ROM:7C64 48			     asla
 ROM:7C65 2A 0C			     bpl     loc_7C73
 ROM:7C67 96 80			     lda     0x80	     ; read DRA
-ROM:7C69 8A 23			     oraa    #0x23 ; '#'
+ROM:7C69 8A 23			     oraa    #0x23 ; '#'     ; mute speech, TMS5220 idle
 ROM:7C6B 97 80			     sta     0x80	     ; write DRA
-ROM:7C6D 86 FF			     lda     #0xFF
-ROM:7C6F 97 82			     sta     0x82	     ; write DRB
+ROM:7C6D 86 FF			     lda     #0xFF	     ; RESET
+ROM:7C6F 97 82			     sta     0x82	     ; write DRB (TMS5220)
 ROM:7C71 20 06			     bra     loc_7C79
 ROM:7C73	     ; ---------------------------------------------------------------------------
 ROM:7C73
 ROM:7C73	     loc_7C73:				     ; CODE XREF: sub_7C5E+7j
 ROM:7C73 96 80			     lda     0x80	     ; read DRA
-ROM:7C75 84 DF			     anda    #0xDF ; 'ß'
+ROM:7C75 84 DF			     anda    #0xDF ; 'ß'     ; un-mute speech
 ROM:7C77 97 80			     sta     0x80	     ; write DRA
 ROM:7C79
 ROM:7C79	     loc_7C79:				     ; CODE XREF: sub_7C5E+13j
@@ -17229,12 +17229,12 @@ ROM:7C83	     ; ----------------------------------------------------------------
 ROM:7C83
 ROM:7C83	     loc_7C83:				     ; CODE XREF: sub_7C5E+4j
 ROM:7C83 96 80			     lda     0x80	     ; read DRA
-ROM:7C85 8A 03			     oraa    #3
+ROM:7C85 8A 03			     oraa    #3		     ; TMS5220 idle
 ROM:7C87 97 80			     sta     0x80	     ; write DRA
-ROM:7C89 86 FF			     lda     #0xFF
-ROM:7C8B 97 82			     sta     0x82	     ; write DRB
+ROM:7C89 86 FF			     lda     #0xFF	     ; RESET
+ROM:7C8B 97 82			     sta     0x82	     ; write DRB (TMS5220)
 ROM:7C8D 96 80			     lda     0x80	     ; read DRA
-ROM:7C8F 84 FE			     anda    #0xFE ; 'þ'
+ROM:7C8F 84 FE			     anda    #0xFE ; 'þ'     ; TMS5220 WR#
 ROM:7C91 97 80			     sta     0x80	     ; write DRA
 ROM:7C93 0A 1F			     dec     unk_101F
 ROM:7C95 26 04			     bne     locret_7C9B
@@ -17248,8 +17248,8 @@ ROM:7C9C	     ; ----------------------------------------------------------------
 ROM:7C9C
 ROM:7C9C	     loc_7C9C:				     ; CODE XREF: sub_7C5E+2j
 ROM:7C9C 96 80			     lda     0x80	     ; read DRA
-ROM:7C9E 84 04			     anda    #4
-ROM:7CA0 27 0F			     beq     loc_7CB1
+ROM:7C9E 84 04			     anda    #4		     ; TMS5220 ready?
+ROM:7CA0 27 0F			     beq     loc_7CB1	     ; yes, go
 ROM:7CA2 96 0A			     lda     unk_100A
 ROM:7CA4 84 03			     anda    #3
 ROM:7CA6 26 06			     bne     loc_7CAE
@@ -17264,7 +17264,7 @@ ROM:7CB1	     loc_7CB1:				     ; CODE XREF: sub_7C5E+42j
 ROM:7CB1 86 00			     lda     #0
 ROM:7CB3 97 16			     sta     unk_1016
 ROM:7CB5 96 80			     lda     0x80	     ; read DRA
-ROM:7CB7 8A 03			     oraa    #3
+ROM:7CB7 8A 03			     oraa    #3		     ; TMS5220 idle
 ROM:7CB9 97 80			     sta     0x80	     ; write DRA
 ROM:7CBB 96 20			     lda     byte_1020
 ROM:7CBD 26 25			     bne     loc_7CE4
@@ -17295,10 +17295,10 @@ ROM:7CE4	     loc_7CE4:				     ; CODE XREF: sub_7C5E+5Fj
 ROM:7CE4 81 02			     cmpa    #2
 ROM:7CE6 26 1B			     bne     loc_7D03
 ROM:7CE8 9E 13			     ldx     unk_1013
-ROM:7CEA A6 80			     lda     ,x+
-ROM:7CEC 97 82			     sta     0x82	     ; write DRB
+ROM:7CEA A6 80			     lda     ,x+	     ; TSM5220 cmd
+ROM:7CEC 97 82			     sta     0x82	     ; write DRB (TMS5220)
 ROM:7CEE 96 80			     lda     0x80	     ; read DRA
-ROM:7CF0 84 FE			     anda    #0xFE ; 'þ'
+ROM:7CF0 84 FE			     anda    #0xFE ; 'þ'     ; TMS5220 WR#
 ROM:7CF2 97 80			     sta     0x80	     ; write DRA
 ROM:7CF4 9F 13			     stx     unk_1013
 ROM:7CF6 9C 17			     cmpx    unk_1017
@@ -17338,10 +17338,10 @@ ROM:7D26 EC 84			     ldd     ,x
 ROM:7D28 DD 13			     std     unk_1013
 ROM:7D2A EC 02			     ldd     2,x
 ROM:7D2C DD 17			     std     unk_1017
-ROM:7D2E 86 60			     lda     #0x60 ; '`'
-ROM:7D30 97 82			     sta     0x82	     ; write DRB
+ROM:7D2E 86 60			     lda     #0x60 ; '`'     ; SPEAK EXTERNAL
+ROM:7D30 97 82			     sta     0x82	     ; write DRB (TMS5220)
 ROM:7D32 96 80			     lda     0x80	     ; read DRA
-ROM:7D34 84 FE			     anda    #0xFE ; 'þ'
+ROM:7D34 84 FE			     anda    #0xFE ; 'þ'     ; TMS5220 WR#
 ROM:7D36 97 80			     sta     0x80	     ; write DRA
 ROM:7D38 0A 20			     dec     byte_1020
 ROM:7D3A 39			     rts
@@ -17398,8 +17398,8 @@ ROM:7D75 94 09			     anda    unk_1009
 ROM:7D77 26 1C			     bne     loc_7D95
 ROM:7D79 7F 10 0F		     clr     unk_100F
 ROM:7D7C 96 80			     lda     0x80	     ; read DRA
-ROM:7D7E 84 10			     anda    #0x10
-ROM:7D80 26 13			     bne     loc_7D95
+ROM:7D7E 84 10			     anda    #0x10	     ; sound self test?
+ROM:7D80 26 13			     bne     loc_7D95	     ; no, go
 ROM:7D82 7C 10 0F		     inc     unk_100F
 ROM:7D85 5C			     incb
 ROM:7D86 C1 3C			     cmpb    #0x3C ; '<'     ; valid cmd?
@@ -17439,7 +17439,7 @@ ROM:7DBE	     ; ----------------------------------------------------------------
 ROM:7DBE
 ROM:7DBE	     loc_7DBE:				     ; CODE XREF: sub_7DD3-32j
 ROM:7DBE						     ; sub_7DD3-2Ej ...
-ROM:7DBE CA 08			     orab    #8
+ROM:7DBE CA 08			     orab    #8		     ; hold main CPU in	reset
 ROM:7DC0
 ROM:7DC0	     loc_7DC0:				     ; CODE XREF: sub_7DD3-17j
 ROM:7DC0 D7 80			     stb     0x80	     ; write DRA
@@ -17486,7 +17486,7 @@ ROM:7DF3	     IRQ:				     ; DATA XREF: ROM:7FF8o
 ROM:7DF3 D6 0C			     ldb     unk_100C
 ROM:7DF5 8E 20 20		     ldx     #0x2020
 ROM:7DF8 96 80			     lda     0x80	     ; read DRA
-ROM:7DFA 2A 0A			     bpl     loc_7E06
+ROM:7DFA 2A 0A			     bpl     loc_7E06	     ; main NOT??? ready, go
 ROM:7DFC B6 08 00		     lda     0x800
 ROM:7DFF 27 26			     beq     NMI
 ROM:7E01 5C			     incb
@@ -17504,7 +17504,7 @@ ROM:7E12
 ROM:7E12	     loc_7E12:				     ; CODE XREF: sub_7DD3+35j
 ROM:7E12						     ; sub_7DD3+4Fj
 ROM:7E12 96 80			     lda     0x80	     ; read DRA
-ROM:7E14 2A 0E			     bpl     loc_7E24
+ROM:7E14 2A 0E			     bpl     loc_7E24	     ; main NOT??? ready, go
 ROM:7E16 96 85			     lda     0x85	     ; clr RIOT	intr flag
 ROM:7E18 B6 08 00		     lda     0x800
 ROM:7E1B 27 0A			     beq     NMI
@@ -17528,7 +17528,7 @@ ROM:7E30 86 10			     lda     #0x10	     ; 6532 RAM
 ROM:7E32 1F 8B			     tfr     a,	dp
 ROM:7E34 86 FF			     lda     #0xFF
 ROM:7E36 97 83			     sta     0x83	     ; DDRB=output
-ROM:7E38 97 82			     sta     0x82	     ; DRB=0xFF
+ROM:7E38 97 82			     sta     0x82	     ; DRB=0xFF	(TMS5220 RESET)
 ROM:7E3A 97 80			     sta     0x80	     ; DRA=0xFF
 ROM:7E3C C6 2B			     ldb     #0x2B ; '+'
 ROM:7E3E D7 81			     stb     0x81	     ; DDRA=I/O
@@ -17568,17 +17568,17 @@ ROM:7E87 B7 18 2F		     sta     unk_182F
 ROM:7E8A B7 18 37		     sta     unk_1837
 ROM:7E8D B7 18 3F		     sta     unk_183F
 ROM:7E90 96 80			     lda     0x80	     ; read DRA
-ROM:7E92 84 10			     anda    #0x10
-ROM:7E94 26 08			     bne     loc_7E9E
+ROM:7E92 84 10			     anda    #0x10	     ; sound self test?
+ROM:7E94 26 08			     bne     loc_7E9E	     ; no, skip
 ROM:7E96 96 80			     lda     0x80	     ; read DRA
-ROM:7E98 8A 08			     oraa    #8
+ROM:7E98 8A 08			     oraa    #8		     ; hold main CPU in	reset
 ROM:7E9A 97 80			     sta     0x80	     ; write DRA
 ROM:7E9C 20 33			     bra     loc_7ED1
 ROM:7E9E	     ; ---------------------------------------------------------------------------
 ROM:7E9E
 ROM:7E9E	     loc_7E9E:				     ; CODE XREF: sub_7DD3+C1j
 ROM:7E9E 96 80			     lda     0x80	     ; read DRA
-ROM:7EA0 84 F7			     anda    #0xF7 ; '÷'
+ROM:7EA0 84 F7			     anda    #0xF7 ; '÷'     ; de-assert main CPU reset
 ROM:7EA2 97 80			     sta     0x80	     ; write DRA
 ROM:7EA4 86 3F			     lda     #0x3F ; '?'
 ROM:7EA6 97 00			     sta     unk_1000
