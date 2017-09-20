@@ -3,7 +3,7 @@
 ; msmcdoug@gmail.com
 ;
 
-SWSDK_VERSION                   = 0x0004
+SWSDK_VERSION                   = 0x0005
         .macro SWSDK_SZ_VERSION
         .ascii    "0.0."
         .byte     (1<<7)|0x30|<SWSDK_VERSION
@@ -111,6 +111,7 @@ SWSDK_Font                      = 0x3002        ; font table & renders character
 SWSDK_Crosshairs                = 0x3300
 SWSDK_Crosshairs                = 0x3300
 SWSDK_BlueCornerDots            = 0x333C
+SWSDK_UpperRightTurret          = 0x341A
 SWSDK_LowerRightTurret          = 0x34B4
 SWSDK_XWingNose                 = 0x3558
 SWSDK_UpperLeftTurret           = 0x35CC

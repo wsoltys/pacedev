@@ -1,7 +1,7 @@
 # platform options
 
 # list of all examples built by this makefile
-EXAMPLES = ex1 ex2 ex3 ex4
+EXAMPLES = ex1 ex2 ex3 ex4 ex5
 # the example to install into MAME
 TARGET = ex4
 
