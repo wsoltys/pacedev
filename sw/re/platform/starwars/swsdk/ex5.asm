@@ -1,9 +1,9 @@
 ;
 ;	Star Wars SDK
-; - Example 4
+; - Example 5
 
 				.list		(meb)										; macro expansion binary
-				.module ex4
+				.module ex5
 
 .include "swsdk.inc"
 

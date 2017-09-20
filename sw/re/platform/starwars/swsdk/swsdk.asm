@@ -130,6 +130,39 @@ render_chr:
 				bpl			SWSDK_RenderString							; no, loop
 				rts				
 
+; A = byte to render, Y = display list
+SWSDK_RenderInt8Hex::
+; quick 'n' dirty hack
+        pshs    a
+        anda    #0xF0
+        lsra
+        lsra
+        lsra                                    ; word offset
+        ldx     #0x3004
+        ldx     a,x
+        stx     ,y++
+        puls    a
+        anda    #0x0F
+        asla                                    ; word offset
+        ldx     #0x3004
+        ldx     a,x
+        stx     ,y++
+        rts
+
+; Returns (active high) state of buttons 1-4 in A
+; - requires SDK ISR installed
+SWSDK_ButtonState::
+        lda     SWSDK_in0_shadow+2              ; debounced
+        coma                                    ; active high
+        anda    #SWSDK_IN0_BUTTON1n|SWSDK_IN0_BUTTON4n
+        pshs    a
+        lda     SWSDK_in1_shadow+2              ; debounced
+        coma
+        anda    #SWSDK_IN1_BUTTON2n|SWSDK_IN1_BUTTON3n
+        ora     ,s+                             ; in0 + in1
+        rts
+        
+; A = MW0 (PROM routine address)
 SWSDK_GoMathAndWait::
 				sta			SWSDK_MATHW_MW0
 1$:			tst			SWSDK_IN1
@@ -147,7 +180,18 @@ debounce_in:
         andb    ,x                              ; (prev or curr) AND deb
         stb     ,x+                             ; store deb
         rts
-       
+
+; A = sound CPU command
+SWSDK_WriteSoundCmd::
+        ldb     #14                             ; 14 attempts
+1$:     tst     SWSDK_MainReadyFlag             ; sound CPU ready?
+        bpl     2$                              ; yes, go
+        decb                                    ; exhausted all attempts?
+        bne     1$                              ; no, loop
+        lda     #0                              ; cmd=0x00
+2$:     sta     SWSDK_MainRW                    ; write to sound CPU mailbox
+        rts
+               
 SWSDK_IRQ::
 				SWSDK_KICK_WDOG
 				ldx     #SWSDK_in0_shadow

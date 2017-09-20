@@ -3,7 +3,7 @@
 ; msmcdoug@gmail.com
 ;
 
-SWSDK_VERSION                   = 0x0005
+SWSDK_VERSION                   = 0x0006
         .macro SWSDK_SZ_VERSION
         .ascii    "0.0."
         .byte     (1<<7)|0x30|<SWSDK_VERSION
@@ -147,6 +147,8 @@ SWSDK_IN1                       = 0x4320
   SWSDK_IN1_MATH_RUN            = (1<<7)
 SWSDK_DSW0                      = 0x4340
 SWSDK_DSW1                      = 0x4360
+SWSDK_MainRW                    = 0x4400
+SWSDK_MainReadyFlag             = 0x4401
 SWSDK_AVGGo                     = 0x4600
 SWSDK_AVGReset                  = 0x4620
 SWSDK_Watchdog                  = 0x4640
@@ -188,6 +190,64 @@ SWSDK_MATH_OP_80                = 0x80
 ; and you need to set $0F = 0
 SWSDK_MATH_OP_86                = 0x86
 
+; Sound CPU commands
+SWSDK_SND_OP_00                                         = 0x00
+SWSDK_SND_OP_TEST_TUNE_01                               = 0x01    ; (synth)
+SWSDK_SND_OP_TEST_TUNE_02                               = 0x02    ; (synth)
+SWSDK_SND_OP_ALWAYS                                     = 0x03    ; (sample) Obi-Wan
+SWSDK_SND_OP_WOOKIEE_GROWL                              = 0x04    ; (sample) Chewbacca
+SWSDK_SND_OP_THE_FORCE_WILL_BE_WITH_YOU_ALWAYS          = 0x05    ; (sample) Obi-Wan
+SWSDK_SND_OP_THE_FORCE_WIL_BE_WITH_YOU                  = 0x06    ; (sample) Obi-Wan
+SWSDK_SND_OP_GREAT_SHOT_KID_THAT_WAS_ONE_IN_A_MILLION   = 0x07    ; (sample)
+SWSDK_SND_OP_I_HAVE_YOU_NOW                             = 0x08    ; (sample) Darth Vader
+SWSDK_SND_OP_IM_HIT_BUT_NOT_BAD_R2___CAN_DO_WITH_IT     = 0x09    ; (sample) Luke?
+SWSDK_SND_OP_IM_ON_THE_LEADER                           = 0x0B    ; (sample) Darth Vader
+SWSDK_SND_OP_LET_GO_LUKE                                = 0x0C    ; (sample) Obi-Wan
+SWSDK_SND_OP_IVE_LOST_R2                                = 0x0D    ; (sample) Luke?
+SWSDK_SND_OP_BLEEPS                                     = 0x0E    ; (synth)
+SWSDK_SND_OP_R2_TRY_TO_INCREASE_THE_POWER               = 0x0F    ; (sample) Luke?
+SWSDK_SND_OP_RED_5_STANDING_BY                          = 0x10    ; (sample) Red 5
+SWSDK_SND_OP_REMEMBER                                   = 0x11    ; (sample) Obi-Wan
+SWSDK_SND_OP_I_CANT_SHAKE_HIM                           = 0x12    ; (sample) Luke
+SWSDK_SND_OP_LOOK_AT_THE_SIZE_OF_THAT_THING             = 0x13    ; (sample?)
+SWSDK_SND_OP_STEADY_IN_ATTACK_FORMATION                 = 0x15    ; (sample)Darth Vader
+SWSDK_SND_OP_THE_FORCE_IS_STRING_WITH_THIS_ONE          = 0x16    ; (sample)Darth Vader
+SWSDK_SND_OP_THIS_IS_RED_5_IM_GOING_IN                  = 0x17    ; (sample) Red 5
+SWSDK_SND_OP_LUKE_TRUST_ME                              = 0x18    ; (sample) Obi-Wan
+SWSDK_SND_OP_USE_THE_FORCE_LUKE                         = 0x19    ; (sample) Obi-Wan
+SWSDK_SND_OP_YAHOO_YOURE_ALL_CLEAR_KID                  = 0x1A    ; (sample)
+SWSDK_SND_OP_STAR_WARS_THEME                            = 0x1B    ; (synth)
+SWSDK_SND_OP_STAR_WARS_THEME_2                          = 0x1C    ; (synth)
+SWSDK_SND_OP_STAR_WARS_THEME_3_VADER                    = 0x1D    ; (synth)
+SWSDK_SND_OP_STAR_WARS_THEME_4                          = 0x1E    ; (synth)
+SWSDK_SND_OP_STAR_WARS_THEME_5                          = 0x1F    ; (synth)
+SWSDK_SND_OP_MUSIC_6                                    = 0x20    ; (synth)
+SWSDK_SND_OP_MUSIC_7                                    = 0x21    ; (synth)
+SWSDK_SND_OP_MUSIC_8                                    = 0x22    ; (synth)
+SWSDK_SND_OP_LASER_FIRE_1                               = 0x23    ;
+SWSDK_SND_OP_MUSIC_9                                    = 0x24    ; (synth)
+SWSDK_SND_OP_MUSIC_10                                   = 0x25    ; (synth)
+SWSDK_SND_OP_EXPLOSION                                  = 0x26    ;
+SWSDK_SND_OP_DOUBLE_EXPLOSION                           = 0x27    ;
+SWSDK_SND_OP_NOISE_1                                    = 0x28    ;
+SWSDK_SND_OP_NOISE_2                                    = 0x29    ;
+SWSDK_SND_OP_NEARBY_ENEMY_FIRE                          = 0x2A    ;
+SWSDK_SND_OP_NOISE_3                                    = 0x2C    ;
+SWSDK_SND_OP_LASER_FIRE_2                               = 0x2D    ;
+SWSDK_SND_OP_LASER_FIRE_3                               = 0x2E    ;
+SWSDK_SND_OP_R2D2_1                                     = 0x2F    ;
+SWSDK_SND_OP_R2D2_2                                     = 0x30    ;
+SWSDK_SND_OP_R2D2_3                                     = 0x31    ;
+SWSDK_SND_OP_R2D2_4                                     = 0x32    ;
+SWSDK_SND_OP_NOISE_4                                    = 0x33    ;
+SWSDK_SND_OP_NOISE_5                                    = 0x34    ;
+SWSDK_SND_OP_EXPLOSION_3                                = 0x35    ;
+SWSDK_SND_OP_LASER_FIRE_4                               = 0x36    ;
+SWSDK_SND_OP_NOISE_6                                    = 0x38    ;
+SWSDK_SND_OP_LASER_FIRE_5                               = 0x39    ;
+SWSDK_SND_OP_LASER_FIRE_6                               = 0x3A    ;
+SWSDK_SND_OP_NOISE_7                                    = 0x3B    ;
+
         .macro SWSDK_AVG_HALTED
         lda     SWSDK_IN1
         bita    #SWSDK_IN1_AVG_HALT
@@ -224,5 +284,8 @@ SWSDK_MATH_OP_86                = 0x86
         
         .globl  SWSDK_Init
         .globl  SWSDK_RenderString
+        .globl  SWSDK_RenderInt8Hex
+        .globl  SWSDK_ButtonState
         .globl  SWSDK_GoMathAndWait
+        .globl  SWSDK_WriteSoundCmd
         .globl  SWSDK_IRQ

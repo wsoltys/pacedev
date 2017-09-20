@@ -1,9 +1,9 @@
 # platform options
 
 # list of all examples built by this makefile
-EXAMPLES = ex1 ex2 ex3 ex4 ex5
+EXAMPLES = ex1 ex2 ex3 ex4 ex5 ex6
 # the example to install into MAME
-TARGET = ex4
+TARGET = ex6
 
 MAME_DIR = roms/starwars
 MAME_ROMS = 136021.206.1m
