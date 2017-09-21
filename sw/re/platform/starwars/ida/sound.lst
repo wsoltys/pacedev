@@ -21,8 +21,8 @@ DEVRAM:1000		; Segment type:	Regular
 DEVRAM:1000				.area DEVRAM
 DEVRAM:1000				.org 0x1000
 DEVRAM:1000		; assume dp = 0
-DEVRAM:1000 ??		unk_1000:	.ds 1			; DATA XREF: sub_7DD3:loc_7D4Cr
-DEVRAM:1000							; sub_7DD3+8Do	...
+DEVRAM:1000 ??		unk_1000:	.ds 1						; DATA XREF: sub_7DD3:loc_7D4Cr
+DEVRAM:1000										; sub_7DD3+8Do	...
 DEVRAM:1001 ??				.ds 1
 DEVRAM:1002 ??				.ds 1
 DEVRAM:1003 ??				.ds 1
@@ -39,9 +39,10 @@ DEVRAM:100D ??		unk_100D:	.ds 1
 DEVRAM:100E ??		unk_100E:	.ds 1
 DEVRAM:100F ??		unk_100F:	.ds 1
 DEVRAM:1010 ??		unk_1010:	.ds 1
-DEVRAM:1011 ??		byte_1011:	.ds 1			; DATA XREF: sub_7722+Er
-DEVRAM:1011							; sub_7722+10w	...
-DEVRAM:1012 ??		unk_1012:	.ds 1
+DEVRAM:1011 ??		byte_1011:	.ds 1						; DATA XREF: sub_7722+Er
+DEVRAM:1011										; sub_7722+10w	...
+DEVRAM:1012 ??		byte_1012:	.ds 1						; DATA XREF: sub_76A7+8w
+DEVRAM:1012										; ROM:loc_76F3w ...
 DEVRAM:1013 ??		unk_1013:	.ds 1
 DEVRAM:1014 ??				.ds 1
 DEVRAM:1015 ??		unk_1015:	.ds 1
@@ -50,16 +51,16 @@ DEVRAM:1017 ??		unk_1017:	.ds 1
 DEVRAM:1018 ??				.ds 1
 DEVRAM:1019 ??		unk_1019:	.ds 1
 DEVRAM:101A ??				.ds 1
-DEVRAM:101B ??		byte_101B:	.ds 1			; DATA XREF: ROM:loc_7C1Ew
-DEVRAM:101B							; ROM:7C2Cr
+DEVRAM:101B ??		byte_101B:	.ds 1						; DATA XREF: ROM:loc_7C1Ew
+DEVRAM:101B										; ROM:7C2Cr
 DEVRAM:101C ??				.ds 1
-DEVRAM:101D ??		byte_101D:	.ds 1			; DATA XREF: ROM:7C33r
-DEVRAM:101D							; ROM:7C42w ...
-DEVRAM:101E ??		byte_101E:	.ds 1			; DATA XREF: ROM:7C20r
-DEVRAM:101E							; ROM:7C25w ...
+DEVRAM:101D ??		byte_101D:	.ds 1						; DATA XREF: ROM:7C33r
+DEVRAM:101D										; ROM:7C42w ...
+DEVRAM:101E ??		byte_101E:	.ds 1						; DATA XREF: ROM:7C20r
+DEVRAM:101E										; ROM:7C25w ...
 DEVRAM:101F ??		unk_101F:	.ds 1
-DEVRAM:1020 ??		byte_1020:	.ds 1			; DATA XREF: ROM:7C37r
-DEVRAM:1020							; sub_7C5E+3Bw	...
+DEVRAM:1020 ??		byte_1020:	.ds 1						; DATA XREF: ROM:7C37r
+DEVRAM:1020										; sub_7C5E+3Bw	...
 DEVRAM:1021 ??				.ds 1
 DEVRAM:1022 ??				.ds 1
 DEVRAM:1023 ??				.ds 1
@@ -163,71 +164,73 @@ POKEY:1800	       ; Segment type: Regular
 POKEY:1800			       .area POKEY
 POKEY:1800			       .org 0x1800
 POKEY:1800	       ; assume	dp = 0
-POKEY:1800 ??	       unk_1800:       .ds 1		       ; DATA XREF: sub_7DD3+6Do
-POKEY:1800						       ; sub_7DD3+15Fw	...
-POKEY:1801 ??			       .ds 1
-POKEY:1802 ??			       .ds 1
-POKEY:1803 ??			       .ds 1
-POKEY:1804 ??			       .ds 1
-POKEY:1805 ??			       .ds 1
-POKEY:1806 ??			       .ds 1
-POKEY:1807 ??			       .ds 1
-POKEY:1808 ??			       .ds 1
-POKEY:1809 ??			       .ds 1
-POKEY:180A ??	       unk_180A:       .ds 1
-POKEY:180B ??			       .ds 1
-POKEY:180C ??			       .ds 1
-POKEY:180D ??			       .ds 1
-POKEY:180E ??			       .ds 1
-POKEY:180F ??			       .ds 1
-POKEY:1810 ??			       .ds 1
-POKEY:1811 ??			       .ds 1
-POKEY:1812 ??			       .ds 1
-POKEY:1813 ??			       .ds 1
-POKEY:1814 ??			       .ds 1
-POKEY:1815 ??			       .ds 1
-POKEY:1816 ??			       .ds 1
-POKEY:1817 ??			       .ds 1
-POKEY:1818 ??			       .ds 1
-POKEY:1819 ??			       .ds 1
-POKEY:181A ??			       .ds 1
-POKEY:181B ??			       .ds 1
-POKEY:181C ??			       .ds 1
-POKEY:181D ??			       .ds 1
-POKEY:181E ??			       .ds 1
-POKEY:181F ??			       .ds 1
-POKEY:1820 ??	       unk_1820:       .ds 1
-POKEY:1821 ??			       .ds 1
-POKEY:1822 ??			       .ds 1
-POKEY:1823 ??			       .ds 1
+POKEY:1800 ??	       POKEY1_POT0_AUDF1:.ds 1					       ; DATA XREF: play_pokey_1_2_buffer:loc_749Fo
+POKEY:1800									       ; sub_7DD3+6Do ...
+POKEY:1801 ??	       POKEY1_POT1_AUDC1:.ds 1
+POKEY:1802 ??	       POKEY1_POT2_AUDF2:.ds 1
+POKEY:1803 ??	       POKEY1_POT3_AUDC2:.ds 1
+POKEY:1804 ??	       POKEY1_POT4_AUDF3:.ds 1
+POKEY:1805 ??	       POKEY1_POT5_AUDC3:.ds 1
+POKEY:1806 ??	       POKEY1_POT6_AUDF4:.ds 1
+POKEY:1807 ??	       POKEY1_POT7_AUDC4:.ds 1
+POKEY:1808 ??	       POKEY2_POT0_AUDF1:.ds 1
+POKEY:1809 ??	       POKEY2_POT1_AUDC1:.ds 1
+POKEY:180A ??	       POKEY2_POT2_AUDF2:.ds 1
+POKEY:180B ??	       POKEY2_POT3_AUDC2:.ds 1
+POKEY:180C ??	       POKEY2_POT4_AUDF3:.ds 1
+POKEY:180D ??	       POKEY2_POT5_AUDC3:.ds 1
+POKEY:180E ??	       POKEY2_POT6_AUDF4:.ds 1
+POKEY:180F ??	       POKEY2_POT7_AUDC4:.ds 1
+POKEY:1810 ??	       POKEY3_POT0_AUDF1:.ds 1
+POKEY:1811 ??	       POKEY3_POT1_AUDC1:.ds 1
+POKEY:1812 ??	       POKEY3_POT2_AUDF2:.ds 1
+POKEY:1813 ??	       POKEY3_POT3_AUDC2:.ds 1
+POKEY:1814 ??	       POKEY3_POT4_AUDF3:.ds 1
+POKEY:1815 ??	       POKEY3_POT5_AUDC3:.ds 1
+POKEY:1816 ??	       POKEY3_POT6_AUDF4:.ds 1
+POKEY:1817 ??	       POKEY3_POT7_AUDC4:.ds 1
+POKEY:1818 ??	       POKEY4_POT0_AUDF1:.ds 1
+POKEY:1819 ??	       POKEY4_POT1_AUDC1:.ds 1
+POKEY:181A ??	       POKEY4_POT2_AUDF2:.ds 1
+POKEY:181B ??	       POKEY4_POT3_AUDC2:.ds 1
+POKEY:181C ??	       POKEY4_POT4_AUDF3:.ds 1
+POKEY:181D ??	       POKEY4_POT5_AUDC3:.ds 1
+POKEY:181E ??	       POKEY4_POT6_AUDF4:.ds 1
+POKEY:181F ??	       POKEY4_POT7_AUDC4:.ds 1
+POKEY:1820 ??	       POKEY1_ALLPOT_AUDCTL:.ds	1
+POKEY:1821 ??	       POKEY1_KBCODE_STIMER:.ds	1
+POKEY:1822 ??	       POKEY1_RANDOM_SKREST:.ds	1
+POKEY:1823 ??	       POKEY1_POTGO:   .ds 1
 POKEY:1824 ??			       .ds 1
-POKEY:1825 ??			       .ds 1
-POKEY:1826 ??			       .ds 1
-POKEY:1827 ??	       unk_1827:       .ds 1
-POKEY:1828 ??	       unk_1828:       .ds 1
-POKEY:1829 ??			       .ds 1
-POKEY:182A ??			       .ds 1
-POKEY:182B ??			       .ds 1
+POKEY:1825 ??	       POKEY1_SERIIN_SEROUT:.ds	1
+POKEY:1826 ??	       POKEY1_IRQST_IRQEN:.ds 1
+POKEY:1827 ??	       POKEY1_SKSTAT_SKCTL:.ds 1
+POKEY:1828 ??	       POKEY2_ALLPOT_AUDCTL:.ds	1
+POKEY:1829 ??	       POKEY2_KBCODE_STIMER:.ds	1
+POKEY:182A ??	       POKEY2_RANDOM_SKREST:.ds	1
+POKEY:182B ??	       POKEY2_POTGO:   .ds 1
 POKEY:182C ??			       .ds 1
-POKEY:182D ??			       .ds 1
-POKEY:182E ??			       .ds 1
-POKEY:182F ??	       unk_182F:       .ds 1
-POKEY:1830 ?? ??       word_1830:      .ds 2		       ; DATA XREF: sub_76A7+2Cw
-POKEY:1830						       ; ROM:loc_7905w	...
-POKEY:1832 ??			       .ds 1
-POKEY:1833 ??			       .ds 1
+POKEY:182D ??	       POKEY2_SERIN_SEROUT:.ds 1
+POKEY:182E ??	       POKEY2_IRQST_IRQEN:.ds 1
+POKEY:182F ??	       POKEY2_SKSTAT_SKCTL:.ds 1
+POKEY:1830 ??	       POKEY3_ALLPOT_AUDCTL:.ds	1				       ; DATA XREF: sub_76A7+2Cw
+POKEY:1830									       ; ROM:76DEw ...
+POKEY:1831 ??	       POKEY3_KBCODE_STIMER:.ds	1
+POKEY:1832 ??	       POKEY3_RANDOM_SKREST:.ds	1
+POKEY:1833 ??	       POKEY3_POTGO:   .ds 1
 POKEY:1834 ??			       .ds 1
-POKEY:1835 ??			       .ds 1
-POKEY:1836 ??			       .ds 1
-POKEY:1837 ??	       unk_1837:       .ds 1
-POKEY:1838 ??	       unk_1838:       .ds 1
-POKEY:1839 ??			       .ds 1
-POKEY:183A ??			       .ds 1
-POKEY:183B ??			       .ds 1
+POKEY:1835 ??	       POKEY3_SERIN_SEROUT:.ds 1
+POKEY:1836 ??	       POKEY3_IRQST_IRQEN:.ds 1
+POKEY:1837 ??	       POKEY3_SKSTAT_SKCTL:.ds 1
+POKEY:1838 ??	       POKEY4_ALLPOT_AUDCTL:.ds	1				       ; DATA XREF: sub_76A7+31w
+POKEY:1838									       ; ROM:76E1w ...
+POKEY:1839 ??	       POKEY4_KBCODE_STIMER:.ds	1
+POKEY:183A ??	       POKEY4_RANDOM_SKREST:.ds	1
+POKEY:183B ??	       POKEY4_POTGO:   .ds 1
 POKEY:183C ??			       .ds 1
-POKEY:183D ??			       .ds 1
-POKEY:183E ??			       .ds 1
-POKEY:183F ??	       unk_183F:       .ds 1
+POKEY:183D ??	       POKEY4_SERIN_SEROUT:.ds 1
+POKEY:183E ??	       POKEY4_IRQST_IRQEN:.ds 1
+POKEY:183F ??	       POKEY4_SKSTAT_SKCTL:.ds 1
 POKEY:183F	       ; end of	'POKEY'
 POKEY:183F
 RAM:2000	     ; File Name   : E:\dev\pace\pacedev.net\sw\re\platform\starwars\ida\sound.bin
@@ -239,7 +242,7 @@ RAM:2000	     ; Segment type: Regular
 RAM:2000			     .area RAM
 RAM:2000			     .org 0x2000
 RAM:2000	     ; assume dp = 0
-RAM:2000 ??	     unk_2000:	     .ds 1		     ; DATA XREF: sub_7DD3+80o
+RAM:2000 ??	     unk_2000:	     .ds 1					     ; DATA XREF: sub_7DD3+80o
 RAM:2001 ??			     .ds 1
 RAM:2002 ??			     .ds 1
 RAM:2003 ??			     .ds 1
@@ -495,8 +498,8 @@ RAM:20FC ??			     .ds 1
 RAM:20FD ??			     .ds 1
 RAM:20FE ??			     .ds 1
 RAM:20FF ??			     .ds 1
-RAM:2100 ?? ??	     word_2100:	     .ds 2		     ; DATA XREF: ROM:7445w
-RAM:2100						     ; ROM:loc_744Bw ...
+RAM:2100 ?? ??	     word_2100:	     .ds 2					     ; DATA XREF: ROM:7445w
+RAM:2100									     ; ROM:loc_744Bw ...
 RAM:2102 ??			     .ds 1
 RAM:2103 ??			     .ds 1
 RAM:2104 ??			     .ds 1
@@ -541,7 +544,7 @@ RAM:212A ??			     .ds 1
 RAM:212B ??			     .ds 1
 RAM:212C ??			     .ds 1
 RAM:212D ??			     .ds 1
-RAM:212E ?? ??	     word_212E:	     .ds 2		     ; DATA XREF: sub_7DD3:loc_7DB2r
+RAM:212E ?? ??	     word_212E:	     .ds 2					     ; DATA XREF: sub_7DD3:loc_7DB2r
 RAM:2130 ??			     .ds 1
 RAM:2131 ??			     .ds 1
 RAM:2132 ??			     .ds 1
@@ -8667,8 +8670,8 @@ ROM:58E1 03			     .db    3
 ROM:58E2 03			     .db    3
 ROM:58E3 B4			     .db 0xB4 ;	¥
 ROM:58E4 E0			     .db 0xE0 ;	‡
-ROM:58E5 59	     unk_58E5:	     .db 0x59 ;	Y	     ; DATA XREF: sub_776Bo
-ROM:58E5						     ; ROM:7913o
+ROM:58E5 59	     unk_58E5:	     .db 0x59 ;	Y				     ; DATA XREF: sub_776Bo
+ROM:58E5									     ; ROM:7913o
 ROM:58E6 4B			     .db 0x4B ;	K
 ROM:58E7 59			     .db 0x59 ;	Y
 ROM:58E8 4B			     .db 0x4B ;	K
@@ -15304,402 +15307,254 @@ ROM:72CD 0C			     .db  0xC
 ROM:72CE AA			     .db 0xAA ;	™
 ROM:72CF 00			     .db    0
 ROM:72D0 00			     .db    0
-ROM:72D1 08	     unk_72D1:	     .db    8		     ; DATA XREF: ROM:loc_73B0o
-ROM:72D1						     ; ROM:74ADo
-ROM:72D2 6D			     .db 0x6D ;	m
-ROM:72D3 08			     .db    8
-ROM:72D4 6D			     .db 0x6D ;	m
-ROM:72D5 70			     .db 0x70 ;	p
-ROM:72D6 08	     unk_72D6:	     .db    8		     ; DATA XREF: ROM:loc_73B7o
-ROM:72D6						     ; ROM:74AFo
-ROM:72D7 6E			     .db 0x6E ;	n
-ROM:72D8 0D			     .db  0xD
-ROM:72D9 6E			     .db 0x6E ;	n
-ROM:72DA AD			     .db 0xAD ;	≠
-ROM:72DB 06	     unk_72DB:	     .db    6		     ; DATA XREF: ROM:loc_73E3o
-ROM:72DB						     ; ROM:74B1o
-ROM:72DC 68			     .db 0x68 ;	h
-ROM:72DD 59			     .db 0x59 ;	Y
-ROM:72DE 68			     .db 0x68 ;	h
-ROM:72DF 79			     .db 0x79 ;	y
-ROM:72E0 68			     .db 0x68 ;	h
-ROM:72E1 AE			     .db 0xAE ;	Æ
-ROM:72E2 68			     .db 0x68 ;	h
-ROM:72E3 D6			     .db 0xD6 ;	÷
-ROM:72E4 06	     unk_72E4:	     .db    6		     ; DATA XREF: ROM:loc_73E9o
-ROM:72E4						     ; ROM:74B3o
-ROM:72E5 68			     .db 0x68 ;	h
-ROM:72E6 AD			     .db 0xAD ;	≠
-ROM:72E7 68			     .db 0x68 ;	h
-ROM:72E8 AD			     .db 0xAD ;	≠
-ROM:72E9 69			     .db 0x69 ;	i
-ROM:72EA 02			     .db    2
-ROM:72EB 69			     .db 0x69 ;	i
-ROM:72EC 02			     .db    2
-ROM:72ED 30	     unk_72ED:	     .db 0x30 ;	0	     ; DATA XREF: ROM:loc_73C5o
-ROM:72ED						     ; ROM:74B5o
-ROM:72EE 69			     .db 0x69 ;	i
-ROM:72EF 03			     .db    3
-ROM:72F0 69			     .db 0x69 ;	i
-ROM:72F1 1F			     .db 0x1F
-ROM:72F2 69			     .db 0x69 ;	i
-ROM:72F3 7D			     .db 0x7D ;	}
-ROM:72F4 69			     .db 0x69 ;	i
-ROM:72F5 8D			     .db 0x8D ;	ç
-ROM:72F6 05	     unk_72F6:	     .db    5		     ; DATA XREF: ROM:loc_73D1o
-ROM:72F6						     ; ROM:74B7o
-ROM:72F7 69			     .db 0x69 ;	i
-ROM:72F8 F3			     .db 0xF3 ;	Û
-ROM:72F9 69			     .db 0x69 ;	i
-ROM:72FA F7			     .db 0xF7 ;	˜
-ROM:72FB 69			     .db 0x69 ;	i
-ROM:72FC F3			     .db 0xF3 ;	Û
-ROM:72FD 69			     .db 0x69 ;	i
-ROM:72FE F7			     .db 0xF7 ;	˜
-ROM:72FF 10	     unk_72FF:	     .db 0x10		     ; DATA XREF: ROM:loc_73D7o
-ROM:72FF						     ; ROM:74B9o
-ROM:7300 6A			     .db 0x6A ;	j
-ROM:7301 14			     .db 0x14
-ROM:7302 6A			     .db 0x6A ;	j
-ROM:7303 18			     .db 0x18
-ROM:7304 20	     unk_7304:	     .db 0x20		     ; DATA XREF: ROM:loc_73DDo
-ROM:7304						     ; ROM:74BBo
-ROM:7305 6A			     .db 0x6A ;	j
-ROM:7306 25			     .db 0x25 ;	%
-ROM:7307 6A			     .db 0x6A ;	j
-ROM:7308 31			     .db 0x31 ;	1
-ROM:7309 08	     unk_7309:	     .db    8		     ; DATA XREF: ROM:loc_73EFo
-ROM:7309						     ; ROM:74BDo
-ROM:730A 6A			     .db 0x6A ;	j
-ROM:730B 5A			     .db 0x5A ;	Z
-ROM:730C 6A			     .db 0x6A ;	j
-ROM:730D 8E			     .db 0x8E ;	é
-ROM:730E FF	     unk_730E:	     .db 0xFF		     ; DATA XREF: ROM:loc_73F5o
-ROM:730E						     ; ROM:74BFo
-ROM:730F 6A			     .db 0x6A ;	j
-ROM:7310 AB			     .db 0xAB ;	´
-ROM:7311 6A			     .db 0x6A ;	j
-ROM:7312 CB			     .db 0xCB ;	À
-ROM:7313 6A			     .db 0x6A ;	j
-ROM:7314 AF			     .db 0xAF ;	Ø
-ROM:7315 6A			     .db 0x6A ;	j
-ROM:7316 CB			     .db 0xCB ;	À
-ROM:7317 6A			     .db 0x6A ;	j
-ROM:7318 B3			     .db 0xB3 ;	≥
-ROM:7319 6A			     .db 0x6A ;	j
-ROM:731A CB			     .db 0xCB ;	À
-ROM:731B 6A			     .db 0x6A ;	j
-ROM:731C B7			     .db 0xB7 ;	∑
-ROM:731D 6A			     .db 0x6A ;	j
-ROM:731E CB			     .db 0xCB ;	À
-ROM:731F 6A			     .db 0x6A ;	j
-ROM:7320 BB			     .db 0xBB ;	ª
-ROM:7321 6A			     .db 0x6A ;	j
-ROM:7322 CB			     .db 0xCB ;	À
-ROM:7323 6A			     .db 0x6A ;	j
-ROM:7324 BF			     .db 0xBF ;	ø
-ROM:7325 6A			     .db 0x6A ;	j
-ROM:7326 CB			     .db 0xCB ;	À
-ROM:7327 6A			     .db 0x6A ;	j
-ROM:7328 C3			     .db 0xC3 ;	√
-ROM:7329 6A			     .db 0x6A ;	j
-ROM:732A CB			     .db 0xCB ;	À
-ROM:732B 6A			     .db 0x6A ;	j
-ROM:732C C7			     .db 0xC7 ;	«
-ROM:732D 6A			     .db 0x6A ;	j
-ROM:732E CB			     .db 0xCB ;	À
-ROM:732F 25	     unk_732F:	     .db 0x25 ;	%	     ; DATA XREF: ROM:loc_7401o
-ROM:732F						     ; ROM:74C1o
-ROM:7330 6B			     .db 0x6B ;	k
-ROM:7331 10			     .db 0x10
-ROM:7332 6B			     .db 0x6B ;	k
-ROM:7333 18			     .db 0x18
-ROM:7334 6B			     .db 0x6B ;	k
-ROM:7335 14			     .db 0x14
-ROM:7336 6B			     .db 0x6B ;	k
-ROM:7337 18			     .db 0x18
-ROM:7338 6B			     .db 0x6B ;	k
-ROM:7339 10			     .db 0x10
-ROM:733A 6B			     .db 0x6B ;	k
-ROM:733B 18			     .db 0x18
-ROM:733C 08	     unk_733C:	     .db    8		     ; DATA XREF: ROM:loc_7407o
-ROM:733C						     ; ROM:74C3o
-ROM:733D 6F			     .db 0x6F ;	o
-ROM:733E 3A			     .db 0x3A ;	:
-ROM:733F 70			     .db 0x70 ;	p
-ROM:7340 1E			     .db 0x1E
-ROM:7341 08	     unk_7341:	     .db    8		     ; DATA XREF: ROM:loc_740Do
-ROM:7341						     ; ROM:74C5o
-ROM:7342 70			     .db 0x70 ;	p
-ROM:7343 DF			     .db 0xDF ;	ﬂ
-ROM:7344 72			     .db 0x72 ;	r
-ROM:7345 1F			     .db 0x1F
-ROM:7346 30	     unk_7346:	     .db 0x30 ;	0	     ; DATA XREF: ROM:loc_73FBo
-ROM:7346						     ; ROM:74C7o
-ROM:7347 69			     .db 0x69 ;	i
-ROM:7348 17			     .db 0x17
-ROM:7349 69			     .db 0x69 ;	i
-ROM:734A 58			     .db 0x58 ;	X
-ROM:734B 69			     .db 0x69 ;	i
-ROM:734C 85			     .db 0x85 ;	Ö
-ROM:734D 69			     .db 0x69 ;	i
-ROM:734E C2			     .db 0xC2 ;	¬
-ROM:734F 01	     unk_734F:	     .db    1		     ; DATA XREF: ROM:loc_7413o
-ROM:734F						     ; ROM:74C9o
-ROM:7350 6B			     .db 0x6B ;	k
-ROM:7351 31			     .db 0x31 ;	1
-ROM:7352 6B			     .db 0x6B ;	k
-ROM:7353 35			     .db 0x35 ;	5
-ROM:7354 C0	     unk_7354:	     .db 0xC0 ;	¿	     ; DATA XREF: ROM:loc_73BEo
-ROM:7354						     ; ROM:74CBo
-ROM:7355 6B			     .db 0x6B ;	k
-ROM:7356 46			     .db 0x46 ;	F
-ROM:7357 6B			     .db 0x6B ;	k
-ROM:7358 4E			     .db 0x4E ;	N
-ROM:7359 6B			     .db 0x6B ;	k
-ROM:735A 6B			     .db 0x6B ;	k
-ROM:735B 6B			     .db 0x6B ;	k
-ROM:735C 73			     .db 0x73 ;	s
-ROM:735D E2	     unk_735D:	     .db 0xE2 ;	‚	     ; DATA XREF: ROM:loc_7419o
-ROM:735D						     ; ROM:74CDo
-ROM:735E 6B			     .db 0x6B ;	k
-ROM:735F 8C			     .db 0x8C ;	å
-ROM:7360 6C			     .db 0x6C ;	l
-ROM:7361 00			     .db    0
-ROM:7362 6B			     .db 0x6B ;	k
-ROM:7363 AC			     .db 0xAC ;	¨
-ROM:7364 6C			     .db 0x6C ;	l
-ROM:7365 00			     .db    0
-ROM:7366 6B			     .db 0x6B ;	k
-ROM:7367 C8			     .db 0xC8 ;	»
-ROM:7368 6C			     .db 0x6C ;	l
-ROM:7369 00			     .db    0
-ROM:736A 6B			     .db 0x6B ;	k
-ROM:736B E4			     .db 0xE4 ;	‰
-ROM:736C 6C			     .db 0x6C ;	l
-ROM:736D 00			     .db    0
-ROM:736E 08	     unk_736E:	     .db    8		     ; DATA XREF: ROM:loc_7420o
-ROM:736E						     ; ROM:74CFo
-ROM:736F 72			     .db 0x72 ;	r
-ROM:7370 8C			     .db 0x8C ;	å
-ROM:7371 72			     .db 0x72 ;	r
-ROM:7372 AC			     .db 0xAC ;	¨
-ROM:7373 30	     unk_7373:	     .db 0x30 ;	0	     ; DATA XREF: ROM:loc_7427o
-ROM:7373						     ; ROM:74D1o
-ROM:7374 6C			     .db 0x6C ;	l
-ROM:7375 0D			     .db  0xD
-ROM:7376 6C			     .db 0x6C ;	l
-ROM:7377 2D			     .db 0x2D ;	-
-ROM:7378 6C			     .db 0x6C ;	l
-ROM:7379 6A			     .db 0x6A ;	j
-ROM:737A 6C			     .db 0x6C ;	l
-ROM:737B 7A			     .db 0x7A ;	z
-ROM:737C 30	     unk_737C:	     .db 0x30 ;	0	     ; DATA XREF: ROM:loc_73CBo
-ROM:737C						     ; ROM:74D3o
-ROM:737D 69			     .db 0x69 ;	i
-ROM:737E 57			     .db 0x57 ;	W
-ROM:737F 69			     .db 0x69 ;	i
-ROM:7380 57			     .db 0x57 ;	W
-ROM:7381 69			     .db 0x69 ;	i
-ROM:7382 C1			     .db 0xC1 ;	¡
-ROM:7383 69			     .db 0x69 ;	i
-ROM:7384 C1			     .db 0xC1 ;	¡
-ROM:7385 80	     unk_7385:	     .db 0x80 ;	Ä	     ; DATA XREF: ROM:loc_742Eo
-ROM:7385						     ; ROM:74D5o
-ROM:7386 6C			     .db 0x6C ;	l
-ROM:7387 9B			     .db 0x9B ;	õ
-ROM:7388 6C			     .db 0x6C ;	l
-ROM:7389 A3			     .db 0xA3 ;	£
-ROM:738A 80	     unk_738A:	     .db 0x80 ;	Ä	     ; DATA XREF: ROM:loc_7435o
-ROM:738A						     ; ROM:74D7o
-ROM:738B 6C			     .db 0x6C ;	l
-ROM:738C 9F			     .db 0x9F ;	ü
-ROM:738D 6C			     .db 0x6C ;	l
-ROM:738E A3			     .db 0xA3 ;	£
-ROM:738F FF	     unk_738F:	     .db 0xFF		     ; DATA XREF: ROM:loc_743Co
-ROM:738F						     ; ROM:74D9o
-ROM:7390 6C			     .db 0x6C ;	l
-ROM:7391 A8			     .db 0xA8 ;	®
-ROM:7392 6C			     .db 0x6C ;	l
-ROM:7393 AC			     .db 0xAC ;	¨
-ROM:7394 6C			     .db 0x6C ;	l
-ROM:7395 B1			     .db 0xB1 ;	±
-ROM:7396 6C			     .db 0x6C ;	l
-ROM:7397 B5			     .db 0xB5 ;	µ
-ROM:7398 6C			     .db 0x6C ;	l
-ROM:7399 BA			     .db 0xBA ;	∫
-ROM:739A 6C			     .db 0x6C ;	l
-ROM:739B BE			     .db 0xBE ;	æ
-ROM:739C 6C			     .db 0x6C ;	l
-ROM:739D C7			     .db 0xC7 ;	«
-ROM:739E 6C			     .db 0x6C ;	l
-ROM:739F CB			     .db 0xCB ;	À
-ROM:73A0 6C			     .db 0x6C ;	l
-ROM:73A1 A8			     .db 0xA8 ;	®
-ROM:73A2 6C			     .db 0x6C ;	l
-ROM:73A3 D4			     .db 0xD4 ;	‘
-ROM:73A4 6C			     .db 0x6C ;	l
-ROM:73A5 B1			     .db 0xB1 ;	±
-ROM:73A6 6C			     .db 0x6C ;	l
-ROM:73A7 E1			     .db 0xE1 ;	·
-ROM:73A8 6C			     .db 0x6C ;	l
-ROM:73A9 BA			     .db 0xBA ;	∫
-ROM:73AA 6C			     .db 0x6C ;	l
-ROM:73AB EE			     .db 0xEE ;	Ó
-ROM:73AC 6C			     .db 0x6C ;	l
-ROM:73AD C7			     .db 0xC7 ;	«
-ROM:73AE 6C			     .db 0x6C ;	l
-ROM:73AF FB			     .db 0xFB ;	˚
+ROM:72D1	     ; 1st byte	is a bit field
+ROM:72D1	     ; - each bit=1 denotes two	words of the following array
+ROM:72D1 08	     r2d2_4_dat:     .db    8					     ; DATA XREF: ROM:play_R2D2_4o
+ROM:72D1									     ; ROM:74ADo
+ROM:72D2 6D 08 6D 70		     .dw 0x6D08, 0x6D70
+ROM:72D6 08	     r2d2_2_dat:     .db    8					     ; DATA XREF: ROM:play_R2D2_2o
+ROM:72D6									     ; ROM:74AFo
+ROM:72D7 6E 0D 6E AD		     .dw 0x6E0D, 0x6EAD
+ROM:72DB 06	     laser_fire_4_dat:.db    6					     ; DATA XREF: ROM:play_laser_fire_4o
+ROM:72DB									     ; ROM:74B1o
+ROM:72DC 68 59 68 79+		     .dw 0x6859, 0x6879
+ROM:72DC 68 AE 68 D6		     .dw 0x68AE, 0x68D6
+ROM:72E4 06	     x37_inaudible_dat:.db    6					     ; DATA XREF: ROM:play_0x37_inaudibleo
+ROM:72E4									     ; ROM:74B3o
+ROM:72E5 68 AD 68 AD+		     .dw 0x68AD, 0x68AD
+ROM:72E5 69 02 69 02		     .dw 0x6902, 0x6902
+ROM:72ED 30	     nearby_enemy_fire_dat:.db 0x30 ; 0				     ; DATA XREF: ROM:play_nearby_enemy_fireo
+ROM:72ED									     ; ROM:74B5o
+ROM:72EE 69 03 69 1F+		     .dw 0x6903, 0x691F
+ROM:72EE 69 7D 69 8D		     .dw 0x697D, 0x698D
+ROM:72F6 05	     noise_4_dat:    .db    5					     ; DATA XREF: ROM:play_noise_4o
+ROM:72F6									     ; ROM:74B7o
+ROM:72F7 69 F3 69 F7+		     .dw 0x69F3, 0x69F7
+ROM:72F7 69 F3 69 F7		     .dw 0x69F3, 0x69F7
+ROM:72FF 10	     noise_3_dat:    .db 0x10					     ; DATA XREF: ROM:play_noise_3o
+ROM:72FF									     ; ROM:74B9o
+ROM:7300 6A 14 6A 18		     .dw 0x6A14, 0x6A18
+ROM:7304 20	     laser_fire_5_dat:.db 0x20					     ; DATA XREF: ROM:play_laser_fire_5o
+ROM:7304									     ; ROM:74BBo
+ROM:7305 6A 25 6A 31		     .dw 0x6A25, 0x6A31
+ROM:7309 08	     explosion_3_dat:.db    8					     ; DATA XREF: ROM:play_explosion_3o
+ROM:7309									     ; ROM:74BDo
+ROM:730A 6A 5A 6A 8E		     .dw 0x6A5A, 0x6A8E
+ROM:730E FF	     explosion_2_dat:.db 0xFF					     ; DATA XREF: ROM:play_explosion_2o
+ROM:730E									     ; ROM:74BFo
+ROM:730F 6A AB 6A CB+		     .dw 0x6AAB, 0x6ACB
+ROM:730F 6A AF 6A CB+		     .dw 0x6AAF, 0x6ACB
+ROM:730F 6A B3 6A CB+		     .dw 0x6AB3, 0x6ACB
+ROM:730F 6A B7 6A CB+		     .dw 0x6AB7, 0x6ACB
+ROM:730F 6A BB 6A CB+		     .dw 0x6ABB, 0x6ACB
+ROM:730F 6A BF 6A CB+		     .dw 0x6ABF, 0x6ACB
+ROM:730F 6A C3 6A CB+		     .dw 0x6AC3, 0x6ACB
+ROM:730F 6A C7 6A CB		     .dw 0x6AC7, 0x6ACB
+ROM:732F 25	     explosion_1_dat:.db 0x25 ;	%				     ; DATA XREF: ROM:play_explosion_1o
+ROM:732F									     ; ROM:74C1o
+ROM:7330 6B 10 6B 18+		     .dw 0x6B10, 0x6B18
+ROM:7330 6B 14 6B 18+		     .dw 0x6B14, 0x6B18
+ROM:7330 6B 10 6B 18		     .dw 0x6B10, 0x6B18
+ROM:733C 08	     r2d2_1_dat:     .db    8					     ; DATA XREF: ROM:play_R2D2_1o
+ROM:733C									     ; ROM:74C3o
+ROM:733D 6F 3A 70 1E		     .dw 0x6F3A, 0x701E
+ROM:7341 08	     noise_1_dat:    .db    8					     ; DATA XREF: ROM:play_noise_1o
+ROM:7341									     ; ROM:74C5o
+ROM:7342 70 DF 72 1F		     .dw 0x70DF, 0x721F
+ROM:7346 30	     laser_fire_3_dat:.db 0x30 ; 0				     ; DATA XREF: ROM:play_laser_fire_3o
+ROM:7346									     ; ROM:74C7o
+ROM:7347 69 17 69 58+		     .dw 0x6917, 0x6958
+ROM:7347 69 85 69 C2		     .dw 0x6985, 0x69C2
+ROM:734F 01	     noise_5_dat:    .db    1					     ; DATA XREF: ROM:play_noise_5o
+ROM:734F									     ; ROM:74C9o
+ROM:7350 6B 31 6B 35		     .dw 0x6B31, 0x6B35
+ROM:7354 C0	     laser_fire_6_dat:.db 0xC0 ; ¿				     ; DATA XREF: ROM:play_laser_fire_6o
+ROM:7354									     ; ROM:74CBo
+ROM:7355 6B 46 6B 4E+		     .dw 0x6B46, 0x6B4E
+ROM:7355 6B 6B 6B 73		     .dw 0x6B6B, 0x6B73
+ROM:735D E2	     laser_fire_2_dat:.db 0xE2 ; ‚				     ; DATA XREF: ROM:play_laser_fire_2o
+ROM:735D									     ; ROM:74CDo
+ROM:735E 6B 8C 6C 00+		     .dw 0x6B8C, 0x6C00
+ROM:735E 6B AC 6C 00+		     .dw 0x6BAC, 0x6C00
+ROM:735E 6B C8 6C 00+		     .dw 0x6BC8, 0x6C00
+ROM:735E 6B E4 6C 00		     .dw 0x6BE4, 0x6C00
+ROM:736E 08	     r2d2_3_dat:     .db    8					     ; DATA XREF: ROM:play_R2D2_3o
+ROM:736E									     ; ROM:74CFo
+ROM:736F 72 8C 72 AC		     .dw 0x728C, 0x72AC
+ROM:7373 30	     noise_6_dat:    .db 0x30 ;	0				     ; DATA XREF: ROM:play_noise_6o
+ROM:7373									     ; ROM:74D1o
+ROM:7374 6C 0D 6C 2D+		     .dw 0x6C0D, 0x6C2D
+ROM:7374 6C 6A 6C 7A		     .dw 0x6C6A, 0x6C7A
+ROM:737C 30	     x2B_inaudible_dat:.db 0x30	; 0				     ; DATA XREF: ROM:play_0x2B_inaudibleo
+ROM:737C									     ; ROM:74D3o
+ROM:737D 69 57 69 57+		     .dw 0x6957, 0x6957
+ROM:737D 69 C1 69 C1		     .dw 0x69C1, 0x69C1
+ROM:7385 80	     noise_7_dat:    .db 0x80 ;	Ä				     ; DATA XREF: ROM:play_noise_7o
+ROM:7385									     ; ROM:74D5o
+ROM:7386 6C 9B 6C A3		     .dw 0x6C9B, 0x6CA3
+ROM:738A 80	     noise_2_dat:    .db 0x80 ;	Ä				     ; DATA XREF: ROM:play_noise_2o
+ROM:738A									     ; ROM:74D7o
+ROM:738B 6C 9F 6C A3		     .dw 0x6C9F, 0x6CA3
+ROM:738F FF	     test_tune_pokey12_dat:.db 0xFF				     ; DATA XREF: ROM:play_test_tune_pokey12o
+ROM:738F									     ; ROM:74D9o
+ROM:7390 6C A8 6C AC+		     .dw 0x6CA8, 0x6CAC
+ROM:7390 6C B1 6C B5+		     .dw 0x6CB1, 0x6CB5
+ROM:7390 6C BA 6C BE+		     .dw 0x6CBA, 0x6CBE
+ROM:7390 6C C7 6C CB+		     .dw 0x6CC7, 0x6CCB
+ROM:7390 6C A8 6C D4+		     .dw 0x6CA8, 0x6CD4
+ROM:7390 6C B1 6C E1+		     .dw 0x6CB1, 0x6CE1
+ROM:7390 6C BA 6C EE+		     .dw 0x6CBA, 0x6CEE
+ROM:7390 6C C7 6C FB		     .dw 0x6CC7, 0x6CFB
 ROM:73B0	     ; ---------------------------------------------------------------------------
 ROM:73B0
-ROM:73B0	     loc_73B0:				     ; DATA XREF: ROM:7FC5o
-ROM:73B0 10 8E 72 D1		     ldy     #unk_72D1
-ROM:73B4 7E 74 43		     jmp     loc_7443
+ROM:73B0	     play_R2D2_4:						     ; DATA XREF: ROM:7FC5o
+ROM:73B0 10 8E 72 D1		     ldy     #r2d2_4_dat
+ROM:73B4 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:73B7	     ; ---------------------------------------------------------------------------
 ROM:73B7
-ROM:73B7	     loc_73B7:				     ; DATA XREF: ROM:7FC1o
-ROM:73B7 10 8E 72 D6		     ldy     #unk_72D6
-ROM:73BB 7E 74 43		     jmp     loc_7443
+ROM:73B7	     play_R2D2_2:						     ; DATA XREF: ROM:7FC1o
+ROM:73B7 10 8E 72 D6		     ldy     #r2d2_2_dat
+ROM:73BB 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:73BE	     ; ---------------------------------------------------------------------------
 ROM:73BE
-ROM:73BE	     loc_73BE:				     ; DATA XREF: ROM:7FD5o
-ROM:73BE 10 8E 73 54		     ldy     #unk_7354
-ROM:73C2 7E 74 43		     jmp     loc_7443
+ROM:73BE	     play_laser_fire_6:						     ; DATA XREF: ROM:7FD5o
+ROM:73BE 10 8E 73 54		     ldy     #laser_fire_6_dat
+ROM:73C2 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:73C5	     ; ---------------------------------------------------------------------------
 ROM:73C5
-ROM:73C5	     loc_73C5:				     ; DATA XREF: ROM:7FB5o
-ROM:73C5 10 8E 72 ED		     ldy     #unk_72ED
-ROM:73C9 20 78			     bra     loc_7443
+ROM:73C5	     play_nearby_enemy_fire:					     ; DATA XREF: ROM:7FB5o
+ROM:73C5 10 8E 72 ED		     ldy     #nearby_enemy_fire_dat
+ROM:73C9 20 78			     bra     fmt_pokey_1_2_buffer
 ROM:73CB	     ; ---------------------------------------------------------------------------
 ROM:73CB
-ROM:73CB	     loc_73CB:				     ; DATA XREF: ROM:7FB7o
-ROM:73CB 10 8E 73 7C		     ldy     #unk_737C
-ROM:73CF 20 72			     bra     loc_7443
+ROM:73CB	     play_0x2B_inaudible:					     ; DATA XREF: ROM:7FB7o
+ROM:73CB 10 8E 73 7C		     ldy     #x2B_inaudible_dat
+ROM:73CF 20 72			     bra     fmt_pokey_1_2_buffer
 ROM:73D1	     ; ---------------------------------------------------------------------------
 ROM:73D1
-ROM:73D1	     loc_73D1:				     ; DATA XREF: ROM:7FC7o
-ROM:73D1 10 8E 72 F6		     ldy     #unk_72F6
-ROM:73D5 20 6C			     bra     loc_7443
+ROM:73D1	     play_noise_4:						     ; DATA XREF: ROM:7FC7o
+ROM:73D1 10 8E 72 F6		     ldy     #noise_4_dat
+ROM:73D5 20 6C			     bra     fmt_pokey_1_2_buffer
 ROM:73D7	     ; ---------------------------------------------------------------------------
 ROM:73D7
-ROM:73D7	     loc_73D7:				     ; DATA XREF: ROM:7FB9o
-ROM:73D7 10 8E 72 FF		     ldy     #unk_72FF
-ROM:73DB 20 66			     bra     loc_7443
+ROM:73D7	     play_noise_3:						     ; DATA XREF: ROM:7FB9o
+ROM:73D7 10 8E 72 FF		     ldy     #noise_3_dat
+ROM:73DB 20 66			     bra     fmt_pokey_1_2_buffer
 ROM:73DD	     ; ---------------------------------------------------------------------------
 ROM:73DD
-ROM:73DD	     loc_73DD:				     ; DATA XREF: ROM:7FD3o
-ROM:73DD 10 8E 73 04		     ldy     #unk_7304
-ROM:73E1 20 60			     bra     loc_7443
+ROM:73DD	     play_laser_fire_5:						     ; DATA XREF: ROM:7FD3o
+ROM:73DD 10 8E 73 04		     ldy     #laser_fire_5_dat
+ROM:73E1 20 60			     bra     fmt_pokey_1_2_buffer
 ROM:73E3	     ; ---------------------------------------------------------------------------
 ROM:73E3
-ROM:73E3	     loc_73E3:				     ; DATA XREF: ROM:7FCDo
-ROM:73E3 10 8E 72 DB		     ldy     #unk_72DB
-ROM:73E7 20 5A			     bra     loc_7443
+ROM:73E3	     play_laser_fire_4:						     ; DATA XREF: ROM:7FCDo
+ROM:73E3 10 8E 72 DB		     ldy     #laser_fire_4_dat
+ROM:73E7 20 5A			     bra     fmt_pokey_1_2_buffer
 ROM:73E9	     ; ---------------------------------------------------------------------------
 ROM:73E9
-ROM:73E9	     loc_73E9:				     ; DATA XREF: ROM:7FCFo
-ROM:73E9 10 8E 72 E4		     ldy     #unk_72E4
-ROM:73ED 20 54			     bra     loc_7443
+ROM:73E9	     play_0x37_inaudible:					     ; DATA XREF: ROM:7FCFo
+ROM:73E9 10 8E 72 E4		     ldy     #x37_inaudible_dat
+ROM:73ED 20 54			     bra     fmt_pokey_1_2_buffer
 ROM:73EF	     ; ---------------------------------------------------------------------------
 ROM:73EF
-ROM:73EF	     loc_73EF:				     ; DATA XREF: ROM:7FCBo
-ROM:73EF 10 8E 73 09		     ldy     #unk_7309
-ROM:73F3 20 4E			     bra     loc_7443
+ROM:73EF	     play_explosion_3:						     ; DATA XREF: ROM:7FCBo
+ROM:73EF 10 8E 73 09		     ldy     #explosion_3_dat
+ROM:73F3 20 4E			     bra     fmt_pokey_1_2_buffer
 ROM:73F5	     ; ---------------------------------------------------------------------------
 ROM:73F5
-ROM:73F5	     loc_73F5:				     ; DATA XREF: ROM:7FAFo
-ROM:73F5 10 8E 73 0E		     ldy     #unk_730E
-ROM:73F9 20 48			     bra     loc_7443
+ROM:73F5	     play_explosion_2:						     ; DATA XREF: ROM:7FAFo
+ROM:73F5 10 8E 73 0E		     ldy     #explosion_2_dat
+ROM:73F9 20 48			     bra     fmt_pokey_1_2_buffer
 ROM:73FB	     ; ---------------------------------------------------------------------------
 ROM:73FB
-ROM:73FB	     loc_73FB:				     ; DATA XREF: ROM:7FBDo
-ROM:73FB 10 8E 73 46		     ldy     #unk_7346
-ROM:73FF 20 42			     bra     loc_7443
+ROM:73FB	     play_laser_fire_3:						     ; DATA XREF: ROM:7FBDo
+ROM:73FB 10 8E 73 46		     ldy     #laser_fire_3_dat
+ROM:73FF 20 42			     bra     fmt_pokey_1_2_buffer
 ROM:7401	     ; ---------------------------------------------------------------------------
 ROM:7401
-ROM:7401	     loc_7401:				     ; DATA XREF: ROM:7FADo
-ROM:7401 10 8E 73 2F		     ldy     #unk_732F
-ROM:7405 20 3C			     bra     loc_7443
+ROM:7401	     play_explosion_1:						     ; DATA XREF: ROM:7FADo
+ROM:7401 10 8E 73 2F		     ldy     #explosion_1_dat
+ROM:7405 20 3C			     bra     fmt_pokey_1_2_buffer
 ROM:7407	     ; ---------------------------------------------------------------------------
 ROM:7407
-ROM:7407	     loc_7407:				     ; DATA XREF: ROM:7FBFo
-ROM:7407 10 8E 73 3C		     ldy     #unk_733C
-ROM:740B 20 36			     bra     loc_7443
+ROM:7407	     play_R2D2_1:						     ; DATA XREF: ROM:7FBFo
+ROM:7407 10 8E 73 3C		     ldy     #r2d2_1_dat
+ROM:740B 20 36			     bra     fmt_pokey_1_2_buffer
 ROM:740D	     ; ---------------------------------------------------------------------------
 ROM:740D
-ROM:740D	     loc_740D:				     ; DATA XREF: ROM:7FB1o
-ROM:740D 10 8E 73 41		     ldy     #unk_7341
-ROM:7411 20 30			     bra     loc_7443
+ROM:740D	     play_noise_1:						     ; DATA XREF: ROM:7FB1o
+ROM:740D 10 8E 73 41		     ldy     #noise_1_dat
+ROM:7411 20 30			     bra     fmt_pokey_1_2_buffer
 ROM:7413	     ; ---------------------------------------------------------------------------
 ROM:7413
-ROM:7413	     loc_7413:				     ; DATA XREF: ROM:7FC9o
-ROM:7413 10 8E 73 4F		     ldy     #unk_734F
-ROM:7417 20 2A			     bra     loc_7443
+ROM:7413	     play_noise_5:						     ; DATA XREF: ROM:7FC9o
+ROM:7413 10 8E 73 4F		     ldy     #noise_5_dat
+ROM:7417 20 2A			     bra     fmt_pokey_1_2_buffer
 ROM:7419	     ; ---------------------------------------------------------------------------
 ROM:7419
-ROM:7419	     loc_7419:				     ; DATA XREF: ROM:7FBBo
-ROM:7419 10 8E 73 5D		     ldy     #unk_735D
-ROM:741D 7E 74 43		     jmp     loc_7443
+ROM:7419	     play_laser_fire_2:						     ; DATA XREF: ROM:7FBBo
+ROM:7419 10 8E 73 5D		     ldy     #laser_fire_2_dat
+ROM:741D 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:7420	     ; ---------------------------------------------------------------------------
 ROM:7420
-ROM:7420	     loc_7420:				     ; DATA XREF: ROM:7FC3o
-ROM:7420 10 8E 73 6E		     ldy     #unk_736E
-ROM:7424 7E 74 43		     jmp     loc_7443
+ROM:7420	     play_R2D2_3:						     ; DATA XREF: ROM:7FC3o
+ROM:7420 10 8E 73 6E		     ldy     #r2d2_3_dat
+ROM:7424 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:7427	     ; ---------------------------------------------------------------------------
 ROM:7427
-ROM:7427	     loc_7427:				     ; DATA XREF: ROM:7FD1o
-ROM:7427 10 8E 73 73		     ldy     #unk_7373
-ROM:742B 7E 74 43		     jmp     loc_7443
+ROM:7427	     play_noise_6:						     ; DATA XREF: ROM:7FD1o
+ROM:7427 10 8E 73 73		     ldy     #noise_6_dat
+ROM:742B 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:742E	     ; ---------------------------------------------------------------------------
 ROM:742E
-ROM:742E	     loc_742E:				     ; DATA XREF: ROM:7FD7o
-ROM:742E 10 8E 73 85		     ldy     #unk_7385
-ROM:7432 7E 74 43		     jmp     loc_7443
+ROM:742E	     play_noise_7:						     ; DATA XREF: ROM:7FD7o
+ROM:742E 10 8E 73 85		     ldy     #noise_7_dat
+ROM:7432 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:7435	     ; ---------------------------------------------------------------------------
 ROM:7435
-ROM:7435	     loc_7435:				     ; DATA XREF: ROM:7FB3o
-ROM:7435 10 8E 73 8A		     ldy     #unk_738A
-ROM:7439 7E 74 43		     jmp     loc_7443
+ROM:7435	     play_noise_2:						     ; DATA XREF: ROM:7FB3o
+ROM:7435 10 8E 73 8A		     ldy     #noise_2_dat
+ROM:7439 7E 74 43		     jmp     fmt_pokey_1_2_buffer
 ROM:743C	     ; ---------------------------------------------------------------------------
 ROM:743C
-ROM:743C	     loc_743C:				     ; DATA XREF: ROM:7F63o
-ROM:743C 10 8E 73 8F		     ldy     #unk_738F
+ROM:743C	     play_test_tune_pokey12:					     ; DATA XREF: ROM:7F63o
+ROM:743C 10 8E 73 8F		     ldy     #test_tune_pokey12_dat
 ROM:7440 7E 74 43		     jmp     *+3
 ROM:7443	     ; ---------------------------------------------------------------------------
 ROM:7443
-ROM:7443	     loc_7443:				     ; CODE XREF: ROM:73B4J
-ROM:7443						     ; ROM:73BBJ ...
-ROM:7443 A6 A0			     lda     ,y+
-ROM:7445 B7 21 00		     sta     word_2100
+ROM:7443	     fmt_pokey_1_2_buffer:					     ; CODE XREF: ROM:73B4J
+ROM:7443									     ; ROM:73BBJ ...
+ROM:7443 A6 A0			     lda     ,y+				     ; read bit	field
+ROM:7445 B7 21 00		     sta     word_2100				     ; save
 ROM:7448 8E 21 01		     ldx     #0x2101
 ROM:744B
-ROM:744B	     loc_744B:				     ; CODE XREF: ROM:7467j
-ROM:744B 78 21 00		     asl     word_2100
-ROM:744E 24 12			     bcc     loc_7462
-ROM:7450 EC A1			     ldd     ,y++
-ROM:7452 ED 84			     std     ,x
-ROM:7454 EC A1			     ldd     ,y++
-ROM:7456 ED 05			     std     5,x
+ROM:744B	     loc_744B:							     ; CODE XREF: ROM:7467j
+ROM:744B 78 21 00		     asl     word_2100				     ; bit set?
+ROM:744E 24 12			     bcc     loc_7462				     ; no, skip
+ROM:7450 EC A1			     ldd     ,y++				     ; get 1st word from table
+ROM:7452 ED 84			     std     ,x					     ; store
+ROM:7454 EC A1			     ldd     ,y++				     ; get 2nd word from table
+ROM:7456 ED 05			     std     5,x				     ; store
 ROM:7458 86 01			     lda     #1
 ROM:745A A7 03			     sta     3,x
 ROM:745C A7 02			     sta     2,x
 ROM:745E A7 08			     sta     8,x
 ROM:7460 A7 07			     sta     7,x
 ROM:7462
-ROM:7462	     loc_7462:				     ; CODE XREF: ROM:744Ej
-ROM:7462 30 0A			     leax    0xA,x
-ROM:7464 B6 21 00		     lda     word_2100
-ROM:7467 26 E2			     bne     loc_744B
+ROM:7462	     loc_7462:							     ; CODE XREF: ROM:744Ej
+ROM:7462 30 0A			     leax    10,x				     ; next buffer addr
+ROM:7464 B6 21 00		     lda     word_2100				     ; bit field
+ROM:7467 26 E2			     bne     loc_744B				     ; non-zero, loop
 ROM:7469 39			     rts
 ROM:746A
 ROM:746A	     ; =============== S U B R O U T I N E =======================================
 ROM:746A
 ROM:746A
-ROM:746A	     sub_746A:				     ; CODE XREF: sub_7DD3-CP
+ROM:746A	     play_pokey_1_2_buffer:					     ; CODE XREF: sub_7DD3-CP
 ROM:746A 8E 21 01		     ldx     #0x2101
 ROM:746D C6 00			     ldb     #0
 ROM:746F
-ROM:746F	     loc_746F:				     ; CODE XREF: sub_746A+40j
+ROM:746F	     loc_746F:							     ; CODE XREF: play_pokey_1_2_buffer+40j
 ROM:746F 10 AE 84		     ldy     ,x
 ROM:7472 27 31			     beq     loc_74A5
 ROM:7474 6A 02			     dec     2,x
@@ -15715,62 +15570,62 @@ ROM:7487 A7 01			     sta     1,x
 ROM:7489 20 14			     bra     loc_749F
 ROM:748B	     ; ---------------------------------------------------------------------------
 ROM:748B
-ROM:748B	     loc_748B:				     ; CODE XREF: sub_746A+19j
+ROM:748B	     loc_748B:							     ; CODE XREF: play_pokey_1_2_buffer+19j
 ROM:748B A7 03			     sta     3,x
 ROM:748D A6 3E			     lda     -2,y
 ROM:748F A7 04			     sta     4,x
 ROM:7491 20 06			     bra     loc_7499
 ROM:7493	     ; ---------------------------------------------------------------------------
 ROM:7493
-ROM:7493	     loc_7493:				     ; CODE XREF: sub_746A+10j
+ROM:7493	     loc_7493:							     ; CODE XREF: play_pokey_1_2_buffer+10j
 ROM:7493 A6 04			     lda     4,x
 ROM:7495 AB 3F			     adda    -1,y
 ROM:7497 A7 04			     sta     4,x
 ROM:7499
-ROM:7499	     loc_7499:				     ; CODE XREF: sub_746A+27j
+ROM:7499	     loc_7499:							     ; CODE XREF: play_pokey_1_2_buffer+27j
 ROM:7499 A6 3D			     lda     -3,y
 ROM:749B A7 02			     sta     2,x
 ROM:749D A6 04			     lda     4,x
 ROM:749F
-ROM:749F	     loc_749F:				     ; CODE XREF: sub_746A+1Fj
-ROM:749F 10 8E 18 00		     ldy     #0x1800
+ROM:749F	     loc_749F:							     ; CODE XREF: play_pokey_1_2_buffer+1Fj
+ROM:749F 10 8E 18 00		     ldy     #POKEY1_POT0_AUDF1
 ROM:74A3 A7 A5			     sta     b,y
 ROM:74A5
-ROM:74A5	     loc_74A5:				     ; CODE XREF: sub_746A+8j
-ROM:74A5						     ; sub_746A+Cj
+ROM:74A5	     loc_74A5:							     ; CODE XREF: play_pokey_1_2_buffer+8j
+ROM:74A5									     ; play_pokey_1_2_buffer+Cj
 ROM:74A5 30 05			     leax    5,x
 ROM:74A7 5C			     incb
 ROM:74A8 C1 10			     cmpb    #0x10
 ROM:74AA 25 C3			     bcs     loc_746F
 ROM:74AC 39			     rts
-ROM:74AC	     ; End of function sub_746A
+ROM:74AC	     ; End of function play_pokey_1_2_buffer
 ROM:74AC
 ROM:74AC	     ; ---------------------------------------------------------------------------
-ROM:74AD 72 D1			     .dw unk_72D1
-ROM:74AF 72 D6			     .dw unk_72D6
-ROM:74B1 72 DB			     .dw unk_72DB
-ROM:74B3 72 E4			     .dw unk_72E4
-ROM:74B5 72 ED			     .dw unk_72ED
-ROM:74B7 72 F6			     .dw unk_72F6
-ROM:74B9 72 FF			     .dw unk_72FF
-ROM:74BB 73 04			     .dw unk_7304
-ROM:74BD 73 09			     .dw unk_7309
-ROM:74BF 73 0E			     .dw unk_730E
-ROM:74C1 73 2F			     .dw unk_732F
-ROM:74C3 73 3C			     .dw unk_733C
-ROM:74C5 73 41			     .dw unk_7341
-ROM:74C7 73 46			     .dw unk_7346
-ROM:74C9 73 4F			     .dw unk_734F
-ROM:74CB 73 54			     .dw unk_7354
-ROM:74CD 73 5D			     .dw unk_735D
-ROM:74CF 73 6E			     .dw unk_736E
-ROM:74D1 73 73			     .dw unk_7373
-ROM:74D3 73 7C			     .dw unk_737C
-ROM:74D5 73 85			     .dw unk_7385
-ROM:74D7 73 8A			     .dw unk_738A
-ROM:74D9 73 8F			     .dw unk_738F
-ROM:74DB 22	     unk_74DB:	     .db 0x22 ;	"	     ; DATA XREF: sub_7722:loc_7726o
-ROM:74DB						     ; sub_77A3o
+ROM:74AD 72 D1			     .dw r2d2_4_dat
+ROM:74AF 72 D6			     .dw r2d2_2_dat
+ROM:74B1 72 DB			     .dw laser_fire_4_dat
+ROM:74B3 72 E4			     .dw x37_inaudible_dat
+ROM:74B5 72 ED			     .dw nearby_enemy_fire_dat
+ROM:74B7 72 F6			     .dw noise_4_dat
+ROM:74B9 72 FF			     .dw noise_3_dat
+ROM:74BB 73 04			     .dw laser_fire_5_dat
+ROM:74BD 73 09			     .dw explosion_3_dat
+ROM:74BF 73 0E			     .dw explosion_2_dat
+ROM:74C1 73 2F			     .dw explosion_1_dat
+ROM:74C3 73 3C			     .dw r2d2_1_dat
+ROM:74C5 73 41			     .dw noise_1_dat
+ROM:74C7 73 46			     .dw laser_fire_3_dat
+ROM:74C9 73 4F			     .dw noise_5_dat
+ROM:74CB 73 54			     .dw laser_fire_6_dat
+ROM:74CD 73 5D			     .dw laser_fire_2_dat
+ROM:74CF 73 6E			     .dw r2d2_3_dat
+ROM:74D1 73 73			     .dw noise_6_dat
+ROM:74D3 73 7C			     .dw x2B_inaudible_dat
+ROM:74D5 73 85			     .dw noise_7_dat
+ROM:74D7 73 8A			     .dw noise_2_dat
+ROM:74D9 73 8F			     .dw test_tune_pokey12_dat
+ROM:74DB 22	     unk_74DB:	     .db 0x22 ;	"				     ; DATA XREF: sub_7722:loc_7726o
+ROM:74DB									     ; sub_77A3o
 ROM:74DC 00			     .db    0
 ROM:74DD 01			     .db    1
 ROM:74DE 18			     .db 0x18
@@ -15836,7 +15691,7 @@ ROM:7519 18			     .db 0x18
 ROM:751A 12			     .db 0x12
 ROM:751B	     ; ---------------------------------------------------------------------------
 ROM:751B
-ROM:751B	     loc_751B:				     ; DATA XREF: ROM:7FA7o
+ROM:751B	     play_laser_fire_1:						     ; DATA XREF: ROM:7FA7o
 ROM:751B BD 77 06		     jsr     sub_7706
 ROM:751E C6 02			     ldb     #2
 ROM:7520 BD 77 6B		     jsr     sub_776B
@@ -15852,7 +15707,7 @@ ROM:7538 BD 77 6B		     jsr     sub_776B
 ROM:753B 39			     rts
 ROM:753C	     ; ---------------------------------------------------------------------------
 ROM:753C
-ROM:753C	     loc_753C:				     ; DATA XREF: ROM:7F97o
+ROM:753C	     play_star_wars_theme:					     ; DATA XREF: ROM:7F97o
 ROM:753C BD 77 06		     jsr     sub_7706
 ROM:753F C6 0E			     ldb     #0xE
 ROM:7541 BD 77 6B		     jsr     sub_776B
@@ -15868,7 +15723,7 @@ ROM:7559 BD 77 6B		     jsr     sub_776B
 ROM:755C 39			     rts
 ROM:755D	     ; ---------------------------------------------------------------------------
 ROM:755D
-ROM:755D	     loc_755D:				     ; DATA XREF: ROM:7F99o
+ROM:755D	     play_cantina_theme:					     ; DATA XREF: ROM:7F99o
 ROM:755D BD 77 06		     jsr     sub_7706
 ROM:7560 C6 16			     ldb     #0x16
 ROM:7562 BD 77 6B		     jsr     sub_776B
@@ -15884,7 +15739,7 @@ ROM:757A BD 77 6B		     jsr     sub_776B
 ROM:757D 39			     rts
 ROM:757E	     ; ---------------------------------------------------------------------------
 ROM:757E
-ROM:757E	     loc_757E:				     ; DATA XREF: ROM:7F9Fo
+ROM:757E	     play_end_stage_music:					     ; DATA XREF: ROM:7F9Fo
 ROM:757E BD 77 06		     jsr     sub_7706
 ROM:7581 C6 1E			     ldb     #0x1E
 ROM:7583 BD 77 6B		     jsr     sub_776B
@@ -15900,7 +15755,7 @@ ROM:759B BD 77 6B		     jsr     sub_776B
 ROM:759E 39			     rts
 ROM:759F	     ; ---------------------------------------------------------------------------
 ROM:759F
-ROM:759F	     loc_759F:				     ; DATA XREF: ROM:7FA3o
+ROM:759F	     play_music_7:						     ; DATA XREF: ROM:7FA3o
 ROM:759F BD 77 06		     jsr     sub_7706
 ROM:75A2 C6 26			     ldb     #0x26 ; '&'
 ROM:75A4 BD 77 6B		     jsr     sub_776B
@@ -15916,7 +15771,7 @@ ROM:75BC BD 77 6B		     jsr     sub_776B
 ROM:75BF 39			     rts
 ROM:75C0	     ; ---------------------------------------------------------------------------
 ROM:75C0
-ROM:75C0	     loc_75C0:				     ; DATA XREF: ROM:7FA5o
+ROM:75C0	     play_music_8:						     ; DATA XREF: ROM:7FA5o
 ROM:75C0 BD 77 06		     jsr     sub_7706
 ROM:75C3 C6 2E			     ldb     #0x2E ; '.'
 ROM:75C5 BD 77 6B		     jsr     sub_776B
@@ -15932,7 +15787,7 @@ ROM:75DD BD 77 6B		     jsr     sub_776B
 ROM:75E0 39			     rts
 ROM:75E1	     ; ---------------------------------------------------------------------------
 ROM:75E1
-ROM:75E1	     loc_75E1:				     ; DATA XREF: ROM:7FA9o
+ROM:75E1	     play_music_9:						     ; DATA XREF: ROM:7FA9o
 ROM:75E1 BD 77 06		     jsr     sub_7706
 ROM:75E4 C6 36			     ldb     #0x36 ; '6'
 ROM:75E6 BD 77 6B		     jsr     sub_776B
@@ -15948,7 +15803,7 @@ ROM:75FE BD 77 6B		     jsr     sub_776B
 ROM:7601 39			     rts
 ROM:7602	     ; ---------------------------------------------------------------------------
 ROM:7602
-ROM:7602	     loc_7602:				     ; DATA XREF: ROM:7FA1o
+ROM:7602	     play_music_6:						     ; DATA XREF: ROM:7FA1o
 ROM:7602 BD 77 06		     jsr     sub_7706
 ROM:7605 C6 3E			     ldb     #0x3E ; '>'
 ROM:7607 BD 77 6B		     jsr     sub_776B
@@ -15964,7 +15819,7 @@ ROM:761F BD 77 6B		     jsr     sub_776B
 ROM:7622 39			     rts
 ROM:7623	     ; ---------------------------------------------------------------------------
 ROM:7623
-ROM:7623	     loc_7623:				     ; DATA XREF: ROM:7FABo
+ROM:7623	     play_music_10:						     ; DATA XREF: ROM:7FABo
 ROM:7623 BD 77 06		     jsr     sub_7706
 ROM:7626 C6 46			     ldb     #0x46 ; 'F'
 ROM:7628 BD 77 6B		     jsr     sub_776B
@@ -15980,7 +15835,7 @@ ROM:7640 BD 77 6B		     jsr     sub_776B
 ROM:7643 39			     rts
 ROM:7644	     ; ---------------------------------------------------------------------------
 ROM:7644
-ROM:7644	     loc_7644:				     ; DATA XREF: ROM:7F9Do
+ROM:7644	     play_tweener_music:					     ; DATA XREF: ROM:7F9Do
 ROM:7644 BD 77 06		     jsr     sub_7706
 ROM:7647 C6 4E			     ldb     #0x4E ; 'N'
 ROM:7649 BD 77 6B		     jsr     sub_776B
@@ -15996,7 +15851,7 @@ ROM:7661 BD 77 6B		     jsr     sub_776B
 ROM:7664 39			     rts
 ROM:7665	     ; ---------------------------------------------------------------------------
 ROM:7665
-ROM:7665	     loc_7665:				     ; DATA XREF: ROM:7F9Bo
+ROM:7665	     play_dark_side_theme:					     ; DATA XREF: ROM:7F9Bo
 ROM:7665 BD 77 06		     jsr     sub_7706
 ROM:7668 C6 56			     ldb     #0x56 ; 'V'
 ROM:766A BD 77 6B		     jsr     sub_776B
@@ -16012,7 +15867,7 @@ ROM:7682 BD 77 6B		     jsr     sub_776B
 ROM:7685 39			     rts
 ROM:7686	     ; ---------------------------------------------------------------------------
 ROM:7686
-ROM:7686	     loc_7686:				     ; DATA XREF: ROM:7F65o
+ROM:7686	     play_test_tune_pokey34:					     ; DATA XREF: ROM:7F65o
 ROM:7686 BD 77 0E		     jsr     sub_770E
 ROM:7689 C6 5E			     ldb     #0x5E ; '^'
 ROM:768B BD 77 6B		     jsr     sub_776B
@@ -16030,11 +15885,11 @@ ROM:76A7
 ROM:76A7	     ; =============== S U B R O U T I N E =======================================
 ROM:76A7
 ROM:76A7
-ROM:76A7	     sub_76A7:				     ; CODE XREF: sub_7DD3+D5P
-ROM:76A7 86 00			     lda     #0
-ROM:76A9 B7 18 37		     sta     unk_1837
-ROM:76AC B7 18 3F		     sta     unk_183F
-ROM:76AF 97 12			     sta     unk_1012
+ROM:76A7	     sub_76A7:							     ; CODE XREF: sub_7DD3+D5P
+ROM:76A7 86 00			     lda     #0					     ; disable everything
+ROM:76A9 B7 18 37		     sta     POKEY3_SKSTAT_SKCTL
+ROM:76AC B7 18 3F		     sta     POKEY4_SKSTAT_SKCTL
+ROM:76AF 97 12			     sta     byte_1012
 ROM:76B1 BD 77 06		     jsr     sub_7706
 ROM:76B4 BD 77 0A		     jsr     sub_770A
 ROM:76B7 BD 77 0E		     jsr     sub_770E
@@ -16043,65 +15898,46 @@ ROM:76BD BD 77 16		     jsr     sub_7716
 ROM:76C0 BD 77 1A		     jsr     sub_771A
 ROM:76C3 BD 77 1E		     jsr     sub_771E
 ROM:76C6 BD 77 22		     jsr     sub_7722
-ROM:76C9 86 03			     lda     #3
-ROM:76CB B7 18 37		     sta     unk_1837
-ROM:76CE B7 18 3F		     sta     unk_183F
+ROM:76C9 86 03			     lda     #3					     ; enable KB scan, KB debounce
+ROM:76CB B7 18 37		     sta     POKEY3_SKSTAT_SKCTL
+ROM:76CE B7 18 3F		     sta     POKEY4_SKSTAT_SKCTL
+ROM:76D1	     ; POLY=17-bit, Ch1,3=1.79MHz, CH2+1=16-bit, CH4+3=16-bit
 ROM:76D1 86 78			     lda     #0x78 ; 'x'
-ROM:76D3 B7 18 30		     sta     word_1830
+ROM:76D3 B7 18 30		     sta     POKEY3_ALLPOT_AUDCTL
 ROM:76D6 86 78			     lda     #0x78 ; 'x'
-ROM:76D8 B7 18 38		     sta     unk_1838
+ROM:76D8 B7 18 38		     sta     POKEY4_ALLPOT_AUDCTL
 ROM:76DB 39			     rts
 ROM:76DB	     ; End of function sub_76A7
 ROM:76DB
-ROM:76DB	     ; ---------------------------------------------------------------------------
-ROM:76DC 86			     .db 0x86 ;	Ü
-ROM:76DD 00			     .db    0
-ROM:76DE B7			     .db 0xB7 ;	∑
-ROM:76DF 18			     .db 0x18
-ROM:76E0 30			     .db 0x30 ;	0
-ROM:76E1 B7			     .db 0xB7 ;	∑
-ROM:76E2 18			     .db 0x18
-ROM:76E3 38			     .db 0x38 ;	8
-ROM:76E4 86			     .db 0x86 ;	Ü
-ROM:76E5 01			     .db    1
-ROM:76E6 26			     .db 0x26 ;	&
-ROM:76E7 0B			     .db  0xB
-ROM:76E8 86			     .db 0x86 ;	Ü
-ROM:76E9 78			     .db 0x78 ;	x
-ROM:76EA B7			     .db 0xB7 ;	∑
-ROM:76EB 18			     .db 0x18
-ROM:76EC 30			     .db 0x30 ;	0
-ROM:76ED 86			     .db 0x86 ;	Ü
-ROM:76EE 78			     .db 0x78 ;	x
-ROM:76EF B7			     .db 0xB7 ;	∑
-ROM:76F0 18			     .db 0x18
-ROM:76F1 38			     .db 0x38 ;	8
-ROM:76F2 4F			     .db 0x4F ;	O
-ROM:76F3 97			     .db 0x97 ;	ó
-ROM:76F4 12			     .db 0x12
-ROM:76F5 8D			     .db 0x8D ;	ç
-ROM:76F6 0F			     .db  0xF
-ROM:76F7 8D			     .db 0x8D ;	ç
-ROM:76F8 11			     .db 0x11
-ROM:76F9 8D			     .db 0x8D ;	ç
-ROM:76FA 13			     .db 0x13
-ROM:76FB 8D			     .db 0x8D ;	ç
-ROM:76FC 15			     .db 0x15
-ROM:76FD 8D			     .db 0x8D ;	ç
-ROM:76FE 17			     .db 0x17
-ROM:76FF 8D			     .db 0x8D ;	ç
-ROM:7700 19			     .db 0x19
-ROM:7701 8D			     .db 0x8D ;	ç
-ROM:7702 1B			     .db 0x1B
-ROM:7703 8D			     .db 0x8D ;	ç
-ROM:7704 1D			     .db 0x1D
-ROM:7705 39			     .db 0x39 ;	9
+ROM:76DC	     ; ---------------------------------------------------------------------------
+ROM:76DC 86 00			     lda     #0
+ROM:76DE B7 18 30		     sta     POKEY3_ALLPOT_AUDCTL
+ROM:76E1 B7 18 38		     sta     POKEY4_ALLPOT_AUDCTL
+ROM:76E4 86 01			     lda     #1
+ROM:76E6 26 0B			     bne     loc_76F3
+ROM:76E8 86 78			     lda     #0x78 ; 'x'
+ROM:76EA B7 18 30		     sta     POKEY3_ALLPOT_AUDCTL
+ROM:76ED 86 78			     lda     #0x78 ; 'x'
+ROM:76EF B7 18 38		     sta     POKEY4_ALLPOT_AUDCTL
+ROM:76F2 4F			     clra
+ROM:76F3
+ROM:76F3	     loc_76F3:							     ; CODE XREF: ROM:76E6j
+ROM:76F3 97 12			     sta     byte_1012
+ROM:76F5 8D 0F			     bsr     sub_7706
+ROM:76F7 8D 11			     bsr     sub_770A
+ROM:76F9 8D 13			     bsr     sub_770E
+ROM:76FB 8D 15			     bsr     sub_7712
+ROM:76FD 8D 17			     bsr     sub_7716
+ROM:76FF 8D 19			     bsr     sub_771A
+ROM:7701 8D 1B			     bsr     sub_771E
+ROM:7703 8D 1D			     bsr     sub_7722
+ROM:7705 39			     rts
 ROM:7706
 ROM:7706	     ; =============== S U B R O U T I N E =======================================
 ROM:7706
 ROM:7706
-ROM:7706	     sub_7706:				     ; CODE XREF: ROM:loc_751BP
-ROM:7706						     ; ROM:loc_753CP ...
+ROM:7706	     sub_7706:							     ; CODE XREF: ROM:play_laser_fire_1P
+ROM:7706									     ; ROM:play_star_wars_themeP ...
 ROM:7706 86 00			     lda     #0
 ROM:7708 20 1C			     bra     loc_7726
 ROM:7708	     ; End of function sub_7706
@@ -16110,8 +15946,8 @@ ROM:770A
 ROM:770A	     ; =============== S U B R O U T I N E =======================================
 ROM:770A
 ROM:770A
-ROM:770A	     sub_770A:				     ; CODE XREF: ROM:7523P
-ROM:770A						     ; ROM:7544P ...
+ROM:770A	     sub_770A:							     ; CODE XREF: ROM:7523P
+ROM:770A									     ; ROM:7544P ...
 ROM:770A 86 08			     lda     #8
 ROM:770C 20 18			     bra     loc_7726
 ROM:770C	     ; End of function sub_770A
@@ -16120,8 +15956,8 @@ ROM:770E
 ROM:770E	     ; =============== S U B R O U T I N E =======================================
 ROM:770E
 ROM:770E
-ROM:770E	     sub_770E:				     ; CODE XREF: ROM:752BP
-ROM:770E						     ; ROM:754CP ...
+ROM:770E	     sub_770E:							     ; CODE XREF: ROM:752BP
+ROM:770E									     ; ROM:754CP ...
 ROM:770E 86 10			     lda     #0x10
 ROM:7710 20 14			     bra     loc_7726
 ROM:7710	     ; End of function sub_770E
@@ -16130,8 +15966,8 @@ ROM:7712
 ROM:7712	     ; =============== S U B R O U T I N E =======================================
 ROM:7712
 ROM:7712
-ROM:7712	     sub_7712:				     ; CODE XREF: ROM:7533P
-ROM:7712						     ; ROM:7554P ...
+ROM:7712	     sub_7712:							     ; CODE XREF: ROM:7533P
+ROM:7712									     ; ROM:7554P ...
 ROM:7712 86 18			     lda     #0x18
 ROM:7714 20 10			     bra     loc_7726
 ROM:7714	     ; End of function sub_7712
@@ -16140,7 +15976,8 @@ ROM:7716
 ROM:7716	     ; =============== S U B R O U T I N E =======================================
 ROM:7716
 ROM:7716
-ROM:7716	     sub_7716:				     ; CODE XREF: sub_76A7+16P
+ROM:7716	     sub_7716:							     ; CODE XREF: sub_76A7+16P
+ROM:7716									     ; ROM:76FDp
 ROM:7716 86 20			     lda     #0x20 ; ' '
 ROM:7718 20 0C			     bra     loc_7726
 ROM:7718	     ; End of function sub_7716
@@ -16149,7 +15986,8 @@ ROM:771A
 ROM:771A	     ; =============== S U B R O U T I N E =======================================
 ROM:771A
 ROM:771A
-ROM:771A	     sub_771A:				     ; CODE XREF: sub_76A7+19P
+ROM:771A	     sub_771A:							     ; CODE XREF: sub_76A7+19P
+ROM:771A									     ; ROM:76FFp
 ROM:771A 86 28			     lda     #0x28 ; '('
 ROM:771C 20 08			     bra     loc_7726
 ROM:771C	     ; End of function sub_771A
@@ -16158,7 +15996,8 @@ ROM:771E
 ROM:771E	     ; =============== S U B R O U T I N E =======================================
 ROM:771E
 ROM:771E
-ROM:771E	     sub_771E:				     ; CODE XREF: sub_76A7+1CP
+ROM:771E	     sub_771E:							     ; CODE XREF: sub_76A7+1CP
+ROM:771E									     ; ROM:7701p
 ROM:771E 86 30			     lda     #0x30 ; '0'
 ROM:7720 20 04			     bra     loc_7726
 ROM:7720	     ; End of function sub_771E
@@ -16167,17 +16006,18 @@ ROM:7722
 ROM:7722	     ; =============== S U B R O U T I N E =======================================
 ROM:7722
 ROM:7722
-ROM:7722	     sub_7722:				     ; CODE XREF: sub_76A7+1FP
+ROM:7722	     sub_7722:							     ; CODE XREF: sub_76A7+1FP
+ROM:7722									     ; ROM:7703p
 ROM:7722 86 38			     lda     #0x38 ; '8'
 ROM:7724 20 00			     bra     *+2
 ROM:7726	     ; ---------------------------------------------------------------------------
 ROM:7726
-ROM:7726	     loc_7726:				     ; CODE XREF: sub_7706+2j
-ROM:7726						     ; sub_770A+2j ...
+ROM:7726	     loc_7726:							     ; CODE XREF: sub_7706+2j
+ROM:7726									     ; sub_770A+2j ...
 ROM:7726 8E 74 DB		     ldx     #unk_74DB
 ROM:7729 31 86			     leay    a,x
 ROM:772B
-ROM:772B	     loc_772B:				     ; CODE XREF: sub_77A3+4Dj
+ROM:772B	     loc_772B:							     ; CODE XREF: sub_77A3+4Dj
 ROM:772B EE A4			     ldu     ,y
 ROM:772D A6 22			     lda     2,y
 ROM:772F 43			     coma
@@ -16202,14 +16042,14 @@ ROM:7756 FC 7A 17		     ldd     word_7A17
 ROM:7759 ED 42			     std     2,u
 ROM:775B ED 44			     std     4,u
 ROM:775D AE 23			     ldx     3,y
-ROM:775F D6 12			     ldb     unk_1012
+ROM:775F D6 12			     ldb     byte_1012
 ROM:7761 27 05			     beq     loc_7768
 ROM:7763 AE 26			     ldx     6,y
 ROM:7765 6F 01			     clr     1,x
 ROM:7767 39			     rts
 ROM:7768	     ; ---------------------------------------------------------------------------
 ROM:7768
-ROM:7768	     loc_7768:				     ; CODE XREF: sub_7722+3Fj
+ROM:7768	     loc_7768:							     ; CODE XREF: sub_7722+3Fj
 ROM:7768 6F 03			     clr     3,x
 ROM:776A 39			     rts
 ROM:776A	     ; End of function sub_7722
@@ -16218,8 +16058,8 @@ ROM:776B
 ROM:776B	     ; =============== S U B R O U T I N E =======================================
 ROM:776B
 ROM:776B
-ROM:776B	     sub_776B:				     ; CODE XREF: ROM:7520P
-ROM:776B						     ; ROM:7528P ...
+ROM:776B	     sub_776B:							     ; CODE XREF: ROM:7520P
+ROM:776B									     ; ROM:7528P ...
 ROM:776B 8E 58 E5		     ldx     #unk_58E5
 ROM:776E 3A			     abx
 ROM:776F EC 84			     ldd     ,x
@@ -16235,7 +16075,7 @@ ROM:777C
 ROM:777C	     ; =============== S U B R O U T I N E =======================================
 ROM:777C
 ROM:777C
-ROM:777C	     sub_777C:				     ; CODE XREF: sub_7DD3:loc_7DCAP
+ROM:777C	     sub_777C:							     ; CODE XREF: sub_7DD3:loc_7DCAP
 ROM:777C 96 0A			     lda     unk_100A
 ROM:777E 44			     lsra
 ROM:777F 24 11			     bcc     loc_7792
@@ -16250,7 +16090,7 @@ ROM:778F 8D 12			     bsr     sub_77A3
 ROM:7791 39			     rts
 ROM:7792	     ; ---------------------------------------------------------------------------
 ROM:7792
-ROM:7792	     loc_7792:				     ; CODE XREF: sub_777C+3j
+ROM:7792	     loc_7792:							     ; CODE XREF: sub_777C+3j
 ROM:7792 86 08			     lda     #8
 ROM:7794 8D 0D			     bsr     sub_77A3
 ROM:7796 86 18			     lda     #0x18
@@ -16266,8 +16106,8 @@ ROM:77A3
 ROM:77A3	     ; =============== S U B R O U T I N E =======================================
 ROM:77A3
 ROM:77A3
-ROM:77A3	     sub_77A3:				     ; CODE XREF: sub_777C+7p
-ROM:77A3						     ; sub_777C+Bp ...
+ROM:77A3	     sub_77A3:							     ; CODE XREF: sub_777C+7p
+ROM:77A3									     ; sub_777C+Bp ...
 ROM:77A3 8E 74 DB		     ldx     #unk_74DB
 ROM:77A6 31 86			     leay    a,x
 ROM:77A8 EE A4			     ldu     ,y
@@ -16276,20 +16116,20 @@ ROM:77AC 26 01			     bne     loc_77AF
 ROM:77AE 39			     rts
 ROM:77AF	     ; ---------------------------------------------------------------------------
 ROM:77AF
-ROM:77AF	     loc_77AF:				     ; CODE XREF: sub_77A3+9j
+ROM:77AF	     loc_77AF:							     ; CODE XREF: sub_77A3+9j
 ROM:77AF 6C 4B			     inc     0xB,u
 ROM:77B1 26 02			     bne     loc_77B5
 ROM:77B3 6A 4B			     dec     0xB,u
 ROM:77B5
-ROM:77B5	     loc_77B5:				     ; CODE XREF: sub_77A3+Ej
+ROM:77B5	     loc_77B5:							     ; CODE XREF: sub_77A3+Ej
 ROM:77B5 E6 4C			     ldb     0xC,u
 ROM:77B7 86 FF			     lda     #0xFF
 ROM:77B9 E3 48			     addd    8,u
 ROM:77BB ED 48			     std     8,u
 ROM:77BD 10 2A 00 65		     lbpl    loc_7826
 ROM:77C1
-ROM:77C1	     loc_77C1:				     ; CODE XREF: sub_77A3+59J
-ROM:77C1						     ; sub_77A3+FEj ...
+ROM:77C1	     loc_77C1:							     ; CODE XREF: sub_77A3+59J
+ROM:77C1									     ; sub_77A3+FEj ...
 ROM:77C1 AE C4			     ldx     ,u
 ROM:77C3 E6 81			     ldb     ,x++
 ROM:77C5 AF C4			     stx     ,u
@@ -16298,14 +16138,14 @@ ROM:77C8 10 2B 00 CE		     lbmi    loc_789A
 ROM:77CC 27 02			     beq     loc_77D0
 ROM:77CE EB 4D			     addb    0xD,u
 ROM:77D0
-ROM:77D0	     loc_77D0:				     ; CODE XREF: sub_77A3+29j
-ROM:77D0 96 12			     lda     unk_1012
+ROM:77D0	     loc_77D0:							     ; CODE XREF: sub_77A3+29j
+ROM:77D0 96 12			     lda     byte_1012
 ROM:77D2 27 03			     beq     loc_77D7
 ROM:77D4 4F			     clra
 ROM:77D5 20 0E			     bra     loc_77E5
 ROM:77D7	     ; ---------------------------------------------------------------------------
 ROM:77D7
-ROM:77D7	     loc_77D7:				     ; CODE XREF: sub_77A3+2Fj
+ROM:77D7	     loc_77D7:							     ; CODE XREF: sub_77A3+2Fj
 ROM:77D7 58			     aslb
 ROM:77D8 8E 79 53		     ldx     #unk_7953
 ROM:77DB 3A			     abx
@@ -16314,7 +16154,7 @@ ROM:77DE A3 84			     subd    ,x
 ROM:77E0 ED C8 10		     std     0x10,u
 ROM:77E3 EC 84			     ldd     ,x
 ROM:77E5
-ROM:77E5	     loc_77E5:				     ; CODE XREF: sub_77A3+32j
+ROM:77E5	     loc_77E5:							     ; CODE XREF: sub_77A3+32j
 ROM:77E5 ED 46			     std     6,u
 ROM:77E7 AE C4			     ldx     ,u
 ROM:77E9 A6 1F			     lda     -1,x
@@ -16327,7 +16167,7 @@ ROM:77F9 ED C8 12		     std     0x12,u
 ROM:77FC 7E 77 C1		     jmp     loc_77C1
 ROM:77FF	     ; ---------------------------------------------------------------------------
 ROM:77FF
-ROM:77FF	     loc_77FF:				     ; CODE XREF: sub_77A3+48j
+ROM:77FF	     loc_77FF:							     ; CODE XREF: sub_77A3+48j
 ROM:77FF 5F			     clrb
 ROM:7800 44			     lsra
 ROM:7801 44			     lsra
@@ -16343,43 +16183,43 @@ ROM:7810 ED C8 10		     std     0x10,u
 ROM:7813 96 11			     lda     byte_1011
 ROM:7815 A4 25			     anda    5,y
 ROM:7817 27 0D			     beq     loc_7826
-ROM:7819 96 12			     lda     unk_1012
+ROM:7819 96 12			     lda     byte_1012
 ROM:781B 26 09			     bne     loc_7826
 ROM:781D 39			     rts
 ROM:781E	     ; ---------------------------------------------------------------------------
 ROM:781E
-ROM:781E	     loc_781E:				     ; CODE XREF: sub_77A3+68j
+ROM:781E	     loc_781E:							     ; CODE XREF: sub_77A3+68j
 ROM:781E A6 4F			     lda     0xF,u
 ROM:7820 26 04			     bne     loc_7826
 ROM:7822 5F			     clrb
 ROM:7823 ED C8 10		     std     0x10,u
 ROM:7826
-ROM:7826	     loc_7826:				     ; CODE XREF: sub_77A3+1Aj
-ROM:7826						     ; sub_77A3+74j ...
+ROM:7826	     loc_7826:							     ; CODE XREF: sub_77A3+1Aj
+ROM:7826									     ; sub_77A3+74j ...
 ROM:7826 96 11			     lda     byte_1011
 ROM:7828 A4 25			     anda    5,y
 ROM:782A 27 05			     beq     loc_7831
-ROM:782C 96 12			     lda     unk_1012
+ROM:782C 96 12			     lda     byte_1012
 ROM:782E 26 01			     bne     loc_7831
 ROM:7830 39			     rts
 ROM:7831	     ; ---------------------------------------------------------------------------
 ROM:7831
-ROM:7831	     loc_7831:				     ; CODE XREF: sub_77A3+87j
-ROM:7831						     ; sub_77A3+8Bj
+ROM:7831	     loc_7831:							     ; CODE XREF: sub_77A3+87j
+ROM:7831									     ; sub_77A3+8Bj
 ROM:7831 96 0A			     lda     unk_100A
 ROM:7833 84 06			     anda    #6
 ROM:7835 26 06			     bne     loc_783D
 ROM:7837 67 C8 10		     asr     0x10,u
 ROM:783A 66 C8 11		     ror     0x11,u
 ROM:783D
-ROM:783D	     loc_783D:				     ; CODE XREF: sub_77A3+92j
+ROM:783D	     loc_783D:							     ; CODE XREF: sub_77A3+92j
 ROM:783D E6 4B			     ldb     0xB,u
 ROM:783F 54			     lsrb
 ROM:7840 AE 44			     ldx     4,u
 ROM:7842 3A			     abx
 ROM:7843 E6 84			     ldb     ,x
 ROM:7845 1D			     sex
-ROM:7846 0D 12			     tst     unk_1012
+ROM:7846 0D 12			     tst     byte_1012
 ROM:7848 26 06			     bne     loc_7850
 ROM:784A 58			     aslb
 ROM:784B 49			     rola
@@ -16388,20 +16228,20 @@ ROM:784D 49			     rola
 ROM:784E 58			     aslb
 ROM:784F 49			     rola
 ROM:7850
-ROM:7850	     loc_7850:				     ; CODE XREF: sub_77A3+A5j
+ROM:7850	     loc_7850:							     ; CODE XREF: sub_77A3+A5j
 ROM:7850 E3 46			     addd    6,u
 ROM:7852 E3 C8 10		     addd    0x10,u
 ROM:7855 AE 23			     ldx     3,y
-ROM:7857 0D 12			     tst     unk_1012
+ROM:7857 0D 12			     tst     byte_1012
 ROM:7859 27 04			     beq     loc_785F
 ROM:785B AE 26			     ldx     6,y
 ROM:785D 20 02			     bra     loc_7861
 ROM:785F	     ; ---------------------------------------------------------------------------
 ROM:785F
-ROM:785F	     loc_785F:				     ; CODE XREF: sub_77A3+B6j
+ROM:785F	     loc_785F:							     ; CODE XREF: sub_77A3+B6j
 ROM:785F A7 02			     sta     2,x
 ROM:7861
-ROM:7861	     loc_7861:				     ; CODE XREF: sub_77A3+BAj
+ROM:7861	     loc_7861:							     ; CODE XREF: sub_77A3+BAj
 ROM:7861 E7 84			     stb     ,x
 ROM:7863 EC 46			     ldd     6,u
 ROM:7865 26 06			     bne     loc_786D
@@ -16410,45 +16250,45 @@ ROM:7869 97 10			     sta     unk_1010
 ROM:786B 20 04			     bra     loc_7871
 ROM:786D	     ; ---------------------------------------------------------------------------
 ROM:786D
-ROM:786D	     loc_786D:				     ; CODE XREF: sub_77A3+C2j
+ROM:786D	     loc_786D:							     ; CODE XREF: sub_77A3+C2j
 ROM:786D 86 FF			     lda     #0xFF
 ROM:786F 97 10			     sta     unk_1010
 ROM:7871
-ROM:7871	     loc_7871:				     ; CODE XREF: sub_77A3+C8j
+ROM:7871	     loc_7871:							     ; CODE XREF: sub_77A3+C8j
 ROM:7871 E6 4B			     ldb     0xB,u
 ROM:7873 C1 1F			     cmpb    #0x1F
 ROM:7875 25 02			     bcs     loc_7879
 ROM:7877 C6 1F			     ldb     #0x1F
 ROM:7879
-ROM:7879	     loc_7879:				     ; CODE XREF: sub_77A3+D2j
+ROM:7879	     loc_7879:							     ; CODE XREF: sub_77A3+D2j
 ROM:7879 AE 42			     ldx     2,u
 ROM:787B A6 85			     lda     b,x
 ROM:787D AB 4A			     adda    0xA,u
 ROM:787F 2A 01			     bpl     loc_7882
 ROM:7881 4F			     clra
 ROM:7882
-ROM:7882	     loc_7882:				     ; CODE XREF: sub_77A3+DCj
+ROM:7882	     loc_7882:							     ; CODE XREF: sub_77A3+DCj
 ROM:7882 81 10			     cmpa    #0x10
 ROM:7884 2D 02			     blt     loc_7888
 ROM:7886 86 0F			     lda     #0xF
 ROM:7888
-ROM:7888	     loc_7888:				     ; CODE XREF: sub_77A3+E1j
+ROM:7888	     loc_7888:							     ; CODE XREF: sub_77A3+E1j
 ROM:7888 AA 4E			     oraa    0xE,u
 ROM:788A 94 10			     anda    unk_1010
 ROM:788C AE 23			     ldx     3,y
-ROM:788E D6 12			     ldb     unk_1012
+ROM:788E D6 12			     ldb     byte_1012
 ROM:7890 27 05			     beq     loc_7897
 ROM:7892 AE 26			     ldx     6,y
 ROM:7894 A7 01			     sta     1,x
 ROM:7896 39			     rts
 ROM:7897	     ; ---------------------------------------------------------------------------
 ROM:7897
-ROM:7897	     loc_7897:				     ; CODE XREF: sub_77A3+EDj
+ROM:7897	     loc_7897:							     ; CODE XREF: sub_77A3+EDj
 ROM:7897 A7 03			     sta     3,x
 ROM:7899 39			     rts
 ROM:789A	     ; ---------------------------------------------------------------------------
 ROM:789A
-ROM:789A	     loc_789A:				     ; CODE XREF: sub_77A3+25j
+ROM:789A	     loc_789A:							     ; CODE XREF: sub_77A3+25j
 ROM:789A AE C4			     ldx     ,u
 ROM:789C A6 1F			     lda     -1,x
 ROM:789E 58			     aslb
@@ -16459,7 +16299,7 @@ ROM:78A8 6E 95			     jmp     [b,x]
 ROM:78A8	     ; End of function sub_77A3
 ROM:78A8
 ROM:78A8	     ; ---------------------------------------------------------------------------
-ROM:78AA 78 EC	     off_78AA:	     .dw loc_78EC	     ; DATA XREF: sub_77A3+102o
+ROM:78AA 78 EC	     off_78AA:	     .dw loc_78EC				     ; DATA XREF: sub_77A3+102o
 ROM:78AC 78 EA			     .dw loc_78EA
 ROM:78AE 78 F4			     .dw loc_78F4
 ROM:78B0 78 F2			     .dw loc_78F2
@@ -16479,7 +16319,7 @@ ROM:78CA 79 3D			     .dw loc_793D
 ROM:78CC 79 4B			     .dw loc_794B
 ROM:78CE	     ; ---------------------------------------------------------------------------
 ROM:78CE
-ROM:78CE	     loc_78CE:				     ; DATA XREF: ROM:78B8o
+ROM:78CE	     loc_78CE:							     ; DATA XREF: ROM:78B8o
 ROM:78CE 48			     asla
 ROM:78CF 1F 89			     tfr     a,	b
 ROM:78D1 8E 7A 1B		     ldx     #unk_7A1B
@@ -16489,7 +16329,7 @@ ROM:78D7 ED 42			     std     2,u
 ROM:78D9 7E 77 C1		     jmp     loc_77C1
 ROM:78DC	     ; ---------------------------------------------------------------------------
 ROM:78DC
-ROM:78DC	     loc_78DC:				     ; DATA XREF: ROM:78B6o
+ROM:78DC	     loc_78DC:							     ; DATA XREF: ROM:78B6o
 ROM:78DC 48			     asla
 ROM:78DD 1F 89			     tfr     a,	b
 ROM:78DF 8E 7A 17		     ldx     #word_7A17
@@ -16499,47 +16339,47 @@ ROM:78E5 ED 44			     std     4,u
 ROM:78E7 7E 77 C1		     jmp     loc_77C1
 ROM:78EA	     ; ---------------------------------------------------------------------------
 ROM:78EA
-ROM:78EA	     loc_78EA:				     ; DATA XREF: ROM:78ACo
+ROM:78EA	     loc_78EA:							     ; DATA XREF: ROM:78ACo
 ROM:78EA A0 4C			     suba    0xC,u
 ROM:78EC
-ROM:78EC	     loc_78EC:				     ; DATA XREF: ROM:off_78AAo
+ROM:78EC	     loc_78EC:							     ; DATA XREF: ROM:off_78AAo
 ROM:78EC 40			     nega
 ROM:78ED A7 4C			     sta     0xC,u
 ROM:78EF 7E 77 C1		     jmp     loc_77C1
 ROM:78F2	     ; ---------------------------------------------------------------------------
 ROM:78F2
-ROM:78F2	     loc_78F2:				     ; DATA XREF: ROM:78B0o
+ROM:78F2	     loc_78F2:							     ; DATA XREF: ROM:78B0o
 ROM:78F2 AB 4A			     adda    0xA,u
 ROM:78F4
-ROM:78F4	     loc_78F4:				     ; DATA XREF: ROM:78AEo
+ROM:78F4	     loc_78F4:							     ; DATA XREF: ROM:78AEo
 ROM:78F4 A7 4A			     sta     0xA,u
 ROM:78F6 7E 77 C1		     jmp     loc_77C1
 ROM:78F9	     ; ---------------------------------------------------------------------------
 ROM:78F9
-ROM:78F9	     loc_78F9:				     ; DATA XREF: ROM:78B4o
+ROM:78F9	     loc_78F9:							     ; DATA XREF: ROM:78B4o
 ROM:78F9 AB 4D			     adda    0xD,u
 ROM:78FB
-ROM:78FB	     loc_78FB:				     ; DATA XREF: ROM:78B2o
+ROM:78FB	     loc_78FB:							     ; DATA XREF: ROM:78B2o
 ROM:78FB A7 4D			     sta     0xD,u
 ROM:78FD 7E 77 C1		     jmp     loc_77C1
 ROM:7900	     ; ---------------------------------------------------------------------------
 ROM:7900
-ROM:7900	     loc_7900:				     ; DATA XREF: ROM:78BEo
+ROM:7900	     loc_7900:							     ; DATA XREF: ROM:78BEo
 ROM:7900 A7 4E			     sta     0xE,u
 ROM:7902 7E 77 C1		     jmp     loc_77C1
 ROM:7905	     ; ---------------------------------------------------------------------------
 ROM:7905
-ROM:7905	     loc_7905:				     ; DATA XREF: ROM:78C0o
-ROM:7905 B7 18 30		     sta     word_1830
+ROM:7905	     loc_7905:							     ; DATA XREF: ROM:78C0o
+ROM:7905 B7 18 30		     sta     POKEY3_ALLPOT_AUDCTL
 ROM:7908 7E 77 C1		     jmp     loc_77C1
 ROM:790B	     ; ---------------------------------------------------------------------------
 ROM:790B
-ROM:790B	     loc_790B:				     ; DATA XREF: ROM:78C2o
+ROM:790B	     loc_790B:							     ; DATA XREF: ROM:78C2o
 ROM:790B A7 4F			     sta     0xF,u
 ROM:790D 7E 77 C1		     jmp     loc_77C1
 ROM:7910	     ; ---------------------------------------------------------------------------
 ROM:7910
-ROM:7910	     loc_7910:				     ; DATA XREF: ROM:78C4o
+ROM:7910	     loc_7910:							     ; DATA XREF: ROM:78C4o
 ROM:7910 48			     asla
 ROM:7911 1F 89			     tfr     a,	b
 ROM:7913 8E 58 E5		     ldx     #unk_58E5
@@ -16551,14 +16391,14 @@ ROM:791E ED C4			     std     ,u
 ROM:7920 7E 77 C1		     jmp     loc_77C1
 ROM:7923	     ; ---------------------------------------------------------------------------
 ROM:7923
-ROM:7923	     loc_7923:				     ; DATA XREF: ROM:78C6o
+ROM:7923	     loc_7923:							     ; DATA XREF: ROM:78C6o
 ROM:7923 A7 C8 16		     sta     0x16,u
 ROM:7926 EC C4			     ldd     ,u
 ROM:7928 ED C8 14		     std     0x14,u
 ROM:792B 7E 77 C1		     jmp     loc_77C1
 ROM:792E	     ; ---------------------------------------------------------------------------
 ROM:792E
-ROM:792E	     loc_792E:				     ; DATA XREF: ROM:78C8o
+ROM:792E	     loc_792E:							     ; DATA XREF: ROM:78C8o
 ROM:792E 6A C8 16		     dec     0x16,u
 ROM:7931 10 27 FE 8C		     lbeq    loc_77C1
 ROM:7935 EC C8 14		     ldd     0x14,u
@@ -16566,7 +16406,7 @@ ROM:7938 ED C4			     std     ,u
 ROM:793A 7E 77 C1		     jmp     loc_77C1
 ROM:793D	     ; ---------------------------------------------------------------------------
 ROM:793D
-ROM:793D	     loc_793D:				     ; DATA XREF: ROM:78CAo
+ROM:793D	     loc_793D:							     ; DATA XREF: ROM:78CAo
 ROM:793D AE C4			     ldx     ,u
 ROM:793F 30 01			     leax    1,x
 ROM:7941 AF C8 17		     stx     0x17,u
@@ -16575,12 +16415,12 @@ ROM:7946 ED C4			     std     ,u
 ROM:7948 7E 77 C1		     jmp     loc_77C1
 ROM:794B	     ; ---------------------------------------------------------------------------
 ROM:794B
-ROM:794B	     loc_794B:				     ; DATA XREF: ROM:78CCo
+ROM:794B	     loc_794B:							     ; DATA XREF: ROM:78CCo
 ROM:794B EC C8 17		     ldd     0x17,u
 ROM:794E ED C4			     std     ,u
 ROM:7950 7E 77 C1		     jmp     loc_77C1
 ROM:7950	     ; ---------------------------------------------------------------------------
-ROM:7953 00	     unk_7953:	     .db    0		     ; DATA XREF: sub_77A3+35o
+ROM:7953 00	     unk_7953:	     .db    0					     ; DATA XREF: sub_77A3+35o
 ROM:7954 00			     .db    0
 ROM:7955 B4			     .db 0xB4 ;	¥
 ROM:7956 93			     .db 0x93 ;	ì
@@ -16776,11 +16616,11 @@ ROM:7A13 00			     .db    0
 ROM:7A14 B8			     .db 0xB8 ;	∏
 ROM:7A15 00			     .db    0
 ROM:7A16 AE			     .db 0xAE ;	Æ
-ROM:7A17 7A 65	     word_7A17:	     .dw 0x7A65		     ; DATA XREF: sub_7722+34r
-ROM:7A17						     ; ROM:78DFo
+ROM:7A17 7A 65	     word_7A17:	     .dw 0x7A65					     ; DATA XREF: sub_7722+34r
+ROM:7A17									     ; ROM:78DFo
 ROM:7A19 7A			     .db 0x7A ;	z
 ROM:7A1A 25			     .db 0x25 ;	%
-ROM:7A1B 7A	     unk_7A1B:	     .db 0x7A ;	z	     ; DATA XREF: ROM:78D1o
+ROM:7A1B 7A	     unk_7A1B:	     .db 0x7A ;	z				     ; DATA XREF: ROM:78D1o
 ROM:7A1C 65			     .db 0x65 ;	e
 ROM:7A1D 7A			     .db 0x7A ;	z
 ROM:7A1E E5			     .db 0xE5 ;	Â
@@ -16936,143 +16776,143 @@ ROM:7B63 02			     .db    2
 ROM:7B64 02			     .db    2
 ROM:7B65	     ; ---------------------------------------------------------------------------
 ROM:7B65
-ROM:7B65	     loc_7B65:				     ; DATA XREF: ROM:7F81o
+ROM:7B65	     play_red_5_standing_by:					     ; DATA XREF: ROM:7F81o
 ROM:7B65 CC 7B 6B		     ldd     #unk_7B6B
 ROM:7B68 7E 7C 1E		     jmp     loc_7C1E
 ROM:7B68	     ; ---------------------------------------------------------------------------
-ROM:7B6B 05	     unk_7B6B:	     .db    5		     ; DATA XREF: ROM:loc_7B65o
+ROM:7B6B 05	     unk_7B6B:	     .db    5					     ; DATA XREF: ROM:play_red_5_standing_byo
 ROM:7B6C FF			     .db 0xFF
 ROM:7B6D	     ; ---------------------------------------------------------------------------
 ROM:7B6D
-ROM:7B6D	     loc_7B6D:				     ; DATA XREF: ROM:7F7Fo
+ROM:7B6D	     play_r2___increase_the_power:				     ; DATA XREF: ROM:7F7Fo
 ROM:7B6D CC 7B 73		     ldd     #unk_7B73
 ROM:7B70 7E 7C 1E		     jmp     loc_7C1E
 ROM:7B70	     ; ---------------------------------------------------------------------------
-ROM:7B73 FE	     unk_7B73:	     .db 0xFE ;	˛	     ; DATA XREF: ROM:loc_7B6Do
+ROM:7B73 FE	     unk_7B73:	     .db 0xFE ;	˛				     ; DATA XREF: ROM:play_r2___increase_the_powero
 ROM:7B74 07			     .db    7
 ROM:7B75 FF			     .db 0xFF
 ROM:7B76	     ; ---------------------------------------------------------------------------
 ROM:7B76
-ROM:7B76	     loc_7B76:				     ; DATA XREF: ROM:7F8Fo
+ROM:7B76	     play_this_is_red_5_im_going_in:				     ; DATA XREF: ROM:7F8Fo
 ROM:7B76 CC 7B 7C		     ldd     #unk_7B7C
 ROM:7B79 7E 7C 1E		     jmp     loc_7C1E
 ROM:7B79	     ; ---------------------------------------------------------------------------
-ROM:7B7C 06	     unk_7B7C:	     .db    6		     ; DATA XREF: ROM:loc_7B76o
+ROM:7B7C 06	     unk_7B7C:	     .db    6					     ; DATA XREF: ROM:play_this_is_red_5_im_going_ino
 ROM:7B7D FF			     .db 0xFF
 ROM:7B7E	     ; ---------------------------------------------------------------------------
 ROM:7B7E
-ROM:7B7E	     loc_7B7E:				     ; DATA XREF: ROM:7F77o
+ROM:7B7E	     play_im_on_the_leader:					     ; DATA XREF: ROM:7F77o
 ROM:7B7E CC 7B 84		     ldd     #unk_7B84
 ROM:7B81 7E 7C 1E		     jmp     loc_7C1E
 ROM:7B81	     ; ---------------------------------------------------------------------------
-ROM:7B84 0A	     unk_7B84:	     .db  0xA		     ; DATA XREF: ROM:loc_7B7Eo
+ROM:7B84 0A	     unk_7B84:	     .db  0xA					     ; DATA XREF: ROM:play_im_on_the_leadero
 ROM:7B85 03			     .db    3
 ROM:7B86 0A			     .db  0xA
 ROM:7B87 FF			     .db 0xFF
 ROM:7B88	     ; ---------------------------------------------------------------------------
 ROM:7B88
-ROM:7B88	     loc_7B88:				     ; DATA XREF: ROM:7F93o
+ROM:7B88	     play_use_the_force_luke:					     ; DATA XREF: ROM:7F93o
 ROM:7B88 CC 7B 8E		     ldd     #unk_7B8E
 ROM:7B8B 7E 7C 1E		     jmp     loc_7C1E
 ROM:7B8B	     ; ---------------------------------------------------------------------------
-ROM:7B8E 01	     unk_7B8E:	     .db    1		     ; DATA XREF: ROM:loc_7B88o
+ROM:7B8E 01	     unk_7B8E:	     .db    1					     ; DATA XREF: ROM:play_use_the_force_lukeo
 ROM:7B8F FF			     .db 0xFF
 ROM:7B90	     ; ---------------------------------------------------------------------------
 ROM:7B90
-ROM:7B90	     loc_7B90:				     ; DATA XREF: ROM:7F8Do
+ROM:7B90	     play_the_force___with_this_one:				     ; DATA XREF: ROM:7F8Do
 ROM:7B90 CC 7B 96		     ldd     #unk_7B96
 ROM:7B93 7E 7C 1E		     jmp     loc_7C1E
 ROM:7B93	     ; ---------------------------------------------------------------------------
-ROM:7B96 0A	     unk_7B96:	     .db  0xA		     ; DATA XREF: ROM:loc_7B90o
+ROM:7B96 0A	     unk_7B96:	     .db  0xA					     ; DATA XREF: ROM:play_the_force___with_this_oneo
 ROM:7B97 04			     .db    4
 ROM:7B98 0A			     .db  0xA
 ROM:7B99 FF			     .db 0xFF
 ROM:7B9A	     ; ---------------------------------------------------------------------------
 ROM:7B9A
-ROM:7B9A	     loc_7B9A:				     ; DATA XREF: ROM:7F95o
+ROM:7B9A	     play_yahoo_youre_all_clear_kid:				     ; DATA XREF: ROM:7F95o
 ROM:7B9A 8E 7B A0		     ldx     #unk_7BA0
 ROM:7B9D 7E 7C 31		     jmp     loc_7C31
 ROM:7B9D	     ; ---------------------------------------------------------------------------
-ROM:7BA0 0B	     unk_7BA0:	     .db  0xB		     ; DATA XREF: ROM:loc_7B9Ao
+ROM:7BA0 0B	     unk_7BA0:	     .db  0xB					     ; DATA XREF: ROM:play_yahoo_youre_all_clear_kido
 ROM:7BA1 08			     .db    8
 ROM:7BA2 FF			     .db 0xFF
 ROM:7BA3	     ; ---------------------------------------------------------------------------
 ROM:7BA3
-ROM:7BA3	     loc_7BA3:				     ; DATA XREF: ROM:7F83o
+ROM:7BA3	     play_remember:						     ; DATA XREF: ROM:7F83o
 ROM:7BA3 CC 7B A9		     ldd     #unk_7BA9
 ROM:7BA6 7E 7C 1E		     jmp     loc_7C1E
 ROM:7BA6	     ; ---------------------------------------------------------------------------
-ROM:7BA9 02	     unk_7BA9:	     .db    2		     ; DATA XREF: ROM:loc_7BA3o
+ROM:7BA9 02	     unk_7BA9:	     .db    2					     ; DATA XREF: ROM:play_remembero
 ROM:7BAA FF			     .db 0xFF
 ROM:7BAB	     ; ---------------------------------------------------------------------------
 ROM:7BAB
-ROM:7BAB	     loc_7BAB:				     ; DATA XREF: ROM:7F67o
+ROM:7BAB	     play_always:						     ; DATA XREF: ROM:7F67o
 ROM:7BAB CC 7B B1		     ldd     #unk_7BB1
 ROM:7BAE 7E 7C 1E		     jmp     loc_7C1E
 ROM:7BAE	     ; ---------------------------------------------------------------------------
-ROM:7BB1 10	     unk_7BB1:	     .db 0x10		     ; DATA XREF: ROM:loc_7BABo
+ROM:7BB1 10	     unk_7BB1:	     .db 0x10					     ; DATA XREF: ROM:play_alwayso
 ROM:7BB2 FF			     .db 0xFF
 ROM:7BB3	     ; ---------------------------------------------------------------------------
 ROM:7BB3
-ROM:7BB3	     loc_7BB3:				     ; DATA XREF: ROM:7F6Do
+ROM:7BB3	     play_the_force___with_you:					     ; DATA XREF: ROM:7F6Do
 ROM:7BB3 CC 7B B8		     ldd     #unk_7BB8
 ROM:7BB6 20 66			     bra     loc_7C1E
 ROM:7BB6	     ; ---------------------------------------------------------------------------
-ROM:7BB8 0F	     unk_7BB8:	     .db  0xF		     ; DATA XREF: ROM:loc_7BB3o
+ROM:7BB8 0F	     unk_7BB8:	     .db  0xF					     ; DATA XREF: ROM:play_the_force___with_youo
 ROM:7BB9 FF			     .db 0xFF
 ROM:7BBA	     ; ---------------------------------------------------------------------------
 ROM:7BBA
-ROM:7BBA	     loc_7BBA:				     ; DATA XREF: ROM:7F6Bo
+ROM:7BBA	     play_the_force___always:					     ; DATA XREF: ROM:7F6Bo
 ROM:7BBA CC 7B BF		     ldd     #unk_7BBF
 ROM:7BBD 20 5F			     bra     loc_7C1E
 ROM:7BBD	     ; ---------------------------------------------------------------------------
-ROM:7BBF 0F	     unk_7BBF:	     .db  0xF		     ; DATA XREF: ROM:loc_7BBAo
+ROM:7BBF 0F	     unk_7BBF:	     .db  0xF					     ; DATA XREF: ROM:play_the_force___alwayso
 ROM:7BC0 10			     .db 0x10
 ROM:7BC1 FF			     .db 0xFF
 ROM:7BC2	     ; ---------------------------------------------------------------------------
 ROM:7BC2
-ROM:7BC2	     loc_7BC2:				     ; DATA XREF: ROM:7F71o
+ROM:7BC2	     play_i_have_you_now:					     ; DATA XREF: ROM:7F71o
 ROM:7BC2 CC 7B C7		     ldd     #unk_7BC7
 ROM:7BC5 20 57			     bra     loc_7C1E
 ROM:7BC5	     ; ---------------------------------------------------------------------------
-ROM:7BC7 0A	     unk_7BC7:	     .db  0xA		     ; DATA XREF: ROM:loc_7BC2o
+ROM:7BC7 0A	     unk_7BC7:	     .db  0xA					     ; DATA XREF: ROM:play_i_have_you_nowo
 ROM:7BC8 0C			     .db  0xC
 ROM:7BC9 0A			     .db  0xA
 ROM:7BCA FF			     .db 0xFF
 ROM:7BCB	     ; ---------------------------------------------------------------------------
 ROM:7BCB
-ROM:7BCB	     loc_7BCB:				     ; DATA XREF: ROM:7F8Bo
+ROM:7BCB	     play_steady_in_attack_formation:				     ; DATA XREF: ROM:7F8Bo
 ROM:7BCB CC 7B D0		     ldd     #unk_7BD0
 ROM:7BCE 20 4E			     bra     loc_7C1E
 ROM:7BCE	     ; ---------------------------------------------------------------------------
-ROM:7BD0 0A	     unk_7BD0:	     .db  0xA		     ; DATA XREF: ROM:loc_7BCBo
+ROM:7BD0 0A	     unk_7BD0:	     .db  0xA					     ; DATA XREF: ROM:play_steady_in_attack_formationo
 ROM:7BD1 0E			     .db  0xE
 ROM:7BD2 0A			     .db  0xA
 ROM:7BD3 FF			     .db 0xFF
 ROM:7BD4	     ; ---------------------------------------------------------------------------
 ROM:7BD4
-ROM:7BD4	     loc_7BD4:				     ; DATA XREF: ROM:7F7Do
+ROM:7BD4	     play_bleeps:						     ; DATA XREF: ROM:7F7Do
 ROM:7BD4 CC 7B D9		     ldd     #unk_7BD9
 ROM:7BD7 20 45			     bra     loc_7C1E
 ROM:7BD7	     ; ---------------------------------------------------------------------------
-ROM:7BD9 11	     unk_7BD9:	     .db 0x11		     ; DATA XREF: ROM:loc_7BD4o
+ROM:7BD9 11	     unk_7BD9:	     .db 0x11					     ; DATA XREF: ROM:play_bleepso
 ROM:7BDA FF			     .db 0xFF
 ROM:7BDB	     ; ---------------------------------------------------------------------------
 ROM:7BDB
-ROM:7BDB	     loc_7BDB:				     ; DATA XREF: ROM:7F73o
+ROM:7BDB	     play_im_hit___do_with_it:					     ; DATA XREF: ROM:7F73o
 ROM:7BDB 8E 7B E0		     ldx     #unk_7BE0
 ROM:7BDE 20 51			     bra     loc_7C31
 ROM:7BDE	     ; ---------------------------------------------------------------------------
-ROM:7BE0 FE	     unk_7BE0:	     .db 0xFE ;	˛	     ; DATA XREF: ROM:loc_7BDBo
+ROM:7BE0 FE	     unk_7BE0:	     .db 0xFE ;	˛				     ; DATA XREF: ROM:play_im_hit___do_with_ito
 ROM:7BE1 13			     .db 0x13
 ROM:7BE2 FF			     .db 0xFF
 ROM:7BE3	     ; ---------------------------------------------------------------------------
 ROM:7BE3
-ROM:7BE3	     loc_7BE3:				     ; DATA XREF: ROM:7F7Bo
+ROM:7BE3	     play_ive_lost_r2:						     ; DATA XREF: ROM:7F7Bo
 ROM:7BE3 8E 7B E8		     ldx     #unk_7BE8
 ROM:7BE6 20 49			     bra     loc_7C31
 ROM:7BE6	     ; ---------------------------------------------------------------------------
-ROM:7BE8 FE	     unk_7BE8:	     .db 0xFE ;	˛	     ; DATA XREF: ROM:loc_7BE3o
+ROM:7BE8 FE	     unk_7BE8:	     .db 0xFE ;	˛				     ; DATA XREF: ROM:play_ive_lost_r2o
 ROM:7BE9 FE			     .db 0xFE ;	˛
 ROM:7BEA FE			     .db 0xFE ;	˛
 ROM:7BEB FE			     .db 0xFE ;	˛
@@ -17083,59 +16923,59 @@ ROM:7BEF 14			     .db 0x14
 ROM:7BF0 FF			     .db 0xFF
 ROM:7BF1	     ; ---------------------------------------------------------------------------
 ROM:7BF1
-ROM:7BF1	     loc_7BF1:				     ; DATA XREF: ROM:7F85o
+ROM:7BF1	     play_i_cant_shake_him:					     ; DATA XREF: ROM:7F85o
 ROM:7BF1 8E 7B F6		     ldx     #unk_7BF6
 ROM:7BF4 20 3B			     bra     loc_7C31
 ROM:7BF4	     ; ---------------------------------------------------------------------------
-ROM:7BF6 16	     unk_7BF6:	     .db 0x16		     ; DATA XREF: ROM:loc_7BF1o
+ROM:7BF6 16	     unk_7BF6:	     .db 0x16					     ; DATA XREF: ROM:play_i_cant_shake_himo
 ROM:7BF7 FF			     .db 0xFF
 ROM:7BF8	     ; ---------------------------------------------------------------------------
 ROM:7BF8
-ROM:7BF8	     loc_7BF8:				     ; DATA XREF: ROM:7F91o
+ROM:7BF8	     play_luke_trust_me:					     ; DATA XREF: ROM:7F91o
 ROM:7BF8 CC 7B FD		     ldd     #unk_7BFD
 ROM:7BFB 20 21			     bra     loc_7C1E
 ROM:7BFB	     ; ---------------------------------------------------------------------------
-ROM:7BFD 17	     unk_7BFD:	     .db 0x17		     ; DATA XREF: ROM:loc_7BF8o
+ROM:7BFD 17	     unk_7BFD:	     .db 0x17					     ; DATA XREF: ROM:play_luke_trust_meo
 ROM:7BFE FF			     .db 0xFF
 ROM:7BFF	     ; ---------------------------------------------------------------------------
 ROM:7BFF
-ROM:7BFF	     loc_7BFF:				     ; DATA XREF: ROM:7F79o
+ROM:7BFF	     play_let_go_luke:						     ; DATA XREF: ROM:7F79o
 ROM:7BFF CC 7C 04		     ldd     #unk_7C04
 ROM:7C02 20 1A			     bra     loc_7C1E
 ROM:7C02	     ; ---------------------------------------------------------------------------
-ROM:7C04 09	     unk_7C04:	     .db    9		     ; DATA XREF: ROM:loc_7BFFo
+ROM:7C04 09	     unk_7C04:	     .db    9					     ; DATA XREF: ROM:play_let_go_lukeo
 ROM:7C05 FF			     .db 0xFF
 ROM:7C06	     ; ---------------------------------------------------------------------------
 ROM:7C06
-ROM:7C06	     loc_7C06:				     ; DATA XREF: ROM:7F87o
+ROM:7C06	     play_look_at_the_size___thing:				     ; DATA XREF: ROM:7F87o
 ROM:7C06 8E 7C 0B		     ldx     #unk_7C0B
 ROM:7C09 20 26			     bra     loc_7C31
 ROM:7C09	     ; ---------------------------------------------------------------------------
-ROM:7C0B 0D	     unk_7C0B:	     .db  0xD		     ; DATA XREF: ROM:loc_7C06o
+ROM:7C0B 0D	     unk_7C0B:	     .db  0xD					     ; DATA XREF: ROM:play_look_at_the_size___thingo
 ROM:7C0C FF			     .db 0xFF
 ROM:7C0D	     ; ---------------------------------------------------------------------------
 ROM:7C0D
-ROM:7C0D	     loc_7C0D:				     ; DATA XREF: ROM:7F69o
+ROM:7C0D	     play_wookiee_growl:					     ; DATA XREF: ROM:7F69o
 ROM:7C0D 8E 7C 12		     ldx     #unk_7C12
 ROM:7C10 20 1F			     bra     loc_7C31
 ROM:7C10	     ; ---------------------------------------------------------------------------
-ROM:7C12 12	     unk_7C12:	     .db 0x12		     ; DATA XREF: ROM:loc_7C0Do
+ROM:7C12 12	     unk_7C12:	     .db 0x12					     ; DATA XREF: ROM:play_wookiee_growlo
 ROM:7C13 FF			     .db 0xFF
 ROM:7C14	     ; ---------------------------------------------------------------------------
 ROM:7C14
-ROM:7C14	     loc_7C14:				     ; DATA XREF: ROM:7F6Fo
+ROM:7C14	     play_great_shot___million:					     ; DATA XREF: ROM:7F6Fo
 ROM:7C14 CC 7C 19		     ldd     #unk_7C19
 ROM:7C17 20 05			     bra     loc_7C1E
 ROM:7C17	     ; ---------------------------------------------------------------------------
-ROM:7C19 15	     unk_7C19:	     .db 0x15		     ; DATA XREF: ROM:loc_7C14o
+ROM:7C19 15	     unk_7C19:	     .db 0x15					     ; DATA XREF: ROM:play_great_shot___milliono
 ROM:7C1A FF			     .db 0xFF
 ROM:7C1B	     ; ---------------------------------------------------------------------------
 ROM:7C1B
-ROM:7C1B	     loc_7C1B:				     ; DATA XREF: ROM:7F75o
+ROM:7C1B	     play_0x0A_inaudible:					     ; DATA XREF: ROM:7F75o
 ROM:7C1B CC 00 00		     ldd     #0
 ROM:7C1E
-ROM:7C1E	     loc_7C1E:				     ; CODE XREF: ROM:7B68J
-ROM:7C1E						     ; ROM:7B70J ...
+ROM:7C1E	     loc_7C1E:							     ; CODE XREF: ROM:7B68J
+ROM:7C1E									     ; ROM:7B70J ...
 ROM:7C1E DD 1B			     std     byte_101B
 ROM:7C20 D6 1E			     ldb     byte_101E
 ROM:7C22 5C			     incb
@@ -17149,8 +16989,8 @@ ROM:7C2E ED 84			     std     ,x
 ROM:7C30 39			     rts
 ROM:7C31	     ; ---------------------------------------------------------------------------
 ROM:7C31
-ROM:7C31	     loc_7C31:				     ; CODE XREF: ROM:7B9DJ
-ROM:7C31						     ; ROM:7BDEj ...
+ROM:7C31	     loc_7C31:							     ; CODE XREF: ROM:7B9DJ
+ROM:7C31									     ; ROM:7BDEj ...
 ROM:7C31 D6 1E			     ldb     byte_101E
 ROM:7C33 D1 1D			     cmpb    byte_101D
 ROM:7C35 26 08			     bne     locret_7C3F
@@ -17160,12 +17000,12 @@ ROM:7C3B 1F 10			     tfr     x,	d
 ROM:7C3D 20 DF			     bra     loc_7C1E
 ROM:7C3F	     ; ---------------------------------------------------------------------------
 ROM:7C3F
-ROM:7C3F	     locret_7C3F:			     ; CODE XREF: ROM:7C35j
-ROM:7C3F						     ; ROM:7C39j
+ROM:7C3F	     locret_7C3F:						     ; CODE XREF: ROM:7C35j
+ROM:7C3F									     ; ROM:7C39j
 ROM:7C3F 39			     rts
 ROM:7C40	     ; ---------------------------------------------------------------------------
 ROM:7C40
-ROM:7C40	     loc_7C40:				     ; DATA XREF: ROM:7F89o
+ROM:7C40	     play_0x14_inaudible:					     ; DATA XREF: ROM:7F89o
 ROM:7C40 D6 1E			     ldb     byte_101E
 ROM:7C42 D7 1D			     stb     byte_101D
 ROM:7C44 39			     rts
@@ -17173,15 +17013,15 @@ ROM:7C45
 ROM:7C45	     ; =============== S U B R O U T I N E =======================================
 ROM:7C45
 ROM:7C45
-ROM:7C45	     sub_7C45:				     ; CODE XREF: sub_7C5E+C4j
-ROM:7C45						     ; sub_7DD3+D8P
+ROM:7C45	     sub_7C45:							     ; CODE XREF: sub_7C5E+C4j
+ROM:7C45									     ; sub_7DD3+D8P
 ROM:7C45 86 00			     lda     #0
 ROM:7C47 97 1D			     sta     byte_101D
 ROM:7C49 97 1E			     sta     byte_101E
 ROM:7C4B 97 16			     sta     unk_1016
 ROM:7C4D
-ROM:7C4D	     loc_7C4D:				     ; CODE XREF: sub_7C5E+4Cj
-ROM:7C4D						     ; sub_7C5E+7Dj
+ROM:7C4D	     loc_7C4D:							     ; CODE XREF: sub_7C5E+4Cj
+ROM:7C4D									     ; sub_7C5E+7Dj
 ROM:7C4D 86 FF			     lda     #0xFF
 ROM:7C4F 97 1F			     sta     unk_101F
 ROM:7C51 96 1D			     lda     byte_101D
@@ -17197,75 +17037,75 @@ ROM:7C5E
 ROM:7C5E	     ; =============== S U B R O U T I N E =======================================
 ROM:7C5E
 ROM:7C5E
-ROM:7C5E	     sub_7C5E:				     ; CODE XREF: sub_7DD3:loc_7D95P
-ROM:7C5E						     ; sub_7DD3-6P
+ROM:7C5E	     sub_7C5E:							     ; CODE XREF: sub_7DD3:loc_7D95P
+ROM:7C5E									     ; sub_7DD3-6P
 ROM:7C5E 96 1F			     lda     unk_101F
 ROM:7C60 27 3A			     beq     loc_7C9C
 ROM:7C62 2A 1F			     bpl     loc_7C83
 ROM:7C64 48			     asla
 ROM:7C65 2A 0C			     bpl     loc_7C73
-ROM:7C67 96 80			     lda     0x80	     ; read DRA
-ROM:7C69 8A 23			     oraa    #0x23 ; '#'     ; mute speech, TMS5220 idle
-ROM:7C6B 97 80			     sta     0x80	     ; write DRA
-ROM:7C6D 86 FF			     lda     #0xFF	     ; RESET
-ROM:7C6F 97 82			     sta     0x82	     ; write DRB (TMS5220)
+ROM:7C67 96 80			     lda     0x80				     ; read DRA
+ROM:7C69 8A 23			     oraa    #0x23 ; '#'                             ; mute speech, TMS5220 idle
+ROM:7C6B 97 80			     sta     0x80				     ; write DRA
+ROM:7C6D 86 FF			     lda     #0xFF				     ; RESET
+ROM:7C6F 97 82			     sta     0x82				     ; write DRB (TMS5220)
 ROM:7C71 20 06			     bra     loc_7C79
 ROM:7C73	     ; ---------------------------------------------------------------------------
 ROM:7C73
-ROM:7C73	     loc_7C73:				     ; CODE XREF: sub_7C5E+7j
-ROM:7C73 96 80			     lda     0x80	     ; read DRA
-ROM:7C75 84 DF			     anda    #0xDF ; 'ﬂ'     ; un-mute speech
-ROM:7C77 97 80			     sta     0x80	     ; write DRA
+ROM:7C73	     loc_7C73:							     ; CODE XREF: sub_7C5E+7j
+ROM:7C73 96 80			     lda     0x80				     ; read DRA
+ROM:7C75 84 DF			     anda    #0xDF ; 'ﬂ'                             ; un-mute speech
+ROM:7C77 97 80			     sta     0x80				     ; write DRA
 ROM:7C79
-ROM:7C79	     loc_7C79:				     ; CODE XREF: sub_7C5E+13j
+ROM:7C79	     loc_7C79:							     ; CODE XREF: sub_7C5E+13j
 ROM:7C79 0A 1F			     dec     unk_101F
 ROM:7C7B 2B 04			     bmi     loc_7C81
 ROM:7C7D 86 28			     lda     #0x28 ; '('
 ROM:7C7F 97 1F			     sta     unk_101F
 ROM:7C81
-ROM:7C81	     loc_7C81:				     ; CODE XREF: sub_7C5E+1Dj
+ROM:7C81	     loc_7C81:							     ; CODE XREF: sub_7C5E+1Dj
 ROM:7C81 20 18			     bra     locret_7C9B
 ROM:7C83	     ; ---------------------------------------------------------------------------
 ROM:7C83
-ROM:7C83	     loc_7C83:				     ; CODE XREF: sub_7C5E+4j
-ROM:7C83 96 80			     lda     0x80	     ; read DRA
-ROM:7C85 8A 03			     oraa    #3		     ; TMS5220 idle
-ROM:7C87 97 80			     sta     0x80	     ; write DRA
-ROM:7C89 86 FF			     lda     #0xFF	     ; RESET
-ROM:7C8B 97 82			     sta     0x82	     ; write DRB (TMS5220)
-ROM:7C8D 96 80			     lda     0x80	     ; read DRA
-ROM:7C8F 84 FE			     anda    #0xFE ; '˛'     ; TMS5220 WR#
-ROM:7C91 97 80			     sta     0x80	     ; write DRA
+ROM:7C83	     loc_7C83:							     ; CODE XREF: sub_7C5E+4j
+ROM:7C83 96 80			     lda     0x80				     ; read DRA
+ROM:7C85 8A 03			     oraa    #3					     ; TMS5220 idle
+ROM:7C87 97 80			     sta     0x80				     ; write DRA
+ROM:7C89 86 FF			     lda     #0xFF				     ; RESET
+ROM:7C8B 97 82			     sta     0x82				     ; write DRB (TMS5220)
+ROM:7C8D 96 80			     lda     0x80				     ; read DRA
+ROM:7C8F 84 FE			     anda    #0xFE ; '˛'                             ; TMS5220 WR#
+ROM:7C91 97 80			     sta     0x80				     ; write DRA
 ROM:7C93 0A 1F			     dec     unk_101F
 ROM:7C95 26 04			     bne     locret_7C9B
 ROM:7C97 86 00			     lda     #0
 ROM:7C99 97 20			     sta     byte_1020
 ROM:7C9B
-ROM:7C9B	     locret_7C9B:			     ; CODE XREF: sub_7C5E:loc_7C81j
-ROM:7C9B						     ; sub_7C5E+37j
+ROM:7C9B	     locret_7C9B:						     ; CODE XREF: sub_7C5E:loc_7C81j
+ROM:7C9B									     ; sub_7C5E+37j
 ROM:7C9B 39			     rts
 ROM:7C9C	     ; ---------------------------------------------------------------------------
 ROM:7C9C
-ROM:7C9C	     loc_7C9C:				     ; CODE XREF: sub_7C5E+2j
-ROM:7C9C 96 80			     lda     0x80	     ; read DRA
-ROM:7C9E 84 04			     anda    #4		     ; TMS5220 ready?
-ROM:7CA0 27 0F			     beq     loc_7CB1	     ; yes, go
+ROM:7C9C	     loc_7C9C:							     ; CODE XREF: sub_7C5E+2j
+ROM:7C9C 96 80			     lda     0x80				     ; read DRA
+ROM:7C9E 84 04			     anda    #4					     ; TMS5220 ready?
+ROM:7CA0 27 0F			     beq     loc_7CB1				     ; yes, go
 ROM:7CA2 96 0A			     lda     unk_100A
 ROM:7CA4 84 03			     anda    #3
 ROM:7CA6 26 06			     bne     loc_7CAE
 ROM:7CA8 0C 16			     inc     unk_1016
 ROM:7CAA 10 2B FF 9F		     lbmi    loc_7C4D
 ROM:7CAE
-ROM:7CAE	     loc_7CAE:				     ; CODE XREF: sub_7C5E+48j
+ROM:7CAE	     loc_7CAE:							     ; CODE XREF: sub_7C5E+48j
 ROM:7CAE 7E 7D 43		     jmp     locret_7D43
 ROM:7CB1	     ; ---------------------------------------------------------------------------
 ROM:7CB1
-ROM:7CB1	     loc_7CB1:				     ; CODE XREF: sub_7C5E+42j
+ROM:7CB1	     loc_7CB1:							     ; CODE XREF: sub_7C5E+42j
 ROM:7CB1 86 00			     lda     #0
 ROM:7CB3 97 16			     sta     unk_1016
-ROM:7CB5 96 80			     lda     0x80	     ; read DRA
-ROM:7CB7 8A 03			     oraa    #3		     ; TMS5220 idle
-ROM:7CB9 97 80			     sta     0x80	     ; write DRA
+ROM:7CB5 96 80			     lda     0x80				     ; read DRA
+ROM:7CB7 8A 03			     oraa    #3					     ; TMS5220 idle
+ROM:7CB9 97 80			     sta     0x80				     ; write DRA
 ROM:7CBB 96 20			     lda     byte_1020
 ROM:7CBD 26 25			     bne     loc_7CE4
 ROM:7CBF 96 15			     lda     unk_1015
@@ -17274,7 +17114,7 @@ ROM:7CC3 0A 15			     dec     unk_1015
 ROM:7CC5 7E 7D 43		     jmp     locret_7D43
 ROM:7CC8	     ; ---------------------------------------------------------------------------
 ROM:7CC8
-ROM:7CC8	     loc_7CC8:				     ; CODE XREF: sub_7C5E+63j
+ROM:7CC8	     loc_7CC8:							     ; CODE XREF: sub_7C5E+63j
 ROM:7CC8 D6 1D			     ldb     byte_101D
 ROM:7CCA D1 1E			     cmpb    byte_101E
 ROM:7CCC 27 75			     beq     locret_7D43
@@ -17291,20 +17131,20 @@ ROM:7CE1 97 20			     sta     byte_1020
 ROM:7CE3 39			     rts
 ROM:7CE4	     ; ---------------------------------------------------------------------------
 ROM:7CE4
-ROM:7CE4	     loc_7CE4:				     ; CODE XREF: sub_7C5E+5Fj
+ROM:7CE4	     loc_7CE4:							     ; CODE XREF: sub_7C5E+5Fj
 ROM:7CE4 81 02			     cmpa    #2
 ROM:7CE6 26 1B			     bne     loc_7D03
 ROM:7CE8 9E 13			     ldx     unk_1013
-ROM:7CEA A6 80			     lda     ,x+	     ; TSM5220 cmd
-ROM:7CEC 97 82			     sta     0x82	     ; write DRB (TMS5220)
-ROM:7CEE 96 80			     lda     0x80	     ; read DRA
-ROM:7CF0 84 FE			     anda    #0xFE ; '˛'     ; TMS5220 WR#
-ROM:7CF2 97 80			     sta     0x80	     ; write DRA
+ROM:7CEA A6 80			     lda     ,x+				     ; TSM5220 cmd
+ROM:7CEC 97 82			     sta     0x82				     ; write DRB (TMS5220)
+ROM:7CEE 96 80			     lda     0x80				     ; read DRA
+ROM:7CF0 84 FE			     anda    #0xFE ; '˛'                             ; TMS5220 WR#
+ROM:7CF2 97 80			     sta     0x80				     ; write DRA
 ROM:7CF4 9F 13			     stx     unk_1013
 ROM:7CF6 9C 17			     cmpx    unk_1017
 ROM:7CF8 26 49			     bne     locret_7D43
 ROM:7CFA
-ROM:7CFA	     loc_7CFA:				     ; CODE XREF: sub_7C5E+B1j
+ROM:7CFA	     loc_7CFA:							     ; CODE XREF: sub_7C5E+B1j
 ROM:7CFA 86 01			     lda     #1
 ROM:7CFC 97 20			     sta     byte_1020
 ROM:7CFE 86 80			     lda     #0x80 ; 'Ä'
@@ -17312,7 +17152,7 @@ ROM:7D00 97 15			     sta     unk_1015
 ROM:7D02 39			     rts
 ROM:7D03	     ; ---------------------------------------------------------------------------
 ROM:7D03
-ROM:7D03	     loc_7D03:				     ; CODE XREF: sub_7C5E+88j
+ROM:7D03	     loc_7D03:							     ; CODE XREF: sub_7C5E+88j
 ROM:7D03 25 36			     bcs     loc_7D3B
 ROM:7D05 9E 19			     ldx     unk_1019
 ROM:7D07 E6 80			     ldb     ,x+
@@ -17326,7 +17166,7 @@ ROM:7D15 97 15			     sta     unk_1015
 ROM:7D17 39			     rts
 ROM:7D18	     ; ---------------------------------------------------------------------------
 ROM:7D18
-ROM:7D18	     loc_7D18:				     ; CODE XREF: sub_7C5E+AFj
+ROM:7D18	     loc_7D18:							     ; CODE XREF: sub_7C5E+AFj
 ROM:7D18 8E 40 02		     ldx     #0x4002
 ROM:7D1B 3A			     abx
 ROM:7D1C 3A			     abx
@@ -17338,40 +17178,40 @@ ROM:7D26 EC 84			     ldd     ,x
 ROM:7D28 DD 13			     std     unk_1013
 ROM:7D2A EC 02			     ldd     2,x
 ROM:7D2C DD 17			     std     unk_1017
-ROM:7D2E 86 60			     lda     #0x60 ; '`'     ; SPEAK EXTERNAL
-ROM:7D30 97 82			     sta     0x82	     ; write DRB (TMS5220)
-ROM:7D32 96 80			     lda     0x80	     ; read DRA
-ROM:7D34 84 FE			     anda    #0xFE ; '˛'     ; TMS5220 WR#
-ROM:7D36 97 80			     sta     0x80	     ; write DRA
+ROM:7D2E 86 60			     lda     #0x60 ; '`'                             ; SPEAK EXTERNAL
+ROM:7D30 97 82			     sta     0x82				     ; write DRB (TMS5220)
+ROM:7D32 96 80			     lda     0x80				     ; read DRA
+ROM:7D34 84 FE			     anda    #0xFE ; '˛'                             ; TMS5220 WR#
+ROM:7D36 97 80			     sta     0x80				     ; write DRA
 ROM:7D38 0A 20			     dec     byte_1020
 ROM:7D3A 39			     rts
 ROM:7D3B	     ; ---------------------------------------------------------------------------
 ROM:7D3B
-ROM:7D3B	     loc_7D3B:				     ; CODE XREF: sub_7C5E:loc_7D03j
+ROM:7D3B	     loc_7D3B:							     ; CODE XREF: sub_7C5E:loc_7D03j
 ROM:7D3B 0A 15			     dec     unk_1015
 ROM:7D3D 26 04			     bne     locret_7D43
 ROM:7D3F 86 03			     lda     #3
 ROM:7D41 97 20			     sta     byte_1020
 ROM:7D43
-ROM:7D43	     locret_7D43:			     ; CODE XREF: sub_7C5E:loc_7CAEJ
-ROM:7D43						     ; sub_7C5E+67J ...
+ROM:7D43	     locret_7D43:						     ; CODE XREF: sub_7C5E:loc_7CAEJ
+ROM:7D43									     ; sub_7C5E+67J ...
 ROM:7D43 39			     rts
 ROM:7D43	     ; End of function sub_7C5E
 ROM:7D43
 ROM:7D44	     ; ---------------------------------------------------------------------------
 ROM:7D44	     ; START OF	FUNCTION CHUNK FOR sub_7DD3
 ROM:7D44
-ROM:7D44	     RESET:				     ; CODE XREF: sub_7DD3-83j
-ROM:7D44						     ; sub_7DD3-7Dj ...
+ROM:7D44	     RESET:							     ; CODE XREF: sub_7DD3-83j
+ROM:7D44									     ; sub_7DD3-7Dj ...
 ROM:7D44 7E 7E 27		     jmp     NMI
 ROM:7D47	     ; ---------------------------------------------------------------------------
 ROM:7D47
-ROM:7D47	     loc_7D47:				     ; CODE XREF: sub_7DD3-3J
-ROM:7D47						     ; sub_7DD3+EBJ
+ROM:7D47	     loc_7D47:							     ; CODE XREF: sub_7DD3-3J
+ROM:7D47									     ; sub_7DD3+EBJ
 ROM:7D47 1C EF			     andcc   #0xEF ; 'Ô'
 ROM:7D49 8E 01 4D		     ldx     #0x14D
 ROM:7D4C
-ROM:7D4C	     loc_7D4C:				     ; CODE XREF: sub_7DD3-75j
+ROM:7D4C	     loc_7D4C:							     ; CODE XREF: sub_7DD3-75j
 ROM:7D4C 96 00			     lda     unk_1000
 ROM:7D4E 81 3F			     cmpa    #0x3F ; '?'
 ROM:7D50 26 F2			     bne     RESET
@@ -17393,31 +17233,31 @@ ROM:7D6F C1 03			     cmpb    #3
 ROM:7D71 25 02			     bcs     loc_7D75
 ROM:7D73 86 01			     lda     #1
 ROM:7D75
-ROM:7D75	     loc_7D75:				     ; CODE XREF: sub_7DD3-62j
+ROM:7D75	     loc_7D75:							     ; CODE XREF: sub_7DD3-62j
 ROM:7D75 94 09			     anda    unk_1009
 ROM:7D77 26 1C			     bne     loc_7D95
 ROM:7D79 7F 10 0F		     clr     unk_100F
-ROM:7D7C 96 80			     lda     0x80	     ; read DRA
-ROM:7D7E 84 10			     anda    #0x10	     ; sound self test?
-ROM:7D80 26 13			     bne     loc_7D95	     ; no, go
+ROM:7D7C 96 80			     lda     0x80				     ; read DRA
+ROM:7D7E 84 10			     anda    #0x10				     ; sound self test?
+ROM:7D80 26 13			     bne     loc_7D95				     ; no, go
 ROM:7D82 7C 10 0F		     inc     unk_100F
 ROM:7D85 5C			     incb
-ROM:7D86 C1 3C			     cmpb    #0x3C ; '<'     ; valid cmd?
-ROM:7D88 25 02			     bcs     loc_7D8C	     ; yes, go
-ROM:7D8A C6 01			     ldb     #1		     ; test tune
+ROM:7D86 C1 3C			     cmpb    #0x3C ; '<'                             ; valid cmd?
+ROM:7D88 25 02			     bcs     loc_7D8C				     ; yes, go
+ROM:7D8A C6 01			     ldb     #1					     ; test tune
 ROM:7D8C
-ROM:7D8C	     loc_7D8C:				     ; CODE XREF: sub_7DD3-4Bj
+ROM:7D8C	     loc_7D8C:							     ; CODE XREF: sub_7DD3-4Bj
 ROM:7D8C D7 0E			     stb     unk_100E
 ROM:7D8E 8E 7F 61		     ldx     #cmd_jmp_tbl
 ROM:7D91 3A			     abx
-ROM:7D92 3A			     abx		     ; word offset
-ROM:7D93 AD 94			     jsr     [,x]	     ; go!
+ROM:7D92 3A			     abx					     ; word offset
+ROM:7D93 AD 94			     jsr     [,x]				     ; go!
 ROM:7D95
-ROM:7D95	     loc_7D95:				     ; CODE XREF: sub_7DD3-6Cj
-ROM:7D95						     ; sub_7DD3-5Cj ...
+ROM:7D95	     loc_7D95:							     ; CODE XREF: sub_7DD3-6Cj
+ROM:7D95									     ; sub_7DD3-5Cj ...
 ROM:7D95 BD 7C 5E		     jsr     sub_7C5E
 ROM:7D98 BD 7D D3		     jsr     sub_7DD3
-ROM:7D9B D6 80			     ldb     0x80	     ; read DRA
+ROM:7D9B D6 80			     ldb     0x80				     ; read DRA
 ROM:7D9D 96 15			     lda     unk_1015
 ROM:7D9F 9A 20			     oraa    byte_1020
 ROM:7DA1 26 1B			     bne     loc_7DBE
@@ -17429,7 +17269,7 @@ ROM:7DAC 96 0E			     lda     unk_100E
 ROM:7DAE 81 03			     cmpa    #3
 ROM:7DB0 23 0C			     bls     loc_7DBE
 ROM:7DB2
-ROM:7DB2	     loc_7DB2:				     ; CODE XREF: sub_7DD3-29j
+ROM:7DB2	     loc_7DB2:							     ; CODE XREF: sub_7DD3-29j
 ROM:7DB2 BE 21 2E		     ldx     word_212E
 ROM:7DB5 8C 6D 08		     cmpx    #0x6D08
 ROM:7DB8 24 04			     bcc     loc_7DBE
@@ -17437,18 +17277,18 @@ ROM:7DBA C4 F7			     andb    #0xF7 ; '˜'
 ROM:7DBC 20 02			     bra     loc_7DC0
 ROM:7DBE	     ; ---------------------------------------------------------------------------
 ROM:7DBE
-ROM:7DBE	     loc_7DBE:				     ; CODE XREF: sub_7DD3-32j
-ROM:7DBE						     ; sub_7DD3-2Ej ...
-ROM:7DBE CA 08			     orab    #8		     ; hold main CPU in	reset
+ROM:7DBE	     loc_7DBE:							     ; CODE XREF: sub_7DD3-32j
+ROM:7DBE									     ; sub_7DD3-2Ej ...
+ROM:7DBE CA 08			     orab    #8					     ; hold main CPU in	reset
 ROM:7DC0
-ROM:7DC0	     loc_7DC0:				     ; CODE XREF: sub_7DD3-17j
-ROM:7DC0 D7 80			     stb     0x80	     ; write DRA
+ROM:7DC0	     loc_7DC0:							     ; CODE XREF: sub_7DD3-17j
+ROM:7DC0 D7 80			     stb     0x80				     ; write DRA
 ROM:7DC2 96 0A			     lda     unk_100A
 ROM:7DC4 44			     lsra
 ROM:7DC5 25 03			     bcs     loc_7DCA
-ROM:7DC7 BD 74 6A		     jsr     sub_746A
+ROM:7DC7 BD 74 6A		     jsr     play_pokey_1_2_buffer
 ROM:7DCA
-ROM:7DCA	     loc_7DCA:				     ; CODE XREF: sub_7DD3-Ej
+ROM:7DCA	     loc_7DCA:							     ; CODE XREF: sub_7DD3-Ej
 ROM:7DCA BD 77 7C		     jsr     sub_777C
 ROM:7DCD BD 7C 5E		     jsr     sub_7C5E
 ROM:7DD0 7E 7D 47		     jmp     loc_7D47
@@ -17457,7 +17297,7 @@ ROM:7DD3
 ROM:7DD3	     ; =============== S U B R O U T I N E =======================================
 ROM:7DD3
 ROM:7DD3
-ROM:7DD3	     sub_7DD3:				     ; CODE XREF: sub_7DD3-3BP
+ROM:7DD3	     sub_7DD3:							     ; CODE XREF: sub_7DD3-3BP
 ROM:7DD3
 ROM:7DD3	     ; FUNCTION	CHUNK AT ROM:7D44 SIZE 0000008F	BYTES
 ROM:7DD3
@@ -17470,42 +17310,42 @@ ROM:7DDC D7 0D			     stb     unk_100D
 ROM:7DDE 8E 20 20		     ldx     #0x2020
 ROM:7DE1 E6 85			     ldb     b,x
 ROM:7DE3 10 27 00 40		     lbeq    NMI
-ROM:7DE7 C1 3C			     cmpb    #0x3C ; '<'     ; valid cmd?
-ROM:7DE9 22 07			     bhi     locret_7DF2     ; no, skip
+ROM:7DE7 C1 3C			     cmpb    #0x3C ; '<'                             ; valid cmd?
+ROM:7DE9 22 07			     bhi     locret_7DF2			     ; no, skip
 ROM:7DEB 8E 7F 61		     ldx     #cmd_jmp_tbl
 ROM:7DEE 3A			     abx
-ROM:7DEF 3A			     abx		     ; word offset
+ROM:7DEF 3A			     abx					     ; word offset
 ROM:7DF0 AD 94			     jsr     [,x]
 ROM:7DF2
-ROM:7DF2	     locret_7DF2:			     ; CODE XREF: sub_7DD3+4j
-ROM:7DF2						     ; sub_7DD3+16j
+ROM:7DF2	     locret_7DF2:						     ; CODE XREF: sub_7DD3+4j
+ROM:7DF2									     ; sub_7DD3+16j
 ROM:7DF2 39			     rts
 ROM:7DF3	     ; ---------------------------------------------------------------------------
 ROM:7DF3
-ROM:7DF3	     IRQ:				     ; DATA XREF: ROM:7FF8o
+ROM:7DF3	     IRQ:							     ; DATA XREF: ROM:7FF8o
 ROM:7DF3 D6 0C			     ldb     unk_100C
 ROM:7DF5 8E 20 20		     ldx     #0x2020
-ROM:7DF8 96 80			     lda     0x80	     ; read DRA
-ROM:7DFA 2A 0A			     bpl     loc_7E06	     ; main NOT??? ready, go
+ROM:7DF8 96 80			     lda     0x80				     ; read DRA
+ROM:7DFA 2A 0A			     bpl     loc_7E06				     ; main NOT??? ready, go
 ROM:7DFC B6 08 00		     lda     0x800
 ROM:7DFF 27 26			     beq     NMI
 ROM:7E01 5C			     incb
 ROM:7E02 C4 1F			     andb    #0x1F
 ROM:7E04 A7 85			     sta     b,x
 ROM:7E06
-ROM:7E06	     loc_7E06:				     ; CODE XREF: sub_7DD3+27j
-ROM:7E06 96 85			     lda     0x85	     ; read RIOT intr flag
-ROM:7E08 2A 08			     bpl     loc_7E12	     ; edge-detect, go
+ROM:7E06	     loc_7E06:							     ; CODE XREF: sub_7DD3+27j
+ROM:7E06 96 85			     lda     0x85				     ; read RIOT intr flag
+ROM:7E08 2A 08			     bpl     loc_7E12				     ; edge-detect, go
 ROM:7E0A 86 06			     lda     #6
-ROM:7E0C 97 9F			     sta     0x9F	     ; timer /1024, EI
+ROM:7E0C 97 9F			     sta     0x9F				     ; timer /1024, EI
 ROM:7E0E 0C 0B			     inc     unk_100B
 ROM:7E10 29 15			     bvs     NMI
 ROM:7E12
-ROM:7E12	     loc_7E12:				     ; CODE XREF: sub_7DD3+35j
-ROM:7E12						     ; sub_7DD3+4Fj
-ROM:7E12 96 80			     lda     0x80	     ; read DRA
-ROM:7E14 2A 0E			     bpl     loc_7E24	     ; main NOT??? ready, go
-ROM:7E16 96 85			     lda     0x85	     ; clr RIOT	intr flag
+ROM:7E12	     loc_7E12:							     ; CODE XREF: sub_7DD3+35j
+ROM:7E12									     ; sub_7DD3+4Fj
+ROM:7E12 96 80			     lda     0x80				     ; read DRA
+ROM:7E14 2A 0E			     bpl     loc_7E24				     ; main NOT??? ready, go
+ROM:7E16 96 85			     lda     0x85				     ; clr RIOT	intr flag
 ROM:7E18 B6 08 00		     lda     0x800
 ROM:7E1B 27 0A			     beq     NMI
 ROM:7E1D 5C			     incb
@@ -17514,105 +17354,107 @@ ROM:7E20 A7 85			     sta     b,x
 ROM:7E22 20 EE			     bra     loc_7E12
 ROM:7E24	     ; ---------------------------------------------------------------------------
 ROM:7E24
-ROM:7E24	     loc_7E24:				     ; CODE XREF: sub_7DD3+41j
+ROM:7E24	     loc_7E24:							     ; CODE XREF: sub_7DD3+41j
 ROM:7E24 D7 0C			     stb     unk_100C
 ROM:7E26 3B			     rti
 ROM:7E27	     ; ---------------------------------------------------------------------------
 ROM:7E27
-ROM:7E27	     NMI:				     ; CODE XREF: sub_7DD3:RESETJ
-ROM:7E27						     ; sub_7DD3+10j ...
-ROM:7E27 1A 10			     orcc    #0x10	     ; disable interrupts
+ROM:7E27	     NMI:							     ; CODE XREF: sub_7DD3:RESETJ
+ROM:7E27									     ; sub_7DD3+10j ...
+ROM:7E27 1A 10			     orcc    #0x10				     ; disable interrupts
 ROM:7E29 B6 08 00		     lda     0x800
-ROM:7E2C 10 CE 10 7F		     lds     #0x107F	     ; end of 6532 RAM
-ROM:7E30 86 10			     lda     #0x10	     ; 6532 RAM
+ROM:7E2C 10 CE 10 7F		     lds     #0x107F				     ; end of 6532 RAM
+ROM:7E30 86 10			     lda     #0x10				     ; 6532 RAM
 ROM:7E32 1F 8B			     tfr     a,	dp
 ROM:7E34 86 FF			     lda     #0xFF
-ROM:7E36 97 83			     sta     0x83	     ; DDRB=output
-ROM:7E38 97 82			     sta     0x82	     ; DRB=0xFF	(TMS5220 RESET)
-ROM:7E3A 97 80			     sta     0x80	     ; DRA=0xFF
+ROM:7E36 97 83			     sta     0x83				     ; DDRB=output
+ROM:7E38 97 82			     sta     0x82				     ; DRB=0xFF	(TMS5220 RESET)
+ROM:7E3A 97 80			     sta     0x80				     ; DRA=0xFF
 ROM:7E3C C6 2B			     ldb     #0x2B ; '+'
-ROM:7E3E D7 81			     stb     0x81	     ; DDRA=I/O
-ROM:7E40 8E 18 00		     ldx     #unk_1800	     ; start of	quad pokey I/O
+ROM:7E3E D7 81			     stb     0x81				     ; DDRA=I/O
+ROM:7E40 8E 18 00		     ldx     #POKEY1_POT0_AUDF1			     ; start of	quad pokey I/O
 ROM:7E43 CC 00 00		     ldd     #0
 ROM:7E46
-ROM:7E46	     loc_7E46:				     ; CODE XREF: sub_7DD3+78j
+ROM:7E46	     loc_7E46:							     ; CODE XREF: sub_7DD3+78j
 ROM:7E46 ED 81			     std     ,x++
-ROM:7E48 8C 18 20		     cmpx    #0x1820	     ; done?
-ROM:7E4B 25 F9			     bcs     loc_7E46	     ; no, loop
+ROM:7E48 8C 18 20		     cmpx    #0x1820				     ; done audio control for all pokeys?
+ROM:7E4B 25 F9			     bcs     loc_7E46				     ; no, loop
 ROM:7E4D B6 08 00		     lda     0x800
 ROM:7E50 B7 00 00		     sta     0
-ROM:7E53 8E 20 00		     ldx     #unk_2000	     ; start of	CPU RAM
+ROM:7E53 8E 20 00		     ldx     #unk_2000				     ; start of	CPU RAM
 ROM:7E56 CC 00 00		     ldd     #0
 ROM:7E59
-ROM:7E59	     loc_7E59:				     ; CODE XREF: sub_7DD3+8Bj
-ROM:7E59 ED 81			     std     ,x++	     ; clear word
-ROM:7E5B 8C 28 00		     cmpx    #0x2800	     ; done all	RAM?
-ROM:7E5E 25 F9			     bcs     loc_7E59	     ; no, loop
-ROM:7E60 8E 10 00		     ldx     #unk_1000	     ; start of	6532 RAM
+ROM:7E59	     loc_7E59:							     ; CODE XREF: sub_7DD3+8Bj
+ROM:7E59 ED 81			     std     ,x++				     ; clear word
+ROM:7E5B 8C 28 00		     cmpx    #0x2800				     ; done all	RAM?
+ROM:7E5E 25 F9			     bcs     loc_7E59				     ; no, loop
+ROM:7E60 8E 10 00		     ldx     #unk_1000				     ; start of	6532 RAM
 ROM:7E63
-ROM:7E63	     loc_7E63:				     ; CODE XREF: sub_7DD3+95j
-ROM:7E63 ED 81			     std     ,x++	     ; clear word
-ROM:7E65 8C 10 80		     cmpx    #0x1080	     ; done all	RAM?
-ROM:7E68 25 F9			     bcs     loc_7E63	     ; no, loop
-ROM:7E6A B7 18 27		     sta     unk_1827
-ROM:7E6D B7 18 2F		     sta     unk_182F
-ROM:7E70 B7 18 37		     sta     unk_1837
-ROM:7E73 B7 18 3F		     sta     unk_183F
-ROM:7E76 B7 18 20		     sta     unk_1820
-ROM:7E79 B7 18 28		     sta     unk_1828
-ROM:7E7C B7 18 30		     sta     word_1830
-ROM:7E7F B7 18 38		     sta     unk_1838
-ROM:7E82 86 07			     lda     #7
-ROM:7E84 B7 18 27		     sta     unk_1827
-ROM:7E87 B7 18 2F		     sta     unk_182F
-ROM:7E8A B7 18 37		     sta     unk_1837
-ROM:7E8D B7 18 3F		     sta     unk_183F
-ROM:7E90 96 80			     lda     0x80	     ; read DRA
-ROM:7E92 84 10			     anda    #0x10	     ; sound self test?
-ROM:7E94 26 08			     bne     loc_7E9E	     ; no, skip
-ROM:7E96 96 80			     lda     0x80	     ; read DRA
-ROM:7E98 8A 08			     oraa    #8		     ; hold main CPU in	reset
-ROM:7E9A 97 80			     sta     0x80	     ; write DRA
+ROM:7E63	     loc_7E63:							     ; CODE XREF: sub_7DD3+95j
+ROM:7E63 ED 81			     std     ,x++				     ; clear word
+ROM:7E65 8C 10 80		     cmpx    #0x1080				     ; done all	RAM?
+ROM:7E68 25 F9			     bcs     loc_7E63				     ; no, loop
+ROM:7E6A	     ; disable functionality on	serial ports
+ROM:7E6A B7 18 27		     sta     POKEY1_SKSTAT_SKCTL
+ROM:7E6D B7 18 2F		     sta     POKEY2_SKSTAT_SKCTL
+ROM:7E70 B7 18 37		     sta     POKEY3_SKSTAT_SKCTL
+ROM:7E73 B7 18 3F		     sta     POKEY4_SKSTAT_SKCTL
+ROM:7E76	     ; reset audio control on all pokeys
+ROM:7E76 B7 18 20		     sta     POKEY1_ALLPOT_AUDCTL
+ROM:7E79 B7 18 28		     sta     POKEY2_ALLPOT_AUDCTL
+ROM:7E7C B7 18 30		     sta     POKEY3_ALLPOT_AUDCTL
+ROM:7E7F B7 18 38		     sta     POKEY4_ALLPOT_AUDCTL
+ROM:7E82 86 07			     lda     #7					     ; enable KB scan, KB debounce
+ROM:7E84 B7 18 27		     sta     POKEY1_SKSTAT_SKCTL
+ROM:7E87 B7 18 2F		     sta     POKEY2_SKSTAT_SKCTL
+ROM:7E8A B7 18 37		     sta     POKEY3_SKSTAT_SKCTL
+ROM:7E8D B7 18 3F		     sta     POKEY4_SKSTAT_SKCTL
+ROM:7E90 96 80			     lda     0x80				     ; read DRA
+ROM:7E92 84 10			     anda    #0x10				     ; sound self test?
+ROM:7E94 26 08			     bne     loc_7E9E				     ; no, skip
+ROM:7E96 96 80			     lda     0x80				     ; read DRA
+ROM:7E98 8A 08			     oraa    #8					     ; hold main CPU in	reset
+ROM:7E9A 97 80			     sta     0x80				     ; write DRA
 ROM:7E9C 20 33			     bra     loc_7ED1
 ROM:7E9E	     ; ---------------------------------------------------------------------------
 ROM:7E9E
-ROM:7E9E	     loc_7E9E:				     ; CODE XREF: sub_7DD3+C1j
-ROM:7E9E 96 80			     lda     0x80	     ; read DRA
-ROM:7EA0 84 F7			     anda    #0xF7 ; '˜'     ; de-assert main CPU reset
-ROM:7EA2 97 80			     sta     0x80	     ; write DRA
+ROM:7E9E	     loc_7E9E:							     ; CODE XREF: sub_7DD3+C1j
+ROM:7E9E 96 80			     lda     0x80				     ; read DRA
+ROM:7EA0 84 F7			     anda    #0xF7 ; '˜'                             ; de-assert main CPU reset
+ROM:7EA2 97 80			     sta     0x80				     ; write DRA
 ROM:7EA4 86 3F			     lda     #0x3F ; '?'
 ROM:7EA6 97 00			     sta     unk_1000
 ROM:7EA8 BD 76 A7		     jsr     sub_76A7
 ROM:7EAB BD 7C 45		     jsr     sub_7C45
-ROM:7EAE 96 85			     lda     0x85	     ; read RIOT intr
+ROM:7EAE 96 85			     lda     0x85				     ; read RIOT intr
 ROM:7EB0 B6 08 00		     lda     0x800
 ROM:7EB3 86 5A			     lda     #0x5A ; 'Z'
 ROM:7EB5 B7 00 00		     sta     0
 ROM:7EB8 86 06			     lda     #6
-ROM:7EBA 97 9F			     sta     0x9F	     ; timer /1024, EI
-ROM:7EBC 97 87			     sta     0x87	     ; write edge-detect control
+ROM:7EBA 97 9F			     sta     0x9F				     ; timer /1024, EI
+ROM:7EBC 97 87			     sta     0x87				     ; write edge-detect control
 ROM:7EBE 7E 7D 47		     jmp     loc_7D47
 ROM:7EBE	     ; ---------------------------------------------------------------------------
-ROM:7EC1 20 00	     word_7EC1:	     .dw 0x2000		     ; DATA XREF: sub_7DD3+100o
+ROM:7EC1 20 00	     word_7EC1:	     .dw 0x2000					     ; DATA XREF: sub_7DD3+100o
 ROM:7EC3 28 00			     .dw 0x2800
 ROM:7EC5 01 10			     .dw 0x110
 ROM:7EC7 00 10			     .dw 0x10
 ROM:7EC9 80 02			     .dw 0x8002
-ROM:7ECB 40 00	     word_7ECB:	     .dw 0x4000		     ; DATA XREF: sub_7DD3+127o
-ROM:7ECB						     ; sub_7DD3+12Fo
+ROM:7ECB 40 00	     word_7ECB:	     .dw 0x4000					     ; DATA XREF: sub_7DD3+127o
+ROM:7ECB									     ; sub_7DD3+12Fo
 ROM:7ECD 60 00			     .dw 0x6000
-ROM:7ECF 80 00	     word_7ECF:	     .dw 0x8000		     ; DATA XREF: sub_7DD3:loc_7F22o
+ROM:7ECF 80 00	     word_7ECF:	     .dw 0x8000					     ; DATA XREF: sub_7DD3:loc_7F22o
 ROM:7ED1	     ; ---------------------------------------------------------------------------
 ROM:7ED1
-ROM:7ED1	     loc_7ED1:				     ; CODE XREF: sub_7DD3+C9j
+ROM:7ED1	     loc_7ED1:							     ; CODE XREF: sub_7DD3+C9j
 ROM:7ED1 86 00			     lda     #0
 ROM:7ED3 CE 7E C1		     ldu     #word_7EC1
 ROM:7ED6
-ROM:7ED6	     loc_7ED6:				     ; CODE XREF: sub_7DD3+12Bj
-ROM:7ED6 AE C4			     ldx     ,u		     ; get entry
+ROM:7ED6	     loc_7ED6:							     ; CODE XREF: sub_7DD3+12Bj
+ROM:7ED6 AE C4			     ldx     ,u					     ; get entry
 ROM:7ED8 31 01			     leay    1,x
 ROM:7EDA
-ROM:7EDA	     loc_7EDA:				     ; CODE XREF: sub_7DD3+110j
+ROM:7EDA	     loc_7EDA:							     ; CODE XREF: sub_7DD3+110j
 ROM:7EDA 10 AF 81		     sty     ,x++
 ROM:7EDD 31 A9 FF 01		     leay    0xFF01,y
 ROM:7EE1 AC 42			     cmpx    2,u
@@ -17620,12 +17462,12 @@ ROM:7EE3 25 F5			     bcs     loc_7EDA
 ROM:7EE5 AE C4			     ldx     ,u
 ROM:7EE7 31 01			     leay    1,x
 ROM:7EE9
-ROM:7EE9	     loc_7EE9:				     ; CODE XREF: sub_7DD3+123j
+ROM:7EE9	     loc_7EE9:							     ; CODE XREF: sub_7DD3+123j
 ROM:7EE9 10 AC 81		     cmpy    ,x++
 ROM:7EEC 27 02			     beq     loc_7EF0
 ROM:7EEE AA 44			     oraa    4,u
 ROM:7EF0
-ROM:7EF0	     loc_7EF0:				     ; CODE XREF: sub_7DD3+119j
+ROM:7EF0	     loc_7EF0:							     ; CODE XREF: sub_7DD3+119j
 ROM:7EF0 31 A9 FF 01		     leay    0xFF01,y
 ROM:7EF4 AC 42			     cmpx    2,u
 ROM:7EF6 25 F1			     bcs     loc_7EE9
@@ -17635,11 +17477,11 @@ ROM:7EFE 25 D6			     bcs     loc_7ED6
 ROM:7F00 1F 02			     tfr     d,	y
 ROM:7F02 CE 7E CB		     ldu     #word_7ECB
 ROM:7F05
-ROM:7F05	     loc_7F05:				     ; CODE XREF: sub_7DD3+153j
+ROM:7F05	     loc_7F05:							     ; CODE XREF: sub_7DD3+153j
 ROM:7F05 AE C1			     ldx     ,u++
 ROM:7F07 1F 10			     tfr     x,	d
 ROM:7F09
-ROM:7F09	     loc_7F09:				     ; CODE XREF: sub_7DD3+13Aj
+ROM:7F09	     loc_7F09:							     ; CODE XREF: sub_7DD3+13Aj
 ROM:7F09 E3 81			     addd    ,x++
 ROM:7F0B AC C4			     cmpx    ,u
 ROM:7F0D 25 FA			     bcs     loc_7F09
@@ -17652,46 +17494,48 @@ ROM:7F1A 8A 04			     oraa    #4
 ROM:7F1C 20 02			     bra     loc_7F20
 ROM:7F1E	     ; ---------------------------------------------------------------------------
 ROM:7F1E
-ROM:7F1E	     loc_7F1E:				     ; CODE XREF: sub_7DD3+145j
+ROM:7F1E	     loc_7F1E:							     ; CODE XREF: sub_7DD3+145j
 ROM:7F1E 8A 08			     oraa    #8
 ROM:7F20
-ROM:7F20	     loc_7F20:				     ; CODE XREF: sub_7DD3+149j
+ROM:7F20	     loc_7F20:							     ; CODE XREF: sub_7DD3+149j
 ROM:7F20 1F 02			     tfr     d,	y
 ROM:7F22
-ROM:7F22	     loc_7F22:				     ; CODE XREF: sub_7DD3+13Ej
-ROM:7F22 11 83 7E CF		     cmpu    #word_7ECF	     ; end of table
+ROM:7F22	     loc_7F22:							     ; CODE XREF: sub_7DD3+13Ej
+ROM:7F22 11 83 7E CF		     cmpu    #word_7ECF				     ; end of table
 ROM:7F26 25 DD			     bcs     loc_7F05
 ROM:7F28 1F 20			     tfr     y,	d
 ROM:7F2A C6 03			     ldb     #3
 ROM:7F2C
-ROM:7F2C	     loc_7F2C:				     ; CODE XREF: sub_7DD3+189j
+ROM:7F2C	     loc_7F2C:							     ; CODE XREF: sub_7DD3+189j
 ROM:7F2C 44			     lsra
 ROM:7F2D 24 08			     bcc     loc_7F37
+ROM:7F2F	     ; freq=$CF, noise=pure tone, volume=8
 ROM:7F2F CE CF A8		     ldu     #0xCFA8
-ROM:7F32 FF 18 00		     stu     unk_1800
+ROM:7F32 FF 18 00		     stu     POKEY1_POT0_AUDF1
 ROM:7F35 20 06			     bra     loc_7F3D
 ROM:7F37	     ; ---------------------------------------------------------------------------
+ROM:7F37	     ; freq=$20, noise=pure tone, volume=8
 ROM:7F37
-ROM:7F37	     loc_7F37:				     ; CODE XREF: sub_7DD3+15Aj
+ROM:7F37	     loc_7F37:							     ; CODE XREF: sub_7DD3+15Aj
 ROM:7F37 CE 20 A8		     ldu     #0x20A8
-ROM:7F3A FF 18 0A		     stu     unk_180A
+ROM:7F3A FF 18 0A		     stu     POKEY2_POT2_AUDF2
 ROM:7F3D
-ROM:7F3D	     loc_7F3D:				     ; CODE XREF: sub_7DD3+162j
+ROM:7F3D	     loc_7F3D:							     ; CODE XREF: sub_7DD3+162j
 ROM:7F3D 8E 80 00		     ldx     #0x8000
 ROM:7F40
-ROM:7F40	     loc_7F40:				     ; CODE XREF: sub_7DD3+16Fj
+ROM:7F40	     loc_7F40:							     ; CODE XREF: sub_7DD3+16Fj
 ROM:7F40 30 1F			     leax    -1,x
 ROM:7F42 26 FC			     bne     loc_7F40
 ROM:7F44 CE 00 00		     ldu     #0
-ROM:7F47 FF 18 00		     stu     unk_1800
-ROM:7F4A FF 18 0A		     stu     unk_180A
+ROM:7F47 FF 18 00		     stu     POKEY1_POT0_AUDF1
+ROM:7F4A FF 18 0A		     stu     POKEY2_POT2_AUDF2
 ROM:7F4D 8E 80 00		     ldx     #0x8000
 ROM:7F50 5D			     tstb
 ROM:7F51 26 04			     bne     loc_7F57
 ROM:7F53 30 89 7F FF		     leax    0x7FFF,x
 ROM:7F57
-ROM:7F57	     loc_7F57:				     ; CODE XREF: sub_7DD3+17Ej
-ROM:7F57						     ; sub_7DD3+186j
+ROM:7F57	     loc_7F57:							     ; CODE XREF: sub_7DD3+17Ej
+ROM:7F57									     ; sub_7DD3+186j
 ROM:7F57 30 1F			     leax    -1,x
 ROM:7F59 26 FC			     bne     loc_7F57
 ROM:7F5B 5A			     decb
@@ -17700,67 +17544,70 @@ ROM:7F5E 7E 7D 44		     jmp     RESET
 ROM:7F5E	     ; End of function sub_7DD3
 ROM:7F5E
 ROM:7F5E	     ; ---------------------------------------------------------------------------
-ROM:7F61 7D 44	     cmd_jmp_tbl:    .dw RESET		     ; DATA XREF: sub_7DD3-45o
-ROM:7F61						     ; sub_7DD3+18o
-ROM:7F63 74 3C			     .dw loc_743C
-ROM:7F65 76 86			     .dw loc_7686
-ROM:7F67 7B AB			     .dw loc_7BAB
-ROM:7F69 7C 0D			     .dw loc_7C0D
-ROM:7F6B 7B BA			     .dw loc_7BBA
-ROM:7F6D 7B B3			     .dw loc_7BB3
-ROM:7F6F 7C 14			     .dw loc_7C14
-ROM:7F71 7B C2			     .dw loc_7BC2
-ROM:7F73 7B DB			     .dw loc_7BDB
-ROM:7F75 7C 1B			     .dw loc_7C1B
-ROM:7F77 7B 7E			     .dw loc_7B7E
-ROM:7F79 7B FF			     .dw loc_7BFF
-ROM:7F7B 7B E3			     .dw loc_7BE3
-ROM:7F7D 7B D4			     .dw loc_7BD4
-ROM:7F7F 7B 6D			     .dw loc_7B6D
-ROM:7F81 7B 65			     .dw loc_7B65
-ROM:7F83 7B A3			     .dw loc_7BA3
-ROM:7F85 7B F1			     .dw loc_7BF1
-ROM:7F87 7C 06			     .dw loc_7C06
-ROM:7F89 7C 40			     .dw loc_7C40
-ROM:7F8B 7B CB			     .dw loc_7BCB
-ROM:7F8D 7B 90			     .dw loc_7B90
-ROM:7F8F 7B 76			     .dw loc_7B76
-ROM:7F91 7B F8			     .dw loc_7BF8
-ROM:7F93 7B 88			     .dw loc_7B88
-ROM:7F95 7B 9A			     .dw loc_7B9A
-ROM:7F97 75 3C			     .dw loc_753C
-ROM:7F99 75 5D			     .dw loc_755D
-ROM:7F9B 76 65			     .dw loc_7665
-ROM:7F9D 76 44			     .dw loc_7644
-ROM:7F9F 75 7E			     .dw loc_757E
-ROM:7FA1 76 02			     .dw loc_7602
-ROM:7FA3 75 9F			     .dw loc_759F
-ROM:7FA5 75 C0			     .dw loc_75C0
-ROM:7FA7 75 1B			     .dw loc_751B
-ROM:7FA9 75 E1			     .dw loc_75E1
-ROM:7FAB 76 23			     .dw loc_7623
-ROM:7FAD 74 01			     .dw loc_7401
-ROM:7FAF 73 F5			     .dw loc_73F5
-ROM:7FB1 74 0D			     .dw loc_740D
-ROM:7FB3 74 35			     .dw loc_7435
-ROM:7FB5 73 C5			     .dw loc_73C5
-ROM:7FB7 73 CB			     .dw loc_73CB
-ROM:7FB9 73 D7			     .dw loc_73D7
-ROM:7FBB 74 19			     .dw loc_7419
-ROM:7FBD 73 FB			     .dw loc_73FB
-ROM:7FBF 74 07			     .dw loc_7407
-ROM:7FC1 73 B7			     .dw loc_73B7
-ROM:7FC3 74 20			     .dw loc_7420
-ROM:7FC5 73 B0			     .dw loc_73B0
-ROM:7FC7 73 D1			     .dw loc_73D1
-ROM:7FC9 74 13			     .dw loc_7413
-ROM:7FCB 73 EF			     .dw loc_73EF
-ROM:7FCD 73 E3			     .dw loc_73E3
-ROM:7FCF 73 E9			     .dw loc_73E9
-ROM:7FD1 74 27			     .dw loc_7427
-ROM:7FD3 73 DD			     .dw loc_73DD
-ROM:7FD5 73 BE			     .dw loc_73BE
-ROM:7FD7 74 2E			     .dw loc_742E
+ROM:7F61 7D 44	     cmd_jmp_tbl:    .dw RESET					     ; DATA XREF: sub_7DD3-45o
+ROM:7F61									     ; sub_7DD3+18o
+ROM:7F63 74 3C			     .dw play_test_tune_pokey12			     ; test tune (pokey	1,2)
+ROM:7F65 76 86			     .dw play_test_tune_pokey34			     ; test tune (pokey	3,4)
+ROM:7F67	     ; TMS5220 sounds
+ROM:7F67 7B AB			     .dw play_always				     ; always
+ROM:7F69 7C 0D			     .dw play_wookiee_growl			     ; wookiee growl
+ROM:7F6B 7B BA			     .dw play_the_force___always		     ; the force will be with you, always
+ROM:7F6D 7B B3			     .dw play_the_force___with_you		     ; the force will be with you
+ROM:7F6F 7C 14			     .dw play_great_shot___million		     ; great shot kid... a million
+ROM:7F71 7B C2			     .dw play_i_have_you_now			     ; i have you now
+ROM:7F73 7B DB			     .dw play_im_hit___do_with_it		     ; i'm hit but not bad r2..do with it
+ROM:7F75 7C 1B			     .dw play_0x0A_inaudible			     ; (not audible)
+ROM:7F77 7B 7E			     .dw play_im_on_the_leader			     ; i'm on the leader
+ROM:7F79 7B FF			     .dw play_let_go_luke			     ; let go luke
+ROM:7F7B 7B E3			     .dw play_ive_lost_r2			     ; i've lost r2
+ROM:7F7D 7B D4			     .dw play_bleeps				     ; (bleeps)
+ROM:7F7F 7B 6D			     .dw play_r2___increase_the_power		     ; r2 try to increase the power
+ROM:7F81 7B 65			     .dw play_red_5_standing_by			     ; red 5 standing by
+ROM:7F83 7B A3			     .dw play_remember				     ; remember
+ROM:7F85 7B F1			     .dw play_i_cant_shake_him			     ; i can't shake him
+ROM:7F87 7C 06			     .dw play_look_at_the_size___thing		     ; look at the size	of that	thing
+ROM:7F89 7C 40			     .dw play_0x14_inaudible			     ; (not audible)
+ROM:7F8B 7B CB			     .dw play_steady_in_attack_formation	     ; steady in attack	formation
+ROM:7F8D 7B 90			     .dw play_the_force___with_this_one		     ; the force is strong with	this one
+ROM:7F8F 7B 76			     .dw play_this_is_red_5_im_going_in		     ; this is red 5 i'm going in
+ROM:7F91 7B F8			     .dw play_luke_trust_me			     ; luke trust me
+ROM:7F93 7B 88			     .dw play_use_the_force_luke		     ; use the force luke
+ROM:7F95 7B 9A			     .dw play_yahoo_youre_all_clear_kid		     ; yahoo you're all clear kid
+ROM:7F97	     pokey 3,4 sounds
+ROM:7F97 75 3C			     .dw play_star_wars_theme
+ROM:7F99 75 5D			     .dw play_cantina_theme
+ROM:7F9B 76 65			     .dw play_dark_side_theme
+ROM:7F9D 76 44			     .dw play_tweener_music
+ROM:7F9F 75 7E			     .dw play_end_stage_music
+ROM:7FA1 76 02			     .dw play_music_6
+ROM:7FA3 75 9F			     .dw play_music_7
+ROM:7FA5 75 C0			     .dw play_music_8
+ROM:7FA7 75 1B			     .dw play_laser_fire_1
+ROM:7FA9 75 E1			     .dw play_music_9
+ROM:7FAB 76 23			     .dw play_music_10
+ROM:7FAD	     pokey 1,2 sounds
+ROM:7FAD 74 01			     .dw play_explosion_1
+ROM:7FAF 73 F5			     .dw play_explosion_2
+ROM:7FB1 74 0D			     .dw play_noise_1
+ROM:7FB3 74 35			     .dw play_noise_2
+ROM:7FB5 73 C5			     .dw play_nearby_enemy_fire
+ROM:7FB7 73 CB			     .dw play_0x2B_inaudible
+ROM:7FB9 73 D7			     .dw play_noise_3
+ROM:7FBB 74 19			     .dw play_laser_fire_2
+ROM:7FBD 73 FB			     .dw play_laser_fire_3
+ROM:7FBF 74 07			     .dw play_R2D2_1
+ROM:7FC1 73 B7			     .dw play_R2D2_2
+ROM:7FC3 74 20			     .dw play_R2D2_3
+ROM:7FC5 73 B0			     .dw play_R2D2_4
+ROM:7FC7 73 D1			     .dw play_noise_4
+ROM:7FC9 74 13			     .dw play_noise_5
+ROM:7FCB 73 EF			     .dw play_explosion_3
+ROM:7FCD 73 E3			     .dw play_laser_fire_4
+ROM:7FCF 73 E9			     .dw play_0x37_inaudible
+ROM:7FD1 74 27			     .dw play_noise_6
+ROM:7FD3 73 DD			     .dw play_laser_fire_5
+ROM:7FD5 73 BE			     .dw play_laser_fire_6
+ROM:7FD7 74 2E			     .dw play_noise_7
 ROM:7FD9 FF			     .db 0xFF
 ROM:7FDA FF			     .db 0xFF
 ROM:7FDB FF			     .db 0xFF
