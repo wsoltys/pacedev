@@ -21,7 +21,7 @@ DEVRAM:1000		; Segment type:	Regular
 DEVRAM:1000				.area DEVRAM
 DEVRAM:1000				.org 0x1000
 DEVRAM:1000		; assume dp = 0
-DEVRAM:1000 ??		unk_1000:	.ds 1						; DATA XREF: handle_next_cmd:wait_for_timer_irqr
+DEVRAM:1000 ??		init_done_flag:	.ds 1						; DATA XREF: handle_next_cmd:wait_for_timer_irqr
 DEVRAM:1000										; handle_next_cmd+8Do ...
 DEVRAM:1001 ??				.ds 1
 DEVRAM:1002 ??				.ds 1
@@ -31,17 +31,17 @@ DEVRAM:1005 ??				.ds 1
 DEVRAM:1006 ??				.ds 1
 DEVRAM:1007 ??				.ds 1
 DEVRAM:1008 ??				.ds 1
-DEVRAM:1009 ??		unk_1009:	.ds 1
-DEVRAM:100A ??		unk_100A:	.ds 1
+DEVRAM:1009 ??		timer_irq_cntr_hi:.ds 1
+DEVRAM:100A ??		timer_irq_cntr_lo:.ds 1
 DEVRAM:100B ??		timer_irq_flag:	.ds 1
 DEVRAM:100C ??		cmd_ring_buffer_tail:.ds 1
 DEVRAM:100D ??		cmd_ring_buffer_head:.ds 1
-DEVRAM:100E ??		unk_100E:	.ds 1
+DEVRAM:100E ??		curr_self_test_cmd:.ds 1
 DEVRAM:100F ??		unk_100F:	.ds 1
 DEVRAM:1010 ??		unk_1010:	.ds 1
 DEVRAM:1011 ??		byte_1011:	.ds 1						; DATA XREF: sub_7722+Er
 DEVRAM:1011										; sub_7722+10w	...
-DEVRAM:1012 ??		byte_1012:	.ds 1						; DATA XREF: sub_76A7+8w
+DEVRAM:1012 ??		byte_1012:	.ds 1						; DATA XREF: init_pokey_34_buffers_maybe+8w
 DEVRAM:1012										; ROM:loc_76F3w ...
 DEVRAM:1013 ?? ??	tms5220_voice_data_start:.ds 2
 DEVRAM:1015 ??		tms5220_pause_timer:.ds	1
@@ -209,7 +209,7 @@ POKEY:182C ??			       .ds 1
 POKEY:182D ??	       POKEY2_SERIN_SEROUT:.ds 1
 POKEY:182E ??	       POKEY2_IRQST_IRQEN:.ds 1
 POKEY:182F ??	       POKEY2_SKSTAT_SKCTL:.ds 1
-POKEY:1830 ??	       POKEY3_ALLPOT_AUDCTL:.ds	1				       ; DATA XREF: sub_76A7+2Cw
+POKEY:1830 ??	       POKEY3_ALLPOT_AUDCTL:.ds	1				       ; DATA XREF: init_pokey_34_buffers_maybe+2Cw
 POKEY:1830									       ; ROM:76DEw ...
 POKEY:1831 ??	       POKEY3_KBCODE_STIMER:.ds	1
 POKEY:1832 ??	       POKEY3_RANDOM_SKREST:.ds	1
@@ -218,7 +218,7 @@ POKEY:1834 ??			       .ds 1
 POKEY:1835 ??	       POKEY3_SERIN_SEROUT:.ds 1
 POKEY:1836 ??	       POKEY3_IRQST_IRQEN:.ds 1
 POKEY:1837 ??	       POKEY3_SKSTAT_SKCTL:.ds 1
-POKEY:1838 ??	       POKEY4_ALLPOT_AUDCTL:.ds	1				       ; DATA XREF: sub_76A7+31w
+POKEY:1838 ??	       POKEY4_ALLPOT_AUDCTL:.ds	1				       ; DATA XREF: init_pokey_34_buffers_maybe+31w
 POKEY:1838									       ; ROM:76E1w ...
 POKEY:1839 ??	       POKEY4_KBCODE_STIMER:.ds	1
 POKEY:183A ??	       POKEY4_RANDOM_SKREST:.ds	1
@@ -10194,7 +10194,7 @@ ROM:76A7
 ROM:76A7	     ; =============== S U B R O U T I N E =======================================
 ROM:76A7
 ROM:76A7
-ROM:76A7	     sub_76A7:							     ; CODE XREF: handle_next_cmd+D5P
+ROM:76A7	     init_pokey_34_buffers_maybe:				     ; CODE XREF: handle_next_cmd+D5P
 ROM:76A7 86 00			     lda     #0					     ; disable everything
 ROM:76A9 B7 18 37		     sta     POKEY3_SKSTAT_SKCTL
 ROM:76AC B7 18 3F		     sta     POKEY4_SKSTAT_SKCTL
@@ -10216,7 +10216,7 @@ ROM:76D3 B7 18 30		     sta     POKEY3_ALLPOT_AUDCTL
 ROM:76D6 86 78			     lda     #0x78 ; 'x'
 ROM:76D8 B7 18 38		     sta     POKEY4_ALLPOT_AUDCTL
 ROM:76DB 39			     rts
-ROM:76DB	     ; End of function sub_76A7
+ROM:76DB	     ; End of function init_pokey_34_buffers_maybe
 ROM:76DB
 ROM:76DC	     ; ---------------------------------------------------------------------------
 ROM:76DC 86 00			     lda     #0
@@ -10285,7 +10285,7 @@ ROM:7716
 ROM:7716	     ; =============== S U B R O U T I N E =======================================
 ROM:7716
 ROM:7716
-ROM:7716	     sub_7716:							     ; CODE XREF: sub_76A7+16P
+ROM:7716	     sub_7716:							     ; CODE XREF: init_pokey_34_buffers_maybe+16P
 ROM:7716									     ; ROM:76FDp
 ROM:7716 86 20			     lda     #0x20 ; ' '
 ROM:7718 20 0C			     bra     loc_7726
@@ -10295,7 +10295,7 @@ ROM:771A
 ROM:771A	     ; =============== S U B R O U T I N E =======================================
 ROM:771A
 ROM:771A
-ROM:771A	     sub_771A:							     ; CODE XREF: sub_76A7+19P
+ROM:771A	     sub_771A:							     ; CODE XREF: init_pokey_34_buffers_maybe+19P
 ROM:771A									     ; ROM:76FFp
 ROM:771A 86 28			     lda     #0x28 ; '('
 ROM:771C 20 08			     bra     loc_7726
@@ -10305,7 +10305,7 @@ ROM:771E
 ROM:771E	     ; =============== S U B R O U T I N E =======================================
 ROM:771E
 ROM:771E
-ROM:771E	     sub_771E:							     ; CODE XREF: sub_76A7+1CP
+ROM:771E	     sub_771E:							     ; CODE XREF: init_pokey_34_buffers_maybe+1CP
 ROM:771E									     ; ROM:7701p
 ROM:771E 86 30			     lda     #0x30 ; '0'
 ROM:7720 20 04			     bra     loc_7726
@@ -10315,7 +10315,7 @@ ROM:7722
 ROM:7722	     ; =============== S U B R O U T I N E =======================================
 ROM:7722
 ROM:7722
-ROM:7722	     sub_7722:							     ; CODE XREF: sub_76A7+1FP
+ROM:7722	     sub_7722:							     ; CODE XREF: init_pokey_34_buffers_maybe+1FP
 ROM:7722									     ; ROM:7703p
 ROM:7722 86 38			     lda     #0x38 ; '8'
 ROM:7724 20 00			     bra     *+2
@@ -10385,7 +10385,7 @@ ROM:777C	     ; =============== S U B R O U T I N E ============================
 ROM:777C
 ROM:777C
 ROM:777C	     sub_777C:							     ; CODE XREF: handle_next_cmd:loc_7DCAP
-ROM:777C 96 0A			     lda     unk_100A
+ROM:777C 96 0A			     lda     timer_irq_cntr_lo
 ROM:777E 44			     lsra
 ROM:777F 24 11			     bcc     loc_7792
 ROM:7781 86 00			     lda     #0
@@ -10515,7 +10515,7 @@ ROM:7831	     ; ----------------------------------------------------------------
 ROM:7831
 ROM:7831	     loc_7831:							     ; CODE XREF: sub_77A3+87j
 ROM:7831									     ; sub_77A3+8Bj
-ROM:7831 96 0A			     lda     unk_100A
+ROM:7831 96 0A			     lda     timer_irq_cntr_lo
 ROM:7833 84 06			     anda    #6
 ROM:7835 26 06			     bne     loc_783D
 ROM:7837 67 C8 10		     asr     0x10,u
@@ -11359,7 +11359,7 @@ ROM:7C9C	     service_tms5220:						     ; CODE XREF: handle_tms5220+2j
 ROM:7C9C 96 80			     lda     0x80				     ; read DRA
 ROM:7C9E 84 04			     anda    #4					     ; TMS5220 ready?
 ROM:7CA0 27 0F			     beq     handle_tms5220_ready		     ; yes, go
-ROM:7CA2 96 0A			     lda     unk_100A
+ROM:7CA2 96 0A			     lda     timer_irq_cntr_lo
 ROM:7CA4 84 03			     anda    #3
 ROM:7CA6 26 06			     bne     loc_7CAE
 ROM:7CA8 0C 16			     inc     unk_1016
@@ -11484,29 +11484,29 @@ ROM:7D47 1C EF			     andcc   #0xEF ; 'ï'                             ; enable i
 ROM:7D49 8E 01 4D		     ldx     #333
 ROM:7D4C
 ROM:7D4C	     wait_for_timer_irq:					     ; CODE XREF: handle_next_cmd-75j
-ROM:7D4C 96 00			     lda     unk_1000
-ROM:7D4E 81 3F			     cmpa    #0x3F ; '?'
-ROM:7D50 26 F2			     bne     RESET
+ROM:7D4C 96 00			     lda     init_done_flag
+ROM:7D4E 81 3F			     cmpa    #0x3F ; '?'                             ; did init routine finish?
+ROM:7D50 26 F2			     bne     RESET				     ; no, panic!
 ROM:7D52 1F B8			     tfr     dp, a
-ROM:7D54 81 10			     cmpa    #0x10
-ROM:7D56 26 EC			     bne     RESET
+ROM:7D54 81 10			     cmpa    #0x10				     ; sanity check DP
+ROM:7D56 26 EC			     bne     RESET				     ; panic!
 ROM:7D58 30 1F			     leax    -1,x
 ROM:7D5A 27 E8			     beq     RESET
 ROM:7D5C 04 0B			     lsr     timer_irq_flag			     ; have we had a timer IRQ?
 ROM:7D5E 24 EC			     bcc     wait_for_timer_irq			     ; no, spin
 ROM:7D60 86 5A			     lda     #0x5A ; 'Z'
 ROM:7D62 B7 00 00		     sta     0					     ; signal 'ready' to main CPU
-ROM:7D65 0C 0A			     inc     unk_100A
+ROM:7D65 0C 0A			     inc     timer_irq_cntr_lo
 ROM:7D67 26 2C			     bne     loc_7D95
-ROM:7D69 0C 09			     inc     unk_1009
+ROM:7D69 0C 09			     inc     timer_irq_cntr_hi
 ROM:7D6B 86 03			     lda     #3
-ROM:7D6D D6 0E			     ldb     unk_100E
+ROM:7D6D D6 0E			     ldb     curr_self_test_cmd
 ROM:7D6F C1 03			     cmpb    #3
-ROM:7D71 25 02			     bcs     loc_7D75
+ROM:7D71 25 02			     bcs     loc_7D75				     ; 0,1 or 2, skip
 ROM:7D73 86 01			     lda     #1
 ROM:7D75
 ROM:7D75	     loc_7D75:							     ; CODE XREF: handle_next_cmd-62j
-ROM:7D75 94 09			     anda    unk_1009
+ROM:7D75 94 09			     anda    timer_irq_cntr_hi
 ROM:7D77 26 1C			     bne     loc_7D95
 ROM:7D79 7F 10 0F		     clr     unk_100F
 ROM:7D7C 96 80			     lda     0x80				     ; read DRA
@@ -11520,7 +11520,7 @@ ROM:7D88 25 02			     bcs     loc_7D8C				     ; yes, go
 ROM:7D8A C6 01			     ldb     #1					     ; test tune
 ROM:7D8C
 ROM:7D8C	     loc_7D8C:							     ; CODE XREF: handle_next_cmd-4Bj
-ROM:7D8C D7 0E			     stb     unk_100E
+ROM:7D8C D7 0E			     stb     curr_self_test_cmd
 ROM:7D8E 8E 7F 61		     ldx     #cmd_jmp_tbl
 ROM:7D91 3A			     abx
 ROM:7D92 3A			     abx					     ; word offset
@@ -11539,7 +11539,7 @@ ROM:7DA3 96 11			     lda     byte_1011
 ROM:7DA5 26 17			     bne     loc_7DBE
 ROM:7DA7 B6 10 0F		     lda     unk_100F
 ROM:7DAA 27 06			     beq     loc_7DB2
-ROM:7DAC 96 0E			     lda     unk_100E
+ROM:7DAC 96 0E			     lda     curr_self_test_cmd
 ROM:7DAE 81 03			     cmpa    #3
 ROM:7DB0 23 0C			     bls     loc_7DBE
 ROM:7DB2
@@ -11557,9 +11557,9 @@ ROM:7DBE CA 08			     orab    #8					     ; hold main CPU in	reset
 ROM:7DC0
 ROM:7DC0	     loc_7DC0:							     ; CODE XREF: handle_next_cmd-17j
 ROM:7DC0 D7 80			     stb     0x80				     ; write DRA
-ROM:7DC2 96 0A			     lda     unk_100A
+ROM:7DC2 96 0A			     lda     timer_irq_cntr_lo
 ROM:7DC4 44			     lsra
-ROM:7DC5 25 03			     bcs     loc_7DCA
+ROM:7DC5 25 03			     bcs     loc_7DCA				     ; skip every 2nd time thru
 ROM:7DC7 BD 74 6A		     jsr     play_pokey_1_2_buffer
 ROM:7DCA
 ROM:7DCA	     loc_7DCA:							     ; CODE XREF: handle_next_cmd-Ej
@@ -11662,7 +11662,7 @@ ROM:7E59	     loc_7E59:							     ; CODE XREF: handle_next_cmd+8Bj
 ROM:7E59 ED 81			     std     ,x++				     ; clear word
 ROM:7E5B 8C 28 00		     cmpx    #0x2800				     ; done all	RAM?
 ROM:7E5E 25 F9			     bcs     loc_7E59				     ; no, loop
-ROM:7E60 8E 10 00		     ldx     #unk_1000				     ; start of	6532 RAM
+ROM:7E60 8E 10 00		     ldx     #init_done_flag			     ; start of	6532 RAM
 ROM:7E63
 ROM:7E63	     loc_7E63:							     ; CODE XREF: handle_next_cmd+95j
 ROM:7E63 ED 81			     std     ,x++				     ; clear word
@@ -11699,8 +11699,8 @@ ROM:7E9E 96 80			     lda     0x80				     ; read DRA
 ROM:7EA0 84 F7			     anda    #0xF7 ; '÷'                             ; de-assert main CPU reset
 ROM:7EA2 97 80			     sta     0x80				     ; write DRA
 ROM:7EA4 86 3F			     lda     #0x3F ; '?'
-ROM:7EA6 97 00			     sta     unk_1000				     ; watermark?
-ROM:7EA8 BD 76 A7		     jsr     sub_76A7
+ROM:7EA6 97 00			     sta     init_done_flag			     ; flag init routine finished
+ROM:7EA8 BD 76 A7		     jsr     init_pokey_34_buffers_maybe
 ROM:7EAB BD 7C 45		     jsr     reset_tms5220_ring_buffer
 ROM:7EAE 96 85			     lda     0x85				     ; read RIOT intr
 ROM:7EB0 B6 08 00		     lda     0x800
