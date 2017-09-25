@@ -30,12 +30,12 @@ CART:0019 00			      .db 0
 CART:001A	      ;	---------------------------------------------------------------------------
 CART:001A	      ;	assume dp = 0xC8
 CART:001A
-CART:001A	      MAIN:
+CART:001A	      MAIN:				      ;	Max players = 2, Game versions = 0
 CART:001A CC 02	00		      ldd     #0x200
 CART:001D BD F7	A9		      jsr     Select_Game
 CART:0020 96 79			      lda     Vec_Num_Players
 CART:0022 47			      asra
-CART:0023 97 82			      sta     byte_C882
+CART:0023 97 82			      sta     NumPlayers0_1
 CART:0025 0F 21			      clr     Vec_Joy_Mux_2_X
 CART:0027 0F 22			      clr     Vec_Joy_Mux_2_Y
 CART:0029 BD F5	33		      jsr     Init_Music_Buf
@@ -43,23 +43,23 @@ CART:002C 0F 67			      clr     Vec_Expl_Flag
 CART:002E
 CART:002E	      loc_2E:				      ;	CODE XREF: CART:044Fj
 CART:002E BD F1	AF		      jsr     DP_to_C8
-CART:0031 0F 9D			      clr     word_C89D
-CART:0033 0C 9D			      inc     word_C89D
-CART:0035 8E C9	00		      ldx     #unk_C900
-CART:0038 9F 80			      stx     word_C880
+CART:0031 0F 9D			      clr     byte_C89D
+CART:0033 0C 9D			      inc     byte_C89D
+CART:0035 8E C9	00		      ldx     #score_1
+CART:0038 9F 80			      stx     addr_score
 CART:003A
 CART:003A	      loc_3A:				      ;	CODE XREF: CART:0048j
 CART:003A 86 03			      lda     #3
 CART:003C A7 08			      sta     8,x
 CART:003E 6F 09			      clr     9,x
 CART:0040 BD F8	4F		      jsr     Clear_Score
-CART:0043 8E C9	0E		      ldx     #unk_C90E
-CART:0046 0A 9D			      dec     word_C89D
+CART:0043 8E C9	0E		      ldx     #score_2
+CART:0046 0A 9D			      dec     byte_C89D
 CART:0048 2A F0			      bpl     loc_3A
-CART:004A 8E C9	00		      ldx     #unk_C900
+CART:004A 8E C9	00		      ldx     #score_1
 CART:004D CC 00	A5		      ldd     #0xA5 ; '•'
 CART:0050 ED 0A			      std     0xA,x
-CART:0052 8E C9	0E		      ldx     #unk_C90E
+CART:0052 8E C9	0E		      ldx     #score_2
 CART:0055 CC 00	5B		      ldd     #0x5B ; '['
 CART:0058 ED 0A			      std     0xA,x
 CART:005A 86 A0			      lda     #0xA0 ; '†'
@@ -79,15 +79,15 @@ CART:0066	      loc_66:				      ;	CODE XREF: CART:03D6J
 CART:0066						      ;	CART:03DDj
 CART:0066 86 3F			      lda     #0x3F ; '?'
 CART:0068 97 85			      sta     byte_C885
-CART:006A 8E C8	C5		      ldx     #word_C8C5
-CART:006D C6 26			      ldb     #0x26 ; '&'
+CART:006A 8E C8	C5		      ldx     #byte_C8C5
+CART:006D C6 26			      ldb     #38
 CART:006F BD F5	3F		      jsr     Clear_x_b
 CART:0072 BD 0E	F6		      jsr     sub_EF6
-CART:0075 8E C8	D1		      ldx     #(word_C8D0+1)
+CART:0075 8E C8	D1		      ldx     #bonus
 CART:0078 BD F8	4F		      jsr     Clear_Score
 CART:007B
 CART:007B	      loc_7B:
-CART:007B 9E 80			      ldx     word_C880
+CART:007B 9E 80			      ldx     addr_score
 CART:007D
 CART:007D	      loc_7D:
 CART:007D EC 0A			      ldd     0xA,x
@@ -111,7 +111,7 @@ CART:009C BD F2	89		      jsr     Do_Sound
 CART:009F BD F1	AF		      jsr     DP_to_C8
 CART:00A2 0A 85			      dec     byte_C885
 CART:00A4 26 E0			      bne     loc_86
-CART:00A6 9E 80			      ldx     word_C880
+CART:00A6 9E 80			      ldx     addr_score
 CART:00A8 6A 08			      dec     8,x
 CART:00AA BD F5	33		      jsr     Init_Music_Buf
 CART:00AD 20 06			      bra     loc_B5
@@ -124,7 +124,7 @@ CART:00B5
 CART:00B5	      loc_B5:				      ;	CODE XREF: CART:00ADj
 CART:00B5 86 2A			      lda     #0x2A ; '*'
 CART:00B7 97 86			      sta     byte_C886
-CART:00B9 DE 80			      ldu     word_C880
+CART:00B9 DE 80			      ldu     addr_score
 CART:00BB EC 4A			      ldd     0xA,u
 CART:00BD DD 8F			      std     word_C88F
 CART:00BF DD 95			      std     byte_C895
@@ -151,7 +151,7 @@ CART:00E2 10 A3	81		      cmpd    ,x++
 CART:00E5 2C F5			      bge     loc_DC
 CART:00E7
 CART:00E7	      loc_E7:				      ;	CODE XREF: CART:00E0j
-CART:00E7 8E C8	D1		      ldx     #(word_C8D0+1)
+CART:00E7 8E C8	D1		      ldx     #bonus
 CART:00EA BD F8	4F		      jsr     Clear_Score
 CART:00ED 96 83			      lda     byte_C883
 CART:00EF 81 06			      cmpa    #6
@@ -171,7 +171,7 @@ CART:00FE 8E C9	74		      ldx     #unk_C974
 CART:0101 BD F5	45		      jsr     Clear_x_256
 CART:0104
 CART:0104	      loc_104:				      ;	CODE XREF: CART:0153j
-CART:0104 0F C7			      clr     word_C8C7
+CART:0104 0F C7			      clr     byte_C8C7
 CART:0106 C6 0B			      ldb     #0xB
 CART:0108 8E 0C	E6		      ldx     #unk_CE6
 CART:010B CE C9	1C		      ldu     #unk_C91C
@@ -180,12 +180,12 @@ CART:010E	      loc_10E:				      ;	CODE XREF: CART:014Fj
 CART:010E BD F5	17		      jsr     Random
 CART:0111 91 A8			      cmpa    byte_C8A8
 CART:0113 22 37			      bhi     loc_14C
-CART:0115 0C C7			      inc     word_C8C7
+CART:0115 0C C7			      inc     byte_C8C7
 CART:0117 86 80			      lda     #0x80 ; 'Ä'
 CART:0119 A7 42			      sta     2,u
 CART:011B BD F5	17		      jsr     Random
 CART:011E 84 1F			      anda    #0x1F
-CART:0120 97 9D			      sta     word_C89D
+CART:0120 97 9D			      sta     byte_C89D
 CART:0122 80 10			      suba    #0x10
 CART:0124 AB 84			      adda    ,x
 CART:0126 A7 C4			      sta     ,u
@@ -213,9 +213,9 @@ CART:014C	      loc_14C:				      ;	CODE XREF: CART:0113j
 CART:014C 30 02			      leax    2,x
 CART:014E 5A			      decb
 CART:014F 26 BD			      bne     loc_10E
-CART:0151 96 C7			      lda     word_C8C7
+CART:0151 96 C7			      lda     byte_C8C7
 CART:0153 27 AF			      beq     loc_104
-CART:0155 97 C8			      sta     word_C8C7+1
+CART:0155 97 C8			      sta     unk_C8C8
 CART:0157 1F 30			      tfr     u, d
 CART:0159 83 C9	24		      subd    #unk_C924
 CART:015C D7 AA			      stb     byte_C8AA
@@ -228,7 +228,7 @@ CART:0168 86 20			      lda     #0x20 ; ' '
 CART:016A 97 97			      sta     byte_C897
 CART:016C 86 01			      lda     #1
 CART:016E 97 98			      sta     byte_C898
-CART:0170 96 C7			      lda     word_C8C7
+CART:0170 96 C7			      lda     byte_C8C7
 CART:0172 C6 50			      ldb     #0x50 ; 'P'
 CART:0174 3D			      mul
 CART:0175 4D			      tsta
@@ -238,22 +238,22 @@ CART:017A 5F			      clrb
 CART:017B
 CART:017B	      loc_17B:				      ;	CODE XREF: CART:0176j
 CART:017B DD 2E			      std     Vec_Counter_1
-CART:017D 0F C5			      clr     word_C8C5
+CART:017D 0F C5			      clr     byte_C8C5
 CART:017F
-CART:017F	      loc_17F:				      ;	CODE XREF: CART:01B2j
+CART:017F	      GAME_LOOP:			      ;	CODE XREF: CART:01B2j
 CART:017F BD F1	92		      jsr     Wait_Recal
 CART:0182 BD F1	F8		      jsr     Joy_Digital
 CART:0185 BD F1	BA		      jsr     Read_Btns
 CART:0188 BD F2	89		      jsr     Do_Sound
 CART:018B BD 04	86		      jsr     sub_486
 CART:018E BD F1	AF		      jsr     DP_to_C8
-CART:0191 8E 01	98		      ldx     #off_198
-CART:0194 96 C5			      lda     word_C8C5
+CART:0191 8E 01	98		      ldx     #main_jmp_tbl
+CART:0194 96 C5			      lda     byte_C8C5	      ;	jmp tbl	entry
 CART:0196 6E 96			      jmp     [a,x]
 CART:0196	      ;	---------------------------------------------------------------------------
-CART:0198 01 B4	      off_198:	      .dw loc_1B4	      ;	DATA XREF: CART:0191o
-CART:019A 09 76			      .dw loc_976
-CART:019C 03 6B			      .dw loc_36B
+CART:0198 01 B4	      main_jmp_tbl:   .dw main_sub_1	      ;	DATA XREF: CART:0191o
+CART:019A 09 76			      .dw main_sub_2
+CART:019C 03 6B			      .dw main_sub_3
 CART:019E	      ;	---------------------------------------------------------------------------
 CART:019E
 CART:019E	      loc_19E:				      ;	CODE XREF: CART:0298J
@@ -271,10 +271,10 @@ CART:01AE 30 1F			      leax    -1,x
 CART:01B0
 CART:01B0	      loc_1B0:				      ;	CODE XREF: CART:01ACj
 CART:01B0 9F 2E			      stx     Vec_Counter_1
-CART:01B2 20 CB			      bra     loc_17F
+CART:01B2 20 CB			      bra     GAME_LOOP
 CART:01B4	      ;	---------------------------------------------------------------------------
 CART:01B4
-CART:01B4	      loc_1B4:				      ;	DATA XREF: CART:off_198o
+CART:01B4	      main_sub_1:			      ;	DATA XREF: CART:main_jmp_tblo
 CART:01B4 8E C8	8F		      ldx     #word_C88F
 CART:01B7 96 E9			      lda     byte_C8E9
 CART:01B9 27 04			      beq     loc_1BF
@@ -284,44 +284,44 @@ CART:01BF	      ;	--------------------------------------------------------------
 CART:01BF
 CART:01BF	      loc_1BF:				      ;	CODE XREF: CART:01B9j
 CART:01BF 5F			      clrb
-CART:01C0 96 1C			      lda     Vec_Joy_1_Y
-CART:01C2 2A 04			      bpl     loc_1C8
-CART:01C4 CB 08			      addb    #8
+CART:01C0 96 1C			      lda     Vec_Joy_1_Y     ;	up/down
+CART:01C2 2A 04			      bpl     loc_1C8	      ;	up, go
+CART:01C4 CB 08			      addb    #8	      ;	8=down
 CART:01C6 20 04			      bra     loc_1CC
 CART:01C8	      ;	---------------------------------------------------------------------------
 CART:01C8
 CART:01C8	      loc_1C8:				      ;	CODE XREF: CART:01C2j
-CART:01C8 27 02			      beq     loc_1CC
-CART:01CA CB 04			      addb    #4
+CART:01C8 27 02			      beq     loc_1CC	      ;	centre,	go
+CART:01CA CB 04			      addb    #4	      ;	4=up
 CART:01CC
 CART:01CC	      loc_1CC:				      ;	CODE XREF: CART:01C6j
 CART:01CC						      ;	CART:loc_1C8j
-CART:01CC 96 1B			      lda     Vec_Joy_1_X
-CART:01CE 2A 04			      bpl     loc_1D4
-CART:01D0 CB 11			      addb    #0x11
+CART:01CC 96 1B			      lda     Vec_Joy_1_X     ;	left/right
+CART:01CE 2A 04			      bpl     loc_1D4	      ;	right, go
+CART:01D0 CB 11			      addb    #0x11	      ;	left=0x11
 CART:01D2 20 04			      bra     loc_1D8
 CART:01D4	      ;	---------------------------------------------------------------------------
 CART:01D4
 CART:01D4	      loc_1D4:				      ;	CODE XREF: CART:01CEj
-CART:01D4 27 02			      beq     loc_1D8
-CART:01D6 CB 02			      addb    #2
+CART:01D4 27 02			      beq     loc_1D8	      ;	centre,	go
+CART:01D6 CB 02			      addb    #2	      ;	right=2
 CART:01D8
 CART:01D8	      loc_1D8:				      ;	CODE XREF: CART:01D2j
 CART:01D8						      ;	CART:loc_1D4j
 CART:01D8 96 0F			      lda     Vec_Btn_State
-CART:01DA 27 27			      beq     loc_203
-CART:01DC CA 20			      orab    #0x20 ; ' '
-CART:01DE C5 0F			      bitb    #0xF
-CART:01E0 27 30			      beq     loc_212
-CART:01E2 D7 EA			      stb     byte_C8EA
+CART:01DA 27 27			      beq     loc_203	      ;	no buttons pressed, skip
+CART:01DC CA 20			      orab    #0x20 ; ' '     ; 0x20=btn
+CART:01DE C5 0F			      bitb    #0xF	      ;	joystick centred?
+CART:01E0 27 30			      beq     loc_212	      ;	yes, skip
+CART:01E2 D7 EA			      stb     controller_state
 CART:01E4 86 08			      lda     #8
 CART:01E6 97 E9			      sta     byte_C8E9
-CART:01E8 C4 0F			      andb    #0xF
-CART:01EA D7 EB			      stb     byte_C8EB
+CART:01E8 C4 0F			      andb    #0xF	      ;	directions only
+CART:01EA D7 EB			      stb     joystick_state
 CART:01EC 86 06			      lda     #6
-CART:01EE BD 09	39		      jsr     sub_939
-CART:01F1 DD 9E			      std     word_C89D+1
-CART:01F3 8E C8	9E		      ldx     #(word_C89D+1)
+CART:01EE BD 09	39		      jsr     sub_939	      ;	wtf?
+CART:01F1 DD 9E			      std     unk_C89E
+CART:01F3 8E C8	9E		      ldx     #unk_C89E
 CART:01F6 C6 03			      ldb     #3
 CART:01F8 BD 03	33		      jsr     sub_333
 CART:01FB 86 01			      lda     #1
@@ -331,7 +331,7 @@ CART:0201 20 0F			      bra     loc_212
 CART:0203	      ;	---------------------------------------------------------------------------
 CART:0203
 CART:0203	      loc_203:				      ;	CODE XREF: CART:01DAj
-CART:0203 D7 EA			      stb     byte_C8EA
+CART:0203 D7 EA			      stb     controller_state
 CART:0205 96 26			      lda     Vec_Loop_Count+1
 CART:0207 85 02			      bita    #2
 CART:0209 26 07			      bne     loc_212
@@ -341,21 +341,21 @@ CART:0210 ED 84			      std     ,x
 CART:0212
 CART:0212	      loc_212:				      ;	CODE XREF: CART:01BDj
 CART:0212						      ;	CART:01E0j ...
-CART:0212 96 EA			      lda     byte_C8EA
-CART:0214 26 06			      bne     loc_21C
+CART:0212 96 EA			      lda     controller_state ; anything depressed?
+CART:0214 26 06			      bne     loc_21C	      ;	yes, skip
 CART:0216 0F CE			      clr     byte_C8CE
-CART:0218 0F CF			      clr     byte_C8CF
+CART:0218 0F CF			      clr     validated_dir
 CART:021A 20 27			      bra     loc_243
 CART:021C	      ;	---------------------------------------------------------------------------
 CART:021C
 CART:021C	      loc_21C:				      ;	CODE XREF: CART:0214j
-CART:021C 85 20			      bita    #0x20 ; ' '
-CART:021E 27 0D			      beq     loc_22D
+CART:021C 85 20			      bita    #0x20 ; ' '     ; any button depressed?
+CART:021E 27 0D			      beq     loc_22D	      ;	no, skip
 CART:0220 0F CE			      clr     byte_C8CE
-CART:0222 CE 0A	3C		      ldu     #0xA3C
-CART:0225 84 0F			      anda    #0xF
+CART:0222 CE 0A	3C		      ldu     #joy_dir_tbl
+CART:0225 84 0F			      anda    #0xF	      ;	direction only
 CART:0227 E6 C6			      ldb     a,u
-CART:0229 D7 CF			      stb     byte_C8CF
+CART:0229 D7 CF			      stb     validated_dir
 CART:022B 20 16			      bra     loc_243
 CART:022D	      ;	---------------------------------------------------------------------------
 CART:022D
@@ -367,7 +367,7 @@ CART:0233 84 08			      anda    #8
 CART:0235 1F 89			      tfr     a, b
 CART:0237 57			      asrb
 CART:0238 57			      asrb
-CART:0239 D7 CF			      stb     byte_C8CF
+CART:0239 D7 CF			      stb     validated_dir
 CART:023B AA E0			      oraa    ,s+
 CART:023D 47			      asra
 CART:023E 47			      asra
@@ -378,14 +378,14 @@ CART:0243	      loc_243:				      ;	CODE XREF: CART:021Aj
 CART:0243						      ;	CART:022Bj
 CART:0243 DC 8F			      ldd     word_C88F
 CART:0245 BD 0F	98		      jsr     sub_F98
-CART:0248 8E 0E	EA		      ldx     #0xEEA
+CART:0248 8E 0E	EA		      ldx     #unk_EEA
 CART:024B BD 0E	C7		      jsr     sub_EC7
 CART:024E D5 99			      bitb    byte_C899
 CART:0250 27 56			      beq     loc_2A8
 CART:0252 96 9A			      lda     byte_C89A
 CART:0254 81 02			      cmpa    #2
 CART:0256 26 0C			      bne     loc_264
-CART:0258 96 C6			      lda     word_C8C5+1
+CART:0258 96 C6			      lda     unk_C8C6
 CART:025A 85 10			      bita    #0x10
 CART:025C 26 3D			      bne     loc_29B
 CART:025E C4 04			      andb    #4
@@ -396,7 +396,7 @@ CART:0264
 CART:0264	      loc_264:				      ;	CODE XREF: CART:0256j
 CART:0264 81 05			      cmpa    #5
 CART:0266 26 0C			      bne     loc_274
-CART:0268 96 C6			      lda     word_C8C5+1
+CART:0268 96 C6			      lda     unk_C8C6
 CART:026A 85 04			      bita    #4
 CART:026C 26 2D			      bne     loc_29B
 CART:026E C4 01			      andb    #1
@@ -407,7 +407,7 @@ CART:0274
 CART:0274	      loc_274:				      ;	CODE XREF: CART:0266j
 CART:0274 81 09			      cmpa    #9
 CART:0276 26 0C			      bne     loc_284
-CART:0278 96 C6			      lda     word_C8C5+1
+CART:0278 96 C6			      lda     unk_C8C6
 CART:027A 85 02			      bita    #2
 CART:027C 26 1D			      bne     loc_29B
 CART:027E C4 02			      andb    #2
@@ -418,7 +418,7 @@ CART:0284
 CART:0284	      loc_284:				      ;	CODE XREF: CART:0276j
 CART:0284 81 0C			      cmpa    #0xC
 CART:0286 26 13			      bne     loc_29B
-CART:0288 96 C6			      lda     word_C8C5+1
+CART:0288 96 C6			      lda     unk_C8C6
 CART:028A 85 08			      bita    #8
 CART:028C 26 0D			      bne     loc_29B
 CART:028E C4 08			      andb    #8
@@ -426,9 +426,9 @@ CART:0290 27 09			      beq     loc_29B
 CART:0292
 CART:0292	      loc_292:				      ;	CODE XREF: CART:0262j
 CART:0292						      ;	CART:0272j ...
-CART:0292 D7 EA			      stb     byte_C8EA
+CART:0292 D7 EA			      stb     controller_state
 CART:0294 C6 02			      ldb     #2
-CART:0296 D7 C5			      stb     word_C8C5
+CART:0296 D7 C5			      stb     byte_C8C5
 CART:0298 7E 01	9E		      jmp     loc_19E
 CART:029B	      ;	---------------------------------------------------------------------------
 CART:029B
@@ -438,7 +438,7 @@ CART:029B 86 08			      lda     #8
 CART:029D 9A 67			      oraa    Vec_Expl_Flag
 CART:029F 97 67			      sta     Vec_Expl_Flag
 CART:02A1 C6 04			      ldb     #4
-CART:02A3 D7 C5			      stb     word_C8C5
+CART:02A3 D7 C5			      stb     byte_C8C5
 CART:02A5 7E 01	9E		      jmp     loc_19E
 CART:02A8	      ;	---------------------------------------------------------------------------
 CART:02A8
@@ -469,7 +469,7 @@ CART:02CC	      ;	--------------------------------------------------------------
 CART:02CC
 CART:02CC	      loc_2CC:				      ;	CODE XREF: CART:02B0j
 CART:02CC						      ;	CART:02BEj ...
-CART:02CC 9E 80			      ldx     word_C880
+CART:02CC 9E 80			      ldx     addr_score
 CART:02CE A6 08			      lda     8,x
 CART:02D0 8D 43			      bsr     sub_315
 CART:02D2 6D 09			      tst     9,x
@@ -479,23 +479,23 @@ CART:02D8 A1 02			      cmpa    2,x
 CART:02DA 2E 0A			      bgt     loc_2E6
 CART:02DC 6C 08			      inc     8,x
 CART:02DE 6C 09			      inc     9,x
-CART:02E0 CE FF	44		      ldu     #0xFF44
+CART:02E0 CE FF	44		      ldu     #unk_FF44
 CART:02E3 BD F6	8D		      jsr     Init_Music
 CART:02E6
 CART:02E6	      loc_2E6:				      ;	CODE XREF: CART:02D4j
 CART:02E6						      ;	CART:02DAj
-CART:02E6 0D C8			      tst     word_C8C7+1
+CART:02E6 0D C8			      tst     unk_C8C8
 CART:02E8 26 28			      bne     loc_312
 CART:02EA 86 02			      lda     #2
 CART:02EC 95 98			      bita    byte_C898
 CART:02EE 26 22			      bne     loc_312
 CART:02F0 0C 98			      inc     byte_C898
 CART:02F2 4F			      clra
-CART:02F3 D6 C7			      ldb     word_C8C7
+CART:02F3 D6 C7			      ldb     byte_C8C7
 CART:02F5 C1 0A			      cmpb    #0xA
-CART:02F7 2D 04			      blt     loc_2FD
+CART:02F7 2D 04			      blt     loc_2FD	      ;	no BCD conversion req'd
 CART:02F9 C0 0A			      subb    #0xA
-CART:02FB CA 10			      orab    #0x10
+CART:02FB CA 10			      orab    #0x10	      ;	convert	to BCD
 CART:02FD
 CART:02FD	      loc_2FD:				      ;	CODE XREF: CART:02F7j
 CART:02FD 58			      aslb
@@ -505,11 +505,11 @@ CART:0300 49			      rola
 CART:0301 58			      aslb
 CART:0302 49			      rola
 CART:0303 58			      aslb
-CART:0304 49			      rola
+CART:0304 49			      rola		      ;	x16 (BCD x10)
 CART:0305 34 06			      pshs    a,b
 CART:0307 BD F8	7C		      jsr     Add_Score_d
 CART:030A 35 06			      puls    b,a
-CART:030C 8E C8	D1		      ldx     #(word_C8D0+1)
+CART:030C 8E C8	D1		      ldx     #bonus
 CART:030F BD F8	7C		      jsr     Add_Score_d
 CART:0312
 CART:0312	      loc_312:				      ;	CODE XREF: CART:02E8j
@@ -523,14 +523,14 @@ CART:0315	      sub_315:				      ;	CODE XREF: CART:0083P
 CART:0315						      ;	CART:02D0p
 CART:0315 5F			      clrb
 CART:0316 CE C8	D8		      ldu     #unk_C8D8
-CART:0319 97 9D			      sta     word_C89D
+CART:0319 97 9D			      sta     byte_C89D
 CART:031B 27 09			      beq     loc_326
 CART:031D 86 69			      lda     #0x69 ; 'i'
 CART:031F
 CART:031F	      loc_31F:				      ;	CODE XREF: sub_315+Fj
 CART:031F A7 C5			      sta     b,u
 CART:0321 5C			      incb
-CART:0322 D1 9D			      cmpb    word_C89D
+CART:0322 D1 9D			      cmpb    byte_C89D
 CART:0324 2D F9			      blt     loc_31F
 CART:0326
 CART:0326	      loc_326:				      ;	CODE XREF: sub_315+6j
@@ -550,11 +550,11 @@ CART:0333
 CART:0333
 CART:0333	      sub_333:				      ;	CODE XREF: CART:01F8P
 CART:0333						      ;	sub_64A+71P
-CART:0333 D7 9D			      stb     word_C89D
+CART:0333 D7 9D			      stb     byte_C89D
 CART:0335 34 50			      pshs    x,u
 CART:0337 EC 84			      ldd     ,x
 CART:0339 BD 0F	98		      jsr     sub_F98
-CART:033C 8E 0E	EE		      ldx     #0xEEE
+CART:033C 8E 0E	EE		      ldx     #unk_EEE
 CART:033F BD 0E	C7		      jsr     sub_EC7
 CART:0342 35 10			      puls    x
 CART:0344 D5 99			      bitb    byte_C899
@@ -564,13 +564,13 @@ CART:034A 86 08			      lda     #8
 CART:034C 3D			      mul
 CART:034D CE C9	74		      ldu     #unk_C974
 CART:0350 33 C5			      leau    b,u
-CART:0352 96 EB			      lda     byte_C8EB
+CART:0352 96 EB			      lda     joystick_state
 CART:0354 A7 47			      sta     7,u
-CART:0356 96 9D			      lda     word_C89D
+CART:0356 96 9D			      lda     byte_C89D
 CART:0358 A7 46			      sta     6,u
 CART:035A EC 84			      ldd     ,x
 CART:035C ED C4			      std     ,u
-CART:035E D6 EB			      ldb     byte_C8EB
+CART:035E D6 EB			      ldb     joystick_state
 CART:0360 86 02			      lda     #2
 CART:0362 BD 09	39		      jsr     sub_939
 CART:0365 ED 44			      std     4,u
@@ -582,21 +582,21 @@ CART:0369	      ;	End of function	sub_333
 CART:0369
 CART:036B	      ;	---------------------------------------------------------------------------
 CART:036B
-CART:036B	      loc_36B:				      ;	DATA XREF: CART:019Co
-CART:036B 0F EA			      clr     byte_C8EA
+CART:036B	      main_sub_3:			      ;	DATA XREF: CART:019Co
+CART:036B 0F EA			      clr     controller_state
 CART:036D 0F CD			      clr     byte_C8CD
 CART:036F BD 06	4A		      jsr     sub_64A
 CART:0372 BD 08	25		      jsr     sub_825
 CART:0375 96 86			      lda     byte_C886
 CART:0377 84 0F			      anda    #0xF
-CART:0379 CE 0D	0B		      ldu     #0xD0B
+CART:0379 CE 0D	0B		      ldu     #unk_D0B
 CART:037C E6 C6			      ldb     a,u
-CART:037E D7 D0			      stb     word_C8D0
+CART:037E D7 D0			      stb     byte_C8D0
 CART:0380 0A 86			      dec     byte_C886
 CART:0382 10 2A	FE 18		      lbpl    loc_19E
 CART:0386 86 A0			      lda     #0xA0 ; '†'
 CART:0388 97 A8			      sta     byte_C8A8
-CART:038A 9E 80			      ldx     word_C880
+CART:038A 9E 80			      ldx     addr_score
 CART:038C CE CB	EB		      ldu     #Vec_High_Score
 CART:038F BD F8	D8		      jsr     New_High_Score
 CART:0392 86 50			      lda     #0x50 ; 'P'
@@ -613,68 +613,68 @@ CART:03A6 BD F2	89		      jsr     Do_Sound
 CART:03A9 BD F1	AF		      jsr     DP_to_C8
 CART:03AC 0A 85			      dec     byte_C885
 CART:03AE 26 EA			      bne     loc_39A
-CART:03B0 8E C9	00		      ldx     #unk_C900
+CART:03B0 8E C9	00		      ldx     #score_1
 CART:03B3 CC 00	A5		      ldd     #0xA5 ; '•'
 CART:03B6 ED 0A			      std     0xA,x
-CART:03B8 8E C9	0E		      ldx     #unk_C90E
+CART:03B8 8E C9	0E		      ldx     #score_2
 CART:03BB CC 00	5B		      ldd     #0x5B ; '['
 CART:03BE ED 0A			      std     0xA,x
-CART:03C0 0F C6			      clr     word_C8C5+1
-CART:03C2 0D 82			      tst     byte_C882
-CART:03C4 27 13			      beq     loc_3D9
-CART:03C6 8E C9	00		      ldx     #unk_C900
-CART:03C9 0D 81			      tst     word_C880+1
+CART:03C0 0F C6			      clr     unk_C8C6
+CART:03C2 0D 82			      tst     NumPlayers0_1   ;	2 players?
+CART:03C4 27 13			      beq     loc_3D9	      ;	no, skip
+CART:03C6 8E C9	00		      ldx     #score_1
+CART:03C9 0D 81			      tst     addr_score+1
 CART:03CB 26 03			      bne     loc_3D0
-CART:03CD 8E C9	0E		      ldx     #unk_C90E
+CART:03CD 8E C9	0E		      ldx     #score_2
 CART:03D0
 CART:03D0	      loc_3D0:				      ;	CODE XREF: CART:03CBj
 CART:03D0 6D 08			      tst     8,x
 CART:03D2 27 05			      beq     loc_3D9
-CART:03D4 9F 80			      stx     word_C880
+CART:03D4 9F 80			      stx     addr_score
 CART:03D6 7E 00	66		      jmp     loc_66
 CART:03D9	      ;	---------------------------------------------------------------------------
 CART:03D9
 CART:03D9	      loc_3D9:				      ;	CODE XREF: CART:03C4j
 CART:03D9						      ;	CART:03D2j
-CART:03D9 9E 80			      ldx     word_C880
+CART:03D9 9E 80			      ldx     addr_score
 CART:03DB 6D 08			      tst     8,x
 CART:03DD 10 26	FC 85		      lbne    loc_66
 CART:03E1 0F 9F			      clr     byte_C89F
 CART:03E3 8E 0C	00		      ldx     #0xC00
 CART:03E6
 CART:03E6	      loc_3E6:				      ;	CODE XREF: CART:0457j
-CART:03E6 9F 9D			      stx     word_C89D
+CART:03E6 9F 9D			      stx     byte_C89D
 CART:03E8 BD 0D	41		      jsr     sub_D41
 CART:03EB BD F1	92		      jsr     Wait_Recal
 CART:03EE BD F2	A5		      jsr     Intensity_5F
 CART:03F1 BD F2	89		      jsr     Do_Sound
 CART:03F4 7D C8	9F		      tst     byte_C89F
 CART:03F7 27 06			      beq     loc_3FF
-CART:03F9 CE 0C	DE		      ldu     #0xCDE
+CART:03F9 CE 0C	DE		      ldu     #str_CMK
 CART:03FC BD F3	73		      jsr     Print_Str_hwyx
 CART:03FF
 CART:03FF	      loc_3FF:				      ;	CODE XREF: CART:03F7j
-CART:03FF CE 04	6D		      ldu     #0x46D
+CART:03FF CE 04	6D		      ldu     #strHIGHSCORE
 CART:0402 BD F3	73		      jsr     Print_Str_hwyx
 CART:0405 CE CB	EB		      ldu     #Vec_High_Score
-CART:0408 CC 60	E0		      ldd     #0x60E0
+CART:0408 CC 60	E0		      ldd     #0x60E0	      ;	pen position
 CART:040B BD F3	7A		      jsr     Print_Str_d
 CART:040E BD 06	32		      jsr     sub_632
-CART:0411 10 8E	04 7C		      ldy     #0x47C
+CART:0411 10 8E	04 7C		      ldy     #msg_pen_pos_tbl
 CART:0415 EC A1			      ldd     ,y++
 CART:0417 FD C8	2A		      std     Vec_Text_HW
-CART:041A EC A1			      ldd     ,y++
+CART:041A EC A1			      ldd     ,y++	      ;	pen position
 CART:041C CE 04	5C		      ldu     #aGotYou	      ;	"GOT YOU"
 CART:041F 34 40			      pshs    u
 CART:0421 BD F3	7A		      jsr     Print_Str_d
-CART:0424 35 40			      puls    u
-CART:0426 EC A1			      ldd     ,y++
+CART:0424 35 40			      puls    u		      ;	(again)
+CART:0426 EC A1			      ldd     ,y++	      ;	pen position
 CART:0428 BD F3	7A		      jsr     Print_Str_d
-CART:042B 34 40			      pshs    u
-CART:042D EC A1			      ldd     ,y++
+CART:042B 34 40			      pshs    u		      ;	"HUMANOID"
+CART:042D EC A1			      ldd     ,y++	      ;	pen position
 CART:042F BD F3	7A		      jsr     Print_Str_d
-CART:0432 EC A1			      ldd     ,y++
-CART:0434 35 40			      puls    u
+CART:0432 EC A1			      ldd     ,y++	      ;	pen position
+CART:0434 35 40			      puls    u		      ;	(again)
 CART:0436 BD F3	7A		      jsr     Print_Str_d
 CART:0439 BD F1	BA		      jsr     Read_Btns
 CART:043C BD F1	AF		      jsr     DP_to_C8
@@ -693,7 +693,7 @@ CART:044F 10 26	FB DB		      lbne    loc_2E
 CART:0453
 CART:0453	      loc_453:				      ;	CODE XREF: CART:0441j
 CART:0453						      ;	CART:044Bj
-CART:0453 9E 9D			      ldx     word_C89D
+CART:0453 9E 9D			      ldx     byte_C89D
 CART:0455 30 1F			      leax    -1,x
 CART:0457 26 8D			      bne     loc_3E6
 CART:0459 7E F0	00		      jmp     RESET
@@ -702,31 +702,14 @@ CART:045C 47 4F	54 20+aGotYou:	      .ascii 'GOT YOU'        ; DATA XREF: CART:0
 CART:0463 FF			      .db 0xFF
 CART:0464 48 55	4D 41+aHumanoid:      .ascii 'HUMANOID'
 CART:046C FF			      .db 0xFF
-CART:046D F8			      .db 0xF8 ; ¯
-CART:046E 38			      .db 0x38 ; 8
-CART:046F 70			      .db 0x70 ; p
-CART:0470 D8			      .db 0xD8 ; ÿ
-CART:0471 48			      .db 0x48 ; H
-CART:0472 49			      .db 0x49 ; I
-CART:0473 47			      .db 0x47 ; G
-CART:0474 48			      .db 0x48 ; H
-CART:0475 20			      .db 0x20
-CART:0476 53			      .db 0x53 ; S
-CART:0477 43			      .db 0x43 ; C
-CART:0478 4F			      .db 0x4F ; O
-CART:0479 52			      .db 0x52 ; R
-CART:047A 45			      .db 0x45 ; E
-CART:047B 20			      .db 0x20
-CART:047C F2			      .db 0xF2 ; Ú
-CART:047D 4A			      .db 0x4A ; J
-CART:047E 22			      .db 0x22 ; "
-CART:047F D8			      .db 0xD8 ; ÿ
-CART:0480 20			      .db 0x20
-CART:0481 D8			      .db 0xD8 ; ÿ
-CART:0482 00			      .db    0
-CART:0483 CF			      .db 0xCF ; œ
-CART:0484 FE			      .db 0xFE ; ˛
-CART:0485 CF			      .db 0xCF ; œ
+CART:046D F8 38	70 D8 strHIGHSCORE:   .db 0xF8,	0x38, 0x70, 0xD8 ; DATA	XREF: CART:loc_3FFo
+CART:0471 48 49	47 48+aHighScore:     .ascii 'HIGH SCORE '
+CART:047C F2 4A	      msg_pen_pos_tbl:.db 0xF2,	0x4A	      ;	DATA XREF: CART:0411o
+CART:047C						      ;	dflt text height & width
+CART:047E 22 D8			      .dw 0x22D8	      ;	"GOT YOU"
+CART:0480 20 D8			      .dw 0x20D8	      ;	(again)
+CART:0482 00 CF			      .dw 0xCF		      ;	"HUMANOID"
+CART:0484 FE CF			      .dw 0xFECF	      ;	(again)
 CART:0486
 CART:0486	      ;	===============	S U B R	O U T I	N E =======================================
 CART:0486
@@ -735,13 +718,13 @@ CART:0486	      sub_486:				      ;	CODE XREF: CART:0099P
 CART:0486						      ;	CART:018BP ...
 CART:0486 7C C8	24		      inc     Vec_0Ref_Enable
 CART:0489 BD F2	A5		      jsr     Intensity_5F
-CART:048C 8E F3	DD		      ldx     #0xF3DD
-CART:048F BF C8	C9		      stx     word_C8C9
+CART:048C 8E F3	DD		      ldx     #Draw_VL
+CART:048F BF C8	C9		      stx     addr_some_routine
 CART:0492 86 7F			      lda     #0x7F ; ''
 CART:0494 B7 C8	CB		      sta     word_C8CB
 CART:0497 C6 04			      ldb     #4
 CART:0499 E7 71			      stb     -0xF,s
-CART:049B CE 0B	0B		      ldu     #0xB0B
+CART:049B CE 0B	0B		      ldu     #unk_B0B
 CART:049E
 CART:049E	      loc_49E:				      ;	CODE XREF: sub_486+26j
 CART:049E 86 01			      lda     #1
@@ -755,18 +738,18 @@ CART:04AE 7F C8	23		      clr     Vec_Misc_Count
 CART:04B1 86 08			      lda     #8
 CART:04B3 A7 71			      sta     -0xF,s
 CART:04B5 10 8E	C8 AB		      ldy     #unk_C8AB
-CART:04B9 CE 0B	1B		      ldu     #0xB1B
+CART:04B9 CE 0B	1B		      ldu     #unk_B1B
 CART:04BC
 CART:04BC	      loc_4BC:				      ;	CODE XREF: sub_486+43j
 CART:04BC E6 A0			      ldb     ,y+
-CART:04BE 8E 0B	3B		      ldx     #0xB3B
+CART:04BE 8E 0B	3B		      ldx     #unk_B3B
 CART:04C1 3A			      abx
 CART:04C2 BD 08	C7		      jsr     sub_8C7
 CART:04C5 33 42			      leau    2,u
 CART:04C7 6A 71			      dec     -0xF,s
 CART:04C9 26 F1			      bne     loc_4BC
-CART:04CB CE 0A	E9		      ldu     #0xAE9
-CART:04CE B6 C8	C6		      lda     word_C8C5+1
+CART:04CB CE 0A	E9		      ldu     #unk_AE9
+CART:04CE B6 C8	C6		      lda     unk_C8C6
 CART:04D1 27 08			      beq     loc_4DB
 CART:04D3 EE C6			      ldu     a,u
 CART:04D5 30 42			      leax    2,u
@@ -774,31 +757,31 @@ CART:04D7 4F			      clra
 CART:04D8 BD 08	C7		      jsr     sub_8C7
 CART:04DB
 CART:04DB	      loc_4DB:				      ;	CODE XREF: sub_486+4Bj
-CART:04DB CC F8	38		      ldd     #0xF838
+CART:04DB CC F8	38		      ldd     #0xF838	      ;	default	text height, width
 CART:04DE FD C8	2A		      std     Vec_Text_HW
-CART:04E1 B6 C8	D5		      lda     word_C8D5
+CART:04E1 B6 C8	D5		      lda     bonus+4
 CART:04E4 81 30			      cmpa    #0x30 ; '0'
 CART:04E6 2F 0F			      ble     loc_4F7
-CART:04E8 CE 0A	E1		      ldu     #0xAE1
+CART:04E8 CE 0A	E1		      ldu     #strBONUS
 CART:04EB BD F3	78		      jsr     Print_Str_yx
-CART:04EE CC 70	F0		      ldd     #0x70F0
-CART:04F1 CE C8	D1		      ldu     #(word_C8D0+1)
+CART:04EE CC 70	F0		      ldd     #0x70F0	      ;	pen position
+CART:04F1 CE C8	D1		      ldu     #bonus
 CART:04F4 BD F3	7A		      jsr     Print_Str_d
 CART:04F7
 CART:04F7	      loc_4F7:				      ;	CODE XREF: sub_486+60j
 CART:04F7 BD 06	32		      jsr     sub_632
-CART:04FA CC F8	20		      ldd     #0xF820
+CART:04FA CC F8	20		      ldd     #0xF820	      ;	default	text width, height
 CART:04FD FD C8	2A		      std     Vec_Text_HW
 CART:0500 CE C8	D8		      ldu     #unk_C8D8
-CART:0503 7D C8	81		      tst     word_C880+1
+CART:0503 7D C8	81		      tst     addr_score+1
 CART:0506 27 08			      beq     loc_510
-CART:0508 CC 98	40		      ldd     #0x9840
+CART:0508 CC 98	40		      ldd     #0x9840	      ;	pen position
 CART:050B BD F3	7A		      jsr     Print_Str_d
 CART:050E 20 06			      bra     loc_516
 CART:0510	      ;	---------------------------------------------------------------------------
 CART:0510
 CART:0510	      loc_510:				      ;	CODE XREF: sub_486+80j
-CART:0510 CC 98	A0		      ldd     #0x98A0
+CART:0510 CC 98	A0		      ldd     #0x98A0	      ;	pen position
 CART:0513 BD F3	7A		      jsr     Print_Str_d
 CART:0516
 CART:0516	      loc_516:				      ;	CODE XREF: sub_486+88j
@@ -822,7 +805,7 @@ CART:0530 20 EA			      bra     loc_51C
 CART:0532	      ;	---------------------------------------------------------------------------
 CART:0532
 CART:0532	      loc_532:				      ;	CODE XREF: sub_486:loc_51Cj
-CART:0532 B6 C8	C7		      lda     word_C8C7
+CART:0532 B6 C8	C7		      lda     byte_C8C7
 CART:0535 10 27	00 AE		      lbeq    loc_5E7
 CART:0539 A7 71			      sta     -0xF,s
 CART:053B CE C9	1C		      ldu     #unk_C91C
@@ -840,21 +823,21 @@ CART:054A 2A 4D			      bpl     loc_599
 CART:054C 7F C8	24		      clr     Vec_0Ref_Enable
 CART:054F 86 04			      lda     #4
 CART:0551 B7 C8	CB		      sta     word_C8CB
-CART:0554 10 8E	0A 67		      ldy     #0xA67
+CART:0554 10 8E	0A 67		      ldy     #unk_A67
 CART:0558 A6 43			      lda     3,u
 CART:055A 48			      asla
 CART:055B 10 AE	A6		      ldy     a,y
-CART:055E 8E 06	19		      ldx     #0x619
-CART:0561 BF C8	C9		      stx     word_C8C9
+CART:055E 8E 06	19		      ldx     #loc_619
+CART:0561 BF C8	C9		      stx     addr_some_routine
 CART:0564 BD 08	C7		      jsr     sub_8C7
 CART:0567 31 26			      leay    6,y
-CART:0569 8E 06	14		      ldx     #0x614
-CART:056C BF C8	C9		      stx     word_C8C9
+CART:0569 8E 06	14		      ldx     #loc_614
+CART:056C BF C8	C9		      stx     addr_some_routine
 CART:056F BD 08	C7		      jsr     sub_8C7
 CART:0572 31 26			      leay    6,y
 CART:0574 7C C8	24		      inc     Vec_0Ref_Enable
-CART:0577 8E F3	BC		      ldx     #0xF3BC
-CART:057A BF C8	C9		      stx     word_C8C9
+CART:0577 8E F3	BC		      ldx     #Mov_Draw_VL
+CART:057A BF C8	C9		      stx     addr_some_routine
 CART:057D 86 04			      lda     #4
 CART:057F B7 C8	23		      sta     Vec_Misc_Count
 CART:0582 A6 44			      lda     4,u
@@ -905,8 +888,8 @@ CART:05CE 26 17			      bne     loc_5E7
 CART:05D0 7C C8	24		      inc     Vec_0Ref_Enable
 CART:05D3 86 14			      lda     #0x14
 CART:05D5 B7 C8	CB		      sta     word_C8CB
-CART:05D8 8E F4	10		      ldx     #0xF410
-CART:05DB BF C8	C9		      stx     word_C8C9
+CART:05D8 8E F4	10		      ldx     #Draw_VLp
+CART:05DB BF C8	C9		      stx     addr_some_routine
 CART:05DE 8E 0B	99		      ldx     #0xB99
 CART:05E1 CE C8	93		      ldu     #byte_C893
 CART:05E4 BD 08	C7		      jsr     sub_8C7
@@ -915,17 +898,17 @@ CART:05E7	      loc_5E7:				      ;	CODE XREF: sub_486+AFj
 CART:05E7						      ;	sub_486+143j ...
 CART:05E7 7D C8	86		      tst     byte_C886
 CART:05EA 2B 27			      bmi     locret_613
-CART:05EC 8E 09	EF		      ldx     #0x9EF
-CART:05EF BF C8	C9		      stx     word_C8C9
+CART:05EC 8E 09	EF		      ldx     #loc_9EF
+CART:05EF BF C8	C9		      stx     addr_some_routine
 CART:05F2 86 09			      lda     #9
 CART:05F4 B7 C8	CB		      sta     word_C8CB
 CART:05F7 CE C8	8F		      ldu     #word_C88F
 CART:05FA BD 08	C7		      jsr     sub_8C7
 CART:05FD BD F3	54		      jsr     Reset0Ref
-CART:0600 B6 C8	C5		      lda     word_C8C5
+CART:0600 B6 C8	C5		      lda     byte_C8C5
 CART:0603 81 04			      cmpa    #4
 CART:0605 26 0C			      bne     locret_613
-CART:0607 B6 C8	D0		      lda     word_C8D0
+CART:0607 B6 C8	D0		      lda     byte_C8D0
 CART:060A B7 C8	CB		      sta     word_C8CB
 CART:060D BD 08	C7		      jsr     sub_8C7
 CART:0610 BD F3	54		      jsr     Reset0Ref
@@ -935,50 +918,39 @@ CART:0613						      ;	sub_486+17Fj
 CART:0613 39			      rts
 CART:0613	      ;	End of function	sub_486
 CART:0613
-CART:0613	      ;	---------------------------------------------------------------------------
-CART:0614 8E			      .db 0x8E ; é
-CART:0615 0B			      .db  0xB
-CART:0616 5E			      .db 0x5E ; ^
-CART:0617 20			      .db 0x20
-CART:0618 03			      .db    3
-CART:0619 8E			      .db 0x8E ; é
-CART:061A 0B			      .db  0xB
-CART:061B 43			      .db 0x43 ; C
-CART:061C BD			      .db 0xBD ; Ω
-CART:061D F3			      .db 0xF3 ; Û
-CART:061E AD			      .db 0xAD ; ≠
-CART:061F A6			      .db 0xA6 ; ¶
-CART:0620 44			      .db 0x44 ; D
-CART:0621 84			      .db 0x84 ; Ñ
-CART:0622 02			      .db    2
-CART:0623 AE			      .db 0xAE ; Æ
-CART:0624 A6			      .db 0xA6 ; ¶
-CART:0625 86			      .db 0x86 ; Ü
-CART:0626 01			      .db    1
-CART:0627 BD			      .db 0xBD ; Ω
-CART:0628 F3			      .db 0xF3 ; Û
-CART:0629 DA			      .db 0xDA ; ⁄
-CART:062A AE			      .db 0xAE ; Æ
-CART:062B 24			      .db 0x24 ; $
-CART:062C BD			      .db 0xBD ; Ω
-CART:062D F3			      .db 0xF3 ; Û
-CART:062E DD			      .db 0xDD ; ›
-CART:062F 7E			      .db 0x7E ; ~
-CART:0630 F3			      .db 0xF3 ; Û
-CART:0631 54			      .db 0x54 ; T
+CART:0614	      ;	---------------------------------------------------------------------------
+CART:0614
+CART:0614	      loc_614:				      ;	DATA XREF: sub_486+E3o
+CART:0614 8E 0B	5E		      ldx     #VL_5_B5E
+CART:0617 20 03			      bra     loc_61C
+CART:0619	      ;	---------------------------------------------------------------------------
+CART:0619
+CART:0619	      loc_619:				      ;	DATA XREF: sub_486+D8o
+CART:0619 8E 0B	43		      ldx     #VL_5_B43
+CART:061C
+CART:061C	      loc_61C:				      ;	CODE XREF: CART:0617j
+CART:061C BD F3	AD		      jsr     Mov_Draw_VLc_a
+CART:061F A6 44			      lda     4,u
+CART:0621 84 02			      anda    #2
+CART:0623 AE A6			      ldx     a,y
+CART:0625 86 01			      lda     #1
+CART:0627 BD F3	DA		      jsr     Draw_VL_a
+CART:062A AE 24			      ldx     4,y
+CART:062C BD F3	DD		      jsr     Draw_VL
+CART:062F 7E F3	54		      jmp     Reset0Ref
 CART:0632
 CART:0632	      ;	===============	S U B R	O U T I	N E =======================================
 CART:0632
 CART:0632
 CART:0632	      sub_632:				      ;	CODE XREF: CART:040EP
 CART:0632						      ;	sub_486:loc_4F7P
-CART:0632 CC 70	86		      ldd     #0x7086
-CART:0635 CE C9	00		      ldu     #unk_C900
+CART:0632 CC 70	86		      ldd     #0x7086	      ;	pen position
+CART:0635 CE C9	00		      ldu     #score_1
 CART:0638 BD F3	7A		      jsr     Print_Str_d
-CART:063B 7D C8	82		      tst     byte_C882
+CART:063B 7D C8	82		      tst     NumPlayers0_1
 CART:063E 27 09			      beq     locret_649
-CART:0640 CC 70	24		      ldd     #0x7024
-CART:0643 CE C9	0E		      ldu     #unk_C90E
+CART:0640 CC 70	24		      ldd     #0x7024	      ;	pen position
+CART:0643 CE C9	0E		      ldu     #score_2
 CART:0646 BD F3	7A		      jsr     Print_Str_d
 CART:0649
 CART:0649	      locret_649:			      ;	CODE XREF: sub_632+Cj
@@ -991,9 +963,9 @@ CART:064A
 CART:064A
 CART:064A	      sub_64A:				      ;	CODE XREF: CART:02ABP
 CART:064A						      ;	CART:036FP
-CART:064A 96 C8			      lda     word_C8C7+1
+CART:064A 96 C8			      lda     unk_C8C8
 CART:064C 10 27	01 24		      lbeq    loc_774
-CART:0650 0F 9D			      clr     word_C89D
+CART:0650 0F 9D			      clr     byte_C89D
 CART:0652 96 A9			      lda     byte_C8A9
 CART:0654
 CART:0654	      loc_654:				      ;	CODE XREF: sub_64A+23j
@@ -1002,13 +974,13 @@ CART:0657 33 C6			      leau    a,u
 CART:0659 8B 08			      adda    #8
 CART:065B 91 AA			      cmpa    byte_C8AA
 CART:065D 23 0A			      bls     loc_669
-CART:065F 0D 9D			      tst     word_C89D
+CART:065F 0D 9D			      tst     byte_C89D
 CART:0661 27 03			      beq     loc_666
 CART:0663 7E 07	74		      jmp     loc_774
 CART:0666	      ;	---------------------------------------------------------------------------
 CART:0666
 CART:0666	      loc_666:				      ;	CODE XREF: sub_64A+17j
-CART:0666 0C 9D			      inc     word_C89D
+CART:0666 0C 9D			      inc     byte_C89D
 CART:0668 4F			      clra
 CART:0669
 CART:0669	      loc_669:				      ;	CODE XREF: sub_64A+13j
@@ -1052,12 +1024,12 @@ CART:06A7
 CART:06A7	      loc_6A7:				      ;	CODE XREF: sub_64A+51j
 CART:06A7 CA 80			      orab    #0x80 ; 'Ä'
 CART:06A9 C4 0F			      andb    #0xF
-CART:06AB D7 EB			      stb     byte_C8EB
+CART:06AB D7 EB			      stb     joystick_state
 CART:06AD 30 C4			      leax    ,u
 CART:06AF 86 07			      lda     #7
 CART:06B1 BD 09	39		      jsr     sub_939
-CART:06B4 DD 9E			      std     word_C89D+1
-CART:06B6 8E C8	9E		      ldx     #(word_C89D+1)
+CART:06B4 DD 9E			      std     unk_C89E
+CART:06B6 8E C8	9E		      ldx     #unk_C89E
 CART:06B9 D6 84			      ldb     byte_C884
 CART:06BB BD 03	33		      jsr     sub_333
 CART:06BE 86 02			      lda     #2
@@ -1116,7 +1088,7 @@ CART:070C 6D 42			      tst     2,u
 CART:070E 2A 14			      bpl     loc_724
 CART:0710 EC C4			      ldd     ,u
 CART:0712 BD 0F	98		      jsr     sub_F98
-CART:0715 8E 0E	E6		      ldx     #0xEE6
+CART:0715 8E 0E	E6		      ldx     #unk_EE6
 CART:0718 BD 0E	C7		      jsr     sub_EC7
 CART:071B D5 99			      bitb    byte_C899
 CART:071D 27 05			      beq     loc_724
@@ -1126,8 +1098,8 @@ CART:0724
 CART:0724	      loc_724:				      ;	CODE XREF: sub_64A+C4j
 CART:0724						      ;	sub_64A+D3j
 CART:0724 8E C9	1C		      ldx     #unk_C91C
-CART:0727 96 C7			      lda     word_C8C7
-CART:0729 97 9D			      sta     word_C89D
+CART:0727 96 C7			      lda     byte_C8C7
+CART:0729 97 9D			      sta     byte_C89D
 CART:072B
 CART:072B	      loc_72B:				      ;	CODE XREF: sub_64A+107j
 CART:072B EC C4			      ldd     ,u
@@ -1137,7 +1109,7 @@ CART:0732 6D 02			      tst     2,x
 CART:0734 2A 17			      bpl     loc_74D
 CART:0736 6D 42			      tst     2,u
 CART:0738 2A 13			      bpl     loc_74D
-CART:073A 10 8E	0D 35		      ldy     #0xD35
+CART:073A 10 8E	0D 35		      ldy     #unk_D35
 CART:073E BD 0D	1B		      jsr     sub_D1B
 CART:0741 24 0A			      bcc     loc_74D
 CART:0743 BD 08	0F		      jsr     sub_80F
@@ -1148,19 +1120,19 @@ CART:074D
 CART:074D	      loc_74D:				      ;	CODE XREF: sub_64A+E6j
 CART:074D						      ;	sub_64A+EAj ...
 CART:074D 30 08			      leax    8,x
-CART:074F 0A 9D			      dec     word_C89D
+CART:074F 0A 9D			      dec     byte_C89D
 CART:0751 26 D8			      bne     loc_72B
 CART:0753 A6 42			      lda     2,u
 CART:0755 2A 1D			      bpl     loc_774
 CART:0757 EC C4			      ldd     ,u
 CART:0759 8E C8	8F		      ldx     #word_C88F
-CART:075C 10 8E	0D 39		      ldy     #0xD39
+CART:075C 10 8E	0D 39		      ldy     #unk_D39
 CART:0760 BD 0D	1B		      jsr     sub_D1B
 CART:0763 24 0F			      bcc     loc_774
 CART:0765 1F 31			      tfr     u, x
 CART:0767 BD 08	0F		      jsr     sub_80F
 CART:076A 86 04			      lda     #4
-CART:076C 97 C5			      sta     word_C8C5
+CART:076C 97 C5			      sta     byte_C8C5
 CART:076E 86 08			      lda     #8
 CART:0770 9A 67			      oraa    Vec_Expl_Flag
 CART:0772 97 67			      sta     Vec_Expl_Flag
@@ -1198,14 +1170,14 @@ CART:07A5 97 76			      sta     byte_C876
 CART:07A7
 CART:07A7	      loc_7A7:				      ;	CODE XREF: sub_64A+155j
 CART:07A7 96 91			      lda     word_C891
-CART:07A9 CE 07	EE		      ldu     #0x7EE
+CART:07A9 CE 07	EE		      ldu     #unk_7EE
 CART:07AC AB C5			      adda    b,u
 CART:07AE D6 92			      ldb     word_C891+1
 CART:07B0 DD 93			      std     byte_C893
-CART:07B2 0D C5			      tst     word_C8C5
+CART:07B2 0D C5			      tst     byte_C8C5
 CART:07B4 26 18			      bne     loc_7CE
 CART:07B6 8E C8	8F		      ldx     #word_C88F
-CART:07B9 10 8E	0D 39		      ldy     #0xD39
+CART:07B9 10 8E	0D 39		      ldy     #unk_D39
 CART:07BD BD 0D	1B		      jsr     sub_D1B
 CART:07C0 24 0C			      bcc     loc_7CE
 CART:07C2 0C 98			      inc     byte_C898
@@ -1213,14 +1185,14 @@ CART:07C4 86 08			      lda     #8
 CART:07C6 9A 67			      oraa    Vec_Expl_Flag
 CART:07C8 97 67			      sta     Vec_Expl_Flag
 CART:07CA 86 04			      lda     #4
-CART:07CC 97 C5			      sta     word_C8C5
+CART:07CC 97 C5			      sta     byte_C8C5
 CART:07CE
 CART:07CE	      loc_7CE:				      ;	CODE XREF: sub_64A+16Aj
 CART:07CE						      ;	sub_64A+176j
 CART:07CE 8E C9	1C		      ldx     #unk_C91C
-CART:07D1 96 C7			      lda     word_C8C7
-CART:07D3 97 9D			      sta     word_C89D
-CART:07D5 10 8E	0D 35		      ldy     #0xD35
+CART:07D1 96 C7			      lda     byte_C8C7
+CART:07D3 97 9D			      sta     byte_C89D
+CART:07D5 10 8E	0D 35		      ldy     #unk_D35
 CART:07D9
 CART:07D9	      loc_7D9:				      ;	CODE XREF: sub_64A+1A1j
 CART:07D9 6D 02			      tst     2,x
@@ -1233,7 +1205,7 @@ CART:07E7
 CART:07E7	      loc_7E7:				      ;	CODE XREF: sub_64A+191j
 CART:07E7						      ;	sub_64A+198j
 CART:07E7 30 08			      leax    8,x
-CART:07E9 0A 9D			      dec     word_C89D
+CART:07E9 0A 9D			      dec     byte_C89D
 CART:07EB 26 EC			      bne     loc_7D9
 CART:07ED
 CART:07ED	      locret_7ED:			      ;	CODE XREF: sub_64A+12Cj
@@ -1242,7 +1214,7 @@ CART:07ED 39			      rts
 CART:07ED	      ;	End of function	sub_64A
 CART:07ED
 CART:07ED	      ;	---------------------------------------------------------------------------
-CART:07EE 00			      .db    0
+CART:07EE 00	      unk_7EE:	      .db    0		      ;	DATA XREF: sub_64A+15Fo
 CART:07EF 08			      .db    8
 CART:07F0 0C			      .db  0xC
 CART:07F1 0E			      .db  0xE
@@ -1281,13 +1253,13 @@ CART:080F
 CART:080F
 CART:080F	      sub_80F:				      ;	CODE XREF: sub_64A+D7P
 CART:080F						      ;	sub_64A+F9P ...
-CART:080F 0A C8			      dec     word_C8C7+1
+CART:080F 0A C8			      dec     unk_C8C8
 CART:0811 86 0F			      lda     #0xF
 CART:0813 A7 02			      sta     2,x
 CART:0815 86 04			      lda     #4
 CART:0817 97 67			      sta     Vec_Expl_Flag
 CART:0819 34 10			      pshs    x
-CART:081B 9E 80			      ldx     word_C880
+CART:081B 9E 80			      ldx     addr_score
 CART:081D CC 00	50		      ldd     #0x50 ; 'P'
 CART:0820 BD F8	7C		      jsr     Add_Score_d
 CART:0823 35 90			      puls    pc,x
@@ -1308,17 +1280,17 @@ CART:0830	      loc_830:				      ;	CODE XREF: sub_825+9Dj
 CART:0830 E6 47			      ldb     7,u
 CART:0832 C4 0F			      andb    #0xF
 CART:0834 10 27	00 7E		      lbeq    loc_8B6
-CART:0838 D7 EB			      stb     byte_C8EB
+CART:0838 D7 EB			      stb     joystick_state
 CART:083A A6 46			      lda     6,u
 CART:083C 97 A1			      sta     byte_C8A1
 CART:083E
 CART:083E	      loc_83E:				      ;	CODE XREF: sub_825+8Fj
-CART:083E D6 EB			      ldb     byte_C8EB
+CART:083E D6 EB			      ldb     joystick_state
 CART:0840 86 01			      lda     #1
 CART:0842 30 C4			      leax    ,u
 CART:0844 BD 09	39		      jsr     sub_939
 CART:0847 ED C4			      std     ,u
-CART:0849 D6 EB			      ldb     byte_C8EB
+CART:0849 D6 EB			      ldb     joystick_state
 CART:084B 86 01			      lda     #1
 CART:084D 30 44			      leax    4,u
 CART:084F BD 09	39		      jsr     sub_939
@@ -1327,7 +1299,7 @@ CART:0854 EC 44			      ldd     4,u
 CART:0856 BD 0F	98		      jsr     sub_F98
 CART:0859 0D 9A			      tst     byte_C89A
 CART:085B 2B 06			      bmi     loc_863
-CART:085D 8E 0E	F2		      ldx     #0xEF2
+CART:085D 8E 0E	F2		      ldx     #unk_EF2
 CART:0860 BD 0E	C7		      jsr     sub_EC7
 CART:0863
 CART:0863	      loc_863:				      ;	CODE XREF: sub_825+36j
@@ -1338,14 +1310,14 @@ CART:0869 E4 47			      andb    7,u
 CART:086B E7 47			      stb     7,u
 CART:086D
 CART:086D	      loc_86D:				      ;	CODE XREF: sub_825+40j
-CART:086D 8E C9	1C		      ldx     #0xC91C
-CART:0870 96 C7			      lda     word_C8C7
-CART:0872 97 9D			      sta     word_C89D
+CART:086D 8E C9	1C		      ldx     #unk_C91C
+CART:0870 96 C7			      lda     byte_C8C7
+CART:0872 97 9D			      sta     byte_C89D
 CART:0874
 CART:0874	      loc_874:				      ;	CODE XREF: sub_825+6Bj
 CART:0874 A6 02			      lda     2,x
 CART:0876 2A 14			      bpl     loc_88C
-CART:0878 10 8E	0D 35		      ldy     #0xD35
+CART:0878 10 8E	0D 35		      ldy     #unk_D35
 CART:087C EC 44			      ldd     4,u
 CART:087E BD 0D	1B		      jsr     sub_D1B
 CART:0881 24 09			      bcc     loc_88C
@@ -1357,19 +1329,19 @@ CART:088C
 CART:088C	      loc_88C:				      ;	CODE XREF: sub_825+51j
 CART:088C						      ;	sub_825+5Cj
 CART:088C 30 08			      leax    8,x
-CART:088E 0A 9D			      dec     word_C89D
+CART:088E 0A 9D			      dec     byte_C89D
 CART:0890 26 E2			      bne     loc_874
 CART:0892 EC 44			      ldd     4,u
 CART:0894 8E C8	8F		      ldx     #word_C88F
-CART:0897 10 8E	0D 3D		      ldy     #0xD3D
+CART:0897 10 8E	0D 3D		      ldy     #unk_D3D
 CART:089B BD 0D	1B		      jsr     sub_D1B
 CART:089E 24 12			      bcc     loc_8B2
-CART:08A0 0D C5			      tst     word_C8C5
+CART:08A0 0D C5			      tst     byte_C8C5
 CART:08A2 26 0E			      bne     loc_8B2
 CART:08A4 86 08			      lda     #8
 CART:08A6 97 67			      sta     Vec_Expl_Flag
 CART:08A8 86 04			      lda     #4
-CART:08AA 97 C5			      sta     word_C8C5
+CART:08AA 97 C5			      sta     byte_C8C5
 CART:08AC C6 F0			      ldb     #0xF0 ; ''
 CART:08AE E4 47			      andb    7,u
 CART:08B0 E7 47			      stb     7,u
@@ -1402,7 +1374,7 @@ CART:08C7 BD F1	AF		      jsr     DP_to_C8
 CART:08CA E6 C4			      ldb     ,u
 CART:08CC 1D			      sex
 CART:08CD D3 E2			      addd    byte_C8E2
-CART:08CF D7 9D			      stb     word_C89D
+CART:08CF D7 9D			      stb     byte_C89D
 CART:08D1 2A 13			      bpl     loc_8E6
 CART:08D3 43			      coma
 CART:08D4 26 60			      bne     loc_936
@@ -1432,7 +1404,7 @@ CART:08F7						      ;	sub_8C7+1Dj ...
 CART:08F7 E6 41			      ldb     1,u
 CART:08F9 1D			      sex
 CART:08FA D3 E4			      addd    byte_C8E4
-CART:08FC D7 9E			      stb     word_C89D+1
+CART:08FC D7 9E			      stb     unk_C89E
 CART:08FE 2A 13			      bpl     loc_913
 CART:0900 43			      coma
 CART:0901 26 33			      bne     loc_936
@@ -1461,11 +1433,11 @@ CART:0924	      loc_924:				      ;	CODE XREF: sub_8C7+3Ej
 CART:0924						      ;	sub_8C7+4Aj ...
 CART:0924 BD F1	AA		      jsr     DO_TO_D0
 CART:0927	      ;	assume dp = 0xD0
-CART:0927 FC C8	9D		      ldd     word_C89D
+CART:0927 FC C8	9D		      ldd     byte_C89D
 CART:092A BD F2	FC		      jsr     Moveto_d_7F
 CART:092D B6 C8	CB		      lda     word_C8CB
-CART:0930 97 04			      sta     unk_D004
-CART:0932 AD 9F	C8 C9		      jsr     [word_C8C9]
+CART:0930 97 04			      sta     byte_D004
+CART:0932 AD 9F	C8 C9		      jsr     [addr_some_routine]
 CART:0936
 CART:0936	      loc_936:				      ;	CODE XREF: sub_8C7+Dj
 CART:0936						      ;	sub_8C7+15j ...
@@ -1478,10 +1450,10 @@ CART:0939
 CART:0939
 CART:0939	      sub_939:				      ;	CODE XREF: CART:01EEP
 CART:0939						      ;	CART:020DP ...
-CART:0939 C5 03			      bitb    #3
-CART:093B 27 15			      beq     loc_952
-CART:093D C5 0C			      bitb    #0xC
-CART:093F 27 11			      beq     loc_952
+CART:0939 C5 03			      bitb    #3	      ;	left/right?
+CART:093B 27 15			      beq     loc_952	      ;	no, skip
+CART:093D C5 0C			      bitb    #0xC	      ;	up/down?
+CART:093F 27 11			      beq     loc_952	      ;	no, skip
 CART:0941 34 04			      pshs    b
 CART:0943 C6 03			      ldb     #3
 CART:0945 3D			      mul
@@ -1536,7 +1508,7 @@ CART:0974	      ;	End of function	sub_939
 CART:0974
 CART:0976	      ;	---------------------------------------------------------------------------
 CART:0976
-CART:0976	      loc_976:				      ;	DATA XREF: CART:019Ao
+CART:0976	      main_sub_2:			      ;	DATA XREF: CART:019Ao
 CART:0976 C6 80			      ldb     #0x80 ; 'Ä'
 CART:0978 D7 E6			      stb     unk_D0E6
 CART:097A D6 EA			      ldb     unk_D0EA
@@ -1632,69 +1604,39 @@ CART:09E8 58			      aslb
 CART:09E9 49			      rola
 CART:09EA DD E4			      std     unk_D0E4
 CART:09EC 7E 01	9E		      jmp     loc_19E
-CART:09EC	      ;	---------------------------------------------------------------------------
-CART:09EF 7F			      .db 0x7F ; 
-CART:09F0 C8			      .db 0xC8 ; »
-CART:09F1 24			      .db 0x24 ; $
-CART:09F2 86			      .db 0x86 ; Ü
-CART:09F3 0A			      .db  0xA
-CART:09F4 8E			      .db 0x8E ; é
-CART:09F5 0B			      .db  0xB
-CART:09F6 CD			      .db 0xCD ; Õ
-CART:09F7 BD			      .db 0xBD ; Ω
-CART:09F8 F3			      .db 0xF3 ; Û
-CART:09F9 DA			      .db 0xDA ; ⁄
-CART:09FA F6			      .db 0xF6 ; ˆ
-CART:09FB C8			      .db 0xC8 ; »
-CART:09FC CE			      .db 0xCE ; Œ
-CART:09FD 27			      .db 0x27 ; '
-CART:09FE 16			      .db 0x16
-CART:09FF 8E			      .db 0x8E ; é
-CART:0A00 0A			      .db  0xA
-CART:0A01 47			      .db 0x47 ; G
-CART:0A02 AE			      .db 0xAE ; Æ
-CART:0A03 85			      .db 0x85 ; Ö
-CART:0A04 BD			      .db 0xBD ; Ω
-CART:0A05 F4			      .db 0xF4 ; Ù
-CART:0A06 10			      .db 0x10
-CART:0A07 8E			      .db 0x8E ; é
-CART:0A08 0A			      .db  0xA
-CART:0A09 51			      .db 0x51 ; Q
-CART:0A0A F6			      .db 0xF6 ; ˆ
-CART:0A0B C8			      .db 0xC8 ; »
-CART:0A0C CF			      .db 0xCF ; œ
-CART:0A0D AE			      .db 0xAE ; Æ
-CART:0A0E 85			      .db 0x85 ; Ö
-CART:0A0F 7C			      .db 0x7C ; |
-CART:0A10 C8			      .db 0xC8 ; »
-CART:0A11 24			      .db 0x24 ; $
-CART:0A12 7E			      .db 0x7E ; ~
-CART:0A13 F4			      .db 0xF4 ; Ù
-CART:0A14 10			      .db 0x10
-CART:0A15 8E			      .db 0x8E ; é
-CART:0A16 0C			      .db  0xC
-CART:0A17 5B			      .db 0x5B ; [
-CART:0A18 BD			      .db 0xBD ; Ω
-CART:0A19 F3			      .db 0xF3 ; Û
-CART:0A1A AD			      .db 0xAD ; ≠
-CART:0A1B 8E			      .db 0x8E ; é
-CART:0A1C 0A			      .db  0xA
-CART:0A1D 55			      .db 0x55 ; U
-CART:0A1E F6			      .db 0xF6 ; ˆ
-CART:0A1F C8			      .db 0xC8 ; »
-CART:0A20 CF			      .db 0xCF ; œ
-CART:0A21 27			      .db 0x27 ; '
-CART:0A22 05			      .db    5
-CART:0A23 AE			      .db 0xAE ; Æ
-CART:0A24 85			      .db 0x85 ; Ö
-CART:0A25 7E			      .db 0x7E ; ~
-CART:0A26 F3			      .db 0xF3 ; Û
-CART:0A27 AD			      .db 0xAD ; ≠
-CART:0A28 AE			      .db 0xAE ; Æ
-CART:0A29 84			      .db 0x84 ; Ñ
-CART:0A2A 7E			      .db 0x7E ; ~
-CART:0A2B F4			      .db 0xF4 ; Ù
-CART:0A2C 10			      .db 0x10
+CART:09EF	      ;	---------------------------------------------------------------------------
+CART:09EF
+CART:09EF	      loc_9EF:				      ;	DATA XREF: sub_486+166o
+CART:09EF 7F C8	24		      clr     Vec_0Ref_Enable
+CART:09F2 86 0A			      lda     #10
+CART:09F4 8E 0B	CD		      ldx     #vl_1
+CART:09F7 BD F3	DA		      jsr     Draw_VL_a
+CART:09FA F6 C8	CE		      ldb     byte_C8CE
+CART:09FD 27 16			      beq     loc_A15
+CART:09FF 8E 0A	47		      ldx     #0xA47
+CART:0A02 AE 85			      ldx     b,x
+CART:0A04 BD F4	10		      jsr     Draw_VLp
+CART:0A07 8E 0A	51		      ldx     #0xA51
+CART:0A0A F6 C8	CF		      ldb     validated_dir
+CART:0A0D AE 85			      ldx     b,x
+CART:0A0F 7C C8	24		      inc     Vec_0Ref_Enable
+CART:0A12 7E F4	10		      jmp     Draw_VLp
+CART:0A15	      ;	---------------------------------------------------------------------------
+CART:0A15
+CART:0A15	      loc_A15:				      ;	CODE XREF: CART:09FDj
+CART:0A15 8E 0C	5B		      ldx     #VL_5_C5B
+CART:0A18 BD F3	AD		      jsr     Mov_Draw_VLc_a
+CART:0A1B 8E 0A	55		      ldx     #0xA55
+CART:0A1E F6 C8	CF		      ldb     validated_dir
+CART:0A21 27 05			      beq     loc_A28
+CART:0A23 AE 85			      ldx     b,x
+CART:0A25 7E F3	AD		      jmp     Mov_Draw_VLc_a
+CART:0A28	      ;	---------------------------------------------------------------------------
+CART:0A28
+CART:0A28	      loc_A28:				      ;	CODE XREF: CART:0A21j
+CART:0A28 AE 84			      ldx     ,x
+CART:0A2A 7E F4	10		      jmp     Draw_VLp
+CART:0A2A	      ;	---------------------------------------------------------------------------
 CART:0A2D 20	      unk_A2D:	      .db 0x20		      ;	DATA XREF: CART:00D9o
 CART:0A2E 33			      .db 0x33 ; 3
 CART:0A2F 31			      .db 0x31 ; 1
@@ -1710,22 +1652,23 @@ CART:0A38 30			      .db 0x30 ; 0
 CART:0A39 37			      .db 0x37 ; 7
 CART:0A3A 35			      .db 0x35 ; 5
 CART:0A3B 80			      .db 0x80 ; Ä
-CART:0A3C 80			      .db 0x80 ; Ä
-CART:0A3D 02			      .db    2
-CART:0A3E 04			      .db    4
-CART:0A3F 80			      .db 0x80 ; Ä
-CART:0A40 06			      .db    6
-CART:0A41 08			      .db    8
-CART:0A42 0A			      .db  0xA
-CART:0A43 80			      .db 0x80 ; Ä
-CART:0A44 0C			      .db  0xC
-CART:0A45 0E			      .db  0xE
-CART:0A46 10			      .db 0x10
-CART:0A47 0C			      .db  0xC
-CART:0A48 5B			      .db 0x5B ; [
-CART:0A49 0B			      .db  0xB
-CART:0A4A E4			      .db 0xE4 ; ‰
-CART:0A4B 0B			      .db  0xB
+CART:0A3C 80	      joy_dir_tbl:    .db 0x80 ; Ä	      ;	DATA XREF: CART:0222o
+CART:0A3C						      ;	0=invalid
+CART:0A3D 02			      .db    2		      ;	1=left
+CART:0A3E 04			      .db    4		      ;	2=right
+CART:0A3F 80			      .db 0x80 ; Ä	      ;	3=left+right=invalid
+CART:0A40 06			      .db    6		      ;	4=up
+CART:0A41 08			      .db    8		      ;	5=up+left
+CART:0A42 0A			      .db  0xA		      ;	6=up+right
+CART:0A43 80			      .db 0x80 ; Ä	      ;	7=up+left+right=invalid
+CART:0A44 0C			      .db  0xC		      ;	8=down
+CART:0A45 0E			      .db  0xE		      ;	9=down+left
+CART:0A46 10			      .db 0x10		      ;	10=down+right
+CART:0A47 0C			      .db  0xC		      ;	11=down+left+right=down
+CART:0A48 5B			      .db 0x5B ; [	      ;	12=up+down=???
+CART:0A49 0B			      .db  0xB		      ;	13=up+down+left=???
+CART:0A4A E4			      .db 0xE4 ; ‰	      ;	14=up+down+right=???
+CART:0A4B 0B			      .db  0xB		      ;	15=up+down+left+right=???
 CART:0A4C FD			      .db 0xFD ; ˝
 CART:0A4D 0C			      .db  0xC
 CART:0A4E 16			      .db 0x16
@@ -1753,7 +1696,7 @@ CART:0A63 0C			      .db  0xC
 CART:0A64 9B			      .db 0x9B ; õ
 CART:0A65 0C			      .db  0xC
 CART:0A66 AF			      .db 0xAF ; Ø
-CART:0A67 0A			      .db  0xA
+CART:0A67 0A	      unk_A67:	      .db  0xA		      ;	DATA XREF: sub_486+CEo
 CART:0A68 7D			      .db 0x7D ; }
 CART:0A69 0A			      .db  0xA
 CART:0A6A A5			      .db 0xA5 ; •
@@ -1875,15 +1818,10 @@ CART:0ADD 0B			      .db  0xB
 CART:0ADE 97			      .db 0x97 ; ó
 CART:0ADF 0B			      .db  0xB
 CART:0AE0 97			      .db 0x97 ; ó
-CART:0AE1 70			      .db 0x70 ; p
-CART:0AE2 DA			      .db 0xDA ; ⁄
-CART:0AE3 42			      .db 0x42 ; B
-CART:0AE4 4F			      .db 0x4F ; O
-CART:0AE5 4E			      .db 0x4E ; N
-CART:0AE6 55			      .db 0x55 ; U
-CART:0AE7 53			      .db 0x53 ; S
+CART:0AE1 70 DA	      strBONUS:	      .db 0x70,	0xDA	      ;	DATA XREF: sub_486+62o
+CART:0AE3 42 4F	4E 55+aBonus:	      .ascii 'BONUS'
 CART:0AE8 FF			      .db 0xFF
-CART:0AE9 0A			      .db  0xA
+CART:0AE9 0A	      unk_AE9:	      .db  0xA		      ;	DATA XREF: sub_486+45o
 CART:0AEA E9			      .db 0xE9 ; È
 CART:0AEB 0A			      .db  0xA
 CART:0AEC FB			      .db 0xFB ; ˚
@@ -1917,7 +1855,7 @@ CART:0B07 A0			      .db 0xA0 ; †
 CART:0B08 EC			      .db 0xEC ; Ï
 CART:0B09 00			      .db    0
 CART:0B0A 28			      .db 0x28 ; (
-CART:0B0B 60			      .db 0x60 ; `
+CART:0B0B 60	      unk_B0B:	      .db 0x60 ; `	      ;	DATA XREF: sub_486+15o
 CART:0B0C EC			      .db 0xEC ; Ï
 CART:0B0D 0B			      .db  0xB
 CART:0B0E 2B			      .db 0x2B ; +
@@ -1933,7 +1871,7 @@ CART:0B17 60			      .db 0x60 ; `
 CART:0B18 14			      .db 0x14
 CART:0B19 0B			      .db  0xB
 CART:0B1A 37			      .db 0x37 ; 7
-CART:0B1B 20			      .db 0x20
+CART:0B1B 20	      unk_B1B:	      .db 0x20		      ;	DATA XREF: sub_486+33o
 CART:0B1C C4			      .db 0xC4 ; ƒ
 CART:0B1D 20			      .db 0x20
 CART:0B1E EC			      .db 0xEC ; Ï
@@ -1965,7 +1903,7 @@ CART:0B37 00			      .db    0
 CART:0B38 50			      .db 0x50 ; P
 CART:0B39 C0			      .db 0xC0 ; ¿
 CART:0B3A 00			      .db    0
-CART:0B3B 40			      .db 0x40 ; @
+CART:0B3B 40	      unk_B3B:	      .db 0x40 ; @	      ;	DATA XREF: sub_486+38o
 CART:0B3C 00			      .db    0
 CART:0B3D C0			      .db 0xC0 ; ¿
 CART:0B3E 00			      .db    0
@@ -1973,19 +1911,13 @@ CART:0B3F 00			      .db    0
 CART:0B40 28			      .db 0x28 ; (
 CART:0B41 00			      .db    0
 CART:0B42 D8			      .db 0xD8 ; ÿ
-CART:0B43 05			      .db    5
-CART:0B44 64			      .db 0x64 ; d
-CART:0B45 00			      .db    0
-CART:0B46 00			      .db    0
-CART:0B47 28			      .db 0x28 ; (
-CART:0B48 E8			      .db 0xE8 ; Ë
-CART:0B49 28			      .db 0x28 ; (
-CART:0B4A 84			      .db 0x84 ; Ñ
-CART:0B4B 00			      .db    0
-CART:0B4C 00			      .db    0
-CART:0B4D EC			      .db 0xEC ; Ï
-CART:0B4E 30			      .db 0x30 ; 0
-CART:0B4F 00			      .db    0
+CART:0B43 05	      VL_5_B43:	      .db 5		      ;	DATA XREF: CART:loc_619o
+CART:0B44 64 00	00 28+		      .db 0x64,	0
+CART:0B44 E8 28	84 00+		      .db 0, 0x28
+CART:0B44 00 EC	30 00		      .db 0xE8,	0x28
+CART:0B44			      .db 0x84,	0
+CART:0B44			      .db 0, 0xEC
+CART:0B44			      .db 0x30,	0
 CART:0B50 00			      .db    0
 CART:0B51 E4			      .db 0xE4 ; ‰
 CART:0B52 9C			      .db 0x9C ; ú
@@ -2000,19 +1932,13 @@ CART:0B5A 8D			      .db 0x8D ; ç
 CART:0B5B 00			      .db    0
 CART:0B5C 00			      .db    0
 CART:0B5D 1C			      .db 0x1C
-CART:0B5E 05			      .db    5
-CART:0B5F 64			      .db 0x64 ; d
-CART:0B60 00			      .db    0
-CART:0B61 00			      .db    0
-CART:0B62 D8			      .db 0xD8 ; ÿ
-CART:0B63 E8			      .db 0xE8 ; Ë
-CART:0B64 D8			      .db 0xD8 ; ÿ
-CART:0B65 84			      .db 0x84 ; Ñ
-CART:0B66 00			      .db    0
-CART:0B67 00			      .db    0
-CART:0B68 14			      .db 0x14
-CART:0B69 30			      .db 0x30 ; 0
-CART:0B6A 00			      .db    0
+CART:0B5E 05	      VL_5_B5E:	      .db 5		      ;	DATA XREF: CART:loc_614o
+CART:0B5F 64 00	00 D8+		      .db 0x64,	0
+CART:0B5F E8 D8	84 00+		      .db 0, 0xD8
+CART:0B5F 00 14	30 00		      .db 0xE8,	0xD8
+CART:0B5F			      .db 0x84,	0
+CART:0B5F			      .db 0, 0x14
+CART:0B5F			      .db 0x30,	0
 CART:0B6B 00			      .db    0
 CART:0B6C 1C			      .db 0x1C
 CART:0B6D 9C			      .db 0x9C ; ú
@@ -2111,26 +2037,16 @@ CART:0BC9 FF			      .db 0xFF
 CART:0BCA 03			      .db    3
 CART:0BCB 05			      .db    5
 CART:0BCC 01			      .db    1
-CART:0BCD 00			      .db    0
-CART:0BCE 14			      .db 0x14
-CART:0BCF C4			      .db 0xC4 ; ƒ
-CART:0BD0 00			      .db    0
-CART:0BD1 00			      .db    0
-CART:0BD2 D8			      .db 0xD8 ; ÿ
-CART:0BD3 3C			      .db 0x3C ; <
-CART:0BD4 00			      .db    0
-CART:0BD5 00			      .db    0
-CART:0BD6 14			      .db 0x14
-CART:0BD7 0F			      .db  0xF
-CART:0BD8 14			      .db 0x14
-CART:0BD9 0A			      .db  0xA
-CART:0BDA 00			      .db    0
-CART:0BDB 0A			      .db  0xA
-CART:0BDC EC			      .db 0xEC ; Ï
-CART:0BDD F6			      .db 0xF6 ; ˆ
-CART:0BDE EC			      .db 0xEC ; Ï
-CART:0BDF F6			      .db 0xF6 ; ˆ
-CART:0BE0 00			      .db    0
+CART:0BCD 00 14	C4 00+vl_1:	      .db 0, 0x14	      ;	DATA XREF: CART:09F4o
+CART:0BCD 00 D8	3C 00+		      .db 0xC4,	0
+CART:0BCD 00 14	0F 14+		      .db 0, 0xD8
+CART:0BCD 0A 00	0A EC+		      .db 0x3C,	0
+CART:0BCD F6 EC	F6 00		      .db 0, 0x14
+CART:0BCD			      .db 0xF, 0x14
+CART:0BCD			      .db 0xA, 0
+CART:0BCD			      .db 0xA, 0xEC
+CART:0BCD			      .db 0xF6,	0xEC
+CART:0BCD			      .db 0xF6,	0
 CART:0BE1 F1			      .db 0xF1 ; Ò
 CART:0BE2 14			      .db 0x14
 CART:0BE3 01			      .db    1
@@ -2253,19 +2169,13 @@ CART:0C57 FF			      .db 0xFF
 CART:0C58 E6			      .db 0xE6 ; Ê
 CART:0C59 00			      .db    0
 CART:0C5A 01			      .db    1
-CART:0C5B 05			      .db    5
-CART:0C5C C4			      .db 0xC4 ; ƒ
-CART:0C5D 0A			      .db  0xA
-CART:0C5E D8			      .db 0xD8 ; ÿ
-CART:0C5F 00			      .db    0
-CART:0C60 FC			      .db 0xFC ; ¸
-CART:0C61 0A			      .db  0xA
-CART:0C62 FC			      .db 0xFC ; ¸
-CART:0C63 F6			      .db 0xF6 ; ˆ
-CART:0C64 00			      .db    0
-CART:0C65 EC			      .db 0xEC ; Ï
-CART:0C66 30			      .db 0x30 ; 0
-CART:0C67 00			      .db    0
+CART:0C5B 05	      VL_5_C5B:	      .db 5		      ;	DATA XREF: CART:loc_A15o
+CART:0C5C C4 0A	D8 00+		      .db 0xC4,	0xA
+CART:0C5C FC 0A	FC F6+		      .db 0xD8,	0
+CART:0C5C 00 EC	30 00		      .db 0xFC,	0xA
+CART:0C5C			      .db 0xFC,	0xF6
+CART:0C5C			      .db 0, 0xEC
+CART:0C5C			      .db 0x30,	0
 CART:0C68 03			      .db    3
 CART:0C69 32			      .db 0x32 ; 2
 CART:0C6A 1E			      .db 0x1E
@@ -2384,13 +2294,8 @@ CART:0CDA FF			      .db 0xFF
 CART:0CDB 10			      .db 0x10
 CART:0CDC 10			      .db 0x10
 CART:0CDD 01			      .db    1
-CART:0CDE F8			      .db 0xF8 ; ¯
-CART:0CDF 30			      .db 0x30 ; 0
-CART:0CE0 A0			      .db 0xA0 ; †
-CART:0CE1 30			      .db 0x30 ; 0
-CART:0CE2 43			      .db 0x43 ; C
-CART:0CE3 4D			      .db 0x4D ; M
-CART:0CE4 4B			      .db 0x4B ; K
+CART:0CDE F8 30	A0 30 str_CMK:	      .db 0xF8,	0x30, 0xA0, 0x30 ; DATA	XREF: CART:03F9o
+CART:0CE2 43 4D	4B    aCmk:	      .ascii 'CMK'
 CART:0CE5 80			      .db 0x80 ; Ä
 CART:0CE6 40	      unk_CE6:	      .db 0x40 ; @	      ;	DATA XREF: CART:0108o
 CART:0CE7 B0			      .db 0xB0 ; ∞
@@ -2414,7 +2319,7 @@ CART:0CF8 40			      .db 0x40 ; @
 CART:0CF9 50			      .db 0x50 ; P
 CART:0CFA C0			      .db 0xC0 ; ¿
 CART:0CFB 50			      .db 0x50 ; P
-CART:0CFC 05			      .db    5
+CART:0CFC 05	      unk_CFC:	      .db    5		      ;	DATA XREF: sub_EF6+2o
 CART:0CFD 04			      .db    4
 CART:0CFE 04			      .db    4
 CART:0CFF 04			      .db    4
@@ -2429,7 +2334,7 @@ CART:0D07 08			      .db    8
 CART:0D08 08			      .db    8
 CART:0D09 08			      .db    8
 CART:0D0A 0A			      .db  0xA
-CART:0D0B 08			      .db    8
+CART:0D0B 08	      unk_D0B:	      .db    8		      ;	DATA XREF: CART:0379o
 CART:0D0C 07			      .db    7
 CART:0D0D 06			      .db    6
 CART:0D0E 05			      .db    5
@@ -2472,15 +2377,17 @@ CART:0D34 39			      rts
 CART:0D34	      ;	End of function	sub_D1B
 CART:0D34
 CART:0D34	      ;	---------------------------------------------------------------------------
-CART:0D35 06			      .db    6
+CART:0D35 06	      unk_D35:	      .db    6		      ;	DATA XREF: sub_64A+F0o
+CART:0D35						      ;	sub_64A+18Bo ...
 CART:0D36 FA			      .db 0xFA ; ˙
 CART:0D37 06			      .db    6
 CART:0D38 FA			      .db 0xFA ; ˙
-CART:0D39 05			      .db    5
+CART:0D39 05	      unk_D39:	      .db    5		      ;	DATA XREF: sub_64A+112o
+CART:0D39						      ;	sub_64A+16Fo
 CART:0D3A F7			      .db 0xF7 ; ˜
 CART:0D3B 05			      .db    5
 CART:0D3C FB			      .db 0xFB ; ˚
-CART:0D3D 05			      .db    5
+CART:0D3D 05	      unk_D3D:	      .db    5		      ;	DATA XREF: sub_825+72o
 CART:0D3E FB			      .db 0xFB ; ˚
 CART:0D3F 05			      .db    5
 CART:0D40 FB			      .db 0xFB ; ˚
@@ -2809,19 +2716,19 @@ CART:0EE5 39			      rts
 CART:0EE5	      ;	End of function	sub_EC7
 CART:0EE5
 CART:0EE5	      ;	---------------------------------------------------------------------------
-CART:0EE6 08			      .db    8
+CART:0EE6 08	      unk_EE6:	      .db    8		      ;	DATA XREF: sub_64A+CBo
 CART:0EE7 38			      .db 0x38 ; 8
 CART:0EE8 20			      .db 0x20
 CART:0EE9 08			      .db    8
-CART:0EEA 0A			      .db  0xA
+CART:0EEA 0A	      unk_EEA:	      .db  0xA		      ;	DATA XREF: CART:0248o
 CART:0EEB 3C			      .db 0x3C ; <
 CART:0EEC 24			      .db 0x24 ; $
 CART:0EED 04			      .db    4
-CART:0EEE 04			      .db    4
+CART:0EEE 04	      unk_EEE:	      .db    4		      ;	DATA XREF: sub_333+9o
 CART:0EEF 3C			      .db 0x3C ; <
 CART:0EF0 24			      .db 0x24 ; $
 CART:0EF1 04			      .db    4
-CART:0EF2 01			      .db    1
+CART:0EF2 01	      unk_EF2:	      .db    1		      ;	DATA XREF: sub_825+38o
 CART:0EF3 3F			      .db 0x3F ; ?
 CART:0EF4 27			      .db 0x27 ; '
 CART:0EF5 01			      .db    1
@@ -2832,7 +2739,7 @@ CART:0EF6
 CART:0EF6	      sub_EF6:				      ;	CODE XREF: CART:0072P
 CART:0EF6						      ;	CART:00B2P
 CART:0EF6 86 0F			      lda     #0xF
-CART:0EF8 CE 0C	FC		      ldu     #0xCFC
+CART:0EF8 CE 0C	FC		      ldu     #unk_CFC
 CART:0EFB 8E C8	B5		      ldx     #unk_C8B5
 CART:0EFE 31 84			      leay    ,x
 CART:0F00 BD F6	83		      jsr     Move_Mem_a
@@ -2995,7 +2902,7 @@ CART:0FBF D7 9A			      stb     unk_D09A
 CART:0FC1 8E C8	B5		      ldx     #unk_C8B5
 CART:0FC4 A6 85			      lda     b,x
 CART:0FC6 97 99			      sta     unk_D099
-CART:0FC8 8E 0F	D3		      ldx     #0xFD3
+CART:0FC8 8E 0F	D3		      ldx     #word_FD3
 CART:0FCB 58			      aslb
 CART:0FCC EC 85			      ldd     b,x
 CART:0FCE D3 9B			      addd    unk_D09B
@@ -3004,16 +2911,11 @@ CART:0FD2 39			      rts
 CART:0FD2	      ;	End of function	sub_F98
 CART:0FD2
 CART:0FD2	      ;	---------------------------------------------------------------------------
-CART:0FD3 E0			      .db 0xE0 ; ‡
-CART:0FD4 64			      .db 0x64 ; d
-CART:0FD5 E0			      .db 0xE0 ; ‡
-CART:0FD6 3C			      .db 0x3C ; <
-CART:0FD7 E0			      .db 0xE0 ; ‡
-CART:0FD8 14			      .db 0x14
-CART:0FD9 E0			      .db 0xE0 ; ‡
-CART:0FDA EC			      .db 0xEC ; Ï
-CART:0FDB E0			      .db 0xE0 ; ‡
-CART:0FDC C4			      .db 0xC4 ; ƒ
+CART:0FD3 E0 64	      word_FD3:	      .dw 0xE064	      ;	DATA XREF: sub_F98+30o
+CART:0FD5 E0 3C			      .dw 0xE03C
+CART:0FD7 E0 14			      .dw 0xE014
+CART:0FD9 E0 EC			      .dw 0xE0EC
+CART:0FDB E0 C4			      .dw 0xE0C4
 CART:0FDD 20			      .db 0x20
 CART:0FDE 64			      .db 0x64 ; d
 CART:0FDF 20			      .db 0x20
@@ -3136,7 +3038,8 @@ RAM:C83C ??			     .ds 1
 RAM:C83D ??	     Vec_Rfrsh_lo:   .ds 1		     ; DATA XREF: Init_OS_RAM+1Aw
 RAM:C83D						     ; Wait_Recal:Set_Refreshr
 RAM:C83E ??	     Vec_Rfrsh_hi:   .ds 1
-RAM:C83F ??	     Vec_Music_Work: .ds 1		     ; DATA XREF: Init_Music_Buf+2o
+RAM:C83F ??	     Vec_Music_Work: .ds 1		     ; DATA XREF: Do_Sound:Do_Sound_xo
+RAM:C83F						     ; Init_Music_Buf+2o
 RAM:C840 ??			     .ds 1
 RAM:C841 ??			     .ds 1
 RAM:C842 ??	     Vec_Music_Wk_A: .ds 1
@@ -3195,9 +3098,9 @@ RAM:C87B ?? ??	     Vec_Seed_Ptr:   .ds 2		     ; DATA XREF: Init_OS_RAM+Dw
 RAM:C87B						     ; Random:loc_F51Ar
 RAM:C87D ?? ?? ??    Vec_Random_Seed:.ds 3		     ; DATA XREF: Init_OS_RAM+Ao
 RAM:C87D						     ; Init_OS_RAM:loc_F173w
-RAM:C880 ?? ??	     word_C880:	     .ds 2		     ; DATA XREF: CART:0038w
+RAM:C880 ?? ??	     addr_score:     .ds 2		     ; DATA XREF: CART:0038w
 RAM:C880						     ; CART:loc_7Br ...
-RAM:C882 ??	     byte_C882:	     .ds 1		     ; DATA XREF: CART:0023w
+RAM:C882 ??	     NumPlayers0_1:  .ds 1		     ; DATA XREF: CART:0023w
 RAM:C882						     ; CART:03C2r ...
 RAM:C883 ??	     byte_C883:	     .ds 1		     ; DATA XREF: CART:00C9w
 RAM:C883						     ; CART:00CBw ...
@@ -3235,8 +3138,10 @@ RAM:C89A ??	     byte_C89A:	     .ds 1		     ; DATA XREF: CART:0252r
 RAM:C89A						     ; sub_64A+85r ...
 RAM:C89B ?? ??	     word_C89B:	     .ds 2		     ; DATA XREF: sub_64A+94r
 RAM:C89B						     ; BIOS:E04Aw ...
-RAM:C89D ?? ??	     word_C89D:	     .ds 2		     ; DATA XREF: CART:0031w
+RAM:C89D ??	     byte_C89D:	     .ds 1		     ; DATA XREF: CART:0031w
 RAM:C89D						     ; CART:0033w ...
+RAM:C89E ??	     unk_C89E:	     .ds 1		     ; DATA XREF: CART:01F1w
+RAM:C89E						     ; CART:01F3o ...
 RAM:C89F ??	     byte_C89F:	     .ds 1		     ; DATA XREF: CART:03E1w
 RAM:C89F						     ; CART:03F4r ...
 RAM:C8A0 ??	     unk_C8A0:	     .ds 1		     ; DATA XREF: sub_EAF0+35r
@@ -3283,26 +3188,27 @@ RAM:C8C2 ??			     .ds 1
 RAM:C8C3 ??			     .ds 1
 RAM:C8C4 ??	     byte_C8C4:	     .ds 1		     ; DATA XREF: BIOS:E073w
 RAM:C8C4						     ; BIOS:E084o ...
-RAM:C8C5 ?? ??	     word_C8C5:	     .ds 2		     ; DATA XREF: CART:006Ao
+RAM:C8C5 ??	     byte_C8C5:	     .ds 1		     ; DATA XREF: CART:006Ao
 RAM:C8C5						     ; CART:017Dw ...
-RAM:C8C7 ?? ??	     word_C8C7:	     .ds 2		     ; DATA XREF: CART:loc_104w
+RAM:C8C6 ??	     unk_C8C6:	     .ds 1		     ; DATA XREF: CART:0258r
+RAM:C8C6						     ; CART:0268r ...
+RAM:C8C7 ??	     byte_C8C7:	     .ds 1		     ; DATA XREF: CART:loc_104w
 RAM:C8C7						     ; CART:0115w ...
-RAM:C8C9 ?? ??	     word_C8C9:	     .ds 2		     ; DATA XREF: sub_486+9w
+RAM:C8C8 ??	     unk_C8C8:	     .ds 1		     ; DATA XREF: CART:0155w
+RAM:C8C8						     ; CART:loc_2E6r ...
+RAM:C8C9 ?? ??	     addr_some_routine:.ds 2		     ; DATA XREF: sub_486+9w
 RAM:C8C9						     ; sub_486+DBw ...
 RAM:C8CB ?? ??	     word_C8CB:	     .ds 2		     ; DATA XREF: sub_486+Ew
 RAM:C8CB						     ; sub_486+CBw ...
 RAM:C8CD ??	     byte_C8CD:	     .ds 1		     ; DATA XREF: CART:036Dw
 RAM:C8CE ??	     byte_C8CE:	     .ds 1		     ; DATA XREF: CART:0216w
 RAM:C8CE						     ; CART:0220w ...
-RAM:C8CF ??	     byte_C8CF:	     .ds 1		     ; DATA XREF: CART:0218w
+RAM:C8CF ??	     validated_dir:  .ds 1		     ; DATA XREF: CART:0218w
 RAM:C8CF						     ; CART:0229w ...
-RAM:C8D0 ?? ??	     word_C8D0:	     .ds 2		     ; DATA XREF: CART:037Ew
-RAM:C8D0						     ; sub_486+181r ...
-RAM:C8D2 ??			     .ds 1
-RAM:C8D3 ??			     .ds 1
-RAM:C8D4 ??			     .ds 1
-RAM:C8D5 ?? ??	     word_C8D5:	     .ds 2		     ; DATA XREF: sub_486+5Br
-RAM:C8D7 ??			     .ds 1
+RAM:C8D0 ??	     byte_C8D0:	     .ds 1		     ; DATA XREF: CART:037Ew
+RAM:C8D0						     ; sub_486+181r
+RAM:C8D1 ?? ?? ?? ??+bonus:	     .ds 7		     ; DATA XREF: CART:0075o
+RAM:C8D1 ?? ?? ??					     ; CART:loc_E7o ...
 RAM:C8D8 ??	     unk_C8D8:	     .ds 1		     ; DATA XREF: sub_315+1o
 RAM:C8D8						     ; sub_486+7Ao
 RAM:C8D9 ?? ??	     word_C8D9:	     .ds 2		     ; DATA XREF: BIOS:E079w
@@ -3326,9 +3232,9 @@ RAM:C8E6						     ; sub_8C7+22r ...
 RAM:C8E7 ?? ??	     word_C8E7:	     .ds 2		     ; DATA XREF: sub_E353r
 RAM:C8E9 ??	     byte_C8E9:	     .ds 1		     ; DATA XREF: CART:01B7r
 RAM:C8E9						     ; CART:01BBw ...
-RAM:C8EA ??	     byte_C8EA:	     .ds 1		     ; DATA XREF: CART:01E2w
+RAM:C8EA ??	     controller_state:.ds 1		     ; DATA XREF: CART:01E2w
 RAM:C8EA						     ; CART:loc_203w ...
-RAM:C8EB ??	     byte_C8EB:	     .ds 1		     ; DATA XREF: CART:01EAw
+RAM:C8EB ??	     joystick_state: .ds 1		     ; DATA XREF: CART:01EAw
 RAM:C8EB						     ; sub_333+1Fr ...
 RAM:C8EC ??	     byte_C8EC:	     .ds 1		     ; DATA XREF: sub_E647+B9w
 RAM:C8ED ?? ??	     word_C8ED:	     .ds 2		     ; DATA XREF: sub_E51E+EDr
@@ -3351,14 +3257,8 @@ RAM:C8FC ??			     .ds 1
 RAM:C8FD ??			     .ds 1
 RAM:C8FE ??			     .ds 1
 RAM:C8FF ??			     .ds 1
-RAM:C900 ??	     unk_C900:	     .ds 1		     ; DATA XREF: CART:0035o
-RAM:C900						     ; CART:004Ao ...
-RAM:C901 ??			     .ds 1
-RAM:C902 ??			     .ds 1
-RAM:C903 ??			     .ds 1
-RAM:C904 ??			     .ds 1
-RAM:C905 ??			     .ds 1
-RAM:C906 ??			     .ds 1
+RAM:C900 ?? ?? ?? ??+score_1:	     .ds 7		     ; DATA XREF: CART:0035o
+RAM:C900 ?? ?? ??					     ; CART:004Ao ...
 RAM:C907 ?? ??	     word_C907:	     .ds 2		     ; DATA XREF: sub_E4B8+53r
 RAM:C907						     ; sub_E84C+12w
 RAM:C909 ?? ??	     word_C909:	     .ds 2		     ; DATA XREF: sub_E4B8+58r
@@ -3367,7 +3267,7 @@ RAM:C90B ??	     unk_C90B:	     .ds 1		     ; DATA XREF: sub_E4B8+2o
 RAM:C90B						     ; sub_E7E4+13o
 RAM:C90C ??			     .ds 1
 RAM:C90D ??			     .ds 1
-RAM:C90E ??	     unk_C90E:	     .ds 1		     ; DATA XREF: CART:0043o
+RAM:C90E ??	     score_2:	     .ds 1		     ; DATA XREF: CART:0043o
 RAM:C90E						     ; CART:0052o ...
 RAM:C90F ??			     .ds 1
 RAM:C910 ??			     .ds 1
@@ -4134,34 +4034,40 @@ VIA:D000	     ; Segment type: Regular
 VIA:D000			     .area VIA
 VIA:D000			     .org 0xD000
 VIA:D000	     ; assume dp = 0
-VIA:D000 ??			     .ds 1
-VIA:D001 ??			     .ds 1
+VIA:D000 ??	     byte_D000:	     .ds 1		     ; DATA XREF: Read_Btns_Mask+14w
+VIA:D000						     ; Read_Btns_Mask+17w ...
+VIA:D001 ??	     byte_D001:	     .ds 1		     ; DATA XREF: Read_Btns_Mask+Fw
+VIA:D001						     ; Read_Btns_Mask+21r ...
 VIA:D002 ??			     .ds 1
-VIA:D003 ??			     .ds 1
-VIA:D004 ??	     unk_D004:	     .ds 1
-VIA:D005 ??			     .ds 1
+VIA:D003 ??	     unk_D003:	     .ds 1
+VIA:D004 ??	     byte_D004:	     .ds 1		     ; DATA XREF: sub_8C7+69w
+VIA:D004						     ; sub_E76A+Aw ...
+VIA:D005 ??	     byte_D005:	     .ds 1		     ; DATA XREF: Moveto_ix+12w
+VIA:D005						     ; Draw_VL+12w ...
 VIA:D006 ??			     .ds 1
 VIA:D007 ??			     .ds 1
-VIA:D008 ??			     .ds 1
+VIA:D008 ??	     unk_D008:	     .ds 1
 VIA:D009 ??			     .ds 1
-VIA:D00A ??			     .ds 1
-VIA:D00B ??			     .ds 1
-VIA:D00C ??			     .ds 1
-VIA:D00D ??			     .ds 1
+VIA:D00A ??	     byte_D00A:	     .ds 1		     ; DATA XREF: Dot_ix+6w
+VIA:D00A						     ; Dot_ix+Ew ...
+VIA:D00B ??	     unk_D00B:	     .ds 1
+VIA:D00C ??	     unk_D00C:	     .ds 1
+VIA:D00D ??	     byte_D00D:	     .ds 1		     ; DATA XREF: Wait_Recal:loc_F19Er
+VIA:D00D						     ; Moveto_ix:loc_F33Dr ...
 VIA:D00E ??			     .ds 1
 VIA:D00F ??	     unk_D00F:	     .ds 1
 VIA:D010 ??			     .ds 1
 VIA:D011 ??			     .ds 1
 VIA:D012 ??	     unk_D012:	     .ds 1
 VIA:D013 ??	     unk_D013:	     .ds 1
-VIA:D014 ??			     .ds 1
+VIA:D014 ??	     unk_D014:	     .ds 1
 VIA:D015 ??	     unk_D015:	     .ds 1
 VIA:D016 ??			     .ds 1
 VIA:D017 ??			     .ds 1
 VIA:D018 ??			     .ds 1
 VIA:D019 ??			     .ds 1
 VIA:D01A ??			     .ds 1
-VIA:D01B ??			     .ds 1
+VIA:D01B ??	     unk_D01B:	     .ds 1
 VIA:D01C ??			     .ds 1
 VIA:D01D ??			     .ds 1
 VIA:D01E ??			     .ds 1
@@ -4169,10 +4075,10 @@ VIA:D01F ??			     .ds 1
 VIA:D020 ??			     .ds 1
 VIA:D021 ??			     .ds 1
 VIA:D022 ??			     .ds 1
-VIA:D023 ??			     .ds 1
+VIA:D023 ??	     unk_D023:	     .ds 1
 VIA:D024 ??			     .ds 1
 VIA:D025 ??			     .ds 1
-VIA:D026 ??			     .ds 1
+VIA:D026 ??	     unk_D026:	     .ds 1
 VIA:D027 ??			     .ds 1
 VIA:D028 ??			     .ds 1
 VIA:D029 ??			     .ds 1
@@ -4186,14 +4092,14 @@ VIA:D030 ??			     .ds 1
 VIA:D031 ??			     .ds 1
 VIA:D032 ??			     .ds 1
 VIA:D033 ??			     .ds 1
-VIA:D034 ??			     .ds 1
-VIA:D035 ??			     .ds 1
-VIA:D036 ??			     .ds 1
-VIA:D037 ??			     .ds 1
+VIA:D034 ??	     unk_D034:	     .ds 1
+VIA:D035 ??	     unk_D035:	     .ds 1
+VIA:D036 ??	     unk_D036:	     .ds 1
+VIA:D037 ??	     unk_D037:	     .ds 1
 VIA:D038 ??			     .ds 1
-VIA:D039 ??			     .ds 1
+VIA:D039 ??	     unk_D039:	     .ds 1
 VIA:D03A ??			     .ds 1
-VIA:D03B ??			     .ds 1
+VIA:D03B ??	     unk_D03B:	     .ds 1
 VIA:D03C ??	     unk_D03C:	     .ds 1
 VIA:D03D ??			     .ds 1
 VIA:D03E ??			     .ds 1
@@ -4204,38 +4110,38 @@ VIA:D042 ??	     unk_D042:	     .ds 1
 VIA:D043 ??	     unk_D043:	     .ds 1
 VIA:D044 ??	     unk_D044:	     .ds 1
 VIA:D045 ??	     unk_D045:	     .ds 1
-VIA:D046 ??			     .ds 1
+VIA:D046 ??	     unk_D046:	     .ds 1
 VIA:D047 ??	     unk_D047:	     .ds 1
 VIA:D048 ??			     .ds 1
 VIA:D049 ??	     unk_D049:	     .ds 1
 VIA:D04A ??			     .ds 1
 VIA:D04B ??	     unk_D04B:	     .ds 1
 VIA:D04C ??			     .ds 1
-VIA:D04D ??			     .ds 1
+VIA:D04D ??	     unk_D04D:	     .ds 1
 VIA:D04E ??			     .ds 1
 VIA:D04F ??	     unk_D04F:	     .ds 1
 VIA:D050 ??	     unk_D050:	     .ds 1
-VIA:D051 ??			     .ds 1
+VIA:D051 ??	     unk_D051:	     .ds 1
 VIA:D052 ??			     .ds 1
-VIA:D053 ??			     .ds 1
-VIA:D054 ??			     .ds 1
-VIA:D055 ??			     .ds 1
-VIA:D056 ??			     .ds 1
-VIA:D057 ??			     .ds 1
-VIA:D058 ??			     .ds 1
-VIA:D059 ??			     .ds 1
-VIA:D05A ??			     .ds 1
-VIA:D05B ??			     .ds 1
-VIA:D05C ??			     .ds 1
-VIA:D05D ??			     .ds 1
+VIA:D053 ??	     unk_D053:	     .ds 1
+VIA:D054 ??	     unk_D054:	     .ds 1
+VIA:D055 ??	     unk_D055:	     .ds 1
+VIA:D056 ??	     unk_D056:	     .ds 1
+VIA:D057 ??	     unk_D057:	     .ds 1
+VIA:D058 ??	     unk_D058:	     .ds 1
+VIA:D059 ??	     unk_D059:	     .ds 1
+VIA:D05A ??	     unk_D05A:	     .ds 1
+VIA:D05B ??	     unk_D05B:	     .ds 1
+VIA:D05C ??	     unk_D05C:	     .ds 1
+VIA:D05D ??	     unk_D05D:	     .ds 1
 VIA:D05E ??			     .ds 1
-VIA:D05F ??			     .ds 1
+VIA:D05F ??	     unk_D05F:	     .ds 1
 VIA:D060 ??			     .ds 1
 VIA:D061 ??			     .ds 1
 VIA:D062 ??			     .ds 1
-VIA:D063 ??			     .ds 1
+VIA:D063 ??	     unk_D063:	     .ds 1
 VIA:D064 ??			     .ds 1
-VIA:D065 ??			     .ds 1
+VIA:D065 ??	     unk_D065:	     .ds 1
 VIA:D066 ??			     .ds 1
 VIA:D067 ??	     unk_D067:	     .ds 1
 VIA:D068 ??			     .ds 1
@@ -4260,20 +4166,20 @@ VIA:D07A ??	     unk_D07A:	     .ds 1
 VIA:D07B ??			     .ds 1
 VIA:D07C ??			     .ds 1
 VIA:D07D ??			     .ds 1
-VIA:D07E ??			     .ds 1
+VIA:D07E ??	     unk_D07E:	     .ds 1
 VIA:D07F ??			     .ds 1
 VIA:D080 ??	     unk_D080:	     .ds 1
 VIA:D081 ??			     .ds 1
 VIA:D082 ??			     .ds 1
-VIA:D083 ??			     .ds 1
+VIA:D083 ??	     unk_D083:	     .ds 1
 VIA:D084 ??			     .ds 1
 VIA:D085 ??	     unk_D085:	     .ds 1
 VIA:D086 ??			     .ds 1
-VIA:D087 ??			     .ds 1
-VIA:D088 ??			     .ds 1
-VIA:D089 ??			     .ds 1
-VIA:D08A ??			     .ds 1
-VIA:D08B ??			     .ds 1
+VIA:D087 ??	     unk_D087:	     .ds 1
+VIA:D088 ??	     unk_D088:	     .ds 1
+VIA:D089 ??	     unk_D089:	     .ds 1
+VIA:D08A ??	     unk_D08A:	     .ds 1
+VIA:D08B ??	     unk_D08B:	     .ds 1
 VIA:D08C ??			     .ds 1
 VIA:D08D ??			     .ds 1
 VIA:D08E ??			     .ds 1
@@ -4296,10 +4202,10 @@ VIA:D09E ??			     .ds 1
 VIA:D09F ??	     unk_D09F:	     .ds 1
 VIA:D0A0 ??			     .ds 1
 VIA:D0A1 ??			     .ds 1
-VIA:D0A2 ??			     .ds 1
-VIA:D0A3 ??			     .ds 1
+VIA:D0A2 ??	     unk_D0A2:	     .ds 1
+VIA:D0A3 ??	     unk_D0A3:	     .ds 1
 VIA:D0A4 ??			     .ds 1
-VIA:D0A5 ??			     .ds 1
+VIA:D0A5 ??	     unk_D0A5:	     .ds 1
 VIA:D0A6 ??			     .ds 1
 VIA:D0A7 ??			     .ds 1
 VIA:D0A8 ??	     unk_D0A8:	     .ds 1
@@ -4317,45 +4223,45 @@ VIA:D0B3 ??			     .ds 1
 VIA:D0B4 ??			     .ds 1
 VIA:D0B5 ??			     .ds 1
 VIA:D0B6 ??			     .ds 1
-VIA:D0B7 ??			     .ds 1
-VIA:D0B8 ??			     .ds 1
-VIA:D0B9 ??			     .ds 1
+VIA:D0B7 ??	     unk_D0B7:	     .ds 1
+VIA:D0B8 ??	     unk_D0B8:	     .ds 1
+VIA:D0B9 ??	     unk_D0B9:	     .ds 1
 VIA:D0BA ??			     .ds 1
 VIA:D0BB ??			     .ds 1
 VIA:D0BC ??			     .ds 1
-VIA:D0BD ??			     .ds 1
-VIA:D0BE ??			     .ds 1
-VIA:D0BF ??			     .ds 1
-VIA:D0C0 ??			     .ds 1
-VIA:D0C1 ??			     .ds 1
-VIA:D0C2 ??			     .ds 1
+VIA:D0BD ??	     unk_D0BD:	     .ds 1
+VIA:D0BE ??	     unk_D0BE:	     .ds 1
+VIA:D0BF ??	     unk_D0BF:	     .ds 1
+VIA:D0C0 ??	     unk_D0C0:	     .ds 1
+VIA:D0C1 ??	     unk_D0C1:	     .ds 1
+VIA:D0C2 ??	     unk_D0C2:	     .ds 1
 VIA:D0C3 ??			     .ds 1
 VIA:D0C4 ??			     .ds 1
 VIA:D0C5 ??			     .ds 1
 VIA:D0C6 ??	     unk_D0C6:	     .ds 1
 VIA:D0C7 ??			     .ds 1
-VIA:D0C8 ??			     .ds 1
-VIA:D0C9 ??			     .ds 1
-VIA:D0CA ??			     .ds 1
-VIA:D0CB ??			     .ds 1
-VIA:D0CC ??			     .ds 1
+VIA:D0C8 ??	     unk_D0C8:	     .ds 1
+VIA:D0C9 ??	     unk_D0C9:	     .ds 1
+VIA:D0CA ??	     unk_D0CA:	     .ds 1
+VIA:D0CB ??	     unk_D0CB:	     .ds 1
+VIA:D0CC ??	     unk_D0CC:	     .ds 1
 VIA:D0CD ??			     .ds 1
-VIA:D0CE ??			     .ds 1
+VIA:D0CE ??	     unk_D0CE:	     .ds 1
 VIA:D0CF ??			     .ds 1
-VIA:D0D0 ??			     .ds 1
+VIA:D0D0 ??	     unk_D0D0:	     .ds 1
 VIA:D0D1 ??	     unk_D0D1:	     .ds 1
-VIA:D0D2 ??			     .ds 1
+VIA:D0D2 ??	     unk_D0D2:	     .ds 1
 VIA:D0D3 ??			     .ds 1
-VIA:D0D4 ??			     .ds 1
-VIA:D0D5 ??			     .ds 1
-VIA:D0D6 ??			     .ds 1
-VIA:D0D7 ??			     .ds 1
-VIA:D0D8 ??			     .ds 1
+VIA:D0D4 ??	     unk_D0D4:	     .ds 1
+VIA:D0D5 ??	     unk_D0D5:	     .ds 1
+VIA:D0D6 ??	     unk_D0D6:	     .ds 1
+VIA:D0D7 ??	     unk_D0D7:	     .ds 1
+VIA:D0D8 ??	     unk_D0D8:	     .ds 1
 VIA:D0D9 ??			     .ds 1
 VIA:D0DA ??			     .ds 1
 VIA:D0DB ??			     .ds 1
-VIA:D0DC ??			     .ds 1
-VIA:D0DD ??			     .ds 1
+VIA:D0DC ??	     unk_D0DC:	     .ds 1
+VIA:D0DD ??	     unk_D0DD:	     .ds 1
 VIA:D0DE ??	     unk_D0DE:	     .ds 1
 VIA:D0DF ??	     unk_D0DF:	     .ds 1
 VIA:D0E0 ??	     unk_D0E0:	     .ds 1
@@ -4369,20 +4275,20 @@ VIA:D0E7 ??	     unk_D0E7:	     .ds 1
 VIA:D0E8 ??	     unk_D0E8:	     .ds 1
 VIA:D0E9 ??			     .ds 1
 VIA:D0EA ??	     unk_D0EA:	     .ds 1
-VIA:D0EB ??			     .ds 1
-VIA:D0EC ??			     .ds 1
-VIA:D0ED ??			     .ds 1
-VIA:D0EE ??			     .ds 1
-VIA:D0EF ??			     .ds 1
-VIA:D0F0 ??			     .ds 1
+VIA:D0EB ??	     unk_D0EB:	     .ds 1
+VIA:D0EC ??	     unk_D0EC:	     .ds 1
+VIA:D0ED ??	     unk_D0ED:	     .ds 1
+VIA:D0EE ??	     unk_D0EE:	     .ds 1
+VIA:D0EF ??	     unk_D0EF:	     .ds 1
+VIA:D0F0 ??	     unk_D0F0:	     .ds 1
 VIA:D0F1 ??			     .ds 1
-VIA:D0F2 ??			     .ds 1
-VIA:D0F3 ??			     .ds 1
-VIA:D0F4 ??			     .ds 1
-VIA:D0F5 ??			     .ds 1
-VIA:D0F6 ??			     .ds 1
-VIA:D0F7 ??			     .ds 1
-VIA:D0F8 ??			     .ds 1
+VIA:D0F2 ??	     unk_D0F2:	     .ds 1
+VIA:D0F3 ??	     unk_D0F3:	     .ds 1
+VIA:D0F4 ??	     unk_D0F4:	     .ds 1
+VIA:D0F5 ??	     unk_D0F5:	     .ds 1
+VIA:D0F6 ??	     unk_D0F6:	     .ds 1
+VIA:D0F7 ??	     unk_D0F7:	     .ds 1
+VIA:D0F8 ??	     unk_D0F8:	     .ds 1
 VIA:D0F9 ??			     .ds 1
 VIA:D0FA ??			     .ds 1
 VIA:D0FB ??			     .ds 1
@@ -6212,9 +6118,9 @@ BIOS:E01E 26 F9			      bne     loc_E019
 BIOS:E020 BD E8	E3		      jsr     sub_E8E3
 BIOS:E023 7C C8	24		      inc     Vec_0Ref_Enable
 BIOS:E026 86 BB			      lda     #0xBB ; 'ª'
-BIOS:E028 B7 C8	80		      sta     word_C880
+BIOS:E028 B7 C8	80		      sta     addr_score
 BIOS:E02B 8E 01	01		      ldx     #0x101
-BIOS:E02E BF C8	81		      stx     word_C880+1
+BIOS:E02E BF C8	81		      stx     addr_score+1
 BIOS:E031
 BIOS:E031	      loc_E031:				      ;	CODE XREF: BIOS:E0E9j
 BIOS:E031 8E C8	83		      ldx     #byte_C883
@@ -6247,7 +6153,7 @@ BIOS:E06A CC 00	01		      ldd     #1
 BIOS:E06D BD F8	7C		      jsr     Add_Score_d
 BIOS:E070 8E ED	AB		      ldx     #0xEDAB
 BIOS:E073 9F C4			      stx     byte_C8C4
-BIOS:E075 9F C6			      stx     word_C8C5+1
+BIOS:E075 9F C6			      stx     unk_C8C6
 BIOS:E077 86 05			      lda     #5
 BIOS:E079 97 D9			      sta     word_C8D9
 BIOS:E07B 97 DA			      sta     word_C8D9+1
@@ -6675,7 +6581,7 @@ BIOS:E2F7 86 D0			      lda     #0xD0 ; '–'
 BIOS:E2F9 1F 8B			      tfr     a, dp
 BIOS:E2FB BD F2	A5		      jsr     Intensity_5F
 BIOS:E2FE C6 0C			      ldb     #0xC
-BIOS:E300 10 8E	C8 C8		      ldy     #(word_C8C7+1)
+BIOS:E300 10 8E	C8 C8		      ldy     #unk_C8C8
 BIOS:E304 8E CB	89		      ldx     #unk_CB89
 BIOS:E307 BD EA	8D		      jsr     sub_EA8D
 BIOS:E30A
@@ -7110,7 +7016,7 @@ BIOS:E4E7	      ;	--------------------------------------------------------------
 BIOS:E4E7
 BIOS:E4E7	      loc_E4E7:				      ;	CODE XREF: sub_E4B8+14j
 BIOS:E4E7 6F C4			      clr     ,u
-BIOS:E4E9 7A C8	EA		      dec     byte_C8EA
+BIOS:E4E9 7A C8	EA		      dec     controller_state
 BIOS:E4EC
 BIOS:E4EC	      loc_E4EC:				      ;	CODE XREF: sub_E4B8+10j
 BIOS:E4EC B6 C8	BD		      lda     word_C8BD
@@ -7122,9 +7028,9 @@ BIOS:E4F8 27 E5			      beq     loc_E4DF
 BIOS:E4FA 6F 84			      clr     ,x
 BIOS:E4FC 7C C8	B6		      inc     word_C8B6
 BIOS:E4FF 6C C4			      inc     ,u
-BIOS:E501 FC C8	C8		      ldd     word_C8C7+1
+BIOS:E501 FC C8	C8		      ldd     unk_C8C8
 BIOS:E504 ED 45			      std     5,u
-BIOS:E506 FC C8	CA		      ldd     word_C8C9+1
+BIOS:E506 FC C8	CA		      ldd     addr_some_routine+1
 BIOS:E509 ED 47			      std     7,u
 BIOS:E50B FC C9	07		      ldd     word_C907
 BIOS:E50E ED 41			      std     1,u
@@ -7132,7 +7038,7 @@ BIOS:E510 FC C9	09		      ldd     word_C909
 BIOS:E513 ED 43			      std     3,u
 BIOS:E515 86 18			      lda     #0x18
 BIOS:E517 A7 49			      sta     9,u
-BIOS:E519 7C C8	EA		      inc     byte_C8EA
+BIOS:E519 7C C8	EA		      inc     controller_state
 BIOS:E51C 20 C1			      bra     loc_E4DF
 BIOS:E51C	      ;	End of function	sub_E4B8
 BIOS:E51C
@@ -7237,7 +7143,7 @@ BIOS:E5CB
 BIOS:E5CB	      loc_E5CB:				      ;	CODE XREF: sub_E51E+91j
 BIOS:E5CB						      ;	sub_E51E+99j
 BIOS:E5CB 6F C4			      clr     ,u
-BIOS:E5CD 7A C8	EB		      dec     byte_C8EB
+BIOS:E5CD 7A C8	EB		      dec     joystick_state
 BIOS:E5D0 7E E5	2A		      jmp     loc_E52A
 BIOS:E5D3	      ;	---------------------------------------------------------------------------
 BIOS:E5D3
@@ -7372,7 +7278,7 @@ BIOS:E6B3	      ;	--------------------------------------------------------------
 BIOS:E6B3
 BIOS:E6B3	      loc_E6B3:				      ;	CODE XREF: sub_E647+31j
 BIOS:E6B3 7A C8	D9		      dec     word_C8D9
-BIOS:E6B6 7F C8	EB		      clr     byte_C8EB
+BIOS:E6B6 7F C8	EB		      clr     joystick_state
 BIOS:E6B9 7F C8	ED		      clr     word_C8ED
 BIOS:E6BC B6 C8	79		      lda     Vec_Num_Players
 BIOS:E6BF 27 2B			      beq     loc_E6EC
@@ -7494,10 +7400,10 @@ BIOS:E76A
 BIOS:E76A	      sub_E76A:				      ;	CODE XREF: sub_E647+49P
 BIOS:E76A						      ;	sub_E647+53P ...
 BIOS:E76A 34 32			      pshs    a,x,y
-BIOS:E76C 8E C8	C8		      ldx     #(word_C8C7+1)
+BIOS:E76C 8E C8	C8		      ldx     #unk_C8C8
 BIOS:E76F BD F2	F2		      jsr     Moveto_x_7F
 BIOS:E772 A6 E4			      lda     ,s
-BIOS:E774 97 04			      sta     unk_D004
+BIOS:E774 97 04			      sta     byte_D004
 BIOS:E776 1F 20			      tfr     y, d
 BIOS:E778 BD F3	12		      jsr     Moveto_d
 BIOS:E77B C6 0C			      ldb     #0xC
@@ -7840,7 +7746,7 @@ BIOS:E932 E1 61			      cmpb    1,s
 BIOS:E934 23 DF			      bls     loc_E915
 BIOS:E936 E0 62			      subb    2,s
 BIOS:E938 2F DB			      ble     loc_E915
-BIOS:E93A D7 04			      stb     unk_D004
+BIOS:E93A D7 04			      stb     byte_D004
 BIOS:E93C 8E CB	71		      ldx     #unk_CB71
 BIOS:E93F 48			      asla
 BIOS:E940 AE 86			      ldx     a,x
@@ -7873,7 +7779,7 @@ BIOS:E95F	      loc_E95F:				      ;	CODE XREF: sub_E94A+Cj
 BIOS:E95F BD F3	54		      jsr     Reset0Ref
 BIOS:E962 86 03			      lda     #3
 BIOS:E964 B7 C8	23		      sta     Vec_Misc_Count
-BIOS:E967 8E C8	C8		      ldx     #(word_C8C7+1)
+BIOS:E967 8E C8	C8		      ldx     #unk_C8C8
 BIOS:E96A BD F2	F2		      jsr     Moveto_x_7F
 BIOS:E96D E6 E4			      ldb     ,s
 BIOS:E96F 58			      aslb
@@ -7881,7 +7787,7 @@ BIOS:E970 58			      aslb
 BIOS:E971 EB 62			      addb    2,s
 BIOS:E973 2F DF			      ble     loc_E954
 BIOS:E975 C4 7F			      andb    #0x7F ; ''
-BIOS:E977 D7 04			      stb     unk_D004
+BIOS:E977 D7 04			      stb     byte_D004
 BIOS:E979 8E CB	71		      ldx     #unk_CB71
 BIOS:E97C A6 E4			      lda     ,s
 BIOS:E97E 4A			      deca
@@ -8058,7 +7964,7 @@ BIOS:EA6D	      sub_EA6D:				      ;	CODE XREF: sub_E4B8+24P
 BIOS:EA6D						      ;	sub_E51E+C8P
 BIOS:EA6D 34 06			      pshs    a,b
 BIOS:EA6F 86 7F			      lda     #0x7F ; ''
-BIOS:EA71 97 04			      sta     unk_D004
+BIOS:EA71 97 04			      sta     byte_D004
 BIOS:EA73 A6 A4			      lda     ,y
 BIOS:EA75 E6 22			      ldb     2,y
 BIOS:EA77 BD F2	C3		      jsr     Dot_d
@@ -8103,7 +8009,7 @@ BIOS:EA9D	      sub_EA9D:				      ;	CODE XREF: BIOS:E0CCP
 BIOS:EA9D						      ;	sub_E129+98P
 BIOS:EA9D 34 56			      pshs    a,b,x,u
 BIOS:EA9F 86 7F			      lda     #0x7F ; ''
-BIOS:EAA1 97 04			      sta     unk_D004
+BIOS:EAA1 97 04			      sta     byte_D004
 BIOS:EAA3 BD F3	73		      jsr     Print_Str_hwyx
 BIOS:EAA6 35 D6			      puls    pc,u,x,b,a
 BIOS:EAA6	      ;	End of function	sub_EA9D
@@ -8170,9 +8076,9 @@ BIOS:EAF0 BD F1	92		      jsr     Wait_Recal
 BIOS:EAF3 34 08			      pshs    dp
 BIOS:EAF5 BD F2	E6		      jsr     Recalibrate
 BIOS:EAF8 BD EA	B4		      jsr     sub_EAB4
-BIOS:EAFB B6 C8	80		      lda     word_C880
+BIOS:EAFB B6 C8	80		      lda     addr_score
 BIOS:EAFE BD F1	B4		      jsr     Read_Btns_Mask
-BIOS:EB01 FC C8	81		      ldd     word_C880+1
+BIOS:EB01 FC C8	81		      ldd     addr_score+1
 BIOS:EB04 FD C8	1F		      std     Vec_Joy_Mux_1_X
 BIOS:EB07 FD C8	21		      std     Vec_Joy_Mux_2_X
 BIOS:EB0A BD F1	F8		      jsr     Joy_Digital
@@ -8182,7 +8088,7 @@ BIOS:EB11 96 9C			      lda     unk_D09C
 BIOS:EB13 27 08			      beq     loc_EB1D
 BIOS:EB15 0A 9C			      dec     unk_D09C
 BIOS:EB17 26 04			      bne     loc_EB1D
-BIOS:EB19 AD 9F	C8 9D		      jsr     [word_C89D]
+BIOS:EB19 AD 9F	C8 9D		      jsr     [byte_C89D]
 BIOS:EB1D
 BIOS:EB1D	      loc_EB1D:				      ;	CODE XREF: sub_EAF0+23j
 BIOS:EB1D						      ;	sub_EAF0+27j
@@ -9513,7 +9419,7 @@ BIOS:F192	      ;	===============	S U B R	O U T I	N E ==========================
 BIOS:F192
 BIOS:F192
 BIOS:F192	      Wait_Recal:			      ;	CODE XREF: CART:loc_96P
-BIOS:F192						      ;	CART:loc_17FP ...
+BIOS:F192						      ;	CART:GAME_LOOPP ...
 BIOS:F192 BE C8	25		      ldx     Vec_Loop_Count
 BIOS:F195 30 01			      leax    1,x
 BIOS:F197 BF C8	25		      stx     Vec_Loop_Count
@@ -9522,7 +9428,7 @@ BIOS:F19C	      ;	assume dp = 0xD0
 BIOS:F19C 86 20			      lda     #0x20 ; ' '
 BIOS:F19E
 BIOS:F19E	      loc_F19E:				      ;	CODE XREF: Wait_Recal+Ej
-BIOS:F19E 95 0D			      bita    unk_D00D
+BIOS:F19E 95 0D			      bita    byte_D00D
 BIOS:F1A0 27 FC			      beq     loc_F19E
 BIOS:F1A2
 BIOS:F1A2	      Set_Refresh:			      ;	CODE XREF: INIT_VIA+16j
@@ -9568,19 +9474,19 @@ BIOS:F1BA 8E C8	12		      ldx     #Vec_Button_1_1
 BIOS:F1BD A6 1D			      lda     -3,x
 BIOS:F1BF A7 1E			      sta     -2,x
 BIOS:F1C1 86 0E			      lda     #0xE
-BIOS:F1C3 97 01			      sta     unk_D001
+BIOS:F1C3 97 01			      sta     byte_D001
 BIOS:F1C5 CC 19	01		      ldd     #0x1901
-BIOS:F1C8 97 00			      sta     unk_D000
+BIOS:F1C8 97 00			      sta     byte_D000
 BIOS:F1CA 12			      nop
-BIOS:F1CB D7 00			      stb     unk_D000
+BIOS:F1CB D7 00			      stb     byte_D000
 BIOS:F1CD 0F 03			      clr     unk_D003
 BIOS:F1CF CC 09	01		      ldd     #0x901
-BIOS:F1D2 97 00			      sta     unk_D000
+BIOS:F1D2 97 00			      sta     byte_D000
 BIOS:F1D4 12			      nop
-BIOS:F1D5 96 01			      lda     unk_D001
+BIOS:F1D5 96 01			      lda     byte_D001
 BIOS:F1D7 43			      coma
 BIOS:F1D8 A7 1D			      sta     -3,x
-BIOS:F1DA D7 00			      stb     unk_D000
+BIOS:F1DA D7 00			      stb     byte_D000
 BIOS:F1DC C6 FF			      ldb     #0xFF
 BIOS:F1DE D7 03			      stb     unk_D003
 BIOS:F1E0 43			      coma
@@ -9620,14 +9526,14 @@ BIOS:F1FF 8C C8	23		      cmpx    #Vec_Misc_Count
 BIOS:F202 26 F7			      bne     loc_F1FB
 BIOS:F204 6F 84			      clr     ,x
 BIOS:F206 86 01			      lda     #1
-BIOS:F208 97 00			      sta     unk_D000
+BIOS:F208 97 00			      sta     byte_D000
 BIOS:F20A 39			      rts
 BIOS:F20B	      ;	---------------------------------------------------------------------------
 BIOS:F20B
 BIOS:F20B	      loc_F20B:				      ;	CODE XREF: Joy_Digital+5j
-BIOS:F20B 97 00			      sta     unk_D000
-BIOS:F20D 0F 01			      clr     unk_D001
-BIOS:F20F 0A 00			      dec     unk_D000
+BIOS:F20B 97 00			      sta     byte_D000
+BIOS:F20D 0F 01			      clr     byte_D001
+BIOS:F20F 0A 00			      dec     byte_D000
 BIOS:F211 C6 60			      ldb     #0x60 ; '`'
 BIOS:F213
 BIOS:F213	      loc_F213:				      ;	CODE XREF: Joy_Digital+1Cj
@@ -9636,20 +9542,20 @@ BIOS:F214 2A FD			      bpl     loc_F213
 BIOS:F216 B6 C8	23		      lda     Vec_Misc_Count
 BIOS:F219 2B 25			      bmi     loc_F240
 BIOS:F21B 86 20			      lda     #0x20 ; ' '
-BIOS:F21D 0C 00			      inc     unk_D000
-BIOS:F21F 95 00			      bita    unk_D000
+BIOS:F21D 0C 00			      inc     byte_D000
+BIOS:F21F 95 00			      bita    byte_D000
 BIOS:F221 27 0A			      beq     loc_F22D
 BIOS:F223 C6 40			      ldb     #0x40 ; '@'
-BIOS:F225 D7 01			      stb     unk_D001
-BIOS:F227 95 00			      bita    unk_D000
+BIOS:F225 D7 01			      stb     byte_D001
+BIOS:F227 95 00			      bita    byte_D000
 BIOS:F229 26 0B			      bne     loc_F236
 BIOS:F22B 20 08			      bra     loc_F235
 BIOS:F22D	      ;	---------------------------------------------------------------------------
 BIOS:F22D
 BIOS:F22D	      loc_F22D:				      ;	CODE XREF: Joy_Digital+29j
 BIOS:F22D C6 C0			      ldb     #0xC0 ; '¿'
-BIOS:F22F D7 01			      stb     unk_D001
-BIOS:F231 95 00			      bita    unk_D000
+BIOS:F22F D7 01			      stb     byte_D001
+BIOS:F231 95 00			      bita    byte_D000
 BIOS:F233 27 01			      beq     loc_F236
 BIOS:F235
 BIOS:F235	      loc_F235:				      ;	CODE XREF: Joy_Digital+33j
@@ -9663,22 +9569,22 @@ BIOS:F23A	      ;	--------------------------------------------------------------
 BIOS:F23A
 BIOS:F23A	      loc_F23A:				      ;	CODE XREF: Joy_Digital+58j
 BIOS:F23A 1F 98			      tfr     b, a
-BIOS:F23C 9A 01			      oraa    unk_D001
-BIOS:F23E 97 01			      sta     unk_D001
+BIOS:F23C 9A 01			      oraa    byte_D001
+BIOS:F23E 97 01			      sta     byte_D001
 BIOS:F240
 BIOS:F240	      loc_F240:				      ;	CODE XREF: Joy_Digital+21j
 BIOS:F240 86 20			      lda     #0x20 ; ' '
-BIOS:F242 95 00			      bita    unk_D000
+BIOS:F242 95 00			      bita    byte_D000
 BIOS:F244 26 06			      bne     loc_F24C
 BIOS:F246 1F 98			      tfr     b, a
-BIOS:F248 98 01			      eora    unk_D001
-BIOS:F24A 97 01			      sta     unk_D001
+BIOS:F248 98 01			      eora    byte_D001
+BIOS:F24A 97 01			      sta     byte_D001
 BIOS:F24C
 BIOS:F24C	      loc_F24C:				      ;	CODE XREF: Joy_Digital+4Cj
 BIOS:F24C 54			      lsrb
 BIOS:F24D F1 C8	1A		      cmpb    Vec_Joy_Resltn
 BIOS:F250 26 E8			      bne     loc_F23A
-BIOS:F252 D6 01			      ldb     unk_D001
+BIOS:F252 D6 01			      ldb     byte_D001
 BIOS:F254 20 E0			      bra     loc_F236
 BIOS:F254	      ;	End of function	Joy_Digital
 BIOS:F254
@@ -9700,17 +9606,17 @@ BIOS:F259						      ;	Do_Sound+Ep
 BIOS:F259 E7 86			      stb     a,x
 BIOS:F25B
 BIOS:F25B	      Sound_Byte_raw:
-BIOS:F25B 97 01			      sta     unk_D001
+BIOS:F25B 97 01			      sta     byte_D001
 BIOS:F25D 86 19			      lda     #0x19
-BIOS:F25F 97 00			      sta     unk_D000
+BIOS:F25F 97 00			      sta     byte_D000
 BIOS:F261 86 01			      lda     #1
-BIOS:F263 97 00			      sta     unk_D000
-BIOS:F265 96 01			      lda     unk_D001
-BIOS:F267 D7 01			      stb     unk_D001
+BIOS:F263 97 00			      sta     byte_D000
+BIOS:F265 96 01			      lda     byte_D001
+BIOS:F267 D7 01			      stb     byte_D001
 BIOS:F269 C6 11			      ldb     #0x11
-BIOS:F26B D7 00			      stb     unk_D000
+BIOS:F26B D7 00			      stb     byte_D000
 BIOS:F26D C6 01			      ldb     #1
-BIOS:F26F D7 00			      stb     unk_D000
+BIOS:F26F D7 00			      stb     byte_D000
 BIOS:F271 39			      rts
 BIOS:F271	      ;	End of function	Sound_Byte_x
 BIOS:F271
@@ -9753,11 +9659,11 @@ BIOS:F289
 BIOS:F289
 BIOS:F289	      Do_Sound:				      ;	CODE XREF: CART:009CP
 BIOS:F289						      ;	CART:0188P ...
-BIOS:F289 8E C8	00		      ldx     #0xC800
+BIOS:F289 8E C8	00		      ldx     #Vec_Snd_Shadow
 BIOS:F28C
 BIOS:F28C	      Do_Sound_x:
-BIOS:F28C CE C8	3F		      ldu     #0xC83F
-BIOS:F28F 86 0D			      lda     #0xD
+BIOS:F28C CE C8	3F		      ldu     #Vec_Music_Work
+BIOS:F28F 86 0D			      lda     #13
 BIOS:F291
 BIOS:F291	      loc_F291:				      ;	CODE XREF: Do_Sound+11j
 BIOS:F291 E6 C0			      ldb     ,u+
@@ -9801,14 +9707,14 @@ BIOS:F2A9 86 7F			      lda     #0x7F ; ''
 BIOS:F2AB
 BIOS:F2AB	      Intensity_a:			      ;	CODE XREF: BIOS:F29Fj
 BIOS:F2AB						      ;	BIOS:F2A3j ...
-BIOS:F2AB 97 01			      sta     unk_D001
+BIOS:F2AB 97 01			      sta     byte_D001
 BIOS:F2AD B7 C8	27		      sta     Vec_Brightness
 BIOS:F2B0 CC 05	04		      ldd     #0x504
-BIOS:F2B3 97 00			      sta     unk_D000
-BIOS:F2B5 D7 00			      stb     unk_D000
-BIOS:F2B7 D7 00			      stb     unk_D000
+BIOS:F2B3 97 00			      sta     byte_D000
+BIOS:F2B5 D7 00			      stb     byte_D000
+BIOS:F2B7 D7 00			      stb     byte_D000
 BIOS:F2B9 C6 01			      ldb     #1
-BIOS:F2BB D7 00			      stb     unk_D000
+BIOS:F2BB D7 00			      stb     byte_D000
 BIOS:F2BD 39			      rts
 BIOS:F2BD	      ;	End of function	Intensity_7F
 BIOS:F2BD
@@ -9830,13 +9736,13 @@ BIOS:F2C3 8D 4D			      bsr     Moveto_d
 BIOS:F2C5
 BIOS:F2C5	      Dot_here:
 BIOS:F2C5 86 FF			      lda     #0xFF
-BIOS:F2C7 97 0A			      sta     unk_D00A
+BIOS:F2C7 97 0A			      sta     byte_D00A
 BIOS:F2C9 F6 C8	28		      ldb     Vec_Dot_Dwell
 BIOS:F2CC
 BIOS:F2CC	      loc_F2CC:				      ;	CODE XREF: Dot_ix+Cj
 BIOS:F2CC 5A			      decb
 BIOS:F2CD 26 FD			      bne     loc_F2CC
-BIOS:F2CF 0F 0A			      clr     unk_D00A
+BIOS:F2CF 0F 0A			      clr     byte_D00A
 BIOS:F2D1 39			      rts
 BIOS:F2D1	      ;	End of function	Dot_ix
 BIOS:F2D1
@@ -9888,7 +9794,7 @@ BIOS:F2F2
 BIOS:F2F2	      Moveto_x_7F:			      ;	CODE XREF: sub_E76A+5P
 BIOS:F2F2						      ;	sub_E94A+20P ...
 BIOS:F2F2 C6 7F			      ldb     #0x7F ; ''
-BIOS:F2F4 D7 04			      stb     unk_D004
+BIOS:F2F4 D7 04			      stb     byte_D004
 BIOS:F2F6 A6 84			      lda     ,x
 BIOS:F2F8 E6 02			      ldb     2,x
 BIOS:F2FA 20 16			      bra     Moveto_d
@@ -9900,11 +9806,11 @@ BIOS:F2FC
 BIOS:F2FC
 BIOS:F2FC	      Moveto_d_7F:			      ;	CODE XREF: sub_486+121P
 BIOS:F2FC						      ;	sub_8C7+63P ...
-BIOS:F2FC 97 01			      sta     unk_D001
+BIOS:F2FC 97 01			      sta     byte_D001
 BIOS:F2FE 34 06			      pshs    a,b
 BIOS:F300 86 7F			      lda     #0x7F ; ''
-BIOS:F302 97 04			      sta     unk_D004
-BIOS:F304 0F 00			      clr     unk_D000
+BIOS:F302 97 04			      sta     byte_D004
+BIOS:F304 0F 00			      clr     byte_D000
 BIOS:F306 20 10			      bra     loc_F318
 BIOS:F306	      ;	End of function	Moveto_d_7F
 BIOS:F306
@@ -9922,7 +9828,7 @@ BIOS:F30C	      Moveto_ix_7F:
 BIOS:F30C C6 7F			      ldb     #0x7F ; ''
 BIOS:F30E
 BIOS:F30E	      Moveto_ix_a:			      ;	CODE XREF: Moveto_ix_FF+2j
-BIOS:F30E D7 04			      stb     unk_D004
+BIOS:F30E D7 04			      stb     byte_D004
 BIOS:F30E	      ;	End of function	Moveto_ix_FF
 BIOS:F30E
 BIOS:F310
@@ -9934,17 +9840,17 @@ BIOS:F310 EC 81			      ldd     ,x++
 BIOS:F312
 BIOS:F312	      Moveto_d:				      ;	CODE XREF: sub_E76A+EP
 BIOS:F312						      ;	Dot_ix:Dot_dp ...
-BIOS:F312 97 01			      sta     unk_D001
-BIOS:F314 0F 00			      clr     unk_D000
+BIOS:F312 97 01			      sta     byte_D001
+BIOS:F314 0F 00			      clr     byte_D000
 BIOS:F316 34 06			      pshs    a,b
 BIOS:F318
 BIOS:F318	      loc_F318:				      ;	CODE XREF: Moveto_d_7F+Aj
 BIOS:F318 86 CE			      lda     #0xCE ; 'Œ'
 BIOS:F31A 97 0C			      sta     unk_D00C
-BIOS:F31C 0F 0A			      clr     unk_D00A
-BIOS:F31E 0C 00			      inc     unk_D000
-BIOS:F320 D7 01			      stb     unk_D001
-BIOS:F322 0F 05			      clr     unk_D005
+BIOS:F31C 0F 0A			      clr     byte_D00A
+BIOS:F31E 0C 00			      inc     byte_D000
+BIOS:F320 D7 01			      stb     byte_D001
+BIOS:F322 0F 05			      clr     byte_D005
 BIOS:F324 35 06			      puls    b,a
 BIOS:F326 BD F5	84		      jsr     Abs_a_b
 BIOS:F329 E7 7F			      stb     -1,s
@@ -9963,7 +9869,7 @@ BIOS:F33B 86 04			      lda     #4
 BIOS:F33D
 BIOS:F33D	      loc_F33D:				      ;	CODE XREF: Moveto_ix+29j
 BIOS:F33D						      ;	Moveto_ix+2Fj
-BIOS:F33D D5 0D			      bitb    unk_D00D
+BIOS:F33D D5 0D			      bitb    byte_D00D
 BIOS:F33F 27 FC			      beq     loc_F33D
 BIOS:F341
 BIOS:F341	      loc_F341:				      ;	CODE XREF: Moveto_ix+32j
@@ -9974,7 +9880,7 @@ BIOS:F345	      ;	--------------------------------------------------------------
 BIOS:F345
 BIOS:F345	      loc_F345:				      ;	CODE XREF: Moveto_ix+21j
 BIOS:F345						      ;	Moveto_ix+37j
-BIOS:F345 D5 0D			      bitb    unk_D00D
+BIOS:F345 D5 0D			      bitb    byte_D00D
 BIOS:F347 27 FC			      beq     loc_F345
 BIOS:F349 39			      rts
 BIOS:F349	      ;	End of function	Moveto_ix
@@ -10000,16 +9906,16 @@ BIOS:F354	      Reset0Ref:			      ;	CODE XREF: sub_486+12FP
 BIOS:F354						      ;	sub_486+177P ...
 BIOS:F354 CC 00	CC		      ldd     #0xCC ; 'Ã'
 BIOS:F357 D7 0C			      stb     unk_D00C
-BIOS:F359 97 0A			      sta     unk_D00A
+BIOS:F359 97 0A			      sta     byte_D00A
 BIOS:F35B
 BIOS:F35B	      Reset_Pen:
 BIOS:F35B CC 03	02		      ldd     #0x302
-BIOS:F35E 0F 01			      clr     unk_D001
-BIOS:F360 97 00			      sta     unk_D000
-BIOS:F362 D7 00			      stb     unk_D000
-BIOS:F364 D7 00			      stb     unk_D000
+BIOS:F35E 0F 01			      clr     byte_D001
+BIOS:F360 97 00			      sta     byte_D000
+BIOS:F362 D7 00			      stb     byte_D000
+BIOS:F364 D7 00			      stb     byte_D000
 BIOS:F366 C6 01			      ldb     #1
-BIOS:F368 D7 00			      stb     unk_D000
+BIOS:F368 D7 00			      stb     byte_D000
 BIOS:F36A
 BIOS:F36A	      locret_F36A:			      ;	CODE XREF: Draw_Pat_VL_a-E2j
 BIOS:F36A 39			      rts
@@ -10022,7 +9928,7 @@ BIOS:F36B
 BIOS:F36B	      Reset0Int:			      ;	CODE XREF: Recalibrate+5P
 BIOS:F36B CC 00	CC		      ldd     #0xCC ; 'Ã'
 BIOS:F36E D7 0C			      stb     unk_D00C
-BIOS:F370 97 0A			      sta     unk_D00A
+BIOS:F370 97 0A			      sta     byte_D00A
 BIOS:F372 39			      rts
 BIOS:F372	      ;	End of function	Reset0Int
 BIOS:F372
@@ -10101,39 +10007,45 @@ BIOS:F3A5 C6 2D			      ldb     #0x2D ; '-'
 BIOS:F3A7 36 06			      pshu    a,b
 BIOS:F3A9 36 10			      pshu    x
 BIOS:F3AB 20 CB			      bra     Print_Str_yx
-BIOS:F3AD	      ;	---------------------------------------------------------------------------
 BIOS:F3AD
-BIOS:F3AD	      Mov_Draw_VLc_a:
+BIOS:F3AD	      ;	===============	S U B R	O U T I	N E =======================================
+BIOS:F3AD
+BIOS:F3AD
+BIOS:F3AD	      Mov_Draw_VLc_a:			      ;	CODE XREF: CART:loc_61CP
+BIOS:F3AD						      ;	CART:0A18P ...
 BIOS:F3AD A6 80			      lda     ,x+
 BIOS:F3AF 20 08			      bra     Mov_Draw_VL_a
 BIOS:F3B1	      ;	---------------------------------------------------------------------------
 BIOS:F3B1
 BIOS:F3B1	      Mov_Draw_VL_b:
-BIOS:F3B1 D7 04			      stb     unk_D004
+BIOS:F3B1 D7 04			      stb     byte_D004
 BIOS:F3B3 20 07			      bra     Mov_Draw_VL
 BIOS:F3B5	      ;	---------------------------------------------------------------------------
 BIOS:F3B5
 BIOS:F3B5	      Mov_Draw_VLcs:
 BIOS:F3B5 EC 81			      ldd     ,x++
-BIOS:F3B7 D7 04			      stb     unk_D004
+BIOS:F3B7 D7 04			      stb     byte_D004
 BIOS:F3B9
-BIOS:F3B9	      Mov_Draw_VL_a:			      ;	CODE XREF: BIOS:F3AFj
+BIOS:F3B9	      Mov_Draw_VL_a:			      ;	CODE XREF: Mov_Draw_VLc_a+2j
 BIOS:F3B9 B7 C8	23		      sta     Vec_Misc_Count
+BIOS:F3B9	      ;	End of function	Mov_Draw_VLc_a
+BIOS:F3B9
 BIOS:F3BC
 BIOS:F3BC	      ;	===============	S U B R	O U T I	N E =======================================
 BIOS:F3BC
 BIOS:F3BC
-BIOS:F3BC	      Mov_Draw_VL:			      ;	CODE XREF: BIOS:F3B3j
+BIOS:F3BC	      Mov_Draw_VL:			      ;	CODE XREF: Mov_Draw_VLc_a+6j
 BIOS:F3BC						      ;	BIOS:F480P
+BIOS:F3BC						      ;	DATA XREF: ...
 BIOS:F3BC EC 84			      ldd     ,x
 BIOS:F3BE
 BIOS:F3BE	      Mov_Draw_VL_d:			      ;	CODE XREF: BIOS:loc_FFA3P
-BIOS:F3BE 97 01			      sta     unk_D001
-BIOS:F3C0 0F 00			      clr     unk_D000
+BIOS:F3BE 97 01			      sta     byte_D001
+BIOS:F3C0 0F 00			      clr     byte_D000
 BIOS:F3C2 30 02			      leax    2,x
 BIOS:F3C4 12			      nop
-BIOS:F3C5 0C 00			      inc     unk_D000
-BIOS:F3C7 D7 01			      stb     unk_D001
+BIOS:F3C5 0C 00			      inc     byte_D000
+BIOS:F3C7 D7 01			      stb     byte_D001
 BIOS:F3C9 CC 00	00		      ldd     #0
 BIOS:F3CC 20 1F			      bra     loc_F3ED
 BIOS:F3CC	      ;	End of function	Mov_Draw_VL
@@ -10146,49 +10058,49 @@ BIOS:F3D0 20 08			      bra     Draw_VL_a
 BIOS:F3D2	      ;	---------------------------------------------------------------------------
 BIOS:F3D2
 BIOS:F3D2	      Draw_VL_b:
-BIOS:F3D2 D7 04			      stb     unk_D004
+BIOS:F3D2 D7 04			      stb     byte_D004
 BIOS:F3D4 20 07			      bra     Draw_VL
 BIOS:F3D6	      ;	---------------------------------------------------------------------------
 BIOS:F3D6
 BIOS:F3D6	      Draw_VLcs:
 BIOS:F3D6 EC 81			      ldd     ,x++
-BIOS:F3D8 D7 04			      stb     unk_D004
-BIOS:F3DA	      ;	START OF FUNCTION CHUNK	FOR Draw_VL
+BIOS:F3D8 D7 04			      stb     byte_D004
 BIOS:F3DA
-BIOS:F3DA	      Draw_VL_a:			      ;	CODE XREF: BIOS:F3D0j
-BIOS:F3DA						      ;	Draw_VL+22j
+BIOS:F3DA	      ;	===============	S U B R	O U T I	N E =======================================
+BIOS:F3DA
+BIOS:F3DA
+BIOS:F3DA	      Draw_VL_a:			      ;	CODE XREF: CART:0627P
+BIOS:F3DA						      ;	CART:09F7P ...
 BIOS:F3DA B7 C8	23		      sta     Vec_Misc_Count
-BIOS:F3DA	      ;	END OF FUNCTION	CHUNK FOR Draw_VL
+BIOS:F3DA	      ;	End of function	Draw_VL_a
+BIOS:F3DA
 BIOS:F3DD
 BIOS:F3DD	      ;	===============	S U B R	O U T I	N E =======================================
 BIOS:F3DD
 BIOS:F3DD
-BIOS:F3DD	      Draw_VL:				      ;	CODE XREF: BIOS:F3D4j
-BIOS:F3DD						      ;	BIOS:F488P
-BIOS:F3DD
-BIOS:F3DD	      ;	FUNCTION CHUNK AT BIOS:F3DA SIZE 00000003 BYTES
-BIOS:F3DD
+BIOS:F3DD	      Draw_VL:				      ;	CODE XREF: CART:062CP
+BIOS:F3DD						      ;	BIOS:F3D4j ...
 BIOS:F3DD EC 84			      ldd     ,x
 BIOS:F3DF
 BIOS:F3DF	      Draw_Line_d:			      ;	CODE XREF: BIOS:FFC4P
-BIOS:F3DF 97 01			      sta     unk_D001
-BIOS:F3E1 0F 00			      clr     unk_D000
+BIOS:F3DF 97 01			      sta     byte_D001
+BIOS:F3E1 0F 00			      clr     byte_D000
 BIOS:F3E3 30 02			      leax    2,x
 BIOS:F3E5 12			      nop
-BIOS:F3E6 0C 00			      inc     unk_D000
-BIOS:F3E8 D7 01			      stb     unk_D001
+BIOS:F3E6 0C 00			      inc     byte_D000
+BIOS:F3E8 D7 01			      stb     byte_D001
 BIOS:F3EA CC FF	00		      ldd     #0xFF00
 BIOS:F3ED
 BIOS:F3ED	      loc_F3ED:				      ;	CODE XREF: Mov_Draw_VL+10j
-BIOS:F3ED 97 0A			      sta     unk_D00A
-BIOS:F3EF D7 05			      stb     unk_D005
+BIOS:F3ED 97 0A			      sta     byte_D00A
+BIOS:F3EF D7 05			      stb     byte_D005
 BIOS:F3F1 CC 00	40		      ldd     #0x40 ; '@'
 BIOS:F3F4
 BIOS:F3F4	      loc_F3F4:				      ;	CODE XREF: Draw_VL+19j
-BIOS:F3F4 D5 0D			      bitb    unk_D00D
+BIOS:F3F4 D5 0D			      bitb    byte_D00D
 BIOS:F3F6 27 FC			      beq     loc_F3F4
 BIOS:F3F8 12			      nop
-BIOS:F3F9 97 0A			      sta     unk_D00A
+BIOS:F3F9 97 0A			      sta     byte_D00A
 BIOS:F3FB B6 C8	23		      lda     Vec_Misc_Count
 BIOS:F3FE 4A			      deca
 BIOS:F3FF 2A D9			      bpl     Draw_VL_a
@@ -10215,25 +10127,26 @@ BIOS:F40E
 BIOS:F40E
 BIOS:F40E	      Draw_VLp_b:			      ;	CODE XREF: sub_E76A+15P
 BIOS:F40E						      ;	sub_EA7F+9P ...
-BIOS:F40E D7 04			      stb     unk_D004
+BIOS:F40E D7 04			      stb     byte_D004
 BIOS:F410
-BIOS:F410	      Draw_VLp:				      ;	CODE XREF: Draw_VLp_b+20j
+BIOS:F410	      Draw_VLp:				      ;	CODE XREF: CART:0A04P
+BIOS:F410						      ;	CART:0A12J ...
 BIOS:F410 EC 01			      ldd     1,x
-BIOS:F412 97 01			      sta     unk_D001
-BIOS:F414 0F 00			      clr     unk_D000
+BIOS:F412 97 01			      sta     byte_D001
+BIOS:F414 0F 00			      clr     byte_D000
 BIOS:F416 A6 84			      lda     ,x
 BIOS:F418 30 03			      leax    3,x
-BIOS:F41A 0C 00			      inc     unk_D000
-BIOS:F41C D7 01			      stb     unk_D001
-BIOS:F41E 97 0A			      sta     unk_D00A
-BIOS:F420 0F 05			      clr     unk_D005
+BIOS:F41A 0C 00			      inc     byte_D000
+BIOS:F41C D7 01			      stb     byte_D001
+BIOS:F41E 97 0A			      sta     byte_D00A
+BIOS:F420 0F 05			      clr     byte_D005
 BIOS:F422 CC 00	40		      ldd     #0x40 ; '@'
 BIOS:F425
 BIOS:F425	      loc_F425:				      ;	CODE XREF: Draw_VLp_b+19j
-BIOS:F425 D5 0D			      bitb    unk_D00D
+BIOS:F425 D5 0D			      bitb    byte_D00D
 BIOS:F427 27 FC			      beq     loc_F425
 BIOS:F429 12			      nop
-BIOS:F42A 97 0A			      sta     unk_D00A
+BIOS:F42A 97 0A			      sta     byte_D00A
 BIOS:F42C A6 84			      lda     ,x
 BIOS:F42E 2F E0			      ble     Draw_VLp
 BIOS:F430 7E F3	4F		      jmp     Check0Ref
@@ -10261,18 +10174,18 @@ BIOS:F437	      Draw_Pat_VL:			      ;	CODE XREF: BIOS:F47Ap
 BIOS:F437 EC 84			      ldd     ,x
 BIOS:F439
 BIOS:F439	      Draw_Pat_VL_d:
-BIOS:F439 97 01			      sta     unk_D001
-BIOS:F43B 0F 00			      clr     unk_D000
+BIOS:F439 97 01			      sta     byte_D001
+BIOS:F43B 0F 00			      clr     byte_D000
 BIOS:F43D 30 02			      leax    2,x
-BIOS:F43F 0C 00			      inc     unk_D000
-BIOS:F441 D7 01			      stb     unk_D001
+BIOS:F43F 0C 00			      inc     byte_D000
+BIOS:F441 D7 01			      stb     byte_D001
 BIOS:F443 B6 C8	29		      lda     Vec_Pattern
 BIOS:F446 C6 40			      ldb     #0x40 ; '@'
-BIOS:F448 97 0A			      sta     unk_D00A
-BIOS:F44A 0F 05			      clr     unk_D005
-BIOS:F44C F5 D0	0D		      bitb    unk_D00D
+BIOS:F448 97 0A			      sta     byte_D00A
+BIOS:F44A 0F 05			      clr     byte_D005
+BIOS:F44C F5 D0	0D		      bitb    byte_D00D
 BIOS:F44F 27 0B			      beq     loc_F45C
-BIOS:F451 0F 0A			      clr     unk_D00A
+BIOS:F451 0F 0A			      clr     byte_D00A
 BIOS:F453 B6 C8	23		      lda     Vec_Misc_Count
 BIOS:F456 26 DB			      bne     loc_F433
 BIOS:F458 39			      rts
@@ -10282,12 +10195,12 @@ BIOS:F459	      loc_F459:				      ;	CODE XREF: Draw_Pat_VL_a+2Dj
 BIOS:F459 B6 C8	29		      lda     Vec_Pattern
 BIOS:F45C
 BIOS:F45C	      loc_F45C:				      ;	CODE XREF: Draw_Pat_VL_a+1Bj
-BIOS:F45C 97 0A			      sta     unk_D00A
+BIOS:F45C 97 0A			      sta     byte_D00A
 BIOS:F45E 12			      nop
-BIOS:F45F D5 0D			      bitb    unk_D00D
+BIOS:F45F D5 0D			      bitb    byte_D00D
 BIOS:F461 27 F6			      beq     loc_F459
 BIOS:F463 B6 C8	23		      lda     Vec_Misc_Count
-BIOS:F466 0F 0A			      clr     unk_D00A
+BIOS:F466 0F 0A			      clr     byte_D00A
 BIOS:F468 4D			      tsta
 BIOS:F469 26 C8			      bne     loc_F433
 BIOS:F46B 7E F3	4F		      jmp     Check0Ref
@@ -10334,40 +10247,40 @@ BIOS:F495						      ;	Print_Str_d+6J
 BIOS:F495 FF C8	2C		      stu     Vec_Str_Ptr
 BIOS:F498 8E F9	D4		      ldx     #0xF9D4
 BIOS:F49B CC 18	83		      ldd     #0x1883
-BIOS:F49E 0F 01			      clr     unk_D001
+BIOS:F49E 0F 01			      clr     byte_D001
 BIOS:F4A0 97 0B			      sta     unk_D00B
 BIOS:F4A2 8E F9	D4		      ldx     #0xF9D4
 BIOS:F4A5
 BIOS:F4A5	      loc_F4A5:				      ;	CODE XREF: Print_Str+73j
-BIOS:F4A5 D7 00			      stb     unk_D000
-BIOS:F4A7 0A 00			      dec     unk_D000
+BIOS:F4A5 D7 00			      stb     byte_D000
+BIOS:F4A7 0A 00			      dec     byte_D000
 BIOS:F4A9 CC 80	81		      ldd     #0x8081
 BIOS:F4AC 12			      nop
-BIOS:F4AD 0C 00			      inc     unk_D000
-BIOS:F4AF D7 00			      stb     unk_D000
-BIOS:F4B1 97 00			      sta     unk_D000
+BIOS:F4AD 0C 00			      inc     byte_D000
+BIOS:F4AF D7 00			      stb     byte_D000
+BIOS:F4B1 97 00			      sta     byte_D000
 BIOS:F4B3 7D C8	00		      tst     Vec_Snd_Shadow
-BIOS:F4B6 0C 00			      inc     unk_D000
+BIOS:F4B6 0C 00			      inc     byte_D000
 BIOS:F4B8 B6 C8	2B		      lda     Vec_Text_Width
-BIOS:F4BB 97 01			      sta     unk_D001
+BIOS:F4BB 97 01			      sta     byte_D001
 BIOS:F4BD CC 01	00		      ldd     #0x100
 BIOS:F4C0 FE C8	2C		      ldu     Vec_Str_Ptr
-BIOS:F4C3 97 00			      sta     unk_D000
+BIOS:F4C3 97 00			      sta     byte_D000
 BIOS:F4C5 20 04			      bra     loc_F4CB
 BIOS:F4C7	      ;	---------------------------------------------------------------------------
 BIOS:F4C7
 BIOS:F4C7	      loc_F4C7:				      ;	CODE XREF: Print_Str+38j
 BIOS:F4C7 A6 86			      lda     a,x
-BIOS:F4C9 97 0A			      sta     unk_D00A
+BIOS:F4C9 97 0A			      sta     byte_D00A
 BIOS:F4CB
 BIOS:F4CB	      loc_F4CB:				      ;	CODE XREF: Print_Str+30j
 BIOS:F4CB A6 C0			      lda     ,u+
 BIOS:F4CD 2A F8			      bpl     loc_F4C7
 BIOS:F4CF 86 81			      lda     #0x81 ; 'Å'
-BIOS:F4D1 97 00			      sta     unk_D000
-BIOS:F4D3 00 01			      neg     unk_D001
+BIOS:F4D1 97 00			      sta     byte_D000
+BIOS:F4D3 00 01			      neg     byte_D001
 BIOS:F4D5 86 01			      lda     #1
-BIOS:F4D7 97 00			      sta     unk_D000
+BIOS:F4D7 97 00			      sta     byte_D000
 BIOS:F4D9 8C FB	B4		      cmpx    #0xFBB4
 BIOS:F4DC 27 2C			      beq     loc_F50A
 BIOS:F4DE 30 88	50		      leax    0x50,x
@@ -10383,16 +10296,16 @@ BIOS:F4EB 86 81			      lda     #0x81 ; 'Å'
 BIOS:F4ED 12			      nop
 BIOS:F4EE 5A			      decb
 BIOS:F4EF 26 FA			      bne     loc_F4EB
-BIOS:F4F1 97 00			      sta     unk_D000
+BIOS:F4F1 97 00			      sta     byte_D000
 BIOS:F4F3 F6 C8	2A		      ldb     Vec_Text_HW
-BIOS:F4F6 D7 01			      stb     unk_D001
-BIOS:F4F8 0A 00			      dec     unk_D000
+BIOS:F4F6 D7 01			      stb     byte_D001
+BIOS:F4F8 0A 00			      dec     byte_D000
 BIOS:F4FA CC 81	01		      ldd     #0x8101
 BIOS:F4FD 12			      nop
-BIOS:F4FE 97 00			      sta     unk_D000
-BIOS:F500 0F 01			      clr     unk_D001
-BIOS:F502 D7 00			      stb     unk_D000
-BIOS:F504 97 00			      sta     unk_D000
+BIOS:F4FE 97 00			      sta     byte_D000
+BIOS:F500 0F 01			      clr     byte_D001
+BIOS:F502 D7 00			      stb     byte_D000
+BIOS:F504 97 00			      sta     byte_D000
 BIOS:F506 C6 03			      ldb     #3
 BIOS:F508 20 9B			      bra     loc_F4A5
 BIOS:F50A	      ;	---------------------------------------------------------------------------
@@ -11176,11 +11089,11 @@ BIOS:F84F
 BIOS:F84F
 BIOS:F84F	      Clear_Score:			      ;	CODE XREF: CART:0040P
 BIOS:F84F						      ;	CART:0078P ...
-BIOS:F84F CC 20	20		      ldd     #0x2020
+BIOS:F84F CC 20	20		      ldd     #0x2020	      ;	"  "
 BIOS:F852 ED 84			      std     ,x
 BIOS:F854 ED 02			      std     2,x
 BIOS:F856 A7 04			      sta     4,x
-BIOS:F858 CC 30	80		      ldd     #0x3080
+BIOS:F858 CC 30	80		      ldd     #0x3080	      ;	"0",0x80
 BIOS:F85B ED 05			      std     5,x
 BIOS:F85D 39			      rts
 BIOS:F85D	      ;	End of function	Clear_Score
@@ -12908,7 +12821,7 @@ BIOS:FF40 1D			      .db 0x1D
 BIOS:FF41 32			      .db 0x32 ; 2
 BIOS:FF42 1D			      .db 0x1D
 BIOS:FF43 80			      .db 0x80 ; Ä
-BIOS:FF44 FE			      .db 0xFE ; ˛
+BIOS:FF44 FE	      unk_FF44:	      .db 0xFE ; ˛	      ;	DATA XREF: CART:02E0o
 BIOS:FF45 28			      .db 0x28 ; (
 BIOS:FF46 FE			      .db 0xFE ; ˛
 BIOS:FF47 B6			      .db 0xB6 ; ∂
@@ -13008,14 +12921,14 @@ BIOS:FFA3	      ;	--------------------------------------------------------------
 BIOS:FFA3
 BIOS:FFA3	      loc_FFA3:				      ;	CODE XREF: BIOS:FFC2j
 BIOS:FFA3 BD F3	BE		      jsr     Mov_Draw_VL_d
-BIOS:FFA6 B6 C8	80		      lda     word_C880
+BIOS:FFA6 B6 C8	80		      lda     addr_score
 BIOS:FFA9 84 7F			      anda    #0x7F ; ''
 BIOS:FFAB
 BIOS:FFAB	      loc_FFAB:				      ;	CODE XREF: BIOS:FFA1j
-BIOS:FFAB B7 C8	80		      sta     word_C880
+BIOS:FFAB B7 C8	80		      sta     addr_score
 BIOS:FFAE
 BIOS:FFAE	      loc_FFAE:				      ;	CODE XREF: BIOS:FFCCj
-BIOS:FFAE 7A C8	80		      dec     word_C880
+BIOS:FFAE 7A C8	80		      dec     addr_score
 BIOS:FFB1 A6 A4			      lda     ,y
 BIOS:FFB3 47			      asra
 BIOS:FFB4 84 F8			      anda    #0xF8 ; '¯'
@@ -13026,10 +12939,10 @@ BIOS:FFBA 58			      aslb
 BIOS:FFBB 58			      aslb
 BIOS:FFBC 57			      asrb
 BIOS:FFBD C4 F8			      andb    #0xF8 ; '¯'
-BIOS:FFBF 7D C8	80		      tst     word_C880
+BIOS:FFBF 7D C8	80		      tst     addr_score
 BIOS:FFC2 2B DF			      bmi     loc_FFA3
 BIOS:FFC4 BD F3	DF		      jsr     Draw_Line_d
-BIOS:FFC7 B6 C8	80		      lda     word_C880
+BIOS:FFC7 B6 C8	80		      lda     addr_score
 BIOS:FFCA 85 0F			      bita    #0xF
 BIOS:FFCC 26 E0			      bne     loc_FFAE
 BIOS:FFCE 85 20			      bita    #0x20 ; ' '
