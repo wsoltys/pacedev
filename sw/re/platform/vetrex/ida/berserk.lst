@@ -79,7 +79,7 @@ CART:0066	      start_life:						      ;	CODE XREF: CART:03D6J
 CART:0066									      ;	CART:03DDj
 CART:0066 86 3F			      lda     #0x3F ; '?'
 CART:0068 97 85			      sta     byte_C885
-CART:006A 8E C8	C5		      ldx     #byte_C8C5
+CART:006A 8E C8	C5		      ldx     #next_sub_fn_offs
 CART:006D C6 26			      ldb     #38
 CART:006F BD F5	3F		      jsr     Clear_x_b
 CART:0072 BD 0E	F6		      jsr     sub_EF6
@@ -122,7 +122,7 @@ CART:00AF BD F1	AF		      jsr     DP_to_C8
 CART:00B2 BD 0E	F6		      jsr     sub_EF6
 CART:00B5
 CART:00B5	      loc_B5:							      ;	CODE XREF: CART:00ADj
-CART:00B5 86 2A			      lda     #0x2A ; '*'
+CART:00B5 86 2A			      lda     #42
 CART:00B7 97 86			      sta     byte_C886
 CART:00B9 DE 80			      ldu     addr_curr_player_data
 CART:00BB EC 4A			      ldd     0xA,u
@@ -170,17 +170,17 @@ CART:00FC 97 A7			      sta     byte_C8A7
 CART:00FE 8E C9	74		      ldx     #unk_C974
 CART:0101 BD F5	45		      jsr     Clear_x_256
 CART:0104
-CART:0104	      loc_104:							      ;	CODE XREF: CART:0153j
-CART:0104 0F C7			      clr     byte_C8C7
-CART:0106 C6 0B			      ldb     #0xB
-CART:0108 8E 0C	E6		      ldx     #unk_CE6
-CART:010B CE C9	1C		      ldu     #unk_C91C
+CART:0104	      init_robots:						      ;	CODE XREF: CART:0153j
+CART:0104 0F C7			      clr     num_starting_robots
+CART:0106 C6 0B			      ldb     #11				      ;	max num	robots per maze
+CART:0108 8E 0C	E6		      ldx     #robot_XY_tbl
+CART:010B CE C9	1C		      ldu     #robot_data
 CART:010E
 CART:010E	      loc_10E:							      ;	CODE XREF: CART:014Fj
 CART:010E BD F5	17		      jsr     Random
-CART:0111 91 A8			      cmpa    byte_C8A8
-CART:0113 22 37			      bhi     loc_14C
-CART:0115 0C C7			      inc     byte_C8C7
+CART:0111 91 A8			      cmpa    byte_C8A8				      ;	add this robot for this	level?
+CART:0113 22 37			      bhi     loc_14C				      ;	no, skip
+CART:0115 0C C7			      inc     num_starting_robots
 CART:0117 86 80			      lda     #0x80 ; '€'
 CART:0119 A7 42			      sta     2,u
 CART:011B BD F5	17		      jsr     Random
@@ -188,12 +188,12 @@ CART:011E 84 1F			      anda    #0x1F
 CART:0120 97 9D			      sta     tmp_C89D
 CART:0122 80 10			      suba    #0x10
 CART:0124 AB 84			      adda    ,x
-CART:0126 A7 C4			      sta     ,u
+CART:0126 A7 C4			      sta     ,u				      ;	X?
 CART:0128 BD F5	17		      jsr     Random
 CART:012B 84 0F			      anda    #0xF
 CART:012D 80 08			      suba    #8
 CART:012F AB 01			      adda    1,x
-CART:0131 A7 41			      sta     1,u
+CART:0131 A7 41			      sta     1,u				      ;	Y?
 CART:0133 6F 43			      clr     3,u
 CART:0135 6F 44			      clr     4,u
 CART:0137 BD F5	17		      jsr     Random
@@ -210,14 +210,14 @@ CART:0148 6F 47			      clr     7,u
 CART:014A 33 48			      leau    8,u
 CART:014C
 CART:014C	      loc_14C:							      ;	CODE XREF: CART:0113j
-CART:014C 30 02			      leax    2,x
-CART:014E 5A			      decb
-CART:014F 26 BD			      bne     loc_10E
-CART:0151 96 C7			      lda     byte_C8C7
-CART:0153 27 AF			      beq     loc_104
-CART:0155 97 C8			      sta     unk_C8C8
-CART:0157 1F 30			      tfr     u, d
-CART:0159 83 C9	24		      subd    #unk_C924
+CART:014C 30 02			      leax    2,x				      ;	next robot position entry
+CART:014E 5A			      decb					      ;	done all robots?
+CART:014F 26 BD			      bne     loc_10E				      ;	no, loop
+CART:0151 96 C7			      lda     num_starting_robots		      ;	sanity check; at least 1 robot?
+CART:0153 27 AF			      beq     init_robots			      ;	no, try	again
+CART:0155 97 C8			      sta     num_robots_left			      ;	init
+CART:0157 1F 30			      tfr     u, d				      ;	ptr unused robot data memory
+CART:0159 83 C9	24		      subd    #(robot_data+8)
 CART:015C D7 AA			      stb     byte_C8AA
 CART:015E DC 95			      ldd     byte_C895
 CART:0160 DD 91			      std     word_C891
@@ -228,7 +228,7 @@ CART:0168 86 20			      lda     #0x20 ; ' '
 CART:016A 97 97			      sta     byte_C897
 CART:016C 86 01			      lda     #1
 CART:016E 97 98			      sta     byte_C898
-CART:0170 96 C7			      lda     byte_C8C7
+CART:0170 96 C7			      lda     num_starting_robots
 CART:0172 C6 50			      ldb     #0x50 ; 'P'
 CART:0174 3D			      mul
 CART:0175 4D			      tsta
@@ -238,7 +238,7 @@ CART:017A 5F			      clrb
 CART:017B
 CART:017B	      loc_17B:							      ;	CODE XREF: CART:0176j
 CART:017B DD 2E			      std     Vec_Counter_1
-CART:017D 0F C5			      clr     byte_C8C5
+CART:017D 0F C5			      clr     next_sub_fn_offs
 CART:017F
 CART:017F	      GAME_LOOP:						      ;	CODE XREF: CART:01B2j
 CART:017F BD F1	92		      jsr     Wait_Recal
@@ -248,7 +248,7 @@ CART:0188 BD F2	89		      jsr     Do_Sound
 CART:018B BD 04	86		      jsr     sub_486
 CART:018E BD F1	AF		      jsr     DP_to_C8
 CART:0191 8E 01	98		      ldx     #main_jmp_tbl
-CART:0194 96 C5			      lda     byte_C8C5				      ;	jmp tbl	entry
+CART:0194 96 C5			      lda     next_sub_fn_offs			      ;	jmp tbl	entry
 CART:0196 6E 96			      jmp     [a,x]
 CART:0196	      ;	---------------------------------------------------------------------------
 CART:0198 01 B4	      main_jmp_tbl:   .dw main_sub_1				      ;	DATA XREF: CART:0191o
@@ -428,7 +428,7 @@ CART:0292	      loc_292:							      ;	CODE XREF: CART:0262j
 CART:0292									      ;	CART:0272j ...
 CART:0292 D7 EA			      stb     controller_state
 CART:0294 C6 02			      ldb     #2
-CART:0296 D7 C5			      stb     byte_C8C5
+CART:0296 D7 C5			      stb     next_sub_fn_offs
 CART:0298 7E 01	9E		      jmp     loc_19E
 CART:029B	      ;	---------------------------------------------------------------------------
 CART:029B
@@ -438,7 +438,7 @@ CART:029B 86 08			      lda     #8
 CART:029D 9A 67			      oraa    Vec_Expl_Flag
 CART:029F 97 67			      sta     Vec_Expl_Flag
 CART:02A1 C6 04			      ldb     #4
-CART:02A3 D7 C5			      stb     byte_C8C5
+CART:02A3 D7 C5			      stb     next_sub_fn_offs
 CART:02A5 7E 01	9E		      jmp     loc_19E
 CART:02A8	      ;	---------------------------------------------------------------------------
 CART:02A8
@@ -484,17 +484,17 @@ CART:02E3 BD F6	8D		      jsr     Init_Music
 CART:02E6
 CART:02E6	      loc_2E6:							      ;	CODE XREF: CART:02D4j
 CART:02E6									      ;	CART:02DAj
-CART:02E6 0D C8			      tst     unk_C8C8
-CART:02E8 26 28			      bne     loc_312
+CART:02E6 0D C8			      tst     num_robots_left			      ;	any robots left?
+CART:02E8 26 28			      bne     loc_312				      ;	yes, skip
 CART:02EA 86 02			      lda     #2
 CART:02EC 95 98			      bita    byte_C898
 CART:02EE 26 22			      bne     loc_312
 CART:02F0 0C 98			      inc     byte_C898
 CART:02F2 4F			      clra
-CART:02F3 D6 C7			      ldb     byte_C8C7
-CART:02F5 C1 0A			      cmpb    #0xA
+CART:02F3 D6 C7			      ldb     num_starting_robots		      ;	for bonus calc
+CART:02F5 C1 0A			      cmpb    #10
 CART:02F7 2D 04			      blt     loc_2FD				      ;	no BCD conversion req'd
-CART:02F9 C0 0A			      subb    #0xA
+CART:02F9 C0 0A			      subb    #10
 CART:02FB CA 10			      orab    #0x10				      ;	convert	to BCD
 CART:02FD
 CART:02FD	      loc_2FD:							      ;	CODE XREF: CART:02F7j
@@ -507,10 +507,10 @@ CART:0302 49			      rola
 CART:0303 58			      aslb
 CART:0304 49			      rola					      ;	x16 (BCD x10)
 CART:0305 34 06			      pshs    a,b
-CART:0307 BD F8	7C		      jsr     Add_Score_d
+CART:0307 BD F8	7C		      jsr     Add_Score_d			      ;	add bonus to score
 CART:030A 35 06			      puls    b,a
 CART:030C 8E C8	D1		      ldx     #bonus
-CART:030F BD F8	7C		      jsr     Add_Score_d
+CART:030F BD F8	7C		      jsr     Add_Score_d			      ;	set bonus
 CART:0312
 CART:0312	      loc_312:							      ;	CODE XREF: CART:02E8j
 CART:0312									      ;	CART:02EEj
@@ -805,10 +805,10 @@ CART:0530 20 EA			      bra     loc_51C
 CART:0532	      ;	---------------------------------------------------------------------------
 CART:0532
 CART:0532	      loc_532:							      ;	CODE XREF: sub_486:loc_51Cj
-CART:0532 B6 C8	C7		      lda     byte_C8C7
+CART:0532 B6 C8	C7		      lda     num_starting_robots
 CART:0535 10 27	00 AE		      lbeq    loc_5E7
 CART:0539 A7 71			      sta     -0xF,s
-CART:053B CE C9	1C		      ldu     #unk_C91C
+CART:053B CE C9	1C		      ldu     #robot_data
 CART:053E
 CART:053E	      loc_53E:							      ;	CODE XREF: sub_486+10Dj
 CART:053E									      ;	sub_486+13Cj
@@ -905,7 +905,7 @@ CART:05F4 B7 C8	CB		      sta     word_C8CB
 CART:05F7 CE C8	8F		      ldu     #word_C88F
 CART:05FA BD 08	C7		      jsr     sub_8C7
 CART:05FD BD F3	54		      jsr     Reset0Ref
-CART:0600 B6 C8	C5		      lda     byte_C8C5
+CART:0600 B6 C8	C5		      lda     next_sub_fn_offs
 CART:0603 81 04			      cmpa    #4
 CART:0605 26 0C			      bne     locret_613
 CART:0607 B6 C8	D0		      lda     byte_C8D0
@@ -963,13 +963,13 @@ CART:064A
 CART:064A
 CART:064A	      sub_64A:							      ;	CODE XREF: CART:02ABP
 CART:064A									      ;	CART:036FP
-CART:064A 96 C8			      lda     unk_C8C8
-CART:064C 10 27	01 24		      lbeq    loc_774
+CART:064A 96 C8			      lda     num_robots_left			      ;	any left?
+CART:064C 10 27	01 24		      lbeq    loc_774				      ;	no, go
 CART:0650 0F 9D			      clr     tmp_C89D
 CART:0652 96 A9			      lda     byte_C8A9
 CART:0654
 CART:0654	      loc_654:							      ;	CODE XREF: sub_64A+23j
-CART:0654 CE C9	1C		      ldu     #unk_C91C
+CART:0654 CE C9	1C		      ldu     #robot_data
 CART:0657 33 C6			      leau    a,u
 CART:0659 8B 08			      adda    #8
 CART:065B 91 AA			      cmpa    byte_C8AA
@@ -1093,12 +1093,12 @@ CART:0718 BD 0E	C7		      jsr     sub_EC7
 CART:071B D5 99			      bitb    byte_C899
 CART:071D 27 05			      beq     loc_724
 CART:071F 1F 31			      tfr     u, x
-CART:0721 BD 08	0F		      jsr     sub_80F
+CART:0721 BD 08	0F		      jsr     robot_killed
 CART:0724
 CART:0724	      loc_724:							      ;	CODE XREF: sub_64A+C4j
 CART:0724									      ;	sub_64A+D3j
-CART:0724 8E C9	1C		      ldx     #unk_C91C
-CART:0727 96 C7			      lda     byte_C8C7
+CART:0724 8E C9	1C		      ldx     #robot_data
+CART:0727 96 C7			      lda     num_starting_robots
 CART:0729 97 9D			      sta     tmp_C89D
 CART:072B
 CART:072B	      loc_72B:							      ;	CODE XREF: sub_64A+107j
@@ -1112,9 +1112,9 @@ CART:0738 2A 13			      bpl     loc_74D
 CART:073A 10 8E	0D 35		      ldy     #unk_D35
 CART:073E BD 0D	1B		      jsr     sub_D1B
 CART:0741 24 0A			      bcc     loc_74D
-CART:0743 BD 08	0F		      jsr     sub_80F
+CART:0743 BD 08	0F		      jsr     robot_killed
 CART:0746 1E 13			      exg     x, u
-CART:0748 BD 08	0F		      jsr     sub_80F
+CART:0748 BD 08	0F		      jsr     robot_killed
 CART:074B 1E 13			      exg     x, u
 CART:074D
 CART:074D	      loc_74D:							      ;	CODE XREF: sub_64A+E6j
@@ -1130,9 +1130,9 @@ CART:075C 10 8E	0D 39		      ldy     #unk_D39
 CART:0760 BD 0D	1B		      jsr     sub_D1B
 CART:0763 24 0F			      bcc     loc_774
 CART:0765 1F 31			      tfr     u, x
-CART:0767 BD 08	0F		      jsr     sub_80F
+CART:0767 BD 08	0F		      jsr     robot_killed
 CART:076A 86 04			      lda     #4
-CART:076C 97 C5			      sta     byte_C8C5
+CART:076C 97 C5			      sta     next_sub_fn_offs
 CART:076E 86 08			      lda     #8
 CART:0770 9A 67			      oraa    Vec_Expl_Flag
 CART:0772 97 67			      sta     Vec_Expl_Flag
@@ -1174,7 +1174,7 @@ CART:07A9 CE 07	EE		      ldu     #unk_7EE
 CART:07AC AB C5			      adda    b,u
 CART:07AE D6 92			      ldb     word_C891+1
 CART:07B0 DD 93			      std     byte_C893
-CART:07B2 0D C5			      tst     byte_C8C5
+CART:07B2 0D C5			      tst     next_sub_fn_offs
 CART:07B4 26 18			      bne     loc_7CE
 CART:07B6 8E C8	8F		      ldx     #word_C88F
 CART:07B9 10 8E	0D 39		      ldy     #unk_D39
@@ -1185,12 +1185,12 @@ CART:07C4 86 08			      lda     #8
 CART:07C6 9A 67			      oraa    Vec_Expl_Flag
 CART:07C8 97 67			      sta     Vec_Expl_Flag
 CART:07CA 86 04			      lda     #4
-CART:07CC 97 C5			      sta     byte_C8C5
+CART:07CC 97 C5			      sta     next_sub_fn_offs
 CART:07CE
 CART:07CE	      loc_7CE:							      ;	CODE XREF: sub_64A+16Aj
 CART:07CE									      ;	sub_64A+176j
-CART:07CE 8E C9	1C		      ldx     #unk_C91C
-CART:07D1 96 C7			      lda     byte_C8C7
+CART:07CE 8E C9	1C		      ldx     #robot_data
+CART:07D1 96 C7			      lda     num_starting_robots
 CART:07D3 97 9D			      sta     tmp_C89D
 CART:07D5 10 8E	0D 35		      ldy     #unk_D35
 CART:07D9
@@ -1200,7 +1200,7 @@ CART:07DB 2A 0A			      bpl     loc_7E7
 CART:07DD DC 93			      ldd     byte_C893
 CART:07DF BD 0D	1B		      jsr     sub_D1B
 CART:07E2 24 03			      bcc     loc_7E7
-CART:07E4 BD 08	0F		      jsr     sub_80F
+CART:07E4 BD 08	0F		      jsr     robot_killed
 CART:07E7
 CART:07E7	      loc_7E7:							      ;	CODE XREF: sub_64A+191j
 CART:07E7									      ;	sub_64A+198j
@@ -1251,19 +1251,19 @@ CART:080F
 CART:080F	      ;	===============	S U B R	O U T I	N E =======================================
 CART:080F
 CART:080F
-CART:080F	      sub_80F:							      ;	CODE XREF: sub_64A+D7P
+CART:080F	      robot_killed:						      ;	CODE XREF: sub_64A+D7P
 CART:080F									      ;	sub_64A+F9P ...
-CART:080F 0A C8			      dec     unk_C8C8
+CART:080F 0A C8			      dec     num_robots_left
 CART:0811 86 0F			      lda     #0xF
 CART:0813 A7 02			      sta     2,x
 CART:0815 86 04			      lda     #4
 CART:0817 97 67			      sta     Vec_Expl_Flag
 CART:0819 34 10			      pshs    x
 CART:081B 9E 80			      ldx     addr_curr_player_data
-CART:081D CC 00	50		      ldd     #0x50 ; 'P'
+CART:081D CC 00	50		      ldd     #0x50 ; 'P'                             ; add 50 pts
 CART:0820 BD F8	7C		      jsr     Add_Score_d
-CART:0823 35 90			      puls    pc,x
-CART:0823	      ;	End of function	sub_80F
+CART:0823 35 90			      puls    pc,x				      ;	ret
+CART:0823	      ;	End of function	robot_killed
 CART:0823
 CART:0825
 CART:0825	      ;	===============	S U B R	O U T I	N E =======================================
@@ -1310,8 +1310,8 @@ CART:0869 E4 47			      andb    7,u
 CART:086B E7 47			      stb     7,u
 CART:086D
 CART:086D	      loc_86D:							      ;	CODE XREF: sub_825+40j
-CART:086D 8E C9	1C		      ldx     #unk_C91C
-CART:0870 96 C7			      lda     byte_C8C7
+CART:086D 8E C9	1C		      ldx     #robot_data
+CART:0870 96 C7			      lda     num_starting_robots
 CART:0872 97 9D			      sta     tmp_C89D
 CART:0874
 CART:0874	      loc_874:							      ;	CODE XREF: sub_825+6Bj
@@ -1321,7 +1321,7 @@ CART:0878 10 8E	0D 35		      ldy     #unk_D35
 CART:087C EC 44			      ldd     4,u
 CART:087E BD 0D	1B		      jsr     sub_D1B
 CART:0881 24 09			      bcc     loc_88C
-CART:0883 BD 08	0F		      jsr     sub_80F
+CART:0883 BD 08	0F		      jsr     robot_killed
 CART:0886 C6 F0			      ldb     #0xF0 ; 'ð'
 CART:0888 E4 47			      andb    7,u
 CART:088A E7 47			      stb     7,u
@@ -1336,12 +1336,12 @@ CART:0894 8E C8	8F		      ldx     #word_C88F
 CART:0897 10 8E	0D 3D		      ldy     #unk_D3D
 CART:089B BD 0D	1B		      jsr     sub_D1B
 CART:089E 24 12			      bcc     loc_8B2
-CART:08A0 0D C5			      tst     byte_C8C5
+CART:08A0 0D C5			      tst     next_sub_fn_offs
 CART:08A2 26 0E			      bne     loc_8B2
 CART:08A4 86 08			      lda     #8
 CART:08A6 97 67			      sta     Vec_Expl_Flag
 CART:08A8 86 04			      lda     #4
-CART:08AA 97 C5			      sta     byte_C8C5
+CART:08AA 97 C5			      sta     next_sub_fn_offs
 CART:08AC C6 F0			      ldb     #0xF0 ; 'ð'
 CART:08AE E4 47			      andb    7,u
 CART:08B0 E7 47			      stb     7,u
@@ -2297,28 +2297,19 @@ CART:0CDD 01			      .db    1
 CART:0CDE F8 30	A0 30 str_CMK:	      .db 0xF8,	0x30, 0xA0, 0x30		      ;	DATA XREF: CART:03F9o
 CART:0CE2 43 4D	4B    aCmk:	      .ascii 'CMK'
 CART:0CE5 80			      .db 0x80 ; €
-CART:0CE6 40	      unk_CE6:	      .db 0x40 ; @				      ;	DATA XREF: CART:0108o
-CART:0CE7 B0			      .db 0xB0 ; °
-CART:0CE8 C0			      .db 0xC0 ; À
-CART:0CE9 B0			      .db 0xB0 ; °
-CART:0CEA 40			      .db 0x40 ; @
-CART:0CEB D8			      .db 0xD8 ; Ø
-CART:0CEC 00			      .db    0
-CART:0CED D8			      .db 0xD8 ; Ø
-CART:0CEE C0			      .db 0xC0 ; À
-CART:0CEF D8			      .db 0xD8 ; Ø
-CART:0CF0 00			      .db    0
-CART:0CF1 00			      .db    0
-CART:0CF2 40			      .db 0x40 ; @
-CART:0CF3 28			      .db 0x28 ; (
-CART:0CF4 00			      .db    0
-CART:0CF5 28			      .db 0x28 ; (
-CART:0CF6 C0			      .db 0xC0 ; À
-CART:0CF7 28			      .db 0x28 ; (
-CART:0CF8 40			      .db 0x40 ; @
-CART:0CF9 50			      .db 0x50 ; P
-CART:0CFA C0			      .db 0xC0 ; À
-CART:0CFB 50			      .db 0x50 ; P
+CART:0CE6	      ;	base coordinates to which random offsets are added
+CART:0CE6	      ;	for robots 1-11	in the maze
+CART:0CE6 40 B0	C0 B0+robot_XY_tbl:   .db 64, 176				      ;	DATA XREF: CART:0108o
+CART:0CE6 40 D8	00 D8+		      .db 192, 176
+CART:0CE6 C0 D8	00 00+		      .db 64, 216
+CART:0CE6 40 28	00 28+		      .db 0, 216
+CART:0CE6 C0 28	40 50+		      .db 192, 216
+CART:0CE6 C0 50			      .db 0, 0
+CART:0CE6			      .db 64, 40
+CART:0CE6			      .db 0, 40
+CART:0CE6			      .db 192, 40
+CART:0CE6			      .db 64, 80
+CART:0CE6			      .db 192, 80
 CART:0CFC 05	      unk_CFC:	      .db    5					      ;	DATA XREF: sub_EF6+2o
 CART:0CFD 04			      .db    4
 CART:0CFE 04			      .db    4
@@ -3188,13 +3179,13 @@ RAM:C8C2 ??			     .ds 1
 RAM:C8C3 ??			     .ds 1
 RAM:C8C4 ??	     byte_C8C4:	     .ds 1					     ; DATA XREF: BIOS:E073w
 RAM:C8C4									     ; BIOS:E084o ...
-RAM:C8C5 ??	     byte_C8C5:	     .ds 1					     ; DATA XREF: CART:006Ao
+RAM:C8C5 ??	     next_sub_fn_offs:.ds 1					     ; DATA XREF: CART:006Ao
 RAM:C8C5									     ; CART:017Dw ...
 RAM:C8C6 ??	     unk_C8C6:	     .ds 1					     ; DATA XREF: CART:0258r
 RAM:C8C6									     ; CART:0268r ...
-RAM:C8C7 ??	     byte_C8C7:	     .ds 1					     ; DATA XREF: CART:loc_104w
+RAM:C8C7 ??	     num_starting_robots:.ds 1					     ; DATA XREF: CART:init_robotsw
 RAM:C8C7									     ; CART:0115w ...
-RAM:C8C8 ??	     unk_C8C8:	     .ds 1					     ; DATA XREF: CART:0155w
+RAM:C8C8 ??	     num_robots_left:.ds 1					     ; DATA XREF: CART:0155w
 RAM:C8C8									     ; CART:loc_2E6r ...
 RAM:C8C9 ?? ??	     addr_some_routine:.ds 2					     ; DATA XREF: sub_486+9w
 RAM:C8C9									     ; sub_486+DBw ...
@@ -3280,95 +3271,10 @@ RAM:C918 ??			     .ds 1
 RAM:C919 ??			     .ds 1
 RAM:C91A ??			     .ds 1
 RAM:C91B ??			     .ds 1
-RAM:C91C ??	     unk_C91C:	     .ds 1					     ; DATA XREF: CART:010Bo
-RAM:C91C									     ; sub_486+B5o ...
-RAM:C91D ??			     .ds 1
-RAM:C91E ??			     .ds 1
-RAM:C91F ??			     .ds 1
-RAM:C920 ??			     .ds 1
-RAM:C921 ??			     .ds 1
-RAM:C922 ??			     .ds 1
-RAM:C923 ??			     .ds 1
-RAM:C924 ??	     unk_C924:	     .ds 1					     ; DATA XREF: CART:0159o
-RAM:C925 ??			     .ds 1
-RAM:C926 ??			     .ds 1
-RAM:C927 ??			     .ds 1
-RAM:C928 ??			     .ds 1
-RAM:C929 ??			     .ds 1
-RAM:C92A ??			     .ds 1
-RAM:C92B ??			     .ds 1
-RAM:C92C ??			     .ds 1
-RAM:C92D ??			     .ds 1
-RAM:C92E ??			     .ds 1
-RAM:C92F ??			     .ds 1
-RAM:C930 ??			     .ds 1
-RAM:C931 ??			     .ds 1
-RAM:C932 ??			     .ds 1
-RAM:C933 ??			     .ds 1
-RAM:C934 ??			     .ds 1
-RAM:C935 ??			     .ds 1
-RAM:C936 ??			     .ds 1
-RAM:C937 ??			     .ds 1
-RAM:C938 ??			     .ds 1
-RAM:C939 ??			     .ds 1
-RAM:C93A ??			     .ds 1
-RAM:C93B ??			     .ds 1
-RAM:C93C ??			     .ds 1
-RAM:C93D ??			     .ds 1
-RAM:C93E ??			     .ds 1
-RAM:C93F ??			     .ds 1
-RAM:C940 ??			     .ds 1
-RAM:C941 ??			     .ds 1
-RAM:C942 ??			     .ds 1
-RAM:C943 ??			     .ds 1
-RAM:C944 ??			     .ds 1
-RAM:C945 ??			     .ds 1
-RAM:C946 ??			     .ds 1
-RAM:C947 ??			     .ds 1
-RAM:C948 ??			     .ds 1
-RAM:C949 ??			     .ds 1
-RAM:C94A ??			     .ds 1
-RAM:C94B ??			     .ds 1
-RAM:C94C ??			     .ds 1
-RAM:C94D ??			     .ds 1
-RAM:C94E ??			     .ds 1
-RAM:C94F ??			     .ds 1
-RAM:C950 ??			     .ds 1
-RAM:C951 ??			     .ds 1
-RAM:C952 ??			     .ds 1
-RAM:C953 ??			     .ds 1
-RAM:C954 ??			     .ds 1
-RAM:C955 ??			     .ds 1
-RAM:C956 ??			     .ds 1
-RAM:C957 ??			     .ds 1
-RAM:C958 ??			     .ds 1
-RAM:C959 ??			     .ds 1
-RAM:C95A ??			     .ds 1
-RAM:C95B ??			     .ds 1
-RAM:C95C ??			     .ds 1
-RAM:C95D ??			     .ds 1
-RAM:C95E ??			     .ds 1
-RAM:C95F ??			     .ds 1
-RAM:C960 ??			     .ds 1
-RAM:C961 ??			     .ds 1
-RAM:C962 ??			     .ds 1
-RAM:C963 ??			     .ds 1
-RAM:C964 ??			     .ds 1
-RAM:C965 ??			     .ds 1
-RAM:C966 ??			     .ds 1
-RAM:C967 ??			     .ds 1
-RAM:C968 ??			     .ds 1
-RAM:C969 ??			     .ds 1
-RAM:C96A ??			     .ds 1
-RAM:C96B ??			     .ds 1
-RAM:C96C ??			     .ds 1
-RAM:C96D ??			     .ds 1
-RAM:C96E ??			     .ds 1
-RAM:C96F ??			     .ds 1
-RAM:C970 ??			     .ds 1
-RAM:C971 ??			     .ds 1
-RAM:C972 ??			     .ds 1
-RAM:C973 ??			     .ds 1
+RAM:C91C	     ; 8 bytes for up to 11 robots
+RAM:C91C	     ; - $0/$1 = X/Y
+RAM:C91C ?? ?? ?? ??+robot_data:     .ds 0x58					     ; DATA XREF: CART:010Bo
+RAM:C91C ?? ?? ?? ??+								     ; sub_486+B5o ...
 RAM:C974 ??	     unk_C974:	     .ds 1					     ; DATA XREF: CART:00FEo
 RAM:C974									     ; CART:02B6o ...
 RAM:C975 ??			     .ds 1
@@ -6575,16 +6481,16 @@ BIOS:E2F4									      ;	sub_E262+8Ej
 BIOS:E2F4 BD E8	4C		      jsr     sub_E84C
 BIOS:E2F7
 BIOS:E2F7	      loc_E2F7:							      ;	CODE XREF: sub_E262+84j
-BIOS:E2F7 86 D0			      lda     #0xD0 ; 'Ð'
+BIOS:E2F7 86 D0			      lda     #0xD0 ; 'Ð'                             ; hardware
 BIOS:E2F9 1F 8B			      tfr     a, dp
 BIOS:E2FB BD F2	A5		      jsr     Intensity_5F
-BIOS:E2FE C6 0C			      ldb     #0xC
-BIOS:E300 10 8E	C8 C8		      ldy     #unk_C8C8
-BIOS:E304 8E CB	89		      ldx     #unk_CB89
-BIOS:E307 BD EA	8D		      jsr     sub_EA8D
+BIOS:E2FE C6 0C			      ldb     #12				      ;	scale factor
+BIOS:E300 10 8E	C8 C8		      ldy     #0xC8C8				      ;	(200,200)
+BIOS:E304 8E CB	89		      ldx     #unk_CB89				      ;	vector list
+BIOS:E307 BD EA	8D		      jsr     Moveto_y_7F_Draw_VLp_b
 BIOS:E30A
 BIOS:E30A	      locret_E30A:						      ;	CODE XREF: sub_E262+8j
-BIOS:E30A 35 88			      puls    pc,dp
+BIOS:E30A 35 88			      puls    pc,dp				      ;	ret
 BIOS:E30A	      ;	End of function	sub_E2F2
 BIOS:E30A
 BIOS:E30C	      ;	---------------------------------------------------------------------------
@@ -7026,7 +6932,7 @@ BIOS:E4F8 27 E5			      beq     loc_E4DF
 BIOS:E4FA 6F 84			      clr     ,x
 BIOS:E4FC 7C C8	B6		      inc     word_C8B6
 BIOS:E4FF 6C C4			      inc     ,u
-BIOS:E501 FC C8	C8		      ldd     unk_C8C8
+BIOS:E501 FC C8	C8		      ldd     num_robots_left
 BIOS:E504 ED 45			      std     5,u
 BIOS:E506 FC C8	CA		      ldd     addr_some_routine+1
 BIOS:E509 ED 47			      std     7,u
@@ -7117,7 +7023,7 @@ BIOS:E59E 48			      asla
 BIOS:E59F AE 86			      ldx     a,x
 BIOS:E5A1 31 44			      leay    4,u
 BIOS:E5A3 E6 42			      ldb     2,u
-BIOS:E5A5 BD EA	8D		      jsr     sub_EA8D
+BIOS:E5A5 BD EA	8D		      jsr     Moveto_y_7F_Draw_VLp_b
 BIOS:E5A8 7E E5	2A		      jmp     loc_E52A
 BIOS:E5AB	      ;	---------------------------------------------------------------------------
 BIOS:E5AB
@@ -7134,7 +7040,7 @@ BIOS:E5BB BD F2	A9		      jsr     Intensity_7F
 BIOS:E5BE 31 44			      leay    4,u
 BIOS:E5C0 8E CB	A7		      ldx     #unk_CBA7
 BIOS:E5C3 C6 04			      ldb     #4
-BIOS:E5C5 BD EA	8D		      jsr     sub_EA8D
+BIOS:E5C5 BD EA	8D		      jsr     Moveto_y_7F_Draw_VLp_b
 BIOS:E5C8 7E E5	2A		      jmp     loc_E52A
 BIOS:E5CB	      ;	---------------------------------------------------------------------------
 BIOS:E5CB
@@ -7398,7 +7304,7 @@ BIOS:E76A
 BIOS:E76A	      sub_E76A:							      ;	CODE XREF: sub_E647+49P
 BIOS:E76A									      ;	sub_E647+53P ...
 BIOS:E76A 34 32			      pshs    a,x,y
-BIOS:E76C 8E C8	C8		      ldx     #unk_C8C8
+BIOS:E76C 8E C8	C8		      ldx     #0xC8C8				      ;	(200,200)
 BIOS:E76F BD F2	F2		      jsr     Moveto_x_7F
 BIOS:E772 A6 E4			      lda     ,s
 BIOS:E774 97 04			      sta     byte_D004
@@ -7777,7 +7683,7 @@ BIOS:E95F	      loc_E95F:							      ;	CODE XREF: sub_E94A+Cj
 BIOS:E95F BD F3	54		      jsr     Reset0Ref
 BIOS:E962 86 03			      lda     #3
 BIOS:E964 B7 C8	23		      sta     Vec_Misc_Count
-BIOS:E967 8E C8	C8		      ldx     #unk_C8C8
+BIOS:E967 8E C8	C8		      ldx     #0xC8C8				      ;	(200,200)
 BIOS:E96A BD F2	F2		      jsr     Moveto_x_7F
 BIOS:E96D E6 E4			      ldb     ,s
 BIOS:E96F 58			      aslb
@@ -7988,7 +7894,7 @@ BIOS:EA8D
 BIOS:EA8D	      ;	===============	S U B R	O U T I	N E =======================================
 BIOS:EA8D
 BIOS:EA8D
-BIOS:EA8D	      sub_EA8D:							      ;	CODE XREF: sub_E2F2+15P
+BIOS:EA8D	      Moveto_y_7F_Draw_VLp_b:					      ;	CODE XREF: sub_E2F2+15P
 BIOS:EA8D									      ;	sub_E51E+87P ...
 BIOS:EA8D 34 16			      pshs    a,b,x
 BIOS:EA8F 1F 21			      tfr     y, x
@@ -7996,8 +7902,8 @@ BIOS:EA91 BD F2	F2		      jsr     Moveto_x_7F
 BIOS:EA94 E6 61			      ldb     1,s
 BIOS:EA96 AE 62			      ldx     2,s
 BIOS:EA98 BD F4	0E		      jsr     Draw_VLp_b
-BIOS:EA9B 35 96			      puls    pc,x,b,a
-BIOS:EA9B	      ;	End of function	sub_EA8D
+BIOS:EA9B 35 96			      puls    pc,x,b,a				      ;	ret
+BIOS:EA9B	      ;	End of function	Moveto_y_7F_Draw_VLp_b
 BIOS:EA9B
 BIOS:EA9D
 BIOS:EA9D	      ;	===============	S U B R	O U T I	N E =======================================
