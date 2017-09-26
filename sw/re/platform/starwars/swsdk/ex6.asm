@@ -158,7 +158,7 @@ display_sdk_msg:
         ldx     #title_msg
         jsr     SWSDK_RenderString
 
-        SWSDK_HALT
+				SWSDK_ENDFRAME
         jmp     loop
 
 instructions:

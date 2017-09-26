@@ -174,7 +174,7 @@ rotate:
 
 skip_rot:
 
-				SWSDK_HALT
+				SWSDK_ENDFRAME
 
         ldx     #SWSDK_in0_shadow
         lda     2,x                             ; debounced

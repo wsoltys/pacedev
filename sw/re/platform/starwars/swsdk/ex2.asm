@@ -110,7 +110,7 @@ wait_AVG:
 				SWSDK_JSRL SWSDK_SquareHatch
 3$:			
 
-				SWSDK_HALT
+				SWSDK_ENDFRAME
 
 				jmp			loop
 

@@ -131,7 +131,7 @@ wait_AVG:
 				leax		1,x
 				stx			msgy
 
-				SWSDK_HALT
+				SWSDK_ENDFRAME
 
 				jmp			loop
 

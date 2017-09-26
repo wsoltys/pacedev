@@ -191,7 +191,7 @@ SW_Y = 700
 				ldx			#title_msg
 				jsr			SWSDK_RenderString
 
-				SWSDK_HALT
+				SWSDK_ENDFRAME
 
 				jmp			loop
 

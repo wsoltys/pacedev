@@ -3,7 +3,7 @@
 ; msmcdoug@gmail.com
 ;
 
-SWSDK_VERSION                   = 0x0006
+SWSDK_VERSION                   = 0x0007
         .macro SWSDK_SZ_VERSION
         .ascii    "0.0."
         .byte     (1<<7)|0x30|<SWSDK_VERSION
@@ -78,7 +78,14 @@ SWSDK_OP_JMPL                   = 0xE000
         ldd     #SWSDK_OP_JMPL | ((addr&0x3FFF)>>1)
         std     ,y++
         .endm
-        
+
+; composite macros
+
+        .macro SWSDK_ENDFRAME
+        SWSDK_CNTR
+        SWSDK_HALT
+        .endm
+                
 SWSDK_BLUE                      = 1
 SWSDK_GREEN                     = 2
 SWSDK_CYAN                      = (SWSDK_BLUE|SWSDK_GREEN)
