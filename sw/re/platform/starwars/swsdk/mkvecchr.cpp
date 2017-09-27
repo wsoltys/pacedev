@@ -76,34 +76,48 @@ uint8_t vec_chr_data[] =
   0x82,	0x88, 0x00, 0x00, 0x00,	0xFE, 0xFF, 0xFE
 };
 
+#define FACTOR 1
+
 static int write_run (int state, int run)
 {
-  while (--run)
+#if 0
+  while (run--)
     fprintf (stdout, "%c", (state ? '#' : ' '));
+#endif
+	printf ("SVEC %d,0,%d\n", run*FACTOR, (state ? 7 : 0));
+
 }
  
 int main (int argc, char *argv[])
 {
   int l, c, b;
   const int n = 0x6f+1-0x20;  // # chars
+  int maxruns = 0;
   
   for (l=0; l<7; l++)
   {
     for (c=0x20; c<=0x6f; c++)
     {
+    	// what are we doing
+    	printf ("; line=%d, chr=$%02X\n", l, c);
+    	
       // data byte for char
-      uint8_t d = vec_chr_data[l*n+c];
+      uint8_t d = vec_chr_data[l*n+c-0x20];
       
       // each bit
       int state = -1;
       int run = 0;
+      int nruns = 0;
       for (b=0; b<8; b++)
       {
         int bit = (d & (1<<(7-b)) ? 1 : 0);
         if (bit != state)
         {
           if (b != 0)
+          {
             write_run (state, run);
+            nruns++;
+          }
           state = bit;
           run = 1;
         }
@@ -111,8 +125,18 @@ int main (int argc, char *argv[])
           run++;
       }
       write_run (state, run);
+      nruns++;
+      
+      if (nruns > maxruns)
+      	maxruns = nruns;
+      	
+      while (nruns++ < 8)
+      	printf (".dw 0xffff\n");
+      printf ("\n");
     }
     
     fprintf (stdout, "\n");
   }
+  
+  fprintf (stderr, "maxruns=%d\n", maxruns);
 }
