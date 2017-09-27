@@ -84,7 +84,7 @@ static int write_run (int state, int run)
   while (run--)
     fprintf (stdout, "%c", (state ? '#' : ' '));
 #endif
-	printf ("SVEC %d,0,%d\n", run*FACTOR, (state ? 7 : 0));
+	printf ("        SVEC %d,0,%d\n", run*FACTOR, (state ? 7 : 0));
 
 }
  
@@ -99,8 +99,8 @@ int main (int argc, char *argv[])
     for (c=0x20; c<=0x6f; c++)
     {
     	// what are we doing
-    	printf ("; line=%d, chr=$%02X\n", l, c);
-    	
+    	//printf ("; line=%d, chr=$%02X\n", l, c);
+    	printf ("lin%d_chr%02X:\n", l, c);
       // data byte for char
       uint8_t d = vec_chr_data[l*n+c-0x20];
       
@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
       	maxruns = nruns;
       	
       while (nruns++ < 8)
-      	printf (".dw 0xffff\n");
+      	printf ("        RTSL\n");
       printf ("\n");
     }
     
