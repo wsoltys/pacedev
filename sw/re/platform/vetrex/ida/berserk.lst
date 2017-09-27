@@ -719,7 +719,7 @@ CART:0486									      ;	CART:018BP ...
 CART:0486 7C C8	24		      inc     Vec_0Ref_Enable
 CART:0489 BD F2	A5		      jsr     Intensity_5F
 CART:048C 8E F3	DD		      ldx     #Draw_VL
-CART:048F BF C8	C9		      stx     addr_some_routine
+CART:048F BF C8	C9		      stx     addr_draw_routine
 CART:0492 86 7F			      lda     #0x7F ; ''                             ; scale=$7F
 CART:0494 B7 C8	CB		      sta     display_8C7_scale
 CART:0497 C6 04			      ldb     #4
@@ -828,16 +828,16 @@ CART:0558 A6 43			      lda     3,u
 CART:055A 48			      asla
 CART:055B 10 AE	A6		      ldy     a,y
 CART:055E 8E 06	19		      ldx     #loc_619
-CART:0561 BF C8	C9		      stx     addr_some_routine
+CART:0561 BF C8	C9		      stx     addr_draw_routine
 CART:0564 BD 08	C7		      jsr     display_something_8C7
 CART:0567 31 26			      leay    6,y
 CART:0569 8E 06	14		      ldx     #loc_614
-CART:056C BF C8	C9		      stx     addr_some_routine
+CART:056C BF C8	C9		      stx     addr_draw_routine
 CART:056F BD 08	C7		      jsr     display_something_8C7
 CART:0572 31 26			      leay    6,y
 CART:0574 7C C8	24		      inc     Vec_0Ref_Enable
 CART:0577 8E F3	BC		      ldx     #Mov_Draw_VL
-CART:057A BF C8	C9		      stx     addr_some_routine
+CART:057A BF C8	C9		      stx     addr_draw_routine
 CART:057D 86 04			      lda     #4
 CART:057F B7 C8	23		      sta     Vec_Misc_Count
 CART:0582 A6 44			      lda     4,u
@@ -889,7 +889,7 @@ CART:05D0 7C C8	24		      inc     Vec_0Ref_Enable
 CART:05D3 86 14			      lda     #0x14
 CART:05D5 B7 C8	CB		      sta     display_8C7_scale
 CART:05D8 8E F4	10		      ldx     #Draw_VLp
-CART:05DB BF C8	C9		      stx     addr_some_routine
+CART:05DB BF C8	C9		      stx     addr_draw_routine
 CART:05DE 8E 0B	99		      ldx     #0xB99
 CART:05E1 CE C8	93		      ldu     #byte_C893
 CART:05E4 BD 08	C7		      jsr     display_something_8C7
@@ -899,7 +899,7 @@ CART:05E7									      ;	display_frame+143j ...
 CART:05E7 7D C8	86		      tst     byte_C886
 CART:05EA 2B 27			      bmi     locret_613
 CART:05EC 8E 09	EF		      ldx     #loc_9EF
-CART:05EF BF C8	C9		      stx     addr_some_routine
+CART:05EF BF C8	C9		      stx     addr_draw_routine
 CART:05F2 86 09			      lda     #9
 CART:05F4 B7 C8	CB		      sta     display_8C7_scale
 CART:05F7 CE C8	8F		      ldu     #word_C88F
@@ -1436,8 +1436,8 @@ CART:0927	      ;	assume dp = 0xD0
 CART:0927 FC C8	9D		      ldd     tmp_C89D
 CART:092A BD F2	FC		      jsr     Moveto_d_7F
 CART:092D B6 C8	CB		      lda     display_8C7_scale
-CART:0930 97 04			      sta     byte_D004
-CART:0932 AD 9F	C8 C9		      jsr     [addr_some_routine]
+CART:0930 97 04			      sta     T1LOLC
+CART:0932 AD 9F	C8 C9		      jsr     [addr_draw_routine]
 CART:0936
 CART:0936	      loc_936:							      ;	CODE XREF: display_something_8C7+Dj
 CART:0936									      ;	display_something_8C7+15j ...
@@ -3159,7 +3159,7 @@ RAM:C8C7 ??	     num_starting_robots:.ds 1					     ; DATA XREF: CART:init_robot
 RAM:C8C7									     ; CART:0115w ...
 RAM:C8C8 ??	     num_robots_left:.ds 1					     ; DATA XREF: CART:0155w
 RAM:C8C8									     ; CART:loc_2E6r ...
-RAM:C8C9 ?? ??	     addr_some_routine:.ds 2					     ; DATA XREF: display_frame+9w
+RAM:C8C9 ?? ??	     addr_draw_routine:.ds 2					     ; DATA XREF: display_frame+9w
 RAM:C8C9									     ; display_frame+DBw ...
 RAM:C8CB ??	     display_8C7_scale:.ds 1					     ; DATA XREF: display_frame+Ew
 RAM:C8CB									     ; display_frame+CBw ...
@@ -3913,28 +3913,33 @@ VIA:D000	     ; Segment type: Regular
 VIA:D000			     .area VIA
 VIA:D000			     .org 0xD000
 VIA:D000	     ; assume dp = 0
-VIA:D000 ??	     byte_D000:	     .ds 1					     ; DATA XREF: Read_Btns_Mask+14w
+VIA:D000 ??	     CNTRL:	     .ds 1					     ; DATA XREF: Read_Btns_Mask+14w
 VIA:D000									     ; Read_Btns_Mask+17w ...
-VIA:D001 ??	     byte_D001:	     .ds 1					     ; DATA XREF: Read_Btns_Mask+Fw
+VIA:D000									     ; Port B (control bits)
+VIA:D001 ??	     DAC:	     .ds 1					     ; DATA XREF: Read_Btns_Mask+Fw
 VIA:D001									     ; Read_Btns_Mask+21r ...
-VIA:D002 ??			     .ds 1
-VIA:D003 ??	     unk_D003:	     .ds 1
-VIA:D004 ??	     byte_D004:	     .ds 1					     ; DATA XREF: display_something_8C7+69w
+VIA:D001									     ; Port A (DAC & PSC data)
+VIA:D002 ??	     DCNTRL:	     .ds 1					     ; Port B direction	control
+VIA:D003 ??	     DDAC:	     .ds 1					     ; Port A direction	control
+VIA:D004 ??	     T1LOLC:	     .ds 1					     ; DATA XREF: display_something_8C7+69w
 VIA:D004									     ; sub_E76A+Aw ...
-VIA:D005 ??	     byte_D005:	     .ds 1					     ; DATA XREF: Moveto_ix+12w
+VIA:D004									     ; Timer #1
+VIA:D005 ??	     T1HOC:	     .ds 1					     ; DATA XREF: Moveto_ix+12w
 VIA:D005									     ; Draw_VL+12w ...
-VIA:D006 ??			     .ds 1
-VIA:D007 ??			     .ds 1
-VIA:D008 ??	     unk_D008:	     .ds 1
-VIA:D009 ??			     .ds 1
-VIA:D00A ??	     byte_D00A:	     .ds 1					     ; DATA XREF: Dot_ix+6w
+VIA:D006 ??	     T1LOL:	     .ds 1
+VIA:D007 ??	     T1HOL:	     .ds 1
+VIA:D008 ??	     T2LOLC:	     .ds 1					     ; Timer #2
+VIA:D009 ??	     T2HOC:	     .ds 1
+VIA:D00A ??	     SHIFT:	     .ds 1					     ; DATA XREF: Dot_ix+6w
 VIA:D00A									     ; Dot_ix+Ew ...
-VIA:D00B ??	     unk_D00B:	     .ds 1
-VIA:D00C ??	     unk_D00C:	     .ds 1
-VIA:D00D ??	     byte_D00D:	     .ds 1					     ; DATA XREF: Wait_Recal:loc_F19Er
+VIA:D00A									     ; Shift register
+VIA:D00B ??	     ACNTRL:	     .ds 1					     ; Auxiliary control register
+VIA:D00C ??	     PCNTRL:	     .ds 1					     ; Peripheral control register
+VIA:D00D ??	     IFLAG:	     .ds 1					     ; DATA XREF: Wait_Recal:loc_F19Er
 VIA:D00D									     ; Moveto_ix:loc_F33Dr ...
-VIA:D00E ??			     .ds 1
-VIA:D00F ??	     unk_D00F:	     .ds 1
+VIA:D00D									     ; Interrupt flag register
+VIA:D00E ??	     IENABL:	     .ds 1					     ; Interrupt enable	register
+VIA:D00F ??	     ORA:	     .ds 1
 VIA:D010 ??			     .ds 1
 VIA:D011 ??			     .ds 1
 VIA:D012 ??	     unk_D012:	     .ds 1
@@ -6084,7 +6089,7 @@ BIOS:E0C9 CE EE	2F		      ldu     #0xEE2F
 BIOS:E0CC BD EA	9D		      jsr     sub_EA9D
 BIOS:E0CF 35 08			      puls    dp
 BIOS:E0D1	      ;	assume dp = 0xD0
-BIOS:E0D1 96 0F			      lda     unk_D00F
+BIOS:E0D1 96 0F			      lda     ORA
 BIOS:E0D3 27 24			      beq     loc_E0F9
 BIOS:E0D5
 BIOS:E0D5	      loc_E0D5:							      ;	CODE XREF: BIOS:E0BFj
@@ -6887,7 +6892,7 @@ BIOS:E4DC BD EA	6D		      jsr     sub_EA6D
 BIOS:E4DF
 BIOS:E4DF	      loc_E4DF:							      ;	CODE XREF: sub_E4B8+37j
 BIOS:E4DF									      ;	sub_E4B8+3Cj ...
-BIOS:E4DF 33 4A			      leau    0xA,u
+BIOS:E4DF 33 4A			      leau    10,u
 BIOS:E4E1 7A C8	8F		      dec     word_C88F
 BIOS:E4E4 26 E0			      bne     loc_E4C6
 BIOS:E4E6 39			      rts
@@ -6909,7 +6914,7 @@ BIOS:E4FC 7C C8	B6		      inc     word_C8B6
 BIOS:E4FF 6C C4			      inc     ,u
 BIOS:E501 FC C8	C8		      ldd     num_robots_left
 BIOS:E504 ED 45			      std     5,u
-BIOS:E506 FC C8	CA		      ldd     addr_some_routine+1
+BIOS:E506 FC C8	CA		      ldd     addr_draw_routine+1
 BIOS:E509 ED 47			      std     7,u
 BIOS:E50B FC C9	07		      ldd     byte_C907
 BIOS:E50E ED 41			      std     1,u
@@ -7282,7 +7287,7 @@ BIOS:E76A 34 32			      pshs    a,x,y
 BIOS:E76C 8E C8	C8		      ldx     #0xC8C8				      ;	(200,200)
 BIOS:E76F BD F2	F2		      jsr     Moveto_x_7F
 BIOS:E772 A6 E4			      lda     ,s
-BIOS:E774 97 04			      sta     byte_D004
+BIOS:E774 97 04			      sta     T1LOLC
 BIOS:E776 1F 20			      tfr     y, d
 BIOS:E778 BD F3	12		      jsr     Moveto_d
 BIOS:E77B C6 0C			      ldb     #0xC
@@ -7625,7 +7630,7 @@ BIOS:E932 E1 61			      cmpb    1,s
 BIOS:E934 23 DF			      bls     loc_E915
 BIOS:E936 E0 62			      subb    2,s
 BIOS:E938 2F DB			      ble     loc_E915
-BIOS:E93A D7 04			      stb     byte_D004
+BIOS:E93A D7 04			      stb     T1LOLC
 BIOS:E93C 8E CB	71		      ldx     #unk_CB71
 BIOS:E93F 48			      asla
 BIOS:E940 AE 86			      ldx     a,x
@@ -7666,7 +7671,7 @@ BIOS:E970 58			      aslb
 BIOS:E971 EB 62			      addb    2,s
 BIOS:E973 2F DF			      ble     loc_E954
 BIOS:E975 C4 7F			      andb    #0x7F ; ''
-BIOS:E977 D7 04			      stb     byte_D004
+BIOS:E977 D7 04			      stb     T1LOLC
 BIOS:E979 8E CB	71		      ldx     #unk_CB71
 BIOS:E97C A6 E4			      lda     ,s
 BIOS:E97E 4A			      deca
@@ -7843,7 +7848,7 @@ BIOS:EA6D	      sub_EA6D:							      ;	CODE XREF: sub_E4B8+24P
 BIOS:EA6D									      ;	sub_E51E+C8P
 BIOS:EA6D 34 06			      pshs    a,b
 BIOS:EA6F 86 7F			      lda     #0x7F ; ''
-BIOS:EA71 97 04			      sta     byte_D004
+BIOS:EA71 97 04			      sta     T1LOLC
 BIOS:EA73 A6 A4			      lda     ,y
 BIOS:EA75 E6 22			      ldb     2,y
 BIOS:EA77 BD F2	C3		      jsr     Dot_d
@@ -7888,7 +7893,7 @@ BIOS:EA9D	      sub_EA9D:							      ;	CODE XREF: BIOS:E0CCP
 BIOS:EA9D									      ;	sub_E129+98P
 BIOS:EA9D 34 56			      pshs    a,b,x,u
 BIOS:EA9F 86 7F			      lda     #0x7F ; ''
-BIOS:EAA1 97 04			      sta     byte_D004
+BIOS:EAA1 97 04			      sta     T1LOLC
 BIOS:EAA3 BD F3	73		      jsr     Print_Str_hwyx
 BIOS:EAA6 35 D6			      puls    pc,u,x,b,a
 BIOS:EAA6	      ;	End of function	sub_EA9D
@@ -9307,12 +9312,12 @@ BIOS:F19C	      ;	assume dp = 0xD0
 BIOS:F19C 86 20			      lda     #0x20 ; ' '
 BIOS:F19E
 BIOS:F19E	      loc_F19E:							      ;	CODE XREF: Wait_Recal+Ej
-BIOS:F19E 95 0D			      bita    byte_D00D
+BIOS:F19E 95 0D			      bita    IFLAG
 BIOS:F1A0 27 FC			      beq     loc_F19E
 BIOS:F1A2
 BIOS:F1A2	      Set_Refresh:						      ;	CODE XREF: INIT_VIA+16j
 BIOS:F1A2 FC C8	3D		      ldd     Vec_Rfrsh_lo
-BIOS:F1A5 DD 08			      std     unk_D008
+BIOS:F1A5 DD 08			      std     T2LOLC
 BIOS:F1A7 7E F2	E6		      jmp     Recalibrate
 BIOS:F1A7	      ;	End of function	Wait_Recal
 BIOS:F1A7
@@ -9353,21 +9358,21 @@ BIOS:F1BA 8E C8	12		      ldx     #Vec_Button_1_1
 BIOS:F1BD A6 1D			      lda     -3,x
 BIOS:F1BF A7 1E			      sta     -2,x
 BIOS:F1C1 86 0E			      lda     #0xE
-BIOS:F1C3 97 01			      sta     byte_D001
+BIOS:F1C3 97 01			      sta     DAC
 BIOS:F1C5 CC 19	01		      ldd     #0x1901
-BIOS:F1C8 97 00			      sta     byte_D000
+BIOS:F1C8 97 00			      sta     CNTRL
 BIOS:F1CA 12			      nop
-BIOS:F1CB D7 00			      stb     byte_D000
-BIOS:F1CD 0F 03			      clr     unk_D003
+BIOS:F1CB D7 00			      stb     CNTRL
+BIOS:F1CD 0F 03			      clr     DDAC
 BIOS:F1CF CC 09	01		      ldd     #0x901
-BIOS:F1D2 97 00			      sta     byte_D000
+BIOS:F1D2 97 00			      sta     CNTRL
 BIOS:F1D4 12			      nop
-BIOS:F1D5 96 01			      lda     byte_D001
+BIOS:F1D5 96 01			      lda     DAC
 BIOS:F1D7 43			      coma
 BIOS:F1D8 A7 1D			      sta     -3,x
-BIOS:F1DA D7 00			      stb     byte_D000
+BIOS:F1DA D7 00			      stb     CNTRL
 BIOS:F1DC C6 FF			      ldb     #0xFF
-BIOS:F1DE D7 03			      stb     unk_D003
+BIOS:F1DE D7 03			      stb     DDAC
 BIOS:F1E0 43			      coma
 BIOS:F1E1 AA 1E			      oraa    -2,x
 BIOS:F1E3 43			      coma
@@ -9405,14 +9410,14 @@ BIOS:F1FF 8C C8	23		      cmpx    #Vec_Misc_Count
 BIOS:F202 26 F7			      bne     loc_F1FB
 BIOS:F204 6F 84			      clr     ,x
 BIOS:F206 86 01			      lda     #1
-BIOS:F208 97 00			      sta     byte_D000
+BIOS:F208 97 00			      sta     CNTRL
 BIOS:F20A 39			      rts
 BIOS:F20B	      ;	---------------------------------------------------------------------------
 BIOS:F20B
 BIOS:F20B	      loc_F20B:							      ;	CODE XREF: Joy_Digital+5j
-BIOS:F20B 97 00			      sta     byte_D000
-BIOS:F20D 0F 01			      clr     byte_D001
-BIOS:F20F 0A 00			      dec     byte_D000
+BIOS:F20B 97 00			      sta     CNTRL
+BIOS:F20D 0F 01			      clr     DAC
+BIOS:F20F 0A 00			      dec     CNTRL
 BIOS:F211 C6 60			      ldb     #0x60 ; '`'
 BIOS:F213
 BIOS:F213	      loc_F213:							      ;	CODE XREF: Joy_Digital+1Cj
@@ -9421,20 +9426,20 @@ BIOS:F214 2A FD			      bpl     loc_F213
 BIOS:F216 B6 C8	23		      lda     Vec_Misc_Count
 BIOS:F219 2B 25			      bmi     loc_F240
 BIOS:F21B 86 20			      lda     #0x20 ; ' '
-BIOS:F21D 0C 00			      inc     byte_D000
-BIOS:F21F 95 00			      bita    byte_D000
+BIOS:F21D 0C 00			      inc     CNTRL
+BIOS:F21F 95 00			      bita    CNTRL
 BIOS:F221 27 0A			      beq     loc_F22D
 BIOS:F223 C6 40			      ldb     #0x40 ; '@'
-BIOS:F225 D7 01			      stb     byte_D001
-BIOS:F227 95 00			      bita    byte_D000
+BIOS:F225 D7 01			      stb     DAC
+BIOS:F227 95 00			      bita    CNTRL
 BIOS:F229 26 0B			      bne     loc_F236
 BIOS:F22B 20 08			      bra     loc_F235
 BIOS:F22D	      ;	---------------------------------------------------------------------------
 BIOS:F22D
 BIOS:F22D	      loc_F22D:							      ;	CODE XREF: Joy_Digital+29j
 BIOS:F22D C6 C0			      ldb     #0xC0 ; '¿'
-BIOS:F22F D7 01			      stb     byte_D001
-BIOS:F231 95 00			      bita    byte_D000
+BIOS:F22F D7 01			      stb     DAC
+BIOS:F231 95 00			      bita    CNTRL
 BIOS:F233 27 01			      beq     loc_F236
 BIOS:F235
 BIOS:F235	      loc_F235:							      ;	CODE XREF: Joy_Digital+33j
@@ -9448,22 +9453,22 @@ BIOS:F23A	      ;	--------------------------------------------------------------
 BIOS:F23A
 BIOS:F23A	      loc_F23A:							      ;	CODE XREF: Joy_Digital+58j
 BIOS:F23A 1F 98			      tfr     b, a
-BIOS:F23C 9A 01			      oraa    byte_D001
-BIOS:F23E 97 01			      sta     byte_D001
+BIOS:F23C 9A 01			      oraa    DAC
+BIOS:F23E 97 01			      sta     DAC
 BIOS:F240
 BIOS:F240	      loc_F240:							      ;	CODE XREF: Joy_Digital+21j
 BIOS:F240 86 20			      lda     #0x20 ; ' '
-BIOS:F242 95 00			      bita    byte_D000
+BIOS:F242 95 00			      bita    CNTRL
 BIOS:F244 26 06			      bne     loc_F24C
 BIOS:F246 1F 98			      tfr     b, a
-BIOS:F248 98 01			      eora    byte_D001
-BIOS:F24A 97 01			      sta     byte_D001
+BIOS:F248 98 01			      eora    DAC
+BIOS:F24A 97 01			      sta     DAC
 BIOS:F24C
 BIOS:F24C	      loc_F24C:							      ;	CODE XREF: Joy_Digital+4Cj
 BIOS:F24C 54			      lsrb
 BIOS:F24D F1 C8	1A		      cmpb    Vec_Joy_Resltn
 BIOS:F250 26 E8			      bne     loc_F23A
-BIOS:F252 D6 01			      ldb     byte_D001
+BIOS:F252 D6 01			      ldb     DAC
 BIOS:F254 20 E0			      bra     loc_F236
 BIOS:F254	      ;	End of function	Joy_Digital
 BIOS:F254
@@ -9485,17 +9490,17 @@ BIOS:F259									      ;	Do_Sound+Ep
 BIOS:F259 E7 86			      stb     a,x
 BIOS:F25B
 BIOS:F25B	      Sound_Byte_raw:
-BIOS:F25B 97 01			      sta     byte_D001
+BIOS:F25B 97 01			      sta     DAC
 BIOS:F25D 86 19			      lda     #0x19
-BIOS:F25F 97 00			      sta     byte_D000
+BIOS:F25F 97 00			      sta     CNTRL
 BIOS:F261 86 01			      lda     #1
-BIOS:F263 97 00			      sta     byte_D000
-BIOS:F265 96 01			      lda     byte_D001
-BIOS:F267 D7 01			      stb     byte_D001
+BIOS:F263 97 00			      sta     CNTRL
+BIOS:F265 96 01			      lda     DAC
+BIOS:F267 D7 01			      stb     DAC
 BIOS:F269 C6 11			      ldb     #0x11
-BIOS:F26B D7 00			      stb     byte_D000
+BIOS:F26B D7 00			      stb     CNTRL
 BIOS:F26D C6 01			      ldb     #1
-BIOS:F26F D7 00			      stb     byte_D000
+BIOS:F26F D7 00			      stb     CNTRL
 BIOS:F271 39			      rts
 BIOS:F271	      ;	End of function	Sound_Byte_x
 BIOS:F271
@@ -9586,14 +9591,14 @@ BIOS:F2A9 86 7F			      lda     #0x7F ; ''
 BIOS:F2AB
 BIOS:F2AB	      Intensity_a:						      ;	CODE XREF: BIOS:F29Fj
 BIOS:F2AB									      ;	BIOS:F2A3j ...
-BIOS:F2AB 97 01			      sta     byte_D001
+BIOS:F2AB 97 01			      sta     DAC
 BIOS:F2AD B7 C8	27		      sta     Vec_Brightness
 BIOS:F2B0 CC 05	04		      ldd     #0x504
-BIOS:F2B3 97 00			      sta     byte_D000
-BIOS:F2B5 D7 00			      stb     byte_D000
-BIOS:F2B7 D7 00			      stb     byte_D000
+BIOS:F2B3 97 00			      sta     CNTRL
+BIOS:F2B5 D7 00			      stb     CNTRL
+BIOS:F2B7 D7 00			      stb     CNTRL
 BIOS:F2B9 C6 01			      ldb     #1
-BIOS:F2BB D7 00			      stb     byte_D000
+BIOS:F2BB D7 00			      stb     CNTRL
 BIOS:F2BD 39			      rts
 BIOS:F2BD	      ;	End of function	Intensity_7F
 BIOS:F2BD
@@ -9615,13 +9620,13 @@ BIOS:F2C3 8D 4D			      bsr     Moveto_d
 BIOS:F2C5
 BIOS:F2C5	      Dot_here:
 BIOS:F2C5 86 FF			      lda     #0xFF
-BIOS:F2C7 97 0A			      sta     byte_D00A
+BIOS:F2C7 97 0A			      sta     SHIFT
 BIOS:F2C9 F6 C8	28		      ldb     Vec_Dot_Dwell
 BIOS:F2CC
 BIOS:F2CC	      loc_F2CC:							      ;	CODE XREF: Dot_ix+Cj
 BIOS:F2CC 5A			      decb
 BIOS:F2CD 26 FD			      bne     loc_F2CC
-BIOS:F2CF 0F 0A			      clr     byte_D00A
+BIOS:F2CF 0F 0A			      clr     SHIFT
 BIOS:F2D1 39			      rts
 BIOS:F2D1	      ;	End of function	Dot_ix
 BIOS:F2D1
@@ -9673,7 +9678,7 @@ BIOS:F2F2
 BIOS:F2F2	      Moveto_x_7F:						      ;	CODE XREF: sub_E76A+5P
 BIOS:F2F2									      ;	sub_E94A+20P ...
 BIOS:F2F2 C6 7F			      ldb     #0x7F ; ''
-BIOS:F2F4 D7 04			      stb     byte_D004
+BIOS:F2F4 D7 04			      stb     T1LOLC
 BIOS:F2F6 A6 84			      lda     ,x
 BIOS:F2F8 E6 02			      ldb     2,x
 BIOS:F2FA 20 16			      bra     Moveto_d
@@ -9685,11 +9690,11 @@ BIOS:F2FC
 BIOS:F2FC
 BIOS:F2FC	      Moveto_d_7F:						      ;	CODE XREF: display_frame+121P
 BIOS:F2FC									      ;	display_something_8C7+63P ...
-BIOS:F2FC 97 01			      sta     byte_D001
+BIOS:F2FC 97 01			      sta     DAC
 BIOS:F2FE 34 06			      pshs    a,b
 BIOS:F300 86 7F			      lda     #0x7F ; ''
-BIOS:F302 97 04			      sta     byte_D004
-BIOS:F304 0F 00			      clr     byte_D000
+BIOS:F302 97 04			      sta     T1LOLC
+BIOS:F304 0F 00			      clr     CNTRL
 BIOS:F306 20 10			      bra     loc_F318
 BIOS:F306	      ;	End of function	Moveto_d_7F
 BIOS:F306
@@ -9707,7 +9712,7 @@ BIOS:F30C	      Moveto_ix_7F:
 BIOS:F30C C6 7F			      ldb     #0x7F ; ''
 BIOS:F30E
 BIOS:F30E	      Moveto_ix_a:						      ;	CODE XREF: Moveto_ix_FF+2j
-BIOS:F30E D7 04			      stb     byte_D004
+BIOS:F30E D7 04			      stb     T1LOLC
 BIOS:F30E	      ;	End of function	Moveto_ix_FF
 BIOS:F30E
 BIOS:F310
@@ -9719,17 +9724,17 @@ BIOS:F310 EC 81			      ldd     ,x++
 BIOS:F312
 BIOS:F312	      Moveto_d:							      ;	CODE XREF: sub_E76A+EP
 BIOS:F312									      ;	Dot_ix:Dot_dp ...
-BIOS:F312 97 01			      sta     byte_D001
-BIOS:F314 0F 00			      clr     byte_D000
+BIOS:F312 97 01			      sta     DAC
+BIOS:F314 0F 00			      clr     CNTRL
 BIOS:F316 34 06			      pshs    a,b
 BIOS:F318
 BIOS:F318	      loc_F318:							      ;	CODE XREF: Moveto_d_7F+Aj
 BIOS:F318 86 CE			      lda     #0xCE ; 'Œ'
-BIOS:F31A 97 0C			      sta     unk_D00C
-BIOS:F31C 0F 0A			      clr     byte_D00A
-BIOS:F31E 0C 00			      inc     byte_D000
-BIOS:F320 D7 01			      stb     byte_D001
-BIOS:F322 0F 05			      clr     byte_D005
+BIOS:F31A 97 0C			      sta     PCNTRL
+BIOS:F31C 0F 0A			      clr     SHIFT
+BIOS:F31E 0C 00			      inc     CNTRL
+BIOS:F320 D7 01			      stb     DAC
+BIOS:F322 0F 05			      clr     T1HOC
 BIOS:F324 35 06			      puls    b,a
 BIOS:F326 BD F5	84		      jsr     Abs_a_b
 BIOS:F329 E7 7F			      stb     -1,s
@@ -9748,7 +9753,7 @@ BIOS:F33B 86 04			      lda     #4
 BIOS:F33D
 BIOS:F33D	      loc_F33D:							      ;	CODE XREF: Moveto_ix+29j
 BIOS:F33D									      ;	Moveto_ix+2Fj
-BIOS:F33D D5 0D			      bitb    byte_D00D
+BIOS:F33D D5 0D			      bitb    IFLAG
 BIOS:F33F 27 FC			      beq     loc_F33D
 BIOS:F341
 BIOS:F341	      loc_F341:							      ;	CODE XREF: Moveto_ix+32j
@@ -9759,7 +9764,7 @@ BIOS:F345	      ;	--------------------------------------------------------------
 BIOS:F345
 BIOS:F345	      loc_F345:							      ;	CODE XREF: Moveto_ix+21j
 BIOS:F345									      ;	Moveto_ix+37j
-BIOS:F345 D5 0D			      bitb    byte_D00D
+BIOS:F345 D5 0D			      bitb    IFLAG
 BIOS:F347 27 FC			      beq     loc_F345
 BIOS:F349 39			      rts
 BIOS:F349	      ;	End of function	Moveto_ix
@@ -9784,17 +9789,17 @@ BIOS:F354
 BIOS:F354	      Reset0Ref:						      ;	CODE XREF: display_frame+12FP
 BIOS:F354									      ;	display_frame+177P ...
 BIOS:F354 CC 00	CC		      ldd     #0xCC ; 'Ã'
-BIOS:F357 D7 0C			      stb     unk_D00C
-BIOS:F359 97 0A			      sta     byte_D00A
+BIOS:F357 D7 0C			      stb     PCNTRL
+BIOS:F359 97 0A			      sta     SHIFT
 BIOS:F35B
 BIOS:F35B	      Reset_Pen:
 BIOS:F35B CC 03	02		      ldd     #0x302
-BIOS:F35E 0F 01			      clr     byte_D001
-BIOS:F360 97 00			      sta     byte_D000
-BIOS:F362 D7 00			      stb     byte_D000
-BIOS:F364 D7 00			      stb     byte_D000
+BIOS:F35E 0F 01			      clr     DAC
+BIOS:F360 97 00			      sta     CNTRL
+BIOS:F362 D7 00			      stb     CNTRL
+BIOS:F364 D7 00			      stb     CNTRL
 BIOS:F366 C6 01			      ldb     #1
-BIOS:F368 D7 00			      stb     byte_D000
+BIOS:F368 D7 00			      stb     CNTRL
 BIOS:F36A
 BIOS:F36A	      locret_F36A:						      ;	CODE XREF: Draw_Pat_VL_a-E2j
 BIOS:F36A 39			      rts
@@ -9806,8 +9811,8 @@ BIOS:F36B
 BIOS:F36B
 BIOS:F36B	      Reset0Int:						      ;	CODE XREF: Recalibrate+5P
 BIOS:F36B CC 00	CC		      ldd     #0xCC ; 'Ã'
-BIOS:F36E D7 0C			      stb     unk_D00C
-BIOS:F370 97 0A			      sta     byte_D00A
+BIOS:F36E D7 0C			      stb     PCNTRL
+BIOS:F370 97 0A			      sta     SHIFT
 BIOS:F372 39			      rts
 BIOS:F372	      ;	End of function	Reset0Int
 BIOS:F372
@@ -9897,13 +9902,13 @@ BIOS:F3AF 20 08			      bra     Mov_Draw_VL_a
 BIOS:F3B1	      ;	---------------------------------------------------------------------------
 BIOS:F3B1
 BIOS:F3B1	      Mov_Draw_VL_b:
-BIOS:F3B1 D7 04			      stb     byte_D004
+BIOS:F3B1 D7 04			      stb     T1LOLC
 BIOS:F3B3 20 07			      bra     Mov_Draw_VL
 BIOS:F3B5	      ;	---------------------------------------------------------------------------
 BIOS:F3B5
 BIOS:F3B5	      Mov_Draw_VLcs:
 BIOS:F3B5 EC 81			      ldd     ,x++
-BIOS:F3B7 D7 04			      stb     byte_D004
+BIOS:F3B7 D7 04			      stb     T1LOLC
 BIOS:F3B9
 BIOS:F3B9	      Mov_Draw_VL_a:						      ;	CODE XREF: Mov_Draw_VLc_a+2j
 BIOS:F3B9 B7 C8	23		      sta     Vec_Misc_Count
@@ -9919,12 +9924,12 @@ BIOS:F3BC									      ;	DATA XREF: ...
 BIOS:F3BC EC 84			      ldd     ,x
 BIOS:F3BE
 BIOS:F3BE	      Mov_Draw_VL_d:						      ;	CODE XREF: BIOS:loc_FFA3P
-BIOS:F3BE 97 01			      sta     byte_D001
-BIOS:F3C0 0F 00			      clr     byte_D000
+BIOS:F3BE 97 01			      sta     DAC
+BIOS:F3C0 0F 00			      clr     CNTRL
 BIOS:F3C2 30 02			      leax    2,x
 BIOS:F3C4 12			      nop
-BIOS:F3C5 0C 00			      inc     byte_D000
-BIOS:F3C7 D7 01			      stb     byte_D001
+BIOS:F3C5 0C 00			      inc     CNTRL
+BIOS:F3C7 D7 01			      stb     DAC
 BIOS:F3C9 CC 00	00		      ldd     #0
 BIOS:F3CC 20 1F			      bra     loc_F3ED
 BIOS:F3CC	      ;	End of function	Mov_Draw_VL
@@ -9937,13 +9942,13 @@ BIOS:F3D0 20 08			      bra     Draw_VL_a
 BIOS:F3D2	      ;	---------------------------------------------------------------------------
 BIOS:F3D2
 BIOS:F3D2	      Draw_VL_b:
-BIOS:F3D2 D7 04			      stb     byte_D004
+BIOS:F3D2 D7 04			      stb     T1LOLC
 BIOS:F3D4 20 07			      bra     Draw_VL
 BIOS:F3D6	      ;	---------------------------------------------------------------------------
 BIOS:F3D6
 BIOS:F3D6	      Draw_VLcs:
 BIOS:F3D6 EC 81			      ldd     ,x++
-BIOS:F3D8 D7 04			      stb     byte_D004
+BIOS:F3D8 D7 04			      stb     T1LOLC
 BIOS:F3DA
 BIOS:F3DA	      ;	===============	S U B R	O U T I	N E =======================================
 BIOS:F3DA
@@ -9962,24 +9967,24 @@ BIOS:F3DD									      ;	BIOS:F3D4j ...
 BIOS:F3DD EC 84			      ldd     ,x
 BIOS:F3DF
 BIOS:F3DF	      Draw_Line_d:						      ;	CODE XREF: BIOS:FFC4P
-BIOS:F3DF 97 01			      sta     byte_D001
-BIOS:F3E1 0F 00			      clr     byte_D000
+BIOS:F3DF 97 01			      sta     DAC
+BIOS:F3E1 0F 00			      clr     CNTRL
 BIOS:F3E3 30 02			      leax    2,x
 BIOS:F3E5 12			      nop
-BIOS:F3E6 0C 00			      inc     byte_D000
-BIOS:F3E8 D7 01			      stb     byte_D001
+BIOS:F3E6 0C 00			      inc     CNTRL
+BIOS:F3E8 D7 01			      stb     DAC
 BIOS:F3EA CC FF	00		      ldd     #0xFF00
 BIOS:F3ED
 BIOS:F3ED	      loc_F3ED:							      ;	CODE XREF: Mov_Draw_VL+10j
-BIOS:F3ED 97 0A			      sta     byte_D00A
-BIOS:F3EF D7 05			      stb     byte_D005
+BIOS:F3ED 97 0A			      sta     SHIFT
+BIOS:F3EF D7 05			      stb     T1HOC
 BIOS:F3F1 CC 00	40		      ldd     #0x40 ; '@'
 BIOS:F3F4
 BIOS:F3F4	      loc_F3F4:							      ;	CODE XREF: Draw_VL+19j
-BIOS:F3F4 D5 0D			      bitb    byte_D00D
+BIOS:F3F4 D5 0D			      bitb    IFLAG
 BIOS:F3F6 27 FC			      beq     loc_F3F4
 BIOS:F3F8 12			      nop
-BIOS:F3F9 97 0A			      sta     byte_D00A
+BIOS:F3F9 97 0A			      sta     SHIFT
 BIOS:F3FB B6 C8	23		      lda     Vec_Misc_Count
 BIOS:F3FE 4A			      deca
 BIOS:F3FF 2A D9			      bpl     Draw_VL_a
@@ -10006,26 +10011,26 @@ BIOS:F40E
 BIOS:F40E
 BIOS:F40E	      Draw_VLp_b:						      ;	CODE XREF: sub_E76A+15P
 BIOS:F40E									      ;	sub_EA7F+9P ...
-BIOS:F40E D7 04			      stb     byte_D004
+BIOS:F40E D7 04			      stb     T1LOLC
 BIOS:F410
 BIOS:F410	      Draw_VLp:							      ;	CODE XREF: CART:0A04P
 BIOS:F410									      ;	CART:0A12J ...
 BIOS:F410 EC 01			      ldd     1,x
-BIOS:F412 97 01			      sta     byte_D001
-BIOS:F414 0F 00			      clr     byte_D000
+BIOS:F412 97 01			      sta     DAC
+BIOS:F414 0F 00			      clr     CNTRL
 BIOS:F416 A6 84			      lda     ,x
 BIOS:F418 30 03			      leax    3,x
-BIOS:F41A 0C 00			      inc     byte_D000
-BIOS:F41C D7 01			      stb     byte_D001
-BIOS:F41E 97 0A			      sta     byte_D00A
-BIOS:F420 0F 05			      clr     byte_D005
+BIOS:F41A 0C 00			      inc     CNTRL
+BIOS:F41C D7 01			      stb     DAC
+BIOS:F41E 97 0A			      sta     SHIFT
+BIOS:F420 0F 05			      clr     T1HOC
 BIOS:F422 CC 00	40		      ldd     #0x40 ; '@'
 BIOS:F425
 BIOS:F425	      loc_F425:							      ;	CODE XREF: Draw_VLp_b+19j
-BIOS:F425 D5 0D			      bitb    byte_D00D
+BIOS:F425 D5 0D			      bitb    IFLAG
 BIOS:F427 27 FC			      beq     loc_F425
 BIOS:F429 12			      nop
-BIOS:F42A 97 0A			      sta     byte_D00A
+BIOS:F42A 97 0A			      sta     SHIFT
 BIOS:F42C A6 84			      lda     ,x
 BIOS:F42E 2F E0			      ble     Draw_VLp
 BIOS:F430 7E F3	4F		      jmp     Check0Ref
@@ -10053,18 +10058,18 @@ BIOS:F437	      Draw_Pat_VL:						      ;	CODE XREF: BIOS:F47Ap
 BIOS:F437 EC 84			      ldd     ,x
 BIOS:F439
 BIOS:F439	      Draw_Pat_VL_d:
-BIOS:F439 97 01			      sta     byte_D001
-BIOS:F43B 0F 00			      clr     byte_D000
+BIOS:F439 97 01			      sta     DAC
+BIOS:F43B 0F 00			      clr     CNTRL
 BIOS:F43D 30 02			      leax    2,x
-BIOS:F43F 0C 00			      inc     byte_D000
-BIOS:F441 D7 01			      stb     byte_D001
+BIOS:F43F 0C 00			      inc     CNTRL
+BIOS:F441 D7 01			      stb     DAC
 BIOS:F443 B6 C8	29		      lda     Vec_Pattern
 BIOS:F446 C6 40			      ldb     #0x40 ; '@'
-BIOS:F448 97 0A			      sta     byte_D00A
-BIOS:F44A 0F 05			      clr     byte_D005
-BIOS:F44C F5 D0	0D		      bitb    byte_D00D
+BIOS:F448 97 0A			      sta     SHIFT
+BIOS:F44A 0F 05			      clr     T1HOC
+BIOS:F44C F5 D0	0D		      bitb    IFLAG
 BIOS:F44F 27 0B			      beq     loc_F45C
-BIOS:F451 0F 0A			      clr     byte_D00A
+BIOS:F451 0F 0A			      clr     SHIFT
 BIOS:F453 B6 C8	23		      lda     Vec_Misc_Count
 BIOS:F456 26 DB			      bne     loc_F433
 BIOS:F458 39			      rts
@@ -10074,12 +10079,12 @@ BIOS:F459	      loc_F459:							      ;	CODE XREF: Draw_Pat_VL_a+2Dj
 BIOS:F459 B6 C8	29		      lda     Vec_Pattern
 BIOS:F45C
 BIOS:F45C	      loc_F45C:							      ;	CODE XREF: Draw_Pat_VL_a+1Bj
-BIOS:F45C 97 0A			      sta     byte_D00A
+BIOS:F45C 97 0A			      sta     SHIFT
 BIOS:F45E 12			      nop
-BIOS:F45F D5 0D			      bitb    byte_D00D
+BIOS:F45F D5 0D			      bitb    IFLAG
 BIOS:F461 27 F6			      beq     loc_F459
 BIOS:F463 B6 C8	23		      lda     Vec_Misc_Count
-BIOS:F466 0F 0A			      clr     byte_D00A
+BIOS:F466 0F 0A			      clr     SHIFT
 BIOS:F468 4D			      tsta
 BIOS:F469 26 C8			      bne     loc_F433
 BIOS:F46B 7E F3	4F		      jmp     Check0Ref
@@ -10126,40 +10131,40 @@ BIOS:F495									      ;	Print_Str_d+6J
 BIOS:F495 FF C8	2C		      stu     Vec_Str_Ptr
 BIOS:F498 8E F9	D4		      ldx     #0xF9D4
 BIOS:F49B CC 18	83		      ldd     #0x1883
-BIOS:F49E 0F 01			      clr     byte_D001
-BIOS:F4A0 97 0B			      sta     unk_D00B
+BIOS:F49E 0F 01			      clr     DAC
+BIOS:F4A0 97 0B			      sta     ACNTRL
 BIOS:F4A2 8E F9	D4		      ldx     #0xF9D4
 BIOS:F4A5
 BIOS:F4A5	      loc_F4A5:							      ;	CODE XREF: Print_Str+73j
-BIOS:F4A5 D7 00			      stb     byte_D000
-BIOS:F4A7 0A 00			      dec     byte_D000
+BIOS:F4A5 D7 00			      stb     CNTRL
+BIOS:F4A7 0A 00			      dec     CNTRL
 BIOS:F4A9 CC 80	81		      ldd     #0x8081
 BIOS:F4AC 12			      nop
-BIOS:F4AD 0C 00			      inc     byte_D000
-BIOS:F4AF D7 00			      stb     byte_D000
-BIOS:F4B1 97 00			      sta     byte_D000
+BIOS:F4AD 0C 00			      inc     CNTRL
+BIOS:F4AF D7 00			      stb     CNTRL
+BIOS:F4B1 97 00			      sta     CNTRL
 BIOS:F4B3 7D C8	00		      tst     Vec_Snd_Shadow
-BIOS:F4B6 0C 00			      inc     byte_D000
+BIOS:F4B6 0C 00			      inc     CNTRL
 BIOS:F4B8 B6 C8	2B		      lda     Vec_Text_Width
-BIOS:F4BB 97 01			      sta     byte_D001
+BIOS:F4BB 97 01			      sta     DAC
 BIOS:F4BD CC 01	00		      ldd     #0x100
 BIOS:F4C0 FE C8	2C		      ldu     Vec_Str_Ptr
-BIOS:F4C3 97 00			      sta     byte_D000
+BIOS:F4C3 97 00			      sta     CNTRL
 BIOS:F4C5 20 04			      bra     loc_F4CB
 BIOS:F4C7	      ;	---------------------------------------------------------------------------
 BIOS:F4C7
 BIOS:F4C7	      loc_F4C7:							      ;	CODE XREF: Print_Str+38j
 BIOS:F4C7 A6 86			      lda     a,x
-BIOS:F4C9 97 0A			      sta     byte_D00A
+BIOS:F4C9 97 0A			      sta     SHIFT
 BIOS:F4CB
 BIOS:F4CB	      loc_F4CB:							      ;	CODE XREF: Print_Str+30j
 BIOS:F4CB A6 C0			      lda     ,u+
 BIOS:F4CD 2A F8			      bpl     loc_F4C7
 BIOS:F4CF 86 81			      lda     #0x81 ; 'Å'
-BIOS:F4D1 97 00			      sta     byte_D000
-BIOS:F4D3 00 01			      neg     byte_D001
+BIOS:F4D1 97 00			      sta     CNTRL
+BIOS:F4D3 00 01			      neg     DAC
 BIOS:F4D5 86 01			      lda     #1
-BIOS:F4D7 97 00			      sta     byte_D000
+BIOS:F4D7 97 00			      sta     CNTRL
 BIOS:F4D9 8C FB	B4		      cmpx    #0xFBB4
 BIOS:F4DC 27 2C			      beq     loc_F50A
 BIOS:F4DE 30 88	50		      leax    0x50,x
@@ -10175,23 +10180,23 @@ BIOS:F4EB 86 81			      lda     #0x81 ; 'Å'
 BIOS:F4ED 12			      nop
 BIOS:F4EE 5A			      decb
 BIOS:F4EF 26 FA			      bne     loc_F4EB
-BIOS:F4F1 97 00			      sta     byte_D000
+BIOS:F4F1 97 00			      sta     CNTRL
 BIOS:F4F3 F6 C8	2A		      ldb     Vec_Text_HW
-BIOS:F4F6 D7 01			      stb     byte_D001
-BIOS:F4F8 0A 00			      dec     byte_D000
+BIOS:F4F6 D7 01			      stb     DAC
+BIOS:F4F8 0A 00			      dec     CNTRL
 BIOS:F4FA CC 81	01		      ldd     #0x8101
 BIOS:F4FD 12			      nop
-BIOS:F4FE 97 00			      sta     byte_D000
-BIOS:F500 0F 01			      clr     byte_D001
-BIOS:F502 D7 00			      stb     byte_D000
-BIOS:F504 97 00			      sta     byte_D000
+BIOS:F4FE 97 00			      sta     CNTRL
+BIOS:F500 0F 01			      clr     DAC
+BIOS:F502 D7 00			      stb     CNTRL
+BIOS:F504 97 00			      sta     CNTRL
 BIOS:F506 C6 03			      ldb     #3
 BIOS:F508 20 9B			      bra     loc_F4A5
 BIOS:F50A	      ;	---------------------------------------------------------------------------
 BIOS:F50A
 BIOS:F50A	      loc_F50A:							      ;	CODE XREF: Print_Str+47j
 BIOS:F50A 86 98			      lda     #0x98 ; 'ò'
-BIOS:F50C 97 0B			      sta     unk_D00B
+BIOS:F50C 97 0B			      sta     ACNTRL
 BIOS:F50E 7E F3	54		      jmp     Reset0Ref
 BIOS:F50E	      ;	End of function	Print_Str
 BIOS:F50E
@@ -10880,7 +10885,7 @@ BIOS:F7E2 8D 51			      bsr     Display_Option
 BIOS:F7E4 BD F1	AF		      jsr     DP_to_C8
 BIOS:F7E7 96 3C			      lda     unk_D03C
 BIOS:F7E9 27 06			      beq     loc_F7F1
-BIOS:F7EB 96 0F			      lda     unk_D00F
+BIOS:F7EB 96 0F			      lda     ORA
 BIOS:F7ED 26 3D			      bne     loc_F82C
 BIOS:F7EF 0F 3C			      clr     unk_D03C
 BIOS:F7F1
@@ -11346,64 +11351,76 @@ BIOS:F9F4	      ;	- 1 byte by 7 lines per	character
 BIOS:F9F4	      ;	- data store is	1st line for every character
 BIOS:F9F4	      ;	- then subsequent lines
 BIOS:F9F4
-BIOS:F9F4 00 20	50 50+chr_data:	      .db 0, 0x20, 0x50, 0x50, 0x20, 0xC8, 0x20, 0x10, 0x10
-BIOS:F9F4 20 C8	20 10+		      .db 0x40,	0x20, 0, 0, 0, 0, 8, 0x30, 0x20, 0x70, 0x70
-BIOS:F9F4 10 40	20 00+		      .db 0x10,	0xF8, 0x30, 0xF8, 0x70,	0x70, 0, 0x60, 0, 0
-BIOS:F9F4 00 00	00 08+		      .db 0, 0x70, 0x70, 0x20, 0xF0, 0x70, 0xF0, 0xF8, 0xF8
-BIOS:F9F4 30 20	70 70+		      .db 0x78,	0x88, 0x70, 8, 0x88, 0x80, 0x88, 0x88, 0xF8
-BIOS:F9F4 10 F8	30 F8+		      .db 0xF0,	0x70, 0xF0, 0x70, 0xF8,	0x88, 0x88, 0x88, 0x88
-BIOS:F9F4 70 70	00 60+		      .db 0x88,	0xF8, 0x70, 0x80, 0x70,	0x20, 0, 0, 0x20, 8
-BIOS:F9F4 00 00	00 70+		      .db 0x20,	0, 0, 0, 0x38, 0x10, 0x20, 0x44, 0x44, 0, 0xFE
-BIOS:F9F4 70 20	F0 70+		      .db 0xFF,	0xFE, 0, 0x70, 0x50, 0x50, 0x78, 0xC8, 0x50
-BIOS:F9F4 F0 F8	F8 78+		      .db 0x20,	0x20, 0x20, 0xA8, 0x20,	0, 0, 0, 8, 0x48, 0x60
-BIOS:F9F4 88 70	08 88+		      .db 0x88,	0x88, 0x30, 0x80, 0x40,	8, 0x88, 0x88, 0x60
-BIOS:F9F4 80 88	88 F8+		      .db 0x60,	0x10, 0, 0x40, 0x88, 0x88, 0x50, 0x48, 0x88
-BIOS:F9F4 F0 70	F0 70+		      .db 0x48,	0x80, 0x80, 0x80, 0x88,	0x20, 8, 0x90, 0x80
-BIOS:F9F4 F8 88	88 88+		      .db 0xD8,	0xC8, 0x88, 0x88, 0x88,	0x88, 0x88, 0xA8, 0x88
-BIOS:F9F4 88 88	F8 70+		      .db 0x88,	0x88, 0x88, 0x88, 8, 0x40, 0x80, 8, 0x50, 0
-BIOS:F9F4 80 70	20 00+		      .db 0, 0x70, 0xC,	0x20, 0x70, 0x70, 0, 0x44, 0x10, 0x70
-BIOS:F9F4 00 20	08 20+		      .db 0, 0,	0x6C, 0x82, 0xFF, 0xFE,	0, 0x70, 0x50, 0xF8
-BIOS:F9F4 00 00	00 38+		      .db 0xA0,	0x10, 0x50, 0x40, 0x40,	0x10, 0x70, 0x20, 0
-BIOS:F9F4 10 20	44 44+		      .db 0, 0,	0x10, 0x48, 0x20, 8, 8,	0x50, 0xF0, 0x80, 0x10
-BIOS:F9F4 00 FE	FF FE+		      .db 0x88,	0x88, 0x60, 0, 0x20, 0x78, 0x20, 8, 0xA8, 0x88
-BIOS:F9F4 00 70	50 50+		      .db 0x48,	0x80, 0x48, 0x80, 0x80,	0x80, 0x88, 0x20, 8
-BIOS:F9F4 78 C8	50 20+		      .db 0xA0,	0x80, 0xA8, 0xA8, 0x88,	0x88, 0x88, 0x88, 0x40
-BIOS:F9F4 20 20	A8 20+		      .db 0x20,	0x88, 0x88, 0x88, 0x50,	0x50, 0x10, 0x40, 0x40
-BIOS:F9F4 00 00	00 08+		      .db 8, 0x88, 0, 0x70, 0xA8, 0xA, 0x20, 0x88, 0xF8, 0x60
-BIOS:F9F4 48 60	88 88+		      .db 0xBA,	0x38, 0x20, 0, 0, 0x92,	0x82, 0xFF, 0xFE, 0
-BIOS:F9F4 30 80	40 08+		      .db 0x20,	0, 0x50, 0x70, 0x20, 0x60, 0, 0x40, 0x10, 0xA8
-BIOS:F9F4 88 88	60 60+		      .db 0xF8,	0, 0x70, 0, 0x20, 0x48,	0x20, 0x70, 0x30, 0x90
-BIOS:F9F4 10 00	40 88+		      .db 8, 0xF0, 0x20, 0x70, 0x78, 0,	0x60, 0x40, 0, 0x10
-BIOS:F9F4 88 50	48 88+		      .db 0x10,	0xB8, 0x88, 0x70, 0x80,	0x48, 0xE0, 0xE0, 0x98
-BIOS:F9F4 48 80	80 80+		      .db 0xF8,	0x20, 8, 0xC0, 0x80, 0xA8, 0x98, 0x88, 0xF0
-BIOS:F9F4 88 20	08 90+		      .db 0x88,	0xF0, 0x20, 0x20, 0x88,	0x50, 0xA8, 0x20, 0x20
-BIOS:F9F4 80 D8	C8 88+		      .db 0x20,	0x40, 0x20, 8, 0, 0, 0xFE, 0x20, 8, 0x20, 0x88
-BIOS:F9F4 88 88	88 88+		      .db 0xF8,	0xF0, 0xA2, 0x38, 0xF8,	0x82, 0x38, 0x92, 0x82
-BIOS:F9F4 A8 88	88 88+		      .db 0xFF,	0xFE, 0, 0, 0, 0xF8, 0x70, 0x40, 0xA8, 0, 0x40
-BIOS:F9F4 88 88	08 40+		      .db 0x10,	0xA8, 0x20, 0x40, 0, 0,	0x40, 0x48, 0x20, 0x80
-BIOS:F9F4 80 08	50 00+		      .db 8, 0xF8, 8, 0x88, 0x40, 0x88,	8, 0x60, 0x60, 0x20
-BIOS:F9F4 00 70	0C 20+		      .db 0x78,	0x20, 0x20, 0xB0, 0xF8,	0x48, 0x80, 0x48, 0x80
-BIOS:F9F4 70 70	00 44+		      .db 0x80,	0x88, 0x88, 0x20, 8, 0xA0, 0x80, 0x88, 0x88
-BIOS:F9F4 10 70	00 00+		      .db 0x88,	0x80, 0xA8, 0xA0, 0x10,	0x20, 0x88, 0x50, 0xA8
-BIOS:F9F4 6C 82	FF FE+		      .db 0x50,	0x20, 0x40, 0x40, 0x10,	8, 0, 0, 0xFE, 0x20
-BIOS:F9F4 00 70	50 F8+		      .db 0x78,	0xA8, 0x88, 0xF8, 0xF0,	0xBA, 0x7C, 0x20, 0x44
-BIOS:F9F4 A0 10	50 40+		      .db 0x44,	0x6C, 0x82, 0xFF, 0xFE,	0, 0, 0, 0x50, 0x28
-BIOS:F9F4 40 10	70 20+		      .db 0x98,	0x90, 0, 0x20, 0x20, 0,	0x20, 0x40, 0, 0, 0x80
-BIOS:F9F4 00 00	00 10+		      .db 0x48,	0x20, 0x80, 0x88, 0x10,	0x88, 0x88, 0x80, 0x88
-BIOS:F9F4 48 20	08 08+		      .db 0x10,	0x60, 0x20, 0x10, 0, 0x40, 0, 0x80, 0x88, 0x48
-BIOS:F9F4 50 F0	80 10+		      .db 0x88,	0x48, 0x80, 0x80, 0x88,	0x88, 0x20, 0x88, 0x90
-BIOS:F9F4 88 88	60 00+		      .db 0x88,	0x88, 0x88, 0x88, 0x80,	0x90, 0x90, 0x88, 0x20
-BIOS:F9F4 20 78	20 08+		      .db 0x88,	0x20, 0xA8, 0x88, 0x20,	0x80, 0x40, 8, 8, 0
-BIOS:F9F4 A8 88	48 80+		      .db 0, 0x48, 0x20, 0xF0, 0x70, 0x70, 0x70, 0x60, 0x44
-BIOS:F9F4 48 80	80 80+		      .db 0x6C,	0x50, 0x38, 0x82, 0, 0x82, 0xFF, 0xFE, 0, 0x20
-BIOS:F9F4 88 20	08 A0+		      .db 0, 0x50, 0xF8, 0x98, 0x68, 0,	0x10, 0x40, 0, 0, 0x80
-BIOS:F9F4 80 A8	A8 88+		      .db 0, 0x80, 0x80, 0x30, 0x70, 0xF8, 0x70, 0x10, 0x70
-BIOS:F9F4 88 88	88 40+		      .db 0x70,	0x80, 0x70, 0x60, 0, 0x40, 0, 0, 0, 0x20, 0x78
-BIOS:F9F4 20 88	88 88+		      .db 0x88,	0xF0, 0x70, 0xF0, 0xF8,	0x80, 0x78, 0x88, 0x70
-BIOS:F9F4 50 50	10 40+		      .db 0x70,	0x88, 0xF8, 0x88, 0x88,	0xF8, 0x80, 0x68, 0x88
-BIOS:F9F4 40 08	88 00+		      .db 0x70,	0x20, 0x70, 0x20, 0x50,	0x88, 0x20, 0xF8, 0x70
-BIOS:F9F4 70 A8	0A 20+		      .db 8, 0x70, 0, 0xF8, 0, 0x20, 0x60, 0x20, 0, 0, 0, 0x38
-BIOS:F9F4 88 F8	60 BA+		      .db 0x82,	0x88, 0, 0, 0, 0xFE, 0xFF, 0xFE
+BIOS:F9F4 00 20	50 50+chr_data:	      .db 0x00,	0x20, 0x50, 0x50, 0x20,	0xC8, 0x20, 0x10
+BIOS:F9F4 20 C8	20 10+		      .db 0x10,	0x40, 0x20, 0x00, 0x00,	0x00, 0x00, 0x08
+BIOS:F9F4 10 40	20 00+		      .db 0x30,	0x20, 0x70, 0x70, 0x10,	0xF8, 0x30, 0xF8
+BIOS:F9F4 00 00	00 08+		      .db 0x70,	0x70, 0x00, 0x60, 0x00,	0x00, 0x00, 0x70
+BIOS:F9F4 30 20	70 70+		      .db 0x70,	0x20, 0xF0, 0x70, 0xF0,	0xF8, 0xF8, 0x78
+BIOS:F9F4 10 F8	30 F8+		      .db 0x88,	0x70, 0x08, 0x88, 0x80,	0x88, 0x88, 0xF8
+BIOS:F9F4 70 70	00 60+		      .db 0xF0,	0x70, 0xF0, 0x70, 0xF8,	0x88, 0x88, 0x88
+BIOS:F9F4 00 00	00 70+		      .db 0x88,	0x88, 0xF8, 0x70, 0x80,	0x70, 0x20, 0x00
+BIOS:F9F4 70 20	F0 70+		      .db 0x00,	0x20, 0x08, 0x20, 0x00,	0x00, 0x00, 0x38
+BIOS:F9F4 F0 F8	F8 78+		      .db 0x10,	0x20, 0x44, 0x44, 0x00,	0xFE, 0xFF, 0xFE
+BIOS:F9F4 88 70	08 88+		      .db 0x00,	0x70, 0x50, 0x50, 0x78,	0xC8, 0x50, 0x20
+BIOS:F9F4 80 88	88 F8+		      .db 0x20,	0x20, 0xA8, 0x20, 0x00,	0x00, 0x00, 0x08
+BIOS:F9F4 F0 70	F0 70+		      .db 0x48,	0x60, 0x88, 0x88, 0x30,	0x80, 0x40, 0x08
+BIOS:F9F4 F8 88	88 88+		      .db 0x88,	0x88, 0x60, 0x60, 0x10,	0x00, 0x40, 0x88
+BIOS:F9F4 88 88	F8 70+		      .db 0x88,	0x50, 0x48, 0x88, 0x48,	0x80, 0x80, 0x80
+BIOS:F9F4 80 70	20 00+		      .db 0x88,	0x20, 0x08, 0x90, 0x80,	0xD8, 0xC8, 0x88
+BIOS:F9F4 00 20	08 20+		      .db 0x88,	0x88, 0x88, 0x88, 0xA8,	0x88, 0x88, 0x88
+BIOS:F9F4 00 00	00 38+		      .db 0x88,	0x88, 0x08, 0x40, 0x80,	0x08, 0x50, 0x00
+BIOS:F9F4 10 20	44 44+		      .db 0x00,	0x70, 0x0C, 0x20, 0x70,	0x70, 0x00, 0x44
+BIOS:F9F4 00 FE	FF FE+		      .db 0x10,	0x70, 0x00, 0x00, 0x6C,	0x82, 0xFF, 0xFE
+BIOS:F9F4 00 70	50 50+		      .db 0x00,	0x70, 0x50, 0xF8, 0xA0,	0x10, 0x50, 0x40
+BIOS:F9F4 78 C8	50 20+		      .db 0x40,	0x10, 0x70, 0x20, 0x00,	0x00, 0x00, 0x10
+BIOS:F9F4 20 20	A8 20+		      .db 0x48,	0x20, 0x08, 0x08, 0x50,	0xF0, 0x80, 0x10
+BIOS:F9F4 00 00	00 08+		      .db 0x88,	0x88, 0x60, 0x00, 0x20,	0x78, 0x20, 0x08
+BIOS:F9F4 48 60	88 88+		      .db 0xA8,	0x88, 0x48, 0x80, 0x48,	0x80, 0x80, 0x80
+BIOS:F9F4 30 80	40 08+		      .db 0x88,	0x20, 0x08, 0xA0, 0x80,	0xA8, 0xA8, 0x88
+BIOS:F9F4 88 88	60 60+		      .db 0x88,	0x88, 0x88, 0x40, 0x20,	0x88, 0x88, 0x88
+BIOS:F9F4 10 00	40 88+		      .db 0x50,	0x50, 0x10, 0x40, 0x40,	0x08, 0x88, 0x00
+BIOS:F9F4 88 50	48 88+		      .db 0x70,	0xA8, 0x0A, 0x20, 0x88,	0xF8, 0x60, 0xBA
+BIOS:F9F4 48 80	80 80+		      .db 0x38,	0x20, 0x00, 0x00, 0x92,	0x82, 0xFF, 0xFE
+BIOS:F9F4 88 20	08 90+		      .db 0x00,	0x20, 0x00, 0x50, 0x70,	0x20, 0x60, 0x00
+BIOS:F9F4 80 D8	C8 88+		      .db 0x40,	0x10, 0xA8, 0xF8, 0x00,	0x70, 0x00, 0x20
+BIOS:F9F4 88 88	88 88+		      .db 0x48,	0x20, 0x70, 0x30, 0x90,	0x08, 0xF0, 0x20
+BIOS:F9F4 A8 88	88 88+		      .db 0x70,	0x78, 0x00, 0x60, 0x40,	0x00, 0x10, 0x10
+BIOS:F9F4 88 88	08 40+		      .db 0xB8,	0x88, 0x70, 0x80, 0x48,	0xE0, 0xE0, 0x98
+BIOS:F9F4 80 08	50 00+		      .db 0xF8,	0x20, 0x08, 0xC0, 0x80,	0xA8, 0x98, 0x88
+BIOS:F9F4 00 70	0C 20+		      .db 0xF0,	0x88, 0xF0, 0x20, 0x20,	0x88, 0x50, 0xA8
+BIOS:F9F4 70 70	00 44+		      .db 0x20,	0x20, 0x20, 0x40, 0x20,	0x08, 0x00, 0x00
+BIOS:F9F4 10 70	00 00+		      .db 0xFE,	0x20, 0x08, 0x20, 0x88,	0xF8, 0xF0, 0xA2
+BIOS:F9F4 6C 82	FF FE+		      .db 0x38,	0xF8, 0x82, 0x38, 0x92,	0x82, 0xFF, 0xFE
+BIOS:F9F4 00 70	50 F8+		      .db 0x00,	0x00, 0x00, 0xF8, 0x70,	0x40, 0xA8, 0x00
+BIOS:F9F4 A0 10	50 40+		      .db 0x40,	0x10, 0xA8, 0x20, 0x40,	0x00, 0x00, 0x40
+BIOS:F9F4 40 10	70 20+		      .db 0x48,	0x20, 0x80, 0x08, 0xF8,	0x08, 0x88, 0x40
+BIOS:F9F4 00 00	00 10+		      .db 0x88,	0x08, 0x60, 0x60, 0x20,	0x78, 0x20, 0x20
+BIOS:F9F4 48 20	08 08+		      .db 0xB0,	0xF8, 0x48, 0x80, 0x48,	0x80, 0x80, 0x88
+BIOS:F9F4 50 F0	80 10+		      .db 0x88,	0x20, 0x08, 0xA0, 0x80,	0x88, 0x88, 0x88
+BIOS:F9F4 88 88	60 00+		      .db 0x80,	0xA8, 0xA0, 0x10, 0x20,	0x88, 0x50, 0xA8
+BIOS:F9F4 20 78	20 08+		      .db 0x50,	0x20, 0x40, 0x40, 0x10,	0x08, 0x00, 0x00
+BIOS:F9F4 A8 88	48 80+		      .db 0xFE,	0x20, 0x78, 0xA8, 0x88,	0xF8, 0xF0, 0xBA
+BIOS:F9F4 48 80	80 80+		      .db 0x7C,	0x20, 0x44, 0x44, 0x6C,	0x82, 0xFF, 0xFE
+BIOS:F9F4 88 20	08 A0+		      .db 0x00,	0x00, 0x00, 0x50, 0x28,	0x98, 0x90, 0x00
+BIOS:F9F4 80 A8	A8 88+		      .db 0x20,	0x20, 0x00, 0x20, 0x40,	0x00, 0x00, 0x80
+BIOS:F9F4 88 88	88 40+		      .db 0x48,	0x20, 0x80, 0x88, 0x10,	0x88, 0x88, 0x80
+BIOS:F9F4 20 88	88 88+		      .db 0x88,	0x10, 0x60, 0x20, 0x10,	0x00, 0x40, 0x00
+BIOS:F9F4 50 50	10 40+		      .db 0x80,	0x88, 0x48, 0x88, 0x48,	0x80, 0x80, 0x88
+BIOS:F9F4 40 08	88 00+		      .db 0x88,	0x20, 0x88, 0x90, 0x88,	0x88, 0x88, 0x88
+BIOS:F9F4 70 A8	0A 20+		      .db 0x80,	0x90, 0x90, 0x88, 0x20,	0x88, 0x20, 0xA8
+BIOS:F9F4 88 F8	60 BA+		      .db 0x88,	0x20, 0x80, 0x40, 0x08,	0x08, 0x00, 0x00
+BIOS:F9F4 38 20	00 00+		      .db 0x48,	0x20, 0xF0, 0x70, 0x70,	0x70, 0x60, 0x44
+BIOS:F9F4 92 82	FF FE+		      .db 0x6C,	0x50, 0x38, 0x82, 0x00,	0x82, 0xFF, 0xFE
+BIOS:F9F4 00 20	00 50+		      .db 0x00,	0x20, 0x00, 0x50, 0xF8,	0x98, 0x68, 0x00
+BIOS:F9F4 70 20	60 00+		      .db 0x10,	0x40, 0x00, 0x00, 0x80,	0x00, 0x80, 0x80
+BIOS:F9F4 40 10	A8 F8+		      .db 0x30,	0x70, 0xF8, 0x70, 0x10,	0x70, 0x70, 0x80
+BIOS:F9F4 00 70	00 20+		      .db 0x70,	0x60, 0x00, 0x40, 0x00,	0x00, 0x00, 0x20
+BIOS:F9F4 48 20	70 30+		      .db 0x78,	0x88, 0xF0, 0x70, 0xF0,	0xF8, 0x80, 0x78
+BIOS:F9F4 90 08	F0 20+		      .db 0x88,	0x70, 0x70, 0x88, 0xF8,	0x88, 0x88, 0xF8
+BIOS:F9F4 70 78	00 60+		      .db 0x80,	0x68, 0x88, 0x70, 0x20,	0x70, 0x20, 0x50
+BIOS:F9F4 40 00	10 10+		      .db 0x88,	0x20, 0xF8, 0x70, 0x08,	0x70, 0x00, 0xF8
+BIOS:F9F4 B8 88	70 80+		      .db 0x00,	0x20, 0x60, 0x20, 0x00,	0x00, 0x00, 0x38
+BIOS:F9F4 48 E0	E0 98+		      .db 0x82,	0x88, 0x00, 0x00, 0x00,	0xFE, 0xFF, 0xFE
 BIOS:FC24 00			      .db    0
 BIOS:FC25 11			      .db 0x11
 BIOS:FC26 41			      .db 0x41 ; A
