@@ -76,7 +76,7 @@ uint8_t vec_chr_data[] =
   0x82,	0x88, 0x00, 0x00, 0x00,	0xFE, 0xFF, 0xFE
 };
 
-#define FACTOR 1
+#define FACTOR 4
 
 static int write_run (int state, int run)
 {
@@ -84,8 +84,9 @@ static int write_run (int state, int run)
   while (run--)
     fprintf (stdout, "%c", (state ? '#' : ' '));
 #endif
-	printf ("        SVEC %d,0,%d\n", run*FACTOR, (state ? 7 : 0));
-
+	//printf ("        SVEC %d,%d,%d\n", run*FACTOR, -run, (state ? 7 : 0));
+	if (state) state = 7;
+	printf ("        .dw 0x%04X\n", ((state&0x07)<<13) | ((run*FACTOR)&0x1FFF));
 }
  
 int main (int argc, char *argv[])
@@ -131,7 +132,8 @@ int main (int argc, char *argv[])
       	maxruns = nruns;
       	
       while (nruns++ < 8)
-      	printf ("        RTSL\n");
+      	//printf ("        RTSL\n");
+      	printf ("        .dw 0\n");
       printf ("\n");
     }
     

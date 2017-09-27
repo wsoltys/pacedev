@@ -13,6 +13,13 @@ SWSDK_OP_JSRL                   = 0xA000
 SWSDK_OP_RTSL                   = 0xC000
 SWSDK_OP_JMPL                   = 0xE000
 
+        ; dx, dy signed 13 bits (-4096..4095)
+        ; z unsigned 3 bits (0..7)
+        .macro SWSDK_VCTR dx,dy,z
+        .dw     #SWSDK_OP_VCTR | (dy&0x1FFF)
+        .dw     #((z&0x07)<<13) | (dx&0x1FFF)
+        .endm
+
         ; dx, dy signed 5 bits (-16..15)
         ; - but represent *half* the distance
         ; *** should this macro halve the parameter values???

@@ -73,7 +73,7 @@ wait_AVG:
         ; The routine that initialises a new display list @$6112 (BANK0)
         ; - which presumably is done every frame -
         ; calls this routine, which renders blue dots in each corner.
-        ;SWSDK_JSRL SWSDK_BlueCornerDots
+        SWSDK_JSRL SWSDK_BlueCornerDots
 
         ; The 3D "STAR WARS" logo is stored in 6809 ROM @$CEDE 
         ; and copied, along with other routines, into vector RAM at $2800.
@@ -118,6 +118,55 @@ SW_Y = 850
         SWSDK_SCAL 4,0
         SWSDK_JSRL 0x29A4
 
+        SWSDK_CNTR
+        SWSDK_COLOR SWSDK_WHITE,255
+        SWSDK_SCAL 2,0
+                
+        ldb     #7                              ; 7 lines
+        stb     *0x90
+        ldx     #0x8000
+        stx     *0x92
+1$:     ldu     #sdk_msg
+        SWSDK_CNTR
+        ldd     #SWSDK_OP_VCTR
+        ldb     *0x90
+        aslb
+        aslb
+        aslb
+        std     ,y++
+        ldd     #0x1EC0
+        std     ,y++
+2$:     ldb     ,u
+        andb    #0x7F
+        subb    #0x20                           ; chrset starts at $20
+        clra
+        aslb
+        rola
+        aslb
+        rola
+        aslb
+        rola                                    ; x16 is char offset
+        aslb
+        rola                                    ; x16 is char offset
+        addd    *0x92                           ; ptr char data
+        tfr     d,x
+3$:     ldd     ,x
+        cmpd    #0x00                           ; end of char?
+        beq     4$                              ; yes, exit
+        ldd     #SWSDK_OP_VCTR
+        std     ,y++
+        ldd     ,x++
+        std     ,y++
+        bra     3$
+4$:     ldb     ,u+
+        bitb    #(1<<7)                         ; end of string?
+        beq     2$                              ; no, loop
+        ldd     *0x92
+        addd    #80*16                          ; ptr next line
+        std     *0x92
+        dec     *0x90                           ; done 7 lines?
+        bne     1$                              ; no, loop
+                        
 				SWSDK_ENDFRAME
         jmp     loop
 
