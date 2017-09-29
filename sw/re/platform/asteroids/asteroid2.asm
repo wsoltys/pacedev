@@ -669,7 +669,7 @@ loc_6836:
 
 loc_685E:
 				JSR	update_and_render_objects
-				JSR	handle_shots				; still	not finished???
+				JSR	handle_collisions			; still	not finished???
 
 loc_6864:									; display (C), scores, extra ships
 				JSR	display_C_scores_ships
@@ -906,72 +906,77 @@ print_PLAYER_N:
 
 ; ---------------------------------------------------------------------------
 				.BYTE $71 ; q
+; Handle collisions
+; - projectiles	are player, saucer, shots
+;   - saucers destroyed	by player shots	only
+;   - player destroyed by all other objects
+;   - asteroids	destroyed by all other objects
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-handle_shots:
+handle_collisions:
 				LDX	#7					; 8 values to check
 
-chk_shot:									; shot status
+chk_projectile:									; object status
 				LDA	ship_Sts,X
-				BEQ	next_shot				; not active, skip
-				BPL	handle_active_shot			; active, go
+				BEQ	next_projectile				; not active, skip
+				BPL	handle_active_projectile		; active, go
 
-next_shot:									; next timer
+next_projectile:								; next projectile
 				DEX
-				BPL	chk_shot				; loop 'til done
+				BPL	chk_projectile				; loop 'til done
 				RTS
 ; ---------------------------------------------------------------------------
 
-handle_active_shot:								; offset to saucer
+handle_active_projectile:							; target=saucer
 				LDY	#$1C
 				CPX	#4					; player shot?
-				BCS	loc_6A0A				; yes, go
-				DEY						; offset to player
-				TXA
-				BNE	loc_6A0A				; (always)
+				BCS	chk_collision				; yes, go
+				DEY						; target=player
+				TXA						; offset
+				BNE	chk_collision				; projectile not player, go
 
-loc_6A07:
+next_target:									; target=asteroid
 				DEY
-				BMI	next_shot
+				BMI	next_projectile				; done all targets, ret
 
-loc_6A0A:									; player/saucer
+chk_collision:									; target object
 				LDA	P1RAM,Y
-				BEQ	loc_6A07				; not active, exit
-				BMI	loc_6A07				; exploding, exit
+				BEQ	next_target				; not active, exit
+				BMI	next_target				; exploding, exit
 				STA	byte_B					; tmp status
-				LDA	asteroid_PLh,Y				; player/saucer	PLh
+				LDA	asteroid_PLh,Y				; target PLh
 				SEC
-				SBC	ship_PLh,X				; - shot PLh
-				STA	byte_8
-				LDA	asteroid_PHh,Y				; player/saucer	PHh
-				SBC	ship_PHh,X				; - shot PHh
+				SBC	ship_PLh,X				; - projectile PLh
+				STA	byte_8					; tmp_d_PLh
+				LDA	asteroid_PHh,Y				; target PHh
+				SBC	ship_PHh,X				; - projectile PHh
 				LSR	A					; /2
 				ROR	byte_8					; low byte
 				ASL	A
 				BEQ	loc_6A34
-				BPL	loc_6A97
+				BPL	no_collision
 				EOR	#$FE ; 'þ'
-				BNE	loc_6A97
+				BNE	no_collision
 				LDA	byte_8
 				EOR	#$FF
 				STA	byte_8
 
-loc_6A34:									; player/saucer	PLv
+loc_6A34:									; target PLv
 				LDA	asteroid_PLv,Y
 				SEC
-				SBC	ship_PLv,X				; - shot PLv
+				SBC	ship_PLv,X				; - projectile PLv
 				STA	byte_9
-				LDA	asteroid_PHv,Y				; player/saucer_PHv
-				SBC	ship_PHv,X				; - shot PHv
+				LDA	asteroid_PHv,Y				; target PHv
+				SBC	ship_PHv,X				; - projectile PHv
 				LSR	A					; /2
 				ROR	byte_9					; low byte
 				ASL	A
 				BEQ	loc_6A55
-				BPL	loc_6A97				; no hit, go
+				BPL	no_collision
 				EOR	#$FE ; 'þ'
-				BNE	loc_6A97
+				BNE	no_collision
 				LDA	byte_9
 				EOR	#$FF
 				STA	byte_9
@@ -985,9 +990,9 @@ loc_6A55:
 				BCS	loc_6A63
 				LDA	#$84 ; '„'
 
-loc_6A63:									; saucer?
+loc_6A63:									; projectile=player?
 				CPX	#1
-				BCS	loc_6A69
+				BCS	loc_6A69				; no, skip
 				ADC	#$1C
 
 loc_6A69:
@@ -998,14 +1003,14 @@ loc_6A69:
 				BEQ	loc_6A75
 				ADC	#$12
 
-loc_6A75:
+loc_6A75:									; saucer
 				LDX	#1
 
 loc_6A77:
 				CMP	byte_8
-				BCC	loc_6A97
+				BCC	no_collision
 				CMP	byte_9
-				BCC	loc_6A97
+				BCC	no_collision
 				STA	byte_B
 				LSR	A
 				CLC
@@ -1013,20 +1018,20 @@ loc_6A77:
 				STA	byte_B
 				LDA	byte_9
 				ADC	byte_8
-				BCS	loc_6A97
+				BCS	no_collision
 				CMP	byte_B
-				BCS	loc_6A97
+				BCS	no_collision
 				JSR	handle_object_hit
 
-loc_6A94:
-				JMP	next_shot
+jmp_next_projectile:
+				JMP	next_projectile
 ; ---------------------------------------------------------------------------
 
-loc_6A97:
+no_collision:									; next target
 				DEY
-				BMI	loc_6A94
-				JMP	loc_6A0A
-; End of function handle_shots
+				BMI	jmp_next_projectile			; done all targets, go
+				JMP	chk_collision				; continue
+; End of function handle_collisions
 
 ; Y=offset to source asteroid, X=offset	to empty slot
 
@@ -3538,10 +3543,10 @@ add_chr_fn:
 				PLA						; pop return address
 				BNE	loc_7849				; return, finishing byte pair (3 chars)
 
-loc_785B:									; numeric?
+loc_785B:									; one of "@_012"?
 				CMP	#$A
 				BCC	loc_7861				; yes, skip
-				ADC	#$D
+				ADC	#$D					; adjust for alpha
 
 loc_7861:									; X = chr*2 (chr fn offset)
 				TAX
