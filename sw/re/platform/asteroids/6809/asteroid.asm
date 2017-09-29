@@ -43,8 +43,8 @@ byte_9                          .equ		0x09
 byte_A                          .equ		0x0A
 byte_B                          .equ		0x0B
 byte_C                          .equ		0x0C
-byte_D                          .equ		0x0D
-byte_E                          .equ		0x0E
+byte_D                          .equ		0x80            ; need 2 bytes (STX)
+byte_E                          .equ		0x82            ; need 2 bytes (STX)
 byte_F                          .equ		0x0F
 initial_offset                  .equ		0x10
 byte_15                         .equ		0x15
@@ -1349,7 +1349,7 @@ display_C_scores_ships:
 ; B = scale ($E0/$F0/$00)
 display_object:
         stb     *globalScale
-        pshs		x																				; object offset (from P1RAM)
+        stx     *byte_D                                 ; object offset (from P1RAM)
         lda     *byte_5                                 ; object_PHh
         lsra
         ror     *byte_4                                 ; object_PLh
@@ -1381,7 +1381,7 @@ display_object:
         cmpa    #0xA0
         bcs     1$
 2$:     ;jsr     set_scale_A_bright_0
-        puls		x																				; restore object offset
+        ldx     *byte_D                                 ; restore object offset
         lda     P1RAM,X                                 ; object status (again)
         bpl     display_shot_ship_asteroid_or_saucer
         cmpx    #0x1B                                   ; PlayerFlag?
