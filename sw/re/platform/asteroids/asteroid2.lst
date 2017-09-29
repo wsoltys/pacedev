@@ -943,7 +943,7 @@ ROM:6A0A	     chk_collision:								     ; target object
 ROM:6A0A B9 00 02				     LDA     P1RAM,Y
 ROM:6A0D F0 F8					     BEQ     next_target			     ; not active, exit
 ROM:6A0F 30 F6					     BMI     next_target			     ; exploding, exit
-ROM:6A11 85 0B					     STA     byte_B				     ; tmp status
+ROM:6A11 85 0B					     STA     byte_B				     ; tmp target status
 ROM:6A13 B9 AF 02				     LDA     asteroid_PLh,Y			     ; target PLh
 ROM:6A16 38					     SEC
 ROM:6A17 FD CA 02				     SBC     ship_PLh,X				     ; - projectile PLh
@@ -980,13 +980,13 @@ ROM:6A51 49 FF					     EOR     #$FF
 ROM:6A53 85 09					     STA     byte_9
 ROM:6A55
 ROM:6A55	     loc_6A55:
-ROM:6A55 A9 2A					     LDA     #$2A ; '*'
-ROM:6A57 46 0B					     LSR     byte_B
+ROM:6A55 A9 2A					     LDA     #42
+ROM:6A57 46 0B					     LSR     byte_B				     ; target status
 ROM:6A59 B0 08					     BCS     loc_6A63
-ROM:6A5B A9 48					     LDA     #$48 ; 'H'
+ROM:6A5B A9 48					     LDA     #72
 ROM:6A5D 46 0B					     LSR     byte_B
 ROM:6A5F B0 02					     BCS     loc_6A63
-ROM:6A61 A9 84					     LDA     #$84 ; '„'
+ROM:6A61 A9 84					     LDA     #132
 ROM:6A63
 ROM:6A63	     loc_6A63:									     ; projectile=player?
 ROM:6A63 E0 01					     CPX     #1
@@ -1121,10 +1121,10 @@ ROM:6B0F	     ; =============== S U B R O U T I N E ============================
 ROM:6B0F
 ROM:6B0F
 ROM:6B0F	     handle_object_hit:
-ROM:6B0F E0 01					     CPX     #1
-ROM:6B11 D0 08					     BNE     loc_6B1B
-ROM:6B13 C0 1B					     CPY     #$1B				     ; player hit?
-ROM:6B15 D0 12					     BNE     loc_6B29				     ; no, skip
+ROM:6B0F E0 01					     CPX     #1					     ; projectile=saucer?
+ROM:6B11 D0 08					     BNE     loc_6B1B				     ; no, skip
+ROM:6B13 C0 1B					     CPY     #$1B				     ; target=player?
+ROM:6B15 D0 12					     BNE     target_not_player			     ; no, skip
 ROM:6B17 A2 00					     LDX     #0
 ROM:6B19 A0 1C					     LDY     #$1C				     ; saucer
 ROM:6B1B
@@ -1137,7 +1137,7 @@ ROM:6B23 A6 18					     LDX     curPlayer
 ROM:6B25 D6 57					     DEC     numShipsP1,X			     ; dec number of ships
 ROM:6B27 A2 00					     LDX     #0					     ; offset to player	ship
 ROM:6B29
-ROM:6B29	     loc_6B29:									     ; flag object exploding
+ROM:6B29	     target_not_player:								     ; flag object exploding
 ROM:6B29 A9 A0					     LDA     #$A0 ; ' '
 ROM:6B2B 9D 1B 02				     STA     ship_Sts,X
 ROM:6B2E A9 00					     LDA     #0
