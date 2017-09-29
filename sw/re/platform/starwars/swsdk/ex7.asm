@@ -6,6 +6,7 @@
         .module ex7
 
 .include "swsdk.inc"
+.include "vectrex.inc"
 
 ; *** BUILD OPTIONS
 ;.define BUILD_OPT_PROFILE
@@ -121,6 +122,8 @@ SW_Y = 850
         SWSDK_CNTR
         SWSDK_COLOR SWSDK_WHITE,255
         SWSDK_SCAL 2,0
+
+        jsr     Select_Game
                 
         ldb     #7                              ; 7 lines
         stb     *0x90

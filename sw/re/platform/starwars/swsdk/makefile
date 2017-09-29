@@ -29,6 +29,7 @@ ASFLAGS = -l -o -s
 LDFLAGS = -i -u -m
 
 SDK_OBJS = swsdk.rel cpuvecs.rel
+VEC_OBJS = vectrex.rel
 
 EX_ROMS = $(patsubst %,%.rom,$(EXAMPLES)) 
 
@@ -52,7 +53,11 @@ vectrex_chrset.ihx : vectrex_chrset.rel
 	$(ECHO) Linking $@...
 	$(LD) $(LDFLAGS) $@ $<
 
-%.ihx: %.rel $(SDK_OBJS)
+ex7.ihx: ex7.rel $(SDK_OBJS) $(VEC_OBJS)
+	$(ECHO) Linking $@...
+	$(LD) $(LDFLAGS) $@ $< $(SDK_OBJS) $(VEC_OBJS)
+
+%.ihx: %.rel $(SDK_OBJS) $(VEC_OBJS)
 	$(ECHO) Linking $@...
 	$(LD) $(LDFLAGS) $@ $< $(SDK_OBJS)
 
