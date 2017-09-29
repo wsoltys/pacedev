@@ -932,7 +932,7 @@ ROM:69FD A0 1C					     LDY     #$1C
 ROM:69FF E0 04					     CPX     #4					     ; player shot?
 ROM:6A01 B0 07					     BCS     chk_collision			     ; yes, go
 ROM:6A03 88					     DEY					     ; target=player
-ROM:6A04 8A					     TXA					     ; offset
+ROM:6A04 8A					     TXA					     ; projectile offset
 ROM:6A05 D0 03					     BNE     chk_collision			     ; projectile not player, go
 ROM:6A07
 ROM:6A07	     next_target:								     ; target=asteroid
@@ -982,26 +982,26 @@ ROM:6A55
 ROM:6A55	     loc_6A55:
 ROM:6A55 A9 2A					     LDA     #42
 ROM:6A57 46 0B					     LSR     byte_B				     ; target status
-ROM:6A59 B0 08					     BCS     loc_6A63
+ROM:6A59 B0 08					     BCS     loc_6A63				     ; player or small saucer, go
 ROM:6A5B A9 48					     LDA     #72
 ROM:6A5D 46 0B					     LSR     byte_B
-ROM:6A5F B0 02					     BCS     loc_6A63
+ROM:6A5F B0 02					     BCS     loc_6A63				     ; large saucer, medium asteroid, go
 ROM:6A61 A9 84					     LDA     #132
 ROM:6A63
-ROM:6A63	     loc_6A63:									     ; projectile=player?
+ROM:6A63	     loc_6A63:
 ROM:6A63 E0 01					     CPX     #1
-ROM:6A65 B0 02					     BCS     loc_6A69				     ; no, skip
-ROM:6A67 69 1C					     ADC     #$1C
+ROM:6A65 B0 02					     BCS     loc_6A69				     ; projectile=saucer/shot, go
+ROM:6A67 69 1C					     ADC     #28				     ; projectile=player
 ROM:6A69
-ROM:6A69	     loc_6A69:
+ROM:6A69	     loc_6A69:									     ; projectile=shot,	go
 ROM:6A69 D0 0C					     BNE     loc_6A77
-ROM:6A6B 69 12					     ADC     #$12
+ROM:6A6B 69 12					     ADC     #18
 ROM:6A6D AE 1C 02				     LDX     saucer_Sts
 ROM:6A70 CA					     DEX
-ROM:6A71 F0 02					     BEQ     loc_6A75
-ROM:6A73 69 12					     ADC     #$12
+ROM:6A71 F0 02					     BEQ     loc_6A75				     ; projectile=small	saucer,	go
+ROM:6A73 69 12					     ADC     #18
 ROM:6A75
-ROM:6A75	     loc_6A75:									     ; saucer
+ROM:6A75	     loc_6A75:									     ; restore offset=saucer
 ROM:6A75 A2 01					     LDX     #1
 ROM:6A77
 ROM:6A77	     loc_6A77:
@@ -1124,40 +1124,40 @@ ROM:6B0F	     handle_object_hit:
 ROM:6B0F E0 01					     CPX     #1					     ; projectile=saucer?
 ROM:6B11 D0 08					     BNE     loc_6B1B				     ; no, skip
 ROM:6B13 C0 1B					     CPY     #$1B				     ; target=player?
-ROM:6B15 D0 12					     BNE     target_not_player			     ; no, skip
-ROM:6B17 A2 00					     LDX     #0
-ROM:6B19 A0 1C					     LDY     #$1C				     ; saucer
+ROM:6B15 D0 12					     BNE     update_projectile_status		     ; no, skip
+ROM:6B17 A2 00					     LDX     #0					     ; for saucer hits player...
+ROM:6B19 A0 1C					     LDY     #$1C				     ; ... player hits saucer
 ROM:6B1B
-ROM:6B1B	     loc_6B1B:
+ROM:6B1B	     loc_6B1B:									     ; projectile
 ROM:6B1B 8A					     TXA
-ROM:6B1C D0 1E					     BNE     loc_6B3C
-ROM:6B1E A9 81					     LDA     #129
+ROM:6B1C D0 1E					     BNE     update_shot_status			     ; must be a shot, go
+ROM:6B1E A9 81					     LDA     #129				     ; init spawn timer
 ROM:6B20 8D FA 02				     STA     shipSpawnTimer
 ROM:6B23 A6 18					     LDX     curPlayer
 ROM:6B25 D6 57					     DEC     numShipsP1,X			     ; dec number of ships
-ROM:6B27 A2 00					     LDX     #0					     ; offset to player	ship
+ROM:6B27 A2 00					     LDX     #0					     ; restore projectile=player
 ROM:6B29
-ROM:6B29	     target_not_player:								     ; flag object exploding
+ROM:6B29	     update_projectile_status:							     ; flag object exploding
 ROM:6B29 A9 A0					     LDA     #$A0 ; ' '
 ROM:6B2B 9D 1B 02				     STA     ship_Sts,X
 ROM:6B2E A9 00					     LDA     #0
 ROM:6B30 9D 3E 02				     STA     ship_Vh,X
 ROM:6B33 9D 61 02				     STA     ship_Vv,X				     ; zero object velocity
-ROM:6B36 C0 1B					     CPY     #$1B				     ; asteroid?
-ROM:6B38 90 0D					     BCC     loc_6B47				     ; yes, go
-ROM:6B3A B0 37					     BCS     handle_saucer_hit			     ; no (saucer), go
+ROM:6B36 C0 1B					     CPY     #$1B				     ; target=asteroid?
+ROM:6B38 90 0D					     BCC     jsr_asteroid_hit			     ; yes, go
+ROM:6B3A B0 37					     BCS     handle_saucer_hit			     ; target=saucer, go
 ROM:6B3C
-ROM:6B3C	     loc_6B3C:
+ROM:6B3C	     update_shot_status:
 ROM:6B3C A9 00					     LDA     #0
-ROM:6B3E 9D 1B 02				     STA     ship_Sts,X				     ; flag object inactive
-ROM:6B41 C0 1B					     CPY     #$1B				     ; player?
-ROM:6B43 F0 21					     BEQ     ship_hit_asteroid			     ; yes, go
+ROM:6B3E 9D 1B 02				     STA     ship_Sts,X				     ; flag shot inactive
+ROM:6B41 C0 1B					     CPY     #$1B				     ; target=player?
+ROM:6B43 F0 21					     BEQ     handle_player_hit			     ; yes, go
 ROM:6B45 B0 2C					     BCS     handle_saucer_hit			     ; no (saucer), go
 ROM:6B47
-ROM:6B47	     loc_6B47:
+ROM:6B47	     jsr_asteroid_hit:
 ROM:6B47 20 EC 75				     JSR     handle_asteroid_hit
 ROM:6B4A
-ROM:6B4A	     explode_asteroid:								     ; (orginal) asteroid status
+ROM:6B4A	     explode_object:								     ; object status
 ROM:6B4A B9 00 02				     LDA     P1RAM,Y
 ROM:6B4D 29 03					     AND     #3
 ROM:6B4F 49 02					     EOR     #2
@@ -1170,24 +1170,24 @@ ROM:6B58 A9 A0					     LDA     #$A0 ; ' '                              ; flag e
 ROM:6B5A 99 00 02				     STA     P1RAM,Y				     ; store
 ROM:6B5D A9 00					     LDA     #0
 ROM:6B5F 99 23 02				     STA     asteroid_Vh,Y
-ROM:6B62 99 46 02				     STA     asteroid_Vv,Y			     ; zero asteroid velocity
+ROM:6B62 99 46 02				     STA     asteroid_Vv,Y			     ; zero object velocity
 ROM:6B65 60					     RTS
 ROM:6B66	     ; ---------------------------------------------------------------------------
 ROM:6B66
-ROM:6B66	     ship_hit_asteroid:								     ; save object index
+ROM:6B66	     handle_player_hit:								     ; save object index
 ROM:6B66 8A					     TXA
 ROM:6B67 A6 18					     LDX     curPlayer
 ROM:6B69 D6 57					     DEC     numShipsP1,X			     ; lose a ship
 ROM:6B6B AA					     TAX					     ; restore object index
 ROM:6B6C A9 81					     LDA     #129				     ; init spawn timer
 ROM:6B6E 8D FA 02				     STA     shipSpawnTimer
-ROM:6B71 D0 D7					     BNE     explode_asteroid			     ; always
+ROM:6B71 D0 D7					     BNE     explode_object			     ; always
 ROM:6B73
 ROM:6B73	     handle_saucer_hit:
 ROM:6B73 AD F8 02				     LDA     starting_saucerCountdownTimer
 ROM:6B76 8D F7 02				     STA     saucerCountdownTimer
 ROM:6B79 A5 1C					     LDA     numPlayers				     ; real game?
-ROM:6B7B F0 CD					     BEQ     explode_asteroid			     ; no, go
+ROM:6B7B F0 CD					     BEQ     explode_object			     ; no, go
 ROM:6B7D 86 0D					     STX     byte_D				     ; save object index
 ROM:6B7F A6 19					     LDX     curPlayer_x2
 ROM:6B81 AD 1C 02				     LDA     saucer_Sts
@@ -1199,7 +1199,7 @@ ROM:6B8B
 ROM:6B8B	     loc_6B8B:
 ROM:6B8B 20 97 73				     JSR     add_A_to_score
 ROM:6B8E A6 0D					     LDX     byte_D				     ; restore object index
-ROM:6B90 4C 4A 6B				     JMP     explode_asteroid
+ROM:6B90 4C 4A 6B				     JMP     explode_object
 ROM:6B90	     ; End of function handle_object_hit
 ROM:6B90
 ROM:6B93
