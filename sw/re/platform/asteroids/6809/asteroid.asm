@@ -435,9 +435,9 @@ handle_active_projectile:
         cmpx    #0                                      ; projectile offset
         bne     chk_collision                      			; projectile not player, go
 next_target:        
-        leay		-1,y
+        leay		-1,y																		; target=asteroid
 				cmpy		#0
-        bmi     next_projectile
+        bmi     next_projectile													; done all targets, ret
 chk_collision:        
         lda     P1RAM,Y																	; target object
         beq     next_target                        			; not active, exit
@@ -445,7 +445,7 @@ chk_collision:
         sta     *byte_B                                 ; tmp status
         lda     asteroid_PLh,Y                          ; target PLh
         suba    ship_PLh,X                              ; - projectile PLh
-        sta     *byte_8
+        sta     *byte_8																	; tmp_d_PLh
         lda     asteroid_PHh,Y                          ; target PHh
         sbca    ship_PHh,X                              ; - projectile PHh
         lsra                                            ; /2
@@ -473,23 +473,23 @@ chk_collision:
         lda     *byte_9
         coma
         sta     *byte_9
-4$:     lda     #0x2A
-        lsr     *byte_B
+4$:     lda     #42
+        lsr     *byte_B																	; target status
+        bcs     5$																			; player or small saucer, go
+        lda     #72
+        lsr     *byte_B																	; large saucer, med asteroid, go
         bcs     5$
-        lda     #0x48
-        lsr     *byte_B
-        bcs     5$
-        lda     #0x84
-5$:    	cmpx    #1																			; projectile=player?
-        bcc     6$                                      ; no, skip
-        adda    #0x1C
-6$:     bne     8$
-        adca    #0x12
+        lda     #132
+5$:    	cmpx    #1																			
+        bcc     6$                                      ; projectile=saucer/shot, go
+        adda    #28																			; projectile=player
+6$:     bne     8$																			; projectile=shot, go
+        adca    #18
         ldb     saucer_Sts                              ; 6502 used X
         decb
-        beq     7$
-        adca    #0x12
-7$:     ldx     #1                                      ; saucer
+        beq     7$																			; projectile=small saucer, go
+        adca    #18
+7$:     ldx     #1                                      ; restore offset=saucer
 8$:     cmpa    *byte_8
         bcs     no_collision
         cmpa    *byte_9
@@ -537,37 +537,40 @@ clone_asteroid_rnd_shape:
 
 ; $6B0F
 handle_object_hit:
-        cmpx    #1
-        bne     1$
-        cmpy    #0x1B                                   ; player hit?
-        bne     2$                                			; no, skip
-        ldx     #0
-        ldy     #0x1C                                   ; saucer
+        cmpx    #1																			; projectile=saucer?
+        bne     1$																			; no, skip
+        cmpy    #0x1B                                   ; target=player?
+        bne     update_projectile_status           			; no, skip
+        ldx     #0																			; for saucer hits player...
+        ldy     #0x1C                                   ; ...player hits saucer
 1$:     cmpx		#0
-        bne     3$
-        lda     #129
+        bne     update_shot_status											; must be a shot, go
+        lda     #129																		; init spawn timer
         sta     shipSpawnTimer
         ldx			#dp_base+numShipsP1
         ldb     *curPlayer
         dec     b,x                            					; dec number of ships
-        ldx     #0                                      ; offset to player ship
-2$:     lda     #0xA0																		; flag object exploding
+        ldx     #0                                      ; restore projectile=player
+update_projectile_status:        
+     		lda     #0xA0																		; flag object exploding
         sta     ship_Sts,X
         clra
         sta     ship_Vh,X
         sta     ship_Vv,X                               ; zero object velocity
-        cmpy    #0x1B                                   ; asteroid?
-        bcs     4$                                			; yes, go
+        cmpy    #0x1B                                   ; target=asteroid?
+        bcs     jsr_asteroid_hit                 				; yes, go
+        bcc     handle_saucer_hit                       ; target=saucer, go
+update_shot_status:
+     		clra
+        sta     ship_Sts,X                              ; flag shot inactive
+        cmpy    #0x1B                                   ; target=player?
+        beq     handle_player_hit                       ; yes, go
         bcc     handle_saucer_hit                       ; no (saucer), go
-3$:     clra
-        sta     ship_Sts,X                              ; flag object inactive
-        cmpy    #0x1B                                   ; player?
-        beq     ship_hit_asteroid                       ; yes, go
-        bcc     handle_saucer_hit                       ; no (saucer), go
-4$:     jsr     handle_asteroid_hit
+jsr_asteroid_hit:
+     		jsr     handle_asteroid_hit
 
-explode_asteroid:                                                               
-        lda     P1RAM,Y																	; (orginal) asteroid status
+explode_object:                                                               
+        lda     P1RAM,Y																	; object status
         anda    #3
         eora    #2
         lsra
@@ -582,19 +585,19 @@ explode_asteroid:
         sta     asteroid_Vv,Y                           ; zero asteroid velocity
         rts
 
-ship_hit_asteroid:                                                              
+handle_player_hit:                                                              
 				ldu			#dp_base+numShipsP1
         ldb     *curPlayer
         dec     b,u                            					; lose a ship
         lda     #129                                    ; init spawn timer
         sta     shipSpawnTimer
-        bne     explode_asteroid                        ; always
+        bne     explode_object                        	; always
 
 handle_saucer_hit:
         lda     starting_saucerCountdownTimer
         sta     saucerCountdownTimer
         lda     *numPlayers                             ; real game?
-        beq     explode_asteroid                        ; no, go
+        beq     explode_object                        	; no, go
         ldb     *curPlayer_x2
         lda     saucer_Sts
         lsra                                            ; small saucer?
@@ -602,7 +605,7 @@ handle_saucer_hit:
         bcs     1$                                			; yes, skip
         lda     #0x20                              			; 20x10 = 200 pts
 1$:     jsr     add_A_to_score
-        jmp     explode_asteroid
+        jmp     explode_object
 				
 ; $6B93
 handle_saucer:
