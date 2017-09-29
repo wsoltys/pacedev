@@ -489,7 +489,7 @@ chk_collision:
         decb
         beq     7$
         adca    #0x12
-7$:     ldx     #1
+7$:     ldx     #1                                      ; saucer
 8$:     cmpa    *byte_8
         bcs     no_collision
         cmpa    *byte_9
@@ -503,7 +503,7 @@ chk_collision:
         bcs     no_collision
         cmpa    *byte_B
         bcc     no_collision
-        ;jsr     handle_object_hit
+        jsr     handle_object_hit
 jmp_next_projectile:     
         jmp     next_projectile
 no_collision:
