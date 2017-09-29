@@ -259,7 +259,7 @@ wave_loop:
 				jsr			handle_saucer
 loc_685E:
 				jsr			update_and_render_objects
-				jsr			handle_shots
+				jsr			handle_collisions
 loc_6864:				
 				jsr			display_C_scores_ships
 				jsr			handle_sounds
@@ -410,59 +410,66 @@ print_PLAYER_N:
 				rts
 
 ; $69F0
-handle_shots:
+; Handle collisions
+; - projectiles are player, saucer, shots
+;   - saucers destroyed by player shots only
+;   - player destroyed by all other objects
+;   - asteroids destroyed by all other objects
+handle_collisions:
         ldx     #7                                      ; 8 values to check
-chk_shot:                                                                       
-        lda     ship_Sts,X															; shot status
-        beq     next_shot                               ; not active, skip
-        bpl     handle_active_shot                      ; active, go
-next_shot:                                                                      
-        leax		-1,x																		; next timer
+chk_projectile:                                                                       
+        lda     ship_Sts,X															; object status
+        beq     next_projectile                         ; not active, skip
+        bpl     handle_active_projectile                ; active, go
+next_projectile:                                                                      
+        leax		-1,x																		; next projectile
         cmpx		#0
-        bpl     chk_shot                                ; loop 'til done
+        bpl     chk_projectile                          ; loop 'til done
 				rts
 
-handle_active_shot:                                                             
-        ldy     #0x1C																		; offset to saucer
+handle_active_projectile:                                                             
+        ldy     #0x1C																		; target=saucer
        	cmpx    #4                                     	; player shot?
-        bcc     2$                                			; yes, go
-        leay		-1,y                                    ; offset to player
-;        txa																						; (not used?)
-        bra     2$                                			; (always)
-1$:     leay		-1,y
+        bcc     chk_collision                     			; yes, go
+        leay		-1,y                                    ; target=player
+        cmpx    #0                                      ; projectile offset
+        bne     chk_collision                      			; projectile not player, go
+next_target:        
+        leay		-1,y
 				cmpy		#0
-        bmi     next_shot
-2$:     lda     P1RAM,Y																	; player/saucer
-        beq     1$                                			; not active, exit
-        bmi     1$                                			; exploding, exit
+        bmi     next_projectile
+chk_collision:        
+        lda     P1RAM,Y																	; target object
+        beq     next_target                        			; not active, exit
+        bmi     next_target                        			; exploding, exit
         sta     *byte_B                                 ; tmp status
-        lda     asteroid_PLh,Y                          ; player/saucer PLh
-        suba    ship_PLh,X                              ; - shot PLh
+        lda     asteroid_PLh,Y                          ; target PLh
+        suba    ship_PLh,X                              ; - projectile PLh
         sta     *byte_8
-        lda     asteroid_PHh,Y                          ; player/saucer PHh
-        sbca    ship_PHh,X                              ; - shot PHh
+        lda     asteroid_PHh,Y                          ; target PHh
+        sbca    ship_PHh,X                              ; - projectile PHh
         lsra                                            ; /2
         ror     *byte_8                                 ; low byte
         asla
         beq     3$
-        bpl     10$
+        bpl     no_collision
         eora    #0xFE
-        bne     10$
+        bne     no_collision
         lda     *byte_8
         coma
         sta     *byte_8
-3$:     lda     asteroid_PLv,Y													; player/saucer PLv
-        suba    ship_PLv,X                              ; - shot PLv
+3$:     lda     asteroid_PLv,Y													; target PLv
+        suba    ship_PLv,X                              ; - projectile PLv
         sta     *byte_9
-        lda     asteroid_PHv,Y                          ; player/saucer_PHv
-        sbca    ship_PHv,X                              ; - shot PHv
+        lda     asteroid_PHv,Y                          ; target PHv
+        sbca    ship_PHv,X                              ; - projectile PHv
         lsra                                            ; /2
         ror     *byte_9                                 ; low byte
         asla
         beq     4$
-        bpl     10$                                			; no hit, go
+        bpl     no_collision
         eora    #0xFE
-        bne     10$
+        bne     no_collision
         lda     *byte_9
         coma
         sta     *byte_9
@@ -473,36 +480,37 @@ handle_active_shot:
         lsr     *byte_B
         bcs     5$
         lda     #0x84
-5$:    	cmpx    #1																			; saucer?
-        bcc     6$
+5$:    	cmpx    #1																			; projectile=player?
+        bcc     6$                                      ; no, skip
         adda    #0x1C
 6$:     bne     8$
-        adda    #0x12
-        ldx     saucer_Sts
-        leax		-1,x
-        cmpx		#0
+        adca    #0x12
+        ldb     saucer_Sts                              ; 6502 used X
+        decb
         beq     7$
-        adda    #0x12
+        adca    #0x12
 7$:     ldx     #1
 8$:     cmpa    *byte_8
-        bcs     10$
+        bcs     no_collision
         cmpa    *byte_9
-        bcs     10$
+        bcs     no_collision
         sta     *byte_B
         lsra
         adda    *byte_B
         sta     *byte_B
         lda     *byte_9
         adca    *byte_8
-        bcs     10$
+        bcs     no_collision
         cmpa    *byte_B
-        bcc     10$
-        jsr     handle_object_hit
-9$:     jmp     next_shot
-10$:    leay		-1,y
+        bcc     no_collision
+        ;jsr     handle_object_hit
+jmp_next_projectile:     
+        jmp     next_projectile
+no_collision:
+        leay		-1,y
 				cmpy		#0
-        bmi     9$
-        jmp     2$
+        bmi     jmp_next_projectile
+        jmp     chk_collision
 
 ; $6A9D
 clone_asteroid_rnd_shape:
