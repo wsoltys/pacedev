@@ -3048,7 +3048,7 @@ ROM:760E F0 04					     BEQ     add_asteroid_score			     ; ship!
 ROM:7610 C9 04					     CMP     #4					     ; player shot?
 ROM:7612 90 09					     BCC     handle_asteroid_split		     ; no, skip	score
 ROM:7614
-ROM:7614	     add_asteroid_score:							     ; score for this asteroid
+ROM:7614	     add_asteroid_score:							     ; score for this asteroid size
 ROM:7614 BD 59 76				     LDA     asteroid_score_tbl,X
 ROM:7617 A6 19					     LDX     curPlayer_x2			     ; offset to score for player
 ROM:7619 18					     CLC

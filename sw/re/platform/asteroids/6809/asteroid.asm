@@ -582,7 +582,7 @@ explode_object:
         sta     P1RAM,Y                                 ; store
         clra
         sta     asteroid_Vh,Y
-        sta     asteroid_Vv,Y                           ; zero asteroid velocity
+        sta     asteroid_Vv,Y                           ; zero object velocity
         rts
 
 handle_player_hit:                                                              
@@ -672,7 +672,7 @@ handle_new_saucer:
         ldb     #2                                      ; large saucer
         lda     starting_saucerCountdownTimer
         bmi     8$
-        ldy     #p1ScoreThousands
+        ldy     #dp_base+p1ScoreThousands
         lda     *curPlayer_x2                           
         lda			a,y																			; p1/p2 score
         cmpa    #0x30                             			; score over 30,000?
@@ -745,7 +745,7 @@ handle_small_saucer:
         jsr     loc_76F0
         sta     *saucerShotDirection
         jsr     update_prng
-        ldx     #p1ScoreThousands
+        ldx     #dp_base+p1ScoreThousands
         ldb     *curPlayer_x2
         ldb			b,x
         cmpb    #0x35                              			; score over 35,000?
@@ -810,6 +810,7 @@ init_players:
 				ldx			#4																			; 4 flags, 4 timers, 4 score bytes
 2$:			sta			ship_Sts,x
 				sta			shipShot_Sts,x													; init timer
+				; *** FIXME NOW
 				sta			byte_4F+2,x															; zero player score
 				leax		-1,x																		; next byte
 				cmpx		#0
@@ -897,13 +898,13 @@ handle_object_entry:
         lda     #0
 7$:     tfr			a,b
         lda     asteroid_PLh,X
-        sta     byte_4
+        sta     *byte_4
         lda     asteroid_PHh,X
-        sta     byte_5
+        sta     *byte_5
         lda     asteroid_PLv,X
-        sta     byte_6
+        sta     *byte_6
         lda     asteroid_PHv,X
-        sta     byte_7
+        sta     *byte_7
         jmp     jsr_display_object
 
 ; $6FC7
@@ -1300,7 +1301,7 @@ display_C_scores_ships:
 				lda			*fastTimer
 				anda		#0x10
 				beq			2$																			; not every frame
-1$:			lda			#p1ScoreTens
+1$:			lda			#dp_base+p1ScoreTens
 				ldb			#2																			; 2 bytes to display
 				sec																							; flag no zero padding
 				jsr			display_numeric													; display P1 score
@@ -1470,14 +1471,14 @@ display_shot:
 				rts
 
 ; $7397
-; B=offset
+; A=score, B=curPlayer_x2
 add_A_to_score:
-				ldu			#p1ScoreTens
-				adca		b,u
+				ldu			#dp_base+p1ScoreTens
+				adda		b,u
 				daa
 				sta			b,u
         bcc     1$
-        ldu			#p1ScoreThousands
+        ldu			#dp_base+p1ScoreThousands
         lda     b,u
         adca    #0
         daa
@@ -1587,7 +1588,7 @@ handle_sounds:
 ; - potentially adds 2 more asteroids to the table
 ;   but note that the original asteroid object entry remains
 handle_asteroid_hit:
-        pshs		x																				; save object index
+        stx     *byte_D                                 ; save object index
         lda     #80
         sta     asteroid_hit_timer
         lda     P1RAM,Y                                 ; asteroid status
@@ -1608,13 +1609,14 @@ handle_asteroid_hit:
         bcs     handle_asteroid_split                   ; no, skip score
 
 add_asteroid_score:                                                             
-        lda     asteroid_score_tbl,X										; score for this asteroid
+        ldx     #asteroid_score_tbl
+        lda     b,x										                  ; score for this asteroid size
         ldb     *curPlayer_x2                           ; offset to score for player
         CLC
         jsr     add_A_to_score                          ; add asteroid score
 
 handle_asteroid_split:                                                          
-        ;ldx     P1RAM,Y																	; asteroid status
+        tst     P1RAM,Y																	; asteroid status
         beq     1$                                			; small, no split, exit
         jsr     get_inactive_asteroid_cnt               ; X = empty slot
         bmi     1$                                			; no slots, exit
@@ -1636,7 +1638,7 @@ handle_asteroid_split:
         asla                                            ; twice as fast
         eora    asteroid_PLv,X
         sta     asteroid_PLv,X
-1$:     puls		x																				; restore object index
+1$:     ldx     *byte_D                                 ; restore object index
         rts
 
 asteroid_score_tbl:
