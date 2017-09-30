@@ -642,10 +642,10 @@ ROM:682A D0 02					     BNE     loc_682E
 ROM:682C E6 5D					     INC     slowTimer				     ; Update Slow Timer
 ROM:682E
 ROM:682E	     loc_682E:									     ; ping-pong DVG RAM $4000/$4400
-ROM:682E A2 40					     LDX     #$40 ; '@'
+ROM:682E A2 40					     LDX     >#DVGRAM
 ROM:6830 29 02					     AND     #2
 ROM:6832 D0 02					     BNE     loc_6836
-ROM:6834 A2 44					     LDX     #$44 ; 'D'
+ROM:6834 A2 44					     LDX     #>DVGRAM+0x4
 ROM:6836
 ROM:6836	     loc_6836:
 ROM:6836 A9 02					     LDA     #2
@@ -1116,6 +1116,7 @@ ROM:6B0C C8					     INY
 ROM:6B0D D0 ED					     BNE     loc_6AFC				     ; always
 ROM:6B0D	     ; End of function copy_vector_list_to_avgram
 ROM:6B0D
+ROM:6B0F	     ; X=projectile offset
 ROM:6B0F
 ROM:6B0F	     ; =============== S U B R O U T I N E =======================================
 ROM:6B0F
@@ -1442,7 +1443,7 @@ ROM:6CFF A9 12					     LDA     #18
 ROM:6D01 99 1B 02				     STA     ship_Sts,Y				     ; init shot timer
 ROM:6D04 B5 61					     LDA     direction,X			     ; ship/saucer
 ROM:6D06 20 D2 77				     JSR     get_thrust_cos
-ROM:6D09 A6 0D					     LDX     byte_D				     ; was byte_2FA
+ROM:6D09 A6 0D					     LDX     byte_D
 ROM:6D0B C9 80					     CMP     #$80 ; '€'                              ; down?
 ROM:6D0D 6A					     ROR     A
 ROM:6D0E 85 09					     STA     byte_9
@@ -1450,14 +1451,14 @@ ROM:6D10 18					     CLC
 ROM:6D11 7D 3E 02				     ADC     ship_Vh,X				     ; add Vh ship/saucer
 ROM:6D14 30 08					     BMI     loc_6D1E
 ROM:6D16 C9 70					     CMP     #112				     ; less than 112?
-ROM:6D18 90 0A					     BCC     loc_6D24				     ; no, skip
-ROM:6D1A A9 6F					     LDA     #111				     ; min = 111
-ROM:6D1C D0 06					     BNE     loc_6D24
+ROM:6D18 90 0A					     BCC     loc_6D24				     ; yes, skip
+ROM:6D1A A9 6F					     LDA     #111				     ; max = 111
+ROM:6D1C D0 06					     BNE     loc_6D24				     ; (always)
 ROM:6D1E
-ROM:6D1E	     loc_6D1E:									     ; more than 145?
-ROM:6D1E C9 91					     CMP     #145
-ROM:6D20 B0 02					     BCS     loc_6D24				     ; no, skip
-ROM:6D22 A9 91					     LDA     #145				     ; max = 145
+ROM:6D1E	     loc_6D1E:									     ; less than -111?
+ROM:6D1E C9 91					     CMP     #-111
+ROM:6D20 B0 02					     BCS     loc_6D24				     ; yes, skip
+ROM:6D22 A9 91					     LDA     #-111				     ; min = -111
 ROM:6D24
 ROM:6D24	     loc_6D24:									     ; update shot Vh
 ROM:6D24 99 3E 02				     STA     ship_Vh,Y
@@ -1471,14 +1472,14 @@ ROM:6D33 18					     CLC
 ROM:6D34 7D 61 02				     ADC     ship_Vv,X
 ROM:6D37 30 08					     BMI     loc_6D41
 ROM:6D39 C9 70					     CMP     #112				     ; less than 112?
-ROM:6D3B 90 0A					     BCC     loc_6D47				     ; no, skip
-ROM:6D3D A9 6F					     LDA     #111				     ; min = 111
+ROM:6D3B 90 0A					     BCC     loc_6D47				     ; yes, skip
+ROM:6D3D A9 6F					     LDA     #111				     ; max = 111
 ROM:6D3F D0 06					     BNE     loc_6D47
 ROM:6D41
-ROM:6D41	     loc_6D41:									     ; more than 145?
-ROM:6D41 C9 91					     CMP     #145
+ROM:6D41	     loc_6D41:									     ; less than -111?
+ROM:6D41 C9 91					     CMP     #-111
 ROM:6D43 B0 02					     BCS     loc_6D47				     ; no, skip
-ROM:6D45 A9 91					     LDA     #145				     ; max = 145
+ROM:6D45 A9 91					     LDA     #-111				     ; min = -111
 ROM:6D47
 ROM:6D47	     loc_6D47:									     ; update shot Vv
 ROM:6D47 99 61 02				     STA     ship_Vv,Y

@@ -644,10 +644,10 @@ loc_6815:									; HALT
 				INC	slowTimer				; Update Slow Timer
 
 loc_682E:									; ping-pong DVG	RAM $4000/$4400
-				LDX	#$40 ; '@'
+				LDX	>#DVGRAM
 				AND	#2
 				BNE	loc_6836
-				LDX	#$44 ; 'D'
+				LDX	#>DVGRAM+0x4
 
 loc_6836:
 				LDA	#2
@@ -934,7 +934,7 @@ handle_active_projectile:							; target=saucer
 				CPX	#4					; player shot?
 				BCS	chk_collision				; yes, go
 				DEY						; target=player
-				TXA						; offset
+				TXA						; projectile offset
 				BNE	chk_collision				; projectile not player, go
 
 next_target:									; target=asteroid
@@ -945,7 +945,7 @@ chk_collision:									; target object
 				LDA	P1RAM,Y
 				BEQ	next_target				; not active, exit
 				BMI	next_target				; exploding, exit
-				STA	byte_B					; tmp status
+				STA	byte_B					; tmp target status
 				LDA	asteroid_PLh,Y				; target PLh
 				SEC
 				SBC	ship_PLh,X				; - projectile PLh
@@ -982,28 +982,28 @@ loc_6A34:									; target PLv
 				STA	byte_9
 
 loc_6A55:
-				LDA	#$2A ; '*'
+				LDA	#42
+				LSR	byte_B					; target status
+				BCS	loc_6A63				; player or small saucer, go
+				LDA	#72
 				LSR	byte_B
-				BCS	loc_6A63
-				LDA	#$48 ; 'H'
-				LSR	byte_B
-				BCS	loc_6A63
-				LDA	#$84 ; '„'
+				BCS	loc_6A63				; large	saucer,	medium asteroid, go
+				LDA	#132
 
-loc_6A63:									; projectile=player?
+loc_6A63:
 				CPX	#1
-				BCS	loc_6A69				; no, skip
-				ADC	#$1C
+				BCS	loc_6A69				; projectile=saucer/shot, go
+				ADC	#28					; projectile=player
 
-loc_6A69:
+loc_6A69:									; projectile=shot, go
 				BNE	loc_6A77
-				ADC	#$12
+				ADC	#18
 				LDX	saucer_Sts
 				DEX
-				BEQ	loc_6A75
-				ADC	#$12
+				BEQ	loc_6A75				; projectile=small saucer, go
+				ADC	#18
 
-loc_6A75:									; saucer
+loc_6A75:									; restore offset=saucer
 				LDX	#1
 
 loc_6A77:
@@ -1118,48 +1118,49 @@ is_svec:									; BBBB SmXX
 				BNE	loc_6AFC				; always
 ; End of function copy_vector_list_to_avgram
 
+; X=projectile offset
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
 handle_object_hit:
-				CPX	#1
-				BNE	loc_6B1B
-				CPY	#$1B					; player hit?
-				BNE	loc_6B29				; no, skip
-				LDX	#0
-				LDY	#$1C					; saucer
+				CPX	#1					; projectile=saucer?
+				BNE	loc_6B1B				; no, skip
+				CPY	#$1B					; target=player?
+				BNE	update_projectile_status		; no, skip
+				LDX	#0					; for saucer hits player...
+				LDY	#$1C					; ... player hits saucer
 
-loc_6B1B:
+loc_6B1B:									; projectile
 				TXA
-				BNE	loc_6B3C
-				LDA	#129
+				BNE	update_shot_status			; must be a shot, go
+				LDA	#129					; init spawn timer
 				STA	shipSpawnTimer
 				LDX	curPlayer
 				DEC	numShipsP1,X				; dec number of	ships
-				LDX	#0					; offset to player ship
+				LDX	#0					; restore projectile=player
 
-loc_6B29:									; flag object exploding
+update_projectile_status:							; flag object exploding
 				LDA	#$A0 ; ' '
 				STA	ship_Sts,X
 				LDA	#0
 				STA	ship_Vh,X
 				STA	ship_Vv,X				; zero object velocity
-				CPY	#$1B					; asteroid?
-				BCC	loc_6B47				; yes, go
-				BCS	handle_saucer_hit			; no (saucer), go
+				CPY	#$1B					; target=asteroid?
+				BCC	jsr_asteroid_hit			; yes, go
+				BCS	handle_saucer_hit			; target=saucer, go
 
-loc_6B3C:
+update_shot_status:
 				LDA	#0
-				STA	ship_Sts,X				; flag object inactive
-				CPY	#$1B					; player?
-				BEQ	ship_hit_asteroid			; yes, go
+				STA	ship_Sts,X				; flag shot inactive
+				CPY	#$1B					; target=player?
+				BEQ	handle_player_hit			; yes, go
 				BCS	handle_saucer_hit			; no (saucer), go
 
-loc_6B47:
+jsr_asteroid_hit:
 				JSR	handle_asteroid_hit
 
-explode_asteroid:								; (orginal) asteroid status
+explode_object:									; object status
 				LDA	P1RAM,Y
 				AND	#3
 				EOR	#2
@@ -1172,24 +1173,24 @@ explode_asteroid:								; (orginal) asteroid status
 				STA	P1RAM,Y					; store
 				LDA	#0
 				STA	asteroid_Vh,Y
-				STA	asteroid_Vv,Y				; zero asteroid	velocity
+				STA	asteroid_Vv,Y				; zero object velocity
 				RTS
 ; ---------------------------------------------------------------------------
 
-ship_hit_asteroid:								; save object index
+handle_player_hit:								; save object index
 				TXA
 				LDX	curPlayer
 				DEC	numShipsP1,X				; lose a ship
 				TAX						; restore object index
 				LDA	#129					; init spawn timer
 				STA	shipSpawnTimer
-				BNE	explode_asteroid			; always
+				BNE	explode_object				; always
 
 handle_saucer_hit:
 				LDA	starting_saucerCountdownTimer
 				STA	saucerCountdownTimer
 				LDA	numPlayers				; real game?
-				BEQ	explode_asteroid			; no, go
+				BEQ	explode_object				; no, go
 				STX	byte_D					; save object index
 				LDX	curPlayer_x2
 				LDA	saucer_Sts
@@ -1201,7 +1202,7 @@ handle_saucer_hit:
 loc_6B8B:
 				JSR	add_A_to_score
 				LDX	byte_D					; restore object index
-				JMP	explode_asteroid
+				JMP	explode_object
 ; End of function handle_object_hit
 
 
@@ -1444,7 +1445,7 @@ new_shot_fired:									; offset to ship/saucer
 				STA	ship_Sts,Y				; init shot timer
 				LDA	direction,X				; ship/saucer
 				JSR	get_thrust_cos
-				LDX	byte_D					; was byte_2FA
+				LDX	byte_D
 				CMP	#$80 ; '€'                              ; down?
 				ROR	A
 				STA	byte_9
@@ -1452,14 +1453,14 @@ new_shot_fired:									; offset to ship/saucer
 				ADC	ship_Vh,X				; add Vh ship/saucer
 				BMI	loc_6D1E
 				CMP	#112					; less than 112?
-				BCC	loc_6D24				; no, skip
-				LDA	#111					; min =	111
-				BNE	loc_6D24
+				BCC	loc_6D24				; yes, skip
+				LDA	#111					; max =	111
+				BNE	loc_6D24				; (always)
 
-loc_6D1E:									; more than 145?
-				CMP	#145
-				BCS	loc_6D24				; no, skip
-				LDA	#145					; max =	145
+loc_6D1E:									; less than -111?
+				CMP	#-111
+				BCS	loc_6D24				; yes, skip
+				LDA	#-111					; min =	-111
 
 loc_6D24:									; update shot Vh
 				STA	ship_Vh,Y
@@ -1473,14 +1474,14 @@ loc_6D24:									; update shot Vh
 				ADC	ship_Vv,X
 				BMI	loc_6D41
 				CMP	#112					; less than 112?
-				BCC	loc_6D47				; no, skip
-				LDA	#111					; min =	111
+				BCC	loc_6D47				; yes, skip
+				LDA	#111					; max =	111
 				BNE	loc_6D47
 
-loc_6D41:									; more than 145?
-				CMP	#145
+loc_6D41:									; less than -111?
+				CMP	#-111
 				BCS	loc_6D47				; no, skip
-				LDA	#145					; max =	145
+				LDA	#-111					; min =	-111
 
 loc_6D47:									; update shot Vv
 				STA	ship_Vv,Y
@@ -3050,7 +3051,7 @@ loc_7605:									; update asteroid status
 				CMP	#4					; player shot?
 				BCC	handle_asteroid_split			; no, skip score
 
-add_asteroid_score:								; score	for this asteroid
+add_asteroid_score:								; score	for this asteroid size
 				LDA	asteroid_score_tbl,X
 				LDX	curPlayer_x2				; offset to score for player
 				CLC

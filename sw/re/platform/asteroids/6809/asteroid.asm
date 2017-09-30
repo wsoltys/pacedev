@@ -557,8 +557,8 @@ handle_object_hit:
         bne     update_shot_status											; must be a shot, go
         lda     #129																		; init spawn timer
         sta     shipSpawnTimer
-        ldx			#dp_base+numShipsP1
         ldb     *curPlayer
+        ldx			#dp_base+numShipsP1
         dec     b,x                            					; dec number of ships
         ldx     #0                                      ; restore projectile=player
 update_projectile_status:        
@@ -596,8 +596,8 @@ explode_object:
         rts
 
 handle_player_hit:                                                              
-				ldu			#dp_base+numShipsP1
         ldb     *curPlayer
+				ldu			#dp_base+numShipsP1
         dec     b,u                            					; lose a ship
         lda     #129                                    ; init spawn timer
         sta     shipSpawnTimer
@@ -682,8 +682,8 @@ handle_new_saucer:
         ldb     #2                                      ; large saucer
         lda     starting_saucerCountdownTimer
         bmi     8$
-        ldy     #dp_base+p1ScoreThousands
         lda     *curPlayer_x2                           
+        ldy     #dp_base+p1ScoreThousands
         lda			a,y																			; p1/p2 score
         cmpa    #0x30                             			; score over 30,000?
         bcc     7$                                			; yes, skip (always small saucer)
@@ -755,8 +755,8 @@ handle_small_saucer:
         jsr     loc_76F0
         sta     *saucerShotDirection
         jsr     update_prng
-        ldx     #dp_base+p1ScoreThousands
         ldb     *curPlayer_x2
+        ldx     #dp_base+p1ScoreThousands
         ldb			b,x
         cmpb    #0x35                              			; score over 35,000?
         ldb     #0
@@ -790,9 +790,10 @@ handle_fire:
 				beq     locret_6CFC  														; no, exit
 				asl     FireSwitch				     									; fire button to C
 				ror     *btn_edge_debounce			     						; shift into bit 7
-;				BIT     *btn_edge_debounce			     						; test
-				BPL     locret_6CFC															; b7=0, not pressed, exit
-				BVS     locret_6CFC															; b6=1, was pressed, exit
+				lda     *btn_edge_debounce
+				anda    #0xC0                                   ; bits 7,6 only
+				cmpa    #0x80                                   ; bit 7=1,6=0?
+				bne     locret_6CFC															; no, exit
 				lda     shipSpawnTimer			     								; ship spawning?
 				bne     locret_6CFC															; yes, exit
 				ldx			#0																			; offset=player
@@ -810,10 +811,77 @@ find_free_shot_slot:
 locret_6CFC:
         rts
 
+; *** FIXME
+; this routine is completely fucked up
+; need to sort out how to emulate using x,y
+; as (1-byte) index registers together
+
 ; $6CFD
 ; X=offset player/saucer, Y=offset shot
 new_shot_fired:
 				stx			*byte_D																	; offset player/saucer
+				lda	    #18
+				sta	    ship_Sts,y				                      ; init shot timer
+				lda     dp_base+direction,x                     ; ship/saucer direction
+				jsr	    get_thrust_cos
+				cmpa	  #0x80                                   ; down?
+				rora
+				sta	    *byte_9
+				adda    ship_Vh,x				                        ; add Vh ship/saucer
+				bmi	    1$
+				cmpa    #112					                          ; less than 112?
+				bcs	    2$				                              ; yes, skip
+				lda	    #111					                          ; max =	111
+				bra	    2$
+1$:		  cmpa    #-111                                   ; less than -111?
+				bcc	    2$				                              ; yes, skip
+				lda	    #-111					                          ; min = -111
+2$:			sta	    ship_Vh,Y                               ; update shot Vh
+				lda     dp_base+direction,x				              ; ship/saucer direction
+				jsr	    get_thrust_sin
+				cmpa	  #0x80
+				rora
+				sta	    *byte_C
+				adda	  ship_Vv,x
+				bmi	    3$
+				cmpa	  #112					                          ; less than 112?
+				bcs	    4$				                              ; no, skip
+				lda	    #111					                          ; min =	111
+				bne	    4$
+3$:			cmpa	  #-111                                   ; less than -111?
+				bcc	    4$				                              ; no, skip
+				lda	    #-111					                          ; min = -111
+4$:			sta	    ship_Vv,Y                               ; update shot Vv
+				ldx	    #0
+				lda	    *byte_9
+				bpl	    5$
+				leax    -1,x
+5$:			stx	    *byte_8
+				ldx	    *byte_D
+				cmpa	  #0x80
+				rora
+				adda	  *byte_9
+				adda	  ship_PLh,X				; ship/saucer Ph
+				sta	    ship_PLh,Y				; update shot Ph
+				lda	    *byte_8
+				adca	  ship_PHh,X				; ship/saucer Ph
+				sta	    ship_PHh,Y				; update shot Ph
+				ldx	    #0
+				lda	    *byte_C
+				bpl	    6$
+				leax    -1,x
+6$:			stx	    *byte_B           ; *** FIXME
+				ldx	    *byte_D
+				cmpa	  #0x80
+				rora
+				adda	  *byte_C
+				adda	  ship_PLv,X				; ship/saucer Pv
+				sta	    ship_PLv,Y				; update shot Pv
+				lda	    *byte_B
+				adca	  ship_PHv,X				; ship/saucer Pv
+				sta	    ship_PHv,Y				; update shot Pv
+				lda	    #0x80
+				sta	    dp_base+timerPlayerFireSound,X
 				rts
 				
 ; $6D90
@@ -835,14 +903,14 @@ init_players:
 				incb
 1$:			stb			*numStartingShipsPerGame
 				lda			#0
-				ldb			#4																			; 4 flags, 4 timers, 4 score bytes
-2$:			ldx			#ship_Sts
-				sta			b,x
-				ldx			#shipShot_Sts
-				sta			b,x
-				ldx			#dp_base+byte_4F+2
-				sta			b,x
-				decb
+				ldx			#4																			; 4 flags, 4 timers, 4 score bytes
+2$:			sta			ship_Sts,x
+				sta			shipShot_Sts,x
+				tfr     x,d                                     ; B=X
+				ldu			#dp_base+byte_4F+2
+				sta			b,u
+				leax    -1,x
+				cmpx    #0
 				bpl			2$																			; loop until done
 				sta			currentNumberOfAsteroids
 				rts
@@ -1026,8 +1094,8 @@ loc_706F:
 				sta			ship_Sts
 				ldb			#0x3E
 				stb			*timerExplosionSound
-				ldx			#dp_base+numShipsP1
 				ldb			*curPlayer
+				ldx			#dp_base+numShipsP1
 				dec			b,x																			; dec number of	ships
 				lda			#129
 				sta			shipSpawnTimer
@@ -1330,7 +1398,7 @@ display_C_scores_ships:
 				lda			*fastTimer
 				anda		#0x10
 				beq			2$																			; not every frame
-1$:			lda			#dp_base+p1ScoreTens
+1$:			lda			#p1ScoreTens
 				ldb			#2																			; 2 bytes to display
 				sec																							; flag no zero padding
 				jsr			display_numeric													; display P1 score
@@ -1496,8 +1564,20 @@ display_saucer:
 
 ; $7384
 display_shot:
-				ldx			*byte_D
-				rts
+.ifndef PLATFORM_COCO3
+.else
+        ldy     *dvg_curr_addr_msb
+        ldb     #OP_SHOT
+        stb			,y+
+        clr			,y+
+        sty     *dvg_curr_addr_msb
+.endif
+				ldx			*byte_D                                 ; restore object offset
+				lda     *fastTimer
+				anda    #3                                      ; time to dec?
+				bne     1$                                      ; no, skip
+				dec     P1RAM,x
+1$:			rts
 
 ; $7397
 ; A=score, B=curPlayer_x2
@@ -1516,8 +1596,8 @@ add_A_to_score:
         bne     1$                                			; no, skip
         lda     #0xB0
         sta     *timerBonusShipSound
-        ldu			#dp_base+numShipsP1
         ldb     *curPlayer
+        ldu			#dp_base+numShipsP1
         inc     b,u                            					; extra ship!
 1$:     rts
 
@@ -1739,9 +1819,9 @@ display_numeric:
 				stb			*byte_16																; offset to last byte
 				adda		*byte_16																; buf +	#bytes-1
 				sta			*byte_15																; ptr current byte
-				ldx			dp_base
-				tfr			a,b
-				abx																							; X=buffer
+				tfr     a,b
+				tfr     dp,a
+				tfr     d,x                                     ; X=buffer
 				puls		cc
 1$:			pshs		cc
 				lda			0,X																			; get next byte

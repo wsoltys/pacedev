@@ -1653,6 +1653,27 @@ dvg_saucer:
 				CLC
 				rts
 
+erase_shot:
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			*0x05										; pixel offset (0-7)
+				lda     #0x10                   ; arbitrary
+				ldy     *0xC2
+        clr     ,y				              ; hack
+				CLC
+				rts
+				
+dvg_shot:
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			*0x05										; pixel offset (0-7)
+				lda     #0x10                   ; arbitrary
+				ldy     *0xC2
+        ora     ,y
+        sta     ,y				              ; hack
+        CLC
+        rts
+        
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -1673,7 +1694,7 @@ erase_jmp_tbl:
 				.word		erase_asteroid
 				.word		erase_chr
 				.word		erase_saucer
-				.word		dvg_nop
+				.word		erase_shot
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1700,7 +1721,7 @@ dvg_jmp_tbl:
 				.word		dvg_asteroid
 				.word		dvg_ship
 				.word		dvg_saucer
-				.word		dvg_nop
+				.word		dvg_shot
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
