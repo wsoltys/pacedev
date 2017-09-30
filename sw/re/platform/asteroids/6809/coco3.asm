@@ -6,6 +6,13 @@
 
 .globl	dp_base
 .globl	asteroids
+.globl	freq3kHz
+.globl	halt
+.globl	hyperspaceSwitch
+.globl	FireSwitch
+.globl	diagStep
+.globl	slamSwitch
+.globl	selfTest
 .globl	leftCoinSwitch
 .globl	centerCoinSwitch
 .globl	rightCoinSwitch
@@ -1735,6 +1742,7 @@ render_loop:
 				bcc			render_loop
 ;
 ; now for some inputs...
+				clr			FireSwitch
 				clr			rotateLeftSwitch
 				clr			rotateRightSwitch
 				clr			thrustSwitch
@@ -1744,8 +1752,14 @@ render_loop:
 				sta			2,x
 				lda			,x
 				bita		#(1<<4)									; <1>?
-				bne			3$
+				bne			2$
 				stb			p1StartSwitch
+2$:			lda			#~(1<<2)								; "ROW = 2
+				sta			2,x
+				lda			,x
+				bita		#(1<<3)									; <Z>?
+				bne			3$
+				stb			FireSwitch
 3$:     lda     #~(1<<3)								; "ROW" = 3
 				sta			2,x
 				lda			,x

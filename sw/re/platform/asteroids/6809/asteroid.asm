@@ -185,6 +185,16 @@ numAsteroidsLeftBeforeSaucer:		.ds		1
 				.bndry	0x100
 P2RAM:													.ds			0x100
 
+; $2000
+																.ds	1
+freq3kHz::			     						.ds	1
+halt::			     								.ds	1
+hyperspaceSwitch::		     			.ds	1
+FireSwitch::		     						.ds	1
+diagStep::			     						.ds	1
+slamSwitch::		     						.ds	1
+selfTest::			     						.ds	1
+
 ; $2400
 leftCoinSwitch::		     				.ds 1
 centerCoinSwitch::		     			.ds 1
@@ -776,18 +786,36 @@ saucer_Vv_tbl:
 
 ; $6CD7
 handle_fire:
-				rts
-				
+				lda     *numPlayers				     									; game active?
+				beq     locret_6CFC  														; no, exit
+				asl     FireSwitch				     									; fire button to C
+				ror     *btn_edge_debounce			     						; shift into bit 7
+;				BIT     *btn_edge_debounce			     						; test
+				BPL     locret_6CFC															; b7=0, not pressed, exit
+				BVS     locret_6CFC															; b6=1, was pressed, exit
+				lda     shipSpawnTimer			     								; ship spawning?
+				bne     locret_6CFC															; yes, exit
+				ldx			#0																			; offset=player
+				ldy     #3					     												; offset shot0 timer - 1
+				sty     *byte_E
+				ldy     #7					     												; offset shot3 timer
+
 ; $6CF2
 find_free_shot_slot:                                                            
-;        lda     ship_Sts,Y															; get shot timer
-;        beq     new_shot_fired                          ; not active, go
-;        dey                                             ; next shot timer
-;        cpy     byte_E                                  ; done all shot timers?
-;        bne     find_free_shot_slot                     ; no, loop
+        lda     ship_Sts,Y															; get shot timer
+        beq     new_shot_fired                          ; not active, go
+        leay		-1,y                                    ; next shot timer
+        cmpy    *byte_E                                 ; done all shot timers?
+        bne     find_free_shot_slot                     ; no, loop
 locret_6CFC:
         rts
 
+; $6CFD
+; X=offset player/saucer, Y=offset shot
+new_shot_fired:
+				stx			*byte_D																	; offset player/saucer
+				rts
+				
 ; $6D90
 handle_high_score_entry:
 				lda			#0xFF																		; *** remove me
@@ -807,13 +835,14 @@ init_players:
 				incb
 1$:			stb			*numStartingShipsPerGame
 				lda			#0
-				ldx			#4																			; 4 flags, 4 timers, 4 score bytes
-2$:			sta			ship_Sts,x
-				sta			shipShot_Sts,x													; init timer
-				; *** FIXME NOW
-				sta			byte_4F+2,x															; zero player score
-				leax		-1,x																		; next byte
-				cmpx		#0
+				ldb			#4																			; 4 flags, 4 timers, 4 score bytes
+2$:			ldx			#ship_Sts
+				sta			b,x
+				ldx			#shipShot_Sts
+				sta			b,x
+				ldx			#dp_base+byte_4F+2
+				sta			b,x
+				decb
 				bpl			2$																			; loop until done
 				sta			currentNumberOfAsteroids
 				rts
