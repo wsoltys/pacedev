@@ -1653,13 +1653,15 @@ dvg_saucer:
 				CLC
 				rts
 
+shot_bmp:
+				.byte		0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
+				
 erase_shot:
 				leay		2,y
 				sty			*0x0B										; update dvgram address
 				lda			*0x05										; pixel offset (0-7)
-				lda     #0x10                   ; arbitrary
 				ldy     *0xC2
-        clr     ,y				              ; hack
+        clr     ,y
 				CLC
 				rts
 				
@@ -1667,7 +1669,8 @@ dvg_shot:
 				leay		2,y
 				sty			*0x0B										; update dvgram address
 				lda			*0x05										; pixel offset (0-7)
-				lda     #0x10                   ; arbitrary
+				ldu			#shot_bmp
+				lda			a,u
 				ldy     *0xC2
         ora     ,y
         sta     ,y				              ; hack

@@ -43,8 +43,8 @@ byte_9                          .equ		0x09
 byte_A                          .equ		0x0A
 byte_B                          .equ		0x0B
 byte_C                          .equ		0x0C
-byte_D                          .equ		0x80            ; need 2 bytes (STX)
-byte_E                          .equ		0x82            ; need 2 bytes (STX)
+byte_D                          .equ		0x9D            ; need 2 bytes (STX)
+byte_E                          .equ		0x8E            ; need 2 bytes (STX)
 byte_F                          .equ		0x0F
 initial_offset                  .equ		0x10
 byte_15                         .equ		0x15
@@ -811,11 +811,6 @@ find_free_shot_slot:
 locret_6CFC:
         rts
 
-; *** FIXME
-; this routine is completely fucked up
-; need to sort out how to emulate using x,y
-; as (1-byte) index registers together
-
 ; $6CFD
 ; X=offset player/saucer, Y=offset shot
 new_shot_fired:
@@ -824,8 +819,7 @@ new_shot_fired:
 				sta	    ship_Sts,y				                      ; init shot timer
 				lda     dp_base+direction,x                     ; ship/saucer direction
 				jsr	    get_thrust_cos
-				cmpa	  #0x80                                   ; down?
-				rora
+				asra
 				sta	    *byte_9
 				adda    ship_Vh,x				                        ; add Vh ship/saucer
 				bmi	    1$
@@ -839,8 +833,7 @@ new_shot_fired:
 2$:			sta	    ship_Vh,Y                               ; update shot Vh
 				lda     dp_base+direction,x				              ; ship/saucer direction
 				jsr	    get_thrust_sin
-				cmpa	  #0x80
-				rora
+				asra
 				sta	    *byte_C
 				adda	  ship_Vv,x
 				bmi	    3$
@@ -858,8 +851,7 @@ new_shot_fired:
 				leax    -1,x
 5$:			stx	    *byte_8
 				ldx	    *byte_D
-				cmpa	  #0x80
-				rora
+				asra
 				adda	  *byte_9
 				adda	  ship_PLh,X				; ship/saucer Ph
 				sta	    ship_PLh,Y				; update shot Ph
@@ -870,10 +862,10 @@ new_shot_fired:
 				lda	    *byte_C
 				bpl	    6$
 				leax    -1,x
-6$:			stx	    *byte_B           ; *** FIXME
+6$:			tfr			x,d
+				stb	    *byte_B
 				ldx	    *byte_D
-				cmpa	  #0x80
-				rora
+				asra
 				adda	  *byte_C
 				adda	  ship_PLv,X				; ship/saucer Pv
 				sta	    ship_PLv,Y				; update shot Pv
@@ -1941,8 +1933,8 @@ get_thrust_sin:
 .ifndef PLATFORM_COCO3
         LDA     DVGROM+$7B9,X                           ; sine table
 .else
-				ldx			#sine_tbl
-				lda			a,x
+				ldu			#sine_tbl
+				lda			a,u
 .endif                                
         rts
 
