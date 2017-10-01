@@ -1444,10 +1444,10 @@ new_shot_fired:									; offset to ship/saucer
 				LDA	#18
 				STA	ship_Sts,Y				; init shot timer
 				LDA	direction,X				; ship/saucer
-				JSR	get_thrust_cos
+				JSR	cos_A					; h component
 				LDX	byte_D
-				CMP	#$80 ; '€'                              ; down?
-				ROR	A
+				CMP	#$80 ; '€'
+				ROR	A					; arithmetic shift right
 				STA	byte_9
 				CLC
 				ADC	ship_Vh,X				; add Vh ship/saucer
@@ -1465,10 +1465,10 @@ loc_6D1E:									; less than -111?
 loc_6D24:									; update shot Vh
 				STA	ship_Vh,Y
 				LDA	direction,X				; ship/saucer
-				JSR	get_thrust_sin
+				JSR	sin_A					; v component
 				LDX	byte_D
 				CMP	#$80 ; '€'
-				ROR	A
+				ROR	A					; arithmetic shift right
 				STA	byte_C
 				CLC
 				ADC	ship_Vv,X
@@ -1494,7 +1494,7 @@ loc_6D51:
 				STX	byte_8
 				LDX	byte_D
 				CMP	#$80 ; '€'
-				ROR	A
+				ROR	A					; arithmetic shift right
 				CLC
 				ADC	byte_9
 				CLC
@@ -1512,7 +1512,7 @@ loc_6D71:
 				STX	byte_B
 				LDX	byte_D
 				CMP	#$80 ; '€'
-				ROR	A
+				ROR	A					; arithmetic shift right
 				CLC
 				ADC	byte_C
 				CLC
@@ -2077,7 +2077,7 @@ check_thrust:
 				STA	$3C03					; sound	(ship thrust)
 				LDY	#0
 				LDA	direction
-				JSR	get_thrust_cos
+				JSR	cos_A
 				BPL	loc_70B4
 				DEY
 
@@ -2093,7 +2093,7 @@ loc_70B4:
 				STX	ship_thrust_dH
 				LDY	#0
 				LDA	direction
-				JSR	get_thrust_sin
+				JSR	sin_A
 				BPL	loc_70CF
 				DEY
 
@@ -3420,21 +3420,21 @@ tap:				.BYTE 2
 ; =============== S U B	R O U T	I N E =======================================
 
 
-get_thrust_cos:
+cos_A:
 				CLC
 				ADC	#64					; (0-127)=up, (128-255)=down
-; End of function get_thrust_cos
+; End of function cos_A
 
 
 ; =============== S U B	R O U T	I N E =======================================
 
 
-get_thrust_sin:
+sin_A:
 				BPL	sub_77DF				; up? go
 				AND	#$7F ; ''                              ; mask off up/down
 				JSR	sub_77DF
 				JMP	negate_A
-; End of function get_thrust_sin
+; End of function sin_A
 
 
 ; =============== S U B	R O U T	I N E =======================================

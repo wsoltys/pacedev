@@ -1442,10 +1442,10 @@ ROM:6CFD 86 0D					     STX     byte_D
 ROM:6CFF A9 12					     LDA     #18
 ROM:6D01 99 1B 02				     STA     ship_Sts,Y				     ; init shot timer
 ROM:6D04 B5 61					     LDA     direction,X			     ; ship/saucer
-ROM:6D06 20 D2 77				     JSR     get_thrust_cos
+ROM:6D06 20 D2 77				     JSR     cos_A				     ; h component
 ROM:6D09 A6 0D					     LDX     byte_D
-ROM:6D0B C9 80					     CMP     #$80 ; '€'                              ; down?
-ROM:6D0D 6A					     ROR     A
+ROM:6D0B C9 80					     CMP     #$80 ; '€'
+ROM:6D0D 6A					     ROR     A					     ; arithmetic shift	right
 ROM:6D0E 85 09					     STA     byte_9
 ROM:6D10 18					     CLC
 ROM:6D11 7D 3E 02				     ADC     ship_Vh,X				     ; add Vh ship/saucer
@@ -1463,10 +1463,10 @@ ROM:6D24
 ROM:6D24	     loc_6D24:									     ; update shot Vh
 ROM:6D24 99 3E 02				     STA     ship_Vh,Y
 ROM:6D27 B5 61					     LDA     direction,X			     ; ship/saucer
-ROM:6D29 20 D5 77				     JSR     get_thrust_sin
+ROM:6D29 20 D5 77				     JSR     sin_A				     ; v component
 ROM:6D2C A6 0D					     LDX     byte_D
 ROM:6D2E C9 80					     CMP     #$80 ; '€'
-ROM:6D30 6A					     ROR     A
+ROM:6D30 6A					     ROR     A					     ; arithmetic shift	right
 ROM:6D31 85 0C					     STA     byte_C
 ROM:6D33 18					     CLC
 ROM:6D34 7D 61 02				     ADC     ship_Vv,X
@@ -1492,7 +1492,7 @@ ROM:6D51	     loc_6D51:
 ROM:6D51 86 08					     STX     byte_8
 ROM:6D53 A6 0D					     LDX     byte_D
 ROM:6D55 C9 80					     CMP     #$80 ; '€'
-ROM:6D57 6A					     ROR     A
+ROM:6D57 6A					     ROR     A					     ; arithmetic shift	right
 ROM:6D58 18					     CLC
 ROM:6D59 65 09					     ADC     byte_9
 ROM:6D5B 18					     CLC
@@ -1510,7 +1510,7 @@ ROM:6D71	     loc_6D71:
 ROM:6D71 86 0B					     STX     byte_B
 ROM:6D73 A6 0D					     LDX     byte_D
 ROM:6D75 C9 80					     CMP     #$80 ; '€'
-ROM:6D77 6A					     ROR     A
+ROM:6D77 6A					     ROR     A					     ; arithmetic shift	right
 ROM:6D78 18					     CLC
 ROM:6D79 65 0C					     ADC     byte_C
 ROM:6D7B 18					     CLC
@@ -2075,7 +2075,7 @@ ROM:70A5 A9 80					     LDA     #$80 ; '€'
 ROM:70A7 8D 03 3C				     STA     $3C03				     ; sound (ship thrust)
 ROM:70AA A0 00					     LDY     #0
 ROM:70AC A5 61					     LDA     direction
-ROM:70AE 20 D2 77				     JSR     get_thrust_cos
+ROM:70AE 20 D2 77				     JSR     cos_A
 ROM:70B1 10 01					     BPL     loc_70B4
 ROM:70B3 88					     DEY
 ROM:70B4
@@ -2091,7 +2091,7 @@ ROM:70C0 8D 3E 02				     STA     ship_Vh
 ROM:70C3 86 64					     STX     ship_thrust_dH
 ROM:70C5 A0 00					     LDY     #0
 ROM:70C7 A5 61					     LDA     direction
-ROM:70C9 20 D5 77				     JSR     get_thrust_sin
+ROM:70C9 20 D5 77				     JSR     sin_A
 ROM:70CC 10 01					     BPL     loc_70CF
 ROM:70CE 88					     DEY
 ROM:70CF
@@ -3418,21 +3418,21 @@ ROM:77D2
 ROM:77D2	     ; =============== S U B R O U T I N E =======================================
 ROM:77D2
 ROM:77D2
-ROM:77D2	     get_thrust_cos:
+ROM:77D2	     cos_A:
 ROM:77D2 18					     CLC
 ROM:77D3 69 40					     ADC     #64				     ; (0-127)=up, (128-255)=down
-ROM:77D3	     ; End of function get_thrust_cos
+ROM:77D3	     ; End of function cos_A
 ROM:77D3
 ROM:77D5
 ROM:77D5	     ; =============== S U B R O U T I N E =======================================
 ROM:77D5
 ROM:77D5
-ROM:77D5	     get_thrust_sin:
+ROM:77D5	     sin_A:
 ROM:77D5 10 08					     BPL     sub_77DF				     ; up? go
 ROM:77D7 29 7F					     AND     #$7F ; ''                              ; mask off up/down
 ROM:77D9 20 DF 77				     JSR     sub_77DF
 ROM:77DC 4C 08 77				     JMP     negate_A
-ROM:77DC	     ; End of function get_thrust_sin
+ROM:77DC	     ; End of function sin_A
 ROM:77DC
 ROM:77DF
 ROM:77DF	     ; =============== S U B R O U T I N E =======================================
