@@ -818,7 +818,7 @@ new_shot_fired:
 				lda	    #18
 				sta	    ship_Sts,y				                      ; init shot timer
 				lda     dp_base+direction,x                     ; ship/saucer direction
-				jsr	    get_thrust_cos
+				jsr	    cos_A																		; h component
 				asra
 				sta	    *byte_9
 				adda    ship_Vh,x				                        ; add Vh ship/saucer
@@ -832,10 +832,10 @@ new_shot_fired:
 				lda	    #-111					                          ; min = -111
 2$:			sta	    ship_Vh,Y                               ; update shot Vh
 				lda     dp_base+direction,x				              ; ship/saucer direction
-				jsr	    get_thrust_sin
+				jsr	    sin_A																		; v component
 				asra
 				sta	    *byte_C
-				adda	  ship_Vv,x
+				adda	  ship_Vv,x																; add Vv ship/saucer
 				bmi	    3$
 				cmpa	  #112					                          ; less than 112?
 				bcs	    4$				                              ; no, skip
@@ -1125,7 +1125,7 @@ check_thrust:
 				;sta			$3C03																		; sound	(ship thrust)
 				ldb			#0																			; ??=0
 				lda			*direction
-				jsr			get_thrust_cos
+				jsr			cos_A
 				bpl			1$
 				decb 																						; ??=-1
 1$:			asla
@@ -1137,7 +1137,7 @@ check_thrust:
 				stb			*ship_thrust_dH
 				ldb			#0
 				lda			*direction
-				jsr			get_thrust_sin
+				jsr			sin_A
 				bpl			2$
 				decb
 2$:			asla
@@ -1916,10 +1916,10 @@ update_prng:
 tap:		.byte		0x02
 
 ; $77D2
-get_thrust_cos:
+cos_A:
         adda    #64                                     ; (0-127)=up, (128-255)=down
 
-get_thrust_sin:
+sin_A:
         bpl     1$                                			; up? go
         anda    #0x7F                              			; mask off up/down
         jsr     1$
