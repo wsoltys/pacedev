@@ -911,6 +911,7 @@ init_players:
 init_sound:
 				rts
 
+; $6F3E
 display_extra_ships:
         beq     9$
         stb     *byte_8

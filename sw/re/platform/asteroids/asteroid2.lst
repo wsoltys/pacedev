@@ -1342,7 +1342,7 @@ ROM:6C65
 ROM:6C65	     handle_small_saucer:
 ROM:6C65 AD 3F 02				     LDA     saucer_Vh
 ROM:6C68 C9 80					     CMP     #$80 ; '€'
-ROM:6C6A 6A					     ROR     A
+ROM:6C6A 6A					     ROR     A					     ; arithmetic shift	right
 ROM:6C6B 85 0C					     STA     byte_C
 ROM:6C6D AD CA 02				     LDA     ship_PLh
 ROM:6C70 38					     SEC
@@ -1359,7 +1359,7 @@ ROM:6C83 E5 0C					     SBC     byte_C
 ROM:6C85 AA					     TAX
 ROM:6C86 AD 62 02				     LDA     saucer_Vv
 ROM:6C89 C9 80					     CMP     #$80 ; '€'
-ROM:6C8B 6A					     ROR     A
+ROM:6C8B 6A					     ROR     A					     ; arithmetic shift	right
 ROM:6C8C 85 0C					     STA     byte_C
 ROM:6C8E AD ED 02				     LDA     ship_PLv
 ROM:6C91 38					     SEC

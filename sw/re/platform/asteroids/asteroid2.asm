@@ -1344,7 +1344,7 @@ loc_6C54:
 handle_small_saucer:
 				LDA	saucer_Vh
 				CMP	#$80 ; '€'
-				ROR	A
+				ROR	A					; arithmetic shift right
 				STA	byte_C
 				LDA	ship_PLh
 				SEC
@@ -1361,7 +1361,7 @@ handle_small_saucer:
 				TAX
 				LDA	saucer_Vv
 				CMP	#$80 ; '€'
-				ROR	A
+				ROR	A					; arithmetic shift right
 				STA	byte_C
 				LDA	ship_PLv
 				SEC
