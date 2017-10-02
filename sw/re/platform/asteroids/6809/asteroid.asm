@@ -1810,13 +1810,13 @@ display_numeric:
 				decb																						; #bytes-1
 				stb			*byte_16																; offset to last byte
 				adda		*byte_16																; buf +	#bytes-1
-				sta			*byte_15																; ptr current byte
+				;sta			*byte_15																; ptr current byte
 				tfr     a,b
 				tfr     dp,a
-				tfr     d,x                                     ; X=buffer
+				tfr     d,u                                     ; U=buffer
 				puls		cc
 1$:			pshs		cc
-				lda			0,X																			; get next byte
+				lda			0,u																			; get next byte
 				lsra
 				lsra
 				lsra
@@ -1826,9 +1826,9 @@ display_numeric:
 				lda			*byte_16																; bytes	remaining?
 				bne			2$																			; no, skip
 				CLC																							; flag padding
-2$:			lda			0,X																			; get byte (low	nibble)
+2$:			lda			0,u																			; get byte (low	nibble)
 				jsr			display_digit
-				dec			*byte_15																; ptr current byte
+				leau		-1,u																		; ptr current byte
 				dec			*byte_16																; done?
 				bpl			1$																			; no, loop
 				rts
