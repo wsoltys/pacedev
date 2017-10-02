@@ -966,7 +966,7 @@ handle_object_entry:
         bmi     6$
         cmpx    #0x1B                                   ; playerFlag?
         beq     4$                                			; yes, go
-        bcs     5$
+        bcc     5$
         dec     currentNumberOfAsteroids
         bne     3$
         lda     #0x7F
