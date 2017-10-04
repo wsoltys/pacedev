@@ -852,7 +852,7 @@ toggle_player:									; player alive?
 				LDX	numPlayers
 				LDA	numShipsP1
 				ORA	numShipsP2				; either play have ships left?
-				BEQ	loc_69CF				; no, exit
+				BEQ	end_game				; no, exit
 				JSR	zero_saucer
 				DEX						; 1 player game?
 				BEQ	loc_69CD				; yes, exit
@@ -877,7 +877,7 @@ loc_69CD:
 				RTS
 ; ---------------------------------------------------------------------------
 
-loc_69CF:
+end_game:
 				STX	numPlayersPreviousGame
 				LDA	#$FF
 				STA	numPlayers				; invalidate
@@ -1700,12 +1700,12 @@ handle_hyperspace:
 				AND	#$1F
 				CMP	#29
 				BCC	loc_6EA2
-				LDA	#28
+				LDA	#28					; max=28
 
 loc_6EA2:
 				CMP	#3
 				BCS	loc_6EA8
-				LDA	#3
+				LDA	#3					; min=3
 
 loc_6EA8:									; 3-28
 				STA	ship_PHh
@@ -1729,12 +1729,12 @@ loc_6EAD:									; random vertical position
 loc_6EC6:
 				CMP	#21
 				BCC	loc_6ECC
-				LDA	#20
+				LDA	#20					; max=20
 
 loc_6ECC:
 				CMP	#3
 				BCS	loc_6ED2
-				LDA	#3
+				LDA	#3					; min=3
 
 loc_6ED2:									; 3-20
 				STA	ship_PHv

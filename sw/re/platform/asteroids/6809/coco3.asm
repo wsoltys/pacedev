@@ -1914,13 +1914,20 @@ render_loop:
 				bcc			render_loop
 ;
 ; now for some inputs...
+        clr     hyperspaceSwitch
 				clr			FireSwitch
 				clr			rotateLeftSwitch
 				clr			rotateRightSwitch
 				clr			thrustSwitch
 				ldx			#KEYROW
 				ldb			#(1<<7)
-				lda			#~(1<<1)								; "ROW = 1
+				lda			#~(1<<0)								; "ROW = 0
+				sta			2,x
+				lda			,x
+				bita		#(1<<3)									; <X>?
+				bne			1$
+				stb			hyperspaceSwitch
+1$:			lda			#~(1<<1)								; "ROW = 1
 				sta			2,x
 				lda			,x
 				bita		#(1<<4)									; <1>?

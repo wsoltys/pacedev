@@ -407,6 +407,71 @@ display_push_start:
 				
 ; $6960
 handle_end_turn_or_game:
+        lda     *fastTimer
+        anda    #0x3F
+        bne     1$
+        lda     starting_ThumpCounter
+        cmpa    #8
+        beq     1$
+        dec     starting_ThumpCounter
+1$:     ldb     *curPlayer
+        ldx     #dp_base+numShipsP1
+        lda     b,x                                     ; any ships left?
+        bne     toggle_player                           ; yes, skip
+        lda     shipShot_Sts
+        ora     shipShot_Sts+1
+        ora     shipShot_Sts+2
+        ora     shipShot_Sts+3                          ; shot(s) still active?
+        bne     toggle_player                           ; yes, skip
+        ldb     #7                                      ; "GAME OVER"
+        jsr     PrintPackedMsg
+        lda     *numPlayers
+        cmpa    #2                                      ; 2 player game?
+        bcs     toggle_player                           ; no, skip
+        jsr     print_PLAYER_N                          ; display player
+
+toggle_player:
+        lda     ship_Sts                                ; player alive?
+        bne     1$                                      ; yes, skip
+        lda     shipSpawnTimer
+        cmpa    #0x80
+        bne     1$
+        lda     #16
+        sta     shipSpawnTimer
+        ldb     *numPlayers
+        lda     *numShipsP1
+        ora     *numShipsP2                             ; either play have ships left?
+        beq     end_game                                ; no, exit
+        jsr     zero_saucer
+        decb                                            ; 1 player game?
+        beq     1$                                      ; yes, exit
+        lda     #0x80
+        sta     *timerStartGame
+        ldb     *curPlayer
+        eorb    #1                                      ; toggler player
+        ldx     #dp_base+numShipsP1
+        lda     b,x                                     ; other player have any ships left?
+        beq     1$                                      ; no, exit
+        stb     *curPlayer                              ; update current player
+        lda     #4                                      ; RAMSEL
+        ; *** bank-switch player RAM
+        eora    *io3200ShadowRegister                    ; toggle
+        sta     *io3200ShadowRegister
+        ;sta     $3200                                   ; output
+        aslb                                            ; current player * 2
+        stb     *curPlayer_x2
+1$:     CLC
+        rts
+
+end_game:
+        stb     *numPlayersPreviousGame
+        lda     #0xFF
+        sta     *numPlayers                             ; invalidate
+        jsr     init_sound
+        lda     *io3200ShadowRegister
+        anda    #0xF8                                   ; RAMSEL=0, lamps OFF
+        ora     #3                                      ; lamps ON
+        sta     *io3200ShadowRegister
 				CLC
 				rts
 
@@ -853,25 +918,25 @@ new_shot_fired:
 				ldx	    *byte_D
 				asra
 				adda	  *byte_9
-				adda	  ship_PLh,X				; ship/saucer Ph
-				sta	    ship_PLh,Y				; update shot Ph
+				adda	  ship_PLh,X				                      ; ship/saucer Ph
+				sta	    ship_PLh,Y				                      ; update shot Ph
 				lda	    *byte_8
-				adca	  ship_PHh,X				; ship/saucer Ph
-				sta	    ship_PHh,Y				; update shot Ph
-				ldx	    #0
-				lda	    *byte_C
-				bpl	    6$
-				leax    -1,x
-6$:			tfr			x,d
-				stb	    *byte_B
-				ldx	    *byte_D
-				asra
-				adda	  *byte_C
-				adda	  ship_PLv,X				; ship/saucer Pv
-				sta	    ship_PLv,Y				; update shot Pv
-				lda	    *byte_B
-				adca	  ship_PHv,X				; ship/saucer Pv
-				sta	    ship_PHv,Y				; update shot Pv
+				adca	  ship_PHh,X				                      ; ship/saucer Ph
+				sta	    ship_PHh,Y				                      ; update shot Ph
+				ldx	    #0                                      
+				lda	    *byte_C                                 
+				bpl	    6$                                      
+				leax    -1,x                                    
+6$:			tfr			x,d                                     
+				stb	    *byte_B                                 
+				ldx	    *byte_D                                 
+				asra                                            
+				adda	  *byte_C                                 
+				adda	  ship_PLv,X				                      ; ship/saucer Pv
+				sta	    ship_PLv,Y				                      ; update shot Pv
+				lda	    *byte_B                                 
+				adca	  ship_PHv,X				                      ; ship/saucer Pv
+				sta	    ship_PHv,Y				                      ; update shot Pv
 				lda	    #0x80
 				sta	    dp_base+timerPlayerFireSound,X
 				rts
@@ -883,7 +948,52 @@ handle_high_score_entry:
 
 ; $6E74
 handle_hyperspace:
-				rts
+        lda     *numPlayers
+        beq     9$                                      ; not a real game, exit
+        lda     ship_Sts
+        bmi     9$                                      ; exploding, exit
+        lda     shipSpawnTimer
+        bne     9$
+        lda     hyperspaceSwitch                        ; button pressed?
+        bpl     9$                                      ; no, exit
+        lda     #0                                      ; flag hyperspace?
+        sta     ship_Sts
+        sta     ship_Vh
+        sta     ship_Vv                                 ; zero ship velocity
+        lda     #48
+        sta     shipSpawnTimer
+        jsr     update_prng                             ; random horizontal position
+        anda    #0x1F
+        cmpa    #29
+        bcs     1$
+        lda     #28                                     ; max=28
+1$:     cmpa    #3
+        bcc     2$
+        lda     #3                                      ; min=3
+2$:     sta     ship_PHh                                ; 3-28
+        ldb     #5
+3$:     jsr     update_prng                             ; random vertical position
+        decb
+        bne     3$
+        anda    #0x1F
+        incb                                            ; =1 (successful)
+        cmpa    #24
+        bcs     4$
+        anda    #7
+        asla
+        adca    #4
+        cmpa    currentNumberOfAsteroids
+        bcs     4$
+        ldb     #0x80                                   ; flag unsuccessful (death)
+4$:     cmpa    #21
+        bcs     5$
+        lda     #20                                     ; max=20
+5$:     cmpa    #3
+        bcc     6$
+        lda     #3                                      ; min=3
+6$:     sta     ship_PHv                                ; 3-20
+        stb     *hyperspaceFlag
+9$:		  rts
 																
 ; $6ED8
 init_players:

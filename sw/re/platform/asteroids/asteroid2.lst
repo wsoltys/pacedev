@@ -850,7 +850,7 @@ ROM:69A0 8D FA 02				     STA     shipSpawnTimer
 ROM:69A3 A6 1C					     LDX     numPlayers
 ROM:69A5 A5 57					     LDA     numShipsP1
 ROM:69A7 05 58					     ORA     numShipsP2				     ; either play have	ships left?
-ROM:69A9 F0 24					     BEQ     loc_69CF				     ; no, exit
+ROM:69A9 F0 24					     BEQ     end_game				     ; no, exit
 ROM:69AB 20 2D 70				     JSR     zero_saucer
 ROM:69AE CA					     DEX					     ; 1 player	game?
 ROM:69AF F0 1C					     BEQ     loc_69CD				     ; yes, exit
@@ -875,7 +875,7 @@ ROM:69CD 18					     CLC
 ROM:69CE 60					     RTS
 ROM:69CF	     ; ---------------------------------------------------------------------------
 ROM:69CF
-ROM:69CF	     loc_69CF:
+ROM:69CF	     end_game:
 ROM:69CF 86 1A					     STX     numPlayersPreviousGame
 ROM:69D1 A9 FF					     LDA     #$FF
 ROM:69D3 85 1C					     STA     numPlayers				     ; invalidate
@@ -1698,12 +1698,12 @@ ROM:6E97 20 B5 77				     JSR     update_prng			     ; random horizontal positio
 ROM:6E9A 29 1F					     AND     #$1F
 ROM:6E9C C9 1D					     CMP     #29
 ROM:6E9E 90 02					     BCC     loc_6EA2
-ROM:6EA0 A9 1C					     LDA     #28
+ROM:6EA0 A9 1C					     LDA     #28				     ; max=28
 ROM:6EA2
 ROM:6EA2	     loc_6EA2:
 ROM:6EA2 C9 03					     CMP     #3
 ROM:6EA4 B0 02					     BCS     loc_6EA8
-ROM:6EA6 A9 03					     LDA     #3
+ROM:6EA6 A9 03					     LDA     #3					     ; min=3
 ROM:6EA8
 ROM:6EA8	     loc_6EA8:									     ; 3-28
 ROM:6EA8 8D 84 02				     STA     ship_PHh
@@ -1727,12 +1727,12 @@ ROM:6EC6
 ROM:6EC6	     loc_6EC6:
 ROM:6EC6 C9 15					     CMP     #21
 ROM:6EC8 90 02					     BCC     loc_6ECC
-ROM:6ECA A9 14					     LDA     #20
+ROM:6ECA A9 14					     LDA     #20				     ; max=20
 ROM:6ECC
 ROM:6ECC	     loc_6ECC:
 ROM:6ECC C9 03					     CMP     #3
 ROM:6ECE B0 02					     BCS     loc_6ED2
-ROM:6ED0 A9 03					     LDA     #3
+ROM:6ED0 A9 03					     LDA     #3					     ; min=3
 ROM:6ED2
 ROM:6ED2	     loc_6ED2:									     ; 3-20
 ROM:6ED2 8D A7 02				     STA     ship_PHv
