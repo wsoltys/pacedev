@@ -1676,7 +1676,155 @@ dvg_shot:
         sta     ,y				              ; hack
         CLC
         rts
-        
+
+shrapnel_0:
+    .byte $%00010000, $%00010000
+    .byte $%00000010, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00001000
+    .byte $%00000100, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00010000, $%00010000
+    .byte $%00000000, $%01000000
+    .byte $%00000100, $%00010000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+
+shrapnel_1:
+    .byte $%00100000, $%00000000
+    .byte $%00000000, $%00001000
+    .byte $%00000010, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000100
+    .byte $%00000100, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00100000, $%00001000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%01000000
+    .byte $%00000100, $%00001000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+
+shrapnel_2:
+    .byte $%01000000, $%00001000
+    .byte $%00000000, $%00000000
+    .byte $%00000010, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000010
+    .byte $%00001000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%01000000, $%00001000
+    .byte $%00000000, $%01000000
+    .byte $%00000000, $%00000000
+    .byte $%00001000, $%00001000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+
+shrapnel_3:
+    .byte $%10000000, $%00000100
+    .byte $%00000000, $%00000000
+    .byte $%00000010, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000001
+    .byte $%00001000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%00000000
+    .byte $%10000000, $%00000100
+    .byte $%00000000, $%00000000
+    .byte $%00000000, $%01000000
+    .byte $%00000000, $%00000000
+    .byte $%00001000, $%00000100
+
+shrapnel_bmp_tbl:
+     		; 4 shrapnel patterns, some re-used
+    		.word shrapnel_0
+    		.word shrapnel_1
+    		.word shrapnel_2, shrapnel_2
+    		.word shrapnel_3, shrapnel_3
+
+erase_shrapnel:
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			#16
+				sta			*0xD4										; lines
+				ldy			*0xC2
+				ldd			#0
+1$:			std			,y
+				sta			2,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+        CLC
+        rts
+    
+dvg_shrapnel:
+				; the original uses 6 global scale factors from $B-$0
+				; and 4 patterns in this sequence
+				; $B:2,6 $C:0,4,6 $D,$E,$F,$0:0,2,4,6
+				; instead we'll just use global scale factor
+				; $B=0, $C=1, $D,$E=2, $F,$0=3
+        lda     *0x08                   ; global scale
+				ldu			#shrapnel_bmp_tbl
+				suba    #0x0B                   ; (0-5)
+				lsla                            ; word offset
+				ldu			a,u
+				leay		2,y
+				sty			*0x0B										; update dvgram address
+				lda			*0x05										; pixel offset (0-7)
+				lsla														; x2
+				adda		#>shift_tbl
+				ldb			#0x80
+				std			*0xD0										; offset
+				inca
+				std			*0xD2										; offset2
+				lda			#16
+				sta			*0xD4										; lines
+				ldy			*0xC2
+1$:			ldb			,u+											; sprite data byte 1
+				ldx			*0xD0										; offset
+				lda			b,x											; 1st half of byte 1
+				ora			,y
+				sta			,y
+				ldx			*0xD2										; offset2
+				lda			b,x											; 2nd half of byte 1
+				ldb			,u+											; sprite data byte 2
+				ldx			*0xD0										; offset
+				ora			b,x											; 2nd of byte 1, 1st of byte 2
+				ora			1,y
+				sta			1,y
+				ldx			*0xD2										; offset 2
+				lda			b,x											; 2nd of byte 2
+				ora			2,y
+				sta			2,y
+				leay		32,y
+				dec			*0xD4										; done all lines?
+				bne			1$											; no, loop
+				lda			*0x05										; pixel offset
+				adda		#6
+				bita		#0x08
+				beq			2$
+				anda		#0x07
+				ldy			*0xC2
+				leay		1,y
+				sty			*0xC2										; update CUR
+2$:			sta			*0x05
+        CLC
+        rts
+            
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -1698,7 +1846,7 @@ erase_jmp_tbl:
 				.word		erase_chr
 				.word		erase_saucer
 				.word		erase_shot
-				.word		dvg_nop
+				.word		erase_shrapnel
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1725,7 +1873,7 @@ dvg_jmp_tbl:
 				.word		dvg_ship
 				.word		dvg_saucer
 				.word		dvg_shot
-				.word		dvg_nop
+				.word		dvg_shrapnel
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
