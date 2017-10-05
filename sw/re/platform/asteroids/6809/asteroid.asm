@@ -849,10 +849,10 @@ handle_small_saucer:
         ldb     #0
         bcs     1$                                			; no, skip
         incb
-1$:     ldx			unk_6CCF
+1$:     ldx			#unk_6CCF
 				anda    b,x
         bpl     2$
-        ldx			unk_6CD1
+        ldx			#unk_6CD1
         ora     b,x
 2$:     adda    *saucerShotDirection
 
@@ -964,13 +964,137 @@ new_shot_fired:
 				
 ; $6D90
 handle_high_score_entry:
-        ; UNIMPLEMENTED
-				lda			#0xFF																		; *** remove me
+        lda     *placeP1HighScore
+        anda    *placeP2HighScore
+        bpl     high_score_entry
 				rts
 
 ; $6D97
 high_score_entry:
-        ; UNIMPLEMENTED
+        lda     *numPlayersPreviousGame
+        lsra
+        beq     2$
+        ldb     #1                                      ; "PLAYER"
+        jsr     PrintPackedMsg
+        lda     #2
+        ldb     *placeP2HighScore
+        bpl     1$
+        deca
+1$:     sta     *curPlayer
+        ldb     *fastTimer
+        andb    #0x10
+        bne     2$
+        jsr     display_digit_A
+2$:     lsr     *curPlayer
+        jsr     set_RAMSEL_for_player
+        ldb     #2                                      ; "YOUR SCORE IS ONE OF THE TEN BEST"
+        jsr     PrintPackedMsg
+        ldb     #3                                      ; "PLEASE ENTER YOUR INITIALS"
+        jsr     PrintPackedMsg
+        ldb     #4                                      ; "PUSH ROTATE TO SELECT LETTER"
+        jsr     PrintPackedMsg
+        ldb     #5                                      ; "PUSH HYPERSPACE WHEN LETTER IS CORRECT"
+        jsr     PrintPackedMsg
+        lda     #0x20
+        sta     *globalScale
+        lda     #100
+        ldb     #57
+        jsr     write_CURx4_cmd
+        lda     #0x70
+        ;jsr     set_scale_A_bright_0
+        ldb     *curPlayer
+        ldx     #dp_base+placeP1HighScore
+        ldb     b,x
+        stb     *byte_B
+        addb    *letterHighScoreEntry
+        stb     *byte_C
+        jsr     display_initial
+        ldb     *byte_B
+        incb
+        jsr     display_initial
+        ldb     *byte_B
+        incb
+        incb
+        jsr     display_initial
+        lda     hyperspaceSwitch                        ; read hyperspace button
+        rola                                            ; shift into C
+        rol     *btn_edge_debounce                      ; shift into bit0
+        lda     *btn_edge_debounce
+        anda    #0x1F                                   ; low 5 bits
+        cmpa    #7                                      ; 00111?
+        bne     5$                                      ; no, exit
+        inc     *letterHighScoreEntry
+        lda     *letterHighScoreEntry
+        cmpa    #3
+        bcs     4$
+        ldb     *curPlayer
+        lda     #0xFF
+        ldx     #dp_base+placeP1HighScore
+        sta     b,x
+3$:     ldb     #0
+        stb     *curPlayer
+        stb     *letterHighScoreEntry
+        ldb     #0xF0
+        stb     *slowTimer
+        jmp     set_RAMSEL_for_player
+        
+4$:     inc     *byte_C
+        ldb     *byte_C
+        lda     #0xF4
+        sta     *slowTimer
+        lda     #0x0B
+        ldx     #dp_base+highScoreInitials
+        sta     b,x
+5$:     lda     slowTimer
+        bne     loc_6E3A
+        lda     #$FF
+        sta     placeP1HighScore
+        sta     placeP2HighScore
+        bmi     3$
+
+loc_6E3A:
+        lda     fastTimer
+        and     #7
+        bne     loc_6E71
+        lda     rotateLeftSwitch
+        bpl     loc_6E49
+        lda     #1
+        bne     loc_6E50
+
+loc_6E49:
+        lda     rotateRightSwitch
+        bpl     loc_6E71
+        lda     #$FF
+
+loc_6E50:
+        ldx     byte_C
+        clc
+        adc     highScoreInitials,X
+        bmi     loc_6E67
+        cmp     #$B
+        bcs     loc_6E69
+        cmp     #1
+        beq     loc_6E63
+        lda     #0
+        beq     loc_6E6F
+
+loc_6E63:
+        lda     #$B
+        bne     loc_6E6F
+
+loc_6E67:
+        lda     #$24 ; '$'
+
+loc_6E69:
+        cmp     #$25 ; '%'
+        bcc     loc_6E6F
+        lda     #0
+
+loc_6E6F:
+        sta     highScoreInitials,X
+
+loc_6E71:
+        lda     #0
         rts
         
 ; $6E74
@@ -1050,6 +1174,7 @@ init_sound:
 				rts
 
 ; $6F1A
+; B=offset into initials
 display_initial:
         ldy     #dp_base+highScoreInitials
         lda     b,y                                     ; get initial
