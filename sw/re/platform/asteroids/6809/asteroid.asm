@@ -43,9 +43,9 @@ byte_9                          .equ		0x09
 byte_A                          .equ		0x0A
 byte_B                          .equ		0x0B
 byte_C                          .equ		0x0C
-byte_D                          .equ		0x9D            ; need 2 bytes (STX)
+byte_D                          .equ		0xAD            ; need 2 bytes (STX)
 byte_E                          .equ		0x8E            ; need 2 bytes (STX)
-byte_F                          .equ		0x0F
+byte_F                          .equ		0xAF            ; need 2 bytes (STX)
 initial_offset                  .equ		0x10
 byte_15                         .equ		0x15
 byte_16                         .equ		0x16
@@ -230,6 +230,17 @@ start:
 				jsr			osd_start				
 				jsr			init_sound
 				jsr			init_players
+
+        ; fudge high score table
+        lda     #0x34
+        sta     *highScoreTable
+        lda     #0x12
+        sta     *highScoreTable+1
+        lda     #10+0x0D                                ; M
+        sta     *highScoreInitials
+        sta     *highScoreInitials+1
+        lda     #10+0x03                                ; C
+        sta     *highScoreInitials+2
 				
 game_loop:
 				jsr			init_wave
@@ -1040,12 +1051,38 @@ init_sound:
 
 ; $6F1A
 display_initial:
-        ; UNIMPLEMENTED
-        rts
+        ldy     #dp_base+highScoreInitials
+        lda     b,y                                     ; get initial
+        asla                                            ; convert to char code
+        bne     display_char_code_A                     ; no, display
+        lda     *placeP1HighScore
+        anda    *placeP2HighScore                       ; entered as <space>?
+        bmi     display_char_code_A                     ; yes, display
+.ifndef PLATFORM_COCO3
+        LDA     #$72 ; 'r'                              ; brightness=7, S=0, X=2
+        LDX     #$F8 ; 'ø'                              ; cmd=SVEC, s=-ve, Y=0
+        JSR     write_AX_to_avgram
+        LDA     #1                                      ; brightness=0, S=0, X=0
+        LDX     #$F8 ; 'ø'                              ; cmd=SVEC, s=-ve, Y=0
+        JMP     write_AX_to_avgram
+.else
+				lda			#(38<<1)																; underscore
+				jmp			display_char_code_A
+.endif
         
 ; $6F35
-display_char_code_Y:
-        ; UNIMPLEMENTED
+display_char_code_A:
+.ifndef PLATFORM_COCO3
+        LDX     DVGROM+$6D5,Y                           ; chr fn
+        LDA     DVGROM+$6D4,Y                           ; chr fn
+        JMP     write_AX_to_avgram
+.else
+     		ldy			*dvg_curr_addr_msb
+				ldb			#OP_CHR
+        stb     ,y+
+        sta     ,y+
+				sty     *dvg_curr_addr_msb
+.endif                                
         rts
         
 ; $6F3E
@@ -1738,8 +1775,86 @@ set_RAMSEL_for_player:
         
 ; $73C4
 display_high_score_table:
-        ; UNIMPLEMENTED
-        SEC
+        lda     *numPlayers                             ; game active?
+        beq     2$                                      ; no, skip
+1$:     CLC                                             ; flag game active
+        rts
+2$:     lda     *slowTimer
+        anda    #4
+        bne     1$
+        lda     *highScoreTable
+        ora     *highScoreTable+1
+        beq     1$
+        ldb     #0                                      ; "HIGH SCORES"
+        jsr     PrintPackedMsg
+        ldb     #0
+        stb     *initial_offset                         ; offset into initials
+        ldx     #0
+        lda     #1
+        sta     *globalScale
+        lda     #167                                    ; starting Y coord (x4=668)
+        sta     *byte_E
+        lda     #16
+        sta     *globalScale
+
+display_hs_entry:
+        lda     dp_base+highScoreTable,X
+        ora     dp_base+highScoreTable+1,X              ; end of table?
+        beq     9$                                      ; yes, exit
+        stx     *byte_F                                 ; entry counter (x2)
+        lda     #95                                     ; x coord (x4=380)
+        ldb     *byte_E                                 ; y coord
+        jsr     write_CURx4_cmd
+        lda     #0x40                                   ; S=4
+        ;jsr     set_scale_A_bright_0
+        ldd     *byte_F                                 ; entry counter (x2)
+        tfr     b,a
+        lsra                                            ; x1
+        adda    #1
+        daa
+        sta     *byte_D                                 ; number buffer for printing
+        lda     #byte_D                                 ; ptr number buffer
+        SEC                                             ; flag no zero padding
+        ldb     #1                                      ; 1 byte to print
+        ldx     #0                                      ; extra brightness
+        jsr     display_numeric                         ; display entry no.
+.ifndef PLATFORM_COCO3
+        LDA     #$40 ; '@'                              ; S=4
+        TAX                                             ; Brightness=4
+        JSR     set_scale_A_bright_X                    ; displays a dot???
+        LDY     #0                                      ; <space>
+.else
+        lda			#(37<<1)																; period
+.endif                                
+        jsr     display_char_code_A
+        ldd     *byte_F                                 ; entry counter (x2)
+        tfr     b,a
+        adda    #highScoreTable                         ; get ptr entry (score)
+        ldb     #2                                      ; 2 bytes to print
+        SEC                                             ; flag no zero padding
+        ldx     #0                                      ; extra brightness
+        jsr     display_numeric                         ; display score
+        lda     #0
+        jsr     display_digit_A
+        lda     #0                                      ; <space>
+        jsr     display_char_code_A
+        ldb     *initial_offset                         ; get 1st initial
+        jsr     display_initial
+        inc     *initial_offset
+        ldb     *initial_offset                         ; get 2nd initial
+        jsr     display_initial
+        inc     *initial_offset
+        ldb     *initial_offset                         ; get 3rd initial
+        jsr     display_initial
+        inc     *initial_offset
+        lda     *byte_E                                 ; y coord
+        suba    #8                                      ; adjust for next line
+        sta     *byte_E                                 ; update
+        ldx     *byte_F                                 ; entry counter (x2)
+        leax    2,x
+        cmpx    #20                                     ; done all 10 entries?
+        bcs     display_hs_entry                        ; no, loop
+9$:     SEC
 				rts
 
 ; $745A
@@ -1906,7 +2021,40 @@ asteroid_score_tbl:
 				
 ; $765C
 check_high_score:
-        ; UNIMPLEMENTED
+        lda     *numPlayers                             ; game active?
+        bpl     locret_7698                             ; yes, skip
+        ldx     #2                                      ; 2 players to check
+        sta     *slowTimer
+        sta     *placeP1HighScore
+        sta     *placeP2HighScore
+loc_7668:
+        ldy     #0
+1$:     lda     dp_base+highScoreTable,Y
+        cmpa    dp_base+p1ScoreTens,X
+        lda     dp_base+highScoreTable+1,Y
+        sbca    dp_base+p1ScoreThousands,X
+        bcc     insert_score_in_table                   ; high score here, exit
+        leay    2,y                                     ; next high score entry
+        cmpy    #20                                     ; done all 10 entries (20 bytes)?
+        bcs     1$                                      ; no, loop
+
+loc_767C:
+        leax    -2,x                                    ; set to player 1
+        cmpx    #0
+        bpl     loc_7668                                ; loop for player 1
+        lda     *placeP2HighScore
+        bmi     2$
+        cmpa    *placeP1HighScore
+        bcs     2$
+        adca    #2
+        cmpa    #30
+        bcs     1$
+        lda     #0xFF
+1$:     sta     *placeP2HighScore
+2$:     lda     #0
+        sta     *numPlayers                             ; flag game over
+        sta     *letterHighScoreEntry
+locret_7698:
 				rts
 
 ; $7699
