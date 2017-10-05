@@ -2086,7 +2086,7 @@ ROM:70B6 65 64					     ADC     ship_thrust_dH
 ROM:70B8 AA					     TAX
 ROM:70B9 98					     TYA
 ROM:70BA 6D 3E 02				     ADC     ship_Vh
-ROM:70BD 20 25 71				     JSR     calc_thrust_delta
+ROM:70BD 20 25 71				     JSR     limit_thrust
 ROM:70C0 8D 3E 02				     STA     ship_Vh
 ROM:70C3 86 64					     STX     ship_thrust_dH
 ROM:70C5 A0 00					     LDY     #0
@@ -2102,7 +2102,7 @@ ROM:70D1 65 65					     ADC     ship_thrust_dV
 ROM:70D3 AA					     TAX
 ROM:70D4 98					     TYA
 ROM:70D5 6D 61 02				     ADC     ship_Vv
-ROM:70D8 20 25 71				     JSR     calc_thrust_delta
+ROM:70D8 20 25 71				     JSR     limit_thrust
 ROM:70DB 8D 61 02				     STA     ship_Vv
 ROM:70DE 86 65					     STX     ship_thrust_dV
 ROM:70E0 60					     RTS
@@ -2158,7 +2158,7 @@ ROM:7125
 ROM:7125	     ; =============== S U B R O U T I N E =======================================
 ROM:7125
 ROM:7125
-ROM:7125	     calc_thrust_delta:
+ROM:7125	     limit_thrust:
 ROM:7125 30 09					     BMI     loc_7130
 ROM:7127 C9 40					     CMP     #64
 ROM:7129 90 0D					     BCC     locret_7138
@@ -2175,7 +2175,7 @@ ROM:7136 A9 C0					     LDA     #192
 ROM:7138
 ROM:7138	     locret_7138:
 ROM:7138 60					     RTS
-ROM:7138	     ; End of function calc_thrust_delta
+ROM:7138	     ; End of function limit_thrust
 ROM:7138
 ROM:7139	     ; sets Z flag if no coincident objects
 ROM:7139

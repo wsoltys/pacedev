@@ -2088,7 +2088,7 @@ loc_70B4:
 				TAX
 				TYA
 				ADC	ship_Vh
-				JSR	calc_thrust_delta
+				JSR	limit_thrust
 				STA	ship_Vh
 				STX	ship_thrust_dH
 				LDY	#0
@@ -2104,7 +2104,7 @@ loc_70CF:
 				TAX
 				TYA
 				ADC	ship_Vv
-				JSR	calc_thrust_delta
+				JSR	limit_thrust
 				STA	ship_Vv
 				STX	ship_thrust_dV
 				RTS
@@ -2160,7 +2160,7 @@ locret_7124:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-calc_thrust_delta:
+limit_thrust:
 				BMI	loc_7130
 				CMP	#64
 				BCC	locret_7138
@@ -2177,7 +2177,7 @@ loc_7130:
 
 locret_7138:
 				RTS
-; End of function calc_thrust_delta
+; End of function limit_thrust
 
 ; sets Z flag if no coincident objects
 
