@@ -610,7 +610,18 @@ clone_asteroid_rnd_shape:
         sta     asteroid_Vv,X
         rts
 
+; $6AD3
+copy_vector_list_from_table_to_dvgram:
+        ; NO_IMPLEMENTATION_REQD
+        rts
+
+; $6AD7
+copy_vector_list_to_avgram:
+        ; NO_IMPLEMENTATION_REQD
+        rts
+                
 ; $6B0F
+; X=projectile offset
 handle_object_hit:
         cmpx    #1																			; projectile=saucer?
         bne     1$																			; no, skip
@@ -836,10 +847,9 @@ handle_small_saucer:
 
 update_shot_direction:
         sta     *saucerShotDirection
-        ; *** these need to change
         ldy     #3
         ldx     #1
-;        stx     *byte_E
+        stx     *byte_E
         jmp     find_free_shot_slot
 
 unk_6CCF:                       
@@ -943,9 +953,15 @@ new_shot_fired:
 				
 ; $6D90
 handle_high_score_entry:
+        ; UNIMPLEMENTED
 				lda			#0xFF																		; *** remove me
 				rts
 
+; $6D97
+high_score_entry:
+        ; UNIMPLEMENTED
+        rts
+        
 ; $6E74
 handle_hyperspace:
         lda     *numPlayers
@@ -1019,8 +1035,19 @@ init_players:
 						
 ; $6EFA
 init_sound:
+        ; UNIMPLEMENTED
 				rts
 
+; $6F1A
+display_initial:
+        ; UNIMPLEMENTED
+        rts
+        
+; $6F35
+display_char_code_Y:
+        ; UNIMPLEMENTED
+        rts
+        
 ; $6F3E
 display_extra_ships:
         beq     9$
@@ -1704,8 +1731,15 @@ add_A_to_score:
         inc     b,u                            					; extra ship!
 1$:     rts
 
+; $73B2
+set_RAMSEL_for_player:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+        
 ; $73C4
 display_high_score_table:
+        ; UNIMPLEMENTED
+        SEC
 				rts
 
 ; $745A
@@ -1722,6 +1756,7 @@ get_inactive_object_cnt:
 				
 ; $7465
 display_exploding_ship:
+        ; UNIMPLEMENTED
 				rts
 
 ; $750B
@@ -1793,8 +1828,19 @@ locret_7554:
 				
 ; $7555
 handle_sounds:
+        ; UNIMPLEMENTED
 				rts
 
+; $755A
+update_sounds:
+        ; UNIMPLEMENTED
+        rts
+        
+; $75CD
+update_player_saucer_sound:
+        ; UNIMPLEMENTED
+        rts
+        
 ; $75EC
 ; X=offset to object that hit asteroid, Y=offset to asteroid
 ; - potentially adds 2 more asteroids to the table
@@ -1860,53 +1906,50 @@ asteroid_score_tbl:
 				
 ; $765C
 check_high_score:
+        ; UNIMPLEMENTED
+				rts
+
+; $7699
+insert_score_in_table:
+        ; UNIMPLEMENTED
 				rts
 
 ; $76F0
 ; A=?(X), B=?(Y)
+; called from handle_small_saucer
 loc_76F0:
 				exg			a,b																			; swap???
 				tsta
-				bpl			loc_76FC
+				bpl			1$
 				nega
-				jsr			loc_76FC
+				jsr			1$
 				nega
 				rts
-            		
-; $76FC     		
-loc_76FC:   		
-				exg			a,b																			; swap 'em back
+1$:			exg			a,b																			; swap 'em back
 				tsta
-				bpl			sub_770E
+				bpl			2$
 				nega
-				jsr			sub_770E
+				jsr			2$
 				eora		#0x80
 				nega
 				rts
-				
-sub_770E:
-				sta			*byte_C
+2$:			sta			*byte_C
 				tfr			b,a
 				cmpa		*byte_C
-				beq			loc_7725
-				bcs			sub_7728
+				beq			3$
+				bcs			4$
 				ldb			*byte_C
 				sta			*byte_C
 				tfr			b,a
-				jsr			sub_7728
+				jsr			4$
 				suba		#0x40
 				nega
 				rts
-
-loc_7725:
-				lda			#0x20
+3$:			lda			#0x20
 				rts
-
-sub_7728:
-				jsr			sub_776C
-				ldx			#unk_772F
-				lda			#1234																		; fix me - need (6502)X
-				lda			a,x
+4$:			jsr			sub_776C                                ; A=offset
+				ldu			#unk_772F
+				lda			a,u
 				rts 		
 
 unk_772F:			
@@ -1958,7 +2001,6 @@ sub_776C:
 				lda			*byte_B
 				rola
 				anda		#0x0F
-;				tax
 				rts
 
 ; $7785
@@ -2155,7 +2197,17 @@ msgTablePtrs:
         .word 0x788F                                    ; German
         .word 0x7946                                    ; French
         .word 0x79F3                                    ; Spanish
-				
+
+; $7A93
+handle_coin_switches:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+        				
+; $7B65
+NMI:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+        				
 ; $7BC0
 halt_dvg:
 .ifndef PLATFORM_COCO3
@@ -2202,6 +2254,11 @@ loc_7BD6:
         puls		cc
         rts
 
+; $7BFC
+write_JSR_cmd:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+        
 ; $7C03
 ; A=X coord, B=Y coord
 write_CURx4_cmd:
@@ -2251,7 +2308,22 @@ update_dvg_curr_addr:
 				bcc			9$
 				inc			*dvg_curr_addr_msb
 9$:			rts				
-				
+
+; $7C49
+from_exploding_ship:
+        ; UNIMPLEMENTED
+        rts
+        				
+; $7CDE
+set_scale_A_bright_0:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+        				
+; $7CE0
+set_scale_A_bright_X:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+        				
 ; $7CF3
 reset:
 				ldx			#0x100
@@ -2297,6 +2369,21 @@ reset:
         ora     *coinMultCredits
         sta     *coinMultCredits
 				jmp			start
+
+; $7D45
+write_AX_to_avgram:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+        				
+; $7D50
+ServiceMode:
+        ; IMPLEMENTATION_NOT_REQD
+        rts
+
+; $7FF5
+rightCoinMultiplierTable:       
+        .byte 1, 4, 5, 6
+        				
 				
 .ifdef BUILD_OPT_PROFILE
 main_isr:
@@ -2325,6 +2412,10 @@ main_isr:
 8$:			dec			*vbl_cnt
 9$:     rti
 .endif
+
+; on the arcade hardware
+; the following data is stored in the AVGROM
+; which is accessible by the 6502
 
 .ifdef PLATFORM_COCO3
 english_msg_offset_tbl:
