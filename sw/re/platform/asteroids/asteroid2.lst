@@ -2679,7 +2679,7 @@ ROM:7406 85 0D					     STA     byte_D				     ; number buffer for printing
 ROM:7408 A9 0D					     LDA     #byte_D				     ; ptr number buffer
 ROM:740A 38					     SEC					     ; flag no zero padding
 ROM:740B A0 01					     LDY     #1					     ; 1 byte to print
-ROM:740D A2 00					     LDX     #0					     ; pad digit
+ROM:740D A2 00					     LDX     #0					     ; extra brightness
 ROM:740F 20 3F 77				     JSR     display_numeric			     ; display entry no.
 ROM:7412 A9 40					     LDA     #$40 ; '@'                              ; S=4
 ROM:7414 AA					     TAX					     ; Brightness=4

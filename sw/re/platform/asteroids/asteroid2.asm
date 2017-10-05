@@ -2681,7 +2681,7 @@ display_hs_entry:
 				LDA	#byte_D					; ptr number buffer
 				SEC						; flag no zero padding
 				LDY	#1					; 1 byte to print
-				LDX	#0					; pad digit
+				LDX	#0					; extra	brightness
 				JSR	display_numeric				; display entry	no.
 				LDA	#$40 ; '@'                              ; S=4
 				TAX						; Brightness=4
