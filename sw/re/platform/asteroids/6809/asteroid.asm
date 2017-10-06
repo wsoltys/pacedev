@@ -41,8 +41,8 @@ byte_7                          .equ		0x07
 byte_8                          .equ		0x08
 byte_9                          .equ		0x09
 byte_A                          .equ		0x0A
-byte_B                          .equ		0x0B
-byte_C                          .equ		0x0C
+byte_B                          .equ		0xAB            ; need 2 bytes (STX)
+byte_C                          .equ		0x8C            ; need 2 bytes (STY)
 byte_D                          .equ		0xAD            ; need 2 bytes (STX)
 byte_E                          .equ		0x8E            ; need 2 bytes (STX)
 byte_F                          .equ		0xAF            ; need 2 bytes (STX)
@@ -1045,56 +1045,40 @@ high_score_entry:
         lda     #0x0B
         ldx     #dp_base+highScoreInitials
         sta     b,x
-5$:     lda     slowTimer
-        bne     loc_6E3A
-        lda     #$FF
-        sta     placeP1HighScore
-        sta     placeP2HighScore
-        bmi     3$
-
-loc_6E3A:
-        lda     fastTimer
-        and     #7
-        bne     loc_6E71
+5$:     lda     *slowTimer
+        bne     6$
+        lda     #0xFF
+        sta     *placeP1HighScore
+        sta     *placeP2HighScore
+        bra     3$
+6$:     lda     *fastTimer
+        anda    #7
+        bne     13$
         lda     rotateLeftSwitch
-        bpl     loc_6E49
+        bpl     7$
         lda     #1
-        bne     loc_6E50
-
-loc_6E49:
-        lda     rotateRightSwitch
-        bpl     loc_6E71
-        lda     #$FF
-
-loc_6E50:
-        ldx     byte_C
-        clc
-        adc     highScoreInitials,X
-        bmi     loc_6E67
-        cmp     #$B
-        bcs     loc_6E69
-        cmp     #1
-        beq     loc_6E63
+        bne     8$
+7$:     lda     rotateRightSwitch
+        bpl     13$
+        lda     #0xFF
+8$:     ldb     *byte_C
+        ldx     #dp_base+highScoreInitials
+        adda    b,x
+        bmi     10$
+        cmpa    #0x0B
+        bcc     11$
+        cmpa    #1
+        beq     9$
         lda     #0
-        beq     loc_6E6F
-
-loc_6E63:
-        lda     #$B
-        bne     loc_6E6F
-
-loc_6E67:
-        lda     #$24 ; '$'
-
-loc_6E69:
-        cmp     #$25 ; '%'
-        bcc     loc_6E6F
+        bra     12$
+9$:     lda     #0x0B
+        bne     12$
+10$:    lda     #0x24
+11$:    cmpa    #0x25
+        bcs     12$
         lda     #0
-
-loc_6E6F:
-        sta     highScoreInitials,X
-
-loc_6E71:
-        lda     #0
+12$:    sta     b,x
+13$:    lda     #0
         rts
         
 ; $6E74
@@ -2184,8 +2168,49 @@ locret_7698:
 
 ; $7699
 insert_score_in_table:
-        ; UNIMPLEMENTED
-				rts
+        stx     *byte_B
+        sty     *byte_C                                 ; high score entry offset
+        tfr     x,d
+        lsra                                            ; 0=p1, 1=p2
+        tfr     d,x
+        tfr     y,d
+        lsra                                            ; high score entry index
+        adda    *(byte_C+1)                             ; high score index * 3
+        std     *byte_D                                 ; offset into initials table?
+        sta     dp_base+placeP1HighScore,X
+        ldx     #27                                     ; offset of 10th initials
+        ldy     #18
+1$:     cmpx    *byte_D                                 ; entry we're after?
+        beq     2$                                      ; yes, exit
+        lda     dp_base+letterHighScoreEntry,X
+        sta     dp_base+highScoreInitials,X
+        lda     dp_base+placeP1HighScore,X
+        sta     dp_base+highScoreInitials+1,X
+        lda     dp_base+placeP2HighScore,X
+        sta     dp_base+highScoreInitials+2,X
+        lda     dp_base+byte_1B,Y
+        sta     dp_base+highScoreTable,Y
+        lda     dp_base+numPlayers,Y
+        sta     dp_base+highScoreTable+1,Y              ; shift entry down
+        leay    -2,y                                    ; next high score entry
+        leax    -3,x                                    ; next initials entry
+        cmpx    #0
+        bne     1$                                      ; not done, loop
+2$:     lda     #0x0B
+        sta     dp_base+highScoreInitials,X
+        lda     #0
+        sta     dp_base+highScoreInitials+1,X
+        sta     dp_base+highScoreInitials+2,X
+        lda     #0xF0
+        sta     *slowTimer
+        ldx     *byte_B                                 ; player 1/2
+        ldy     *byte_C                                 ; high score entry offset
+        lda     dp_base+p1ScoreThousands,X
+        sta     dp_base+highScoreTable+1,Y
+        lda     dp_base+p1ScoreTens,X
+        sta     dp_base+highScoreTable,Y                ; copy score into high score table
+        ldy     #0
+        jmp     loc_767C                                ; continue with next entry
 
 ; $76F0
 ; A=?(X), B=?(Y)
