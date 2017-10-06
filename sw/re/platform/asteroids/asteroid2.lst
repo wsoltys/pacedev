@@ -1569,13 +1569,13 @@ ROM:6DC8 A0 05					     LDY     #5					     ; "PUSH HYPERSPACE	WHEN LETTER IS CO
 ROM:6DCA 20 F6 77				     JSR     PrintPackedMsg
 ROM:6DCD A9 20					     LDA     #$20 ; ' '
 ROM:6DCF 85 00					     STA     globalScale
-ROM:6DD1 A9 64					     LDA     #$64 ; 'd'
-ROM:6DD3 A2 39					     LDX     #$39 ; '9'
+ROM:6DD1 A9 64					     LDA     #100
+ROM:6DD3 A2 39					     LDX     #57
 ROM:6DD5 20 03 7C				     JSR     write_CURx4_cmd
 ROM:6DD8 A9 70					     LDA     #$70 ; 'p'
 ROM:6DDA 20 DE 7C				     JSR     set_scale_A_bright_0
 ROM:6DDD A6 18					     LDX     curPlayer
-ROM:6DDF B4 32					     LDY     $32,X
+ROM:6DDF B4 32					     LDY     placeP1HighScore,X
 ROM:6DE1 84 0B					     STY     byte_B
 ROM:6DE3 98					     TYA
 ROM:6DE4 18					     CLC

@@ -1571,13 +1571,13 @@ loc_6DB4:
 				JSR	PrintPackedMsg
 				LDA	#$20 ; ' '
 				STA	globalScale
-				LDA	#$64 ; 'd'
-				LDX	#$39 ; '9'
+				LDA	#100
+				LDX	#57
 				JSR	write_CURx4_cmd
 				LDA	#$70 ; 'p'
 				JSR	set_scale_A_bright_0
 				LDX	curPlayer
-				LDY	$32,X
+				LDY	placeP1HighScore,X
 				STY	byte_B
 				TYA
 				CLC
