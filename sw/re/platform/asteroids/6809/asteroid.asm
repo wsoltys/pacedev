@@ -26,6 +26,11 @@
 
 ; equ for asteroids here
 
+STARTING_SHIPS                  .equ    1
+.ifndef STARTING_SHIPS
+  STARTING_SHIPS                .equ    3
+.endif
+
         .org    var_base
         
         .bndry  0x100
@@ -1134,8 +1139,12 @@ handle_hyperspace:
 init_players:
 				lda			#2
 				sta			startingAsteroidsPerWave
-				ldb			#3
-				lsr			centerCoinMultiplierAndLives
+				ldb			#STARTING_SHIPS
+				; the original code did LSR on the hardware (dip) location
+				; - of course if we do that on our RAM shadow, it'll change
+				; - so load it into A first
+				lda			centerCoinMultiplierAndLives
+				lsra
 				bcs			1$
 				incb
 1$:			stb			*numStartingShipsPerGame
@@ -1143,9 +1152,7 @@ init_players:
 				ldx			#4																			; 4 flags, 4 timers, 4 score bytes
 2$:			sta			ship_Sts,x
 				sta			shipShot_Sts,x
-				tfr     x,d                                     ; B=X
-				ldu			#dp_base+byte_4F+2
-				sta			b,u
+				sta			dp_base+byte_4F+2,x
 				leax    -1,x
 				cmpx    #0
 				bpl			2$																			; loop until done
