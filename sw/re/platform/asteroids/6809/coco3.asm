@@ -1918,6 +1918,7 @@ render_loop:
 				clr			FireSwitch
 				clr			rotateLeftSwitch
 				clr			rotateRightSwitch
+				clr     p1StartSwitch
 				clr			thrustSwitch
 				ldx			#KEYROW
 				ldb			#(1<<7)
@@ -1953,7 +1954,8 @@ render_loop:
 				stb			rotateLeftSwitch				
 51$:    bita    #(1<<4)                 ; <5>?
 				bne			6$
-52$:		sta			2,x
+52$:		lda     #~(1<<5)								; "ROW" = 5
+        sta			2,x
 				lda			,x
 				bita		#(1<<4)
 				beq			52$											; wait for release
