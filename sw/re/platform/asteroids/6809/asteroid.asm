@@ -1171,8 +1171,8 @@ display_initial:
         lda     b,y                                     ; get initial
         asla                                            ; convert to char code
         bne     display_char_code_A                     ; no, display
-        lda     *placeP1HighScore
-        anda    *placeP2HighScore                       ; entered as <space>?
+        ldb     *placeP1HighScore
+        andb    *placeP2HighScore                       ; entered as <space>?
         bmi     display_char_code_A                     ; yes, display
 .ifndef PLATFORM_COCO3
         LDA     #$72 ; 'r'                              ; brightness=7, S=0, X=2
@@ -2149,7 +2149,7 @@ loc_7668:
         cmpa    dp_base+p1ScoreTens,X
         lda     dp_base+highScoreTable+1,Y
         sbca    dp_base+p1ScoreThousands,X
-        bcc     insert_score_in_table                   ; high score here, exit
+        bcs     insert_score_in_table                   ; high score here, exit
         leay    2,y                                     ; next high score entry
         cmpy    #20                                     ; done all 10 entries (20 bytes)?
         bcs     1$                                      ; no, loop
@@ -2162,7 +2162,7 @@ loc_767C:
         bmi     2$
         cmpa    *placeP1HighScore
         bcs     2$
-        adca    #2
+        adda    #3
         cmpa    #30
         bcs     1$
         lda     #0xFF
@@ -2184,7 +2184,7 @@ insert_score_in_table:
         lsra                                            ; high score entry index
         adda    *(byte_C+1)                             ; high score index * 3
         std     *byte_D                                 ; offset into initials table?
-        sta     dp_base+placeP1HighScore,X
+        stb     dp_base+placeP1HighScore,X
         ldx     #27                                     ; offset of 10th initials
         ldy     #18
 1$:     cmpx    *byte_D                                 ; entry we're after?
@@ -2201,7 +2201,6 @@ insert_score_in_table:
         sta     dp_base+highScoreTable+1,Y              ; shift entry down
         leay    -2,y                                    ; next high score entry
         leax    -3,x                                    ; next initials entry
-        cmpx    #0
         bne     1$                                      ; not done, loop
 2$:     lda     #0x0B
         sta     dp_base+highScoreInitials,X
