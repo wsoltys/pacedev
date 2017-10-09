@@ -330,7 +330,7 @@ RAM:0217 00				     .BYTE   0
 RAM:0218 00				     .BYTE   0
 RAM:0219 00				     .BYTE   0
 RAM:021A 00				     .BYTE   0
-RAM:021B 00	     p1PlayerFlag:	     .BYTE 0				     ; DATA XREF: RAM:render_playerr
+RAM:021B 00	     ship_Sts:		     .BYTE 0				     ; DATA XREF: RAM:render_playerr
 RAM:021B									     ; RAM:08BDr
 RAM:021C 00	     p1SaucerFlag:	     .BYTE 0				     ; DATA XREF: RAM:chk_saucerr
 RAM:021D 00	     saucerShotTimer1:	     .BYTE   0				     ; DATA XREF: RAM:calc_shot_atari_coordsr
@@ -1331,7 +1331,7 @@ RAM:07FE
 RAM:07FE	     chk_asteroid:						     ; CODE XREF: RAM:0869j
 RAM:07FE BD 00 02			     LDA     asteroid_sts,X		     ; asteroid	active?
 RAM:0801 F0 63				     BEQ     loc_866			     ; no, skip
-RAM:0803 48				     PHA
+RAM:0803 48				     PHA				     ; status
 RAM:0804 8E 4E 0B			     STX     tmp_X_B4E
 RAM:0807 BD D2 02			     LDA     asteroid_PLv,X
 RAM:080A 8D 4C 0B			     STA     byte_B4C
@@ -1342,7 +1342,7 @@ RAM:0814 0E 4C 0B			     ASL     byte_B4C
 RAM:0817 2A				     ROL     A
 RAM:0818 0E 4C 0B			     ASL     byte_B4C
 RAM:081B 2A				     ROL     A
-RAM:081C 8D 4D 0B			     STA     byte_B4D			     ; asteroid_Pv/8 (0-127)
+RAM:081C 8D 4D 0B			     STA     byte_B4D			     ; asteroid_Pv/8 (0-1023)
 RAM:081F 29 F0				     AND     #$F0 ; 'ð'                      ; off the screen?
 RAM:0821 D0 04				     BNE     calc_asteroid_atari_coords	     ; no, skip
 RAM:0823 68				     PLA
@@ -1362,27 +1362,27 @@ RAM:083A 2A				     ROL     A
 RAM:083B 0E 4C 0B			     ASL     byte_B4C
 RAM:083E 2A				     ROL     A
 RAM:083F 0E 4C 0B			     ASL     byte_B4C
-RAM:0842 2A				     ROL     A				     ; asteroid_Ph/8 (0-127)
+RAM:0842 2A				     ROL     A				     ; asteroid_Ph/8 (0-1023)
 RAM:0843 AA				     TAX
-RAM:0844 8E 51 0B			     STX     byte_B51
+RAM:0844 8E 51 0B			     STX     tmp_X_B51
 RAM:0847 68				     PLA				     ; status
-RAM:0848 10 0D				     BPL     loc_857
+RAM:0848 10 0D				     BPL     loc_857			     ; go if not destroyed
 RAM:084A 4A				     LSR     A
 RAM:084B 4A				     LSR     A
 RAM:084C 4A				     LSR     A
 RAM:084D 4A				     LSR     A
 RAM:084E 4A				     LSR     A
-RAM:084F 29 03				     AND     #3				     ; size???
+RAM:084F 29 03				     AND     #3				     ; explosion cntr
 RAM:0851 18				     CLC
-RAM:0852 69 0E				     ADC     #$E			     ; get bitmap
+RAM:0852 69 0E				     ADC     #$E			     ; get bitmap (shrapnel)
 RAM:0854 4C 60 08			     JMP     render_asteroid
 RAM:0857	     ; ---------------------------------------------------------------------------
 RAM:0857
 RAM:0857	     loc_857:							     ; CODE XREF: RAM:0848j
-RAM:0857 29 1F				     AND     #$1F
+RAM:0857 29 1F				     AND     #$1F			     ; (4:3)=shape, (2:1)=size,	0=unused
 RAM:0859 AA				     TAX
-RAM:085A BD 53 0B			     LDA     unk_B53,X
-RAM:085D AE 51 0B			     LDX     byte_B51
+RAM:085A BD 53 0B			     LDA     byte_B53,X
+RAM:085D AE 51 0B			     LDX     tmp_X_B51
 RAM:0860
 RAM:0860	     render_asteroid:						     ; CODE XREF: RAM:0854j
 RAM:0860 20 24 0F			     JSR     render_object
@@ -1397,7 +1397,7 @@ RAM:0869 4C FE 07			     JMP     chk_asteroid
 RAM:086C	     ; ---------------------------------------------------------------------------
 RAM:086C
 RAM:086C	     render_player:						     ; CODE XREF: RAM:0867j
-RAM:086C AD 1B 02			     LDA     p1PlayerFlag		     ; visible?
+RAM:086C AD 1B 02			     LDA     ship_Sts			     ; visible?
 RAM:086F D0 03				     BNE     ship_visible		     ; yes, go
 RAM:0871 4C B6 09			     JMP     chk_saucer
 RAM:0874	     ; ---------------------------------------------------------------------------
@@ -1426,7 +1426,7 @@ RAM:089A	     ; ----------------------------------------------------------------
 RAM:089A
 RAM:089A	     loc_89A:							     ; CODE XREF: RAM:0895j
 RAM:089A 38				     SEC
-RAM:089B A9 BF				     LDA     #$BF ; '¿'
+RAM:089B A9 BF				     LDA     #191
 RAM:089D ED 4D 0B			     SBC     byte_B4D
 RAM:08A0 18				     CLC
 RAM:08A1 69 08				     ADC     #8
@@ -1443,33 +1443,36 @@ RAM:08B8 2A				     ROL     A
 RAM:08B9 18				     CLC
 RAM:08BA 69 08				     ADC     #8
 RAM:08BC AA				     TAX
-RAM:08BD AD 1B 02			     LDA     p1PlayerFlag
+RAM:08BD	     ; from original - calc explosion frame
+RAM:08BD AD 1B 02			     LDA     ship_Sts			     ; ship status
 RAM:08C0 49 FF				     EOR     #$FF
 RAM:08C2 29 70				     AND     #$70 ; 'p'
 RAM:08C4 4A				     LSR     A
 RAM:08C5 4A				     LSR     A
-RAM:08C6 4A				     LSR     A
-RAM:08C7 8D C8 0B			     STA     byte_BC8
+RAM:08C6 4A				     LSR     A				     ; num pieces left (x2)
+RAM:08C7 8D C8 0B			     STA     piece_num_x2
 RAM:08CA 8E 4C 0B			     STX     byte_B4C
 RAM:08CD 8C 4D 0B			     STY     byte_B4D
-RAM:08D0 AE C8 0B			     LDX     byte_BC8
+RAM:08D0
+RAM:08D0	     render_piece:						     ; CODE XREF: RAM:0938j
+RAM:08D0 AE C8 0B			     LDX     piece_num_x2
 RAM:08D3 8A				     TXA
 RAM:08D4 0A				     ASL     A
-RAM:08D5 0A				     ASL     A
+RAM:08D5 0A				     ASL     A				     ; x8
 RAM:08D6 48				     PHA
 RAM:08D7 18				     CLC
 RAM:08D8 69 D7				     ADC     #$D7 ; '×'
-RAM:08DA 8D 21 09			     STA     byte_921
+RAM:08DA 8D 21 09			     STA     loc_920+1			     ; patch code
 RAM:08DD A9 1F				     LDA     #$1F
 RAM:08DF 69 00				     ADC     #0
-RAM:08E1 8D 22 09			     STA     byte_922
+RAM:08E1 8D 22 09			     STA     loc_920+2			     ; patch code ($1FD7)
 RAM:08E4 68				     PLA
 RAM:08E5 18				     CLC
 RAM:08E6 69 07				     ADC     #7
-RAM:08E8 8D 19 09			     STA     byte_919
+RAM:08E8 8D 19 09			     STA     loc_918+1			     ; patch code
 RAM:08EB A9 20				     LDA     #$20 ; ' '
 RAM:08ED 69 00				     ADC     #0
-RAM:08EF 8D 1A 09			     STA     byte_91A
+RAM:08EF 8D 1A 09			     STA     loc_918+2			     ; patch code ($2007)
 RAM:08F2 BD B6 07			     LDA     $7B6,X
 RAM:08F5 C9 80				     CMP     #$80 ; '€'
 RAM:08F7 6A				     ROR     A
@@ -1486,47 +1489,33 @@ RAM:090A 6A				     ROR     A
 RAM:090B 18				     CLC
 RAM:090C 6D 4D 0B			     ADC     byte_B4D
 RAM:090F 8D CA 0B			     STA     byte_BCA
-RAM:0912 A2 07				     LDX     #7
+RAM:0912 A2 07				     LDX     #7				     ; 7+1=8 lines?
+RAM:0914
+RAM:0914	     loc_914:							     ; CODE XREF: RAM:0930j
 RAM:0914 8E CB 0B			     STX     byte_BCB
 RAM:0917 18				     CLC
-RAM:0917	     ; ---------------------------------------------------------------------------
-RAM:0918 BD				     .BYTE $BD ; ½
-RAM:0919 07	     byte_919:		     .BYTE 7				     ; DATA XREF: RAM:08E8w
-RAM:091A 19	     byte_91A:		     .BYTE $19				     ; DATA XREF: RAM:08EFw
-RAM:091B 6D				     .BYTE $6D ; m
-RAM:091C CA				     .BYTE $CA ; Ê
-RAM:091D 0B				     .BYTE  $B
-RAM:091E A8				     .BYTE $A8 ; ¨
-RAM:091F 18				     .BYTE $18
-RAM:0920 BD				     .BYTE $BD ; ½
-RAM:0921 66	     byte_921:		     .BYTE $66				     ; DATA XREF: RAM:08DAw
-RAM:0922 19	     byte_922:		     .BYTE $19				     ; DATA XREF: RAM:08E1w
-RAM:0923 6D				     .BYTE $6D ; m
-RAM:0924 C9				     .BYTE $C9 ; É
-RAM:0925 0B				     .BYTE  $B
-RAM:0926 AA				     .BYTE $AA ; ª
-RAM:0927 A9				     .BYTE $A9 ; ©
-RAM:0928 07				     .BYTE   7
-RAM:0929 20				     .BYTE $20
-RAM:092A FA				     .BYTE $FA ; ú
-RAM:092B 17				     .BYTE $17
-RAM:092C AE				     .BYTE $AE ; ®
-RAM:092D CB				     .BYTE $CB ; Ë
-RAM:092E 0B				     .BYTE  $B
-RAM:092F CA				     .BYTE $CA ; Ê
-RAM:0930 10				     .BYTE $10
-RAM:0931 E2				     .BYTE $E2 ; â
-RAM:0932 CE				     .BYTE $CE ; Î
-RAM:0933 C8				     .BYTE $C8 ; È
-RAM:0934 0B				     .BYTE  $B
-RAM:0935 CE				     .BYTE $CE ; Î
-RAM:0936 C8				     .BYTE $C8 ; È
-RAM:0937 0B				     .BYTE  $B
-RAM:0938 10				     .BYTE $10
-RAM:0939 96				     .BYTE $96 ; –
-RAM:093A 4C				     .BYTE $4C ; L
-RAM:093B B6				     .BYTE $B6 ; ¶
-RAM:093C 09				     .BYTE   9
+RAM:0918
+RAM:0918	     loc_918:							     ; DATA XREF: RAM:08E8w
+RAM:0918									     ; RAM:08EFw
+RAM:0918 BD 07 19			     LDA     $1907,X			     ; base = $2007
+RAM:091B 6D CA 0B			     ADC     byte_BCA
+RAM:091E A8				     TAY
+RAM:091F 18				     CLC
+RAM:0920
+RAM:0920	     loc_920:							     ; DATA XREF: RAM:08DAw
+RAM:0920									     ; RAM:08E1w
+RAM:0920 BD 66 19			     LDA     $1966,X			     ; base = $1FD7 (patched)
+RAM:0923 6D C9 0B			     ADC     byte_BC9
+RAM:0926 AA				     TAX
+RAM:0927 A9 07				     LDA     #7
+RAM:0929 20 FA 17			     JSR     sub_17FA
+RAM:092C AE CB 0B			     LDX     byte_BCB
+RAM:092F CA				     DEX				     ; done all	lines?
+RAM:0930 10 E2				     BPL     loc_914			     ; no, loop
+RAM:0932 CE C8 0B			     DEC     piece_num_x2
+RAM:0935 CE C8 0B			     DEC     piece_num_x2		     ; done all	pieces?
+RAM:0938 10 96				     BPL     render_piece		     ; no, loop
+RAM:093A 4C B6 09			     JMP     chk_saucer
 RAM:093D	     ; ---------------------------------------------------------------------------
 RAM:093D
 RAM:093D	     render_player_ship:					     ; CODE XREF: RAM:0878j
@@ -1547,10 +1536,10 @@ RAM:095C	     ; ----------------------------------------------------------------
 RAM:095C
 RAM:095C	     loc_95C:							     ; CODE XREF: RAM:0957j
 RAM:095C 38				     SEC
-RAM:095D A9 BF				     LDA     #$BF ; '¿'
-RAM:095F ED 4D 0B			     SBC     byte_B4D
+RAM:095D A9 BF				     LDA     #191
+RAM:095F ED 4D 0B			     SBC     byte_B4D			     ; invert Y
 RAM:0962 18				     CLC
-RAM:0963 69 05				     ADC     #5
+RAM:0963 69 05				     ADC     #5				     ; +5 fudge-factor
 RAM:0965 8D 50 0B			     STA     ship_y_coord
 RAM:0968 A8				     TAY
 RAM:0969 AD CA 02			     LDA     byte_2CA
@@ -1563,7 +1552,7 @@ RAM:0979 2A				     ROL     A
 RAM:097A 0E 4C 0B			     ASL     byte_B4C
 RAM:097D 2A				     ROL     A
 RAM:097E 18				     CLC
-RAM:097F 69 05				     ADC     #5
+RAM:097F 69 05				     ADC     #5				     ; +5 fudge-factor
 RAM:0981 8D 4F 0B			     STA     ship_x_coord
 RAM:0984 A6 61				     LDX     direction
 RAM:0986 BD CC 0B			     LDA     ship_dir_bitmap_tbl,X	     ; get ship	bitmap from direction
@@ -1578,7 +1567,7 @@ RAM:099A	     ; render thrust pixel
 RAM:099A A6 61				     LDX     direction
 RAM:099C BD CC 0B			     LDA     ship_dir_bitmap_tbl,X	     ; get ship	bitmap from direction
 RAM:099F 38				     SEC
-RAM:09A0 E9 25				     SBC     #$25 ; '%'                      ; 0-based
+RAM:09A0 E9 25				     SBC     #37			     ; 0-based
 RAM:09A2 AA				     TAX
 RAM:09A3 BD E4 0C			     LDA     thrust_y_off_tbl,X
 RAM:09A6 18				     CLC
@@ -1594,7 +1583,7 @@ RAM:09B6	     chk_saucer:						     ; CODE XREF: RAM:0871j
 RAM:09B6									     ; RAM:0897j ...
 RAM:09B6 AD 1C 02			     LDA     p1SaucerFlag		     ; saucer active?
 RAM:09B9 F0 5D				     BEQ     render_shots		     ; no, skip
-RAM:09BB 48				     PHA
+RAM:09BB 48				     PHA				     ; status
 RAM:09BC AD EE 02			     LDA     saucer_PLv
 RAM:09BF 8D 4C 0B			     STA     byte_B4C
 RAM:09C2 AD A8 02			     LDA     saucer_PHv
@@ -1604,18 +1593,18 @@ RAM:09C9 0E 4C 0B			     ASL     byte_B4C
 RAM:09CC 2A				     ROL     A
 RAM:09CD 0E 4C 0B			     ASL     byte_B4C
 RAM:09D0 2A				     ROL     A
-RAM:09D1 8D 4D 0B			     STA     byte_B4D
+RAM:09D1 8D 4D 0B			     STA     byte_B4D			     ; Y (0-1023)
 RAM:09D4 29 F0				     AND     #$F0 ; 'ð'                      ; off the screen?
 RAM:09D6 D0 04				     BNE     loc_9DC			     ; no, go
-RAM:09D8 68				     PLA
+RAM:09D8 68				     PLA				     ; status
 RAM:09D9 4C 18 0A			     JMP     render_shots
 RAM:09DC	     ; ---------------------------------------------------------------------------
 RAM:09DC
 RAM:09DC	     loc_9DC:							     ; CODE XREF: RAM:09D6j
 RAM:09DC 38				     SEC
-RAM:09DD A9 BF				     LDA     #$BF ; '¿'
-RAM:09DF ED 4D 0B			     SBC     byte_B4D
-RAM:09E2 A8				     TAY
+RAM:09DD A9 BF				     LDA     #191
+RAM:09DF ED 4D 0B			     SBC     byte_B4D			     ; invert Y
+RAM:09E2 A8				     TAY				     ; Y = Y coord
 RAM:09E3 AD CB 02			     LDA     byte_2CB
 RAM:09E6 8D 4C 0B			     STA     byte_B4C
 RAM:09E9 AD 85 02			     LDA     byte_285
@@ -1624,11 +1613,11 @@ RAM:09EF 2A				     ROL     A
 RAM:09F0 0E 4C 0B			     ASL     byte_B4C
 RAM:09F3 2A				     ROL     A
 RAM:09F4 0E 4C 0B			     ASL     byte_B4C
-RAM:09F7 2A				     ROL     A
+RAM:09F7 2A				     ROL     A				     ; X (0-1023)
 RAM:09F8 AA				     TAX
-RAM:09F9 8E 51 0B			     STX     byte_B51
-RAM:09FC 68				     PLA
-RAM:09FD 10 0D				     BPL     loc_A0C
+RAM:09F9 8E 51 0B			     STX     tmp_X_B51
+RAM:09FC 68				     PLA				     ; status
+RAM:09FD 10 0D				     BPL     loc_A0C			     ; alive, go
 RAM:09FF 4A				     LSR     A
 RAM:0A00 4A				     LSR     A
 RAM:0A01 4A				     LSR     A
@@ -1641,10 +1630,10 @@ RAM:0A09 4C 15 0A			     JMP     render_saucer
 RAM:0A0C	     ; ---------------------------------------------------------------------------
 RAM:0A0C
 RAM:0A0C	     loc_A0C:							     ; CODE XREF: RAM:09FDj
-RAM:0A0C 29 03				     AND     #3
+RAM:0A0C 29 03				     AND     #3				     ; size
 RAM:0A0E AA				     TAX
-RAM:0A0F BD 73 0B			     LDA     $B73,X
-RAM:0A12 AE 51 0B			     LDX     byte_B51
+RAM:0A0F BD 73 0B			     LDA     unk_B73,X
+RAM:0A12 AE 51 0B			     LDX     tmp_X_B51
 RAM:0A15
 RAM:0A15	     render_saucer:						     ; CODE XREF: RAM:0A09j
 RAM:0A15 20 24 0F			     JSR     render_object
@@ -1657,7 +1646,7 @@ RAM:0A1C
 RAM:0A1C	     calc_shot_atari_coords:					     ; CODE XREF: RAM:0A68j
 RAM:0A1C BD 1D 02			     LDA     saucerShotTimer1,X
 RAM:0A1F F0 44				     BEQ     next_shot
-RAM:0A21 8E 51 0B			     STX     byte_B51
+RAM:0A21 8E 51 0B			     STX     tmp_X_B51
 RAM:0A24 BD EF 02			     LDA     saucerShot_PLv,X
 RAM:0A27 8D 4C 0B			     STA     byte_B4C
 RAM:0A2A BD A9 02			     LDA     saucerShot_PHv,X
@@ -1669,7 +1658,7 @@ RAM:0A35 0E 4C 0B			     ASL     byte_B4C
 RAM:0A38 2A				     ROL     A
 RAM:0A39 8D 4D 0B			     STA     byte_B4D
 RAM:0A3C 38				     SEC
-RAM:0A3D A9 C7				     LDA     #$C7 ; 'Ç'
+RAM:0A3D A9 C7				     LDA     #199			     ; Y fudge-factor =	8
 RAM:0A3F ED 4D 0B			     SBC     byte_B4D
 RAM:0A42 A8				     TAY
 RAM:0A43 BD CC 02			     LDA     saucerShot_PLh,X
@@ -1682,11 +1671,11 @@ RAM:0A53 2A				     ROL     A
 RAM:0A54 0E 4C 0B			     ASL     byte_B4C
 RAM:0A57 2A				     ROL     A
 RAM:0A58 18				     CLC
-RAM:0A59 69 08				     ADC     #8
+RAM:0A59 69 08				     ADC     #8				     ; X fudge-factor =	8
 RAM:0A5B AA				     TAX
-RAM:0A5C AD 51 0B			     LDA     byte_B51
+RAM:0A5C AD 51 0B			     LDA     tmp_X_B51
 RAM:0A5F 20 FA 17			     JSR     sub_17FA
-RAM:0A62 AE 51 0B			     LDX     byte_B51
+RAM:0A62 AE 51 0B			     LDX     tmp_X_B51
 RAM:0A65
 RAM:0A65	     next_shot:							     ; CODE XREF: RAM:0A1Fj
 RAM:0A65 CA				     DEX
@@ -1831,26 +1820,13 @@ RAM:0B4F 00	     ship_x_coord:	     .BYTE 0				     ; DATA XREF: RAM:0981w
 RAM:0B4F									     ; RAM:0989r ...
 RAM:0B50 00	     ship_y_coord:	     .BYTE 0				     ; DATA XREF: RAM:0965w
 RAM:0B50									     ; RAM:09A7r
-RAM:0B51 00	     byte_B51:		     .BYTE 0				     ; DATA XREF: RAM:0844w
+RAM:0B51 00	     tmp_X_B51:		     .BYTE 0				     ; DATA XREF: RAM:0844w
 RAM:0B51									     ; RAM:085Dr ...
 RAM:0B52 00	     tmp_Y_B52:		     .BYTE 0				     ; DATA XREF: RAM:0A72w
 RAM:0B52									     ; RAM:0A95r
-RAM:0B53 00	     unk_B53:		     .BYTE   0				     ; DATA XREF: RAM:085Ar
-RAM:0B54 02				     .BYTE   2
-RAM:0B55 01				     .BYTE   1
-RAM:0B56 01				     .BYTE   1
-RAM:0B57 00				     .BYTE   0
-RAM:0B58 00				     .BYTE   0
-RAM:0B59 00				     .BYTE   0
-RAM:0B5A 00				     .BYTE   0
-RAM:0B5B 03				     .BYTE   3
-RAM:0B5C 05				     .BYTE   5
-RAM:0B5D 04				     .BYTE   4
-RAM:0B5E 04				     .BYTE   4
-RAM:0B5F 03				     .BYTE   3
-RAM:0B60 03				     .BYTE   3
-RAM:0B61 03				     .BYTE   3
-RAM:0B62 03				     .BYTE   3
+RAM:0B53	     ; table lookup based on asteroid patten and size
+RAM:0B53 00 02 01 01+byte_B53:		     .BYTE 0, 2, 1, 1, 0, 0, 0,	0, 3, 5, 4, 4, 3, 3, 3,	3
+RAM:0B53 00 00 00 00+								     ; DATA XREF: RAM:085Ar
 RAM:0B63 06				     .BYTE   6
 RAM:0B64 08				     .BYTE   8
 RAM:0B65 07				     .BYTE   7
@@ -1867,7 +1843,7 @@ RAM:0B6F 09				     .BYTE   9
 RAM:0B70 09				     .BYTE   9
 RAM:0B71 09				     .BYTE   9
 RAM:0B72 09				     .BYTE   9
-RAM:0B73 0C				     .BYTE  $C
+RAM:0B73 0C	     unk_B73:		     .BYTE  $C				     ; DATA XREF: RAM:0A0Fr
 RAM:0B74 0D				     .BYTE  $D
 RAM:0B75 0C				     .BYTE  $C
 RAM:0B76 0C				     .BYTE  $C
@@ -1881,11 +1857,14 @@ RAM:0B9F 20 21 22 23+			     .BYTE $40,	$41, $42, $43, $44, $45, $46, $47, $60,	
 RAM:0B9F 24 25 26 27+			     .BYTE $80,	$81, $82, $83, $84, $85, $86, $87
 RAM:0BC7 00	     byte_BC7:		     .BYTE 0				     ; DATA XREF: RAM:0AD6w
 RAM:0BC7									     ; RAM:0ADBr ...
-RAM:0BC8 00	     byte_BC8:		     .BYTE 0				     ; DATA XREF: RAM:08C7w
-RAM:0BC8									     ; RAM:08D0r
+RAM:0BC8 00	     piece_num_x2:	     .BYTE 0				     ; DATA XREF: RAM:08C7w
+RAM:0BC8									     ; RAM:render_piecer ...
 RAM:0BC9 00	     byte_BC9:		     .BYTE 0				     ; DATA XREF: RAM:08FFw
+RAM:0BC9									     ; RAM:0923r
 RAM:0BCA 00	     byte_BCA:		     .BYTE 0				     ; DATA XREF: RAM:090Fw
-RAM:0BCB 00	     byte_BCB:		     .BYTE 0				     ; DATA XREF: RAM:0914w
+RAM:0BCA									     ; RAM:091Br
+RAM:0BCB 00	     byte_BCB:		     .BYTE 0				     ; DATA XREF: RAM:loc_914w
+RAM:0BCB									     ; RAM:092Cr
 RAM:0BCC 25 25 25 25+ship_dir_bitmap_tbl:    .BYTE $25,	$25, $25, $25, $25, $26, $26, $26, $26,	$26, $26, $26, $26, $26, $26, $26
 RAM:0BCC 25 26 26 26+								     ; DATA XREF: RAM:0986r
 RAM:0BCC 26 26 26 26+								     ; RAM:099Cr
@@ -1918,16 +1897,16 @@ RAM:0CFC	     hook_inputs:						     ; CODE XREF: RAM:046Ep
 RAM:0CFC A9 00				     LDA     #0
 RAM:0CFE 8D 03 24			     STA     p1_start_switch
 RAM:0D01 8D 04 24			     STA     p2_start_switch
-RAM:0D04 8D 04 20			     STA     fire_switch
+RAM:0D04 8D 04 20			     STA     expl_tbl1+$2D
 RAM:0D07 8D 07 24			     STA     rotate_left_switch
 RAM:0D0A 8D 06 24			     STA     rotate_right_switch
 RAM:0D0D 8D 05 24			     STA     thrust_switch
-RAM:0D10 8D 03 20			     STA     hyperspace_switch
+RAM:0D10 8D 03 20			     STA     expl_tbl1+$2C
 RAM:0D13 A0 80				     LDY     #$80 ; '€'
 RAM:0D15 AD 10 D0			     LDA     $D010			     ; joystick	1
 RAM:0D18 29 01				     AND     #1				     ; fire pressed?
 RAM:0D1A D0 0C				     BNE     loc_D28			     ; no, skip
-RAM:0D1C 8C 04 20			     STY     fire_switch
+RAM:0D1C 8C 04 20			     STY     expl_tbl1+$2D
 RAM:0D1F A5 32				     LDA     placeP1HighScore
 RAM:0D21 25 33				     AND     placeP2HighScore
 RAM:0D23 10 03				     BPL     loc_D28
@@ -1938,7 +1917,7 @@ RAM:0D28									     ; hook_inputs+27j
 RAM:0D28 AD 11 D0			     LDA     $D011			     ; joystick	2
 RAM:0D2B 29 01				     AND     #1				     ; fire pressed?
 RAM:0D2D D0 0C				     BNE     loc_D3B			     ; no, skip
-RAM:0D2F 8C 04 20			     STY     fire_switch
+RAM:0D2F 8C 04 20			     STY     expl_tbl1+$2D
 RAM:0D32 A5 32				     LDA     placeP1HighScore
 RAM:0D34 25 33				     AND     placeP2HighScore
 RAM:0D36 10 03				     BPL     loc_D3B
@@ -1964,7 +1943,7 @@ RAM:0D53 AD 00 D3			     LDA     $D300
 RAM:0D56 49 FF				     EOR     #$FF
 RAM:0D58 29 22				     AND     #$22 ; '"'
 RAM:0D5A F0 03				     BEQ     loc_D5F
-RAM:0D5C 8C 03 20			     STY     hyperspace_switch
+RAM:0D5C 8C 03 20			     STY     expl_tbl1+$2C
 RAM:0D5F
 RAM:0D5F	     loc_D5F:							     ; CODE XREF: hook_inputs+5Ej
 RAM:0D5F AD 00 D3			     LDA     $D300
@@ -2288,11 +2267,11 @@ RAM:0F24	     ; ----------------------------------------------------------------
 RAM:0F24
 RAM:0F24	     render_object:						     ; CODE XREF: RAM:render_asteroidp
 RAM:0F24									     ; RAM:render_saucerp
-RAM:0F24 8E B6 0F			     STX     byte_FB6
-RAM:0F27 AA				     TAX
-RAM:0F28 BD B7 0F			     LDA     $FB7,X
+RAM:0F24 8E B6 0F			     STX     byte_FB6			     ; Y (0-127)?
+RAM:0F27 AA				     TAX				     ; from table look-up
+RAM:0F28 BD B7 0F			     LDA     unk_FB7,X
 RAM:0F2B 8D B4 0F			     STA     byte_FB4
-RAM:0F2E BD DF 0F			     LDA     $FDF,X
+RAM:0F2E BD DF 0F			     LDA     unk_FDF,X
 RAM:0F31 8D B5 0F			     STA     byte_FB5
 RAM:0F34 AE B6 0F			     LDX     byte_FB6
 RAM:0F37 B9 ED 19			     LDA     $19ED,Y
@@ -2386,7 +2365,7 @@ RAM:0FB5 42	     byte_FB5:		     .BYTE $42				     ; DATA XREF: RAM:0F31w
 RAM:0FB5									     ; RAM:0F86r
 RAM:0FB6 00	     byte_FB6:		     .BYTE 0				     ; DATA XREF: RAM:render_objectw
 RAM:0FB6									     ; RAM:0F34r
-RAM:0FB7 00				     .BYTE   0
+RAM:0FB7 00	     unk_FB7:		     .BYTE   0				     ; DATA XREF: RAM:0F28r
 RAM:0FB8 80				     .BYTE $80 ; €
 RAM:0FB9 00				     .BYTE   0
 RAM:0FBA 80				     .BYTE $80 ; €
@@ -2426,7 +2405,7 @@ RAM:0FDB 00				     .BYTE   0
 RAM:0FDC 80				     .BYTE $80 ; €
 RAM:0FDD 00				     .BYTE   0
 RAM:0FDE 80				     .BYTE $80 ; €
-RAM:0FDF 00				     .BYTE   0
+RAM:0FDF 00	     unk_FDF:		     .BYTE   0				     ; DATA XREF: RAM:0F2Er
 RAM:0FE0 01				     .BYTE   1
 RAM:0FE1 03				     .BYTE   3
 RAM:0FE2 04				     .BYTE   4
@@ -4416,8 +4395,8 @@ RAM:17FA
 RAM:17FA	     ; =============== S U B R O U T I N E =======================================
 RAM:17FA
 RAM:17FA
-RAM:17FA	     sub_17FA:							     ; CODE XREF: RAM:09B3p
-RAM:17FA									     ; RAM:0A5Fp ...
+RAM:17FA	     sub_17FA:							     ; CODE XREF: RAM:0929p
+RAM:17FA									     ; RAM:09B3p ...
 RAM:17FA 98				     TYA
 RAM:17FB 29 C0				     AND     #$C0 ; 'À'
 RAM:17FD C9 C0				     CMP     #$C0 ; 'À'
@@ -6186,104 +6165,18 @@ RAM:1FD3 CA				     .BYTE $CA ; Ê
 RAM:1FD4 D0				     .BYTE $D0 ; Ð
 RAM:1FD5 F0				     .BYTE $F0 ; ð
 RAM:1FD6 60				     .BYTE $60 ; `
-RAM:1FD7 00				     .BYTE   0
-RAM:1FD8 FF				     .BYTE $FF
-RAM:1FD9 FF				     .BYTE $FF
-RAM:1FDA FE				     .BYTE $FE ; þ
-RAM:1FDB FD				     .BYTE $FD ; ý
-RAM:1FDC FC				     .BYTE $FC ; ü
-RAM:1FDD FC				     .BYTE $FC ; ü
-RAM:1FDE 00				     .BYTE   0
-RAM:1FDF 00				     .BYTE   0
-RAM:1FE0 01				     .BYTE   1
-RAM:1FE1 01				     .BYTE   1
-RAM:1FE2 02				     .BYTE   2
-RAM:1FE3 02				     .BYTE   2
-RAM:1FE4 00				     .BYTE   0
-RAM:1FE5 00				     .BYTE   0
-RAM:1FE6 00				     .BYTE   0
-RAM:1FE7 00				     .BYTE   0
-RAM:1FE8 01				     .BYTE   1
-RAM:1FE9 02				     .BYTE   2
-RAM:1FEA 03				     .BYTE   3
-RAM:1FEB 00				     .BYTE   0
-RAM:1FEC 00				     .BYTE   0
-RAM:1FED 00				     .BYTE   0
-RAM:1FEE 00				     .BYTE   0
-RAM:1FEF 00				     .BYTE   0
-RAM:1FF0 FF				     .BYTE $FF
-RAM:1FF1 FE				     .BYTE $FE ; þ
-RAM:1FF2 FD				     .BYTE $FD ; ý
-RAM:1FF3 FC				     .BYTE $FC ; ü
-RAM:1FF4 00				     .BYTE   0
-RAM:1FF5 00				     .BYTE   0
-RAM:1FF6 00				     .BYTE   0
-RAM:1FF7 00				     .BYTE   0
-RAM:1FF8 FF				     .BYTE $FF
-RAM:1FF9 FE				     .BYTE $FE ; þ
-RAM:1FFA FD				     .BYTE $FD ; ý
-RAM:1FFB 00				     .BYTE   0
-RAM:1FFC 00				     .BYTE   0
-RAM:1FFD 00				     .BYTE   0
-RAM:1FFE 00				     .BYTE   0
-RAM:1FFF 00				     .BYTE   0
-RAM:2000 7F				     .BYTE $7F ; 
-RAM:2001 7F				     .BYTE $7F ; 
-RAM:2002 7F				     .BYTE $7F ; 
-RAM:2003 7F	     hyperspace_switch:	     .BYTE $7F				     ; DATA XREF: hook_inputs+14w
-RAM:2003									     ; hook_inputs+60w
-RAM:2004 7F	     fire_switch:	     .BYTE $7F				     ; DATA XREF: hook_inputs+8w
-RAM:2004									     ; hook_inputs+20w	...
-RAM:2005 7F				     .BYTE $7F ; 
-RAM:2006 7F				     .BYTE $7F ; 
-RAM:2007 7F				     .BYTE $7F ; 
-RAM:2008 01				     .BYTE   1
-RAM:2009 02				     .BYTE   2
-RAM:200A 03				     .BYTE   3
-RAM:200B 04				     .BYTE   4
-RAM:200C 05				     .BYTE   5
-RAM:200D 06				     .BYTE   6
-RAM:200E 00				     .BYTE   0
-RAM:200F 00				     .BYTE   0
-RAM:2010 01				     .BYTE   1
-RAM:2011 02				     .BYTE   2
-RAM:2012 03				     .BYTE   3
-RAM:2013 04				     .BYTE   4
-RAM:2014 00				     .BYTE   0
-RAM:2015 00				     .BYTE   0
-RAM:2016 00				     .BYTE   0
-RAM:2017 00				     .BYTE   0
-RAM:2018 00				     .BYTE   0
-RAM:2019 FF				     .BYTE $FF
-RAM:201A FF				     .BYTE $FF
-RAM:201B 00				     .BYTE   0
-RAM:201C 00				     .BYTE   0
-RAM:201D 00				     .BYTE   0
-RAM:201E 00				     .BYTE   0
-RAM:201F 00				     .BYTE   0
-RAM:2020 FF				     .BYTE $FF
-RAM:2021 FE				     .BYTE $FE ; þ
-RAM:2022 FD				     .BYTE $FD ; ý
-RAM:2023 FC				     .BYTE $FC ; ü
-RAM:2024 00				     .BYTE   0
-RAM:2025 00				     .BYTE   0
-RAM:2026 00				     .BYTE   0
-RAM:2027 00				     .BYTE   0
-RAM:2028 00				     .BYTE   0
-RAM:2029 FF				     .BYTE $FF
-RAM:202A FF				     .BYTE $FF
-RAM:202B 00				     .BYTE   0
-RAM:202C 00				     .BYTE   0
-RAM:202D 00				     .BYTE   0
-RAM:202E 00				     .BYTE   0
-RAM:202F 00				     .BYTE   0
-RAM:2030 01				     .BYTE   1
-RAM:2031 02				     .BYTE   2
-RAM:2032 00				     .BYTE   0
-RAM:2033 00				     .BYTE   0
-RAM:2034 00				     .BYTE   0
-RAM:2035 00				     .BYTE   0
-RAM:2036 00				     .BYTE   0
+RAM:1FD7 00 FF FF FE+expl_tbl1:		     .BYTE 0, $FF, $FF,	$FE, $FD, $FC, $FC, 0
+RAM:1FD7 FD FC FC 00+			     .BYTE 0, 1, 1, 2, 2, 0, 0,	0
+RAM:1FD7 00 01 01 02+			     .BYTE 0, 1, 2, 3, 0, 0, 0,	0
+RAM:1FD7 02 00 00 00+			     .BYTE 0, $FF, $FE,	$FD, $FC, 0, 0,	0
+RAM:1FD7 00 01 02 03+			     .BYTE 0, $FF, $FE,	$FD, 0,	0, 0, 0
+RAM:1FD7 00 00 00 00+			     .BYTE 0, $7F, $7F,	$7F, $7F, $7F, $7F, $7F
+RAM:2007 7F 01 02 03+expl_tbl2:		     .BYTE $7F,	1, 2, 3, 4, 5, 6, 0
+RAM:2007 04 05 06 00+			     .BYTE 0, 1, 2, 3, 4, 0, 0,	0
+RAM:2007 00 01 02 03+			     .BYTE 0, 0, $FF, $FF, 0, 0, 0, 0
+RAM:2007 04 00 00 00+			     .BYTE 0, $FF, $FE,	$FD, $FC, 0, 0,	0
+RAM:2007 00 00 FF FF+			     .BYTE 0, 0, $FF, $FF, 0, 0, 0, 0
+RAM:2007 00 00 00 00+			     .BYTE 0, 1, 2, 0, 0, 0, 0,	0
 RAM:2037 08				     .BYTE   8
 RAM:2038 10				     .BYTE $10
 RAM:2039 16				     .BYTE $16
