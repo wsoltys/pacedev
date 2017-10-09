@@ -2751,29 +2751,29 @@ ROM:7465	     display_exploding_ship:
 ROM:7465 AD 1B 02				     LDA     ship_Sts
 ROM:7468 C9 A2					     CMP     #$A2 ; '¢'                              ; 2 frames past exploding?
 ROM:746A B0 22					     BCS     loc_748E
-ROM:746C A2 0A					     LDX     #10				     ; 10 entries to parse
+ROM:746C A2 0A					     LDX     #10				     ; 5 entries
 ROM:746E
-ROM:746E	     loc_746E:									     ; start at	RTS???
+ROM:746E	     loc_746E:									     ; X
 ROM:746E BD EC 50				     LDA     DVGROM+$EC,X
 ROM:7471 4A					     LSR     A
 ROM:7472 4A					     LSR     A
 ROM:7473 4A					     LSR     A
 ROM:7474 4A					     LSR     A					     ; high->low nibble
 ROM:7475 18					     CLC
-ROM:7476 69 F8					     ADC     #$F8 ; 'ø'
-ROM:7478 49 F8					     EOR     #$F8 ; 'ø'
+ROM:7476 69 F8					     ADC     #$F8 ; 'ø'                              ; -8
+ROM:7478 49 F8					     EOR     #$F8 ; 'ø'                              ; ?
 ROM:747A 95 7E					     STA     byte_7E,X
-ROM:747C BD ED 50				     LDA     DVGROM+$ED,X
+ROM:747C BD ED 50				     LDA     DVGROM+$ED,X			     ; Y
 ROM:747F 4A					     LSR     A
 ROM:7480 4A					     LSR     A
 ROM:7481 4A					     LSR     A
 ROM:7482 4A					     LSR     A					     ; high->low nibble
 ROM:7483 18					     CLC
-ROM:7484 69 F8					     ADC     #$F8 ; 'ø'
-ROM:7486 49 F8					     EOR     #$F8 ; 'ø'
+ROM:7484 69 F8					     ADC     #$F8 ; 'ø'                              ; -8
+ROM:7486 49 F8					     EOR     #$F8 ; 'ø'                              ; ?
 ROM:7488 95 8A					     STA     byte_80+$A,X
 ROM:748A CA					     DEX
-ROM:748B CA					     DEX
+ROM:748B CA					     DEX					     ; next entry
 ROM:748C 10 E0					     BPL     loc_746E
 ROM:748E
 ROM:748E	     loc_748E:
@@ -2821,14 +2821,14 @@ ROM:74CB A5 03					     LDA     dvg_curr_addr_msb
 ROM:74CD 85 0C					     STA     byte_C
 ROM:74CF 20 49 7C				     JSR     from_exploding_ship
 ROM:74D2 A4 09					     LDY     byte_9
-ROM:74D4 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; wrecked ship table address LSB
-ROM:74D7 BE E1 50				     LDX     DVGROM+$E1,Y			     ; wrecked ship table address MSB
+ROM:74D4 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; ship pieces table address LSB
+ROM:74D7 BE E1 50				     LDX     DVGROM+$E1,Y			     ; ship pieces table address MSB
 ROM:74DA 20 45 7D				     JSR     write_AX_to_avgram
 ROM:74DD A4 09					     LDY     byte_9
-ROM:74DF B9 E1 50				     LDA     DVGROM+$E1,Y			     ; wrecked ship table address MSB
+ROM:74DF B9 E1 50				     LDA     DVGROM+$E1,Y			     ; ship pieces table address MSB
 ROM:74E2 49 04					     EOR     #4
 ROM:74E4 AA					     TAX
-ROM:74E5 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; wrecked ship table address LSB
+ROM:74E5 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; ship pieces table address LSB
 ROM:74E8 29 0F					     AND     #$F
 ROM:74EA 49 04					     EOR     #4
 ROM:74EC 20 45 7D				     JSR     write_AX_to_avgram

@@ -2753,29 +2753,29 @@ display_exploding_ship:
 				LDA	ship_Sts
 				CMP	#$A2 ; '¢'                              ; 2 frames past exploding?
 				BCS	loc_748E
-				LDX	#10					; 10 entries to	parse
+				LDX	#10					; 5 entries
 
-loc_746E:									; start	at RTS???
+loc_746E:									; X
 				LDA	DVGROM+$EC,X
 				LSR	A
 				LSR	A
 				LSR	A
 				LSR	A					; high->low nibble
 				CLC
-				ADC	#$F8 ; 'ø'
-				EOR	#$F8 ; 'ø'
+				ADC	#$F8 ; 'ø'                              ; -8
+				EOR	#$F8 ; 'ø'                              ; ?
 				STA	byte_7E,X
-				LDA	DVGROM+$ED,X
+				LDA	DVGROM+$ED,X				; Y
 				LSR	A
 				LSR	A
 				LSR	A
 				LSR	A					; high->low nibble
 				CLC
-				ADC	#$F8 ; 'ø'
-				EOR	#$F8 ; 'ø'
+				ADC	#$F8 ; 'ø'                              ; -8
+				EOR	#$F8 ; 'ø'                              ; ?
 				STA	byte_80+$A,X
 				DEX
-				DEX
+				DEX						; next entry
 				BPL	loc_746E
 
 loc_748E:
@@ -2823,14 +2823,14 @@ loc_74B9:
 				STA	byte_C
 				JSR	from_exploding_ship
 				LDY	byte_9
-				LDA	DVGROM+$E0,Y				; wrecked ship table address LSB
-				LDX	DVGROM+$E1,Y				; wrecked ship table address MSB
+				LDA	DVGROM+$E0,Y				; ship pieces table address LSB
+				LDX	DVGROM+$E1,Y				; ship pieces table address MSB
 				JSR	write_AX_to_avgram
 				LDY	byte_9
-				LDA	DVGROM+$E1,Y				; wrecked ship table address MSB
+				LDA	DVGROM+$E1,Y				; ship pieces table address MSB
 				EOR	#4
 				TAX
-				LDA	DVGROM+$E0,Y				; wrecked ship table address LSB
+				LDA	DVGROM+$E0,Y				; ship pieces table address LSB
 				AND	#$F
 				EOR	#4
 				JSR	write_AX_to_avgram
