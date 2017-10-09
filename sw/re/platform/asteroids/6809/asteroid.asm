@@ -1011,8 +1011,9 @@ high_score_entry:
         ldx     #dp_base+placeP1HighScore
         ldb     b,x
         stb     *byte_B
-        addb    *letterHighScoreEntry
-        stb     *byte_C
+        tfr     b,a
+        adda    *letterHighScoreEntry
+        sta     *byte_C
         jsr     display_initial
         ldb     *byte_B
         incb
@@ -2178,11 +2179,11 @@ insert_score_in_table:
         stx     *byte_B
         sty     *byte_C                                 ; high score entry offset
         tfr     x,d
-        lsra                                            ; 0=p1, 1=p2
+        lsrb                                            ; 0=p1, 1=p2
         tfr     d,x
         tfr     y,d
-        lsra                                            ; high score entry index
-        adda    *(byte_C+1)                             ; high score index * 3
+        lsrb                                            ; high score entry index
+        addb    *(byte_C+1)                             ; high score index * 3
         std     *byte_D                                 ; offset into initials table?
         stb     dp_base+placeP1HighScore,X
         ldx     #27                                     ; offset of 10th initials
