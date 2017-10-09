@@ -2723,6 +2723,13 @@ main_isr:
 ; which is accessible by the 6502
 
 .ifdef PLATFORM_COCO3
+ship_explosion_pieces_velocity:
+        .byte 0xD8, 0x1E                ; (-40,  30)
+        .byte 0x32, 0xEC                ; ( 50, -20)
+        .byte 0x00, 0xC4                ; (  0, -60)
+        .byte 0x3C, 0x14                ; ( 60,  20)
+        .byte 0x0A, 0x46                ; ( 10,  70)
+        .byte 0xD8, 0xD8                ; (-40, -40)
 english_msg_offset_tbl:
         .byte 0x0B, 0x13, 0x19, 0x2F, 0x41, 0x55, 0x6F, 0x77, 0x7D, 0x87, 0x91
 english_msg_tbl:
