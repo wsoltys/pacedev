@@ -463,11 +463,30 @@ static void dump_displaylist (void)
 
 void asteroids2 (void)
 {
+  static int8_t tbl1[] =
+  {
+    0, 0xFF, 0xFF,	0xFE, 0xFD, 0xFC, 0xFC, 0,
+		0, 1, 1, 2, 2, 0, 0,	0,
+		0, 1, 2, 3, 0, 0, 0,	0,
+		0, 0xFF, 0xFE,	0xFD, 0xFC, 0, 0,	0,
+		0, 0xFF, 0xFE,	0xFD, 0,	0, 0, 0,
+		0, 1, 2, 0, 0, 0, 0, 0
+	};
+	static int8_t tbl2[] =
+	{
+    0,	1, 2, 3, 4, 5, 6, 0,
+		0, 1, 2, 3, 4, 0, 0,	0,
+		0, 0, 0xFF, 0xFF, 0, 0, 0, 0,
+		0, 0xFF, 0xFE,	0xFD, 0xFC, 0, 0,	0,
+		0, 0, 0xFF, 0xFF, 0, 0, 0, 0,
+		0, 1, 2, 0, 0, 0, 0,	0
+	};
+	
 	start:
 		reset ();
 		init_sound ();
 		init_players ();
-	
+
 	game_loop:
 		while (1)
 		{
@@ -476,6 +495,17 @@ void asteroids2 (void)
 			wave_loop:
 				while (1)
 				{
+        	int piece, pixel;
+        	
+        	for (piece=0; piece<6; piece++)
+        	{
+        	  for (pixel=0; pixel<8; pixel++)
+        	  {
+        	    osd_line (400+piece*20+tbl1[piece*8+pixel], 400+tbl2[piece*8+pixel],
+        	              400+piece*20+tbl1[piece*8+pixel], 400+tbl2[piece*8+pixel], 15);
+        	  }
+        	}
+
 					// check self-test
 					if (osd_quit ())
 						return;

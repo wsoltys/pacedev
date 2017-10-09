@@ -2753,9 +2753,9 @@ display_exploding_ship:
 				LDA	ship_Sts
 				CMP	#$A2 ; '¢'                              ; 2 frames past exploding?
 				BCS	loc_748E
-				LDX	#10					; 5 entries
+				LDX	#10					; (5+1)	entries
 
-loc_746E:									; X
+init_piece_tbl:									; piece	velocity X
 				LDA	DVGROM+$EC,X
 				LSR	A
 				LSR	A
@@ -2765,7 +2765,7 @@ loc_746E:									; X
 				ADC	#$F8 ; 'ø'                              ; -8
 				EOR	#$F8 ; 'ø'                              ; ?
 				STA	byte_7E,X
-				LDA	DVGROM+$ED,X				; Y
+				LDA	DVGROM+$ED,X				; piece	velocity Y
 				LSR	A
 				LSR	A
 				LSR	A
@@ -2776,7 +2776,7 @@ loc_746E:									; X
 				STA	byte_80+$A,X
 				DEX
 				DEX						; next entry
-				BPL	loc_746E
+				BPL	init_piece_tbl
 
 loc_748E:
 				LDA	ship_Sts
@@ -2784,13 +2784,13 @@ loc_748E:
 				AND	#$70 ; 'p'
 				LSR	A
 				LSR	A
-				LSR	A
+				LSR	A					; num pieces left (x2)
 				TAX
 
-loc_7499:
+render_piece:									; piece	number
 				STX	byte_9
 				LDY	#0
-				LDA	DVGROM+$EC,X
+				LDA	DVGROM+$EC,X				; piece	velocity X
 				BPL	loc_74A3
 				DEY
 
@@ -2804,7 +2804,7 @@ loc_74A3:
 				STA	byte_4
 				STY	byte_5
 				LDY	#0
-				LDA	DVGROM+$ED,X
+				LDA	DVGROM+$ED,X				; piece	velocity Y
 				BPL	loc_74B9
 				DEY
 
@@ -2820,37 +2820,37 @@ loc_74B9:
 				LDA	dvg_curr_addr_lsb
 				STA	byte_B
 				LDA	dvg_curr_addr_msb
-				STA	byte_C
-				JSR	from_exploding_ship
-				LDY	byte_9
-				LDA	DVGROM+$E0,Y				; ship pieces table address LSB
-				LDX	DVGROM+$E1,Y				; ship pieces table address MSB
+				STA	byte_C					; save avgram ptr
+				JSR	calc_and_goto_piece_position
+				LDY	byte_9					; piece	number
+				LDA	DVGROM+$E0,Y				; piece	SVEC byte 1
+				LDX	DVGROM+$E1,Y				; piece	SVEC byte 2
 				JSR	write_AX_to_avgram
-				LDY	byte_9
-				LDA	DVGROM+$E1,Y				; ship pieces table address MSB
-				EOR	#4
+				LDY	byte_9					; piece	number
+				LDA	DVGROM+$E1,Y				; piece	SVEC byte 2
+				EOR	#4					; negate Xs
 				TAX
-				LDA	DVGROM+$E0,Y				; ship pieces table address LSB
-				AND	#$F
-				EOR	#4
-				JSR	write_AX_to_avgram
+				LDA	DVGROM+$E0,Y				; piece	SVEC byte 1
+				AND	#$F					; Z=0
+				EOR	#4					; negate Ys
+				JSR	write_AX_to_avgram			; back to vector start
 				LDY	#$FF
 
-loc_74F1:
+goto_ship_origin:
 				INY
-				LDA	(byte_B),Y
+				LDA	(byte_B),Y				; piece	pos. VECT byte 1
 				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				INY
-				LDA	(byte_B),Y
-				EOR	#4
+				LDA	(byte_B),Y				; piece	pos VECT byte 2
+				EOR	#4					; negate Ys
 				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
-				CPY	#3
-				BCC	loc_74F1
+				CPY	#3					; done whole VECT cmd?
+				BCC	goto_ship_origin			; no, loop
 				JSR	update_dvg_curr_addr
-				LDX	byte_9
+				LDX	byte_9					; piece	number
 				DEX
-				DEX
-				BPL	loc_7499
+				DEX						; done all 6 pieces?
+				BPL	render_piece				; no, loop
 				RTS
 ; End of function display_exploding_ship
 
@@ -3999,7 +3999,7 @@ locret_7C43:
 ; =============== S U B	R O U T	I N E =======================================
 
 
-from_exploding_ship:
+calc_and_goto_piece_position:
 				LDA	byte_5
 				CMP	#$80 ; '€'
 				BCC	loc_7C60
@@ -4101,7 +4101,7 @@ loc_7CAB:
 				INY
 				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				JMP	update_dvg_curr_addr
-; End of function from_exploding_ship
+; End of function calc_and_goto_piece_position
 
 
 ; =============== S U B	R O U T	I N E =======================================

@@ -2751,9 +2751,9 @@ ROM:7465	     display_exploding_ship:
 ROM:7465 AD 1B 02				     LDA     ship_Sts
 ROM:7468 C9 A2					     CMP     #$A2 ; '¢'                              ; 2 frames past exploding?
 ROM:746A B0 22					     BCS     loc_748E
-ROM:746C A2 0A					     LDX     #10				     ; 5 entries
+ROM:746C A2 0A					     LDX     #10				     ; (5+1) entries
 ROM:746E
-ROM:746E	     loc_746E:									     ; X
+ROM:746E	     init_piece_tbl:								     ; piece velocity X
 ROM:746E BD EC 50				     LDA     DVGROM+$EC,X
 ROM:7471 4A					     LSR     A
 ROM:7472 4A					     LSR     A
@@ -2763,7 +2763,7 @@ ROM:7475 18					     CLC
 ROM:7476 69 F8					     ADC     #$F8 ; 'ø'                              ; -8
 ROM:7478 49 F8					     EOR     #$F8 ; 'ø'                              ; ?
 ROM:747A 95 7E					     STA     byte_7E,X
-ROM:747C BD ED 50				     LDA     DVGROM+$ED,X			     ; Y
+ROM:747C BD ED 50				     LDA     DVGROM+$ED,X			     ; piece velocity Y
 ROM:747F 4A					     LSR     A
 ROM:7480 4A					     LSR     A
 ROM:7481 4A					     LSR     A
@@ -2774,7 +2774,7 @@ ROM:7486 49 F8					     EOR     #$F8 ; 'ø'                              ; ?
 ROM:7488 95 8A					     STA     byte_80+$A,X
 ROM:748A CA					     DEX
 ROM:748B CA					     DEX					     ; next entry
-ROM:748C 10 E0					     BPL     loc_746E
+ROM:748C 10 E0					     BPL     init_piece_tbl
 ROM:748E
 ROM:748E	     loc_748E:
 ROM:748E AD 1B 02				     LDA     ship_Sts
@@ -2782,13 +2782,13 @@ ROM:7491 49 FF					     EOR     #$FF
 ROM:7493 29 70					     AND     #$70 ; 'p'
 ROM:7495 4A					     LSR     A
 ROM:7496 4A					     LSR     A
-ROM:7497 4A					     LSR     A
+ROM:7497 4A					     LSR     A					     ; num pieces left (x2)
 ROM:7498 AA					     TAX
 ROM:7499
-ROM:7499	     loc_7499:
+ROM:7499	     render_piece:								     ; piece number
 ROM:7499 86 09					     STX     byte_9
 ROM:749B A0 00					     LDY     #0
-ROM:749D BD EC 50				     LDA     DVGROM+$EC,X
+ROM:749D BD EC 50				     LDA     DVGROM+$EC,X			     ; piece velocity X
 ROM:74A0 10 01					     BPL     loc_74A3
 ROM:74A2 88					     DEY
 ROM:74A3
@@ -2802,7 +2802,7 @@ ROM:74AB 95 7E					     STA     byte_7E,X
 ROM:74AD 85 04					     STA     byte_4
 ROM:74AF 84 05					     STY     byte_5
 ROM:74B1 A0 00					     LDY     #0
-ROM:74B3 BD ED 50				     LDA     DVGROM+$ED,X
+ROM:74B3 BD ED 50				     LDA     DVGROM+$ED,X			     ; piece velocity Y
 ROM:74B6 10 01					     BPL     loc_74B9
 ROM:74B8 88					     DEY
 ROM:74B9
@@ -2818,37 +2818,37 @@ ROM:74C5 84 07					     STY     byte_7
 ROM:74C7 A5 02					     LDA     dvg_curr_addr_lsb
 ROM:74C9 85 0B					     STA     byte_B
 ROM:74CB A5 03					     LDA     dvg_curr_addr_msb
-ROM:74CD 85 0C					     STA     byte_C
-ROM:74CF 20 49 7C				     JSR     from_exploding_ship
-ROM:74D2 A4 09					     LDY     byte_9
-ROM:74D4 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; ship pieces table address LSB
-ROM:74D7 BE E1 50				     LDX     DVGROM+$E1,Y			     ; ship pieces table address MSB
+ROM:74CD 85 0C					     STA     byte_C				     ; save avgram ptr
+ROM:74CF 20 49 7C				     JSR     calc_and_goto_piece_position
+ROM:74D2 A4 09					     LDY     byte_9				     ; piece number
+ROM:74D4 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; piece SVEC byte 1
+ROM:74D7 BE E1 50				     LDX     DVGROM+$E1,Y			     ; piece SVEC byte 2
 ROM:74DA 20 45 7D				     JSR     write_AX_to_avgram
-ROM:74DD A4 09					     LDY     byte_9
-ROM:74DF B9 E1 50				     LDA     DVGROM+$E1,Y			     ; ship pieces table address MSB
-ROM:74E2 49 04					     EOR     #4
+ROM:74DD A4 09					     LDY     byte_9				     ; piece number
+ROM:74DF B9 E1 50				     LDA     DVGROM+$E1,Y			     ; piece SVEC byte 2
+ROM:74E2 49 04					     EOR     #4					     ; negate Xs
 ROM:74E4 AA					     TAX
-ROM:74E5 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; ship pieces table address LSB
-ROM:74E8 29 0F					     AND     #$F
-ROM:74EA 49 04					     EOR     #4
-ROM:74EC 20 45 7D				     JSR     write_AX_to_avgram
+ROM:74E5 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; piece SVEC byte 1
+ROM:74E8 29 0F					     AND     #$F				     ; Z=0
+ROM:74EA 49 04					     EOR     #4					     ; negate Ys
+ROM:74EC 20 45 7D				     JSR     write_AX_to_avgram			     ; back to vector start
 ROM:74EF A0 FF					     LDY     #$FF
 ROM:74F1
-ROM:74F1	     loc_74F1:
+ROM:74F1	     goto_ship_origin:
 ROM:74F1 C8					     INY
-ROM:74F2 B1 0B					     LDA     (byte_B),Y
+ROM:74F2 B1 0B					     LDA     (byte_B),Y				     ; piece pos. VECT byte 1
 ROM:74F4 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:74F6 C8					     INY
-ROM:74F7 B1 0B					     LDA     (byte_B),Y
-ROM:74F9 49 04					     EOR     #4
+ROM:74F7 B1 0B					     LDA     (byte_B),Y				     ; piece pos VECT byte 2
+ROM:74F9 49 04					     EOR     #4					     ; negate Ys
 ROM:74FB 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:74FD C0 03					     CPY     #3
-ROM:74FF 90 F0					     BCC     loc_74F1
+ROM:74FD C0 03					     CPY     #3					     ; done whole VECT cmd?
+ROM:74FF 90 F0					     BCC     goto_ship_origin			     ; no, loop
 ROM:7501 20 39 7C				     JSR     update_dvg_curr_addr
-ROM:7504 A6 09					     LDX     byte_9
+ROM:7504 A6 09					     LDX     byte_9				     ; piece number
 ROM:7506 CA					     DEX
-ROM:7507 CA					     DEX
-ROM:7508 10 8F					     BPL     loc_7499
+ROM:7507 CA					     DEX					     ; done all	6 pieces?
+ROM:7508 10 8F					     BPL     render_piece			     ; no, loop
 ROM:750A 60					     RTS
 ROM:750A	     ; End of function display_exploding_ship
 ROM:750A
@@ -3997,7 +3997,7 @@ ROM:7C49
 ROM:7C49	     ; =============== S U B R O U T I N E =======================================
 ROM:7C49
 ROM:7C49
-ROM:7C49	     from_exploding_ship:
+ROM:7C49	     calc_and_goto_piece_position:
 ROM:7C49 A5 05					     LDA     byte_5
 ROM:7C4B C9 80					     CMP     #$80 ; '€'
 ROM:7C4D 90 11					     BCC     loc_7C60
@@ -4099,7 +4099,7 @@ ROM:7CD6 05 05					     ORA     byte_5
 ROM:7CD8 C8					     INY
 ROM:7CD9 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7CDB 4C 39 7C				     JMP     update_dvg_curr_addr
-ROM:7CDB	     ; End of function from_exploding_ship
+ROM:7CDB	     ; End of function calc_and_goto_piece_position
 ROM:7CDB
 ROM:7CDE
 ROM:7CDE	     ; =============== S U B R O U T I N E =======================================

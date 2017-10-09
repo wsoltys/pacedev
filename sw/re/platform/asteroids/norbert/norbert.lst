@@ -825,7 +825,7 @@ RAM:0401 60				     .BYTE $60 ; `
 RAM:0402 4C				     .BYTE $4C ; L
 RAM:0403 06				     .BYTE   6
 RAM:0404 04				     .BYTE   4
-RAM:0405 00				     .BYTE   0
+RAM:0405 00	     byte_405:		     .BYTE 0				     ; DATA XREF: RAM:042Cr
 RAM:0406 20				     .BYTE $20
 RAM:0407 F9				     .BYTE $F9 ; ˘
 RAM:0408 1B				     .BYTE $1B
@@ -853,80 +853,43 @@ RAM:041D A9				     .BYTE $A9 ; ©
 RAM:041E FC				     .BYTE $FC ; ¸
 RAM:041F 8D				     .BYTE $8D ; ç
 RAM:0420 00				     .BYTE   0
-RAM:0421 28				     .BYTE $28 ; (
-RAM:0422 A9				     .BYTE $A9 ; ©
-RAM:0423 FC				     .BYTE $FC ; ¸
-RAM:0424 8D				     .BYTE $8D ; ç
-RAM:0425 01				     .BYTE   1
-RAM:0426 28				     .BYTE $28 ; (
-RAM:0427 A9				     .BYTE $A9 ; ©
-RAM:0428 FD				     .BYTE $FD ; ˝
-RAM:0429 8D				     .BYTE $8D ; ç
-RAM:042A 02				     .BYTE   2
-RAM:042B 28				     .BYTE $28 ; (
-RAM:042C AD				     .BYTE $AD ; ≠
-RAM:042D 05				     .BYTE   5
-RAM:042E 04				     .BYTE   4
-RAM:042F 09				     .BYTE   9
-RAM:0430 FC				     .BYTE $FC ; ¸
-RAM:0431 8D				     .BYTE $8D ; ç
-RAM:0432 03				     .BYTE   3
-RAM:0433 28				     .BYTE $28 ; (
-RAM:0434 A9				     .BYTE $A9 ; ©
-RAM:0435 7F				     .BYTE $7F ; 
-RAM:0436 A2				     .BYTE $A2 ; ¢
-RAM:0437 07				     .BYTE   7
-RAM:0438 9D				     .BYTE $9D ; ù
-RAM:0439 00				     .BYTE   0
-RAM:043A 20				     .BYTE $20
-RAM:043B 9D				     .BYTE $9D ; ù
-RAM:043C 00				     .BYTE   0
-RAM:043D 24				     .BYTE $24 ; $
-RAM:043E CA				     .BYTE $CA ;  
-RAM:043F 10				     .BYTE $10
-RAM:0440 F7				     .BYTE $F7 ; ˜
-RAM:0441 4C				     .BYTE $4C ; L
-RAM:0442 F3				     .BYTE $F3 ; Û
-RAM:0443 7C				     .BYTE $7C ; |
-RAM:0444 A2				     .BYTE $A2 ; ¢
-RAM:0445 00				     .BYTE   0
-RAM:0446 8A				     .BYTE $8A ; ä
-RAM:0447 95				     .BYTE $95 ; ï
-RAM:0448 00				     .BYTE   0
-RAM:0449 9D				     .BYTE $9D ; ù
-RAM:044A 00				     .BYTE   0
-RAM:044B 02				     .BYTE   2
-RAM:044C 9D				     .BYTE $9D ; ù
-RAM:044D 00				     .BYTE   0
-RAM:044E 03				     .BYTE   3
-RAM:044F 9D				     .BYTE $9D ; ù
-RAM:0450 00				     .BYTE   0
-RAM:0451 40				     .BYTE $40 ; @
-RAM:0452 9D				     .BYTE $9D ; ù
-RAM:0453 00				     .BYTE   0
-RAM:0454 41				     .BYTE $41 ; A
-RAM:0455 9D				     .BYTE $9D ; ù
-RAM:0456 00				     .BYTE   0
-RAM:0457 42				     .BYTE $42 ; B
-RAM:0458 9D				     .BYTE $9D ; ù
-RAM:0459 00				     .BYTE   0
-RAM:045A 43				     .BYTE $43 ; C
-RAM:045B 9D				     .BYTE $9D ; ù
-RAM:045C 00				     .BYTE   0
-RAM:045D 44				     .BYTE $44 ; D
-RAM:045E 9D				     .BYTE $9D ; ù
-RAM:045F 00				     .BYTE   0
-RAM:0460 45				     .BYTE $45 ; E
-RAM:0461 9D				     .BYTE $9D ; ù
-RAM:0462 00				     .BYTE   0
-RAM:0463 46				     .BYTE $46 ; F
-RAM:0464 9D				     .BYTE $9D ; ù
-RAM:0465 00				     .BYTE   0
-RAM:0466 47				     .BYTE $47 ; G
-RAM:0467 E8				     .BYTE $E8 ; Ë
-RAM:0468 D0				     .BYTE $D0 ; –
-RAM:0469 DD				     .BYTE $DD ; ›
-RAM:046A 60				     .BYTE $60 ; `
+RAM:0421	     ; ---------------------------------------------------------------------------
+RAM:0421 28				     PLP
+RAM:0422 A9 FC				     LDA     #$FC ; '¸'
+RAM:0424 8D 01 28			     STA     byte_2801
+RAM:0427 A9 FD				     LDA     #$FD ; '˝'
+RAM:0429 8D 02 28			     STA     byte_2802
+RAM:042C AD 05 04			     LDA     byte_405
+RAM:042F 09 FC				     ORA     #$FC ; '¸'
+RAM:0431 8D 03 28			     STA     byte_2803
+RAM:0434 A9 7F				     LDA     #$7F ; ''
+RAM:0436 A2 07				     LDX     #7
+RAM:0438
+RAM:0438	     loc_438:							     ; CODE XREF: RAM:043Fj
+RAM:0438 9D 00 20			     STA     $2000,X
+RAM:043B 9D 00 24			     STA     $2400,X
+RAM:043E CA				     DEX
+RAM:043F 10 F7				     BPL     loc_438
+RAM:0441 4C F3 7C			     JMP     $7CF3
+RAM:0444	     ; ---------------------------------------------------------------------------
+RAM:0444 A2 00				     LDX     #0
+RAM:0446 8A				     TXA
+RAM:0447
+RAM:0447	     loc_447:							     ; CODE XREF: RAM:0468j
+RAM:0447 95 00				     STA     0,X
+RAM:0449 9D 00 02			     STA     $200,X
+RAM:044C 9D 00 03			     STA     $300,X
+RAM:044F 9D 00 40			     STA     $4000,X
+RAM:0452 9D 00 41			     STA     $4100,X
+RAM:0455 9D 00 42			     STA     $4200,X
+RAM:0458 9D 00 43			     STA     $4300,X
+RAM:045B 9D 00 44			     STA     $4400,X
+RAM:045E 9D 00 45			     STA     $4500,X
+RAM:0461 9D 00 46			     STA     $4600,X
+RAM:0464 9D 00 47			     STA     $4700,X
+RAM:0467 E8				     INX
+RAM:0468 D0 DD				     BNE     loc_447
+RAM:046A 60				     RTS
 RAM:046B	     ; ---------------------------------------------------------------------------
 RAM:046B
 RAM:046B	     atari_hook:
@@ -1454,7 +1417,7 @@ RAM:08C7 8D C8 0B			     STA     piece_num_x2
 RAM:08CA 8E 4C 0B			     STX     byte_B4C
 RAM:08CD 8C 4D 0B			     STY     byte_B4D
 RAM:08D0
-RAM:08D0	     render_piece:						     ; CODE XREF: RAM:0938j
+RAM:08D0	     calc_and_render_piece:					     ; CODE XREF: RAM:0938j
 RAM:08D0 AE C8 0B			     LDX     piece_num_x2
 RAM:08D3 8A				     TXA
 RAM:08D4 0A				     ASL     A
@@ -1489,32 +1452,32 @@ RAM:090A 6A				     ROR     A
 RAM:090B 18				     CLC
 RAM:090C 6D 4D 0B			     ADC     byte_B4D
 RAM:090F 8D CA 0B			     STA     byte_BCA
-RAM:0912 A2 07				     LDX     #7				     ; 7+1=8 lines?
+RAM:0912 A2 07				     LDX     #7				     ; 7+1=8 pixels to render
 RAM:0914
-RAM:0914	     loc_914:							     ; CODE XREF: RAM:0930j
-RAM:0914 8E CB 0B			     STX     byte_BCB
+RAM:0914	     render_piece:						     ; CODE XREF: RAM:0930j
+RAM:0914 8E CB 0B			     STX     pixel_cnt
 RAM:0917 18				     CLC
 RAM:0918
 RAM:0918	     loc_918:							     ; DATA XREF: RAM:08E8w
 RAM:0918									     ; RAM:08EFw
 RAM:0918 BD 07 19			     LDA     $1907,X			     ; base = $2007
 RAM:091B 6D CA 0B			     ADC     byte_BCA
-RAM:091E A8				     TAY
+RAM:091E A8				     TAY				     ; Y coord
 RAM:091F 18				     CLC
 RAM:0920
 RAM:0920	     loc_920:							     ; DATA XREF: RAM:08DAw
 RAM:0920									     ; RAM:08E1w
 RAM:0920 BD 66 19			     LDA     $1966,X			     ; base = $1FD7 (patched)
 RAM:0923 6D C9 0B			     ADC     byte_BC9
-RAM:0926 AA				     TAX
-RAM:0927 A9 07				     LDA     #7
-RAM:0929 20 FA 17			     JSR     sub_17FA
-RAM:092C AE CB 0B			     LDX     byte_BCB
+RAM:0926 AA				     TAX				     ; X coord
+RAM:0927 A9 07				     LDA     #7				     ; next instruction	is LDA...
+RAM:0929 20 FA 17			     JSR     render_pixel
+RAM:092C AE CB 0B			     LDX     pixel_cnt
 RAM:092F CA				     DEX				     ; done all	lines?
-RAM:0930 10 E2				     BPL     loc_914			     ; no, loop
+RAM:0930 10 E2				     BPL     render_piece		     ; no, loop
 RAM:0932 CE C8 0B			     DEC     piece_num_x2
 RAM:0935 CE C8 0B			     DEC     piece_num_x2		     ; done all	pieces?
-RAM:0938 10 96				     BPL     render_piece		     ; no, loop
+RAM:0938 10 96				     BPL     calc_and_render_piece	     ; no, loop
 RAM:093A 4C B6 09			     JMP     chk_saucer
 RAM:093D	     ; ---------------------------------------------------------------------------
 RAM:093D
@@ -1577,7 +1540,7 @@ RAM:09AB BD CC 0C			     LDA     thrust_x_off_tbl,X
 RAM:09AE 18				     CLC
 RAM:09AF 6D 4F 0B			     ADC     ship_x_coord
 RAM:09B2 AA				     TAX
-RAM:09B3 20 FA 17			     JSR     sub_17FA
+RAM:09B3 20 FA 17			     JSR     render_pixel
 RAM:09B6
 RAM:09B6	     chk_saucer:						     ; CODE XREF: RAM:0871j
 RAM:09B6									     ; RAM:0897j ...
@@ -1674,7 +1637,7 @@ RAM:0A58 18				     CLC
 RAM:0A59 69 08				     ADC     #8				     ; X fudge-factor =	8
 RAM:0A5B AA				     TAX
 RAM:0A5C AD 51 0B			     LDA     tmp_X_B51
-RAM:0A5F 20 FA 17			     JSR     sub_17FA
+RAM:0A5F 20 FA 17			     JSR     render_pixel
 RAM:0A62 AE 51 0B			     LDX     tmp_X_B51
 RAM:0A65
 RAM:0A65	     next_shot:							     ; CODE XREF: RAM:0A1Fj
@@ -1752,7 +1715,7 @@ RAM:0AD9	     loc_AD9:							     ; CODE XREF: RAM:0AEEj
 RAM:0AD9 A2 6C				     LDX     #$6C ; 'l'
 RAM:0ADB AC C7 0B			     LDY     byte_BC7
 RAM:0ADE A9 07				     LDA     #7
-RAM:0AE0 20 FA 17			     JSR     sub_17FA
+RAM:0AE0 20 FA 17			     JSR     render_pixel
 RAM:0AE3 18				     CLC
 RAM:0AE4 AD C7 0B			     LDA     byte_BC7
 RAM:0AE7 69 08				     ADC     #8
@@ -1769,19 +1732,19 @@ RAM:0AF6 A5 31				     LDA     letterHighScoreEntry
 RAM:0AF8 D0 25				     BNE     loc_B1F
 RAM:0AFA A2 6A				     LDX     #$6A ; 'j'
 RAM:0AFC A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0AFE 20 FA 17			     JSR     sub_17FA
+RAM:0AFE 20 FA 17			     JSR     render_pixel
 RAM:0B01 A2 6B				     LDX     #$6B ; 'k'
 RAM:0B03 A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B05 20 FA 17			     JSR     sub_17FA
+RAM:0B05 20 FA 17			     JSR     render_pixel
 RAM:0B08 A2 6C				     LDX     #$6C ; 'l'
 RAM:0B0A A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B0C 20 FA 17			     JSR     sub_17FA
+RAM:0B0C 20 FA 17			     JSR     render_pixel
 RAM:0B0F A2 6D				     LDX     #$6D ; 'm'
 RAM:0B11 A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B13 20 FA 17			     JSR     sub_17FA
+RAM:0B13 20 FA 17			     JSR     render_pixel
 RAM:0B16 A2 6E				     LDX     #$6E ; 'n'
 RAM:0B18 A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B1A 20 FA 17			     JSR     sub_17FA
+RAM:0B1A 20 FA 17			     JSR     render_pixel
 RAM:0B1D A9 01				     LDA     #1
 RAM:0B1F
 RAM:0B1F	     loc_B1F:							     ; CODE XREF: RAM:0AF8j
@@ -1789,19 +1752,19 @@ RAM:0B1F C9 01				     CMP     #1
 RAM:0B21 D0 23				     BNE     loc_B46
 RAM:0B23 A2 70				     LDX     #$70 ; 'p'
 RAM:0B25 A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B27 20 FA 17			     JSR     sub_17FA
+RAM:0B27 20 FA 17			     JSR     render_pixel
 RAM:0B2A A2 71				     LDX     #$71 ; 'q'
 RAM:0B2C A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B2E 20 FA 17			     JSR     sub_17FA
+RAM:0B2E 20 FA 17			     JSR     render_pixel
 RAM:0B31 A2 72				     LDX     #$72 ; 'r'
 RAM:0B33 A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B35 20 FA 17			     JSR     sub_17FA
+RAM:0B35 20 FA 17			     JSR     render_pixel
 RAM:0B38 A2 73				     LDX     #$73 ; 's'
 RAM:0B3A A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B3C 20 FA 17			     JSR     sub_17FA
+RAM:0B3C 20 FA 17			     JSR     render_pixel
 RAM:0B3F A2 74				     LDX     #$74 ; 't'
 RAM:0B41 A0 AF				     LDY     #$AF ; 'Ø'
-RAM:0B43 20 FA 17			     JSR     sub_17FA
+RAM:0B43 20 FA 17			     JSR     render_pixel
 RAM:0B46
 RAM:0B46	     loc_B46:							     ; CODE XREF: RAM:0AF4j
 RAM:0B46									     ; RAM:0B21j
@@ -1858,12 +1821,12 @@ RAM:0B9F 24 25 26 27+			     .BYTE $80,	$81, $82, $83, $84, $85, $86, $87
 RAM:0BC7 00	     byte_BC7:		     .BYTE 0				     ; DATA XREF: RAM:0AD6w
 RAM:0BC7									     ; RAM:0ADBr ...
 RAM:0BC8 00	     piece_num_x2:	     .BYTE 0				     ; DATA XREF: RAM:08C7w
-RAM:0BC8									     ; RAM:render_piecer ...
+RAM:0BC8									     ; RAM:calc_and_render_piecer ...
 RAM:0BC9 00	     byte_BC9:		     .BYTE 0				     ; DATA XREF: RAM:08FFw
 RAM:0BC9									     ; RAM:0923r
 RAM:0BCA 00	     byte_BCA:		     .BYTE 0				     ; DATA XREF: RAM:090Fw
 RAM:0BCA									     ; RAM:091Br
-RAM:0BCB 00	     byte_BCB:		     .BYTE 0				     ; DATA XREF: RAM:loc_914w
+RAM:0BCB 00	     pixel_cnt:		     .BYTE 0				     ; DATA XREF: RAM:render_piecew
 RAM:0BCB									     ; RAM:092Cr
 RAM:0BCC 25 25 25 25+ship_dir_bitmap_tbl:    .BYTE $25,	$25, $25, $25, $25, $26, $26, $26, $26,	$26, $26, $26, $26, $26, $26, $26
 RAM:0BCC 25 26 26 26+								     ; DATA XREF: RAM:0986r
@@ -4391,19 +4354,20 @@ RAM:17F6 E0				     .BYTE $E0 ; ‡
 RAM:17F7 E0				     .BYTE $E0 ; ‡
 RAM:17F8 E1				     .BYTE $E1 ; ·
 RAM:17F9 E1				     .BYTE $E1 ; ·
+RAM:17FA	     X=x coord,	Y=y coord
 RAM:17FA
 RAM:17FA	     ; =============== S U B R O U T I N E =======================================
 RAM:17FA
 RAM:17FA
-RAM:17FA	     sub_17FA:							     ; CODE XREF: RAM:0929p
+RAM:17FA	     render_pixel:						     ; CODE XREF: RAM:0929p
 RAM:17FA									     ; RAM:09B3p ...
-RAM:17FA 98				     TYA
+RAM:17FA 98				     TYA				     ; Y coord
 RAM:17FB 29 C0				     AND     #$C0 ; '¿'
-RAM:17FD C9 C0				     CMP     #$C0 ; '¿'
-RAM:17FF D0 02				     BNE     loc_1803
-RAM:1801 A0 BF				     LDY     #$BF ; 'ø'
+RAM:17FD C9 C0				     CMP     #$C0 ; '¿'                      ; b7,6=11?
+RAM:17FF D0 02				     BNE     loc_1803			     ; no, skip
+RAM:1801 A0 BF				     LDY     #191			     ; max=191
 RAM:1803
-RAM:1803	     loc_1803:							     ; CODE XREF: sub_17FA+5j
+RAM:1803	     loc_1803:							     ; CODE XREF: render_pixel+5j
 RAM:1803 B9 ED 19			     LDA     $19ED,Y
 RAM:1806 85 F0				     STA     byte_F0
 RAM:1808 B9 F3 1A			     LDA     $1AF3,Y
@@ -4416,7 +4380,7 @@ RAM:1815 A5 F1				     LDA     byte_F1
 RAM:1817 E9 18				     SBC     #$18
 RAM:1819 85 F1				     STA     byte_F1
 RAM:181B
-RAM:181B	     loc_181B:							     ; CODE XREF: sub_17FA+18j
+RAM:181B	     loc_181B:							     ; CODE XREF: render_pixel+18j
 RAM:181B									     ; DATA XREF: patch_code+1Aw ...
 RAM:181B AC 1E 10			     LDY     byte_101E
 RAM:181E A9 02				     LDA     #2
@@ -4454,7 +4418,7 @@ RAM:1842 A0 00				     LDY     #0
 RAM:1844 11 F0				     ORA     ($F0),Y
 RAM:1846 91 F0				     STA     ($F0),Y
 RAM:1848 60				     RTS
-RAM:1848	     ; End of function sub_17FA
+RAM:1848	     ; End of function render_pixel
 RAM:1848
 RAM:1848	     ; ---------------------------------------------------------------------------
 RAM:1849 80				     .BYTE $80 ; Ä
@@ -5970,7 +5934,7 @@ RAM:1E57 00				     .BYTE   0
 RAM:1E58 49				     .BYTE $49 ; I
 RAM:1E59 FF				     .BYTE $FF
 RAM:1E5A 98	     byte_1E5A:		     .BYTE $98				     ; DATA XREF: RAM:0F41r
-RAM:1E5A									     ; sub_17FA+13r ...
+RAM:1E5A									     ; render_pixel+13r ...
 RAM:1E5B 98	     byte_1E5B:		     .BYTE $98				     ; DATA XREF: atari_antic_stuff+Ar
 RAM:1E5B									     ; atari_antic_stuff+1Dw ...
 RAM:1E5C
@@ -7243,7 +7207,8 @@ RAM:2458 02				     .BYTE   2
 RAM:2459 02				     .BYTE   2
 RAM:245A 04				     .BYTE   4
 RAM:245B EA				     .BYTE $EA ; Í
-RAM:245C 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
+RAM:245C 00 00 00 00+byte_245C:		     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
+RAM:245C 00 00 00 00+								     ; DATA XREF: RAM:loc_3D8Cw
 RAM:245C 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
 RAM:245C 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
 RAM:245C 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
@@ -7303,9 +7268,9 @@ RAM:245C 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	
 RAM:245C 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
 RAM:245C 00 00 00 00+			     .BYTE 0, 0, 0, 0
 RAM:2800 FC				     .BYTE $FC ; ¸
-RAM:2801 FC				     .BYTE $FC ; ¸
-RAM:2802 FD				     .BYTE $FD ; ˝
-RAM:2803 FC				     .BYTE $FC ; ¸
+RAM:2801 FC	     byte_2801:		     .BYTE $FC				     ; DATA XREF: RAM:0424w
+RAM:2802 FD	     byte_2802:		     .BYTE $FD				     ; DATA XREF: RAM:0429w
+RAM:2803 FC	     byte_2803:		     .BYTE $FC				     ; DATA XREF: RAM:0431w
 RAM:2804 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
 RAM:2804 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
 RAM:2804 00 00 00 00+			     .BYTE 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
@@ -11838,86 +11803,50 @@ RAM:3D6C 52				     .BYTE $52 ; R
 RAM:3D6D 3D				     .BYTE $3D ; =
 RAM:3D6E 18				     .BYTE $18
 RAM:3D6F 60				     .BYTE $60 ; `
-RAM:3D70 00				     .BYTE   0
-RAM:3D71 DC				     .BYTE $DC ; ‹
-RAM:3D72 3C				     .BYTE $3C ; <
-RAM:3D73 00				     .BYTE   0
-RAM:3D74 78				     .BYTE $78 ; x
-RAM:3D75 A9				     .BYTE $A9 ; ©
-RAM:3D76 5D				     .BYTE $5D ; ]
-RAM:3D77 8D				     .BYTE $8D ; ç
-RAM:3D78 8A				     .BYTE $8A ; ä
-RAM:3D79 3D				     .BYTE $3D ; =
-RAM:3D7A A9				     .BYTE $A9 ; ©
-RAM:3D7B 45				     .BYTE $45 ; E
-RAM:3D7C 8D				     .BYTE $8D ; ç
-RAM:3D7D 8B				     .BYTE $8B ; ã
-RAM:3D7E 3D				     .BYTE $3D ; =
-RAM:3D7F A9				     .BYTE $A9 ; ©
-RAM:3D80 00				     .BYTE   0
-RAM:3D81 8D				     .BYTE $8D ; ç
-RAM:3D82 8D				     .BYTE $8D ; ç
-RAM:3D83 3D				     .BYTE $3D ; =
-RAM:3D84 A9				     .BYTE $A9 ; ©
-RAM:3D85 04				     .BYTE   4
-RAM:3D86 8D				     .BYTE $8D ; ç
-RAM:3D87 8E				     .BYTE $8E ; é
-RAM:3D88 3D				     .BYTE $3D ; =
-RAM:3D89 AD				     .BYTE $AD ; ≠
-RAM:3D8A B9				     .BYTE $B9 ; π
-RAM:3D8B 65				     .BYTE $65 ; e
-RAM:3D8C 8D				     .BYTE $8D ; ç
-RAM:3D8D 5C				     .BYTE $5C ; \
-RAM:3D8E 24				     .BYTE $24 ; $
-RAM:3D8F 18				     .BYTE $18
-RAM:3D90 AD				     .BYTE $AD ; ≠
-RAM:3D91 8A				     .BYTE $8A ; ä
-RAM:3D92 3D				     .BYTE $3D ; =
-RAM:3D93 69				     .BYTE $69 ; i
-RAM:3D94 01				     .BYTE   1
-RAM:3D95 8D				     .BYTE $8D ; ç
-RAM:3D96 8A				     .BYTE $8A ; ä
-RAM:3D97 3D				     .BYTE $3D ; =
-RAM:3D98 AD				     .BYTE $AD ; ≠
-RAM:3D99 8B				     .BYTE $8B ; ã
-RAM:3D9A 3D				     .BYTE $3D ; =
-RAM:3D9B 69				     .BYTE $69 ; i
-RAM:3D9C 00				     .BYTE   0
-RAM:3D9D 8D				     .BYTE $8D ; ç
-RAM:3D9E 8B				     .BYTE $8B ; ã
-RAM:3D9F 3D				     .BYTE $3D ; =
-RAM:3DA0 18				     .BYTE $18
-RAM:3DA1 AD				     .BYTE $AD ; ≠
-RAM:3DA2 8D				     .BYTE $8D ; ç
-RAM:3DA3 3D				     .BYTE $3D ; =
-RAM:3DA4 69				     .BYTE $69 ; i
-RAM:3DA5 01				     .BYTE   1
-RAM:3DA6 8D				     .BYTE $8D ; ç
-RAM:3DA7 8D				     .BYTE $8D ; ç
-RAM:3DA8 3D				     .BYTE $3D ; =
-RAM:3DA9 AD				     .BYTE $AD ; ≠
-RAM:3DAA 8E				     .BYTE $8E ; é
-RAM:3DAB 3D				     .BYTE $3D ; =
-RAM:3DAC 69				     .BYTE $69 ; i
-RAM:3DAD 00				     .BYTE   0
-RAM:3DAE 8D				     .BYTE $8D ; ç
-RAM:3DAF 8E				     .BYTE $8E ; é
-RAM:3DB0 3D				     .BYTE $3D ; =
-RAM:3DB1 AD				     .BYTE $AD ; ≠
-RAM:3DB2 8A				     .BYTE $8A ; ä
-RAM:3DB3 3D				     .BYTE $3D ; =
-RAM:3DB4 C9				     .BYTE $C9 ; …
-RAM:3DB5 B9				     .BYTE $B9 ; π
-RAM:3DB6 D0				     .BYTE $D0 ; –
-RAM:3DB7 D1				     .BYTE $D1 ; —
-RAM:3DB8 AD				     .BYTE $AD ; ≠
-RAM:3DB9 8B				     .BYTE $8B ; ã
-RAM:3DBA 3D				     .BYTE $3D ; =
-RAM:3DBB C9				     .BYTE $C9 ; …
-RAM:3DBC 65				     .BYTE $65 ; e
-RAM:3DBD D0				     .BYTE $D0 ; –
-RAM:3DBE CA				     .BYTE $CA ;  
-RAM:3DBF 60				     .BYTE $60 ; `
+RAM:3D70	     ; ---------------------------------------------------------------------------
+RAM:3D70 00				     BRK
+RAM:3D71	     ; ---------------------------------------------------------------------------
+RAM:3D71 DC 3C 00			     NOP
+RAM:3D74 78				     SEI
+RAM:3D75 A9 5D				     LDA     #$5D ; ']'
+RAM:3D77 8D 8A 3D			     STA     loc_3D89+1
+RAM:3D7A A9 45				     LDA     #$45 ; 'E'
+RAM:3D7C 8D 8B 3D			     STA     loc_3D89+2
+RAM:3D7F A9 00				     LDA     #0
+RAM:3D81 8D 8D 3D			     STA     loc_3D8C+1
+RAM:3D84 A9 04				     LDA     #4
+RAM:3D86 8D 8E 3D			     STA     loc_3D8C+2
+RAM:3D89
+RAM:3D89	     loc_3D89:							     ; CODE XREF: RAM:3DB6j
+RAM:3D89									     ; RAM:3DBDj
+RAM:3D89									     ; DATA XREF: ...
+RAM:3D89 AD B9 65			     LDA     $65B9
+RAM:3D8C
+RAM:3D8C	     loc_3D8C:							     ; DATA XREF: RAM:3D81w
+RAM:3D8C									     ; RAM:3DA1r ...
+RAM:3D8C 8D 5C 24			     STA     byte_245C
+RAM:3D8F 18				     CLC
+RAM:3D90 AD 8A 3D			     LDA     loc_3D89+1
+RAM:3D93 69 01				     ADC     #1
+RAM:3D95 8D 8A 3D			     STA     loc_3D89+1
+RAM:3D98 AD 8B 3D			     LDA     loc_3D89+2
+RAM:3D9B 69 00				     ADC     #0
+RAM:3D9D 8D 8B 3D			     STA     loc_3D89+2
+RAM:3DA0 18				     CLC
+RAM:3DA1 AD 8D 3D			     LDA     loc_3D8C+1
+RAM:3DA4 69 01				     ADC     #1
+RAM:3DA6 8D 8D 3D			     STA     loc_3D8C+1
+RAM:3DA9 AD 8E 3D			     LDA     loc_3D8C+2
+RAM:3DAC 69 00				     ADC     #0
+RAM:3DAE 8D 8E 3D			     STA     loc_3D8C+2
+RAM:3DB1 AD 8A 3D			     LDA     loc_3D89+1
+RAM:3DB4 C9 B9				     CMP     #$B9 ; 'π'
+RAM:3DB6 D0 D1				     BNE     loc_3D89
+RAM:3DB8 AD 8B 3D			     LDA     loc_3D89+2
+RAM:3DBB C9 65				     CMP     #$65 ; 'e'
+RAM:3DBD D0 CA				     BNE     loc_3D89
+RAM:3DBF 60				     RTS
+RAM:3DBF	     ; ---------------------------------------------------------------------------
 RAM:3DC0 A2				     .BYTE $A2 ; ¢
 RAM:3DC1 00				     .BYTE   0
 RAM:3DC2 BD				     .BYTE $BD ; Ω
