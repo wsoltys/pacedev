@@ -4003,15 +4003,15 @@ locret_7C43:
 
 
 calc_and_goto_piece_position:
-				LDA	byte_5
-				CMP	#$80 ; '€'
-				BCC	loc_7C60
+				LDA	byte_5					; piece	X 0/-1
+				CMP	#$80 ; '€'                              ; positive?
+				BCC	loc_7C60				; yes, skip
+				EOR	#$FF					; negate
+				STA	byte_5					; piece	X sign
+				LDA	byte_4					; piece	X (high	byte)
 				EOR	#$FF
-				STA	byte_5
-				LDA	byte_4
-				EOR	#$FF
-				ADC	#0
-				STA	byte_4
+				ADC	#0					; negate
+				STA	byte_4					; update
 				BCC	loc_7C5F
 				INC	byte_5
 
@@ -4020,15 +4020,15 @@ loc_7C5F:
 
 loc_7C60:
 				ROL	byte_8
-				LDA	byte_7
-				CMP	#$80 ; '€'
-				BCC	loc_7C79
+				LDA	byte_7					; piece	Y 0/-1
+				CMP	#$80 ; '€'                              ; positive?
+				BCC	loc_7C79				; yes, skip
+				EOR	#$FF					; negate
+				STA	byte_7					; piece	Y sign
+				LDA	byte_6					; piece	Y (high	byte)
 				EOR	#$FF
-				STA	byte_7
-				LDA	byte_6
-				EOR	#$FF
-				ADC	#0
-				STA	byte_6
+				ADC	#0					; negate
+				STA	byte_6					; update
 				BCC	loc_7C78
 				INC	byte_7
 
@@ -4037,70 +4037,70 @@ loc_7C78:
 
 loc_7C79:
 				ROL	byte_8
-				LDA	byte_5
-				ORA	byte_7
-				BEQ	loc_7C8B
+				LDA	byte_5					; piece	X sign
+				ORA	byte_7					; piece	Y sign
+				BEQ	loc_7C8B				; both 0, skip
 				LDX	#0
 				CMP	#2
-				BCS	loc_7CAB
-				LDY	#1
-				BNE	loc_7C9B
+				BCS	no_shift_xy
+				LDY	#1					; shift	X,Y by 1
+				BNE	shift_xy_1or2
 
-loc_7C8B:
+loc_7C8B:									; shift	X,Y by 2
 				LDY	#2
 				LDX	#9
-				LDA	byte_4
-				ORA	byte_6
-				BEQ	loc_7CAB
-				BMI	loc_7C9B
+				LDA	byte_4					; piece	X (high	byte)
+				ORA	byte_6					; piece	Y (high	byte)
+				BEQ	no_shift_xy				; both 0, skip
+				BMI	shift_xy_1or2
 
 loc_7C97:
 				INY
 				ASL	A
 				BPL	loc_7C97
 
-loc_7C9B:
+shift_xy_1or2:									; copy shift count
 				TYA
-				TAX
-				LDA	byte_5
+				TAX						; another copy of shift	count
+				LDA	byte_5					; piece	X sign
 
-loc_7C9F:
+shift_loop:
 				ASL	byte_4
-				ROL	A
+				ROL	A					; shift	X up 1 bit
 				ASL	byte_6
-				ROL	byte_7
-				DEY
-				BNE	loc_7C9F
-				STA	byte_5
+				ROL	byte_7					; shift	Y up 1 bit
+				DEY						; done shifting?
+				BNE	shift_loop				; no, loop
+				STA	byte_5					; Xs,X[9..8]
 
-loc_7CAB:
+no_shift_xy:									; shift	count
 				TXA
 				SEC
 				SBC	#$A
-				EOR	#$FF
+				EOR	#$FF					; negate
 				ASL	A
 				ROR	byte_8
 				ROL	A
 				ROR	byte_8
 				ROL	A
 				ASL	A
-				STA	byte_8
+				STA	byte_8					; VCTR opcode ($00-$90)
 				LDY	#0
-				LDA	byte_6
+				LDA	byte_6					; Y[7..0]
 				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
-				LDA	byte_8
+				LDA	byte_8					; VCTR opcode,Ys
 				AND	#$F4 ; 'ô'
-				ORA	byte_7
+				ORA	byte_7					; Y[9..8]
 				INY
 				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
-				LDA	byte_4
+				LDA	byte_4					; piece	X (high	byte)
 				INY
 				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
-				LDA	byte_8
-				AND	#2
-				ASL	A
-				ORA	byte_1
-				ORA	byte_5
+				LDA	byte_8					; VCTR opcode,Xs
+				AND	#2					; Xs (bit1)
+				ASL	A					; adjust for VCTR instruction
+				ORA	byte_1					; always 0???
+				ORA	byte_5					; Xs,X[9..8]
 				INY
 				STA	(dvg_curr_addr_lsb),Y			; store	in avg ram
 				JMP	update_dvg_curr_addr

@@ -4001,15 +4001,15 @@ ROM:7C49	     ; =============== S U B R O U T I N E ============================
 ROM:7C49
 ROM:7C49
 ROM:7C49	     calc_and_goto_piece_position:
-ROM:7C49 A5 05					     LDA     byte_5
-ROM:7C4B C9 80					     CMP     #$80 ; '€'
-ROM:7C4D 90 11					     BCC     loc_7C60
-ROM:7C4F 49 FF					     EOR     #$FF
-ROM:7C51 85 05					     STA     byte_5
-ROM:7C53 A5 04					     LDA     byte_4
+ROM:7C49 A5 05					     LDA     byte_5				     ; piece X 0/-1
+ROM:7C4B C9 80					     CMP     #$80 ; '€'                              ; positive?
+ROM:7C4D 90 11					     BCC     loc_7C60				     ; yes, skip
+ROM:7C4F 49 FF					     EOR     #$FF				     ; negate
+ROM:7C51 85 05					     STA     byte_5				     ; piece X sign
+ROM:7C53 A5 04					     LDA     byte_4				     ; piece X (high byte)
 ROM:7C55 49 FF					     EOR     #$FF
-ROM:7C57 69 00					     ADC     #0
-ROM:7C59 85 04					     STA     byte_4
+ROM:7C57 69 00					     ADC     #0					     ; negate
+ROM:7C59 85 04					     STA     byte_4				     ; update
 ROM:7C5B 90 02					     BCC     loc_7C5F
 ROM:7C5D E6 05					     INC     byte_5
 ROM:7C5F
@@ -4018,15 +4018,15 @@ ROM:7C5F 38					     SEC
 ROM:7C60
 ROM:7C60	     loc_7C60:
 ROM:7C60 26 08					     ROL     byte_8
-ROM:7C62 A5 07					     LDA     byte_7
-ROM:7C64 C9 80					     CMP     #$80 ; '€'
-ROM:7C66 90 11					     BCC     loc_7C79
-ROM:7C68 49 FF					     EOR     #$FF
-ROM:7C6A 85 07					     STA     byte_7
-ROM:7C6C A5 06					     LDA     byte_6
+ROM:7C62 A5 07					     LDA     byte_7				     ; piece Y 0/-1
+ROM:7C64 C9 80					     CMP     #$80 ; '€'                              ; positive?
+ROM:7C66 90 11					     BCC     loc_7C79				     ; yes, skip
+ROM:7C68 49 FF					     EOR     #$FF				     ; negate
+ROM:7C6A 85 07					     STA     byte_7				     ; piece Y sign
+ROM:7C6C A5 06					     LDA     byte_6				     ; piece Y (high byte)
 ROM:7C6E 49 FF					     EOR     #$FF
-ROM:7C70 69 00					     ADC     #0
-ROM:7C72 85 06					     STA     byte_6
+ROM:7C70 69 00					     ADC     #0					     ; negate
+ROM:7C72 85 06					     STA     byte_6				     ; update
 ROM:7C74 90 02					     BCC     loc_7C78
 ROM:7C76 E6 07					     INC     byte_7
 ROM:7C78
@@ -4035,70 +4035,70 @@ ROM:7C78 38					     SEC
 ROM:7C79
 ROM:7C79	     loc_7C79:
 ROM:7C79 26 08					     ROL     byte_8
-ROM:7C7B A5 05					     LDA     byte_5
-ROM:7C7D 05 07					     ORA     byte_7
-ROM:7C7F F0 0A					     BEQ     loc_7C8B
+ROM:7C7B A5 05					     LDA     byte_5				     ; piece X sign
+ROM:7C7D 05 07					     ORA     byte_7				     ; piece Y sign
+ROM:7C7F F0 0A					     BEQ     loc_7C8B				     ; both 0, skip
 ROM:7C81 A2 00					     LDX     #0
 ROM:7C83 C9 02					     CMP     #2
-ROM:7C85 B0 24					     BCS     loc_7CAB
-ROM:7C87 A0 01					     LDY     #1
-ROM:7C89 D0 10					     BNE     loc_7C9B
+ROM:7C85 B0 24					     BCS     no_shift_xy
+ROM:7C87 A0 01					     LDY     #1					     ; shift X,Y by 1
+ROM:7C89 D0 10					     BNE     shift_xy_1or2
 ROM:7C8B
-ROM:7C8B	     loc_7C8B:
+ROM:7C8B	     loc_7C8B:									     ; shift X,Y by 2
 ROM:7C8B A0 02					     LDY     #2
 ROM:7C8D A2 09					     LDX     #9
-ROM:7C8F A5 04					     LDA     byte_4
-ROM:7C91 05 06					     ORA     byte_6
-ROM:7C93 F0 16					     BEQ     loc_7CAB
-ROM:7C95 30 04					     BMI     loc_7C9B
+ROM:7C8F A5 04					     LDA     byte_4				     ; piece X (high byte)
+ROM:7C91 05 06					     ORA     byte_6				     ; piece Y (high byte)
+ROM:7C93 F0 16					     BEQ     no_shift_xy			     ; both 0, skip
+ROM:7C95 30 04					     BMI     shift_xy_1or2
 ROM:7C97
 ROM:7C97	     loc_7C97:
 ROM:7C97 C8					     INY
 ROM:7C98 0A					     ASL     A
 ROM:7C99 10 FC					     BPL     loc_7C97
 ROM:7C9B
-ROM:7C9B	     loc_7C9B:
+ROM:7C9B	     shift_xy_1or2:								     ; copy shift count
 ROM:7C9B 98					     TYA
-ROM:7C9C AA					     TAX
-ROM:7C9D A5 05					     LDA     byte_5
+ROM:7C9C AA					     TAX					     ; another copy of shift count
+ROM:7C9D A5 05					     LDA     byte_5				     ; piece X sign
 ROM:7C9F
-ROM:7C9F	     loc_7C9F:
+ROM:7C9F	     shift_loop:
 ROM:7C9F 06 04					     ASL     byte_4
-ROM:7CA1 2A					     ROL     A
+ROM:7CA1 2A					     ROL     A					     ; shift X up 1 bit
 ROM:7CA2 06 06					     ASL     byte_6
-ROM:7CA4 26 07					     ROL     byte_7
-ROM:7CA6 88					     DEY
-ROM:7CA7 D0 F6					     BNE     loc_7C9F
-ROM:7CA9 85 05					     STA     byte_5
+ROM:7CA4 26 07					     ROL     byte_7				     ; shift Y up 1 bit
+ROM:7CA6 88					     DEY					     ; done shifting?
+ROM:7CA7 D0 F6					     BNE     shift_loop				     ; no, loop
+ROM:7CA9 85 05					     STA     byte_5				     ; Xs,X[9..8]
 ROM:7CAB
-ROM:7CAB	     loc_7CAB:
+ROM:7CAB	     no_shift_xy:								     ; shift count
 ROM:7CAB 8A					     TXA
 ROM:7CAC 38					     SEC
 ROM:7CAD E9 0A					     SBC     #$A
-ROM:7CAF 49 FF					     EOR     #$FF
+ROM:7CAF 49 FF					     EOR     #$FF				     ; negate
 ROM:7CB1 0A					     ASL     A
 ROM:7CB2 66 08					     ROR     byte_8
 ROM:7CB4 2A					     ROL     A
 ROM:7CB5 66 08					     ROR     byte_8
 ROM:7CB7 2A					     ROL     A
 ROM:7CB8 0A					     ASL     A
-ROM:7CB9 85 08					     STA     byte_8
+ROM:7CB9 85 08					     STA     byte_8				     ; VCTR opcode ($00-$90)
 ROM:7CBB A0 00					     LDY     #0
-ROM:7CBD A5 06					     LDA     byte_6
+ROM:7CBD A5 06					     LDA     byte_6				     ; Y[7..0]
 ROM:7CBF 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:7CC1 A5 08					     LDA     byte_8
+ROM:7CC1 A5 08					     LDA     byte_8				     ; VCTR opcode,Ys
 ROM:7CC3 29 F4					     AND     #$F4 ; 'ô'
-ROM:7CC5 05 07					     ORA     byte_7
+ROM:7CC5 05 07					     ORA     byte_7				     ; Y[9..8]
 ROM:7CC7 C8					     INY
 ROM:7CC8 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:7CCA A5 04					     LDA     byte_4
+ROM:7CCA A5 04					     LDA     byte_4				     ; piece X (high byte)
 ROM:7CCC C8					     INY
 ROM:7CCD 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
-ROM:7CCF A5 08					     LDA     byte_8
-ROM:7CD1 29 02					     AND     #2
-ROM:7CD3 0A					     ASL     A
-ROM:7CD4 05 01					     ORA     byte_1
-ROM:7CD6 05 05					     ORA     byte_5
+ROM:7CCF A5 08					     LDA     byte_8				     ; VCTR opcode,Xs
+ROM:7CD1 29 02					     AND     #2					     ; Xs (bit1)
+ROM:7CD3 0A					     ASL     A					     ; adjust for VCTR instruction
+ROM:7CD4 05 01					     ORA     byte_1				     ; always 0???
+ROM:7CD6 05 05					     ORA     byte_5				     ; Xs,X[9..8]
 ROM:7CD8 C8					     INY
 ROM:7CD9 91 02					     STA     (dvg_curr_addr_lsb),Y		     ; store in	avg ram
 ROM:7CDB 4C 39 7C				     JMP     update_dvg_curr_addr
