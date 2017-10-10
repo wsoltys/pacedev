@@ -2796,13 +2796,13 @@ render_piece:									; piece	number
 
 loc_74A3:
 				CLC
-				ADC	byte_7D,X
-				STA	byte_7D,X
+				ADC	byte_7D,X				; + piece X (low byte)
+				STA	byte_7D,X				; update
 				TYA						; 0/-1
-				ADC	byte_7E,X
-				STA	byte_7E,X
-				STA	byte_4
-				STY	byte_5
+				ADC	byte_7E,X				; + piece X (high byte)
+				STA	byte_7E,X				; update
+				STA	byte_4					; piece	X (high	byte)
+				STY	byte_5					; 0/-1
 				LDY	#0
 				LDA	DVGROM+$ED,X				; piece	velocity Y
 				BPL	loc_74B9
@@ -2810,17 +2810,20 @@ loc_74A3:
 
 loc_74B9:
 				CLC
-				ADC	byte_80+9,X
-				STA	byte_80+9,X
+				ADC	byte_80+9,X				; + piece Y (low byte)
+				STA	byte_80+9,X				; update
 				TYA						; 0/-1
-				ADC	byte_80+$A,X
-				STA	byte_80+$A,X
-				STA	byte_6
-				STY	byte_7
+				ADC	byte_80+$A,X				; + piece Y (high byte)
+				STA	byte_80+$A,X				; update
+				STA	byte_6					; piece	Y (high	byte)
+				STY	byte_7					; 0/-1
 				LDA	dvg_curr_addr_lsb
 				STA	byte_B
 				LDA	dvg_curr_addr_msb
 				STA	byte_C					; save avgram ptr
+; Norbert patches the code to call his routine
+; - which uses byte_9 (piece #)	to store byte_4, byte_6
+;   in a table,	and then jumps to calc_and_goto_piece_position
 				JSR	calc_and_goto_piece_position
 				LDY	byte_9					; piece	number
 				LDA	DVGROM+$E0,Y				; piece	SVEC byte 1

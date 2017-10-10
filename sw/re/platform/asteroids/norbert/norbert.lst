@@ -436,7 +436,7 @@ RAM:0280 00				     .BYTE   0
 RAM:0281 00				     .BYTE   0
 RAM:0282 00				     .BYTE   0
 RAM:0283 00				     .BYTE   0
-RAM:0284 00	     byte_284:		     .BYTE 0				     ; DATA XREF: RAM:08AAr
+RAM:0284 00	     ship_PHh:		     .BYTE 0				     ; DATA XREF: RAM:08AAr
 RAM:0284									     ; RAM:096Fr
 RAM:0285 00	     byte_285:		     .BYTE 0				     ; DATA XREF: RAM:09E9r
 RAM:0286 00	     saucerShot_PHh:	     .BYTE   0				     ; DATA XREF: RAM:0A49r
@@ -508,7 +508,7 @@ RAM:02C6 00				     .BYTE   0
 RAM:02C7 00				     .BYTE   0
 RAM:02C8 00				     .BYTE   0
 RAM:02C9 00				     .BYTE   0
-RAM:02CA 00	     byte_2CA:		     .BYTE 0				     ; DATA XREF: RAM:08A4r
+RAM:02CA 00	     ship_PLh:		     .BYTE 0				     ; DATA XREF: RAM:08A4r
 RAM:02CA									     ; RAM:0969r
 RAM:02CB 00	     byte_2CB:		     .BYTE 0				     ; DATA XREF: RAM:09E3r
 RAM:02CC 00	     saucerShot_PLh:	     .BYTE   0				     ; DATA XREF: RAM:0A43r
@@ -1381,7 +1381,7 @@ RAM:0888 0E 4C 0B			     ASL     byte_B4C
 RAM:088B 2A				     ROL     A
 RAM:088C 0E 4C 0B			     ASL     byte_B4C
 RAM:088F 2A				     ROL     A
-RAM:0890 8D 4D 0B			     STA     byte_B4D
+RAM:0890 8D 4D 0B			     STA     byte_B4D			     ; atari Y coord (inverted)
 RAM:0893 29 F0				     AND     #$F0 ; 'ð'
 RAM:0895 D0 03				     BNE     loc_89A
 RAM:0897 4C B6 09			     JMP     chk_saucer
@@ -1393,10 +1393,10 @@ RAM:089B A9 BF				     LDA     #191
 RAM:089D ED 4D 0B			     SBC     byte_B4D
 RAM:08A0 18				     CLC
 RAM:08A1 69 08				     ADC     #8
-RAM:08A3 A8				     TAY
-RAM:08A4 AD CA 02			     LDA     byte_2CA
+RAM:08A3 A8				     TAY				     ; atari Y coord
+RAM:08A4 AD CA 02			     LDA     ship_PLh
 RAM:08A7 8D 4C 0B			     STA     byte_B4C
-RAM:08AA AD 84 02			     LDA     byte_284
+RAM:08AA AD 84 02			     LDA     ship_PHh
 RAM:08AD 0E 4C 0B			     ASL     byte_B4C
 RAM:08B0 2A				     ROL     A
 RAM:08B1 0E 4C 0B			     ASL     byte_B4C
@@ -1405,7 +1405,7 @@ RAM:08B5 0E 4C 0B			     ASL     byte_B4C
 RAM:08B8 2A				     ROL     A
 RAM:08B9 18				     CLC
 RAM:08BA 69 08				     ADC     #8
-RAM:08BC AA				     TAX
+RAM:08BC AA				     TAX				     ; atari X coord
 RAM:08BD	     ; from original - calc explosion frame
 RAM:08BD AD 1B 02			     LDA     ship_Sts			     ; ship status
 RAM:08C0 49 FF				     EOR     #$FF
@@ -1414,8 +1414,8 @@ RAM:08C4 4A				     LSR     A
 RAM:08C5 4A				     LSR     A
 RAM:08C6 4A				     LSR     A				     ; num pieces left (x2)
 RAM:08C7 8D C8 0B			     STA     piece_num_x2
-RAM:08CA 8E 4C 0B			     STX     byte_B4C
-RAM:08CD 8C 4D 0B			     STY     byte_B4D
+RAM:08CA 8E 4C 0B			     STX     byte_B4C			     ; explosion X
+RAM:08CD 8C 4D 0B			     STY     byte_B4D			     ; explosion Y
 RAM:08D0
 RAM:08D0	     calc_and_render_piece:					     ; CODE XREF: RAM:0938j
 RAM:08D0 AE C8 0B			     LDX     piece_num_x2
@@ -1436,22 +1436,22 @@ RAM:08E8 8D 19 09			     STA     loc_918+1			     ; patch code
 RAM:08EB A9 20				     LDA     #$20 ; ' '
 RAM:08ED 69 00				     ADC     #0
 RAM:08EF 8D 1A 09			     STA     loc_918+2			     ; patch code ($2007)
-RAM:08F2 BD B6 07			     LDA     $7B6,X
+RAM:08F2 BD B6 07			     LDA     $7B6,X			     ; piece X (high byte) org.	code
 RAM:08F5 C9 80				     CMP     #$80 ; '€'
 RAM:08F7 6A				     ROR     A
 RAM:08F8 C9 80				     CMP     #$80 ; '€'
-RAM:08FA 6A				     ROR     A
+RAM:08FA 6A				     ROR     A				     ; /4
 RAM:08FB 18				     CLC
-RAM:08FC 6D 4C 0B			     ADC     byte_B4C
-RAM:08FF 8D C9 0B			     STA     byte_BC9
-RAM:0902 BD B7 07			     LDA     $7B7,X
+RAM:08FC 6D 4C 0B			     ADC     byte_B4C			     ; + explosion X
+RAM:08FF 8D C9 0B			     STA     piece_X			     ; piece X
+RAM:0902 BD B7 07			     LDA     $7B7,X			     ; piece Y (high byte) org.	code
 RAM:0905 C9 80				     CMP     #$80 ; '€'
 RAM:0907 6A				     ROR     A
 RAM:0908 C9 80				     CMP     #$80 ; '€'
-RAM:090A 6A				     ROR     A
+RAM:090A 6A				     ROR     A				     ; /4
 RAM:090B 18				     CLC
-RAM:090C 6D 4D 0B			     ADC     byte_B4D
-RAM:090F 8D CA 0B			     STA     byte_BCA
+RAM:090C 6D 4D 0B			     ADC     byte_B4D			     ; + explosion Y
+RAM:090F 8D CA 0B			     STA     piece_Y			     ; piece Y
 RAM:0912 A2 07				     LDX     #7				     ; 7+1=8 pixels to render
 RAM:0914
 RAM:0914	     render_piece:						     ; CODE XREF: RAM:0930j
@@ -1460,15 +1460,15 @@ RAM:0917 18				     CLC
 RAM:0918
 RAM:0918	     loc_918:							     ; DATA XREF: RAM:08E8w
 RAM:0918									     ; RAM:08EFw
-RAM:0918 BD 07 19			     LDA     $1907,X			     ; base = $2007
-RAM:091B 6D CA 0B			     ADC     byte_BCA
+RAM:0918 BD 07 19			     LDA     $1907,X			     ; piece pixel Y offset
+RAM:091B 6D CA 0B			     ADC     piece_Y			     ; + piece Y
 RAM:091E A8				     TAY				     ; Y coord
 RAM:091F 18				     CLC
 RAM:0920
 RAM:0920	     loc_920:							     ; DATA XREF: RAM:08DAw
 RAM:0920									     ; RAM:08E1w
-RAM:0920 BD 66 19			     LDA     $1966,X			     ; base = $1FD7 (patched)
-RAM:0923 6D C9 0B			     ADC     byte_BC9
+RAM:0920 BD 66 19			     LDA     $1966,X			     ; piece pixel X offset
+RAM:0923 6D C9 0B			     ADC     piece_X			     ; + piece X
 RAM:0926 AA				     TAX				     ; X coord
 RAM:0927 A9 07				     LDA     #7				     ; next instruction	is LDA...
 RAM:0929 20 FA 17			     JSR     render_pixel
@@ -1505,9 +1505,9 @@ RAM:0962 18				     CLC
 RAM:0963 69 05				     ADC     #5				     ; +5 fudge-factor
 RAM:0965 8D 50 0B			     STA     ship_y_coord
 RAM:0968 A8				     TAY
-RAM:0969 AD CA 02			     LDA     byte_2CA
+RAM:0969 AD CA 02			     LDA     ship_PLh
 RAM:096C 8D 4C 0B			     STA     byte_B4C
-RAM:096F AD 84 02			     LDA     byte_284
+RAM:096F AD 84 02			     LDA     ship_PHh
 RAM:0972 0E 4C 0B			     ASL     byte_B4C
 RAM:0975 2A				     ROL     A
 RAM:0976 0E 4C 0B			     ASL     byte_B4C
@@ -1822,9 +1822,9 @@ RAM:0BC7 00	     byte_BC7:		     .BYTE 0				     ; DATA XREF: RAM:0AD6w
 RAM:0BC7									     ; RAM:0ADBr ...
 RAM:0BC8 00	     piece_num_x2:	     .BYTE 0				     ; DATA XREF: RAM:08C7w
 RAM:0BC8									     ; RAM:calc_and_render_piecer ...
-RAM:0BC9 00	     byte_BC9:		     .BYTE 0				     ; DATA XREF: RAM:08FFw
+RAM:0BC9 00	     piece_X:		     .BYTE 0				     ; DATA XREF: RAM:08FFw
 RAM:0BC9									     ; RAM:0923r
-RAM:0BCA 00	     byte_BCA:		     .BYTE 0				     ; DATA XREF: RAM:090Fw
+RAM:0BCA 00	     piece_Y:		     .BYTE 0				     ; DATA XREF: RAM:090Fw
 RAM:0BCA									     ; RAM:091Br
 RAM:0BCB 00	     pixel_cnt:		     .BYTE 0				     ; DATA XREF: RAM:render_piecew
 RAM:0BCB									     ; RAM:092Cr

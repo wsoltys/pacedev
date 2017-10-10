@@ -2794,13 +2794,13 @@ ROM:74A2 88					     DEY
 ROM:74A3
 ROM:74A3	     loc_74A3:
 ROM:74A3 18					     CLC
-ROM:74A4 75 7D					     ADC     byte_7D,X
-ROM:74A6 95 7D					     STA     byte_7D,X
+ROM:74A4 75 7D					     ADC     byte_7D,X				     ; + piece X (low byte)
+ROM:74A6 95 7D					     STA     byte_7D,X				     ; update
 ROM:74A8 98					     TYA					     ; 0/-1
-ROM:74A9 75 7E					     ADC     byte_7E,X
-ROM:74AB 95 7E					     STA     byte_7E,X
-ROM:74AD 85 04					     STA     byte_4
-ROM:74AF 84 05					     STY     byte_5
+ROM:74A9 75 7E					     ADC     byte_7E,X				     ; + piece X (high byte)
+ROM:74AB 95 7E					     STA     byte_7E,X				     ; update
+ROM:74AD 85 04					     STA     byte_4				     ; piece X (high byte)
+ROM:74AF 84 05					     STY     byte_5				     ; 0/-1
 ROM:74B1 A0 00					     LDY     #0
 ROM:74B3 BD ED 50				     LDA     DVGROM+$ED,X			     ; piece velocity Y
 ROM:74B6 10 01					     BPL     loc_74B9
@@ -2808,17 +2808,20 @@ ROM:74B8 88					     DEY
 ROM:74B9
 ROM:74B9	     loc_74B9:
 ROM:74B9 18					     CLC
-ROM:74BA 75 89					     ADC     byte_80+9,X
-ROM:74BC 95 89					     STA     byte_80+9,X
+ROM:74BA 75 89					     ADC     byte_80+9,X			     ; + piece Y (low byte)
+ROM:74BC 95 89					     STA     byte_80+9,X			     ; update
 ROM:74BE 98					     TYA					     ; 0/-1
-ROM:74BF 75 8A					     ADC     byte_80+$A,X
-ROM:74C1 95 8A					     STA     byte_80+$A,X
-ROM:74C3 85 06					     STA     byte_6
-ROM:74C5 84 07					     STY     byte_7
+ROM:74BF 75 8A					     ADC     byte_80+$A,X			     ; + piece Y (high byte)
+ROM:74C1 95 8A					     STA     byte_80+$A,X			     ; update
+ROM:74C3 85 06					     STA     byte_6				     ; piece Y (high byte)
+ROM:74C5 84 07					     STY     byte_7				     ; 0/-1
 ROM:74C7 A5 02					     LDA     dvg_curr_addr_lsb
 ROM:74C9 85 0B					     STA     byte_B
 ROM:74CB A5 03					     LDA     dvg_curr_addr_msb
 ROM:74CD 85 0C					     STA     byte_C				     ; save avgram ptr
+ROM:74CF	     ; Norbert patches the code	to call	his routine
+ROM:74CF	     ; - which uses byte_9 (piece #) to	store byte_4, byte_6
+ROM:74CF	     ;	 in a table, and then jumps to calc_and_goto_piece_position
 ROM:74CF 20 49 7C				     JSR     calc_and_goto_piece_position
 ROM:74D2 A4 09					     LDY     byte_9				     ; piece number
 ROM:74D4 B9 E0 50				     LDA     DVGROM+$E0,Y			     ; piece SVEC byte 1
