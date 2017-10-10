@@ -9,6 +9,7 @@
 				.module asteroid
 				
 .define			PLATFORM_COCO3
+;.define     PLATFORM_STARWARS
 
 .iifdef PLATFORM_COCO3	.include "coco3.inc"
 
@@ -44,13 +45,13 @@ byte_5                          .equ		0x05
 byte_6                          .equ		0x06
 byte_7                          .equ		0x07
 byte_8                          .equ		0x08
-byte_9                          .equ		0x09
+byte_9                          .equ		0xA0            ; need 2 bytes (STX)
 byte_A                          .equ		0x0A
-byte_B                          .equ		0xAB            ; need 2 bytes (STX)
-byte_C                          .equ		0x8C            ; need 2 bytes (STY)
-byte_D                          .equ		0xAD            ; need 2 bytes (STX)
-byte_E                          .equ		0x8E            ; need 2 bytes (STX)
-byte_F                          .equ		0xAF            ; need 2 bytes (STX)
+byte_B                          .equ		0xA2            ; need 2 bytes (STX)
+byte_C                          .equ		0xA4            ; need 2 bytes (STY)
+byte_D                          .equ		0xA6            ; need 2 bytes (STX)
+byte_E                          .equ		0xA8            ; need 2 bytes (STX)
+byte_F                          .equ		0xAD            ; need 2 bytes (STX)
 initial_offset                  .equ		0x10
 byte_15                         .equ		0x15
 byte_16                         .equ		0x16
@@ -1175,30 +1176,30 @@ display_initial:
         ldb     *placeP1HighScore
         andb    *placeP2HighScore                       ; entered as <space>?
         bmi     display_char_code_A                     ; yes, display
-.ifndef PLATFORM_COCO3
+.ifdef PLATFORM_COCO3
+				lda			#(38<<1)																; underscore
+				jmp			display_char_code_A
+.else
         LDA     #$72 ; 'r'                              ; brightness=7, S=0, X=2
         LDX     #$F8 ; 'ø'                              ; cmd=SVEC, s=-ve, Y=0
         JSR     write_AX_to_avgram
         LDA     #1                                      ; brightness=0, S=0, X=0
         LDX     #$F8 ; 'ø'                              ; cmd=SVEC, s=-ve, Y=0
         JMP     write_AX_to_avgram
-.else
-				lda			#(38<<1)																; underscore
-				jmp			display_char_code_A
 .endif
         
 ; $6F35
 display_char_code_A:
-.ifndef PLATFORM_COCO3
-        LDX     DVGROM+$6D5,Y                           ; chr fn
-        LDA     DVGROM+$6D4,Y                           ; chr fn
-        JMP     write_AX_to_avgram
-.else
+.ifdef PLATFORM_COCO3
      		ldy			*dvg_curr_addr_msb
 				ldb			#OP_CHR
         stb     ,y+
         sta     ,y+
 				sty     *dvg_curr_addr_msb
+.else
+        LDX     DVGROM+$6D5,Y                           ; chr fn
+        LDA     DVGROM+$6D4,Y                           ; chr fn
+        JMP     write_AX_to_avgram
 .endif                                
         rts
         
@@ -1211,13 +1212,7 @@ display_extra_ships:
         ldb     #213                                    ; Y coord (x4=852)
         jsr     write_CURx4_cmd
 
-.ifndef PLATFORM_COCO3
-1$:     ldx     #$DA ; 'Ú'
-        lda     #$54 ; 'T'                              ; addr=0x54DA
-        jsr     write_JSR_cmd                           ; display extra ships?
-        dec     byte_8
-        bne     1$
-.else                                
+.ifdef PLATFORM_COCO3
         lda     #OP_LIFE
      		ldy			*dvg_curr_addr_msb
 1$:			sta			,y+
@@ -1225,6 +1220,12 @@ display_extra_ships:
         dec     *byte_8
         bne     1$
         sty			*dvg_curr_addr_msb
+.else
+1$:     ldx     #$DA ; 'Ú'
+        lda     #$54 ; 'T'                              ; addr=0x54DA
+        jsr     write_JSR_cmd                           ; display extra ships?
+        dec     byte_8
+        bne     1$
 .endif                                
 9$:			rts
 
@@ -1650,16 +1651,16 @@ limit_asteroid_velocity:
 display_C_scores_ships:
 				lda			#16
 				sta			*globalScale
-.ifndef PLATFORM_COCO3
-				lda			#0x50
-				ldx			#0xA4																		; addr = 0x50A4
-				;jsr			write_JSR_cmd														; "(C)1979 ATARI INC"
-.else
+.ifdef PLATFORM_COCO3
         ldy     *dvg_curr_addr_msb
         ldb     #OP_COPYRIGHT
         stb			,y+
         stb			,y+
         sty     *dvg_curr_addr_msb
+.else
+				lda			#0x50
+				ldx			#0xA4																		; addr = 0x50A4
+				;jsr			write_JSR_cmd														; "(C)1979 ATARI INC"
 .endif                                
 
 				lda			#25																			; X coord (x4=100)
@@ -1781,16 +1782,16 @@ display_object:
         beq     loc_7355                                ; yes, go
         anda    #0x0C                                   ; status (3:2)
         lsra                                            ; status (3:2)->(2:1)
-.ifndef PLATFORM_COCO3                                
-        TAY                                             ; pattern = word offset
-        LDA     DVGROM+$F8,Y                            ; shrapnel table address LSB
-        LDX     DVGROM+$F9,Y                            ; shrapnel table address MSB
-.else
+.ifdef PLATFORM_COCO3                                
         ldy     *dvg_curr_addr_msb
         ldb     #OP_SHRAPNEL
         stb			,y+
         sta			,y+
         sty			*dvg_curr_addr_msb
+.else
+        TAY                                             ; pattern = word offset
+        LDA     DVGROM+$F8,Y                            ; shrapnel table address LSB
+        LDX     DVGROM+$F9,Y                            ; shrapnel table address MSB
 .endif                                
         bra     loc_7370                                ; always
 
@@ -1805,7 +1806,14 @@ display_shot_ship_asteroid_or_saucer:
         cmpx    #0x1C                                   ; SaucerFlag?
         beq     display_saucer                          ; yes, go
         bcc     display_shot                            ; shot, go
-.ifndef PLATFORM_COCO3
+.ifdef PLATFORM_COCO3
+        ldy     *dvg_curr_addr_msb
+        ldb     #OP_ASTEROID
+        stb			,y+
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+loc_7370:
+.else
         AND     #$18                                    ; status (4:3)
         LSR     A
         LSR     A                                       ; status (4:3)->(2:1)
@@ -1815,13 +1823,6 @@ display_shot_ship_asteroid_or_saucer:
 
 loc_7370:                                                                       
         JSR     write_AX_to_avgram											; writes JSR instruction
-.else
-        ldy     *dvg_curr_addr_msb
-        ldb     #OP_ASTEROID
-        stb			,y+
-        sta			,y+
-        sty			*dvg_curr_addr_msb
-loc_7370:
 .endif                                
 				ldx			*byte_D
 				rts
@@ -1834,27 +1835,28 @@ display_ship:
 
 ; $737C
 display_saucer:
-.ifndef PLATFORM_COCO3
-        lda     DVGROM+$250
-        ldx     DVGROM+$251                             ; saucer table address MSB
-.else
+.ifdef PLATFORM_COCO3
         ldy     *dvg_curr_addr_msb
         ldb     #OP_SAUCER
         stb			,y+
         sta			,y+
         sty     *dvg_curr_addr_msb
+.else
+        lda     DVGROM+$250
+        ldx     DVGROM+$251                             ; saucer table address MSB
 .endif                                
         bra			loc_7370                                ; always
 
 ; $7384
 display_shot:
-.ifndef PLATFORM_COCO3
-.else
+.ifdef PLATFORM_COCO3
         ldy     *dvg_curr_addr_msb
         ldb     #OP_SHOT
         stb			,y+
         clr			,y+
         sty     *dvg_curr_addr_msb
+.else
+; missing        
 .endif
 				ldx			*byte_D                                 ; restore object offset
 				lda     *fastTimer
@@ -1935,13 +1937,13 @@ display_hs_entry:
         ldb     #1                                      ; 1 byte to print
         ldx     #0                                      ; extra brightness
         jsr     display_numeric                         ; display entry no.
-.ifndef PLATFORM_COCO3
+.ifdef PLATFORM_COCO3
+        lda			#(37<<1)																; period
+.else
         LDA     #$40 ; '@'                              ; S=4
         TAX                                             ; Brightness=4
         JSR     set_scale_A_bright_X                    ; displays a dot???
         LDY     #0                                      ; <space>
-.else
-        lda			#(37<<1)																; period
 .endif                                
         jsr     display_char_code_A
         ldd     *byte_F                                 ; entry counter (x2)
@@ -1988,7 +1990,110 @@ get_inactive_object_cnt:
 				
 ; $7465
 display_exploding_ship:
-        ; UNIMPLEMENTED
+        lda     ship_Sts
+        cmpa    #0xA2                                   ; 2 frames past exploding?
+        bcs     loc_748E
+        ldx     #10                                     ; (5+1) entries
+
+init_piece_tbl:
+        lda     ship_explosion_pieces_velocity,x        ; piece velocity X
+        lsra
+        lsra
+        lsra
+        lsra                                            ; high->low nibble
+        adda    #0xF8                                   ; -8
+        eora    #0xF8
+        sta     dp_base+byte_7E,x
+        lda     ship_explosion_pieces_velocity+1,x      ; piece velocity Y
+        lsra
+        lsra
+        lsra
+        lsra                                            ; high->low nibble
+        adda    #0xF8                                   ; -8
+        eora    #0xF8
+        sta     dp_base+byte_80+0x0A,x
+        leax    -2,x
+        cmpx    #0
+        bpl     init_piece_tbl
+
+loc_748E:
+        ldb     ship_Sts
+        eorb    #0xFF
+        andb    #0x70
+        lsrb
+        lsrb
+        lsrb                                            ; num pieces left (x2)
+        clra
+        tfr     d,x
+        
+render_piece:
+        stx     *byte_9                                 ; piece number
+        ldb     #0
+        lda     ship_explosion_pieces_velocity,x        ; piece velocity X
+        bpl     1$
+        decb
+1$:     adda    dp_base+byte_7D,X                       ; + piece X (low byte)
+        sta     dp_base+byte_7D,X                       ; update
+        tfr     b,a                                     ; 0/-1
+        adca    dp_base+byte_7E,X                       ; + piece X (high byte)
+        sta     dp_base+byte_7E,X                       ; update
+        sta     *byte_4                                 ; piece X (high byte)
+        stb     *byte_5                                 ; 0/-1
+        ldb     #0
+        lda     ship_explosion_pieces_velocity+1,x      ; piece velocity Y
+        bpl     2$
+        decb
+2$:     adda    dp_base+byte_80+9,x                     ; + piece Y (low byte)
+        sta     dp_base+byte_80+9,x                     ; update
+        tfr     b,a                                     ; 0/-1
+        adca    dp_base+byte_80+0x0A,x                  ; + piece Y (high byte)
+        sta     dp_base+byte_80+0x0A,x                  ; update
+        sta     *byte_6                                 ; piece Y (high byte)
+        stb     *byte_7                                 ; 0/-1
+        ldu     dvg_curr_addr_msb
+        stu     *byte_B
+        ; Norbert patches the code to call his routine
+        ; - which uses byte_9 (piece #) to store byte_4, byte_6
+        ;	 in a table, and then jumps to calc_and_goto_piece_position
+.ifdef PLATFORM_COCO3
+;        ldy     #0
+;        sta     (dvg_curr_addr_lsb),y                   ; ship_Sts
+;        iny
+;        lda     #OP_EXPLODINGSHIP
+;        sta     (dvg_curr_addr_lsb),y
+;        jsr     update_dvg_curr_addr
+.else
+        jsr     calc_and_goto_piece_position
+        ldy     byte_9
+        lda     DVGROM+$E0,Y                            ; wrecked ship table address LSB
+        ldx     DVGROM+$E1,Y                            ; wrecked ship table address MSB
+        jsr     write_AX_to_avgram
+        ldy     byte_9
+        lda     DVGROM+$E1,Y                            ; wrecked ship table address MSB
+        eor     #4
+        tax
+        lda     DVGROM+$E0,Y                            ; wrecked ship table address LSB
+        and     #$F
+        eor     #4
+        jsr     write_AX_to_avgram
+        ldy     #$FF
+
+loc_74F1:
+        iny
+        lda     (byte_B),Y
+        sta     (dvg_curr_addr_lsb),Y                   ; store in avg ram
+        iny
+        lda     (byte_B),Y
+        eor     #4
+        sta     (dvg_curr_addr_lsb),Y                   ; store in avg ram
+        cpy     #3
+        bcc     loc_74F1
+        jsr     update_dvg_curr_addr
+.endif        
+        ldx     *byte_9
+        leax    -2,x
+        cmpx    #0
+        bpl     render_piece
 				rts
 
 ; $750B
@@ -1997,7 +2102,20 @@ calc_ship_and_render:
         clr     *extra_brightness
         ;ldb     #0                                      ; default positive delta
         lda     *direction
-.ifndef PLATFORM_COCO3                                
+.ifdef PLATFORM_COCO3                                
+				ldy			*dvg_curr_addr_msb
+        ldb			thrustSwitch
+        bpl			1$
+        ldb			*fastTimer
+        andb		#4
+        beq			1$
+        ldb			#OP_SHIP_THRUST
+        bra			2$
+1$:     ldb     #OP_SHIP
+2$:     stb     ,y+
+				sta			,y+
+        sty     *dvg_curr_addr_msb
+.else
         BPL     loc_751B                                ; positive, skip
         LDY     #4                                      ; flag negative delta
         TXA                                             ; 0
@@ -2041,19 +2159,6 @@ loc_752A:                                                                       
 
 loc_7551:
 		    JSR     copy_vector_list_from_table_to_dvgram
-.else
-				ldy			*dvg_curr_addr_msb
-        ldb			thrustSwitch
-        bpl			1$
-        ldb			*fastTimer
-        andb		#4
-        beq			1$
-        ldb			#OP_SHIP_THRUST
-        bra			2$
-1$:     ldb     #OP_SHIP
-2$:     stb     ,y+
-				sta			,y+
-        sty     *dvg_curr_addr_msb
 .endif                                
 locret_7554:
 				rts
@@ -2322,7 +2427,13 @@ display_bright_digit:
 				adda		#1
 				pshs		cc
 				asla																						; x2
-.ifndef PLATFORM_COCO3				
+.ifdef PLATFORM_COCO3				
+				ldy			*dvg_curr_addr_msb
+				ldb			#OP_CHR
+				stb			,y+
+				sta			,y+
+				sty			*dvg_curr_addr_msb
+.else
 				tay								; word offset
 				lda			DVGROM+$6D4,Y				; chr fn
 				asl			A					; low address *	2
@@ -2336,12 +2447,6 @@ display_bright_digit:
 				sta			byte_8					; flag to flip X
 				sta			byte_9					; flag to flip Y
 				jsr			copy_vector_list_to_avgram
-.else
-				ldy			*dvg_curr_addr_msb
-				ldb			#OP_CHR
-				stb			,y+
-				sta			,y+
-				sty			*dvg_curr_addr_msb
 .endif				
 				puls		cc
 				rts
@@ -2388,11 +2493,11 @@ sin_A:
         eora    #0x7F                              			; toggle up/down
         inca
 2$:     
-.ifndef PLATFORM_COCO3
-        LDA     DVGROM+$7B9,X                           ; sine table
-.else
+.ifdef PLATFORM_COCO3
 				ldu			#sine_tbl
 				lda			a,u
+.else
+        LDA     DVGROM+$7B9,X                           ; sine table
 .endif                                
         rts
 
@@ -2458,7 +2563,14 @@ add_chr_fn:
         bcs     2$                                			; yes, skip
         adda    #0x0E
 2$:                                                                       
-.ifndef PLATFORM_COCO3
+.ifdef PLATFORM_COCO3
+        ldy			*dvg_curr_addr_msb
+        ldb     #OP_CHR
+        stb			,y+
+        suba    #2                                      ; $6D2 vs $6D4!
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+.else
         TAX																							; X = chr*2 (chr fn offset)
         LDA     DVGROM+$6D2,X                           ; chr fn msb
         STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
@@ -2467,13 +2579,6 @@ add_chr_fn:
         STA     (dvg_curr_addr_lsb),Y                   ; store in avg ram
         INY
         LDX     #0
-.else
-        ldy			*dvg_curr_addr_msb
-        ldb     #OP_CHR
-        stb			,y+
-        suba    #2                                      ; $6D2 vs $6D4!
-        sta			,y+
-        sty			*dvg_curr_addr_msb
 .endif                                
         rts
 
@@ -2481,14 +2586,14 @@ msgCoords:
 				.byte 100, 182                                  ; "HIGH SCORES"
 				.byte 100, 182                                  ; "PLAYER"
 				.byte 12, 170                                   ; "YOUR SCORE...TEN BEST"
-.ifndef PLATFORM_COCO3
-        .byte 12, 162                                   ; "PLEASE...INITIALS"
-        .byte 12, 154                                   ; "PUSH ROTATE...LETTER"
-        .byte 12, 146                                   ; "PUSH HYPERSPACE...CORRECT"
-.else
+.ifdef PLATFORM_COCO3
         .byte 12, 162-4                                 ; "PLEASE...INITIALS"
         .byte 12, 154-8                                 ; "PUSH ROTATE...LETTER"
         .byte 12, 146-12                                ; "PUSH HYPERSPACE...CORRECT"
+.else
+        .byte 12, 162                                   ; "PLEASE...INITIALS"
+        .byte 12, 154                                   ; "PUSH ROTATE...LETTER"
+        .byte 12, 146                                   ; "PUSH HYPERSPACE...CORRECT"
 .endif                                
         .byte 100, 198                                  ; "PUSH START"
         .byte 100, 157                                  ; "GAME OVER"
@@ -2515,10 +2620,10 @@ NMI:
         				
 ; $7BC0
 halt_dvg:
-.ifndef PLATFORM_COCO3
-        LDA     #$B0 ; '°'
-.else
+.ifdef PLATFORM_COCO3
         lda     #OP_HALT
+.else
+        LDA     #$B0 ; '°'
 .endif
         ldy     *dvg_curr_addr_msb
         sta			,y+
@@ -2540,7 +2645,13 @@ display_digit_A:
 loc_7BD6:
         pshs		cc
         asla																						; x2 (word offset)
-.ifndef PLATFORM_COCO3
+.ifdef PLATFORM_COCO3
+				ldy			*dvg_curr_addr_msb
+        ldb     #OP_CHR
+        stb     ,y+
+        sta			,y+
+        sty			*dvg_curr_addr_msb
+.else
         ldy     #0
         tax
         lda     DVGROM+$6D4,X                           ; chr fn msb
@@ -2549,12 +2660,6 @@ loc_7BD6:
         iny
         sta     (dvg_curr_addr_lsb),Y                   ; store in avg ram
         jsr     update_dvg_curr_addr
-.else
-				ldy			*dvg_curr_addr_msb
-        ldb     #OP_CHR
-        stb     ,y+
-        sta			,y+
-        sty			*dvg_curr_addr_msb
 .endif                                
         puls		cc
         rts
@@ -2589,10 +2694,10 @@ write_CUR_cmd:
 				incb
 				lda			3,X																			; @$7 =	Y*4 (msb)
 				anda		#0x0F																		; clear	command	nibble
-.ifndef PLATFORM_COCO3
-        ORA     #$A0 ; ' '                              ; CUR command
-.else
+.ifdef PLATFORM_COCO3
         ora     #OP_CUR
+.else
+        ORA     #$A0 ; ' '                              ; CUR command
 .endif
 				sta			0,y																			; store	in avg ram
 				incb
@@ -2615,7 +2720,7 @@ update_dvg_curr_addr:
 9$:			rts				
 
 ; $7C49
-from_exploding_ship:
+calc_and_goto_piece_position:
         ; UNIMPLEMENTED
         rts
         				
@@ -2645,12 +2750,12 @@ reset:
 				sta			dvgram
 				lda			#0xE2
 				sta			dvgram+1																; JMP $0402
-.ifndef PLATFORM_COCO3
-				LDA     #$B0 ; '°'                              ; HALT
-        STA     dvgram+3
-.else
+.ifdef PLATFORM_COCO3
 				lda			#OP_HALT
         sta     dvgram+2
+.else
+				LDA     #$B0 ; '°'                              ; HALT
+        STA     dvgram+3
 .endif
         lda			#0xB0
         sta     *placeP1HighScore
