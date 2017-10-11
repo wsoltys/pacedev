@@ -1500,12 +1500,22 @@ ship_tbl:
 		.word ship_12, ship_13, ship_14, ship_15
 		.word ship_16, ship_17, ship_18, ship_19
 		.word ship_20, ship_21, ship_22, ship_23
+
+thrust_x_off_tbl:
+    .byte 0, 0, 1, 1, 2, 3, 3, 3, 4, 5, 5, 6, 6, 6, 5, 5
+    .byte 4, 3, 3, 3, 2, 1, 1, 0
+	
+thrust_y_off_tbl:
+    .byte 3, 3, 4, 5, 5, 6, 6, 6, 5, 5, 4, 3, 3, 2, 1, 1
+    .byte 1, 0, 0, 0, 1, 1, 2, 3
 		
 erase_ship:
 				jsr			erase_chr
 				rts
 				
 dvg_ship:
+        lda     ,y                      ; opcode incl. thrust
+        sta     *0xC8
 				lda			1,y											; direction
 				clrb														; D = direction
 				lsra
@@ -1519,6 +1529,7 @@ dvg_ship:
 				rorb														; D = (0..15)
 				addd		*0xD8										; A = dir (0..47) = (0..23)*2
 				anda		#0x3E
+				sta     *0xD8                   ; A=(0..23)*2 for thrust
 				ldu			#ship_tbl
 				ldu			a,u											; address of BMP				
 				leay		2,y
@@ -1545,7 +1556,31 @@ dvg_ship:
 				leay		32,y
 				dec			*0xD4										; done all lines?
 				bne			1$											; no, loop
-				CLC
+				lda     *0xC8                   ; opcode
+				bita    #(1<<3)                 ; thrust?
+				beq     9$                      ; no, skip
+        ldb     *0xD8
+        lsrb                            ; B=dir=(0..23)
+        ldx     #thrust_x_off_tbl
+        abx
+        lda     ,x                      ; x offset for pixel
+        ldb     24,x                    ; y offset for pixel
+        ldx     *0xC2                   ; video address
+        adda    *0x05                   ; add pixel x offset
+        bita    #8
+        beq     2$
+        leax    1,x                     ; bump video address
+        anda    #7
+2$:     ldu     #shot_bmp
+        lda     a,u                     ; get thrust data
+        aslb
+        aslb
+        aslb
+        aslb
+        aslb                            ; y offset x32
+        abx
+        sta     ,x                      ; display thrust
+9$:		  CLC
 				rts
 				
 large_saucer_bmp:

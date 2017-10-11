@@ -2078,7 +2078,7 @@ render_piece:
         jsr     write_AX_to_avgram
         ldy     #$FF
 
-loc_74F1:
+goto_ship_origin:
         iny
         lda     (byte_B),Y
         sta     (dvg_curr_addr_lsb),Y                   ; store in avg ram
