@@ -4044,7 +4044,7 @@ loc_7C79:
 				CMP	#2
 				BCS	no_shift_xy
 				LDY	#1					; shift	X,Y by 1
-				BNE	shift_xy_1or2
+				BNE	shift_xy
 
 loc_7C8B:									; shift	X,Y by 2
 				LDY	#2
@@ -4052,14 +4052,14 @@ loc_7C8B:									; shift	X,Y by 2
 				LDA	byte_4					; piece	X (high	byte)
 				ORA	byte_6					; piece	Y (high	byte)
 				BEQ	no_shift_xy				; both 0, skip
-				BMI	shift_xy_1or2
+				BMI	shift_xy
 
 loc_7C97:
 				INY
 				ASL	A
 				BPL	loc_7C97
 
-shift_xy_1or2:									; copy shift count
+shift_xy:									; copy shift count
 				TYA
 				TAX						; another copy of shift	count
 				LDA	byte_5					; piece	X sign

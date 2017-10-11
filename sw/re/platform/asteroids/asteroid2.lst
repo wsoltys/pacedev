@@ -4042,7 +4042,7 @@ ROM:7C81 A2 00					     LDX     #0
 ROM:7C83 C9 02					     CMP     #2
 ROM:7C85 B0 24					     BCS     no_shift_xy
 ROM:7C87 A0 01					     LDY     #1					     ; shift X,Y by 1
-ROM:7C89 D0 10					     BNE     shift_xy_1or2
+ROM:7C89 D0 10					     BNE     shift_xy
 ROM:7C8B
 ROM:7C8B	     loc_7C8B:									     ; shift X,Y by 2
 ROM:7C8B A0 02					     LDY     #2
@@ -4050,14 +4050,14 @@ ROM:7C8D A2 09					     LDX     #9
 ROM:7C8F A5 04					     LDA     byte_4				     ; piece X (high byte)
 ROM:7C91 05 06					     ORA     byte_6				     ; piece Y (high byte)
 ROM:7C93 F0 16					     BEQ     no_shift_xy			     ; both 0, skip
-ROM:7C95 30 04					     BMI     shift_xy_1or2
+ROM:7C95 30 04					     BMI     shift_xy
 ROM:7C97
 ROM:7C97	     loc_7C97:
 ROM:7C97 C8					     INY
 ROM:7C98 0A					     ASL     A
 ROM:7C99 10 FC					     BPL     loc_7C97
 ROM:7C9B
-ROM:7C9B	     shift_xy_1or2:								     ; copy shift count
+ROM:7C9B	     shift_xy:									     ; copy shift count
 ROM:7C9B 98					     TYA
 ROM:7C9C AA					     TAX					     ; another copy of shift count
 ROM:7C9D A5 05					     LDA     byte_5				     ; piece X sign
