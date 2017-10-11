@@ -1860,15 +1860,143 @@ dvg_shrapnel:
         CLC
         rts
 
+expl_x_offs_tbl:
+    .byte 0, 0xFF, 0xFF,	0xFE, 0xFD, 0xFC, 0xFC, 0
+		.byte 0, 1, 1, 2, 2, 0, 0,	0
+		.byte 0, 1, 2, 3, 0, 0, 0,	0
+		.byte 0, 0xFF, 0xFE,	0xFD, 0xFC, 0, 0,	0
+		.byte 0, 0xFF, 0xFE,	0xFD, 0,	0, 0, 0
+		.byte 0, 1, 2, 0, 0, 0, 0, 0
+
+expl_y_offs_tbl:
+    .byte 0,	1, 2, 3, 4, 5, 6, 0
+		.byte 0, 1, 2, 3, 4, 0, 0,	0
+		.byte 0, 0, 0xFF, 0xFF, 0, 0, 0, 0
+		.byte 0, 0xFF, 0xFE,	0xFD, 0xFC, 0, 0,	0
+		.byte 0, 0, 0xFF, 0xFF, 0, 0, 0, 0
+		.byte 0, 1, 2, 0, 0, 0, 0,	0
+
 erase_explodingship:
+        ldb     1,y                     ; piece num (x2)
+        aslb
+        aslb                            ; x8
+        ldx     #expl_x_offs_tbl
+        abx                             ; ptr piece pixel offsets
+        ldb     2,y                     ; piece Xx4 (signed) (+/-32)
+        asrb
+        asrb                            ; /4 (+/-8)
+        addb    *0x05                   ; + pixel offset for ship
+        tfr     b,a
+        anda    #7
+        sta     *0x06                   ; pixel offset of piece
+        asrb
+        asrb
+        asrb                            ; byte offset of piece
+        sex
+        addd    *0xC2                   ; + screen addr of ship
+        std     *0xC4                   ; screen addr of piece
+        ldb     3,y                     ; piece Yx4 (signed) (+/-32)
+        sex
+        aslb
+        rola
+        aslb
+        rola
+        aslb                            
+        rola                            ; /4*32=*8
+        andb    #~31
+        addd    *0xC4                   ; + screen addr of piece
+        std     *0xC4                   ; update
         leay    4,y
         sty     *0x0B
+        ldb     #8                      ; 8 pixels to plot
+        stb     *0x09
+1$:     ldb     ,x+                     ; x offset of pixel (signed)
+        addb    *0x06                   ; + pixel offset of piece
+        stb     *0x07                   ; pixel offset of pixel
+        asrb
+        asrb
+        asrb                            ; byte offset of pixel
+        sex
+        addd    *0xC4                   ; + screen addr of piece
+        std     *0xC6                   ; screen addr of pixel
+        ldb     47,x                    ; y offset of pixel (signed)
+        aslb
+        aslb
+        aslb
+        aslb
+        aslb                            ; x32
+        sex
+        addd    *0xC6                   ; + screen addr of pixel
+        tfr     d,y                     ; final screen addr of pixel
+        ldb     *0x07                   ; pixel offset of pixel
+        andb    #7
+        ldu     #shot_bmp
+        lda     b,u
+        clr     ,y                      ; render pixel
+        dec     *0x09                   ; done all pixels?
+        bne     1$                      ; no, loop
         CLC
         rts
                     
 dvg_explodingship:
+        ldb     1,y                     ; piece num (x2)
+        aslb
+        aslb                            ; x8
+        ldx     #expl_x_offs_tbl
+        abx                             ; ptr piece pixel offsets
+        ldb     2,y                     ; piece Xx4 (signed) (+/-32)
+        asrb
+        asrb                            ; /4 (+/-8)
+        addb    *0x05                   ; + pixel offset for ship
+        tfr     b,a
+        anda    #7
+        sta     *0x06                   ; pixel offset of piece
+        asrb
+        asrb
+        asrb                            ; byte offset of piece
+        sex
+        addd    *0xC2                   ; + screen addr of ship
+        std     *0xC4                   ; screen addr of piece
+        ldb     3,y                     ; piece Yx4 (signed) (+/-32)
+        sex
+        aslb
+        rola
+        aslb
+        rola
+        aslb                            
+        rola                            ; /4*32=*8
+        andb    #~31
+        addd    *0xC4                   ; + screen addr of piece
+        std     *0xC4                   ; update
         leay    4,y
         sty     *0x0B
+        ldb     #8                      ; 8 pixels to plot
+        stb     *0x09
+1$:     ldb     ,x+                     ; x offset of pixel (signed)
+        addb    *0x06                   ; + pixel offset of piece
+        stb     *0x07                   ; pixel offset of pixel
+        asrb
+        asrb
+        asrb                            ; byte offset of pixel
+        sex
+        addd    *0xC4                   ; + screen addr of piece
+        std     *0xC6                   ; screen addr of pixel
+        ldb     47,x                    ; y offset of pixel (signed)
+        aslb
+        aslb
+        aslb
+        aslb
+        aslb                            ; x32
+        sex
+        addd    *0xC6                   ; + screen addr of pixel
+        tfr     d,y                     ; final screen addr of pixel
+        ldb     *0x07                   ; pixel offset of pixel
+        andb    #7
+        ldu     #shot_bmp
+        lda     b,u
+        sta     ,y                      ; render pixel
+        dec     *0x09                   ; done all pixels?
+        bne     1$                      ; no, loop
         CLC
         rts
                     

@@ -1992,7 +1992,7 @@ get_inactive_object_cnt:
 display_exploding_ship:
         lda     ship_Sts
         cmpa    #0xA2                                   ; 2 frames past exploding?
-        bcs     loc_748E
+        bcc     render_explosion
         ldx     #10                                     ; (5+1) entries
 
 init_piece_tbl:
@@ -2016,7 +2016,7 @@ init_piece_tbl:
         cmpx    #0
         bpl     init_piece_tbl
 
-loc_748E:
+render_explosion:
         ldb     ship_Sts
         eorb    #0xFF
         andb    #0x70
