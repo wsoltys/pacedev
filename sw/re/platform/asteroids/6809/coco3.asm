@@ -1859,7 +1859,19 @@ dvg_shrapnel:
 2$:			sta			*0x05
         CLC
         rts
-            
+
+erase_explodingship:
+        leay    4,y
+        sty     *0x0B
+        CLC
+        rts
+                    
+dvg_explodingship:
+        leay    4,y
+        sty     *0x0B
+        CLC
+        rts
+                    
 dvg_nop:
 				leay		2,y
 				sty			*0x0B
@@ -1882,7 +1894,7 @@ erase_jmp_tbl:
 				.word		erase_saucer
 				.word		erase_shot
 				.word		erase_shrapnel
-				.word		dvg_nop
+				.word		erase_explodingship
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop
@@ -1909,7 +1921,7 @@ dvg_jmp_tbl:
 				.word		dvg_saucer
 				.word		dvg_shot
 				.word		dvg_shrapnel
-				.word		dvg_nop
+				.word		dvg_explodingship
 				.word		dvg_nop
 				.word		dvg_nop
 				.word		dvg_nop

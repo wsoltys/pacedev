@@ -2032,11 +2032,11 @@ render_piece:
         lda     ship_explosion_pieces_velocity,x        ; piece velocity X
         bpl     1$
         decb
-1$:     adda    dp_base+byte_7D,X                       ; + piece X (low byte)
+1$:     adda    dp_base+byte_7D,x                       ; + piece X (low byte)
         sta     dp_base+byte_7D,X                       ; update
         tfr     b,a                                     ; 0/-1
-        adca    dp_base+byte_7E,X                       ; + piece X (high byte)
-        sta     dp_base+byte_7E,X                       ; update
+        adca    dp_base+byte_7E,x                       ; + piece X (high byte)
+        sta     dp_base+byte_7E,x                       ; update
         sta     *byte_4                                 ; piece X (high byte)
         stb     *byte_5                                 ; 0/-1
         ldb     #0
@@ -2050,18 +2050,24 @@ render_piece:
         sta     dp_base+byte_80+0x0A,x                  ; update
         sta     *byte_6                                 ; piece Y (high byte)
         stb     *byte_7                                 ; 0/-1
-        ldu     dvg_curr_addr_msb
-        stu     *byte_B
+        ldy     *dvg_curr_addr_msb
+        sty     *byte_B
         ; Norbert patches the code to call his routine
         ; - which uses byte_9 (piece #) to store byte_4, byte_6
         ;	 in a table, and then jumps to calc_and_goto_piece_position
 .ifdef PLATFORM_COCO3
-;        ldy     #0
-;        sta     (dvg_curr_addr_lsb),y                   ; ship_Sts
-;        iny
-;        lda     #OP_EXPLODINGSHIP
-;        sta     (dvg_curr_addr_lsb),y
-;        jsr     update_dvg_curr_addr
+        ; we have X/byte_9 is the piece number
+        ; byte_4 and byte_6 are X,Y coords (MSB) respectively
+        ; CUR will be the ship position
+        ; - note we have to offset by (+8,+8)
+        lda     #OP_EXPLODINGSHIP
+        sta     ,y+
+        ldd     *byte_9                                 ; piece index
+        stb     ,y+
+        lda     *byte_4                                 ; X offset
+        ldb     *byte_6                                 ; Y offset
+        std     ,y++
+        sty     *dvg_curr_addr_msb
 .else
         jsr     calc_and_goto_piece_position
         ldy     byte_9
@@ -2721,8 +2727,99 @@ update_dvg_curr_addr:
 
 ; $7C49
 calc_and_goto_piece_position:
-        ; UNIMPLEMENTED
+        ; this code is relevant only to vector systems
+        ; and is completely untested
+        ; - so don't run it for now...
         rts
+				lda	    *byte_5					                        ; piece	X 0/-1
+				cmpa    #0x80                                   ; positive?
+				bcs	    2$                                      ; yes, skip
+				eora    #0xFF                                   ; negate
+				sta	    *byte_5					                        ; piece	X sign
+				lda	    *byte_4					                        ; piece	X (high	byte)
+				eora	  #0xFF
+				adca	  #0					                            ; negate
+				sta	    *byte_4					                        ; update
+				bcc	    1$
+				inc	    *byte_5
+1$:			SEC
+2$:			rol     *byte_8
+				lda	    *byte_7					                        ; piece	Y 0/-1
+				cmpa	  #0x80                                   ; positive?
+				bcs	    4$				                              ; yes, skip
+				eora	  #0xFF					                          ; negate
+				sta	    *byte_7					                        ; piece	Y sign
+				lda	    *byte_6					                        ; piece	Y (high	byte)
+				eora	  #0xFF
+				adca	  #0					                            ; negate
+				sta	    *byte_6					                        ; update
+				bcc	    3$
+				inc	    *byte_7
+3$:			SEC
+4$:		  rol	    *byte_8
+				lda	    *byte_5					                        ; piece	X sign
+				ora	    *byte_7					                        ; piece	Y sign
+				beq	    5$                                      ; both 0, skip
+				ldx	    #0
+				cmpa	  #2
+				bcc	    no_shift_xy
+				ldy	    #1					                            ; shift	X,Y by 1
+				bne	    shift_xy
+5$:		  ldy	    #2                                      ; shift	X,Y by 2
+				ldx	    #9
+				lda	    *byte_4					                        ; piece	X (high	byte)
+				ora	    *byte_6					                        ; piece	Y (high	byte)
+				beq	    no_shift_xy				                      ; both 0, skip
+				bmi	    shift_xy
+6$:			leay    1,y
+				asla
+				bpl	    6$
+
+shift_xy:									
+        tfr     y,x                                     ; copy shift count
+				lda	    *byte_5					                        ; piece	X sign
+
+shift_loop:
+				asl	    *byte_4
+				rola					                                  ; shift	X up 1 bit
+				asl	    *byte_6
+				rol	    *byte_7					                        ; shift	Y up 1 bit
+				leay    -1,y                                    ; done shifting?
+				bne	    shift_loop				                      ; no, loop
+				sta	    *byte_5					                        ; Xs,X[9..8]
+
+no_shift_xy:
+        tfr     x,d
+        tfr     b,a                                     ; A=shift count
+				SEC
+				sbca	  #0x0A
+				eora	  #0xFF					                          ; negate
+				asla
+				ror	    *byte_8
+				rola
+				ror	    *byte_8
+				rola
+				asla
+				sta	    *byte_8					                        ; VCTR opcode ($00-$90)
+				ldy	    #0
+				lda	    *byte_6					                        ; Y[7..0]
+				sta	    (dvg_curr_addr_lsb),Y			              ; store	in avg ram
+				lda	    *byte_8					                        ; VCTR opcode,Ys
+				anda	  #0xF4
+				ora	    *byte_7					                        ; Y[9..8]
+				leay    1,y
+				sta	    (dvg_curr_addr_lsb),Y			              ; store	in avg ram
+				lda	    *byte_4					                        ; piece	X (high	byte)
+				leay    1,y
+				sta	    (dvg_curr_addr_lsb),Y			              ; store	in avg ram
+				lda	    *byte_8					                        ; VCTR opcode,Xs
+				anda	  #2					                            ; Xs (bit1)
+				asla					                                  ; adjust for VCTR instruction
+				ora	    *byte_1					                        ; always 0???
+				ora	    *byte_5					                        ; Xs,X[9..8]
+				leay    1,y
+				sta	    (dvg_curr_addr_lsb),Y			              ; store	in avg ram
+				jmp	    update_dvg_curr_addr
         				
 ; $7CDE
 set_scale_A_bright_0:
