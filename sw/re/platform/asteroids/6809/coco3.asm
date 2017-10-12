@@ -1920,18 +1920,24 @@ erase_explodingship:
         addd    *0xC4                   ; + screen addr of piece
         std     *0xC6                   ; screen addr of pixel
         ldb     47,x                    ; y offset of pixel (signed)
-        aslb
-        aslb
-        aslb
-        aslb
-        aslb                            ; x32
         sex
+        aslb
+        rola
+        aslb
+        rola
+        aslb
+        rola
+        aslb
+        rola
+        aslb
+        rola                            ; x32
         addd    *0xC6                   ; + screen addr of pixel
         tfr     d,y                     ; final screen addr of pixel
         ldb     *0x07                   ; pixel offset of pixel
         andb    #7
         ldu     #shot_bmp
         lda     b,u
+        ora			,y
         clr     ,y                      ; render pixel
         dec     *0x09                   ; done all pixels?
         bne     1$                      ; no, loop
@@ -1982,18 +1988,24 @@ dvg_explodingship:
         addd    *0xC4                   ; + screen addr of piece
         std     *0xC6                   ; screen addr of pixel
         ldb     47,x                    ; y offset of pixel (signed)
-        aslb
-        aslb
-        aslb
-        aslb
-        aslb                            ; x32
         sex
+        aslb
+        rola
+        aslb
+        rola
+        aslb
+        rola
+        aslb
+        rola
+        aslb
+        rola                            ; x32
         addd    *0xC6                   ; + screen addr of pixel
         tfr     d,y                     ; final screen addr of pixel
         ldb     *0x07                   ; pixel offset of pixel
         andb    #7
         ldu     #shot_bmp
         lda     b,u
+        ora			,y
         sta     ,y                      ; render pixel
         dec     *0x09                   ; done all pixels?
         bne     1$                      ; no, loop
