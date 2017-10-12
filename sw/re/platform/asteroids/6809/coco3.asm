@@ -438,6 +438,8 @@ osd_start::
 				rts
 
 dvg_cur:
+.if 0	
+				; scale 0..191			
 				ldd			,y											; D = CUR Y (0-1023) (10 bits)
 				lsra														
 				rorb
@@ -450,6 +452,16 @@ dvg_cur:
 				rorb														; B = CUR Y (0-192) (8 bits)
 				stb			*0x06
 				ldb			#191
+.else
+				; scale 0..255 with an offset
+				ldd			,y++										; D = CUR Y (0-1023) (10 bits)
+				lsra
+				rorb
+				lsra
+				rorb
+				stb			*0x06
+				ldb			#191+8
+.endif				
 				subb		*0x06
 				stb			*0x06										; store non-inverted Y
 				; find address of line
@@ -978,7 +990,7 @@ dvg_copyright:
 				ldu			#copyright
 				lda			#5
 				sta			*0xD4
-				ldy			#168*32+12
+				ldy			#(168+18)*32+12
 1$:			ldb			#8
 2$:			lda			,u+
 				ora			,y

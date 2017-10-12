@@ -2592,7 +2592,7 @@ msgCoords:
 				.byte 100, 182                                  ; "HIGH SCORES"
 				.byte 100, 182                                  ; "PLAYER"
 				.byte 12, 170                                   ; "YOUR SCORE...TEN BEST"
-.ifdef PLATFORM_COCO3
+.ifdef PLATFORM_COCO3_NOT_REQD
         .byte 12, 162-4                                 ; "PLEASE...INITIALS"
         .byte 12, 154-8                                 ; "PUSH ROTATE...LETTER"
         .byte 12, 146-12                                ; "PUSH HYPERSPACE...CORRECT"
@@ -2678,6 +2678,9 @@ write_JSR_cmd:
 ; $7C03
 ; A=X coord, B=Y coord
 write_CURx4_cmd:
+.ifdef PLATFORM_COCO3
+				subb		#28
+.endif				
 				clr			*byte_5
 				clr			*byte_7
 				asla
