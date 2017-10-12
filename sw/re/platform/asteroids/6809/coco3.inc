@@ -215,3 +215,11 @@ OP_SCALEBRIGHTNESS  .equ 0xE0
 OP_HALT             .equ 0xF0
 
 OP_NOERASE					.equ 0x08
+
+; offset to object render coordinates
+
+SHIP_X_OFFS = 5
+SHIP_Y_OFFS = 5
+SHOT_X_OFFS = 8
+SHOT_Y_OFFS = 8
+
